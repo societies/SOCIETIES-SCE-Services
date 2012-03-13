@@ -24,15 +24,10 @@
  */
 package org.societies.rdPartyService.enterprise.sharedCalendar;
 
-import java.io.IOException;
-import java.net.URL;
-import java.util.Properties;
+import java.util.List;
 
-import com.google.api.client.googleapis.auth.oauth2.draft10.GoogleAccessProtectedResource;
-import com.google.api.client.http.HttpTransport;
-import com.google.api.client.http.javanet.NetHttpTransport;
-import com.google.api.client.json.jackson.JacksonFactory;
-import com.google.api.services.calendar.Calendar;
+import org.societies.rdPartyService.enterprise.sharedCalendar.dataObject.Calendar;
+import org.societies.rdPartyService.enterprise.sharedCalendar.dataObject.Event;
 
 /**
  * Describe your class here...
@@ -42,48 +37,51 @@ import com.google.api.services.calendar.Calendar;
  */
 public class SharedCalendar implements ISharedCalendar {
 
-private static String	clientId;
-private static String	clientSecret ;
-private static String	accessToken;
-private static String	refreshToken;
-private static Calendar service=null;
-private Properties props;
-	
-//Test main
-public static void main(String[] argj){
-	new SharedCalendar().setUp();
-}
-
-
-/**
- * Utility methods
- */
-private void setUp(){
-	 props = new Properties();
-     URL url = ClassLoader.getSystemResource("META-INF/conf/backEnd.properties");
-     try {
-		props.load(url.openStream());
-	
-     clientId=props.getProperty("clientId");
-     clientSecret =props.getProperty("clientSecret");
-     accessToken=props.getProperty("accessToken");
-     refreshToken=props.getProperty("refreshToken");
-     
-     HttpTransport httpTransport = new NetHttpTransport();
-	    JacksonFactory jsonFactory = new JacksonFactory();
-	    GoogleAccessProtectedResource accessProtectedResource = new GoogleAccessProtectedResource(
-		        accessToken, httpTransport, jsonFactory, clientId, clientSecret,
-		        refreshToken);
-
-		    Calendar tmpService = Calendar.builder(httpTransport, jsonFactory)
-		        .setApplicationName("testApp")
-		        .setHttpRequestInitializer(accessProtectedResource)
-		        .build();
-	service= tmpService;
-     
-     } catch (Exception e) {
- 		// TODO Auto-generated catch block
- 		e.printStackTrace();
- 	}
+	/* (non-Javadoc)
+	 * @see org.societies.rdPartyService.enterprise.sharedCalendar.ISharedCalendar#retrieveCalendarList()
+	 */
+	@Override
+	public List<Calendar> retrieveCalendarList() {
+		// TODO Auto-generated method stub
+		return null;
 	}
+
+	/* (non-Javadoc)
+	 * @see org.societies.rdPartyService.enterprise.sharedCalendar.ISharedCalendar#retrieveCalendarEvents(java.lang.String)
+	 */
+	@Override
+	public List<Event> retrieveCalendarEvents(String calendarId) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.societies.rdPartyService.enterprise.sharedCalendar.ISharedCalendar#subscribeToEvent(java.lang.String, java.lang.String, java.lang.String)
+	 */
+	@Override
+	public boolean subscribeToEvent(String calendarId, String eventId,
+			String subscriberId) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.societies.rdPartyService.enterprise.sharedCalendar.ISharedCalendar#findEvents(java.lang.String, java.lang.String)
+	 */
+	@Override
+	public List<Event> findEvents(String calendarId, String keyWord) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.societies.rdPartyService.enterprise.sharedCalendar.ISharedCalendar#unsubscribeFromEvent(java.lang.String, java.lang.String, java.lang.String)
+	 */
+	@Override
+	public boolean unsubscribeFromEvent(String calendarId, String eventId,
+			String subscriberId) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
 }

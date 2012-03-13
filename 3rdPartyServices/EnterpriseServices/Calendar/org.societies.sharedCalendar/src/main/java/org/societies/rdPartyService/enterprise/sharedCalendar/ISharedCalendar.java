@@ -30,16 +30,49 @@ import org.societies.rdPartyService.enterprise.sharedCalendar.dataObject.Calenda
 import org.societies.rdPartyService.enterprise.sharedCalendar.dataObject.Event;
 
 /**
- * Describe your class here...
+ * 
  *
  * @author solutanet
  *
  */
 public interface ISharedCalendar {
+	/**
+	 * This method is used to retrieve all available calendars provided by the 3rd party service
+	 * @return the list of Calendars
+	 */
 
 	public List<Calendar> retrieveCalendarList();
+	
+	/**
+	 * 
+	 * @param calendarId
+	 * @return the list of events inside a specific Calendar
+	 */
 	public List<Event> retrieveCalendarEvents(String calendarId);
+	
+	/**
+	 * 
+	 * @param calendarId
+	 * @param eventId
+	 * @param subscriberId the identifier for the subscriber
+	 * @return true if the subscription is performed correctly false otherwise
+	 */
 	public boolean subscribeToEvent(String calendarId,String eventId, String subscriberId);
+	
+	/**
+	 * 
+	 * @param calendarId
+	 * @param keyWord
+	 * @return the list of events that match the input keyword
+	 */
 	public List<Event> findEvents(String calendarId,String keyWord);
+	
+	/**
+	 * 
+	 * @param calendarId
+	 * @param eventId
+	 * @param subscriberId
+	 * @return true if the unsubscription is performed correctly, false otherwise
+	 */
 	public boolean unsubscribeFromEvent(String calendarId,String eventId, String subscriberId);
 }
