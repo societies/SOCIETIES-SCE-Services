@@ -24,49 +24,96 @@
  */
 package org.societies.rdPartyService.enterprise.sharedCalendar;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.societies.rdPartyService.enterprise.sharedCalendar.dataObject.Calendar;
 import org.societies.rdPartyService.enterprise.sharedCalendar.dataObject.Event;
 
+import com.google.api.services.calendar.model.CalendarListEntry;
+import com.google.api.services.calendar.model.EventAttendee;
+
 /**
  * Describe your class here...
- *
+ * 
  * @author solutanet
- *
+ * 
  */
 public class SharedCalendar implements ISharedCalendar {
-
-	/* (non-Javadoc)
-	 * @see org.societies.rdPartyService.enterprise.sharedCalendar.ISharedCalendar#retrieveCalendarList()
+	private static SharedCalendarUtil util = new SharedCalendarUtil();
+private static Logger log=LoggerFactory.getLogger(SharedCalendar.class);
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.societies.rdPartyService.enterprise.sharedCalendar.ISharedCalendar
+	 * #retrieveCalendarList()
 	 */
 	@Override
 	public List<Calendar> retrieveCalendarList() {
-		// TODO Auto-generated method stub
-		return null;
+		List<Calendar> returnedCalendarList=new ArrayList<Calendar>();
+		try {
+			returnedCalendarList=calendarListFromCalendarEntry(util.retrieveAllCalendar());
+			
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			log.error(e.getMessage());
+		}
+		return returnedCalendarList;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.societies.rdPartyService.enterprise.sharedCalendar.ISharedCalendar#retrieveCalendarEvents(java.lang.String)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.societies.rdPartyService.enterprise.sharedCalendar.ISharedCalendar
+	 * #retrieveCalendarEvents(java.lang.String)
 	 */
 	@Override
 	public List<Event> retrieveCalendarEvents(String calendarId) {
-		// TODO Auto-generated method stub
-		return null;
+		List<Event> returnedEventList=new ArrayList<Event>();
+		try {
+			returnedEventList=eventListFromGoogleEventList(util.retrieveAllEvents(calendarId));
+		} catch (Exception e) {
+			log.error(e.getMessage());
+		}
+		return returnedEventList;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.societies.rdPartyService.enterprise.sharedCalendar.ISharedCalendar#subscribeToEvent(java.lang.String, java.lang.String, java.lang.String)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.societies.rdPartyService.enterprise.sharedCalendar.ISharedCalendar
+	 * #subscribeToEvent(java.lang.String, java.lang.String, java.lang.String)
 	 */
 	@Override
 	public boolean subscribeToEvent(String calendarId, String eventId,
 			String subscriberId) {
-		// TODO Auto-generated method stub
-		return false;
+		boolean returnedValue=false;
+		try {
+			com.google.api.services.calendar.model.Event event=util.findEventUsingId(calendarId, eventId);
+			
+			
+			event.getAttendees().add(createEventAttendee(subscriberId));
+			util.updateEvent(calendarId, event);
+			returnedValue=true;
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			log.error(e.getMessage());
+		}
+		return returnedValue;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.societies.rdPartyService.enterprise.sharedCalendar.ISharedCalendar#findEvents(java.lang.String, java.lang.String)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.societies.rdPartyService.enterprise.sharedCalendar.ISharedCalendar
+	 * #findEvents(java.lang.String, java.lang.String)
 	 */
 	@Override
 	public List<Event> findEvents(String calendarId, String keyWord) {
@@ -74,14 +121,67 @@ public class SharedCalendar implements ISharedCalendar {
 		return null;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.societies.rdPartyService.enterprise.sharedCalendar.ISharedCalendar#unsubscribeFromEvent(java.lang.String, java.lang.String, java.lang.String)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.societies.rdPartyService.enterprise.sharedCalendar.ISharedCalendar
+	 * #unsubscribeFromEvent(java.lang.String, java.lang.String,
+	 * java.lang.String)
 	 */
 	@Override
 	public boolean unsubscribeFromEvent(String calendarId, String eventId,
 			String subscriberId) {
-		// TODO Auto-generated method stub
-		return false;
+		boolean returnedValue=false;
+		try {
+			com.google.api.services.calendar.model.Event event=util.findEventUsingId(calendarId, eventId);
+			
+			List<EventAttendee> tmpAttendeeList=event.getAttendees();
+			//
+			tmpAttendeeList.get(3).equals(createEventAttendee(subscriberId));
+			//
+			
+			tmpAttendeeList.remove(createEventAttendee(subscriberId));
+			
+			event.setAttendees(tmpAttendeeList);
+			util.updateEvent(calendarId, event);
+			returnedValue=true;
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			log.error(e.getMessage());
+		}
+		return returnedValue;
 	}
 
+	
+	/**
+	 * Utility methods
+	 */
+	
+	private List<Calendar> calendarListFromCalendarEntry(List<CalendarListEntry> inList){
+		List<Calendar> tmpCalendarList=new ArrayList<Calendar>();
+		for (CalendarListEntry calendarListEntry : inList) {
+			tmpCalendarList.add(new Calendar(calendarListEntry.getSummary(), calendarListEntry.getDescription(), calendarListEntry.getLocation(), calendarListEntry.getId()));
+		}
+		return tmpCalendarList;
+	}
+	
+	private List<Event> eventListFromGoogleEventList(List<com.google.api.services.calendar.model.Event> inList){
+		List<Event> tmpEventList=new ArrayList<Event>();
+		for (com.google.api.services.calendar.model.Event event : inList) {
+			tmpEventList.add(new Event(event.getId(), event.getDescription(), event.getSummary(), event.getStart().toString(),	 event.getEnd().toString(), event.getLocation()));
+		}
+		return tmpEventList;
+	}
+	
+	/**
+	 * Used to map Societies subscriber to google EventAttendee
+	 */
+	
+	private EventAttendee createEventAttendee(String subscriberId){
+		EventAttendee attendee= new EventAttendee();
+		attendee.setEmail(subscriberId+"@societies.eu");
+		attendee.setDisplayName(subscriberId);
+		return attendee;
+	}
 }

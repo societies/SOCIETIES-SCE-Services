@@ -24,12 +24,57 @@
  */
 package org.societies.rdPartyService.enterprise.sharedCalendar;
 
+import java.util.List;
+
+import junit.framework.TestCase;
+
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.societies.rdPartyService.enterprise.sharedCalendar.dataObject.Calendar;
+import org.societies.rdPartyService.enterprise.sharedCalendar.dataObject.Event;
+
 /**
  * Describe your class here...
- *
+ * 
  * @author solutanet
- *
+ * 
  */
 public class TestSharedCalendar {
+	private static SharedCalendar calendar = new SharedCalendar();
+	private static Logger log = LoggerFactory
+			.getLogger(TestSharedCalendar.class);
+	private String testCalendarId="soluta.net_n1i86mmq647g7pmc573uslm1d4@group.calendar.google.com";
+	private String testEventId="f7n275hud3e62l1kk5cktqmjjo";
+
+	@Test
+	public void testRetrieveAllCalendar() {
+		List<Calendar> calendarList = calendar.retrieveCalendarList();
+		log.info("Calendars retrieved:");
+		
+		for (Calendar calendar : calendarList) {
+			log.info("Calendar id: " + calendar.getCalendarId());
+			
+		}
+		
+	}
+	
+	@Test
+	public void retrieveCalendarEvent(){
+		List<Event> eventList=calendar.retrieveCalendarEvents(testCalendarId);
+		log.info("Events retrieved:");
+		for (Event event : eventList) {
+			log.info("Event id: "+event.getEventId());
+		}
+	}
+	@Test
+	public void addSubscriber(){
+		 calendar.subscribeToEvent(testCalendarId, testEventId, "xxxx");
+	}
+	
+	@Test
+	public void unsubscribe(){
+		calendar.unsubscribeFromEvent(testCalendarId, testEventId, "xxxx");
+	}
 
 }
