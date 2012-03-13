@@ -24,6 +24,11 @@
  */
 package org.societies.rdPartyService.enterprise.sharedCalendar;
 
+import java.util.List;
+
+import org.societies.rdPartyService.enterprise.sharedCalendar.dataObject.Calendar;
+import org.societies.rdPartyService.enterprise.sharedCalendar.dataObject.Event;
+
 /**
  * Describe your class here...
  *
@@ -32,4 +37,9 @@ package org.societies.rdPartyService.enterprise.sharedCalendar;
  */
 public interface ISharedCalendar {
 
+	public List<Calendar> retrieveCalendarList();
+	public List<Event> retrieveCalendarEvents(String calendarId);
+	public boolean subscribeToEvent(String calendarId,String eventId, String subscriberId);
+	public List<Event> findEvents(String calendarId,String keyWord);
+	public boolean unsubscribeFromEvent(String calendarId,String eventId, String subscriberId);
 }
