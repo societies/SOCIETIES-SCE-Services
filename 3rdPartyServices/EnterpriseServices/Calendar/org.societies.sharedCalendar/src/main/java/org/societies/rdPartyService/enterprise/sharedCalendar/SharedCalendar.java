@@ -25,9 +25,13 @@
 package org.societies.rdPartyService.enterprise.sharedCalendar;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.codec.binary.Hex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.societies.rdPartyService.enterprise.sharedCalendar.dataObject.Calendar;
@@ -44,7 +48,8 @@ import com.google.api.services.calendar.model.EventAttendee;
  */
 public class SharedCalendar implements ISharedCalendar {
 	private static SharedCalendarUtil util = new SharedCalendarUtil();
-private static Logger log=LoggerFactory.getLogger(SharedCalendar.class);
+	private static Logger log = LoggerFactory.getLogger(SharedCalendar.class);
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -54,10 +59,11 @@ private static Logger log=LoggerFactory.getLogger(SharedCalendar.class);
 	 */
 	@Override
 	public List<Calendar> retrieveCalendarList() {
-		List<Calendar> returnedCalendarList=new ArrayList<Calendar>();
+		List<Calendar> returnedCalendarList = new ArrayList<Calendar>();
 		try {
-			returnedCalendarList=calendarListFromCalendarEntry(util.retrieveAllCalendar());
-			
+			returnedCalendarList = calendarListFromCalendarEntry(util
+					.retrieveAllCalendar());
+
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			log.error(e.getMessage());
@@ -74,9 +80,10 @@ private static Logger log=LoggerFactory.getLogger(SharedCalendar.class);
 	 */
 	@Override
 	public List<Event> retrieveCalendarEvents(String calendarId) {
-		List<Event> returnedEventList=new ArrayList<Event>();
+		List<Event> returnedEventList = new ArrayList<Event>();
 		try {
-			returnedEventList=eventListFromGoogleEventList(util.retrieveAllEvents(calendarId));
+			returnedEventList = eventListFromGoogleEventList(util
+					.retrieveAllEvents(calendarId));
 		} catch (Exception e) {
 			log.error(e.getMessage());
 		}
@@ -93,14 +100,23 @@ private static Logger log=LoggerFactory.getLogger(SharedCalendar.class);
 	@Override
 	public boolean subscribeToEvent(String calendarId, String eventId,
 			String subscriberId) {
-		boolean returnedValue=false;
+		boolean returnedValue = false;
 		try {
-			com.google.api.services.calendar.model.Event event=util.findEventUsingId(calendarId, eventId);
+			com.google.api.services.calendar.model.Event event = util
+					.findEventUsingId(calendarId, eventId);
+/*
+ * Check if event has attendees
+ */
+			if (event.getAttendees()!=null){
+				event.getAttendees().add(createEventAttendee(subscriberId));}
+			else{
+				List<EventAttendee> attendeesList= new ArrayList<EventAttendee>();
+				attendeesList.add(createEventAttendee(subscriberId));
+				event.setAttendees(attendeesList);
+			}
 			
-			
-			event.getAttendees().add(createEventAttendee(subscriberId));
 			util.updateEvent(calendarId, event);
-			returnedValue=true;
+			returnedValue = true;
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			log.error(e.getMessage());
@@ -132,20 +148,18 @@ private static Logger log=LoggerFactory.getLogger(SharedCalendar.class);
 	@Override
 	public boolean unsubscribeFromEvent(String calendarId, String eventId,
 			String subscriberId) {
-		boolean returnedValue=false;
+		boolean returnedValue = false;
 		try {
-			com.google.api.services.calendar.model.Event event=util.findEventUsingId(calendarId, eventId);
-			
-			List<EventAttendee> tmpAttendeeList=event.getAttendees();
-			//
-			tmpAttendeeList.get(3).equals(createEventAttendee(subscriberId));
-			//
-			
+			com.google.api.services.calendar.model.Event event = util
+					.findEventUsingId(calendarId, eventId);
+
+			List<EventAttendee> tmpAttendeeList = event.getAttendees();
+
 			tmpAttendeeList.remove(createEventAttendee(subscriberId));
-			
+
 			event.setAttendees(tmpAttendeeList);
 			util.updateEvent(calendarId, event);
-			returnedValue=true;
+			returnedValue = true;
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			log.error(e.getMessage());
@@ -153,34 +167,54 @@ private static Logger log=LoggerFactory.getLogger(SharedCalendar.class);
 		return returnedValue;
 	}
 
-	
 	/**
 	 * Utility methods
 	 */
-	
-	private List<Calendar> calendarListFromCalendarEntry(List<CalendarListEntry> inList){
-		List<Calendar> tmpCalendarList=new ArrayList<Calendar>();
+
+	private List<Calendar> calendarListFromCalendarEntry(
+			List<CalendarListEntry> inList) {
+		List<Calendar> tmpCalendarList = new ArrayList<Calendar>();
 		for (CalendarListEntry calendarListEntry : inList) {
-			tmpCalendarList.add(new Calendar(calendarListEntry.getSummary(), calendarListEntry.getDescription(), calendarListEntry.getLocation(), calendarListEntry.getId()));
+			tmpCalendarList.add(new Calendar(calendarListEntry.getSummary(),
+					calendarListEntry.getDescription(), calendarListEntry
+							.getLocation(), calendarListEntry.getId()));
 		}
 		return tmpCalendarList;
 	}
-	
-	private List<Event> eventListFromGoogleEventList(List<com.google.api.services.calendar.model.Event> inList){
-		List<Event> tmpEventList=new ArrayList<Event>();
+
+	private List<Event> eventListFromGoogleEventList(
+			List<com.google.api.services.calendar.model.Event> inList) {
+		List<Event> tmpEventList = new ArrayList<Event>();
 		for (com.google.api.services.calendar.model.Event event : inList) {
-			tmpEventList.add(new Event(event.getId(), event.getDescription(), event.getSummary(), event.getStart().toString(),	 event.getEnd().toString(), event.getLocation()));
+			tmpEventList.add(new Event(event.getId(), event.getDescription(),
+					event.getSummary(), event.getStart().toString(), event
+							.getEnd().toString(), event.getLocation()));
 		}
 		return tmpEventList;
 	}
-	
+
 	/**
 	 * Used to map Societies subscriber to google EventAttendee
 	 */
-	
-	private EventAttendee createEventAttendee(String subscriberId){
-		EventAttendee attendee= new EventAttendee();
-		attendee.setEmail(subscriberId+"@societies.eu");
+
+	private EventAttendee createEventAttendee(String subscriberId) {
+		EventAttendee attendee = new EventAttendee();
+		// Create the MD5 to use in the email field
+		MessageDigest messageDigest;
+		String mailField ="";
+		try {
+			messageDigest = MessageDigest.getInstance("MD5");
+
+			messageDigest.reset();
+			messageDigest.update(subscriberId.getBytes(Charset.forName("UTF8")));
+			byte[] resultByte = messageDigest.digest();
+			mailField = new String(Hex.encodeHex(resultByte));
+		} catch (NoSuchAlgorithmException e) {
+			// TODO Auto-generated catch block
+			log.error(e.getMessage());
+		}
+		//
+		attendee.setEmail(mailField + "@societies.eu");
 		attendee.setDisplayName(subscriberId);
 		return attendee;
 	}

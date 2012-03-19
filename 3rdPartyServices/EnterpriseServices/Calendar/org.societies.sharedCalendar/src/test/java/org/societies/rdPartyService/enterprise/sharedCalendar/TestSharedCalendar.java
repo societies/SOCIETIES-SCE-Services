@@ -34,6 +34,8 @@ import org.slf4j.LoggerFactory;
 import org.societies.rdPartyService.enterprise.sharedCalendar.dataObject.Calendar;
 import org.societies.rdPartyService.enterprise.sharedCalendar.dataObject.Event;
 
+import com.google.api.services.calendar.model.EventAttendee;
+
 /**
  * Describe your class here...
  * 
@@ -65,6 +67,8 @@ public class TestSharedCalendar {
 		log.info("Events retrieved:");
 		for (Event event : eventList) {
 			log.info("Event id: "+event.getEventId());
+			
+			
 		}
 	}
 	@Test
