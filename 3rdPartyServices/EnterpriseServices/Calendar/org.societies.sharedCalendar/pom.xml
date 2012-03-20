@@ -64,6 +64,15 @@
 			<version>${slf4j.version}</version>
 			<scope>compile</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-simple</artifactId>
+			<version>${slf4j.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>com.springsource.slf4j.org.apache.commons.logging</artifactId>
+		</dependency>
 	</dependencies>
 
 
@@ -82,11 +91,12 @@
 						<Bundle-Version>${project.version}</Bundle-Version>
 						<Embed-Dependency>google-api-services-calendar;groupId=com.google.apis;version=v3-rev3-1.4.0-beta,
 							google-api-client;groupId=com.google.api-client;version=1.7.0-beta,
-							google-http-client;groupId=com.google.http-client;version=1.7.0-beta
+							google-http-client;groupId=com.google.http-client;version=1.7.0-beta,
+							*;scope=compile|runtime;type=!pom
 						</Embed-Dependency>
 						<Embed-Transitive>true</Embed-Transitive>
 						<Export-Package>org.societies.rdPartyService.enterprise.sharedCalendar</Export-Package>
-						<Import-Package>!com.google.*,!org.apache.*,!org.xmlpull.*,!junit.framework,!org.codehaus.jackson,*</Import-Package>
+						<Import-Package>!sun.misc.*;resolution=optional,!javax.*,!com.google.*,!org.apache.*,!org.xmlpull.*,!junit.framework,!org.codehaus.jackson,*</Import-Package>
 					</instructions>
 				</configuration>
 
