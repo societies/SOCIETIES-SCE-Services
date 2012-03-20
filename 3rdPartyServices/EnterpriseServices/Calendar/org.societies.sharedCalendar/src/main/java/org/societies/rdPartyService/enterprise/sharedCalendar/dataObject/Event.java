@@ -38,6 +38,12 @@ public class Event {
 	private String startDate;
 	private String endDate;
 	private String location;
+	
+	
+	
+	public Event(){
+		super();
+	}
 	/**
 	 * @param eventId
 	 * @param eventDescription

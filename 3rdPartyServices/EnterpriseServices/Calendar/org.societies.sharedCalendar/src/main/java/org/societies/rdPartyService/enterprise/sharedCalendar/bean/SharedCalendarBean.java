@@ -22,59 +22,50 @@
  * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.societies.rdPartyService.enterprise.sharedCalendar;
-
-import java.util.List;
-
-import org.societies.rdpartyservice.enterprise.sharedcalendar.Calendar;
-import org.societies.rdpartyservice.enterprise.sharedcalendar.Event;
-
-
+package org.societies.rdPartyService.enterprise.sharedCalendar.bean;
 
 /**
- * 
+ * Describe your class here...
  *
  * @author solutanet
  *
  */
-public interface ISharedCalendar {
-	/**
-	 * This method is used to retrieve all available calendars provided by the 3rd party service
-	 * @return the list of Calendars
-	 */
+public class SharedCalendarBean {
 
-	public List<Calendar> retrieveCalendarList();
-	
-	/**
-	 * 
-	 * @param calendarId
-	 * @return the list of events inside a specific Calendar
-	 */
-	public List<Event> retrieveCalendarEvents(String calendarId);
-	
-	/**
-	 * 
-	 * @param calendarId
-	 * @param eventId
-	 * @param subscriberId the identifier for the subscriber
-	 * @return true if the subscription is performed correctly false otherwise
-	 */
-	public boolean subscribeToEvent(String calendarId,String eventId, String subscriberId);
-	
-	/**
-	 * 
-	 * @param calendarId
-	 * @param keyWord
-	 * @return the list of events that match the input keyword
-	 */
-	public List<Event> findEvents(String calendarId,String keyWord);
-	
-	/**
-	 * 
-	 * @param calendarId
-	 * @param eventId
-	 * @param subscriberId
-	 * @return true if the unsubscription is performed correctly, false otherwise
-	 */
-	public boolean unsubscribeFromEvent(String calendarId,String eventId, String subscriberId);
+	public enum methodType{retrieveCalendarList,retrieveCalendarEvents,subscribeToEvent,findEvents,unsubscribeFromEvent};
+	private methodType method;
+	private String calendarId;
+	private String eventId;
+	private String keyWord;
+	private String subscriverId;
+	public methodType getMethod() {
+		return method;
+	}
+	public void setMethod(methodType method) {
+		this.method = method;
+	}
+	public String getCalendarId() {
+		return calendarId;
+	}
+	public void setCalendarId(String calendarId) {
+		this.calendarId = calendarId;
+	}
+	public String getEventId() {
+		return eventId;
+	}
+	public void setEventId(String eventId) {
+		this.eventId = eventId;
+	}
+	public String getKeyWord() {
+		return keyWord;
+	}
+	public void setKeyWord(String keyWord) {
+		this.keyWord = keyWord;
+	}
+	public String getSubscriverId() {
+		return subscriverId;
+	}
+	public void setSubscriverId(String subscriverId) {
+		this.subscriverId = subscriverId;
+	}
 }

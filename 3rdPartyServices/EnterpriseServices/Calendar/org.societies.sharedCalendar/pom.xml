@@ -30,7 +30,12 @@
 	</repositories>
 
 	<dependencies>
+		<dependency>
+			<groupId>org.societies.api.external</groupId>
+			<artifactId>societies-api</artifactId>
+			<version>${release.version}</version>
 
+		</dependency>
 		<!-- Google API -->
 		<dependency>
 			<groupId>com.google.api-client</groupId>
@@ -64,12 +69,50 @@
 			<version>${slf4j.version}</version>
 			<scope>compile</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-simple</artifactId>
+			<version>${slf4j.version}</version>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>com.springsource.slf4j.org.apache.commons.logging</artifactId>
+		</dependency>
+		<!-- xsd generation -->
+		<dependency>
+			<groupId>javax.xml.bind</groupId>
+			<artifactId>jaxb-api</artifactId>
+			<version>2.0</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.sun.xml.bind</groupId>
+			<artifactId>jaxb-impl</artifactId>
+			<version>2.0.3</version>
+			<scope>provided</scope>
+		</dependency>
 	</dependencies>
 
 
 
 	<build>
 		<plugins>
+
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>jaxb2-maven-plugin</artifactId>
+				<version>1.3.1</version>
+				<configuration>
+					<includes>
+						<include>**/*.java</include>
+					</includes>
+					<packageName>org.societies.rdPartyService.enterprise.sharedCalendar.bean</packageName>
+				</configuration>
+			</plugin>
+
+
+
 			<plugin>
 				<groupId>org.apache.felix</groupId>
 				<artifactId>maven-bundle-plugin</artifactId>
@@ -82,11 +125,12 @@
 						<Bundle-Version>${project.version}</Bundle-Version>
 						<Embed-Dependency>google-api-services-calendar;groupId=com.google.apis;version=v3-rev3-1.4.0-beta,
 							google-api-client;groupId=com.google.api-client;version=1.7.0-beta,
-							google-http-client;groupId=com.google.http-client;version=1.7.0-beta
+							google-http-client;groupId=com.google.http-client;version=1.7.0-beta,
+							*;scope=compile|runtime;type=!pom
 						</Embed-Dependency>
 						<Embed-Transitive>true</Embed-Transitive>
 						<Export-Package>org.societies.rdPartyService.enterprise.sharedCalendar</Export-Package>
-						<Import-Package>!com.google.*,!org.apache.*,!org.xmlpull.*,!junit.framework,!org.codehaus.jackson,*</Import-Package>
+						<Import-Package>!com.google.*,!org.apache.*,!org.xmlpull.*,!junit.framework,!org.codehaus.jackson,!javax.*,!sun.misc.*,*</Import-Package>
 					</instructions>
 				</configuration>
 

@@ -22,59 +22,45 @@
  * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.societies.rdPartyService.enterprise.sharedCalendar;
+package org.societies.rdPartyService.enterprise.sharedCalendar.bean;
 
 import java.util.List;
 
-import org.societies.rdpartyservice.enterprise.sharedcalendar.Calendar;
-import org.societies.rdpartyservice.enterprise.sharedcalendar.Event;
-
-
+import org.societies.rdPartyService.enterprise.sharedCalendar.dataObject.Calendar;
+import org.societies.rdPartyService.enterprise.sharedCalendar.dataObject.Event;
 
 /**
+ * Describe your class here...
  * 
- *
  * @author solutanet
- *
+ * 
  */
-public interface ISharedCalendar {
-	/**
-	 * This method is used to retrieve all available calendars provided by the 3rd party service
-	 * @return the list of Calendars
-	 */
+public class SharedCalendarResult {
+	private List<Event> eventList;
+	private List<Calendar> calendarList;
+	private boolean subscribingResult;
 
-	public List<Calendar> retrieveCalendarList();
-	
-	/**
-	 * 
-	 * @param calendarId
-	 * @return the list of events inside a specific Calendar
-	 */
-	public List<Event> retrieveCalendarEvents(String calendarId);
-	
-	/**
-	 * 
-	 * @param calendarId
-	 * @param eventId
-	 * @param subscriberId the identifier for the subscriber
-	 * @return true if the subscription is performed correctly false otherwise
-	 */
-	public boolean subscribeToEvent(String calendarId,String eventId, String subscriberId);
-	
-	/**
-	 * 
-	 * @param calendarId
-	 * @param keyWord
-	 * @return the list of events that match the input keyword
-	 */
-	public List<Event> findEvents(String calendarId,String keyWord);
-	
-	/**
-	 * 
-	 * @param calendarId
-	 * @param eventId
-	 * @param subscriberId
-	 * @return true if the unsubscription is performed correctly, false otherwise
-	 */
-	public boolean unsubscribeFromEvent(String calendarId,String eventId, String subscriberId);
+	public List<Event> getEventList() {
+		return eventList;
+	}
+
+	public void setEventList(List<Event> eventList) {
+		this.eventList = eventList;
+	}
+
+	public List<Calendar> getCalendarList() {
+		return calendarList;
+	}
+
+	public void setCalendarList(List<Calendar> calendarList) {
+		this.calendarList = calendarList;
+	}
+
+	public boolean isSubscribingResult() {
+		return subscribingResult;
+	}
+
+	public void setSubscribingResult(boolean subscribingResult) {
+		this.subscribingResult = subscribingResult;
+	}
 }

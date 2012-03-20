@@ -36,6 +36,10 @@ public class Calendar {
 	private String description;
 	private String location;
 	private String calendarId;
+	
+	public Calendar(){
+		super();
+	}
 	/**
 	 * @param summary
 	 * @param description

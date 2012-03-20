@@ -34,8 +34,9 @@ import java.util.List;
 import org.apache.commons.codec.binary.Hex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.societies.rdPartyService.enterprise.sharedCalendar.dataObject.Calendar;
-import org.societies.rdPartyService.enterprise.sharedCalendar.dataObject.Event;
+import org.societies.rdpartyservice.enterprise.sharedcalendar.Calendar;
+import org.societies.rdpartyservice.enterprise.sharedcalendar.Event;
+
 
 import com.google.api.services.calendar.model.CalendarListEntry;
 import com.google.api.services.calendar.model.EventAttendee;
@@ -175,9 +176,12 @@ public class SharedCalendar implements ISharedCalendar {
 			List<CalendarListEntry> inList) {
 		List<Calendar> tmpCalendarList = new ArrayList<Calendar>();
 		for (CalendarListEntry calendarListEntry : inList) {
-			tmpCalendarList.add(new Calendar(calendarListEntry.getSummary(),
-					calendarListEntry.getDescription(), calendarListEntry
-							.getLocation(), calendarListEntry.getId()));
+			Calendar tmpCalendar=new Calendar();
+			tmpCalendar.setSummary(calendarListEntry.getSummary());
+			tmpCalendar.setCalendarId(calendarListEntry.getId());
+			tmpCalendar.setDescription(calendarListEntry.getDescription());
+			tmpCalendar.setLocation(calendarListEntry.getLocation());
+			tmpCalendarList.add(tmpCalendar);
 		}
 		return tmpCalendarList;
 	}
@@ -186,9 +190,14 @@ public class SharedCalendar implements ISharedCalendar {
 			List<com.google.api.services.calendar.model.Event> inList) {
 		List<Event> tmpEventList = new ArrayList<Event>();
 		for (com.google.api.services.calendar.model.Event event : inList) {
-			tmpEventList.add(new Event(event.getId(), event.getDescription(),
-					event.getSummary(), event.getStart().toString(), event
-							.getEnd().toString(), event.getLocation()));
+			Event tmpEvent=new Event();
+			tmpEvent.setEndDate(event.getEnd().toString());
+			tmpEvent.setStartDate(event.getStart().toString());
+			tmpEvent.setEventId(event.getId());
+			tmpEvent.setEventSummary(event.getSummary());
+			tmpEvent.setLocation(event.getLocation());
+			tmpEvent.setEventDescription(event.getDescription());
+			tmpEventList.add(tmpEvent);
 		}
 		return tmpEventList;
 	}

@@ -31,8 +31,9 @@ import junit.framework.TestCase;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.societies.rdPartyService.enterprise.sharedCalendar.dataObject.Calendar;
-import org.societies.rdPartyService.enterprise.sharedCalendar.dataObject.Event;
+import org.societies.rdpartyservice.enterprise.sharedcalendar.Calendar;
+import org.societies.rdpartyservice.enterprise.sharedcalendar.Event;
+
 
 import com.google.api.services.calendar.model.EventAttendee;
 

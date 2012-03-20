@@ -11,4 +11,5 @@
        keeping these definitions separate is to facilitate integration
        testing of the bundle outside of an OSGi container -->
        <osgi:service ref="sharedCalendar" interface="org.societies.rdPartyService.enterprise.sharedCalendar.ISharedCalendar"/>
+<osgi:reference id="CommManagerBundle" interface="org.societies.comm.xmpp.interfaces.CommManager" />
 </beans>
