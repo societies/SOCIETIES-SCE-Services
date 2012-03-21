@@ -34,7 +34,11 @@
 			<groupId>org.societies.api.external</groupId>
 			<artifactId>societies-api</artifactId>
 			<version>${release.version}</version>
-
+		</dependency>
+		<dependency>
+			<groupId>org.societies.api.schema</groupId>
+			<artifactId>societies-api-schema</artifactId>
+			<version>${release.version}</version>
 		</dependency>
 		<!-- Google API -->
 		<dependency>
@@ -166,7 +170,8 @@
 							<version>${project.version}</version>
 							<type>jar</type>
 							<overWrite>true</overWrite>
-							<outputDirectory>${spring.osgi.deploy.dir}</outputDirectory>
+<!-- 							<outputDirectory>${spring.osgi.deploy.dir}</outputDirectory> -->
+							<outputDirectory>${env.VIRGO_HOME}/pickup</outputDirectory>
 						</artifactItem>
 					</artifactItems>
 				</configuration>

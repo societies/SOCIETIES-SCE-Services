@@ -34,7 +34,7 @@ import org.societies.api.comm.xmpp.exceptions.XMPPError;
 import org.societies.api.comm.xmpp.interfaces.ICommManager;
 import org.societies.api.comm.xmpp.interfaces.IFeatureServer;
 import org.societies.rdPartyService.enterprise.sharedCalendar.ISharedCalendar;
-import org.societies.rdPartyService.enterprise.sharedCalendar.SharedCalendar;
+import org.societies.rdpartyservice.enterprise.sharedcalendar.Calendar;
 
 /**
  * Describe your class here...
@@ -44,22 +44,31 @@ import org.societies.rdPartyService.enterprise.sharedCalendar.SharedCalendar;
  */
 public class CommsServer implements IFeatureServer{
 	private ICommManager commManager;
-	private ISharedCalendar sharedCalendarService=new SharedCalendar();
+	private ISharedCalendar sharedCalendarService;
+	
+	public ISharedCalendar getSharedCalendarService() {
+		return sharedCalendarService;
+	}
+
+	public void setSharedCalendarService(ISharedCalendar sharedCalendarService) {
+		this.sharedCalendarService = sharedCalendarService;
+	}
+
 	private static final List<String> NAMESPACES = Collections.unmodifiableList(
 			Arrays.asList("http://societies.org/rdPartyService/enterprise/sharedCalendar"));
-			private static final List<String> PACKAGES = Collections.unmodifiableList(
-			Arrays.asList("org.societies.rdpartyservice.enterprise.sharedcalendar.Event"));
+	private static final List<String> PACKAGES = Collections.unmodifiableList(
+			Arrays.asList("org.societies.rdpartyservice.enterprise.sharedcalendar"));
 	
 	//PROPERTIES
 	public ICommManager getCommManager() {
-	return commManager;
+		return commManager;
 	}
 
 	public void setCommManager(ICommManager commManager) {
-	this.commManager = commManager;
+		this.commManager = commManager;
 	}
 	
-	public void InitService() {
+	public void initService() {
 		//REGISTER OUR ServiceManager WITH THE XMPP Communication Manager
 		try {
 		getCommManager().register(this);
@@ -74,7 +83,7 @@ public class CommsServer implements IFeatureServer{
 	@Override
 	public List<String> getXMLNamespaces() {
 		// TODO Auto-generated method stub
-		return null;
+		return CommsServer.NAMESPACES;
 	}
 
 	/* (non-Javadoc)
@@ -83,7 +92,7 @@ public class CommsServer implements IFeatureServer{
 	@Override
 	public List<String> getJavaPackages() {
 		// TODO Auto-generated method stub
-		return null;
+		return CommsServer.PACKAGES;
 	}
 
 	/* (non-Javadoc)
@@ -92,7 +101,10 @@ public class CommsServer implements IFeatureServer{
 	@Override
 	public void receiveMessage(Stanza stanza, Object payload) {
 		// TODO Auto-generated method stub
-		
+		System.out.println(stanza);
+		if (payload instanceof Calendar){
+			System.out.println((Calendar)payload);
+		}
 	}
 
 	/* (non-Javadoc)

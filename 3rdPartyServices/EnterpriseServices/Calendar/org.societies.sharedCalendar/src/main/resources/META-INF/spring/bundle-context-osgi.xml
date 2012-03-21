@@ -10,6 +10,7 @@
        in a separate file if you do not want to. The rationale for 
        keeping these definitions separate is to facilitate integration
        testing of the bundle outside of an OSGi container -->
-       <osgi:service ref="sharedCalendar" interface="org.societies.rdPartyService.enterprise.sharedCalendar.ISharedCalendar"/>
-<osgi:reference id="CommManagerBundle" interface="org.societies.comm.xmpp.interfaces.CommManager" />
+   	<osgi:reference id="commManagerPlatformService" cardinality="1..1" bean-name="xcCommunication" interface="org.societies.api.comm.xmpp.interfaces.ICommManager"/>
+   	<osgi:service ref="sharedCalendarServiceBean" interface="org.societies.rdPartyService.enterprise.sharedCalendar.ISharedCalendar"/>
+   	<osgi:service ref="sharedCalendarCommsManager" interface="org.societies.api.comm.xmpp.interfaces.IFeatureServer" />		
 </beans>
