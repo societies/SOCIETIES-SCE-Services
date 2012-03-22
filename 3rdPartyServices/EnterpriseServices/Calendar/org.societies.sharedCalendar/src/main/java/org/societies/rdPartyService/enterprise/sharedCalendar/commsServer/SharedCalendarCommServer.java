@@ -33,7 +33,10 @@ import org.societies.api.comm.xmpp.exceptions.CommunicationException;
 import org.societies.api.comm.xmpp.exceptions.XMPPError;
 import org.societies.api.comm.xmpp.interfaces.ICommManager;
 import org.societies.api.comm.xmpp.interfaces.IFeatureServer;
+import org.societies.rdPartyService.enterprise.sharedCalendar.ISharedCalendar;
+import org.societies.rdPartyService.enterprise.sharedCalendar.SharedCalendar;
 import org.societies.rdpartyservice.enterprise.sharedcalendar.Calendar;
+import org.societies.rdpartyservice.enterprise.sharedcalendar.Event;
 
 /**
  * Describe your class here...
@@ -43,7 +46,7 @@ import org.societies.rdpartyservice.enterprise.sharedcalendar.Calendar;
  */
 public class SharedCalendarCommServer implements IFeatureServer{
 	private ICommManager commManager;
-	//private ISharedCalendar sharedCalendarService = new SharedCalendar();
+	private ISharedCalendar sharedCalendarService = new SharedCalendar();
 	
 	private static final List<String> NAMESPACES = Collections.unmodifiableList(
 			Arrays.asList("http://societies.org/rdPartyService/enterprise/sharedCalendar"));
@@ -105,7 +108,36 @@ public class SharedCalendarCommServer implements IFeatureServer{
 	@Override
 	public Object getQuery(Stanza stanza, Object payload) throws XMPPError {
 		// TODO Auto-generated method stub
-		return null;
+		org.societies.rdpartyservice.enterprise.sharedcalendar.SharedCalendarBean bean = null;
+		Object result = null;
+		if (payload instanceof org.societies.rdpartyservice.enterprise.sharedcalendar.SharedCalendarBean){
+			bean = (org.societies.rdpartyservice.enterprise.sharedcalendar.SharedCalendarBean) payload;
+			switch (bean.getMethod()) {
+			case FIND_EVENTS:
+				List<Event> foundEvents = this.sharedCalendarService.findEvents(bean.getCalendarId(), bean.getKeyWord());
+				result = foundEvents;
+				break;
+			case RETRIEVE_CALENDAR_EVENTS:
+				List<Event> retrievedEvents = this.sharedCalendarService.retrieveCalendarEvents(bean.getCalendarId());
+				result = retrievedEvents;
+				break;
+			case RETRIEVE_CALENDAR_LIST:
+				List<Calendar> retrievedCalendars = this.sharedCalendarService.retrieveCalendarList();
+				result = retrievedCalendars;
+				break;
+			case SUBSCRIBE_TO_EVENT:
+				Boolean successfull = this.sharedCalendarService.subscribeToEvent(bean.getCalendarId(), bean.getEventId(), bean.getSubscriverId());
+				result = successfull;
+				break;
+			case UNSUBSCRIBE_FROM_EVENT:
+				Boolean successfull2 = this.sharedCalendarService.unsubscribeFromEvent(bean.getCalendarId(), bean.getEventId(), bean.getSubscriverId());
+				result = successfull2;
+				break;
+			default:
+				break;
+			}
+		}
+		return result;
 	}
 
 	/* (non-Javadoc)
