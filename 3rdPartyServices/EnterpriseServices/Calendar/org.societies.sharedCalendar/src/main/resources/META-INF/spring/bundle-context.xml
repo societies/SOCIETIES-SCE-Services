@@ -7,9 +7,11 @@
        bundle. The configuration of OSGi definitions is kept in a separate 
        configuration file so that this file can easily be used
        for integration testing outside of an OSGi environment -->
-	<bean id="sharedCalendarServiceBean" class="org.societies.rdPartyService.enterprise.sharedCalendar.SharedCalendar"/>
-	<bean id="sharedCalendarCommsManager" class="org.societies.rdPartyService.enterprise.sharedCalendar.commsServer.CommsServer" init-method="initService">
-		<property name="commManager" ref="commManagerPlatformService" />
-		<property name="sharedCalendarService" ref="sharedCalendarServiceBean" />
+	
+	<bean 	id="sharedCalendarCommsManager" 
+			class="org.societies.rdPartyService.enterprise.sharedCalendar.commsServer.SharedCalendarCommServer"
+			depends-on="CommManagerBundle" 
+			init-method="initService">
+		<property name="commManager" ref="CommManagerBundle" />
 	</bean>
 </beans>

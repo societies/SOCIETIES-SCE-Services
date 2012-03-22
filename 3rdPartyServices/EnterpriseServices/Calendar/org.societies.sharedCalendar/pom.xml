@@ -133,7 +133,7 @@
 							*;scope=compile|runtime;type=!pom
 						</Embed-Dependency>
 						<Embed-Transitive>true</Embed-Transitive>
-						<Export-Package>org.societies.rdPartyService.enterprise.sharedCalendar</Export-Package>
+<!-- 						<Export-Package>org.societies.rdPartyService.enterprise.sharedCalendar.*</Export-Package> -->
 						<Import-Package>!com.google.*,!org.apache.*,!org.xmlpull.*,!junit.framework,!org.codehaus.jackson,!javax.*,!sun.misc.*,*</Import-Package>
 					</instructions>
 				</configuration>
