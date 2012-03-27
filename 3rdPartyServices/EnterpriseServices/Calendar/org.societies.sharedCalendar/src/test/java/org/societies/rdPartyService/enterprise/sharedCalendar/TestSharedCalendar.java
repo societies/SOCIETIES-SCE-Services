@@ -33,6 +33,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.societies.rdpartyservice.enterprise.sharedcalendar.Calendar;
 import org.societies.rdpartyservice.enterprise.sharedcalendar.Event;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.annotation.Rollback;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.AbstractTransactionalJUnit4SpringContextTests;
 
 
 import com.google.api.services.calendar.model.EventAttendee;
@@ -43,8 +47,12 @@ import com.google.api.services.calendar.model.EventAttendee;
  * @author solutanet
  * 
  */
-public class TestSharedCalendar {
-	private static SharedCalendar calendar = new SharedCalendar();
+@ContextConfiguration(locations = { "../../../../../META-INF/SharedCalendarTest-context.xml" })
+public class TestSharedCalendar extends AbstractTransactionalJUnit4SpringContextTests {
+@Autowired
+
+	private  SharedCalendar sharedCalendar;
+
 	private static Logger log = LoggerFactory
 			.getLogger(TestSharedCalendar.class);
 	private String testCalendarId="soluta.net_n1i86mmq647g7pmc573uslm1d4@group.calendar.google.com";
@@ -52,7 +60,8 @@ public class TestSharedCalendar {
 
 	@Test
 	public void testRetrieveAllCalendar() {
-		List<Calendar> calendarList = calendar.retrieveCalendarList();
+		sharedCalendar.setUtil(new SharedCalendarUtil());
+		List<Calendar> calendarList = sharedCalendar.retrieveCalendarList();
 		log.info("Calendars retrieved:");
 		
 		for (Calendar calendar : calendarList) {
@@ -64,7 +73,7 @@ public class TestSharedCalendar {
 	
 	@Test
 	public void retrieveCalendarEvent(){
-		List<Event> eventList=calendar.retrieveCalendarEvents(testCalendarId);
+		List<Event> eventList=sharedCalendar.retrieveCalendarEvents(testCalendarId);
 		log.info("Events retrieved:");
 		for (Event event : eventList) {
 			log.info("Event id: "+event.getEventId());
@@ -74,12 +83,30 @@ public class TestSharedCalendar {
 	}
 	@Test
 	public void addSubscriber(){
-		 calendar.subscribeToEvent(testCalendarId, testEventId, "xxxx");
+		 sharedCalendar.subscribeToEvent(testCalendarId, testEventId, "xxxx");
 	}
 	
 	@Test
 	public void unsubscribe(){
-		calendar.unsubscribeFromEvent(testCalendarId, testEventId, "xxxx");
+		sharedCalendar.unsubscribeFromEvent(testCalendarId, testEventId, "xxxx");
+	}
+	
+	@Test
+	@Rollback(false)
+	public void createPrivateCalendar(){
+		boolean result=sharedCalendar.createPrivateCalendarUsingCSSId("TestCISIs", "Test private calendar");
+		assert(result);
+	}
+	
+	@Test
+	public void insertRemoveCalendar() throws InterruptedException{
+		int max=50;
+		for(int i=0;i<max;i++){
+		sharedCalendar.createPrivateCalendarUsingCSSId("TestCISIs"+i, "Test private calendar");
+		Thread.sleep(100);}
+		for(int i=0;i<max;i++){
+			sharedCalendar.deletePrivateCalendarUsingCSSId("TestCISIs"+i);
+			Thread.sleep(100);}
 	}
 
 }

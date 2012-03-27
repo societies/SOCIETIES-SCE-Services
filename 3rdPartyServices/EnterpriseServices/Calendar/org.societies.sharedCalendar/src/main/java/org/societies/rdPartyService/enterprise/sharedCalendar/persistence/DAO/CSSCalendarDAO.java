@@ -22,68 +22,69 @@
  * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.societies.rdPartyService.enterprise.sharedCalendar;
+package org.societies.rdPartyService.enterprise.sharedCalendar.persistence.DAO;
 
-import java.util.List;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.Table;
 
-import org.societies.rdpartyservice.enterprise.sharedcalendar.Calendar;
-import org.societies.rdpartyservice.enterprise.sharedcalendar.Event;
-
-
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * 
+ * Describe your class here...
  *
  * @author solutanet
  *
  */
-public interface ISharedCalendar {
+@Entity
+@Table(name="CSSPersonalCalendar")
+public class CSSCalendarDAO {
+	
+	private long id;
+	private String CSSId;
+	private String calendarId;
 	/**
-	 * This method is used to retrieve all available calendars provided by the 3rd party service
-	 * @return the list of Calendars
+	 * 
 	 */
+	public CSSCalendarDAO() {
+		super();
+		// TODO Auto-generated constructor stub
+	}
+	/**
+	 * @param cSSId
+	 * @param calendarId
+	 */
+	public CSSCalendarDAO(String cSSId, String calendarId) {
+		super();
+		CSSId = cSSId;
+		this.calendarId = calendarId;
+	}
+	
+	@Column(name = "CSSId")
+	public String getCSSId() {
+		return CSSId;
+	}
+	public void setCSSId(String cSSId) {
+		CSSId = cSSId;
+	}
+	
+	@Column(name = "CalendarId")
+	public String getCalendarId() {
+		return calendarId;
+	}
+	public void setCalendarId(String calendarId) {
+		this.calendarId = calendarId;
+	}
+	@Id
+	@GeneratedValue
+	@Column(name="id")
+	public long getId() {
+		return id;
+	}
+	public void setId(long id) {
+		this.id = id;
+	}
 
-	public List<Calendar> retrieveCalendarList();
-	
-	/**
-	 * 
-	 * @param calendarId
-	 * @return the list of events inside a specific Calendar
-	 */
-	public List<Event> retrieveCalendarEvents(String calendarId);
-	
-	/**
-	 * 
-	 * @param calendarId
-	 * @param eventId
-	 * @param subscriberId the identifier for the subscriber
-	 * @return true if the subscription is performed correctly false otherwise
-	 */
-	public boolean subscribeToEvent(String calendarId,String eventId, String subscriberId);
-	
-	/**
-	 * 
-	 * @param calendarId
-	 * @param keyWord
-	 * @return the list of events that match the input keyword
-	 */
-	public List<Event> findEvents(String calendarId,String keyWord);
-	
-	/**
-	 * 
-	 * @param calendarId
-	 * @param eventId
-	 * @param subscriberId
-	 * @return true if the unsubscription is performed correctly, false otherwise
-	 */
-	public boolean unsubscribeFromEvent(String calendarId,String eventId, String subscriberId);
-	
-	/**
-	 * This method create a private calendar for a CSS
-	 * @param CSSId
-	 * @return
-	 */
-	public boolean createPrivateCalendar(String calendarSummary);
-	
-	
 }

@@ -22,68 +22,29 @@
  * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.societies.rdPartyService.enterprise.sharedCalendar;
-
-import java.util.List;
-
-import org.societies.rdpartyservice.enterprise.sharedcalendar.Calendar;
-import org.societies.rdpartyservice.enterprise.sharedcalendar.Event;
-
-
+package org.societies.rdPartyService.enterprise.sharedCalendar.privateCalendarUtil;
 
 /**
- * 
+ * Describe your class here...
  *
  * @author solutanet
  *
  */
-public interface ISharedCalendar {
-	/**
-	 * This method is used to retrieve all available calendars provided by the 3rd party service
-	 * @return the list of Calendars
-	 */
+public interface IPrivateCalendarUtil {
 
-	public List<Calendar> retrieveCalendarList();
-	
 	/**
 	 * 
-	 * @param calendarId
-	 * @return the list of events inside a specific Calendar
-	 */
-	public List<Event> retrieveCalendarEvents(String calendarId);
-	
-	/**
-	 * 
-	 * @param calendarId
-	 * @param eventId
-	 * @param subscriberId the identifier for the subscriber
-	 * @return true if the subscription is performed correctly false otherwise
-	 */
-	public boolean subscribeToEvent(String calendarId,String eventId, String subscriberId);
-	
-	/**
-	 * 
-	 * @param calendarId
-	 * @param keyWord
-	 * @return the list of events that match the input keyword
-	 */
-	public List<Event> findEvents(String calendarId,String keyWord);
-	
-	/**
-	 * 
-	 * @param calendarId
-	 * @param eventId
-	 * @param subscriberId
-	 * @return true if the unsubscription is performed correctly, false otherwise
-	 */
-	public boolean unsubscribeFromEvent(String calendarId,String eventId, String subscriberId);
-	
-	/**
-	 * This method create a private calendar for a CSS
 	 * @param CSSId
+	 * @param calendarSummary
 	 * @return
 	 */
-	public boolean createPrivateCalendar(String calendarSummary);
+	public boolean createPrivateCalendarUsingCSSId(String CSSId, String calendarSummary);
 	
-	
+	/**
+	 * 
+	 * @param CSSId
+	 * @param calendarSummary
+	 * @return
+	 */
+	public boolean deletePrivateCalendarUsingCSSId(String CSSId);
 }

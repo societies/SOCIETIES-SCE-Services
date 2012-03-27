@@ -32,11 +32,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.codec.binary.Hex;
+import org.hibernate.HibernateException;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
+import org.hibernate.criterion.Example;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.societies.api.schema.cssmanagement.CssRecord;
+import org.societies.rdPartyService.enterprise.sharedCalendar.persistence.DAO.CSSCalendarDAO;
+import org.societies.rdPartyService.enterprise.sharedCalendar.privateCalendarUtil.IPrivateCalendarUtil;
 import org.societies.rdpartyservice.enterprise.sharedcalendar.Calendar;
 import org.societies.rdpartyservice.enterprise.sharedcalendar.Event;
-
 
 import com.google.api.services.calendar.model.CalendarListEntry;
 import com.google.api.services.calendar.model.EventAttendee;
@@ -47,9 +54,26 @@ import com.google.api.services.calendar.model.EventAttendee;
  * @author solutanet
  * 
  */
-public class SharedCalendar implements ISharedCalendar {
-	private static SharedCalendarUtil util = new SharedCalendarUtil();
+public class SharedCalendar implements ISharedCalendar, IPrivateCalendarUtil {
+	private SharedCalendarUtil util;
+	private SessionFactory sessionFactory;
 	private static Logger log = LoggerFactory.getLogger(SharedCalendar.class);
+
+	public SessionFactory getSessionFactory() {
+		return sessionFactory;
+	}
+
+	public void setSessionFactory(SessionFactory sessionFactory) {
+		this.sessionFactory = sessionFactory;
+	}
+
+	public SharedCalendarUtil getUtil() {
+		return util;
+	}
+
+	public void setUtil(SharedCalendarUtil util) {
+		this.util = util;
+	}
 
 	/*
 	 * (non-Javadoc)
@@ -105,17 +129,17 @@ public class SharedCalendar implements ISharedCalendar {
 		try {
 			com.google.api.services.calendar.model.Event event = util
 					.findEventUsingId(calendarId, eventId);
-/*
- * Check if event has attendees
- */
-			if (event.getAttendees()!=null){
-				event.getAttendees().add(createEventAttendee(subscriberId));}
-			else{
-				List<EventAttendee> attendeesList= new ArrayList<EventAttendee>();
+			/*
+			 * Check if event has attendees
+			 */
+			if (event.getAttendees() != null) {
+				event.getAttendees().add(createEventAttendee(subscriberId));
+			} else {
+				List<EventAttendee> attendeesList = new ArrayList<EventAttendee>();
 				attendeesList.add(createEventAttendee(subscriberId));
 				event.setAttendees(attendeesList);
 			}
-			
+
 			util.updateEvent(calendarId, event);
 			returnedValue = true;
 		} catch (IOException e) {
@@ -168,6 +192,127 @@ public class SharedCalendar implements ISharedCalendar {
 		return returnedValue;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.societies.rdPartyService.enterprise.sharedCalendar.ISharedCalendar
+	 * #createPrivateCalendar(java.lang.String) THIS METHOD HAS NO
+	 * IMPLEMENTATION. USE THE createPrivateCalendarUsingCSSId TO STORE THE
+	 * MAPPING BETWEEN CSSID AND CALENDARID
+	 */
+	@Override
+	public boolean createPrivateCalendar(String calendarSummary) {
+
+		return false;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.societies.rdPartyService.enterprise.sharedCalendar.privateCalendarUtil
+	 * .IPrivateCalendarUtil#createPrivateCalendarUsingCSSId(java.lang.String,
+	 * java.lang.String)
+	 */
+	@Override
+	public boolean createPrivateCalendarUsingCSSId(String CSSId,
+			String calendarSummary) {
+		String storedCalendarId = null;
+		Transaction t = null;
+		Session session = null;
+		boolean result=false;
+		
+		try {
+			session = sessionFactory.openSession();
+			CSSCalendarDAO template = new CSSCalendarDAO();
+			template.setCSSId(CSSId);
+			List<CSSCalendarDAO> results = session
+					.createCriteria(CSSCalendarDAO.class)
+					.add(Example.create(template)).list();
+			if (results.size() < 0) {
+			
+			storedCalendarId = util.createCalendar(calendarSummary);
+			CSSCalendarDAO cssCalendarDAO = new CSSCalendarDAO(CSSId,
+					storedCalendarId);
+			
+			t = session.beginTransaction();
+			session.save(cssCalendarDAO);
+			t.commit();
+			result=true;
+			}else{
+				log.info("The CSS already has a calendar.");
+			}
+		} catch (HibernateException he) {
+			log.error(he.getMessage());
+			if (t != null) {
+				t.rollback();
+				try {
+					util.deleteCalendar(storedCalendarId);
+				} catch (IOException e) {
+
+					log.error(e.getMessage());
+				}
+			}
+		} catch (IOException e) {
+			log.error(e.getMessage());
+		} finally {
+
+			if (session != null) {
+				session.close();
+			}
+
+		}
+		return result;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.societies.rdPartyService.enterprise.sharedCalendar.privateCalendarUtil
+	 * .IPrivateCalendarUtil#deletePrivateCalendarUsingCSSId(java.lang.String,
+	 * java.lang.String)
+	 */
+	@Override
+	public boolean deletePrivateCalendarUsingCSSId(String CSSId) {
+		boolean result = false;
+		String storedCalendarId = null;
+		Session session = null;
+		Transaction t = null;
+		try {
+			session = sessionFactory.openSession();
+			CSSCalendarDAO template = new CSSCalendarDAO();
+			template.setCSSId(CSSId);
+			List<CSSCalendarDAO> results = session
+					.createCriteria(CSSCalendarDAO.class)
+					.add(Example.create(template)).list();
+			if (results.size() != 0) {
+				CSSCalendarDAO tmpCSSCalendarDAO = (CSSCalendarDAO) session
+						.get(CSSCalendarDAO.class, results.get(0).getId());
+				util.deleteCalendar(results.get(0).getCalendarId());
+				t = session.beginTransaction();
+
+				session.delete(tmpCSSCalendarDAO);
+				t.commit();
+			}
+		} catch (HibernateException he) {
+			if (t != null) {
+				t.rollback();
+			}
+			log.error(he.getMessage());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			log.error(e.getMessage());
+		} finally {
+			if (session != null) {
+				session.close();
+			}
+		}
+
+		return result;
+	}
+
 	/**
 	 * Utility methods
 	 */
@@ -176,7 +321,7 @@ public class SharedCalendar implements ISharedCalendar {
 			List<CalendarListEntry> inList) {
 		List<Calendar> tmpCalendarList = new ArrayList<Calendar>();
 		for (CalendarListEntry calendarListEntry : inList) {
-			Calendar tmpCalendar=new Calendar();
+			Calendar tmpCalendar = new Calendar();
 			tmpCalendar.setSummary(calendarListEntry.getSummary());
 			tmpCalendar.setCalendarId(calendarListEntry.getId());
 			tmpCalendar.setDescription(calendarListEntry.getDescription());
@@ -190,7 +335,7 @@ public class SharedCalendar implements ISharedCalendar {
 			List<com.google.api.services.calendar.model.Event> inList) {
 		List<Event> tmpEventList = new ArrayList<Event>();
 		for (com.google.api.services.calendar.model.Event event : inList) {
-			Event tmpEvent=new Event();
+			Event tmpEvent = new Event();
 			tmpEvent.setEndDate(event.getEnd().toString());
 			tmpEvent.setStartDate(event.getStart().toString());
 			tmpEvent.setEventId(event.getId());
@@ -210,12 +355,13 @@ public class SharedCalendar implements ISharedCalendar {
 		EventAttendee attendee = new EventAttendee();
 		// Create the MD5 to use in the email field
 		MessageDigest messageDigest;
-		String mailField ="";
+		String mailField = "";
 		try {
 			messageDigest = MessageDigest.getInstance("MD5");
 
 			messageDigest.reset();
-			messageDigest.update(subscriberId.getBytes(Charset.forName("UTF8")));
+			messageDigest
+					.update(subscriberId.getBytes(Charset.forName("UTF8")));
 			byte[] resultByte = messageDigest.digest();
 			mailField = new String(Hex.encodeHex(resultByte));
 		} catch (NoSuchAlgorithmException e) {
@@ -227,4 +373,5 @@ public class SharedCalendar implements ISharedCalendar {
 		attendee.setDisplayName(subscriberId);
 		return attendee;
 	}
+
 }

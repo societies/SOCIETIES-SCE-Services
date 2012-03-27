@@ -64,11 +64,11 @@ import com.google.api.services.calendar.model.Events;
  */
 public class SharedCalendarUtil {
 
-	private static String clientId;
-	private static String clientSecret;
-	private static String accessToken;
-	private static String refreshToken;
-	private static Calendar service = null;
+	private  String clientId;
+	private  String clientSecret;
+	private  String accessToken;
+	private  String refreshToken;
+	private  Calendar service = null;
 	private Properties props;
 	private static Logger log=LoggerFactory.getLogger(SharedCalendarUtil.class);
 
@@ -82,17 +82,37 @@ public class SharedCalendarUtil {
 		SharedCalendarUtil testCalendar = new SharedCalendarUtil();
 		testCalendar.setUp();
 		// testCalendar.retrieveAllCalendar();
-		testCalendar.retrieveAllEvents(testCalendarId);
+		//testCalendar.retrieveAllEvents(testCalendarId);
 		// testCalendar.createEvent(testCalendarId, "eventXX",
 		// "description eventxx", new Date(), new Date(), "Attendee Name",
 		// "toni@toni.com");
 		// testCalendar.findEventsUsingQuery(testCalendarId, "eventXX");
+		String calendarId=testCalendar.createCalendar("Summary");
+		System.out.println(calendarId);
+		
 	}
 	
 	/**
 	 * Constructor that initialize the class field
 	 */
 	public SharedCalendarUtil(){
+		this.readAndSetProperties();
+		this.setUp();
+	}
+
+	/**
+	 * @param clientId
+	 * @param clientSecret
+	 * @param accessToken
+	 * @param refreshToken
+	 */
+	public SharedCalendarUtil(String clientId, String clientSecret,
+			String accessToken, String refreshToken) {
+		super();
+		this.clientId = clientId;
+		this.clientSecret = clientSecret;
+		this.accessToken = accessToken;
+		this.refreshToken = refreshToken;
 		this.setUp();
 	}
 
@@ -154,6 +174,26 @@ public class SharedCalendarUtil {
 		}
 		return returnedList;
 	}
+	
+	/**
+	 * This method is used to create a calendar
+	 * @param calendarSummary
+	 * @return the calendarId
+	 * @throws IOException
+	 */
+	protected String createCalendar(String calendarSummary) throws IOException{
+		com.google.api.services.calendar.model.Calendar calendar = new com.google.api.services.calendar.model.Calendar();
+
+		calendar.setSummary(calendarSummary);
+		
+		
+		//calendar.setTimeZone("Rome");
+
+		com.google.api.services.calendar.model.Calendar createdCalendar = service.calendars().insert(calendar).execute();
+	return createdCalendar.getId();
+	}
+	
+	
 
 	/**
 	 * This method is used to create an event inside a specified calendar
@@ -242,6 +282,18 @@ public class SharedCalendarUtil {
 		Event updatedEvent = service.events().update(calendarId, eventToUpdate.getId(), eventToUpdate).execute();
 	}
 	
+	/**
+	 * Delete an existing calendar
+	 * @param calendarId
+	 * @throws IOException
+	 */
+	protected void deleteCalendar(String calendarId) throws IOException{
+		service.calendars().delete(calendarId).execute();
+	}
+	
+	protected void deleteEvent(String calendarId, String eventId) throws IOException{
+		service.events().delete(calendarId, eventId).execute();
+	}
 	
 	
 	/**
@@ -252,23 +304,8 @@ public class SharedCalendarUtil {
 	 * The first time the application starts the authorization code must be supplied following the instructions on the console. 
 	 */
 	protected void setUp() {
-		props = new Properties();
-		URL url = ClassLoader
-				.getSystemResource("META-INF/conf/backEnd.properties");
-		InputStream inputStream = null;
-		try {
-			inputStream = url.openStream();
-			props.load(inputStream);
-
-			clientId = props.getProperty("clientId");
-			clientSecret = props.getProperty("clientSecret");
-			accessToken = props.getProperty("accessToken");
-			refreshToken = props.getProperty("refreshToken");
-
-			if (accessToken == null || refreshToken == null) {
-				setupAuthorization(props, url);
-			}
-
+		
+try{
 			HttpTransport httpTransport = new NetHttpTransport();
 			JacksonFactory jsonFactory = new JacksonFactory();
 			GoogleAccessProtectedResource accessProtectedResource = new GoogleAccessProtectedResource(
@@ -283,15 +320,8 @@ public class SharedCalendarUtil {
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} finally {
-			if (inputStream != null)
-				try {
-					inputStream.close();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-		}
+		} 
+		
 	}
 
 	/**
@@ -342,4 +372,36 @@ public class SharedCalendarUtil {
 				null);
 
 	}
+	
+	/**
+	 * Read properties from a file
+	 * Used to test the library outside an Osgi container
+	 */
+	private void readAndSetProperties(){
+		props = new Properties();
+		URL url = ClassLoader
+				.getSystemResource("META-INF/conf/backEnd.properties");
+		InputStream inputStream = null;
+		try {
+			inputStream = url.openStream();
+			props.load(inputStream);
+
+			clientId = props.getProperty("clientId");
+			clientSecret = props.getProperty("clientSecret");
+			accessToken = props.getProperty("accessToken");
+			refreshToken = props.getProperty("refreshToken");
+
+			if (accessToken == null || refreshToken == null) {
+				setupAuthorization(props, url);
+			}}catch (Exception e) {
+				// TODO: handle exception
+			}finally {
+				if (inputStream != null)
+					try {
+						inputStream.close();
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+	}}
 }

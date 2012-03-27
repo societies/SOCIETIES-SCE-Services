@@ -46,7 +46,7 @@ import org.societies.rdpartyservice.enterprise.sharedcalendar.Event;
  */
 public class SharedCalendarCommServer implements IFeatureServer{
 	private ICommManager commManager;
-	private ISharedCalendar sharedCalendarService = new SharedCalendar();
+	private ISharedCalendar sharedCalendarService;
 	
 	private static final List<String> NAMESPACES = Collections.unmodifiableList(
 			Arrays.asList("http://societies.org/rdPartyService/enterprise/sharedCalendar"));
@@ -62,6 +62,14 @@ public class SharedCalendarCommServer implements IFeatureServer{
 		this.commManager = commManager;
 	}
 	
+	public ISharedCalendar getSharedCalendarService() {
+		return sharedCalendarService;
+	}
+
+	public void setSharedCalendarService(ISharedCalendar sharedCalendarService) {
+		this.sharedCalendarService = sharedCalendarService;
+	}
+
 	public void initService() {
 		// REGISTER OUR ServiceManager WITH THE XMPP Communication Manager
 		ICommManager cm = getCommManager();
@@ -132,6 +140,7 @@ public class SharedCalendarCommServer implements IFeatureServer{
 			case UNSUBSCRIBE_FROM_EVENT:
 				Boolean successfull2 = this.sharedCalendarService.unsubscribeFromEvent(bean.getCalendarId(), bean.getEventId(), bean.getSubscriverId());
 				result = successfull2;
+				
 				break;
 			default:
 				break;
