@@ -24,6 +24,7 @@
  */
 package org.societies.rdPartyService.enterprise.sharedCalendar.commsServer;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -37,6 +38,7 @@ import org.societies.rdPartyService.enterprise.sharedCalendar.ISharedCalendar;
 import org.societies.rdPartyService.enterprise.sharedCalendar.SharedCalendar;
 import org.societies.rdpartyservice.enterprise.sharedcalendar.Calendar;
 import org.societies.rdpartyservice.enterprise.sharedcalendar.Event;
+import org.societies.rdpartyservice.enterprise.sharedcalendar.SharedCalendarResult;
 
 /**
  * Describe your class here...
@@ -46,7 +48,7 @@ import org.societies.rdpartyservice.enterprise.sharedcalendar.Event;
  */
 public class SharedCalendarCommServer implements IFeatureServer{
 	private ICommManager commManager;
-	private ISharedCalendar sharedCalendarService;
+	private SharedCalendar sharedCalendarService;
 	
 	private static final List<String> NAMESPACES = Collections.unmodifiableList(
 			Arrays.asList("http://societies.org/rdPartyService/enterprise/sharedCalendar"));
@@ -62,11 +64,11 @@ public class SharedCalendarCommServer implements IFeatureServer{
 		this.commManager = commManager;
 	}
 	
-	public ISharedCalendar getSharedCalendarService() {
+	public SharedCalendar getSharedCalendarService() {
 		return sharedCalendarService;
 	}
 
-	public void setSharedCalendarService(ISharedCalendar sharedCalendarService) {
+	public void setSharedCalendarService(SharedCalendar sharedCalendarService) {
 		this.sharedCalendarService = sharedCalendarService;
 	}
 
@@ -123,25 +125,68 @@ public class SharedCalendarCommServer implements IFeatureServer{
 			switch (bean.getMethod()) {
 			case FIND_EVENTS:
 				List<Event> foundEvents = this.sharedCalendarService.findEvents(bean.getCalendarId(), bean.getKeyWord());
-				result = foundEvents;
+				SharedCalendarResult beanResultCalendarEventKeyword= new SharedCalendarResult();
+				List<Event> tmpEventListKeyword=new ArrayList<Event>();
+				tmpEventListKeyword=beanResultCalendarEventKeyword.getEventList();
+				tmpEventListKeyword.addAll(foundEvents);
+				result = beanResultCalendarEventKeyword;
 				break;
 			case RETRIEVE_CALENDAR_EVENTS:
 				List<Event> retrievedEvents = this.sharedCalendarService.retrieveCalendarEvents(bean.getCalendarId());
-				result = retrievedEvents;
+				SharedCalendarResult beanResultCalendarEvent= new SharedCalendarResult();
+				List<Event> tmpEventList=new ArrayList<Event>();
+				tmpEventList=beanResultCalendarEvent.getEventList();
+				tmpEventList.addAll(retrievedEvents);
+				result = beanResultCalendarEvent;
 				break;
 			case RETRIEVE_CALENDAR_LIST:
 				List<Calendar> retrievedCalendars = this.sharedCalendarService.retrieveCalendarList();
-				result = retrievedCalendars;
+				SharedCalendarResult beanResultCalendarList= new SharedCalendarResult();
+				List<Calendar> tmpCalendarList=new ArrayList<Calendar>();
+				tmpCalendarList=beanResultCalendarList.getCalendarList();
+				tmpCalendarList.addAll(retrievedCalendars);
+				result = beanResultCalendarList;
 				break;
 			case SUBSCRIBE_TO_EVENT:
-				Boolean successfull = this.sharedCalendarService.subscribeToEvent(bean.getCalendarId(), bean.getEventId(), bean.getSubscriverId());
-				result = successfull;
+				Boolean successfull = this.sharedCalendarService.subscribeToEvent(bean.getCalendarId(), bean.getEventId(), bean.getSubscriberId());
+				SharedCalendarResult beanResultSubscribeToEvent= new SharedCalendarResult();
+				beanResultSubscribeToEvent.setSubscribingResult(successfull);
+				result = beanResultSubscribeToEvent;
 				break;
 			case UNSUBSCRIBE_FROM_EVENT:
-				Boolean successfull2 = this.sharedCalendarService.unsubscribeFromEvent(bean.getCalendarId(), bean.getEventId(), bean.getSubscriverId());
-				result = successfull2;
+				Boolean successfull2 = this.sharedCalendarService.unsubscribeFromEvent(bean.getCalendarId(), bean.getEventId(), bean.getSubscriberId());
+				SharedCalendarResult beanResultUnSubscribeToEvent= new SharedCalendarResult();
+				beanResultUnSubscribeToEvent.setSubscribingResult(successfull2);
+				result = beanResultUnSubscribeToEvent;
 				
 				break;
+			case CREATE_PRIVATE_CALENDAR:
+				Boolean createPrivateCalendarStatus= this.sharedCalendarService.createPrivateCalendarUsingCSSId(stanza.getFrom().getJid(), bean.getPrivateCalendarSummary());
+				SharedCalendarResult beanResultCreatePrivateCalendar= new SharedCalendarResult();
+				beanResultCreatePrivateCalendar.setCreatePrivateCalendarResult(createPrivateCalendarStatus);
+				result = beanResultCreatePrivateCalendar;
+			break;
+			
+			case CREATE_EVENT_ON_PRIVATE_CALENDAR:
+				SharedCalendarResult beanResultCreateEventPrivateCalendar= new SharedCalendarResult();
+				String calendarId=this.sharedCalendarService.retrievePrivateCalendarId(stanza.getFrom().getJid());
+				if (calendarId!=null){
+				String returnedEventId=this.sharedCalendarService.createEventOnPrivateCalendarUsingCSSId(calendarId, bean.getNewEvent());
+				beanResultCreateEventPrivateCalendar.setEventId(returnedEventId);
+				}
+				result=beanResultCreateEventPrivateCalendar;
+				break;
+				
+			case RETRIEVE_EVENTS_PRIVATE_CALENDAR:
+				SharedCalendarResult beanResultRetrieveEventsPrivateCalendar= new SharedCalendarResult();
+				String calendarIdForAllEvents=this.sharedCalendarService.retrievePrivateCalendarId(stanza.getFrom().getJid());
+				if (calendarIdForAllEvents!=null){
+					List<Event> returnedPrivateCalendarEventList=this.sharedCalendarService.retrieveCalendarEvents(calendarIdForAllEvents);
+					List<Event> tmpListEvent=beanResultRetrieveEventsPrivateCalendar.getEventList();
+					tmpListEvent.addAll(returnedPrivateCalendarEventList);
+					}
+					result=beanResultRetrieveEventsPrivateCalendar;
+					break;
 			default:
 				break;
 			}

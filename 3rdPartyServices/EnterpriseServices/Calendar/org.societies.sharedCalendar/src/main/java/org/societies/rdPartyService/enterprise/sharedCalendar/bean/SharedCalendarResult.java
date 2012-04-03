@@ -24,6 +24,8 @@
  */
 package org.societies.rdPartyService.enterprise.sharedCalendar.bean;
 
+
+
 import java.util.List;
 
 import org.societies.rdPartyService.enterprise.sharedCalendar.dataObject.Calendar;
@@ -39,6 +41,36 @@ public class SharedCalendarResult {
 	private List<Event> eventList;
 	private List<Calendar> calendarList;
 	private boolean subscribingResult;
+	private boolean createPrivateCalendarResult;
+	private String eventId;
+
+	/**
+	 * @return the eventId
+	 */
+	public String getEventId() {
+		return eventId;
+	}
+
+	/**
+	 * @param eventId the eventId to set
+	 */
+	public void setEventId(String eventId) {
+		this.eventId = eventId;
+	}
+
+	/**
+	 * @return the createPrivateCalendarResult
+	 */
+	public boolean isCreatePrivateCalendarResult() {
+		return createPrivateCalendarResult;
+	}
+
+	/**
+	 * @param createPrivateCalendarResult the createPrivateCalendarResult to set
+	 */
+	public void setCreatePrivateCalendarResult(boolean createPrivateCalendarResult) {
+		this.createPrivateCalendarResult = createPrivateCalendarResult;
+	}
 
 	public List<Event> getEventList() {
 		return eventList;

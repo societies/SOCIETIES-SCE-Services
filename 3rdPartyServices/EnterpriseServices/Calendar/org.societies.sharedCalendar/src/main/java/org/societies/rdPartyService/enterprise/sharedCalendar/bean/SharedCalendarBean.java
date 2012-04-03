@@ -24,6 +24,10 @@
  */
 package org.societies.rdPartyService.enterprise.sharedCalendar.bean;
 
+import org.societies.rdPartyService.enterprise.sharedCalendar.dataObject.Event;
+
+
+
 /**
  * Describe your class here...
  *
@@ -32,12 +36,34 @@ package org.societies.rdPartyService.enterprise.sharedCalendar.bean;
  */
 public class SharedCalendarBean {
 
-	public enum methodType{retrieveCalendarList,retrieveCalendarEvents,subscribeToEvent,findEvents,unsubscribeFromEvent};
+	public enum methodType{retrieveCalendarList,retrieveCalendarEvents,
+		subscribeToEvent,findEvents,unsubscribeFromEvent,createPrivateCalendar,
+		createEventOnPrivateCalendar,retrieveEventsPrivateCalendar};
 	private methodType method;
 	private String calendarId;
 	private String eventId;
 	private String keyWord;
-	private String subscriverId;
+	private String subscriberId;
+	private String privateCalendarSummary;
+	private Event newEvent;
+	/**
+	 * @return the newEvent
+	 */
+	public Event getNewEvent() {
+		return newEvent;
+	}
+	/**
+	 * @param newEvent the newEvent to set
+	 */
+	public void setNewEvent(Event newEvent) {
+		this.newEvent = newEvent;
+	}
+	public String getPrivateCalendarSummary() {
+		return privateCalendarSummary;
+	}
+	public void setPrivateCalendarSummary(String privateCalendarSummary) {
+		this.privateCalendarSummary = privateCalendarSummary;
+	}
 	public methodType getMethod() {
 		return method;
 	}
@@ -62,10 +88,10 @@ public class SharedCalendarBean {
 	public void setKeyWord(String keyWord) {
 		this.keyWord = keyWord;
 	}
-	public String getSubscriverId() {
-		return subscriverId;
+	public String getSubscriberId() {
+		return subscriberId;
 	}
-	public void setSubscriverId(String subscriverId) {
-		this.subscriverId = subscriverId;
+	public void setSubscriberId(String subscriverId) {
+		this.subscriberId = subscriverId;
 	}
 }

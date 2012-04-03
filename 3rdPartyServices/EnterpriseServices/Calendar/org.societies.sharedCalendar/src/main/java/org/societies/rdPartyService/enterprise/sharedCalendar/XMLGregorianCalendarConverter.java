@@ -22,82 +22,63 @@
  * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.societies.rdPartyService.enterprise.sharedCalendar.dataObject;
-
-import java.util.Date;
-
+package org.societies.rdPartyService.enterprise.sharedCalendar;
+import java.util.GregorianCalendar;
+import javax.xml.datatype.DatatypeConfigurationException;
+import javax.xml.datatype.DatatypeFactory;
+import javax.xml.datatype.XMLGregorianCalendar;
 /**
  * Describe your class here...
  *
  * @author solutanet
  *
  */
-public class Event {
-
-	private String eventId;
-	private String eventDescription;
-	private String eventSummary;
-	private Date startDate;
-	private Date endDate;
-	private String location;
-	
-	
-	
-	public Event(){
-		super();
-	}
+public class XMLGregorianCalendarConverter {
 	/**
-	 * @param eventId
-	 * @param eventDescription
-	 * @param eventSummary
-	 * @param startDate
-	 * @param endDate
-	 * @param location
-	 */
-	public Event(String eventId, String eventDescription, String eventSummary,
-			Date startDate, Date endDate, String location) {
-		super();
-		this.eventId = eventId;
-		this.eventDescription = eventDescription;
-		this.eventSummary = eventSummary;
-		this.startDate = startDate;
-		this.endDate = endDate;
-		this.location = location;
-	}
-	public String getEventId() {
-		return eventId;
-	}
-	public void setEventId(String eventId) {
-		this.eventId = eventId;
-	}
-	public String getEventDescription() {
-		return eventDescription;
-	}
-	public void setEventDescription(String eventDescription) {
-		this.eventDescription = eventDescription;
-	}
-	public String getEventSummary() {
-		return eventSummary;
-	}
-	public void setEventSummary(String eventSummary) {
-		this.eventSummary = eventSummary;
-	}
-	public Date getStartDate() {
-		return startDate;
-	}
-	public void setStartDate(Date startDate) {
-		this.startDate = startDate;
-	}
-	public Date getEndDate() {
-		return endDate;
-	}
-	public void setEndDate(Date endDate) {
-		this.endDate = endDate;
-	}
-	public String getLocation() {
-		return location;
-	}
-	public void setLocation(String location) {
-		this.location = location;
-	}
+     * Needed to create XMLGregorianCalendar instances
+     */
+    private static DatatypeFactory df = null;
+    static {
+        try {
+            df = DatatypeFactory.newInstance();
+        } catch (DatatypeConfigurationException dce) {
+            throw new IllegalStateException(
+                "Exception while obtaining DatatypeFactory instance", dce);
+        }
+    }  
+
+    /**
+     * Converts a java.util.Date into an instance of XMLGregorianCalendar
+     *
+     * @param date Instance of java.util.Date or a null reference
+     * @return XMLGregorianCalendar instance whose value is based upon the
+     *  value in the date parameter. If the date parameter is null then
+     *  this method will simply return null.
+     */
+    public static XMLGregorianCalendar asXMLGregorianCalendar(java.util.Date date) {
+        if (date == null) {
+            return null;
+        } else {
+            GregorianCalendar gc = new GregorianCalendar();
+            gc.setTimeInMillis(date.getTime());
+            return df.newXMLGregorianCalendar(gc);
+        }
+    }
+
+    /**
+     * Converts an XMLGregorianCalendar to an instance of java.util.Date
+     *
+     * @param xgc Instance of XMLGregorianCalendar or a null reference
+     * @return java.util.Date instance whose value is based upon the
+     *  value in the xgc parameter. If the xgc parameter is null then
+     *  this method will simply return null.
+     */
+    public static java.util.Date asDate(XMLGregorianCalendar xgc) {
+        if (xgc == null) {
+            return null;
+        } else {
+            return xgc.toGregorianCalendar().getTime();
+        }
+    }
+
 }

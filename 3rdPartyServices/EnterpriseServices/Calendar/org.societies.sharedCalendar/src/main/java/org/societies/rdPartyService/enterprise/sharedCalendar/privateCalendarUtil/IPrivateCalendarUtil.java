@@ -24,6 +24,10 @@
  */
 package org.societies.rdPartyService.enterprise.sharedCalendar.privateCalendarUtil;
 
+import java.util.Date;
+
+import org.societies.rdpartyservice.enterprise.sharedcalendar.Event;
+
 /**
  * Describe your class here...
  *
@@ -47,4 +51,19 @@ public interface IPrivateCalendarUtil {
 	 * @return
 	 */
 	public boolean deletePrivateCalendarUsingCSSId(String CSSId);
+	
+	/**
+	 * 
+	 * @param calendarId
+	 * @param eventTitle
+	 * @param description
+	 * @param startDate
+	 * @param endDate
+	 * @param attendeeName
+	 * @param attendeeEmail
+	 * @return
+	 */
+	
+	public String createEventOnPrivateCalendarUsingCSSId(String calendarId,Event newEvent);
+	
 }

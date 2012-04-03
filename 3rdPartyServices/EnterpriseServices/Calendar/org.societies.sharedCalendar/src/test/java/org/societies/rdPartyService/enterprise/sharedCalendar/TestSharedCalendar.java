@@ -98,6 +98,7 @@ public class TestSharedCalendar extends AbstractTransactionalJUnit4SpringContext
 		assert(result);
 	}
 	
+	/*
 	@Test
 	public void insertRemoveCalendar() throws InterruptedException{
 		int max=50;
@@ -107,6 +108,6 @@ public class TestSharedCalendar extends AbstractTransactionalJUnit4SpringContext
 		for(int i=0;i<max;i++){
 			sharedCalendar.deletePrivateCalendarUsingCSSId("TestCISIs"+i);
 			Thread.sleep(100);}
-	}
+	}*/
 
 }

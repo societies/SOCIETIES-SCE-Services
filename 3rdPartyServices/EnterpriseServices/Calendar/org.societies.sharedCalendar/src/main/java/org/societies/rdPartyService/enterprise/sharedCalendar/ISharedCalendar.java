@@ -24,6 +24,7 @@
  */
 package org.societies.rdPartyService.enterprise.sharedCalendar;
 
+import java.util.Date;
 import java.util.List;
 
 import org.societies.rdpartyservice.enterprise.sharedcalendar.Calendar;
@@ -84,6 +85,24 @@ public interface ISharedCalendar {
 	 * @return
 	 */
 	public boolean createPrivateCalendar(String calendarSummary);
+	
+	/**
+	 * this method create an event inside a private calendar using as identifier the CSS Jid
+	 * @param eventTitle
+	 * @param description
+	 * @param startDate
+	 * @param endDate
+	 * @param attendeeName
+	 * @param attendeeEmail
+	 * @return
+	 */
+	public String createEventOnPrivateCalendar(Event newEvent);
+	
+	/**
+	 * 
+	 * @return
+	 */
+	public List<Event> retrieveEventsPrivateCalendar();
 	
 	
 }

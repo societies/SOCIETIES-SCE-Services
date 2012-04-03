@@ -29,6 +29,7 @@ import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.codec.binary.Hex;
@@ -37,6 +38,7 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.criterion.Example;
+import org.hibernate.criterion.Restrictions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.societies.api.schema.cssmanagement.CssRecord;
@@ -45,6 +47,7 @@ import org.societies.rdPartyService.enterprise.sharedCalendar.privateCalendarUti
 import org.societies.rdpartyservice.enterprise.sharedcalendar.Calendar;
 import org.societies.rdpartyservice.enterprise.sharedcalendar.Event;
 
+import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.model.CalendarListEntry;
 import com.google.api.services.calendar.model.EventAttendee;
 
@@ -221,8 +224,8 @@ public class SharedCalendar implements ISharedCalendar, IPrivateCalendarUtil {
 		String storedCalendarId = null;
 		Transaction t = null;
 		Session session = null;
-		boolean result=false;
-		
+		boolean result = false;
+
 		try {
 			session = sessionFactory.openSession();
 			CSSCalendarDAO template = new CSSCalendarDAO();
@@ -230,17 +233,17 @@ public class SharedCalendar implements ISharedCalendar, IPrivateCalendarUtil {
 			List<CSSCalendarDAO> results = session
 					.createCriteria(CSSCalendarDAO.class)
 					.add(Example.create(template)).list();
-			if (results.size() < 0) {
-			
-			storedCalendarId = util.createCalendar(calendarSummary);
-			CSSCalendarDAO cssCalendarDAO = new CSSCalendarDAO(CSSId,
-					storedCalendarId);
-			
-			t = session.beginTransaction();
-			session.save(cssCalendarDAO);
-			t.commit();
-			result=true;
-			}else{
+			if (results.size() == 0) {
+
+				storedCalendarId = util.createCalendar(calendarSummary);
+				CSSCalendarDAO cssCalendarDAO = new CSSCalendarDAO(CSSId,
+						storedCalendarId);
+
+				t = session.beginTransaction();
+				session.save(cssCalendarDAO);
+				t.commit();
+				result = true;
+			} else {
 				log.info("The CSS already has a calendar.");
 			}
 		} catch (HibernateException he) {
@@ -313,6 +316,61 @@ public class SharedCalendar implements ISharedCalendar, IPrivateCalendarUtil {
 		return result;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.societies.rdPartyService.enterprise.sharedCalendar.ISharedCalendar
+	 * #createEventOnPrivateCalendar(java.lang.String, java.lang.String,
+	 * java.util.Date, java.util.Date, java.lang.String, java.lang.String)
+	 * IMPLEMENTATION. USE THE createEventOnPrivateCalendarUsingCSSId TO STORE
+	 * THE MAPPING BETWEEN CSSID AND CALENDARID
+	 */
+	@Override
+	public String createEventOnPrivateCalendar(Event newEvent) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.societies.rdPartyService.enterprise.sharedCalendar.privateCalendarUtil
+	 * .
+	 * IPrivateCalendarUtil#createEventOnPrivateCalendarUsingCSSId(java.lang.String
+	 * , java.lang.String, java.lang.String, java.util.Date, java.util.Date,
+	 * java.lang.String, java.lang.String)
+	 */
+	@Override
+	public String createEventOnPrivateCalendarUsingCSSId(String calendarId,
+			Event newEvent) {
+		String returnedEventId = "";
+		try {
+			returnedEventId = util.createEvent(calendarId, newEvent
+					.getEventSummary(), newEvent.getEventDescription(),
+					XMLGregorianCalendarConverter.asDate(newEvent
+							.getStartDate()), XMLGregorianCalendarConverter
+							.asDate(newEvent.getEndDate()), newEvent
+							.getLocation());
+
+		} catch (IOException e) {
+
+			log.error(e.getMessage());
+		}
+		return returnedEventId;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.societies.rdPartyService.enterprise.sharedCalendar.ISharedCalendar#retrieveEventsPrivateCalendar()
+	 * DO NOT USE THIS METHOD BUT USE THE retrieveCalendarEvents PASSING THE CALENDAR ID RETRIEVED USING THE CSSID 
+	 */
+	@Override
+	public List<Event> retrieveEventsPrivateCalendar() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 	/**
 	 * Utility methods
 	 */
@@ -336,8 +394,12 @@ public class SharedCalendar implements ISharedCalendar, IPrivateCalendarUtil {
 		List<Event> tmpEventList = new ArrayList<Event>();
 		for (com.google.api.services.calendar.model.Event event : inList) {
 			Event tmpEvent = new Event();
-			tmpEvent.setEndDate(event.getEnd().toString());
-			tmpEvent.setStartDate(event.getStart().toString());
+			tmpEvent.setEndDate(XMLGregorianCalendarConverter
+					.asXMLGregorianCalendar(new Date(event.getEnd()
+							.getDateTime().getValue())));
+			tmpEvent.setStartDate(XMLGregorianCalendarConverter
+					.asXMLGregorianCalendar(new Date(event.getStart()
+							.getDateTime().getValue())));
 			tmpEvent.setEventId(event.getId());
 			tmpEvent.setEventSummary(event.getSummary());
 			tmpEvent.setLocation(event.getLocation());
@@ -373,5 +435,19 @@ public class SharedCalendar implements ISharedCalendar, IPrivateCalendarUtil {
 		attendee.setDisplayName(subscriberId);
 		return attendee;
 	}
+
+	public String retrievePrivateCalendarId(String CSSId) {
+		String returnedCalendarId = null;
+		Session session = sessionFactory.openSession();
+		List<CSSCalendarDAO> returnedCSSCalendarDAO = session
+				.createCriteria(CSSCalendarDAO.class)
+				.add(Restrictions.eq("CSSId", CSSId)).list();
+		if (returnedCSSCalendarDAO.size() != 0) {
+			returnedCalendarId = returnedCSSCalendarDAO.get(0).getCalendarId();
+		}
+		return returnedCalendarId;
+	}
+
+	
 
 }

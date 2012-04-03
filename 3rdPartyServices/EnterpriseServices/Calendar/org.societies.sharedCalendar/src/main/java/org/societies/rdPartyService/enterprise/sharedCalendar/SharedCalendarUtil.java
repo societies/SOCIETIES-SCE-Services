@@ -209,27 +209,20 @@ public class SharedCalendarUtil {
 	 * @throws IOException
 	 */
 	protected String createEvent(String calendarId, String eventTitle,
-			String description, Date startDate, Date endDate,
-			String attendeeName, String attendeeEmail) throws IOException {
+			String description, Date startDate, Date endDate,String location) throws IOException {
 		Event event = new Event();
 		event.setSummary(eventTitle);
 		event.setDescription(description);
 
 		// set dates
 
-		DateTime start = new DateTime(startDate, TimeZone.getTimeZone("CET"));
+		DateTime start = new DateTime(startDate,TimeZone.getDefault());
 		event.setStart(new EventDateTime().setDateTime(start));
 
-		DateTime end = new DateTime(endDate, TimeZone.getTimeZone("CET"));
+		DateTime end = new DateTime(endDate, TimeZone.getDefault());
 		event.setEnd(new EventDateTime().setDateTime(end));
 
-		// Test insert attendees
-		List<EventAttendee> eventAttendeesList = new ArrayList<EventAttendee>();
-		EventAttendee tmpAttendee = new EventAttendee();
-		tmpAttendee.setDisplayName(attendeeName);
-		tmpAttendee.setEmail(attendeeEmail);
-		eventAttendeesList.add(tmpAttendee);
-		event.setAttendees(eventAttendeesList);
+		event.setLocation(location);
 		// Store event
 		Event createdEvent = service.events().insert(calendarId, event)
 				.execute();
@@ -294,6 +287,8 @@ public class SharedCalendarUtil {
 	protected void deleteEvent(String calendarId, String eventId) throws IOException{
 		service.events().delete(calendarId, eventId).execute();
 	}
+	
+	
 	
 	
 	/**
