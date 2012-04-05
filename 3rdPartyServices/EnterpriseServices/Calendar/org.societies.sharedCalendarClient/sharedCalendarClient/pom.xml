@@ -7,12 +7,12 @@
 	<version>1.0-SNAPSHOT</version>
 	<packaging>apk</packaging>
 	<name>sharedCalendarClient</name>
-
 	<parent>
 		<groupId>org.societies</groupId>
 		<artifactId>android-parent</artifactId>
 		<version>0.1</version>
 	</parent>
+
 	<dependencies>
 		<dependency>
 			<groupId>org.asmack</groupId>
@@ -27,7 +27,6 @@
 		<dependency>
 			<groupId>android</groupId>
 			<artifactId>android</artifactId>
-			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.societies.api.external</groupId>
@@ -39,12 +38,12 @@
 			<artifactId>societies-api-internal</artifactId>
 		</dependency>
 
-	<!-- 	<dependency>
+		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
 			<version>1.6.2</version>
 		</dependency>
- -->
+
 		<dependency>
 			<groupId>xerces</groupId>
 			<artifactId>xercesImpl</artifactId>
@@ -76,35 +75,25 @@
 		<plugins>
 			<plugin>
 				<groupId>com.jayway.maven.plugins.android.generation2</groupId>
-				<artifactId>android-maven-plugin</artifactId>
-				<version>3.0.0</version>
+				<artifactId>maven-android-plugin</artifactId>
+				<version>2.9.0-issue170</version>
+				<extensions>true</extensions>
 				<configuration>
-					<androidManifestFile>${project.basedir}/AndroidManifest.xml</androidManifestFile>
-					<assetsDirectory>${project.basedir}/assets</assetsDirectory>
-					<resourceDirectory>${project.basedir}/res</resourceDirectory>
-					<nativeLibrariesDirectory>${project.basedir}/src/main/native</nativeLibrariesDirectory>
 					<sdk>
 						<platform>8</platform>
 						<path>${android.home}</path>
 					</sdk>
-					<deleteConflictingFiles>true</deleteConflictingFiles>
+					<emulator>
+						<!-- the name of the avd device to use for starting the emulator -->
+						<avd>Test22Device</avd>
+					</emulator>
 					<undeployBeforeDeploy>true</undeployBeforeDeploy>
 					<unpackDependencies>false</unpackDependencies>
 					<fileToUnpack>${project.artifactId}.${project.version}-shaded.apk</fileToUnpack>
 					<jvmArguments>
 						<jvmArgument>-Xms256m</jvmArgument>
-						<jvmArgument>-Xmx1024m</jvmArgument>
+						<jvmArgument>-Xmx512m</jvmArgument>
 					</jvmArguments>
-				</configuration>
-				<extensions>true</extensions>
-			</plugin>
-
-			<plugin>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>2.3.2</version>
-				<configuration>
-					<source>1.6</source>
-					<target>1.6</target>
 				</configuration>
 			</plugin>
 			<plugin>
