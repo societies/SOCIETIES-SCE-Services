@@ -39,8 +39,7 @@ import org.societies.api.comm.xmpp.datatypes.XMPPInfo;
 
 import org.societies.thirdpartyservices.api.internal.networking.INetworkingDirectoryCallback;
 import org.societies.thirdpartyservices.schema.networking.NetworkingBeanResult;
-import org.societies.thirdpartyservices.schema.networking.NetworkingBeanUserRecordResult;
-import org.societies.thirdpartyservices.schema.networking.NetworkingBeanNetworkingRecordResult;
+
 
 
 /**
