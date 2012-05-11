@@ -30,12 +30,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.societies.api.comm.xmpp.datatypes.Stanza;
 import org.societies.api.comm.xmpp.datatypes.XMPPInfo;
 import org.societies.api.comm.xmpp.exceptions.XMPPError;
 import org.societies.api.comm.xmpp.interfaces.ICommCallback;
 
 
+
+import org.societies.rdpartyService.enterprise.interfaces.IReturnedResultCallback;
 import org.societies.rdpartyservice.enterprise.sharedcalendar.SharedCalendarResult;
 
 
@@ -50,6 +54,7 @@ public class SharedCalendarCallBack implements ICommCallback{
 			Arrays.asList("http://societies.org/rdPartyService/enterprise/sharedCalendar"));
 	private static final List<String> PACKAGES = Collections.unmodifiableList(
 			Arrays.asList("org.societies.rdpartyservice.enterprise.sharedcalendar"));
+	private static Logger log = LoggerFactory.getLogger(SharedCalendarCallBack.class);
 	
 	//MAP TO STORE THE ALL THE CLIENT CONNECTIONS
 		private final Map<String, IReturnedResultCallback> calendarClients = new HashMap<String, IReturnedResultCallback>();
@@ -61,6 +66,7 @@ public class SharedCalendarCallBack implements ICommCallback{
 		public SharedCalendarCallBack(String clientID, IReturnedResultCallback calendarClient) {
 			//STORE THIS CALLBACK WITH THIS REQUEST ID
 			calendarClients.put(clientID, calendarClient);
+			log.debug("Insert new callback entry in the map");
 		}
 		
 		/**Returns the correct calendar client callback for this request 
@@ -71,6 +77,8 @@ public class SharedCalendarCallBack implements ICommCallback{
 		private IReturnedResultCallback getRequestingClient(String requestID) {
 			IReturnedResultCallback requestingClient = (IReturnedResultCallback) calendarClients.get(requestID);
 			calendarClients.remove(requestID);
+			
+				log.info("Requested client is retrieved: "+(requestingClient==null?false:true)+".");
 			return requestingClient;
 		}
 		/* (non-Javadoc)

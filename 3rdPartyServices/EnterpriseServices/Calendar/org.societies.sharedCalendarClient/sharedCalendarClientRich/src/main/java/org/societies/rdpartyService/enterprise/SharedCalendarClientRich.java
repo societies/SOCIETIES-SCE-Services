@@ -30,6 +30,8 @@ import java.util.List;
 
 
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.societies.api.comm.xmpp.datatypes.Stanza;
 import org.societies.api.comm.xmpp.datatypes.XMPPInfo;
 import org.societies.api.comm.xmpp.exceptions.CommunicationException;
@@ -38,9 +40,12 @@ import org.societies.api.comm.xmpp.interfaces.ICommCallback;
 import org.societies.api.comm.xmpp.interfaces.ICommManager;
 import org.societies.api.identity.IIdentity;
 import org.societies.api.identity.IIdentityManager;
-
-
+import org.societies.rdpartyService.enterprise.interfaces.IReturnedResultCallback;
+import org.societies.rdpartyService.enterprise.interfaces.ISharedCalendarClientRich;
+import org.societies.rdpartyservice.enterprise.sharedcalendar.Calendar;
+import org.societies.rdpartyservice.enterprise.sharedcalendar.Event;
 import org.societies.rdpartyservice.enterprise.sharedcalendar.SharedCalendarBean;
+import org.societies.rdpartyservice.enterprise.sharedcalendar.SharedCalendarResult;
 
 /**
  * Describe your class here...
@@ -48,7 +53,8 @@ import org.societies.rdpartyservice.enterprise.sharedcalendar.SharedCalendarBean
  * @author solutanet
  *
  */
-public class SharedCalendarClientRich implements ICommCallback {
+public class SharedCalendarClientRich implements ICommCallback, ISharedCalendarClientRich {
+	private static Logger log = LoggerFactory.getLogger(SharedCalendarClientRich.class);
 	private ICommManager commManager;
 	private IIdentityManager idMgr;
 	private static final List<String> NAMESPACES = Collections.unmodifiableList(
@@ -77,7 +83,9 @@ public class SharedCalendarClientRich implements ICommCallback {
 			idMgr = commManager.getIdManager();
 			
 			//Test
-			retrieveAllPublicCalendars(new TestCallBack());
+			//retrieveAllPublicCalendars(new TestCallBackRetrieveAllCalendars());
+			//createCSSCalendar(new TestCallBackCreateCSSCalendar(), "Test private calendar from bundle");
+			retrieveCSSCalendarEvents(new TestCallBackRetrieveCSSCalendarEvents());
 		}
 		
 	/* (non-Javadoc)
@@ -148,7 +156,7 @@ public class SharedCalendarClientRich implements ICommCallback {
 		IIdentity toIdentity = idMgr.getThisNetworkNode();
 		Stanza stanza = new Stanza(toIdentity);
 
-		//SETUP CALC CLIENT RETURN STUFF
+		//SETUP CALENDAR CLIENT RETURN STUFF
 		SharedCalendarCallBack callback = new SharedCalendarCallBack(stanza.getId(), returnedResultCallback);
 
 		//CREATE MESSAGE BEAN
@@ -158,23 +166,111 @@ public class SharedCalendarClientRich implements ICommCallback {
 		try {
 			//SEND INFORMATION QUERY - RESPONSE WILL BE IN "callback.RecieveMessage()"
 			commManager.sendIQGet(stanza, calendarBean, callback);
+			log.info("The message was sent to XMPP server for retrieve all public calendar.");
 		} catch (CommunicationException e) {
-			System.out.println("ERROR");
-		};
+			log.error("ERROR: "+e.getStackTrace()[0].getMethodName());
+		}
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.societies.rdpartyService.enterprise.interfaces.ISharedCalendarClientRich#retrieveCSSCalendarEvents(org.societies.rdpartyService.enterprise.interfaces.IReturnedResultCallback)
+	 */
+	@Override
+	public void retrieveCSSCalendarEvents(
+			IReturnedResultCallback returnedResultCallback) {
+		IIdentity toIdentity = idMgr.getThisNetworkNode();
+		Stanza stanza = new Stanza(toIdentity);
+
+		//SETUP CALENDAR CLIENT RETURN STUFF
+		SharedCalendarCallBack callback = new SharedCalendarCallBack(stanza.getId(), returnedResultCallback);
+
+		//CREATE MESSAGE BEAN
+		SharedCalendarBean calendarBean=new SharedCalendarBean();
+		
+		calendarBean.setMethod(org.societies.rdpartyservice.enterprise.sharedcalendar.MethodType.RETRIEVE_EVENTS_PRIVATE_CALENDAR);
+		try {
+			//SEND INFORMATION QUERY - RESPONSE WILL BE IN "callback.RecieveMessage()"
+			commManager.sendIQGet(stanza, calendarBean, callback);
+			log.info("The message was sent to XMPP server for retrieve CSS calendar events.");
+		} catch (CommunicationException e) {
+			log.error("ERROR: "+e.getStackTrace()[0].getMethodName());
+		}
+		
+	}
+	
+	public void createCSSCalendar(IReturnedResultCallback returnedResultCallback, String calendarSummary){
+		IIdentity toIdentity = idMgr.getThisNetworkNode();
+		Stanza stanza = new Stanza(toIdentity);
+
+		//SETUP CALENDAR CLIENT RETURN STUFF
+		SharedCalendarCallBack callback = new SharedCalendarCallBack(stanza.getId(), returnedResultCallback);
+
+		//CREATE MESSAGE BEAN
+		SharedCalendarBean calendarBean=new SharedCalendarBean();
+		
+		calendarBean.setMethod(org.societies.rdpartyservice.enterprise.sharedcalendar.MethodType.CREATE_PRIVATE_CALENDAR);
+		calendarBean.setPrivateCalendarSummary(calendarSummary);
+		try {
+			//SEND INFORMATION QUERY - RESPONSE WILL BE IN "callback.RecieveMessage()"
+			commManager.sendIQGet(stanza, calendarBean, callback);
+			log.info("The message was sent to XMPP server for create a CSS calendar with summary: "+calendarSummary+".");
+		} catch (CommunicationException e) {
+			log.error("ERROR: "+e.getStackTrace()[0].getMethodName());
+		}
 	}
 
-	private class TestCallBack implements IReturnedResultCallback
-	{
-		
 	
+	///////////////////////////////////TESTS CALLBACK CLASSES/////////////////////////////////////////////
 
+	private class TestCallBackRetrieveAllCalendars implements IReturnedResultCallback
+	{
+	
 	/* (non-Javadoc)
 	 * @see org.societies.rdpartyService.enterprise.IReturnedResultCallback#receiveResult(java.lang.Object)
 	 */
 	@Override
 	public void receiveResult(Object returnValue) {
-		System.out.println("Results returned");
+		log.info("Results returned");
+		SharedCalendarResult result=(SharedCalendarResult) returnValue;
+		List<Calendar> returnedList=result.getCalendarList();
+		for (Calendar calendar : returnedList) {
+			log.info(calendar.getDescription());
+		}
 		
 	}
 	}
+	
+	private class TestCallBackRetrieveCSSCalendarEvents implements IReturnedResultCallback
+	{
+	
+	/* (non-Javadoc)
+	 * @see org.societies.rdpartyService.enterprise.IReturnedResultCallback#receiveResult(java.lang.Object)
+	 */
+	@Override
+	public void receiveResult(Object returnValue) {
+		log.info("Results returned");
+		SharedCalendarResult result=(SharedCalendarResult) returnValue;
+		List<Event> returnedList=result.getEventList();
+		for (Event event : returnedList) {
+			log.info(event.getEventDescription());
+		}
+		
+	}
+	}
+	private class TestCallBackCreateCSSCalendar implements IReturnedResultCallback
+	{
+	
+	/* (non-Javadoc)
+	 * @see org.societies.rdpartyService.enterprise.IReturnedResultCallback#receiveResult(java.lang.Object)
+	 */
+	@Override
+	public void receiveResult(Object returnValue) {
+		log.info("Results returned");
+		SharedCalendarResult result=(SharedCalendarResult) returnValue;
+		log.info("The private calendar is created: "+ result.isCreatePrivateCalendarResult());
+		
+		
+	}
+	}
+
 }
