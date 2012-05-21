@@ -38,8 +38,14 @@ import org.societies.api.comm.xmpp.exceptions.CommunicationException;
 import org.societies.api.comm.xmpp.exceptions.XMPPError;
 import org.societies.api.comm.xmpp.interfaces.ICommCallback;
 import org.societies.api.comm.xmpp.interfaces.ICommManager;
+
+
 import org.societies.api.identity.IIdentity;
 import org.societies.api.identity.IIdentityManager;
+import org.societies.api.identity.InvalidFormatException;
+
+
+
 import org.societies.rdpartyService.enterprise.interfaces.IReturnedResultCallback;
 import org.societies.rdpartyService.enterprise.interfaces.ISharedCalendarClientRich;
 import org.societies.rdpartyservice.enterprise.sharedcalendar.Calendar;
@@ -83,9 +89,9 @@ public class SharedCalendarClientRich implements ICommCallback, ISharedCalendarC
 			idMgr = commManager.getIdManager();
 			
 			//Test
-			//retrieveAllPublicCalendars(new TestCallBackRetrieveAllCalendars());
+			retrieveAllPublicCalendars(new TestCallBackRetrieveAllCalendars());
 			//createCSSCalendar(new TestCallBackCreateCSSCalendar(), "Test private calendar from bundle");
-			retrieveCSSCalendarEvents(new TestCallBackRetrieveCSSCalendarEvents());
+			//retrieveCSSCalendarEvents(new TestCallBackRetrieveCSSCalendarEvents());
 		}
 		
 	/* (non-Javadoc)
@@ -153,7 +159,14 @@ public class SharedCalendarClientRich implements ICommCallback, ISharedCalendarC
 
 	
 	public void retrieveAllPublicCalendars(IReturnedResultCallback returnedResultCallback){
-		IIdentity toIdentity = idMgr.getThisNetworkNode();
+		IIdentity toIdentity=null;
+		try {
+			toIdentity = idMgr.fromJid(getServiceServer());
+		} catch (InvalidFormatException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		
 		Stanza stanza = new Stanza(toIdentity);
 
 		//SETUP CALENDAR CLIENT RETURN STUFF
@@ -178,7 +191,15 @@ public class SharedCalendarClientRich implements ICommCallback, ISharedCalendarC
 	@Override
 	public void retrieveCSSCalendarEvents(
 			IReturnedResultCallback returnedResultCallback) {
-		IIdentity toIdentity = idMgr.getThisNetworkNode();
+		IIdentity toIdentity=null;
+		try {
+			toIdentity = idMgr.fromJid(getServiceServer());
+		} catch (InvalidFormatException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		
+		//IIdentity toIdentity = new NetworkNodeImpl( retrieve3rdPartyCalendarServerIdentity());
 		Stanza stanza = new Stanza(toIdentity);
 
 		//SETUP CALENDAR CLIENT RETURN STUFF
@@ -199,7 +220,13 @@ public class SharedCalendarClientRich implements ICommCallback, ISharedCalendarC
 	}
 	
 	public void createCSSCalendar(IReturnedResultCallback returnedResultCallback, String calendarSummary){
-		IIdentity toIdentity = idMgr.getThisNetworkNode();
+		IIdentity toIdentity=null;
+		try {
+			toIdentity = idMgr.fromJid(getServiceServer());
+		} catch (InvalidFormatException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 		Stanza stanza = new Stanza(toIdentity);
 
 		//SETUP CALENDAR CLIENT RETURN STUFF
@@ -218,7 +245,17 @@ public class SharedCalendarClientRich implements ICommCallback, ISharedCalendarC
 			log.error("ERROR: "+e.getStackTrace()[0].getMethodName());
 		}
 	}
-
+	
+	//Utility methods
+	
+	/**
+	 * This method is used to retrieve the jid of the Server where the 3rd party service is deployed.
+	 * In a future version this property is loaded dynamically from xml file.
+	 * @return the jid of the server where the service is deployed
+	 */
+private String getServiceServer(){
+	return "XCManager.societies.local";
+}
 	
 	///////////////////////////////////TESTS CALLBACK CLASSES/////////////////////////////////////////////
 
