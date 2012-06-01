@@ -308,7 +308,7 @@ try{
 					clientSecret, refreshToken);
 
 			Calendar tmpService = Calendar.builder(httpTransport, jsonFactory)
-					.setApplicationName("testApp")
+					.setApplicationName("SCalendar")
 					.setHttpRequestInitializer(accessProtectedResource).build();
 			service = tmpService;
 
@@ -375,7 +375,7 @@ try{
 	private void readAndSetProperties(){
 		props = new Properties();
 		URL url = ClassLoader
-				.getSystemResource("META-INF/conf/backEnd.properties");
+				.getSystemResource("META-INF/spring/backEnd.properties");
 		InputStream inputStream = null;
 		try {
 			inputStream = url.openStream();
@@ -386,7 +386,7 @@ try{
 			accessToken = props.getProperty("accessToken");
 			refreshToken = props.getProperty("refreshToken");
 
-			if (accessToken == null || refreshToken == null) {
+			if (accessToken == null || refreshToken == null || accessToken.equalsIgnoreCase("")|| refreshToken.equalsIgnoreCase("")) {
 				setupAuthorization(props, url);
 			}}catch (Exception e) {
 				// TODO: handle exception

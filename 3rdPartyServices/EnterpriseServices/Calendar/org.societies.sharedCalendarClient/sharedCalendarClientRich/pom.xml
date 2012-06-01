@@ -10,11 +10,7 @@
 	<groupId>org.societies.rdpartyService.enterprise</groupId>
 	<artifactId>sharedCalendarClientRich</artifactId>
 	<packaging>bundle</packaging>
-	<version>0.1</version>
-	
-	
-    
-    <properties>
+	<properties>
 		<slf4j-version>1.6.4</slf4j-version>
 		<spring.maven.artifact.version>2.5.6.SEC01</spring.maven.artifact.version>
 		<spring.osgi.version>1.2.1</spring.osgi.version>
@@ -60,6 +56,13 @@
 			<version>${slf4j.version}</version>
 			<scope>provided</scope>
 		</dependency>
+		<dependency>
+			<groupId>net.sf.json-lib</groupId>
+			<artifactId>json-lib</artifactId>
+			<version>2.4</version>
+			 <classifier>jdk15</classifier>
+			 <scope>compile</scope>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -73,7 +76,21 @@
 						<Import-Package>
     						org.springframework.beans.factory.annotation*;version="0",
     						org.springframework.stereotype*;version="0",
-							*
+    						!groovy.lang.*,
+    						!javax.xml.datatype,
+    						!junit.framework,
+    						!nu.xom,
+    						!org.apache.avalon.framework.logger,
+    						!org.apache.log,
+    						!org.apache.log4j,
+    						!org.apache.oro.text.regex,
+    						!org.codehaus.groovy.reflection,
+    						!org.codehaus.groovy.runtime,
+    						!org.codehaus.groovy.runtime.callsite,
+    						!org.codehaus.groovy.runtime.typehandling,
+    						!org.codehaus.groovy.runtime.wrappers,
+    						!javax.servlet,
+    						*
 						</Import-Package>
 						<Export-Package>
 							

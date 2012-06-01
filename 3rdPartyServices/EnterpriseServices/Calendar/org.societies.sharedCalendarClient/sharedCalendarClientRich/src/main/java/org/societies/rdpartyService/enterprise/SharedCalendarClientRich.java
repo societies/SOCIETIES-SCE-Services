@@ -28,6 +28,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.societies.api.comm.xmpp.datatypes.Stanza;
@@ -39,6 +42,7 @@ import org.societies.api.comm.xmpp.interfaces.ICommManager;
 import org.societies.api.identity.IIdentity;
 import org.societies.api.identity.IIdentityManager;
 import org.societies.api.identity.InvalidFormatException;
+
 import org.societies.rdpartyService.enterprise.interfaces.IReturnedResultCallback;
 import org.societies.rdpartyService.enterprise.interfaces.ISharedCalendarClientRich;
 import org.societies.rdpartyservice.enterprise.sharedcalendar.Calendar;
@@ -119,9 +123,8 @@ public class SharedCalendarClientRich implements ICommCallback,	ISharedCalendarC
 		idMgr = commManager.getIdManager();
 
 		// Test
-		retrieveAllPublicCalendars(new TestCallBackRetrieveAllCalendars());
-		// createCSSCalendar(new TestCallBackCreateCSSCalendar(),
-		// "Test private calendar from bundle");
+		//retrieveAllPublicCalendars(new TestCallBackRetrieveAllCalendars());
+	// createCSSCalendar(new TestCallBackCreateCSSCalendar(),"Test private calendar from bundle");
 		// retrieveCSSCalendarEvents(new
 		// TestCallBackRetrieveCSSCalendarEvents());
 	}
@@ -367,7 +370,7 @@ public class SharedCalendarClientRich implements ICommCallback,	ISharedCalendarC
 			for (Event event : returnedList) {
 				log.info(event.getEventDescription());
 			}
-
+			renderEventsOnCalendar(returnedList);
 		}
 	}
 
@@ -390,5 +393,27 @@ public class SharedCalendarClientRich implements ICommCallback,	ISharedCalendarC
 		}
 	}
 
+	private String renderEventsOnCalendar(List<Event> eventListToRender){
+		/*
+	  "id":10182,
+      "start":"2009-05-03T14:00:00.000+10:00",
+      "end":"2009-05-03T15:00:00.000+10:00",
+      "title":"Dev Meeting"
+      */
+		JSONArray jasonArray=new JSONArray();
+		
+		 for (Event event : eventListToRender) {
+			 JSONObject object=new JSONObject();
+			object.put("id", event.getEventId());
+			object.put("start", XMLGregorianCalendarConverter.asDate(event.getStartDate()));
+			object.put("end", XMLGregorianCalendarConverter.asDate(event.getEndDate()));
+			object.put("title", event.getEventDescription());
+			jasonArray.add(object);
+		}
+		 for (Object object : jasonArray) {
+			log.debug(object.toString());
+		}
+		return null;
+	}
 
 }
