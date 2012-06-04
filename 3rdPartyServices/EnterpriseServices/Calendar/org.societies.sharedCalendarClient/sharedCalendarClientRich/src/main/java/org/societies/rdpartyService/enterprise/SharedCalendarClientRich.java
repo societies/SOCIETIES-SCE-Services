@@ -217,18 +217,26 @@ public class SharedCalendarClientRich implements ICommCallback,	ISharedCalendarC
 		// TODO Auto-generated method stub
 
 	}
-
-	public void retrieveAllPublicCalendars(
-			IReturnedResultCallback returnedResultCallback) {
-		IIdentity toIdentity = null;
+	
+	private IIdentity retrieveTargetIdentity(){
+		IIdentity result = null;
 		try {
-			toIdentity = idMgr.fromJid(getServiceServer());
+			if (idMgr != null){
+				result = idMgr.fromJid(getServiceServer());
+			}else{
+				log.error("Identity Manager is NOT available.");
+			}
 		} catch (InvalidFormatException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
-		}
+		} 
+		return result;
+	}
 
-		Stanza stanza = new Stanza(toIdentity);
+	public void retrieveAllPublicCalendars(
+			IReturnedResultCallback returnedResultCallback) {
+		
+		Stanza stanza = new Stanza(retrieveTargetIdentity());
 
 		// SETUP CALENDAR CLIENT RETURN STUFF
 		SharedCalendarCallBack callback = new SharedCalendarCallBack(
@@ -261,17 +269,10 @@ public class SharedCalendarClientRich implements ICommCallback,	ISharedCalendarC
 	@Override
 	public void retrieveCSSCalendarEvents(
 			IReturnedResultCallback returnedResultCallback) {
-		IIdentity toIdentity = null;
-		try {
-			toIdentity = idMgr.fromJid(getServiceServer());
-		} catch (InvalidFormatException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-
+		
 		// IIdentity toIdentity = new NetworkNodeImpl(
 		// retrieve3rdPartyCalendarServerIdentity());
-		Stanza stanza = new Stanza(toIdentity);
+		Stanza stanza = new Stanza(retrieveTargetIdentity());
 
 		// SETUP CALENDAR CLIENT RETURN STUFF
 		SharedCalendarCallBack callback = new SharedCalendarCallBack(
@@ -296,14 +297,8 @@ public class SharedCalendarClientRich implements ICommCallback,	ISharedCalendarC
 	public void createCSSCalendar(
 			IReturnedResultCallback returnedResultCallback,
 			String calendarSummary) {
-		IIdentity toIdentity = null;
-		try {
-			toIdentity = idMgr.fromJid(getServiceServer());
-		} catch (InvalidFormatException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-		Stanza stanza = new Stanza(toIdentity);
+		
+		Stanza stanza = new Stanza(retrieveTargetIdentity());
 
 		// SETUP CALENDAR CLIENT RETURN STUFF
 		SharedCalendarCallBack callback = new SharedCalendarCallBack(
