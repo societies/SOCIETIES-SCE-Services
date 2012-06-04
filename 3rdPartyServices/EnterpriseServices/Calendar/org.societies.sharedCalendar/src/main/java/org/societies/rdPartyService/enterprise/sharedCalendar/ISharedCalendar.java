@@ -39,12 +39,22 @@ import org.societies.rdpartyservice.enterprise.sharedcalendar.Event;
  *
  */
 public interface ISharedCalendar {
+	
+	/**
+	 * This method create a private calendar for a CIS
+	 * @param CISId
+	 * @param calendarSummary
+	 * @return
+	 */
+	public boolean createCISCalendar(String calendarSummary, String CISId);
+	
 	/**
 	 * This method is used to retrieve all available calendars provided by the 3rd party service
+	 * @Param CISId
 	 * @return the list of Calendars
 	 */
 
-	public List<Calendar> retrieveCalendarList();
+	public List<Calendar> retrieveCISCalendarList(String CISId);
 	
 	/**
 	 * 
@@ -81,10 +91,11 @@ public interface ISharedCalendar {
 	
 	/**
 	 * This method create a private calendar for a CSS
-	 * @param CSSId
+	 * @param calendarSummary
 	 * @return
 	 */
 	public boolean createPrivateCalendar(String calendarSummary);
+	
 	
 	/**
 	 * this method create an event inside a private calendar using as identifier the CSS Jid

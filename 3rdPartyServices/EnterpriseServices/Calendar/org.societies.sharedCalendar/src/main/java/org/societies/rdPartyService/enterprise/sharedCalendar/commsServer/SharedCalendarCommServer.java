@@ -139,8 +139,8 @@ public class SharedCalendarCommServer implements IFeatureServer{
 				tmpEventList.addAll(retrievedEvents);
 				result = beanResultCalendarEvent;
 				break;
-			case RETRIEVE_CALENDAR_LIST:
-				List<Calendar> retrievedCalendars = this.sharedCalendarService.retrieveCalendarList();
+			case RETRIEVE_CIS_CALENDAR_LIST:
+				List<Calendar> retrievedCalendars = this.sharedCalendarService.retrieveCISCalendarList(bean.getCISId());
 				SharedCalendarResult beanResultCalendarList= new SharedCalendarResult();
 				List<Calendar> tmpCalendarList=new ArrayList<Calendar>();
 				tmpCalendarList=beanResultCalendarList.getCalendarList();

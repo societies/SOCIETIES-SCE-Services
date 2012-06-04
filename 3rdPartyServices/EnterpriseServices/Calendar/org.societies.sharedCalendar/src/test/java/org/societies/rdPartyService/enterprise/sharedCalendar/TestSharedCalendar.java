@@ -56,7 +56,7 @@ public class TestSharedCalendar extends AbstractTransactionalJUnit4SpringContext
 	@Test
 	public void testRetrieveAllCalendar() {
 		sharedCalendar.setUtil(new SharedCalendarUtil());
-		List<Calendar> calendarList = sharedCalendar.retrieveCalendarList();
+		List<Calendar> calendarList = sharedCalendar.retrieveCISCalendarList("TestCIS");
 		log.info("Calendars retrieved:");
 		
 		for (Calendar calendar : calendarList) {
@@ -89,7 +89,14 @@ public class TestSharedCalendar extends AbstractTransactionalJUnit4SpringContext
 	@Test
 	@Rollback(false)
 	public void createPrivateCalendar(){
-		boolean result=sharedCalendar.createPrivateCalendarUsingCSSId("TestCISIs", "Test private calendar");
+		boolean result=sharedCalendar.createPrivateCalendarUsingCSSId("TestCSS", "Test private calendar");
+		assert(result);
+	}
+	
+	@Test
+	@Rollback(false)
+	public void createCISCalendar(){
+		boolean result=sharedCalendar.createCISCalendar("Test CIS calendar","TestCIS");
 		assert(result);
 	}
 	

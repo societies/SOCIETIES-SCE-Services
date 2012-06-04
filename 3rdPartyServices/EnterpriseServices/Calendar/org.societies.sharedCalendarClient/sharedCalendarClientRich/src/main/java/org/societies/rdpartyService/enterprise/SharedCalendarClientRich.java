@@ -24,9 +24,27 @@
  */
 package org.societies.rdpartyService.enterprise;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.Locale;
+import java.util.TimeZone;
+
+import javax.xml.datatype.Duration;
+import javax.xml.datatype.XMLGregorianCalendar;
+import javax.xml.namespace.QName;
 
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
@@ -124,9 +142,8 @@ public class SharedCalendarClientRich implements ICommCallback,	ISharedCalendarC
 
 		// Test
 		//retrieveAllPublicCalendars(new TestCallBackRetrieveAllCalendars());
-	// createCSSCalendar(new TestCallBackCreateCSSCalendar(),"Test private calendar from bundle");
-		// retrieveCSSCalendarEvents(new
-		// TestCallBackRetrieveCSSCalendarEvents());
+	 createCSSCalendar(new TestCallBackCreateCSSCalendar(),"Test private calendar from bundle");
+		 retrieveCSSCalendarEvents(new TestCallBackRetrieveCSSCalendarEvents());
 	}
 
 	/*
@@ -241,7 +258,7 @@ public class SharedCalendarClientRich implements ICommCallback,	ISharedCalendarC
 		SharedCalendarBean calendarBean = new SharedCalendarBean();
 
 		calendarBean
-				.setMethod(org.societies.rdpartyservice.enterprise.sharedcalendar.MethodType.RETRIEVE_CALENDAR_LIST);
+				.setMethod(org.societies.rdpartyservice.enterprise.sharedcalendar.MethodType.RETRIEVE_CIS_CALENDAR_LIST);
 		try {
 			// SEND INFORMATION QUERY - RESPONSE WILL BE IN
 			// "callback.RecieveMessage()"
@@ -393,6 +410,11 @@ public class SharedCalendarClientRich implements ICommCallback,	ISharedCalendarC
 		}
 	}
 
+	/**
+	 * This method create the list JSON objects (compatible with the presentation framewok jquery-weekcalendar-1.2.2) starting from a list of events.
+	 * @param eventListToRender
+	 * @return the String that represent the Json array
+	 */
 	private String renderEventsOnCalendar(List<Event> eventListToRender){
 		/*
 	  "id":10182,
@@ -400,20 +422,72 @@ public class SharedCalendarClientRich implements ICommCallback,	ISharedCalendarC
       "end":"2009-05-03T15:00:00.000+10:00",
       "title":"Dev Meeting"
       */
-		JSONArray jasonArray=new JSONArray();
+		JSONArray jsonArray=new JSONArray();
 		
+		SimpleDateFormat simpleDaeFtormat=new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSZ");
 		 for (Event event : eventListToRender) {
 			 JSONObject object=new JSONObject();
-			object.put("id", event.getEventId());
-			object.put("start", XMLGregorianCalendarConverter.asDate(event.getStartDate()));
-			object.put("end", XMLGregorianCalendarConverter.asDate(event.getEndDate()));
+			object.put("id", Integer.parseInt(event.getEventId()));
+			object.put("start", simpleDaeFtormat.format(XMLGregorianCalendarConverter.asDate(event.getStartDate())));
+			object.put("end", simpleDaeFtormat.format(XMLGregorianCalendarConverter.asDate(event.getEndDate())));
 			object.put("title", event.getEventDescription());
-			jasonArray.add(object);
+			jsonArray.add(object);
 		}
-		 for (Object object : jasonArray) {
+		 for (Object object : jsonArray) {
 			log.debug(object.toString());
 		}
-		return null;
+		return jsonArray.toString();
 	}
 
+	private boolean writeJsonToFile(String path ,String JSONObjects){
+		String tesPath = "C:\\Documents and Settings\\solutanet\\Desktop\\jquery-weekcalendar-1.2.2\\events.json";
+
+        FileWriter fileWriter = null;
+        BufferedWriter out=null;
+    try{
+    	fileWriter = new FileWriter(new File(tesPath));
+    	out = new BufferedWriter(fileWriter);
+        log.info("Start Writing JsonFile");
+        out.write(JSONObjects);
+            
+      }catch (Exception e){
+      log.error("Error: " + e);
+      }
+    finally{
+    	if ((fileWriter !=null)||(out!=null)){
+    	try {
+    		out.flush();
+		out.close();
+		fileWriter.close();} 
+    	catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}}
+    }
+return true;
+	}
+	
+	
+	//Main method for test purposes only
+	
+	public static void main (String [] argj)
+{
+	List<Event> tmpEventList=new ArrayList<Event>();
+	for (int i=0; i<3; i++){
+		Event tmpEvent=new Event();
+		Date tmpDateStart=new Date();
+		Date tmpDateEnd=new Date();
+		tmpDateStart.setHours(tmpDateStart.getHours()+i);
+		tmpDateEnd.setHours(tmpDateEnd.getHours()+i+1);
+		tmpEvent.setStartDate(new XMLGregorianCalendarConverter().asXMLGregorianCalendar(tmpDateStart));
+		tmpEvent.setEndDate(new XMLGregorianCalendarConverter().asXMLGregorianCalendar(tmpDateEnd));
+		tmpEvent.setEventDescription("Description "+i);
+		tmpEvent.setEventSummary("Summary "+i);
+		tmpEvent.setEventId(""+i);
+		tmpEventList.add(tmpEvent);}
+	SharedCalendarClientRich tmpClient=new SharedCalendarClientRich();
+		String JsonObj=tmpClient.renderEventsOnCalendar(tmpEventList);
+		tmpClient.writeJsonToFile("", JsonObj);
+	
 }
+	}

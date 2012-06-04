@@ -127,7 +127,7 @@ public class SharedCalendarUtil {
 	 * @return
 	 * @throws Exception
 	 */
-	protected List<CalendarListEntry> retrieveAllCalendar() throws Exception {
+	protected List<CalendarListEntry> retrieveAllCISCalendar(String CISId) throws Exception {
 		CalendarList calendarList = service.calendarList().list().execute();
 		List<CalendarListEntry> returnedCalendarList = new ArrayList<CalendarListEntry>();
 		while (true) {
@@ -145,6 +145,7 @@ public class SharedCalendarUtil {
 				break;
 			}
 		}
+		
 		return returnedCalendarList;
 	}
 
@@ -399,4 +400,6 @@ try{
 						e.printStackTrace();
 					}
 	}}
+	
+	
 }
