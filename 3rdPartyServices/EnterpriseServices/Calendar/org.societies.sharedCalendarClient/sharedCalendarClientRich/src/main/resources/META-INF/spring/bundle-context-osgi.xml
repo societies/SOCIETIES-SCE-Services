@@ -14,7 +14,12 @@
 		this file. There is no requirement to keep these definitions in a separate 
 		file if you do not want to. The rationale for keeping these definitions separate 
 		is to facilitate integration testing of the bundle outside of an OSGi container -->
+<<<<<<< HEAD
 	<bean id="sharedCalClientRich" class="org.societies.rdpartyService.enterprise.SharedCalendarClientRich" init-method="InitService">
+=======
+	<bean 	id="sharedCalClientRich" class="org.societies.rdpartyService.enterprise.SharedCalendarClientRich"
+			init-method="InitService">
+>>>>>>> branch 'Development' of https://github.com/societies/SOCIETIES-SCE-Services.git
 		<constructor-arg value="${serverJid}" />
 		<property name="commManager" ref="CommManagerBundle" />
 		<!-- property name="idMgr" ref="IdentityManagerBundle" /-->

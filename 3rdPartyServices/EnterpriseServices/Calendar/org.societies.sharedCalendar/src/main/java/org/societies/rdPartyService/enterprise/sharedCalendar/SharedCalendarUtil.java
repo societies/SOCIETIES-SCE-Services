@@ -26,6 +26,7 @@ package org.societies.rdPartyService.enterprise.sharedCalendar;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -40,7 +41,10 @@ import java.util.TimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.api.client.auth.oauth2.TokenResponse;
 import com.google.api.client.auth.oauth2.draft10.AccessTokenResponse;
+import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeTokenRequest;
+import com.google.api.client.googleapis.auth.oauth2.GoogleTokenResponse;
 import com.google.api.client.googleapis.auth.oauth2.draft10.GoogleAccessProtectedResource;
 import com.google.api.client.googleapis.auth.oauth2.draft10.GoogleAccessTokenRequest.GoogleAuthorizationCodeGrant;
 import com.google.api.client.googleapis.auth.oauth2.draft10.GoogleAuthorizationRequestUrl;
@@ -52,7 +56,6 @@ import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.CalendarList;
 import com.google.api.services.calendar.model.CalendarListEntry;
 import com.google.api.services.calendar.model.Event;
-import com.google.api.services.calendar.model.EventAttendee;
 import com.google.api.services.calendar.model.EventDateTime;
 import com.google.api.services.calendar.model.Events;
 
@@ -87,9 +90,12 @@ public class SharedCalendarUtil {
 		// "description eventxx", new Date(), new Date(), "Attendee Name",
 		// "toni@toni.com");
 		// testCalendar.findEventsUsingQuery(testCalendarId, "eventXX");
-		String calendarId=testCalendar.createCalendar("Summary");
-		System.out.println(calendarId);
-		
+		try {
+			String calendarId=testCalendar.createCalendar("Summary");
+			System.out.println(calendarId);
+		} catch (IOException e) {
+			log.error("Unable to create calendar", e);
+		}		
 	}
 	
 	/**
@@ -128,13 +134,18 @@ public class SharedCalendarUtil {
 	 * @throws Exception
 	 */
 	protected List<CalendarListEntry> retrieveAllCISCalendar(String CISId) throws Exception {
-		CalendarList calendarList = service.calendarList().list().execute();
+		
 		List<CalendarListEntry> returnedCalendarList = new ArrayList<CalendarListEntry>();
+		CalendarList calendarList;
+		try {
+			calendarList = service.calendarList().list().execute();
+		} catch (IOException e1) {
+			log.error("Unable to list calendars", e1);
+			return returnedCalendarList;
+		}
+		
 		while (true) {
 			for (CalendarListEntry calendarListEntry : calendarList.getItems()) {
-//				log.info(calendarListEntry.getSummary());
-//				log.info(calendarListEntry.getDescription());
-//				log.info(calendarListEntry.getLocation());
 				returnedCalendarList.add(calendarListEntry);
 			}
 			String pageToken = calendarList.getNextPageToken();
@@ -151,24 +162,28 @@ public class SharedCalendarUtil {
 
 	protected List<Event> retrieveAllEvents(String calendarId)
 			throws IOException {
-		com.google.api.services.calendar.model.Events events = service.events()
-				.list(calendarId).execute();
+		
 		List<Event> returnedList = new ArrayList<Event>();
+		
+		com.google.api.services.calendar.model.Events events = null;
+		try {
+			events = service.events().list(calendarId).execute();
+		} catch (IOException e) {
+			log.error("Unable to list calendars", e);
+			return returnedList;
+		}
 		while (true) {
 			for (Event event : events.getItems()) {
-//				log.info(event.getSummary());
-//				log.info(event.getAttendees().get(0).getDisplayName());
-//				log.info(event.getDescription());
-//				log.info(event.getId());
-//				log.info(event.getLocation());
-//				log.info(event.getStart().toString());
-//				log.info(event.getEnd().toString());
 				returnedList.add(event);
 			}
 			String pageToken = events.getNextPageToken();
 			if (pageToken != null && !pageToken.isEmpty()) {
-				events = service.events().list(calendarId)
-						.setPageToken(pageToken).execute();
+				try {
+					events = service.events().list(calendarId).setPageToken(pageToken).execute();
+				} catch (IOException e) {
+					log.error("Unable to retrieve further events", e);
+					break;
+				}
 			} else {
 				break;
 			}
@@ -184,14 +199,15 @@ public class SharedCalendarUtil {
 	 */
 	protected String createCalendar(String calendarSummary) throws IOException{
 		com.google.api.services.calendar.model.Calendar calendar = new com.google.api.services.calendar.model.Calendar();
-
+		String result = null;
 		calendar.setSummary(calendarSummary);
-		
-		
-		//calendar.setTimeZone("Rome");
-
-		com.google.api.services.calendar.model.Calendar createdCalendar = service.calendars().insert(calendar).execute();
-	return createdCalendar.getId();
+		try {
+			com.google.api.services.calendar.model.Calendar createdCalendar = service.calendars().insert(calendar).execute();
+			result = createdCalendar.getId();
+		} catch (IOException e) {
+			log.error("Unable to create Calendar with summary "+calendarSummary, e);
+		} 
+		return result;
 	}
 	
 	
@@ -211,6 +227,7 @@ public class SharedCalendarUtil {
 	 */
 	protected String createEvent(String calendarId, String eventTitle,
 			String description, Date startDate, Date endDate,String location) throws IOException {
+		String result = null;
 		Event event = new Event();
 		event.setSummary(eventTitle);
 		event.setDescription(description);
@@ -225,10 +242,14 @@ public class SharedCalendarUtil {
 
 		event.setLocation(location);
 		// Store event
-		Event createdEvent = service.events().insert(calendarId, event)
-				.execute();
-
-		return createdEvent.getId();
+		try {
+			Event createdEvent = service.events().insert(calendarId, event)
+					.execute();
+			result = createdEvent.getId();
+		} catch (IOException e) {
+			log.error("Unable to create event", e);
+		}
+		return result;
 	}
 
 	/**
@@ -240,13 +261,19 @@ public class SharedCalendarUtil {
 	 */
 	protected List<Event> findEventsUsingQuery(String calendarId, String query)
 			throws IOException {
-		Events events = service.events().list(calendarId).setQ(query).execute();
+		
 		List<Event> returnedEventList = new ArrayList<Event>();
-		for (Event event : events.getItems()) {
-//			log.info(event.getSummary());
-//			log.info(event.getDescription());
-			returnedEventList.add(event);
-		}
+		
+		Events events = null;
+		try {
+			events = service.events().list(calendarId).setQ(query).execute();
+			for (Event event : events.getItems()) {
+				returnedEventList.add(event);
+			}
+		} catch (IOException e) {
+			log.error("Unable to query calendar with id "+calendarId, e);
+		}		
+		
 		return returnedEventList;
 	}
 
@@ -259,10 +286,12 @@ public class SharedCalendarUtil {
 	 */
 	protected Event findEventUsingId(String calendarId, String eventId)
 			throws IOException {
-
-		Event event = service.events().get(calendarId, eventId).execute();
-
-//		log.info(event.getSummary());
+		Event event = null;
+		try {
+			event = service.events().get(calendarId, eventId).execute();
+		} catch (IOException e) {
+			log.error("Unable to find event '"+eventId+"' in calendar with id '"+calendarId+"'", e);
+		}
 		return event;
 	}
 	
@@ -272,8 +301,11 @@ public class SharedCalendarUtil {
 	 */
 	protected void updateEvent(String calendarId,Event eventToUpdate ) throws IOException{
 		
-
-		Event updatedEvent = service.events().update(calendarId, eventToUpdate.getId(), eventToUpdate).execute();
+		try {
+			Event updatedEvent = service.events().update(calendarId, eventToUpdate.getId(), eventToUpdate).execute();
+		} catch (IOException e) {
+			log.error("Unable to update event '"+eventToUpdate.getId()+"' in calendar with id '"+calendarId+"'", e);
+		}
 	}
 	
 	/**
@@ -282,26 +314,34 @@ public class SharedCalendarUtil {
 	 * @throws IOException
 	 */
 	protected void deleteCalendar(String calendarId) throws IOException{
-		service.calendars().delete(calendarId).execute();
+		try {
+			service.calendars().delete(calendarId).execute();
+		} catch (IOException e) {
+			log.error("Unable to delete calendar with id '"+calendarId+"'", e);
+		}
 	}
 	
 	protected void deleteEvent(String calendarId, String eventId) throws IOException{
-		service.events().delete(calendarId, eventId).execute();
+		try {
+			service.events().delete(calendarId, eventId).execute();
+		} catch (IOException e) {
+			log.error("Unable to delete event with id '"+eventId+"' from calendar with id '"+calendarId+"'", e);
+		}
 	}
 	
 	
 	
 	
 	/**
-	 * This method is used to set up the token used to communicate with Google bakend
+	 * This method is used to set up the token used to communicate with Google backend
 	 * Tokens are read from the properties file backEnd.properties inside Meta-INF/conf
 	 * The properties that have to be set up before start the application are clientId and clientSecret taken from
 	 * the google API console (https://code.google.com/apis/console).
 	 * The first time the application starts the authorization code must be supplied following the instructions on the console. 
 	 */
 	protected void setUp() {
-		
-try{
+
+		try {
 			HttpTransport httpTransport = new NetHttpTransport();
 			JacksonFactory jsonFactory = new JacksonFactory();
 			GoogleAccessProtectedResource accessProtectedResource = new GoogleAccessProtectedResource(
@@ -312,12 +352,10 @@ try{
 					.setApplicationName("SCalendar")
 					.setHttpRequestInitializer(accessProtectedResource).build();
 			service = tmpService;
-
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} 
-		
+			log.error("Unable to initialize remote Calendar Service", e);
+		}
+
 	}
 
 	/**
@@ -327,8 +365,7 @@ try{
 	 * @param path
 	 * @throws Exception
 	 */
-	protected void setupAuthorization(Properties properties, URL path)
-			throws Exception {
+	protected void setupAuthorization(Properties properties, URL path) throws Exception {
 		HttpTransport httpTransport = new NetHttpTransport();
 		JacksonFactory jsonFactory = new JacksonFactory();
 
@@ -339,33 +376,43 @@ try{
 		String redirectUrl = "urn:ietf:wg:oauth:2.0:oob";
 		String scope = "https://www.googleapis.com/auth/calendar";
 
-		// Step 1: Authorize -->
-		String authorizationUrl = new GoogleAuthorizationRequestUrl(clientId,
-				redirectUrl, scope).build();
+		try {
+			// Step 1: Authorize -->
+			String authorizationUrl = new GoogleAuthorizationRequestUrl(clientId,
+					redirectUrl, scope).build();
 
-		// Point or redirect your user to the authorizationUrl.
-		log.info("Go to the following link in your browser:");
-		log.info(authorizationUrl);
+			// Point or redirect your user to the authorizationUrl.
+			log.info("Go to the following link in your browser: "+authorizationUrl);
+			// Read the authorization code from the standard input stream.
+			BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+			log.info("What is the authorization code?");
+			String code = in.readLine();
+			// End of Step 1 <--
 
-		// Read the authorization code from the standard input stream.
-		BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
-		log.info("What is the authorization code?");
-		String code = in.readLine();
-		// End of Step 1 <--
-
-		// Step 2: Exchange -->
-		AccessTokenResponse response = new GoogleAuthorizationCodeGrant(
-				httpTransport, jsonFactory, clientId, clientSecret, code,
-				redirectUrl).execute();
-		// End of Step 2 <--
-
-		// Set and store tokens
-		accessToken = response.accessToken;
-		refreshToken = response.refreshToken;
-		properties.setProperty("accessToken", accessToken);
-		properties.setProperty("refreshToken", refreshToken);
-		properties.store(new FileOutputStream(new File(path.getPath()), true),
-				null);
+			// Step 2: Exchange -->
+			AccessTokenResponse response = new GoogleAuthorizationCodeGrant(
+					httpTransport, jsonFactory, clientId, clientSecret, code,
+					redirectUrl).execute();
+			// End of Step 2 <--
+			GoogleAuthorizationCodeTokenRequest tokenReq = new GoogleAuthorizationCodeTokenRequest(httpTransport, jsonFactory, clientId, clientSecret, code, redirectUrl);
+			GoogleTokenResponse tokenResp = tokenReq.execute();
+			TokenResponse returnedToken = new TokenResponse();
+			returnedToken.setAccessToken(tokenResp.getAccessToken());
+			returnedToken.setRefreshToken(tokenResp.getRefreshToken());
+			// Set and store tokens - old
+//			accessToken = response.accessToken;
+//			refreshToken = response.refreshToken;
+			// Set and store tokens - new
+			accessToken = returnedToken.getAccessToken();
+			refreshToken = returnedToken.getRefreshToken();
+			properties.setProperty("accessToken", accessToken);
+			properties.setProperty("refreshToken", refreshToken);
+			properties.store(new FileOutputStream(new File(path.getPath()), true), null);
+		} catch (FileNotFoundException e) {
+			log.error("Unable to set-up authorization", e);
+		} catch (IOException e) {
+			log.error("Unable to set-up authorization", e);
+		}
 
 	}
 	
@@ -375,8 +422,7 @@ try{
 	 */
 	private void readAndSetProperties(){
 		props = new Properties();
-		URL url = ClassLoader
-				.getSystemResource("META-INF/spring/backEnd.properties");
+		URL url = ClassLoader.getSystemResource("META-INF/conf/backEnd.properties");
 		InputStream inputStream = null;
 		try {
 			inputStream = url.openStream();
