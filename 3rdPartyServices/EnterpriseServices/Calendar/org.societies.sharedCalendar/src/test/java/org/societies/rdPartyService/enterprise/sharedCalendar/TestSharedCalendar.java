@@ -24,6 +24,8 @@
  */
 package org.societies.rdPartyService.enterprise.sharedCalendar;
 
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
 
 import org.junit.Test;
@@ -50,38 +52,79 @@ public class TestSharedCalendar extends AbstractTransactionalJUnit4SpringContext
 
 	private static Logger log = LoggerFactory
 			.getLogger(TestSharedCalendar.class);
-	private String testCalendarId="soluta.net_n1i86mmq647g7pmc573uslm1d4@group.calendar.google.com";
-	private String testEventId="f7n275hud3e62l1kk5cktqmjjo";
+	private static String testCalendarId="Unassigned";
+	private static String testEventId="Unassigned";
+	private static final String _testCisId = "TestCIS";
+	private static final String _testCisSummary = "Test CIS calendar";
 
+	
 	@Test
-	public void testRetrieveAllCalendar() {
-		sharedCalendar.setUtil(new SharedCalendarUtil());
-		List<Calendar> calendarList = sharedCalendar.retrieveCISCalendarList("TestCIS");
-		log.info("Calendars retrieved:");
-		
-		for (Calendar calendar : calendarList) {
-			log.info("Calendar id: " + calendar.getCalendarId());
-			
+	@Rollback(false)
+	public void createCISCalendar(){
+		List<Calendar> cisCalendars = sharedCalendar.retrieveCISCalendarList(_testCisId);
+		boolean isCisCalendarAvailable = !cisCalendars.isEmpty();
+		boolean result=false;
+		if (!isCisCalendarAvailable){
+			log.info(cisCalendars.size()+" Calendars retrieved");
+			result = sharedCalendar.createCISCalendar(_testCisSummary,_testCisId);
+		}else{			
+//			for (Calendar calendar : cisCalendars) {
+//				if(calendar.getSummary().equalsIgnoreCase(_testCisSummary)){
+//					result = sharedCalendar.deleteCISCalendar(calendar.getCalendarId());
+//					break;
+//				}
+//			}
 		}
-		
+		assert(isCisCalendarAvailable || result);
 	}
 	
 	@Test
+	@Rollback(false)
+	public void testRetrieveAllCalendar() {
+		sharedCalendar.setUtil(new SharedCalendarUtil());
+		List<Calendar> calendarList = sharedCalendar.retrieveCISCalendarList(_testCisId);
+		log.info(calendarList.size()+" Calendars retrieved");
+		
+		for (Calendar calendar : calendarList) {
+			log.info("Calendar id: " + calendar.getCalendarId()+" - Calendar summary: "+calendar.getSummary());
+			testCalendarId = calendar.getCalendarId();
+		}	
+		//Add an event to the calendar if none is found
+		List<Event> availableEvents = sharedCalendar.retrieveCalendarEvents(testCalendarId);
+		if (availableEvents.isEmpty()){
+			Event newEvt = new Event();
+			newEvt.setEventDescription("SOCIETIES GA");
+			newEvt.setLocation("Heriot Watt University Edinburgh Campus");
+			Date start = new GregorianCalendar(2012, 5, 25).getTime();
+			Date stop = new GregorianCalendar(2012, 5, 29).getTime();
+			newEvt.setStartDate(new XMLGregorianCalendarConverter().asXMLGregorianCalendar(start));
+			newEvt.setEndDate(new XMLGregorianCalendarConverter().asXMLGregorianCalendar(stop));			
+			newEvt.setEventSummary("Integration Meeting");
+			sharedCalendar.createEventOnPrivateCalendarUsingCSSId(testCalendarId, newEvt);
+		}		
+	}
+	
+	
+	
+	@Test
+	@Rollback(false)
 	public void retrieveCalendarEvent(){
 		List<Event> eventList=sharedCalendar.retrieveCalendarEvents(testCalendarId);
-		log.info("Events retrieved:");
+		log.info("Events retrieved for calendar with id '"+testCalendarId+"' :");
 		for (Event event : eventList) {
-			log.info("Event id: "+event.getEventId());
-			
-			
+			log.info("Event id: "+event.getEventId()+" - Event Summary:"+event.getEventSummary());
+			testEventId = event.getEventId();			
 		}
 	}
+	
 	@Test
+	@Rollback(false)
 	public void addSubscriber(){
 		 sharedCalendar.subscribeToEvent(testCalendarId, testEventId, "xxxx");
 	}
 	
 	@Test
+	@Rollback(false)
 	public void unsubscribe(){
 		sharedCalendar.unsubscribeFromEvent(testCalendarId, testEventId, "xxxx");
 	}
@@ -93,12 +136,7 @@ public class TestSharedCalendar extends AbstractTransactionalJUnit4SpringContext
 		assert(result);
 	}
 	
-	@Test
-	@Rollback(false)
-	public void createCISCalendar(){
-		boolean result=sharedCalendar.createCISCalendar("Test CIS calendar","TestCIS");
-		assert(result);
-	}
+	
 	
 	/*
 	@Test

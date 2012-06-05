@@ -13,21 +13,15 @@
 		The configuration of OSGi definitions is kept in a separate configuration 
 		file so that this file can easily be used for integration testing outside 
 		of an OSGi environment -->
+
 	<context:annotation-config />
 
-	<tx:annotation-driven />
-	
-	<bean id="SharedCalendarPropConfig"
-		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
-		<property name="ignoreResourceNotFound" value="true"></property>
-		<property name="locations">
-			<list>
-			<!-- 	<value>classpath:META-INF/spring/derby_database.properties</value> -->
-				<value>file:${VIRGO_HOME}\config\org.societies.platform.properties</value>
-			</list>
-		</property>	
-	</bean>
-	
+	<!-- bean id="SharedCalendarPropConfig" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"> 
+		<property name="ignoreResourceNotFound" value="true"></property> <property 
+		name="locations"> <list> <!- - <value>classpath:META-INF/spring/derby_database.properties</value> 
+		- -> <value>file:${VIRGO_HOME}\config\org.societies.platform.properties </value> 
+		</list> </property> </bean -->
+
 
 	<bean id="sessionFactory"
 		class="org.springframework.orm.hibernate3.annotation.AnnotationSessionFactoryBean">
@@ -37,13 +31,13 @@
 			<list>
 				<value>org.societies.rdPartyService.enterprise.sharedCalendar.persistence.DAO.CSSCalendarDAO
 				</value>
-
+				<value>org.societies.rdPartyService.enterprise.sharedCalendar.persistence.DAO.CISCalendarDAO
+				</value>
 			</list>
 		</property>
 
 		<property name="annotatedPackages">
 			<list>
-
 				<value>org.societies.rdPartyService.enterprise.sharedCalendar.persistence.DAO
 				</value>
 			</list>
@@ -60,6 +54,7 @@
 			</props>
 		</property>
 	</bean>
+
 	<bean id="transactionManager"
 		class="org.springframework.orm.hibernate3.HibernateTransactionManager">
 		<property name="sessionFactory" ref="sessionFactory" />
@@ -72,18 +67,13 @@
 		<property name="sharedCalendarService" ref="sharedCalendar" />
 
 	</bean>
+
 	<bean id="sharedCalendar"
 		class="org.societies.rdPartyService.enterprise.sharedCalendar.SharedCalendar">
 		<property name="util" ref="sharedCalendarUtil" />
 		<property name="sessionFactory" ref="sessionFactory" />
 	</bean>
 
-
-
 	<!-- enable the configuration of transactional behavior based on annotations -->
 	<tx:annotation-driven transaction-manager="transactionManager" />
-
-	
-
-
 </beans>

@@ -39,19 +39,17 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.criterion.Example;
-import org.hibernate.criterion.Projection;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.societies.api.schema.cssmanagement.CssRecord;
 import org.societies.rdPartyService.enterprise.sharedCalendar.persistence.DAO.CISCalendarDAO;
 import org.societies.rdPartyService.enterprise.sharedCalendar.persistence.DAO.CSSCalendarDAO;
 import org.societies.rdPartyService.enterprise.sharedCalendar.privateCalendarUtil.IPrivateCalendarUtil;
 import org.societies.rdpartyservice.enterprise.sharedcalendar.Calendar;
 import org.societies.rdpartyservice.enterprise.sharedcalendar.Event;
+import org.springframework.util.StringUtils;
 
-import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.model.CalendarListEntry;
 import com.google.api.services.calendar.model.EventAttendee;
 
@@ -128,6 +126,51 @@ public class SharedCalendar implements ISharedCalendar, IPrivateCalendarUtil {
 		}
 		return result;
 	}
+	
+	@Override
+	public boolean deleteCISCalendar(String calendarId) {
+		
+			
+			Transaction t = null;
+			Session session = null;
+			boolean result = false;
+
+			try {
+				session = sessionFactory.openSession();
+				CISCalendarDAO template = new CISCalendarDAO();
+				template.setCalendarId(calendarId);
+				List<CISCalendarDAO> results = session
+						.createCriteria(CISCalendarDAO.class)
+						.add(Example.create(template)).list();
+				if (results.size() == 1) {					
+					t = session.beginTransaction();
+					session.delete(results.get(0));
+					util.deleteCalendar(calendarId);
+					t.commit();										
+					result = true;					
+				} else {
+					log.info("The CIS has not been found.");
+				}
+			} catch (HibernateException he) {
+				log.error(he.getMessage());
+				if (t != null) {
+					t.rollback();
+				}
+			} catch (IOException e) {
+				log.error(e.getMessage());
+				if (t != null) {
+					t.rollback();
+				}
+			} finally {
+				if (session != null) {
+					session.close();
+				}
+			}
+			
+			return result;
+		
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -234,9 +277,16 @@ public class SharedCalendar implements ISharedCalendar, IPrivateCalendarUtil {
 					.findEventUsingId(calendarId, eventId);
 
 			List<EventAttendee> tmpAttendeeList = event.getAttendees();
-
-			tmpAttendeeList.remove(createEventAttendee(subscriberId));
-
+			EventAttendee attendeeToRemove = null;
+			
+			for (EventAttendee ea : tmpAttendeeList) {
+				if (subscriberId.equalsIgnoreCase(ea.getDisplayName())) {
+					attendeeToRemove = ea;
+					break;
+				}
+			}
+			
+			boolean foundAndRemoved = attendeeToRemove != null && tmpAttendeeList.remove(attendeeToRemove);
 			event.setAttendees(tmpAttendeeList);
 			util.updateEvent(calendarId, event);
 			returnedValue = true;
@@ -286,17 +336,15 @@ public class SharedCalendar implements ISharedCalendar, IPrivateCalendarUtil {
 					.createCriteria(CSSCalendarDAO.class)
 					.add(Example.create(template)).list();
 			if (results.size() == 0) {
-
 				storedCalendarId = util.createCalendar(calendarSummary);
-				CSSCalendarDAO cssCalendarDAO = new CSSCalendarDAO(CSSId,
-						storedCalendarId);
-
+				CSSCalendarDAO cssCalendarDAO = new CSSCalendarDAO(CSSId, storedCalendarId);
 				t = session.beginTransaction();
 				session.save(cssCalendarDAO);
 				t.commit();
 				result = true;
 			} else {
 				log.info("The CSS already has a calendar.");
+				result = true;
 			}
 		} catch (HibernateException he) {
 			log.error(he.getMessage());
@@ -422,6 +470,15 @@ public class SharedCalendar implements ISharedCalendar, IPrivateCalendarUtil {
 		// TODO Auto-generated method stub
 		return null;
 	}
+	
+	/* (non-Javadoc)
+	 * DO NOT USE THIS METHOD BUT USE THE deletePrivateCalendar PASSING THE CALENDAR ID RETRIEVED USING THE CSSID 
+	 */
+	@Override	
+	public boolean deletePrivateCalendar() {
+		// TODO Auto-generated method stub
+		return false;
+	}
 
 	/**
 	 * Utility methods
@@ -531,6 +588,9 @@ private List<CalendarListEntry> filterCISCalendar(List<CalendarListEntry> listTo
 		
 		return listToFilter;
 	}
+
+	
+	
 	
 
 }

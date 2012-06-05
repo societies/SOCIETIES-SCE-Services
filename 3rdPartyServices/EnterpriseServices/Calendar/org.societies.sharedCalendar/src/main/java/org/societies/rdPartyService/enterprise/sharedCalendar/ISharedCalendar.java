@@ -49,6 +49,13 @@ public interface ISharedCalendar {
 	public boolean createCISCalendar(String calendarSummary, String CISId);
 	
 	/**
+	 * This method deletes the CIS calendar with the provided CalendarId
+	 * @param CalendarId
+	 * @return true if successful
+	 */
+	public boolean deleteCISCalendar(String calendarId);
+	
+	/**
 	 * This method is used to retrieve all available calendars provided by the 3rd party service
 	 * @Param CISId
 	 * @return the list of Calendars
@@ -95,6 +102,12 @@ public interface ISharedCalendar {
 	 * @return
 	 */
 	public boolean createPrivateCalendar(String calendarSummary);
+	
+	/**
+	 * This method removes a private calendar for a CSS
+	 * @return
+	 */
+	public boolean deletePrivateCalendar();
 	
 	
 	/**

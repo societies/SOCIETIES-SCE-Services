@@ -20,7 +20,7 @@
 		<property name="locations">
 			<list>
 				<value>classpath:META-INF/spring/derby_database.properties</value>
-				<value>classpath:META-INF/spring/backEnd.properties</value>
+				<value>classpath:META-INF/conf/backEnd.properties</value>
 			</list>
 		</property>
 	</bean>
@@ -58,19 +58,14 @@
 
 		<property name="annotatedClasses">
 			<list>
-				<value>org.societies.rdPartyService.enterprise.sharedCalendar.persistence.DAO.CSSCalendarDAO
-				</value>
-				<value>org.societies.rdPartyService.enterprise.sharedCalendar.persistence.DAO.CISCalendarDAO
-				</value>
-
+				<value>org.societies.rdPartyService.enterprise.sharedCalendar.persistence.DAO.CSSCalendarDAO</value>
+				<value>org.societies.rdPartyService.enterprise.sharedCalendar.persistence.DAO.CISCalendarDAO</value>
 			</list>
 		</property>
 
 		<property name="annotatedPackages">
 			<list>
-
-				<value>org.societies.rdPartyService.enterprise.sharedCalendar.persistence.DAO
-				</value>
+				<value>org.societies.rdPartyService.enterprise.sharedCalendar.persistence.DAO</value>
 			</list>
 		</property>
 

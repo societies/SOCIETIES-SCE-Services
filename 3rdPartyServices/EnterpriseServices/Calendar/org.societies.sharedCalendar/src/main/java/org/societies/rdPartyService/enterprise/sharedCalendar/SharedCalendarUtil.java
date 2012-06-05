@@ -77,9 +77,6 @@ public class SharedCalendarUtil {
 
 	
 	
-	// For test purpose only
-	private static final String testCalendarId = "soluta.net_n1i86mmq647g7pmc573uslm1d4@group.calendar.google.com";
-
 	// Test main
 	public static void main(String[] argj) throws Exception {
 		SharedCalendarUtil testCalendar = new SharedCalendarUtil();
@@ -390,9 +387,9 @@ public class SharedCalendarUtil {
 			// End of Step 1 <--
 
 			// Step 2: Exchange -->
-			AccessTokenResponse response = new GoogleAuthorizationCodeGrant(
-					httpTransport, jsonFactory, clientId, clientSecret, code,
-					redirectUrl).execute();
+//			AccessTokenResponse response = new GoogleAuthorizationCodeGrant(
+//					httpTransport, jsonFactory, clientId, clientSecret, code,
+//					redirectUrl).execute();
 			// End of Step 2 <--
 			GoogleAuthorizationCodeTokenRequest tokenReq = new GoogleAuthorizationCodeTokenRequest(httpTransport, jsonFactory, clientId, clientSecret, code, redirectUrl);
 			GoogleTokenResponse tokenResp = tokenReq.execute();
