@@ -24,7 +24,6 @@
  */
 package org.societies.rdPartyService.enterprise.sharedCalendar;
 
-import java.util.Date;
 import java.util.List;
 
 import org.societies.rdpartyservice.enterprise.sharedcalendar.Calendar;
@@ -33,7 +32,7 @@ import org.societies.rdpartyservice.enterprise.sharedcalendar.Event;
 
 
 /**
- * 
+ * This is the exposed interface that client developers will use.
  *
  * @author solutanet
  *

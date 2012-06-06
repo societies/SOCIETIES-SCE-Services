@@ -48,13 +48,12 @@ import org.societies.rdPartyService.enterprise.sharedCalendar.persistence.DAO.CS
 import org.societies.rdPartyService.enterprise.sharedCalendar.privateCalendarUtil.IPrivateCalendarUtil;
 import org.societies.rdpartyservice.enterprise.sharedcalendar.Calendar;
 import org.societies.rdpartyservice.enterprise.sharedcalendar.Event;
-import org.springframework.util.StringUtils;
 
 import com.google.api.services.calendar.model.CalendarListEntry;
 import com.google.api.services.calendar.model.EventAttendee;
 
 /**
- * Describe your class here...
+ * Back-end class that implements the calendar management logic.
  * 
  * @author solutanet
  * 

@@ -24,12 +24,11 @@
  */
 package org.societies.rdPartyService.enterprise.sharedCalendar.privateCalendarUtil;
 
-import java.util.Date;
-
 import org.societies.rdpartyservice.enterprise.sharedcalendar.Event;
 
 /**
- * Describe your class here...
+ * This is the interface that manages Private (i.e. CSS-level) calendars.
+ * The CSSId parameter (aka JID) is retrieved from the Communication Server.
  *
  * @author solutanet
  *

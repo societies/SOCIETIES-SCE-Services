@@ -26,25 +26,14 @@ package org.societies.rdpartyService.enterprise;
 
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.ObjectOutputStream;
-import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.List;
-import java.util.Locale;
-import java.util.TimeZone;
-
-import javax.xml.datatype.Duration;
-import javax.xml.datatype.XMLGregorianCalendar;
-import javax.xml.namespace.QName;
 
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
@@ -60,7 +49,6 @@ import org.societies.api.comm.xmpp.interfaces.ICommManager;
 import org.societies.api.identity.IIdentity;
 import org.societies.api.identity.IIdentityManager;
 import org.societies.api.identity.InvalidFormatException;
-
 import org.societies.rdpartyService.enterprise.interfaces.IReturnedResultCallback;
 import org.societies.rdpartyService.enterprise.interfaces.ISharedCalendarClientRich;
 import org.societies.rdpartyservice.enterprise.sharedcalendar.Calendar;
@@ -329,7 +317,7 @@ public class SharedCalendarClientRich implements ICommCallback,	ISharedCalendarC
 
 		calendarBean
 				.setMethod(org.societies.rdpartyservice.enterprise.sharedcalendar.MethodType.CREATE_PRIVATE_CALENDAR);
-		calendarBean.setPrivateCalendarSummary(calendarSummary);
+		calendarBean.setCalendarSummary(calendarSummary);
 		try {
 			// SEND INFORMATION QUERY - RESPONSE WILL BE IN
 			// "callback.RecieveMessage()"
@@ -400,7 +388,7 @@ public class SharedCalendarClientRich implements ICommCallback,	ISharedCalendarC
 			log.info("Results returned");
 			SharedCalendarResult result = (SharedCalendarResult) returnValue;
 			log.info("The private calendar is created: "
-					+ result.isCreatePrivateCalendarResult());
+					+ result.isLastOperationSuccessful());
 
 		}
 	}
