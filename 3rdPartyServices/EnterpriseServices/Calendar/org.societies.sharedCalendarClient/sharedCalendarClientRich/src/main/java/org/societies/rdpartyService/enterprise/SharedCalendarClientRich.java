@@ -65,6 +65,7 @@ import org.societies.rdpartyservice.enterprise.sharedcalendar.SharedCalendarResu
 public class SharedCalendarClientRich implements ICommCallback,	ISharedCalendarClientRich {
 	
 	private static Logger log = LoggerFactory.getLogger(SharedCalendarClientRich.class);
+	private String pathForJSONfile;
 	private ICommManager commManager;
 	private IIdentityManager idMgr;
 	
@@ -82,9 +83,10 @@ public class SharedCalendarClientRich implements ICommCallback,	ISharedCalendarC
 		super();
 	}
 	
-	public SharedCalendarClientRich(String serviceServer) {
+	public SharedCalendarClientRich(String serviceServer, String jsonFilePath) {
 		super();
 		this.serviceServer = serviceServer;
+		this.pathForJSONfile=jsonFilePath;
 	}
 
 	// PROPERTIES
@@ -129,9 +131,9 @@ public class SharedCalendarClientRich implements ICommCallback,	ISharedCalendarC
 		idMgr = commManager.getIdManager();
 
 		// Test
-		//retrieveAllPublicCalendars(new TestCallBackRetrieveAllCalendars());
+		
 	 createCSSCalendar(new TestCallBackCreateCSSCalendar(),"Test private calendar from bundle");
-		 retrieveCSSCalendarEvents(new TestCallBackRetrieveCSSCalendarEvents());
+//		 retrieveCSSCalendarEvents(new TestCallBackRetrieveCSSCalendarEvents());
 	}
 
 	/*
@@ -241,8 +243,8 @@ public class SharedCalendarClientRich implements ICommCallback,	ISharedCalendarC
 		return result;
 	}
 
-	public void retrieveAllPublicCalendars(
-			IReturnedResultCallback returnedResultCallback) {
+	public void retrieveCISCalendars(
+			IReturnedResultCallback returnedResultCallback, String CISId) {
 		
 		Stanza stanza = new Stanza(retrieveTargetIdentity());
 
@@ -255,6 +257,7 @@ public class SharedCalendarClientRich implements ICommCallback,	ISharedCalendarC
 
 		calendarBean
 				.setMethod(org.societies.rdpartyservice.enterprise.sharedcalendar.MethodType.RETRIEVE_CIS_CALENDAR_LIST);
+		calendarBean.setCISId(CISId);
 		try {
 			// SEND INFORMATION QUERY - RESPONSE WILL BE IN
 			// "callback.RecieveMessage()"
@@ -370,7 +373,7 @@ public class SharedCalendarClientRich implements ICommCallback,	ISharedCalendarC
 			for (Event event : returnedList) {
 				log.info(event.getEventDescription());
 			}
-			renderEventsOnCalendar(returnedList);
+			createJSONOEvents(returnedList);
 		}
 	}
 
@@ -398,7 +401,7 @@ public class SharedCalendarClientRich implements ICommCallback,	ISharedCalendarC
 	 * @param eventListToRender
 	 * @return the String that represent the Json array
 	 */
-	private String renderEventsOnCalendar(List<Event> eventListToRender){
+	private String createJSONOEvents(List<Event> eventListToRender){
 		/*
 	  "id":10182,
       "start":"2009-05-03T14:00:00.000+10:00",
@@ -423,7 +426,7 @@ public class SharedCalendarClientRich implements ICommCallback,	ISharedCalendarC
 	}
 
 	private boolean writeJsonToFile(String path ,String JSONObjects){
-		String tesPath = "C:\\Documents and Settings\\solutanet\\Desktop\\jquery-weekcalendar-1.2.2\\events.json";
+		String tesPath = pathForJSONfile;
 
         FileWriter fileWriter = null;
         BufferedWriter out=null;
@@ -469,7 +472,7 @@ return true;
 		tmpEvent.setEventId(""+i);
 		tmpEventList.add(tmpEvent);}
 	SharedCalendarClientRich tmpClient=new SharedCalendarClientRich();
-		String JsonObj=tmpClient.renderEventsOnCalendar(tmpEventList);
+		String JsonObj=tmpClient.createJSONOEvents(tmpEventList);
 		tmpClient.writeJsonToFile("", JsonObj);
 	
 }

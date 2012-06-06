@@ -33,10 +33,11 @@ package org.societies.rdpartyService.enterprise.interfaces;
 public interface ISharedCalendarClientRich {
 
 	/**
-	 * This operation returns all the calendars declared public. These calendars are visible to all CSS or CIS in the Societies platform.
+	 * This operation returns all the calendars of a CIS.
 	 * @param returnedResultCallback
+	 * @param CIS Id
 	 */
-	public void retrieveAllPublicCalendars(IReturnedResultCallback returnedResultCallback);
+	public void retrieveCISCalendars(IReturnedResultCallback returnedResultCallback, String CISId);
 	
 	/**
 	 * This operation is used to retrieve all events in a CSS calendar.
