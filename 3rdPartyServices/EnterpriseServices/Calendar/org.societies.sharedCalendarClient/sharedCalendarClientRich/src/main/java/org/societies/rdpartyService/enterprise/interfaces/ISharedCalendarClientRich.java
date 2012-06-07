@@ -24,6 +24,10 @@
  */
 package org.societies.rdpartyService.enterprise.interfaces;
 
+import java.util.List;
+
+import org.societies.rdpartyservice.enterprise.sharedcalendar.Event;
+
 /**
  * Describe your class here...
  *
@@ -33,24 +37,120 @@ package org.societies.rdpartyService.enterprise.interfaces;
 public interface ISharedCalendarClientRich {
 
 	/**
+	 * This method create a private calendar for a CIS
+	 * @param CISId
+	 * @param calendarSummary
+	 * @return
+	 */
+	public void createCISCalendar(IReturnedResultCallback returnedResultCallback,String calendarSummary, String CISId);
+	
+	
+	
+	/**
 	 * This operation returns all the calendars of a CIS.
 	 * @param returnedResultCallback
 	 * @param CIS Id
 	 */
 	public void retrieveCISCalendars(IReturnedResultCallback returnedResultCallback, String CISId);
 	
+	
+	/**
+	 * This method deletes the CIS calendar with the provided CalendarId
+	 * @param CalendarId
+	 * @return true if successful
+	 */
+	public void deleteCISCalendar(IReturnedResultCallback returnedResultCallback,String calendarId);
+	
+	/**
+	 * 
+	 * @param calendarId
+	 * @return the list of events inside a CIS Calendar
+	 */
+	public void retrieveCISCalendarEvents(IReturnedResultCallback returnedResultCallback,String calendarId);
+	
+	/**
+	 * This method create an Event on CIS Calendar
+	 * @param newEvent
+	 * @param calendarId
+	 * @return the id of the event
+	 */
+	public void createEventOnCISCalendar(IReturnedResultCallback returnedResultCallback,Event newEvent, String calendarId);
+	
+	/**
+	 * 
+	 * @param eventId
+	 * @param calendarId
+	 * @return true if the event is deleted successfully
+	 */
+	public void deleteEventOnCISCalendar(IReturnedResultCallback returnedResultCallback,String eventId, String calendarId);
+	
 	/**
 	 * This operation is used to retrieve all events in a CSS calendar.
+	 * The id of the calendar is not passed to the method because it is retrieved by the server using the Jid in the xmpp message.
 	 * @param returnedResultCallback
 	 */
-	public void retrieveCSSCalendarEvents(IReturnedResultCallback returnedResultCallback);
+	public void retrieveEventsPrivateCalendar(IReturnedResultCallback returnedResultCallback);
 	
 	/**
 	 * This operation is used for create a calendar associated with the CSS
+	 * 
 	 * @param returnedResultCallback
 	 * @param calendarSummary
 	 */
-	public void createCSSCalendar(IReturnedResultCallback returnedResultCallback, String calendarSummary);
+	public void createPrivateCalendar(IReturnedResultCallback returnedResultCallback, String calendarSummary);
 	
+	/**
+	 * This method removes a private calendar for a CSS
+	 * The id of the calendar is not passed to the method because it is retrieved by the server using the Jid in the xmpp message.
+	 * @return
+	 */
+	public void deletePrivateCalendar(IReturnedResultCallback returnedResultCallback);
+	
+	
+	/**
+	 * This method create an event inside a private calendar using as identifier the CSS Jid
+	 * The id of the calendar is not passed to the method because it is retrieved by the server using the Jid in the xmpp message.
+	 * @param eventTitle
+	 * @param description
+	 * @param startDate
+	 * @param endDate
+	 * @param attendeeName
+	 * @param attendeeEmail
+	 * @return
+	 */
+	public void createEventOnPrivateCalendar(IReturnedResultCallback returnedResultCallback,Event newEvent);
+	
+	/**
+	 * This method is used to delete an event on a CSS calendar.
+	 * @param eventId
+	 * @return true if the event is deleted successfully.
+	 */
+	public void deleteEventOnPrivateCalendar(IReturnedResultCallback returnedResultCallback,String eventId);
+	
+	/**
+	 * This method is used to subscribe to an event in a CIS calendar.
+	 * @param calendarId
+	 * @param eventId
+	 * @param subscriberId the identifier for the subscriber
+	 * @return true if the subscription is performed correctly false otherwise
+	 */
+	public void subscribeToEvent(IReturnedResultCallback returnedResultCallback,String calendarId,String eventId, String subscriberId);
+	
+	/**
+	 * This method is used to retrieve events in a CIS calendar that match a keyword
+	 * @param calendarId
+	 * @param keyWord
+	 * @return the list of events that match the input keyword
+	 */
+	public void findEvents(IReturnedResultCallback returnedResultCallback,String calendarId,String keyWord);
+	
+	/**
+	 * This method is used to unsubscribe to an event in a CIS calendar.
+	 * @param calendarId
+	 * @param eventId
+	 * @param subscriberId
+	 * @return true if the unsubscription is performed correctly, false otherwise
+	 */
+	public void unsubscribeFromEvent(IReturnedResultCallback returnedResultCallback,String calendarId,String eventId, String subscriberId);
 	
 }
