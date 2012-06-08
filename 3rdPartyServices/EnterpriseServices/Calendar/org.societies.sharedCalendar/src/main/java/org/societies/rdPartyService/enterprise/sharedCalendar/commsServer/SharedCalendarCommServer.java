@@ -128,7 +128,7 @@ public class SharedCalendarCommServer implements IFeatureServer{
 				List<Calendar> retrievedCalendars = this.sharedCalendarService.retrieveCISCalendarList(bean.getCISId());
 				resultBean.setCalendarList(retrievedCalendars);
 				break;
-			case RETRIEVE_CALENDAR_EVENTS:
+			case RETRIEVE_CIS_CALENDAR_EVENTS:
 				List<Event> retrievedEvents = this.sharedCalendarService.retrieveCalendarEvents(bean.getCalendarId());
 				resultBean.setEventList(retrievedEvents);
 				break;
@@ -157,7 +157,7 @@ public class SharedCalendarCommServer implements IFeatureServer{
 					resultBean.setEventId(returnedEventId);
 				}
 				break;
-			case RETRIEVE_EVENTS_PRIVATE_CALENDAR:
+			case RETRIEVE_EVENTS_ON_PRIVATE_CALENDAR:
 				String calendarIdForAllEvents = this.sharedCalendarService.retrievePrivateCalendarId(stanza.getFrom().getJid());
 				if (calendarIdForAllEvents != null) {
 					List<Event> returnedPrivateCalendarEventList = this.sharedCalendarService.retrieveCalendarEvents(calendarIdForAllEvents);
