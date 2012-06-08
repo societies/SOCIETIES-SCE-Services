@@ -16,6 +16,7 @@
 		is to facilitate integration testing of the bundle outside of an OSGi container -->
 	<bean id="sharedCalClientRich" class="org.societies.rdpartyService.enterprise.SharedCalendarClientRich" init-method="InitService">
 		<constructor-arg value="${serverJid}" />
+		<constructor-arg value="${jsonFilePath}" />
 		<property name="commManager" ref="CommManagerBundle" />
 		<!-- property name="idMgr" ref="IdentityManagerBundle" /-->
 	</bean>

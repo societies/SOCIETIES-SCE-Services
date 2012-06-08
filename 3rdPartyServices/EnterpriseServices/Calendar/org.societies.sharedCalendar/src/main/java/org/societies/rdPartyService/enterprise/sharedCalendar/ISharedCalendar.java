@@ -65,9 +65,25 @@ public interface ISharedCalendar {
 	/**
 	 * 
 	 * @param calendarId
-	 * @return the list of events inside a specific Calendar
+	 * @return the list of events inside a CIS Calendar
 	 */
-	public List<Event> retrieveCalendarEvents(String calendarId);
+	public List<Event> retrieveCISCalendarEvents(String calendarId);
+	
+	/**
+	 * This method create an Event on CIS Calendar
+	 * @param newEvent
+	 * @param calendarId
+	 * @return the id of the event
+	 */
+	public String createEventOnCISCalendar(Event newEvent, String calendarId);
+	
+	/**
+	 * 
+	 * @param eventId
+	 * @param calendarId
+	 * @return true if the event is deleted successfully
+	 */
+	public boolean deleteEventOnCISCalendar(String eventId, String calendarId);
 	
 	/**
 	 * 
@@ -122,10 +138,19 @@ public interface ISharedCalendar {
 	public String createEventOnPrivateCalendar(Event newEvent);
 	
 	/**
-	 * 
+	 * This method is used to retrieve all events in a CSS calendar.
+	 * The calendar id is not used because it is retrieved using the Jid in the XMPP message sent to the server. 
 	 * @return
 	 */
-	public List<Event> retrieveEventsPrivateCalendar();
+	public List<Event> retrieveEventsOnPrivateCalendar();
+	
+	
+	/**
+	 * This method is used to delete an event on a CSS calendar.
+	 * @param eventId
+	 * @return true if the event is deleted successfully.
+	 */
+	public boolean deleteEventOnPrivateCalendar(String eventId);
 	
 	
 }
