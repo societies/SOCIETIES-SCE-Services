@@ -315,6 +315,7 @@ public class SharedCalendarUtil {
 			service.calendars().delete(calendarId).execute();
 		} catch (IOException e) {
 			log.error("Unable to delete calendar with id '"+calendarId+"'", e);
+			throw e;
 		}
 	}
 	
@@ -323,6 +324,7 @@ public class SharedCalendarUtil {
 			service.events().delete(calendarId, eventId).execute();
 		} catch (IOException e) {
 			log.error("Unable to delete event with id '"+eventId+"' from calendar with id '"+calendarId+"'", e);
+		throw e;
 		}
 	}
 	

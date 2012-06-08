@@ -201,7 +201,7 @@ public class SharedCalendar implements ISharedCalendar, IPrivateCalendarUtil {
 	 * #retrieveCalendarEvents(java.lang.String)
 	 */
 	@Override
-	public List<Event> retrieveCalendarEvents(String calendarId) {
+	public List<Event> retrieveCISCalendarEvents(String calendarId) {
 		List<Event> returnedEventList = new ArrayList<Event>();
 		try {
 			returnedEventList = eventListFromGoogleEventList(util
@@ -212,6 +212,42 @@ public class SharedCalendar implements ISharedCalendar, IPrivateCalendarUtil {
 		return returnedEventList;
 	}
 
+	/* (non-Javadoc)
+	 * @see org.societies.rdPartyService.enterprise.sharedCalendar.ISharedCalendar#createEventOnCISCalendar(org.societies.rdpartyservice.enterprise.sharedcalendar.Event, java.lang.String)
+	 */
+	@Override
+	public String createEventOnCISCalendar(Event newEvent, String calendarId) {
+		String returnedEventId = "";
+		try {
+			returnedEventId = util.createEvent(calendarId, newEvent
+					.getEventSummary(), newEvent.getEventDescription(),
+					XMLGregorianCalendarConverter.asDate(newEvent
+							.getStartDate()), XMLGregorianCalendarConverter
+							.asDate(newEvent.getEndDate()), newEvent
+							.getLocation());
+
+		} catch (IOException e) {
+
+			log.error(e.getMessage());
+		}
+		return returnedEventId;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.societies.rdPartyService.enterprise.sharedCalendar.ISharedCalendar#deleteEventOnCISCalendar(java.lang.String, java.lang.String)
+	 */
+	@Override
+	public boolean deleteEventOnCISCalendar(String eventId, String calendarId) {
+		boolean deletionOk=false;
+		try {
+			util.deleteEvent(calendarId, eventId);
+			deletionOk=true;
+		} catch (Exception e) {
+			log.error("Error during deletion of CIS calendar event: "+e.getMessage());
+		}
+		return deletionOk;
+	}
+	
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -367,7 +403,15 @@ public class SharedCalendar implements ISharedCalendar, IPrivateCalendarUtil {
 		}
 		return result;
 	}
-
+	
+	/* (non-Javadoc)
+	 * DO NOT USE THIS METHOD BUT USE THE deletePrivateCalendar PASSING THE CALENDAR ID RETRIEVED USING THE CSSID 
+	 */
+	@Override	
+	public boolean deletePrivateCalendar() {
+		// TODO Auto-generated method stub
+		return false;
+	}
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -422,7 +466,7 @@ public class SharedCalendar implements ISharedCalendar, IPrivateCalendarUtil {
 	 * org.societies.rdPartyService.enterprise.sharedCalendar.ISharedCalendar
 	 * #createEventOnPrivateCalendar(java.lang.String, java.lang.String,
 	 * java.util.Date, java.util.Date, java.lang.String, java.lang.String)
-	 * IMPLEMENTATION. USE THE createEventOnPrivateCalendarUsingCSSId TO STORE
+	 * DO NOT USE THIS IMPLEMENTATION. USE THE createEventOnPrivateCalendarUsingCSSId TO STORE
 	 * THE MAPPING BETWEEN CSSID AND CALENDARID
 	 */
 	@Override
@@ -462,19 +506,22 @@ public class SharedCalendar implements ISharedCalendar, IPrivateCalendarUtil {
 	
 	/* (non-Javadoc)
 	 * @see org.societies.rdPartyService.enterprise.sharedCalendar.ISharedCalendar#retrieveEventsPrivateCalendar()
-	 * DO NOT USE THIS METHOD BUT USE THE retrieveCalendarEvents PASSING THE CALENDAR ID RETRIEVED USING THE CSSID 
+	 * DO NOT USE THIS METHOD BUT USE THE retrieveCISCalendarEvents PASSING THE CALENDAR ID RETRIEVED USING THE CSSID 
 	 */
 	@Override
-	public List<Event> retrieveEventsPrivateCalendar() {
+	public List<Event> retrieveEventsOnPrivateCalendar() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 	
+	
+	
 	/* (non-Javadoc)
-	 * DO NOT USE THIS METHOD BUT USE THE deletePrivateCalendar PASSING THE CALENDAR ID RETRIEVED USING THE CSSID 
+	 * @see org.societies.rdPartyService.enterprise.sharedCalendar.ISharedCalendar#deleteEventOnPrivateCalendar(java.lang.String)
+	 *DO NOT USE THIS METHOD BUT USE THE deleteEventOnCISCalendar(String, String) PASSING THE CALENDAR ID RETRIEVED USING THE CSSID
 	 */
-	@Override	
-	public boolean deletePrivateCalendar() {
+	@Override
+	public boolean deleteEventOnPrivateCalendar(String eventId) {
 		// TODO Auto-generated method stub
 		return false;
 	}
@@ -587,6 +634,10 @@ private List<CalendarListEntry> filterCISCalendar(List<CalendarListEntry> listTo
 		
 		return listToFilter;
 	}
+
+	
+
+	
 
 	
 	

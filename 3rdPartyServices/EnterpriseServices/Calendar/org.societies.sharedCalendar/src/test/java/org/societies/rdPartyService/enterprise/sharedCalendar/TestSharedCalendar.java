@@ -90,7 +90,7 @@ public class TestSharedCalendar extends AbstractTransactionalJUnit4SpringContext
 			testCalendarId = calendar.getCalendarId();
 		}	
 		//Add an event to the calendar if none is found
-		List<Event> availableEvents = sharedCalendar.retrieveCalendarEvents(testCalendarId);
+		List<Event> availableEvents = sharedCalendar.retrieveCISCalendarEvents(testCalendarId);
 		if (availableEvents.isEmpty()){
 			Event newEvt = new Event();
 			newEvt.setEventDescription("SOCIETIES GA");
@@ -109,7 +109,7 @@ public class TestSharedCalendar extends AbstractTransactionalJUnit4SpringContext
 	@Test
 	@Rollback(false)
 	public void retrieveCalendarEvent(){
-		List<Event> eventList=sharedCalendar.retrieveCalendarEvents(testCalendarId);
+		List<Event> eventList=sharedCalendar.retrieveCISCalendarEvents(testCalendarId);
 		log.info("Events retrieved for calendar with id '"+testCalendarId+"' :");
 		for (Event event : eventList) {
 			log.info("Event id: "+event.getEventId()+" - Event Summary:"+event.getEventSummary());

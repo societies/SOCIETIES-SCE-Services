@@ -129,7 +129,7 @@ public class SharedCalendarCommServer implements IFeatureServer{
 				resultBean.setCalendarList(retrievedCalendars);
 				break;
 			case RETRIEVE_CIS_CALENDAR_EVENTS:
-				List<Event> retrievedEvents = this.sharedCalendarService.retrieveCalendarEvents(bean.getCalendarId());
+				List<Event> retrievedEvents = this.sharedCalendarService.retrieveCISCalendarEvents(bean.getCalendarId());
 				resultBean.setEventList(retrievedEvents);
 				break;
 			case SUBSCRIBE_TO_EVENT:
@@ -160,7 +160,7 @@ public class SharedCalendarCommServer implements IFeatureServer{
 			case RETRIEVE_EVENTS_ON_PRIVATE_CALENDAR:
 				String calendarIdForAllEvents = this.sharedCalendarService.retrievePrivateCalendarId(stanza.getFrom().getJid());
 				if (calendarIdForAllEvents != null) {
-					List<Event> returnedPrivateCalendarEventList = this.sharedCalendarService.retrieveCalendarEvents(calendarIdForAllEvents);
+					List<Event> returnedPrivateCalendarEventList = this.sharedCalendarService.retrieveCISCalendarEvents(calendarIdForAllEvents);
 					resultBean.setEventList(returnedPrivateCalendarEventList);
 				}
 				break;
