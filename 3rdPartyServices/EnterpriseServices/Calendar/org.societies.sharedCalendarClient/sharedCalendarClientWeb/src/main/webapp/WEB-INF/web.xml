@@ -4,6 +4,7 @@
 	version="2.5">
     <display-name>Shared Calendar Web Application</display-name>
 	
+    <!-- 
      <context-param>
 	    <param-name>contextConfigLocation</param-name>      
 	    <param-value>
@@ -11,16 +12,12 @@
 	        /WEB-INF/cal-servlet.xml
 	    </param-value>
 	 </context-param>
-    
+     -->
+     
     <context-param>
         <param-name>contextClass</param-name>
         <param-value>org.springframework.osgi.web.context.support.OsgiBundleXmlWebApplicationContext</param-value>
     </context-param>
-
-<!--     <context-param> -->
-<!--         <param-name>contextConfigLocation</param-name> -->
-<!--         <param-value>WEB-INF/calWebClient-servlet.xml</param-value> -->
-<!--     </context-param> -->
 
     <listener>
         <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
@@ -29,7 +26,7 @@
     <servlet>
         <servlet-name>cal</servlet-name>
         <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
-        <init-param>
+        <!-- init-param>
       		<param-name>contextClass</param-name>     
       		<param-value>org.springframework.osgi.web.context.support.OsgiBundleXmlWebApplicationContext</param-value>
     	</init-param>
@@ -39,7 +36,7 @@
 			    /WEB-INF/applicationContext.xml,
 			    /WEB-INF/cal-servlet.xml
 			</param-value>
-		</init-param>
+		</init-param-->
     	<load-on-startup>2</load-on-startup>        
     </servlet>
 	 

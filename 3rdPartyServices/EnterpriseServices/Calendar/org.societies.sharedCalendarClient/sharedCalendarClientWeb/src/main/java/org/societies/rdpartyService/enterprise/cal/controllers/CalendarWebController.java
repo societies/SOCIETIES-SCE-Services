@@ -7,7 +7,6 @@ import org.societies.rdpartyService.enterprise.interfaces.IReturnedResultCallbac
 import org.societies.rdpartyService.enterprise.interfaces.ISharedCalendarClientRich;
 import org.societies.rdpartyservice.enterprise.sharedcalendar.SharedCalendarResult;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.osgi.extensions.annotation.ServiceReference;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
@@ -59,7 +58,7 @@ public class CalendarWebController {
 		return calClientService;
 	}
 	
-	@ServiceReference
+	//@ServiceR eference(cardinality=ServiceReferenceCardinality.C0__1)
 	public void setCalClientService(ISharedCalendarClientRich calClientService) {
 		this.calClientService = calClientService;
 	}

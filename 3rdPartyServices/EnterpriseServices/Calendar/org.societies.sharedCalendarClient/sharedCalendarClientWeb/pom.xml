@@ -12,6 +12,11 @@
 	<version>1.0-SNAPSHOT</version>
 	<name>sharedCalendarClientWeb Maven Webapp</name>
 	<url>http://maven.apache.org</url>
+	
+	<properties>
+		<springdm.version>1.2.1</springdm.version>		
+	</properties>
+	
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework</groupId>
@@ -34,13 +39,13 @@
 		<dependency>
 			<groupId>org.springframework.osgi</groupId>
 			<artifactId>spring-osgi-annotation</artifactId>
-			<version>1.2.1</version>
+			<version>${springdm.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.osgi</groupId>
 			<artifactId>org.springframework.osgi.web</artifactId>
-			<version>1.2.1</version>
+			<version>${springdm.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
@@ -180,7 +185,7 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-war-plugin</artifactId>
 				<version>2.2</version>
-				<configuration>					
+				<configuration>
 					<archive>
 						<manifestFile>${project.build.directory}/META-INF/MANIFEST.MF</manifestFile>
 					</archive>
@@ -214,25 +219,19 @@
 								<artifactItem>
 									<groupId>org.springframework.osgi</groupId>
 									<artifactId>org.springframework.osgi.web</artifactId>
-									<version>1.2.1</version>
+									<version>${springdm.version}</version>
 									<type>jar</type>
 								</artifactItem>
 								<artifactItem>
-									<groupId>org.jfree.chart</groupId>
-									<artifactId>org.jfree.chart-library</artifactId>
-									<version>1.0.9</version>
-									<type>libd</type>
-								</artifactItem>
-								<artifactItem>
-									<groupId>org.jfree.chart</groupId>
-									<artifactId>com.springsource.org.jfree.chart</artifactId>
-									<version>1.0.9</version>
+									<groupId>org.springframework</groupId>
+									<artifactId>org.springframework.web</artifactId>
+									<version>${spring.version}</version>
 									<type>jar</type>
 								</artifactItem>
 								<artifactItem>
-									<groupId>org.jfree</groupId>
-									<artifactId>com.springsource.org.jfree</artifactId>
-									<version>1.0.12</version>
+									<groupId>org.springframework</groupId>
+									<artifactId>org.springframework.web.servlet</artifactId>
+									<version>${spring.version}</version>
 									<type>jar</type>
 								</artifactItem>
 								<artifactItem>
@@ -240,6 +239,16 @@
 									<artifactId>com.springsource.javax.servlet</artifactId>
 									<version>2.5.0</version>
 								</artifactItem>
+								<artifactItem>
+									<groupId>org.springframework.osgi</groupId>
+									<artifactId>spring-osgi-annotation</artifactId>
+									<version>${springdm.version}</version>									
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.springframework.osgi</groupId>
+									<artifactId>spring-osgi-web-extender</artifactId>
+									<version>${springdm.version}</version>									
+								</artifactItem>		
 							</artifactItems>
 							<outputDirectory>${spring.osgi.deploy.dir}</outputDirectory>
 						</configuration>
