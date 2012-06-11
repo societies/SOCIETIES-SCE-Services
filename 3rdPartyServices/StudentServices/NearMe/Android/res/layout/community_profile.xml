@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout 
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:orientation="vertical"
+	android:layout_width="fill_parent"
+	android:layout_height="fill_parent" android:gravity="center|top">
+
+	<LinearLayout
+		android:orientation="horizontal"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:gravity="left">
+	</LinearLayout>
+		
+	<LinearLayout
+		android:orientation="horizontal"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:layout_marginTop="20.0dip"
+		android:gravity="left">
+			
+		<TextView
+			android:layout_width="120.0dip"
+			android:layout_height="wrap_content"
+			android:layout_marginLeft="5.0dip"
+			android:text="Name:"
+			android:gravity="left"
+			style="@style/PVC.style_04" />
+				
+		<TextView
+			android:id="@id/community_profile_name"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_marginLeft="5.0dip"
+			android:gravity="left"
+			style="@style/PVC.style_04" />						
+	</LinearLayout>
+	
+	
+		<LinearLayout
+		android:orientation="horizontal"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:layout_marginTop="10.0dip"
+		android:gravity="left">
+			
+		<TextView
+			android:layout_width="120.0dip"
+			android:layout_height="wrap_content"
+			android:layout_marginLeft="5.0dip"
+			android:text="Description:"
+			android:gravity="left"
+			style="@style/PVC.style_04" />
+				
+		<TextView
+			android:id="@id/community_profile_description"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_marginLeft="5.0dip"
+			android:text=""
+			android:gravity="left"
+			style="@style/PVC.style_04" />						
+	</LinearLayout>
+	
+	
+	<LinearLayout
+		android:orientation="horizontal"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:layout_marginTop="10.0dip"
+		android:gravity="left">
+			
+		<TextView
+			android:layout_width="120.0dip"
+			android:layout_height="wrap_content"
+			android:layout_marginLeft="5.0dip"
+			android:text="Administrator:"
+			android:gravity="left"
+			style="@style/PVC.style_04" />
+				
+		<TextView
+			android:id="@id/community_profile_administrator"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_marginLeft="5.0dip"
+			android:text=""
+			android:gravity="left"
+			style="@style/PVC.style_04" />						
+	</LinearLayout>
+
+
+	<LinearLayout
+		android:orientation="horizontal"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:layout_marginTop="10.0dip"
+		android:gravity="left">
+			
+		<TextView
+			android:layout_width="120.0dip"
+			android:layout_height="wrap_content"
+			android:layout_marginLeft="5.0dip"
+			android:text="Profile:"
+			android:gravity="left"
+			style="@style/PVC.style_04" />
+				
+		<TextView
+			android:id="@id/community_profile_category"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_marginLeft="5.0dip"
+			android:text=""
+			android:gravity="left"
+			style="@style/PVC.style_04" />						
+	</LinearLayout>
+
+	
+	<LinearLayout
+		android:orientation="horizontal"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:layout_marginTop="10.0dip"
+		android:gravity="left">
+			
+		<TextView
+			android:layout_width="120.0dip"
+			android:layout_height="wrap_content"
+			android:layout_marginLeft="5.0dip"
+			android:text="Visibility:"
+			android:gravity="left"
+			style="@style/PVC.style_04" />
+				
+		<TextView
+			android:id="@id/community_profile_visibility"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_marginLeft="5.0dip"
+			android:text=""
+			android:gravity="left"
+			style="@style/PVC.style_04" />						
+	</LinearLayout>
+	
+	
+	<LinearLayout
+		android:orientation="horizontal"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:layout_marginTop="10.0dip"
+		android:gravity="left">
+			
+		<TextView
+			android:layout_width="120.0dip"
+			android:layout_height="wrap_content"
+			android:layout_marginLeft="5.0dip"
+			android:text="DateCreation:"
+			android:gravity="left"
+			style="@style/PVC.style_04" />
+				
+		<TextView
+			android:id="@id/community_profile_date"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_marginLeft="5.0dip"
+			android:text=""
+			android:gravity="left"
+			style="@style/PVC.style_04" />						
+	</LinearLayout>
+	
+	<LinearLayout
+		android:orientation="horizontal"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:layout_marginTop="10.0dip"
+		android:gravity="left">
+			
+		<TextView
+			android:layout_width="120.0dip"
+			android:layout_height="wrap_content"
+			android:layout_marginLeft="5.0dip"
+			android:text="Members:"
+			android:gravity="left"
+			style="@style/PVC.style_04" />
+				
+		<TextView
+			android:id="@id/community_profile_members"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_marginLeft="5.0dip"
+			android:text=""
+			android:gravity="left"
+			style="@style/PVC.style_04" />						
+	</LinearLayout>	
+		
+
+</LinearLayout>

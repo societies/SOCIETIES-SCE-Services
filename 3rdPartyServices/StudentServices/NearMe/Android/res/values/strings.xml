@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="hello">Hello World, XPruebas05Activity!</string>
+    <string name="app_name">ASoCom</string>
+    <string name="top_titre">void</string>
+    <string name="msn_chat_date">01/01/2000  -- 12:00 am</string>
+    <string name="msn_chat_name">false</string>
+    <string name="msn_chat_text">void</string>
+    <string name="list_member_text_01">Void</string>
+    <string name="list_member_text_02">0</string>
+    <string name="service_started"></string>
+    <string name="notification_started_title"></string>
+    <string name="notification_started_text"></string>
+</resources>

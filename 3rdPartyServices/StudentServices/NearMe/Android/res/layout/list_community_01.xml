@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout 
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:orientation="vertical"
+	android:padding="0.0dip" 
+	android:layout_width="fill_parent"
+	android:layout_height="fill_parent"
+	android:gravity="bottom"
+	android:layout_marginLeft="0.0dip"
+	android:layout_marginTop="0.0dip">
+
+	<LinearLayout 
+		android:orientation="vertical"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:gravity="center">
+		<com.asocom.components.TopTitre
+	    	android:id="@id/list_community_01_top_titre"
+	       	android:layout_width="fill_parent"
+	       	android:layout_height="fill_parent"
+	       	android:background="#0000AA"/>
+	</LinearLayout>
+	
+	<LinearLayout
+		android:adjustViewBounds="true"
+		android:background="@drawable/list_menu_01"
+		android:orientation="horizontal"
+		android:layout_width="wrap_content"
+		android:layout_height="36.0dip"
+		android:gravity="bottom">
+		<Button 
+			android:layout_marginLeft="5.0dip"
+			android:layout_width="85.0dip"
+			android:layout_height="30.0dip"
+			android:background="@drawable/list_menu_02"	
+			android:text="List"	
+		/>
+		
+		<Button 
+			android:id="@id/list_community_01_button_radar"
+			android:layout_marginLeft="5.0dip"
+			android:layout_width="85.0dip"
+			android:layout_height="30.0dip"
+			android:background="@drawable/list_menu"
+			android:text="Radar"			
+		/>
+	</LinearLayout>
+
+
+		<ScrollView
+			android:id="@id/list_community_01_scroll_view"
+			android:layout_width="fill_parent"
+			android:layout_height="346.0dip"
+			android:gravity="left">	
+		</ScrollView>			
+		
+</LinearLayout>

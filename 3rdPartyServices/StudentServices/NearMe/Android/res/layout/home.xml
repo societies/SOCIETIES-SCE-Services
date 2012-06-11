@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout 
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:orientation="vertical"
+	android:layout_width="fill_parent"
+	android:layout_height="346.0dip"
+	android:gravity="center"
+	android:layout_marginLeft="0.0dip"
+	android:layout_marginTop="0.0dip">
+
+		<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+		    android:layout_width="fill_parent"
+		    android:layout_height="fill_parent"
+		    android:gravity="center"
+		    android:stretchColumns="3">
+
+		    <TableRow 
+		    	android:gravity="center"
+		    	android:layout_marginTop="25.0dip">
+		        <Button android:gravity="center" android:background="@drawable/home_profile" android:id="@id/home_profile" android:layout_height="90.0dip" android:layout_width="90.0dip"></Button>
+		        <ImageView
+		        	android:layout_width="50.0dip"
+		    		android:layout_height="50.0dip"
+		            android:gravity="center"/>
+		        <Button android:gravity="center" android:background="@drawable/home_communities" android:id="@id/home_communities" android:layout_height="90.0dip" android:layout_width="90.0dip"></Button>
+		    </TableRow>
+		
+		    <TableRow android:gravity="center"
+		    	android:layout_marginTop="20.0dip">
+		        <Button android:gravity="center" android:background="@drawable/home_my_communities" android:id="@id/home_my_communities" android:layout_height="90.0dip" android:layout_width="90.0dip"></Button>
+		        <ImageView
+		        	android:layout_width="50.0dip"
+		    		android:layout_height="50.0dip"
+		            android:gravity="center"/>
+		        <Button android:gravity="center" android:background="@drawable/home_create_community" android:id="@id/home_create_community" android:layout_height="90.0dip" android:layout_width="90.0dip"></Button>
+		    </TableRow>
+
+		    <TableRow 
+		    		android:gravity="center"
+					android:layout_marginTop="20.0dip">
+		        <Button android:gravity="center" android:background="@drawable/home_friends" android:id="@id/home_friends" android:layout_height="90.0dip" android:layout_width="90.0dip"></Button>
+		        <ImageView
+		        	android:layout_width="50.0dip"
+		    		android:layout_height="50.0dip"
+		            android:gravity="center"/>
+		        <Button android:gravity="center" android:background="@drawable/home_all_users" android:id="@id/home_all_users" android:layout_height="90.0dip" android:layout_width="90.0dip"></Button>
+		    </TableRow>
+		    
+		</TableLayout>
+		
+</LinearLayout>
