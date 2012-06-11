@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:adjustViewBounds="true"
+	android:orientation="vertical"
+	android:padding="0.0dip" 
+	android:layout_width="fill_parent"
+	android:layout_height="60.0dip"
+	android:gravity="center"
+	android:layout_marginLeft="2.0dip"
+	android:layout_marginTop="10.0dip"
+	android:background="@drawable/part_list01">
+				
+		<LinearLayout
+			android:gravity="center"
+			android:orientation="horizontal"
+			android:padding="0.0dip" 
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content">
+			
+		<LinearLayout
+			android:adjustViewBounds="true"
+			android:background="@drawable/blue_frame"
+			android:gravity="center"
+			android:layout_width="44.0dip"
+			android:layout_height="44.0dip">
+		
+			<ImageView
+				android:id="@id/part_list_02_image_01" 
+				android:adjustViewBounds="true"
+				android:minHeight="40.0dip"
+				android:minWidth="40.0dip"
+				android:maxWidth="40.0dip"
+				android:maxHeight="40.0dip"
+				android:layout_width="40.0dip" 
+				android:layout_height="40.0dip"
+				/>
+		</LinearLayout>
+		<TextView
+			android:layout_marginLeft="5.0dip"
+			android:gravity="left" 
+			style="@style/PVC.style_04" 
+			android:text="@string/list_member_text_01" 
+			android:id="@id/part_list_02_text_01" 
+			android:layout_width="155.0dip" 
+			android:layout_height="wrap_content">
+		</TextView>
+			
+			<LinearLayout
+				android:layout_marginLeft="15.0dip"
+				android:gravity="center"
+				android:orientation="horizontal"
+				android:padding="0.0dip" 
+				android:layout_width="90.0dip"
+				android:layout_height="40.0dip">
+				
+				<Button
+					android:adjustViewBounds="true"
+					android:background="@drawable/button_ok"
+					android:id="@id/part_list_02_Button_01"
+					android:layout_width="35.0dip"
+					android:layout_height="35.0dip"
+					android:gravity="center">				
+				</Button>
+				
+				<LinearLayout
+					android:gravity="center"
+					android:orientation="horizontal"
+					android:padding="0.0dip" 
+					android:layout_width="15.0dip"
+					android:layout_height="15.0dip">
+				</LinearLayout>
+								
+				<Button
+					android:adjustViewBounds="true"
+					android:background="@drawable/button_cancel"
+					android:id="@id/part_list_02_Button_02"
+					android:layout_width="35.0dip"
+					android:layout_height="35.0dip"
+					android:gravity="center">				
+				</Button>
+			</LinearLayout>
+			
+		</LinearLayout>	
+		<LinearLayout
+		android:layout_marginTop="4.0dip"
+			android:gravity="center"
+			android:orientation="horizontal"
+			android:padding="0.0dip" 
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:background="@drawable/line">			
+		</LinearLayout>		
+		
+</LinearLayout>

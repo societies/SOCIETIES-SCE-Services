@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout 
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:orientation="vertical"
+	android:layout_width="fill_parent"
+	android:layout_height="fill_parent" android:gravity="center|top">
+
+	<LinearLayout
+		android:orientation="horizontal"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:gravity="left">
+	</LinearLayout>
+		
+	<LinearLayout
+		android:orientation="horizontal"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:layout_marginTop="20.0dip"
+		android:gravity="left">
+			
+		<TextView
+			android:layout_width="120.0dip"
+			android:layout_height="wrap_content"
+			android:layout_marginLeft="5.0dip"
+			android:text="Name:"
+			android:gravity="left"
+			style="@style/PVC.style_04" />
+				
+		<TextView
+			android:id="@id/member_profile_name"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_marginLeft="5.0dip"
+			android:gravity="left"
+			style="@style/PVC.style_04" />						
+	</LinearLayout>
+	
+	
+		<LinearLayout
+		android:orientation="horizontal"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:layout_marginTop="10.0dip"
+		android:gravity="left">
+			
+		<TextView
+			android:layout_width="120.0dip"
+			android:layout_height="wrap_content"
+			android:layout_marginLeft="5.0dip"
+			android:text="Description:"
+			android:gravity="left"
+			style="@style/PVC.style_04" />
+				
+		<TextView
+			android:id="@id/member_profile_description"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_marginLeft="5.0dip"
+			android:text=""
+			android:gravity="left"
+			style="@style/PVC.style_04" />						
+	</LinearLayout>
+	
+	
+	<LinearLayout
+		android:orientation="horizontal"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:layout_marginTop="10.0dip"
+		android:gravity="left">
+			
+		<TextView
+			android:layout_width="120.0dip"
+			android:layout_height="wrap_content"
+			android:layout_marginLeft="5.0dip"
+			android:text="Date Of Birth:"
+			android:gravity="left"
+			style="@style/PVC.style_04" />
+				
+		<TextView
+			android:id="@id/member_profile_dateofbirth"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_marginLeft="5.0dip"
+			android:text=""
+			android:gravity="left"
+			style="@style/PVC.style_04" />						
+	</LinearLayout>
+
+
+	<LinearLayout
+		android:orientation="horizontal"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:layout_marginTop="10.0dip"
+		android:gravity="left">
+			
+		<TextView
+			android:layout_width="120.0dip"
+			android:layout_height="wrap_content"
+			android:layout_marginLeft="5.0dip"
+			android:text="Gender:"
+			android:gravity="left"
+			style="@style/PVC.style_04" />
+				
+		<TextView
+			android:id="@id/member_profile_gender"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_marginLeft="5.0dip"
+			android:text=""
+			android:gravity="left"
+			style="@style/PVC.style_04" />						
+	</LinearLayout>
+
+	
+	<LinearLayout
+		android:orientation="horizontal"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:layout_marginTop="10.0dip"
+		android:gravity="left">
+			
+		<TextView
+			android:layout_width="120.0dip"
+			android:layout_height="wrap_content"
+			android:layout_marginLeft="5.0dip"
+			android:text="email:"
+			android:gravity="left"
+			style="@style/PVC.style_04" />
+				
+		<TextView
+			android:id="@id/member_profile_email"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_marginLeft="5.0dip"
+			android:text=""
+			android:gravity="left"
+			style="@style/PVC.style_04" />						
+	</LinearLayout>
+	
+	
+	<LinearLayout
+		android:orientation="horizontal"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:layout_marginTop="10.0dip"
+		android:gravity="left">
+			
+		<TextView
+			android:layout_width="120.0dip"
+			android:layout_height="wrap_content"
+			android:layout_marginLeft="5.0dip"
+			android:text="Profile:"
+			android:gravity="left"
+			style="@style/PVC.style_04" />
+				
+		<TextView
+			android:id="@id/member_profile_status"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_marginLeft="5.0dip"
+			android:text=""
+			android:gravity="left"
+			style="@style/PVC.style_04" />						
+	</LinearLayout>
+	
+	<LinearLayout
+		android:orientation="horizontal"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:layout_marginTop="10.0dip"
+		android:gravity="left">
+	</LinearLayout>	
+		
+
+</LinearLayout>
