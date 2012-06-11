@@ -24,8 +24,6 @@
  */
 package org.societies.rdpartyService.enterprise.interfaces;
 
-import java.util.List;
-
 import org.societies.rdpartyservice.enterprise.sharedcalendar.Event;
 
 /**
