@@ -147,6 +147,35 @@ public class Volunteer {
 		this.expertiseSkills = expertiseSkills;
 	}
 	
+	public boolean findLanguage(String lang){
+		Set<String> langs = this.spokenLanguages.keySet();
+	    Iterator<String> iter = langs.iterator();
+	    while (iter.hasNext()) {
+	    	if(iter.next().equalsIgnoreCase(lang))
+	    		return true;
+	    }
+	    return false;
+	}
+	
+	public boolean findSkill(String skill){
+		Set<String> skills = this.expertiseSkills.keySet();
+	    Iterator<String> iter = skills.iterator();
+	    while (iter.hasNext()) {
+	    	if(iter.next().equalsIgnoreCase(skill))
+	    		return true;
+	    }
+	    return false;
+	}
+	
+	public boolean findPropertie(String pro){
+		boolean ok = false;
+		ok = ok || this.institut.equalsIgnoreCase(pro);
+		ok = ok || this.country.equalsIgnoreCase(pro);
+		ok = ok || this.findLanguage(pro);
+		ok = ok || this.findSkill(pro);
+	    return ok;
+	}
+	
 	public String toString(){
 		StringBuilder s = new StringBuilder();
 		s.append("id : "+this.ID+"\n");

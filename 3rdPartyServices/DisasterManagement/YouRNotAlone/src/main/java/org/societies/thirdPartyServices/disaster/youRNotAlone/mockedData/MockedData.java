@@ -59,7 +59,7 @@ public class MockedData{
 		v6.addSpokenLanguage("chinese");
 		v6.addSkill("java");
 		v6.addSkill("C++");
-		v6.addSkill("ruby");
+		v6.addSkill("python");
 		
 		volunteers = new ArrayList<Volunteer>();
 		volunteers.add(v1);

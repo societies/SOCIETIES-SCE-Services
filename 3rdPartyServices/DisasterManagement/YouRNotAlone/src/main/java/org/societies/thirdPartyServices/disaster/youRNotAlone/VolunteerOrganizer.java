@@ -25,7 +25,75 @@
 
 package org.societies.thirdPartyServices.disaster.youRNotAlone;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Set;
+
+import org.societies.thirdPartyServices.disaster.youRNotAlone.model.Volunteer;
+
 class VolunteerOrganizer {
+	private HashMap<String,Volunteer> volunteers;
 	
+	public VolunteerOrganizer(){
+		this.volunteers = new HashMap<String,Volunteer>();
+	}
 	
+	public void loadVolunteers(HashMap<String,Volunteer> volunteers){
+		this.volunteers = volunteers;
+	}
+	
+	public void loadVolunteers(ArrayList<Volunteer> volunteersList){
+		for(int i=0;i<volunteersList.size();i++)
+			this.volunteers.put(volunteersList.get(i).getID(), volunteersList.get(i));
+	}
+	
+	public void addVolunteer(Volunteer v){
+		this.volunteers.put(v.getID(), v);
+	}
+	
+	public ArrayList<Volunteer> getGroupByLanguages(ArrayList<String> langs){
+		ArrayList<Volunteer> group = new ArrayList<Volunteer>();
+		Set<String> IDs = this.volunteers.keySet();
+	    Iterator<String> iter = IDs.iterator();
+	    while (iter.hasNext()) {
+	    	Volunteer v = this.volunteers.get(iter.next());
+	    	Boolean ok = true;
+	    	for(int i=0;i<langs.size();i++)
+	    		ok = ok && v.findLanguage(langs.get(i));
+	    	if(ok)
+	    		group.add(v);
+	    }
+	    return group;
+	}
+	
+	public ArrayList<Volunteer> getGroupBySkills(ArrayList<String> skills){
+		ArrayList<Volunteer> group = new ArrayList<Volunteer>();
+		Set<String> IDs = this.volunteers.keySet();
+	    Iterator<String> iter = IDs.iterator();
+	    while (iter.hasNext()) {
+	    	Volunteer v = this.volunteers.get(iter.next());
+	    	Boolean ok = true;
+	    	for(int i=0;i<skills.size();i++)
+	    		ok = ok && v.findSkill(skills.get(i));
+	    	if(ok)
+	    		group.add(v);
+	    }
+	    return group;
+	}
+	
+	public ArrayList<Volunteer> getGroupByProperties(ArrayList<String> properties){
+		ArrayList<Volunteer> group = new ArrayList<Volunteer>();
+		Set<String> IDs = this.volunteers.keySet();
+	    Iterator<String> iter = IDs.iterator();
+	    while (iter.hasNext()) {
+	    	Volunteer v = this.volunteers.get(iter.next());
+	    	Boolean ok = true;
+	    	for(int i=0;i<properties.size();i++)
+	    		ok = ok && v.findPropertie(properties.get(i));
+	    	if(ok)
+	    		group.add(v);
+	    }
+	    return group;
+	}
 }
