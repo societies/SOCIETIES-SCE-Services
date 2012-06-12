@@ -41,8 +41,7 @@
     
     <context:component-scan base-package="org.societies.rdpartyService.enterprise.cal.controllers"/>
     
-    <bean class="org.springframework.osgi.extensions.annotation.ServiceReferenceInjectionBeanPostProcessor"/>
-	
+ 
 	<bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
 	  <property name="viewClass" value="org.springframework.web.servlet.view.JstlView" />
 	  <property name="prefix" value="/WEB-INF/views/"/>

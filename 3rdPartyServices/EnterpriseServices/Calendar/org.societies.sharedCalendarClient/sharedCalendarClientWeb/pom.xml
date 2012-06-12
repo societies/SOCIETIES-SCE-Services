@@ -266,7 +266,7 @@
 							<version>${project.version}</version>
 							<type>war</type>
 							<overWrite>true</overWrite>
-							<outputDirectory>${env.VIRGO_HOME}/pickup</outputDirectory>
+							<outputDirectory>${spring.osgi.deploy.dir}</outputDirectory>
 						</artifactItem>
 					</artifactItems>
 				</configuration>

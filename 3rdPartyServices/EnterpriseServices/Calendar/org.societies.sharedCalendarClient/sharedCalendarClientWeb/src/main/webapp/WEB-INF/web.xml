@@ -14,10 +14,11 @@
 	 </context-param>
      -->
      
-    <context-param>
-        <param-name>contextClass</param-name>
-        <param-value>org.springframework.osgi.web.context.support.OsgiBundleXmlWebApplicationContext</param-value>
-    </context-param>
+   <!-- OSGI aware web application context declaration -->
+	<context-param>
+		<param-name>contextClass</param-name>
+		<param-value>org.eclipse.virgo.web.dm.ServerOsgiBundleXmlWebApplicationContext</param-value>
+	</context-param>
 
     <listener>
         <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
