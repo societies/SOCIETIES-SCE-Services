@@ -29,7 +29,7 @@
 		persistent-id="sharedCalClient" />
 
 	<osgi:reference id="CommManagerBundle"
-		interface="org.societies.api.comm.xmpp.interfaces.ICommManager" />
+		interface="org.societies.api.comm.xmpp.interfaces.ICommManager" cardinality="1..1"/>
 	<!-- osgi:reference id="IdentityManagerBundle"
 		interface="org.societies.api.identity.IIdentityManager" /-->
 		

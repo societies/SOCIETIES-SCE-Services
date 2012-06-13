@@ -14,7 +14,7 @@
 
     <tx:annotation-driven />
 	
-    <bean id="calClientRich"
-		class="org.societies.rdpartyService.enterprise.SharedCalendarClientRich">
+    <bean id="calClientRich" class="org.societies.rdpartyService.enterprise.SharedCalendarClientRich">
+        <property name="commManager" ref="CommManagerBundle"/>
 	</bean>
 </beans>
