@@ -32,5 +32,8 @@
 		interface="org.societies.api.comm.xmpp.interfaces.ICommManager" />
 	<!-- osgi:reference id="IdentityManagerBundle"
 		interface="org.societies.api.identity.IIdentityManager" /-->
+		
+	<osgi:service id="calClientRichInterface" ref="calClientRich" interface="org.societies.rdpartyService.enterprise.interfaces.ISharedCalendarClientRich" />
+	<osgi:service id="calClientCommCallback" ref="calClientRich" interface="org.societies.api.comm.xmpp.interfaces.ICommCallback" />
 
 </beans>

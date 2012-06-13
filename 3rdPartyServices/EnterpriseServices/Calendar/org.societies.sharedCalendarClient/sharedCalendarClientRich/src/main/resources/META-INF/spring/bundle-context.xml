@@ -13,5 +13,8 @@
     <!-- Required for Async processing -->
 
     <tx:annotation-driven />
-
+	
+    <bean id="calClientRich"
+		class="org.societies.rdpartyService.enterprise.SharedCalendarClientRich">
+	</bean>
 </beans>

@@ -132,7 +132,7 @@ public class SharedCalendarClientRich implements ICommCallback,	ISharedCalendarC
 
 		// Test
 		
-	 createPrivateCalendar(new TestCallBackCreateCSSCalendar(),"Test private calendar from bundle");
+	 //createPrivateCalendar(new TestCallBackCreateCSSCalendar(),"Test private calendar from bundle");
 //		 retrieveCSSCalendarEvents(new TestCallBackRetrieveCSSCalendarEvents());
 	}
 
