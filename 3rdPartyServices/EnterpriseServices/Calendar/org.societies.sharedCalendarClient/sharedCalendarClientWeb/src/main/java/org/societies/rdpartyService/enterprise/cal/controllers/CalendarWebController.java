@@ -9,6 +9,7 @@ import org.societies.rdpartyservice.enterprise.sharedcalendar.SharedCalendarResu
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
 @Controller
@@ -19,40 +20,12 @@ public class CalendarWebController {
 		// TODO Auto-generated constructor stub
 	}
 
-	/**
-	 * 
-	 * Private CallBack Class that handles ISharedCalendarClientRich invocations
-	 *
-	 * @author gspadotto
-	 *
-	 */
-	private class CalendarWebResultCallback implements IReturnedResultCallback {
-		/** The Controller to pass results to */
-		private CalendarWebController wc = null;
-		
-		public CalendarWebResultCallback(CalendarWebController controller) {
-			this.wc = controller;
-		}
-
-		@Override
-		public void receiveResult(Object arg0) {
-			if (arg0 instanceof SharedCalendarResult){
-				this.wc.result = (SharedCalendarResult) arg0;
-			}else{
-				//Log some info...
-			}
-		}
-		
-	}
-	
-	
-	
 	private SharedCalendarResult result = null;
 	
 	@Autowired
 	private ISharedCalendarClientRich calClientService = null;
 	
-	private CalendarWebResultCallback cb = new CalendarWebResultCallback(this);
+	private CalendarWebResultCallback cb = null;
 
 	public ISharedCalendarClientRich getCalClientService() {
 		return calClientService;
@@ -81,11 +54,19 @@ public class CalendarWebController {
     */
 	
 	@RequestMapping("/getAllCisCalendars.do")
-	public ModelAndView getContacts() {
+	public @ResponseBody String getContacts() {
 		//calClientService.retrieveEventsPrivateCalendar(this.cb);
-		Map<String, Object> model = new HashMap<String, Object>();
-		model.put("message", "Please login to your Societies account");
-		return new ModelAndView("index", model);
+		this.cb = new CalendarWebResultCallback(this);
+		this.calClientService.retrieveCISCalendars(this.cb, "jane.societies.local");
+		return new String("{invoked: true}");
+	}
+
+	public SharedCalendarResult getResult() {
+		return result;
+	}
+
+	public void setResult(SharedCalendarResult result) {
+		this.result = result;
 	}
 
 }

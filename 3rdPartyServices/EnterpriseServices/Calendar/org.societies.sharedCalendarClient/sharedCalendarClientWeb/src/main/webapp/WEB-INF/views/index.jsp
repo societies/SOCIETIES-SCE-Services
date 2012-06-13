@@ -1,11 +1,11 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-<script src="../js/prototype.js" type="text/javascript"></script>
+<script src="/sharedCal/resources/js/prototype.js" type="text/javascript"></script>
 <title>Shared Calendar Web Client</title>
 </head>
 <body>
-	<script language="JavaScript" src="/resources/js/myCalendar.js"></script>
+	<script language="JavaScript" src="/sharedCal/resources/js/myCalendar.js"></script>
 	<h2>Hello World!</h2>
 	<button id="retrieveCalendar">Retrieve All Calendars</button>
 	<br/>Result:<br/>
@@ -15,7 +15,7 @@
 
 	
 	$("retrieveCalendar").on("click", function(event){
-			new Ajax.Updater('result','CalendarServlet/',
+			new Ajax.Updater('result','/sharedCal/retrieveCalendars.do',
 					  {
 					    method:'get',
 					    onSuccess: function(transport){

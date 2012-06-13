@@ -35,7 +35,7 @@
 		http://www.springframework.org/schema/osgi http://www.springframework.org/schema/osgi/spring-osgi.xsd
 		http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd">
 	
-<!--     <mvc:resources mapping="/resources/**" location="/resources/"/> -->
+    <mvc:resources mapping="/resources/**" location="/resources/"/>
     <!-- Configures the annotation-driven Spring MVC Controller programming model -->
 	<mvc:annotation-driven />	
     
