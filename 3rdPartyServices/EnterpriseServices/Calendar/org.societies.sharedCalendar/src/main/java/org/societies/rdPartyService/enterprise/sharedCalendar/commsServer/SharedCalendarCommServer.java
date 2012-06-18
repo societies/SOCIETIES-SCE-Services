@@ -151,7 +151,7 @@ public class SharedCalendarCommServer implements IFeatureServer{
 				);
 				break;
 			case DELETE_PRIVATE_CALENDAR:
-				resultBean.setLastOperationSuccessful(this.sharedCalendarService.deletePrivateCalendar());
+				resultBean.setLastOperationSuccessful(this.sharedCalendarService.deletePrivateCalendarUsingCSSId((this.sharedCalendarService.retrievePrivateCalendarId(stanza.getFrom().getJid()))));
 				break;
 			case CREATE_EVENT_ON_PRIVATE_CALENDAR:
 				String calendarId = this.sharedCalendarService.retrievePrivateCalendarId(stanza.getFrom().getJid());
@@ -161,16 +161,35 @@ public class SharedCalendarCommServer implements IFeatureServer{
 				}
 				break;
 			case RETRIEVE_EVENTS_ON_PRIVATE_CALENDAR:
+				//USE the same method for CIS but before retrieve the calendar id associated to the CSS using the Jid.
 				String calendarIdForAllEvents = this.sharedCalendarService.retrievePrivateCalendarId(stanza.getFrom().getJid());
 				if (calendarIdForAllEvents != null) {
 					List<Event> returnedPrivateCalendarEventList = this.sharedCalendarService.retrieveCISCalendarEvents(calendarIdForAllEvents);
 					resultBean.setEventList(returnedPrivateCalendarEventList);
 				}
 				break;
+			case CREATE_CIS_CALENDAR:
+				resultBean.setLastOperationSuccessful(this.sharedCalendarService.createCISCalendar(bean.getCalendarSummary(), bean.getCISId()));
+				break;
+			case CREATE_EVENT_ON_CIS_CALENDAR:
+				resultBean.setEventId((this.sharedCalendarService.createEventOnCISCalendar(bean.getNewEvent(), bean.getCalendarId())));
+				if (resultBean.getEventId()!="")
+				{
+					resultBean.setLastOperationSuccessful(true);
+				}else{resultBean.setLastOperationSuccessful(false);}
+			case DELETE_EVENT_ON_CIS_CALENDAR:
+				resultBean.setLastOperationSuccessful(this.sharedCalendarService.deleteEventOnCISCalendar(bean.getEventId(), bean.getCalendarId()));
+				break;
+			case DELETE_EVENT_ON_PRIVATE_CALENDAR:
+				//USE the same method for CIS but before retrieve the calendar id associated to the CSS using the Jid.
+				resultBean.setLastOperationSuccessful(this.sharedCalendarService.deleteEventOnCISCalendar(bean.getEventId(), this.sharedCalendarService.retrievePrivateCalendarId(stanza.getFrom().getJid())));
+				break;
+				
 			default:
 				resultBean = null;
 				break;
 			}
+			
 		}
 		return resultBean;
 	}
