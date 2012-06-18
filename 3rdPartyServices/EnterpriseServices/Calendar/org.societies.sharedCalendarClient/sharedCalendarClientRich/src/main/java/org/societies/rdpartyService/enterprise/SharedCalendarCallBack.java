@@ -119,6 +119,7 @@ public class SharedCalendarCallBack implements ICommCallback{
 	@Override
 	public void receiveError(Stanza stanza, XMPPError error) {
 		// TODO Auto-generated method stub
+		log.debug("Receive Error");
 		
 	}
 
@@ -128,7 +129,7 @@ public class SharedCalendarCallBack implements ICommCallback{
 	@Override
 	public void receiveInfo(Stanza stanza, String node, XMPPInfo info) {
 		// TODO Auto-generated method stub
-		
+		log.debug("Receive Info");
 	}
 
 	/* (non-Javadoc)
@@ -137,7 +138,7 @@ public class SharedCalendarCallBack implements ICommCallback{
 	@Override
 	public void receiveItems(Stanza stanza, String node, List<String> items) {
 		// TODO Auto-generated method stub
-		
+		log.debug("Receive Items");
 	}
 
 	/* (non-Javadoc)
@@ -146,7 +147,7 @@ public class SharedCalendarCallBack implements ICommCallback{
 	@Override
 	public void receiveMessage(Stanza stanza, Object payload) {
 		// TODO Auto-generated method stub
-		
+		log.debug("Receive Message");
 	}
 
 }

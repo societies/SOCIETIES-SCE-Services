@@ -18,22 +18,18 @@
 		<constructor-arg value="${serverJid}" />
 		<constructor-arg value="${jsonFilePath}" />
 		<property name="commManager" ref="CommManagerBundle" />
-		<!-- property name="idMgr" ref="IdentityManagerBundle" /-->
+<!-- 		<property name="idMgr" ref="IdentityManagerBundle" /> -->
 	</bean>
 
 
-	<context:property-placeholder
-		properties-ref="clientProperties" />
+	<context:property-placeholder properties-ref="clientProperties" />
 
-	<osgi-compendium:cm-properties id="clientProperties"
-		persistent-id="sharedCalClient" />
+	<osgi-compendium:cm-properties id="clientProperties" persistent-id="sharedCalClient" />
 
-	<osgi:reference id="CommManagerBundle"
-		interface="org.societies.api.comm.xmpp.interfaces.ICommManager" cardinality="1..1"/>
-	<!-- osgi:reference id="IdentityManagerBundle"
-		interface="org.societies.api.identity.IIdentityManager" /-->
+	<osgi:reference id="CommManagerBundle" interface="org.societies.api.comm.xmpp.interfaces.ICommManager" cardinality="1..1"/>
+<!-- 	<osgi:reference id="IdentityManagerBundle" interface="org.societies.api.identity.IIdentityManager"  cardinality="1..1"/> -->
 		
-	<osgi:service id="calClientRichInterface" ref="calClientRich" interface="org.societies.rdpartyService.enterprise.interfaces.ISharedCalendarClientRich" />
-	<osgi:service id="calClientCommCallback" ref="calClientRich" interface="org.societies.api.comm.xmpp.interfaces.ICommCallback" />
+	<osgi:service id="calClientRichInterface" ref="sharedCalClientRich" interface="org.societies.rdpartyService.enterprise.interfaces.ISharedCalendarClientRich" />
+	<osgi:service id="calClientCommCallback" ref="sharedCalClientRich" interface="org.societies.api.comm.xmpp.interfaces.ICommCallback" />
 
 </beans>

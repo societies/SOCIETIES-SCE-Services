@@ -28,6 +28,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.societies.api.comm.xmpp.datatypes.Stanza;
 import org.societies.api.comm.xmpp.exceptions.CommunicationException;
 import org.societies.api.comm.xmpp.exceptions.XMPPError;
@@ -48,6 +50,7 @@ import org.societies.rdpartyservice.enterprise.sharedcalendar.SharedCalendarResu
 public class SharedCalendarCommServer implements IFeatureServer{
 	private ICommManager commManager;
 	private SharedCalendar sharedCalendarService;
+	private static Logger log = LoggerFactory.getLogger(SharedCalendarCommServer.class);
 	
 	private static final List<String> NAMESPACES = Collections.unmodifiableList(
 			Arrays.asList("http://societies.org/rdPartyService/enterprise/sharedCalendar"));
@@ -105,9 +108,9 @@ public class SharedCalendarCommServer implements IFeatureServer{
 	@Override
 	public void receiveMessage(Stanza stanza, Object payload) {
 		// TODO Auto-generated method stub
-		System.out.println(stanza);
+		log.debug("Stanza:"+stanza);
 		if (payload instanceof Calendar){
-			System.out.println((Calendar)payload);
+			log.debug("Payload:"+(Calendar)payload);
 		}
 	}
 

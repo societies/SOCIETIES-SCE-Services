@@ -1,5 +1,7 @@
 package org.societies.rdpartyService.enterprise.cal.controllers;
 
+import java.util.concurrent.Semaphore;
+
 import org.societies.rdpartyService.enterprise.interfaces.IReturnedResultCallback;
 import org.societies.rdpartyservice.enterprise.sharedcalendar.SharedCalendarResult;
 
@@ -13,9 +15,17 @@ import org.societies.rdpartyservice.enterprise.sharedcalendar.SharedCalendarResu
 public class CalendarWebResultCallback implements IReturnedResultCallback {
 	/** The Controller to pass results to */
 	private CalendarWebController wc = null;
+	/** Semaphore for synchronous execution, ugly.*/
+	private Semaphore sem = new Semaphore(1, true);
 	
 	public CalendarWebResultCallback(CalendarWebController controller) {
 		this.wc = controller;
+		try {
+			sem.acquire();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	@Override
@@ -25,6 +35,12 @@ public class CalendarWebResultCallback implements IReturnedResultCallback {
 		}else{
 			//Log some info...
 		}
+		//Work done, release the semaphore for Synchronous Execution
+		sem.release();
+	}
+
+	public Semaphore getSem() {
+		return sem;
 	}
 
 }
