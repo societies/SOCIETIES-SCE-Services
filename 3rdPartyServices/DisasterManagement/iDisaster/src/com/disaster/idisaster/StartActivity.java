@@ -29,6 +29,8 @@ import com.disaster.idisaster.R;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -103,5 +105,45 @@ public class StartActivity extends Activity implements OnClickListener {
 		getPreferences ();				// retrieve user preferences
 		startNextActivity ();			// select next activity
 	}
+
+
+
+/**
+ * onCreateOptionsMenu creates the activity menu.
+ */
+ 
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu){
+		menu.clear();
+		getMenuInflater().inflate(R.menu.start_menu, menu);
+
+//		It is possible to set up a variable menu		
+//			menu.findItem (R.id....).setVisible(true);
+
+		return true;
+	}
+
+
+/**
+  * onOptionsItemSelected handles the selection of an item in the activity menu.
+  */
+
+	@Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+		
+    	case R.id.startMenuLogoff:
+//TODO: Call the Social Provider
+        	iDisasterApplication.getInstance().setUserName
+        		(getString(R.string.noPreference), getString(R.string.noPreference));	// reset user preferences
+//        	iDisasterApplication.getinstance().userLoggedIn = false;
+
+    		break;
+    		
+    	default:
+    		break;
+    	}
+    	return true;
+    }
 
 }

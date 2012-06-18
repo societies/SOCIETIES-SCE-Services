@@ -26,7 +26,10 @@ package com.disaster.idisaster;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.widget.TextView;
+import android.widget.Toast;
 
 /**
  * This activity allows the user to look up users
@@ -45,6 +48,44 @@ public class UserListActivity extends Activity {
 	TextView textview = new TextView(this);
         textview.setText("This is the Users tab");
         setContentView(textview);
+    }
+
+/**
+ * onCreateOptionsMenu expands the activity menu for this activity tab.
+ */
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu){
+
+		//The FIXED menu is set by the TabActivity.
+    	super.onCreateOptionsMenu(menu);
+    	
+    	menu.setGroupVisible(R.id.disasterMenuUser, true);
+    	return true;
+    }
+
+    /**
+    * onOptionsItemSelected handles the selection of an item in the activity menu.
+    */
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+		// The TabActivity handles items in the FIXED menu.
+    	super.onOptionsItemSelected(item);
+
+    	switch (item.getItemId()) {
+
+    		case R.id.disasterMenuAddUser:
+    //TODO: Remove code for testing the correct setting of preferences 
+    			Toast.makeText(getApplicationContext(),
+    				"Menu item chosen: Add user", Toast.LENGTH_LONG)
+    				.show();			
+    		break;
+    		
+    		default:
+    		break;
+    	}
+    	return true;
     }
 
 }

@@ -28,6 +28,8 @@ import com.disaster.idisaster.R;
 
 import android.app.ListActivity;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -61,7 +63,46 @@ public class FeedListActivity extends ListActivity {
 	      // When clicked, show a toast with the TextView text
 	      Toast.makeText(getApplicationContext(), ((TextView) view).getText(),
 	          Toast.LENGTH_SHORT).show();
-	    }
-	  });
+	    	}
+	  	});
 	  }
+
+/**
+ * onCreateOptionsMenu expands the activity menu for this activity tab.
+*/
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu){
+
+    	//The FIXED menu is set by the TabActivity.
+    	super.onCreateOptionsMenu(menu);
+    	
+    	menu.setGroupVisible(R.id.disasterMenuFeed, true);
+    	return true;
     }
+
+ /**
+  * onOptionsItemSelected handles the selection of an item in the activity menu.
+  */
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+		// The TabActivity handles items in the FIXED menu.
+    	super.onOptionsItemSelected(item);
+    	
+    	switch (item.getItemId()) {
+
+    		case R.id.disasterMenuAddFeed:
+    //TODO: Remove code for testing the correct setting of preferences 
+    			Toast.makeText(getApplicationContext(),
+    				"Menu item chosen: Add feed", Toast.LENGTH_LONG)
+    				.show();			
+    		break;
+    		
+    		default:
+    		break;
+    	}
+    	return true;
+    }
+
+}
