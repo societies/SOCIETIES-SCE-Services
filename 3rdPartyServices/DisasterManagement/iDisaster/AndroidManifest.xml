@@ -9,7 +9,7 @@
 
     <application
         android:icon="@drawable/disaster_launcher" android:label="@string/app_name" 
- 		android:debuggable="true" android:allowTaskReparenting="false" android:name="iDisasterApplication">
+ 		android:debuggable="true" android:allowTaskReparenting="false" android:name=".iDisasterApplication">
          
         <activity
             android:name=".StartActivity"
@@ -57,17 +57,17 @@
         </activity>
 
 		<activity
-		    android:name=".FeedActivity"
+		    android:name=".FeedListActivity"
             android:theme="@android:style/Theme.NoTitleBar" >  
 		</activity>
 		
         <activity
-            android:name=".ServiceActivity"
+            android:name=".ServiceListActivity"
             android:theme="@android:style/Theme.NoTitleBar" >
         </activity>
         
         <activity
-            android:name=".UserActivity"
+            android:name=".UserListActivity"
             android:theme="@android:style/Theme.NoTitleBar" > 
         </activity>       
         

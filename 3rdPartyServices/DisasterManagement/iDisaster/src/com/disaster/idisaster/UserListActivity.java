@@ -35,7 +35,7 @@ import android.widget.TextView;
  * @author Babak.Farshchian@sintef.no
  *
  */
-public class UserActivity extends Activity {
+public class UserListActivity extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

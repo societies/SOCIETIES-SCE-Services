@@ -24,6 +24,8 @@
  */
 package com.disaster.idisaster;
 
+import com.disaster.idisaster.R;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -126,10 +128,10 @@ public class NewDisasterActivity extends Activity implements OnClickListener {
 //TODO: Refresh list of disasters? - so it is displayed in the previous activity
     		
 //TODO: remove test code
-    	    iDisasterApplication.getinstance().disasterNameList.add(disasterName);
+    	    iDisasterApplication.getInstance().disasterNameList.add(disasterName);
     	    
     	    // report data change to adapter
-    	    iDisasterApplication.getinstance().disasterAdapter.notifyDataSetChanged();
+    	    iDisasterApplication.getInstance().disasterAdapter.notifyDataSetChanged();
 
     		
 // TODO: Remove code for testing the correct setting of preferences 

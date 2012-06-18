@@ -29,12 +29,12 @@
     <string name="loginUserNameLabel">Login as:</string>
 
     <string name="newDisasterCreateButton">Create</string>
-    <string name="newDisasterDialog">Please re-enter the community name and description.</string>
-    <string name="newDisasterHeading">New community</string>
+    <string name="newDisasterDialog">Please re-enter the team name and description.</string>
+    <string name="newDisasterHeading">New disaster team</string>
     <string name="newDisasterDescriptionHint">Description</string>
     <string name="newDisasterDescriptionLabel">Description:</string>
     <string name="newDisasterTestDialog">The application is in NewDisaster Activity.</string>
-    <string name="newDisasterNameHint">Community name</string>
+    <string name="newDisasterNameHint">Team name</string>
     <string name="newDisasterNameLabel">Name:</string>
     
     <string name="startButton">Start</string>

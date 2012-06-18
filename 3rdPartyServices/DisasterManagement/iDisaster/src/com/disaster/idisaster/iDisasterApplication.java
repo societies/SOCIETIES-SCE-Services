@@ -26,7 +26,9 @@ package com.disaster.idisaster;
 
 import java.util.ArrayList;
 
-import org.societies.android.platform.client.SocietiesApp;
+import com.disaster.idisaster.R;
+
+//import org.societies.android.platform.client.SocietiesApp;
 
 import android.app.AlertDialog;
 import android.app.Application;
@@ -53,7 +55,7 @@ public class iDisasterApplication extends Application {
 	Editor editor;												// Editor for changing preferences
 
 	Boolean platformLoggedIn = false;
-	SocietiesApp iDisasterSoc; 							// represents access to the SOCIETIES platform.
+//	SocietiesApp iDisasterSoc; 							// represents access to the SOCIETIES platform.
 
 //TODO: remove test code	
 	ArrayList <String> disasterNameList = new ArrayList ();
@@ -73,7 +75,7 @@ public class iDisasterApplication extends Application {
 
 
 	// returns application instance
-	public static iDisasterApplication getinstance () {
+	public static iDisasterApplication getInstance () {
 		return singleton;
 	}
 	
@@ -85,7 +87,6 @@ public class iDisasterApplication extends Application {
 
 	    // Restore preferences from preferences file.
 		// If the preferences file does not exist, it is created when changes are committed.
-		
 		preferences = getSharedPreferences(PREFS_NAME, 0);
 	    editor = preferences.edit();
 	    editor.putString ("pref.dummy", "");
@@ -111,8 +112,8 @@ public class iDisasterApplication extends Application {
 //		- SOCIETIES platform is not installed on this node.
 //		- user and password are not correct
 		
-		//Instantiate iDisasterSoc which will give a handle to the platform components
-    	iDisasterSoc = new SocietiesApp (getUserName (), getPassword ());		
+// old code: Instantiate iDisasterSoc which will give a handle to the platform components
+//    	iDisasterSoc = new SocietiesApp (getUserName (), getPassword ());		
 		platformLoggedIn = true;
 
 	}

@@ -24,18 +24,14 @@
  */
 package com.disaster.idisaster;
 
+import com.disaster.idisaster.R;
+
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.text.InputType;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
-import android.widget.EditText;
-import android.widget.Toast;
 
 /**
  * This is the activity (without GUI) that starts 
@@ -73,8 +69,8 @@ public class StartActivity extends Activity implements OnClickListener {
  */
     private void getPreferences () {
 
-    	userName = iDisasterApplication.getinstance().getUserName ();
-    	disasterName = iDisasterApplication.getinstance().getDisasterName ();
+    	userName = iDisasterApplication.getInstance().getUserName ();
+    	disasterName = iDisasterApplication.getInstance().getDisasterName ();
 	}
 		
 /**

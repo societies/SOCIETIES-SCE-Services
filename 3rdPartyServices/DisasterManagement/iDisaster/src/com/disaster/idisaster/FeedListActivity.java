@@ -24,6 +24,8 @@
  */
 package com.disaster.idisaster;
 
+import com.disaster.idisaster.R;
+
 import android.app.ListActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -41,7 +43,7 @@ import android.widget.Toast;
  * @author Babak.Farshchian@sintef.no
  *
  */
-public class FeedActivity extends ListActivity {
+public class FeedListActivity extends ListActivity {
     static final String[] FEEDLIST = new String[] { "Images sent", "Lakarna assessment postponed", "Translation Request: Kren-douar"};
 
     @Override

@@ -36,7 +36,7 @@ import android.widget.TextView;
  * @author Babak.Farshchian@sintef.no
  *
  */
-public class ServiceActivity extends Activity {
+public class ServiceListActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 	// TODO Auto-generated method stub
