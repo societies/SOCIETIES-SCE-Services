@@ -1,9 +1,9 @@
 package org.societies.rdpartyService.enterprise.cal.controllers;
 
-import java.util.concurrent.Callable;
 import java.util.concurrent.Semaphore;
 
 import org.societies.rdpartyService.enterprise.interfaces.ISharedCalendarClientRich;
+import org.societies.rdpartyservice.enterprise.sharedcalendar.MethodType;
 import org.societies.rdpartyservice.enterprise.sharedcalendar.SharedCalendarResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -15,6 +15,8 @@ import com.google.gson.Gson;
 
 @Controller
 public class CalendarWebController {
+	
+	private static long _DEADLINE = 3000;
 	
 	public CalendarWebController() {
 		super();
@@ -56,29 +58,30 @@ public class CalendarWebController {
       <xs:enumeration value="deleteEventOnPrivateCalendar"/>
     */
 	
-	@RequestMapping("/getAllCisCalendars.do")
-	public  String getContacts() {
-		//calClientService.retrieveEventsPrivateCalendar(this.cb);
-		this.cb = new CalendarWebResultCallback(this);
-		this.calClientService.retrieveCISCalendars(this.cb, "jane.societies.local");
-		return "Index";
+	private boolean inDeadline(long start){
+		return (System.currentTimeMillis()-start<CalendarWebController._DEADLINE);
+	}
+	
+	private void wait4semaphore(){
+		Semaphore s = this.cb.getSem();
+		long start = System.currentTimeMillis();
+		//TODO Add a deadline to avoid infinite wait
+		while (!s.tryAcquire() && inDeadline(start)){
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				//Do nothing
+			}
+		}		
 	}
 	
 	@RequestMapping("/getAllCisCalendarsAjax.do")
 	public @ResponseBody String getContactsAjax(@RequestParam(defaultValue="TestCIS", value="cisId") String cisId) {
 		//calClientService.retrieveEventsPrivateCalendar(this.cb);
 		this.cb = new CalendarWebResultCallback(this);
-		Semaphore s = this.cb.getSem();
 		//TODO remove hard-coded string
 		this.calClientService.retrieveCISCalendars(this.cb, cisId);
-		//TODO Add a deadline to avoid infinite wait
-		while (!s.tryAcquire()){
-			try {
-				Thread.sleep(1000);
-			} catch (InterruptedException e) {
-				//Do nothing
-			}
-		}
+		this.wait4semaphore();
 		String ajaxResult = this.gson.toJson(this.result);
 		return ajaxResult;
 	}
@@ -87,20 +90,36 @@ public class CalendarWebController {
 	public @ResponseBody String createCisCalendarAjax(@RequestParam(defaultValue="TestCIS", value="cisId") String cisId, @RequestParam(defaultValue="Calendar Summary", value="cisSummary") String summary) {
 		//calClientService.retrieveEventsPrivateCalendar(this.cb);
 		this.cb = new CalendarWebResultCallback(this);
-		Semaphore s = this.cb.getSem();
-		//TODO remove hard-coded string
 		this.calClientService.createCISCalendar(this.cb, summary, cisId);
-		//TODO Add a deadline to avoid infinite wait
-		while (!s.tryAcquire()){
-			try {
-				Thread.sleep(1000);
-			} catch (InterruptedException e) {
-				//Do nothing
-			}
-		}
+		this.wait4semaphore();		
 		String ajaxResult = this.gson.toJson(this.result);
 		return ajaxResult;
 	}
+	
+	@RequestMapping("/createCssCalendarAjax.do")
+	public @ResponseBody String createCssCalendarAjax(@RequestParam(defaultValue="CSS Calendar Summary", value="cssSummary") String summary) {
+		//calClientService.retrieveEventsPrivateCalendar(this.cb);
+		this.cb = new CalendarWebResultCallback(this);
+		this.calClientService.createPrivateCalendar(this.cb, summary);
+		this.wait4semaphore();
+		String ajaxResult = this.gson.toJson(this.result);
+		return ajaxResult;
+	}
+		
+	@RequestMapping("/getPrivateEvents.do")
+	public @ResponseBody String getPrivateEvents() {
+		this.cb = new CalendarWebResultCallback(this);
+		this.calClientService.retrieveEventsPrivateCalendar(this.cb);
+		this.wait4semaphore();
+		String ajaxResult = this.calClientService.createJSONOEvents(this.result.getEventList());
+		return ajaxResult;
+	}
+	
+	@RequestMapping("/index.do")
+	public String getHome() {
+		return "Index";
+	}
+
 
 	public SharedCalendarResult getResult() {
 		return result;

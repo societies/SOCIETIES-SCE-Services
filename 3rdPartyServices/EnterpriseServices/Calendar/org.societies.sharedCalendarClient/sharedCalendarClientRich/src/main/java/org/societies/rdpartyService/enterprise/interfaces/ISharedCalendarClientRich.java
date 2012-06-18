@@ -24,6 +24,8 @@
  */
 package org.societies.rdpartyService.enterprise.interfaces;
 
+import java.util.List;
+
 import org.societies.rdpartyservice.enterprise.sharedcalendar.Event;
 
 /**
@@ -150,5 +152,12 @@ public interface ISharedCalendarClientRich {
 	 * @return true if the unsubscription is performed correctly, false otherwise
 	 */
 	public void unsubscribeFromEvent(IReturnedResultCallback returnedResultCallback,String calendarId,String eventId, String subscriberId);
+	
+	/**
+	 * Return a list of events as a JSON String compliant with WeekCalendar
+	 * @param eventListToRender
+	 * @return the JSON equivalent.
+	 */
+	public String createJSONOEvents(List<Event> eventListToRender);
 	
 }
