@@ -57,11 +57,24 @@ public class iDisasterApplication extends Application {
 	Boolean platformLoggedIn = false;
 //	SocietiesApp iDisasterSoc; 							// represents access to the SOCIETIES platform.
 
-//TODO: remove test code	
-	ArrayList <String> disasterNameList = new ArrayList ();
+//TODO: remove test code
+	ArrayList <String> disasterNameList = new ArrayList<String> ();
+	ArrayList <String> disasterDescriptionList = new ArrayList<String> ();
 
+	ArrayList <String> feedContentList = new ArrayList<String> ();
+
+	ArrayList <String> userNameList = new ArrayList<String> ();
+	ArrayList <String> userDescriptionList = new ArrayList<String> ();
+
+	ArrayList <String> serviceNameList = new ArrayList<String> ();
+	ArrayList <String> serviceDescriptionList = new ArrayList<String> ();
+
+	
 // Common resources	
 	ArrayAdapter<String> disasterAdapter;
+	ArrayAdapter<String> feedAdapter;
+	ArrayAdapter<String> userAdapter;
+	ArrayAdapter<String> serviceAdapter;
 
 
 	// TODO: Remove unnecessary attributes 
@@ -96,10 +109,26 @@ public class iDisasterApplication extends Application {
 //    	for (int i = 1; i < 10; i = i + 1) {
 //    		disasterNameList.add ("Disaster " + Integer.toString (i));
 //		}
-		disasterNameList.add ("Cyprus AMC November 2010");
-		disasterNameList.add ("Cyprus AMC April 2011");
-		disasterNameList.add ("Aquila");
+		disasterNameList.add ("Nicosia Team");
+		disasterNameList.add ("Larnaka Team");
+		disasterNameList.add ("Limassol Team");
 
+		disasterDescriptionList.add ("Team assigned to the Nicosia region.");
+		disasterDescriptionList.add ("Team assigned to the Larnaka region.");
+		disasterDescriptionList.add ("Team assigned to the Limassol region.");
+
+		userNameList.add ("Tim");
+		userNameList.add ("Tom");
+
+		userDescriptionList.add ("Doctor.");
+		userDescriptionList.add ("Civil Engineer.");
+
+		serviceNameList.add ("Nicosia Team");
+
+		serviceDescriptionList.add ("This service allows picture sharing with your team.");
+
+		
+		
 	    if (getUserName () != getString(R.string.noPreference)){
 	    	platformLogIn();	// Instantiate the Societies platform
 	    }

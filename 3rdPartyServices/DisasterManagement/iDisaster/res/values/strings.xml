@@ -13,13 +13,28 @@
     
     <string name="emptyText"></string>
     <string name="noPreference">n/a</string>
-    
+
     <string name="disaster_menu_add_feed">Add feed</string>
     <string name="disaster_menu_add_service">Add service</string>
     <string name="disaster_menu_add_user">Add user</string>
     <string name="disaster_menu_selectDisaster">Select new team</string>
-    
+
+    <string name="disasterCreateButton">Create</string>
+    <string name="disasterCreateDialog">Please re-enter the team name and description.</string>
+    <string name="disasterCreateHeading">New disaster team</string>
+    <string name="disasterCreateDescriptionHint">Description</string>
+    <string name="disasterCreateDescriptionLabel">Description:</string>
+    <string name="disasterCreateTestDialog">The application is in NewDisaster Activity.</string>
+    <string name="disasterCreateNameHint">Team name</string>
+    <string name="disasterCreateNameLabel">Name:</string>
+
     <string name="disasterHeading">Selected team</string>
+
+    <string name="feedAddButton">Add</string>
+    <string name="feedAddHeading">Edit Feed</string>
+    <string name="feedDetailsHeading">Feed details</string>
+    <string name="feedContentHint">Enter a short status</string>
+    <string name="feedContentLabel">Content:</string>
     
     <string name="loginButton">Log In</string>
     <string name="loginDialog">Please re-enter your user name and password.</string>
@@ -31,22 +46,34 @@
     <string name="loginUserNameHint">Name</string>
     <string name="loginUserNameLabel">Login as:</string>
 
-    <string name="newDisasterCreateButton">Create</string>
-    <string name="newDisasterDialog">Please re-enter the team name and description.</string>
-    <string name="newDisasterHeading">New disaster team</string>
-    <string name="newDisasterDescriptionHint">Description</string>
-    <string name="newDisasterDescriptionLabel">Description:</string>
-    <string name="newDisasterTestDialog">The application is in NewDisaster Activity.</string>
-    <string name="newDisasterNameHint">Team name</string>
-    <string name="newDisasterNameLabel">Name:</string>
+	<string name="serviceAddButton">Add</string>
+    <string name="serviceAddHeading">Search service</string>   
+    <string name="serviceDetailsHeading">Service information</string>
+    <string name="serviceDescriptionHint">Enter keywords</string>
+    <string name="serviceDescriptionLabel">Description:</string>
+    <string name="serviceNameHint">Service name</string>
+    <string name="serviceNameLabel">Name:</string>
     
     <string name="startButton">Start</string>
     <string name="start_menu_logoff">Log off</string>
     <string name="startTestDialog">The application is in Start Activity.</string>
-    
+
+    <string name="toastFeedContent">Please enter a short status.</string>
+    <string name="toastUserDescription">Please enter keywords.</string>
     <string name="toastUserName">Please enter a user name.</string>
     <string name="toastPassword">Please enter a password.</string>
     <string name="toastDisasterName">Please enter a disaster name.</string>
     <string name="toastDisasterDescription">Please enter a disaster description.</string>
+    <string name="toastServiceName">Please enter a service name.</string>
+    <string name="toastServiceDescription">Please enter keywords.</string>
     
+	<string name="userAddButton">Add</string>
+    <string name="userAddHeading">Search user</string>
+	<string name="userDetailsHeading">User profile</string>
+	<string name="userDescriptionHint">Enter keywords</string>
+    <string name="userDescriptionLabel">Description:</string>
+    <string name="userNameHint">User name</string>
+    <string name="userNameLabel">Name:</string>
+    <string name="userAddDialog">Please re-enter the user name and description.</string>
+
 </resources>

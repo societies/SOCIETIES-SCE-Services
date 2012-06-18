@@ -117,7 +117,7 @@ public class LoginActivity extends Activity implements OnClickListener {
         	iDisasterApplication.getInstance().platformLogIn ();
 
     		
-    		boolean loginCode = false;	// TODO: replace by code returned by Societes API
+    		boolean loginCode = false;	// TODO: replaced by code returned by Societes API
     			    		
     		// Create dialog for wrong password
     		if (loginCode) { 							

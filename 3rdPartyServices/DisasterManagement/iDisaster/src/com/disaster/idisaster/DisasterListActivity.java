@@ -158,7 +158,7 @@ public class DisasterListActivity extends ListActivity {
 
 		switch (item.getItemId()) {
 		case R.id.disasterMenuAdd:
-			startActivity(new Intent(DisasterListActivity.this, NewDisasterActivity.class));
+			startActivity(new Intent(DisasterListActivity.this, DisasterCreateActivity.class));
 			break;
 		default:
 			break;

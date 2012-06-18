@@ -42,7 +42,7 @@
         </activity>
 
         <activity
-            android:name=".NewDisasterActivity"
+            android:name=".DisasterCreateActivity"
             android:theme="@android:style/Theme.NoTitleBar"
             >
             <!-- 
