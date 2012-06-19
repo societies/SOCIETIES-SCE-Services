@@ -16,7 +16,7 @@
 
     <string name="disaster_menu_add_feed">Add feed</string>
     <string name="disaster_menu_add_service">Add service</string>
-    <string name="disaster_menu_add_user">Add user</string>
+    <string name="disaster_menu_add_member">Add member</string>
     <string name="disaster_menu_selectDisaster">Select new team</string>
 
     <string name="disasterCreateButton">Create</string>
@@ -59,21 +59,22 @@
     <string name="startTestDialog">The application is in Start Activity.</string>
 
     <string name="toastFeedContent">Please enter a short status.</string>
-    <string name="toastUserDescription">Please enter keywords.</string>
     <string name="toastUserName">Please enter a user name.</string>
     <string name="toastPassword">Please enter a password.</string>
     <string name="toastDisasterName">Please enter a disaster name.</string>
     <string name="toastDisasterDescription">Please enter a disaster description.</string>
+    <string name="toastMemberName">Please enter a user name.</string>
+    <string name="toastMemberDescription">Please enter keywords.</string>
     <string name="toastServiceName">Please enter a service name.</string>
     <string name="toastServiceDescription">Please enter keywords.</string>
     
-	<string name="userAddButton">Add</string>
-    <string name="userAddHeading">Search user</string>
-	<string name="userDetailsHeading">User profile</string>
-	<string name="userDescriptionHint">Enter keywords</string>
-    <string name="userDescriptionLabel">Description:</string>
-    <string name="userNameHint">User name</string>
-    <string name="userNameLabel">Name:</string>
-    <string name="userAddDialog">Please re-enter the user name and description.</string>
+	<string name="memberAddButton">Add</string>
+    <string name="memberAddHeading">Search member</string>
+	<string name="memberDetailsHeading">Member profile</string>
+	<string name="memberDescriptionHint">Enter keywords</string>
+    <string name="memberDescriptionLabel">Description:</string>
+    <string name="memberNameHint">New nember name</string>
+    <string name="memberNameLabel">Name:</string>
+    <string name="memberAddDialog">Please re-enter the member name and description.</string>
 
 </resources>

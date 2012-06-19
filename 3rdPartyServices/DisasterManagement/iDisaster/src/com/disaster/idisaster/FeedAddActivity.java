@@ -27,9 +27,6 @@ package com.disaster.idisaster;
 import com.disaster.idisaster.R;
 
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.content.DialogInterface;
-import android.content.Intent;
 import android.os.Bundle;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -39,7 +36,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 
 /**
- * Activity for creating a new disaster community.
+ * Activity for adding a new feed to the selected disaster team (community).
  * 
  * @author Jacqueline.Floch@sintef.no
  *
@@ -61,10 +58,6 @@ public class FeedAddActivity extends Activity implements OnClickListener {
     	// Add click listener to button
     	final Button button = (Button) findViewById(R.id.feedAddButton);
     	button.setOnClickListener(this);
-
-//	    Test dialog
-//    	iDisasterApplication.getinstance().showDialog (this, getString(R.string.newDisasterTestDialog), getString(R.string.dialogOK));
-
     }
 
 
@@ -75,29 +68,30 @@ public class FeedAddActivity extends Activity implements OnClickListener {
 
 	public void onClick(View view) {
 
-    	if (feedContentView.getText().length() == 0) {					// check input for feed name
+    	if (feedContentView.getText().length() == 0) {					// check input for content
 
     		// Hide the soft keyboard otherwise the toast message does appear more clearly.
     	    InputMethodManager mgr = (InputMethodManager) getSystemService(this.INPUT_METHOD_SERVICE);
     	    mgr.hideSoftInputFromWindow(feedContentView.getWindowToken(), 0);
 	    
-    		Toast.makeText(this, getString(R.string.toastDisasterName), 
+    		Toast.makeText(this, getString(R.string.toastFeedContent), 
     				Toast.LENGTH_LONG).show();
     		return;
 
-    	} else {														// verify the password and store in preferences file
+    	} else {														// add activity to feed
 
     		feedContent = feedContentView.getText().toString();
 
-    		//TODO: Add call to the Social Provider
+//TODO: Add call to the Social Provider
 	    		
 //TODO: Refresh list of feeds? - so it is displayed in the previous activity
     		
 //TODO: remove test code
     	    iDisasterApplication.getInstance().feedContentList.add(feedContent);
     	    
-    	    // report data change to adapter
-    	    iDisasterApplication.getInstance().feedAdapter.notifyDataSetChanged();
+    	    // Notify data change to adapter
+// TODO: Add to adapter
+//    	    iDisasterApplication.getInstance().feedAdapter.notifyDataSetChanged();
 
     		
 // TODO: Remove code for testing the correct setting of preferences 
@@ -109,10 +103,8 @@ public class FeedAddActivity extends Activity implements OnClickListener {
     	    InputMethodManager mgr = (InputMethodManager) getSystemService(this.INPUT_METHOD_SERVICE);
     	    mgr.hideSoftInputFromWindow(feedContentView.getWindowToken(), 0);
 
-//	    	finish();	// noHistory=true in Manifest => the activity is removed from the activity stack and finished.
-
-    	    // Go back to the list of feeds
-//	    	startActivity(new Intent(NewDisasterActivity.this, DisasterListActivity.class));
+	    	finish();
+    	    // Go back to the previous activity
 	    }
     }
 

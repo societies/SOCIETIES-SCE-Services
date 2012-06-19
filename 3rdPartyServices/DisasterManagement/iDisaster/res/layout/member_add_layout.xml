@@ -5,24 +5,24 @@
     android:layout_width="fill_parent"
 	android:layout_height="fill_parent">
 
- 		<TextView android:id="@+id/userAddLabel" android:layout_width="fill_parent"
-     		android:text="@string/userAddHeading" 
+ 		<TextView android:id="@+id/memberAddLabel" android:layout_width="fill_parent"
+     		android:text="@string/memberAddHeading" 
      		android:textSize="20dip" android:textStyle="bold"
      		android:textColor="@color/white" android:background="@color/orange"
 			android:layout_height="wrap_content" 
 			android:paddingLeft="5dip"
 			android:paddingTop="2dip" android:paddingBottom="2dip" />
  				
-	 	<TableLayout android:id="@+id/userAddTable"
+	 	<TableLayout android:id="@+id/memberAddTable"
 			android:layout_width="fill_parent" android:layout_height="fill_parent"
 			xmlns:android="http://schemas.android.com/apk/res/android"
-			android:layout_below="@id/userAddLabel"
+			android:layout_below="@id/memberAddLabel"
 			android:background="@color/white"
 			>
 			
 			<TableRow>
-				<TextView android:id="@+id/editUserAddNameLabel"
-					android:text="@string/userNameLabel" android:textColor="@color/black"
+				<TextView android:id="@+id/editMemberAddNameLabel"
+					android:text="@string/memberNameLabel" android:textColor="@color/black"
 					android:textStyle="bold" android:width="100dp" 
 					android:layout_width="wrap_content" android:layout_height="wrap_content"
 					android:paddingLeft="2dip" android:paddingRight="2dip"
@@ -32,9 +32,9 @@
 				<!-- Not sure if android:text is needed below -->
 
 			<EditText
-				    android:id="@+id/editUserAddName"
+				    android:id="@+id/editMemberAddName"
 				    android:text="@string/emptyText"
-				    android:hint="@string/userNameHint" android:textColor="@color/black"
+				    android:hint="@string/memberNameHint" android:textColor="@color/black"
 				    android:background="@android:drawable/editbox_background"
 				    android:width="200dp" android:maxWidth="200dp"
 				    android:layout_width="fill_parent" android:layout_height="wrap_content"
@@ -42,27 +42,27 @@
 				    android:paddingTop="10dip" android:paddingBottom="10dip" 
 				    />
 				
-<!--			    android:layout_toRightOf="@id/editUserNameLabel"  -->
+<!--			    android:layout_toRightOf="@id/editMemberNameLabel"  -->
 				
 			</TableRow>
 
 			<TableRow>
 
 				<TextView
-				    android:id="@+id/editUserAddDescriptionLabel"
-				    android:text="@string/userDescriptionLabel" android:textColor= "@color/black" 
+				    android:id="@+id/editMemberAddDescriptionLabel"
+				    android:text="@string/memberDescriptionLabel" android:textColor= "@color/black" 
 					android:textStyle="bold" android:width="100dp" 
 					android:layout_width="wrap_content" android:layout_height="wrap_content"
 					android:paddingLeft="2dip" android:paddingRight="2dip"
 					android:paddingTop="2dip" android:paddingBottom="2dip" 
 					/>
-<!-- 				android:layout_below="@id/editUserNameLabel"  -->
+<!-- 				android:layout_below="@id/editMemberNameLabel"  -->
 
 <!-- Not sure if android:text is needed below -->
 				<EditText
-				    android:id="@+id/editUserAddDescription"
+				    android:id="@+id/editMemberAddDescription"
 				    android:text="@string/emptyText"
-				    android:hint= "@string/userDescriptionHint" android:textColor="@color/black"
+				    android:hint= "@string/memberDescriptionHint" android:textColor="@color/black"
 				    android:background="@android:drawable/editbox_background"
 				    android:width="200dp"
 				    android:layout_width="fill_parent" android:layout_height="wrap_content"
@@ -77,7 +77,7 @@ android:maxWidth="140dp"
 			<TableRow>
 
 			    <TextView
-				    android:id="@+id/userAddDummy1"
+				    android:id="@+id/memberAddDummy1"
 				    android:text="@string/emptyText" android:textColor= "@color/black"
 					android:textStyle="bold" android:width="100dp" 
 					android:layout_width="wrap_content" android:layout_height="wrap_content"
@@ -86,9 +86,9 @@ android:maxWidth="140dp"
 <!-- 				android:layout_below="@id/editPasswordLabel" -->
 
 				<Button
-				    android:id="@+id/userAddButton" 
+				    android:id="@+id/memberAddButton" 
 				    android:layout_width="wrap_content" android:layout_height="wrap_content"
-				    android:text="@string/userAddButton"
+				    android:text="@string/memberAddButton"
 				    android:textColor="@color/black" 
 				/>
 <!-- 				android:layout_toRightOf="@id/loginDummy1" -->

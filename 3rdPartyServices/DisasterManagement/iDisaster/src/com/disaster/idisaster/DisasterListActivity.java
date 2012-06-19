@@ -43,22 +43,18 @@ import android.widget.Toast;
 
 
 /**
- * This activity allows the users to manage the disasters they own and
- * or the disasters they subscribe to.
+ * This activity allows the users to manage the disaster teams they own and
+ * or the disaster teams they subscribe to.
  * 
  * @author Jacqueline.Floch@sintef.no
  *
  */
 
 public class DisasterListActivity extends ListActivity {
-	
-//	ICisOwned [] disasterRecordList;
-	
-//	ArrayList <String> disasterNameList = new ArrayList ();
-	
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-    	// TODO Auto-generated method stub
 
     	super.onCreate(savedInstanceState);
     	
@@ -70,39 +66,19 @@ public class DisasterListActivity extends ListActivity {
     	// listView.setTextFilterEnabled(true);  
     	
     	
-    	// TODO: Get the list from Societies API
-//    	ICisManager cisManagerRef = iDisasterApplication.getInstance().iDisasterSoc.getCisManager();
+// TODO: Get the list from the Societies Content Provide
 
-// TODO: The API should be extended with CISRecord 
-//			By setting some of the fields in the record the developer can specify what
-//    		kind of CISs he wants to get a list of
-//    	Array <ICisOwned> cisOwned = cisManagerRef.getCisList (new CisRecord (...) )
 
-    	
-//    	for (int i = 1; i < 10; i = i + 1) {
-//			disasterNameList.add (disasterRecordList[i].getName() );
-//    		disasterNameList.add ("Disaster " + Integer.toString (i));
-//		}
-    	 
     	// The Adapter provides access to the data items.
     	// The Adapter is also responsible for making a View for each item in the data set.
     	//  Parameters: Context, Layout for the row, ID of the View to which the data is written, Array of data
-
-//     	ArrayAdapter<String> adapter = new ArrayAdapter<String> (this,
-//		R.layout.disaster_list_item, R.id.disaster_item, disasterNameList);
-
-//     	ArrayAdapter<String> adapter = new ArrayAdapter<String> (this,
-//		R.layout.disaster_list_item, R.id.disaster_item, iDisasterApplication.getinstance().disasterNameList);
 
     	iDisasterApplication.getInstance().disasterAdapter = new ArrayAdapter<String> (this,
 		R.layout.disaster_list_item, R.id.disaster_item, iDisasterApplication.getInstance().disasterNameList);
 
     	// Assign adapter to ListView
-//    	listView.setAdapter(adapter);
 
     	listView.setAdapter(iDisasterApplication.getInstance().disasterAdapter);
-//	    Test dialog
-//    	iDisasterApplication.getinstance().showDialog (this, getString(R.string.disasterListTestDialog), getString(R.string.dialogOK));
 
     	// Add listener for short click.
     	// 
@@ -115,17 +91,16 @@ public class DisasterListActivity extends ListActivity {
 
 // TODO: Remove code for testing the correct setting of preferences 
     			Toast.makeText(getApplicationContext(),
-    				"Click ListItem Number " + (position+1) + " " + iDisasterApplication.getInstance().disasterNameList.get (position), Toast.LENGTH_LONG)
+    				"Click ListItem Number   " + (position+1) + "   " + iDisasterApplication.getInstance().disasterNameList.get (position), Toast.LENGTH_LONG)
     				.show();
 
-//    	    	finish();	// noHistory=true in Manifest => the activity is removed from the activity stack and finished.
-
-    			
     			// Start the Disaster Activity
-    			Intent intent = new Intent(DisasterListActivity.this, DisasterActivity.class);  
-    			intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | 	// Put the activity o top of stack
-    							Intent.FLAG_ACTIVITY_SINGLE_TOP); 	// If activity is on top top of stack, do not create new instance.
-    			startActivity(intent);
+    			startActivity (new Intent(DisasterListActivity.this, DisasterActivity.class));
+    			
+//TODO: Not sure whether or not the activity should finish...
+// noHistory is not set in Manifest (noHistory=true => the activity is removed from the activity stack and finished.
+    			finish();
+
     		}
     	});	
 
@@ -133,7 +108,6 @@ public class DisasterListActivity extends ListActivity {
     	// listView.setOnItemLongClickListener(new DrawPopup());
 
     }
-    
 
 /**
  * onCreateOptionsMenu creates the activity menu.
@@ -165,161 +139,5 @@ public class DisasterListActivity extends ListActivity {
 		}
 		return true;
 	}
-
-/**
-	@Override
-	public void onListItemClick (ListView l, View v, int pos, long id) {
-		if(l.getAdapter().getItemViewType(pos) == SeparatedListAdapter.TYPE_SECTION_HEADER)
-		{
-			//Pressing a header			
-			return;
-		}
-		Poi p = (Poi) l.getAdapter().getItem(pos);
-
-		if (requestCode == NewPoiActivity.CHOOSE_POI){
-			Intent resultIntent = new Intent();
-			resultIntent.putExtra(IntentPassable.POI, p);
-			setResult( Activity.RESULT_OK, resultIntent );
-			finish();
-			return;
-		}
-
-		if (requestCode == PlanTripTab.ADD_TO_TRIP || requestCode == TripListActivity.ADD_TO_TRIP){
-
-			if(selectedPois == null){				
-				selectedPois = new ArrayList<Poi>();
-			}
-			if(!selectedPois.contains(p)){
-				v.setBackgroundColor(0xff9ba7d5);
-				selectedPois.add(p);
-			}else {
-				v.setBackgroundColor(Color.TRANSPARENT);
-				selectedPois.remove(p);
-			}
-			return;
-		}
-
-
-		if (requestCode == SHARE_POI){
-			if(sharePois == null){				
-				sharePois = new ArrayList<Poi>();
-			}
-			if(!sharePois.contains(p)){
-				v.setBackgroundColor(0xff9ba7d5);
-				sharePois.add(p);
-			}else {
-				v.setBackgroundColor(Color.TRANSPARENT);
-				sharePois.remove(p);
-			}
-			return;
-		}
-
-		if (requestCode == DOWNLOAD_POI){
-
-			if(downloadedPois == null){				
-				downloadedPois = new ArrayList<Poi>();
-			}
-			if(!downloadedPois.contains(p)){
-				v.setBackgroundColor(0xff9ba7d5);
-				downloadedPois.add(p);
-			}else {
-				v.setBackgroundColor(Color.TRANSPARENT);
-				downloadedPois.remove(p);
-			}
-			return;
-		}
-
-		Intent details = new Intent(PlanPoiTab.this, PoiDetailsActivity.class);
-		details.putExtra(IntentPassable.POI, p);
-
-		startActivity(details);
-	}//onListItemClick
-	
-*/
-
-/**
- * Show quick actions when the user long-presses an item 
- */
-	/**
-	final private class DrawPopup implements AdapterView.OnItemLongClickListener {
-
-		public boolean onItemLongClick(AdapterView<?> parent, View v, int pos, long id) {
-
-			final String	s 			= (String) parent.getAdapter().getItem(pos);
-			final AdapterView<?> par 	= parent;
-			final int	idx				= pos;
-			final int[] xy 				= new int[2];
-			
-			v.getLocationInWindow(xy);
-
-			final Rect rect 		= new Rect(	xy[0], 
-					xy[1], 
-					xy[0]+v.getWidth(), 
-					xy[1]+v.getHeight());
-
-			final QuickActionPopup qa = new QuickActionPopup (DisasterActivity.this, v, rect);
-
-			Drawable mapviewIcon	= res.getDrawable(android.R.drawable.ic_menu_mapmode);
-			Drawable directIcon		= res.getDrawable(android.R.drawable.ic_menu_directions);
-			Drawable deleteIcon		= res.getDrawable(android.R.drawable.ic_menu_delete);
-
-			// declare quick actions 			
-			qa.addItem(deleteIcon, "Delete from tour", new OnClickListener(){
-
-				public void onClick(View view){
-					db.deleteFromTrip(trip, trip.getPoiAt(idx));
-
-					trip.removePoi(idx);
-
-					//delete from list
-					((PoiAdapter)par.getAdapter()).remove(p);	
-					((PoiAdapter)par.getAdapter()).notifyDataSetChanged();
-					qa.dismiss();
-				}
-			});
-
-			qa.addItem(mapviewIcon,	"Show on map",		new OnClickListener(){
-
-				public void onClick(View view){
-
-					Intent showInMap = new Intent(TripListActivity.this, MapsActivity.class);
-					ArrayList<Poi> selectedPois = new ArrayList<Poi>();
-					selectedPois.add(p);
-					showInMap.putParcelableArrayListExtra(IntentPassable.POILIST, selectedPois);
-
-					startActivity(showInMap);
-					qa.dismiss();
-				}
-			});
-
-			qa.addItem(directIcon,	"Get directions",	new OnClickListener(){
-
-				public void onClick(View view){
-
-					//Latitude and longitude for current position
-					double slon = userLocation.getLongitude();
-					double slat = userLocation.getLatitude();
-					//Latitude and longitude for selected poi
-					double dlon = p.getGeoPoint().getLongitudeE6()/1E6;
-					double dlat = p.getGeoPoint().getLatitudeE6()/1E6;
-
-					Intent navigate = new Intent(TripListActivity.this, NavigateFrom.class);
-					navigate.putExtra("slon", slon);
-					navigate.putExtra("slat", slat);
-					navigate.putExtra("dlon", dlon);
-					navigate.putExtra("dlat", dlat);
-					startActivity(navigate);
-
-					qa.dismiss();
-
-				}
-			});
-
-			qa.show();
-
-			return true;
-		}
-	}
-*/
 
 }

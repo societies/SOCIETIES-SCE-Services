@@ -36,6 +36,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.util.Log;
 import android.widget.ArrayAdapter;
 
 /**
@@ -63,31 +64,36 @@ public class iDisasterApplication extends Application {
 
 	ArrayList <String> feedContentList = new ArrayList<String> ();
 
-	ArrayList <String> userNameList = new ArrayList<String> ();
-	ArrayList <String> userDescriptionList = new ArrayList<String> ();
+	ArrayList <String> memberNameList = new ArrayList<String> ();
+	ArrayList <String> memberDescriptionList = new ArrayList<String> ();
 
 	ArrayList <String> serviceNameList = new ArrayList<String> ();
 	ArrayList <String> serviceDescriptionList = new ArrayList<String> ();
 
 	
-// Common resources	
+//TODO: discuss design. Are these common resources really needed?	
 	ArrayAdapter<String> disasterAdapter;
 	ArrayAdapter<String> feedAdapter;
-	ArrayAdapter<String> userAdapter;
+	ArrayAdapter<String> memberAdapter;
 	ArrayAdapter<String> serviceAdapter;
 
+// Turn off debugging before RELEASE! Set DEBUG to 0.
+//	 -1: ALWAYS PRINT (Not debug, but plain ERROR)
+//	 0: NO_DEBUG
+//	 1: SOME_DEBUG
+//	 2: MORE_DEBUG
+//	 3: EVEN_MORE_DEBUG
+//	 4: EVEN_EVEN_MORE_DEBUG
+//	 5: EVEN_EVEN_EVEN_MORE_DEBUG
+//	 6: ...
+	public static final int DEBUG = 0;
+	public static final String DEBUG_Context = "iDisaster";
 
-	// TODO: Remove unnecessary attributes 
-//    String societiesServer = "server.societies.eu";	// The name of the server where cloud node is hosted
-//    String username = "Babak"; 						// username to log into societiesServer
-//    String password = "SocietieS";					// password for username.
-//    CssRecord cssRecord;								// Represents information about the user of the application. to be populated.
 
-//TODO: Find out which class CssId is.
-//    String cssId;
-
-
-	// returns application instance
+/**
+ * getInstance returns application instance.
+ * Activities used this pointer to access the common resources.
+ */	  
 	public static iDisasterApplication getInstance () {
 		return singleton;
 	}
@@ -106,46 +112,44 @@ public class iDisasterApplication extends Application {
 	    editor.commit ();
 
 //TODO: remove test code
-//    	for (int i = 1; i < 10; i = i + 1) {
-//    		disasterNameList.add ("Disaster " + Integer.toString (i));
-//		}
 		disasterNameList.add ("Nicosia Team");
 		disasterNameList.add ("Larnaka Team");
 		disasterNameList.add ("Limassol Team");
-
 		disasterDescriptionList.add ("Team assigned to the Nicosia region.");
 		disasterDescriptionList.add ("Team assigned to the Larnaka region.");
 		disasterDescriptionList.add ("Team assigned to the Limassol region.");
 
-		userNameList.add ("Tim");
-		userNameList.add ("Tom");
-
-		userDescriptionList.add ("Doctor.");
-		userDescriptionList.add ("Civil Engineer.");
+		memberNameList.add ("Tim");
+		memberNameList.add ("Tom");
+		memberDescriptionList.add ("Doctor.");
+		memberDescriptionList.add ("Civil Engineer.");
 
 		serviceNameList.add ("Nicosia Team");
-
 		serviceDescriptionList.add ("This service allows picture sharing with your team.");
-
+// end of remobed
 		
-		
+//TODO: CSS_ID should be stored
 	    if (getUserName () != getString(R.string.noPreference)){
 	    	platformLogIn();	// Instantiate the Societies platform
 	    }
 	    
 	} //onCreate
 
+//TODO: Replace to call to SocialProvider
+/**
+ * platformLogIn supports checking connection with SocialProvider
+ * and retrieving the CSS_ID and name for the user.
+ */	  
+
 	public void platformLogIn () {
 
 //TODO: catch exception if
-//		- SOCIETIES platform is not installed on this node.
-//		- user and password are not correct
+//		- no response from SocialProvider.
 		
-// old code: Instantiate iDisasterSoc which will give a handle to the platform components
-//    	iDisasterSoc = new SocietiesApp (getUserName (), getPassword ());		
 		platformLoggedIn = true;
-
 	}
+
+//TODO: Go through the follwoing code and remove if nor necessary
 
 	public String getUserName () {
 		return preferences.getString ("pref.username",getString(R.string.noPreference));
@@ -187,4 +191,28 @@ public class iDisasterApplication extends Application {
 		AlertDialog dialog = builder.create();
 		dialog.show();
 	}
+
+
+/***
+ * Debug method to include the filename, line-number and method of the caller
+ */
+	public static void debug(int d, String msg) {
+
+		if (DEBUG >= d) {
+			StackTraceElement[] st = Thread.currentThread().getStackTrace();
+			int stackLevel = 2;
+			while ( stackLevel < st.length-1
+					&& ( st[stackLevel].getMethodName().equals("debug") || st[stackLevel].getMethodName().matches("access\\$\\d+") ) ){
+				//|| st[stackLevel].getMethodName().matches("run")
+				stackLevel++;
+			}
+			StackTraceElement e = st[stackLevel];
+			if ( d < 0 ){ //error
+				Log.e (DEBUG_Context, e.getMethodName() + ": " + msg + " at (" + e.getFileName()+":"+e.getLineNumber() +")" );
+			} else { //debug
+				Log.d (DEBUG_Context, e.getMethodName() + ": " + msg + " at (" + e.getFileName()+":"+e.getLineNumber() +")" );
+			}
+		}
+	}
+
 }

@@ -19,12 +19,11 @@ import android.widget.Toast;
 /**
  * This activity is responsible for interaction with the
  * main home page for iDisaster.
- * The home page relates to a specific Disaster community
- * and provide access to activity feeds, users and services
- * related to the community.
+ * The home page relates to a specific Disaster team (community)
+ * and provide access to community feed (activities), members and
+ * services.
  * 
  * @authors Jacqueline.Floch@sintef.no
- * 			Babak.Farshchian@sintef.no
  *
  */
 public class DisasterActivity extends TabActivity {
@@ -37,7 +36,7 @@ public class DisasterActivity extends TabActivity {
         
 // TODO: Add check that 1) a disaster is selected 2) the selected disaster still exists...
         
-        setContentView(R.layout.disaster_layout);
+        setContentView (R.layout.disaster_layout);
 
         // Set view label to selected disaster name
     	String disasterName = iDisasterApplication.getInstance().getDisasterName ();
@@ -46,34 +45,36 @@ public class DisasterActivity extends TabActivity {
 		title.setText (disasterName);
         
         Resources res = getResources();		// Resource object to get Drawables
-//        TabHost tabHost = getTabHost();		// The activity TabHost
         TabHost tabHost = getTabHost();		// The activity TabHost
         TabHost.TabSpec spec;				// Reusable TabSpec for each tab
         Intent intent;						// Reusable Intent for each tab
 
-        // Create an Intent to launch an Activity for the tab (to be reused)
+        // For each hosted Activity
+        // - create an Intent to launch an Activity (to be reused)
+        // - initialize a TabSpec for each tab and add it to the TabHost
+
+        // Create Feed Activity Tab
         intent = new Intent().setClass(this, FeedListActivity.class);
-        
-        // Initialize a TabSpec for each tab and add it to the TabHost
         spec = tabHost.newTabSpec("activities").setIndicator("Activities",
                           res.getDrawable(R.drawable.ic_tab_activities))
                       .setContent(intent);
         tabHost.addTab(spec);
 
-        // Do the same for the other tabs
-        intent = new Intent().setClass(this, UserListActivity.class);
-        spec = tabHost.newTabSpec("users").setIndicator("Users",
-                          res.getDrawable(R.drawable.ic_tab_users))
+        // Create Member Activity Tab
+        intent = new Intent().setClass(this, MemberListActivity.class);
+        spec = tabHost.newTabSpec("members").setIndicator("Members",
+                          res.getDrawable(R.drawable.ic_tab_members))
                       .setContent(intent);
         tabHost.addTab(spec);
 
+        // Create Service Activity Tab
         intent = new Intent().setClass(this, ServiceListActivity.class);
         spec = tabHost.newTabSpec("services").setIndicator("Services",
                           res.getDrawable(R.drawable.ic_tab_services))
                       .setContent(intent);
         tabHost.addTab(spec);
 
-        // Start with disasters tab visible:
+        // Start with Feed tab visible:
         tabHost.setCurrentTab(0);
 
     }
@@ -84,23 +85,30 @@ public class DisasterActivity extends TabActivity {
 		super.onResume();
 	}//onResume
 
+    /** Called when resuming a previous activity (for instance using back button) */
+    @Override
+    protected void onPause () {
+    	super.onPause ();
+    	iDisasterApplication.getInstance().setDisasterName 
+		(getString(R.string.noPreference));					// reset user preferences
+    }
+    
 /**
  * onCreateOptionsMenu creates the FIXED activity menu for the TabActivity.
  * Each TabHost will add a variable menu.
- */
-     
+ */  
     @Override
     public boolean onCreateOptionsMenu(Menu menu){
     	
     	menu.clear();
     	getMenuInflater().inflate(R.menu.disaster_menu, menu);
     	
-    	// Disable all variable menus; they will be set by each Activity Tab
+    	// Disable all variable menus; a variable menu is set by each hosted Activity
 		menu.setGroupVisible(R.id.disasterMenuFeed, false);
-		menu.setGroupVisible(R.id.disasterMenuUser, false);
+		menu.setGroupVisible(R.id.disasterMenuMember, false);
 		menu.setGroupVisible(R.id.disasterMenuService, false);
 
-// REMOVED CODE: this is handled in each TabHost activity
+// Alternative code: set variable menu in this Activity 
 //    	String currentTab = tabHost.getCurrentTabTag ();
 //    	if (currentTab == "activities") {
 //    		menu.setGroupVisible(R.id.disasterMenuFeed, true);
@@ -122,14 +130,14 @@ public class DisasterActivity extends TabActivity {
 
 			case R.id.disasterMenuSelectDisaster:
             	iDisasterApplication.getInstance().setDisasterName 
-            		(getString(R.string.noPreference));									// reset user preferences
-// TODO:not sure whether or not the activity should finish
-// noHistory= true is used in Manifest => the activity is removed from the activity stack and finished.
-//            	 finish();
-    			startActivity(new Intent(DisasterActivity.this, DisasterListActivity.class));
+            		(getString(R.string.noPreference));					// reset user preferences
+    			startActivity(new Intent(DisasterActivity.this, DisasterListActivity.class));    			
+           	 	finish();
+
 			break;
 
-// REMOVED CODE: this is handled in each TabHost activity			
+// Alternative code: handle commands in the variable menu ins this activity
+// (currently done in the hosted activity)			
 //			case R.id.disasterMenuAddFeed:
 //				...
 //			break;
@@ -141,6 +149,5 @@ public class DisasterActivity extends TabActivity {
     	}
     	return true;
     }
-
   
 }
