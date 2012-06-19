@@ -77,10 +77,13 @@ public class ServiceListActivity extends Activity {
 		switch (item.getItemId()) {
 
 			case R.id.disasterMenuAddService:
-//TODO: Remove code for testing the correct setting of preferences 
-				Toast.makeText(getApplicationContext(),
-						"Menu item chosen: Add service", Toast.LENGTH_LONG)
-						.show();			
+
+////TODO: Remove code for testing the correct setting of preferences 
+//				Toast.makeText(getApplicationContext(),
+//						"Menu item chosen: Add service", Toast.LENGTH_LONG)
+//						.show();			
+
+				startActivity(new Intent(ServiceListActivity.this, ServiceAddActivity.class));
 			break;
 		
 			default:

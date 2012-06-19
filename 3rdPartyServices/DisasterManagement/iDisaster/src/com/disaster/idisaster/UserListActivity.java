@@ -25,6 +25,7 @@
 package com.disaster.idisaster;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -76,10 +77,12 @@ public class UserListActivity extends Activity {
     	switch (item.getItemId()) {
 
     		case R.id.disasterMenuAddUser:
-    //TODO: Remove code for testing the correct setting of preferences 
-    			Toast.makeText(getApplicationContext(),
-    				"Menu item chosen: Add user", Toast.LENGTH_LONG)
-    				.show();			
+////TODO: Remove code for testing the correct setting of preferences 
+//    			Toast.makeText(getApplicationContext(),
+//    				"Menu item chosen: Add user", Toast.LENGTH_LONG)
+//    				.show();
+    			
+    			startActivity(new Intent(UserListActivity.this, UserAddActivity.class));
     		break;
     		
     		default:

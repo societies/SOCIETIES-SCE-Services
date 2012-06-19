@@ -27,6 +27,7 @@ package com.disaster.idisaster;
 import com.disaster.idisaster.R;
 
 import android.app.ListActivity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -92,11 +93,12 @@ public class FeedListActivity extends ListActivity {
     	
     	switch (item.getItemId()) {
 
-    		case R.id.disasterMenuAddFeed:
-    //TODO: Remove code for testing the correct setting of preferences 
-    			Toast.makeText(getApplicationContext(),
-    				"Menu item chosen: Add feed", Toast.LENGTH_LONG)
-    				.show();			
+    		case R.id.disasterMenuAddFeed:    			
+//TODO: Remove code for testing the correct setting of preferences 
+//    			Toast.makeText(getApplicationContext(),
+//    				"Menu item chosen: Add feed", Toast.LENGTH_LONG)
+//    				.show();
+    			startActivity(new Intent(FeedListActivity.this, FeedAddActivity.class));
     		break;
     		
     		default:

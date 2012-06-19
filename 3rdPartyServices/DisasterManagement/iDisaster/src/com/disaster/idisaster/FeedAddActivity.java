@@ -109,7 +109,7 @@ public class FeedAddActivity extends Activity implements OnClickListener {
     	    InputMethodManager mgr = (InputMethodManager) getSystemService(this.INPUT_METHOD_SERVICE);
     	    mgr.hideSoftInputFromWindow(feedContentView.getWindowToken(), 0);
 
-	    	finish();	// noHistory=true in Manifest => the activity is removed from the activity stack and finished.
+//	    	finish();	// noHistory=true in Manifest => the activity is removed from the activity stack and finished.
 
     	    // Go back to the list of feeds
 //	    	startActivity(new Intent(NewDisasterActivity.this, DisasterListActivity.class));

@@ -126,7 +126,7 @@ public class ServiceAddActivity extends Activity implements OnClickListener {
     	    mgr.hideSoftInputFromWindow(serviceNameView.getWindowToken(), 0);
 
 
-	    	finish();	// noHistory=true in Manifest => the activity is removed from the activity stack and finished.
+//	    	finish();	// noHistory=true in Manifest => the activity is removed from the activity stack and finished.
 
     	    // Go back to the list of services
 //	    	startActivity(new Intent(NewDisasterActivity.this, DisasterListActivity.class));
