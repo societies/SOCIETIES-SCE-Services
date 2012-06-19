@@ -39,7 +39,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 
 /**
- * Activity for creating a new disaster community.
+ * Activity for adding a new service to the selected disaster team (community).
  * 
  * @author Jacqueline.Floch@sintef.no
  *
@@ -66,9 +66,6 @@ public class ServiceAddActivity extends Activity implements OnClickListener {
     	final Button button = (Button) findViewById(R.id.serviceAddButton);
     	button.setOnClickListener(this);
 
-//	    Test dialog
-//    	iDisasterApplication.getinstance().showDialog (this, getString(R.string.newDisasterTestDialog), getString(R.string.dialogOK));
-
     }
 
 
@@ -89,7 +86,7 @@ public class ServiceAddActivity extends Activity implements OnClickListener {
     				Toast.LENGTH_LONG).show();
     		return;
 
-    	} else if (serviceDescriptionView.getText().length() == 0) {	// check input for description (or any obligatory field
+    	} else if (serviceDescriptionView.getText().length() == 0) {	// check input for description (or any obligatory field)
 
     		// Hide the soft keyboard otherwise the toast message does appear more clearly.
     	    InputMethodManager mgr = (InputMethodManager) getSystemService(this.INPUT_METHOD_SERVICE);
@@ -99,7 +96,7 @@ public class ServiceAddActivity extends Activity implements OnClickListener {
 	    			Toast.LENGTH_LONG).show();
 	    	return;
 
-    	} else {														// verify the password and store in preferences file
+    	} else {														// add to registry
 
     		serviceName = serviceNameView.getText().toString();
     		serviceDescription = serviceDescriptionView.getText().toString();
@@ -113,7 +110,8 @@ public class ServiceAddActivity extends Activity implements OnClickListener {
     	    iDisasterApplication.getInstance().serviceNameList.add(serviceName);
     	    
     	    // report data change to adapter
-    	    iDisasterApplication.getInstance().serviceAdapter.notifyDataSetChanged();
+// TODO: Add to adapter
+//    	    iDisasterApplication.getInstance().serviceAdapter.notifyDataSetChanged();
 
     		
 // TODO: Remove code for testing the correct setting of preferences 
@@ -125,11 +123,8 @@ public class ServiceAddActivity extends Activity implements OnClickListener {
     	    InputMethodManager mgr = (InputMethodManager) getSystemService(this.INPUT_METHOD_SERVICE);
     	    mgr.hideSoftInputFromWindow(serviceNameView.getWindowToken(), 0);
 
-
-//	    	finish();	// noHistory=true in Manifest => the activity is removed from the activity stack and finished.
-
-    	    // Go back to the list of services
-//	    	startActivity(new Intent(NewDisasterActivity.this, DisasterListActivity.class));
+	    	finish();
+    	    // Go back to the previous activity
 	    }
     }
 

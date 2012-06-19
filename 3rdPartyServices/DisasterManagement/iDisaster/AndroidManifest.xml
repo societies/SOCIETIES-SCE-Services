@@ -36,24 +36,18 @@
             android:name=".DisasterListActivity"
             android:theme="@android:style/Theme.NoTitleBar" 
             >
-            <!-- 
-            android:noHistory="true" >
-             -->
         </activity>
 
         <activity
             android:name=".DisasterCreateActivity"
             android:theme="@android:style/Theme.NoTitleBar"
-            >
-            <!-- 
-            android:noHistory="true" >
-             -->
+        	>
         </activity>
         
         <activity
             android:name=".DisasterActivity"
             android:theme="@android:style/Theme.NoTitleBar"
-            android:noHistory="true" >
+            >
         </activity>
 
 		<activity
@@ -86,19 +80,19 @@
         <activity
             android:name=".ServiceDetailsActivity"
             android:theme="@android:style/Theme.NoTitleBar"
-            android:noHistory="true" >
+            >
         </activity>
 
         <activity
 		    android:name=".FeedAddActivity"
             android:theme="@android:style/Theme.NoTitleBar"
-            android:noHistory="true" >  
+            >  
 		</activity>
 		
         <activity
             android:name=".MemberAddActivity"
             android:theme="@android:style/Theme.NoTitleBar"
-            android:noHistory="true" > 
+            > 
         </activity>       
 		
         <activity

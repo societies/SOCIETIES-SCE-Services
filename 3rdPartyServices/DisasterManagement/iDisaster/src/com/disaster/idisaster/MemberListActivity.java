@@ -59,9 +59,12 @@ public class MemberListActivity extends Activity {
     public boolean onCreateOptionsMenu(Menu menu){
 
 		//The FIXED menu is set by the TabActivity.
+// I am uncertain why the call to the super class leads to the creation
+// of the fixed menu set by the TabActivity (DisasterActivity)
+
     	super.onCreateOptionsMenu(menu);
     	
-    	menu.setGroupVisible(R.id.disasterMenuUser, true);
+    	menu.setGroupVisible(R.id.disasterMenuMember, true);
     	return true;
     }
 
@@ -72,6 +75,9 @@ public class MemberListActivity extends Activity {
     public boolean onOptionsItemSelected(MenuItem item) {
 
 		// The TabActivity handles items in the FIXED menu.
+// I am uncertain why the call to the super class leads to handling
+// of a command in the fixed menu by the TabActivity (DisasterActivity)
+
     	super.onOptionsItemSelected(item);
 
     	switch (item.getItemId()) {

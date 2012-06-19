@@ -39,7 +39,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 
 /**
- * Activity for creating a new disaster community.
+ * Activity for creating a new member to the selected disaster team (community).
  * 
  * @author Jacqueline.Floch@sintef.no
  *
@@ -66,9 +66,6 @@ public class MemberAddActivity extends Activity implements OnClickListener {
     	final Button button = (Button) findViewById(R.id.memberAddButton);
     	button.setOnClickListener(this);
 
-//	    Test dialog
-//    	iDisasterApplication.getinstance().showDialog (this, getString(R.string.newDisasterTestDialog), getString(R.string.dialogOK));
-
     }
 
 
@@ -79,7 +76,7 @@ public class MemberAddActivity extends Activity implements OnClickListener {
 
 	public void onClick(View view) {
 
-    	if (memberNameView.getText().length() == 0) {					// check input for disaster name
+    	if (memberNameView.getText().length() == 0) {					// check input for member name
 
     		// Hide the soft keyboard otherwise the toast message does appear more clearly.
     	    InputMethodManager mgr = (InputMethodManager) getSystemService(this.INPUT_METHOD_SERVICE);
@@ -89,7 +86,7 @@ public class MemberAddActivity extends Activity implements OnClickListener {
     				Toast.LENGTH_LONG).show();
     		return;
 
-    	} else if (memberDescriptionView.getText().length() == 0) {	// check input for description (or any obligatory field
+    	} else if (memberDescriptionView.getText().length() == 0) {	// check input for description (or any obligatory field)
 
     		// Hide the soft keyboard otherwise the toast message does appear more clearly.
     	    InputMethodManager mgr = (InputMethodManager) getSystemService(this.INPUT_METHOD_SERVICE);
@@ -106,13 +103,14 @@ public class MemberAddActivity extends Activity implements OnClickListener {
 
     		//TODO: Add call for search to the Social Provider
 	    		
-//TODO: Refresh list of disasters? - so it is displayed in the previous activity
+//TODO: Refresh list of members? - so it is displayed in the previous activity
     		
 //TODO: remove test code
     	    iDisasterApplication.getInstance().memberNameList.add(memberName);
     	    
     	    // report data change to adapter
-    	    iDisasterApplication.getInstance().disasterAdapter.notifyDataSetChanged();
+// TODO: Add to adapter
+//    	    iDisasterApplication.getInstance().disasterAdapter.notifyDataSetChanged();
 
     		
 // TODO: Remove code for testing the correct setting of preferences 
@@ -123,11 +121,8 @@ public class MemberAddActivity extends Activity implements OnClickListener {
     	    InputMethodManager mgr = (InputMethodManager) getSystemService(this.INPUT_METHOD_SERVICE);
     	    mgr.hideSoftInputFromWindow(memberNameView.getWindowToken(), 0);
 
-
-//	    	finish();	// noHistory=true in Manifest => the activity is removed from the activity stack and finished.
-
-    	    // Go back to the list of disasters
-//	    	startActivity(new Intent(NewDisasterActivity.this, DisasterListActivity.class));
+	    	finish ();
+    	    // Go back to the previous activity
 	    }
     }
 
