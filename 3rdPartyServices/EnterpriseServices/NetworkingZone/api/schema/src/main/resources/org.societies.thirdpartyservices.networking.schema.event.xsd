@@ -1,0 +1,48 @@
+<xs:schema elementFormDefault="qualified" version="1.0"
+	xmlns="http://societies.org/thirdpartyservices/schema/networking"
+	targetNamespace="http://societies.org/thirdpartyservices/schema/networking"
+	xmlns:tns="http://societies.org/thirdpartyservices/schema/networking"
+	xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+
+
+
+		<xs:element name="networkingEventBean">
+			<xs:complexType>
+				<xs:sequence>
+					<xs:element name="action" type="tns:eventAction"
+						minOccurs="0" />
+					<xs:element name="userDetails" type="tns:userDetails"
+						minOccurs="0" />
+					<xs:element name="zoneDetails" type="tns:zoneDetails"
+						minOccurs="0" />
+				</xs:sequence>
+			</xs:complexType>
+		</xs:element>
+
+		<xs:complexType name="userDetails">
+			<xs:sequence>
+				<xs:element name="displayName" type="xs:string"
+					minOccurs="0" />
+				<xs:element name="id" type="xs:int" />
+			</xs:sequence>
+		</xs:complexType>
+
+		<xs:complexType name="zoneDetails">
+			<xs:sequence>
+				<xs:element name="zoneDisplayName" type="xs:string"
+					minOccurs="0" />
+				<xs:element name="zoneId" type="xs:int" />
+			</xs:sequence>
+		</xs:complexType>
+		
+
+
+		<xs:simpleType name="eventAction">
+			<xs:restriction base="xs:string">
+				<xs:enumeration value="joinedZone" />
+				<xs:enumeration value="leftZone" />
+			</xs:restriction>
+		</xs:simpleType>
+	</xs:schema>
+
