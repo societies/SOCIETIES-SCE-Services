@@ -5,10 +5,23 @@
 	    android:id="@+id/disasterMenuSelectDisaster" 
 	    android:icon="@android:drawable/ic_menu_preferences"
 		android:title="@string/disaster_menu_selectDisaster" />
-	<item 
-	    android:id="@+id/disasterMenuLogoff" 
-	    android:icon="@android:drawable/ic_lock_power_off"
-		android:title="@string/disaster_menu_logoff" />
+
+	<group android:id="@+id/disasterMenuFeed">
+		<item android:id="@+id/disasterMenuAddFeed" android:icon="@android:drawable/ic_menu_add"
+			android:title="@string/disaster_menu_add_feed" />
+	</group>
+		
+	<group android:id="@+id/disasterMenuUser">
+		<item android:id="@+id/disasterMenuAddUser" android:icon="@android:drawable/ic_menu_add"
+			android:title="@string/disaster_menu_add_user" />
+	</group>
+	
+	<group android:id="@+id/disasterMenuService">
+		<item android:id="@+id/disasterMenuAddService" android:icon="@android:drawable/ic_menu_add"
+			android:title="@string/disaster_menu_add_service" />		
+	</group>
+			
+	
 	
 </menu>
 

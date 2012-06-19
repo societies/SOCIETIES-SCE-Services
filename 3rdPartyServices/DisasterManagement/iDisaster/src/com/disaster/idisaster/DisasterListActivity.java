@@ -24,8 +24,10 @@
  */
 package com.disaster.idisaster;
 
-import org.societies.api.cis.management.ICisManager;
-import org.societies.api.cis.management.ICisOwned;
+//import org.societies.api.cis.management.ICisManager;
+//import org.societies.api.cis.management.ICisOwned;
+
+import com.disaster.idisaster.R;
 
 import android.app.ListActivity;
 import android.content.Intent;
@@ -69,7 +71,7 @@ public class DisasterListActivity extends ListActivity {
     	
     	
     	// TODO: Get the list from Societies API
-    	ICisManager cisManagerRef = iDisasterApplication.getinstance().iDisasterSoc.getCisManager();
+//    	ICisManager cisManagerRef = iDisasterApplication.getInstance().iDisasterSoc.getCisManager();
 
 // TODO: The API should be extended with CISRecord 
 //			By setting some of the fields in the record the developer can specify what
@@ -92,13 +94,13 @@ public class DisasterListActivity extends ListActivity {
 //     	ArrayAdapter<String> adapter = new ArrayAdapter<String> (this,
 //		R.layout.disaster_list_item, R.id.disaster_item, iDisasterApplication.getinstance().disasterNameList);
 
-    	iDisasterApplication.getinstance().disasterAdapter = new ArrayAdapter<String> (this,
-		R.layout.disaster_list_item, R.id.disaster_item, iDisasterApplication.getinstance().disasterNameList);
+    	iDisasterApplication.getInstance().disasterAdapter = new ArrayAdapter<String> (this,
+		R.layout.disaster_list_item, R.id.disaster_item, iDisasterApplication.getInstance().disasterNameList);
 
     	// Assign adapter to ListView
 //    	listView.setAdapter(adapter);
 
-    	listView.setAdapter(iDisasterApplication.getinstance().disasterAdapter);
+    	listView.setAdapter(iDisasterApplication.getInstance().disasterAdapter);
 //	    Test dialog
 //    	iDisasterApplication.getinstance().showDialog (this, getString(R.string.disasterListTestDialog), getString(R.string.dialogOK));
 
@@ -109,11 +111,11 @@ public class DisasterListActivity extends ListActivity {
     			int position, long id) {
     			// Store the selected disaster in preferences
 //TODO: Add unique ID to CIS instead of name since name can be duplicated 
-            	iDisasterApplication.getinstance().setDisasterName (iDisasterApplication.getinstance().disasterNameList.get (position));
+            	iDisasterApplication.getInstance().setDisasterName (iDisasterApplication.getInstance().disasterNameList.get (position));
 
 // TODO: Remove code for testing the correct setting of preferences 
     			Toast.makeText(getApplicationContext(),
-    				"Click ListItem Number " + (position+1) + " " + iDisasterApplication.getinstance().disasterNameList.get (position), Toast.LENGTH_LONG)
+    				"Click ListItem Number " + (position+1) + " " + iDisasterApplication.getInstance().disasterNameList.get (position), Toast.LENGTH_LONG)
     				.show();
 
 //    	    	finish();	// noHistory=true in Manifest => the activity is removed from the activity stack and finished.
@@ -156,7 +158,7 @@ public class DisasterListActivity extends ListActivity {
 
 		switch (item.getItemId()) {
 		case R.id.disasterMenuAdd:
-			startActivity(new Intent(DisasterListActivity.this, NewDisasterActivity.class));
+			startActivity(new Intent(DisasterListActivity.this, DisasterCreateActivity.class));
 			break;
 		default:
 			break;

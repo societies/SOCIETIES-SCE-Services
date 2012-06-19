@@ -24,27 +24,36 @@
  */
 package com.disaster.idisaster;
 
+import com.disaster.idisaster.R;
+
 import android.app.Activity;
 import android.os.Bundle;
 import android.widget.TextView;
 
 /**
- * This activity allows the user to look up users
- * in a directory, more to be added.
+ * Activity for Activity for showing an activity feed details.
  * 
- * @author Babak.Farshchian@sintef.no
+ * @author Jacqueline.Floch@sintef.no
  *
  */
-public class UserActivity extends Activity {
+public class FeedDetailsActivity extends Activity {
+
+	private TextView feedContentView;
+	private String feedContent = "feedTestContent";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-	// TODO Auto-generated method stub
-	super.onCreate(savedInstanceState);
 
-	TextView textview = new TextView(this);
-        textview.setText("This is the Users tab");
-        setContentView(textview);
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.feed_details_layout);
+		
+		// Get text fields
+//TODO : find error!
+//		feedContentView = (TextView) findViewById (R.id.showFeedDetailsContent);
+
+//	    Test dialog
+//    	iDisasterApplication.getinstance().showDialog (this, getString(R.string.newDisasterTestDialog), getString(R.string.dialogOK));
+
     }
 
 }

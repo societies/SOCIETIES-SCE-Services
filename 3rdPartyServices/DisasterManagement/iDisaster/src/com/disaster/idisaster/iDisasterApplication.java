@@ -26,7 +26,9 @@ package com.disaster.idisaster;
 
 import java.util.ArrayList;
 
-import org.societies.android.platform.client.SocietiesApp;
+import com.disaster.idisaster.R;
+
+//import org.societies.android.platform.client.SocietiesApp;
 
 import android.app.AlertDialog;
 import android.app.Application;
@@ -53,13 +55,26 @@ public class iDisasterApplication extends Application {
 	Editor editor;												// Editor for changing preferences
 
 	Boolean platformLoggedIn = false;
-	SocietiesApp iDisasterSoc; 							// represents access to the SOCIETIES platform.
+//	SocietiesApp iDisasterSoc; 							// represents access to the SOCIETIES platform.
 
-//TODO: remove test code	
-	ArrayList <String> disasterNameList = new ArrayList ();
+//TODO: remove test code
+	ArrayList <String> disasterNameList = new ArrayList<String> ();
+	ArrayList <String> disasterDescriptionList = new ArrayList<String> ();
 
+	ArrayList <String> feedContentList = new ArrayList<String> ();
+
+	ArrayList <String> userNameList = new ArrayList<String> ();
+	ArrayList <String> userDescriptionList = new ArrayList<String> ();
+
+	ArrayList <String> serviceNameList = new ArrayList<String> ();
+	ArrayList <String> serviceDescriptionList = new ArrayList<String> ();
+
+	
 // Common resources	
 	ArrayAdapter<String> disasterAdapter;
+	ArrayAdapter<String> feedAdapter;
+	ArrayAdapter<String> userAdapter;
+	ArrayAdapter<String> serviceAdapter;
 
 
 	// TODO: Remove unnecessary attributes 
@@ -73,7 +88,7 @@ public class iDisasterApplication extends Application {
 
 
 	// returns application instance
-	public static iDisasterApplication getinstance () {
+	public static iDisasterApplication getInstance () {
 		return singleton;
 	}
 	
@@ -85,7 +100,6 @@ public class iDisasterApplication extends Application {
 
 	    // Restore preferences from preferences file.
 		// If the preferences file does not exist, it is created when changes are committed.
-		
 		preferences = getSharedPreferences(PREFS_NAME, 0);
 	    editor = preferences.edit();
 	    editor.putString ("pref.dummy", "");
@@ -95,10 +109,26 @@ public class iDisasterApplication extends Application {
 //    	for (int i = 1; i < 10; i = i + 1) {
 //    		disasterNameList.add ("Disaster " + Integer.toString (i));
 //		}
-		disasterNameList.add ("Cyprus AMC November 2010");
-		disasterNameList.add ("Cyprus AMC April 2011");
-		disasterNameList.add ("Aquila");
+		disasterNameList.add ("Nicosia Team");
+		disasterNameList.add ("Larnaka Team");
+		disasterNameList.add ("Limassol Team");
 
+		disasterDescriptionList.add ("Team assigned to the Nicosia region.");
+		disasterDescriptionList.add ("Team assigned to the Larnaka region.");
+		disasterDescriptionList.add ("Team assigned to the Limassol region.");
+
+		userNameList.add ("Tim");
+		userNameList.add ("Tom");
+
+		userDescriptionList.add ("Doctor.");
+		userDescriptionList.add ("Civil Engineer.");
+
+		serviceNameList.add ("Nicosia Team");
+
+		serviceDescriptionList.add ("This service allows picture sharing with your team.");
+
+		
+		
 	    if (getUserName () != getString(R.string.noPreference)){
 	    	platformLogIn();	// Instantiate the Societies platform
 	    }
@@ -111,8 +141,8 @@ public class iDisasterApplication extends Application {
 //		- SOCIETIES platform is not installed on this node.
 //		- user and password are not correct
 		
-		//Instantiate iDisasterSoc which will give a handle to the platform components
-    	iDisasterSoc = new SocietiesApp (getUserName (), getPassword ());		
+// old code: Instantiate iDisasterSoc which will give a handle to the platform components
+//    	iDisasterSoc = new SocietiesApp (getUserName (), getPassword ());		
 		platformLoggedIn = true;
 
 	}

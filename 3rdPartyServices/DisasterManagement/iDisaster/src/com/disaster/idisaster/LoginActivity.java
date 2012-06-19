@@ -24,6 +24,8 @@
  */
 package com.disaster.idisaster;
 
+import com.disaster.idisaster.R;
+
 import android.app.Activity;
 import android.os.Bundle;
 
@@ -112,10 +114,10 @@ public class LoginActivity extends Activity implements OnClickListener {
 
 //TODO: the user name and pasword should be checked by the platform
         	// Instantiate the Societies platform => needs modification of platforLogin
-        	iDisasterApplication.getinstance().platformLogIn ();
+        	iDisasterApplication.getInstance().platformLogIn ();
 
     		
-    		boolean loginCode = false;	// TODO: replace by code returned by Societes API
+    		boolean loginCode = false;	// TODO: replaced by code returned by Societes API
     			    		
     		// Create dialog for wrong password
     		if (loginCode) { 							
@@ -137,7 +139,7 @@ public class LoginActivity extends Activity implements OnClickListener {
 	   		}
 	    		
     		// Store user name and password in preferences
-        	iDisasterApplication.getinstance().setUserName (userName, userPassword);
+        	iDisasterApplication.getInstance().setUserName (userName, userPassword);
         	
 // Code for testing the correct setting of preferences 
 //    	    String testName = iDisasterApplication.getinstance().preferences.

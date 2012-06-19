@@ -24,6 +24,8 @@
  */
 package com.disaster.idisaster;
 
+import com.disaster.idisaster.R;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -42,7 +44,7 @@ import android.widget.Button;
  * @author Jacqueline.Floch@sintef.no
  *
  */
-public class NewDisasterActivity extends Activity implements OnClickListener {
+public class DisasterCreateActivity extends Activity implements OnClickListener {
 
 	private EditText disasterNameView;
 	private EditText disasterDescriptionView;
@@ -54,14 +56,14 @@ public class NewDisasterActivity extends Activity implements OnClickListener {
     protected void onCreate(Bundle savedInstanceState) {
 
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.new_disaster_layout);
+		setContentView(R.layout.disaster_create_layout);
 
 		// Get editable fields
-		disasterNameView = (EditText) findViewById(R.id.editNewDisasterName);
-		disasterDescriptionView = (EditText) findViewById(R.id.editNewDisasterDescription);
+		disasterNameView = (EditText) findViewById(R.id.editDisasterCreateName);
+		disasterDescriptionView = (EditText) findViewById(R.id.editDisasterCreateDescription);
 
     	// Add click listener to button
-    	final Button button = (Button) findViewById(R.id.newDisasterCreateButton);
+    	final Button button = (Button) findViewById(R.id.disasterCreateButton);
     	button.setOnClickListener(this);
 
 //	    Test dialog
@@ -109,7 +111,7 @@ public class NewDisasterActivity extends Activity implements OnClickListener {
     		// Create dialog for wrong password
     		if (disasterCreationCode) { 							
     			AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this);
-    			alertBuilder.setMessage(getString(R.string.newDisasterDialog))
+    			alertBuilder.setMessage(getString(R.string.disasterCreateDialog))
     				.setCancelable(false)
     				.setPositiveButton (getString(R.string.dialogOK), new DialogInterface.OnClickListener() {
     					public void onClick(DialogInterface dialog, int id) {
@@ -126,10 +128,10 @@ public class NewDisasterActivity extends Activity implements OnClickListener {
 //TODO: Refresh list of disasters? - so it is displayed in the previous activity
     		
 //TODO: remove test code
-    	    iDisasterApplication.getinstance().disasterNameList.add(disasterName);
+    	    iDisasterApplication.getInstance().disasterNameList.add(disasterName);
     	    
     	    // report data change to adapter
-    	    iDisasterApplication.getinstance().disasterAdapter.notifyDataSetChanged();
+    	    iDisasterApplication.getInstance().disasterAdapter.notifyDataSetChanged();
 
     		
 // TODO: Remove code for testing the correct setting of preferences 

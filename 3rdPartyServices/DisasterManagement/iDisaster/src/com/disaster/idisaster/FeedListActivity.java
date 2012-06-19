@@ -24,27 +24,87 @@
  */
 package com.disaster.idisaster;
 
-import android.app.Activity;
+import com.disaster.idisaster.R;
+
+import android.app.ListActivity;
+import android.content.Intent;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 /**
- * This activity allows the user to browse available
- * DDC applications on the device, add DDC applications 
- * to a disaster, etc.
+ * This activity allows the users to manage their 
+ * disasters or the disasters they subscribe to.
  * 
  * @author Babak.Farshchian@sintef.no
  *
  */
-public class ServiceActivity extends Activity {
+public class FeedListActivity extends ListActivity {
+    static final String[] FEEDLIST = new String[] { "Images sent", "Lakarna assessment postponed", "Translation Request: Kren-douar"};
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 	// TODO Auto-generated method stub
 	super.onCreate(savedInstanceState);
+	setListAdapter(new ArrayAdapter<String>(this, R.layout.tab_list_item, FEEDLIST));
 
-	TextView textview = new TextView(this);
-        textview.setText("This is the Services tab");
-        setContentView(textview);
+	  ListView lv = getListView();
+	  lv.setTextFilterEnabled(true);
+
+	  lv.setOnItemClickListener(new OnItemClickListener() {
+	    public void onItemClick(AdapterView<?> parent, View view,
+	        int position, long id) {
+	      // When clicked, show a toast with the TextView text
+	      Toast.makeText(getApplicationContext(), ((TextView) view).getText(),
+	          Toast.LENGTH_SHORT).show();
+	    	}
+	  	});
+	  }
+
+/**
+ * onCreateOptionsMenu expands the activity menu for this activity tab.
+*/
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu){
+
+    	//The FIXED menu is set by the TabActivity.
+    	super.onCreateOptionsMenu(menu);
+    	
+    	menu.setGroupVisible(R.id.disasterMenuFeed, true);
+    	return true;
+    }
+
+ /**
+  * onOptionsItemSelected handles the selection of an item in the activity menu.
+  */
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+		// The TabActivity handles items in the FIXED menu.
+    	super.onOptionsItemSelected(item);
+    	
+    	switch (item.getItemId()) {
+
+    		case R.id.disasterMenuAddFeed:    			
+//TODO: Remove code for testing the correct setting of preferences 
+//    			Toast.makeText(getApplicationContext(),
+//    				"Menu item chosen: Add feed", Toast.LENGTH_LONG)
+//    				.show();
+    			startActivity(new Intent(FeedListActivity.this, FeedAddActivity.class));
+    		break;
+    		
+    		default:
+    		break;
+    	}
+    	return true;
     }
 
 }

@@ -24,42 +24,42 @@
  */
 package com.disaster.idisaster;
 
-import android.app.ListActivity;
+import com.disaster.idisaster.R;
+
+import android.app.Activity;
 import android.os.Bundle;
-import android.view.View;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
-import android.widget.ArrayAdapter;
-import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 /**
- * This activity allows the users to manage their 
- * disasters or the disasters they subscribe to.
+ * Activity for showing user profile details.
  * 
- * @author Babak.Farshchian@sintef.no
+ * @author Jacqueline.Floch@sintef.no
  *
  */
-public class FeedActivity extends ListActivity {
-    static final String[] FEEDLIST = new String[] { "Images sent", "Lakarna assessment postponed", "Translation Request: Kren-douar"};
+public class UserDetailsActivity extends Activity {
+
+	private TextView userNameView;
+	private TextView userDescriptionView;
+	private String userName = "userTestName";
+	private String userDescription = "userTestDescription";
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-	// TODO Auto-generated method stub
-	super.onCreate(savedInstanceState);
-	setListAdapter(new ArrayAdapter<String>(this, R.layout.tab_list_item, FEEDLIST));
 
-	  ListView lv = getListView();
-	  lv.setTextFilterEnabled(true);
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.user_details_layout);
 
-	  lv.setOnItemClickListener(new OnItemClickListener() {
-	    public void onItemClick(AdapterView<?> parent, View view,
-	        int position, long id) {
-	      // When clicked, show a toast with the TextView text
-	      Toast.makeText(getApplicationContext(), ((TextView) view).getText(),
-	          Toast.LENGTH_SHORT).show();
-	    }
-	  });
-	  }
+		// Get text fields
+		userNameView = (TextView) findViewById(R.id.showUserDetailsName);
+		userDescriptionView = (TextView) findViewById(R.id.showUserDetailsDescription);
+		
+		//TODO: set name and description
+		
+
+//	    Test dialog
+//    	iDisasterApplication.getinstance().showDialog (this, getString(R.string.newDisasterTestDialog), getString(R.string.dialogOK));
+
     }
+
+}
