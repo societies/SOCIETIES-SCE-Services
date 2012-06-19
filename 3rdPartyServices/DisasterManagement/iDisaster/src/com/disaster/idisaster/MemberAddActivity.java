@@ -44,26 +44,26 @@ import android.widget.Button;
  * @author Jacqueline.Floch@sintef.no
  *
  */
-public class UserAddActivity extends Activity implements OnClickListener {
+public class MemberAddActivity extends Activity implements OnClickListener {
 
-	private EditText userNameView;
-	private EditText userDescriptionView;
-	private String userName;
-	private String userDescription;
+	private EditText memberNameView;
+	private EditText memberDescriptionView;
+	private String memberName;
+	private String memberDescription;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.user_add_layout);
+		setContentView(R.layout.member_add_layout);
 
 		// Get editable fields
-		userNameView = (EditText) findViewById(R.id.editUserAddName);
-		userDescriptionView = (EditText) findViewById(R.id.editUserAddDescription);
+		memberNameView = (EditText) findViewById(R.id.editMemberAddName);
+		memberDescriptionView = (EditText) findViewById(R.id.editMemberAddDescription);
 
     	// Add click listener to button
-    	final Button button = (Button) findViewById(R.id.userAddButton);
+    	final Button button = (Button) findViewById(R.id.memberAddButton);
     	button.setOnClickListener(this);
 
 //	    Test dialog
@@ -79,49 +79,49 @@ public class UserAddActivity extends Activity implements OnClickListener {
 
 	public void onClick(View view) {
 
-    	if (userNameView.getText().length() == 0) {					// check input for disaster name
+    	if (memberNameView.getText().length() == 0) {					// check input for disaster name
 
     		// Hide the soft keyboard otherwise the toast message does appear more clearly.
     	    InputMethodManager mgr = (InputMethodManager) getSystemService(this.INPUT_METHOD_SERVICE);
-    	    mgr.hideSoftInputFromWindow(userNameView.getWindowToken(), 0);
+    	    mgr.hideSoftInputFromWindow(memberNameView.getWindowToken(), 0);
 	    
-    		Toast.makeText(this, getString(R.string.toastUserName), 
+    		Toast.makeText(this, getString(R.string.toastMemberName), 
     				Toast.LENGTH_LONG).show();
     		return;
 
-    	} else if (userDescriptionView.getText().length() == 0) {	// check input for description (or any obligatory field
+    	} else if (memberDescriptionView.getText().length() == 0) {	// check input for description (or any obligatory field
 
     		// Hide the soft keyboard otherwise the toast message does appear more clearly.
     	    InputMethodManager mgr = (InputMethodManager) getSystemService(this.INPUT_METHOD_SERVICE);
-    	    mgr.hideSoftInputFromWindow(userDescriptionView.getWindowToken(), 0);
+    	    mgr.hideSoftInputFromWindow(memberDescriptionView.getWindowToken(), 0);
 
-    	    Toast.makeText(this, getString(R.string.toastUserDescription), 
+    	    Toast.makeText(this, getString(R.string.toastMemberDescription), 
 	    			Toast.LENGTH_LONG).show();
 	    	return;
 
     	} else {
 
-    		userName = userNameView.getText().toString();
-    		userDescription = userDescriptionView.getText().toString();
+    		memberName = memberNameView.getText().toString();
+    		memberDescription = memberDescriptionView.getText().toString();
 
     		//TODO: Add call for search to the Social Provider
 	    		
 //TODO: Refresh list of disasters? - so it is displayed in the previous activity
     		
 //TODO: remove test code
-    	    iDisasterApplication.getInstance().userNameList.add(userName);
+    	    iDisasterApplication.getInstance().memberNameList.add(memberName);
     	    
     	    // report data change to adapter
     	    iDisasterApplication.getInstance().disasterAdapter.notifyDataSetChanged();
 
     		
 // TODO: Remove code for testing the correct setting of preferences 
-    	    Toast.makeText(this, "Debug: "  + userName + " " + userDescription, Toast.LENGTH_LONG).show();
+    	    Toast.makeText(this, "Debug: "  + memberName + " " + memberDescription, Toast.LENGTH_LONG).show();
 
     	    // Hide the soft keyboard:
 			// - the soft keyboard will not appear on next activity window!
     	    InputMethodManager mgr = (InputMethodManager) getSystemService(this.INPUT_METHOD_SERVICE);
-    	    mgr.hideSoftInputFromWindow(userNameView.getWindowToken(), 0);
+    	    mgr.hideSoftInputFromWindow(memberNameView.getWindowToken(), 0);
 
 
 //	    	finish();	// noHistory=true in Manifest => the activity is removed from the activity stack and finished.

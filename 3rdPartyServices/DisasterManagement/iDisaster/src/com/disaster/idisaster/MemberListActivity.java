@@ -24,42 +24,71 @@
  */
 package com.disaster.idisaster;
 
-import com.disaster.idisaster.R;
-
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.widget.TextView;
+import android.widget.Toast;
 
 /**
- * Activity for showing user profile details.
+ * This activity allows the user to look up members
+ * in a directory, more to be added.
  * 
- * @author Jacqueline.Floch@sintef.no
+ * @author Babak.Farshchian@sintef.no
  *
  */
-public class UserDetailsActivity extends Activity {
-
-	private TextView userNameView;
-	private TextView userDescriptionView;
-	private String userName = "userTestName";
-	private String userDescription = "userTestDescription";
-
+public class MemberListActivity extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+	// TODO Auto-generated method stub
+	super.onCreate(savedInstanceState);
 
-		super.onCreate(savedInstanceState);
-		setContentView(R.layout.user_details_layout);
+	TextView textview = new TextView(this);
+        textview.setText("This is the Users tab");
+        setContentView(textview);
+    }
 
-		// Get text fields
-		userNameView = (TextView) findViewById(R.id.showUserDetailsName);
-		userDescriptionView = (TextView) findViewById(R.id.showUserDetailsDescription);
-		
-		//TODO: set name and description
-		
+/**
+ * onCreateOptionsMenu expands the activity menu for this activity tab.
+ */
 
-//	    Test dialog
-//    	iDisasterApplication.getinstance().showDialog (this, getString(R.string.newDisasterTestDialog), getString(R.string.dialogOK));
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu){
 
+		//The FIXED menu is set by the TabActivity.
+    	super.onCreateOptionsMenu(menu);
+    	
+    	menu.setGroupVisible(R.id.disasterMenuUser, true);
+    	return true;
+    }
+
+    /**
+    * onOptionsItemSelected handles the selection of an item in the activity menu.
+    */
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+		// The TabActivity handles items in the FIXED menu.
+    	super.onOptionsItemSelected(item);
+
+    	switch (item.getItemId()) {
+
+    		case R.id.disasterMenuAddMember:
+////TODO: Remove code for testing the correct setting of preferences 
+//    			Toast.makeText(getApplicationContext(),
+//    				"Menu item chosen: Add member", Toast.LENGTH_LONG)
+//    				.show();
+    			
+    			startActivity(new Intent(MemberListActivity.this, MemberAddActivity.class));
+    		break;
+    		
+    		default:
+    		break;
+    	}
+    	return true;
     }
 
 }

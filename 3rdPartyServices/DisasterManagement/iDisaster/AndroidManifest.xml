@@ -62,7 +62,7 @@
 		</activity>
 
         <activity
-            android:name=".UserListActivity"
+            android:name=".MemberListActivity"
             android:theme="@android:style/Theme.NoTitleBar" > 
         </activity>       
 		
@@ -78,7 +78,7 @@
 		</activity>
 		
         <activity
-            android:name=".UserDetailsActivity"
+            android:name=".MemberDetailsActivity"
             android:theme="@android:style/Theme.NoTitleBar"
             android:noHistory="true" > 
         </activity>       
@@ -96,7 +96,7 @@
 		</activity>
 		
         <activity
-            android:name=".UserAddActivity"
+            android:name=".MemberAddActivity"
             android:theme="@android:style/Theme.NoTitleBar"
             android:noHistory="true" > 
         </activity>       

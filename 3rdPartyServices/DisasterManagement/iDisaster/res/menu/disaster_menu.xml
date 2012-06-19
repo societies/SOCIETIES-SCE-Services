@@ -12,8 +12,8 @@
 	</group>
 		
 	<group android:id="@+id/disasterMenuUser">
-		<item android:id="@+id/disasterMenuAddUser" android:icon="@android:drawable/ic_menu_add"
-			android:title="@string/disaster_menu_add_user" />
+		<item android:id="@+id/disasterMenuAddMember" android:icon="@android:drawable/ic_menu_add"
+			android:title="@string/disaster_menu_add_member" />
 	</group>
 	
 	<group android:id="@+id/disasterMenuService">

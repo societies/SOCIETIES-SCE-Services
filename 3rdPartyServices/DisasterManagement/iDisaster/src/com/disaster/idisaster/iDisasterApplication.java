@@ -63,8 +63,8 @@ public class iDisasterApplication extends Application {
 
 	ArrayList <String> feedContentList = new ArrayList<String> ();
 
-	ArrayList <String> userNameList = new ArrayList<String> ();
-	ArrayList <String> userDescriptionList = new ArrayList<String> ();
+	ArrayList <String> memberNameList = new ArrayList<String> ();
+	ArrayList <String> memberDescriptionList = new ArrayList<String> ();
 
 	ArrayList <String> serviceNameList = new ArrayList<String> ();
 	ArrayList <String> serviceDescriptionList = new ArrayList<String> ();
@@ -117,11 +117,11 @@ public class iDisasterApplication extends Application {
 		disasterDescriptionList.add ("Team assigned to the Larnaka region.");
 		disasterDescriptionList.add ("Team assigned to the Limassol region.");
 
-		userNameList.add ("Tim");
-		userNameList.add ("Tom");
+		memberNameList.add ("Tim");
+		memberNameList.add ("Tom");
 
-		userDescriptionList.add ("Doctor.");
-		userDescriptionList.add ("Civil Engineer.");
+		memberDescriptionList.add ("Doctor.");
+		memberDescriptionList.add ("Civil Engineer.");
 
 		serviceNameList.add ("Nicosia Team");
 

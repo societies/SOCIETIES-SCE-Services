@@ -61,9 +61,9 @@ public class DisasterActivity extends TabActivity {
         tabHost.addTab(spec);
 
         // Do the same for the other tabs
-        intent = new Intent().setClass(this, UserListActivity.class);
-        spec = tabHost.newTabSpec("users").setIndicator("Users",
-                          res.getDrawable(R.drawable.ic_tab_users))
+        intent = new Intent().setClass(this, MemberListActivity.class);
+        spec = tabHost.newTabSpec("members").setIndicator("Members",
+                          res.getDrawable(R.drawable.ic_tab_members))
                       .setContent(intent);
         tabHost.addTab(spec);
 
