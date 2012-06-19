@@ -196,6 +196,7 @@
 						<Bundle-SymbolicName>${project.groupId}.${project.artifactId}</Bundle-SymbolicName>
 						<Bundle-Name>${project.name}</Bundle-Name>
 						<Bundle-Version>${project.version}</Bundle-Version>
+						
 						<Embed-Dependency>google-api-services-calendar;groupId=com.google.apis;version=v3-rev3-1.4.0-beta,
 							google-api-client;groupId=com.google.api-client;version=1.7.0-beta,
 							google-http-client;groupId=com.google.http-client;version=1.7.0-beta,
@@ -203,7 +204,8 @@
 						</Embed-Dependency>
 						<Embed-Transitive>true</Embed-Transitive>
 <!-- 						<Export-Package>org.societies.rdPartyService.enterprise.sharedCalendar.*</Export-Package> -->
-						<Import-Package>!com.google.*,!org.apache.*,!org.xmlpull.*,!junit.framework,!org.codehaus.jackson,!javax.servlet.*,!sun.misc.*,*</Import-Package>
+						<!-- See http://www.bradchen.com/node/10 for reasons of importing hibernate packages -->
+						<Import-Package>javassist.util.proxy, org.hibernate.proxy, !com.google.*,!org.apache.*,!org.xmlpull.*,!junit.framework,!org.codehaus.jackson,!javax.servlet.*,!sun.misc.*,*</Import-Package>
 					</instructions>
 				</configuration>
 
@@ -240,6 +242,18 @@
 							<type>jar</type>
 							<overWrite>true</overWrite>
 <!-- 							<outputDirectory>${spring.osgi.deploy.dir}</outputDirectory> -->
+							<outputDirectory>${env.VIRGO_HOME}/repository/usr</outputDirectory>
+						</artifactItem>
+						<artifactItem>
+							<groupId>org.jboss.javassist</groupId>
+							<artifactId>com.springsource.javassist</artifactId>
+							<version>3.15.0.GA</version>
+							<outputDirectory>${env.VIRGO_HOME}/repository/usr</outputDirectory>
+						</artifactItem>
+						<artifactItem>
+							<groupId>org.hibernate</groupId>
+							<artifactId>com.springsource.org.hibernate</artifactId>
+							<version>4.1.0.Final</version>
 							<outputDirectory>${env.VIRGO_HOME}/repository/usr</outputDirectory>
 						</artifactItem>
 					</artifactItems>

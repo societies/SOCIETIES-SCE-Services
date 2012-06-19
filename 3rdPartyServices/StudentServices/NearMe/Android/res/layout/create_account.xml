@@ -1,0 +1,253 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout 
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:orientation="vertical"
+	android:layout_width="fill_parent"
+	android:layout_height="fill_parent" android:gravity="center|top">
+
+	<LinearLayout
+		android:orientation="horizontal"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:gravity="left">
+		
+		<LinearLayout
+			android:layout_marginLeft="10.0dip"
+			android:adjustViewBounds="true"
+			android:background="@drawable/blue_frame"
+			android:orientation="horizontal"
+			android:layout_width="58.0dip"
+			android:layout_height="58.0dip" android:gravity="center"
+			android:clickable="true"
+			android:onClick="userProfileImage">
+	
+			<ImageView
+				android:id="@id/create_account_image" 
+				android:adjustViewBounds="true"
+				android:minHeight="50.0dip"
+				android:minWidth="50.0dip"
+				android:maxWidth="50.0dip"
+				android:maxHeight="50.0dip"
+				android:layout_width="50.0dip" 
+				android:layout_height="50.0dip"
+				android:gravity="center">
+				</ImageView>		
+						
+		</LinearLayout>
+
+	</LinearLayout>
+	
+	<LinearLayout
+		android:layout_marginTop="2.0dip"
+		android:background="@drawable/line"
+		android:orientation="horizontal"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:gravity="center">
+	</LinearLayout>
+		
+	<LinearLayout
+		android:layout_marginTop="2.0dip"
+		android:orientation="horizontal"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:gravity="center">
+			
+		<TextView
+			android:layout_width="120.0dip"
+			android:layout_height="wrap_content"
+			android:layout_marginLeft="5.0dip"
+			android:text="Name:"
+			android:gravity="left"
+			style="@style/PVC.style_04" />
+				
+		<EditText
+			android:id="@id/create_account_name"
+			android:layout_width="180.0dip"
+			android:layout_height="40.0dip"/>
+						
+	</LinearLayout>
+		
+	<LinearLayout
+		android:layout_marginTop="2.0dip"
+		android:orientation="horizontal"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:gravity="center">
+			
+		<TextView
+			android:layout_width="120.0dip"
+			android:layout_height="wrap_content"
+			android:layout_marginLeft="5.0dip"
+			android:text="User mood message:"
+			android:gravity="left"
+			style="@style/PVC.style_04" />
+				
+		<EditText
+		    android:id="@id/create_account_description"
+		    android:layout_width="180.0dip"
+		    android:layout_height="75dp" />
+	
+	</LinearLayout>
+					
+	<LinearLayout
+		android:gravity="center"
+		android:orientation="horizontal"
+		android:padding="0.0dip" 
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content">
+			
+		<TextView
+			android:layout_width="fill_parent"
+			android:layout_height="15.0dip"
+			android:text="                                 200 characters Maximum"
+			android:gravity="center"
+			android:layout_marginBottom="5dip"
+			style="@style/PVC.style_03" />
+	</LinearLayout>			
+		
+	<LinearLayout
+		android:layout_marginTop="5.0dip"
+		android:orientation="horizontal"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:gravity="center">			
+			
+		<TextView
+			android:layout_width="120.0dip"
+			android:layout_height="wrap_content"
+			android:layout_marginLeft="5.0dip"
+			android:text="Date of Birth:"
+			android:gravity="left"
+			style="@style/PVC.style_04" />
+				
+		<EditText
+			android:id="@id/create_account_date"
+			android:layout_width="180.0dip"
+			android:layout_height="40.0dip"
+			android:onClick="userProfileDate"
+			
+			
+			
+			/>			
+
+	</LinearLayout>
+			<TextView
+			android:layout_width="fill_parent"
+			android:layout_height="15.0dip"
+			android:text="            DD/MM/YYYY"
+			android:gravity="center"
+			android:layout_marginBottom="5dip"
+			style="@style/PVC.style_03" />
+	<LinearLayout
+		android:layout_marginTop="5.0dip"
+		android:orientation="horizontal"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:gravity="center">
+			
+		<TextView
+			android:layout_width="120.0dip"
+			android:layout_height="wrap_content"
+			android:layout_marginLeft="5.0dip"
+			android:text="Gender:"
+			android:gravity="left"
+			style="@style/PVC.style_04" />
+		
+		<LinearLayout
+			android:layout_marginTop="5.0dip"
+			android:orientation="vertical"
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content"
+			android:gravity="center">
+				
+			<RadioGroup android:id="@id/create_account_radio_group"
+    			android:orientation="vertical"
+    			android:layout_width="fill_parent"
+    			android:layout_height="fill_parent" >
+ 
+    			<RadioButton android:id="@id/create_account_radio_group_01"
+        			android:layout_width="100dip"
+        			android:layout_height="40dip"
+        			android:text="Male" 
+        			style="@style/PVC.style_04"/>
+ 
+    			<RadioButton android:id="@id/create_account_radio_group_02"
+        			android:layout_width="100dip"
+        			android:layout_height="40dip"
+        			android:text="Female" 
+        			style="@style/PVC.style_04" 
+        			/>
+ 
+ 			</RadioGroup>
+		</LinearLayout>			
+	</LinearLayout>
+		
+	<LinearLayout
+		android:layout_marginTop="5.0dip"
+		android:orientation="horizontal"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:gravity="center">
+		
+		<TextView
+			android:layout_width="120.0dip"
+			android:layout_height="wrap_content"
+			android:layout_marginLeft="5.0dip"
+			android:text="E-mail:"
+			android:gravity="left"
+			style="@style/PVC.style_04" />
+				
+		<EditText
+			android:id="@id/create_account_email"
+			android:layout_width="180.0dip"
+			android:layout_height="40.0dip"/>			
+	</LinearLayout>
+	
+	<LinearLayout
+		android:layout_marginTop="5.0dip"
+		android:orientation="horizontal"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:gravity="center">
+		
+		<TextView
+			android:layout_width="120.0dip"
+			android:layout_height="wrap_content"
+			android:layout_marginLeft="5.0dip"
+			android:text="Password:"
+			android:gravity="left"
+			style="@style/PVC.style_04" />
+				
+		<EditText
+			android:id="@id/create_account_password"
+			android:layout_width="180.0dip"
+			android:layout_height="40.0dip"
+			android:password="true"/>			
+	</LinearLayout>
+
+	<LinearLayout
+		android:orientation="horizontal"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:gravity="right" android:layout_marginTop="15.0dip">
+				
+		<Button
+			android:id="@id/create_account_save"
+			android:layout_width="100.0dip"
+			android:layout_height="40.0dip"
+			android:text="Save"
+			
+		/>
+		
+		<Button
+			android:id="@id/create_account_cancel"
+			android:layout_width="100.0dip"
+			android:layout_height="40.0dip"
+			android:text="Cancel"
+		/>
+
+			
+	</LinearLayout>
+</LinearLayout>

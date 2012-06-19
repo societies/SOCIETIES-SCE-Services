@@ -153,4 +153,11 @@ public interface ISharedCalendarClientRich {
 	 */
 	public void unsubscribeFromEvent(IReturnedResultCallback returnedResultCallback,String calendarId,String eventId, String subscriberId);
 	
+	/**
+	 * Return a list of events as a JSON String compliant with WeekCalendar
+	 * @param eventListToRender
+	 * @return the JSON equivalent.
+	 */
+	public String createJSONOEvents(List<Event> eventListToRender);
+	
 }

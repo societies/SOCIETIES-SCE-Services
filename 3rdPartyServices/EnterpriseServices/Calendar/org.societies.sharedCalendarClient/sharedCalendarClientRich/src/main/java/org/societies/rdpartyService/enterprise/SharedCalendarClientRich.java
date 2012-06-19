@@ -132,7 +132,7 @@ public class SharedCalendarClientRich implements ICommCallback,	ISharedCalendarC
 
 		// Test
 		
-	 createPrivateCalendar(new TestCallBackCreateCSSCalendar(),"Test private calendar from bundle");
+	 //createPrivateCalendar(new TestCallBackCreateCSSCalendar(),"Test private calendar from bundle");
 //		 retrieveCSSCalendarEvents(new TestCallBackRetrieveCSSCalendarEvents());
 	}
 
@@ -753,7 +753,7 @@ public class SharedCalendarClientRich implements ICommCallback,	ISharedCalendarC
 	 * @param eventListToRender
 	 * @return the String that represent the Json array
 	 */
-	private String createJSONOEvents(List<Event> eventListToRender){
+	public String createJSONOEvents(List<Event> eventListToRender){
 		/*
 	  "id":10182,
       "start":"2009-05-03T14:00:00.000+10:00",
