@@ -134,20 +134,22 @@ public class TestSharedCalendar extends AbstractTransactionalJUnit4SpringContext
 	public void createPrivateCalendar(){
 		boolean result=sharedCalendar.createPrivateCalendarUsingCSSId("TestCSS", "Test private calendar");
 		assert(result);
+		sharedCalendar.deletePrivateCalendarUsingCSSId("TestCSS");
+	}
+	
+	@Test
+	@Rollback(false)
+	public void deleteCISCalendar(){
+		List<Calendar> cisCalendars = sharedCalendar.retrieveCISCalendarList(_testCisId);
+		boolean isCisCalendarAvailable = !cisCalendars.isEmpty();
+		boolean result=false;
+		if (isCisCalendarAvailable){
+			result = sharedCalendar.deleteCISCalendar(testCalendarId);
+		}
+		assert(!isCisCalendarAvailable || result);
 	}
 	
 	
 	
-	/*
-	@Test
-	public void insertRemoveCalendar() throws InterruptedException{
-		int max=50;
-		for(int i=0;i<max;i++){
-		sharedCalendar.createPrivateCalendarUsingCSSId("TestCISIs"+i, "Test private calendar");
-		Thread.sleep(100);}
-		for(int i=0;i<max;i++){
-			sharedCalendar.deletePrivateCalendarUsingCSSId("TestCISIs"+i);
-			Thread.sleep(100);}
-	}*/
 
 }
