@@ -359,11 +359,12 @@ public class SharedCalendarUtil {
 
 	/**
 	 * This method is called when tokens are not specified inside the backEnd.properties file.
-	 * 
+	 * IMPORTANT This method is now replaced by the tool used to generate the properties file for the calendar.
 	 * @param properties
 	 * @param path
 	 * @throws Exception
 	 */
+	@Deprecated
 	protected void setupAuthorization(Properties properties, URL path) throws Exception {
 		HttpTransport httpTransport = new NetHttpTransport();
 		JacksonFactory jsonFactory = new JacksonFactory();
@@ -431,10 +432,11 @@ public class SharedCalendarUtil {
 			clientSecret = props.getProperty("clientSecret");
 			accessToken = props.getProperty("accessToken");
 			refreshToken = props.getProperty("refreshToken");
-
-			if (accessToken == null || refreshToken == null || accessToken.equalsIgnoreCase("")|| refreshToken.equalsIgnoreCase("")) {
-				setupAuthorization(props, url);
-			}}catch (Exception e) {
+//Replaced by the configurator tool
+//			if (accessToken == null || refreshToken == null || accessToken.equalsIgnoreCase("")|| refreshToken.equalsIgnoreCase("")) {
+//				setupAuthorization(props, url);
+//			}
+		}catch (Exception e) {
 				// TODO: handle exception
 			}finally {
 				if (inputStream != null)
