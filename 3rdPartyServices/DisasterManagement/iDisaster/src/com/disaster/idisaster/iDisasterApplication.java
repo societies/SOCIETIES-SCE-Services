@@ -112,12 +112,12 @@ public class iDisasterApplication extends Application {
 	    editor.commit ();
 
 //TODO: remove test code
-		disasterNameList.add ("Nicosia Team");
-		disasterNameList.add ("Larnaka Team");
-		disasterNameList.add ("Limassol Team");
-		disasterDescriptionList.add ("Team assigned to the Nicosia region.");
-		disasterDescriptionList.add ("Team assigned to the Larnaka region.");
-		disasterDescriptionList.add ("Team assigned to the Limassol region.");
+//		disasterNameList.add ("Nicosia Team");
+//		disasterNameList.add ("Larnaka Team");
+//		disasterNameList.add ("Limassol Team");
+//		disasterDescriptionList.add ("Team assigned to the Nicosia region.");
+//		disasterDescriptionList.add ("Team assigned to the Larnaka region.");
+//		disasterDescriptionList.add ("Team assigned to the Limassol region.");
 
 		memberNameList.add ("Tim");
 		memberNameList.add ("Tom");
@@ -168,11 +168,11 @@ public class iDisasterApplication extends Application {
 	}
 
 	public String getPassword () {
-		return preferences.getString ("pref.password",getString(R.string.noPreference));
+		return preferences.getString ("pref.password", getString(R.string.noPreference));
 	}
 
 	public String getDisasterName () {
-		return preferences.getString ("pref.disastername",getString(R.string.noPreference));
+		return preferences.getString ("pref.disastername", getString(R.string.noPreference));
 	}
 
 	public void setDisasterName (String name) {

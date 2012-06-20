@@ -87,6 +87,8 @@ public class StartActivity extends Activity implements OnClickListener {
     	if (userName == getString(R.string.noPreference)) {								// no user name (no password)
     		startActivity(new Intent(StartActivity.this, LoginActivity.class));
     		return;
+//TODO: For some reason this does not well when application is relaunched from Eclipse without
+// deleting the data. Although disasterName is set to n/a, the program jumps to the last case.
     	} else if (disasterName == getString(R.string.noPreference)) {					// no disaster selected
     		startActivity(new Intent(StartActivity.this, DisasterListActivity.class));
     		return;

@@ -37,6 +37,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.AdapterView.OnItemClickListener;
 
+// TODO: Add import
+// import org.societies.android.platform.SocialContract;
+
 /**
  * This activity allows the user to browse available
  * DDC applications on the device, add DDC applications 
@@ -52,6 +55,9 @@ public class ServiceListActivity extends ListActivity {
     super.onCreate(savedInstanceState);
 
 //TODO: query Content Provider
+    
+    
+    
 
 //TODO: if no service in the CIS create a simple TextView
 //	TextView textview = new TextView(this);

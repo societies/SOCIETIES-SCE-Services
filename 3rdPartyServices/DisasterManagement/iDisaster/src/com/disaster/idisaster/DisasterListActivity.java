@@ -41,6 +41,14 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
+//TODO: Add import
+//import org.societies.android.platform.SocialContract;
+import android.content.ContentValues;
+import android.database.Cursor;
+import android.net.Uri;
+import android.test.ProviderTestCase2;
+import android.test.mock.MockContentResolver;
+
 
 /**
  * This activity allows the users to manage the disaster teams they own and
@@ -54,35 +62,82 @@ public class DisasterListActivity extends ListActivity {
 
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate (Bundle savedInstanceState) {
 
     	super.onCreate(savedInstanceState);
-    	
     	setContentView (R.layout.disaster_list_layout);
     	ListView listView = getListView();
-    	
+
     	// Enable filtering for the contents of the list view.
     	// The filtering logic should be provided
     	// listView.setTextFilterEnabled(true);  
     	
     	
-// TODO: Get the list from the Societies Content Provide
+// TODO: Get the list from the Societies Content Provider instead of static data
+    	
+    	iDisasterApplication.getInstance().disasterAdapter = new ArrayAdapter<String> (this,
+		R.layout.disaster_list_item, R.id.disaster_item, iDisasterApplication.getInstance().disasterNameList);
+
+// TODO: Remove test code
+//    			//1- Create local ContentValues to hold the community data.
+//    			ContentValues initialValues = new ContentValues();
+//    			initialValues.put(SocialContract.Community.NAME , "XYZ");
+//    			initialValues.put(SocialContract.Community.OWNER_ID , "babak@societies.org");
+//    			initialValues.put(SocialContract.Community.CREATION_DATE , "today");
+    			
+//    			// Call insert in SocialProvider to initiate insertion
+//    			Uri newCommunityUri= resolver.insert(SocialContract.Community.CONTENT_URI , 
+//    					initialValues);
+// TODO: End of test code
+
+// TODO: Define query
+//    			//What to get:
+//    			String[] projection ={
+//    					SocialContract.Community._ID,
+//    					SocialContract.Community.NAME
+//    				};
+//    			//WHERE CIS type = disaster
+//    			String selection = SocialContract.Community.TYPE + " = " + "disaster";
+//    			Cursor cursor = resolver.query(SocialContract.Community.CONTENT_URI,
+//    					projection, selection, null, null);
+//
+    	
+// TODO: check query result
+//
+//    			if (cursor == null) {						// An error has occurred.
+//  The activity is not visible yet. To display text, it should be made visible first
+//     	    	// Assign a "fake" adapter to ListView?
+//	
+//				listView.setAdapter(iDisasterApplication.getInstance().disasterAdapter);
+//				display error dialog and close application?
+//
+//    	
+//    			} else if (cursor.getCount () <1) {			// The cursor is empty
+//  The activity is not visible yet. To display text, it should be made visible first
+//	    	// Assign adapter (related to empty cursor) to ListView?
+//			// when list is empty the text message in layout is displayed...    	
+//
+//				listView.setAdapter(iDisasterApplication.getInstance().disasterAdapter);
+//
+//
+//    			} else {									// Display data
+    	
+//		
+////		if (!cursor.moveToFirst()) return;
+//
 
 
     	// The Adapter provides access to the data items.
     	// The Adapter is also responsible for making a View for each item in the data set.
     	//  Parameters: Context, Layout for the row, ID of the View to which the data is written, Array of data
 
-    	iDisasterApplication.getInstance().disasterAdapter = new ArrayAdapter<String> (this,
-		R.layout.disaster_list_item, R.id.disaster_item, iDisasterApplication.getInstance().disasterNameList);
-
     	// Assign adapter to ListView
 
     	listView.setAdapter(iDisasterApplication.getInstance().disasterAdapter);
 
     	// Add listener for short click.
-    	// 
-    	listView.setOnItemClickListener(new OnItemClickListener() {
+
+       	listView.setOnItemClickListener(new OnItemClickListener() {
     		public void onItemClick (AdapterView<?> parent, View view,
     			int position, long id) {
     			// Store the selected disaster in preferences
@@ -102,9 +157,14 @@ public class DisasterListActivity extends ListActivity {
 
     		}
     	});	
+       	
+//		}
 
+
+       	
     	// Add listener for long click
     	// listView.setOnItemLongClickListener(new DrawPopup());
+
 
     }
 
