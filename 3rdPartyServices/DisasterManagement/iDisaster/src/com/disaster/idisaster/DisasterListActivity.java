@@ -97,9 +97,8 @@ public class DisasterListActivity extends ListActivity {
     			// Start the Disaster Activity
     			startActivity (new Intent(DisasterListActivity.this, DisasterActivity.class));
     			
-//TODO: Not sure whether or not the activity should finish...
-// noHistory is not set in Manifest (noHistory=true => the activity is removed from the activity stack and finished.
-    			finish();
+// The activity is kept on stack (check also that "noHistory" is not set in Manifest
+//    			finish();
 
     		}
     	});	
@@ -108,6 +107,21 @@ public class DisasterListActivity extends ListActivity {
     	// listView.setOnItemLongClickListener(new DrawPopup());
 
     }
+
+    /** Called at start of the active lifetime. */
+    @Override
+	protected void onResume() {
+		super.onResume();
+    	iDisasterApplication.getInstance().setDisasterName 
+		(getString(R.string.noPreference));					// reset user preferences
+
+	}//onResume
+
+    /** Called when resuming a previous activity (for instance using back button) */
+//    @Override
+//    protected void onPause () {
+//    	super.onPause ();
+//    }
 
 /**
  * onCreateOptionsMenu creates the activity menu.

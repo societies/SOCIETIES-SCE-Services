@@ -36,7 +36,7 @@ import android.widget.Toast;
  * This activity allows the user to look up members
  * in a directory, more to be added.
  * 
- * @author Babak.Farshchian@sintef.no
+ * @author Jacqueline.Floch@sintef.no
  *
  */
 public class MemberListActivity extends Activity {

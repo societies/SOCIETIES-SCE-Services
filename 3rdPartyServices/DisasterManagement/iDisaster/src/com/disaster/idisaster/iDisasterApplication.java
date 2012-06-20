@@ -124,8 +124,14 @@ public class iDisasterApplication extends Application {
 		memberDescriptionList.add ("Doctor.");
 		memberDescriptionList.add ("Civil Engineer.");
 
-		serviceNameList.add ("Nicosia Team");
+		serviceNameList.add ("Share picture");
 		serviceDescriptionList.add ("This service allows picture sharing with your team.");
+		serviceNameList.add ("Jacket control");
+		serviceDescriptionList.add ("This service allows people in your team to remote control your jacket.");
+		serviceNameList.add ("Ask for help");
+		serviceDescriptionList.add ("This service allows you to request help from volunteers.");
+		serviceNameList.add ("Test");
+		serviceDescriptionList.add ("This service is a test.");
 // end of remobed
 		
 //TODO: CSS_ID should be stored

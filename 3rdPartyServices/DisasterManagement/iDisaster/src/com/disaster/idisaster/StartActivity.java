@@ -90,8 +90,7 @@ public class StartActivity extends Activity implements OnClickListener {
     	} else if (disasterName == getString(R.string.noPreference)) {					// no disaster selected
     		startActivity(new Intent(StartActivity.this, DisasterListActivity.class));
     		return;
-    	} else {
-    		
+    	} else {   		
     		startActivity(new Intent(StartActivity.this, DisasterActivity.class));
     		return;
     	}
