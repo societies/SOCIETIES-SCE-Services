@@ -36,6 +36,7 @@ import javax.swing.JOptionPane;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.societies.api.css.devicemgmt.rfid.IRfidDriver;
 import org.societies.api.schema.servicelifecycle.model.ServiceResourceIdentifier;
 
 import ac.hw.rfid.client.api.remote.IRfidClient;
@@ -53,6 +54,8 @@ public class RfidServer implements IRfidServer {
 	
 	private Hashtable<String, String> wUnitToSymlocTable;
 	private ServerGUIFrame frame;
+	
+	private IRfidDriver rfidDriver;
 	
 	//private Hashtable<String, String> dpiToServiceID;
 	Hashtable<String, Timer> tagToTimerTable = new Hashtable<String, Timer>();
@@ -299,5 +302,19 @@ public class RfidServer implements IRfidServer {
 	 */
 	public void setRfidClient(IRfidClient rfidClient) {
 		this.rfidClient = rfidClient;
+	}
+
+	/**
+	 * @return the rfidDriver
+	 */
+	public IRfidDriver getRfidDriver() {
+		return rfidDriver;
+	}
+
+	/**
+	 * @param rfidDriver the rfidDriver to set
+	 */
+	public void setRfidDriver(IRfidDriver rfidDriver) {
+		this.rfidDriver = rfidDriver;
 	}
 }

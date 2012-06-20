@@ -37,6 +37,10 @@
 		
 		<osgi:reference id="rfidServer" interface="ac.hw.rfid.server.api.IRfidServer"></osgi:reference>
 		
+		
+		<osgi:reference id="rfidDriver" interface="org.societies.api.css.devicemgmt.rfid.IRfidDriver"></osgi:reference>
+		
+		
 		<!--  <osgi:reference id="upcm" interface="org.societies.personalisation.preference.api.UserPreferenceConditionMonitor.IUserPreferenceConditionMonitor"/> -->
 
 
@@ -46,4 +50,6 @@
 			value="RFID Server service" />
 		<property name="serviceName" value="RFIDServerService" />
 	</bean>
+	
+	
 </beans>

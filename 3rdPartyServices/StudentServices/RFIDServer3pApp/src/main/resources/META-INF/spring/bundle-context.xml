@@ -14,6 +14,7 @@
 		class="ac.hw.rfid.server.RfidServer"
 		name="rfidServer" init-method="initialiseRFIDServer">
 		<property name="rfidClientRemote" ref="rfidClientRemote"></property>
+		<property name="rfidDriver" ref="rfidDriver"></property>
 	</bean>
 
 	<bean id="rfidClientRemote"
