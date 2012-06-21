@@ -67,7 +67,7 @@ public class DisasterCreateActivity extends Activity implements OnClickListener 
     	button.setOnClickListener(this);
 
 //	    Test dialog
-//    	iDisasterApplication.getinstance().showDialog (this, getString(R.string.DisasterCreateTestDialog), getString(R.string.dialogOK));
+//    	iDisasterApplication.getInstance().showDialog (this, getString(R.string.DisasterCreateTestDialog), getString(R.string.dialogOK));
 
     }
 

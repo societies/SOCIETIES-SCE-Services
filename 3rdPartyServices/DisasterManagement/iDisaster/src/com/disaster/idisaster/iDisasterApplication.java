@@ -161,10 +161,16 @@ public class iDisasterApplication extends Application {
 		return preferences.getString ("pref.username",getString(R.string.noPreference));
 	}
 
-	public void setUserName (String name, String password) {
+	public void setUserIdentity (String name, String email, String password) {
     	editor.putString ("pref.username", name);
+    	editor.putString ("pref.email", email);
     	editor.putString ("pref.password", password);
     	editor.commit ();    	
+	}
+
+
+	public String getEmail () {
+		return preferences.getString ("pref.email", getString(R.string.noPreference));
 	}
 
 	public String getPassword () {
@@ -197,6 +203,9 @@ public class iDisasterApplication extends Application {
 		AlertDialog dialog = builder.create();
 		dialog.show();
 	}
+
+//  Example for using Test dialog
+//	iDisasterApplication.getInstance().showDialog (this, getString(R.string.loginTestDialog), getString(R.string.dialogOK));
 
 
 /***

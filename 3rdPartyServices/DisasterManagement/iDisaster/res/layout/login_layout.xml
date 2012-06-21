@@ -31,12 +31,39 @@
 					/>
 
 				<!-- Not sure if android:text is needed below -->
+				<!-- Not sure about width. Before android:width="140dp" android:maxWidth="140dp"-->
+				
 				<EditText
 				    android:id="@+id/editUserName"
 				    android:text="@string/emptyText"
 				    android:hint="@string/loginUserNameHint" android:textColor="@color/black"
 				    android:background="@android:drawable/editbox_background"
-				    android:width="140dp" android:maxWidth="140dp"
+				    android:width="200dp" android:maxWidth="200dp"
+				    android:layout_width="fill_parent" android:layout_height="wrap_content"
+				    android:paddingRight="2dip"
+				    android:paddingTop="10dip" android:paddingBottom="10dip"
+				    />
+				
+<!--			    android:layout_toRightOf="@id/editUserNameLabel"  -->
+				
+			</TableRow>
+
+			<TableRow>
+				<TextView android:id="@+id/editEmailLabel"
+					android:text="@string/loginEmailLabel" android:textColor="@color/black"
+					android:textStyle="bold" android:width="100dp" 
+					android:layout_width="wrap_content" android:layout_height="wrap_content"
+					android:paddingLeft="2dip" android:paddingRight="2dip"
+					android:paddingTop="2dip" android:paddingBottom="2dip" 
+					/>
+
+				<!-- Not sure if android:text is needed below -->
+				<EditText
+				    android:id="@+id/editEmail"
+				    android:text="@string/emptyText"
+				    android:hint="@string/loginEmailHint" android:textColor="@color/black"
+				    android:background="@android:drawable/editbox_background"
+				    android:width="200dp" android:maxWidth="200dp"
 				    android:layout_width="fill_parent" android:layout_height="wrap_content"
 				    android:paddingRight="2dip"
 				    android:paddingTop="10dip" android:paddingBottom="10dip" 
@@ -45,7 +72,7 @@
 <!--			    android:layout_toRightOf="@id/editUserNameLabel"  -->
 				
 			</TableRow>
-
+			
 			<TableRow>
 
 				<TextView
@@ -64,7 +91,7 @@
 				    android:text="@string/emptyText"
 				    android:hint= "@string/loginPasswordHint" android:textColor="@color/black"
 				    android:background="@android:drawable/editbox_background"
-				    android:width="140dp" android:maxWidth="140dp"
+				    android:width="200dp" android:maxWidth="200dp"
 				    android:layout_width="fill_parent" android:layout_height="wrap_content"
 				    android:paddingRight="2dip"
 				    android:paddingTop="10dip" android:paddingBottom="10dip" />
@@ -102,8 +129,6 @@
 	    			/> 
  
  -->
-
-
 			</TableRow>
 
 			<TableRow>			

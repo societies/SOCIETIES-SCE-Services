@@ -44,6 +44,14 @@ import android.content.Intent;
 
 import android.view.inputmethod.InputMethodManager;
 
+import org.societies.android.api.cis.SocialContract;
+import android.net.Uri;
+
+import android.content.ContentValues;
+import android.content.ContentResolver;
+import android.database.Cursor;
+
+
 
 /**
  * This activity is responsible for user login,
@@ -53,11 +61,17 @@ import android.view.inputmethod.InputMethodManager;
  *
  */
 
+
+// TODO: This ACtivity will be removed
+// Login should be handled by CSS Management Light
+
 public class LoginActivity extends Activity implements OnClickListener {
 
 	private EditText userNameView;
+	private EditText userEmailView;
 	private EditText userPasswordView;
 	private String userName;
+	private String userEmail;
 	private String userPassword;
 
 	
@@ -69,16 +83,15 @@ public class LoginActivity extends Activity implements OnClickListener {
 
 		// Get editable fields
 		userNameView = (EditText) findViewById(R.id.editUserName);
-	    userPasswordView = (EditText) findViewById(R.id.editPassword);
+		userEmailView = (EditText) findViewById(R.id.editEmail);
+		userPasswordView = (EditText) findViewById(R.id.editPassword);
 	    userPasswordView.setInputType (InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
 
     	// Add click listener to button
     	final Button button = (Button) findViewById(R.id.loginButton);
     	button.setOnClickListener(this);
     	
-//	    Test dialog
-//    	iDisasterApplication.getinstance().showDialog (this, getString(R.string.loginTestDialog), getString(R.string.dialogOK));
-
+    	
     }
  		
 /**
@@ -86,78 +99,148 @@ public class LoginActivity extends Activity implements OnClickListener {
  * the OnClickListener is assigned to the button
  */
 	public void onClick (View view) {
-			
+
+// TODO: remove code
+// The text will now be set to the Hint text
+//    	if (userNameView.getText().length() == 0) {					// check input for user name
+//
+//    	// Hide the soft keyboard otherwise the toast message does appear more clearly.
+//    	    InputMethodManager mgr = (InputMethodManager) getSystemService(this.INPUT_METHOD_SERVICE);
+//    	    mgr.hideSoftInputFromWindow(userNameView.getWindowToken(), 0);
+//	    
+//    		Toast.makeText(this, getString(R.string.toastUserName), 
+//    				Toast.LENGTH_LONG).show();
+//    		return;
+//
+//    	} else if (userPasswordView.getText().length() == 0) {		// check input for password
+//
+//    		// Hide the soft keyboard otherwise the toast message does appear more clearly.
+//    	    InputMethodManager mgr = (InputMethodManager) getSystemService(this.INPUT_METHOD_SERVICE);
+//    	    mgr.hideSoftInputFromWindow(userPasswordView.getWindowToken(), 0);
+//
+//    	    Toast.makeText(this, getString(R.string.toastPassword), 
+//	    			Toast.LENGTH_LONG).show();
+//	    	return;
+//
+//    	} else {													// verify the password and store in preferences file
+//
+//    		userName = userNameView.getText().toString();
+//    		userPassword = userPasswordView.getText().toString();
+//		... go on as bealow
+
     	if (userNameView.getText().length() == 0) {					// check input for user name
-
-    	// Hide the soft keyboard otherwise the toast message does appear more clearly.
-    	    InputMethodManager mgr = (InputMethodManager) getSystemService(this.INPUT_METHOD_SERVICE);
-    	    mgr.hideSoftInputFromWindow(userNameView.getWindowToken(), 0);
-	    
-    		Toast.makeText(this, getString(R.string.toastUserName), 
-    				Toast.LENGTH_LONG).show();
-    		return;
-
-    	} else if (userPasswordView.getText().length() == 0) {		// check input for password
-
-    		// Hide the soft keyboard otherwise the toast message does appear more clearly.
-    	    InputMethodManager mgr = (InputMethodManager) getSystemService(this.INPUT_METHOD_SERVICE);
-    	    mgr.hideSoftInputFromWindow(userPasswordView.getWindowToken(), 0);
-
-    	    Toast.makeText(this, getString(R.string.toastPassword), 
-	    			Toast.LENGTH_LONG).show();
-	    	return;
-
-    	} else {													// verify the password and store in preferences file
-
+    		userName = getString (R.string.loginUserNameHint);
+    	} else {
     		userName = userNameView.getText().toString();
-    		userPassword = userPasswordView.getText().toString();
 
-//TODO: the user name and pasword should be checked by the platform
+    	}
+
+    	if (userEmailView.getText().length() == 0) {		// check input for password
+    		userEmail = getString (R.string.loginEmailHint);
+    	} else {
+    		userEmail = userEmailView.getText().toString();
+    	}
+
+    	if (userPasswordView.getText().length() == 0) {		// check input for password
+    		userPassword = getString (R.string.loginPasswordHint);
+    	} else {
+    		userPassword = userPasswordView.getText().toString();
+    	}
+
+     		
+//TODO: the user name and password should be checked by the platform
         	// Instantiate the Societies platform => needs modification of platforLogin
-        	iDisasterApplication.getInstance().platformLogIn ();
+        iDisasterApplication.getInstance().platformLogIn ();
 
     		
-    		boolean loginCode = false;	// TODO: replaced by code returned by Societes API
+    	boolean loginCode = false;	// TODO: replaced by code returned by Societes API
     			    		
-    		// Create dialog for wrong password
-    		if (loginCode) { 							
-    			AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this);
-    			alertBuilder.setMessage(getString(R.string.loginDialog))
-    				.setCancelable(false)
-    				.setPositiveButton (getString(R.string.dialogOK), new DialogInterface.OnClickListener() {
-    					public void onClick(DialogInterface dialog, int id) {
-	    		           userNameView.setText(getString(R.string.emptyText));
-	    		           userNameView.setHint(getString(R.string.loginUserNameHint));
-	    		           userPasswordView.setText(getString(R.string.emptyText));
-	    		           userPasswordView.setHint(getString(R.string.loginPasswordHint));
-	    		           return;
-    					}
-    				});
-	    		AlertDialog alert = alertBuilder.create();
-	    		alert.show();
-	    		return;
-	   		}
+    	// Create dialog for wrong password
+    	if (loginCode) { 							
+    		AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this);
+    		alertBuilder.setMessage(getString(R.string.loginDialog))
+    			.setCancelable(false)
+    			.setPositiveButton (getString(R.string.dialogOK), new DialogInterface.OnClickListener() {
+    				public void onClick(DialogInterface dialog, int id) {
+	    	           userNameView.setText(getString(R.string.emptyText));
+	    	           userNameView.setHint(getString(R.string.loginUserNameHint));
+	    	           userEmailView.setText(getString(R.string.emptyText));
+	    	           userEmailView.setHint(getString(R.string.loginEmailHint));
+	    	           userPasswordView.setText(getString(R.string.emptyText));
+	    	           userPasswordView.setHint(getString(R.string.loginPasswordHint));
+	    	           return;
+    				}
+    			});
+	    	AlertDialog alert = alertBuilder.create();
+	    	alert.show();
+	    	return;
+	   	}
 	    		
-    		// Store user name and password in preferences
-        	iDisasterApplication.getInstance().setUserName (userName, userPassword);
+    	// Store user name and password in preferences
+        iDisasterApplication.getInstance().setUserIdentity (userName, userEmail, userPassword);
         	
 // Code for testing the correct setting of preferences 
-//    	    String testName = iDisasterApplication.getinstance().preferences.
+//    	    String testName = iDisasterApplication.getInstance().preferences.
 //    	    	getString ("pref.username","");
-//    	    String testPassword = iDisasterApplication.getinstance().preferences.
+//    	    String testEmail = iDisasterApplication.getInstance().preferences.
+//	    	getString ("pref.email","");
+//    	    String testPassword = iDisasterApplication.getInstance().preferences.
 //    	    	getString ("pref.password","");
-//    	    Toast.makeText(this, "Debug: "  + testName + " " + testPassword, 
+//    	    Toast.makeText(this, "Debug: "  + testName + " " + testEmail + " " + testPassword, 
 //    			Toast.LENGTH_LONG).show();
 
-    	    // Hide the soft keyboard:
-			// - the soft keyboard will not appear on next activity window!
-    	    InputMethodManager mgr = (InputMethodManager) getSystemService(this.INPUT_METHOD_SERVICE);
-    	    mgr.hideSoftInputFromWindow(userPasswordView.getWindowToken(), 0);
+        // Add user to Social Provider
+        insertMe ();
+        
 
-//    	    finish();	// noHistory=true in Manifest => the activity is removed from the activity stack and finished.
+        // Hide the soft keyboard:
+		// - the soft keyboard will not appear on next activity window!
+    	InputMethodManager mgr = (InputMethodManager) getSystemService(this.INPUT_METHOD_SERVICE);
+    	mgr.hideSoftInputFromWindow(userPasswordView.getWindowToken(), 0);
 
-	    	// Send intent to Disaster activity
-	    	startActivity(new Intent(LoginActivity.this, DisasterListActivity.class));
-	    }
-    }
+//    	finish();	// noHistory=true in Manifest => the activity is removed from the activity stack and finished.
+
+	    // Send intent to Disaster activity
+	    startActivity(new Intent(LoginActivity.this, DisasterListActivity.class));
+	}
+
+	/**
+	 * insertMe is to add the user information in SocialProvider
+	 */
+
+	private void insertMe () {
+		
+		Uri uri = SocialContract.Me.CONTENT_URI;
+		//What to get:
+		String[] projection = new String [] {
+				SocialContract.Me.GLOBAL_ID,
+				SocialContract.Me.NAME,
+				SocialContract.Me.DISPLAY_NAME
+			};
+		
+		String selection = null;
+		String[] selectionArgs = null;
+		String sortOrder = null;
+		Cursor cursor = managedQuery (uri, projection, selection, selectionArgs,
+				sortOrder);
+		
+		while (cursor.moveToNext()) {
+
+			String displayName = cursor.getString(cursor
+					.getColumnIndex(SocialContract.Community.DISPLAY_NAME));
+			
+			iDisasterApplication.getInstance().showDialog (this, "name: " + displayName , getString(R.string.dialogOK));
+			
+		}
+
+		
+//		ContentValues updateValues = new ContentValues();
+//		updateValues.put(SocialContract.Me.GLOBAL_ID , userEmail);
+//		updateValues.put(SocialContract.Me.NAME , userName);
+//		updateValues.put(SocialContract.Me.DISPLAY_NAME , userName);
+//		managedQuery(uri, projection, selection, selectionArgs,
+//				sortOrder);
+		
+	
+	}
 }

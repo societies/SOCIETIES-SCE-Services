@@ -52,7 +52,7 @@ public class FeedDetailsActivity extends Activity {
 //		feedContentView = (TextView) findViewById (R.id.showFeedDetailsContent);
 
 //	    Test dialog
-//    	iDisasterApplication.getinstance().showDialog (this, getString(R.string.newDisasterTestDialog), getString(R.string.dialogOK));
+//    	iDisasterApplication.getInstance().showDialog (this, getString(R.string.newDisasterTestDialog), getString(R.string.dialogOK));
 
     }
 

@@ -36,16 +36,17 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 
 /**
- * This is the activity (without GUI) that starts 
- * when you first click on the icon in Android.
+ * This is the activity that starts when you first click on the icon in Android.
  * 
- * The GUI is not shown the first time the application
- * is launched since the user should first log in.
+ * It selects the next activities depending on the stored user preferences.
  * 
  * @author Jacqueline.Floch@sintef.no
  * 
  *
  */
+
+// TODO: will be extended to retrieve the user data in the SocialProvider
+
 public class StartActivity extends Activity implements OnClickListener {
 
 	String userName;
@@ -62,7 +63,7 @@ public class StartActivity extends Activity implements OnClickListener {
 	    button.setOnClickListener(this);
 
 //	    Test dialog
-//    	iDisasterApplication.getinstance().showDialog (this, getString(R.string.startTestDialog), getString(R.string.dialogOK));
+//    	iDisasterApplication.getInstance().showDialog (this, getString(R.string.startTestDialog), getString(R.string.dialogOK));
 
     }
 
@@ -103,6 +104,10 @@ public class StartActivity extends Activity implements OnClickListener {
  * the OnClickListener is assigned to the button
  */
 	public void onClick (View view) {
+
+// Test Content Provider
+//		startActivity(new Intent(StartActivity.this, TestContentProvider.class));
+		
 		getPreferences ();				// retrieve user preferences
 		startNextActivity ();			// select next activity
 	}
@@ -135,9 +140,11 @@ public class StartActivity extends Activity implements OnClickListener {
 		
     	case R.id.startMenuLogoff:
 //TODO: Call the Social Provider
-        	iDisasterApplication.getInstance().setUserName
-        		(getString(R.string.noPreference), getString(R.string.noPreference));	// reset user preferences
-//        	iDisasterApplication.getinstance().userLoggedIn = false;
+    		// reset user preferences
+        	iDisasterApplication.getInstance().setUserIdentity
+        		(getString(R.string.noPreference), getString(R.string.noPreference),
+        		getString(R.string.noPreference));	
+//        	iDisasterApplication.getInstance().userLoggedIn = false;
 
     		break;
     		
