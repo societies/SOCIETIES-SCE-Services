@@ -72,7 +72,6 @@ public class iDisasterApplication extends Application {
 
 	
 //TODO: discuss design. Are these common resources really needed?	
-	ArrayAdapter<String> disasterAdapter;
 	ArrayAdapter<String> feedAdapter;
 	ArrayAdapter<String> memberAdapter;
 	ArrayAdapter<String> serviceAdapter;
@@ -132,50 +131,51 @@ public class iDisasterApplication extends Application {
 		serviceDescriptionList.add ("This service allows you to request help from volunteers.");
 		serviceNameList.add ("Test");
 		serviceDescriptionList.add ("This service is a test.");
-// end of remobed
+// end of removed
 		
-//TODO: CSS_ID should be stored
-	    if (getUserName () != getString(R.string.noPreference)){
-	    	platformLogIn();	// Instantiate the Societies platform
-	    }
+////TODO: CSS_ID should be stored
+//	    if (getUserName () != getString(R.string.noPreference)){
+//	    	platformLogIn();	// Instantiate the Societies platform
+//	    }
 	    
 	} //onCreate
 
-//TODO: Replace to call to SocialProvider
-/**
- * platformLogIn supports checking connection with SocialProvider
- * and retrieving the CSS_ID and name for the user.
- */	  
+////TODO: Replace to call to SocialProvider
+///**
+// * platformLogIn supports checking connection with SocialProvider
+// * and retrieving the CSS_ID and name for the user.
+// */	  
+//
+//	public void platformLogIn () {
+//
+////TODO: catch exception if
+////		- no response from SocialProvider.
+//		
+//		platformLoggedIn = true;
+//	}
 
-	public void platformLogIn () {
+//TODO: Go through the following code and remove if nor necessary
 
-//TODO: catch exception if
-//		- no response from SocialProvider.
-		
-		platformLoggedIn = true;
-	}
-
-//TODO: Go through the follwoing code and remove if nor necessary
-
-	public String getUserName () {
-		return preferences.getString ("pref.username",getString(R.string.noPreference));
-	}
-
-	public void setUserIdentity (String name, String email, String password) {
-    	editor.putString ("pref.username", name);
-    	editor.putString ("pref.email", email);
-    	editor.putString ("pref.password", password);
-    	editor.commit ();    	
-	}
-
-
-	public String getEmail () {
-		return preferences.getString ("pref.email", getString(R.string.noPreference));
-	}
-
-	public String getPassword () {
-		return preferences.getString ("pref.password", getString(R.string.noPreference));
-	}
+//	public String getUserName () {
+//		return preferences.getString ("pref.username",getString(R.string.noPreference));
+//	}
+//
+//	public void setUserIdentity (String name, String email, String password) {
+//    	editor.putString ("pref.username", name);
+//    	editor.putString ("pref.email", email);
+//    	editor.putString ("pref.password", password);
+//    	editor.commit ();    	
+//	}
+//
+//
+//	public String getEmail () {
+//		return preferences.getString ("pref.email", getString(R.string.noPreference));
+//	}
+//
+//	public String getPassword () {
+//		return preferences.getString ("pref.password", getString(R.string.noPreference));
+//	}
+//
 
 	public String getDisasterName () {
 		return preferences.getString ("pref.disastername", getString(R.string.noPreference));

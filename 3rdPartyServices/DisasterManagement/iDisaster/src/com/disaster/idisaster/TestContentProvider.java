@@ -28,6 +28,7 @@ import com.disaster.idisaster.R;
 
 
 import android.app.Activity;
+import android.content.ContentResolver;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -43,6 +44,9 @@ import android.widget.TextView;
  */
 public class TestContentProvider extends Activity {
 
+	ContentResolver resolver;
+	Cursor cursor;
+	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -59,10 +63,12 @@ public class TestContentProvider extends Activity {
 			contactView.append(displayName);
 			contactView.append("\n");
 		}
+
 	}
 
 	private Cursor getContacts() {
 		// Run query
+
 		Uri uri = ContactsContract.Contacts.CONTENT_URI;
 		String[] projection = new String[] { ContactsContract.Contacts._ID,
 				ContactsContract.Contacts.DISPLAY_NAME };
@@ -72,8 +78,31 @@ public class TestContentProvider extends Activity {
 		String sortOrder = ContactsContract.Contacts.DISPLAY_NAME
 				+ " COLLATE LOCALIZED ASC";
 
+		resolver  = getContentResolver();
+		cursor = resolver.query(uri, projection, selection, selectionArgs,sortOrder);
+
+		return cursor;
+
+// Code from Lars Vogel example (vogella.com). 
+// managedQuery is deprecated.
+//
+// When using managedQuery(), the activity keeps a reference to the cursor and close it
+// whenever needed (in onDestroy() for instance.) 
+// When using a contentResolver's query(), the developer has to manage the cursor as a sensitive
+// resource. If you forget, for instance, to close() it in onDestroy(), you will leak 
+// underlying resources (logcat will warn you about it.)
+//
+//		return managedQuery(uri, projection, selection, selectionArgs,
+//				sortOrder);
+	}
+
+	@Override
+	public void onDestroy () {
+		super.onDestroy();
 		
-		return managedQuery(uri, projection, selection, selectionArgs,
-				sortOrder);
+		if (cursor != null) {
+			cursor.close();
+		}
+		
 	}
 }

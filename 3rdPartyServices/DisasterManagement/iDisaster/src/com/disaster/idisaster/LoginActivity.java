@@ -44,7 +44,7 @@ import android.content.Intent;
 
 import android.view.inputmethod.InputMethodManager;
 
-import org.societies.android.api.cis.SocialContract;
+import com.disaster.idisaster.SocialContract;
 import android.net.Uri;
 
 import android.content.ContentValues;
@@ -150,7 +150,7 @@ public class LoginActivity extends Activity implements OnClickListener {
      		
 //TODO: the user name and password should be checked by the platform
         	// Instantiate the Societies platform => needs modification of platforLogin
-        iDisasterApplication.getInstance().platformLogIn ();
+//        iDisasterApplication.getInstance().platformLogIn ();
 
     		
     	boolean loginCode = false;	// TODO: replaced by code returned by Societes API
@@ -175,10 +175,15 @@ public class LoginActivity extends Activity implements OnClickListener {
 	    	alert.show();
 	    	return;
 	   	}
-	    		
+    	
+// TODO: store log information in the Social Provider - not in preferences.
+// Temporary solution as long CSS Manager Light is not available
+    	
     	// Store user name and password in preferences
-        iDisasterApplication.getInstance().setUserIdentity (userName, userEmail, userPassword);
-        	
+//        iDisasterApplication.getInstance().setUserIdentity (userName, userEmail, userPassword);
+      	
+    	
+    	
 // Code for testing the correct setting of preferences 
 //    	    String testName = iDisasterApplication.getInstance().preferences.
 //    	    	getString ("pref.username","");
@@ -211,6 +216,8 @@ public class LoginActivity extends Activity implements OnClickListener {
 	private void insertMe () {
 		
 		Uri uri = SocialContract.Me.CONTENT_URI;
+
+		
 		//What to get:
 		String[] projection = new String [] {
 				SocialContract.Me.GLOBAL_ID,
@@ -221,17 +228,30 @@ public class LoginActivity extends Activity implements OnClickListener {
 		String selection = null;
 		String[] selectionArgs = null;
 		String sortOrder = null;
-		Cursor cursor = managedQuery (uri, projection, selection, selectionArgs,
-				sortOrder);
 		
-		while (cursor.moveToNext()) {
+		ContentResolver resolver  = getContentResolver();
+		Cursor cursor = resolver.query(uri, projection, selection, selectionArgs,sortOrder);
 
-			String displayName = cursor.getString(cursor
-					.getColumnIndex(SocialContract.Community.DISPLAY_NAME));
+//		Cursor cursor = getContentResolver().query(uri, projection, selection, selectionArgs,
+//				sortOrder);
+		
+		
+		if (cursor == null) {
+			iDisasterApplication.getInstance().showDialog (this, "No content provider found", getString(R.string.dialogOK));
 			
-			iDisasterApplication.getInstance().showDialog (this, "name: " + displayName , getString(R.string.dialogOK));
-			
+		} else {
+
+			while (cursor.moveToNext()) {
+
+				String displayName = cursor.getString(cursor
+						.getColumnIndex(SocialContract.Community.DISPLAY_NAME));
+				
+				iDisasterApplication.getInstance().showDialog (this, "name: " + displayName , getString(R.string.dialogOK));
+				
+			}
+
 		}
+		
 
 		
 //		ContentValues updateValues = new ContentValues();

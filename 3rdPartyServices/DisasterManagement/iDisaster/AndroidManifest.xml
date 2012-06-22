@@ -5,10 +5,13 @@
     android:versionName="1.0" >
 
     <uses-sdk android:minSdkVersion="8" />
+ 
     <uses-permission
-        android:name="org.societies.cis.android.SocialProvider.READ" />
+        android:name="org.societies.android.SocialProvider.READ" />
     <uses-permission
-        android:name="org.societies.cis.android.SocialProvider.WRITE" />
+        android:name="org.societies.android.SocialProvider.WRITE" />
+
+
     <uses-permission
         android:name="android.permission.READ_CONTACTS" />
     

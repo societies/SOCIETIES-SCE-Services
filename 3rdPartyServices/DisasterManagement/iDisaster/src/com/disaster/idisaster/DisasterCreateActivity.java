@@ -131,7 +131,7 @@ public class DisasterCreateActivity extends Activity implements OnClickListener 
     	    iDisasterApplication.getInstance().disasterNameList.add(disasterName);
     	    
     	    // report data change to adapter
-    	    iDisasterApplication.getInstance().disasterAdapter.notifyDataSetChanged();
+//    	    iDisasterApplication.getInstance().disasterAdapter.notifyDataSetChanged();
 
     		
 // TODO: Remove code for testing the correct setting of preferences 

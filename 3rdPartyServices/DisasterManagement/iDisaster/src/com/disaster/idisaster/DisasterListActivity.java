@@ -27,11 +27,14 @@ package com.disaster.idisaster;
 //import org.societies.api.cis.management.ICisManager;
 //import org.societies.api.cis.management.ICisOwned;
 
+import java.util.ArrayList;
+
 import com.disaster.idisaster.R;
 
 import android.app.ListActivity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -41,13 +44,26 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
+
+
+
+
+
 //TODO: Add import
 //import org.societies.android.platform.SocialContract;
-import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
-import android.test.ProviderTestCase2;
-import android.test.mock.MockContentResolver;
+
+
+
+
+import android.content.ContentResolver;
+import android.database.Cursor;
+import android.net.Uri;
+import android.os.Bundle;
+import android.provider.ContactsContract;
+import android.widget.TextView;
+
 
 
 /**
@@ -60,122 +76,84 @@ import android.test.mock.MockContentResolver;
 
 public class DisasterListActivity extends ListActivity {
 
+	ContentResolver resolver;
+	Cursor cursor;
+	
+	// before declared in create
+	ArrayAdapter<String> disasterAdapter;
+	ListView listView;
+	
 
     @Override
     protected void onCreate (Bundle savedInstanceState) {
 
     	super.onCreate(savedInstanceState);
     	setContentView (R.layout.disaster_list_layout);
-    	ListView listView = getListView();
-
-    	// Enable filtering for the contents of the list view.
-    	// The filtering logic should be provided
-    	// listView.setTextFilterEnabled(true);  
-    	
-    	
-// TODO: Get the list from the Societies Content Provider instead of static data
-    	
-    	iDisasterApplication.getInstance().disasterAdapter = new ArrayAdapter<String> (this,
-		R.layout.disaster_list_item, R.id.disaster_item, iDisasterApplication.getInstance().disasterNameList);
-
-// TODO: Remove test code
-//    			//1- Create local ContentValues to hold the community data.
-//    			ContentValues initialValues = new ContentValues();
-//    			initialValues.put(SocialContract.Community.NAME , "XYZ");
-//    			initialValues.put(SocialContract.Community.OWNER_ID , "babak@societies.org");
-//    			initialValues.put(SocialContract.Community.CREATION_DATE , "today");
-    			
-//    			// Call insert in SocialProvider to initiate insertion
-//    			Uri newCommunityUri= resolver.insert(SocialContract.Community.CONTENT_URI , 
-//    					initialValues);
-// TODO: End of test code
-
-// TODO: Define query
-//    			//What to get:
-//    			String[] projection ={
-//    					SocialContract.Community._ID,
-//    					SocialContract.Community.NAME
-//    				};
-//    			//WHERE CIS type = disaster
-//    			String selection = SocialContract.Community.TYPE + " = " + "disaster";
-//    			Cursor cursor = resolver.query(SocialContract.Community.CONTENT_URI,
-//    					projection, selection, null, null);
-//
-    	
-// TODO: check query result
-//
-//    			if (cursor == null) {						// An error has occurred.
-//  The activity is not visible yet. To display text, it should be made visible first
-//     	    	// Assign a "fake" adapter to ListView?
-//	
-//				listView.setAdapter(iDisasterApplication.getInstance().disasterAdapter);
-//				display error dialog and close application?
-//
-//    	
-//    			} else if (cursor.getCount () <1) {			// The cursor is empty
-//  The activity is not visible yet. To display text, it should be made visible first
-//	    	// Assign adapter (related to empty cursor) to ListView?
-//			// when list is empty the text message in layout is displayed...    	
-//
-//				listView.setAdapter(iDisasterApplication.getInstance().disasterAdapter);
-//
-//
-//    			} else {									// Display data
-    	
-//		
-////		if (!cursor.moveToFirst()) return;
-//
-
-
-    	// The Adapter provides access to the data items.
-    	// The Adapter is also responsible for making a View for each item in the data set.
-    	//  Parameters: Context, Layout for the row, ID of the View to which the data is written, Array of data
-
-    	// Assign adapter to ListView
-
-    	listView.setAdapter(iDisasterApplication.getInstance().disasterAdapter);
+    	listView = getListView();
+    	resolver = getContentResolver();
+ 
 
     	// Add listener for short click.
-
        	listView.setOnItemClickListener(new OnItemClickListener() {
     		public void onItemClick (AdapterView<?> parent, View view,
     			int position, long id) {
-    			// Store the selected disaster in preferences
+    			// Store the selected disaster in preferences ??
 //TODO: Add unique ID to CIS instead of name since name can be duplicated 
-            	iDisasterApplication.getInstance().setDisasterName (iDisasterApplication.getInstance().disasterNameList.get (position));
-
+    			iDisasterApplication.getInstance().setDisasterName ("Name will be updated");
+    			
 // TODO: Remove code for testing the correct setting of preferences 
     			Toast.makeText(getApplicationContext(),
-    				"Click ListItem Number   " + (position+1) + "   " + iDisasterApplication.getInstance().disasterNameList.get (position), Toast.LENGTH_LONG)
+    				"Click ListItem Number   " + (position+1) + "   " + "Name will be provided", Toast.LENGTH_LONG)
     				.show();
 
     			// Start the Disaster Activity
     			startActivity (new Intent(DisasterListActivity.this, DisasterActivity.class));
-    			
+
 // The activity is kept on stack (check also that "noHistory" is not set in Manifest
 //    			finish();
-
     		}
     	});	
        	
-//		}
-
-
-       	
     	// Add listener for long click
     	// listView.setOnItemLongClickListener(new DrawPopup());
-
-
     }
 
-    /** Called at start of the active lifetime. */
+    /**  */
+    
+/**
+ * onResume is called at start of the active lifetime.
+ * The lists of disaster is retrieved from SocialProvider and assigned to 
+ * view.
+*/
+
+// TODO: check if it is necessary to use an adaptater as the list of disasters is
+// retrieved anyway.
+    
     @Override
 	protected void onResume() {
 		super.onResume();
-    	iDisasterApplication.getInstance().setDisasterName 
-		(getString(R.string.noPreference));					// reset user preferences
 
-	}//onResume
+// TODO: Is it necessary to clear this adpater?		
+    	if (disasterAdapter!= null) disasterAdapter.clear();
+		
+		iDisasterApplication.getInstance().setDisasterName // reset user preferences
+		(getString(R.string.noPreference));
+		
+		getDisasterTeams();
+		assignAdapter ();		
+	}
+
+
+/**
+ * onPause releases all data.
+ */
+       
+	@Override
+    protected void onPause() {
+    	super.onPause ();
+    	
+    	cursor.close();    	
+    }
 
     /** Called when resuming a previous activity (for instance using back button) */
 //    @Override
@@ -183,6 +161,82 @@ public class DisasterListActivity extends ListActivity {
 //    	super.onPause ();
 //    }
 
+/**
+ * getDisasters retrieves the list of disaster teams from Social Provider.
+ */
+	private Cursor getDisasterTeams () {
+
+		Uri uri = SocialContract.MyCommunity.CONTENT_URI;
+
+		String[] projection = new String[] { 
+				SocialContract.MyCommunity.DISPLAY_NAME };
+
+//		String[] projection = new String[] { SocialContract.MyCommunity._ID,
+//				SocialContract.MyCommunity.DISPLAY_NAME };
+//		String selection = ContactsContract.Contacts.IN_VISIBLE_GROUP + " = '"
+//				+ ("1") + "'";
+
+// TODO: select only string I am member of		
+		String selection = null;
+
+		String[] selectionArgs = null;
+
+// TODO: check that ordering is OK
+		String sortOrder = SocialContract.MyCommunity.DISPLAY_NAME
+				+ " COLLATE LOCALIZED ASC";
+
+		cursor = resolver.query(uri, projection, selection, selectionArgs,sortOrder);
+
+		return cursor;
+
+//
+// When using managedQuery(), the activity keeps a reference to the cursor and close it
+// whenever needed (in onDestroy() for instance.) 
+// When using a contentResolver's query(), the developer has to manage the cursor as a sensitive
+// resource. If you forget, for instance, to close() it in onDestroy(), you will leak 
+// underlying resources (logcat will warn you about it.)
+//
+	}
+
+/**
+ * assignAdapter assigns data to display to adapter and adapter to view.
+ */
+	private void assignAdapter () {
+		
+		if (cursor == null) {
+			// assign an empty List to Adapter
+	    	disasterAdapter = new ArrayAdapter<String> (this,
+	    			R.layout.disaster_list_item, R.id.disaster_item, new ArrayList<String> ());
+
+	    	// associate adapter to list (in order to be able to display text?)
+	    	listView.setAdapter(disasterAdapter);    	
+
+	    	iDisasterApplication.getInstance().showDialog (this,
+					"Unable to retrieve user information from SocialProvider",
+					 getString(R.string.dialogOK));
+// TODO: should terminate somehow here
+		} else {
+			if (cursor.getCount() == 0) {
+				// assign an empty List to Adapter
+		    	disasterAdapter = new ArrayAdapter<String> (this,
+		    			R.layout.disaster_list_item, R.id.disaster_item, new ArrayList<String> ());		
+		    	listView.setAdapter(disasterAdapter);
+			} else {				
+				ArrayList<String> disasterList = new ArrayList<String> ();
+				while (cursor.moveToNext()) {
+					String displayName = cursor.getString(cursor
+							.getColumnIndex(ContactsContract.Data.DISPLAY_NAME));
+					disasterList.add (displayName);
+
+				}
+		    	disasterAdapter = new ArrayAdapter<String> (this,
+		    			R.layout.disaster_list_item, R.id.disaster_item, disasterList);
+		    	listView.setAdapter(disasterAdapter);
+			}
+		}
+	}
+
+    
 /**
  * onCreateOptionsMenu creates the activity menu.
  */
@@ -202,7 +256,7 @@ public class DisasterListActivity extends ListActivity {
  * onOptionsItemSelected handles the selection of an item in the activity menu.
  */
 	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
+	public boolean onOptionsItemSelected (MenuItem item) {
 
 		switch (item.getItemId()) {
 		case R.id.disasterMenuAdd:

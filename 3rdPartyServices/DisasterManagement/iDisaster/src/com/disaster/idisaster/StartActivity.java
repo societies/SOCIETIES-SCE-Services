@@ -27,18 +27,30 @@ package com.disaster.idisaster;
 import com.disaster.idisaster.R;
 
 import android.app.Activity;
+import android.content.ContentResolver;
 import android.content.Intent;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.TextView;
+
+import com.disaster.idisaster.SocialContract;
+import android.net.Uri;
+import android.content.ContentValues;
+import android.content.ContentResolver;
+import android.database.Cursor;
+
 
 /**
  * This is the activity that starts when you first click on the icon in Android.
  * 
  * It selects the next activities depending on the stored user preferences.
+ * See the method startNextActivity for more details.
  * 
  * @author Jacqueline.Floch@sintef.no
  * 
@@ -51,6 +63,7 @@ public class StartActivity extends Activity implements OnClickListener {
 
 	String userName;
 	String disasterName;
+	Boolean loggedIn = false;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -58,23 +71,129 @@ public class StartActivity extends Activity implements OnClickListener {
     	super.onCreate(savedInstanceState);
     				
 	    setContentView (R.layout.start_layout);	// create GUI
+   	    
 	    // Add click listener to button
 	    final Button button = (Button) findViewById(R.id.startButton);
 	    button.setOnClickListener(this);
 
-//	    Test dialog
-//    	iDisasterApplication.getInstance().showDialog (this, getString(R.string.startTestDialog), getString(R.string.dialogOK));
-
     }
 
 /**
+ * onResume: Things to do when the activity becomes visible.
+ * - check the ContentProvider is answering
+ * - check if the user is logged in
+ * 
+ */
+	@Override
+    public void onResume () {
+    	
+    	super.onResume();
+    	
+    	// check is the user is logged in
+    	// if logged in display the user name
+    	// if not tell the user he is not logged in.
+    
+    	loggedIn = false;
+    	
+		TextView startView = (TextView) findViewById(R.id.startInfo);
+		
+		userName = getUserIdentity();
+
+		if (userName == null) {											// No data returned by Social provider
+			iDisasterApplication.getInstance().showDialog (this,
+					"Unable to retrieve user information from SocialProvider",
+					 getString(R.string.dialogOK));
+		} else if (userName == "Your Name") {							// User is not identified
+			startView.setText(getString(R.string.startInfoNotLogged));
+			loggedIn = true;
+		
+		} else {														// User is identified
+			startView.setText(getString(R.string.startInfoLogged) + userName);
+		}
+		loggedIn = true;
+
+	}
+
+/**
+ * onClick is called when button is clicked because
+ * the OnClickListener is assigned to the button
+ */
+	 public void onClick (View view) {
+
+// TODO: remove TEST! Test Content Provider
+//	    		startActivity(new Intent(StartActivity.this, TestContentProvider.class));
+
+//		if (userName == null) 	// No contact provider. Terminate Application.
+//			finish ();
+		
+		if (!loggedIn) {		// no user name
+    		startActivity(new Intent(StartActivity.this, LoginActivity.class));
+    		return;			
+		} else {
+	    	disasterName = iDisasterApplication.getInstance().getDisasterName ();
+	    	if (disasterName == getString(R.string.noPreference)) {				// no disaster selected
+	    		startActivity(new Intent(StartActivity.this, DisasterListActivity.class));
+	    		return;
+	    	} else {
+	    		startActivity(new Intent(StartActivity.this, DisasterActivity.class));
+	    		return;
+	    	}
+		}
+		
+// Old code: remove		
+//   	getPreferences ();				// retrieve user preferences
+//		startNextActivity ();			// select next activity
+   	}
+
+
+/**
+ * getUserIdentity is to add the user information in SocialProvider
+ */
+
+	private String getUserIdentity () {
+		String displayName = null;
+		
+		Uri uri = SocialContract.Me.CONTENT_URI;
+
+		//What to get:
+		String[] projection = new String [] {
+				SocialContract.Me.GLOBAL_ID,
+				SocialContract.Me.NAME,
+				SocialContract.Me.DISPLAY_NAME
+			};
+		
+//		String selection = "";
+		String selection = SocialContract.Me._ID + " = 1";
+
+		String[] selectionArgs = null;
+		String sortOrder = null;
+		
+		Cursor cursor = getContentResolver().query(uri, projection, selection, selectionArgs, sortOrder);
+		
+		if (cursor == null) {
+			iDisasterApplication.getInstance().showDialog (this,
+					"Unable to retrieve user information from SocialProvider",
+					 getString(R.string.dialogOK));
+		} else {
+// TODO: Add a check: There should be a single user (stored in Me).
+			int i= cursor.getCount();
+			if (cursor.moveToFirst()){
+				displayName = cursor.getString(cursor
+						.getColumnIndex(SocialContract.Me.DISPLAY_NAME));			}
+		}
+		return displayName;
+	}
+
+	
+/**
  * getPreferences retrieves the preferences stored in the preferences file.
  */
-    private void getPreferences () {
-
-    	userName = iDisasterApplication.getInstance().getUserName ();
-    	disasterName = iDisasterApplication.getInstance().getDisasterName ();
-	}
+//    private void getPreferences () {
+//
+//// TODO: get log information from the Social Provider. Do not store it in preferences.    	
+//    	userName = iDisasterApplication.getInstance().getUserName ();
+//    	disasterName = iDisasterApplication.getInstance().getDisasterName ();
+//	}
 		
 /**
  * startNextActivity is called when to select the next activity.
@@ -83,35 +202,21 @@ public class StartActivity extends Activity implements OnClickListener {
  * otherwise if no disaster is selected, it starts the DisasterActivity
  * otherwise it starts the HomeActivity.
  */
-	private void startNextActivity () {
-		
-    	if (userName == getString(R.string.noPreference)) {								// no user name (no password)
-    		startActivity(new Intent(StartActivity.this, LoginActivity.class));
-    		return;
-//TODO: For some reason this does not well when application is relaunched from Eclipse without
-// deleting the data. Although disasterName is set to n/a, the program jumps to the last case.
-    	} else if (disasterName == getString(R.string.noPreference)) {					// no disaster selected
-    		startActivity(new Intent(StartActivity.this, DisasterListActivity.class));
-    		return;
-    	} else {   		
-    		startActivity(new Intent(StartActivity.this, DisasterActivity.class));
-    		return;
-    	}
-    }
-
-/**
- * onClick is called when button is clicked because
- * the OnClickListener is assigned to the button
- */
-	public void onClick (View view) {
-
-// Test Content Provider
-//		startActivity(new Intent(StartActivity.this, TestContentProvider.class));
-		
-		getPreferences ();				// retrieve user preferences
-		startNextActivity ();			// select next activity
-	}
-
+//	private void startNextActivity () {
+//		
+//    	if (userName == getString(R.string.noPreference)) {						// no user name (no password)
+//    		startActivity(new Intent(StartActivity.this, LoginActivity.class));
+//    		return;
+////TODO: For some reason this does not well when application is relaunched from Eclipse without
+//// deleting the data. Although disasterName is set to n/a, the program jumps to the last case.
+//    	} else if (disasterName == getString(R.string.noPreference)) {					// no disaster selected
+//    		startActivity(new Intent(StartActivity.this, DisasterListActivity.class));
+//    		return;
+//    	} else {   		
+//    		startActivity(new Intent(StartActivity.this, DisasterActivity.class));
+//    		return;
+//    	}
+//    }
 
 
 /**
@@ -141,9 +246,12 @@ public class StartActivity extends Activity implements OnClickListener {
     	case R.id.startMenuLogoff:
 //TODO: Call the Social Provider
     		// reset user preferences
-        	iDisasterApplication.getInstance().setUserIdentity
-        		(getString(R.string.noPreference), getString(R.string.noPreference),
-        		getString(R.string.noPreference));	
+    		iDisasterApplication.getInstance().setDisasterName // reset user preferences
+    		(getString(R.string.noPreference));					
+
+//        	iDisasterApplication.getInstance().setUserIdentity
+//        		(getString(R.string.noPreference), getString(R.string.noPreference),
+//        		getString(R.string.noPreference));	
 //        	iDisasterApplication.getInstance().userLoggedIn = false;
 
     		break;
