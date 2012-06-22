@@ -38,13 +38,17 @@
     
     <string name="loginButton">Log In</string>
     <string name="loginDialog">Please re-enter your user name and password.</string>
+    <string name="loginEmailHint">babak@societies.org</string>
+    <string name="loginEmailLabel">Email:</string>
     <string name="loginHeading">iDisaster</string>
-    <string name="loginInfo">Sign up for Societies</string>
-    <string name="loginPasswordHint">Password</string>
+    <string name="loginInfo">Sign up for Societies.</string>
+<!-- <string name="loginPasswordHint">Password</string> -->
+    <string name="loginPasswordHint">*********</string>    
     <string name="loginPasswordLabel">Password:</string>
-    <string name="loginTestDialog">The application is in Login Activity.</string>
-    <string name="loginUserNameHint">Name</string>
-    <string name="loginUserNameLabel">Login as:</string>
+<!-- <string name="loginUserNameHint">Name</string>  -->
+    <string name="loginUserNameHint">Babak Farshchian</string>
+    <string name="loginUserNameLabel">Name:</string>
+<!-- <string name="loginUserNameLabel">Login as:</string>  -->
 
 	<string name="serviceAddButton">Add</string>
     <string name="serviceAddHeading">Search service</string>   
@@ -57,6 +61,9 @@
     <string name="startButton">Start</string>
     <string name="start_menu_logoff">Log off</string>
     <string name="startTestDialog">The application is in Start Activity.</string>
+    <string name="startInfoNotLogged">You are not logged in.</string>
+    <string name="startInfoLogged">You are logged as </string>
+    
 
     <string name="toastFeedContent">Please enter a short status.</string>
     <string name="toastUserName">Please enter a user name.</string>

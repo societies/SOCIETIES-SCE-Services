@@ -24,77 +24,85 @@
  */
 package com.disaster.idisaster;
 
+import com.disaster.idisaster.R;
+
+
 import android.app.Activity;
-import android.content.Intent;
+import android.content.ContentResolver;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuItem;
+import android.provider.ContactsContract;
 import android.widget.TextView;
-import android.widget.Toast;
 
 /**
- * This activity allows the user to look up members
- * in a directory, more to be added.
+ * This is an activity to test Content Provider code.
  * 
  * @author Jacqueline.Floch@sintef.no
+ * 
  *
  */
-public class MemberListActivity extends Activity {
+public class TestContentProvider extends Activity {
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-	// TODO Auto-generated method stub
-	super.onCreate(savedInstanceState);
+	ContentResolver resolver;
+	Cursor cursor;
+	
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.test_content_provider_layout);
+		TextView contactView = (TextView) findViewById(R.id.contactview);
 
-	TextView textview = new TextView(this);
-        textview.setText("This is the Users tab");
-        setContentView(textview);
-    }
+		Cursor cursor = getContacts();
 
-/**
- * onCreateOptionsMenu expands the activity menu for this activity tab.
- */
+		while (cursor.moveToNext()) {
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu){
+			String displayName = cursor.getString(cursor
+					.getColumnIndex(ContactsContract.Data.DISPLAY_NAME));
+			contactView.append("Name: ");
+			contactView.append(displayName);
+			contactView.append("\n");
+		}
 
-		//The FIXED menu is set by the TabActivity.
-// I am uncertain why the call to the super class leads to the creation
-// of the fixed menu set by the TabActivity (DisasterActivity)
+	}
 
-    	super.onCreateOptionsMenu(menu);
-    	
-    	menu.setGroupVisible(R.id.disasterMenuMember, true);
-    	return true;
-    }
+	private Cursor getContacts() {
+		// Run query
 
-    /**
-    * onOptionsItemSelected handles the selection of an item in the activity menu.
-    */
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+		Uri uri = ContactsContract.Contacts.CONTENT_URI;
+		String[] projection = new String[] { ContactsContract.Contacts._ID,
+				ContactsContract.Contacts.DISPLAY_NAME };
+		String selection = ContactsContract.Contacts.IN_VISIBLE_GROUP + " = '"
+				+ ("1") + "'";
+		String[] selectionArgs = null;
+		String sortOrder = ContactsContract.Contacts.DISPLAY_NAME
+				+ " COLLATE LOCALIZED ASC";
 
-		// The TabActivity handles items in the FIXED menu.
-// I am uncertain why the call to the super class leads to handling
-// of a command in the fixed menu by the TabActivity (DisasterActivity)
+		resolver  = getContentResolver();
+		cursor = resolver.query(uri, projection, selection, selectionArgs,sortOrder);
 
-    	super.onOptionsItemSelected(item);
+		return cursor;
 
-    	switch (item.getItemId()) {
+// Code from Lars Vogel example (vogella.com). 
+// managedQuery is deprecated.
+//
+// When using managedQuery(), the activity keeps a reference to the cursor and close it
+// whenever needed (in onDestroy() for instance.) 
+// When using a contentResolver's query(), the developer has to manage the cursor as a sensitive
+// resource. If you forget, for instance, to close() it in onDestroy(), you will leak 
+// underlying resources (logcat will warn you about it.)
+//
+//		return managedQuery(uri, projection, selection, selectionArgs,
+//				sortOrder);
+	}
 
-    		case R.id.disasterMenuAddMember:
-////TODO: Remove code for testing the correct setting of preferences 
-//    			Toast.makeText(getApplicationContext(),
-//    				"Menu item chosen: Add member", Toast.LENGTH_LONG)
-//    				.show();
-    			
-    			startActivity(new Intent(MemberListActivity.this, MemberAddActivity.class));
-    		break;
-    		
-    		default:
-    		break;
-    	}
-    	return true;
-    }
-
+	@Override
+	public void onDestroy () {
+		super.onDestroy();
+		
+		if (cursor != null) {
+			cursor.close();
+		}
+		
+	}
 }

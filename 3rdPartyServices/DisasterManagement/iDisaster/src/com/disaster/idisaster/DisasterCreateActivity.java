@@ -67,7 +67,7 @@ public class DisasterCreateActivity extends Activity implements OnClickListener 
     	button.setOnClickListener(this);
 
 //	    Test dialog
-//    	iDisasterApplication.getinstance().showDialog (this, getString(R.string.DisasterCreateTestDialog), getString(R.string.dialogOK));
+//    	iDisasterApplication.getInstance().showDialog (this, getString(R.string.DisasterCreateTestDialog), getString(R.string.dialogOK));
 
     }
 
@@ -131,7 +131,7 @@ public class DisasterCreateActivity extends Activity implements OnClickListener 
     	    iDisasterApplication.getInstance().disasterNameList.add(disasterName);
     	    
     	    // report data change to adapter
-    	    iDisasterApplication.getInstance().disasterAdapter.notifyDataSetChanged();
+//    	    iDisasterApplication.getInstance().disasterAdapter.notifyDataSetChanged();
 
     		
 // TODO: Remove code for testing the correct setting of preferences 

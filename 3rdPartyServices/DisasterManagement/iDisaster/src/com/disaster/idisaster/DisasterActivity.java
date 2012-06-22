@@ -80,18 +80,19 @@ public class DisasterActivity extends TabActivity {
     }
 
     /** Called at start of the active lifetime. */
-    @Override
-	protected void onResume() {
-		super.onResume();
-	}//onResume
+//    @Override
+//	protected void onResume() {
+//		super.onResume();
+//	}//onResume
 
-    /** Called when resuming a previous activity (for instance using back button) */
-    @Override
-    protected void onPause () {
-    	super.onPause ();
-    	iDisasterApplication.getInstance().setDisasterName 
-		(getString(R.string.noPreference));					// reset user preferences
-    }
+    /** Called when activity goes in foreground */
+// Reset of user preferences is now done in onResume in DisasterList Activity
+//    @Override
+//    protected void onPause () {
+//    	super.onPause ();
+//    	iDisasterApplication.getInstance().setDisasterName 
+//		(getString(R.string.noPreference));					// reset user preferences
+//    }
     
 /**
  * onCreateOptionsMenu creates the FIXED activity menu for the TabActivity.
@@ -129,9 +130,15 @@ public class DisasterActivity extends TabActivity {
 		switch (item.getItemId()) {
 
 			case R.id.disasterMenuSelectDisaster:
-            	iDisasterApplication.getInstance().setDisasterName 
-            		(getString(R.string.noPreference));					// reset user preferences
-    			startActivity(new Intent(DisasterActivity.this, DisasterListActivity.class));    			
+// Reset of user preferences is done in onResume in DisasterList Activity
+//            	iDisasterApplication.getInstance().setDisasterName 
+//            		(getString(R.string.noPreference));					// reset user preferences
+
+				// Start the Disaster Activity
+    			Intent intent = new Intent(DisasterActivity.this, DisasterListActivity.class);  
+    			intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT); // Put activity in the front of stack if it is already running.
+    			startActivity(intent);
+
            	 	finish();
 
 			break;

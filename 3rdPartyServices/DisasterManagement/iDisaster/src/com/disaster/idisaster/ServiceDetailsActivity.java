@@ -59,7 +59,7 @@ public class ServiceDetailsActivity extends Activity {
 		//TODO: set name and description
 
 //	    Test dialog
-//    	iDisasterApplication.getinstance().showDialog (this, getString(R.string.newDisasterTestDialog), getString(R.string.dialogOK));
+//    	iDisasterApplication.getInstance().showDialog (this, getString(R.string.newDisasterTestDialog), getString(R.string.dialogOK));
 
     }
 
