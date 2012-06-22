@@ -1,0 +1,200 @@
+# --- NAVI --------------------------------------------------------------------
+NAVI_HOME = Home
+NAVI_USER_SETTINGS = Benutzereinstellungen
+NAVI_TICKETS = Requests
+NAVI_USERS = Benutzer
+NAVI_LANGUAGES = Sprachen
+NAVI_TAGS = Tags
+NAVI_HELP = Hilfe
+NAVI_CONTACT = Kontakt
+NAVI_ABOUT = Projektbeschreibung
+NAVI_CONFIG = Konfiguration
+NAVI_LOGOUT = Abmelden
+NAVI_LOGIN = Anmelden
+# -----------------------------------------------------------------------------
+
+# --- TICKETS GENERAL ---------------------------------------------------------
+TICKETS_TYPE = Request Typ
+TICKETS_SUMMARY = Zusammenfassung
+TICKETS_DESCRIPTION = Beschreibung
+TICKETS_SHORT_DESCRIPTION = Titel
+TICKETS_STATUS = Status
+TICKETS_REPORTER = Reporter
+TICKETS_CREATED = Erstellt
+TICKETS_TAGS = Tags (Tags mit Komma trennen)
+TICKETS_DEADLINE = Deadline
+TICKETS_IMAGE = Bild
+TICKETS_OPTIONS = Optionen
+TICKETS_BACK = Zurück
+TICKETS_BACK_LONG = Zurück zur Requestauswahl
+TICKETS_ID = ID
+TICKETS_ANSWER = Antworten
+TICKETS_ANSWERS = Antworten
+TICKETS_AT = am
+TICKETS_LIST_CLOSED = geschlossene Requests mit auflisten
+TICKETS_LIST_SUGGESTIONS = nur vorgeschlagene Requests auflisten
+TICKETS_ANSWER_2 = Meine Antwort
+TICKETS_REQUEST = Request
+TICKETS_LIST_NO_RES = Keine Ergebnisse gefunden
+TICKETS_NOTIFICATIONS = E-Mail Benachrichtungen
+TICKETS_NOTIFY_TICKET = Informiere mich, wenn neue Anfragen erstellt worden sind
+TICKETS_NOTIFY_ANSWER = Informiere mich, wenn ich eine Antwort auf eine meiner Anfragen erhalten habe
+# -----------------------------------------------------------------------------
+
+
+# --- TICKETS LIST ------------------------------------------------------------
+TICKETS_HEADLINE = Request - Anzeige
+TICKETS_SEARCH = Suche
+TICKETS_RESULT = Ergebnis
+TICKETS_CREATE_NEW = neuen Request erstellen
+TICKETS_REFRESH = Ergebnisse aktualisieren
+# -----------------------------------------------------------------------------
+
+# --- TICKETS CREATE ----------------------------------------------------------
+TICKETS_CREATE_HEADLINE_create = Request erstellen
+TICKETS_CREATE_HEADLINE_modify = Request ändern
+TICKETS_CREATE_BUTTON_create = Erstellen
+TICKETS_CREATE_BUTTON_modify = Ändern
+TICKETS_CREATE_IMAGE_UPLOAD = Bitte Bild (jpg, png, gif, pjpeg) zum Hochladen auswählen (optional):
+TICKETS_CREATE_CURRENT_IMAGE = Aktuelles Bild
+# -----------------------------------------------------------------------------
+
+# --- TICKETS PROCESS ---------------------------------------------------------
+TICKETS_PROCESS_HEADER = Request - Bearbeiten
+TICKETS_PROCESS_CREATED_AT = erstellt
+TICKETS_PROCESS_BY = von
+TICKETS_PROCESS_ATTACHED_IMAGE = Angehängtes Bild
+TICKETS_PROCESS_ANSWER_TEXT = Bitte beantworten Sie die Frage.
+TICKETS_PROCESS_ANSWER = Beantworten
+# -----------------------------------------------------------------------------
+
+
+# --- DB_OUTPUT_TRANSLATION ---------------------------------------------------
+DB_TICKETS_question = Frage
+DB_TICKETS_tag image = Bild taggen
+DB_TICKETS_translation = Übersetzung
+
+
+DB_STATUS_opened = offen
+DB_STATUS_closed = geschlossen
+# -----------------------------------------------------------------------------
+
+# --- LOGOUT ------------------------------------------------------------------
+LOGOUT_MSG = Sie sind nun abgemeldet. Danke für Ihren Besuch.
+# -----------------------------------------------------------------------------
+
+
+# --- USER_SETTINGS -----------------------------------------------------------
+USER_SETTINGS_HEADING = Benutzereinstellungen
+USER_SETTINGS_FIRST_NAME = Vorname
+USER_SETTINGS_LAST_NAME = Nachname
+USER_SETTINGS_EMAIL = E-Mail
+USER_SETTINGS_LANGUAGE = Sprache
+USER_SETTINGS_NEW_PASSWORD = Neues Passwort
+USER_SETTINGS_RE_PASSWORD = Re-Passwort
+USER_SETTINGS_BUTTON_SAVE = Speichern
+# -----------------------------------------------------------------------------
+
+# --- TOOLTIPS ----------------------------------------------------------------
+TOOLTIP_EDIT = bearbeiten
+TOOLTIP_ARCHIVE = Request schließen
+TOOLTIP_REOPEN = Request wieder öffnen
+TOOLTIP_DELETE = löschen
+# -----------------------------------------------------------------------------
+
+# --- CONFIRMS ----------------------------------------------------------------
+CONFIRM_DELETE_TICKET = Willst du diesen Request wirklich löschen? Alle zugehörigen Votes und Antworten werden ebenso gelöscht!
+CONFIRM_DELETE_USER = Willst du diesen Benutzer wirklich löschen? Alle Requests und Antworten des Benutzers werden auf die Anonymous-User-ID gesetzt!
+CONFIRM_DELETE_LANG = Willst du die Sprache wirklich löschen? Sei dir sicher, was du tust! Es wird nicht empfohlen, eine Sprache zu löschen.
+CONFIRM_DELETE_TAG = Willst du den Tag wirklich löschen?
+# -----------------------------------------------------------------------------
+
+# --- USERS ------------------------------------------------------------------
+USERS_HEADING = Benutzermanagement
+USERS_SEARCH = Suche
+USERS_RESULT = Ergebnis
+USERS_BUTTON_CREATE_NEW_USER = Erstelle neuen Benutzer
+USERS_BUTTON_REFRESH_RESULTS = Ergebnisse aktualisieren 
+USERS_ID = ID
+USERS_NAME = Name
+USERS_EMAIL = E-Mail
+USERS_GROUP = Gruppe
+USERS_LANGUAGE = Sprache
+USERS_OPTIONS = Optionen
+USERS_INSTITUTE = Organisation
+
+USERS_HEADING_create = Benutzer anlegen
+USERS_HEADING_modify = Benutzer bearbeiten
+USERS_FIRST_NAME = Vorname
+USERS_LAST_NAME = Nachname
+USERS_PASSWORD = Passwort
+USERS_RE_PASSWORD = Re-Passwort
+USERS_BUTTON_create = Registrieren
+USERS_BUTTON_modify = Ändern
+USERS_BUTTON_BACK = Zurück
+USERS_REQUIRED = Erforderlich
+USERS_NOTIFY_TICKET = Benachrichtigung neue Tickets
+USERS_NOTIFY_ANSWER = Benachrichtigung neue Antworten
+# ----------------------------------------------------------------------------
+
+# --- LANGUAGES --------------------------------------------------------------
+LANGUAGES_HEADING = Sprachenmanagement
+LANGUAGES_SEARCH = Suche
+LANGUAGES_RESULT = Ergebnis
+LANGUAGES_BUTTON_CREATE_NEW_LANGUAGE = Erstelle neue Sprache
+LANGUAGES_BUTTON_REFRESH_RESULTS = Ergebnisse aktualisieren 
+LANGUAGES_ID = ID
+LANGUAGES_LANGUAGE = Sprache
+LANGUAGES_TRANS_AV = Übersetzung verfügbar
+LANGUAGES_YES = Ja
+LANGUAGES_NO = Nein
+LANGUAGES_OPTIONS = Optionen
+LANGUAGES_HINT_LABEL = Hinweis
+LANGUAGES_HINT = Sämtliche Übersetzungsdateien sind unter "./lang/" zu finden. Dabei wird folgende Notation genutzt: [#language name#] + '.lang' (e.g. german.lang, english.lang). Wenn für eine Sprache eine Übersetzungsdatei vorhanden ist, so erscheint die Sprache automatisch in der Sprachen-Auswahlbox.
+LANGUAGES_BUTTON_create = erstellen
+LANGUAGES_BUTTON_modify = ändern
+LANGUAGES_BUTTON_BACK = zurück
+# ----------------------------------------------------------------------------
+
+# --- TAGS -------------------------------------------------------------------
+TAGS_HEADING = Tags - Liste
+TAGS_SEARCH = Suche
+TAGS_ID = Id
+TAGS_NAME = Name
+TAGS_COUNT_TICKETS = Anzahl Tickets
+TAGS_COUNT_USERS = Anzahl Benutzer
+TAGS_OPTIONS = Optionen
+TAGS_BUTTON_REFRESH_RESULTS = Refresh
+# ----------------------------------------------------------------------------
+
+# --- LOGIN ------------------------------------------------------------------
+LOGIN_HEADING = Login
+LOGIN_EMAIL = E-Mail
+LOGIN_PASSWORD = Passwort
+LOGIN_BUTTON_LOGIN = Login
+LOGIN_FORGOT_PASSWD = Passwort vergessen?
+LOGIN_REGISTER = Neuen Account registrieren
+# -----------------------------------------------------------------------------
+
+# --- ABOUT -------------------------------------------------------------------
+ABOUT_HEADING = Projektbeschreibung
+# -----------------------------------------------------------------------------
+
+# --- HELP --------------------------------------------------------------------
+HELP_HEADING = Hilfe
+# -----------------------------------------------------------------------------
+
+# --- CONTACT -----------------------------------------------------------------
+CONTACT_HEADING = Kontakt
+# -----------------------------------------------------------------------------
+
+# --- CONFIGURATION -----------------------------------------------------------
+CONF_HEADING = Konfiguration
+CONF_XMPP = XMPP aktiv?
+CONF_EMAIL_NOTIFICATION = E-Mail Benachrichtung bei neuen Requests?
+CONF_BUTTON_SAVE = Speichern
+# -----------------------------------------------------------------------------
+
+# --- USER ACTIVATION ---------------------------------------------------------
+USER_ACTIVATION_HEADING = User Aktivierung
+# -----------------------------------------------------------------------------

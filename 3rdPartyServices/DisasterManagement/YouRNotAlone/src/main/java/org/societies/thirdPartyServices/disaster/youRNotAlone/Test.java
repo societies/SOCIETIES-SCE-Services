@@ -12,6 +12,7 @@ class Test{
 		MockedData mData = new MockedData(); 
 		VolunteerOrganizer organizer = new VolunteerOrganizer();
 		organizer.loadVolunteers(mData.getMockedVolunteers());
+		VolunteerCluster cluster = new VolunteerCluster(10,organizer.getAllLanguages(),organizer.getAllSkills());
 
 		ArrayList<String> langs = new ArrayList<String>();
 		langs.add("english");
@@ -32,8 +33,13 @@ class Test{
 		pros.addAll(langs);
 		pros.addAll(skills);
 		ArrayList<Volunteer> propertiesGroup = organizer.getGroupByProperties(pros);
-		System.out.println("property group test:");
-		displayGroup(propertiesGroup);
+//		System.out.println("property group test:");
+//		displayGroup(propertiesGroup);
+		
+		
+		cluster.loadInstanceFromVolunteers(mData.getMockedVolunteers());
+		cluster.update();
+		
 	}
 
 	public static void displayGroup(ArrayList<Volunteer> group){
