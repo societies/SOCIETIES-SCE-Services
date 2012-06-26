@@ -106,7 +106,7 @@ public class ClientGUIFrame extends JFrame
 			IIdentity serverIdentity,
 			ServiceResourceIdentifier clientID) 
 	{
-		super( "TITLE" );
+		super( "My RFID location monitoring application" );
 		this.rfidServer = server;
 		this.userIdentity = userIdentity;
 		this.serverIdentity = serverIdentity;

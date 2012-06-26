@@ -38,8 +38,8 @@
 		
 			<bean id="serMetamodel" class="org.societies.api.schema.servicelifecycle.model.Service">
 		<property name="authorSignature" value="elizaP" />
-		<property name="serviceDescription"
-			value="RFID Client service" />
+		<property name="serviceDescription" value="RFID Client service" />
+		<property name="serviceType" value="THIRD_PARTY_CLIENT" />		
 		<property name="serviceName" value="RFIDClientService" />
 	</bean>
 </beans>

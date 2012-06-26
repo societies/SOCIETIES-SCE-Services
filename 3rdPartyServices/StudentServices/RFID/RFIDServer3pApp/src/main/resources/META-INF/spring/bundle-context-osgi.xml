@@ -19,6 +19,7 @@
 			<entry key="TargetPlatform" value="SOCIETIES" />
 			<entry key="ServiceProvider" value="ICT-SOCIETIES" />
 			<entry key="ServiceMetaModel" value-ref="serMetamodel" />
+			<entry key="ServiceClient" value="file://%virgo_home%/repository/usr/RFIDClientApp.jar" />
 		</osgi:service-properties>
         </osgi:service>
        
@@ -42,8 +43,8 @@
 
 	<bean id="serMetamodel" class="org.societies.api.schema.servicelifecycle.model.Service">
 		<property name="authorSignature" value="elizaP" />
-		<property name="serviceDescription"
-			value="RFID Server service" />
+		<property name="serviceDescription"	value="RFID Server service" />
+		<property name="serviceType" value="THIRD_PARTY_SERVER" />
 		<property name="serviceName" value="RFIDServerService" />
 	</bean>
 	

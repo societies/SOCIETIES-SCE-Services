@@ -140,10 +140,13 @@ public class RfidClient implements IRfidClient {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			
-			this.clientID = ServiceModelUtils.generateServiceResourceIdentifier(serverIdentity, this.getClass());
+			try{
+				this.clientID = ServiceModelUtils.generateServiceResourceIdentifier(serverIdentity, IRfidClient.class);
+			}catch(Exception e){
+				this.logging.debug("Unable to retrieve my serviceID. Exception is:\n"+e.getMessage());
+			}
 			if (this.clientID ==null){
-				JOptionPane.showMessageDialog(null, "My serviceId is null :( ");
+				JOptionPane.showMessageDialog(null, "My serviceId is null. Contact Sancho! ");
 			}else{
 				JOptionPane.showMessageDialog(null, "My serviceId is: "+this.clientID.getIdentifier());
 			}
