@@ -8,6 +8,8 @@ import org.societies.thirdPartyServices.disaster.youRNotAlone.model.*;
 public class MockedData{	
 	
 	public ArrayList<Volunteer> volunteers;
+	public ArrayList<String> allLanguages;
+	public ArrayList<String> allSkills;
 	
 	public MockedData(){
 		Volunteer v1 = new Volunteer("1","Dingqi","Yang","Telecom SudParis",
@@ -74,5 +76,6 @@ public class MockedData{
 	public ArrayList<Volunteer> getMockedVolunteers(){
 		return this.volunteers;
 	}
+
 	
 }

@@ -24,31 +24,88 @@
  */
 package com.disaster.idisaster;
 
-import android.app.Activity;
+import android.app.ListActivity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.AdapterView.OnItemClickListener;
+
+// TODO: Add import
+// import org.societies.android.platform.SocialContract;
 
 /**
  * This activity allows the user to browse available
  * DDC applications on the device, add DDC applications 
  * to a disaster, etc.
  * 
- * @author Babak.Farshchian@sintef.no
+ * @author Jacqueline.Floch@sintef.no
  *
  */
-public class ServiceListActivity extends Activity {
+public class ServiceListActivity extends ListActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-	// TODO Auto-generated method stub
-	super.onCreate(savedInstanceState);
 
-	TextView textview = new TextView(this);
-        textview.setText("This is the Services tab");
-        setContentView(textview);
+    super.onCreate(savedInstanceState);
+
+//TODO: query Content Provider
+    
+    
+    
+
+//TODO: if no service in the CIS create a simple TextView
+//	TextView textview = new TextView(this);
+//        textview.setText("This is the Services tab");
+//        setContentView(textview);
+
+    	setContentView (R.layout.service_list_layout);
+    	ListView listView = getListView();
+    	
+    	// Enable filtering for the contents of the list view.
+    	// The filtering logic should be provided
+    	// listView.setTextFilterEnabled(true);  
+    	
+    	
+// TODO: Get the list from the Societies Content Provide
+
+
+    	// The Adapter provides access to the data items.
+    	// The Adapter is also responsible for making a View for each item in the data set.
+    	//  Parameters: Context, Layout for the row, ID of the View to which the data is written, Array of data
+
+//TODO: customize the layout for the row is necessary
+// At the moment a simple string is used as for disaster.
+
+    	iDisasterApplication.getInstance().serviceAdapter = new ArrayAdapter<String> (this,
+		R.layout.disaster_list_item, R.id.disaster_item, iDisasterApplication.getInstance().serviceNameList);
+
+    	// Assign adapter to ListView
+
+    	listView.setAdapter(iDisasterApplication.getInstance().serviceAdapter);
+
+    	// Add listener for short click.
+    	// 
+    	listView.setOnItemClickListener(new OnItemClickListener() {
+    		public void onItemClick (AdapterView<?> parent, View view,
+    			int position, long id) {
+// TODO: Remove code for testing the correct setting of preferences 
+    			Toast.makeText(getApplicationContext(),
+    				"Click ListItem Number   " + (position+1) + "   " + iDisasterApplication.getInstance().serviceNameList.get (position), Toast.LENGTH_LONG)
+    				.show();
+
+    			// Start the ServiceDetails Activity
+    			startActivity (new Intent(ServiceListActivity.this, ServiceDetailsActivity.class));
+    			
+// The activity is kept on stack (check also that "noHistory" is not set in Manifest
+//    			finish();
+    		}
+    	});
     }
 
 /**
@@ -59,6 +116,8 @@ public class ServiceListActivity extends Activity {
 	public boolean onCreateOptionsMenu(Menu menu){
 
 		//The FIXED menu is set by the TabActivity.
+// I am uncertain why the call to the super class leads to the creation
+// of the fixed menu set by the TabActivity (DisasterActivity)
 		super.onCreateOptionsMenu(menu);
 		
 		menu.setGroupVisible(R.id.disasterMenuService, true);
@@ -72,7 +131,9 @@ public class ServiceListActivity extends Activity {
 	public boolean onOptionsItemSelected(MenuItem item) {
 
 		// The TabActivity handles items in the FIXED menu.
-    	super.onOptionsItemSelected(item);
+// I am uncertain why the call to the super class leads to handling
+// of a command in the fixed menu by the TabActivity (DisasterActivity)
+		super.onOptionsItemSelected(item);
 
 		switch (item.getItemId()) {
 

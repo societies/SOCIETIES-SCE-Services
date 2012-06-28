@@ -39,7 +39,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 
 /**
- * Activity for creating a new disaster community.
+ * Activity for creating a new disaster team (community).
  * 
  * @author Jacqueline.Floch@sintef.no
  *
@@ -67,7 +67,7 @@ public class DisasterCreateActivity extends Activity implements OnClickListener 
     	button.setOnClickListener(this);
 
 //	    Test dialog
-//    	iDisasterApplication.getinstance().showDialog (this, getString(R.string.newDisasterTestDialog), getString(R.string.dialogOK));
+//    	iDisasterApplication.getInstance().showDialog (this, getString(R.string.DisasterCreateTestDialog), getString(R.string.dialogOK));
 
     }
 
@@ -89,7 +89,7 @@ public class DisasterCreateActivity extends Activity implements OnClickListener 
     				Toast.LENGTH_LONG).show();
     		return;
 
-    	} else if (disasterDescriptionView.getText().length() == 0) {	// check input for description (or any obligatory field
+    	} else if (disasterDescriptionView.getText().length() == 0) {	// check input for description (or any obligatory field)
 
     		// Hide the soft keyboard otherwise the toast message does appear more clearly.
     	    InputMethodManager mgr = (InputMethodManager) getSystemService(this.INPUT_METHOD_SERVICE);
@@ -99,16 +99,16 @@ public class DisasterCreateActivity extends Activity implements OnClickListener 
 	    			Toast.LENGTH_LONG).show();
 	    	return;
 
-    	} else {														// verify the password and store in preferences file
+    	} else {														// add disaster to directory
 
     		disasterName = disasterNameView.getText().toString();
     		disasterDescription = disasterDescriptionView.getText().toString();
-
-    		//TODO: Add call to the Societes API plaftorm to create community
-
+    		
+//TODO: Add call to the Social Provider
+    		
     		boolean disasterCreationCode = false;	// TODO: replace by code returned by Societes API
     			    		
-    		// Create dialog for wrong password
+    		// Create dialog for error
     		if (disasterCreationCode) { 							
     			AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this);
     			alertBuilder.setMessage(getString(R.string.disasterCreateDialog))
@@ -124,14 +124,14 @@ public class DisasterCreateActivity extends Activity implements OnClickListener 
 	    		alert.show();
 	    		return;
 	   		}
-	    		
+	
 //TODO: Refresh list of disasters? - so it is displayed in the previous activity
     		
 //TODO: remove test code
     	    iDisasterApplication.getInstance().disasterNameList.add(disasterName);
     	    
     	    // report data change to adapter
-    	    iDisasterApplication.getInstance().disasterAdapter.notifyDataSetChanged();
+//    	    iDisasterApplication.getInstance().disasterAdapter.notifyDataSetChanged();
 
     		
 // TODO: Remove code for testing the correct setting of preferences 
@@ -143,11 +143,8 @@ public class DisasterCreateActivity extends Activity implements OnClickListener 
     	    InputMethodManager mgr = (InputMethodManager) getSystemService(this.INPUT_METHOD_SERVICE);
     	    mgr.hideSoftInputFromWindow(disasterNameView.getWindowToken(), 0);
 
-
-	    	finish();	// noHistory=true in Manifest => the activity is removed from the activity stack and finished.
-
-    	    // Go back to the list of disasters
-//	    	startActivity(new Intent(NewDisasterActivity.this, DisasterListActivity.class));
+	    	finish();
+    	    // Go back to the previous activity
 	    }
     }
 

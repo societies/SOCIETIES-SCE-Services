@@ -38,6 +38,9 @@ public class Volunteer {
 	private String institut;
 	private String country;
 	private String email;
+	private int languageCount;
+	private int skillCount;
+
 	private HashMap<String,Integer> spokenLanguages;
 	private HashMap<String,Integer> expertiseSkills;
 	
@@ -145,6 +148,22 @@ public class Volunteer {
 
 	public void setExpertiseSkills(HashMap<String,Integer> expertiseSkills) {
 		this.expertiseSkills = expertiseSkills;
+	}
+	
+	public int getLanguageCount() {
+		return languageCount;
+	}
+
+	public void setLanguageCount(int languageCount) {
+		this.languageCount = languageCount;
+	}
+
+	public int getSkillCount() {
+		return skillCount;
+	}
+
+	public void setSkillCount(int skillCount) {
+		this.skillCount = skillCount;
 	}
 	
 	public boolean findLanguage(String lang){

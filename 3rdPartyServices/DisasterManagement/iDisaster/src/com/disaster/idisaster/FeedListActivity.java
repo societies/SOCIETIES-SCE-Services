@@ -40,10 +40,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 /**
- * This activity allows the users to manage their 
- * disasters or the disasters they subscribe to.
+ * This activity allows the users to manage the activity feed in 
+ * a selected disaster team (a disaster team the user is member of).
  * 
- * @author Babak.Farshchian@sintef.no
+ * @author Jacqueline.Floch@sintef.no
  *
  */
 public class FeedListActivity extends ListActivity {
@@ -61,6 +61,7 @@ public class FeedListActivity extends ListActivity {
 	  lv.setOnItemClickListener(new OnItemClickListener() {
 	    public void onItemClick(AdapterView<?> parent, View view,
 	        int position, long id) {
+//TODO: Display the activity details 	    	
 	      // When clicked, show a toast with the TextView text
 	      Toast.makeText(getApplicationContext(), ((TextView) view).getText(),
 	          Toast.LENGTH_SHORT).show();
@@ -76,6 +77,8 @@ public class FeedListActivity extends ListActivity {
     public boolean onCreateOptionsMenu(Menu menu){
 
     	//The FIXED menu is set by the TabActivity.
+// I am uncertain why the call to the super class leads to the creation
+// of the fixed menu set by the TabActivity (DisasterActivity)
     	super.onCreateOptionsMenu(menu);
     	
     	menu.setGroupVisible(R.id.disasterMenuFeed, true);
@@ -89,6 +92,8 @@ public class FeedListActivity extends ListActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
 
 		// The TabActivity handles items in the FIXED menu.
+// I am uncertain why the call to the super class leads to handling
+// of a command in the fixed menu by the TabActivity (DisasterActivity)
     	super.onOptionsItemSelected(item);
     	
     	switch (item.getItemId()) {
