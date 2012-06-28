@@ -27,7 +27,11 @@ package ac.hw.rfid.server;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Dictionary;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Timer;
@@ -41,10 +45,27 @@ import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
+import org.osgi.framework.Filter;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTracker;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.societies.api.css.devicemgmt.IAction;
+import org.societies.api.css.devicemgmt.IDevice;
+import org.societies.api.css.devicemgmt.IDriverService;
+import org.societies.api.css.devicemgmt.model.DeviceActionsConstants;
+import org.societies.api.css.devicemgmt.model.DeviceMgmtConstants;
+import org.societies.api.css.devicemgmt.model.DeviceMgmtDriverServiceNames;
+import org.societies.api.css.devicemgmt.model.DeviceMgmtEventConstants;
+import org.societies.api.css.devicemgmt.model.DeviceStateVariableConstants;
+import org.societies.api.css.devicemgmt.model.DeviceTypeConstants;
 import org.societies.api.css.devicemgmt.rfid.IRfidDriver;
 import org.societies.api.css.devicemgmt.rfid.RFIDUpdateEvent;
+import org.societies.api.internal.css.devicemgmt.model.DeviceMgmtDriverServiceConstants;
 import org.societies.api.osgi.event.CSSEvent;
 import org.societies.api.osgi.event.CSSEventConstants;
 import org.societies.api.osgi.event.EventListener;
@@ -52,11 +73,12 @@ import org.societies.api.osgi.event.EventTypes;
 import org.societies.api.osgi.event.IEventMgr;
 import org.societies.api.osgi.event.InternalEvent;
 import org.societies.api.schema.servicelifecycle.model.ServiceResourceIdentifier;
+import org.springframework.osgi.context.BundleContextAware;
 
 import ac.hw.rfid.client.api.remote.IRfidClient;
 import ac.hw.rfid.server.api.IRfidServer;
 
-public class RfidServer extends EventListener implements IRfidServer {
+public class RfidServer extends EventListener implements IRfidServer, ServiceTrackerCustomizer, BundleContextAware {
 
 	private Logger logging = LoggerFactory.getLogger(this.getClass());
 	//private ServiceResourceIdentifier myServiceId;
@@ -77,7 +99,49 @@ public class RfidServer extends EventListener implements IRfidServer {
 
 	private IRfidClient rfidClientRemote;
 	
+	private BundleContext bundleContext;
+	
+	private ServiceTracker serviceTracker;
+	
+	private Collection<IDevice> devicesTracked = Collections.synchronizedCollection(new ArrayList<IDevice>()); 
+	
+	
+	@Override
+	public void setBundleContext(BundleContext bundleContext) {
+		this.bundleContext = bundleContext;
+	}
+	
+	/**
+	 * @return the eventMgr
+	 */
+	public IEventMgr getEventMgr() {
+		return eventMgr;
+	}
+
+	/**
+	 * @param eventMgr the eventMgr to set
+	 */
+	public void setEventMgr(IEventMgr eventMgr) {
+		this.eventMgr = eventMgr;
+	}
+	
+	
 	public void initialiseRFIDServer(){
+		
+		
+		String stringFilter = "(&("+ Constants.OBJECTCLASS +"="+ IDevice.class.getName()+")("+DeviceMgmtConstants.DEVICE_TYPE+"="+DeviceTypeConstants.RFID_READER+"))";
+		
+		Filter filter = null;
+		try {
+			filter = bundleContext.createFilter(stringFilter);
+		} catch (InvalidSyntaxException e) {
+			e.printStackTrace();
+		}
+		
+		this.serviceTracker = new ServiceTracker(bundleContext, filter, this);
+		this.serviceTracker.open();
+		
+		
 
 		this.tagtoIdentityTable = new Hashtable<String, String>();
 		this.tagToPasswordTable = new Hashtable<String, String>();
@@ -88,15 +152,59 @@ public class RfidServer extends EventListener implements IRfidServer {
 			this.wUnitToSymlocTable = new Hashtable<String, String>();
 			
 		}
-		this.registerForRFIDEvents();
 		String[] options = new String[]{"0.localhost","1.University addresses"};
 		String str = (String) JOptionPane.showInputDialog(null, "Select Configuration", "Configuration", JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
 		if (str.equalsIgnoreCase(options[0])){
-			this.rfidDriver.connect("127.0.0.1");
+			
+			for(IDevice iDevice : devicesTracked)
+			{
+				if (iDevice.getDeviceId().contains("127.0.0.1")) 
+				{
+					this.registerForRFIDEvents(iDevice.getDeviceId());
+					
+					IDriverService iDriverService = iDevice.getService(DeviceMgmtDriverServiceNames.RFID_READER_DRIVER_SERVICE);
+					IAction iAction = iDriverService.getAction(DeviceActionsConstants.RFID_CONNECT_ACTION);
+					
+					Dictionary<String, Object> dic = new Hashtable<String, Object>();
+					
+					dic.put(DeviceStateVariableConstants.IP_ADDRESS_STATE_VARIABLE, "127.0.0.1");
+					iAction.invokeAction(dic);
+				}
+			}
+
+			//this.rfidDriver.connect("127.0.0.1");
 		}else{
-			this.rfidDriver.connect("137.195.27.197");
-		
-			this.rfidDriver.connect("137.195.27.198");
+			
+			for(IDevice iDevice : devicesTracked)
+			{
+				if (iDevice.getDeviceId().contains("137.195.27.197")) 
+				{
+					this.registerForRFIDEvents(iDevice.getDeviceId());
+					
+					IDriverService iDriverService = iDevice.getService(DeviceMgmtDriverServiceNames.RFID_READER_DRIVER_SERVICE);
+					IAction iAction = iDriverService.getAction(DeviceActionsConstants.RFID_CONNECT_ACTION);
+					
+					Dictionary<String, Object> dic = new Hashtable<String, Object>();
+					
+					dic.put(DeviceStateVariableConstants.IP_ADDRESS_STATE_VARIABLE, "137.195.27.197");
+					iAction.invokeAction(dic);
+				}
+				if (iDevice.getDeviceId().contains("137.195.27.198")) 
+				{
+					this.registerForRFIDEvents(iDevice.getDeviceId());
+					
+					IDriverService iDriverService = iDevice.getService(DeviceMgmtDriverServiceNames.RFID_READER_DRIVER_SERVICE);
+					IAction iAction = iDriverService.getAction(DeviceActionsConstants.RFID_CONNECT_ACTION);
+					
+					Dictionary<String, Object> dic = new Hashtable<String, Object>();
+					
+					dic.put(DeviceStateVariableConstants.IP_ADDRESS_STATE_VARIABLE, "137.195.27.198");
+					iAction.invokeAction(dic);
+				}
+			}
+			
+			//this.rfidDriver.connect("137.195.27.197");
+			//this.rfidDriver.connect("137.195.27.198");
 		}
 		frame = new ServerGUIFrame(this);
 	}
@@ -123,13 +231,14 @@ public class RfidServer extends EventListener implements IRfidServer {
 
 
 
-	private void registerForRFIDEvents(){
+	private void registerForRFIDEvents(String deviceId){
 		String eventFilter = "(&" + 
-				"(" + CSSEventConstants.EVENT_NAME + "=RFIDUpdate)" +
-				"(" + CSSEventConstants.EVENT_SOURCE + "=RFIDDriver)" +
+				"(" + CSSEventConstants.EVENT_NAME + "=" + DeviceMgmtEventConstants.RFID_READER_EVENT + ")" +
+				"(" + CSSEventConstants.EVENT_SOURCE + "=" + deviceId + ")" +
 				")";
 		this.eventMgr.subscribeInternalEvent(this, new String[]{EventTypes.RFID_UPDATE_EVENT}, eventFilter);
 	}
+	
 	/*
 	 * Method called when an RFID_UPDATE_EVENT is received
 	 */
@@ -291,47 +400,73 @@ public class RfidServer extends EventListener implements IRfidServer {
 		this.rfidClientRemote = rfidClientRemote;
 	}
 
-	/**
-	 * @return the rfidDriver
-	 */
-	public IRfidDriver getRfidDriver() {
-		return rfidDriver;
-	}
-
-	/**
-	 * @param rfidDriver the rfidDriver to set
-	 */
-	public void setRfidDriver(IRfidDriver rfidDriver) {
-		this.rfidDriver = rfidDriver;
-	}
+//	/**
+//	 * @return the rfidDriver
+//	 */
+//	public IRfidDriver getRfidDriver() {
+//		return rfidDriver;
+//	}
+//
+//	/**
+//	 * @param rfidDriver the rfidDriver to set
+//	 */
+//	public void setRfidDriver(IRfidDriver rfidDriver) {
+//		this.rfidDriver = rfidDriver;
+//	}
 
 	@Override
 	public void handleExternalEvent(CSSEvent arg0) {
-		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void handleInternalEvent(InternalEvent event) {
-		if (event.geteventInfo() instanceof RFIDUpdateEvent){
-			RFIDUpdateEvent rfidEvent = (RFIDUpdateEvent) event.geteventInfo();
-			this.sendUpdate(rfidEvent.getWakeupUnit(), rfidEvent.getRFIDTagNumber());
-			this.logging.debug("Received RFIDUpdateEvent: "+rfidEvent.getWakeupUnit()+" - "+rfidEvent.getRFIDTagNumber() );
-		}
+//		if (event.geteventInfo() instanceof RFIDUpdateEvent){
+//			RFIDUpdateEvent rfidEvent = (RFIDUpdateEvent) event.geteventInfo();
+//			this.sendUpdate(rfidEvent.getWakeupUnit(), rfidEvent.getRFIDTagNumber());
+//			this.logging.debug("Received RFIDUpdateEvent: "+rfidEvent.getWakeupUnit()+" - "+rfidEvent.getRFIDTagNumber() );
+//		}
+		
+		HashMap<String, String> payload = (HashMap<String, String>)event.geteventInfo();
+		this.sendUpdate(payload.get("wakeupUnit"), payload.get("tagNumber"));
+		this.logging.debug("Received RFIDUpdateEvent: "+payload.get("wakeupUnit")+" - "+ payload.get("tagNumber"));
+		
 		
 	}
 
-	/**
-	 * @return the eventMgr
-	 */
-	public IEventMgr getEventMgr() {
-		return eventMgr;
+
+
+
+
+	@Override
+	public Object addingService(ServiceReference reference) {
+		
+		IDevice iDevice = (IDevice) bundleContext.getService(reference);
+		
+		bindDevice(iDevice);
+		
+		return iDevice;
 	}
 
-	/**
-	 * @param eventMgr the eventMgr to set
-	 */
-	public void setEventMgr(IEventMgr eventMgr) {
-		this.eventMgr = eventMgr;
+	@Override
+	public void modifiedService(ServiceReference reference, Object service) {
+
+		
+	}
+
+	@Override
+	public void removedService(ServiceReference reference, Object service) {
+		
+		unbindDevice((IDevice)service);
+	}
+	
+	protected void bindDevice(IDevice device) {
+		devicesTracked.add(device);
+		System.out.println("RfidServer: Reader added");
+	}
+
+	protected void unbindDevice(IDevice device) {
+		devicesTracked.remove(device);
+		System.out.println("RfidServer: Reader removed");
 	}
 }
