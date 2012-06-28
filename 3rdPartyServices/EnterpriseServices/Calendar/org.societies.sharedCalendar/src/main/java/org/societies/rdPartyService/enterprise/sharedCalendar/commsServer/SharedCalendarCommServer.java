@@ -125,7 +125,7 @@ public class SharedCalendarCommServer implements IFeatureServer{
 			bean = (org.societies.rdpartyservice.enterprise.sharedcalendar.SharedCalendarBean) payload;
 			switch (bean.getMethod()) {
 			case DELETE_CIS_CALENDAR:
-				resultBean.setLastOperationSuccessful(this.sharedCalendarService.deleteCISCalendar(bean.getCISId()));
+				resultBean.setLastOperationSuccessful(this.sharedCalendarService.deleteCISCalendar(bean.getCalendarId()));
 				break;
 			case RETRIEVE_CIS_CALENDAR_LIST:
 				List<Calendar> retrievedCalendars = this.sharedCalendarService.retrieveCISCalendarList(bean.getCISId());
