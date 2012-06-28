@@ -22,15 +22,94 @@
  * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package si.setcce.societies.taskposting.backend;
+package si.setcce.societies.taskposting.api;
 
-import si.setcce.societies.taskposting.api.ITaskPosting;
+import java.util.HashMap;
+import java.util.List;
+
+import org.societies.api.identity.IIdentity;
+
+import si.setcce.societies.taskposting.api.Answer;
+import si.setcce.societies.taskposting.api.Contributor;
 
 /**
+ * Model of a task or problem.
  *
  * @author Mitja Vardjan
  *
  */
-public class TaskPosting {
+public class Task {
 
+	private boolean solutionPublic;
+	private List<Contributor> contributors;
+	private List<Answer> answers;
+	private Answer solution;
+	private boolean completed;
+	private HashMap<IIdentity, Double> rates = new HashMap<IIdentity, Double>();
+
+	public Task() {
+		
+	}
+	
+	public boolean isSolutionPublic() {
+		return solutionPublic;
+	}
+
+	public void setSolutionPublic(boolean solutionPublic) {
+		this.solutionPublic = solutionPublic;
+	}
+	
+	public void addContributor(Contributor contributor) {
+		contributors.add(contributor);
+	}
+
+	public void addAnswer(Answer answer){
+		answers.add(answer);
+	}
+
+	public List<Answer> getAnswers() {
+		return answers;
+	}
+
+	public List<Contributor> getContributors() {
+		return contributors;
+	}
+
+	public void setSolution(Answer solution) {
+		this.solution = solution;
+	}
+
+	public void confirmCompletion() {
+		this.completed = true;
+	}
+
+	public void rate(IIdentity rater, double rate) {
+		rates.put(rater, rate);
+	}
+	
+	/**
+	 * @return Average rate or NaN if there are no rates yet
+	 */
+	public double getRate() {
+		
+		double result = 0;
+		
+		if (rates.size() == 0) {
+			return Double.NaN;
+		}
+		
+		for (Double rate : rates.values()) {
+			result += rate;
+		}
+		result /= rates.size();
+		return result;
+	}
+
+	public void rateSolution() {
+		// TODO
+	}
+	
+	public void updateTagsOrCategories() {
+		// TODO
+	}
 }

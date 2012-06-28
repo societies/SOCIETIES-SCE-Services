@@ -22,15 +22,37 @@
  * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package si.setcce.societies.taskposting.backend;
-
-import si.setcce.societies.taskposting.api.ITaskPosting;
+package si.setcce.societies.taskposting.api;
 
 /**
+ * Main TaskPosting service interface to other services.
  *
  * @author Mitja Vardjan
  *
  */
-public class TaskPosting {
+public interface ITaskPosting {
 
+	public void postTask(Task task);
+
+	public void updateTask(Task updated);
+	
+	public void assignTask();
+
+	public void postAnswer();
+
+	public void updateAnswer();
+
+	public void findTask();
+
+	public void createCisFromContributors();
+
+	public void setSolution(Answer solution);
+
+	public void confirmCompletion();
+
+	public void rateTask();
+
+	public void rateSolution();
+	
+	public void updateTagsOrCategories();
 }

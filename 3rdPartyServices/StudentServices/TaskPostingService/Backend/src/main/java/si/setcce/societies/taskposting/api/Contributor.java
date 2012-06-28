@@ -25,11 +25,20 @@
 package si.setcce.societies.taskposting.api;
 
 /**
- * Describe your class here...
+ * Contributor to problem solution, or worker that has accepted a task
  *
- * @author mitjav
+ * @author Mitja Vardjan
  *
  */
-public interface ITask {
+public class Contributor {
 
+	private final String name;
+	
+	public Contributor(String name) {
+		this.name = name;
+	}
+	
+	public String getName() {
+		return name;
+	}
 }

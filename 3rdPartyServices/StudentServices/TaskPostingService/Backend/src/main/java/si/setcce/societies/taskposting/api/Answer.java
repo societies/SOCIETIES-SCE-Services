@@ -22,16 +22,14 @@
  * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package si.setcce.societies.taskposting.model;
-
-import si.setcce.societies.taskposting.api.ITask;
+package si.setcce.societies.taskposting.api;
 
 /**
- * Describe your class here...
+ * Answer or solution to task or problem
  *
- * @author mitjav
+ * @author Mitja Vardjan
  *
  */
-public class Task implements ITask {
+public class Answer {
 
 }
