@@ -6,6 +6,7 @@
 	<artifactId>taskposting-backend</artifactId>
 	<packaging>bundle</packaging>
 	<version>0.0.1-SNAPSHOT</version>
+	<name>Task Posting Backend</name>
 
 	<developers>
 		<developer>
