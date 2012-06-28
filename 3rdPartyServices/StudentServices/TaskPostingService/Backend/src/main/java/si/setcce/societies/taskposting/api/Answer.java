@@ -32,4 +32,13 @@ package si.setcce.societies.taskposting.api;
  */
 public class Answer {
 
+	private String description;
+	
+	public Answer(String description) {
+		this.description = description;
+	}
+	
+	public String getDescription() {
+		return description;
+	}
 }

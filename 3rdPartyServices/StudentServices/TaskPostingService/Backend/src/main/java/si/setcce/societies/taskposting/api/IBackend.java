@@ -24,90 +24,24 @@
  */
 package si.setcce.societies.taskposting.api;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-
 import org.societies.api.identity.IIdentity;
+import org.societies.api.context.broker.ICtxBroker;
 
 /**
- * Model of a task or problem.
+ * Methods to be implemented on the backend and invoked remotely from the clients.
  *
  * @author Mitja Vardjan
  *
  */
-public class Task {
-
-	private boolean solutionPublic;
-	private List<Contributor> contributors = new ArrayList<Contributor>();
-	private List<Answer> answers = new ArrayList<Answer>();
-	private Answer solution = null;
-	private boolean completed = false;
-	private HashMap<IIdentity, Double> rates = new HashMap<IIdentity, Double>();
-
-	public Task(boolean solutionPublic) {
-		this.solutionPublic = solutionPublic;
-	}
-	
-	public boolean isSolutionPublic() {
-		return solutionPublic;
-	}
-
-	public void setSolutionPublic(boolean solutionPublic) {
-		this.solutionPublic = solutionPublic;
-	}
-	
-	public void addContributor(Contributor contributor) {
-		contributors.add(contributor);
-	}
-
-	public void addAnswer(Answer answer){
-		answers.add(answer);
-	}
-
-	public List<Answer> getAnswers() {
-		return answers;
-	}
-
-	public List<Contributor> getContributors() {
-		return contributors;
-	}
-
-	public void setSolution(Answer solution) {
-		this.solution = solution;
-	}
-
-	public void confirmCompletion() {
-		this.completed = true;
-	}
-
-	public void rate(IIdentity rater, double rate) {
-		rates.put(rater, rate);
-	}
+public interface IBackend {
 	
 	/**
-	 * @return Average rate or NaN if there are no rates yet
+	 * Send user's location to the backend server.
+	 * 
+	 * @param user The user who is reporting his location
+	 * 
+	 * @param location The symbolic location as received from
+	 * {@link ICtxBroker}
 	 */
-	public double getRate() {
-		
-		double result = 0;
-		
-		if (rates.size() == 0) {
-			return Double.NaN;
-		}
-		
-		for (Double rate : rates.values()) {
-			result += rate;
-		}
-		result /= rates.size();
-		return result;
-	}
-
-	public void rateSolution() {
-		// TODO
-	}
-	
-	public void updateTagsOrCategories() {
-		// TODO
-	}
+	public void setUserLocation(IIdentity user, String location);
 }
