@@ -97,12 +97,12 @@ public class CommsClient implements IBackendRemote {
 
 	@Override
 	@Async
-	public void setUserLocation(IIdentity user, String location) {
+	public void setUserLocation(IIdentity user, String location, IBackendCallback callback) {
 
 		LOG.debug("setUserLocation({}, {})", user, location);
 
 		IIdentity toIdentity = getBackend();
-		sendIQ(toIdentity, MethodType.SET_USER_LOCATION, user, location, null);
+		sendIQ(toIdentity, MethodType.SET_USER_LOCATION, user, location, callback);
 	}
 	
 	private IIdentity getBackend() {

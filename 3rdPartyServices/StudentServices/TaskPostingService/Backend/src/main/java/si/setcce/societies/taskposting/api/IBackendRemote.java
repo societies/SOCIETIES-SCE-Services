@@ -44,5 +44,5 @@ public interface IBackendRemote {
 	 * @param location The symbolic location as received from
 	 * {@link ICtxBroker}
 	 */
-	public void setUserLocation(IIdentity user, String location);
+	public void setUserLocation(IIdentity user, String location, IBackendCallback callback);
 }
