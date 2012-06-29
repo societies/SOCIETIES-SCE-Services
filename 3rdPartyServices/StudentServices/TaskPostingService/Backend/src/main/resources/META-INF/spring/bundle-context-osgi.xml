@@ -10,7 +10,7 @@
 		is to facilitate integration testing of the bundle outside of an OSGi container -->
 
 	<!-- Register remote interfaces of remote services -->	
-	<osgi:service ref="NegotiationProviderRemote"
+	<osgi:service ref="TaskPostingRemote"
 		interface="si.setcce.societies.taskposting.ITaskPosting" />
 
 	<!-- Get a reference to the Platform Comms Gateway service -->

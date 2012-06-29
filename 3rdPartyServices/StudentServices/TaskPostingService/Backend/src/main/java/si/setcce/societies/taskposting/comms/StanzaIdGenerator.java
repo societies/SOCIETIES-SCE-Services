@@ -22,30 +22,28 @@
  * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package si.setcce.societies.taskposting.api;
-
-import java.util.concurrent.Future;
-
-import org.societies.api.identity.IIdentity;
-import org.societies.api.context.broker.ICtxBroker;
-import org.societies.api.ext3p.schema.taskposting.ResultBean;
+package si.setcce.societies.taskposting.comms;
 
 /**
- * Methods to be implemented on the backend and invoked remotely from the clients.
+ * 
  *
  * @author Mitja Vardjan
  *
  */
-public interface IBackend {
+public class StanzaIdGenerator {
+
+	private static int counter = 0;
 	
+	private static int nextInt() {
+		return counter++;
+	}
+
 	/**
-	 * Send user's location to the backend server.
-	 * @see {@link IBackendRemote}
+	 * Generates a number that is increased by one with each call. Starting with zero.
 	 * 
-	 * @param user The user who is reporting his location
-	 * 
-	 * @param location The symbolic location as received from
-	 * {@link ICtxBroker}
+	 * @return String representation of next number
 	 */
-	public Future<ResultBean> setUserLocation(IIdentity user, String location);
+	public static String next() {
+		return String.valueOf(nextInt());
+	}
 }

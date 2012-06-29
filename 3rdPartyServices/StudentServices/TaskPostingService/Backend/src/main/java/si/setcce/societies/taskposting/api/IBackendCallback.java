@@ -24,28 +24,15 @@
  */
 package si.setcce.societies.taskposting.api;
 
-import java.util.concurrent.Future;
-
-import org.societies.api.identity.IIdentity;
-import org.societies.api.context.broker.ICtxBroker;
 import org.societies.api.ext3p.schema.taskposting.ResultBean;
 
 /**
- * Methods to be implemented on the backend and invoked remotely from the clients.
+ * Describe your class here...
  *
- * @author Mitja Vardjan
+ * @author mitjav
  *
  */
-public interface IBackend {
+public interface IBackendCallback {
 	
-	/**
-	 * Send user's location to the backend server.
-	 * @see {@link IBackendRemote}
-	 * 
-	 * @param user The user who is reporting his location
-	 * 
-	 * @param location The symbolic location as received from
-	 * {@link ICtxBroker}
-	 */
-	public Future<ResultBean> setUserLocation(IIdentity user, String location);
+	public void receiveResult(ResultBean result);
 }

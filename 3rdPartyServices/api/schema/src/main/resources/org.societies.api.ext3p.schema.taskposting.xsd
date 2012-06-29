@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<xs:schema  elementFormDefault="qualified" version="1.0" 
+			targetNamespace="http://societies.org/api/ext3p/schema/taskposting"
+			xmlns:tns="http://societies.org/api/ext3p/schema/taskposting"
+			xmlns:ns1="http://societies.org/api/schema/servicelifecycle/model"
+			xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+	<xs:import namespace="http://societies.org/api/schema/servicelifecycle/model"
+	schemaLocation="../../../../external/src/main/resources/org.societies.api.schema.servicelifecycle.model.xsd" />
+
+	<!-- Message bean and result bean require the additional "element" node -->
+	<xs:element name="backendBean">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="method" type="tns:methodType" minOccurs="0"/>
+				<xs:element name="userIdentity" type="xs:string" minOccurs="0"/>
+				<xs:element name="location" type="xs:string" minOccurs="0"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	
+	<!-- Message bean and result bean require the additional "element" node -->
+	<xs:element name="backendBeanResult">
+		<xs:complexType >
+			<xs:sequence>
+				<xs:element name="resultBean" type="tns:resultBean" minOccurs="0"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	
+	<!-- Other datatypes do not require the additional "element" node -->
+	<xs:complexType name="resultBean">
+		<xs:sequence>
+			<xs:element name="success" type="xs:boolean"/>
+		</xs:sequence>
+	</xs:complexType>
+	
+	<!-- Other datatypes do not require the additional "element" node -->
+	<xs:simpleType name="methodType">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="setUserLocation"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+</xs:schema>
