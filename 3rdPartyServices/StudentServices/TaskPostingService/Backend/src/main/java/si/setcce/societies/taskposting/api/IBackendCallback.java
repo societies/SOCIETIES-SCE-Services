@@ -27,12 +27,17 @@ package si.setcce.societies.taskposting.api;
 import org.societies.api.ext3p.schema.taskposting.ResultBean;
 
 /**
- * Describe your class here...
+ * Callback for {@link IBackendRemote}
  *
  * @author mitjav
  *
  */
 public interface IBackendCallback {
 	
+	/**
+	 * Receive the result of asynchronous network call
+	 * 
+	 * @param result The result
+	 */
 	public void receiveResult(ResultBean result);
 }
