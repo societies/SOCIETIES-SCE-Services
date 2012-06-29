@@ -33,11 +33,11 @@ import org.societies.api.context.broker.ICtxBroker;
  * @author Mitja Vardjan
  *
  */
-public interface IBackend {
+public interface IBackendRemote {
 	
 	/**
 	 * Send user's location to the backend server.
-	 * @see {@link IBackendRemote}
+	 * @see {@link IBackend}
 	 * 
 	 * @param user The user who is reporting his location
 	 * 
