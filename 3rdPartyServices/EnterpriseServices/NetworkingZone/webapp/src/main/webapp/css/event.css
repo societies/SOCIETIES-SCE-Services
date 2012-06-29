@@ -1,0 +1,458 @@
+
+#event_container {
+	background: #fff;
+	margin: 0 auto;
+	text-align: left;
+	width: 300px;
+}
+
+
+#event_top {
+	display: block;
+	height: 10px;
+	margin: 10px auto 0;
+	width: 300px;
+}
+
+#event_footer {
+	width: 640px;
+	clear: both;
+	color: #999999;
+	text-align: center;
+	width: 300px;
+	padding-bottom: 15px;
+	font-size: 85%;
+}
+
+
+#event_footer a {
+	color: #999999;
+	text-decoration: none;
+	border-bottom: 1px dotted #999999;
+}
+
+#event_bottom {
+	display: block;
+	height: 10px;
+	margin: 0 auto;
+	width: 650px;
+}
+
+event_form.event_appnitro {
+	margin: 20px 20px 0;
+	padding: 0 0 20px;
+}
+
+/**** Logo Section  *****/
+event_h1 {
+	background-color: #D9EAE8;
+	margin: 0;
+	min-height: 0;
+	padding: 0;
+	text-decoration: none;
+	text-indent: -8000px;
+}
+
+event_h1 a {
+	display: block;
+	height: 100%;
+	min-height: 40px;
+	overflow: hidden;
+}
+
+event_img {
+	behavior: url(css/iepngfix.htc);
+	border: none;
+}
+
+/**** Form Section ****/
+.event_appnitro {
+	font-family: Lucida Grande, Tahoma, Arial, Verdana, sans-serif;
+	font-size: small;
+}
+
+.event_appnitro li {
+	width: 75%;
+}
+
+event_form ul {
+	font-size: 100%;
+	list-style-type: none;
+	margin: 0;
+	padding: 0;
+	width: 100%;
+}
+
+event_form li {
+	display: block;
+	margin: 0;
+	padding: 4px 5px 2px 9px;
+	position: relative;
+}
+
+event_form li:after {
+	clear: both;
+	content: ".";
+	display: block;
+	height: 0;
+	visibility: hidden;
+}
+
+
+* html event_form li {
+	height: 1%;
+}
+
+
+* html event_form li div {
+	display: inline-block;
+}
+
+event_form li div {
+	color: #444;
+	margin: 0 4px 0 0;
+	padding: 0 0 8px;
+}
+
+event_form li span {
+	color: #444;
+	float: left;
+	margin: 0 4px 0 0;
+	padding: 0 0 8px;
+}
+
+event_form li div.left {
+	display: inline;
+	float: left;
+	width: 48%;
+}
+
+event_form li div.right {
+	display: inline;
+	float: right;
+	width: 48%;
+}
+
+event_form li div.left .medium {
+	width: 100%;
+}
+
+event_form li div.right .medium {
+	width: 100%;
+}
+
+.clear {
+	clear: both;
+}
+
+event_form li div label {
+	clear: both;
+	color: #444;
+	display: block;
+	font-size: 9px;
+	line-height: 9px;
+	margin: 0;
+	padding-top: 3px;
+}
+
+event_form li span label {
+	clear: both;
+	color: #444;
+	display: block;
+	font-size: 9px;
+	line-height: 9px;
+	margin: 0;
+	padding-top: 3px;
+}
+
+event_form li .datepicker {
+	cursor: pointer !important;
+	float: left;
+	height: 16px;
+	margin: .1em 5px 0 0;
+	padding: 0;
+	width: 16px;
+}
+
+.event_form_description {
+	border-bottom: 1px dotted #ccc;
+	clear: both;
+	display: inline-block;
+	margin: 0 0 1em;
+}
+
+.event_form_description[class] {
+	display: block;
+}
+
+.event_form_description h2 {
+	clear: left;
+	font-size: 160%;
+	font-weight: 400;
+	margin: 0 0 3px;
+}
+
+.event_form_description p {
+	font-size: 95%;
+	line-height: 130%;
+	margin: 0 0 12px;
+}
+
+event_form hr {
+	display: none;
+}
+
+event_form li.section_break {
+	border-top: 1px dotted #ccc;
+	margin-top: 9px;
+	padding-bottom: 0;
+	padding-left: 9px;
+	padding-top: 13px;
+	width: 97% !important;
+}
+
+event_form ul li.first {
+	border-top: none !important;
+	margin-top: 0 !important;
+	padding-top: 0 !important;
+}
+
+event_form .section_break h3 {
+	font-size: 110%;
+	font-weight: 400;
+	line-height: 130%;
+	margin: 0 0 2px;
+}
+
+event_form .section_break p {
+	font-size: 85%;
+	margin: 0 0 10px;
+}
+
+
+
+/**** Inputs and Labels ****/
+event_label.description {
+	border: none;
+	color: #222;
+	display: block;
+	font-size: 95%;
+	font-weight: 700;
+	line-height: 150%;
+	padding: 0 0 1px;
+}
+
+event_span.symbol {
+	font-size: 115%;
+	line-height: 130%;
+}
+
+event_input.text {
+	background: #fff url(images/shadow.gif) repeat-x top;
+	border-bottom: 1px solid #ddd;
+	border-left: 1px solid #c3c3c3;
+	border-right: 1px solid #c3c3c3;
+	border-top: 1px solid #7c7c7c;
+	color: #333;
+	font-size: 100%;
+	margin: 0;
+	padding: 2px 0;
+}
+
+event_input.file {
+	color: #333;
+	font-size: 100%;
+	margin: 0;
+	padding: 2px 0;
+}
+
+event_textarea.event_textarea {
+	background: #fff url(images/shadow.gif) repeat-x top;
+	border-bottom: 1px solid #ddd;
+	border-left: 1px solid #c3c3c3;
+	border-right: 1px solid #c3c3c3;
+	border-top: 1px solid #7c7c7c;
+	color: #333;
+	font-family: "Lucida Grande", Tahoma, Arial, Verdana, sans-serif;
+	font-size: 100%;
+	margin: 0;
+	width: 99%;
+}
+
+
+
+
+
+
+event_textarea.small {
+	height: 5.5em;
+}
+
+event_textarea.medium {
+	height: 10em;
+}
+
+event_textarea.large {
+	height: 20em;
+}
+
+/**** Errors ****/
+#event_error_message {
+	background: #fff;
+	border: 1px dotted red;
+	margin-bottom: 1em;
+	padding-left: 0;
+	padding-right: 0;
+	padding-top: 4px;
+	text-align: center;
+	width: 99%;
+}
+
+#event_error_message_title {
+	color: #DF0000;
+	font-size: 125%;
+	margin: 7px 0 5px;
+	padding: 0;
+}
+
+#event_error_message_desc {
+	color: #000;
+	font-size: 100%;
+	margin: 0 0 .8em;
+}
+
+#event_error_message_desc strong {
+	background-color: #FFDFDF;
+	color: red;
+	padding: 2px 3px;
+}
+
+event_form li.error {
+	background-color: #FFDFDF !important;
+	border-bottom: 1px solid #EACBCC;
+	border-right: 1px solid #EACBCC;
+	margin: 3px 0;
+}
+
+event_form li.error label {
+	color: #DF0000 !important;
+}
+
+event_form p.error {
+	clear: both;
+	color: red;
+	font-size: 10px;
+	font-weight: 700;
+	margin: 0 0 5px;
+}
+
+event_form .required {
+	color: red;
+	float: none;
+	font-weight: 700;
+}
+
+/**** Guidelines and Error Highlight ****/
+event_form li.highlighted {
+	background-color: #fff7c0;
+}
+
+event_form .event_guidelines {
+	background: #f5f5f5;
+	border: 1px solid #e6e6e6;
+	color: #444;
+	font-size: 80%;
+	left: 100%;
+	line-height: 130%;
+	margin: 0 0 0 8px;
+	padding: 8px 10px 9px;
+	position: absolute;
+	top: 0;
+	visibility: hidden;
+	width: 42%;
+	z-index: 1000;
+}
+
+event_form .event_guidelines small {
+	font-size: 105%;
+}
+
+event_form li.highlighted .event_guidelines {
+	visibility: visible;
+}
+
+event_form li:hover .event_guidelines {
+	visibility: visible;
+}
+
+.no_event_guidelines .event_guidelines {
+	display: none !important;
+}
+
+.no_event_guidelines form li {
+	width: 97%;
+}
+
+.no_event_guidelines li.section {
+	padding-left: 9px;
+}
+
+/*** Success Message ****/
+.event_form_success {
+	clear: both;
+	margin: 0;
+	padding: 90px 0pt 100px;
+	text-align: center
+}
+
+.event_form_success h2 {
+	clear: left;
+	font-size: 160%;
+	font-weight: normal;
+	margin: 0pt 0pt 3px;
+}
+
+
+
+
+
+/** Embedded Form **/
+.embed #event_form_container {
+	border: none;
+}
+
+.embed #event_top,.embed #event_bottom,.embed event_h1 {
+	display: none;
+}
+
+.embed #event_form_container {
+	width: 100%;
+}
+
+.embed #event_footer {
+	text-align: left;
+	padding-left: 10px;
+	width: 99%;
+}
+
+.embed #event_footer.success {
+	text-align: center;
+}
+
+.embed event_form.event_appnitro {
+	margin: 0px 0px 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
