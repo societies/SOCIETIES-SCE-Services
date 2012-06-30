@@ -79,7 +79,6 @@ public class DisasterListActivity extends ListActivity {
 	ContentResolver resolver;
 	Cursor cursor;
 	
-	// before declared in create
 	ArrayAdapter<String> disasterAdapter;
 	ListView listView;
 	
@@ -91,20 +90,31 @@ public class DisasterListActivity extends ListActivity {
     	setContentView (R.layout.disaster_list_layout);
     	listView = getListView();
     	resolver = getContentResolver();
- 
+    	
+		if (iDisasterApplication.testDataUsed) {			// Test data
+			iDisasterApplication.getInstance().disasterAdapter = new ArrayAdapter<String> (this,
+					R.layout.disaster_list_item, R.id.disaster_item, iDisasterApplication.getInstance().disasterNameList);
+
+			listView.setAdapter(iDisasterApplication.getInstance().disasterAdapter);
+		}
+    	
 
     	// Add listener for short click.
        	listView.setOnItemClickListener(new OnItemClickListener() {
     		public void onItemClick (AdapterView<?> parent, View view,
     			int position, long id) {
-    			// Store the selected disaster in preferences ??
-//TODO: Add unique ID to CIS instead of name since name can be duplicated 
-    			iDisasterApplication.getInstance().setDisasterName ("Name will be updated");
+    			if (iDisasterApplication.testDataUsed) {			// Test data  			
+    				iDisasterApplication.getInstance().disasterTeamName = iDisasterApplication.getInstance().disasterNameList.get(position);
+// Store the selected disaster in preferences
+//    				iDisasterApplication.getInstance().setDisasterTeamName (name);
+    			} else {											// Fetch data from Social Provide
+//TODO: get name in from Social Provider
+    				iDisasterApplication.getInstance().disasterTeamName = "Name will be be fetched";
+    			}
     			
-// TODO: Remove code for testing the correct setting of preferences 
     			Toast.makeText(getApplicationContext(),
-    				"Click ListItem Number   " + (position+1) + "   " + "Name will be provided", Toast.LENGTH_LONG)
-    				.show();
+        				"Click ListItem Number   " + (position+1) + "   " + iDisasterApplication.getInstance().disasterTeamName,
+        				Toast.LENGTH_LONG).show();
 
     			// Start the Disaster Activity
     			startActivity (new Intent(DisasterListActivity.this, DisasterActivity.class));
@@ -132,15 +142,19 @@ public class DisasterListActivity extends ListActivity {
     @Override
 	protected void onResume() {
 		super.onResume();
+	
+		if (! iDisasterApplication.testDataUsed) {			// If test data not used
 
-// TODO: Is it necessary to clear this adpater?		
-    	if (disasterAdapter!= null) disasterAdapter.clear();
+			if (disasterAdapter!= null) disasterAdapter.clear();
+
+// All information is fetched from the Social Provider. Preferences are no longer used.
+//
+//			iDisasterApplication.getInstance().setDisasterTeamName // reset user preferences
+//			(getString(R.string.noPreference));
 		
-		iDisasterApplication.getInstance().setDisasterName // reset user preferences
-		(getString(R.string.noPreference));
-		
-		getDisasterTeams();
-		assignAdapter ();		
+			getDisasterTeams();
+			assignAdapter ();
+		}
 	}
 
 
@@ -152,7 +166,7 @@ public class DisasterListActivity extends ListActivity {
     protected void onPause() {
     	super.onPause ();
     	
-    	cursor.close();    	
+//    	cursor.close();    	
     }
 
     /** Called when resuming a previous activity (for instance using back button) */
