@@ -38,11 +38,9 @@ public class DisasterActivity extends TabActivity {
         
         setContentView (R.layout.disaster_layout);
 
-        // Set view label to selected disaster name
-    	String disasterName = iDisasterApplication.getInstance().getDisasterName ();
 		TextView title = (TextView)findViewById(R.id.disasterLabel);
 
-		title.setText (disasterName);
+		title.setText (iDisasterApplication.getInstance().disasterTeamName);
         
         Resources res = getResources();		// Resource object to get Drawables
         TabHost tabHost = getTabHost();		// The activity TabHost
