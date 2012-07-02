@@ -3,6 +3,7 @@ package org.societies.enterprise.collabtools;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
@@ -55,13 +56,8 @@ public class TestUtils {
     {
         for ( Person person : personRepository.getAllPersons() )
         {
-            int nrOfFriends = r.nextInt( maxNrOfFriendsEach ) + 1;
-            for ( int j = 0; j < nrOfFriends; j++ )
-            {
-//                person.addFriend( getRandomPerson() );
-            	person.addFriend(getPersonWithSimilarInterests(person.getInterests()));
-            }
-            
+                person.addFriend( getRandomPerson() );
+//            	person.addFriend(getPersonWithSimilarInterests(person));    
         }
     }
 
@@ -100,19 +96,22 @@ public class TestUtils {
                 + r.nextInt( nrOfPersons ) );
     }
     
-    private Person getPersonWithSimilarInterests(String[] interests)
+    private Person getPersonWithSimilarInterests(Person self)
     {
     	for ( Person person : personRepository.getAllPersons() )
     	{
-    		for (String match : interests)
-    		{
-    			if (Arrays.asList(person.getInterests()).contains(match))
-    				return person;
+    		if (!self.equals(person)) {
+				List<String> personInterest = Arrays.asList(person.getInterests());
+    			for (String match : self.getInterests()) {    			
+    				if (personInterest.contains(match))
+    					return person;
+    			}
     		}
+
     	}
     	return null;
     }
-	
+
 	/**
 	 * @return
 	 */
@@ -129,7 +128,12 @@ public class TestUtils {
 				"project planning", "project management", "software engineering", "software development", "technical writing"};
 		Set<String> finalInterests = new HashSet<String>();
 		for(int i=0; i<3; i++){
-			finalInterests.add(interests[r.nextInt(interests.length)]);
+			String temp = interests[r.nextInt(interests.length)];
+			//Check if duplicated
+			if (!finalInterests.contains(temp))
+				finalInterests.add(temp);
+			else
+				i--;
 		}
 		return finalInterests.toArray(new String[0]);
 	}

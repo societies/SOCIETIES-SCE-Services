@@ -11,7 +11,7 @@ Bundle-Name: Collaboration Tools
 Created-By: Apache Maven Bundle Plugin
 Build-Jdk: 1.6.0_32
 Bundle-Version: 0.0.1.SNAPSHOT
-Bnd-LastModified: 1340136553035
+Bnd-LastModified: 1341247190680
 Embed-Transitive: true
 Bundle-ManifestVersion: 2
 Bundle-Activator: org.societies.enterprise.collabtools.Activator
@@ -27,12 +27,13 @@ Import-Package: ch.qos.logback.classic;resolution:=optional,ch.qos.log
  el.type;resolution:=optional,javax.lang.model.util;resolution:=option
  al,javax.management;resolution:=optional,javax.management.remote;reso
  lution:=optional,javax.security.auth.x500;resolution:=optional,javax.
- tools;resolution:=optional,javax.xml.parsers;resolution:=optional,org
- .osgi.framework;version="[1.6,2)",org.slf4j;resolution:=optional;vers
- ion="[1.6,2)",org.slf4j.impl;resolution:=optional;version="[1.6,2)",o
- rg.xml.sax;resolution:=optional,org.xml.sax.ext;resolution:=optional,
- org.xml.sax.helpers;resolution:=optional,sun.misc;resolution:=optiona
- l
+ tools;resolution:=optional,javax.xml.namespace;resolution:=optional,j
+ avax.xml.parsers;resolution:=optional,javax.xml.xpath;resolution:=opt
+ ional,org.osgi.framework;version="[1.6,2)",org.slf4j;resolution:=opti
+ onal;version="[1.6,2)",org.slf4j.impl;resolution:=optional;version="[
+ 1.6,2)",org.w3c.dom;resolution:=optional,org.xml.sax;resolution:=opti
+ onal,org.xml.sax.ext;resolution:=optional,org.xml.sax.helpers;resolut
+ ion:=optional,sun.misc;resolution:=optional
 Embed-Dependency: *;scope=compile|runtime
 Bundle-SymbolicName: org.societies.enterprise.CollabTools
 Originally-Created-By: Apache Maven Bundle Plugin

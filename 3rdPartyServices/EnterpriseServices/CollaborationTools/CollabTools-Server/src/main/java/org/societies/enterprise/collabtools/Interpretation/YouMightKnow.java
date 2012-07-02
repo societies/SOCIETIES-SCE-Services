@@ -30,7 +30,7 @@ public class YouMightKnow {
 
 	}
 
-	private void findFriends(Node rootNode, List<Node> path, List<String> matches, int depth) {
+	private void findFriends(Node rootNode, List<Node> path, List<String> interests, int depth) {
 		for ( Relationship rel : rootNode.getRelationships( RelTypes.KNOWS ) )
 		{
 			Node personNode = rel.getOtherNode( rootNode );
@@ -39,9 +39,10 @@ public class YouMightKnow {
 				continue;
 			}
 			List<String> newMatches = new ArrayList<String>();
-			for ( String match : matches )
+			for ( String match : interests )
 			{
-				if ( personNode.getProperty( match ).equals( rootNode.getProperty( match ) ) )
+				//TODO: fix!!
+				if ( personNode.getProperty(LongTermCtxTypes.INTERESTS).equals( rootNode.getProperty(LongTermCtxTypes.INTERESTS) ) )
 				{
 					newMatches.add( match );
 				}
@@ -107,7 +108,7 @@ public class YouMightKnow {
 	        return suggestions;
 	    }
 	  
-	  static void printMightKnow( final List<List<Node>> suggestions,
+	  public static void printMightKnow( final List<List<Node>> suggestions,
 	            final String[] properties )
 	        {
 	            for ( List<Node> suggestion : suggestions )

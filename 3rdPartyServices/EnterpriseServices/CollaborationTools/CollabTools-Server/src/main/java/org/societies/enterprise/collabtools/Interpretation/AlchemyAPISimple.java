@@ -88,8 +88,10 @@ public class AlchemyAPISimple {
 			String statusStr = getNodeValue(factory, doc, "/results/status/text()");
 			if (null == statusStr || !statusStr.equals("OK")) {
 				String statusInfoStr = getNodeValue(factory, doc, "/results/statusInfo/text()");
-				if (null != statusInfoStr && statusInfoStr.length() > 0)
-					throw new IOException("Error making API call: " + statusInfoStr + '.');
+				if (null != statusInfoStr && statusInfoStr.length() > 0) {
+					return null;
+//					throw new IOException("Error making API call: " + statusInfoStr + '.');
+				}
 
 				throw new IOException("Error making API call: " + statusStr + '.');
 			}

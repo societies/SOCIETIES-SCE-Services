@@ -57,10 +57,14 @@ public class ContextIncrementation implements IContextIncrementation {
 		// Extract concept tags for a text string.
 		for (String interest : interests) {
 			setInterests.add(interest);
+			//Check if interest is null
+			System.out.println("Interest: "+interest);
 			Document doc = alchemyObj.TextGetRankedConcepts(interest);
-			NodeList result = doc.getElementsByTagName("text");
-			for (int i = 0; i < result.getLength(); i++) {
-				setInterests.add(result.item(i).getTextContent().toLowerCase());
+			if (doc != null) {
+				NodeList result = doc.getElementsByTagName("text");
+				for (int i = 0; i < result.getLength(); i++) {
+					setInterests.add(result.item(i).getTextContent().toLowerCase());
+				}
 			}
 		}
 		return setInterests.toArray(new String[setInterests.size()]);

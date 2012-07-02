@@ -11,6 +11,7 @@ import org.neo4j.index.impl.lucene.LuceneIndex;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.societies.enterprise.collabtools.Interpretation.YouMightKnow;
 import org.societies.enterprise.collabtools.acquisition.PersonRepository;
 import org.societies.enterprise.collabtools.runtime.ShortTermCtxMonitor;
 import org.societies.enterprise.collabtools.runtime.SessionRepository;
@@ -57,7 +58,8 @@ public class MainTest {
 		test.createMockShortTermCtx();
 		test.incrementInterests();
 		test.setupFriendsBetweenPeople(5);
-
+		YouMightKnow ymn = new YouMightKnow(personRepository.getPersonByName("person#"+3), new String[] {"project planning"}, 5);
+		ymn.printMightKnow(ymn.findYouMightKnow(personRepository.getPersonByName("person#"+3)) , new String[] {"plan"} );
 
 		System.out.println("TestUtils completed" );
 
