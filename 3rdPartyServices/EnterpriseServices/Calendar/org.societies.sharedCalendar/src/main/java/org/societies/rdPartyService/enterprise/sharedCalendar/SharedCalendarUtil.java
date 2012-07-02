@@ -170,7 +170,12 @@ public class SharedCalendarUtil {
 			return returnedList;
 		}
 		while (true) {
-			for (Event event : events.getItems()) {
+			List<Event> eventsList = events.getItems();
+			if (eventsList == null){
+				log.error("Empty Events List");
+				break;
+			}
+			for (Event event : eventsList) {
 				returnedList.add(event);
 			}
 			String pageToken = events.getNextPageToken();

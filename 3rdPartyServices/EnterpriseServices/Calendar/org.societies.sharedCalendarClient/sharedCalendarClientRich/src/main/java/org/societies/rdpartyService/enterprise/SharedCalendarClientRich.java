@@ -287,9 +287,9 @@ public class SharedCalendarClientRich implements ICommCallback,	ISharedCalendarC
 		// CREATE MESSAGE BEAN
 		SharedCalendarBean calendarBean = new SharedCalendarBean();
 
-		calendarBean
-				.setMethod(org.societies.rdpartyservice.enterprise.sharedcalendar.MethodType.CREATE_CIS_CALENDAR);
+		calendarBean.setMethod(org.societies.rdpartyservice.enterprise.sharedcalendar.MethodType.CREATE_CIS_CALENDAR);
 		calendarBean.setCalendarSummary(calendarSummary);
+		calendarBean.setCISId(CISId);
 		try {
 			// SEND INFORMATION QUERY - RESPONSE WILL BE IN
 			// "callback.RecieveMessage()"
@@ -765,7 +765,7 @@ public class SharedCalendarClientRich implements ICommCallback,	ISharedCalendarC
 		SimpleDateFormat simpleDaeFtormat=new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSZ");
 		 for (Event event : eventListToRender) {
 			 JSONObject object=new JSONObject();
-			object.put("id", Integer.parseInt(event.getEventId()));
+			object.put("id", /*Integer.parseInt(*/event.getEventId()/*)*/);
 			object.put("start", simpleDaeFtormat.format(XMLGregorianCalendarConverter.asDate(event.getStartDate())));
 			object.put("end", simpleDaeFtormat.format(XMLGregorianCalendarConverter.asDate(event.getEndDate())));
 			object.put("title", event.getEventDescription());

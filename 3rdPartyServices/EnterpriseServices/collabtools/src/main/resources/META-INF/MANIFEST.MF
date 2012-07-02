@@ -1,0 +1,39 @@
+Manifest-Version: 1.0
+Bundle-ClassPath: .,neo4j-kernel-1.8.M04.jar,neo4j-graph-algo-1.8.M04.
+ jar,neo4j-lucene-index-1.8.M04.jar,geronimo-jta_1.1_spec-1.1.1.jar,or
+ g.osgi.core-4.3.0.jar,neo4j-udc-1.8.M04.jar,neo4j-1.8.M04.jar,commons
+ -cli-1.2.jar,neo4j-jmx-1.8.M04.jar,neo4j-cypher-1.8.M04.jar,neo4j-gra
+ ph-matching-1.8.M04.jar,lucene-core-3.5.0.jar,scala-library-2.9.1-1.j
+ ar
+Built-By: cviana
+Tool: Bnd-1.43.0
+Bundle-Name: Collaboration Tools
+Created-By: Apache Maven Bundle Plugin
+Build-Jdk: 1.6.0_32
+Bundle-Version: 0.0.1.SNAPSHOT
+Bnd-LastModified: 1340136553035
+Embed-Transitive: true
+Bundle-ManifestVersion: 2
+Bundle-Activator: org.societies.enterprise.collabtools.Activator
+Import-Package: ch.qos.logback.classic;resolution:=optional,ch.qos.log
+ back.classic.joran;resolution:=optional,ch.qos.logback.core;resolutio
+ n:=optional,ch.qos.logback.core.joran.spi;resolution:=optional,com.su
+ n.source.tree;resolution:=optional,com.sun.source.util;resolution:=op
+ tional,com.sun.tools.javac.model;resolution:=optional,com.sun.tools.j
+ avac.processing;resolution:=optional,com.sun.tools.javac.tree;resolut
+ ion:=optional,com.sun.tools.javac.util;resolution:=optional,javax.ann
+ otation.processing;resolution:=optional,javax.lang.model;resolution:=
+ optional,javax.lang.model.element;resolution:=optional,javax.lang.mod
+ el.type;resolution:=optional,javax.lang.model.util;resolution:=option
+ al,javax.management;resolution:=optional,javax.management.remote;reso
+ lution:=optional,javax.security.auth.x500;resolution:=optional,javax.
+ tools;resolution:=optional,javax.xml.parsers;resolution:=optional,org
+ .osgi.framework;version="[1.6,2)",org.slf4j;resolution:=optional;vers
+ ion="[1.6,2)",org.slf4j.impl;resolution:=optional;version="[1.6,2)",o
+ rg.xml.sax;resolution:=optional,org.xml.sax.ext;resolution:=optional,
+ org.xml.sax.helpers;resolution:=optional,sun.misc;resolution:=optiona
+ l
+Embed-Dependency: *;scope=compile|runtime
+Bundle-SymbolicName: org.societies.enterprise.CollabTools
+Originally-Created-By: Apache Maven Bundle Plugin
+

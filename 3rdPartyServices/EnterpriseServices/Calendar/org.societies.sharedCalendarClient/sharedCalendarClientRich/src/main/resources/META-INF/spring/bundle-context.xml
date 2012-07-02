@@ -14,4 +14,6 @@
 
     <tx:annotation-driven />
 	
+    <bean id="sharedCalendarClient"	class="org.societies.rdpartyService.enterprise.SharedCalendarClientRich">		
+	</bean>
 </beans>

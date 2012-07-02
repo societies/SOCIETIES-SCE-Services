@@ -38,7 +38,7 @@
     
     <string name="loginButton">Log In</string>
     <string name="loginDialog">Please re-enter your user name and password.</string>
-    <string name="loginEmailHint">babak@societies.org</string>
+    <string name="loginEmailHint">jackie@societies.org</string>
     <string name="loginEmailLabel">Email:</string>
     <string name="loginHeading">iDisaster</string>
     <string name="loginInfo">Sign up for Societies.</string>
@@ -46,7 +46,7 @@
     <string name="loginPasswordHint">*********</string>    
     <string name="loginPasswordLabel">Password:</string>
 <!-- <string name="loginUserNameHint">Name</string>  -->
-    <string name="loginUserNameHint">Babak Farshchian</string>
+    <string name="loginUserNameHint">Jacqueline F</string>
     <string name="loginUserNameLabel">Name:</string>
 <!-- <string name="loginUserNameLabel">Login as:</string>  -->
 

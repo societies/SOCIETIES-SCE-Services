@@ -163,11 +163,14 @@ public class CalendarConfigurator {
 				prop.setProperty("accessToken", accessToken);
 				prop.setProperty("refreshToken", refreshToken);
 				String tmpFilePath=txtStorePropFilePath.getText();
-				if ((tmpFilePath.endsWith("\\"))||(tmpFilePath.endsWith("/"))){
-					tmpFilePath=tmpFilePath+"bk.properties";
-				}else{
-					tmpFilePath=tmpFilePath+"/bk.properties";
-				}
+				String pathSeparator = System.getProperty("path.separator");
+				String suffix = tmpFilePath.endsWith(pathSeparator)?"bk.properties":pathSeparator+"bk.properties";
+				tmpFilePath += suffix;		
+//				if ((tmpFilePath.endsWith("\\"))||(tmpFilePath.endsWith("/"))){
+//					tmpFilePath=tmpFilePath+"bk.properties";
+//				}else{
+//					tmpFilePath=tmpFilePath+"/bk.properties";
+//				}
 				prop.store(new FileOutputStream(new File(tmpFilePath), false), null);
 				
 				//Show ok dialog

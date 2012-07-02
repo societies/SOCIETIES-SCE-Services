@@ -30,7 +30,6 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.codec.binary.Hex;
@@ -39,7 +38,6 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.criterion.Example;
-import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -599,11 +597,20 @@ public class SharedCalendar implements ISharedCalendar, IPrivateCalendarUtil {
 	public String retrievePrivateCalendarId(String CSSId) {
 		String returnedCalendarId = null;
 		Session session = sessionFactory.openSession();
-		List<CSSCalendarDAO> returnedCSSCalendarDAO = session
-				.createCriteria(CSSCalendarDAO.class)
-				.add(Restrictions.eq("CSSId", CSSId)).list();
-		if (returnedCSSCalendarDAO.size() != 0) {
-			returnedCalendarId = returnedCSSCalendarDAO.get(0).getCalendarId();
+		try {
+			List<CSSCalendarDAO> returnedCSSCalendarDAO = session
+					.createCriteria(CSSCalendarDAO.class)
+					.add(Restrictions.eq("CSSId", CSSId)).list();
+			if (returnedCSSCalendarDAO.size() != 0) {
+				returnedCalendarId = returnedCSSCalendarDAO.get(0).getCalendarId();
+			}
+		} catch (HibernateException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally {
+			if (session!=null){
+				session.close();
+			}
 		}
 		return returnedCalendarId;
 	}
@@ -615,22 +622,22 @@ public class SharedCalendar implements ISharedCalendar, IPrivateCalendarUtil {
 	 * @return
 	 */
 private List<CalendarListEntry> filterCISCalendar(List<CalendarListEntry> listToFilter, String CISId){
-		Session session=sessionFactory.openSession();
-		try{
-			List<String> cisCalendarIdList=session.createCriteria(CISCalendarDAO.class).add(Restrictions.eq("CISId", CISId)).setProjection(Projections.property("calendarId")).list();
-			Iterator<CalendarListEntry> iterator=listToFilter.iterator();
-			while (iterator.hasNext()){
-				if (!(cisCalendarIdList.contains(iterator.next().getId()))){
-					iterator.remove();
-				}
-			}
-		}catch (Exception e) {
-			// TODO: handle exception
-		}finally{
-			if (session!=null){
-				session.close();
-			}
-		}
+//		Session session=sessionFactory.openSession();
+//		try{
+//			List<String> cisCalendarIdList=session.createCriteria(CISCalendarDAO.class).add(Restrictions.eq("CISId", CISId)).setProjection(Projections.property("calendarId")).list();
+//			Iterator<CalendarListEntry> iterator=listToFilter.iterator();
+//			while (iterator.hasNext()){
+//				if (!(cisCalendarIdList.contains(iterator.next().getId()))){
+//					iterator.remove();
+//				}
+//			}
+//		}catch (Exception e) {
+//			// TODO: handle exception
+//		}finally{
+//			if (session!=null){
+//				session.close();
+//			}
+//		}
 		
 		return listToFilter;
 	}

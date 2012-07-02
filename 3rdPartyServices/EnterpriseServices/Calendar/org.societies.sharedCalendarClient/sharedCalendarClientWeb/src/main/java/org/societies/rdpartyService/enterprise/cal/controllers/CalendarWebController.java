@@ -115,6 +115,24 @@ public class CalendarWebController {
 		return ajaxResult;
 	}
 	
+	@RequestMapping("/deletePrivateCalendar.do")
+	public @ResponseBody String deletePrivateCalendar() {
+		this.cb = new CalendarWebResultCallback(this);
+		this.calClientService.deletePrivateCalendar(this.cb);
+		this.wait4semaphore();
+		String ajaxResult = this.gson.toJson(this.result);
+		return ajaxResult;
+	}
+	
+	@RequestMapping("/deleteCisCalendar.do")
+	public @ResponseBody String deleteCisCalendar(@RequestParam(defaultValue="myCisCalendarId", value="calendarId") String calendarId) {
+		this.cb = new CalendarWebResultCallback(this);
+		this.calClientService.deleteCISCalendar(this.cb, calendarId);
+		this.wait4semaphore();
+		String ajaxResult = this.gson.toJson(this.result);
+		return ajaxResult;
+	}
+	
 	@RequestMapping("/index.do")
 	public String getHome() {
 		return "Index";

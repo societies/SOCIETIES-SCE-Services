@@ -34,7 +34,7 @@
 		<osgi:reference id="commManager" interface="org.societies.api.comm.xmpp.interfaces.ICommManager"></osgi:reference>
 						
 		
-		<osgi:reference id="rfidDriver" interface="org.societies.api.css.devicemgmt.rfid.IRfidDriver"></osgi:reference>
+		<!-- <osgi:reference id="rfidDriver" interface="org.societies.api.css.devicemgmt.rfid.IRfidDriver"></osgi:reference> -->
 		<osgi:reference id="eventMgr" interface="org.societies.api.osgi.event.IEventMgr"></osgi:reference>
 		
 		

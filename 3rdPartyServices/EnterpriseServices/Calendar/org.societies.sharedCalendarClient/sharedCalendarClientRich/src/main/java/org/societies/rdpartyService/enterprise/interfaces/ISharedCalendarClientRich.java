@@ -59,7 +59,7 @@ public interface ISharedCalendarClientRich {
 	 * @param CalendarId
 	 * @return true if successful
 	 */
-	public void deleteCISCalendar(IReturnedResultCallback returnedResultCallback,String calendarId);
+	public void deleteCISCalendar(IReturnedResultCallback returnedResultCallback, String calendarId);
 	
 	/**
 	 * 
