@@ -50,13 +50,17 @@ public class iDisasterApplication extends Application {
 	
 
 	private static iDisasterApplication singleton; // Reference to the single instance of the Application
-	
-	static final String PREFS_NAME = "iDisasterPreferences"; 	// File for storing preferences
-	SharedPreferences preferences;								// Preferences shared with all activities
-	Editor editor;												// Editor for changing preferences
 
-	Boolean platformLoggedIn = false;
-//	SocietiesApp iDisasterSoc; 							// represents access to the SOCIETIES platform.
+// All information is fetched from the Social Provider. Preferences are no longer used.
+//
+
+//	static final String PREFS_NAME = "iDisasterPreferences"; 	// File for storing preferences
+//	SharedPreferences preferences;								// Preferences shared with all activities
+//	Editor editor;												// Editor for changing preferences
+
+
+	static final Boolean testDataUsed = false;		// When set to true do not used SocialProvider
+	String disasterTeamName = "n/a";
 
 //TODO: remove test code
 	ArrayList <String> disasterNameList = new ArrayList<String> ();
@@ -71,7 +75,8 @@ public class iDisasterApplication extends Application {
 	ArrayList <String> serviceDescriptionList = new ArrayList<String> ();
 
 	
-//TODO: discuss design. Are these common resources really needed?	
+//TODO: discuss design. Are these common adapter resources needed (performance)?	
+	ArrayAdapter<String> disasterAdapter;
 	ArrayAdapter<String> feedAdapter;
 	ArrayAdapter<String> memberAdapter;
 	ArrayAdapter<String> serviceAdapter;
@@ -103,89 +108,52 @@ public class iDisasterApplication extends Application {
 		super.onCreate ();
 		singleton = this;
 
-	    // Restore preferences from preferences file.
-		// If the preferences file does not exist, it is created when changes are committed.
-		preferences = getSharedPreferences(PREFS_NAME, 0);
-	    editor = preferences.edit();
-	    editor.putString ("pref.dummy", "");
-	    editor.commit ();
+// All information is fetched from the Social Provider. Preferences are no longer used.
+//
+// Restore preferences from preferences file.
+// If the preferences file does not exist, it is created when changes are committed.
+//		preferences = getSharedPreferences(PREFS_NAME, 0);
+//	    editor = preferences.edit();
+//	    editor.putString ("pref.dummy", "");
+//	    editor.commit ();
 
 //TODO: remove test code
-//		disasterNameList.add ("Nicosia Team");
-//		disasterNameList.add ("Larnaka Team");
-//		disasterNameList.add ("Limassol Team");
-//		disasterDescriptionList.add ("Team assigned to the Nicosia region.");
-//		disasterDescriptionList.add ("Team assigned to the Larnaka region.");
-//		disasterDescriptionList.add ("Team assigned to the Limassol region.");
 
-		memberNameList.add ("Tim");
-		memberNameList.add ("Tom");
-		memberDescriptionList.add ("Doctor.");
-		memberDescriptionList.add ("Civil Engineer.");
+	    if (testDataUsed) {   
+	    	disasterNameList.add ("Nicosia Team");
+	    	disasterNameList.add ("Larnaka Team");
+	    	disasterNameList.add ("Limassol Team");
+	    	disasterDescriptionList.add ("Team assigned to the Nicosia region.");
+	    	disasterDescriptionList.add ("Team assigned to the Larnaka region.");
+	    	disasterDescriptionList.add ("Team assigned to the Limassol region.");
 
-		serviceNameList.add ("Share picture");
-		serviceDescriptionList.add ("This service allows picture sharing with your team.");
-		serviceNameList.add ("Jacket control");
-		serviceDescriptionList.add ("This service allows people in your team to remote control your jacket.");
-		serviceNameList.add ("Ask for help");
-		serviceDescriptionList.add ("This service allows you to request help from volunteers.");
-		serviceNameList.add ("Test");
-		serviceDescriptionList.add ("This service is a test.");
+	    	memberNameList.add ("Tim");
+	    	memberNameList.add ("Tom");
+	    	memberDescriptionList.add ("Doctor.");
+	    	memberDescriptionList.add ("Civil Engineer.");
+
+	    	serviceNameList.add ("Share picture");
+	    	serviceDescriptionList.add ("This service allows picture sharing with your team.");
+	    	serviceNameList.add ("Jacket control");
+	    	serviceDescriptionList.add ("This service allows people in your team to remote control your jacket.");
+	    	serviceNameList.add ("Ask for help");
+	    	serviceDescriptionList.add ("This service allows you to request help from volunteers.");
+	    }
 // end of removed
-		
-////TODO: CSS_ID should be stored
-//	    if (getUserName () != getString(R.string.noPreference)){
-//	    	platformLogIn();	// Instantiate the Societies platform
-//	    }
-	    
+			    
 	} //onCreate
 
-////TODO: Replace to call to SocialProvider
-///**
-// * platformLogIn supports checking connection with SocialProvider
-// * and retrieving the CSS_ID and name for the user.
-// */	  
+// All information is fetched from the Social Provider. Preferences are no longer used.
 //
-//	public void platformLogIn () {
+//	public String getDisasterTeamName () {
+//		return preferences.getString ("pref.disasterteamname", getString(R.string.noPreference));
+//	}
 //
-////TODO: catch exception if
-////		- no response from SocialProvider.
+//	public void setDisasterTeamName (String name) {
+//    	editor.putString ("pref.disasterteamname", name);
+//    	editor.commit ();
 //		
-//		platformLoggedIn = true;
 //	}
-
-//TODO: Go through the following code and remove if nor necessary
-
-//	public String getUserName () {
-//		return preferences.getString ("pref.username",getString(R.string.noPreference));
-//	}
-//
-//	public void setUserIdentity (String name, String email, String password) {
-//    	editor.putString ("pref.username", name);
-//    	editor.putString ("pref.email", email);
-//    	editor.putString ("pref.password", password);
-//    	editor.commit ();    	
-//	}
-//
-//
-//	public String getEmail () {
-//		return preferences.getString ("pref.email", getString(R.string.noPreference));
-//	}
-//
-//	public String getPassword () {
-//		return preferences.getString ("pref.password", getString(R.string.noPreference));
-//	}
-//
-
-	public String getDisasterName () {
-		return preferences.getString ("pref.disastername", getString(R.string.noPreference));
-	}
-
-	public void setDisasterName (String name) {
-    	editor.putString ("pref.disastername", name);
-    	editor.commit ();
-		
-	}
 
 /**
 * showDialog is used under testing
@@ -203,7 +171,6 @@ public class iDisasterApplication extends Application {
 		AlertDialog dialog = builder.create();
 		dialog.show();
 	}
-
 //  Example for using Test dialog
 //	iDisasterApplication.getInstance().showDialog (this, getString(R.string.loginTestDialog), getString(R.string.dialogOK));
 

@@ -1,0 +1,88 @@
+<xs:schema elementFormDefault="qualified" version="1.0"
+	xmlns="http://societies.org/thirdpartyservices/schema/networking"
+	targetNamespace="http://societies.org/thirdpartyservices/schema/networking/directory"
+	xmlns:tns="http://societies.org/thirdpartyservices/schema/networking/directory"
+	xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+
+
+
+		<xs:element name="networkingBean">
+			<xs:complexType>
+				<xs:sequence>
+					<xs:element name="method" type="tns:methodType"
+						minOccurs="0" />
+					<xs:element name="networkRec" type="tns:networkingRecord"
+						minOccurs="0" />
+					<xs:element name="userRec" type="tns:userRecord"
+						minOccurs="0" />
+					<xs:element name="id" type="xs:int"
+						minOccurs="0" />
+					<xs:element name="friendid" type="xs:int"
+						minOccurs="0" />			
+				</xs:sequence>
+			</xs:complexType>
+		</xs:element>
+
+		<xs:element name="networkingBeanResult">
+			<xs:complexType>
+				<xs:sequence>
+					<xs:element name="resultUserRec" type="tns:userRecordResult"
+						minOccurs="0" />
+					<xs:element name="resultNetwRec" type="tns:networkingRecord"
+						minOccurs="0" />	
+				</xs:sequence>
+			</xs:complexType>
+		</xs:element>
+		
+		
+		<xs:complexType name="userRecord">
+			<xs:sequence>
+				<xs:element name="company" type="xs:string" minOccurs="0" />
+				<xs:element name="displayName" type="xs:string"
+					minOccurs="0" />
+				<xs:element name="id" type="xs:int" />
+				<xs:element name="login" type="xs:string" minOccurs="0" />
+				<xs:element name="password" type="xs:string" minOccurs="0" />
+			</xs:sequence>
+		</xs:complexType>
+
+		<xs:complexType name="userRecordResult">
+
+			<xs:sequence>
+				<xs:element name="result" type="tns:userResult"
+					minOccurs="0" />
+				<xs:element name="userRec" type="tns:userRecord"
+					minOccurs="0" />
+			</xs:sequence>
+		</xs:complexType>
+
+
+
+		<xs:complexType name="networkingRecord">
+			<xs:sequence>
+				<xs:element name="friendid" type="xs:int" />
+				<xs:element name="id" type="xs:int" />
+				<xs:element name="shareHash" type="xs:int" />
+			</xs:sequence>
+		</xs:complexType>
+
+
+		<xs:simpleType name="userResult">
+			<xs:restriction base="xs:string">
+				<xs:enumeration value="USER_OK" />
+				<xs:enumeration value="USER_NOT_FOUND" />
+				<xs:enumeration value="USER_ALREADY_EXISTS" />
+			</xs:restriction>
+		</xs:simpleType>
+
+		<xs:simpleType name="methodType">
+			<xs:restriction base="xs:string">
+				<xs:enumeration value="getUserRecord" />
+				<xs:enumeration value="updateUserRecord" />
+				<xs:enumeration value="getNetworkingRecord" />
+				<xs:enumeration value="updateNetworkingRecord" />
+			</xs:restriction>
+		</xs:simpleType>
+	</xs:schema>
+
