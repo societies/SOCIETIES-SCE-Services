@@ -1,0 +1,7 @@
+When context is available on Android:
+- subscribe to changes in symbolic location
+- on change, get my symbolic location from context broker
+- if location is at any public display, then send my identity (and/or preferences) to the service backend.
+
+When security services are available on Android:
+- use digsig

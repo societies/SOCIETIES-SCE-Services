@@ -1,0 +1,100 @@
+Annotations
+===========
+
+The annotations plugin allows for developers to add additional meta-data to update statuses on Statusnet.
+Original Author: Julien Chaumond
+Edited by Michael Treyvaud <michael.treyvaud@gmail.com>
+
+Installation
+------------
+
+NOTE: This plugin will only work with a patched version of Statusnet - this version of statusnet has edited core code which allows for this plugin to work correctly. If you would like to add this plugin to statusnet - you can find the patched version of statusnet here.
+
+Simply add the Annotations directory to your statusnet /plugins directory.
+
+Once the Annotations directory is in place, edit your statusnet config file with the following details.
+
+Simply add this.
+------------------------------------------------------------------------------------------------------------------------------------
+addPlugin('Annotations');
+------------------------------------------------------------------------------------------------------------------------------------
+
+Or if you have already set up  your own custom annotations, add the following config, replacing the stored_annotations with your own custom annotations.
+------------------------------------------------------------------------------------------------------------------------------------
+addPlugin('Annotations', array(
+                'demo' => true,
+                'stored_annotations' => array(array(
+                                                'custom_tssg_event' => array(
+                                                                                'event_title' => null,
+                                                                                'event_start_time' => null,
+                                                                                'event_end_time' => null,
+                                                                                'event_date' => null,
+                                                                                'event_location' => null,
+                                                                                'event_url' => null,
+                                                                                'event_description' => null,
+                                                                                'event_lat' => null,
+                                                                                'event_long' => null)))));
+------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+Implementation details
+----------------------
+
+At the moment the plugin only provides support for json submitted annotations.
+
+Important details
+^^^^^^^^^^^^^^^^^
+
+If you are adding your own custom tables to the statusnet data base you must do the following.
+
+Within the "function onCheckSchema()" of the AnnotationsPlugin.php class, add your own database table details - this will ensure that the database table is created and ready for you to use when loading statusnet.
+
+an example can be seen below.
+
+------------------------------------------------------------------------------------------------------------------------------------
+$schema->ensureTable('custom_tssg_event',
+				array(new ColumnDef('notice_id','int',11,false,'PRI'),
+					new ColumnDef('event_title','varchar',36,false),
+					new ColumnDef('event_start_time','timestamp'),
+					new ColumnDef('event_end_time','timestamp'),
+					new ColumnDef('event_date','datetime'),
+					new ColumnDef('event_location','varchar',255),
+					new ColumnDef('event_url','varchar',255),
+                                        new ColumnDef('event_description','varchar',255),
+                                        new ColumnDef('event_lat','decimal(10,7)'),
+                                        new ColumnDef('event_long','decimal(10,7)'),
+				));
+------------------------------------------------------------------------------------------------------------------------------------
+
+
+Within the AnnotationsPlugin.php file, you must also configure your database settings to allow meta-data to be removed from the database when the associated status-update has been removed.
+
+The settings required can be foudn within "function onNoticeDeleteRelated($notice)", please make sure you update this! An example can be seen within the onNoticeDeleteRelated($notice) function.
+
+
+Annotations are currently stored by default within the "annotations" table of the statusnet database, the plugin adds the annotations to a "content" column in json format, if you would like to save your own annotations to it's own separate database table, please take a look at the example TSSG_CUSTOM_EVENT.php file within the Annotations/classes directory of this plugin.
+
+Even if you do this, the annotations will be saved in both the "annotations" and "yourcustomtable" tables. Make sure to update the 
+onNoticeDeleteRelated($notice) function within AnnotationsPlugin.php file to ensure proper removal of the data.
+
+examples
+^^^^^^^^
+
+Within the Annotations/scripts directory you can post messages and view messages with custom annotations.
+
+createnotice.php
+~~~~~~~~~~~~~~~~~
+
+Open command prompt and type "php createmessage.php", this will send a status update to your implementation of statusnet with example details.
+
+In order for this to work, you must edit the createnotice.php file. Simply add a valid username and password to the nickname and password fields.
+
+shownotice.php
+~~~~~~~~~~~~~~~
+
+Open command prompt and type "php shownotice.php", this will return the status update with the hidden meta-data.
+
+In order for this to work you must edit the shownotice.php file and update the url with the url of your own instance of statusnet. You must also change the message if to the id of the message you would lie to view.
+
+

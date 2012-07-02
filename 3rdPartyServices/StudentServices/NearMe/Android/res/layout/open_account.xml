@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout 
+	android:background="@drawable/bg_default"
+	android:layout_width="fill_parent" android:layout_height="fill_parent"
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:gravity="center">
+	
+	<LinearLayout
+		android:gravity="center"
+		android:orientation="vertical"
+		android:layout_width="fill_parent"
+		android:layout_height="fill_parent">
+		<LinearLayout
+			android:background="@drawable/logo01"
+			android:gravity="center"
+			android:orientation="vertical"
+			android:layout_width="120dip"
+			android:layout_height="120dip">
+		</LinearLayout>
+		
+		<LinearLayout
+			android:layout_width="20dip"
+			android:layout_height="20dip"
+			android:gravity="center">
+		</LinearLayout>
+		
+		<TextView
+			android:layout_width="255.0dip"
+			android:layout_height="30.0dip"
+			android:text="Login:                                                "
+			android:gravity="center"
+			style="@style/PVC.style_04"/>
+		
+		<LinearLayout
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:orientation="horizontal"
+			android:gravity="center">
+
+			
+		<Spinner 
+        	android:id="@id/open_account_list"
+        	android:layout_width="175.0dip"
+			android:layout_height="40.0dip"
+			android:layout_marginRight="5.0dip"
+		/>
+		<Button
+				android:id="@id/open_account_delete"
+				android:layout_width="80dip"
+				android:layout_height="40dip"
+				android:text="Delete"/>	
+		
+		</LinearLayout>	
+				
+		<TextView
+			android:layout_width="255.0dip"
+			android:layout_height="30.0dip"
+			android:text="Password:                                         "
+			android:gravity="center"
+			style="@style/PVC.style_04"/>
+		
+		<EditText
+			android:id="@id/open_account_password"
+			android:layout_width="255.0dip"
+			android:layout_height="40.0dip"
+			android:layout_marginBottom="10.0dip"
+			android:password="true"/>
+			
+			
+		<LinearLayout
+			android:orientation="vertical"
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content"
+			android:gravity="center">
+						
+		</LinearLayout>
+			
+			
+		<LinearLayout
+			android:layout_width="fill_parent"
+			android:layout_height="50dip"
+			android:gravity="center">
+			<Button
+				android:id="@id/open_account_ok"
+				android:layout_marginRight="15dip" 
+				android:layout_width="120dip"
+				android:layout_height="40dip"
+				android:text="Ok"/>				
+			<Button
+				android:id="@id/open_account_cancel"
+				android:layout_width="120dip"
+				android:layout_height="40dip"
+				android:text="Cancel"/>
+		</LinearLayout>
+		
+	</LinearLayout>
+			
+		
+</RelativeLayout>

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout 
+	
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:sgo="http://schemas.android.com/apk/res/com.views"
+	android:orientation="horizontal"
+	android:padding="0.0dip" 
+	android:layout_width="fill_parent"
+	android:layout_height="60.0dip"
+	android:gravity="center|left">
+	
+	<LinearLayout
+		android:id="@id/options_icon"
+		android:layout_width="fill_parent"
+		android:layout_height="60.0dip"
+		android:onClick="options_icon"
+		android:background="@drawable/part_list01"
+		android:gravity="center">
+
+   		
+			<LinearLayout 
+				android:layout_width="20.0dip"
+				android:layout_height="fill_parent">
+			</LinearLayout>
+			
+			<TextView
+				android:layout_width="wrap_content"
+				android:layout_height="24.0dip"
+				android:layout_marginLeft="2.0dip"
+				android:text="Delete"
+				android:gravity="center"
+				style="@style/PVC.style_07" />
+			<LinearLayout 
+				android:layout_width="170.0dip"
+				android:layout_height="fill_parent">
+			</LinearLayout>
+				<ImageView				
+				android:background="@drawable/options_leave"
+				android:adjustViewBounds="true"
+				android:layout_width="60.0dip" 
+				android:layout_height="60.0dip" 
+				android:gravity="center"				
+				/>
+				
+	</LinearLayout>
+		
+</LinearLayout>

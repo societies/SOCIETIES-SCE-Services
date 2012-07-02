@@ -1,0 +1,203 @@
+# --- NAVI --------------------------------------------------------------------
+NAVI_HOME = Home
+NAVI_USER_SETTINGS = User Settings
+NAVI_TICKETS = Requests 
+NAVI_USERS = Users
+NAVI_LANGUAGES = Languages
+NAVI_TAGS = Tags
+NAVI_HELP = Help
+NAVI_CONTACT = Contact
+NAVI_ABOUT = About
+NAVI_CONFIG = Config
+NAVI_LOGIN = Login
+NAVI_LOGOUT = Logout
+# -----------------------------------------------------------------------------
+
+
+# --- TICKETS GENERAL ---------------------------------------------------------
+TICKETS_TYPE = Request Type
+TICKETS_SUMMARY = Summary
+TICKETS_SHORT_DESCRIPTION = Title
+TICKETS_DESCRIPTION = Description
+TICKETS_STATUS = Status
+TICKETS_REPORTER = Reporter
+TICKETS_CREATED = Created
+TICKETS_TAGS = Tags (seperate tags with commas)
+TICKETS_DEADLINE = Deadline
+TICKETS_IMAGE = Image
+TICKETS_OPTIONS = Options
+TICKETS_BACK = Back
+TICKETS_BACK_LONG = Back to request listening
+TICKETS_ID = ID
+TICKETS_ANSWER = Answer
+TICKETS_ANSWERS = Answers
+TICKETS_AT = at
+TICKETS_LIST_CLOSED = also list closed requests
+TICKETS_LIST_SUGGESTIONS = only list suggested requests
+TICKETS_ANSWER_2 = My Answer
+TICKETS_REQUEST = Request
+TICKETS_LIST_NO_RES = No results found
+TICKETS_NOTIFICATIONS = E-Mail Notifications
+TICKETS_NOTIFY_TICKET = Notify if new tickets arrive
+TICKETS_NOTIFY_ANSWER = Notify if new answers for one of my tickets arrive
+
+# -----------------------------------------------------------------------------
+
+
+
+# --- TICKETS LIST ------------------------------------------------------------
+TICKETS_HEADLINE = Request - View
+TICKETS_SEARCH = Search
+TICKETS_RESULT = Result
+TICKETS_CREATE_NEW = create new request
+TICKETS_REFRESH = refresh results
+# -----------------------------------------------------------------------------
+
+
+# --- TICKETS CREATE ----------------------------------------------------------
+TICKETS_CREATE_HEADLINE_create = Create request
+TICKETS_CREATE_HEADLINE_modify = Modify request
+TICKETS_CREATE_BUTTON_create = Create
+TICKETS_CREATE_BUTTON_modify = Modify
+TICKETS_CREATE_IMAGE_UPLOAD = Please select an image (jpg, png, gif, pjpeg) to upload (optional): 
+TICKETS_CREATE_CURRENT_IMAGE = Current image
+# -----------------------------------------------------------------------------
+
+# --- TICKETS PROCESS ---------------------------------------------------------
+TICKETS_PROCESS_HEADER = Request - Process
+TICKETS_PROCESS_CREATED_AT = created at
+TICKETS_PROCESS_ATTACHED_IMAGE = Attached Image
+TICKETS_PROCESS_BY = by
+TICKETS_PROCESS_ANSWER_TEXT = Please answer the question.
+TICKETS_PROCESS_ANSWER = Answer
+# -----------------------------------------------------------------------------
+
+
+# --- DB_OUTPUT_TRANSLATION ---------------------------------------------------
+DB_TICKETS_question = question
+DB_TICKETS_tag image = tag image
+DB_TICKETS_translation = translation
+
+DB_STATUS_opened = opened
+DB_STATUS_closed = closed
+# -----------------------------------------------------------------------------
+
+# --- LOGOUT ------------------------------------------------------------------
+LOGOUT_MSG = Logout was successful. Thank you for your visit.
+# -----------------------------------------------------------------------------
+
+# --- CREATE/MODIFY MASK ------------------------------------------------------
+USER_SETTINGS_HEADING = User settings
+USER_SETTINGS_FIRST_NAME = First name
+USER_SETTINGS_LAST_NAME = Last name
+USER_SETTINGS_EMAIL = E-Mail
+USER_SETTINGS_LANGUAGE = Language
+USER_SETTINGS_NEW_PASSWORD = New password
+USER_SETTINGS_RE_PASSWORD = Re-password
+USER_SETTINGS_BUTTON_SAVE = save
+# -----------------------------------------------------------------------------
+
+# --- TOOLTIPS ---------------------------------------------------------------
+TOOLTIP_EDIT = edit
+TOOLTIP_ARCHIVE = close request
+TOOLTIP_REOPEN = reopen request
+TOOLTIP_DELETE = delete
+# -----------------------------------------------------------------------------
+
+# --- CONFIRMS ----------------------------------------------------------------
+CONFIRM_DELETE_TICKET = Do you really want to delete this request? All answers and votes with this request-ID are also deleted!
+CONFIRM_DELETE_USER = Do you really want to delete this user? All requests from this user will be set to Anonymous-ID!
+CONFIRM_DELETE_LANG = Do you really want to delete this language? Be sure what you are doing! NOT RECOMMANDED!
+CONFIRM_DELETE_TAG =  Do you really want to delete this tag?
+# -----------------------------------------------------------------------------
+
+# --- USERS ------------------------------------------------------------------
+USERS_HEADING = Users
+USERS_SEARCH = Search
+USERS_RESULT = Result
+USERS_BUTTON_CREATE_NEW_USER = Create new user
+USERS_BUTTON_REFRESH_RESULTS = Refresh results 
+USERS_ID = ID
+USERS_NAME = Name
+USERS_EMAIL = E-Mail
+USERS_GROUP = Group
+USERS_LANGUAGE = Language
+USERS_OPTIONS = Options
+USERS_INSTITUTE = Organisation
+
+USERS_HEADING_create = Register user
+USERS_HEADING_modify = Modify user
+USERS_FIRST_NAME = First name
+USERS_LAST_NAME = Last name
+USERS_PASSWORD = Password
+USERS_RE_PASSWORD = Re-Password
+USERS_BUTTON_create = register
+USERS_BUTTON_modify = modify
+USERS_BUTTON_BACK = back
+USERS_REQUIRED = Required
+USERS_NOTIFY_TICKET = Notify on new tickets
+USERS_NOTIFY_ANSWER = Notify on new answers
+
+# ----------------------------------------------------------------------------
+
+# --- LANGUAGES --------------------------------------------------------------
+LANGUAGES_HEADING = Languages
+LANGUAGES_SEARCH = Search
+LANGUAGES_RESULT = Result
+LANGUAGES_BUTTON_CREATE_NEW_LANGUAGE = Create new language
+LANGUAGES_BUTTON_REFRESH_RESULTS = Refresh results 
+LANGUAGES_ID = ID
+LANGUAGES_LANGUAGE = Language
+LANGUAGES_TRANS_AV = Translation available
+LANGUAGES_YES = Yes
+LANGUAGES_NO = No
+LANGUAGES_OPTIONS = Options
+LANGUAGES_HINT_LABEL = Hint
+LANGUAGES_HINT = All translation files are located at "./lang/". Thereby the following notation is used for the file names: [#language name#] + '.lang' (e.g. german.lang, english.lang). If a translation is available for a language, the language is appearing automatically within the language select box.
+LANGUAGES_BUTTON_create = create
+LANGUAGES_BUTTON_modify = modify
+LANGUAGES_BUTTON_BACK = back
+# ---------------------------------------------------------------------------- 
+
+# --- TAGS -------------------------------------------------------------------
+TAGS_HEADING = Tags - List
+TAGS_SEARCH = Search
+TAGS_ID = Id
+TAGS_NAME = Name
+TAGS_COUNT_TICKETS = Count tickets
+TAGS_COUNT_USERS = Count users
+TAGS_OPTIONS = Options
+TAGS_BUTTON_REFRESH_RESULTS = Refresh
+# ----------------------------------------------------------------------------
+
+# --- LOGIN ------------------------------------------------------------------
+LOGIN_HEADING = Login
+LOGIN_EMAIL = E-Mail
+LOGIN_PASSWORD = Password
+LOGIN_BUTTON_LOGIN = Login
+LOGIN_FORGOT_PASSWD = Forgot your password?
+LOGIN_REGISTER = Register a new account
+# -----------------------------------------------------------------------------
+
+# --- ABOUT -------------------------------------------------------------------
+ABOUT_HEADING = About
+# -----------------------------------------------------------------------------
+
+# --- HELP --------------------------------------------------------------------
+HELP_HEADING = Help
+# -----------------------------------------------------------------------------
+
+# --- CONTACT -----------------------------------------------------------------
+CONTACT_HEADING = Contact
+# -----------------------------------------------------------------------------
+
+# --- CONFIGURATION -----------------------------------------------------------
+CONF_HEADING = Configuration
+CONF_XMPP = XMPP active?
+CONF_EMAIL_NOTIFICATION = E-Mail notification at new requests?
+CONF_BUTTON_SAVE = Save
+# -----------------------------------------------------------------------------
+
+# --- USER ACTIVATION ---------------------------------------------------------
+USER_ACTIVATION_HEADING = User Activation
+# -----------------------------------------------------------------------------

@@ -1,5 +1,6 @@
 
 # ignore Eclipse workspace files:
+build.properties
 .metadata
 .settings
 .project

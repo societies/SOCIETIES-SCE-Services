@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:adjustViewBounds="true" android:orientation="vertical"
+	android:layout_width="fill_parent" android:layout_height="130dip"
+	android:gravity="center|top" android:background="@drawable/options_bg">
+
+	<LinearLayout android:orientation="horizontal"
+		android:layout_width="fill_parent" android:layout_height="wrap_content"
+		android:gravity="center|left">
+		<LinearLayout android:orientation="horizontal"
+			android:layout_width="5dip" android:layout_height="15dip"
+			android:gravity="center|left">
+		</LinearLayout>
+		<ImageView android:layout_marginRight="4.0dip"
+			android:baselineAlignBottom="@drawable/status_01"
+			android:adjustViewBounds="true" android:id="@id/options_image_status"
+			android:layout_height="24.0dip" android:layout_width="24.0dip"
+			android:layout_marginLeft="4.0dip">
+		</ImageView>
+
+		<TextView android:gravity="left" android:layout_height="wrap_content"
+			android:layout_width="200.0dip" android:layout_marginLeft="2.0dip"
+			android:text="@string/list_member_text_01" style="@style/PVC.style_06"
+			android:id="@id/options_text_top">
+		</TextView>
+	</LinearLayout>
+
+	<LinearLayout android:orientation="horizontal"
+		android:layout_width="fill_parent" android:layout_height="wrap_content"
+		android:gravity="center|left">
+	<LinearLayout
+		android:layout_width="10dip" android:layout_height="10dip"
+		android:gravity="center|left">
+		</LinearLayout>
+		<LinearLayout
+			android:adjustViewBounds="true" android:background="@drawable/options_image2"
+			android:orientation="horizontal" android:layout_width="60.0dip"
+			android:layout_height="60.0dip" android:gravity="center">
+
+			<ImageView android:id="@id/options_image_description"
+				android:adjustViewBounds="true" android:minHeight="52.0dip"
+				android:minWidth="52.0dip" android:maxWidth="52.0dip"
+				android:maxHeight="52.0dip" android:layout_width="52.0dip"
+				android:layout_height="52.0dip" />
+		</LinearLayout>
+
+
+		<LinearLayout android:layout_marginLeft="8dip"
+			android:background="@drawable/options_description"
+			android:layout_height="60.0dip" android:layout_width="230.0dip"
+			android:gravity="center">
+
+
+			<TextView android:layout_height="58.0dip"
+				android:layout_width="220.0dip"
+				android:text="@string/list_member_text_01" style="@style/PVC.style_03"
+				android:id="@id/options_text_description">
+			</TextView>
+
+		</LinearLayout>
+
+
+
+	</LinearLayout>
+
+	<LinearLayout android:gravity="center"
+		android:orientation="horizontal" android:padding="0.0dip"
+		android:layout_width="wrap_content" android:layout_height="10dip">
+	</LinearLayout>
+
+
+	<LinearLayout android:orientation="horizontal"
+		android:layout_height="36.0dip" android:gravity="bottom"
+		android:layout_width="wrap_content">
+		<Button android:id="@id/options_button_01" android:text="Community"
+			android:layout_marginLeft="5.0dip" android:layout_height="30.0dip"
+			android:layout_width="100.0dip" android:background="@drawable/list_menu_02"></Button>
+		<Button android:text="Resources" android:layout_height="30.0dip"
+			android:layout_marginLeft="5.0dip" android:background="@drawable/list_menu"
+			android:id="@id/options_button_02" android:layout_width="100.0dip"></Button>
+		<Button android:text="Profile" android:layout_height="30.0dip"
+			android:layout_marginLeft="5.0dip" android:background="@drawable/list_menu"
+			android:id="@id/options_button_03" android:layout_width="100.0dip"></Button>
+
+	</LinearLayout>
+</LinearLayout>

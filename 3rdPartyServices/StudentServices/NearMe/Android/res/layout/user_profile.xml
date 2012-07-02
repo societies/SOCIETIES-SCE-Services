@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout 
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:orientation="vertical"
+	android:layout_width="fill_parent"
+	android:layout_height="wrap_content" android:gravity="center|top">
+<LinearLayout
+			android:background="@drawable/logo01"
+			android:gravity="center"
+			android:orientation="vertical"
+			android:layout_width="120dip"
+			android:layout_height="120dip"
+			android:layout_marginBottom="15dip">
+    	
+		</LinearLayout>
+		
+	<LinearLayout
+		android:layout_marginTop="2.0dip"
+		android:orientation="horizontal"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:gravity="center">
+		
+		<TextView
+			android:layout_width="120.0dip"
+			android:layout_height="wrap_content"
+			android:layout_marginLeft="5.0dip"
+			android:text="Name:"
+			android:gravity="left"
+			style="@style/PVC.style_04" />
+				
+		<EditText
+			android:id="@id/user_profile_name"
+			android:layout_width="180.0dip"
+			android:layout_height="40.0dip"/>
+						
+	</LinearLayout>
+		
+			
+	<LinearLayout
+		android:gravity="center"
+		android:orientation="horizontal"
+		android:padding="0.0dip" 
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content">
+	</LinearLayout>			
+		
+	<LinearLayout
+		android:layout_marginTop="5.0dip"
+		android:orientation="horizontal"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:gravity="center">			
+			
+		<TextView
+			android:layout_width="120.0dip"
+			android:layout_height="wrap_content"
+			android:layout_marginLeft="5.0dip"
+			android:text="Category:"
+			android:gravity="left"
+			style="@style/PVC.style_04" />
+			
+		<Spinner android:id="@id/user_profile_category"
+    		android:layout_width="180.0dip"
+    		android:layout_height="40.0dip" />	
+	
+	</LinearLayout>
+	
+	<LinearLayout
+		android:layout_marginTop="5.0dip"
+		android:orientation="horizontal"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:gravity="center">			
+			
+		<TextView
+			android:layout_width="120.0dip"
+			android:layout_height="wrap_content"
+			android:layout_marginLeft="5.0dip"
+			android:text="Interest:"
+			android:gravity="left"
+			style="@style/PVC.style_04" />
+			
+		<Spinner android:id="@id/user_profile_interest"
+    		android:layout_width="180.0dip"
+    		android:layout_height="40.0dip" />	
+	
+	</LinearLayout>
+	
+	<LinearLayout
+		android:layout_marginTop="5.0dip"
+		android:orientation="horizontal"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:gravity="center">			
+			
+		<TextView
+			android:layout_width="120.0dip"
+			android:layout_height="wrap_content"
+			android:layout_marginLeft="5.0dip"
+			android:text="Preference:"
+			android:gravity="left"
+			style="@style/PVC.style_04" />
+			
+		<Spinner android:id="@id/user_profile_preference"
+    		android:layout_width="180.0dip"
+    		android:layout_height="40.0dip" />	
+	
+	</LinearLayout>    
+	    
+	<LinearLayout
+		android:orientation="horizontal"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:gravity="right" android:layout_marginTop="6.0dip">
+				
+		<Button
+			android:id="@id/user_profile_save"
+			android:layout_width="100.0dip"
+			android:layout_height="40.0dip"
+			android:text="Save"	
+			android:layout_marginRight="8dip"		
+		/>
+
+
+			
+	</LinearLayout>
+	
+
+
+	    <LinearLayout
+	        android:layout_marginLeft="10dip"
+	        android:id="@id/user_profile_layout"
+	        android:layout_width="fill_parent"
+	        android:layout_height="170dip"
+	        android:gravity="left"
+            android:orientation="vertical" 
+            style="@style/PVC.style_04">
+			<TextView
+				android:id="@id/user_profile_text"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:gravity="left"
+				style="@style/PVC.style_04" />
+	        
+		</LinearLayout>  
+
+	    
+	    
+	    <LinearLayout
+		android:orientation="horizontal"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:gravity="right">
+		
+		<Button
+			android:id="@id/user_profile_ok"
+			android:layout_width="100.0dip"
+			android:layout_height="40.0dip"
+			android:text="Ok"
+			android:layout_marginTop="10dip"
+			android:layout_marginRight="8dip"
+		/>
+		
+		</LinearLayout>
+		
+</LinearLayout>
