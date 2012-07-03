@@ -96,6 +96,15 @@ public class CalendarWebController {
 		return ajaxResult;
 	}
 	
+	@RequestMapping("/getCisCalendarEvents.do")
+	public @ResponseBody String getCisCalendarEvents(@RequestParam(defaultValue="myCisCalendarId", value="calendarId") String calendarId) {
+		this.cb = new CalendarWebResultCallback(this);
+		this.calClientService.retrieveCISCalendarEvents(this.cb, calendarId);
+		this.wait4semaphore();
+		String ajaxResult = this.gson.toJson(this.result);
+		return ajaxResult;
+	}
+	
 	@RequestMapping("/createCssCalendarAjax.do")
 	public @ResponseBody String createCssCalendarAjax(@RequestParam(defaultValue="CSS Calendar Summary", value="cssSummary") String summary) {
 		//calClientService.retrieveEventsPrivateCalendar(this.cb);

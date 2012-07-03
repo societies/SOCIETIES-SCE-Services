@@ -78,6 +78,23 @@ new Ajax.Updater('result','/sharedCal/createCisCalendarAjax.do',
 		  });			
 });
 
+$("getCisCalendarEventsButton").on("click", function(event){
+	new Ajax.Updater('result','/sharedCal/getCisCalendarEvents.do',
+			  {
+				parameters: { calendarId: $F('calId')},
+			    method:'get',
+			    onSuccess: function(transport){
+			      var response = transport.responseText || "no response text";
+			      var ajResp = eval("(" + response + ")"); 
+			      //alert("Success! \n\n" + response);
+			      eventData.events = ajResp;
+			      jQuery("#calendar").weekCalendar('refresh'); 
+			      jQuery("#calendar").show();
+			    },
+			    onFailure: function(){ alert('Something went wrong...') }
+			  });			
+	});
+
 $("deleteCisCalendarButton").on("click", function(event){
 	new Ajax.Updater('result','/sharedCal/deleteCisCalendar.do',
 			  {

@@ -17,7 +17,7 @@
 	Cis/Css Calendar Summary: <input type="text" id="cisSummary" /><br/>
 	Calendar ID: <input type="text" id="calId" /><br/>
 	<button id="getAllCisCalendarsAjax">Show all Cis Calendars</button><br/>
-	<button id="createCisCalendarButton">Create Cis Calendar</button><button id="deleteCisCalendarButton">Delete Cis Calendar</button><br/>
+	<button id="createCisCalendarButton">Create Cis Calendar</button><button id="deleteCisCalendarButton">Delete Cis Calendar</button><button id="getCisCalendarEventsButton">Get Cis Calendar Events</button><br/>
 	<button id="createCssCalendarButton">Create CSS Calendar</button><button id="deleteCssCalendarButton">Delete CSS Calendar</button><br/>	
 	<button id="retrieveCssCalendarEvents">Get Private (CSS) Events</button><br/>
 	<br/>Result:<br/>
