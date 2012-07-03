@@ -135,18 +135,18 @@ public class SimpleCtxMatching {
     	return true;
 	}
 
-	/**
-	 * @param statusText
-	 * @param temp
-	 * @return
-	 */
-	private boolean isUnique(String statusText, ContextUpdates[] temp) {
-        for(int j = 0; j < temp.length; j++) {
-            if(temp[j] != null && statusText.equals(temp[j].getStatusText()))
-                return false;
-        }
-        return true;
-	}
+//	/**
+//	 * @param statusText
+//	 * @param temp
+//	 * @return
+//	 */
+//	private boolean isUnique(String statusText, ContextUpdates[] temp) {
+//        for(int j = 0; j < temp.length; j++) {
+//            if(temp[j] != null && statusText.equals(temp[j].getStatusText()))
+//                return false;
+//        }
+//        return true;
+//	}
 
 	public static <T> List<T> getDuplicate(Collection<T> list) {
 

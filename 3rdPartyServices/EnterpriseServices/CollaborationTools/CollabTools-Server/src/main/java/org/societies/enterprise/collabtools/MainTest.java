@@ -56,7 +56,7 @@ public class MainTest {
 		//Creating some updates
 		test.createMockLongTermCtx();
 		test.createMockShortTermCtx();
-		test.incrementInterests();
+//		test.incrementInterests();
 		test.setupFriendsBetweenPeople(5);
 		YouMightKnow ymn = new YouMightKnow(personRepository.getPersonByName("person#"+3), new String[] {"project planning"}, 5);
 		ymn.printMightKnow(ymn.findYouMightKnow(personRepository.getPersonByName("person#"+3)) , new String[] {"plan"} );

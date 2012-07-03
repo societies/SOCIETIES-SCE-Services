@@ -56,8 +56,10 @@ public class TestUtils {
     {
         for ( Person person : personRepository.getAllPersons() )
         {
-                person.addFriend( getRandomPerson() );
-//            	person.addFriend(getPersonWithSimilarInterests(person));    
+//                person.addFriend( getRandomPerson() );
+        	Person[] persons = getPersonWithSimilarInterests(person);
+        	for (Person individual : persons)
+        		person.addFriend(individual);    
         }
     }
 
@@ -95,21 +97,24 @@ public class TestUtils {
         return personRepository.getPersonByName( "person#"
                 + r.nextInt( nrOfPersons ) );
     }
-    
-    private Person getPersonWithSimilarInterests(Person self)
+
+    private Person[] getPersonWithSimilarInterests(Person self)
     {
+    	ArrayList<Person> persons = new ArrayList<Person>();
     	for ( Person person : personRepository.getAllPersons() )
     	{
     		if (!self.equals(person)) {
-				List<String> personInterest = Arrays.asList(person.getInterests());
+    			List<String> personInterest = Arrays.asList(person.getInterests());
     			for (String match : self.getInterests()) {    			
-    				if (personInterest.contains(match))
-    					return person;
+    				if (personInterest.contains(match)) {
+    					persons.add(person);
+    					break;
+    				}
     			}
     		}
 
     	}
-    	return null;
+    	return persons.toArray(new Person[persons.size()]);
     }
 
 	/**
