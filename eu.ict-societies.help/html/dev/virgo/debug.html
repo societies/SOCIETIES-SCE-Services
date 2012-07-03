@@ -1,0 +1,61 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+	<title>Virgo Management</title>
+	<link rel="stylesheet" type="text/css" href="../../css/societies_help.css" />
+</head>
+
+<body>
+<h1>Virgo Management</h1>
+<p>To start Virgo Tomcat Server run the startup.sh (Linux) or startup.bat (Windows) script. 
+For both platforms, the script is located in the VIRGO_HOME/bin directory.</p>
+<p>
+Once Virgo Tomcat Server has started, the console will display a log message similar to the one shown below, along with other status messages:
+</p>
+<pre class="code">[2009-11-30 12:12:12.111] Thread-2 &lt;UR0001I&gt; User region ready.</pre>
+<p>The preceding message indicates that you can start using VTS.</p>
+<p>To start Virgo in "clean mode", add the <span class="code">-clean</span> option as a suffix of the script invocation. 
+When you start Virgo Tomcat Server in clean mode, the startup script removes the <span class="code">VIRGO_HOME/work</span> directory 
+(and hence all running applications) as well as all trace, log and dump files. 
+It leaves the <span class="code">VIRGO_HOME/repository</span> and <span class="code">VIRGO_HOME/pickup</span> directories untouched, 
+which means that any applications previously hot deployed will be automatically reinstalled.</p>
+<p>Finally, to start Virgo in debug mode, launch the startup script with the following parameters:</p>
+<pre class="code">startup.[bat|sh] -debug 8001 -suspend</pre>
+<p>this will start the Virgo debug agent, listening on port 8001, and suspend the Virgo boot procedure until a debugger attaches to the agent.</p>
+<p>This feature will be invaluable when debugging a Third Party service that has been deployed into or that interacts with a SOCIETIES node running on Virgo.</p>
+<p>Once the server is started, you might access its web-based console using the following url: <a href="http://localhost:8080/admin">http://localhost:8080/admin</a> (input "admin" as ID, and "springsource" as password).</p>
+<p>With the default configuration, server logs are available at <span class="code">VIRGO_HOME\serviceability\logs</span></p>
+<h2>Debugging Bundles running on a remote Virgo App Server from within Eclipse</h2>
+<p>Build the project using maven and deploy the jar to the virgo pickup directory</p>
+
+<p>Start virgo server in debug mode as follows.</p>
+
+<pre class="code">VIRGO_HOME\bin\startup.bat -debug 8000</pre>
+
+Or
+
+<pre class="code">VIRGO_HOME\bin\startup.bat -debug -suspend</pre>
+
+<p>Note: The -suspend option will suspend Virgo's Virtual Machine until a debugger is attached to the specified port (i.e. it will pause the boot of the Virgo server until a debug session is initiated from Eclipse)</p>
+
+<p>From Eclipse navigate to run &rarr; debug configuration:</p>
+<p><img align="middle" alt="Eclipse Debug Configuration Settings" src="../../img/image007.png"></p>
+
+<p>This will open the Debug Configuration window:</p>
+<p><img align="middle" alt="Debug Configuration" src="../../img/image009.png"></p>
+<p>Select "Remote Java Application" icon on left side, Right click and say "New" (give your preferred name of your config - in this case "Virgo_External_Debug").
+After clicking on New, Eclipse will create a new Remote Java Application configuration for your selected project.</p>
+<p>Provide the host name and port on which your process is listening for debugger connections. 
+Check the "Allow termination of remote VM" check box if you would like to close the remote Java application from within Eclipse.</p>
+<p>The debug configuration is ready for use, as long as you remember to start the target application (in our case, Virgo) before connecting the Eclipse remote debugger to it. 
+You can now debug by going to "Debug Configurations" selecting your project in "Remote Java Application" and clicking on "DEBUG".</p>
+<p>If you want to perform line-by-line executions of the debugged code, you will have to tell the debugger which locations to search 
+for the matching code.</p>
+<p>The following image shows how to define the code lookup folders:</p>
+<p><img align="middle" alt="Debug Configuration" src="../../img/image011.png"></p>
+<p>Make sure you have built the code recently and have set breakpoints at the desired locations in the code before starting the debug process, 
+and enjoy your remote Virgo debugging sessions.</p>
+</body>
+</html>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?NLS TYPE="org.eclipse.help.toc"?>
+
+<toc label="Development Environment and Toolkit Setup" link_to="toc.xml#devEnv"> 
+	<topic label="Prerequisite Downloads and Versions"  href="html/dev/prerequisites/maintopic.html"> 
+	</topic>
+	<topic href="html/dev/virgo/maintopic.html" label="Installing Virgo Tomcat Server">
+		<topic href="html/dev/virgo/prerequisites.html" label="Prerequisites"></topic>
+  		<topic href="html/dev/virgo/installation.html" label="Installation"></topic>
+  		<topic href="html/dev/virgo/env.html" label="Environment Variables Setup"></topic>
+  		<topic href="html/dev/virgo/debug.html" label="Starting, stopping and debugging Virgo"></topic>
+  		<topic href="html/dev/virgo/eclipse.html" label="Running Virgo from Eclipse"></topic>
+  		<topic href="html/dev/virgo/properties.html" label="SOCIETIES Platform Properties"></topic> 
+	</topic>
+	<topic href="html/dev/openfire/maintopic.html" label="Installing OpenFire">
+		<topic label="Sub Topic 2" href="html/dev/openfire/subtopic.html" /> 
+	</topic>  
+	<topic href="html/dev/osgi/maintopic.html" label="OSGi/SpringDM Bundle Development with Maven">
+		<topic label="Sub Topic 2" href="html/dev/osgi/subtopic.html" /> 
+	</topic> 
+	<topic href="html/dev/distribution/maintopic.html" label="SOCIETIES Platform Distribution">
+		<topic label="Sub Topic 2" href="html/dev/distribution/subtopic.html" /> 
+	</topic> 
+</toc>

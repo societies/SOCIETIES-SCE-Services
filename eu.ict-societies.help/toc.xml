@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?NLS TYPE="org.eclipse.help.toc"?>
+
+<toc label="SOCIETIES Documentation" topic="html/toc.html">
+   <topic label="Development Environment and Toolkit Setup">
+      <anchor id="devEnv"/>
+   </topic>
+   <topic label="Third Party Service APIs">
+      <anchor id="apis"/>
+   </topic>
+   <topic label="Samples">
+      <anchor id="samples"/>
+   </topic>
+</toc>
