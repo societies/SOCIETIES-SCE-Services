@@ -31,7 +31,11 @@ import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.index.Index;
+import org.neo4j.graphdb.index.IndexHits;
+import org.neo4j.graphdb.index.IndexManager;
 import org.neo4j.helpers.collection.IterableWrapper;
+import org.neo4j.helpers.collection.MapUtil;
+import org.neo4j.index.lucene.QueryContext;
 import org.societies.enterprise.collabtools.runtime.SessionRepository;
 
 import scala.actors.threadpool.Arrays;
@@ -43,15 +47,15 @@ public class PersonRepository
     private final Node personRefNode;
 	private SessionRepository sessionRep;
 
-    public PersonRepository( GraphDatabaseService graphDb, Index<Node> index)
+    public PersonRepository(GraphDatabaseService graphDb, Index<Node> index)
     {
         this.graphDb = graphDb;
         this.index = index;
 
-        personRefNode = getPersonsRootNode( graphDb );
+        personRefNode = getPersonsRootNode(graphDb);
     }
 
-    private Node getPersonsRootNode( GraphDatabaseService graphDb )
+    private Node getPersonsRootNode(GraphDatabaseService graphDb)
     {
         Relationship rel = graphDb.getReferenceNode().getSingleRelationship(
                 REF_PERSONS, Direction.OUTGOING );
@@ -76,7 +80,7 @@ public class PersonRepository
         }
     }
 
-    public Person createPerson( String name ) throws Exception
+    public Person createPerson(String name) throws Exception
     {
         // to guard against duplications we use the lock grabbed on ref node
         // when
@@ -137,16 +141,27 @@ public class PersonRepository
     	return persons;
     }
     
-    public String getPersonByProperties( String name, String interest )
+    public Person getPersonsByProperty(String property )
     {
-        Node personNode = index.get( Person.NAME, name ).getSingle();
-        if ( personNode == null )
-        {
-            throw new IllegalArgumentException( "Interests from Person[" + name
-                    + "] not found" );
-        }
-        Person person = new Person( personNode );
-        return person.getInterest(interest);
+    	IndexHits<Node> hits = index.get(LongTermCtxTypes.COMPANY, "Intel");
+    	//TODO:
+    	for ( Node personNode : index.query(LongTermCtxTypes.COMPANY, "TI") )
+    	{
+    		Person person = new Person( personNode );
+    	    System.out.println(person.getName());
+    	}
+//        IndexManager indexManager =  graphDb.index();
+//        Index<Node> index = indexManager.forNodes("company",MapUtil.stringMap(IndexManager.PROVIDER, "lucene", "type", "fulltext"));
+//        IndexHits<Node> hits = index.query("company", new QueryContext("*"));
+//        Node personNode = index.get( Person.NAME, name ).getSingle();
+//        if ( personNode == null )
+//        {
+//            throw new IllegalArgumentException( "Property from Person[" + name
+//                    + "] not found" );
+//        }
+//        Person person = new Person( personNode );
+//        return person.getInterest(property);
+		return null;
     }
 
     public void deletePerson( Person person )

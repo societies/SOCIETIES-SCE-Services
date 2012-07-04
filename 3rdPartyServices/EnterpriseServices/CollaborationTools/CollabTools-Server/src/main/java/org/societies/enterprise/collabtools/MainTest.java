@@ -58,10 +58,11 @@ public class MainTest {
 //		Creating some updates
 		test.createMockLongTermCtx();
 		test.createMockShortTermCtx();
+		test.ctxIncrement();
 		test.setupFriendsBetweenPeople();
 		
-		YouMightKnow ymn = new YouMightKnow(personRepository.getPersonByName("person#"+3), new String[] {"project planning"}, 5);
-		ymn.printMightKnow(ymn.findYouMightKnow(personRepository.getPersonByName("person#"+3)) , new String[] {"project planning"} );
+//		YouMightKnow ymn = new YouMightKnow(personRepository.getPersonByName("person#"+3), new String[] {"project planning"}, 5);
+//		ymn.printMightKnow(ymn.findYouMightKnow(personRepository.getPersonByName("person#"+3)) , new String[] {"project planning"} );
 
 		System.out.println("TestUtils completed" );
 

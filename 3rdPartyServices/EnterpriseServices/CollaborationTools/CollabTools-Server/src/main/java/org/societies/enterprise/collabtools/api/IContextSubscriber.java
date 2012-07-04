@@ -31,6 +31,6 @@ package org.societies.enterprise.collabtools.api;
  *
  */
 public class IContextSubscriber {
-	//Societies integration....
+	//Societies integration.... miner
 
 }

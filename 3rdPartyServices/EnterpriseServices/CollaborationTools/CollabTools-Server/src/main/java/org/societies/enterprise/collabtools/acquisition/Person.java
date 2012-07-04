@@ -83,7 +83,7 @@ public class Person extends Observable
 
     // END SNIPPET: delegate-to-the-node
     
-	public String getInterest(String property){
+	public String getLongTermCtx(String property){
 		return (String) underlyingNode.getProperty( property );
 	}
 	
@@ -93,7 +93,7 @@ public class Person extends Observable
 	}
 	
 	public void setLongTermCtx(final String property, String value){
-		Index<Node> index = underlyingNode.getGraphDatabase().index().forNodes("nodes");
+		Index<Node> index = underlyingNode.getGraphDatabase().index().forNodes("PersonNodes");
 		Transaction tx = underlyingNode.getGraphDatabase().beginTx();
 		try
 		{
@@ -109,7 +109,7 @@ public class Person extends Observable
 	}
 	
 	public void setLongTermCtx(final String property, String[] values){
-		Index<Node> index = underlyingNode.getGraphDatabase().index().forNodes("nodes");
+		Index<Node> index = underlyingNode.getGraphDatabase().index().forNodes("PersonNodes");
 		Transaction tx = underlyingNode.getGraphDatabase().beginTx();
 		try
 		{

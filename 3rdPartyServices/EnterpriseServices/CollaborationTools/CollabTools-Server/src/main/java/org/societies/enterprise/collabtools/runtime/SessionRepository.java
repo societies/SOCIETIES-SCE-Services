@@ -73,15 +73,32 @@ public class SessionRepository implements Observer {
 		persons.contains(person);
 		return true;
 	}
+	
+	/**
+	 * @param sessionName 
+	 * @return
+	 */
+	public boolean containSession(String sessionName) {
+		return sessionsTable.containsKey(sessionName);
+	}
 
 
-	public synchronized boolean differenceBetweenHashSets(HashSet<Person> a, HashSet<Person> b) {
+	public synchronized boolean differenceBetweenSessionMembers(HashSet<Person> members, String sessionName) {
 //		List<Person> result = ((List<Person>) ((ArrayList<Person>) a).clone());
-		HashSet<Person> result = ((HashSet<Person>) ((HashSet<Person>) a).clone());
-		result.removeAll(b);
+		HashSet<Person> result = ((HashSet<Person>) ((HashSet<Person>) members).clone());
+		result.removeAll(sessionsTable.get(sessionName));
 		if (result.isEmpty())
 			return false;
 		return true;
+	}
+
+
+	/**
+	 * @param sessionName
+	 * @param hashSet
+	 */
+	public void inviteMembers(String sessionName, HashSet<Person> persons) {
+		sessionsTable.put(sessionName, persons);
 	}
 
 }

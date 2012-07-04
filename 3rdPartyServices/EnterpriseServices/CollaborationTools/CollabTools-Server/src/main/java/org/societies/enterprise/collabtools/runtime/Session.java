@@ -55,6 +55,10 @@ public class Session implements Observer {
 	public void setCollabApp(String[] collabApp) {
 		this.collabApp = collabApp;
 	}
+	
+	public void setRoles(String[] collabApp) {
+		this.collabApp = collabApp;
+	}
 
 	public void sortListMembers (List<Person> list) {
 		Collections.sort (list, new Comparator<Person>() {  

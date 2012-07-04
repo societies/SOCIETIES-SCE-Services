@@ -18,7 +18,7 @@ import org.neo4j.graphdb.factory.GraphDatabaseSetting;
 import org.neo4j.helpers.collection.IteratorUtil;
 import org.neo4j.kernel.EmbeddedGraphDatabase;
 import org.neo4j.kernel.impl.util.FileUtils;
-import org.societies.enterprise.collabtools.Interpretation.ContextIncrementation;
+import org.societies.enterprise.collabtools.Interpretation.ContextAnalyzer;
 import org.societies.enterprise.collabtools.acquisition.LongTermCtxTypes;
 import org.societies.enterprise.collabtools.acquisition.Person;
 import org.societies.enterprise.collabtools.acquisition.PersonRepository;
@@ -187,20 +187,6 @@ public class TestUtils {
 		
 	}
 
-	/**
-	 * @throws ParserConfigurationException 
-	 * @throws SAXException 
-	 * @throws IOException 
-	 * @throws XPathExpressionException 
-	 * 
-	 */
-	public void incrementInterests() throws XPathExpressionException, IOException, SAXException, ParserConfigurationException {
-		ContextIncrementation increment = new ContextIncrementation();
-    	for (Person friend :personRepository.getAllPersons()) {
-    		String[] newInterests = increment.ctxIncremantationByConcept(friend.getInterests());
-    		friend.setLongTermCtx(LongTermCtxTypes.INTERESTS, newInterests);
-    	}		
-	}
 	
 	public void menu() throws XPathExpressionException, IOException, SAXException, ParserConfigurationException {
 		Scanner scan = new Scanner(System.in);
@@ -239,7 +225,7 @@ public class TestUtils {
 				setupFriendsBetweenPeople();
 				break;
 			case 3:
-				incrementInterests();
+				ctxIncrement();
 				break;
 			case 4:
 				deleteSocialGraph();
@@ -255,6 +241,18 @@ public class TestUtils {
 			}
 		}
 		while (!quit);
+	}
+
+	/**
+	 * @throws XPathExpressionException
+	 * @throws IOException
+	 * @throws SAXException
+	 * @throws ParserConfigurationException
+	 */
+	public void ctxIncrement() throws XPathExpressionException, IOException,
+			SAXException, ParserConfigurationException {
+		ContextAnalyzer ctxRsn = new ContextAnalyzer(personRepository);
+		ctxRsn.incrementInterests();
 	}
 	
 	private static void clearDirectory( File path )

@@ -36,8 +36,11 @@ import org.neo4j.graphdb.index.Index;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.societies.enterprise.collabtools.acquisition.Person;
+import org.societies.enterprise.collabtools.acquisition.PersonRepository;
 import org.societies.enterprise.collabtools.acquisition.ShortTermCtxTypes;
 import org.societies.enterprise.collabtools.acquisition.ContextUpdates;
+import org.societies.enterprise.collabtools.runtime.ContextActivity;
+import org.societies.enterprise.collabtools.runtime.SessionRepository;
 
 /**
  * Describe your class here...
@@ -45,9 +48,11 @@ import org.societies.enterprise.collabtools.acquisition.ContextUpdates;
  * @author cviana
  *
  */
-public class SimpleCtxMatching {
+public class Rules {
 	
-	private static Logger log = LoggerFactory.getLogger(SimpleCtxMatching.class);
+	private static Logger log = LoggerFactory.getLogger(Rules.class);
+	public PersonRepository personRepository;
+	public SessionRepository sessionRepository;
 //	private Index<Node> indexStatus;
 	// Start with ten, expand by ten when limit reached
 	private Hashtable<String, HashSet<Person>> hashCtxList = new Hashtable<String, HashSet<Person>>(10,10);
@@ -55,29 +60,53 @@ public class SimpleCtxMatching {
 	/**
 	 * @param indexStatus
 	 */
-	public SimpleCtxMatching(Index<Node> indexStatus) {
+	public Rules(Index<Node> indexStatus) {
 //		this.indexStatus = indexStatus;
 	}
 
 	/**
+	 * @param sessionRepository 
+	 * @param personRepository 
 	 * 
 	 */
-	public SimpleCtxMatching() {
-		// TODO Auto-generated constructor stub
+	public Rules(PersonRepository personRepository, SessionRepository sessionRepository) {
+		this.personRepository = personRepository;
+		this.sessionRepository = sessionRepository;
 	}
-
-	public synchronized Hashtable<String, HashSet<Person>> getPersonsWithMatchingCtx(final String ctxAtributte, HashSet<ContextUpdates> statusHashset) {
-		//Compare symbolic location
-		ContextUpdates [] statusUpdateArray = new ContextUpdates[statusHashset.size()];
-		statusHashset.toArray(statusUpdateArray);
-		if (ctxAtributte.equals(ShortTermCtxTypes.LOCATION)){
-			return  getUniqueElements(statusUpdateArray, ShortTermCtxTypes.LOCATION);
-		}
-		//For others short term context types
-		return  getUniqueElements(statusUpdateArray, ctxAtributte);	
-	}
-
 	
+	public synchronized Hashtable<String, HashSet<Person>> getPersonsWithMatchingCtx(final String ctxAtributte, HashSet statusHashset) {
+			//Compare symbolic location
+			ContextUpdates[] statusUpdateArray = new ContextUpdates[statusHashset.size()];
+			statusHashset.toArray(statusUpdateArray);
+			if (ctxAtributte.equals(ShortTermCtxTypes.LOCATION)){
+				return  getUniqueElements(statusUpdateArray, ShortTermCtxTypes.LOCATION);
+			}
+			//For others short term context types
+			return  getUniqueElements(statusUpdateArray, ctxAtributte);	
+	}
+	
+	/**
+	 * @param ctxAtributte
+	 * @param personsSameLocation
+	 * @return 
+	 */
+	public Hashtable<String, HashSet<Person>> getPersonsWithMatchingCtx(String ctxAtributte, Hashtable<String, HashSet<Person>> personsSameLocation) {
+		//For long term context types
+			Person person = personRepository.getPersonsByProperty(ctxAtributte);
+			return new Hashtable<String, HashSet<Person>>();
+	
+	}
+
+	/**
+	 * @param lastUpdates
+	 * @return
+	 */
+	public Hashtable<String, HashSet<Person>> getPersonsSameLocation() {
+		System.out.println("Checking last short term context...");
+		HashSet<ContextUpdates> lastUpdates = ContextActivity.getLastContextUpdates(personRepository);
+		return getPersonsWithMatchingCtx(ShortTermCtxTypes.LOCATION, lastUpdates);
+	}
+
 	/**
 	 * @param unique
 	 * @param statusList

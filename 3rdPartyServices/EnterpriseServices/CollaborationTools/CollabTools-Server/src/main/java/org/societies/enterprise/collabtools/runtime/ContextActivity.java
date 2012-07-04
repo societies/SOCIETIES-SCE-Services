@@ -39,12 +39,12 @@ import org.societies.enterprise.collabtools.acquisition.PersonRepository;
  * @author cviana
  *
  */
-public class ContextActivity {
+public final class ContextActivity {
 	
 	private static final Logger logger  = LoggerFactory.getLogger(ContextActivity.class);
 	
 	//Get context changes often
-	public HashSet<ContextUpdates> getLastContextUpdates(PersonRepository personRepository) {
+	public static HashSet<ContextUpdates> getLastContextUpdates(PersonRepository personRepository) {
 		HashSet<ContextUpdates> ctxHashSet = new HashSet<ContextUpdates>();
 		for (Person person : personRepository.getAllPersons() ) {
 			ctxHashSet.add(person.getLastStatus());

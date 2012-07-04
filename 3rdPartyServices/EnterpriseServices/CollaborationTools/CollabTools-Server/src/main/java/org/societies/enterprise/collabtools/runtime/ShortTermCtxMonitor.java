@@ -30,7 +30,8 @@ import java.util.Hashtable;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.societies.enterprise.collabtools.Interpretation.SimpleCtxMatching;
+import org.societies.enterprise.collabtools.Interpretation.Rules;
+import org.societies.enterprise.collabtools.acquisition.LongTermCtxTypes;
 import org.societies.enterprise.collabtools.acquisition.ShortTermCtxTypes;
 import org.societies.enterprise.collabtools.acquisition.ContextUpdates;
 import org.societies.enterprise.collabtools.acquisition.Person;
@@ -45,44 +46,45 @@ import org.societies.enterprise.collabtools.acquisition.PersonRepository;
  */
 public class ShortTermCtxMonitor extends Thread{
 
-	private PersonRepository personRepository;
+	private Rules matchingRules;
 	private SessionRepository sessionRepository;
-	private ContextActivity retrieveLastStatusUpdates = new ContextActivity();
 	private static final Logger logger  = LoggerFactory.getLogger(ShortTermCtxMonitor.class);
 	private static final long SECONDS = 5 * 1000;
 
 	public ShortTermCtxMonitor (PersonRepository personRepository, SessionRepository sessionRepository) {
-		this.personRepository = personRepository;
+		matchingRules = new Rules(personRepository, sessionRepository);
 		this.sessionRepository = sessionRepository;
 	}
 
 	public synchronized void run(){
 		try {
 			while (true) {
-				System.out.println("Checking last people contexts...");
-				HashSet<ContextUpdates> lastUpdates = retrieveLastStatusUpdates.getLastContextUpdates(personRepository);
 
 				System.out.println("Checking if people context match");
-				SimpleCtxMatching matching = new SimpleCtxMatching();
+
 
 				//First rule is location
-				Hashtable<String, HashSet<Person>> personsSameLocation = matching.getPersonsWithMatchingCtx(ShortTermCtxTypes.LOCATION, lastUpdates);
+				Hashtable<String, HashSet<Person>> personsSameLocation = matchingRules.getPersonsSameLocation();
 				if (!personsSameLocation.isEmpty()) {
 					Enumeration<String> iterator = personsSameLocation.keys();
+					//For each different location, apply the follow rules...
 					while(iterator.hasMoreElements()) {
 						String sessionName = iterator.nextElement();
-						if (!sessionRepository.sessionsTable.containsKey(sessionName)) {
-							logger.info("If session still doesn't exist, create one");
+						matchingRules.getPersonsWithMatchingCtx(LongTermCtxTypes.COMPANY, personsSameLocation);
+						//Second rule: Status
+						//Check status of the user e.g busy, on phone, driving...
+						//					checkStatus();
+						
+						logger.info("If session still doesn't exist, create one");
+						if (!sessionRepository.containSession(sessionName)) {
 							logger.info("Starting a new session..");
-							sessionRepository.sessionsTable.put(sessionName, personsSameLocation.get(sessionName));
 							logger.info("Inviting people..");
-							//sessions.create(sessionName);
-							//						sessions.invite(sessionName, personsSameLocation.get(sessionName));
+							sessionRepository.inviteMembers(sessionName, personsSameLocation.get(sessionName));
 						} //Check conflict if actual users in the session
-						else if (sessionRepository.differenceBetweenHashSets(personsSameLocation.get(sessionName), sessionRepository.sessionsTable.get(sessionName))){
+						else if (sessionRepository.differenceBetweenSessionMembers(personsSameLocation.get(sessionName), sessionName)){
 							if (!personsSameLocation.get(sessionName).isEmpty()) {
 								//Compare persons in same location with members in this session
-								sessionRepository.sessionsTable.put(sessionName, personsSameLocation.get(sessionName));
+								sessionRepository.inviteMembers(sessionName, personsSameLocation.get(sessionName));
 								logger.info("Checking if users are in a session..");
 							}
 							//Second rule: Status
@@ -103,5 +105,6 @@ public class ShortTermCtxMonitor extends Thread{
 			e.printStackTrace();
 		}
 	}
+
 
 }

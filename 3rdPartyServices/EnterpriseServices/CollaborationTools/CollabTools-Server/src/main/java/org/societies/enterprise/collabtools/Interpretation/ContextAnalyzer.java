@@ -34,7 +34,10 @@ import java.util.Set;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathExpressionException;
 
-import org.societies.enterprise.collabtools.api.IContextIncrementation;
+import org.societies.enterprise.collabtools.acquisition.LongTermCtxTypes;
+import org.societies.enterprise.collabtools.acquisition.Person;
+import org.societies.enterprise.collabtools.acquisition.PersonRepository;
+import org.societies.enterprise.collabtools.api.IContextReasoning;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
@@ -45,9 +48,18 @@ import org.xml.sax.SAXException;
  * @author cviana
  *
  */
-public class ContextIncrementation implements IContextIncrementation {
+public class ContextAnalyzer implements IContextReasoning {
 
-	public final String[] ctxIncremantationByConcept(String[] interests) throws XPathExpressionException, IOException, SAXException, ParserConfigurationException{
+	private PersonRepository personRepository;
+
+	/**
+	 * @param personRepository
+	 */
+	public ContextAnalyzer(PersonRepository personRepository) {
+		this.personRepository = personRepository;
+	}
+
+	private final String[] ctxEnrichedByConcept(String[] interests) throws XPathExpressionException, IOException, SAXException, ParserConfigurationException{
 		final String APIKEY = "ca193cc1d3101c225266787a3d5fc1f810b52f02";
 		// Create an AlchemyAPI object.
 		//AlchemyAPI api key, enable to 1000 queries a day
@@ -68,6 +80,20 @@ public class ContextIncrementation implements IContextIncrementation {
 			}
 		}
 		return setInterests.toArray(new String[setInterests.size()]);
+	}
+	
+	/**
+	 * @throws ParserConfigurationException 
+	 * @throws SAXException 
+	 * @throws IOException 
+	 * @throws XPathExpressionException 
+	 * 
+	 */
+	public void incrementInterests() throws XPathExpressionException, IOException, SAXException, ParserConfigurationException {
+    	for (Person friend :personRepository.getAllPersons()) {
+    		String[] newInterests = ctxEnrichedByConcept(friend.getInterests());
+    		friend.setLongTermCtx(LongTermCtxTypes.INTERESTS, newInterests);
+    	}		
 	}
 
 }
