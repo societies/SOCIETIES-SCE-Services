@@ -68,8 +68,8 @@ public class Activator implements BundleActivator
         
         //Setting up GraphDB
         TestUtils test = new TestUtils(personRepository, sessionRepository);
-        test.createPersons();
-        test.setupFriendsBetweenPeople(10);
+        test.createPersons(5);
+        test.setupFriendsBetweenPeople();
         
         System.out.println("Starting Context Monitor..." );
         ShortTermCtxMonitor thread = new ShortTermCtxMonitor(personRepository, sessionRepository);

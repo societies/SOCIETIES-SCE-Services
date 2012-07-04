@@ -72,7 +72,7 @@ public class ShortTermCtxMonitor extends Thread{
 					while(iterator.hasMoreElements()) {
 						String sessionName = iterator.nextElement();
 						if (!sessionRepository.sessionsTable.containsKey(sessionName)) {
-							logger.info("If session stil doesn't exist, create one");
+							logger.info("If session still doesn't exist, create one");
 							logger.info("Starting a new session..");
 							sessionRepository.sessionsTable.put(sessionName, personsSameLocation.get(sessionName));
 							logger.info("Inviting people..");

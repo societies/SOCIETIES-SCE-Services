@@ -35,6 +35,8 @@ public class MainTest {
 	 * @throws Exception 
 	 */
 	public static void main(String[] args) throws Exception {
+
+		
 		//Database setup
 		logger.info("Database setup");
 		GraphDatabaseFactory gdbf = new GraphDatabaseFactory();
@@ -50,16 +52,16 @@ public class MainTest {
 		TestUtils test = new TestUtils(personRepository, sessionRepository);
 		//Clean graph DB
 		test.deleteSocialGraph();
-
-		logger.info("Setting up GraphDB with some people");
-		test.createPersons(); //5 people by default
-		//Creating some updates
+		
+//		test.menu();
+		test.createPersons(5); //5 people by default
+//		Creating some updates
 		test.createMockLongTermCtx();
 		test.createMockShortTermCtx();
-//		test.incrementInterests();
-		test.setupFriendsBetweenPeople(5);
+		test.setupFriendsBetweenPeople();
+		
 		YouMightKnow ymn = new YouMightKnow(personRepository.getPersonByName("person#"+3), new String[] {"project planning"}, 5);
-		ymn.printMightKnow(ymn.findYouMightKnow(personRepository.getPersonByName("person#"+3)) , new String[] {"plan"} );
+		ymn.printMightKnow(ymn.findYouMightKnow(personRepository.getPersonByName("person#"+3)) , new String[] {"project planning"} );
 
 		System.out.println("TestUtils completed" );
 
@@ -69,10 +71,10 @@ public class MainTest {
 		ShortTermCtxMonitor thread = new ShortTermCtxMonitor(personRepository, sessionRepository);
 		thread.start();
 
-		Thread.sleep(7 * 1000);
-		//Creating more updates
-		test.createMockShortTermCtx();
-		Thread.sleep(3 * 1000);
+//		Thread.sleep(7 * 1000);
+//		//Creating more updates
+//		test.createMockShortTermCtx();
+//		Thread.sleep(3 * 1000);
 
 		//        logger.info("Shutting down graphDb" );
 		//        registerShutdownHook();

@@ -1,16 +1,23 @@
 package org.societies.enterprise.collabtools;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
+import java.util.Scanner;
 import java.util.Set;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathExpressionException;
 
+import org.neo4j.graphdb.factory.GraphDatabaseSetting;
 import org.neo4j.helpers.collection.IteratorUtil;
+import org.neo4j.kernel.EmbeddedGraphDatabase;
+import org.neo4j.kernel.impl.util.FileUtils;
 import org.societies.enterprise.collabtools.Interpretation.ContextIncrementation;
 import org.societies.enterprise.collabtools.acquisition.LongTermCtxTypes;
 import org.societies.enterprise.collabtools.acquisition.Person;
@@ -24,7 +31,7 @@ import scala.actors.threadpool.Arrays;
 public class TestUtils {
 
     private static final Random r = new Random( System.currentTimeMillis() );
-	private static int nrOfPersons = 5;
+	private static int nrOfPersons;
     private PersonRepository personRepository;
     private SessionRepository sessionRep;
     
@@ -33,8 +40,9 @@ public class TestUtils {
         this.sessionRep = sessionRep;
 	}
     
-	public void createPersons() throws Exception
+	public void createPersons(int nrOfPersons) throws Exception
     {
+		this.nrOfPersons = nrOfPersons;
         for ( int i = 0; i < nrOfPersons; i++ )
         {    	
             Person person = personRepository.createPerson( "person#" + i);
@@ -46,20 +54,21 @@ public class TestUtils {
 	
     public void deleteSocialGraph()
     {
+//    	clearDirectory( new File("target/PersonsGraphDb"));
         for ( Person person : personRepository.getAllPersons() )
         {
             personRepository.deletePerson( person );
         }
     }
 
-	public void setupFriendsBetweenPeople( int maxNrOfFriendsEach )
+	public void setupFriendsBetweenPeople()
     {
         for ( Person person : personRepository.getAllPersons() )
         {
 //                person.addFriend( getRandomPerson() );
-        	Person[] persons = getPersonWithSimilarInterests(person);
-        	for (Person individual : persons)
-        		person.addFriend(individual);    
+        	Map<Person, Integer> persons = personRepository.getPersonWithSimilarInterests(person);
+			for (Map.Entry<Person, Integer> entry : persons.entrySet())
+        		person.addFriend(entry.getKey(),entry.getValue());    
         }
     }
 
@@ -98,24 +107,7 @@ public class TestUtils {
                 + r.nextInt( nrOfPersons ) );
     }
 
-    private Person[] getPersonWithSimilarInterests(Person self)
-    {
-    	ArrayList<Person> persons = new ArrayList<Person>();
-    	for ( Person person : personRepository.getAllPersons() )
-    	{
-    		if (!self.equals(person)) {
-    			List<String> personInterest = Arrays.asList(person.getInterests());
-    			for (String match : self.getInterests()) {    			
-    				if (personInterest.contains(match)) {
-    					persons.add(person);
-    					break;
-    				}
-    			}
-    		}
 
-    	}
-    	return persons.toArray(new Person[persons.size()]);
-    }
 
 	/**
 	 * @return
@@ -209,6 +201,82 @@ public class TestUtils {
     		friend.setLongTermCtx(LongTermCtxTypes.INTERESTS, newInterests);
     	}		
 	}
+	
+	public void menu() throws XPathExpressionException, IOException, SAXException, ParserConfigurationException {
+		Scanner scan = new Scanner(System.in);
+		int menu = 0;
+		System.out.println("===========================================");
+		System.out.println("|              MENU SELECTION             |");
+		System.out.println("===========================================");
+		System.out.println("| Options:                                |");
+		System.out.println("|   1. Create persons                     |");
+		System.out.println("|   2. Setup friends with same interests  |");
+		System.out.println("|   3. Reasoning interests                |");
+		System.out.println("|   4. Delete social graph                |");
+		System.out.println("|   5. Change location                    |");
+		System.out.println("|   6. Exit                               |");
+		System.out.println("===========================================");
+
+		boolean quit = false;
+		do{
+			System.out.print(" Select option: ");
+			menu = scan.nextInt();
+			System.out.println();
+			switch(menu) {
+			case 1:
+				System.out.print(" Number of persons: ");
+				int numberOfPersons = scan.nextInt();
+				try {
+					createPersons(numberOfPersons);
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				createMockLongTermCtx();
+				createMockShortTermCtx();
+				break;
+			case 2:
+				setupFriendsBetweenPeople();
+				break;
+			case 3:
+				incrementInterests();
+				break;
+			case 4:
+				deleteSocialGraph();
+				break;
+			case 5:
+				createMockShortTermCtx();
+				break;
+			case 6:
+				quit = true;
+				break;
+			default:
+				System.out.println("Invalid Entry!");
+			}
+		}
+		while (!quit);
+	}
+	
+	private static void clearDirectory( File path )
+    {
+        try
+        {
+            FileUtils.deleteRecursively( path );
+        }
+        catch ( IOException e )
+        {
+            if ( GraphDatabaseSetting.osIsWindows() )
+            {
+                System.err.println( "Couldn't clear directory, and that's ok because this is Windows. Next " +
+                		EmbeddedGraphDatabase.class.getSimpleName() + " will get a new directory" );
+                e.printStackTrace();
+            }
+            else
+            {
+                throw new RuntimeException( "Couldn't not clear directory" );
+            }
+        }
+    }
 
 	
 }

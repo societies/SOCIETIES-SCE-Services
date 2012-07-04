@@ -21,6 +21,10 @@ package org.societies.enterprise.collabtools.acquisition;
 import static org.societies.enterprise.collabtools.acquisition.RelTypes.A_PERSON;
 import static org.societies.enterprise.collabtools.acquisition.RelTypes.REF_PERSONS;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
@@ -29,6 +33,8 @@ import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.index.Index;
 import org.neo4j.helpers.collection.IterableWrapper;
 import org.societies.enterprise.collabtools.runtime.SessionRepository;
+
+import scala.actors.threadpool.Arrays;
 
 public class PersonRepository
 {
@@ -109,6 +115,26 @@ public class PersonRepository
                     + "] not found" );
         }
         return new Person( personNode );
+    }
+    
+    public Map<Person, Integer> getPersonWithSimilarInterests(Person self)
+    {
+    	Map<Person,Integer> persons = new HashMap<Person, Integer>();
+    	for ( Person person : getAllPersons() )
+    	{
+        	int counter = 0;
+    		if (!self.equals(person)) {
+    			List<String> personInterest = Arrays.asList(person.getInterests());
+    			for (String match : self.getInterests()) {    			
+    				if (personInterest.contains(match)) {
+    					counter++;
+    					persons.put(person, counter);
+    				}
+    			}
+    		}
+
+    	}
+    	return persons;
     }
     
     public String getPersonByProperties( String name, String interest )

@@ -124,10 +124,8 @@ public class SimpleCtxMatching {
     				//has first element?
     				listTemp = new HashSet<Person>();
         			listTemp.add(temp[j].getPerson());
-        			System.out.println("temp[j] "+j+temp[j].getPerson()+temp[j].getLocation());
     			}
 				listTemp.add(status.getPerson());
-				System.out.println("status "+status.getPerson()+status.getLocation());
     			hashCtxList.put(status.getLocation(), listTemp);
     			return false;
     		}

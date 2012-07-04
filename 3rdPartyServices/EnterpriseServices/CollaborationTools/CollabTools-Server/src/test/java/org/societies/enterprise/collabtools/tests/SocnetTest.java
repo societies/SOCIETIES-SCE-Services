@@ -135,7 +135,7 @@ public class SocnetTest
     {
         Person person1 = personRepository.getPersonByName( "person#1" );
         Person person2 = personRepository.getPersonByName( "person#2" );
-        person1.addFriend( person2 );
+        person1.addFriend( person2, 1 );
 
         int noOfFriends = person1.getNrOfFriends();
 
@@ -223,9 +223,9 @@ public class SocnetTest
 
         // Start -> middleMan1 -> middleMan2 -> endMan
 
-        start.addFriend( middleMan1 );
-        middleMan1.addFriend( middleMan2 );
-        middleMan2.addFriend( endMan );
+        start.addFriend( middleMan1, null );
+        middleMan1.addFriend( middleMan2, null );
+        middleMan2.addFriend( endMan, null );
 
         Iterable<Person> path = start.getShortestPathTo( endMan, 4 );
 
@@ -244,14 +244,14 @@ public class SocnetTest
         Person e = personRepository.createPerson( "e" );
 
         // A is friends with B,C and D
-        a.addFriend( b );
-        a.addFriend( c );
-        a.addFriend( d );
+        a.addFriend( b, null );
+        a.addFriend( c, null );
+        a.addFriend( d, null );
 
         // E is also friend with B, C and D
-        e.addFriend( b );
-        e.addFriend( c );
-        e.addFriend( d );
+        e.addFriend( b, null );
+        e.addFriend( c, null );
+        e.addFriend( d, null );
         
         Person recommendation = IteratorUtil.single( a.getFriendRecommendation( 1 ).iterator() );
 
@@ -271,17 +271,17 @@ public class SocnetTest
 
 
         // A is friends with B,C and D
-        a.addFriend( b );
-        a.addFriend( c );
-        a.addFriend( d );
+        a.addFriend( b, null );
+        a.addFriend( c, null );
+        a.addFriend( d, null );
 
         // E is only friend with B
-        e.addFriend( b );
+        e.addFriend( b, null );
 
         // F is friend with B, C, D
-        f.addFriend( b );
-        f.addFriend( c );
-        f.addFriend( d );
+        f.addFriend( b, null );
+        f.addFriend( c, null );
+        f.addFriend( d, null );
 
         ArrayList<Person> recommendations = fromIterableToArrayList( a.getFriendRecommendation( 2 ).iterator() );
 
@@ -367,7 +367,7 @@ public class SocnetTest
             int nrOfFriends = r.nextInt( maxNrOfFriendsEach ) + 1;
             for ( int j = 0; j < nrOfFriends; j++ )
             {
-                person.addFriend( getRandomPerson() );
+                person.addFriend( getRandomPerson(), j );
             }
         }
     }

@@ -40,14 +40,14 @@ import org.societies.enterprise.collabtools.acquisition.Person;
  */
 public class Session implements Observer {
 
-	private List<Person> persons;
+	private List<Person> members;
 	private String[] collabApp;
 
-	public List<Person> getPersons() {
-		return persons;
+	public List<Person> getMembers() {
+		return members;
 	}
-	public void setPersons(List<Person> persons) {
-		this.persons = persons;
+	public void setPersons(List<Person> members) {
+		this.members = members;
 	}
 	public String[] getCollabApp() {
 		return collabApp;
@@ -56,7 +56,7 @@ public class Session implements Observer {
 		this.collabApp = collabApp;
 	}
 
-	public void sortListPersons (List<Person> list) {
+	public void sortListMembers (List<Person> list) {
 		Collections.sort (list, new Comparator<Person>() {  
 			public int compare(Person o1, Person o2) {  
 				Person p1 = (Person) o1;  

@@ -151,7 +151,7 @@ public class Person extends Observable
 
     // END SNIPPET: override
 
-    public void addFriend( Person otherPerson )
+    public void addFriend( Person otherPerson, Integer weight )
     {
         Transaction tx = underlyingNode.getGraphDatabase().beginTx();
         try
@@ -161,7 +161,7 @@ public class Person extends Observable
                 Relationship friendRel = getFriendRelationshipTo( otherPerson );
                 if ( friendRel == null )
                 {
-                    underlyingNode.createRelationshipTo( otherPerson.getUnderlyingNode(), KNOWS );
+                    underlyingNode.createRelationshipTo( otherPerson.getUnderlyingNode(), KNOWS ).setProperty("weight", weight);
                 }
                 tx.success();
             }
