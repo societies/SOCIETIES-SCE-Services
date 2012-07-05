@@ -30,6 +30,7 @@ import java.util.Observable;
 import java.util.Observer;
 
 import org.societies.enterprise.collabtools.acquisition.Person;
+import org.societies.enterprise.collabtools.acquisition.ShortTermCtxTypes;
 
 /**
  * Describe your class here...
@@ -51,11 +52,11 @@ public class SessionRepository implements Observer {
 		System.out.println("Person has change location : " + person.getName());
 		if (isInSession(person)) {
 			//Remove person from session
-			System.out.println(person.getLastStatus().getLocation());
-			HashSet<Person> persons = sessionsTable.get(person.getLastStatus().getLocation());
+			System.out.println(person.getLastStatus().getShortTermCtx(ShortTermCtxTypes.LOCATION));
+			HashSet<Person> persons = sessionsTable.get(person.getLastStatus().getShortTermCtx(ShortTermCtxTypes.LOCATION));
 			System.out.println("Session table before: "+persons.toString());
 			persons.remove(person);
-			sessionsTable.put(person.getLastStatus().getLocation(), persons);
+			sessionsTable.put(person.getLastStatus().getShortTermCtx(ShortTermCtxTypes.LOCATION), persons);
 			System.out.println("Session table after: "+persons.toString());
 		}
 	}
@@ -66,7 +67,7 @@ public class SessionRepository implements Observer {
 	 * @return
 	 */
 	private boolean isInSession(Person person) {
-		HashSet<Person> persons = sessionsTable.get(person.getLastStatus().getLocation());
+		HashSet<Person> persons = sessionsTable.get(person.getLastStatus().getShortTermCtx(ShortTermCtxTypes.LOCATION));
 		if (persons == null) {
 			return false;
 		}

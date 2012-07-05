@@ -363,8 +363,8 @@ public class Person extends Observable
     	ContextUpdates ctxStatus= getLastStatus();
     	//Check old location with new location
     	if (context.equals(ShortTermCtxTypes.LOCATION))
-    		if (ctxStatus != null && !location.equals(ctxStatus.getLocation())){
-    	        System.out.println(ctxStatus.getPerson()+" had location: "+ctxStatus.getLocation()+" and now has location: "+location);
+    		if (ctxStatus != null && !location.equals(ctxStatus.getShortTermCtx(ShortTermCtxTypes.LOCATION))){
+    	        System.out.println(ctxStatus.getPerson()+" had location: "+ctxStatus.getShortTermCtx(ShortTermCtxTypes.LOCATION)+" and now has location: "+location);
     			return true;
     		}
     	return false;

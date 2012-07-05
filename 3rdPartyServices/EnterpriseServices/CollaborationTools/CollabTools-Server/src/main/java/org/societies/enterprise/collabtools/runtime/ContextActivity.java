@@ -48,9 +48,6 @@ public final class ContextActivity {
 		HashSet<ContextUpdates> ctxHashSet = new HashSet<ContextUpdates>();
 		for (Person person : personRepository.getAllPersons() ) {
 			ctxHashSet.add(person.getLastStatus());
-			logger.info(person.getLastStatus().getPerson().toString());
-			logger.info(person.getLastStatus().getStatusText());
-			logger.info(person.getLastStatus().getLocation());
 		}
 		return ctxHashSet;
 	}
@@ -62,9 +59,6 @@ public final class ContextActivity {
 			String[] interests = person.getInterests();
 			String personName = person.getName();
 			hashTable.put(personName, interests);
-			logger.info(person.getLastStatus().getPerson().toString());
-			logger.info(person.getLastStatus().getStatusText());
-			logger.info(person.getLastStatus().getLocation());
 		}
 		return hashTable;
 	}

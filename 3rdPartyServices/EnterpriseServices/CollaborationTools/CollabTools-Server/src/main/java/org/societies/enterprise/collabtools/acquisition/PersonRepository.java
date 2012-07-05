@@ -21,6 +21,7 @@ package org.societies.enterprise.collabtools.acquisition;
 import static org.societies.enterprise.collabtools.acquisition.RelTypes.A_PERSON;
 import static org.societies.enterprise.collabtools.acquisition.RelTypes.REF_PERSONS;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -141,14 +142,13 @@ public class PersonRepository
     	return persons;
     }
     
-    public Person getPersonsByProperty(String property )
+    public Person[] getPersonsByProperty(String property )
     {
-    	IndexHits<Node> hits = index.get(LongTermCtxTypes.COMPANY, "Intel");
-    	//TODO:
+    	List<Person> persons = new ArrayList<Person>();
     	for ( Node personNode : index.query(LongTermCtxTypes.COMPANY, "TI") )
     	{
     		Person person = new Person( personNode );
-    	    System.out.println(person.getName());
+    		persons.add(person);
     	}
 //        IndexManager indexManager =  graphDb.index();
 //        Index<Node> index = indexManager.forNodes("company",MapUtil.stringMap(IndexManager.PROVIDER, "lucene", "type", "fulltext"));
@@ -161,7 +161,7 @@ public class PersonRepository
 //        }
 //        Person person = new Person( personNode );
 //        return person.getInterest(property);
-		return null;
+		return (Person[]) persons.toArray();
     }
 
     public void deletePerson( Person person )

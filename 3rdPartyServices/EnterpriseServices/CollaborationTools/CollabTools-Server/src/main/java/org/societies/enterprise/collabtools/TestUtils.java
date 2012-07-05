@@ -225,7 +225,7 @@ public class TestUtils {
 				setupFriendsBetweenPeople();
 				break;
 			case 3:
-				ctxIncrement();
+				enrichedCtx();
 				break;
 			case 4:
 				deleteSocialGraph();
@@ -249,7 +249,7 @@ public class TestUtils {
 	 * @throws SAXException
 	 * @throws ParserConfigurationException
 	 */
-	public void ctxIncrement() throws XPathExpressionException, IOException,
+	public void enrichedCtx() throws XPathExpressionException, IOException,
 			SAXException, ParserConfigurationException {
 		ContextAnalyzer ctxRsn = new ContextAnalyzer(personRepository);
 		ctxRsn.incrementInterests();

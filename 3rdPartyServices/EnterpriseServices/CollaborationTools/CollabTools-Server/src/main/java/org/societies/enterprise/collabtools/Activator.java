@@ -18,7 +18,7 @@ import org.osgi.framework.ServiceRegistration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.societies.enterprise.collabtools.acquisition.PersonRepository;
-import org.societies.enterprise.collabtools.runtime.ShortTermCtxMonitor;
+import org.societies.enterprise.collabtools.runtime.CtxMonitor;
 import org.societies.enterprise.collabtools.runtime.SessionRepository;
 
 
@@ -72,7 +72,7 @@ public class Activator implements BundleActivator
         test.setupFriendsBetweenPeople();
         
         System.out.println("Starting Context Monitor..." );
-        ShortTermCtxMonitor thread = new ShortTermCtxMonitor(personRepository, sessionRepository);
+        CtxMonitor thread = new CtxMonitor(personRepository, sessionRepository);
 		thread.start();
      
  

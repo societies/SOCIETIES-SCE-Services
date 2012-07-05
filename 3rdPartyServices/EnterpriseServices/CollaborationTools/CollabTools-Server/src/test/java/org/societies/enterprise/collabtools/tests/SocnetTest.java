@@ -89,9 +89,9 @@ public class SocnetTest
 
 			ContextUpdates update = person.getStatus().iterator().next();
 			assertThat(update, CoreMatchers.<Object> notNullValue());
-			assertThat(update.getStatusText(), equalTo("Testing!"));
+			assertThat(update.getShortTermCtx(ShortTermCtxTypes.STATUS), equalTo("Testing!"));
 			assertThat(update.getPerson(), equalTo(person));
-            System.out.println("Person: "+person.getName()+" Status: "+update.getStatusText());
+            System.out.println("Person: "+person.getName()+" Status: "+update.getShortTermCtx(ShortTermCtxTypes.STATUS));
 		}
     }
     
@@ -125,8 +125,8 @@ public class SocnetTest
         for ( ContextUpdates update : person.getStatus() )
         {
             i--;
-            assertThat( update.getStatusText(), equalTo( statuses.get( i ) ) );
-            System.out.println("Person: "+person.getName()+" Status: "+update.getStatusText());
+            assertThat( update.getShortTermCtx(ShortTermCtxTypes.STATUS), equalTo( statuses.get( i ) ) );
+            System.out.println("Person: "+person.getName()+" Status: "+update.getShortTermCtx(ShortTermCtxTypes.STATUS));
         }
     }
 
@@ -189,7 +189,7 @@ public class SocnetTest
         for(ContextUpdates status : person.getStatus())
         {
             assertThat(status.getPerson(), equalTo( person ));
-            System.out.println("Person: "+status.getPerson()+" Status: "+status.getStatusText());
+            System.out.println("Person: "+status.getPerson()+" Status: "+status.getShortTermCtx(ShortTermCtxTypes.STATUS));
         }
         
 //        for ( Node node : index.query( "name", "*e*" ) )
@@ -204,7 +204,7 @@ public class SocnetTest
         {
             // This will return
         	ContextUpdates s = new ContextUpdates(node);
-        	System.out.println(s.getStatusText());
+        	System.out.println(s.getShortTermCtx(ShortTermCtxTypes.STATUS));
         }
     }
 

@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -49,19 +50,19 @@ import org.societies.enterprise.collabtools.runtime.SessionRepository;
  *
  */
 public class Rules {
-	
+
 	private static Logger log = LoggerFactory.getLogger(Rules.class);
 	public PersonRepository personRepository;
 	public SessionRepository sessionRepository;
-//	private Index<Node> indexStatus;
+	//	private Index<Node> indexStatus;
 	// Start with ten, expand by ten when limit reached
-	private Hashtable<String, HashSet<Person>> hashCtxList = new Hashtable<String, HashSet<Person>>(10,10);
+	private Hashtable<String, HashSet<Person>>  hashCtxList = new Hashtable<String, HashSet<Person>>(10,10);
 
 	/**
 	 * @param indexStatus
 	 */
 	public Rules(Index<Node> indexStatus) {
-//		this.indexStatus = indexStatus;
+		//		this.indexStatus = indexStatus;
 	}
 
 	/**
@@ -73,28 +74,67 @@ public class Rules {
 		this.personRepository = personRepository;
 		this.sessionRepository = sessionRepository;
 	}
-	
-	public synchronized Hashtable<String, HashSet<Person>> getPersonsWithMatchingCtx(final String ctxAtributte, HashSet statusHashset) {
-			//Compare symbolic location
-			ContextUpdates[] statusUpdateArray = new ContextUpdates[statusHashset.size()];
-			statusHashset.toArray(statusUpdateArray);
-			if (ctxAtributte.equals(ShortTermCtxTypes.LOCATION)){
-				return  getUniqueElements(statusUpdateArray, ShortTermCtxTypes.LOCATION);
-			}
-			//For others short term context types
-			return  getUniqueElements(statusUpdateArray, ctxAtributte);	
+
+	public synchronized Hashtable<String, HashSet<Person>> getPersonsWithMatchingShortTermCtx(final String ctxAtributte, HashSet<Person> personHashSet) {
+		//Compare symbolic location
+		this.hashCtxList.clear();
+		HashSet<ContextUpdates> lastUpdates = new HashSet<ContextUpdates>();
+		Iterator<Person> it = personHashSet.iterator();
+		while(it.hasNext())
+			lastUpdates.add(it.next().getLastStatus());
+		ContextUpdates[] statusUpdateArray = new ContextUpdates[lastUpdates.size()];
+		lastUpdates.toArray(statusUpdateArray);
+		return  getUniqueElements(statusUpdateArray, ctxAtributte);	
 	}
-	
+
 	/**
 	 * @param ctxAtributte
 	 * @param personsSameLocation
 	 * @return 
 	 */
-	public Hashtable<String, HashSet<Person>> getPersonsWithMatchingCtx(String ctxAtributte, Hashtable<String, HashSet<Person>> personsSameLocation) {
+	public Hashtable<String, HashSet<Person>> getPersonsWithMatchingLongTermCtx(final String ctxAtributte, HashSet<Person> hashsetPersons) {
 		//For long term context types
-			Person person = personRepository.getPersonsByProperty(ctxAtributte);
-			return new Hashtable<String, HashSet<Person>>();
-	
+		this.hashCtxList.clear();
+		Person[] person = new Person[hashsetPersons.size()];
+		hashsetPersons.toArray(person);
+		for (Person p : person) {
+			System.out.println(p.getLongTermCtx(ctxAtributte));
+		}
+		Person[] temp = new Person[person.length]; // null array of persons
+		int count = 0;
+		for(int j = 0; j < person.length; j++) {
+			if(hasSameLongTermCtx(person[j], temp, ctxAtributte))
+				temp[count++] = person[j];
+		}
+		System.out.println("Number of persons with context "+ctxAtributte);
+		Hashtable<String, HashSet<Person>>  hashCtxList = new Hashtable<String, HashSet<Person>>(10,10);
+		hashCtxList = (Hashtable<String, HashSet<Person>>) this.hashCtxList.clone();
+		return hashCtxList;
+	}
+
+
+	/**
+	 * @param person
+	 * @param people
+	 * @param ctxAtributte 
+	 * @return
+	 */
+	private boolean hasSameLongTermCtx(Person person, Person[] people, final String ctxAtributte) {
+		HashSet<Person> hashsetTemp;
+		hashsetTemp = hashCtxList.get(person.getLongTermCtx(ctxAtributte));
+		for(int j = 0; j < people.length; j++) {
+			if(people[j] != null && person.getLongTermCtx(ctxAtributte).equals(people[j].getLongTermCtx(ctxAtributte))) {
+				if (hashsetTemp==null) {
+					//has first element?
+					hashsetTemp = new HashSet<Person>();
+					hashsetTemp.add(people[j]);
+				}
+				hashsetTemp.add(person);
+				hashCtxList.put(person.getLongTermCtx(ctxAtributte), hashsetTemp);
+				return false;
+			}
+		}
+		return true;
 	}
 
 	/**
@@ -103,25 +143,28 @@ public class Rules {
 	 */
 	public Hashtable<String, HashSet<Person>> getPersonsSameLocation() {
 		System.out.println("Checking last short term context...");
-		HashSet<ContextUpdates> lastUpdates = ContextActivity.getLastContextUpdates(personRepository);
-		return getPersonsWithMatchingCtx(ShortTermCtxTypes.LOCATION, lastUpdates);
+		HashSet<Person> personHashSet = new HashSet<Person>();
+		for (Person person : personRepository.getAllPersons() ) {
+			personHashSet.add(person);
+		}
+		return getPersonsWithMatchingShortTermCtx(ShortTermCtxTypes.LOCATION, personHashSet);
 	}
 
-	/**
-	 * @param unique
-	 * @param statusList
-	 * @return
-	 */
-	private int[] getDuplicateIndices(ContextUpdates[] unique, ContextUpdates[] statusList) {
-        int[] indices = new int[unique.length];
-        for(int j = 0; j < unique.length; j++) {
-            for(int k = 0; k < statusList.length; k++) {
-                if(unique[j].equals(statusList[k]))
-                    indices[j]++;
-            }
-        }
-        return indices;
-	}
+	//	/**
+	//	 * @param unique
+	//	 * @param statusList
+	//	 * @return
+	//	 */
+	//	private int[] getDuplicateIndices(ContextUpdates[] unique, ContextUpdates[] statusList) {
+	//        int[] indices = new int[unique.length];
+	//        for(int j = 0; j < unique.length; j++) {
+	//            for(int k = 0; k < statusList.length; k++) {
+	//                if(unique[j].equals(statusList[k]))
+	//                    indices[j]++;
+	//            }
+	//        }
+	//        return indices;
+	//	}
 
 	/**
 	 * @param statusList
@@ -129,51 +172,51 @@ public class Rules {
 	 */
 	private Hashtable<String, HashSet<Person>>  getUniqueElements(ContextUpdates[] statusArray, final String ctxAttribute) {
 		ContextUpdates[] temp = new ContextUpdates[statusArray.length]; // null elements
-		System.out.println("Number of persons: "+temp.length);
+		System.out.println("Number of persons: "+temp.length+" with context "+ctxAttribute);
 		int count = 0;
-		if (ctxAttribute.equals(ShortTermCtxTypes.LOCATION)) { 
-			for(int j = 0; j < statusArray.length; j++) {
-				if(isSameLocation(statusArray[j], temp))
-					temp[count++] = statusArray[j];
-			}
+		for(int j = 0; j < statusArray.length; j++) {
+			if(hasSameShortTermCtx(statusArray[j], temp, ctxAttribute))
+				temp[count++] = statusArray[j];
 		}
+		Hashtable<String, HashSet<Person>>  hashCtxList = new Hashtable<String, HashSet<Person>>(10,10);
+		hashCtxList = (Hashtable<String, HashSet<Person>>) this.hashCtxList.clone();
 		return hashCtxList;
-		
-//		StatusUpdate[] uniqueStrs = new StatusUpdate[count];
-//		System.arraycopy(temp, 0, uniqueStrs, 0, count);
-//		return uniqueStrs;
-	}
-	
-	private boolean isSameLocation(ContextUpdates status, ContextUpdates[] temp) {
-		HashSet<Person> listTemp;
-		listTemp = hashCtxList.get(status.getLocation());
-    	for(int j = 0; j < temp.length; j++) {
-    		if(temp[j] != null && status.getLocation().equals(temp[j].getLocation())) {
-    			if (listTemp==null) {
-    				//has first element?
-    				listTemp = new HashSet<Person>();
-        			listTemp.add(temp[j].getPerson());
-    			}
-				listTemp.add(status.getPerson());
-    			hashCtxList.put(status.getLocation(), listTemp);
-    			return false;
-    		}
-    	}
-    	return true;
+
+		//		StatusUpdate[] uniqueStrs = new StatusUpdate[count];
+		//		System.arraycopy(temp, 0, uniqueStrs, 0, count);
+		//		return uniqueStrs;
 	}
 
-//	/**
-//	 * @param statusText
-//	 * @param temp
-//	 * @return
-//	 */
-//	private boolean isUnique(String statusText, ContextUpdates[] temp) {
-//        for(int j = 0; j < temp.length; j++) {
-//            if(temp[j] != null && statusText.equals(temp[j].getStatusText()))
-//                return false;
-//        }
-//        return true;
-//	}
+	private boolean hasSameShortTermCtx(ContextUpdates ctx, ContextUpdates[] temp, final String ctxAttribute) {
+		HashSet<Person> hashsetTemp;
+		hashsetTemp = hashCtxList.get(ctx.getShortTermCtx(ctxAttribute));
+		for(int j = 0; j < temp.length; j++) {
+			if(temp[j] != null && ctx.getShortTermCtx(ctxAttribute).equals(temp[j].getShortTermCtx(ctxAttribute))) {
+				if (hashsetTemp==null) {
+					//has first element?
+					hashsetTemp = new HashSet<Person>();
+					hashsetTemp.add(temp[j].getPerson());
+				}
+				hashsetTemp.add(ctx.getPerson());
+				hashCtxList.put(ctx.getShortTermCtx(ctxAttribute), hashsetTemp);
+				return false;
+			}
+		}
+		return true;
+	}
+
+	//	/**
+	//	 * @param statusText
+	//	 * @param temp
+	//	 * @return
+	//	 */
+	//	private boolean isUnique(String statusText, ContextUpdates[] temp) {
+	//        for(int j = 0; j < temp.length; j++) {
+	//            if(temp[j] != null && statusText.equals(temp[j].getStatusText()))
+	//                return false;
+	//        }
+	//        return true;
+	//	}
 
 	public static <T> List<T> getDuplicate(Collection<T> list) {
 
@@ -200,11 +243,11 @@ public class Rules {
 			return false;
 		return true;
 	}
-	
+
 	public static boolean checkDuplicate(List<ContextUpdates> list) {
 		HashSet<String> set = new HashSet<String>();
 		for (int i = 0; i < list.size(); i++) {
-			boolean val = set.add(list.get(i).getStatusText());
+			boolean val = set.add(list.get(i).getShortTermCtx(ShortTermCtxTypes.STATUS));
 			if (val == false) {
 				return val;
 			}

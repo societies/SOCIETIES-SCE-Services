@@ -13,7 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.societies.enterprise.collabtools.Interpretation.YouMightKnow;
 import org.societies.enterprise.collabtools.acquisition.PersonRepository;
-import org.societies.enterprise.collabtools.runtime.ShortTermCtxMonitor;
+import org.societies.enterprise.collabtools.runtime.CtxMonitor;
 import org.societies.enterprise.collabtools.runtime.SessionRepository;
 
 /**
@@ -54,11 +54,11 @@ public class MainTest {
 		test.deleteSocialGraph();
 		
 //		test.menu();
-		test.createPersons(5); //5 people by default
+		test.createPersons(25); //5 people by default
 //		Creating some updates
 		test.createMockLongTermCtx();
 		test.createMockShortTermCtx();
-		test.ctxIncrement();
+//		test.enrichedCtx();
 		test.setupFriendsBetweenPeople();
 		
 //		YouMightKnow ymn = new YouMightKnow(personRepository.getPersonByName("person#"+3), new String[] {"project planning"}, 5);
@@ -69,7 +69,7 @@ public class MainTest {
 		//Find people to create dynamic relationship
 
 		System.out.println("Starting Context Monitor..." );
-		ShortTermCtxMonitor thread = new ShortTermCtxMonitor(personRepository, sessionRepository);
+		CtxMonitor thread = new CtxMonitor(personRepository, sessionRepository);
 		thread.start();
 
 //		Thread.sleep(7 * 1000);

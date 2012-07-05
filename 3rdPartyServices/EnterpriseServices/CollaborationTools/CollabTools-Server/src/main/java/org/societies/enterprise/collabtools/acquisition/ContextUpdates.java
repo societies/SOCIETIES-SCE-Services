@@ -76,14 +76,9 @@ public class ContextUpdates extends Observable
         return IteratorUtil.singleOrNull( traverser.iterator() ).endNode();
     }
 
-    public String getStatusText()
+    public String getShortTermCtx(final String property)
     {
-        return (String)underlyingNode.getProperty( ShortTermCtxTypes.STATUS );
-    }
-    
-    public String getLocation()
-    {
-        return (String)underlyingNode.getProperty( ShortTermCtxTypes.LOCATION );
+        return (String)underlyingNode.getProperty(property);
     }
 
     
