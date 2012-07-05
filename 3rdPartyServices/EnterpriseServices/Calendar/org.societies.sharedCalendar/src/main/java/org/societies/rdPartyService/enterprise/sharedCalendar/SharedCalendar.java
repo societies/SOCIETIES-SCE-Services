@@ -31,6 +31,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.codec.binary.Hex;
 import org.hibernate.HibernateException;
@@ -41,6 +42,8 @@ import org.hibernate.criterion.Example;
 import org.hibernate.criterion.Restrictions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.societies.api.css.devicemgmt.IDevice;
+import org.societies.api.osgi.event.IEventMgr;
 import org.societies.rdPartyService.enterprise.sharedCalendar.persistence.DAO.CISCalendarDAO;
 import org.societies.rdPartyService.enterprise.sharedCalendar.persistence.DAO.CSSCalendarDAO;
 import org.societies.rdPartyService.enterprise.sharedCalendar.privateCalendarUtil.IPrivateCalendarUtil;
@@ -60,6 +63,13 @@ public class SharedCalendar implements ISharedCalendar, IPrivateCalendarUtil {
 	private SharedCalendarUtil util;
 	private SessionFactory sessionFactory;
 	private static Logger log = LoggerFactory.getLogger(SharedCalendar.class);
+	private IEventMgr evtMgr;
+	/**
+	 * This is the set of all available instances of the IDevice interface.
+	 * A DeviceListener bean instance tracks whenever a new IDevice is bound or unbound.
+	 * See http://static.springsource.org/osgi/docs/1.2.1/reference/html-single/#service-registry:refs:collection:dynamics
+	 */
+	private Set<IDevice> availableDevices;
 
 	public SessionFactory getSessionFactory() {
 		return sessionFactory;
@@ -640,6 +650,22 @@ private List<CalendarListEntry> filterCISCalendar(List<CalendarListEntry> listTo
 //		}
 		
 		return listToFilter;
+	}
+
+	public IEventMgr getEvtMgr() {
+		return evtMgr;
+	}
+
+	public void setEvtMgr(IEventMgr evtMgr) {
+		this.evtMgr = evtMgr;
+	}
+
+	public Set<IDevice> getAvailableDevices() {
+		return availableDevices;
+	}
+
+	public void setAvailableDevices(Set<IDevice> availableDevices) {
+		this.availableDevices = availableDevices;
 	}
 
 	

@@ -67,11 +67,13 @@
 		<property name="sharedCalendarService" ref="sharedCalendar" />
 
 	</bean>
-
+	
 	<bean id="sharedCalendar"
 		class="org.societies.rdPartyService.enterprise.sharedCalendar.SharedCalendar">
 		<property name="util" ref="sharedCalendarUtil" />
 		<property name="sessionFactory" ref="sessionFactory" />
+		<property name="evtMgr" ref="eventManager" />
+		<property name="availableDevices" ref="availableDevicesSet" />
 	</bean>
 
 	<!-- enable the configuration of transactional behavior based on annotations -->

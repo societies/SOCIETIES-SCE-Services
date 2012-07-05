@@ -30,6 +30,7 @@
 		persistent-id="bk" />
 
 	<osgi:reference id="dataSource" interface="javax.sql.DataSource" />
+	<osgi:reference id="eventManager" interface="org.societies.api.osgi.event.IEventMgr"/>
 	
 	<osgi:service ref="sharedCalendar" interface="org.societies.rdPartyService.enterprise.sharedCalendar.ISharedCalendar" >
      <osgi:service-properties>
@@ -44,6 +45,11 @@
 <!--      <property name="serviceDescription" value="Shared Calendar Server Component" /> -->
 <!--      <property name="serviceName" value="Shared Calendar Server" /> -->
 <!--  </bean> -->
-	
+
+	<osgi:set id="availableDevicesSet" interface="org.societies.api.css.devicemgmt.IDevice">
+		<osgi:listener bind-method="onBind" unbind-method="onUnbind">
+        	<bean class="org.societies.rdPartyService.enterprise.sharedCalendar.DeviceListener"/>
+        </osgi:listener>
+	</osgi:set>
 
 </beans>
