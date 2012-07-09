@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plan name="Minimum Plan For Calendar Server" version="3.0.0" scoped="false" atomic="false" 
+        xmlns="http://www.eclipse.org/virgo/schema/plan" 
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+        xsi:schemaLocation=" 
+                http://www.eclipse.org/virgo/schema/plan 
+                http://www.eclipse.org/virgo/schema/plan/eclipse-virgo-plan.xsd">
+
+    <artifact type="bundle" name="org.societies.api.external.societies-api" />
+	<artifact type="bundle" name="org.societies.api.internal.societies-api-internal" />
+	
+	<artifact type="bundle" name="org.societies.comm.CommonLibraries" />
+	<artifact type="bundle" name="org.societies.comm.xmpp.XCCommunicationMgr" />
+	<artifact type="bundle" name="org.societies.comm.event.mgmt"/>
+	
+	<!-- Calendar Server Artifacts - Start -->
+	<artifact type="bundle" name="org.societies.rdpartyService.enterprise.sharedCalendar"/>
+	<artifact type="configuration" name="bk"/>
+	<!-- Calendar Server Artifacts - End -->
+	
+	<!-- Device Manager Stuff -->
+	<artifact type="bundle" name="org.societies.css.devicemgmt.devicemanager"/>
+	<artifact type="bundle" name="org.societies.css.devicemgmt.DeviceDriverSimulator"/>
+	<artifact type="bundle" name="org.societies.css.devicemgmt.DeviceCommsMgr"/>
+	
+	<!-- Not needed for the moment -->
+	<artifact type="bundle" name="org.societies.comm.xmpp.pubsub.PubsubServiceBundle"/>
+	<artifact type="bundle" name="org.societies.comm.xmpp.pubsub.PubsubClientBundle"/>
+</plan>
