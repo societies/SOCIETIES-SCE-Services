@@ -1,0 +1,21 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+	<title>Schema Definition for Message Beans</title>
+</head>
+
+<body>
+<h1>Schema Definition for Message Beans</h1>
+
+As depicted in Figure 27, the communication across Communication Gateways happens by the exchange of XML documents, transported by XMPP. These XML documents must be compliant to a Schema that is shared across the communicating nodes, and that represents the service interfaces that are exposed for remote invocation. In the following sections we will describe how a developer is supposed to create such a schema so that XML message beans might be reliably created on a variety of programming languages.<br />
+
+We have created 3 example bundles, a Calculator service, a Fortune Cookie service and a Complex Service which are running as bundles in the container (all are available in the GIT Code Repository). The creation of the raw XML that is passed between client/server/client is abstracted within the SOCIETIES framework. You cannot call the interface of your Service directly. Instead, each developer must create an XML schema to which message beans being passed between Client and Server comply to. Each message bean stores as properties:<br />
+<ul>
+<li>the method to be called</li>
+<li>relevant parameters for that method</li>
+</ul>
+You will create one XSD schema file per service interface. The XSD file contains your XMPP namespace, methods, parameters and parameter types. We have tried to simplify the process by breaking it into 3 steps. If you are already comfortable writing the XML for your Message Bean schema directly, then go straight to step 3 (Section 3.5.2.3).
+</body>
+</html>

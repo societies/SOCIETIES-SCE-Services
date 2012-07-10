@@ -1,0 +1,60 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+	<title>Step 1: Create a temporary bean for your interface</title>
+</head>
+
+<body>
+<h1>Step 1: Create a temporary bean for your interface</h1>
+
+We are going to create a set of beans (i.e. Java Classes that comply with the javabeans naming conventions) that will be automatically introspected to generate the corresponding XML Schema. Below is the interface of the minimalistic example Calculator service that we want to expose to remote clients.<br />
+<pre>
+public interface ICalc {
+    /**Adds 2 numbers together and returns total*/
+    public int Add(int a, int b);
+
+    /**Subtracts 2 numbers and returns total */
+    public int Subtract(int a, int b);
+}
+</pre>
+ 
+Our temporary bean needs to hold only the name of the method the user wants to call and each of the parameters. Do not worry about the return type here, the return type is held in a separate bean described later.
+<pre>
+public class CalcBean {
+     public enum methodType {Add, Subtract};
+     private methodType method;
+     private int a;
+     private int b;
+ 
+     public int getA() {     return a; }
+     public void setA(int a) { this.a = a; }
+ 
+     public int getB() {     return b; }
+     public void setB(int b) { this.b = b; }
+ 
+     public methodType getMethod() {
+         return method;
+     }
+	 
+     public void setMethod(methodType method) {
+         this.method = method;
+     }
+}
+</pre>
+
+Now, you must create a temporary java bean for your result. The calculator returns a simple integer but other, more complex examples are available in the <a href="https://github.com/societies/SOCIETIES-Platform/tree/development/platform-infrastructure/comms-frwk/ExampleServices">GIT Code Repository</a>.
+<pre>
+public class CalcBeanResult {
+    private <b>int</b> result;
+
+    public int getResult() { return result; }
+    public void setResult(int result) { this.result = result; }
+}
+</pre>
+
+Lastly, put your datatype Classes in this project. They must be in bean format, that is Get/Set methods for any property and no parameterised constructors. This will allow them to be passed as parameters in your methods.
+
+</body>
+</html>

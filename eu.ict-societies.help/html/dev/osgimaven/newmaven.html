@@ -1,0 +1,37 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+	<title>Creating new Maven-Spring-OSGI project within Eclipse using maven plug-in</title>
+</head>
+
+<body>
+<h1>Creating new Maven-Spring-OSGI project within Eclipse using maven plug-in</h1>
+
+In Eclipse: new &rarr; maven Project<br />
+<br />
+	<img src="../../img/image027.png" /><br />
+<br />
+
+In the new Maven project dialog, select “All Catalogs” and filter for OSGI. Eclipse will search and display the list of archetypes for OSGI project. Select the one highlighted in the screen capture.<br />
+<br />
+	<img src="../../img/image029.png" /><br />
+<br />
+Click next, follow the screen, supply your project-specific group-id, artefact-id and package names, then finish. You will get a new Maven project whose structure is depicted in.<br />
+<br />
+	<img src="../../img/image031.png" /><br />
+<br />
+
+Delete the content of the generated pom.xml and replace it with the content of the pom.xml file available at the <a href="https://github.com/societies/Societies-Seed/tree/master/OSGI_Spring_Tutorial/templatePom.xml">GIT Code Repository</a>, just remember to update the artifactId and groupId entries with the correct values for your project.<br />
+<br />
+	<img src="../../img/image033.png" /><br />
+<br />
+
+Edit bundle-context.xml file (located as in figure above) to define a new Spring bean (see figure below).<br />
+<br />
+	<img src="../../img/image035.png" /><br />
+<br />
+
+</body>
+</html>

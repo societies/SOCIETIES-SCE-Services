@@ -1,0 +1,43 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+	<title>OpenFire Configuration</title>
+</head>
+
+<body>
+<h1>OpenFire Configuration</h1>
+Start the Openfire Server and select "Launch Admin" to lauch the admin website. The first time you do this you will need to make some config choices. You can select defaults for most screens, but please make the following edits:<br />
+<br />
+	<ul>
+		<li>"Server Setup": Domain name defaults to your machine name. Change it to "societies.local" (see figure below)</li>
+	</ul>
+
+	<img src="../../img/image022.jpg" /><br />
+<br /><br />
+
+
+	<ul>
+		<li>"Database Config": Choose "Embedded Database" (see figure below)</li>
+	</ul>
+
+	<img src="../../img/image024.jpg" /><br />
+<br /><br />	
+
+When complete, login to the admin website and perform the following changes:
+	<ul>
+		<li>Under "Users/Groups", select "Create New User" and create a new user account, e.g. alec</li>
+		<li>Under "Server" -> "Server Settings" -> "External Components". In the "Service Enabled" box, click the "Enabled" checkbox and enter a "Default shared secret", e.g. "password" and click "Save Settings"</li>
+		<li>In the "Allowed to Connect" box, create a new subdomain (which represents a new External Component) and provide the values as in Figure 13</li>
+	</ul>
+
+	<img src="../../img/image025.png" /><br />
+
+<br /><br />
+
+Click "Add Component" to finish adding the external component. You do not have to provide any implementation file: this setting simply represents the connection informations of an external component that will connect later on (ie the XCManager component).<br />
+<br />
+Finally, edit your local "hosts" file to ensure that "societies.local" maps to 127.0.0.1. Confirm this by pinging societies.local from a command prompt.
+</body>
+</html>
