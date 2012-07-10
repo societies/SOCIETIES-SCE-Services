@@ -1,0 +1,34 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+	<title>SOCIETIES Platform Distribution</title>
+</head>
+
+<body>
+<h1>SOCIETIES Platform Distribution</h1>
+
+At the time of writing this deliverable, the SOCIETIES platform is distributed in the form of source code, publicly available at <a href="https://github.com/societies/SOCIETIES-Platform">https://github.com/societies/SOCIETIES-Platform</a><br />
+<br />
+In the "builder" sub-folder within the structure of the project, two Maven configuration files are made available to build the sets of components that are relevant for the light nodes and the rich/cloud nodes: android-projects.xml and spring-osgi-projects.xml, respectively.<br />
+<br />
+Building the SOCIETIES platform of choice is thus as simple as invoking:<br />
+<br />
+<div style="width: 100%;" align="center">
+<i>mvn -f [android|spring-osgi]-projects.xml clean install</i>
+</div>
+<br />
+from a command-line shell within the builder folder.<br />
+<br />
+In the same folder, two Virgo plan files are available to list the required components on a Rich/Client node:<br />
+<br />
+1.      <b>societies-platform.plan</b> lists all components required by the platform to provide its full set of functionalities<br />
+<br />
+2.      <b>societies-3p-services.plan</b> lists the set of bundles that 3rd Party services might require<br />
+<br />
+A more user-friendly packaging of the SOCIETIES platform distributions is being considered and will be described in D6.2, the final version of this deliverable.<br />
+<br />
+Technical support for 3rd party service developers will be provided through online collaboration tools (guidelines & tutorials, bug reporting, forums, etc) available at <a href="https://redmine.ict-societies.eu/projects/sp">https://redmine.ict-societies.eu/projects/sp</a> (user registration required).<br />
+</body>
+</html>

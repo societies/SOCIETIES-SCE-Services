@@ -1,0 +1,30 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+	<title>Step 3: Build the schema</title>
+</head>
+
+<body>
+<h1>Step 3: Build the schema</h1>
+
+The schema is now part of the main build for the system as it sits in the API project folder so it will include:
+<ol>
+<li>Schema Message Beans</li>
+<li>Schema-generated datatypes</li>
+</ol>
+
+Your original interface class should now be refactored to accept the schema-generated datatypes as paramater types and not your original java datatypes. This is because the Group Manager component will extract the schema-generated datatypes from the message bean and will pass these as the parameters to your service interface. You will get a type mismatch if you will have not modified your interface, e.g. Original interface to FortuneCookie service is
+<pre>
+public interface IWisdowm {
+    public <span style="color: #FF0000;">org.societies.examples.fortunecookie.datatypes.Cookie</span> getCookie();
+}
+</pre>
+
+However, what is retrieved from the <i>MessageBeanResult</i> class is is
+<pre>
+public <span style="color: #FF0000;">org.societies.api.schema.fortunecookie.Cookie</span> getCookie();
+</pre>
+</body>
+</html>

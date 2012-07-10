@@ -1,0 +1,33 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+	<title>Spring Configuration for Registering a Bean as an OSGI Service</title>
+</head>
+
+<body>
+<h1>Spring Configuration for Registering a Bean as an OSGI Service</h1>
+
+Edit <i>bundle-context-osgi.xml</i> as per figure below.<br />
+<br />
+<br />
+	<img src="../../img/image037.png" /><br />
+<br />
+
+Note: to add any new namespace into this spring config file - right click on this page as shown in figure below, then select "Configure Namespaces...".<br />
+<br />
+<br />
+	<img src="../../img/image039.png" /><br />
+<br />
+
+The window in figure below will appear, from which you can select the Spring namespaces you are interested in including in your Context Configuration:<br />
+<br />
+<br />
+	<img src="../../img/image041.png" /><br />
+<br />
+
+Once configured, build the project using <i>mvn install</i> and, if you already have the VIRGO_HOME environment variable set, your jar will be automatically copied to the  VIRGO_HOME/pickup/ directory, ready for execution.<br />
+
+</body>
+</html>

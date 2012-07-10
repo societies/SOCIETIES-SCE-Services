@@ -1,0 +1,123 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+	<title>Activity</title>
+</head>
+
+<body>
+<h1>Activity</h1>
+
+The Activity component provides Third Party developers with the possibility of sending a stream of custom events at the CSS or CIS level. The APIs that have been defined so far are a subset of the <a href="http://opensocial-resources.googlecode.com/svn/spec/2.0.1/Core-API-Server.xml">Open Social Core API Server specification</a>.<br />
+<br />
+The interface org.societies.api.activity.IActivity is a simple provided interface that Service Activities instances have to implement in order for the SOCIETIES framework to be able to deal with them appropriately:<br />
+<pre>
+<b>
+<span style="color: #7f0055;">public interface</span> IActivity {
+      <span style="color: #7f0055;">public</span> Long getId();
+      <span style="color: #7f0055;">public void</span> setId(Long id);
+      <span style="color: #7f0055;">public</span> String getVerb();
+      <span style="color: #7f0055;">public void</span> setVerb(String verb);
+      <span style="color: #7f0055;">public</span> String getActor();
+      <span style="color: #7f0055;">public void</span> setActor(String actor);
+      <span style="color: #7f0055;">public</span> String getObject();
+      <span style="color: #7f0055;">public void</span> setObject(String object);
+      <span style="color: #7f0055;">public</span> String getTarget();
+      <span style="color: #7f0055;">public void</span> setTarget(String target);
+      <span style="color: #7f0055;">public</span> String getPublished();
+      <span style="color: #7f0055;">public void</span> setPublished(String published);
+}
+</b>
+</pre>
+On the other hand, the org.societies.api.activity.IActivityFeed interface formalizes the Activity Feed management service that is provided by SOCIETIES Nodes:<br />
+<pre>
+<b>
+<span style="color: #7f0055;">public interface</span> IActivityFeed {
+<span style="color: #3f5fbf;">
+       /**
+        * This method will parse a <u>timeperiod</u> and return a subset of the <u>activities</u>
+        *  in this <u>activityfeed</u> that is within the given <u>timeperiod</u>
+        * 
+        * @param <u>timeperiod</u> can be: "<u>millisecondssinceepoch millisecondssinceepoch</u>+n"
+        * @return a List of Iactivity or a empty list if the parameters are wrong or the
+        *                                          <u>timeperiod</u> did not match any <u>activities</u>
+        */
+</span>
+
+       <span style="color: #7f0055;">public</span> List<IActivity> getActivities(String timePeriod);
+<span style="color: #3f5fbf;">
+       /**
+        * This method will parse a query and a <u>timeperiod</u> and return a subset of the <u>activities</u>
+        *  in this <u>activityfeed</u> that matches the query constraints and is within the given
+        * <u>timeperiod</u>
+        * @return a List of IActivity or a empty list if the parameters are wrong or the query and/or <u>timeperiod</u> did not match any <u>activities</u>
+        */
+</span>
+       <span style="color: #7f0055;">public</span> List<IActivity> getActivities(String query, String timePeriod);
+<span style="color: #3f5fbf;">
+       /**
+        * This method will add a activity and post it on the associated <u>pubsub</u> service.
+        *
+        * @param {@link IActivity} activity, the activity that will be added.
+        */
+</span>
+       <span style="color: #7f0055;">public void</span> addCisActivity(IActivity activity);
+<span style="color: #3f5fbf;">
+       /**
+        * This method will parse a criteria and delete the activities that match the criteria
+        * 
+        * @param criteria which has the same definition as the query of "getActivities(String query.."
+        * @return {@link <u>int</u>} number of deleted activities.
+        */
+</span>
+       <span style="color: #7f0055;">public int</span> cleanupFeed(String criteria);
+<span style="color: #3f5fbf;">
+       /**
+        *
+        *
+        * @param IActivty activity the activity that should be deleted.
+        * @return boolean true if the the activity was found and deleted, false if not.
+        */
+</span>
+       <span style="color: #7f0055;">public boolean</span> deleteActivity(IActivity activity);
+<span style="color: #3f5fbf;">
+       /**
+        *
+        * @param List of ActivityEntry as used by the social data connector, and implemented by <u>shindig</u>.
+        * @return long number of entries successfully imported
+        */
+</span>
+       <span style="color: #7f0055;">public long</span> importActivityEntries(List<?> activityEntries);
+
+}
+</b>
+</pre>
+ 
+
+The "query" input parameter syntax (for the getActivities and cleanupFeed methods) is defined as per <a href="http://opensocial-resources.googlecode.com/svn/spec/2.0.1/Core-API-Server.xml#Request-Parameter-FilterBy-Value">OpenSocial Query Specs</a> but with one addition: the Query String should be a JSON-compliant String that is structured as follows:<br />
+<pre>
+{
+   ...
+   "filterBy" : "name",
+   "filterOp" : "startsWith",
+   "filterValue" : "John"
+    ...
+}
+</pre>
+ 
+
+Thus it needs to contain the keys (and their corresponding values) "filterBy", "filterOp" and "filterValue" (the last one can have a empty value given certain filterOps, see below)<br />
+Filter operators are those specified as values for the "filterOp" key. The operation to use when filtering a collection by a field specified in 'filterBy', defaults to "contains".<br />
+Valid operation values are:<br />
+<ol>
+<li><b>contains</b> Returns elements where filterValue appears somewhere in the element's filterBy field value.</li>
+<li><b>equals</b> Returns elements where filterValue exactly matches the element's filterBy field value.</li>
+<li><b>startsWith</b> Returns elements where filterValue exactly matches the first N characters of the element's filterBy field value, where N is the length of the filterValue string.</li>
+<li><b>present</b> Returns elements where the element's filterBy field value is not empty or null.</li>
+<li><b>isNull</b> is the exact opposite of "present", NOTE: this is in addition to the OpenSocial specification.</li>
+</ol>
+The last two filter operators do not need to have a value set for the corresponding "filterValue" key.
+
+</body>
+</html>

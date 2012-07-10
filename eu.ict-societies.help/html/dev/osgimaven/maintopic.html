@@ -1,0 +1,51 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+	<title>OSGi/SpringDM Bundle development with Maven</title>
+</head>
+
+<body>
+<h1>OSGi/SpringDM Bundle development with Maven</h1>
+
+The SOCIETIES framework relies on SpringDM bundles being deployed into the VIRGO App Server running in instances of Rich and Cloud nodes. This section will provide a primer for Third Party Service developers that want to provide the bundles that expose their services using the Maven build system together with the Spring Tooling plugin.<br />
+<br />
+The source code supporting this tutorial is available at <a href="https://github.com/societies/Societies-Seed/tree/master/OSGI_Spring_Tutorial">OSGi Spring Tutorial</a><br />
+<br />
+There is a Maven archetype that eases the creation of SpringDM bundle project:<br />
+<br />
+<table border="1"><tr><td>
+mvn archetype:create -DarchetypeGroupId=org.springframework.osgi<br />
+<br />
+-DarchetypeArtifactId=spring-osgi-bundle-archetype<br />
+<br />
+-DarchetypeVersion=&lt;spring-dm version&gt;<br />
+<br />
+-DgroupId=&lt;your-project-groupId&gt;<br />
+<br />
+-DartifactId=&lt;your-project-artifactId&gt;<br />
+<br />
+-Dversion=&lt;your-project-version&gt;<br />
+</td></tr></table>
+<br />
+To create a new project open a console and navigate to the directory where you want to create project and simply type the following:
+<br /><br />
+<table border="1"><tr><td>
+mvn archetype:create<br/>
+<br />
+-DarchetypeGroupId=org.springframework.osgi<br />
+<br />
+-DarchetypeArtifactId=spring-osgi-bundle-archetype<br />
+<br />
+-DarchetypeVersion=1.1.0<br />
+<br />
+-DgroupId=org.foo<br />
+<br />
+-DartifactId=org.foo.my-springdm-bundle<br />
+<br />
+-Dversion=0.1<br />
+</td></tr></table>
+
+</body>
+</html>

@@ -1,0 +1,43 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+	<title>Creating a "Service Consuming" Project</title>
+</head>
+
+<body>
+<h1>Creating a "Service Consuming" Project</h1>
+
+Create the project using same approach described in Section 2.4.1 and modify your pom to import the required packages and dependencies. Create your "service consuming" class by importing the service exposed API (see Figure 22 for an example).<br />
+<br />
+<br />
+	<img src="../../img/image043.png" /><br />
+<br />
+Importing Spring annotations simply means add the following imports:<br />
+<br />
+<i>
+import org.springframework.beans.factory.annotation.Autowired;<br />
+<br />
+import org.springframework.stereotype.Component;<br />
+</i><br />
+Then add the @Component annotation to the class and the @Autowired annotation either to the property that will reference the required service or to the constructor taking the parameter of the same type of the service interface (as seen in figure above).<br />
+<br />
+Edit the module-context.xml file to scan the packages which needs autowiring (figure below):< br />
+
+<br />
+<br />
+	<img src="../../img/image045.png" /><br />
+<br />
+
+Edit the bundle-context-osgi.xml file to fetch the service that implements the required interface (figure below):<br />
+
+<br />
+<br />
+	<img src="../../img/image047.png" /><br />
+<br />
+
+Build your project and start Virgo: check the log file in VIRGO_HOME\ serviceability\logs for the log output of the example service - if you followed the tutorial code - or from your specific service.
+
+</body>
+</html>

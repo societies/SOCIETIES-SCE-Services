@@ -13,12 +13,37 @@
   		<topic href="html/dev/virgo/properties.html" label="SOCIETIES Platform Properties"></topic> 
 	</topic>
 	<topic href="html/dev/openfire/maintopic.html" label="Installing OpenFire">
-		<topic label="Sub Topic 2" href="html/dev/openfire/subtopic.html" /> 
-	</topic>  
-	<topic href="html/dev/osgi/maintopic.html" label="OSGi/SpringDM Bundle Development with Maven">
-		<topic label="Sub Topic 2" href="html/dev/osgi/subtopic.html" /> 
-	</topic> 
-	<topic href="html/dev/distribution/maintopic.html" label="SOCIETIES Platform Distribution">
-		<topic label="Sub Topic 2" href="html/dev/distribution/subtopic.html" /> 
-	</topic> 
+		<topic href="html/dev/openfire/configuration.html" label="OpenFire Configuration">
+  </topic>
+  <topic href="html/dev/openfire/PSIconfiguration.html" label="PSI Configuration">
+  </topic>
+	</topic>
+ <topic href="html/dev/osgimaven/maintopic.html" label="OSGi/SpringDM Bundle Development with Maven">
+    <topic href="html/dev/osgimaven/newmaven.html" label="Creating new Maven-Spring-OSGI project within Eclipse using maven plug-in">
+    </topic>
+    <topic href="html/dev/osgimaven/registering.html" label="Spring Configuration for Registering a Bean as an OSGI Service">
+    </topic>
+    <topic href="html/dev/osgimaven/serviceconsuming.html" label="Creating a &quot;Service Consuming&quot; Project">
+    </topic>
+ </topic>
+ <topic href="html/dev/platformdistribution/maintopic.html" label="SOCIETIES Platform Distribution">
+ </topic>
+ <topic href="html/dev/3PSAPIs/maintopic.html" label="3rd Party Service APIs">
+    <topic href="html/dev/3PSAPIs/activity.html" label="Activity">
+    </topic>
+    <topic href="html/dev/3PSAPIs/cismanagement.html" label="CIS Management">
+    </topic>
+ </topic>
+ <topic href="html/dev/communicationxmpp/maintopic.html" label="Communication / XMPP">
+    <topic href="html/dev/communicationxmpp/technicalarchitecture.html" label="Technical Architecture">
+    </topic>
+    <topic href="html/dev/communicationxmpp/schemadefinition.html" label="Schema Definition for Message Beans">
+    </topic>
+    <topic href="html/dev/communicationxmpp/step1.html" label="Step 1: Create a temporary bean for your interface">
+    </topic>
+    <topic href="html/dev/communicationxmpp/step2.html" label="Step 2: Generate and adapt the schema for your message bean">
+    </topic>
+    <topic href="html/dev/communicationxmpp/step3.html" label="Step 3: Build the schema">
+    </topic>
+ </topic>  
 </toc>
