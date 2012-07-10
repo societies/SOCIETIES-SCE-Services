@@ -8,10 +8,10 @@
 <script type='text/javascript' src='http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js'></script>
 <script type='text/javascript' src='http://ajax.googleapis.com/ajax/libs/jqueryui/1.7.2/jquery-ui.min.js'></script>
 <script type='text/javascript' src='/sharedCal/resources/js/jquery.weekcalendar.js'></script>
+<script type='text/javascript' src="/sharedCal/resources/js/SharedCalendar.js"></script>
 <title>Shared Calendar Web Client</title>
 </head>
-<body>
-	<script language="JavaScript" src="/sharedCal/resources/js/SharedCalendar.js"></script>
+<body>	
 	<h2>SOCIETIES Shared Calendar Web UI</h2>
 	Cis ID: <input type="text" id="cisId" /><br/>
 	Cis/Css Calendar Summary: <input type="text" id="cisSummary" /><br/>
@@ -22,7 +22,6 @@
 	<button id="retrieveCssCalendarEvents">Get Private (CSS) Events</button><br/>
 	<br/>Result:<br/>
 	<div id="result"></div>
-	<div id='calendar'></div>
-	<script type='text/javascript' src='/sharedCal/resources/js/myCalendar.js'></script>
+	<div id='calendar'></div>	
 </body>
 </html>

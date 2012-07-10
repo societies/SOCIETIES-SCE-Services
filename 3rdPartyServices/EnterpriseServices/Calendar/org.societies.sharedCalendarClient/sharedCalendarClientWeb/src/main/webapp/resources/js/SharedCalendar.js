@@ -74,7 +74,7 @@ new Ajax.Updater('result','/sharedCal/createCisCalendarAjax.do',
 		      var response = transport.responseText || "no response text";
 		      $('result').replace("<p>CIS Calendar created successfully.</p>");
 		    },
-		    onFailure: function(){ alert('Something went wrong...') }
+		    onFailure: function(){ alert('Something went wrong...'); }
 		  });			
 });
 
@@ -91,7 +91,7 @@ $("getCisCalendarEventsButton").on("click", function(event){
 			      jQuery("#calendar").weekCalendar('refresh'); 
 			      jQuery("#calendar").show();
 			    },
-			    onFailure: function(){ alert('Something went wrong...') }
+			    onFailure: function(){ alert('Something went wrong...'); }
 			  });			
 	});
 
@@ -104,7 +104,7 @@ $("deleteCisCalendarButton").on("click", function(event){
 			      var response = transport.responseText || "no response text";
 			      $('result').replace("<p>CIS Calendar deleted successfully.</p>");
 			    },
-			    onFailure: function(){ alert('Something went wrong...') }
+			    onFailure: function(){ alert('Something went wrong...'); }
 			  });			
 	});
 
@@ -117,7 +117,7 @@ $("createCssCalendarButton").on("click", function(event){
 			      var response = transport.responseText || "no response text";
 			      $('result').replace("<p>CSS Calendar created successfully.</p>");
 			    },
-			    onFailure: function(){ alert('Something went wrong...') }
+			    onFailure: function(){ alert('Something went wrong...'); }
 			  });			
 	});
 
@@ -129,7 +129,7 @@ $("deleteCssCalendarButton").on("click", function(event){
 		      var response = transport.responseText || "no response text";
 		      $('result').replace("<p>CSS Calendar deleted successfully.</p>");
 		    },
-		    onFailure: function(){ alert('Something went wrong...') }
+		    onFailure: function(){ alert('Something went wrong...'); }
 		  });			
 });
 
@@ -168,7 +168,7 @@ $("getAllCisCalendarsAjax").on("click", function(event){
 			  result += "</table>";
 			  $('result').replace(result);
 		    },
-		    onFailure: function(){ alert('Something went wrong...') }
+		    onFailure: function(){ alert('Something went wrong...'); }
 		  }
 	);			
 });

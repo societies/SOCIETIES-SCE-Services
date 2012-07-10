@@ -29,11 +29,10 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
@@ -46,15 +45,15 @@ import org.societies.api.comm.xmpp.exceptions.CommunicationException;
 import org.societies.api.comm.xmpp.exceptions.XMPPError;
 import org.societies.api.comm.xmpp.interfaces.ICommCallback;
 import org.societies.api.comm.xmpp.interfaces.ICommManager;
+import org.societies.api.css.devicemgmt.IDevice;
 import org.societies.api.identity.IIdentity;
 import org.societies.api.identity.IIdentityManager;
 import org.societies.api.identity.InvalidFormatException;
+import org.societies.api.osgi.event.IEventMgr;
 import org.societies.rdpartyService.enterprise.interfaces.IReturnedResultCallback;
 import org.societies.rdpartyService.enterprise.interfaces.ISharedCalendarClientRich;
-import org.societies.rdpartyservice.enterprise.sharedcalendar.Calendar;
 import org.societies.rdpartyservice.enterprise.sharedcalendar.Event;
 import org.societies.rdpartyservice.enterprise.sharedcalendar.SharedCalendarBean;
-import org.societies.rdpartyservice.enterprise.sharedcalendar.SharedCalendarResult;
 
 /**
  * This class implement functionalities to interact with the server part of the SharedCalendar Service.
@@ -68,6 +67,13 @@ public class SharedCalendarClientRich implements ICommCallback,	ISharedCalendarC
 	private String pathForJSONfile;
 	private ICommManager commManager;
 	private IIdentityManager idMgr;
+	private IEventMgr evtMgr;
+	/**
+	 * This is the set of all available instances of the IDevice interface.
+	 * A DeviceListener bean instance tracks whenever a new IDevice is bound or unbound.
+	 * See http://static.springsource.org/osgi/docs/1.2.1/reference/html-single/#service-registry:refs:collection:dynamics
+	 */
+	private Set<IDevice> availableDevices;
 	
 	private static final List<String> NAMESPACES = Collections
 			.unmodifiableList(Arrays
@@ -129,11 +135,6 @@ public class SharedCalendarClientRich implements ICommCallback,	ISharedCalendarC
 			e.printStackTrace();
 		}
 		idMgr = commManager.getIdManager();
-
-		// Test
-		
-	 //createPrivateCalendar(new TestCallBackCreateCSSCalendar(),"Test private calendar from bundle");
-//		 retrieveCSSCalendarEvents(new TestCallBackRetrieveCSSCalendarEvents());
 	}
 
 	/*
@@ -144,7 +145,7 @@ public class SharedCalendarClientRich implements ICommCallback,	ISharedCalendarC
 	 */
 	@Override
 	public List<String> getXMLNamespaces() {
-		// TODO Auto-generated method stub
+		
 		return NAMESPACES;
 	}
 
@@ -156,7 +157,7 @@ public class SharedCalendarClientRich implements ICommCallback,	ISharedCalendarC
 	 */
 	@Override
 	public List<String> getJavaPackages() {
-		// TODO Auto-generated method stub
+		
 		return PACKAGES;
 	}
 
@@ -169,7 +170,7 @@ public class SharedCalendarClientRich implements ICommCallback,	ISharedCalendarC
 	 */
 	@Override
 	public void receiveResult(Stanza stanza, Object payload) {
-		// TODO Auto-generated method stub
+		
 
 	}
 
@@ -183,7 +184,7 @@ public class SharedCalendarClientRich implements ICommCallback,	ISharedCalendarC
 	 */
 	@Override
 	public void receiveError(Stanza stanza, XMPPError error) {
-		// TODO Auto-generated method stub
+		
 
 	}
 
@@ -197,7 +198,7 @@ public class SharedCalendarClientRich implements ICommCallback,	ISharedCalendarC
 	 */
 	@Override
 	public void receiveInfo(Stanza stanza, String node, XMPPInfo info) {
-		// TODO Auto-generated method stub
+		
 
 	}
 
@@ -211,7 +212,7 @@ public class SharedCalendarClientRich implements ICommCallback,	ISharedCalendarC
 	 */
 	@Override
 	public void receiveItems(Stanza stanza, String node, List<String> items) {
-		// TODO Auto-generated method stub
+		
 
 	}
 
@@ -224,8 +225,7 @@ public class SharedCalendarClientRich implements ICommCallback,	ISharedCalendarC
 	 */
 	@Override
 	public void receiveMessage(Stanza stanza, Object payload) {
-		// TODO Auto-generated method stub
-
+		
 	}
 	
 	private IIdentity retrieveTargetIdentity(){
@@ -237,7 +237,7 @@ public class SharedCalendarClientRich implements ICommCallback,	ISharedCalendarC
 				log.error("Identity Manager is NOT available.");
 			}
 		} catch (InvalidFormatException e1) {
-			// TODO Auto-generated catch block
+			
 			e1.printStackTrace();
 		} 
 		return result;
@@ -682,71 +682,6 @@ public class SharedCalendarClientRich implements ICommCallback,	ISharedCalendarC
 		
 	}
 	
-
-	// /////////////////////////////////TESTS CALLBACK CLASSES/////////////////////////////////////////////
-
-	private class TestCallBackRetrieveAllCalendars implements
-			IReturnedResultCallback {
-
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see org.societies.rdpartyService.enterprise.IReturnedResultCallback#
-		 * receiveResult(java.lang.Object)
-		 */
-		@Override
-		public void receiveResult(Object returnValue) {
-			log.info("Results returned");
-			SharedCalendarResult result = (SharedCalendarResult) returnValue;
-			List<Calendar> returnedList = result.getCalendarList();
-			for (Calendar calendar : returnedList) {
-				log.info(calendar.getDescription());
-			}
-
-		}
-	}
-
-	private class TestCallBackRetrieveCSSCalendarEvents implements
-			IReturnedResultCallback {
-
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see org.societies.rdpartyService.enterprise.IReturnedResultCallback#
-		 * receiveResult(java.lang.Object)
-		 */
-		@Override
-		public void receiveResult(Object returnValue) {
-			log.info("Results returned");
-			SharedCalendarResult result = (SharedCalendarResult) returnValue;
-			List<Event> returnedList = result.getEventList();
-			for (Event event : returnedList) {
-				log.info(event.getEventDescription());
-			}
-			createJSONOEvents(returnedList);
-		}
-	}
-
-	private class TestCallBackCreateCSSCalendar implements
-			IReturnedResultCallback {
-
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see org.societies.rdpartyService.enterprise.IReturnedResultCallback#
-		 * receiveResult(java.lang.Object)
-		 */
-		@Override
-		public void receiveResult(Object returnValue) {
-			log.info("Results returned");
-			SharedCalendarResult result = (SharedCalendarResult) returnValue;
-			log.info("The private calendar is created: "
-					+ result.isLastOperationSuccessful());
-
-		}
-	}
-
-	
 	//UTILITY METHODS//
 	/**
 	 * This method create the list JSON objects (compatible with the presentation framewok jquery-weekcalendar-1.2.2) starting from a list of events.
@@ -798,40 +733,26 @@ public class SharedCalendarClientRich implements ICommCallback,	ISharedCalendarC
 		out.close();
 		fileWriter.close();} 
     	catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}}
     }
 return true;
 	}
-	
-	
-	//Main method for test purposes only
-	
-	public static void main (String [] argj)
-{
-	List<Event> tmpEventList=new ArrayList<Event>();
-	for (int i=0; i<3; i++){
-		Event tmpEvent=new Event();
-		Date tmpDateStart=new Date();
-		Date tmpDateEnd=new Date();
-		tmpDateStart.setHours(tmpDateStart.getHours()+i);
-		tmpDateEnd.setHours(tmpDateEnd.getHours()+i+1);
-		tmpEvent.setStartDate(new XMLGregorianCalendarConverter().asXMLGregorianCalendar(tmpDateStart));
-		tmpEvent.setEndDate(new XMLGregorianCalendarConverter().asXMLGregorianCalendar(tmpDateEnd));
-		tmpEvent.setEventDescription("Description "+i);
-		tmpEvent.setEventSummary("Summary "+i);
-		tmpEvent.setEventId(""+i);
-		tmpEventList.add(tmpEvent);}
-	SharedCalendarClientRich tmpClient=new SharedCalendarClientRich();
-		String JsonObj=tmpClient.createJSONOEvents(tmpEventList);
-		tmpClient.writeJsonToFile("", JsonObj);
+
+	public IEventMgr getEvtMgr() {
+		return evtMgr;
+	}
+
+	public void setEvtMgr(IEventMgr evtMgr) {
+		this.evtMgr = evtMgr;
+	}
+
+	public Set<IDevice> getAvailableDevices() {
+		return availableDevices;
+	}
+
+	public void setAvailableDevices(Set<IDevice> availableDevices) {
+		this.availableDevices = availableDevices;
+	}
 	
 }
-
-	
-
-	
-
-	
-	}
