@@ -1,0 +1,28 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+	<title>Publisher</title>
+</head>
+
+<body>
+<h1>Publisher</h1>
+
+The Publisher list of APIs allows for publishing/removing content on a SOCIETIES node.
+<ol>
+<li><i>pubsubService</i> the owner/id of the pubsub service Node represents the topic name</li>
+<li><i>ItemID</i> a unique identifier for that event. If you re-publish an event using the same ID you will overwrite the previously published event details</li>
+<li><i>item</i> an EventBean containing your schema datatype. NOT the datatype directly, but a MessageBean/ResultBean or EventBean containing the datatype</li>
+</ol>
+
+<pre>
+/**Publishes an event for this identity, on this node of unique itemID and content of item */
+public String publisherPublish(Identity pubsubService, String node, String itemId, object item) throws XMPPError, CommunicationException;
+
+/**Remove an event for this node of provided itemID */
+public void publisherDelete(Identity pubsubService, String node, String itemId) throws XMPPError, CommunicationException;
+</pre>
+
+</body>
+</html>

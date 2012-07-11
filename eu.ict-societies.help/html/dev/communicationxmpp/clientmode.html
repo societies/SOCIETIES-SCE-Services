@@ -1,0 +1,61 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+	<title>Client Mode</title>
+</head>
+
+<body>
+<h1>Client Mode</h1>
+
+In client mode, the Comms Group Manager component plays the role of a proxy for several service bundles, exposing interfaces whose implementation is accessed remotely.<br />
+<br />
+Your Comms Group Manager component will implement the Remote API for each of the remote services that it proxies, so it should register these Remote API's as provided services in the Virgo container. To send and receive messages, you will also need a reference to the Platform Comms Gateway service in your Bundle-context-osgi.xml:
+<pre>
+	<osgi:service ref="CalcServiceRemote" interface="org.societies.examples.commsmanager.ICalcRemote" />
+	<osgi:service ref="CalcServiceRemote" interface="org.societies.examples.commsmanager.IComplexServiceRemote" />
+	<osgi:reference id="CommManagerBundle" interface="org.societies.comm.xmpp.interfaces.ICommManager"/>
+</pre>
+ 
+The required Platform Comms Gateway service is injected in your component by specifying the property in the Bundle-context.xml file and you need to register your Comms Group Manager with the Platform Comms Gateway in your InitService() method. So ensure you define an init-method value in the Bundle-context.xml file:
+<pre>
+<bean id="CalcServiceRemote"
+      class="org.societies.comm.examples.commsmanager.impl.CommsClient"
+      depends-on="CommManagerBundle"
+       init-method="<span style="color: #FF0000;">InitService</span>">
+       <property name="commManager" ref="CommManagerBundle"/>
+</bean>
+</pre>
+ 
+
+... and register your Comms Group Manager with the Platform Comms Gateway in your InitService() method implementation:
+<pre>
+public class CommsClient implements ICommCallback{
+     public void InitService() {
+         getCommManager().register(this);
+     }
+</pre>
+ 
+
+To receive the reply messages back from the Platform Comms Gateway you must implement the org.societies.comm.xmpp.interfaces.ICommCallback interface, which is similar to the IFeatureServer interface:
+<pre>
+/**Returns the list of package names of the message beans you'll be passing*/
+ public List<String> getJavaPackages();
+/**Returns the list of namespaces for the message beans you'll be passing*/
+ public List<String> getXMLNamespaces();
+</pre>
+ 
+
+The interface to the Comm Manager to send a message is:
+<pre>
+/**For calling methods that have return types */
+public void sendIQGet(Stanza stanza, Object messageBean, ICommCallback callback)
+             throws CommunicationException;
+ 
+/**For calling methods that have void types */
+public void sendMessage(Stanza stanza, String type, Object messageBean)
+             throws CommunicationException;
+</pre>
+</body>
+</html>

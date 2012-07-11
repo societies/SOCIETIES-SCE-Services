@@ -1,0 +1,36 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+	<title>Owner</title>
+</head>
+
+<body>
+<h1>Owner</h1>
+
+The Owner list of APIs allows the creation and administration of a Pubsub node.
+<ol>
+<li><i>pubsubService</i> the owner identity of the pubsub service</li>
+<li><i>Node</i> the topic name.</li>
+</ol> 
+
+<pre>
+/**Creates a pubsub node for this identity using the provided node name ("topic") */
+ public void ownerCreate(Identity pubsubService, String node) throws XMPPError, CommunicationException;
+
+ /**Deletes the pubsub node for this identity and node name */
+ public void ownerDelete(Identity pubsubService, String node) throws XMPPError, CommunicationException;
+
+ /**Deletes all the published events for this identity on this node */
+ public void ownerPurgeItems(Identity pubsubService, String node) throws XMPPError, CommunicationException;
+
+ /**Returns the list of identities of users who are subscribed to this pubsub node */
+ public Map<Identity, SubscriptionState> ownerGetSubscriptions(Identity pubsubService, String node) throws XMPPError, CommunicationException;
+ public Map<Identity, Affiliation> ownerGetAffiliations(Identity pubsubService, String node) throws XMPPError, CommunicationException;
+ public void ownerSetSubscriptions(Identity pubsubService, String node, Map<Identity, SubscriptionState> subscriptions) throws XMPPError, CommunicationException;
+ public void ownerSetAffiliations(Identity pubsubService, String node, Map<Identity, Affiliation> affiliations) throws XMPPError, CommunicationException;
+</pre>
+
+</body>
+</html>

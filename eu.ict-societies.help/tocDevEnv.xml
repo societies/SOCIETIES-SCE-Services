@@ -45,5 +45,39 @@
     </topic>
     <topic href="html/dev/communicationxmpp/step3.html" label="Step 3: Build the schema">
     </topic>
+    <topic href="html/dev/communicationxmpp/cgm.html" label="Communication Group Manager">
+    </topic>
+    <topic href="html/dev/communicationxmpp/servermode.html" label="Server mode">
+    </topic>
+    <topic href="html/dev/communicationxmpp/processingincomingrequests.html" label="Processing Incoming Requests">
+    </topic>
+    <topic href="html/dev/communicationxmpp/clientmode.html" label="Client Mode">
+    </topic>
+    <topic href="html/dev/communicationxmpp/receivingacallback.html" label="Receiving a Callback from the Platform Gateway">
+    </topic>
+    <topic href="html/dev/communicationxmpp/fromtheclientside.html" label="From The Client Side - Calling Methods and Passing Parameters">
+    </topic>
+    <topic href="html/dev/communicationxmpp/eventing.html" label="Eventing">
+    </topic>
+    <topic href="html/dev/communicationxmpp/internaleventing.html" label="Internal Eventing (OSGi)">
+    </topic>
+    <topic href="html/dev/communicationxmpp/creatingeventtype.html" label="Creating an Event Type">
+    </topic>
+    <topic href="html/dev/communicationxmpp/subscribingtoanevent.html" label="Subscribing to an Event">
+    </topic>
+    <topic href="html/dev/communicationxmpp/publishinganevent.html" label="Publishing an Event">
+    </topic>
+    <topic href="html/dev/communicationxmpp/receivinganevent.html" label="Receiving an Event">
+    </topic>
+    <topic href="html/dev/communicationxmpp/externaleventing.html" label="External Eventing (XMPP PubSub)">
+    </topic>
+    <topic href="html/dev/communicationxmpp/owner.html" label="Owner">
+    </topic>
+    <topic href="html/dev/communicationxmpp/publisher.html" label="Publisher">
+    </topic>
+    <topic href="html/dev/communicationxmpp/subscriber.html" label="Subscriber">
+    </topic>
+    <topic href="html/dev/communicationxmpp/eventbeanpersistencyformat.html" label="Event Bean Persistency Format">
+    </topic>
  </topic>  
 </toc>

@@ -1,0 +1,58 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+	<title>Server mode</title>
+</head>
+
+<body>
+<h1>Server mode</h1>
+
+First, you need to get a reference to the CommunicationManager service and a reference to each of the services you manage by registering in the Bundle-context-osgi.xml:
+<pre>
+	&lt;osgi:reference id="CommManagerBundle" interface="org.societies.comm.xmpp.interfaces.CommManager" /&gt;
+	&lt;osgi:reference id="CalculatorBundle" interface="org.societies.examples.calculator.ICalc" /&gt;
+	&lt;osgi:reference id="FortuneCookieBundle" interface="org.societies.examples.fortunecookie.api.IWisdom" /&gt;
+	&lt;osgi:reference id="ComplexServiceBundle" interface="org.societies.examples.complexservice.IComplexService" /&gt;
+</pre>
+ 
+Then you need to register your Comms Group Manager with the Platform Comms Gateway in your InitService() method. So ensure you specify an init-method in the Bundle-context.xml file.
+<pre>
+&lt;bean id="CommsServerManager"
+       class="org.societies.comm.examples.commsmanager.impl.CommsServer"
+       depends-on="CommManagerBundle, FortuneCookieBundle, CalculatorBundle, ComplexBundle"
+       init-method="InitService"&gt;
+       &lt;property name="commManager" ref="CommManagerBundle"/&gt;
+       &lt;property name="fcGenerator" ref="FortuneCookieBundle"/&gt;
+       &lt;property name="calcService" ref="CalculatorBundle"/&gt;
+       &lt;property name="complexSvc" ref="ComplexBundle"/&gt;
+&lt;/bean&gt;
+</pre>
+
+Finally, the following code snippet shows how you actually register your Module Group Manager with the Platform Comms Gateway in your InitService() method
+<pre>
+public void InitService() {
+    getCommManager().register(this);
+}
+</pre>
+ 
+To receive messages from the Platform Comms Gateway you must implement the <i>org.societies.comm.xmpp.interfaces.IFeatureServer</i> interface. The methods that have to be implemented are:
+<pre>
+/**Returns the list of package names of the message beans you'll be passing*/
+public List<String> getJavaPackages();
+
+/**Returns the list of namespaces for the message beans you'll be passing*/
+public List<String> getXMLNamespaces();
+
+/** Put your functionality here if there is NO return object, i.e. VOID */
+public void receiveMessage(Stanza stanza, Object messageBean);
+
+/** Put your functionality here if there IS a return object */
+public Object getQuery(Stanza stanza, Object messageBean);
+
+/** Put your functionality here if there IS a return object and you are updating also */
+public Object setQuery(Stanza arg0, Object arg1);
+</pre>
+</body>
+</html>

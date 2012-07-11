@@ -1,0 +1,35 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+	<title>Subscribing to an Event</title>
+</head>
+
+<body>
+<h1>Subscribing to an Event</h1>
+
+The interface for subscribing to an internal event is:
+<pre>
+/**To subscribe a listener for events
+ * @param listener instance of the EventListener
+ * @param eventType    String array of event types {@link EventTypes}
+ * @param filterOption a String containing an LDAP-style filter specification {@link EventConstants}
+ */
+
+public void subscribeInternalEvent(EventListener listener, String[] eventTypes, String filterOption);
+</pre>
+
+As the EventTypes paramater is an array, you can subscribe to multiple events at the same time. You can also set a filter option using the LDAP style filter spec, based on any of the CSSEventConstants such that the event filter string looks like:
+<pre>
+String eventFilter = "(&" +
+    "(" + CSSEventConstants.EVENT_NAME + "=test_event_name)" +
+    "(" + CSSEventConstants.EVENT_SOURCE + "=test_event_source)" +  ")";
+</pre>
+And the filtering subscription is set up as:
+<pre>
+//SUBSCRIBING TO INTERNAL EVENT
+getEventMgr().subscribeInternalEvent(this, new String[] {EventTypes.CONTEXT_EVENT}, eventFilter);
+</pre>
+</body>
+</html>

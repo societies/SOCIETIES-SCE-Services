@@ -1,0 +1,34 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+	<title>Event Bean Persistency Format</title>
+</head>
+
+<body>
+<h1>Event Bean Persistency Format</h1>
+
+The format of the event bean is not obvious from the descriptions and needs some additional explanations. Since the event bean has to be described in the relevant XMPP namespace in order to be transported, it must be
+<ul>
+<li>an existing message bean already being used in remote method invocations</li>
+</ul>
+<ul>
+<li>must be added to the XMPP namespace Schema file.</li>
+</ul>
+
+
+The format of the event bean can be of any complexity but must follow the following format:
+<pre>
+    &lt;xs:element name="cssEvent"&gt;
+        &lt;xs:complexType&gt;
+            &lt;xs:sequence&gt;
+                             .
+                             .
+            &lt;/xs:sequence&gt;
+        &lt;/xs:complexType&gt;
+  &lt;/xs:element&gt;
+</pre>
+
+</body>
+</html>

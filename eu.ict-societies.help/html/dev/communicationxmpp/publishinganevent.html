@@ -1,0 +1,35 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+	<title>Publishing an Event</title>
+</head>
+
+<body>
+<h1>Publishing an Event</h1>
+
+InternalEvent is the object type that is published.
+<pre>
+/**Constructor
+ * @param eventType String for the type of event {@link EventTypes}
+ * @param eventName String for the name of event
+ * @param eventSource String for the source component or peer id
+ * @param eventInfo object for the event info. Must implement {@link Serializable}
+ */
+
+public InternalEvent(String eventType, String eventName, String eventSource, Serializable eventInfo);
+</pre>
+
+The EventInfo property is where developers will add their own object types. In the following example, an instance of the TestObject Class represents the payload:
+<pre>
+ //GENERATE TEST PAYLOAD
+ TestObject myPayload = new TestObject();
+
+ //GENERATE EVENT
+ InternalEvent event = new InternalEvent(EventTypes.CONTEXT_EVENT, "test_event_name", "test_event_source", payload);
+
+ getEventMgr().publishInternalEvent(event);
+</pre>
+</body>
+</html>
