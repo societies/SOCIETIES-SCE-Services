@@ -1,0 +1,21 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+	<title>Eventing</title>
+</head>
+
+<body>
+<h1>Eventing</h1>
+
+The eventing and pubsub feature provided by the SOCIETIES Platform allows Third Party service developers to exploit those designs patterns within their services. There are currently 2 eventing models available.
+<ol>
+<li>Internal eventing between bundles within the container using the OSGI EventAdmin. Events only available to bundles running within the same container. Supports native java objects as payloads</li>
+<li>External eventing between conecting clients (including other containers). Allows a CSS Node to create an event stream for other clients (CSS nodes) to subscribe to. Supports schema generated objects only as payload</li>
+</ol>
+
+The Pubsub service is dependent on the communication framework. For further details about it see section 3.5. The examples in this section refer to the code available on <a href="https://github.com/societies/SOCIETIES-Platform/tree/development/platform-infrastructure/comms-frwk/ExampleServices">GitHub</a>).
+
+</body>
+</html>

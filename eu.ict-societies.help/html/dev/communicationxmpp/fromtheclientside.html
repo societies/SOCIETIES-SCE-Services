@@ -1,0 +1,31 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+	<title>From The Client Side - Calling Methods and Passing Parameters</title>
+</head>
+
+<body>
+<h1>From The Client Side - Calling Methods and Passing Parameters</h1>
+
+To call a service from a remote client, make a reference to the Comms Group Manager service instance which is implementing the Remote API of the required service. Your client class must implement the ICalcRemoteCallback interface to be able to handle the asynchronous result delivery. Then, simply call the method you wish to consume with relevant parameters. For example:
+
+<pre>
+ public class ClientTester implements ICalcRemoteCallback {
+     public void StartTest() {
+         getRemoteCalculator().AddAsync(2, 3, this);
+     }
+     ...
+</pre>
+ 
+
+Implement the receiveCalcResult() method to receive your response:
+<pre>
+ public void receiveCalcResult(Object calcResult) {
+     int result = (Integer)calcResult;
+ }
+</pre>
+If the complete idea of how the communication framework works is not yet clear, we do once again suggest to download and study the examples that are available in the <a href="https://github.com/societies/SOCIETIES-Platform/tree/development/platform-infrastructure/comms-frwk/ExampleServices">GIT Code Repository</a>.
+</body>
+</html>
