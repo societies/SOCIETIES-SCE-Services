@@ -4,6 +4,7 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.societies.api.css.devicemgmt.IAction;
 import org.societies.api.css.devicemgmt.IDevice;
 import org.societies.api.css.devicemgmt.IDriverService;
 
@@ -15,6 +16,9 @@ public class ClientDeviceListener {
 		IDriverService[] services = service.getServices();
 		for (IDriverService iDriverService : services) {
 			log.debug("Provided Service: "+iDriverService.getServiceDescription());
+			for (IAction action : iDriverService.getActions()){
+				log.debug("Provided action: "+action.getActionName());
+			}			
 		}
 	}
 
