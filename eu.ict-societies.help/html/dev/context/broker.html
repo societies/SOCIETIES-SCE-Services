@@ -1,0 +1,16 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+	<title>Broker</title>
+</head>
+<body>
+<h1>Broker</h1>
+
+The Context Broker component  manages access to current, past and future context data. The past context refers to the data stored in the context history database. The future context information is provided on the fly based on context prediction methods. The Context Broker also supports distributed context queries; it is a gateway to context data and decides whether the local DB, a remote DB or the Context Inference Management need to be contacted to retrieve the requested context data. The Context Broker exposes two interfaces, namely org.societies.api.context.broker.IctxBroker and org.societies.api.internal.context.broker.ICtxBroker.
+The latter is used by platform services, therefore it does not perform any access control when handling context data.<br />
+<br />
+Some of the methods that the internal Context Broker interface provides allow the creation, update, retrieval, and removal of context model objects. The following section demonstrates what are the necessary interfaces and classes that need to be imported and how to use them. 
+</body>
+</html>

@@ -1,0 +1,56 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+	<title>Technical Configuration</title>
+</head>
+
+<body>
+<h1>Technical Configuration</h1>
+
+If not already done for the Third Party service purpose, the following dependencies have to be added in Maven's pom.xml file:
+
+<pre>
+&lt;dependency&gt;
+   &lt;groupId&gt;org.societies.api.external&lt;/groupId&gt;
+   &lt;artifactId&gt;societies-api&lt;/artifactId&gt;
+   &lt;version&gt;${release.version}&lt;/version&gt;
+   &lt;scope&gt;provided&lt;/scope&gt;
+&lt;/dependency&gt;
+
+&lt;dependency&gt;
+   &lt;groupId&gt;org.societies.comm.xmpp&lt;/groupId&gt;
+   &lt;artifactId&gt;CommunicationFrameworkCommons&lt;/artifactId&gt;
+   &lt;version&gt;${version.comm}&lt;/version&gt;
+   &lt;scope&gt;compile&lt;/scope&gt;
+&lt;/dependency&gt;
+</pre>
+ 
+Also, in the build section of the pom.xml file, as part of the maven-bundle-plugin configuration settings, you should also add the following imports:
+<pre>
+&lt;Import-Package&gt;
+	...
+	org.slf4j.*,
+	org.societies.api.css.devicemgmt,
+	org.osgi.framework,
+	org.osgi.util.tracker,
+	org.springframework.osgi.context,
+	org.societies.api.osgi.event,
+	...
+&lt;/Import-Package&gt;
+</pre>
+
+The only mandatory service reference that needs to be injected by the runtime environment is an instance of IEventManager, so the bundle-context-osgi.xml file associated with the Third Party must include:
+<pre>
+&lt;osgi:reference id="EventManager" interface="org.societies.api.osgi.event.IEventMgr"/&gt;
+</pre>
+
+Finally, the following bundles should be added in your Virgo plan file (together with other SOCIETIES platform bundles such as the Communication Manager, not listed here as they are mandatory):
+<pre>
+&lt;!-- Device Management bundles.  --&gt;
+&lt;artifact type="bundle" name="org.societies.css.devicemgmt.DeviceCommsMgr"/&gt;
+&lt;artifact type="bundle" name="org.societies.css.devicemgmt.devicemanager"/&gt;
+</pre>
+</body>
+</html>

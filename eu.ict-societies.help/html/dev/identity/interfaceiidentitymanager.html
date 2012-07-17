@@ -1,0 +1,70 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+	<title>Interface IIdentityManager</title>
+</head>
+
+<body>
+<h1>Interface IIdentityManager</h1>
+Provides methods for Identity Management <br />
+<table style="width: 100%;">
+	<thead style="background-color: #ccccff;">Method Summary</thead>
+	
+	<tr>
+		<td>
+			<u>INetworkNode</u>
+		</td>
+		<td>
+			<u>fromFullJid</u>(<u>String</u> jid)
+			Parses a full Jabber ID including the resource to an IIdentity object eg, john@societies.local/laptop
+		</td>
+	</tr>
+	
+	<tr>
+		<td>
+			<u>IIdentity</u>
+		</td>
+		<td>
+			<u>fromJid</u>(<u>String</u> jid)
+			Parses a Jabber ID to an IIdentity object, eg, john@societies.local
+		</td>
+	</tr>
+
+	<tr>
+		<td>
+			<u>INetworkNode</u>
+		</td>
+		<td>
+			<u>getIdentityContextMapper</u>()
+			Returns the Domain Authority Node Identity
+		</td>
+	</tr>
+	
+	<tr>
+		<td>
+			<u>IIdentityContextMapper</u>
+		</td>
+		<td>
+			<u>getDomainAuthorityNode</u>()
+			Returns the Domain Authority Node Identity
+		</td>
+	</tr>
+	
+	<tr>
+		<td>
+			<u>Set</ul>&lt;<u>IIdentity</u>&gt;</u>
+		</td>
+		<td>
+			<u>getDomainAuthorityNode</u>()
+			Returns the Domain Authority Node Identity
+		</td>
+	</tr>
+	
+	
+	
+</table>
+
+</body>
+</html>
