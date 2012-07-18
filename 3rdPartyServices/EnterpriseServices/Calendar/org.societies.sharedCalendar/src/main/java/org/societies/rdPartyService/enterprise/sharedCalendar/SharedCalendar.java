@@ -30,6 +30,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -39,11 +40,13 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.criterion.Example;
+import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.societies.api.css.devicemgmt.IDevice;
 import org.societies.api.osgi.event.IEventMgr;
+import org.societies.api.services.IServices;
 import org.societies.rdPartyService.enterprise.sharedCalendar.persistence.DAO.CISCalendarDAO;
 import org.societies.rdPartyService.enterprise.sharedCalendar.persistence.DAO.CSSCalendarDAO;
 import org.societies.rdPartyService.enterprise.sharedCalendar.privateCalendarUtil.IPrivateCalendarUtil;
@@ -70,6 +73,7 @@ public class SharedCalendar implements ISharedCalendar, IPrivateCalendarUtil {
 	 * See http://static.springsource.org/osgi/docs/1.2.1/reference/html-single/#service-registry:refs:collection:dynamics
 	 */
 	private Set<IDevice> availableDevices;
+	private IServices serviceMetadataUtil;
 
 	public SessionFactory getSessionFactory() {
 		return sessionFactory;
@@ -92,6 +96,9 @@ public class SharedCalendar implements ISharedCalendar, IPrivateCalendarUtil {
 	 */
 	@Override
 	public boolean createCISCalendar(String calendarSummary, String CISId) {
+		
+		//Test purpose only
+		//log.info("SERVICE INSTANCE IDENTIFIER: "+serviceMetadataUtil.getMyServiceId(this.getClass()).getServiceInstanceIdentifier());
 		String storedCalendarId = null;
 		Transaction t = null;
 		Session session = null;
@@ -632,22 +639,22 @@ public class SharedCalendar implements ISharedCalendar, IPrivateCalendarUtil {
 	 * @return
 	 */
 private List<CalendarListEntry> filterCISCalendar(List<CalendarListEntry> listToFilter, String CISId){
-//		Session session=sessionFactory.openSession();
-//		try{
-//			List<String> cisCalendarIdList=session.createCriteria(CISCalendarDAO.class).add(Restrictions.eq("CISId", CISId)).setProjection(Projections.property("calendarId")).list();
-//			Iterator<CalendarListEntry> iterator=listToFilter.iterator();
-//			while (iterator.hasNext()){
-//				if (!(cisCalendarIdList.contains(iterator.next().getId()))){
-//					iterator.remove();
-//				}
-//			}
-//		}catch (Exception e) {
-//			// TODO: handle exception
-//		}finally{
-//			if (session!=null){
-//				session.close();
-//			}
-//		}
+		Session session=sessionFactory.openSession();
+		try{
+			List<String> cisCalendarIdList=session.createCriteria(CISCalendarDAO.class).add(Restrictions.eq("CISId", CISId)).setProjection(Projections.property("calendarId")).list();
+			Iterator<CalendarListEntry> iterator=listToFilter.iterator();
+			while (iterator.hasNext()){
+				if (!(cisCalendarIdList.contains(iterator.next().getId()))){
+					iterator.remove();
+				}
+			}
+		}catch (Exception e) {
+			// TODO: handle exception
+		}finally{
+			if (session!=null){
+				session.close();
+			}
+		}
 		
 		return listToFilter;
 	}
@@ -662,6 +669,14 @@ private List<CalendarListEntry> filterCISCalendar(List<CalendarListEntry> listTo
 
 	public Set<IDevice> getAvailableDevices() {
 		return availableDevices;
+	}
+
+	public IServices getServiceMetadataUtil() {
+		return serviceMetadataUtil;
+	}
+
+	public void setServiceMetadataUtil(IServices serviceMetadataUtil) {
+		this.serviceMetadataUtil = serviceMetadataUtil;
 	}
 
 	public void setAvailableDevices(Set<IDevice> availableDevices) {
