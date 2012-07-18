@@ -1,0 +1,37 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+	<title>API Definition</title>
+</head>
+
+<body>
+<h1>API Definition</h1>
+
+In order to use the Device Management feature, a Third Party service should use two interfaces provided by two components of the Societies platform.
+<ul>
+<li><i>IDevice</i> interface (provided by the Device Management bundle): used to be informed about the type of a newly discovered device.</li>
+<li><i>IEventMgr</i> interface (provided by the Event Management bundle): used to be informed of new data from drivers.</li>
+</ul>
+
+The <i>IDevice</i> interface shall be tracked directly from the OSGi service registry while the <i>IEventMgr</i> interface is bound through the Spring Service reference declared in the bundle-context-osgi.xml file. Figure 31 shows an example of a system where three devices are connected to the CSS nodes. The drivers and devices are not represented in the picture. In this case, the Third Party Service Consumer has bound two IDevice interfaces out of the three available.<br />
+<br />
+<img src="../../img/image059.png" />
+<br /><br />
+The Device Management model is exposed in the extenal APIs, in the package org.societies.api.css.devicemgmt.model.<br />
+<br />
+The Device model is used in order to represent all the necessary information that describes the situation of a CSS entity or a group of entities that form a CIS. In more detail, the model consists of the following main classes:
+<ul>
+<li><i>DeviceMgmtConstants</i>: This class contains property key constants used when registering IDevice services. All these properties are provided by the DeviceManager when it registers a new IDevice service. These property keys can be used by the consumer of the service as an LDAP filter to refine the set of Device services it is interested in being notified about. The LDAP Syntax of the filter is as per <a href="http://www.osgi.org/javadoc/r4v43/core/org/osgi/framework/Filter.html">OSGi specifications</a>, which in turn are based on the <a href="http://www.ietf.org/rfc/rfc1960.txt">RFC 1960</a>.</li>
+<li><i>DeviceTypeConstants</i>: This class defines static strings identifying the type of devices that should be integrated in the User Trials. For instance: "public static final String SCREEN = "screen";".</li>
+<li><i>DeviceMgmtEventConstants</i>: This class defines constants used to define a topic in which events of a given type, related to a specific device type, are sent. For instance: "public static final String SCREEN_EVENT = "actuator/screenEvent";".</li>
+<li><i>DeviceMgmtDriverServiceNames</i>: This class defines constants used to get the driver service name object which will be used to invoke actions on the associated devices type. For instance: public static final String SCREEN_DRIVER_SERVICE = "actuator/screenDriverService";.</li>
+<li><i>DeviceActionsConstants</i>: this class does not exist yet. It is used to provide the list of actions implemented by a device type.</li>
+</ul>
+
+All these classes defining constants should be shared among the driver developer(s) and the Third Party Service developer(s) so that both parties rely on a consistent semantic model describing the informations related to the given device.<br />
+<br />
+Future revisions of the Device Management model will address the issues related to the fact that a Semantic metamodel has not been defined yet, thus forcing the developer (both Driver's and Third Party) to rely on hard-coded constants to distinguish which type of Device, Event, Service or Action a given event deals with.
+</body>
+</html>

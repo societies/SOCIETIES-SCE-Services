@@ -79,5 +79,39 @@
     </topic>
     <topic href="html/dev/communicationxmpp/eventbeanpersistencyformat.html" label="Event Bean Persistency Format">
     </topic>
+ </topic>
+ <topic href="html/dev/context/maintopic.html" label="Context">
+    <topic href="html/dev/context/model.html" label="Model">
+    </topic>
+    <topic href="html/dev/context/broker.html" label="Broker">
+    </topic>
+    <topic href="html/dev/context/creatingandupdating" label="Creating and updating context model objects">
+    </topic>
+    <topic href="html/dev/context/retrievingandlookingup.html" label="Retrieving and Looking-up context information">
+    </topic>
+    <topic href="html/dev/context/removing.html" label="Removing context model objects">
+    </topic>
+    <topic href="html/dev/context/subscribing.html" label="Subscribing for and reacting to context change events">
+    </topic>
+    <topic href="html/dev/context/maintaining.html" label="Maintaining history of context attributes">
+    </topic>
+ </topic>
+ <topic href="html/dev/devicemanagement/maintopic.html" label="Device Management">
+    <topic href="html/dev/devicemanagement/apidefinition.html" label="API Definition">
+    </topic>
+    <topic href="html/dev/devicemanagement/examples.html" label="Examples">
+    </topic>
+    <topic href="html/dev/devicemanagement/idevice.html" label="IDevice Example Usage">
+    </topic>
+    <topic href="html/dev/devicemanagement/idriverservice.html" label="IDriverService Example Usage">
+    </topic>
+    <topic href="html/dev/devicemanagement/iaction.html" label="IAction Example Usage">
+    </topic>
+    <topic href="html/dev/devicemanagement/technicalconfiguration.html" label="Technical Configuration">
+    </topic>
+ </topic>
+ <topic href="html/dev/identity/maintopic.html" label="Identity">
+    <topic href="html/dev/identity/interfaceiidentity.html" label="Interface IIdentity">
+    </topic>
  </topic>  
 </toc>

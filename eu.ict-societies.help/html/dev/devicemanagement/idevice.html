@@ -1,0 +1,20 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+	<title>IDevice Example Usage</title>
+</head>
+
+<body>
+<h1>IDevice Example Usage</h1>
+
+This is a provided interface, it is used by the Third Party service to get device metadata (device name, type, description, id, the type of network used to connect the device, the location, the manufacturer, etc). It also provides system informations such as the name of the associated OSGi services and the events managed by the underlying driver.
+<pre>
+IDevice ls2 = iDevice;
+LOG.info("Device Type: "+ ls2.getDeviceName());
+LOG.info("Device Type: "+ ls2.getDeviceType());
+LOG.info("Device ID: "+ ls2.getDeviceId());
+</pre>
+</body>
+</html>

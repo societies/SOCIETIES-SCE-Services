@@ -1,0 +1,67 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+	<title>Interface IIdentity</title>
+</head>
+
+<body>
+<h1>Interface IIdentity</h1>
+
+<table style="width: 100%;">
+	<thead style="background-color: #ccccff;">Method Summary</thead>
+	
+	<tr>
+		<td>
+			<u>String</u>
+		</td>
+		<td>
+			<u>getBareJid</u>()
+			Returns the bare Jabber ID without resource eg, john@societies.local
+		</td>
+	</tr>
+	
+	<tr>
+		<td>
+			<u>String</u>
+		</td>
+		<td>
+			<u>getDomain</u>()
+			Returns the domain of a Jabber ID eg, societies.local from john@societies.local
+		</td>
+	</tr>
+
+	<tr>
+		<td>
+			<u>String</u>
+		</td>
+		<td>
+			<u>getIdentifier</u>()
+			Returns the username of a Jabber ID, eg, John from john@societies.local
+		</td>
+	</tr>
+	
+	<tr>
+		<td>
+			<u>String</u>
+		</td>
+		<td>
+			<u>getJid</u>()
+			Returns the full Jabber ID including resource eg, john@societies.local/laptop
+		</td>
+	</tr>
+
+	<tr>
+		<td>
+			<u>IdentityType</u>
+		</td>
+		<td>
+			<u>getType</u>()
+			Returns the CSS Type
+		</td>
+	</tr>
+</table>
+
+</body>
+</html>

@@ -1,0 +1,32 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+	<title>Maintaining history of context attributes</title>
+</head>
+<body>
+<h1>Maintaining history of context attributes</h1>
+
+Context Attributes can be registered for recording each time an update on the attribute value is performed. Old values are recorded along with timestamps and stored in order to form a Context History log. Context History data can be retrieved or removed by methods provided by the ICtxBroker.
+<pre>
+// by setting the history recording flag to true the CtxAttribute values will be stored to Context History Database upon update
+ctxAttributeString.setHistoryRecorded(true);
+</pre>
+ 
+<pre>
+// Retrieval of Context history data for a specified time period
+// if null values are used for starting and ending Date the whole set of history data is retrieved
+List<CtxHistoryAttribute> ctxHistoryData =  internalCtxBroker.retrieveHistory((CtxAttributeIdentifier) ctxAttributeStringIdentifier, startDate, endDate).get();
+</pre>
+ 
+Additionally a developer can register for recording a group (tuples) of context attributes. One CtxAttribute type is considered as the primary while the rest are considered as escorting. The recording of tuples will be performed when the value of the primary attribute is updated.
+
+<pre>
+internalCtxBroker.setHistoryTuples(primaryAttrIdentifier,listOfEscortingAttributeIds);
+// Retrieval of Context history tuples of data for a specified time period
+Map<CtxHistoryAttribute, List<CtxHistoryAttribute>>> contextTuples = retrieveHistoryTuples(primaryAttrIdentifier, listOfEscortingAttributeIds, Date arg2, Date arg3).get();
+</pre>
+
+</body>
+</html>

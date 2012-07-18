@@ -1,0 +1,80 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+	<title>Creating and updating context model objects</title>
+</head>
+<body>
+<h1>Creating and updating context model objects</h1>
+<pre>
+import org.societies.api.internal.context.broker.ICtxBroker;
+import org.societies.api.context.model.CtxAttribute;
+import org.societies.api.context.model.CtxAttributeIdentifier;
+import org.societies.api.context.model.CtxEntity;
+import org.societies.api.context.model.CtxEntityIdentifier;
+import org.societies.api.context.model.CtxIdentifier;
+import org.societies.api.context.model.CtxModelObject;
+
+/** The Internal Context Broker service reference. */
+@Autowired
+private ICtxBroker internalCtxBroker;
+
+// create an Entity that represents a device
+CtxEntity deviceEntity = this.internalCtxBroker.createEntity("device").get();
+
+// get the context identifier of the created entity
+CtxEntityIdentifier deviceEntityId = .getId();
+
+// create an attribute to model the name of the device entity
+CtxAttribute deviceNameAttr = this.internalCtxBroker.createAttribute(deviceEntityId, "name").get();
+
+// assign a String value to the attribute
+deviceNameAttr.setStringValue("device1234");
+deviceNameAttr.setValueType(CtxAttributeValueType.STRING);
+
+// update the attribute in the Context DB
+deviceNameAttr = (CtxAttribute) this.internalCtxBroker.update(deviceNameAttr).get();
+
+// create an attribute to model the operating voltage of the device
+CtxAttribute deviceVoltAttr = this.internalCtxBroker.createAttribute(deviceEntityId, "voltage").get();
+
+// assign an integer value
+deviceVoltAttr.setIntegerValue(new Integer(220));
+deviceVoltAttr.setValueType(CtxAttributeValueType.INTEGER);
+deviceVoltAttr.setValueMetric("volts");
+
+// update the attribute in the Context DB
+deviceVoltAttr = (CtxAttribute) this.internalCtxBroker.update(deviceVoltAttr).get();
+
+// create an attribute to model the temperature of the device
+CtxAttribute deviceTempAttr = this.internalCtxBroker.createAttribute(deviceEntityId, "temperature").get();
+
+// assign a double value
+deviceTempAttr.setDoubleValue(36.6);
+deviceTempAttr.setValueType(CtxAttributeValueType.DOUBLE);
+deviceVoltAttr.setValueMetric("celsius");
+
+
+// update the attribute in the Context DB
+deviceTempAttr = (CtxAttribute) this.internalCtxBroker.update(deviceTempAttr).get();
+
+// create an attribute with a Binary value
+CtxAttribute deviceBinAttr = this.internalCtxBroker.createAttribute(deviceEntityId, "serializableData").get();
+
+// this is a mock Serializable class
+MockBlobClass blob = new MockBlobClass();
+byte[] blobBytes = SerialisationHelper.serialise(blob);
+deviceBinAttr.setBinaryValue(blobBytes);
+deviceBinAttr.setValueType(CtxAttributeValueType.BINARY);
+
+
+// update the attribute in the Context DB
+deviceBinAttr = (CtxAttribute) this.internalCtxBroker.update(deviceBinAttr).get();
+
+// Alternatively, the value of the attribute could be updated as follows:
+deviceBinAttr = this.internalCtxBroker.updateAttribute(deviceBinAttr.getId(), blobBytes).get();
+</pre>
+
+</body>
+</html>

@@ -1,0 +1,60 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+	<title>Model</title>
+</head>
+
+<body>
+<h1>Model</h1>
+
+The context model will be used in order to represent all the necessary information that describes the situation of a CSS entity or a group of entities that form a CIS. In more detail, the model consists of the following main classes:
+<ul>
+<li>CtxModelObject</li>
+</ul>
+
+It is the base abstract class of all context model objects. It is extended by the following classes:
+<ul>
+<li>CtxEntity</li>
+</ul>
+
+The CtxEntity class represents the notion of a context entity which corresponds to an object of the physical or conceptual world. The type of a CtxEntity defines the nature of the modelled entity.  For example an entity could be a "person", a "device", or a "service".
+<ul>
+<li>CtxAttribute</li>
+</ul>
+
+The CtxAttribute class describes a CtxEntity's static and dynamic properties such as the "name", "age", or "location". Multiple CtxAttributes can be assigned to a CtxEntity,while the value of each CtxAttribute can be set and retrieved using the appropriate setter and getter method. The following CtxAttributeValueTypes are supported:
+
+<ul>
+<li>INTEGER: Integer value.</li>
+<li>STRING: Text value.</li>
+<li>DOUBLE: Double-precision floating point numeric value.</li>
+<li>BINARY: Binary value (<i>byte[]</i>).</li>
+</ul>
+
+<ul>
+<li>CtxAssociation</li>
+</ul>
+
+The CtxAssociation is used in order to describe relations among different CtxEntities. We define two types of associations ; Undirected associations that are peer relations (e.g. "friends", "schoolmates", "fellowPassengers") and directed associations that are non-peer relations ("locatedIn", "owns", "uses").
+
+<ul>
+<li>CommunityMemberContextEntity</li>
+</ul>
+
+It is a subclass of the CtxEntity class and a generalisation of the two classes below.
+
+<ul>
+<li>IndividualContextEntity</li>
+</ul>
+
+It is used in order to represent individuals (CSS owners). More specifically, an IndividualCtxEntity may belong to zero or more CISs, simultaneously. The individual members of a pervasive community do not need to be human beings (i.e. of type "person"). They can also be organisations, smart space infrastructures, autonomous or semi-autonomous agents, etc. It inherits all attributes and operations of the CtxEntity class and extends them by methods related to the management of communities the individual belongs to.
+
+<ul>
+<li>CommunityContextEntity</li>
+</ul>
+
+This class is used to represent community context entities. A CommunityCtxEntity corresponds to a pervasive community (CIS) and is associated with a set of  CommunityMemberCtxEntity objects representing its members, i.e. individuals and/or other communities. The CtxAttribute class is used in order to describe the community context attributes of a CIS. Common context characteristics shared among community members are described by the CtxBond class.
+</body>
+</html>
