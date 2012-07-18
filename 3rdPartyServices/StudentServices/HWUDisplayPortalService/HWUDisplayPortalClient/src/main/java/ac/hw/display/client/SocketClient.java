@@ -146,8 +146,8 @@ public class SocketClient {
 			e.printStackTrace();
 		}
 
-/*		message = "START SERVICE\n" +
-				"MockService2\n";*/
+		message = "START SERVICE\n" +
+				"MockService2\n";
 		c.sendMessage(message);
 		try {
 			Thread.sleep(8000);
@@ -155,10 +155,10 @@ public class SocketClient {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-/*		message = "LOGOUT\n" +
+		message = "LOGOUT\n" +
 				"eliza@societies.local\n";
 		c.sendMessage("LOGOUTeliza@societies.local");
-*/
+
 	}
 }
 

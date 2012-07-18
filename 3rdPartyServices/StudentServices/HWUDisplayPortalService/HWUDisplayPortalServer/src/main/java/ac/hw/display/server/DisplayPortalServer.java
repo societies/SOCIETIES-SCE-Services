@@ -33,11 +33,14 @@ import java.util.regex.Pattern;
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.societies.api.schema.servicelifecycle.model.ServiceResourceIdentifier;
 import org.societies.api.services.IServices;
 
 
 import ac.hw.display.server.api.IDisplayPortalServer;
+import ac.hw.display.server.comm.CommsServer;
 import ac.hw.display.server.gui.ScreenConfigurationDialog;
 import ac.hw.display.server.model.ScreenConfiguration;
 /**
@@ -52,6 +55,7 @@ public class DisplayPortalServer implements IDisplayPortalServer{
 	
 	List<String> screenIPAddresses;
 
+	private static Logger LOG = LoggerFactory.getLogger(CommsServer.class);
 
 
 	private Hashtable<String, String> currentlyUsedScreens;
@@ -78,7 +82,11 @@ public class DisplayPortalServer implements IDisplayPortalServer{
 		ScreenConfigurationDialog dialog = new ScreenConfigurationDialog();
 	
 		screenconfig = dialog.getScreens();
-		System.out.println(screenconfig.toString());
+		if (dialog!=null){
+			dialog.dispose();
+		}
+		this.LOG.debug(screenconfig.toString());
+		this.LOG.debug("initialised");
 	}
 
 	
