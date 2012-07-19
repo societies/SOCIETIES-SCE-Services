@@ -54,9 +54,9 @@ public class SharedCalendarCommServer implements IFeatureServer{
 	private static Logger log = LoggerFactory.getLogger(SharedCalendarCommServer.class);
 	
 	private static final List<String> NAMESPACES = Collections.unmodifiableList(
-			Arrays.asList("http://societies.org/rdPartyService/enterprise/sharedCalendar"));
+			Arrays.asList("http://societies.org/api/ext3p/schema/sharedCalendar"));
 	private static final List<String> PACKAGES = Collections.unmodifiableList(
-			Arrays.asList("org.societies.rdpartyservice.enterprise.sharedcalendar"));
+			Arrays.asList("org.societies.api.ext3p.schema.sharedcalendar"));
 	
 	//PROPERTIES
 	public ICommManager getCommManager() {

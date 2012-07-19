@@ -14,6 +14,7 @@
 	<artifact type="bundle" name="org.societies.comm.event.mgmt"/>
 	
 	<!-- Calendar Client Artifacts - Start -->
+	<artifact type="bundle" name="org.societies.api.ext3p.schema.societies-api-ext3p-schema" />
 	<artifact type="configuration" name="sharedCalClient"/>
 	<artifact type="bundle" name="org.societies.rdpartyService.enterprise.sharedCalendarClientRich"/>	
 	<artifact type="bundle" name="sharedCalendarClientWeb"/>	
@@ -22,7 +23,6 @@
 	
 	<!-- Device Manager Stuff -->
 	<artifact type="bundle" name="org.societies.css.devicemgmt.devicemanager"/>
-	<!-- The next bundle is not strictly required but it's handy for testing -->
 	<artifact type="bundle" name="org.societies.css.devicemgmt.DeviceDriverSimulator"/>
 	<artifact type="bundle" name="org.societies.css.devicemgmt.DeviceCommsMgr"/>
 	
