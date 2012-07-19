@@ -98,7 +98,7 @@ public class SharedCalendar implements ISharedCalendar, IPrivateCalendarUtil {
 	public boolean createCISCalendar(String calendarSummary, String CISId) {
 		
 		//Test purpose only
-		//log.info("SERVICE INSTANCE IDENTIFIER: "+serviceMetadataUtil.getMyServiceId(this.getClass()).getServiceInstanceIdentifier());
+	//	log.info("SERVICE INSTANCE IDENTIFIER: "+serviceMetadataUtil.getMyServiceId(this.getClass()).getServiceInstanceIdentifier());
 		String storedCalendarId = null;
 		Transaction t = null;
 		Session session = null;
