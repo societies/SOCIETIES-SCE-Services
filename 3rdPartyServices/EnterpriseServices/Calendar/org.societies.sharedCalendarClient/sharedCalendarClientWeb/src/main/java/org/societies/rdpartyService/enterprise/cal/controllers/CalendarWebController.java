@@ -101,7 +101,7 @@ public class CalendarWebController {
 		this.cb = new CalendarWebResultCallback(this);
 		this.calClientService.retrieveCISCalendarEvents(this.cb, calendarId);
 		this.wait4semaphore();
-		String ajaxResult = this.gson.toJson(this.result);
+		String ajaxResult = this.calClientService.createJSONOEvents(this.result.getEventList());
 		return ajaxResult;
 	}
 	
