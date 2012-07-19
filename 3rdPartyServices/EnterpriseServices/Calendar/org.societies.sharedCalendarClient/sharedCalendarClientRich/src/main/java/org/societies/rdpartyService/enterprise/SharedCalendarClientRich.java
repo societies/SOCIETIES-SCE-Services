@@ -34,9 +34,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.societies.api.comm.xmpp.datatypes.Stanza;
@@ -46,14 +43,20 @@ import org.societies.api.comm.xmpp.exceptions.XMPPError;
 import org.societies.api.comm.xmpp.interfaces.ICommCallback;
 import org.societies.api.comm.xmpp.interfaces.ICommManager;
 import org.societies.api.css.devicemgmt.IDevice;
+import org.societies.api.ext3p.schema.sharedcalendar.Event;
+import org.societies.api.ext3p.schema.sharedcalendar.MethodType;
+import org.societies.api.ext3p.schema.sharedcalendar.SharedCalendarBean;
 import org.societies.api.identity.IIdentity;
 import org.societies.api.identity.IIdentityManager;
 import org.societies.api.identity.InvalidFormatException;
 import org.societies.api.osgi.event.IEventMgr;
 import org.societies.rdpartyService.enterprise.interfaces.IReturnedResultCallback;
 import org.societies.rdpartyService.enterprise.interfaces.ISharedCalendarClientRich;
-import org.societies.rdpartyservice.enterprise.sharedcalendar.Event;
-import org.societies.rdpartyservice.enterprise.sharedcalendar.SharedCalendarBean;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 
 /**
  * This class implement functionalities to interact with the server part of the SharedCalendar Service.
@@ -258,7 +261,7 @@ public class SharedCalendarClientRich implements ICommCallback,	ISharedCalendarC
 		SharedCalendarBean calendarBean = new SharedCalendarBean();
 
 		calendarBean
-				.setMethod(org.societies.rdpartyservice.enterprise.sharedcalendar.MethodType.RETRIEVE_CIS_CALENDAR_LIST);
+				.setMethod(MethodType.RETRIEVE_CIS_CALENDAR_LIST);
 		calendarBean.setCISId(CISId);
 		try {
 			// SEND INFORMATION QUERY - RESPONSE WILL BE IN
@@ -287,7 +290,7 @@ public class SharedCalendarClientRich implements ICommCallback,	ISharedCalendarC
 		// CREATE MESSAGE BEAN
 		SharedCalendarBean calendarBean = new SharedCalendarBean();
 
-		calendarBean.setMethod(org.societies.rdpartyservice.enterprise.sharedcalendar.MethodType.CREATE_CIS_CALENDAR);
+		calendarBean.setMethod(MethodType.CREATE_CIS_CALENDAR);
 		calendarBean.setCalendarSummary(calendarSummary);
 		calendarBean.setCISId(CISId);
 		try {
@@ -318,7 +321,7 @@ public class SharedCalendarClientRich implements ICommCallback,	ISharedCalendarC
 		SharedCalendarBean calendarBean = new SharedCalendarBean();
 
 		calendarBean
-				.setMethod(org.societies.rdpartyservice.enterprise.sharedcalendar.MethodType.DELETE_CIS_CALENDAR);
+				.setMethod(MethodType.DELETE_CIS_CALENDAR);
 		calendarBean.setCalendarId(calendarId);
 		try {
 			// SEND INFORMATION QUERY - RESPONSE WILL BE IN
@@ -348,7 +351,7 @@ public class SharedCalendarClientRich implements ICommCallback,	ISharedCalendarC
 		SharedCalendarBean calendarBean = new SharedCalendarBean();
 
 		calendarBean
-				.setMethod(org.societies.rdpartyservice.enterprise.sharedcalendar.MethodType.RETRIEVE_CIS_CALENDAR_EVENTS);
+				.setMethod(MethodType.RETRIEVE_CIS_CALENDAR_EVENTS);
 		calendarBean.setCalendarId(calendarId);
 		try {
 			// SEND INFORMATION QUERY - RESPONSE WILL BE IN
@@ -365,7 +368,7 @@ public class SharedCalendarClientRich implements ICommCallback,	ISharedCalendarC
 	
 	
 	/* (non-Javadoc)
-	 * @see org.societies.rdpartyService.enterprise.interfaces.ISharedCalendarClientRich#createEventOnCISCalendar(org.societies.rdpartyService.enterprise.interfaces.IReturnedResultCallback, org.societies.rdpartyservice.enterprise.sharedcalendar.Event, java.lang.String)
+	 * @see org.societies.rdpartyService.enterprise.interfaces.ISharedCalendarClientRich#createEventOnCISCalendar(org.societies.rdpartyService.enterprise.interfaces.IReturnedResultCallback, Event, java.lang.String)
 	 */
 	@Override
 	public void createEventOnCISCalendar(
@@ -381,7 +384,7 @@ public class SharedCalendarClientRich implements ICommCallback,	ISharedCalendarC
 		SharedCalendarBean calendarBean = new SharedCalendarBean();
 
 		calendarBean
-				.setMethod(org.societies.rdpartyservice.enterprise.sharedcalendar.MethodType.CREATE_EVENT_ON_CIS_CALENDAR);
+				.setMethod(MethodType.CREATE_EVENT_ON_CIS_CALENDAR);
 		calendarBean.setCalendarId(calendarId);
 		calendarBean.setNewEvent(newEvent);
 		try {
@@ -413,7 +416,7 @@ public class SharedCalendarClientRich implements ICommCallback,	ISharedCalendarC
 		SharedCalendarBean calendarBean = new SharedCalendarBean();
 
 		calendarBean
-				.setMethod(org.societies.rdpartyservice.enterprise.sharedcalendar.MethodType.DELETE_EVENT_ON_CIS_CALENDAR);
+				.setMethod(MethodType.DELETE_EVENT_ON_CIS_CALENDAR);
 		calendarBean.setCalendarId(calendarId);
 		calendarBean.setEventId(eventId);
 		
@@ -445,7 +448,7 @@ public class SharedCalendarClientRich implements ICommCallback,	ISharedCalendarC
 		SharedCalendarBean calendarBean = new SharedCalendarBean();
 
 		calendarBean
-				.setMethod(org.societies.rdpartyservice.enterprise.sharedcalendar.MethodType.SUBSCRIBE_TO_EVENT);
+				.setMethod(MethodType.SUBSCRIBE_TO_EVENT);
 		calendarBean.setCalendarId(calendarId);
 		calendarBean.setEventId(eventId);
 		calendarBean.setSubscriberId(subscriberId);
@@ -480,7 +483,7 @@ public class SharedCalendarClientRich implements ICommCallback,	ISharedCalendarC
 		SharedCalendarBean calendarBean = new SharedCalendarBean();
 
 		calendarBean
-				.setMethod(org.societies.rdpartyservice.enterprise.sharedcalendar.MethodType.FIND_EVENTS);
+				.setMethod(MethodType.FIND_EVENTS);
 		calendarBean.setCalendarId(calendarId);
 		calendarBean.setKeyWord(keyWord);
 		
@@ -513,7 +516,7 @@ public class SharedCalendarClientRich implements ICommCallback,	ISharedCalendarC
 		SharedCalendarBean calendarBean = new SharedCalendarBean();
 
 		calendarBean
-				.setMethod(org.societies.rdpartyservice.enterprise.sharedcalendar.MethodType.UNSUBSCRIBE_FROM_EVENT);
+				.setMethod(MethodType.UNSUBSCRIBE_FROM_EVENT);
 		calendarBean.setCalendarId(calendarId);
 		calendarBean.setEventId(eventId);
 		calendarBean.setSubscriberId(subscriberId);
@@ -556,7 +559,7 @@ public class SharedCalendarClientRich implements ICommCallback,	ISharedCalendarC
 		SharedCalendarBean calendarBean = new SharedCalendarBean();
 
 		calendarBean
-				.setMethod(org.societies.rdpartyservice.enterprise.sharedcalendar.MethodType.RETRIEVE_EVENTS_ON_PRIVATE_CALENDAR);
+				.setMethod(MethodType.RETRIEVE_EVENTS_ON_PRIVATE_CALENDAR);
 		try {
 			// SEND INFORMATION QUERY - RESPONSE WILL BE IN
 			// "callback.RecieveMessage()"
@@ -582,7 +585,7 @@ public class SharedCalendarClientRich implements ICommCallback,	ISharedCalendarC
 		SharedCalendarBean calendarBean = new SharedCalendarBean();
 
 		calendarBean
-				.setMethod(org.societies.rdpartyservice.enterprise.sharedcalendar.MethodType.CREATE_PRIVATE_CALENDAR);
+				.setMethod(MethodType.CREATE_PRIVATE_CALENDAR);
 		calendarBean.setCalendarSummary(calendarSummary);
 		try {
 			// SEND INFORMATION QUERY - RESPONSE WILL BE IN
@@ -614,7 +617,7 @@ public class SharedCalendarClientRich implements ICommCallback,	ISharedCalendarC
 		SharedCalendarBean calendarBean = new SharedCalendarBean();
 
 		calendarBean
-				.setMethod(org.societies.rdpartyservice.enterprise.sharedcalendar.MethodType.DELETE_PRIVATE_CALENDAR);
+				.setMethod(MethodType.DELETE_PRIVATE_CALENDAR);
 		try {
 			// SEND INFORMATION QUERY - RESPONSE WILL BE IN
 			// "callback.RecieveMessage()"
@@ -627,7 +630,7 @@ public class SharedCalendarClientRich implements ICommCallback,	ISharedCalendarC
 	}
 
 	/* (non-Javadoc)
-	 * @see org.societies.rdpartyService.enterprise.interfaces.ISharedCalendarClientRich#createEventOnPrivateCalendar(org.societies.rdpartyService.enterprise.interfaces.IReturnedResultCallback, org.societies.rdpartyservice.enterprise.sharedcalendar.Event)
+	 * @see org.societies.rdpartyService.enterprise.interfaces.ISharedCalendarClientRich#createEventOnPrivateCalendar(org.societies.rdpartyService.enterprise.interfaces.IReturnedResultCallback, Event)
 	 */
 	@Override
 	public void createEventOnPrivateCalendar(
@@ -642,7 +645,7 @@ public class SharedCalendarClientRich implements ICommCallback,	ISharedCalendarC
 		SharedCalendarBean calendarBean = new SharedCalendarBean();
 
 		calendarBean
-				.setMethod(org.societies.rdpartyservice.enterprise.sharedcalendar.MethodType.CREATE_EVENT_ON_PRIVATE_CALENDAR);
+				.setMethod(MethodType.CREATE_EVENT_ON_PRIVATE_CALENDAR);
 		calendarBean.setNewEvent(newEvent);
 		try {
 			// SEND INFORMATION QUERY - RESPONSE WILL BE IN
@@ -669,7 +672,7 @@ public class SharedCalendarClientRich implements ICommCallback,	ISharedCalendarC
 		SharedCalendarBean calendarBean = new SharedCalendarBean();
 
 		calendarBean
-				.setMethod(org.societies.rdpartyservice.enterprise.sharedcalendar.MethodType.DELETE_EVENT_ON_PRIVATE_CALENDAR);
+				.setMethod(MethodType.DELETE_EVENT_ON_PRIVATE_CALENDAR);
 		calendarBean.setEventId(eventId);
 		try {
 			// SEND INFORMATION QUERY - RESPONSE WILL BE IN
@@ -695,21 +698,25 @@ public class SharedCalendarClientRich implements ICommCallback,	ISharedCalendarC
       "end":"2009-05-03T15:00:00.000+10:00",
       "title":"Dev Meeting"
       */
-		JSONArray jsonArray=new JSONArray();
+		SimpleDateFormat sdf = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz");
+		Gson gson = new GsonBuilder().create();
+		String result = gson.toJson(eventListToRender);
+		log.debug("JSON Representation1:"+result);
 		
-		SimpleDateFormat simpleDaeFtormat=new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSZ");
-		 for (Event event : eventListToRender) {
-			 JSONObject object=new JSONObject();
-			object.put("id", /*Integer.parseInt(*/event.getEventId()/*)*/);
-			object.put("start", simpleDaeFtormat.format(XMLGregorianCalendarConverter.asDate(event.getStartDate())));
-			object.put("end", simpleDaeFtormat.format(XMLGregorianCalendarConverter.asDate(event.getEndDate())));
-			object.put("title", event.getEventDescription());
+		JsonArray jsonArray=new JsonArray();
+		JsonObject object= null;
+		
+		for (Event event : eventListToRender) {
+			object=new JsonObject();
+			object.addProperty("id", event.getEventId());
+			object.addProperty("start", sdf.format(XMLGregorianCalendarConverter.asDate(event.getStartDate())));
+			object.addProperty("end", sdf.format(XMLGregorianCalendarConverter.asDate(event.getEndDate())));
+			object.addProperty("title", event.getEventDescription());
 			jsonArray.add(object);
 		}
-		 for (Object object : jsonArray) {
-			log.debug(object.toString());
-		}
-		return jsonArray.toString();
+		result = jsonArray.toString();
+		log.debug("JSON Representation2:"+result);
+		return result;
 	}
 
 	private boolean writeJsonToFile(String path ,String JSONObjects){

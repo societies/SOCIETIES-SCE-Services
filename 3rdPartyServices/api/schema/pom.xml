@@ -5,9 +5,9 @@
 	<artifactId>societies-api-ext3p-schema</artifactId>
 	<version>${release.version}</version>
 	<name>SOCIETIES 3p services Schema API</name>
-	<packaging>jar</packaging>
+	<packaging>bundle</packaging>
 
-	
+
 	<developers>
 		<developer>
 			<name>Bruno Jean-Bart </name>
@@ -91,13 +91,6 @@
 							<goal>generate</goal>
 						</goals>
 						<configuration>
-							<schemaExcludes>
-								<exclude>dataforms.xsd</exclude>
-								<exclude>pubsub.xsd</exclude>
-								<exclude>pubsub#errors.xsd</exclude>
-								<exclude>pubsub#owner.xsd</exclude>
-								<exclude>pubsub#event.xsd</exclude>
-							</schemaExcludes>
 							<args>
 								<arg>-Xcollection-setter-injector</arg>
 							</args>
@@ -183,6 +176,71 @@
 					</reportPlugins>
 				</configuration>
 			</plugin>
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<extensions>true</extensions>
+				<configuration>
+					<instructions>
+						<!-- the API will export all interfaces packages for the rest of modules. 
+							The exclusion of internal package can be avoided as the plugin excludes automatically 
+							'internal' and 'impl' package names org.societies.api.** -->
+						<_exportcontents>
+							org.societies.api.ext3p.schema.*
+						</_exportcontents>
+					</instructions>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<configuration>
+					<artifactItems>
+						<artifactItem>
+							<groupId>${project.groupId}</groupId>
+							<artifactId>${project.artifactId}</artifactId>
+							<version>${release.version}</version>
+							<type>jar</type>
+							<overWrite>true</overWrite>
+							<outputDirectory>${spring.osgi.deploy.dir}</outputDirectory>
+						</artifactItem>
+					</artifactItems>
+				</configuration>
+			</plugin>
 		</plugins>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-dependency-plugin</artifactId>
+					<executions>
+						<!-- Used to copy the generated artifact to the container defined by 
+							VIRGO_HOME -->
+						<execution>
+							<id>copy</id>
+							<phase>install</phase>
+							<goals>
+								<goal>copy</goal>
+							</goals>
+							<configuration>
+								<stripVersion>true</stripVersion>
+							</configuration>
+						</execution>
+						<!-- Used to analyze the dependencies of the project. Will print warnings 
+							during verify phase,directly before install phase -->
+						<execution>
+							<id>analyze</id>
+							<phase>verify</phase>
+							<goals>
+								<goal>analyze-only</goal>
+							</goals>
+							<configuration>
+								<failOnWarning>false</failOnWarning>
+							</configuration>
+						</execution>
+					</executions>
+				</plugin>
+			</plugins>
+		</pluginManagement>
 	</build>
 </project>

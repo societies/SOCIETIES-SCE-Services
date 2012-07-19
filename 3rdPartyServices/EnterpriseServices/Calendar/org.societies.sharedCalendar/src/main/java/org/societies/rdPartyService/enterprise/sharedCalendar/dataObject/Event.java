@@ -33,7 +33,8 @@ import java.util.Date;
  *
  */
 public class Event {
-
+	
+	
 	private String eventId;
 	private String eventDescription;
 	private String eventSummary;

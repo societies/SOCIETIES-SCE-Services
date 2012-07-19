@@ -35,10 +35,11 @@ import org.societies.api.comm.xmpp.exceptions.CommunicationException;
 import org.societies.api.comm.xmpp.exceptions.XMPPError;
 import org.societies.api.comm.xmpp.interfaces.ICommManager;
 import org.societies.api.comm.xmpp.interfaces.IFeatureServer;
+import org.societies.api.ext3p.schema.sharedcalendar.Calendar;
+import org.societies.api.ext3p.schema.sharedcalendar.Event;
+import org.societies.api.ext3p.schema.sharedcalendar.SharedCalendarBean;
+import org.societies.api.ext3p.schema.sharedcalendar.SharedCalendarResult;
 import org.societies.rdPartyService.enterprise.sharedCalendar.SharedCalendar;
-import org.societies.rdpartyservice.enterprise.sharedcalendar.Calendar;
-import org.societies.rdpartyservice.enterprise.sharedcalendar.Event;
-import org.societies.rdpartyservice.enterprise.sharedcalendar.SharedCalendarResult;
 
 /**
  * This is the Shared Calendar Communication Manager that marshalls / unmarshalls XMPP messages
@@ -53,9 +54,9 @@ public class SharedCalendarCommServer implements IFeatureServer{
 	private static Logger log = LoggerFactory.getLogger(SharedCalendarCommServer.class);
 	
 	private static final List<String> NAMESPACES = Collections.unmodifiableList(
-			Arrays.asList("http://societies.org/rdPartyService/enterprise/sharedCalendar"));
+			Arrays.asList("http://societies.org/api/ext3p/schema/sharedCalendar"));
 	private static final List<String> PACKAGES = Collections.unmodifiableList(
-			Arrays.asList("org.societies.rdpartyservice.enterprise.sharedcalendar"));
+			Arrays.asList("org.societies.api.ext3p.schema.sharedcalendar"));
 	
 	//PROPERTIES
 	public ICommManager getCommManager() {
@@ -119,10 +120,10 @@ public class SharedCalendarCommServer implements IFeatureServer{
 	 */
 	@Override
 	public Object getQuery(Stanza stanza, Object payload) throws XMPPError {
-		org.societies.rdpartyservice.enterprise.sharedcalendar.SharedCalendarBean bean = null;
+		SharedCalendarBean bean = null;
 		SharedCalendarResult resultBean = new SharedCalendarResult();
-		if (payload instanceof org.societies.rdpartyservice.enterprise.sharedcalendar.SharedCalendarBean){
-			bean = (org.societies.rdpartyservice.enterprise.sharedcalendar.SharedCalendarBean) payload;
+		if (payload instanceof SharedCalendarBean){
+			bean = (SharedCalendarBean) payload;
 			switch (bean.getMethod()) {
 			case DELETE_CIS_CALENDAR:
 				resultBean.setLastOperationSuccessful(this.sharedCalendarService.deleteCISCalendar(bean.getCalendarId()));

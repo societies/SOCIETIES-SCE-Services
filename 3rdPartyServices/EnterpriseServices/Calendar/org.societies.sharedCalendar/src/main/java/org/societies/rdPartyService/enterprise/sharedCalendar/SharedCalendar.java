@@ -45,13 +45,13 @@ import org.hibernate.criterion.Restrictions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.societies.api.css.devicemgmt.IDevice;
+import org.societies.api.ext3p.schema.sharedcalendar.Calendar;
+import org.societies.api.ext3p.schema.sharedcalendar.Event;
 import org.societies.api.osgi.event.IEventMgr;
 import org.societies.api.services.IServices;
 import org.societies.rdPartyService.enterprise.sharedCalendar.persistence.DAO.CISCalendarDAO;
 import org.societies.rdPartyService.enterprise.sharedCalendar.persistence.DAO.CSSCalendarDAO;
 import org.societies.rdPartyService.enterprise.sharedCalendar.privateCalendarUtil.IPrivateCalendarUtil;
-import org.societies.rdpartyservice.enterprise.sharedcalendar.Calendar;
-import org.societies.rdpartyservice.enterprise.sharedcalendar.Event;
 
 import com.google.api.services.calendar.model.CalendarListEntry;
 import com.google.api.services.calendar.model.EventAttendee;
