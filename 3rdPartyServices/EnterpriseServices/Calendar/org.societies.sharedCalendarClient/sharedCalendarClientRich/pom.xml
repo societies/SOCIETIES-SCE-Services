@@ -25,9 +25,9 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.societies.api.ext3p.schema</groupId>
-			<artifactId>societies-api-ext3p-schema</artifactId>
-			<version>${release.version}</version>
+			<groupId>org.societies.api.ext3p</groupId>
+			<artifactId>societies-api-ext3p</artifactId>
+			<version>0.1</version>
 			<scope>provided</scope>
 		</dependency>
 		<!-- Communication Manager  -->

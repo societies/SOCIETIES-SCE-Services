@@ -5,9 +5,9 @@
 	<artifactId>societies-api-ext3p-schema</artifactId>
 	<version>${release.version}</version>
 	<name>SOCIETIES 3p services Schema API</name>
-	<packaging>bundle</packaging>
+	<packaging>jar</packaging>
 
-
+	
 	<developers>
 		<developer>
 			<name>Bruno Jean-Bart </name>
@@ -33,34 +33,6 @@
 			<version>${release.version}</version>
 			<scope>provided</scope>
 		</dependency>
-		<dependency>
-			<groupId>org.simpleframework</groupId>
-			<artifactId>simple-xml</artifactId>
-			<version>2.6.4</version>
-			<scope>provided</scope>
-			<exclusions>
-			    <!-- StAX is not available on Android -->
-			    <exclusion>
-			        <artifactId>stax</artifactId>
-			        <groupId>stax</groupId>
-			    </exclusion>
-			    <exclusion>
-			        <artifactId>stax-api</artifactId>
-			        <groupId>stax</groupId>
-			    </exclusion>
-			    <!-- Provided by Android -->
-			    <exclusion>
-			        <artifactId>xpp3</artifactId>
-			        <groupId>xpp3</groupId>
-			    </exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
-		    <groupId>org.societies.maven.converters</groupId>
-		    <artifactId>SimpleXMLConverters</artifactId>
-		    <version>0.1</version>
-		    <scope>provided</scope>
-		</dependency>		
 	</dependencies>
 
 	<build>
@@ -76,10 +48,6 @@
 			</resource>
 		</resources>
 		<plugins>
-		  <!-- 1) generate-sources jaxb2:generate
-			 	 2) process-sources  jaxb2simple:convert
-				 3) compile 		 maven-compiler-plugin 
-			-->
 			<plugin>
 				<groupId>org.jvnet.jaxb2.maven2</groupId>
 				<artifactId>maven-jaxb2-plugin</artifactId>
@@ -91,6 +59,13 @@
 							<goal>generate</goal>
 						</goals>
 						<configuration>
+							<schemaExcludes>
+								<exclude>dataforms.xsd</exclude>
+								<exclude>pubsub.xsd</exclude>
+								<exclude>pubsub#errors.xsd</exclude>
+								<exclude>pubsub#owner.xsd</exclude>
+								<exclude>pubsub#event.xsd</exclude>
+							</schemaExcludes>
 							<args>
 								<arg>-Xcollection-setter-injector</arg>
 							</args>
@@ -111,22 +86,6 @@
 						<version>0.5.0-1</version>
 					</dependency>
 				</dependencies>
-			</plugin>
-				<plugin>
-				<groupId>org.societies.maven</groupId>
-				<artifactId>jaxb2simple-maven-plugin</artifactId>
-				<version>1.0-SNAPSHOT</version>
-				<executions>
-					<execution>
-						<phase>process-sources</phase>
-						<goals>
-							<goal>convert</goal>
-						</goals>
-					</execution>
-				</executions>
-				<configuration>
-			 	 <!-- <folderInputDirectory>${project.build.directory}/generated-sources/</folderInputDirectory> -->
-				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -177,21 +136,6 @@
 				</configuration>
 			</plugin>
 			<plugin>
-				<groupId>org.apache.felix</groupId>
-				<artifactId>maven-bundle-plugin</artifactId>
-				<extensions>true</extensions>
-				<configuration>
-					<instructions>
-						<!-- the API will export all interfaces packages for the rest of modules. 
-							The exclusion of internal package can be avoided as the plugin excludes automatically 
-							'internal' and 'impl' package names org.societies.api.** -->
-						<_exportcontents>
-							org.societies.api.ext3p.schema.*
-						</_exportcontents>
-					</instructions>
-				</configuration>
-			</plugin>
-			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-dependency-plugin</artifactId>
 				<configuration>
@@ -200,7 +144,7 @@
 							<groupId>${project.groupId}</groupId>
 							<artifactId>${project.artifactId}</artifactId>
 							<version>${release.version}</version>
-							<type>jar</type>
+							<type>bundle</type>
 							<overWrite>true</overWrite>
 							<outputDirectory>${spring.osgi.deploy.dir}</outputDirectory>
 						</artifactItem>
@@ -208,39 +152,5 @@
 				</configuration>
 			</plugin>
 		</plugins>
-		<pluginManagement>
-			<plugins>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-dependency-plugin</artifactId>
-					<executions>
-						<!-- Used to copy the generated artifact to the container defined by 
-							VIRGO_HOME -->
-						<execution>
-							<id>copy</id>
-							<phase>install</phase>
-							<goals>
-								<goal>copy</goal>
-							</goals>
-							<configuration>
-								<stripVersion>true</stripVersion>
-							</configuration>
-						</execution>
-						<!-- Used to analyze the dependencies of the project. Will print warnings 
-							during verify phase,directly before install phase -->
-						<execution>
-							<id>analyze</id>
-							<phase>verify</phase>
-							<goals>
-								<goal>analyze-only</goal>
-							</goals>
-							<configuration>
-								<failOnWarning>false</failOnWarning>
-							</configuration>
-						</execution>
-					</executions>
-				</plugin>
-			</plugins>
-		</pluginManagement>
 	</build>
 </project>

@@ -20,7 +20,7 @@
     <artifact type="bundle" name="societies-webapp"/>
 	
 	<!-- Calendar Server Artifacts - Start -->
-	<artifact type="bundle" name="org.societies.api.ext3p.schema.societies-api-ext3p-schema" />
+	<artifact type="bundle" name="org.societies.api.ext3p.societies-api-ext3p"/>
 	<artifact type="bundle" name="org.societies.rdpartyService.enterprise.sharedCalendar"/>
 	<artifact type="configuration" name="bk"/>
 	<!-- Calendar Server Artifacts - End -->

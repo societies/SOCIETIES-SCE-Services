@@ -24,10 +24,6 @@
  */
 package org.societies.rdpartyService.enterprise;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Collections;
@@ -67,7 +63,6 @@ import com.google.gson.JsonObject;
 public class SharedCalendarClientRich implements ICommCallback,	ISharedCalendarClientRich {
 	
 	private static Logger log = LoggerFactory.getLogger(SharedCalendarClientRich.class);
-	private String pathForJSONfile;
 	private ICommManager commManager;
 	private IIdentityManager idMgr;
 	private IEventMgr evtMgr;
@@ -92,10 +87,9 @@ public class SharedCalendarClientRich implements ICommCallback,	ISharedCalendarC
 		super();
 	}
 	
-	public SharedCalendarClientRich(String serviceServer, String jsonFilePath) {
+	public SharedCalendarClientRich(String serviceServer) {
 		super();
 		this.serviceServer = serviceServer;
-		this.pathForJSONfile=jsonFilePath;
 	}
 
 	// PROPERTIES
@@ -586,7 +580,7 @@ public class SharedCalendarClientRich implements ICommCallback,	ISharedCalendarC
       "end":"2009-05-03T15:00:00.000+10:00",
       "title":"Dev Meeting"
       */
-		SimpleDateFormat sdf = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz");
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSZ");
 		Gson gson = new GsonBuilder().create();
 		String result = gson.toJson(eventListToRender);
 		log.debug("JSON Representation1:"+result);
@@ -605,33 +599,6 @@ public class SharedCalendarClientRich implements ICommCallback,	ISharedCalendarC
 		result = jsonArray.toString();
 		log.debug("JSON Representation2:"+result);
 		return result;
-	}
-
-	private boolean writeJsonToFile(String path ,String JSONObjects){
-		String tesPath = pathForJSONfile;
-
-        FileWriter fileWriter = null;
-        BufferedWriter out=null;
-    try{
-    	fileWriter = new FileWriter(new File(tesPath));
-    	out = new BufferedWriter(fileWriter);
-        log.info("Start Writing JsonFile");
-        out.write(JSONObjects);
-            
-      }catch (Exception e){
-      log.error("Error: " + e);
-      }
-    finally{
-    	if ((fileWriter !=null)||(out!=null)){
-    	try {
-    		out.flush();
-		out.close();
-		fileWriter.close();} 
-    	catch (IOException e) {
-			e.printStackTrace();
-		}}
-    }
-return true;
 	}
 
 	public IEventMgr getEvtMgr() {

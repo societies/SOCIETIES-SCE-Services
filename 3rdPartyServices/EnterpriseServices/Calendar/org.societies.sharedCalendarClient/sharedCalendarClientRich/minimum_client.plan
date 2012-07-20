@@ -14,7 +14,7 @@
 	<artifact type="bundle" name="org.societies.comm.event.mgmt"/>
 	
 	<!-- Calendar Client Artifacts - Start -->
-	<artifact type="bundle" name="org.societies.api.ext3p.schema.societies-api-ext3p-schema" />
+	<artifact type="bundle" name="org.societies.api.ext3p.societies-api-ext3p"/>
 	<artifact type="configuration" name="sharedCalClient"/>
 	<artifact type="bundle" name="org.societies.rdpartyService.enterprise.sharedCalendarClientRich"/>	
 	<artifact type="bundle" name="sharedCalendarClientWeb"/>	
