@@ -80,10 +80,10 @@ public class SharedCalendarClientRich implements ICommCallback,	ISharedCalendarC
 	
 	private static final List<String> NAMESPACES = Collections
 			.unmodifiableList(Arrays
-					.asList("http://societies.org/rdPartyService/enterprise/sharedCalendar"));
+					.asList("http://societies.org/api/ext3p/schema/sharedCalendar"));
 	private static final List<String> PACKAGES = Collections
 			.unmodifiableList(Arrays
-					.asList("org.societies.rdpartyservice.enterprise.sharedcalendar"));
+					.asList("org.societies.api.ext3p.schema.sharedcalendar"));
 
 	/** The JID of the server running the calendar service */
 	private String serviceServer;
@@ -260,14 +260,17 @@ public class SharedCalendarClientRich implements ICommCallback,	ISharedCalendarC
 		// CREATE MESSAGE BEAN
 		SharedCalendarBean calendarBean = new SharedCalendarBean();
 
-		calendarBean
-				.setMethod(MethodType.RETRIEVE_CIS_CALENDAR_LIST);
+		calendarBean.setMethod(MethodType.RETRIEVE_CIS_CALENDAR_LIST);
 		calendarBean.setCISId(CISId);
+		this.sendMsg(stanza, calendarBean, callback, "The message was sent to XMPP server for retrieve all public calendar.");
+	}
+	
+	private void sendMsg(Stanza stanza, SharedCalendarBean calendarBean, SharedCalendarCallBack callback, String explanation){
 		try {
 			// SEND INFORMATION QUERY - RESPONSE WILL BE IN
 			// "callback.RecieveMessage()"
 			commManager.sendIQGet(stanza, calendarBean, callback);
-			log.info("The message was sent to XMPP server for retrieve all public calendar.");
+			log.info(explanation);
 		} catch (CommunicationException e) {
 			log.error("ERROR: " + e.getStackTrace()[0].getMethodName());
 		}
@@ -293,16 +296,8 @@ public class SharedCalendarClientRich implements ICommCallback,	ISharedCalendarC
 		calendarBean.setMethod(MethodType.CREATE_CIS_CALENDAR);
 		calendarBean.setCalendarSummary(calendarSummary);
 		calendarBean.setCISId(CISId);
-		try {
-			// SEND INFORMATION QUERY - RESPONSE WILL BE IN
-			// "callback.RecieveMessage()"
-			commManager.sendIQGet(stanza, calendarBean, callback);
-			log.info("The message was sent to XMPP server for create a CSS calendar with summary: "
-					+ calendarSummary + ".");
-		} catch (CommunicationException e) {
-			log.error("ERROR: " + e.getStackTrace()[0].getMethodName());
-		}
-		
+		this.sendMsg(stanza, calendarBean, callback, "The message was sent to XMPP server for create a CSS calendar with summary: "
+					+ calendarSummary + ".");		
 	}
 
 	/* (non-Javadoc)
@@ -323,16 +318,8 @@ public class SharedCalendarClientRich implements ICommCallback,	ISharedCalendarC
 		calendarBean
 				.setMethod(MethodType.DELETE_CIS_CALENDAR);
 		calendarBean.setCalendarId(calendarId);
-		try {
-			// SEND INFORMATION QUERY - RESPONSE WILL BE IN
-			// "callback.RecieveMessage()"
-			commManager.sendIQGet(stanza, calendarBean, callback);
-			log.info("The message was sent to XMPP server for delete a CIS calendar with id: "
-					+ calendarId + ".");
-		} catch (CommunicationException e) {
-			log.error("ERROR: " + e.getStackTrace()[0].getMethodName());
-		}
-		
+		this.sendMsg(stanza, calendarBean, callback, "The message was sent to XMPP server for delete a CIS calendar with id: "
+				+ calendarId + ".");			
 	}
 
 	/* (non-Javadoc)
@@ -353,16 +340,8 @@ public class SharedCalendarClientRich implements ICommCallback,	ISharedCalendarC
 		calendarBean
 				.setMethod(MethodType.RETRIEVE_CIS_CALENDAR_EVENTS);
 		calendarBean.setCalendarId(calendarId);
-		try {
-			// SEND INFORMATION QUERY - RESPONSE WILL BE IN
-			// "callback.RecieveMessage()"
-			commManager.sendIQGet(stanza, calendarBean, callback);
-			log.info("The message was sent to XMPP server for retrieve CIS calendar events in calendar with id: "
-					+ calendarId + ".");
-		} catch (CommunicationException e) {
-			log.error("ERROR: " + e.getStackTrace()[0].getMethodName());
-		}
-		
+		this.sendMsg(stanza, calendarBean, callback, "The message was sent to XMPP server for retrieve CIS calendar events in calendar with id: "
+				+ calendarId + ".");		
 	}
 
 	
@@ -387,16 +366,8 @@ public class SharedCalendarClientRich implements ICommCallback,	ISharedCalendarC
 				.setMethod(MethodType.CREATE_EVENT_ON_CIS_CALENDAR);
 		calendarBean.setCalendarId(calendarId);
 		calendarBean.setNewEvent(newEvent);
-		try {
-			// SEND INFORMATION QUERY - RESPONSE WILL BE IN
-			// "callback.RecieveMessage()"
-			commManager.sendIQGet(stanza, calendarBean, callback);
-			log.info("The message was sent to XMPP server for create an event on CIS calendar with id: "
-					+ calendarId + ".");
-		} catch (CommunicationException e) {
-			log.error("ERROR: " + e.getStackTrace()[0].getMethodName());
-		}
-		
+		this.sendMsg(stanza, calendarBean, callback, "The message was sent to XMPP server for create an event on CIS calendar with id: "
+				+ calendarId + ".");		
 	}
 
 	/* (non-Javadoc)
@@ -419,17 +390,8 @@ public class SharedCalendarClientRich implements ICommCallback,	ISharedCalendarC
 				.setMethod(MethodType.DELETE_EVENT_ON_CIS_CALENDAR);
 		calendarBean.setCalendarId(calendarId);
 		calendarBean.setEventId(eventId);
-		
-		try {
-			// SEND INFORMATION QUERY - RESPONSE WILL BE IN
-			// "callback.RecieveMessage()"
-			commManager.sendIQGet(stanza, calendarBean, callback);
-			log.info("The message was sent to XMPP server for delete an event with id: "+eventId+" on CIS calendar with id: "
-					+ calendarId + ".");
-		} catch (CommunicationException e) {
-			log.error("ERROR: " + e.getStackTrace()[0].getMethodName());
-		}
-		
+		this.sendMsg(stanza, calendarBean, callback, "The message was sent to XMPP server for delete an event with id: "+eventId+" on CIS calendar with id: "
+				+ calendarId + ".");		
 	}
 	/* (non-Javadoc)
 	 * @see org.societies.rdpartyService.enterprise.interfaces.ISharedCalendarClientRich#subscribeToEvent(org.societies.rdpartyService.enterprise.interfaces.IReturnedResultCallback, java.lang.String, java.lang.String, java.lang.String)
@@ -452,18 +414,8 @@ public class SharedCalendarClientRich implements ICommCallback,	ISharedCalendarC
 		calendarBean.setCalendarId(calendarId);
 		calendarBean.setEventId(eventId);
 		calendarBean.setSubscriberId(subscriberId);
-		
-		try {
-			// SEND INFORMATION QUERY - RESPONSE WILL BE IN
-			// "callback.RecieveMessage()"
-			commManager.sendIQGet(stanza, calendarBean, callback);
-			log.info("The message was sent to XMPP server for subscribe to an event with id: "+eventId+" on CIS calendar with id: "
-					+ calendarId + " and subscriber id: "+subscriberId+".");
-		} catch (CommunicationException e) {
-			log.error("ERROR: " + e.getStackTrace()[0].getMethodName());
-		}
-		
-		
+		this.sendMsg(stanza, calendarBean, callback, "The message was sent to XMPP server for subscribe to an event with id: "+eventId+" on CIS calendar with id: "
+				+ calendarId + " and subscriber id: "+subscriberId+".");
 	}
 
 	/* (non-Javadoc)
@@ -486,17 +438,8 @@ public class SharedCalendarClientRich implements ICommCallback,	ISharedCalendarC
 				.setMethod(MethodType.FIND_EVENTS);
 		calendarBean.setCalendarId(calendarId);
 		calendarBean.setKeyWord(keyWord);
-		
-		try {
-			// SEND INFORMATION QUERY - RESPONSE WILL BE IN
-			// "callback.RecieveMessage()"
-			commManager.sendIQGet(stanza, calendarBean, callback);
-			log.info("The message was sent to XMPP server for retrieve events on CIS calendar with id: "
-					+ calendarId + " using keyword: "+keyWord+".");
-		} catch (CommunicationException e) {
-			log.error("ERROR: " + e.getStackTrace()[0].getMethodName());
-		}
-		
+		this.sendMsg(stanza, calendarBean, callback, "The message was sent to XMPP server for retrieve events on CIS calendar with id: "
+				+ calendarId + " using keyword: "+keyWord+".");
 	}
 
 	/* (non-Javadoc)
@@ -520,17 +463,8 @@ public class SharedCalendarClientRich implements ICommCallback,	ISharedCalendarC
 		calendarBean.setCalendarId(calendarId);
 		calendarBean.setEventId(eventId);
 		calendarBean.setSubscriberId(subscriberId);
-		
-		try {
-			// SEND INFORMATION QUERY - RESPONSE WILL BE IN
-			// "callback.RecieveMessage()"
-			commManager.sendIQGet(stanza, calendarBean, callback);
-			log.info("The message was sent to XMPP server for unsubscribe to an event with id: "+eventId+" on CIS calendar with id: "
-					+ calendarId + " and subscriber id: "+subscriberId+".");
-		} catch (CommunicationException e) {
-			log.error("ERROR: " + e.getStackTrace()[0].getMethodName());
-		}
-		
+		this.sendMsg(stanza, calendarBean, callback, "The message was sent to XMPP server for unsubscribe to an event with id: "+eventId+" on CIS calendar with id: "
+				+ calendarId + " and subscriber id: "+subscriberId+".");
 	}
 	
 	//START CSS CALENDAR IMPLEMENTATION METHODS//
@@ -547,8 +481,6 @@ public class SharedCalendarClientRich implements ICommCallback,	ISharedCalendarC
 	public void retrieveEventsPrivateCalendar(
 			IReturnedResultCallback returnedResultCallback) {
 		
-		// IIdentity toIdentity = new NetworkNodeImpl(
-		// retrieve3rdPartyCalendarServerIdentity());
 		Stanza stanza = new Stanza(retrieveTargetIdentity());
 
 		// SETUP CALENDAR CLIENT RETURN STUFF
@@ -558,17 +490,8 @@ public class SharedCalendarClientRich implements ICommCallback,	ISharedCalendarC
 		// CREATE MESSAGE BEAN
 		SharedCalendarBean calendarBean = new SharedCalendarBean();
 
-		calendarBean
-				.setMethod(MethodType.RETRIEVE_EVENTS_ON_PRIVATE_CALENDAR);
-		try {
-			// SEND INFORMATION QUERY - RESPONSE WILL BE IN
-			// "callback.RecieveMessage()"
-			commManager.sendIQGet(stanza, calendarBean, callback);
-			log.info("The message was sent to XMPP server for retrieve CSS calendar events.");
-		} catch (CommunicationException e) {
-			log.error("ERROR: " + e.getStackTrace()[0].getMethodName());
-		}
-
+		calendarBean.setMethod(MethodType.RETRIEVE_EVENTS_ON_PRIVATE_CALENDAR);
+		this.sendMsg(stanza, calendarBean, callback, "The message was sent to XMPP server for retrieve CSS calendar events.");
 	}
 
 	public void createPrivateCalendar(
@@ -584,18 +507,10 @@ public class SharedCalendarClientRich implements ICommCallback,	ISharedCalendarC
 		// CREATE MESSAGE BEAN
 		SharedCalendarBean calendarBean = new SharedCalendarBean();
 
-		calendarBean
-				.setMethod(MethodType.CREATE_PRIVATE_CALENDAR);
+		calendarBean.setMethod(MethodType.CREATE_PRIVATE_CALENDAR);
 		calendarBean.setCalendarSummary(calendarSummary);
-		try {
-			// SEND INFORMATION QUERY - RESPONSE WILL BE IN
-			// "callback.RecieveMessage()"
-			commManager.sendIQGet(stanza, calendarBean, callback);
-			log.info("The message was sent to XMPP server for create a CSS calendar with summary: "
-					+ calendarSummary + ".");
-		} catch (CommunicationException e) {
-			log.error("ERROR: " + e.getStackTrace()[0].getMethodName());
-		}
+		this.sendMsg(stanza, calendarBean, callback, "The message was sent to XMPP server for create a CSS calendar with summary: "
+				+ calendarSummary + ".");
 	}
 	
 	
@@ -616,17 +531,8 @@ public class SharedCalendarClientRich implements ICommCallback,	ISharedCalendarC
 		// CREATE MESSAGE BEAN
 		SharedCalendarBean calendarBean = new SharedCalendarBean();
 
-		calendarBean
-				.setMethod(MethodType.DELETE_PRIVATE_CALENDAR);
-		try {
-			// SEND INFORMATION QUERY - RESPONSE WILL BE IN
-			// "callback.RecieveMessage()"
-			commManager.sendIQGet(stanza, calendarBean, callback);
-			log.info("The message was sent to XMPP server for delete a CSS calendar.");
-		} catch (CommunicationException e) {
-			log.error("ERROR: " + e.getStackTrace()[0].getMethodName());
-		}
-		
+		calendarBean.setMethod(MethodType.DELETE_PRIVATE_CALENDAR);
+		this.sendMsg(stanza, calendarBean, callback, "The message was sent to XMPP server for delete a CSS calendar.");
 	}
 
 	/* (non-Javadoc)
@@ -644,18 +550,9 @@ public class SharedCalendarClientRich implements ICommCallback,	ISharedCalendarC
 		// CREATE MESSAGE BEAN
 		SharedCalendarBean calendarBean = new SharedCalendarBean();
 
-		calendarBean
-				.setMethod(MethodType.CREATE_EVENT_ON_PRIVATE_CALENDAR);
+		calendarBean.setMethod(MethodType.CREATE_EVENT_ON_PRIVATE_CALENDAR);
 		calendarBean.setNewEvent(newEvent);
-		try {
-			// SEND INFORMATION QUERY - RESPONSE WILL BE IN
-			// "callback.RecieveMessage()"
-			commManager.sendIQGet(stanza, calendarBean, callback);
-			log.info("The message was sent to XMPP server for create a CSS calendar events.");
-		} catch (CommunicationException e) {
-			log.error("ERROR: " + e.getStackTrace()[0].getMethodName());
-		}
-		
+		this.sendMsg(stanza, calendarBean, callback, "The message was sent to XMPP server for create a CSS calendar events.");
 	}
 	/* (non-Javadoc)
 	 * @see org.societies.rdpartyService.enterprise.interfaces.ISharedCalendarClientRich#deleteEventOnPrivateCalendar(java.lang.String)
@@ -671,18 +568,9 @@ public class SharedCalendarClientRich implements ICommCallback,	ISharedCalendarC
 		// CREATE MESSAGE BEAN
 		SharedCalendarBean calendarBean = new SharedCalendarBean();
 
-		calendarBean
-				.setMethod(MethodType.DELETE_EVENT_ON_PRIVATE_CALENDAR);
+		calendarBean.setMethod(MethodType.DELETE_EVENT_ON_PRIVATE_CALENDAR);
 		calendarBean.setEventId(eventId);
-		try {
-			// SEND INFORMATION QUERY - RESPONSE WILL BE IN
-			// "callback.RecieveMessage()"
-			commManager.sendIQGet(stanza, calendarBean, callback);
-			log.info("The message was sent to XMPP server for delete a CSS calendar event.");
-		} catch (CommunicationException e) {
-			log.error("ERROR: " + e.getStackTrace()[0].getMethodName());
-		}
-		
+		this.sendMsg(stanza, calendarBean, callback, "The message was sent to XMPP server for delete a CSS calendar event.");
 	}
 	
 	//UTILITY METHODS//
