@@ -28,9 +28,9 @@
 	<!-- <osgi:reference id="IdentityManagerBundle" interface="org.societies.api.identity.IIdentityManager" 
 		cardinality="1..1"/> -->
 
-	<osgi:service id="calClientRichInterface" ref="sharedCalClientRich"
+	<osgi:service id="calClientRichInterface" ref="sharedCalendarClientRich"
 		interface="org.societies.rdpartyService.enterprise.interfaces.ISharedCalendarClientRich" />
-	<osgi:service id="calClientCommCallback" ref="sharedCalClientRich"
+	<osgi:service id="calClientCommCallback" ref="sharedCalendarClientRich"
 		interface="org.societies.api.comm.xmpp.interfaces.ICommCallback" />
 	
 
