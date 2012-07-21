@@ -6,25 +6,31 @@
                 http://www.eclipse.org/virgo/schema/plan 
                 http://www.eclipse.org/virgo/schema/plan/eclipse-virgo-plan.xsd">
 
-    <artifact type="bundle" name="org.societies.api.external.societies-api" />
+	<artifact type="bundle" name="org.societies.api.external.societies-api" />
 	<artifact type="bundle" name="org.societies.api.internal.societies-api-internal" />
 	
 	<artifact type="bundle" name="org.societies.comm.CommonLibraries" />
 	<artifact type="bundle" name="org.societies.comm.xmpp.XCCommunicationMgr" />
 	<artifact type="bundle" name="org.societies.comm.event.mgmt"/>
 	
+	<!-- Service Discovery & Registry  -->
+    <artifact type="bundle" name="org.societies.platform.servicelifecycle.serviceRegistry"/>
+    <artifact type="bundle" name="org.societies.platform.servicelifecycle.serviceManagement"/>
+    <artifact type="bundle" name="org.societies.slm.SLMCommsManager"/>
+    <artifact type="bundle" name="societies-webapp"/>
+	
 	<!-- Calendar Server Artifacts - Start -->
+	<artifact type="bundle" name="org.societies.api.ext3p.societies-api-ext3p"/>
 	<artifact type="bundle" name="org.societies.rdpartyService.enterprise.sharedCalendar"/>
 	<artifact type="configuration" name="bk"/>
 	<!-- Calendar Server Artifacts - End -->
 	
 	<!-- Device Manager Stuff -->
 	<artifact type="bundle" name="org.societies.css.devicemgmt.devicemanager"/>
-	<!-- The next bundle is not strictly required but it's handy for testing -->
 	<artifact type="bundle" name="org.societies.css.devicemgmt.DeviceDriverSimulator"/>
 	<artifact type="bundle" name="org.societies.css.devicemgmt.DeviceCommsMgr"/>
 	
-	<!-- Not needed for the moment -->
+	<!-- PubSub -->
 	<artifact type="bundle" name="org.societies.comm.xmpp.pubsub.PubsubServiceBundle"/>
 	<artifact type="bundle" name="org.societies.comm.xmpp.pubsub.PubsubClientBundle"/>
 </plan>

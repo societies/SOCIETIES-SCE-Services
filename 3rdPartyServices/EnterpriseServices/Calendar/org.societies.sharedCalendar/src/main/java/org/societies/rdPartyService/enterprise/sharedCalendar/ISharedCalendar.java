@@ -26,8 +26,8 @@ package org.societies.rdPartyService.enterprise.sharedCalendar;
 
 import java.util.List;
 
-import org.societies.rdpartyservice.enterprise.sharedcalendar.Calendar;
-import org.societies.rdpartyservice.enterprise.sharedcalendar.Event;
+import org.societies.api.ext3p.schema.sharedcalendar.Calendar;
+import org.societies.api.ext3p.schema.sharedcalendar.Event;
 
 
 

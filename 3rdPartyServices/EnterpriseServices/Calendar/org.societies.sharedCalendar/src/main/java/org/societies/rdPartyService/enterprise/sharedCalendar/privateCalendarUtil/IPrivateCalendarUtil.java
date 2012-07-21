@@ -24,7 +24,8 @@
  */
 package org.societies.rdPartyService.enterprise.sharedCalendar.privateCalendarUtil;
 
-import org.societies.rdpartyservice.enterprise.sharedcalendar.Event;
+import org.societies.api.ext3p.schema.sharedcalendar.Event;
+
 
 /**
  * This is the interface that manages Private (i.e. CSS-level) calendars.

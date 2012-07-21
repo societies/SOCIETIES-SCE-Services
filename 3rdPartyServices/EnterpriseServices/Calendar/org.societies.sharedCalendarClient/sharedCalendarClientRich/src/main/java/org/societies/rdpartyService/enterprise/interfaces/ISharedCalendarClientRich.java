@@ -26,7 +26,8 @@ package org.societies.rdpartyService.enterprise.interfaces;
 
 import java.util.List;
 
-import org.societies.rdpartyservice.enterprise.sharedcalendar.Event;
+import org.societies.api.ext3p.schema.sharedcalendar.Event;
+
 
 /**
  * This is the interface used in the client node to interact with the backend of the calendar service.

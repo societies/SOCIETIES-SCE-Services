@@ -73,9 +73,9 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.societies.api.schema</groupId>
-			<artifactId>societies-api-schema</artifactId>
-			<version>${release.version}</version>
+			<groupId>org.societies.api.ext3p</groupId>
+			<artifactId>societies-api-ext3p</artifactId>
+			<version>0.1</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
@@ -104,19 +104,6 @@
 			<version>2.2.1</version>
 			<scope>provided</scope>
 		</dependency>
-<!-- 		<dependency> -->
-<!-- 			<groupId>org.springframework</groupId> -->
-<!-- 			<artifactId>org.springframework.web.portlet</artifactId> -->
-<!-- 			<version>${spring.version}</version> -->
-<!-- 			<exclusions> -->
-<!-- 				<exclusion> -->
-<!-- 					<artifactId>com.springsource.javax.servlet</artifactId> -->
-<!-- 					<groupId>javax.servlet</groupId> -->
-<!-- 				</exclusion> -->
-<!-- 			</exclusions> -->
-<!-- 			<type>jar</type> -->
-<!-- 			<scope>provided</scope> -->
-<!-- 		</dependency>		 -->
 	</dependencies>
 	<build>
 		<finalName>sharedCalendar-webapp</finalName>
@@ -147,7 +134,6 @@
 						<Bundle-ClassPath>WEB-INF/classes,.</Bundle-ClassPath>
 						<Webapp-Context>sharedCal</Webapp-Context>						
 						<Import-Package>
-							*,
 							org.springframework.stereotype;version="[3.0,4)",
 							org.springframework.ui;version="[3.0,4)",
 							org.springframework.web.bind.annotation;version="[3.0,4)",
