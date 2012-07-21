@@ -32,12 +32,24 @@
 		</xs:restriction>
 	</xs:simpleType>
 	
-		<xs:element name="displayPortalServerResultBean">
+		<xs:element name="displayPortalServerIPAddressResultBean">
 	<xs:complexType>
 		<xs:sequence>
 			<xs:element name="ipAddress" type="xs:string" minOccurs="1"></xs:element>
-			<xs:element name="screenLocations" type="xs:base64Binary"></xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	</xs:element>
+			<xs:element name="displayPortalServerServiceIDResultBean">
+	<xs:complexType>
+		<xs:sequence>
 			<xs:element name="serviceID" type="ns1:serviceResourceIdentifier"></xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	</xs:element>
+			<xs:element name="displayPortalServerScreenLocationResultBean">
+	<xs:complexType>
+		<xs:sequence>
+			<xs:element name="screenLocations" type="xs:base64Binary"></xs:element>
 		</xs:sequence>
 	</xs:complexType>
 	</xs:element>

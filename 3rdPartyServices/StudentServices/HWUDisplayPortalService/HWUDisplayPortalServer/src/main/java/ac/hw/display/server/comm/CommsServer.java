@@ -38,7 +38,11 @@ import org.societies.api.comm.xmpp.interfaces.ICommManager;
 import org.societies.api.comm.xmpp.interfaces.IFeatureServer;
 import org.societies.api.context.model.util.SerialisationHelper;
 import org.societies.api.ext3p.schema.displayportalserverbean.DisplayPortalServerBean;
+import org.societies.api.ext3p.schema.displayportalserverbean.DisplayPortalServerIPAddressResultBean;
 import org.societies.api.ext3p.schema.displayportalserverbean.DisplayPortalServerMethodType;
+import org.societies.api.ext3p.schema.displayportalserverbean.DisplayPortalServerScreenLocationResultBean;
+import org.societies.api.ext3p.schema.displayportalserverbean.DisplayPortalServerServiceIDResultBean;
+import org.societies.api.schema.servicelifecycle.model.ServiceResourceIdentifier;
 
 import ac.hw.display.server.api.IDisplayPortalServer;
 
@@ -124,7 +128,9 @@ public class CommsServer implements IFeatureServer{
 				
 				try {
 					byte[] serialisedObj = SerialisationHelper.serialise(locations);
-					return serialisedObj;
+					DisplayPortalServerScreenLocationResultBean resultBean = new DisplayPortalServerScreenLocationResultBean();
+					resultBean.setScreenLocations(serialisedObj);
+					return resultBean;
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -136,11 +142,18 @@ public class CommsServer implements IFeatureServer{
 				
 				String identity = ((DisplayPortalServerBean) payload).getIdentity();
 				String location = ((DisplayPortalServerBean) payload).getLocation();
-				return this.displayPortalServer.requestAccess(identity, location);
+				String ipAddress =  this.displayPortalServer.requestAccess(identity, location);
+				DisplayPortalServerIPAddressResultBean resultBean = new DisplayPortalServerIPAddressResultBean();
+				resultBean.setIpAddress(ipAddress);
+				return resultBean;
 			}
 			
 			if (((DisplayPortalServerBean) payload).getMethod().equals(DisplayPortalServerMethodType.GET_SERVER_SERVICE_ID)){
-				return this.displayPortalServer.getServerServiceId();
+				ServiceResourceIdentifier serviceId = displayPortalServer.getServerServiceId();
+				DisplayPortalServerServiceIDResultBean resultBean = new DisplayPortalServerServiceIDResultBean();
+				resultBean.setServiceID(serviceId);
+				return resultBean;
+				
 			}
 			/*
 			 * unknown method called

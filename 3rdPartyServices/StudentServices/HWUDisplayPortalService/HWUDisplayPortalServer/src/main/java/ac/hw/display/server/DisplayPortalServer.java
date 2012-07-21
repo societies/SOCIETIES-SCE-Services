@@ -74,7 +74,7 @@ public class DisplayPortalServer implements IDisplayPortalServer{
 	
 	public void initialiseServer(){
 		UIManager.put("ClassLoader", ClassLoader.getSystemClassLoader());
-		
+		currentlyUsedScreens = new Hashtable<String, String>();
 		this.getScreenConfigurationFromUser();
 	}
 	

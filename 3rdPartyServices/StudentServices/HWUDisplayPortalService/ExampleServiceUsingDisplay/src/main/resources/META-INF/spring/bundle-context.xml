@@ -10,22 +10,14 @@
 		this file can easily be used for integration testing outside of an OSGi environment -->
 
  
-	<bean id="displayPortalClient"
-		class="ac.hw.display.client.DisplayPortalClient"
-		name="displayPortalClient" init-method="Init">
-	    <property name="commManager" ref="commManager"></property>
-		<property name="portalServerRemote" ref="displayServerRemote"></property>
-		<property name="ctxBroker" ref="ctxBroker"></property>
-		<property name="services" ref="IServices"></property>
+	<bean id="exampleService"
+		class="ac.hw.display.example.ExampleService"
+		name="exampleService" init-method="Init">
+	    <property name="commMgr" ref="commManager"></property>
+	    <property name="displayDriverService" ref="displayDriverServiceRef"></property>
 		<property name="evMgr" ref="eventMgmtRef"></property>
 	</bean>
 
-	<bean id="displayServerRemote"
-	    class=" ac.hw.display.client.comm.CommsClient"
-	    name="displayServerRemote"
-	    init-method="InitService">
-	    <property name="commManager" ref="commManager"></property>
-	</bean>
 
 	
 	<!-- <context:component-scan base-package="org.societies.personalisation.management.impl"></context:component-scan> -->

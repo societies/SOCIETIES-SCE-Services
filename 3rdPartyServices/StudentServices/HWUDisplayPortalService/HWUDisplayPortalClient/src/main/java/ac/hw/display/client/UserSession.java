@@ -24,6 +24,7 @@
  */
 package ac.hw.display.client;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -38,11 +39,40 @@ public class UserSession {
 	private List<ServiceInfo> services;
 	
 	public UserSession(String userIdentity){
-		this.userIdentity = userIdentity;
+		this.setUserIdentity(userIdentity);
+		services = new ArrayList<ServiceInfo>();
 	}
 	
 	public void addService(ServiceInfo sInfo){
 		this.services.add(sInfo);
+	}
+
+	/**
+	 * @return the userIdentity
+	 */
+	public String getUserIdentity() {
+		return userIdentity;
+	}
+
+	/**
+	 * @param userIdentity the userIdentity to set
+	 */
+	public void setUserIdentity(String userIdentity) {
+		this.userIdentity = userIdentity;
+	}
+
+	public List<ServiceInfo> getServices() {
+		
+		return this.services;
+	}
+
+	public boolean containsService(String serviceName) {
+		for (ServiceInfo sInfo : services){
+			if (sInfo.getServiceName().equalsIgnoreCase(serviceName)){
+				return true;
+			}
+		}
+		return false;
 	}
 	
 	

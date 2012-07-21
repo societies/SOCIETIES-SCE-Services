@@ -24,23 +24,31 @@
  */
 package ac.hw.display.client;
 
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.societies.api.comm.xmpp.interfaces.ICommManager;
 import org.societies.api.context.broker.ICtxBroker;
+import org.societies.api.css.devicemgmt.display.DisplayEvent;
+import org.societies.api.css.devicemgmt.display.DisplayEventConstants;
+import org.societies.api.css.devicemgmt.display.IDisplayDriver;
 import org.societies.api.identity.IIdentity;
 import org.societies.api.identity.IIdentityManager;
 import org.societies.api.identity.InvalidFormatException;
 import org.societies.api.identity.RequestorService;
-import org.societies.api.internal.servicelifecycle.IServiceDiscovery;
+import org.societies.api.osgi.event.EMSException;
+import org.societies.api.osgi.event.EventTypes;
+import org.societies.api.osgi.event.IEventMgr;
+import org.societies.api.osgi.event.InternalEvent;
 import org.societies.api.schema.servicelifecycle.model.ServiceResourceIdentifier;
 import org.societies.api.services.IServices;
 
-import ac.hw.display.client.api.IDisplayPortalClient;
 import ac.hw.display.server.api.remote.IDisplayPortalServer;
 
 /**
@@ -49,7 +57,7 @@ import ac.hw.display.server.api.remote.IDisplayPortalServer;
  * @author Eliza
  *
  */
-public class DisplayPortalClient implements IDisplayPortalClient{
+public class DisplayPortalClient implements IDisplayDriver{
 
 	private ICommManager commManager;
 	private IIdentityManager idMgr;
@@ -61,10 +69,12 @@ public class DisplayPortalClient implements IDisplayPortalClient{
 	private RequestorService requestor;
 	private IServices services;
 	private boolean hasSession;
-	
+	private IEventMgr evMgr;
 	private String currentUsedScreen = "";
-	
-	private IServiceDiscovery serviceDiscovery;
+	private static Logger LOG = LoggerFactory.getLogger(DisplayPortalClient.class);
+
+
+	private UserSession userSession;
 	
 	public DisplayPortalClient(){
 		this.screenLocations = new ArrayList<String>();
@@ -88,6 +98,9 @@ public class DisplayPortalClient implements IDisplayPortalClient{
 		for (int i=0; i<locs.length; i++){
 			this.screenLocations.add(locs[i]);
 		}
+		
+		userSession = new UserSession(this.userIdentity.getJid());
+		
 		JOptionPane.showMessageDialog(null, "DisplayPortalClient initialised");
 		//return true;
 	}
@@ -109,42 +122,105 @@ public class DisplayPortalClient implements IDisplayPortalClient{
 	public void updateUserLocation(String location){
 		//if near a screen
 		if (this.screenLocations.contains(location)){
+			this.LOG.debug("Requesting access");
 			//request access
 			String reply = this.portalServerRemote.requestAccess(serverIdentity, userIdentity.getJid(), location);
 			//if access refused do nothing
 			if (reply=="REFUSED"){
-				System.out.println("Refused access to screen.");
+				this.LOG.debug("Refused access to screen.");
 			}
 			else //if access is granted 
 			{
+				this.LOG.debug("Access to screen granted. IP Address is: "+reply);
 				//check if the user is already using another screen
 				if (this.hasSession){
+					this.LOG.debug("Releasing previous screen session");
 					//release currently used screen
 					this.portalServerRemote.releaseResource(serverIdentity, userIdentity.getJid(), currentUsedScreen);
 				}
 				//now setup new screen
 				SocketClient socketClient = new SocketClient(reply);
-				UserSession userSession = new UserSession(this.userIdentity.getJid());
-		
+				
+				socketClient.startSession(userSession);
 				//TODO: send services TO DISPLAY
 				this.currentUsedScreen = location;
 				this.hasSession = true;
+				DisplayEvent dEvent = new DisplayEvent(DisplayEventConstants.DEVICE_AVAILABLE);
+				InternalEvent iEvent = new InternalEvent(EventTypes.DISPLAY_EVENT, "displayUpdate", "org/societies/css/device", dEvent);
+				try {
+					this.evMgr.publishInternalEvent(iEvent);
+				} catch (EMSException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
 			}
-		}
-		//user is not near a screen
+		}//user is not near a screen
 		else{
+			this.LOG.debug("User not near screen");
 			//if he's using a screen
 			if (this.hasSession){
 				//release resource
 				this.portalServerRemote.releaseResource(serverIdentity, userIdentity.getJid(), currentUsedScreen);
 				this.currentUsedScreen = "";
 				this.hasSession = false;
+				DisplayEvent dEvent = new DisplayEvent(DisplayEventConstants.DEVICE_UNAVAILABLE);
+				InternalEvent iEvent = new InternalEvent(EventTypes.DISPLAY_EVENT, "displayUpdate", "org/societies/css/device", dEvent);
+				try {
+					this.evMgr.publishInternalEvent(iEvent);
+				} catch (EMSException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 		}
 	}
 	
 	
-	
+	@Override
+	public void displayImage(String serviceName, String pathToFile){
+		if (this.hasSession){
+			
+				BinaryDataTransfer dataTransfer = new BinaryDataTransfer(currentUsedScreen);
+				dataTransfer.sendImage(this.userIdentity.getJid(), pathToFile);
+				
+			
+		}
+		
+	}
+
+	@Override
+	public void displayImage(String serviceName, URL remoteImageLocation){
+		if (this.hasSession){
+			
+				SocketClient socketClient = new SocketClient(currentUsedScreen);
+				
+				socketClient.sendImage(userSession, remoteImageLocation);
+				
+			
+		}
+		
+	}
+
+
+	@Override
+	public void sendNotification(String serviceName, String text){
+		if (this.hasSession){
+			if (this.userSession.containsService(serviceName)){
+				SocketClient socketClient = new SocketClient(currentUsedScreen);
+				socketClient.sendText(serviceName, userSession, text);
+				
+				
+			}
+		}
+		
+	}
+
+	@Override
+	public void registerDisplayableService(ServiceResourceIdentifier serviceID, String serviceName, URL executableLocation){
+		ServiceInfo sInfo  = new ServiceInfo(serviceName, executableLocation.toString());
+		this.userSession.addService(sInfo);
+	}
 	
 	/*
 	 * get/set methods
@@ -211,16 +287,19 @@ public class DisplayPortalClient implements IDisplayPortalClient{
 	}
 
 	/**
-	 * @return the serviceDiscovery
+	 * @return the evMgr
 	 */
-	public IServiceDiscovery getServiceDiscovery() {
-		return serviceDiscovery;
+	public IEventMgr getEvMgr() {
+		return evMgr;
 	}
 
 	/**
-	 * @param serviceDiscovery the serviceDiscovery to set
+	 * @param evMgr the evMgr to set
 	 */
-	public void setServiceDiscovery(IServiceDiscovery serviceDiscovery) {
-		this.serviceDiscovery = serviceDiscovery;
+	public void setEvMgr(IEventMgr evMgr) {
+		this.evMgr = evMgr;
 	}
+
+
+
 }

@@ -40,4 +40,18 @@ public class ServiceInfo {
 		this.exe = exe;
 		
 	}
+
+	/**
+	 * @return the exe
+	 */
+	public String getExe() {
+		return exe;
+	}
+
+	/**
+	 * @return the serviceName
+	 */
+	public String getServiceName() {
+		return serviceName;
+	}
 }

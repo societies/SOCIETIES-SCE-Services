@@ -28,6 +28,8 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.societies.api.context.CtxException;
 import org.societies.api.context.broker.ICtxBroker;
 import org.societies.api.context.event.CtxChangeEvent;
@@ -40,6 +42,7 @@ import org.societies.api.context.model.CtxModelType;
 import org.societies.api.identity.IIdentity;
 import org.societies.api.identity.RequestorService;
 
+
 /**
  * Describe your class here...
  *
@@ -49,6 +52,7 @@ import org.societies.api.identity.RequestorService;
 public class ContextEventListener implements CtxChangeEventListener{
 
 	private final DisplayPortalClient client;
+	private static Logger LOG = LoggerFactory.getLogger(ContextEventListener.class);
 
 	private ICtxBroker ctxBroker;
 
@@ -76,6 +80,7 @@ public class ContextEventListener implements CtxChangeEventListener{
 				return;
 			}else{
 				this.ctxBroker.registerForChanges(requestor, this, lookupList.get(0));
+				this.LOG.debug("Registered for symloc events");
 			}
 		} catch (CtxException e) {
 			// TODO Auto-generated catch block
@@ -103,8 +108,12 @@ public class ContextEventListener implements CtxChangeEventListener{
 		Future<CtxModelObject> futureAttribute;
 		try {
 			futureAttribute = this.ctxBroker.retrieve(requestor,ctxIdentifier);
+			
 			try {
 				CtxAttribute ctxAttribute = (CtxAttribute) futureAttribute.get();
+				this.LOG.debug("Received context event for "+ctxAttribute.getType()+" with value: "+ctxAttribute.getStringValue());
+				this.client.updateUserLocation(ctxAttribute.getStringValue());
+				
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

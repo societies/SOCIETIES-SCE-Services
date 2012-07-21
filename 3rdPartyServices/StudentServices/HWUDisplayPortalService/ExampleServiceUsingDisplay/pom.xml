@@ -3,8 +3,8 @@
 
 	<modelVersion>4.0.0</modelVersion>
 	<!-- change the artifactid to your project artifactid -->
-	<groupId>ac.hw.display</groupId>
-	<artifactId>DisplayPortalClientApp</artifactId>
+	<groupId>ac.hw.display.example</groupId>
+	<artifactId>ExampleDisplayService</artifactId>
 	<packaging>bundle</packaging>
 	<version>0.0.1-SNAPSHOT</version>
 

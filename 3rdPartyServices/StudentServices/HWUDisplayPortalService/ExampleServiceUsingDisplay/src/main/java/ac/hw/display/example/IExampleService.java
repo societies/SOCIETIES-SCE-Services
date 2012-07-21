@@ -22,18 +22,9 @@
  * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package ac.hw.display.client;
+package ac.hw.display.example;
 
-import javax.swing.JOptionPane;
-import javax.swing.UIManager;
-
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.BundleEvent;
-import org.osgi.framework.BundleListener;
-import org.osgi.framework.ServiceEvent;
-import org.osgi.framework.ServiceListener;
-import org.springframework.osgi.context.BundleContextAware;
-
+import java.net.URL;
 
 /**
  * Describe your class here...
@@ -41,63 +32,8 @@ import org.springframework.osgi.context.BundleContextAware;
  * @author Eliza
  *
  */
-public class OsgiContextListener implements BundleContextAware, BundleListener{
+public interface IExampleService {
 
-	private DisplayPortalClient displayPortalClient;
-	private boolean isActivated = false;
-	private BundleContext bundleContext;
-
-	public OsgiContextListener (){
-		UIManager.put("ClassLoader", ClassLoader.getSystemClassLoader());
-		//JOptionPane.showMessageDialog(null, "Started OsgiListener");
-	}
-	
-/*	@Override
-	public void onOsgiApplicationEvent(OsgiBundleApplicationContextEvent event) {
-		
-		JOptionPane.showConfirmDialog(null, "onOsgiApplicationEvent called");
-		if (!isActivated){
-			if (event instanceof OsgiBundleContextRefreshedEvent){
-			isActivated = this.getDisplayPortalClient().Init();
-			}
-	}
-		
-	}*/
-
-
-	/**
-	 * @return the displayPortalClient
-	 */
-	public DisplayPortalClient getDisplayPortalClient() {
-		return displayPortalClient;
-	}
-
-
-	/**
-	 * @param displayPortalClient the displayPortalClient to set
-	 */
-	public void setDisplayPortalClient(DisplayPortalClient displayPortalClient) {
-		this.displayPortalClient = displayPortalClient;
-	}
-
-	@Override
-	public void setBundleContext(BundleContext bundleContext) {
-		this.bundleContext = bundleContext;
-/*		if (!this.isActivated){
-			JOptionPane.showMessageDialog(null, displayPortalClient.Init());
-		}
-		this.bundleContext.addBundleListener(this);*/
-	}
-
-
-	@Override
-	public void bundleChanged(BundleEvent event) {
-/*		JOptionPane.showMessageDialog(null, event.getBundle().getSymbolicName());
-		if (!this.isActivated){
-			JOptionPane.showMessageDialog(null, displayPortalClient.Init());
-		}*/
-		
-	}
-
-
+	public void sendNotification(String text);
+	public void displayImage(URL remoteImageLocation);
 }
