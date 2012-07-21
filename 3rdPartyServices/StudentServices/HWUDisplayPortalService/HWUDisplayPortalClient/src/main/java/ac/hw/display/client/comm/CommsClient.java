@@ -60,10 +60,12 @@ public class CommsClient implements IDisplayPortalServer, ICommCallback{
 
 
 	private static final List<String> NAMESPACES = Collections.unmodifiableList(
-			  Arrays.asList("http://societies.org/api/ext3p/schema/displayportalserverbean"));
+			  Arrays.asList("http://societies.org/api/ext3p/schema/displayportalserverbean",
+					  "http://societies.org/api/schema/servicelifecycle/model"));
 	private static final List<String> PACKAGES = Collections.unmodifiableList(
-		  Arrays.asList("org.societies.api.ext3p.schema.displayportalserverbean"));
-
+		  Arrays.asList("org.societies.api.ext3p.schema.displayportalserverbean",
+				  "org.societies.api.schema.servicelifecycle.model"));
+				  
 	private ICommManager commManager;
 	private static Logger logging = LoggerFactory.getLogger(CommsClient.class);
 	private IIdentityManager idMgr;
@@ -188,18 +190,18 @@ public class CommsClient implements IDisplayPortalServer, ICommCallback{
 				synchronized(this.ipAddressResults){
 				this.ipAddressResults.wait();
 				}
+				DisplayPortalServerIPAddressResultBean resultBean = this.ipAddressResults.get(DisplayPortalServerMethodType.REQUEST_ACCESS);
+				
+				String toReturn = new String(resultBean.getIpAddress());
+				
+				this.ipAddressResults.remove(DisplayPortalServerMethodType.REQUEST_ACCESS);
+				return toReturn;
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
-
-		DisplayPortalServerIPAddressResultBean resultBean = this.ipAddressResults.get(DisplayPortalServerMethodType.REQUEST_ACCESS);
-		
-		String toReturn = new String(resultBean.getIpAddress());
-		
-		this.ipAddressResults.remove(DisplayPortalServerMethodType.REQUEST_ACCESS);
-		return toReturn;
+		return "REFUSED";
 	}
 
 	@Override
@@ -240,29 +242,31 @@ public class CommsClient implements IDisplayPortalServer, ICommCallback{
 				synchronized (this.screenLocationsResults){
 					this.screenLocationsResults.wait();
 				}
+				DisplayPortalServerScreenLocationResultBean resultBean = this.screenLocationsResults.get(DisplayPortalServerMethodType.GET_SCREEN_LOCATIONS);
+				
+				byte[] bytearray = resultBean.getScreenLocations();
+				
+				String[] locations;
+				try {
+					locations = (String[]) SerialisationHelper.deserialise(bytearray, this.getClass().getClassLoader());
+					this.screenLocationsResults.remove(DisplayPortalServerMethodType.GET_SCREEN_LOCATIONS);
+					return locations;
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (ClassNotFoundException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
 		
-		DisplayPortalServerScreenLocationResultBean resultBean = this.screenLocationsResults.get(DisplayPortalServerMethodType.GET_SCREEN_LOCATIONS);
+
 		
-		byte[] bytearray = resultBean.getScreenLocations();
 		
-		String[] locations;
-		try {
-			locations = (String[]) SerialisationHelper.deserialise(bytearray, this.getClass().getClassLoader());
-			return locations;
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-		this.screenLocationsResults.remove(DisplayPortalServerMethodType.GET_SCREEN_LOCATIONS);
 		return new String[0];
 	}
 
@@ -274,28 +278,31 @@ public class CommsClient implements IDisplayPortalServer, ICommCallback{
 		Stanza stanza = new Stanza(serverIdentity);
 		
 		try {
+			this.logging.debug("Requesting serviceID");
 			this.commManager.sendIQGet(stanza, bean, this);
+			while (!this.serviceIDResults.containsKey(DisplayPortalServerMethodType.GET_SERVER_SERVICE_ID)){
+				try {
+					this.logging.debug("waiting for results");
+					synchronized(this.serviceIDResults){
+						this.serviceIDResults.wait();
+					}
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			this.logging.debug("Received serviceID");
+			DisplayPortalServerServiceIDResultBean resultBean = this.serviceIDResults.get(DisplayPortalServerMethodType.GET_SERVER_SERVICE_ID);
+			ServiceResourceIdentifier serviceId = resultBean.getServiceID();
+			this.serviceIDResults.remove(DisplayPortalServerMethodType.GET_SERVER_SERVICE_ID);
+			return serviceId;
 		} catch (CommunicationException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
-		while (!this.serviceIDResults.containsKey(DisplayPortalServerMethodType.GET_SERVER_SERVICE_ID)){
-			try {
-				this.logging.debug("waiting for results");
-				synchronized(this.serviceIDResults){
-					this.serviceIDResults.wait();
-				}
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-		DisplayPortalServerServiceIDResultBean resultBean = this.serviceIDResults.get(DisplayPortalServerMethodType.GET_SERVER_SERVICE_ID);
-		ServiceResourceIdentifier serviceId = resultBean.getServiceID();
-		this.serviceIDResults.remove(DisplayPortalServerMethodType.GET_SERVER_SERVICE_ID);
-		return serviceId;
-		
+
+		return null;
 		
 		
 	}

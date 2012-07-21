@@ -56,9 +56,11 @@ import ac.hw.display.server.api.IDisplayPortalServer;
 public class CommsServer implements IFeatureServer{
 
 	private static final List<String> NAMESPACES = Collections.unmodifiableList(
-			  Arrays.asList("http://societies.org/api/ext3p/schema/displayportalserverbean"));
+			  Arrays.asList("http://societies.org/api/ext3p/schema/displayportalserverbean",
+					  "http://societies.org/api/schema/servicelifecycle/model"));
 	private static final List<String> PACKAGES = Collections.unmodifiableList(
-		  Arrays.asList("org.societies.api.ext3p.schema.displayportalserverbean"));
+		  Arrays.asList("org.societies.api.ext3p.schema.displayportalserverbean",
+				  "org.societies.api.schema.servicelifecycle.model"));
 
 	
 	
@@ -124,12 +126,14 @@ public class CommsServer implements IFeatureServer{
 		if (payload instanceof DisplayPortalServerBean){
 			
 			if (((DisplayPortalServerBean) payload).getMethod().equals(DisplayPortalServerMethodType.GET_SCREEN_LOCATIONS)){
+				this.LOG.debug("getQuery: "+DisplayPortalServerMethodType.GET_SCREEN_LOCATIONS);
 				String[] locations = this.displayPortalServer.getScreenLocations();
 				
 				try {
 					byte[] serialisedObj = SerialisationHelper.serialise(locations);
 					DisplayPortalServerScreenLocationResultBean resultBean = new DisplayPortalServerScreenLocationResultBean();
 					resultBean.setScreenLocations(serialisedObj);
+					this.LOG.debug("Returning screen locations");
 					return resultBean;
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
@@ -139,19 +143,22 @@ public class CommsServer implements IFeatureServer{
 				
 			}
 			if (((DisplayPortalServerBean) payload).getMethod().equals(DisplayPortalServerMethodType.REQUEST_ACCESS)){
-				
+				this.LOG.debug("getQuery: "+DisplayPortalServerMethodType.REQUEST_ACCESS);
 				String identity = ((DisplayPortalServerBean) payload).getIdentity();
 				String location = ((DisplayPortalServerBean) payload).getLocation();
 				String ipAddress =  this.displayPortalServer.requestAccess(identity, location);
 				DisplayPortalServerIPAddressResultBean resultBean = new DisplayPortalServerIPAddressResultBean();
 				resultBean.setIpAddress(ipAddress);
+				this.LOG.debug("Returning result of access request: "+ipAddress);
 				return resultBean;
 			}
 			
 			if (((DisplayPortalServerBean) payload).getMethod().equals(DisplayPortalServerMethodType.GET_SERVER_SERVICE_ID)){
+				this.LOG.debug("getQuery: "+DisplayPortalServerMethodType.GET_SERVER_SERVICE_ID);
 				ServiceResourceIdentifier serviceId = displayPortalServer.getServerServiceId();
 				DisplayPortalServerServiceIDResultBean resultBean = new DisplayPortalServerServiceIDResultBean();
 				resultBean.setServiceID(serviceId);
+				this.LOG.debug("Returning serviceID: "+serviceId.getServiceInstanceIdentifier()+" "+serviceId.getIdentifier());
 				return resultBean;
 				
 			}

@@ -13,6 +13,7 @@
 	<bean id="displayPortalServer"
 		class="ac.hw.display.server.DisplayPortalServer"
 		name="displayPortalServer" init-method="initialiseServer">
+	    <property name="commManager" ref="commManager"></property>		
 		<property name="services" ref="IServices"></property>
 	</bean>
 

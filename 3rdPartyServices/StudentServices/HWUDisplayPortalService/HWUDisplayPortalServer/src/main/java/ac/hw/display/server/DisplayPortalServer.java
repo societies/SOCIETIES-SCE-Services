@@ -32,9 +32,14 @@ import java.util.regex.Pattern;
 
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
+import javax.xml.ws.ServiceMode;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.societies.api.comm.xmpp.interfaces.ICommManager;
+import org.societies.api.identity.IIdentity;
+import org.societies.api.identity.IIdentityManager;
+import org.societies.api.internal.servicelifecycle.ServiceModelUtils;
 import org.societies.api.schema.servicelifecycle.model.ServiceResourceIdentifier;
 import org.societies.api.services.IServices;
 
@@ -55,7 +60,7 @@ public class DisplayPortalServer implements IDisplayPortalServer{
 	
 	List<String> screenIPAddresses;
 
-	private static Logger LOG = LoggerFactory.getLogger(CommsServer.class);
+	private static Logger LOG = LoggerFactory.getLogger(DisplayPortalServer.class);
 
 
 	private Hashtable<String, String> currentlyUsedScreens;
@@ -66,6 +71,11 @@ public class DisplayPortalServer implements IDisplayPortalServer{
 
 
 	private ServiceResourceIdentifier myServiceId;
+	
+	private ICommManager commManager;
+	private IIdentityManager idMgr;
+
+	private IIdentity serverIdentity;
 	
 	public DisplayPortalServer(){
 		screenIPAddresses = new ArrayList<String>();
@@ -129,7 +139,16 @@ public class DisplayPortalServer implements IDisplayPortalServer{
 	public ServiceResourceIdentifier getServerServiceId() {
 		if (this.myServiceId==null){
 			this.myServiceId = this.getServices().getMyServiceId(this.getClass());
+			if (this.myServiceId==null){
+				this.myServiceId = ServiceModelUtils.generateServiceResourceIdentifier(this.serverIdentity, this.getClass());
+
+			}
 			
+			if (this.myServiceId==null){
+				this.LOG.debug("ServiceID could not be retrieved");
+			}else{
+				this.LOG.debug("Returning serviceID :"+this.myServiceId);
+			}	
 		}
 		return this.myServiceId;
 	}
@@ -146,6 +165,22 @@ public class DisplayPortalServer implements IDisplayPortalServer{
 	 */
 	public void setServices(IServices services) {
 		this.services = services;
+	}
+
+	/**
+	 * @return the commManager
+	 */
+	public ICommManager getCommManager() {
+		return commManager;
+	}
+
+	/**
+	 * @param commManager the commManager to set
+	 */
+	public void setCommManager(ICommManager commManager) {
+		this.commManager = commManager;
+		this.idMgr = commManager.getIdManager();
+		serverIdentity = this.idMgr.getThisNetworkNode();
 	}
 
 
