@@ -75,9 +75,9 @@
 		<dependency>
 			<groupId>org.societies.api.ext3p</groupId>
 			<artifactId>societies-api-ext3p</artifactId>
-			<version>0.1</version>
+			<version>${release.version}</version>
 			<scope>provided</scope>
-		</dependency>
+		</dependency>		
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-simple</artifactId>
@@ -159,10 +159,10 @@
 						org.societies.rdpartyService.enterprise.interfaces;version="[0.1.0,1.0.0)",
 							org.societies.rdpartyService.enterprise;version="[0.1.0,1.0.0)",
 							 
-						 -->						
+						 -->
 						<Import-Package>
-							org.societies.api.ext3p.schema.sharedcalendar;version="[0.1,1)",
-							org.societies.rdpartyService.enterprise.interfaces;version="[0.1,1)",
+							org.societies.api.ext3p.schema.sharedcalendar;version="[0.1.0,1.0.0)",
+							org.societies.rdpartyService.enterprise.interfaces;version="[0.1.0,1.0.0)",
 							org.springframework.stereotype;version="[3.0,4)",
 							org.springframework.ui;version="[3.0,4)",
 							org.springframework.web.bind.annotation;version="[3.0,4)",
@@ -191,8 +191,7 @@
 							org.springframework.web.servlet.support;version="[3.0.0,4.0.0)",
 							org.springframework.web.servlet.tags;version="[3.0.0,4.0.0)",
 							org.springframework.web.servlet.tags.form;version="[3.0.0,4.0.0)",
-							org.springframework.web.servlet.theme;version="[3.0.0,4.0.0)",
-							*;resolution:=optional																					
+							org.springframework.web.servlet.theme;version="[3.0.0,4.0.0)"						
 						</Import-Package>
 					</instructions>
 				</configuration>
