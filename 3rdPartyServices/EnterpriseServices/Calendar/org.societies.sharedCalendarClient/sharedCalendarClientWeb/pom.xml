@@ -132,8 +132,15 @@
 						<Bundle-Version>${project.version}</Bundle-Version>
 						<Web-ContextPath>sharedCal</Web-ContextPath>
 						<Bundle-ClassPath>WEB-INF/classes,.</Bundle-ClassPath>
-						<Webapp-Context>sharedCal</Webapp-Context>						
+						<Webapp-Context>sharedCal</Webapp-Context>
+						<!--
+						org.societies.rdpartyService.enterprise.interfaces;version="[0.1.0,1.0.0)",
+							org.societies.rdpartyService.enterprise;version="[0.1.0,1.0.0)",
+							 
+						 -->						
 						<Import-Package>
+							org.societies.api.ext3p.schema.sharedcalendar;version="[0.1,1)",
+							org.societies.rdpartyService.enterprise.interfaces;version="[0.1,1)",
 							org.springframework.stereotype;version="[3.0,4)",
 							org.springframework.ui;version="[3.0,4)",
 							org.springframework.web.bind.annotation;version="[3.0,4)",
@@ -162,7 +169,8 @@
 							org.springframework.web.servlet.support;version="[3.0.0,4.0.0)",
 							org.springframework.web.servlet.tags;version="[3.0.0,4.0.0)",
 							org.springframework.web.servlet.tags.form;version="[3.0.0,4.0.0)",
-							org.springframework.web.servlet.theme;version="[3.0.0,4.0.0)"																					
+							org.springframework.web.servlet.theme;version="[3.0.0,4.0.0)",
+							*;resolution:=optional																					
 						</Import-Package>
 					</instructions>
 				</configuration>
@@ -187,6 +195,18 @@
 			</plugin>
 			<plugin>
 				<artifactId>maven-dependency-plugin</artifactId>
+				<configuration>
+					<artifactItems>
+						<artifactItem>
+							<groupId>${project.groupId}</groupId>
+							<artifactId>${project.artifactId}</artifactId>
+							<version>${project.version}</version>
+							<type>war</type>
+							<overWrite>true</overWrite>
+							<outputDirectory>${spring.osgi.deploy.dir}</outputDirectory>
+						</artifactItem>
+					</artifactItems>
+				</configuration>
 				<executions>
 					<execution>
 						<id>copy-installed</id>
@@ -245,22 +265,6 @@
 						</configuration>
 					</execution>
 				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-dependency-plugin</artifactId>
-				<configuration>
-					<artifactItems>
-						<artifactItem>
-							<groupId>${project.groupId}</groupId>
-							<artifactId>${project.artifactId}</artifactId>
-							<version>${project.version}</version>
-							<type>war</type>
-							<overWrite>true</overWrite>
-							<outputDirectory>${spring.osgi.deploy.dir}</outputDirectory>
-						</artifactItem>
-					</artifactItems>
-				</configuration>
 			</plugin>
 		</plugins>
 	</build>

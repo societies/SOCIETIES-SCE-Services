@@ -53,7 +53,7 @@
 		<property name="privacyPolicy" value="http://societies.local/local_file" />
 	</bean>
 
-	<osgi:set id="availableDevicesSet" interface="org.societies.api.css.devicemgmt.IDevice">
+	<osgi:set id="availableDevicesSet" interface="org.societies.api.css.devicemgmt.IDevice" cardinality="0..N">
 		<osgi:listener bind-method="onBind" unbind-method="onUnbind">
 			<bean
 				class="org.societies.rdPartyService.enterprise.sharedCalendar.DeviceListener" />
