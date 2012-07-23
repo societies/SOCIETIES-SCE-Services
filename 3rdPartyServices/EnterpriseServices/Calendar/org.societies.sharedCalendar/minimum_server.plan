@@ -17,7 +17,7 @@
     <artifact type="bundle" name="org.societies.platform.servicelifecycle.serviceRegistry"/>
     <artifact type="bundle" name="org.societies.platform.servicelifecycle.serviceManagement"/>
     <artifact type="bundle" name="org.societies.slm.SLMCommsManager"/>
-    <artifact type="bundle" name="societies-webapp"/>
+    <!--artifact type="bundle" name="societies-webapp"/-->
 	
 	<!-- Calendar Server Artifacts - Start -->
 	<artifact type="bundle" name="org.societies.api.ext3p.societies-api-ext3p"/>
@@ -25,12 +25,14 @@
 	<artifact type="configuration" name="bk"/>
 	<!-- Calendar Server Artifacts - End -->
 	
-	<!-- Device Manager Stuff -->
+	<!-- PubSub - ->
+	<artifact type="bundle" name="org.societies.comm.xmpp.pubsub.PubsubServiceBundle"/>
+	<artifact type="bundle" name="org.societies.comm.xmpp.pubsub.PubsubClientBundle"/>
+	
+	<!- - Device Manager Stuff - ->
 	<artifact type="bundle" name="org.societies.css.devicemgmt.devicemanager"/>
 	<artifact type="bundle" name="org.societies.css.devicemgmt.DeviceDriverSimulator"/>
 	<artifact type="bundle" name="org.societies.css.devicemgmt.DeviceCommsMgr"/>
+	-->
 	
-	<!-- PubSub -->
-	<artifact type="bundle" name="org.societies.comm.xmpp.pubsub.PubsubServiceBundle"/>
-	<artifact type="bundle" name="org.societies.comm.xmpp.pubsub.PubsubClientBundle"/>
 </plan>
