@@ -37,7 +37,7 @@ import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.config.ClientConfig;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
-import com.sun.jersey.api.representation.Form;
+
 
 /**
  * Describe your class here...
@@ -79,10 +79,13 @@ public class TestClient {
 		// Get the Volunteer with id 6
 		String volunteerJSON = getVolunteer(service,"6",MediaType.APPLICATION_JSON);
 		System.out.println(volunteerJSON);
-		// Get group with expertise
+		// Get translators
 		String translator = getTranslator(service,MediaType.APPLICATION_JSON);
 		System.out.println(volunteerJSON);
-		
+		// Get group with expertise
+		// expertise skills are seperated by "&"
+		String groupJSON = getVolunteersByExpertise(service,MediaType.APPLICATION_JSON, "english&Japanese&"); 
+		System.out.println(groupJSON);
 		
 		
 
@@ -109,6 +112,11 @@ public class TestClient {
 	private static String getVolunteers(WebResource service,String type){
 		return service.path("rest").path("/")
 				.accept(type).get(String.class);
+	}
+	
+	private static String getVolunteersByExpertise(WebResource service,String type,String expertise){
+		return service.path("rest").path("volunteers/"+expertise).
+				accept(type).get(String.class);
 	}
 
 	private static String getVolunteer(WebResource service,

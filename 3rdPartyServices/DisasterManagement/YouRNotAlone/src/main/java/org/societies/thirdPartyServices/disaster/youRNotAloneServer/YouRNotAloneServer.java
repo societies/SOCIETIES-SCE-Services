@@ -86,13 +86,13 @@ public class YouRNotAloneServer {
 		}
 		
 		@GET
-		@Path("translator/{v}")
+		@Path("volunteers/{v}")
 		@Produces({MediaType.APPLICATION_XML,MediaType.APPLICATION_JSON})
-		public List<Volunteer> getTranslatorByLang(@PathParam("v") String lang) {
+		public List<Volunteer> getTranslatorByLang(@PathParam("v") String pro) {
 			System.out.println(YouRNotAloneDAO.instance.getVO().getTranslator().size());
-			ArrayList<String> langs = new ArrayList<String>();
-			Collections.addAll(langs, lang.split("&"));
-			return YouRNotAloneDAO.instance.getVO().getGroupByProperties(langs);
+			ArrayList<String> pros = new ArrayList<String>();
+			Collections.addAll(pros, pro.toLowerCase().split("&"));
+			return YouRNotAloneDAO.instance.getVO().getGroupByProperties(pros);
 		}
 		
 //		@POST
