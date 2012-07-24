@@ -14,22 +14,27 @@
 		this file. There is no requirement to keep these definitions in a separate 
 		file if you do not want to. The rationale for keeping these definitions separate 
 		is to facilitate integration testing of the bundle outside of an OSGi container -->
-	<bean id="sharedCalClientRich" class="org.societies.rdpartyService.enterprise.SharedCalendarClientRich" init-method="InitService">
-		<constructor-arg value="${serverJid}" />
-		<constructor-arg value="${jsonFilePath}" />
-		<property name="commManager" ref="CommManagerBundle" />
-<!-- 		<property name="idMgr" ref="IdentityManagerBundle" /> -->
-	</bean>
-
 
 	<context:property-placeholder properties-ref="clientProperties" />
 
 	<osgi-compendium:cm-properties id="clientProperties" persistent-id="sharedCalClient" />
 
-	<osgi:reference id="CommManagerBundle" interface="org.societies.api.comm.xmpp.interfaces.ICommManager" cardinality="1..1"/>
-<!-- 	<osgi:reference id="IdentityManagerBundle" interface="org.societies.api.identity.IIdentityManager"  cardinality="1..1"/> -->
-		
-	<osgi:service id="calClientRichInterface" ref="sharedCalClientRich" interface="org.societies.rdpartyService.enterprise.interfaces.ISharedCalendarClientRich" />
-	<osgi:service id="calClientCommCallback" ref="sharedCalClientRich" interface="org.societies.api.comm.xmpp.interfaces.ICommCallback" />
+	<osgi:reference id="CommManagerBundle" interface="org.societies.api.comm.xmpp.interfaces.ICommManager" cardinality="1..1" />
+	<osgi:reference id="eventManager" interface="org.societies.api.osgi.event.IEventMgr"/>
+	
+	<osgi:service id="calClientRichInterface" ref="sharedCalendarClientRich" interface="org.societies.rdpartyService.enterprise.interfaces.ISharedCalendarClientRich">
+		<osgi:service-properties>
+			<entry key="TargetPlatform" value="SOCIETIES" />
+			<entry key="ServiceProvider" value="ICT-SOCIETIES" />
+		</osgi:service-properties>
+	</osgi:service>
+	<osgi:service id="calClientCommCallback" ref="sharedCalendarClientRich" interface="org.societies.api.comm.xmpp.interfaces.ICommCallback" />
 
+	<osgi:set id="availableDevicesSet" 
+		interface="org.societies.api.css.devicemgmt.IDevice"
+		filter="(deviceType=screen)" cardinality="0..N">
+		<osgi:listener bind-method="onBind" unbind-method="onUnbind">
+        	<bean class="org.societies.rdpartyService.enterprise.ClientDeviceListener"/>
+        </osgi:listener>
+	</osgi:set>
 </beans>

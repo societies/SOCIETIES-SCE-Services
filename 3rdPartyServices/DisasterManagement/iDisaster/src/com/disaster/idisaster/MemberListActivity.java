@@ -47,7 +47,7 @@ public class MemberListActivity extends Activity {
 	super.onCreate(savedInstanceState);
 
 	TextView textview = new TextView(this);
-        textview.setText("This is the Users tab");
+        textview.setText("No Members yet. Select menu to add members.");
         setContentView(textview);
     }
 

@@ -1,0 +1,96 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+	<title>Receiving a Callback from the Platform Gateway</title>
+</head>
+
+<body>
+<h1>Receiving a Callback from the Platform Gateway</h1>
+
+You call the sendMessage() method when your end point service returns no object. The sendIQget() method is used to get a result back, but runs asynchronously and you may end up sending many queries before getting the corresponding results back. In other terms, you are not guaranteed the order of requests is the same order of responses. Therefore, you are required to map a response back to the correct request. To aid with this, your message bean is encapsulated in a Stanza object (the <IQ> xml node) that contains To and From attributes but also a unique identifier that you can use to map requests with asynchronous responses:
+<pre>
+ &lt;iq type="get" <span style="color: #FF0000;">id="7d48d290-2d1b-44b9-b746-7f495949850f"</span> to="xcmanager.societies.local" from="xcmanager.societies.local"&gt;
+   &lt;calcBean xmlns="http://societies.org/example/calculatorservice/schema"&gt;
+     &lt;a&gt;2&lt;/a&gt;
+     &lt;b&gt;3&lt;/b&gt;
+     &lt;method&gt;AddAsync&lt;/method&gt;
+   &lt;/calcBean&gt;
+ &lt;/iq&gt;
+</pre>
+ 
+The Stanza object provides an interface to set and get these attributes:
+<pre>
+public String getId() { return id; }
+public Identity getFrom() { return from; }
+public Identity getTo() { return to; }
+public void setId(String id) { this.id = id; }
+public void setFrom(Identity from) { this.from = from;     }
+public void setTo(Identity to) {this.to = to; }
+</pre>
+ 
+
+As usual with network invocations, you need to implement the ICommCallback interface - which is a Callback interface as the name implies -- to handle the reply in the receiveResult() method.
+
+The suggested strategy is to use an object of type Map<String, ICalcRemoteCallback> for  storing the unique request ID together with the callback that will handle the matching response.
+
+The ExampleCommsManager project uses the CommsClientCallback calls to implement this suggested strategy:
+<pre>
+public class CommsClientCallback implements ICommCallback {
+ //MAP TO STORE THE ALL THE CLIENT CONNECTIONS
+ private final <span style="color: #FF0000;">Map<String, ICalcRemoteCallback> calcClients</span> =
+                                   new HashMap<String,  CalcRemoteCallback> ();
+
+ //CONSTRUCTOR - ADD THE CLIENT AND UNIQUE ID TO THE HASHMAP
+ public CommsClientCallback(String clientID, ICalcRemoteCallback calcClient) {
+     //STORE THIS CALLBACK WITH THIS REQUEST ID
+     <span style="color: #FF0000;">calcClients.put(clientID, calcClient);</span>
+ }
+...
+</pre>
+
+The ICommCallback interface requires you to process the result in the receiveResult() method. As stated before, you receive a generic message bean as the input parameter, so you need to check its runtime type to perform a correct cast.
+<pre>
+ public void receiveResult(Stanza returnStanza, Object msgBeanResult) {
+     //CHECK WHICH END SERVICE IS SENDING US A MESSAGE
+     // --------- CALCULATOR BUNDLE ---------
+     if (msgBeanResult.getClass().equals(CalcBeanResult.class)) {
+         CalcBeanResult calcResult = (CalcBeanResult) msgBeanResult;
+     //return the calcResult.getResult() to the calling client
+     }
+
+     // -------- FORTUNE COOKIE BUNDLE ---------
+     else if (msgBeanResult.getClass().equals(FortuneCookieBeanResult.class)) {
+         FortuneCookieBeanResult fcBeanResult = (FortuneCookieBeanResult) msgBeanResult;
+     //return the fcBeanResult to the calling client
+ }
+</pre>
+ 
+
+Now that we have the result, we need to get the originating client (i.e. the IcommCallback instance associated with the original request) and hand it the return object back. The ID of this request can be found in the returnStanza.getID()
+<pre>
+int returnedValue = calcResult.getResult();
+ICalcRemoteCallback requestingClient = (ICalcRemoteCallback) calcClients.get(returnStanza.getId());
+calcClient.receiveCalcResult(returnedValue);
+</pre>
+ 
+
+At last, you can implement your remote method, eg, AddAsync(). Create your message bean, populate the required properties, put in the correct method, and call sendIQ() for methods with return types or sendMessage() for void methods on the gateway:
+<pre>
+ public void AddAsync(int valA, int valB, ICalcRemoteCallback calcCallback) {
+     ...
+     CalcBean calc = new CalcBean();
+     calc.setA(valA);
+     calc.setB(valB);
+     calc.setMethod(MethodType.AddAsync);
+
+     try {
+         <span style="color: #FF0000;">commManager.sendIQGet(stanza, calc, callback);</span>
+     } catch (CommunicationException e) {
+         LOG.warn(e.getMessage());
+     };
+ }
+</pre>
+</body>
+</html>

@@ -1,0 +1,21 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+	<title>Creating an Event Type</title>
+</head>
+
+<body>
+<h1>Creating an Event Type</h1>
+
+To define your custom event types, add them to the EventTypes.java class in the External API project, package org.societies.api.osgi.event:
+<pre>
+/**Used by Service Management (Service Discovery) to notify a local peer of a failed service */
+public static final String ADD_SERVICE_EVENT="org/societies/servicemgmt/service/addservice";
+
+/**Used by Service Management (Service Discovery) to notify peers of a removed service*/
+public static final String REMOVED_SERVICE_EVENT="org/societies/servicemgmt/service/removeservice";
+</pre>
+</body>
+</html>

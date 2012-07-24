@@ -1,0 +1,41 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+	<title>Subscribing for and reacting to context change events</title>
+</head>
+<body>
+<h1>Subscribing for and reacting to context change events</h1>
+
+The ICtxBroker interface provides methods for registering CtxChangeEventListeners in order to listen for context change events. There are two ways to subscriber for context change event notification:
+<pre>
+// 1a. Register listener by specifying the context attribute identifier
+this.internalCtxBroker.registerForChanges(new MyCtxChangeEventListener(), this.ctxAttributeStringIdentifier);
+
+// 1b. Register listener by specifying the context attribute scope and type
+this.internalCtxBroker.registerForChanges(new MyCtxChangeEventListener(), this.ctxEntityIdentifier, "DeviceID");
+</pre>
+
+The subscriber's implementation of the CtxChangeEventListener interface allows reacting to the following event notifications:
+<pre>
+private class MyCtxChangeEventListener implements CtxChangeEventListener {
+	public void onCreation(CtxChangeEvent event) {
+			LOG.info(event.getId() + ": *** CREATED event ***");
+	}
+
+	public void onModification(CtxChangeEvent event) {
+			LOG.info(event.getId() + ": *** MODIFIED event ***");
+	}
+
+	public void onRemoval(CtxChangeEvent event) {
+			LOG.info(event.getId() + ": *** REMOVED event ***");
+	}
+
+	public void onUpdate(CtxChangeEvent event) {
+			LOG.info(event.getId() + ": *** UPDATED event ***");
+	}
+}
+</pre>
+</body>
+</html>

@@ -1,0 +1,82 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+	<title>CIS Management</title>
+</head>
+
+<body>
+<h1>CIS Management</h1>
+
+This section provides information regarding the use of the SOCIETIES CIS Manager facilities by Third Party context-aware services. The CIS Manager Cloud is the component used by the user to manage his own CISs and the CISs in which he is part of.<br />
+
+<h2>API Definition</h2>
+
+<br />
+<img src="../../img/image050.gif" />
+<br />
+
+The CIS Manager Component is delivered as a single bundle, exposing both server and client functionalities.<br />
+As depicted in Figure 26, there are four main interfaces that a Third Party service developer must be aware of:<br />
+<ol>
+<li>ICisManager: exposes the local methods (createCIS, deleteCIS, listSubscribedCIS, listOwnedCIs, ) and the remote methods (joinCIS and leaveCIS). This is the main interface that clients will use.</li>
+<li>ICis: exposes the methods on remote or local CISs (listMembers, getCisinfo), the implementation is different depending on the fact that the represented CIS is local or remote, but the method signatures are the same.</li>
+<li>ICisOwned: exposes methods on the owned (i.e. "local") CIS. It extends the ICis interface and adds methods which can be applied just to an owned CISs (addMember, removeMember).</li>
+<li>ICisManagerCallback: this is the callback interface for remote methods. At the moment, the data is encapsulated in an object of type org.societies.api.schema.cis.community.Community</li>
+</ol>
+Instances of the ICis interface are created the user joins a CIS, whilst instances of ICisOwned are created when the user creates his own CISs.
+
+The CIS and CisManager Classes implement the IFeatureServer interface (see Section 10.1.3.1) which is required to asynchronously handle requests coming from both other peers, android clients or any other software component able to send and receive XMPP messages.
+
+The CisManager uses the org.societies.cis.manager.CisManager.ICommMgr service provided by the CSS through dependency injection, whilst the ICisOwned instances use their own ICommMgr implementation,  which is created on the fly when they are instantiated.
+
+<h2>Technical Configuration</h2>
+
+If you want to get the Cis Manager service injected in your service, you will have to add the following dependency on you project's Maven configuration file (i.e. pom.xml):
+<pre>
+ &lt;dependency&gt;
+   &lt;groupId&gt;org.societies.api.external&lt;/groupId&gt;
+   &lt;artifactId&gt;societies-api&lt;/artifactId&gt;
+   &lt;version&gt;${release.version}&lt;/version&gt;
+   &lt;scope&gt;provided&lt;/scope&gt;
+ &lt;/dependency&gt;
+</pre>
+ 
+
+Once the dependency is in place, you will be able to insert a reference in Spring's bundle-context-osgi.xml file (which, by SOCIETIES convention, holds all the OSGi-related bean settings):
+<pre>
+	&lt;osgi:reference id="CisManagementBundle" interface="org.societies.api.cis.management.ICisManager"/&gt;
+</pre>
+ 
+
+Finally, the following bundles will have to be available in the Virgo instance that you will be running. Check that they are included in the Virgo plan:
+<pre>
+&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+
+&lt;plan name="org.societies.cismanagement.plan" version="3.0.0" scoped="false" atomic="false"
+        xmlns="http://www.eclipse.org/virgo/schema/plan"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.eclipse.org/virgo/schema/plan
+                http://www.eclipse.org/virgo/schema/plan/eclipse-virgo-plan.xsd"&gt;
+   &lt;artifact type="bundle" name="org.societies.api.external.societies-api"/&gt;
+   &lt;artifact type="bundle" name="org.societies.api.internal.societies-api-internal"/&gt;
+   &lt;artifact type="bundle" name="org.societies.comm.xmpp.XCCommunicationMgr"/&gt;
+   &lt;artifact type="bundle" name="org.societies.data-source"/&gt;
+   &lt;!-- from services --&gt;    
+   &lt;artifact type="bundle" name="org.societies.comm.xmpp.pubsub.PubsubServiceBundle"/&gt;
+   &lt;artifact type="bundle" name="org.societies.comm.xmpp.pubsub.PubsubClientBundle"/&gt;
+   &lt;artifact type="bundle" name="org.societies.platform.servicelifecycle.serviceRegistry"/&gt;
+   &lt;artifact type="bundle" name="org.societies.platform.servicelifecycle.serviceManagement"/&gt;
+   &lt;artifact type="bundle" name="org.societies.slm.SLMCommsManager"/&gt;
+   &lt;!-- from cis manager --&gt;
+   <span style="color: #ff0000;">&lt;artifact type="bundle" name="org.societies.cis.CisDirectoryClient"/&gt;
+   &lt;artifact type="bundle" name="org.societies.cis.manager"/&gt;</span>
+&lt;/plan&gt;
+</pre>
+ 
+
+Example projects are available to understand how to use the Cis Manager functionalities both from a <a href="https://github.com/societies/SOCIETIES-Platform/tree/development/platform-infrastructure/service-lifecycle/platform-webapp">Web App</a>, and as an integration <a href="https://github.com/societies/SOCIETIES-Platform/tree/development/cis-modules/cis-management/cisMgmtTester">test project</a>.
+
+</body>
+</html>

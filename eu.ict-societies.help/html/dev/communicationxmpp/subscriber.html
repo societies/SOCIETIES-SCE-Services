@@ -1,0 +1,49 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+	<title>Subscriber</title>
+</head>
+
+<body>
+<h1>Subscriber</h1>
+
+The Subscriber list of API's allows the user to subscribe and retrieve info from the pubsub node.
+<ol>
+<li><i>Subscriber</i> is the actual callback object interface you are required to implement to react to  notifications. The only method to implement is <i>pubsubEvent()</i></li>
+<li><i>pubsubService</i> is the owner/id of the pubsub service</li>
+<li><i>node</i> is the topic name</li>
+<li><i>itemId</i> is a unique identifier for that event. If you re-publish an event using the same ID you will overwrite the previously published event details</li>
+<li><i>item</i> represents the event details expressed as an XML element object</li>
+</ol>
+
+ 
+<pre>
+/**Subscribe to a pubsub node and provide the subscriber callback object */
+public String subscriberSubscribe(Identity pubsubService, String node, Subscriber subscriber) throws XMPPError, CommunicationException;
+public void subscriberUnsubscribe(Identity pubsubService, String node, Identity subscriber, String subId) throws XMPPError, CommunicationException;
+public List<Element> subscriberRetrieveLast(Identity pubsubService, String node, String subId) throws XMPPError, CommunicationException;
+public List<Element> subscriberRetrieveSpecific(Identity pubsubService, String node, String subId, List<String> itemIdList) throws XMPPError, CommunicationException;
+</pre>
+ 
+
+Subscribing to an event requires you to implement the Subscriber interface (refer to the GIT repository for all details):
+<pre>
+public class PubsubTest implements Subscriber {
+     //SUBSCRIBE
+     pubSubManager.subscriberSubscribe(pubsubID, "Fortune_Cookies", this);
+
+     @Override
+     public void pubsubEvent(Identity pubsubService, String node, String itemId, Object payload) {
+         if (item.getClass().equals(FortuneCookieBeanResult.class)) {
+         FortuneCookieBeanResult info = (FortuneCookieBeanResult)item;
+         Cookie cookie = info.getCookie();
+         LOG.info("### Wisdom: " + cookie.getValue());
+     }
+}
+</pre>
+ 
+
+</body>
+</html>

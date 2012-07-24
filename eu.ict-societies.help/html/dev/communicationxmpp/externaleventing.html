@@ -1,0 +1,75 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+	<title>External Eventing (XMPP PubSub)</title>
+</head>
+
+<body>
+<h1>External Eventing (XMPP PubSub)</h1>
+
+The publish-subscribe eventing functionality added to the SOCIETIES platform provides a framework for a variety of use cases eg news feeds, content syndication, extended presence, geolocation, profile management, and any other service that requires event notifications (see figure below). This technology uses the classic "publish-subscribe" or "observer" design pattern: a person or application publishes information to a node ("topic"), and an event notification (with or without the actual content) is broadcast to all authorized subscribers. If the content is light, it should be included in the event. However, if it is large the event should simply notify that the content is now available and the service should get it when it is ready (using the communication framework). This lowers the load on the PubSubService.<br />
+
+<br />
+<img src="../../img/image051.png" />
+<br />
+
+Eventing Nodes are owned by an identity and may take a a hierarchical form, i.e. root and sub-nodes:
+<ul>
+	<li>root</li>
+		<ul>
+			<li>"Comm Framework"</li>
+				<ul>
+					<li>"Sending messages"</li>
+					<li>"Eventing and Pubsub"</li>
+				</ul>
+			</li>
+			<li>"Android tutorials"</li>
+				<ul>
+					<li>"Client UI"</li>
+					<li>"IPC Services"</li>
+					<li>...</li>
+				</ul>
+		</ul>
+</ul>
+
+It is possible to create Pubsub event Nodes ("topics") from clients (CSS Nodes) that will allow other CSS Nodes to subscribe to them. Developers can add their own object types as the payload, but only if you have converted them into XSD Schema objects. This is to support multiple development environments/platforms.<br />
+<br />
+Refer to the TestExternalEventing class in the GIT Code Repository for full technical details.<br />
+<br />
+You do need to configure a dependency injection so you should get a reference to the PubsubClientBundle service by registering in the Bundle-context-osgi.xml and Bundle-context.xml files.<br />
+<br />
+Get a reference to the PubsubClientBundle service by registering in the Bundle-context-osgi.xml file:
+<pre>
+&lt;osgi:reference id="PubsubClient" interface="org.societies.comm.xmpp.pubsub.PubsubClient"/&gt;
+</pre>
+
+Ensure you set a property to receive a reference to the PubsubClient in the Bundle-context.xml file:
+<pre>
+&lt;bean id="ClientTestPubSub" class="org.societies.examples.testclient.ClientTester"
+      depends-on="PubsubClient"&gt;
+    &lt;property name="pubsubClient" ref="PubsubClient"/&gt;
+&lt;/bean&gt;
+</pre>
+ 
+The client methods available are divided into Owner, Publisher and Subscriber related functionality (see Sections 3.2.2.1, 3.2.2.2 and 3.2.2.3 respectively). To discover the list of available Event Nodes, you can call the discoItems() method. Leaving the node parameter null will return the listing at the root level. On the other hand, setting the node parameter to a specific topic will return the list of sub topics at that level. The Identity is the owner of this CSS Node obtained by invoking the getThisNetworkNode() method:
+<pre>
+PubsubClient pubsubClient;//INJECTED DEPENDENCY THROUGH CONSTRUCTOR OR PROPERTY
+Identity pubsubID = idManager.getThisNetworkNode();
+//GET A LIST OF PUBSUB TOPICS (at root level)
+List<String> listTopics = pubsubClient.discoItems(pubsubID, null);
+for (String s: listTopics)
+    System.out.println(s);
+</pre> 
+
+To add your own object types as payload of the events your component will fire/subscribe to, you need to make them compliant to Schema objects first (see Section 3.5). Then simply add the XMPP package names like in the following snippet of code:
+<pre>
+List<String> packageList = new ArrayList<String>();
+packageList.add("org.societies.api.schema.calculator");
+packageList.add("org.societies.api.schema.fortunecookie");
+pubsubClient.addJaxbPackages(packageList);
+</pre>
+
+</body>
+</html>

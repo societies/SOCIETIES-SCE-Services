@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<xs:schema elementFormDefault="qualified" version="1.0" 
+targetNamespace="http://societies.org/thirdparty/conferenceregistration/schema" 
+xmlns:tns="http://societies.org/thirdparty/conferenceregistration/schema" 
+xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+<xs:element name="conferenceRegBeanResult">
+  <xs:complexType >
+    <xs:sequence>
+	  <xs:element name="conference" type="tns:conference" nillable="true" minOccurs="0"/>
+	  <xs:element name="session" type="tns:session" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="conferenceRegBean">
+  <xs:complexType >
+    <xs:sequence>
+      <xs:element name="method" type="tns:methodName" nillable="true" minOccurs="0"/>
+      <xs:element name="name" type="xs:string" nillable="true" minOccurs="0"/>
+      <xs:element name="description" type="xs:string" nillable="true" minOccurs="0"/>
+      <xs:element name="startDate" type="xs:string" nillable="true" minOccurs="0"/>
+      <xs:element name="endDate" type="xs:string" nillable="true" minOccurs="0"/>
+	  <xs:element name="location" type="xs:string" nillable="true" minOccurs="0"/>
+      <xs:element name="cisId" type="xs:string" nillable="true" minOccurs="0"/>
+      <xs:element name="creatorId" type="xs:string" nillable="true" minOccurs="0"/>
+      <xs:element name="cssId" type="xs:string" nillable="true" minOccurs="0"/>
+	  <xs:element name="sessionId" type="xs:string" nillable="true" minOccurs="0"/>
+	  <xs:element name="conferenceId" type="xs:string" nillable="true" minOccurs="0"/>
+	  <xs:element name="conference" type="tns:conference" nillable="true" minOccurs="0"/>
+	  <xs:element name="session" type="tns:session" nillable="true" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+  <xs:complexType name="conference">
+    <xs:sequence>
+      <xs:element name="conferenceId" type="xs:string"/>
+      <xs:element name="name" type="xs:string" minOccurs="0"/>
+      <xs:element name="description" type="xs:string" minOccurs="0"/>
+      <xs:element name="startDate" type="xs:string" minOccurs="0"/>
+      <xs:element name="endDate" type="xs:string" minOccurs="0"/>
+	  <xs:element name="location" type="xs:string" minOccurs="0"/>
+      <xs:element name="cisId" type="xs:string" minOccurs="0"/>
+      <xs:element name="creatorId" type="xs:string" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+  
+    <xs:complexType name="session">
+    <xs:sequence>
+      <xs:element name="sessionId" type="xs:string"/>
+      <xs:element name="name" type="xs:string" minOccurs="0"/>
+      <xs:element name="description" type="xs:string" minOccurs="0"/>
+      <xs:element name="startDate" type="xs:string" minOccurs="0"/>
+      <xs:element name="endDate" type="xs:string" minOccurs="0"/>
+	  <xs:element name="location" type="xs:string" minOccurs="0"/>
+      <xs:element name="cisId" type="xs:string" minOccurs="0"/>
+      <xs:element name="conferenceId" type="xs:string" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+    
+  <xs:simpleType name="methodName">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="getConference"/>
+      <xs:enumeration value="getConferenceList"/>
+      <xs:enumeration value="createConference"/>
+      <xs:enumeration value="deleteConference"/>
+      <xs:enumeration value="updateConference"/>
+	  <xs:enumeration value="joinConference"/>
+      <xs:enumeration value="leaveConference"/>
+      <xs:enumeration value="addSession"/>
+      <xs:enumeration value="removeSession"/>
+      <xs:enumeration value="updateSession"/>
+	  <xs:enumeration value="getSession"/>
+	  <xs:enumeration value="getConferenceSessions"/>
+      <xs:enumeration value="joinSession"/>
+      <xs:enumeration value="leaveSession"/>
+      <xs:enumeration value="getMyConferencePlan"/>
+    </xs:restriction>
+  </xs:simpleType>
+</xs:schema>
+

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+   <feature url="features/Societies_Help_Feature_1.0.0.201207051126.jar" id="Societies_Help_Feature" version="1.0.0.201207051126">
+      <category name="Societies"/>
+   </feature>
+   <category-def name="Societies" label="Societies Help and Tutorials">
+      <description>
+         Technical help and tutorials to develop SOCIETIES Third Party Services.
+      </description>
+   </category-def>
+</site>

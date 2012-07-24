@@ -1,0 +1,47 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+	<title>Processing incoming requests</title>
+</head>
+
+<body>
+<h1>Processing incoming requests</h1>
+
+The Comms Group Manager will sit in front of several Service Bundles so you need to check the incoming message bean to see which end point to actually call. The Comms Group Manager receives a generic object type, so you must check which bean type it is. The different schema java beans created earlier will also be dependencies for the project implementing the FeatureServer interface:
+<pre>
+// --------- CALCULATOR BUNDLE ---------
+if (messageBean.getClass().equals(CalcBean.class)) {
+    ... call method on the Calculator service ...
+
+// -------- FORTUNE COOKIE BUNDLE ---------
+else if (messageBean.getClass().equals(FortuneCookieBean.class)) {
+    ... call method on the FortuneCookie Service ...
+</pre>
+ 
+
+In our example, we are calling the Add method so our code under the IF statement for the CalcBean.class would look like:
+<pre>
+CalcBean calc = (CalcBean) messageBean;
+switch (calc.getMethod()) {           
+//Add() METHOD
+
+case Add:
+    int a = calc.getA();
+    int b = calc.getB();
+    int result = calcService.Add(a, b); //CALL THE Calculator SERVICE BUNDLE
+    break;
+case ...
+</pre>
+ 
+
+<i>calcService</i> is actually the injected instance of the Calc Service Bundle that performs all the work and returns the result. Finally, the return Bean that contains the return value - what is received by the client -- needs to be instanciated. This is how to do that:
+<pre>
+CalcBeanResult calcRes = new CalcBeanResult();
+calcRes.setResult(result);
+return calcRes;
+</pre>
+
+</body>
+</html>

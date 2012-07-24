@@ -129,9 +129,10 @@ public class DisasterCreateActivity extends Activity implements OnClickListener 
     		
 //TODO: remove test code
     	    iDisasterApplication.getInstance().disasterNameList.add(disasterName);
-    	    
+
+// TODO: remove: only used for screenshot  
     	    // report data change to adapter
-//    	    iDisasterApplication.getInstance().disasterAdapter.notifyDataSetChanged();
+    	    iDisasterApplication.getInstance().disasterAdapter.notifyDataSetChanged();
 
     		
 // TODO: Remove code for testing the correct setting of preferences 

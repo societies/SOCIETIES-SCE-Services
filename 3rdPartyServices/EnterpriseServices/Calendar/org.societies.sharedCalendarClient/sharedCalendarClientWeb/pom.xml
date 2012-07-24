@@ -73,11 +73,11 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.societies.api.schema</groupId>
-			<artifactId>societies-api-schema</artifactId>
+			<groupId>org.societies.api.ext3p</groupId>
+			<artifactId>societies-api-ext3p</artifactId>
 			<version>${release.version}</version>
 			<scope>provided</scope>
-		</dependency>
+		</dependency>		
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-simple</artifactId>
@@ -104,19 +104,28 @@
 			<version>2.2.1</version>
 			<scope>provided</scope>
 		</dependency>
-<!-- 		<dependency> -->
-<!-- 			<groupId>org.springframework</groupId> -->
-<!-- 			<artifactId>org.springframework.web.portlet</artifactId> -->
-<!-- 			<version>${spring.version}</version> -->
-<!-- 			<exclusions> -->
-<!-- 				<exclusion> -->
-<!-- 					<artifactId>com.springsource.javax.servlet</artifactId> -->
-<!-- 					<groupId>javax.servlet</groupId> -->
-<!-- 				</exclusion> -->
-<!-- 			</exclusions> -->
-<!-- 			<type>jar</type> -->
-<!-- 			<scope>provided</scope> -->
-<!-- 		</dependency>		 -->
+		<dependency>
+			<groupId>org.simpleframework</groupId>
+			<artifactId>simple-xml</artifactId>
+			<version>2.6.4</version>
+			<scope>provided</scope>
+			<exclusions>
+				<!-- StAX is not available on Android -->
+				<exclusion>
+					<artifactId>stax</artifactId>
+					<groupId>stax</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>stax-api</artifactId>
+					<groupId>stax</groupId>
+				</exclusion>
+				<!-- Provided by Android -->
+				<exclusion>
+					<artifactId>xpp3</artifactId>
+					<groupId>xpp3</groupId>
+				</exclusion>
+			</exclusions>
+		</dependency>
 	</dependencies>
 	<build>
 		<finalName>sharedCalendar-webapp</finalName>
@@ -145,9 +154,15 @@
 						<Bundle-Version>${project.version}</Bundle-Version>
 						<Web-ContextPath>sharedCal</Web-ContextPath>
 						<Bundle-ClassPath>WEB-INF/classes,.</Bundle-ClassPath>
-						<Webapp-Context>sharedCal</Webapp-Context>						
+						<Webapp-Context>sharedCal</Webapp-Context>
+						<!--
+						org.societies.rdpartyService.enterprise.interfaces;version="[0.1.0,1.0.0)",
+							org.societies.rdpartyService.enterprise;version="[0.1.0,1.0.0)",
+							 
+						 -->
 						<Import-Package>
-							*,
+							org.societies.api.ext3p.schema.sharedcalendar;version="[0.1.0,1.0.0)",
+							org.societies.rdpartyService.enterprise.interfaces;version="[0.1.0,1.0.0)",
 							org.springframework.stereotype;version="[3.0,4)",
 							org.springframework.ui;version="[3.0,4)",
 							org.springframework.web.bind.annotation;version="[3.0,4)",
@@ -176,7 +191,7 @@
 							org.springframework.web.servlet.support;version="[3.0.0,4.0.0)",
 							org.springframework.web.servlet.tags;version="[3.0.0,4.0.0)",
 							org.springframework.web.servlet.tags.form;version="[3.0.0,4.0.0)",
-							org.springframework.web.servlet.theme;version="[3.0.0,4.0.0)"																					
+							org.springframework.web.servlet.theme;version="[3.0.0,4.0.0)"						
 						</Import-Package>
 					</instructions>
 				</configuration>
@@ -201,6 +216,18 @@
 			</plugin>
 			<plugin>
 				<artifactId>maven-dependency-plugin</artifactId>
+				<configuration>
+					<artifactItems>
+						<artifactItem>
+							<groupId>${project.groupId}</groupId>
+							<artifactId>${project.artifactId}</artifactId>
+							<version>${project.version}</version>
+							<type>war</type>
+							<overWrite>true</overWrite>
+							<outputDirectory>${spring.osgi.deploy.dir}</outputDirectory>
+						</artifactItem>
+					</artifactItems>
+				</configuration>
 				<executions>
 					<execution>
 						<id>copy-installed</id>
@@ -259,22 +286,6 @@
 						</configuration>
 					</execution>
 				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-dependency-plugin</artifactId>
-				<configuration>
-					<artifactItems>
-						<artifactItem>
-							<groupId>${project.groupId}</groupId>
-							<artifactId>${project.artifactId}</artifactId>
-							<version>${project.version}</version>
-							<type>war</type>
-							<overWrite>true</overWrite>
-							<outputDirectory>${spring.osgi.deploy.dir}</outputDirectory>
-						</artifactItem>
-					</artifactItems>
-				</configuration>
 			</plugin>
 		</plugins>
 	</build>

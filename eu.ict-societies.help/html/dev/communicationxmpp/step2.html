@@ -1,0 +1,94 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+	<title>Step 2: Generate and adapt the schema for your message bean</title>
+</head>
+
+<body>
+<h1>Step 2: Generate and adapt the schema for your message bean</h1>
+
+If you are using Maven to build your services, check that your project pom.xml file contains the following plugin configuration:
+<pre>
+&lt;project&gt;
+ ...
+         &lt;build&gt;
+                 &lt;plugins&gt;
+                          &lt;plugin&gt;
+                                   &lt;groupId&gt;org.codehaus.mojo&lt;/groupId&gt;
+                                   &lt;artifactId&gt;jaxb2-maven-plugin&lt;/artifactId&gt;
+                                   &lt;version&gt;1.3.1&lt;/version&gt;
+                                   &lt;configuration&gt;                            
+                                            &lt;includes&gt;
+                                            &lt;include&gt;**/*.java&lt;/include&gt;
+                                            &lt;/includes&gt;
+                          &lt;packageName&gt;org.your.xmpp.package.exampleservice&lt;/packageName&gt;
+                                   &lt;/configuration&gt;
+                          &lt;/plugin&gt;
+                          .
+                 &lt;/plugins&gt;
+         &lt;/build&gt;
+&lt;/project&gt;
+</pre>
+ 
+
+Once you have that configuration in place, at the command line, execute:<br />
+<pre>
+> mvn jaxb2:schemagen
+</pre>
+This will create a file called schema1.xsd in the /target/generated-resources/schemagen directory of your Maven project.<br />
+
+Unfortunately, the auto generated schema requires some minor editing. Ensure that the first &lt;xs:schema&gt; tag does actually contain your namespace in the "targetNamespace" and the "tns" attributes.
+<pre>
+&lt;xs:schema  elementFormDefault="qualified" version="1.0"
+            xmlns="<span style="color: #FF0000;">http://societies.org/api/schema/example/calculator"</span>            <-- CHECK HERE
+            targetNamespace="<span style="color: #FF0000;">http://societies.org/api/schema/example/calculator"</span>  <-- CHECK HERE
+            xmlns:tns="<span style="color: #FF0000;">http://societies.org/api/schema/example/calculator"</span>        <-- CHECK HERE
+            xmlns:xs="http://www.w3.org/2001/XMLSchema"&gt;
+</pre>
+ 
+
+Find your 2 beans, e.g. CalcBean and CalcBeanResult.
+<ul>
+<li>Add an &lt;element&gt; node before &lt;complexType&gt;</li>
+<li>Move the NAME to &lt;element&gt;</li>
+</ul>
+BEFORE<br />
+<pre>
+&lt;xs:complexType name="calcBean"&gt;
+    &lt;xs:sequence&gt;
+        &lt;xs:element name="a" type="xs:int"/&gt;
+        &lt;xs:element name="b" type="xs:int"/&gt;
+        &lt;xs:element name="method" type="tns:methodType" minOccurs="0"/&gt;
+    &lt;/xs:sequence&gt;
+&lt;/xs:complexType&gt;
+</pre>
+AFTER<br />
+<pre>
+&lt;xs:element name="calcBean"&gt;
+    &lt;xs:complexType&gt;    &lt;-- notice the NAME attribute has been move up to the ELEMENT node --&gt;
+        &lt;xs:sequence&gt;
+        &lt;xs:element name="a" type="xs:int"/&gt;
+        &lt;xs:element name="b" type="xs:int"/&gt;
+        &lt;xs:element name="method" type="tns:methodType" minOccurs="0"/&gt;
+    &lt;/xs:sequence&gt;
+    &lt;/xs:complexType&gt;
+&lt;/xs:element&gt;
+</pre>
+ 
+You do not need to add <element> nodes to the schema of any of your datatypes you will be passing, just the message bean and the result bean only. However, if you are passing/receiving a complex datatypes (i.e. other than strings, integers, etc) then you will need to prefix the type with the tns namespace. e.g. The FortuneCookieResult returns an object of type "cookie", then its Type definition needs to be prefixed: type="tns:cookie".<br />
+<pre>
+&lt;xs:element name="fortuneCookieBeanResult"&gt;
+  &lt;xs:complexType &gt;
+    &lt;xs:sequence&gt;
+      &lt;xs:element name="cookie" type="tns:cookie"
+         minOccurs="0"/&gt;&lt;!-- ENSURE THE 'TYPE' HAS THE tns PREFIX
+    &lt;/xs:sequence&gt;
+  &lt;/xs:complexType&gt;
+&lt;/xs:element&gt;
+</pre>
+
+This manual editing of the generated dschema files is an annoying shortfall that the consortium is working to resolve. You should rename the XSD Schema file to your XMPP package name of choice, eg. <i>org.your.xmpp.package.exampleservice.xsd</i> and copy to the /schema/resources folder in the SOCIETIES API project.
+</body>
+</html>

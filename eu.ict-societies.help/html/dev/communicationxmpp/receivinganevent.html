@@ -1,0 +1,27 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+	<title>Receiving an Event</title>
+</head>
+
+<body>
+<h1>Receiving an Event</h1>
+
+Developers must extend the org.societies.api.osgi.event.EventListener abstract class to react to the receiving of a given event type. As there may be multiple events occuring within the same class, you should check which eventsType has raised this event by calling the getEventType() method of the InternalEvent. You can then extract your payload using the getEventInfo() method.
+<pre>
+ public class SpringEventTest extends EventListener {
+ 
+ @Override
+ public void handleInternalEvent(InternalEvent event) {
+   LOG.info("*** internal event received *****");   
+   LOG.info("*** event name : "+ event.geteventName());
+   LOG.info("*** event source : "+ event.geteventSource());
+   LOG.info("*** event type : "+ event.geteventType());
+   TestObject payload = (TestObject)event.geteventInfo();
+   LOG.info("*** event name : "+ payload.getName());
+ }
+</pre>
+</body>
+</html>

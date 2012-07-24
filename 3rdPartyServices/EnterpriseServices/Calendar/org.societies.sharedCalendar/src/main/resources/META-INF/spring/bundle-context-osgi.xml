@@ -30,5 +30,33 @@
 		persistent-id="bk" />
 
 	<osgi:reference id="dataSource" interface="javax.sql.DataSource" />
+	<osgi:reference id="eventManager"
+		interface="org.societies.api.osgi.event.IEventMgr" />
+	<osgi:reference id="serviceMgmt"
+		interface="org.societies.api.services.IServices" />
 
+	<osgi:service ref="sharedCalendar"
+		interface="org.societies.rdPartyService.enterprise.sharedCalendar.ISharedCalendar">
+		<osgi:service-properties>
+			<entry key="TargetPlatform" value="SOCIETIES" />
+			<entry key="ServiceProvider" value="ICT-SOCIETIES" />
+			<entry key="ServiceMetaModel" value-ref="serMetamodel" />
+			<entry key="ServiceClient" value="http://societies.local/client.jar" />
+		</osgi:service-properties>
+	</osgi:service>
+
+	<bean id="serMetamodel" class="org.societies.api.schema.servicelifecycle.model.Service">
+		<property name="authorSignature" value="Soluta.Net" />
+		<property name="serviceDescription" value="Shared Calendar Server Component" />
+		<property name="serviceName" value="Shared Calendar Server" />
+		<property name="serviceType" value="THIRD_PARTY_SERVER" />
+		<property name="privacyPolicy" value="http://societies.local/local_file" />
+	</bean>
+
+	<osgi:set id="availableDevicesSet" interface="org.societies.api.css.devicemgmt.IDevice" cardinality="0..N">
+		<osgi:listener bind-method="onBind" unbind-method="onUnbind">
+			<bean
+				class="org.societies.rdPartyService.enterprise.sharedCalendar.DeviceListener" />
+		</osgi:listener>
+	</osgi:set>
 </beans>

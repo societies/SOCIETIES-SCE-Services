@@ -30,17 +30,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.UnavailableException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.societies.api.comm.xmpp.datatypes.Stanza;
 import org.societies.api.comm.xmpp.datatypes.XMPPInfo;
 import org.societies.api.comm.xmpp.exceptions.XMPPError;
 import org.societies.api.comm.xmpp.interfaces.ICommCallback;
-
-
-
+import org.societies.api.ext3p.schema.sharedcalendar.SharedCalendarResult;
 import org.societies.rdpartyService.enterprise.interfaces.IReturnedResultCallback;
-import org.societies.rdpartyservice.enterprise.sharedcalendar.SharedCalendarResult;
 
 
 /**
@@ -51,9 +50,9 @@ import org.societies.rdpartyservice.enterprise.sharedcalendar.SharedCalendarResu
  */
 public class SharedCalendarCallBack implements ICommCallback{
 	private static final List<String> NAMESPACES = Collections.unmodifiableList(
-			Arrays.asList("http://societies.org/rdPartyService/enterprise/sharedCalendar"));
+			Arrays.asList("http://societies.org/api/ext3p/schema/sharedCalendar"));
 	private static final List<String> PACKAGES = Collections.unmodifiableList(
-			Arrays.asList("org.societies.rdpartyservice.enterprise.sharedcalendar"));
+			Arrays.asList("org.societies.api.ext3p.schema.sharedcalendar"));
 	private static Logger log = LoggerFactory.getLogger(SharedCalendarCallBack.class);
 	
 	//MAP TO STORE THE ALL THE CLIENT CONNECTIONS

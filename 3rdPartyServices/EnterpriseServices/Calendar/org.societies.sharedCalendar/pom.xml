@@ -6,7 +6,7 @@
 	<artifactId>sharedCalendar</artifactId>
 	<packaging>bundle</packaging>
 	<name>Shared Calendar Bundle</name>
-	<version>0.1</version>
+	<version>0.1.0</version>
 	<url>http://www.springframework.org/osgi</url>
 
 
@@ -37,11 +37,17 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.societies.api.schema</groupId>
-			<artifactId>societies-api-schema</artifactId>
+			<groupId>org.societies.api.ext3p.schema</groupId>
+			<artifactId>societies-api-ext3p-schema</artifactId>
 			<version>${release.version}</version>
 			<scope>provided</scope>
 		</dependency>
+<!-- 		<dependency> -->
+<!-- 			<groupId>org.societies.api.schema</groupId> -->
+<!-- 			<artifactId>societies-api-schema</artifactId> -->
+<!-- 			<version>${release.version}</version> -->
+<!-- 			<scope>provided</scope> -->
+<!-- 		</dependency> -->
 		<!-- spring -->
 		<dependency>
 			<groupId>org.springframework</groupId>
@@ -50,6 +56,12 @@
 			<version>${spring.version}</version>
 			<scope>provided</scope>
 		</dependency>
+		 <dependency>
+			<groupId>org.springframework.osgi</groupId>
+			<artifactId>spring-osgi-core</artifactId>
+			<version>${spring.osgi.version}</version>
+			<scope>provided</scope>
+		</dependency> 
 		<!-- Google API -->
 		<dependency>
 			<groupId>com.google.api-client</groupId>
@@ -77,13 +89,13 @@
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
 			<version>${slf4j.version}</version>
-			<scope>compile</scope>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-simple</artifactId>
 			<version>${slf4j.version}</version>
-			<scope>compile</scope>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>

@@ -1,0 +1,23 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+	<title>Communication Group Manager</title>
+</head>
+
+<body>
+<h1>Communication Group Manager</h1>
+
+The Platform Comms Gateway manages access from the XMPP server to the service bundles by passing/receiving messages (see Figure 28). As already stated, we don't want every single Service Bundle to register with the XC Manager Component. Rather, it is preferable that a Comms Group Manager registers and manages access to each of its end point services. This removes the need for developers writing custom XMPP code in their services. It is this Comms Group Manager that handles the XMPP communication and accesses the bundles. This component can operate in
+<ol>
+<li><b>Server mode</b>: it receives messages and forwards them to the end point services through their internal API</li>
+<li><b>Client mode</b>: it implements the remote API of each service to send messages</li>
+</ol>
+
+<br />
+<img src="../../img/image053.png" />
+<br />
+
+</body>
+</html>

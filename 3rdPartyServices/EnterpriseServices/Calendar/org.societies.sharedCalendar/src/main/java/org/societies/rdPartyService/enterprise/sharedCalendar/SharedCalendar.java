@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.codec.binary.Hex;
 import org.hibernate.HibernateException;
@@ -43,11 +44,14 @@ import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.societies.api.css.devicemgmt.IDevice;
+import org.societies.api.ext3p.schema.sharedcalendar.Calendar;
+import org.societies.api.ext3p.schema.sharedcalendar.Event;
+import org.societies.api.osgi.event.IEventMgr;
+import org.societies.api.services.IServices;
 import org.societies.rdPartyService.enterprise.sharedCalendar.persistence.DAO.CISCalendarDAO;
 import org.societies.rdPartyService.enterprise.sharedCalendar.persistence.DAO.CSSCalendarDAO;
 import org.societies.rdPartyService.enterprise.sharedCalendar.privateCalendarUtil.IPrivateCalendarUtil;
-import org.societies.rdpartyservice.enterprise.sharedcalendar.Calendar;
-import org.societies.rdpartyservice.enterprise.sharedcalendar.Event;
 
 import com.google.api.services.calendar.model.CalendarListEntry;
 import com.google.api.services.calendar.model.EventAttendee;
@@ -62,6 +66,14 @@ public class SharedCalendar implements ISharedCalendar, IPrivateCalendarUtil {
 	private SharedCalendarUtil util;
 	private SessionFactory sessionFactory;
 	private static Logger log = LoggerFactory.getLogger(SharedCalendar.class);
+	private IEventMgr evtMgr;
+	/**
+	 * This is the set of all available instances of the IDevice interface.
+	 * A DeviceListener bean instance tracks whenever a new IDevice is bound or unbound.
+	 * See http://static.springsource.org/osgi/docs/1.2.1/reference/html-single/#service-registry:refs:collection:dynamics
+	 */
+	private Set<IDevice> availableDevices;
+	private IServices serviceMetadataUtil;
 
 	public SessionFactory getSessionFactory() {
 		return sessionFactory;
@@ -84,6 +96,9 @@ public class SharedCalendar implements ISharedCalendar, IPrivateCalendarUtil {
 	 */
 	@Override
 	public boolean createCISCalendar(String calendarSummary, String CISId) {
+		
+		//Test purpose only
+	//	log.info("SERVICE INSTANCE IDENTIFIER: "+serviceMetadataUtil.getMyServiceId(this.getClass()).getServiceInstanceIdentifier());
 		String storedCalendarId = null;
 		Transaction t = null;
 		Session session = null;
@@ -599,11 +614,20 @@ public class SharedCalendar implements ISharedCalendar, IPrivateCalendarUtil {
 	public String retrievePrivateCalendarId(String CSSId) {
 		String returnedCalendarId = null;
 		Session session = sessionFactory.openSession();
-		List<CSSCalendarDAO> returnedCSSCalendarDAO = session
-				.createCriteria(CSSCalendarDAO.class)
-				.add(Restrictions.eq("CSSId", CSSId)).list();
-		if (returnedCSSCalendarDAO.size() != 0) {
-			returnedCalendarId = returnedCSSCalendarDAO.get(0).getCalendarId();
+		try {
+			List<CSSCalendarDAO> returnedCSSCalendarDAO = session
+					.createCriteria(CSSCalendarDAO.class)
+					.add(Restrictions.eq("CSSId", CSSId)).list();
+			if (returnedCSSCalendarDAO.size() != 0) {
+				returnedCalendarId = returnedCSSCalendarDAO.get(0).getCalendarId();
+			}
+		} catch (HibernateException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally {
+			if (session!=null){
+				session.close();
+			}
 		}
 		return returnedCalendarId;
 	}
@@ -633,6 +657,30 @@ private List<CalendarListEntry> filterCISCalendar(List<CalendarListEntry> listTo
 		}
 		
 		return listToFilter;
+	}
+
+	public IEventMgr getEvtMgr() {
+		return evtMgr;
+	}
+
+	public void setEvtMgr(IEventMgr evtMgr) {
+		this.evtMgr = evtMgr;
+	}
+
+	public Set<IDevice> getAvailableDevices() {
+		return availableDevices;
+	}
+
+	public IServices getServiceMetadataUtil() {
+		return serviceMetadataUtil;
+	}
+
+	public void setServiceMetadataUtil(IServices serviceMetadataUtil) {
+		this.serviceMetadataUtil = serviceMetadataUtil;
+	}
+
+	public void setAvailableDevices(Set<IDevice> availableDevices) {
+		this.availableDevices = availableDevices;
 	}
 
 	

@@ -1,0 +1,40 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+	<title>Sub Topic</title>
+	<link rel="stylesheet" type="text/css" href="../../css/societies_help.css" />
+</head>
+
+<body>
+<h1>SOCIETIES Platform Configuration Properties</h1>
+<p>For any custom configuration, the folder <span class="code">VIRGO_HOME\config</span> has to be used. 
+To allow certain bundles that use a database (currently Derby) to work correctly, a properties file named <span class="code">org.societies.platform.properties</span> 
+is required in the <span class="code">$VIRGO_HOME/config</span> directory 
+(N.B. The VIRGO_HOME environment variable must be created to allow this properties to work).</p>
+
+<p>Its contents for Windows are:</p>
+<pre class="code">
+jdbc.driverClassName=org.apache.derby.jdbc.EmbeddedDriver
+jdbc.url=jdbc\:derby\:${VIRGO_HOME}\\Databases\\servicceregdb;create\=true
+jdbc.password=app
+jdbc.username=app
+hibernate.dialect=org.hibernate.dialect.DerbyDialect
+hibernate.connection.url=jdbc\:derby\:target/database/message;create\=true
+hibernate.dialect=org.hibernate.dialect.DerbyDialect
+hbm2ddl.auto=create-drop
+show_sql=true
+current_session_context_class=thread
+#log4j.logger.org.springframework.osgi=DEBUG
+#log4j.logger.org.springframework=DEBUG
+</pre>
+ 
+<p>Whilst for Linux there are some minor changes. These are the entries that have to be altered:</p>
+<pre class="code">
+jdbc.url=jdbc:derby:${VIRGO_HOME}/Databases/serviceregdb;create=true
+hibernate.connection.url=jdbc:derby:target/database/message;create=true
+</pre>
+<p>all other entries remain untouched.</p>
+</body>
+</html>

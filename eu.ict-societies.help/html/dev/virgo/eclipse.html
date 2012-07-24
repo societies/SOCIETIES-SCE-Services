@@ -1,0 +1,34 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+	<title>Running Virgo inside the Eclipse IDE</title>
+	<link rel="stylesheet" type="text/css" href="../../css/societies_help.css" />
+</head>
+
+<body>
+<h1>Running Virgo inside the Eclipse IDE</h1>
+<p>Running and debugging Virgo instances from within the development environment is a handy feature for developers that will save them from switching back and forth across two different contexts (the IDE and the VIRGO server).</p>
+<p>To set up this feature, first install the "Eclipse Virgo Tools" package from the repository: <a href="http://download.eclipse.org/virgo/milestone/IDE">http://download.eclipse.org/virgo/milestone/IDE</a>.</p>
+<p>In order to do so, go to Help &rarr; Install New Software. There you can add the repository with the ADD button and you will find the packet once the repository is added.</p>
+<p>To configure Virgo server inside eclipse goto Windows&rarr;Preference&rarr;Server option from the left panel and then choose runtime environment:</p>
+<p><img align="middle" alt="Eclipse Debug Configuration Settings" src="../../img/image013.png"></p>
+<p>On the right side you may see an option to add servers, click "add" and type the server name "Virgo", then click "next" to type the server name, server installation directory and JRE:</p>
+<p><img align="middle" alt="Eclipse Debug Configuration Settings" src="../../img/image015.png"></p>
+<p>Click "Ok" to finish, you will have your configured instance of Virgo Web Server in the list of available servers.</p>
+
+<p>To add the server and the view console go to Windows&rarr;show view&rarr;servers. This will add the "server perspective" view, right click press new&rarr;server then filter for virgo and select the server already configured. 
+You should see something similar to what you see in the next picture:</p>
+<img align="middle" alt="Configured Server Runtimes" src="../../img/image017.png"></p>
+<p>Finally, use the start and debug buttons (white "play" icon over green circle and bug icon respectively) to run the 
+server in required mode and view the server console window for various logs. 
+Note: You can drag a project and drop it directly on the virgo server entry in the "Servers" tab for direct 
+deployment from within Eclipse (instead of dropping a jar inside the <span class="code">VIRGO_HOME\pickup</span> directory which has a directory 
+watcher thread scanning it for changes in its content).</p>
+<p>Double click Virgo Server to view various attributes and properties as shown in the following image.</p>
+<img align="middle" alt="Virgo Server Settings from within Eclipse" src="../../img/image019.png"></p>
+
+.
+</body>
+</html>

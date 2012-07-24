@@ -14,4 +14,10 @@
 
     <tx:annotation-driven />
 	
+    <bean id="sharedCalendarClientRich"	class="org.societies.rdpartyService.enterprise.SharedCalendarClientRich" init-method="InitService">
+        <property name="evtMgr" ref="eventManager" />
+		<property name="availableDevices" ref="availableDevicesSet" />
+		<property name="commManager" ref="CommManagerBundle" />	
+		<constructor-arg value="${serverJid}" />		
+	</bean>
 </beans>

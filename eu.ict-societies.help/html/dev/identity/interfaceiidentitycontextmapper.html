@@ -1,0 +1,47 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+	<title>Interface IIdentityContextMapper</title>
+</head>
+
+<body>
+<h1>Interface IIdentityContextMapper</h1>
+Utility class that allows to map context parameters to different identities of the user. <br />
+<table style="width: 100%;">
+	<thead style="background-color: #ccccff;">Method Summary</thead>
+	
+	<tr>
+		<td>
+			<u>CtxIdentifier</u>
+		</td>
+		<td>
+			<u>addMappedCtxIdentifier</ul>(<u>IIdentity</ul> publicId, <u>CtxIdentifier</u> attributeID)
+			Add a mapped context parameter.
+		</td>
+	</tr>
+	
+	<tr>
+		<td>
+			<u>CtxIdentifier</u>
+		</td>
+		<td>
+			<u>getMappedCtxIdentifier</u>(<u>IIdentity</u> publicId, <u>String</u> attributeType)
+			Retrieve a mapped context parameter.
+		</td>
+	</tr>
+
+	<tr>
+		<td>
+			<u>boolean</u>
+		</td>
+		<td>
+			<u>removeMappedCtxIdentifier</u>(<u>IIdentity</u> publicId, <u>CtxIdentifier</u> ctxIdentifier)
+			Remove a mapped context parameter.
+		</td>
+	</tr>
+</table>
+
+</body>
+</html>

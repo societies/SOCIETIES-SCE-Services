@@ -1,0 +1,56 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+	<title>Internal Eventing (OSGi)</title>
+</head>
+
+<body>
+<h1>Internal Eventing (OSGi)</h1>
+
+The internal eventing interface extends the OSGI eventing system. It is targeted at eventing between bundles running within the same Virgo container (see Figure 29). These events are not visible outside of that node, in other terms, they are not available between CSS nodes of the same CSS. As we are contained within the Virgo container, developers are free to add their own Java object types as the payload or event info.<br />
+<br />
+See TestInternalEventing class for full code listing from the Git code repository.<br />
+<br />
+As we are extending the OSGI EventListener, you need to add the following reference in your POM file:
+<pre>
+&lt;dependency&gt;
+    &lt;groupId&gt;org.osgi&lt;/groupId&gt;
+    &lt;artifactId&gt;org.osgi.compendium&lt;/artifactId&gt;
+    &lt;version&gt;4.1.0&lt;/version&gt;
+    &lt;scope&gt;provided&lt;/scope&gt;
+&lt;/dependency&gt;
+</pre>
+
+<br />
+<img src="../../img/image055.png">
+<br />
+
+You do need a dependency injection so you should get a reference to the IEventMgr service by registering in the Bundle-context-osgi.xml and Bundle-context.xml.<br />
+<br />
+In the Bundle-context-osgi.xml file, get a reference to the IEventMgr service:
+<pre>
+&lt;osgi:reference id="eventMgmtRef" interface="org.societies.api.osgi.event.IEventMgr" /&gt;
+</pre>
+
+In the Bundle-context.xml file, ensure you set a property to receive a reference to the IEventMgr:
+<pre>
+&lt;bean id="ClientTester"
+       class="org.societies.examples.testclient.ClientTester"
+       depends-on="eventMgmtRef"&gt;
+     &lt;property name="eventMgr" ref="eventMgmtRef"/&gt;
+&lt;/bean&gt;
+</pre>
+
+In your Virgo Plan ensure that the Event Manager Bundle (org.societies.comm.event.mgmt) is deployed:
+<pre>
+&lt;artifact type="bundle" name="org.societies.comm.event.mgmt" /&gt;
+</pre>
+If needed, ensure that Communications Bundles are also deployed on your Virgo plan.
+<pre>
+&lt;artifact type="bundle" name="org.societies.comm.CommonLibraries"/&gt;
+&lt;artifact type="bundle" name="org.societies.comm.xmpp.XCCommunicationMgr"/&gt;
+</pre>
+</body>
+</html>
