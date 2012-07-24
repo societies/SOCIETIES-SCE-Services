@@ -47,7 +47,7 @@ import com.sun.jersey.api.client.config.DefaultClientConfig;
  */
 public class TestClient {
 	// server main URL
-	final static String MainURL = "http://localhost:8080/YouRNotAloneServer";
+	final static String MainURL = "http://157.159.160.188:8080/YouRNotAloneServer";
 	
 //	test for main client functionality 
 	public static void main(String[] args) {
