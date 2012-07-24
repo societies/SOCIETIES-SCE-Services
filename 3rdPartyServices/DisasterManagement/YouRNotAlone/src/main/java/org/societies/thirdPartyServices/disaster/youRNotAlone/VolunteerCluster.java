@@ -26,13 +26,11 @@
 package org.societies.thirdPartyServices.disaster.youRNotAlone;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
 import org.societies.thirdPartyServices.disaster.youRNotAlone.model.Volunteer;
 
-import weka.clusterers.ClusterEvaluation;
 import weka.clusterers.SimpleKMeans;
 import weka.core.Attribute;
 import weka.core.DenseInstance;
@@ -45,6 +43,7 @@ class VolunteerCluster{
 	private Instances instances;
 	private ArrayList<Attribute> attributes;
 	private ArrayList<String> attributeName;
+	private ArrayList<ArrayList<String>> clusters;
 
 	public VolunteerCluster(int numberOfClusters, ArrayList<String> allLanguages, ArrayList<String> allSkills ){
 		this.numberOfClusters = numberOfClusters;
@@ -104,12 +103,12 @@ class VolunteerCluster{
 			array[i] = 0;
 			
 		in.replaceMissingValues(array);
-		System.out.println(in);
+//		System.out.println(in);
 		return in;
 	}
 
 	public void update(){
-		System.out.println("numberOfClusters is "+numberOfClusters);
+//		System.out.println("numberOfClusters is "+numberOfClusters);
 		SimpleKMeans kmeans = new SimpleKMeans();
 
 		kmeans.setSeed(100);
@@ -123,7 +122,7 @@ class VolunteerCluster{
 			kmeans.setDisplayStdDevs(false);
 			kmeans.setDontReplaceMissingValues(true);
 			kmeans.buildClusterer(instances);
-			System.out.println(kmeans.toString());
+//			System.out.println(kmeans.toString());
 			// This array returns the cluster number (starting with 0) for each instance
 			// The array has as many elements as the number of instances
 			assignments = kmeans.getAssignments();
