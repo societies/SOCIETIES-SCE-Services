@@ -56,9 +56,9 @@ public class MockedData{
 		
 		Volunteer v6 = new Volunteer("6","daqiang","Zhang","Telecom SudParis",
 				"france","daqiang@gmail.com");
-		v6.addSpokenLanguage("english");
-		v6.addSpokenLanguage("japanese");
-		v6.addSpokenLanguage("chinese");
+//		v6.addSpokenLanguage("english");
+//		v6.addSpokenLanguage("japanese");
+//		v6.addSpokenLanguage("chinese");
 		v6.addSkill("java");
 		v6.addSkill("C++");
 		v6.addSkill("python");
