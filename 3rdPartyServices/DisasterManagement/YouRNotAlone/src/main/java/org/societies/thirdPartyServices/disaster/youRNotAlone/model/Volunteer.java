@@ -30,7 +30,16 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
+import org.societies.thirdPartyServices.disaster.youRNotAlone.util.*;
+
+
+@XmlRootElement
+@XmlAccessorType(XmlAccessType.FIELD)
 public class Volunteer {
 	private String ID;
 	private String firstname;
@@ -41,8 +50,13 @@ public class Volunteer {
 	private int languageCount;
 	private int skillCount;
 
+	@XmlJavaTypeAdapter(MyMapAdapter.class)
 	private HashMap<String,Integer> spokenLanguages;
+	
+	@XmlJavaTypeAdapter(MyMapAdapter.class)
 	private HashMap<String,Integer> expertiseSkills;
+	
+	public Volunteer() {} 
 	
 	public Volunteer(String ID, String firstname, String lastname, 
 			String institut, String country, String email,

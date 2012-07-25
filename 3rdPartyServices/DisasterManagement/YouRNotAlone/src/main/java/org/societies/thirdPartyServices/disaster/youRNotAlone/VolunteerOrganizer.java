@@ -33,8 +33,17 @@ import java.util.Set;
 
 import org.societies.thirdPartyServices.disaster.youRNotAlone.model.Volunteer;
 
-class VolunteerOrganizer {
+public class VolunteerOrganizer {
 	private HashMap<String,Volunteer> volunteers;
+	public HashMap<String, Volunteer> getVolunteers() {
+		return volunteers;
+	}
+
+
+	public void setVolunteers(HashMap<String, Volunteer> volunteers) {
+		this.volunteers = volunteers;
+	}
+
 	private ArrayList<String> allLanguages;
 	private ArrayList<String> allSkills;
 
@@ -76,6 +85,10 @@ class VolunteerOrganizer {
 		this.allSkills = allSkills;
 	}
 
+	public int getVolunteerCount(){
+		return this.volunteers.size();
+	}
+	
 	private void extractAllLanguagesAndSkills(){
 		Set<String> langs = new HashSet<String>();
 		Set<String> skills = new HashSet<String>();
@@ -141,5 +154,18 @@ class VolunteerOrganizer {
 				group.add(v);
 		}
 		return group;
+	}
+	
+	public ArrayList<Volunteer> getTranslator(){
+		ArrayList<Volunteer> group = new ArrayList<Volunteer>();
+		Set<String> IDs = this.volunteers.keySet();
+		Iterator<String> iter = IDs.iterator();
+		while (iter.hasNext()) {
+			Volunteer v = this.volunteers.get(iter.next());
+			if(!v.getSpokenLanguages().isEmpty())
+				group.add(v);
+		}
+		return group;
+		
 	}
 }
