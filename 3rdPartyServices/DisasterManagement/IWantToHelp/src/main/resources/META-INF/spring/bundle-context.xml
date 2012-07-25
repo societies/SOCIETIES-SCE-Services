@@ -11,14 +11,4 @@
        for integration testing outside of an OSGi environment -->
 
 
-  <bean id="AnalyzeThisServiceBean" class="org.societies.thirdPartyServices.disasterManagement.analyzeThis.AnalyzeThis"  depends-on="ctxBroker" name="_name_" init-method="activate">
-		  <property name="externalCtxBroker" ref="externalCtxBroker"></property>
-  </bean>
-
-
-
-   
-
-   
-<!--   <context:component-scan base-package="org.societies.personalisation.management.impl"></context:component-scan> -->
 </beans>

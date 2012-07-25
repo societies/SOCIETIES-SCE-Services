@@ -9,6 +9,7 @@ import org.apache.xmlrpc.client.XmlRpcClientConfigImpl;
 
 public class XMLRPCClient {
 	private XmlRpcClient client;
+//	private SimpleDateFormat dateformat = new SimpleDateFormat( "dd/MM/yyyy HH:mm a" );
 	
 	public XMLRPCClient () {
 		try {
@@ -37,7 +38,7 @@ public class XMLRPCClient {
 	public String addRequest(String shortDescription, String longDescription) {
 		String returnString = null;
 		try {
-			Object[] params = new Object[] { shortDescription, longDescription,  "09/28/2012 12:00 am"};
+			Object[] params = new Object[] { shortDescription, longDescription,  ""};
 			returnString = (String) client.execute("societies.addRequest", params);
 		} catch (XmlRpcException e) {
 			// TODO Auto-generated catch block
