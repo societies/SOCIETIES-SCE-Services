@@ -27,7 +27,7 @@
 		<dependency>
 			<groupId>org.societies.api.ext3p</groupId>
 			<artifactId>societies-api-ext3p</artifactId>
-			<version>0.1</version>
+			<version>${release.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<!-- Communication Manager  -->
@@ -78,31 +78,9 @@
 				<extensions>true</extensions>
 				<configuration>
 					<instructions>
-						<!-- Import-Package>
-    						org.springframework.beans.factory.annotation*;version="0",
-    						org.springframework.stereotype*;version="0",
-    						!groovy.lang.*,
-    						!javax.xml.datatype,
-    						!junit.framework,
-    						!nu.xom,
-    						!org.apache.avalon.framework.logger,
-    						!org.apache.log,
-    						!org.apache.log4j,
-    						!org.apache.oro.text.regex,
-    						!org.codehaus.groovy.reflection,
-    						!org.codehaus.groovy.runtime,
-    						!org.codehaus.groovy.runtime.callsite,
-    						!org.codehaus.groovy.runtime.typehandling,
-    						!org.codehaus.groovy.runtime.wrappers,
-    						!javax.servlet,
-    						*
-						</Import-Package-->
 						<Export-Package>
-							org.societies.rdpartyService.enterprise.interfaces,
-							org.societies.rdpartyService.enterprise
+							org.societies.rdpartyService.enterprise.interfaces
 						</Export-Package>
-<!-- 						<Embed-Dependency>*;scope=compile|runtime</Embed-Dependency> -->
-<!-- 						<Embed-Transitive>true</Embed-Transitive> -->
 					</instructions>
 				</configuration>
 			</plugin>
@@ -115,7 +93,7 @@
 							<groupId>${project.groupId}</groupId>
 							<artifactId>${project.artifactId}</artifactId>
 							<version>${release.version}</version>
-							<type>bundle</type>
+							<type>jar</type>
 							<overWrite>true</overWrite>
 							<outputDirectory>${spring.osgi.deploy.dir}</outputDirectory>
 						</artifactItem>

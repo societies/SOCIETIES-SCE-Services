@@ -15,43 +15,24 @@
 		file if you do not want to. The rationale for keeping these definitions separate 
 		is to facilitate integration testing of the bundle outside of an OSGi container -->
 
-	<context:property-placeholder
-		properties-ref="clientProperties" />
+	<context:property-placeholder properties-ref="clientProperties" />
 
-	<osgi-compendium:cm-properties id="clientProperties"
-		persistent-id="sharedCalClient" />
+	<osgi-compendium:cm-properties id="clientProperties" persistent-id="sharedCalClient" />
 
-	<osgi:reference id="CommManagerBundle"
-		interface="org.societies.api.comm.xmpp.interfaces.ICommManager"
-		cardinality="1..1" />
+	<osgi:reference id="CommManagerBundle" interface="org.societies.api.comm.xmpp.interfaces.ICommManager" cardinality="1..1" />
 	<osgi:reference id="eventManager" interface="org.societies.api.osgi.event.IEventMgr"/>
-	<!-- <osgi:reference id="IdentityManagerBundle" interface="org.societies.api.identity.IIdentityManager" 
-		cardinality="1..1"/> -->
-
-	<osgi:service id="calClientRichInterface" ref="sharedCalClientRich"
-		interface="org.societies.rdpartyService.enterprise.interfaces.ISharedCalendarClientRich" />
-	<osgi:service id="calClientCommCallback" ref="sharedCalClientRich"
-		interface="org.societies.api.comm.xmpp.interfaces.ICommCallback" />
 	
-
-	<osgi:service ref="sharedCalendarClient"
-		interface="org.societies.rdpartyService.enterprise.interfaces.ISharedCalendarClientRich">
+	<osgi:service id="calClientRichInterface" ref="sharedCalendarClientRich" interface="org.societies.rdpartyService.enterprise.interfaces.ISharedCalendarClientRich">
 		<osgi:service-properties>
 			<entry key="TargetPlatform" value="SOCIETIES" />
 			<entry key="ServiceProvider" value="ICT-SOCIETIES" />
-<!-- 			<entry key="ServiceMetaModel" value-ref="serMetamodel" /> -->
 		</osgi:service-properties>
 	</osgi:service>
-
-<!-- 	<bean id="serMetamodel" class="org.societies.api.schema.servicelifecycle.model.Service"> -->
-<!-- 		<property name="authorSignature" value="Soluta.Net" /> -->
-<!-- 		<property name="serviceDescription" value="Shared Calendar Client Component" /> -->
-<!-- 		<property name="serviceName" value="Shared Calendar Client" /> -->
-<!-- 	</bean> -->
+	<osgi:service id="calClientCommCallback" ref="sharedCalendarClientRich" interface="org.societies.api.comm.xmpp.interfaces.ICommCallback" />
 
 	<osgi:set id="availableDevicesSet" 
 		interface="org.societies.api.css.devicemgmt.IDevice"
-		filter="(deviceType=screen)">
+		filter="(deviceType=screen)" cardinality="0..N">
 		<osgi:listener bind-method="onBind" unbind-method="onUnbind">
         	<bean class="org.societies.rdpartyService.enterprise.ClientDeviceListener"/>
         </osgi:listener>
