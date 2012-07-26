@@ -166,7 +166,7 @@
 							 
 						 -->
 						<Import-Package>
-							org.societies.api.ext3p.schema.sharedcalendar;version="[0.1.0,1.0.0)",
+							org.societies.api.ext3p.schema.sharedcalendar,
 							org.societies.rdpartyService.enterprise.interfaces;version="[0.1.0,1.0.0)",
 							*;resolution:=optional
 <!-- 							org.springframework.stereotype;version="[3.0,4)", -->

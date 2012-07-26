@@ -5,8 +5,13 @@
 			xmlns:ns1="http://societies.org/api/schema/servicelifecycle/model"
 			xmlns:xs="http://www.w3.org/2001/XMLSchema">
 
-<!-- 	<xs:import namespace="http://societies.org/api/schema/servicelifecycle/model"
-	schemaLocation="../../../../external/src/main/resources/org.societies.api.schema.servicelifecycle.model.xsd" /> -->
+<!-- Original Entry With "wrong" relative path
+	<xs:import namespace="http://societies.org/api/schema/servicelifecycle/model"
+	schemaLocation="../../../../external/src/main/resources/org.societies.api.schema.servicelifecycle.model.xsd" />
+ -->
+ 
+	<xs:import namespace="http://societies.org/api/schema/servicelifecycle/model"
+	schemaLocation="../../../../../../../SOCIETIES-Platform/api/schema/external/src/main/resources/org.societies.api.schema.servicelifecycle.model.xsd" />
 
 	<!-- Message bean and result bean require the additional "element" node -->
 	<xs:element name="backendBean">
