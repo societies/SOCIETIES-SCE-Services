@@ -84,7 +84,9 @@
 				<configuration>
 					<instructions>
 						<Export-Package>org.societies.thirdPartyServices.disasterManagement.analyzeThis</Export-Package>
+						<!-- 
 						<Bundle-Activator>org.societies.thirdPartyServices.disasterManagement.analyzeThis.AnalyzeThis</Bundle-Activator>
+						-->
 						<Bundle-SymbolicName>${project.groupId}.${project.artifactId}</Bundle-SymbolicName>
 						<Bundle-Name>${project.name}</Bundle-Name>
 						<Bundle-Version>${project.version}</Bundle-Version>                        

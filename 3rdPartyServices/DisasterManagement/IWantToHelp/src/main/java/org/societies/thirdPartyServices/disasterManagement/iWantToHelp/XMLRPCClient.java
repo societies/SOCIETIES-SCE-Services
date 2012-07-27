@@ -23,19 +23,43 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.societies.thirdPartyServices.disasterManagement.disasterDataCollector.dmt;
+package org.societies.thirdPartyServices.disasterManagement.iWantToHelp;
 
-public interface IDataToCSSFromDMT {
+import java.net.MalformedURLException;
+import java.net.URL;
 
-	public void setPosition(double latitude, double longitude, double elevation, int satNumber);
+import org.apache.xmlrpc.XmlRpcException;
+import org.apache.xmlrpc.client.XmlRpcClient;
+import org.apache.xmlrpc.client.XmlRpcClientConfigImpl;
 
-	public void setDirection(double roll, double pitch, double yaw);
-
-	public void gpsConnected(boolean connected);
-
-	public void compassConnected(boolean connected);
-
-	public void viewLoaded(String viewXML);
-
-	public void poisSent();
+public class XMLRPCClient {
+	private XmlRpcClient client;
+	
+	public XMLRPCClient () {
+		try {
+			XmlRpcClientConfigImpl config = new XmlRpcClientConfigImpl();
+			config.setServerURL(new URL("http://213.133.100.232/societies/server.php"));
+			client = new XmlRpcClient();
+			client.setConfig(config);
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public UserData getUserData(String email) {
+		String returnString = null;
+		try {
+			Object[] getUserDataParams = new Object[] {email};
+			returnString = (String) client.execute("societies.getUserData", getUserDataParams);
+		} catch (XmlRpcException e) {
+			e.printStackTrace();
+		}
+		return new UserData(returnString);
+	}
+	
+	public static void main(String[] args) {
+		System.out.println("Starting JavaXMLRPCClient in IWantToHelp service ...");
+		XMLRPCClient xmlrpcClient = new XMLRPCClient();
+		System.out.println("getUserData: "+xmlrpcClient.getUserData("user@test.de"));
+	}
 }
