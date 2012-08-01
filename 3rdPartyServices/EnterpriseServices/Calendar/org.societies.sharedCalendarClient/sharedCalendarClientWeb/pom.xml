@@ -166,9 +166,19 @@
 							 
 						 -->
 						<Import-Package>
+						org.springframework.web.context;resolution:=optional,
+						org.eclipse.virgo.web.dm;version="[3.0.0, 4.0.0)";resolution:=optional,
+						org.springframework.web.servlet;version="[3.0, 4.0)";resolution:=optional,
+						org.springframework.web.servlet.DispatcherServlet;resolution:=optional,
+						org.springframework.web.servlet.config;version="[3.0.0, 4.0.0)";resolution:=optional,
+						org.springframework.web.servlet.view;version="[3.0.0, 4.0.0)";resolution:=optional,
+						org.springframework.context.config;resolution:=optional,
+						*;resolution:=optional
+							<!-- 
 							org.societies.api.ext3p.schema.sharedcalendar,
 							org.societies.rdpartyService.enterprise.interfaces;version="[0.1.0,1.0.0)",
-							*;resolution:=optional
+							-->
+							
 <!-- 							org.springframework.stereotype;version="[3.0,4)", -->
 <!-- 							org.springframework.ui;version="[3.0,4)", -->
 <!-- 							org.springframework.web.bind.annotation;version="[3.0,4)", -->
