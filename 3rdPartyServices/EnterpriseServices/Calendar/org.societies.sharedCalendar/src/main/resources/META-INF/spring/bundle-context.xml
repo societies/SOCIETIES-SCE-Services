@@ -81,12 +81,13 @@
 	</bean>
 
 	<bean id="sharedCalendar"
-		class="org.societies.rdPartyService.enterprise.sharedCalendar.SharedCalendar">
+		class="org.societies.rdPartyService.enterprise.sharedCalendar.SharedCalendar" init-method="init">
 		<property name="util" ref="sharedCalendarUtil" />
 		<property name="sessionFactory" ref="sessionFactory" />
 		<property name="evtMgr" ref="eventManager" />
 		<property name="availableDevices" ref="availableDevicesSet" />
 		<property name="serviceMetadataUtil" ref="serviceMgmt" />
+		<property name="cisManager" ref="CisManagementBundle" />
 	</bean>
 
 	<!-- enable the configuration of transactional behavior based on annotations -->

@@ -12,6 +12,7 @@
 <title>Shared Calendar Web Client</title>
 </head>
 <body>	
+<div id="divHeader">
 	<h2>SOCIETIES Shared Calendar Web UI</h2>
 	Cis ID: <input type="text" id="cisId" /><br/>
 	Cis/Css Calendar Summary: <input type="text" id="cisSummary" /><br/>
@@ -22,6 +23,7 @@
 	<button id="retrieveCssCalendarEvents">Get Private (CSS) Events</button><br/>
 	<br/>Result:<br/>
 	<div id="result"></div>
+	</div>
 	<div id='calendar'></div>	
 </body>
 </html>

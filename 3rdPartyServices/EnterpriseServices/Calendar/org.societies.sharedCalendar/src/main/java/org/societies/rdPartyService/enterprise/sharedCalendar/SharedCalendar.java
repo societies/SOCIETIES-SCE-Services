@@ -33,6 +33,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.Future;
 
 import org.apache.commons.codec.binary.Hex;
 import org.hibernate.HibernateException;
@@ -44,10 +45,16 @@ import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.societies.api.activity.IActivityFeed;
+import org.societies.api.cis.management.ICis;
+import org.societies.api.cis.management.ICisManager;
+import org.societies.api.cis.management.ICisOwned;
 import org.societies.api.css.devicemgmt.IDevice;
 import org.societies.api.ext3p.schema.sharedcalendar.Calendar;
 import org.societies.api.ext3p.schema.sharedcalendar.Event;
 import org.societies.api.osgi.event.IEventMgr;
+import org.societies.api.schema.servicelifecycle.model.Service;
+import org.societies.api.schema.servicelifecycle.model.ServiceResourceIdentifier;
 import org.societies.api.services.IServices;
 import org.societies.rdPartyService.enterprise.sharedCalendar.persistence.DAO.CISCalendarDAO;
 import org.societies.rdPartyService.enterprise.sharedCalendar.persistence.DAO.CSSCalendarDAO;
@@ -74,6 +81,25 @@ public class SharedCalendar implements ISharedCalendar, IPrivateCalendarUtil {
 	 */
 	private Set<IDevice> availableDevices;
 	private IServices serviceMetadataUtil;
+	private ICisManager cisManager;
+	
+	/*Start constants definition*/
+	String CIS_MANAGER_CSS_ID ;
+	final String TEST_CSS_PWD="TEST_CSS_PWD";
+	final String TEST_CIS_NAME_1="CALENDAR CIS";
+	final String TEST_CIS_TYPW ="TEST_CIS_TYPW"; 
+	final int TEST_CIS_MODE=1;
+	String CIS_TEST_ID;
+	
+	/*Init method used for test purpose only*/
+	public void init() throws Exception {
+		log.debug("Init method.");
+//		ServiceResourceIdentifier tmpServiceIdentifier=serviceMetadataUtil.getMyServiceId(this.getClass());
+//		CIS_MANAGER_CSS_ID=serviceMetadataUtil.getServer(tmpServiceIdentifier).getJid();
+//		Future<ICisOwned> testCIS = cisManager.createCis(CIS_MANAGER_CSS_ID, TEST_CSS_PWD,
+//                TEST_CIS_NAME_1, TEST_CIS_TYPW , TEST_CIS_MODE);
+//		log.info("TEST CIS CREATED WITH ID: "+testCIS.get().getCisId());
+	}
 
 	public SessionFactory getSessionFactory() {
 		return sessionFactory;
@@ -107,8 +133,6 @@ public class SharedCalendar implements ISharedCalendar, IPrivateCalendarUtil {
 		try {
 			session = sessionFactory.openSession();
 			
-			
-
 				storedCalendarId = util.createCalendar(calendarSummary);
 				CISCalendarDAO cisCalendarDAO = new CISCalendarDAO(CISId,
 						storedCalendarId);
@@ -117,6 +141,15 @@ public class SharedCalendar implements ISharedCalendar, IPrivateCalendarUtil {
 				session.save(cisCalendarDAO);
 				t.commit();
 				result = true;
+				
+				/*Notify to CIS that a new calendar is created*/
+				if (cisManager!=null){
+					ICis iCis=cisManager.getCis("", "");
+				}else{
+					log.debug("CIS manager service not available.");
+				}
+			//	iCis.addCisActivity(iactivity, icismanagercallback); 
+				
 			 
 		} catch (HibernateException he) {
 			log.error(he.getMessage());
@@ -221,6 +254,7 @@ public class SharedCalendar implements ISharedCalendar, IPrivateCalendarUtil {
 		try {
 			returnedEventList = eventListFromGoogleEventList(util
 					.retrieveAllEvents(calendarId));
+			
 		} catch (Exception e) {
 			log.error(e.getMessage());
 		}
@@ -681,6 +715,14 @@ private List<CalendarListEntry> filterCISCalendar(List<CalendarListEntry> listTo
 
 	public void setAvailableDevices(Set<IDevice> availableDevices) {
 		this.availableDevices = availableDevices;
+	}
+
+	public ICisManager getCisManager() {
+		return cisManager;
+	}
+
+	public void setCisManager(ICisManager cisManager) {
+		this.cisManager = cisManager;
 	}
 
 	
