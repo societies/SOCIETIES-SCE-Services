@@ -45,6 +45,24 @@
 			<version>4.1.0</version>
 			<scope>provided</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+			<version>3.1</version>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.simpleframework</groupId>
+			<artifactId>simple-xml</artifactId>
+			<version>2.6.4</version>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+		    <groupId>org.societies.maven.converters</groupId>
+		    <artifactId>SimpleXMLConverters</artifactId>
+		    <version>0.1</version>
+		    <scope>compile</scope>
+		</dependency>
 		<!-- Needed for Societies-specific annotations -->
 <!-- 		<dependency> -->
 <!-- 			<groupId>org.societies.utilities</groupId> -->
@@ -69,8 +87,8 @@
 <!-- 							* -->
 <!-- 						</_exportcontents> -->
 						<Export-Package>org.societies.api.ext3p.schema.*</Export-Package>
-<!-- 						<Embed-Dependency>*;scope=compile|runtime</Embed-Dependency> -->
-<!-- 						<Embed-Transitive>true</Embed-Transitive> -->
+						<Embed-Dependency>*;scope=compile|runtime</Embed-Dependency>
+						<Embed-Transitive>true</Embed-Transitive>
 					</instructions>
 				</configuration>
 			</plugin>
