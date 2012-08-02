@@ -144,7 +144,7 @@ public class SharedCalendar implements ISharedCalendar, IPrivateCalendarUtil {
 				
 				/*Notify to CIS that a new calendar is created*/
 				if (cisManager!=null){
-					ICis iCis=cisManager.getCis("", "");
+					ICis iCis=cisManager.getCis("");
 				}else{
 					log.debug("CIS manager service not available.");
 				}

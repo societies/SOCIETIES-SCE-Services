@@ -35,8 +35,9 @@
 		interface="org.societies.api.osgi.event.IEventMgr" />
 	<osgi:reference id="serviceMgmt"
 		interface="org.societies.api.services.IServices" />
+		<!-- Remove the cardinality 0..1 when ICisManager is fixed -->
 	<osgi:reference id="CisManagementBundle" 
-		interface="org.societies.api.cis.management.ICisManager"/>
+		interface="org.societies.api.cis.management.ICisManager" cardinality="0..1"/>
 
 	<osgi:service ref="sharedCalendar"
 		interface="org.societies.rdPartyService.enterprise.sharedCalendar.ISharedCalendar">
