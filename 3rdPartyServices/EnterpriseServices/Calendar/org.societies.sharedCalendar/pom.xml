@@ -13,7 +13,7 @@
 	<parent>
 		<groupId>org.societies</groupId>
 		<artifactId>spring-osgi-parent</artifactId>
-		<version>0.1</version>
+		<version>RELEASE</version>
 	</parent>
 	<properties>
 		<slf4j-version>1.6.4</slf4j-version>
