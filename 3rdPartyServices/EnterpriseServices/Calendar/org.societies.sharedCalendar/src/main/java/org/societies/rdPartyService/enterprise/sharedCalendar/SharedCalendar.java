@@ -45,17 +45,23 @@ import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.societies.api.activity.IActivity;
 import org.societies.api.activity.IActivityFeed;
+import org.societies.api.activity.IActivityFeedCallback;
 import org.societies.api.cis.management.ICis;
 import org.societies.api.cis.management.ICisManager;
+import org.societies.api.cis.management.ICisManagerCallback;
 import org.societies.api.cis.management.ICisOwned;
 import org.societies.api.css.devicemgmt.IDevice;
 import org.societies.api.ext3p.schema.sharedcalendar.Calendar;
 import org.societies.api.ext3p.schema.sharedcalendar.Event;
 import org.societies.api.osgi.event.IEventMgr;
+import org.societies.api.schema.activityfeed.Activityfeed;
+import org.societies.api.schema.cis.community.Community;
 import org.societies.api.schema.servicelifecycle.model.Service;
 import org.societies.api.schema.servicelifecycle.model.ServiceResourceIdentifier;
 import org.societies.api.services.IServices;
+import org.societies.rdPartyService.enterprise.sharedCalendar.dataObject.CISActivity;
 import org.societies.rdPartyService.enterprise.sharedCalendar.persistence.DAO.CISCalendarDAO;
 import org.societies.rdPartyService.enterprise.sharedCalendar.persistence.DAO.CSSCalendarDAO;
 import org.societies.rdPartyService.enterprise.sharedCalendar.privateCalendarUtil.IPrivateCalendarUtil;
@@ -82,6 +88,7 @@ public class SharedCalendar implements ISharedCalendar, IPrivateCalendarUtil {
 	private Set<IDevice> availableDevices;
 	private IServices serviceMetadataUtil;
 	private ICisManager cisManager;
+	private IActivityFeed activityFeed;
 	
 	/*Start constants definition*/
 	String CIS_MANAGER_CSS_ID ;
@@ -124,7 +131,7 @@ public class SharedCalendar implements ISharedCalendar, IPrivateCalendarUtil {
 	public boolean createCISCalendar(String calendarSummary, String CISId) {
 		
 		//Test purpose only
-	//	log.info("SERVICE INSTANCE IDENTIFIER: "+serviceMetadataUtil.getMyServiceId(this.getClass()).getServiceInstanceIdentifier());
+		log.info("SERVICE INSTANCE IDENTIFIER: "+serviceMetadataUtil.getMyServiceId(this.getClass()).getServiceInstanceIdentifier());
 		String storedCalendarId = null;
 		Transaction t = null;
 		Session session = null;
@@ -143,12 +150,26 @@ public class SharedCalendar implements ISharedCalendar, IPrivateCalendarUtil {
 				result = true;
 				
 				/*Notify to CIS that a new calendar is created*/
+				
 				if (cisManager!=null){
-					ICis iCis=cisManager.getCis("", "");
+				ICisOwned iCis=cisManager.getOwnedCis(CISId);
+					// CISActivity notifyActivity= new CISActivity();
+				IActivity notifyActivity=activityFeed.getEmptyIActivity();
+				//notifyActivity.setId(new Long(1));
+						notifyActivity.setObject("A new calendar for the CIS is created with summary: "+calendarSummary);
+					IActivityFeed activityFeed=iCis.getActivityFeed();
+					activityFeed.addActivity(notifyActivity,new IActivityFeedCallback() {
+						
+						@Override
+						public void receiveResult(Activityfeed activityFeedObject) {
+							// TODO Auto-generated method stub
+							
+						}
+					});
 				}else{
 					log.debug("CIS manager service not available.");
 				}
-			//	iCis.addCisActivity(iactivity, icismanagercallback); 
+				
 				
 			 
 		} catch (HibernateException he) {

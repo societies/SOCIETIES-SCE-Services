@@ -24,6 +24,8 @@
  */
 package org.societies.rdpartyService.enterprise;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Collections;
@@ -39,13 +41,19 @@ import org.societies.api.comm.xmpp.exceptions.XMPPError;
 import org.societies.api.comm.xmpp.interfaces.ICommCallback;
 import org.societies.api.comm.xmpp.interfaces.ICommManager;
 import org.societies.api.css.devicemgmt.IDevice;
+import org.societies.api.css.devicemgmt.display.IDisplayDriver;
 import org.societies.api.ext3p.schema.sharedcalendar.Event;
 import org.societies.api.ext3p.schema.sharedcalendar.MethodType;
 import org.societies.api.ext3p.schema.sharedcalendar.SharedCalendarBean;
 import org.societies.api.identity.IIdentity;
 import org.societies.api.identity.IIdentityManager;
 import org.societies.api.identity.InvalidFormatException;
+import org.societies.api.osgi.event.CSSEvent;
+import org.societies.api.osgi.event.CSSEventConstants;
+import org.societies.api.osgi.event.EventListener;
+import org.societies.api.osgi.event.EventTypes;
 import org.societies.api.osgi.event.IEventMgr;
+import org.societies.api.osgi.event.InternalEvent;
 import org.societies.rdpartyService.enterprise.interfaces.IReturnedResultCallback;
 import org.societies.rdpartyService.enterprise.interfaces.ISharedCalendarClientRich;
 
@@ -60,12 +68,19 @@ import com.google.gson.JsonObject;
  * @author solutanet
  * 
  */
-public class SharedCalendarClientRich implements ICommCallback,	ISharedCalendarClientRich {
+public class SharedCalendarClientRich extends EventListener implements ICommCallback,	ISharedCalendarClientRich {
 	
 	private static Logger log = LoggerFactory.getLogger(SharedCalendarClientRich.class);
 	private ICommManager commManager;
 	private IIdentityManager idMgr;
 	private IEventMgr evtMgr;
+	//70n1 variables used for the integration with screen device.
+	private IDisplayDriver displayDriverService;
+	private String myServiceName;
+	private URL myServiceExeURL;
+	private boolean deviceAvailable = false;
+	
+	
 	/**
 	 * This is the set of all available instances of the IDevice interface.
 	 * A DeviceListener bean instance tracks whenever a new IDevice is bound or unbound.
@@ -132,6 +147,29 @@ public class SharedCalendarClientRich implements ICommCallback,	ISharedCalendarC
 			e.printStackTrace();
 		}
 		idMgr = commManager.getIdManager();
+		
+		//register for display events
+		this.registerForDisplayEvents();
+		try {
+			
+			this.myServiceExeURL = new URL("http://www.macs.hw.ac.uk/~ceeep1/societies/services/MockWindowsExecutable.exe");
+			this.myServiceName = "ExamplePortalDisplayService";
+			this.displayDriverService.registerDisplayableService(null, myServiceName, myServiceExeURL);
+		} catch (MalformedURLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	//70n1
+	//Register for display events
+	private void registerForDisplayEvents() {
+		String eventFilter = "(&" + 
+				"(" + CSSEventConstants.EVENT_NAME + "=displayUpdate)" +
+				"(" + CSSEventConstants.EVENT_SOURCE + "=org/societies/css/device)" +
+				")";
+		this.evtMgr.subscribeInternalEvent(this, new String[]{EventTypes.DISPLAY_EVENT}, eventFilter);
+		this.log.debug("Subscribed to "+EventTypes.DISPLAY_EVENT+" events");
+
 	}
 
 	/*
@@ -615,6 +653,24 @@ public class SharedCalendarClientRich implements ICommCallback,	ISharedCalendarC
 
 	public void setAvailableDevices(Set<IDevice> availableDevices) {
 		this.availableDevices = availableDevices;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.societies.api.osgi.event.EventListener#handleInternalEvent(org.societies.api.osgi.event.InternalEvent)
+	 */
+	@Override
+	public void handleInternalEvent(InternalEvent event) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	/* (non-Javadoc)
+	 * @see org.societies.api.osgi.event.EventListener#handleExternalEvent(org.societies.api.osgi.event.CSSEvent)
+	 */
+	@Override
+	public void handleExternalEvent(CSSEvent event) {
+		// TODO Auto-generated method stub
+		
 	}
 	
 }
