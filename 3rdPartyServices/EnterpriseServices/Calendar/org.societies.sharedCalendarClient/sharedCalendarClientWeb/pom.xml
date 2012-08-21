@@ -9,6 +9,7 @@
 	<groupId>org.societies.rdpartyService.enterprise</groupId>
 	<artifactId>sharedCalendarClientWeb</artifactId>
 	<packaging>war</packaging>
+	<version>0.1.0</version>
 	<name>sharedCalendarClientWeb Maven Webapp</name>
 	<url>http://maven.apache.org</url>
 	
