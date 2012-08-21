@@ -33,7 +33,6 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.Future;
 
 import org.apache.commons.codec.binary.Hex;
 import org.hibernate.HibernateException;

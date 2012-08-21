@@ -42,11 +42,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.api.client.auth.oauth2.TokenResponse;
-import com.google.api.client.auth.oauth2.draft10.AccessTokenResponse;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeTokenRequest;
 import com.google.api.client.googleapis.auth.oauth2.GoogleTokenResponse;
 import com.google.api.client.googleapis.auth.oauth2.draft10.GoogleAccessProtectedResource;
-import com.google.api.client.googleapis.auth.oauth2.draft10.GoogleAccessTokenRequest.GoogleAuthorizationCodeGrant;
 import com.google.api.client.googleapis.auth.oauth2.draft10.GoogleAuthorizationRequestUrl;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
@@ -348,6 +346,7 @@ public class SharedCalendarUtil {
 		try {
 			HttpTransport httpTransport = new NetHttpTransport();
 			JacksonFactory jsonFactory = new JacksonFactory();
+			
 			GoogleAccessProtectedResource accessProtectedResource = new GoogleAccessProtectedResource(
 					accessToken, httpTransport, jsonFactory, clientId,
 					clientSecret, refreshToken);
