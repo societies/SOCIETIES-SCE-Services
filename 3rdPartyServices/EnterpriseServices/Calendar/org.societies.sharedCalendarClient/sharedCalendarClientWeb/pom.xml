@@ -8,6 +8,7 @@
 	</parent>
 	<groupId>org.societies.rdpartyService.enterprise</groupId>
 	<artifactId>sharedCalendarClientWeb</artifactId>
+	<version>0.1.0</version>
 	<packaging>war</packaging>
 	<name>sharedCalendarClientWeb Maven Webapp</name>
 	<url>http://maven.apache.org</url>
@@ -79,7 +80,7 @@
 					</supportedProjectTypes>
 					<instructions>						
 						<Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
-						<Bundle-Version>0.1.0</Bundle-Version>
+						<Bundle-Version>${project.version}</Bundle-Version>
 						<Web-ContextPath>sharedCal</Web-ContextPath>
 						<Bundle-ClassPath>WEB-INF/classes,.</Bundle-ClassPath>
 						<Webapp-Context>sharedCal</Webapp-Context>

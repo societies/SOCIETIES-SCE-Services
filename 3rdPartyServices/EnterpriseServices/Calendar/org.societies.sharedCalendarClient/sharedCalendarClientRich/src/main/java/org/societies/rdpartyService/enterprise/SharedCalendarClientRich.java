@@ -148,16 +148,19 @@ public class SharedCalendarClientRich extends EventListener implements ICommCall
 		}
 		idMgr = commManager.getIdManager();
 		
-		//register for display events
-		this.registerForDisplayEvents();
-		try {
-			
-			this.myServiceExeURL = new URL("http://www.macs.hw.ac.uk/~ceeep1/societies/services/MockWindowsExecutable.exe");
-			this.myServiceName = "ExamplePortalDisplayService";
-			this.displayDriverService.registerDisplayableService(null, myServiceName, myServiceExeURL);
-		} catch (MalformedURLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		if (this.displayDriverService != null) {
+			// register for display events
+			this.registerForDisplayEvents();
+			try {
+				this.myServiceExeURL = new URL("http://www.macs.hw.ac.uk/~ceeep1/societies/services/MockWindowsExecutable.exe");
+				this.myServiceName = "ExamplePortalDisplayService";
+				//this.displayDriverService.registerDisplayableService(null, myServiceName, myServiceExeURL);
+			} catch (MalformedURLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}else{
+			this.log.debug("Display Driver Service not available");
 		}
 	}
 	//70n1
@@ -671,6 +674,14 @@ public class SharedCalendarClientRich extends EventListener implements ICommCall
 	public void handleExternalEvent(CSSEvent event) {
 		// TODO Auto-generated method stub
 		
+	}
+
+	public IDisplayDriver getDisplayDriverService() {
+		return displayDriverService;
+	}
+
+	public void setDisplayDriverService(IDisplayDriver displayDriverService) {
+		this.displayDriverService = displayDriverService;
 	}
 	
 }
