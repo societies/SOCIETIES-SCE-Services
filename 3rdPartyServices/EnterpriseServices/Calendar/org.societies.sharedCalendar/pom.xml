@@ -41,7 +41,7 @@
 			<version>${release.version}</version>
 			<scope>provided</scope>
 		</dependency>
-		 <!-- Common external libraries -->
+		<!-- Common external libraries -->
         <dependency>
                 <groupId>org.societies</groupId>
                 <artifactId>common-ext-libs</artifactId>
@@ -140,8 +140,10 @@
 							jackson-core-asl;groupId=org.codehaus.jackson;version=1.9.4
 						</Embed-Dependency>
 <!-- 						<Export-Package>org.societies.rdPartyService.enterprise.sharedCalendar.*</Export-Package> -->
+						<!-- See http://www.bradchen.com/node/10 for reasons of importing hibernate packages -->
 						<Import-Package>
 <!-- 							org.societies.api.ext3p.schema.sharedcalendar;version="[0.1,1)", -->
+							javassist.util.proxy,
 							com.google.common.*,
 							!com.google.*,
 							!junit.framework,

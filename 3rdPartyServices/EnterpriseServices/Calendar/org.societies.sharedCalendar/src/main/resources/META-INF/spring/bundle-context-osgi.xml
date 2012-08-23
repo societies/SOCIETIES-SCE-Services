@@ -38,7 +38,7 @@
 	<osgi:reference id="CisManagementBundle" 
 		interface="org.societies.api.cis.management.ICisManager"/>
 		<osgi:reference id="activityFeed" 
-		interface="org.societies.api.activity.IActivityFeed"/>
+		interface="org.societies.api.activity.IActivityFeed" cardinality="0..1"/>
 
 	<osgi:service ref="sharedCalendar"
 		interface="org.societies.rdPartyService.enterprise.sharedCalendar.ISharedCalendar">

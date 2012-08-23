@@ -15,10 +15,11 @@
 			<organizationUrl>http://www.trialog.com/</organizationUrl>
 		</developer>
 	</developers>
+	
 	<parent>
 		<groupId>org.societies</groupId>
 		<artifactId>version-parent</artifactId>
-		<version>0.1</version>
+		<version>RELEASE</version>
 	</parent>
 	<dependencies>
 		<dependency>
