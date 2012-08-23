@@ -79,7 +79,7 @@
 					</supportedProjectTypes>
 					<instructions>						
 						<Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
-						<Bundle-Version>${project.version}</Bundle-Version>
+						<Bundle-Version>0.1.0</Bundle-Version>
 						<Web-ContextPath>sharedCal</Web-ContextPath>
 						<Bundle-ClassPath>WEB-INF/classes,.</Bundle-ClassPath>
 						<Webapp-Context>sharedCal</Webapp-Context>
