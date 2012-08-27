@@ -1,0 +1,9 @@
+<resources>
+
+    <string name="app_name">Crowd Tasking</string>
+    <string name="scanQRcode">Scan QR code</string>
+    <string name="title_activity_main">Crowd tasking</string>
+	<string name="result_failed">No barcode found</string>
+	<string name="result_failed_why">"The user gave up and pressed Back"</string>
+    <string name="result_succeeded">Found QR code</string>
+</resources>
