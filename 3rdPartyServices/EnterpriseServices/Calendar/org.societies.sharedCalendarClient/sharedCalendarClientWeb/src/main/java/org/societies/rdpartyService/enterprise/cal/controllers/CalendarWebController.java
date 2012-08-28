@@ -1,5 +1,7 @@
 package org.societies.rdpartyService.enterprise.cal.controllers;
 
+import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.Semaphore;
 
@@ -31,7 +33,6 @@ public class CalendarWebController {
 	
 	@Autowired
 	private ISharedCalendarClientRich calClientService = null;
-	
 	@Autowired
 	private ICisManager cisManagerService = null;
 	
@@ -89,12 +90,11 @@ public class CalendarWebController {
 	
 	@RequestMapping("/getAllRelevantCis.do")
 	public @ResponseBody String getRelevantCis() {
-		//calClientService.retrieveEventsPrivateCalendar(this.cb);
 		this.cb = new CalendarWebResultCallback(this);
-		//TODO remove hard-coded string
-		List<ICis> foundCiss = this.cisManagerService.getCisList();
-		//this.calClientService.retrieveCISCalendars(this.cb, cisId);
-		//this.wait4semaphore();
+		List<ICis> foundCiss = new ArrayList<ICis>();
+		if (this.cisManagerService!=null){
+			foundCiss = this.cisManagerService.getCisList();
+		}
 		String ajaxResult = this.gson.toJson(foundCiss);
 		return ajaxResult;
 	}
