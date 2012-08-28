@@ -129,11 +129,22 @@ $("getCisCalendarEventsButton").on("click", function(event){
 			    onSuccess: function(transport){
 			      var response = transport.responseText || "no response text";
 			      var ajResp = eval("(" + response + ")"); 
-			      //alert("Success! \n\n" + response);
 			      eventData.events = ajResp;
 			      jQuery("#calendar").show();
-			      jQuery("#calendar").weekCalendar('refresh'); 
-			      
+			      jQuery("#calendar").weekCalendar('refresh');
+			      $('eventsTableBody').update("");
+			      $('eventsTableBody').insert({
+			    	  bottom: new Element('tr').update("<th>Event Id</th><th>Event Start</th><th>Event End</th><th>Title</th>")
+			      });
+			      for (var index = 0, len = ajResp.length; index < len; ++index) {
+			    	  var item = ajResp[index];
+			    	  $('eventsTableBody').insert({
+				    	  bottom: new Element('tr', {id:item.id}).update("<td>"+item.id+"</td><td>"+item.start+"</td><td>"+item.end+"</td><td>"+item.title+"</td>")
+				      });
+			    	  Event.observe(item.id, 'click', function(event) {
+			    		    $('cisSummary').value = item.id;
+			    	  });
+			      }			      
 			    },
 			    onFailure: function(){ alert('Something went wrong...'); }
 			  });			
@@ -194,6 +205,35 @@ new Ajax.Updater('result','/sharedCal/getPrivateEvents.do',
 		  });			
 });
 
+$("getAllRelevantCIS").on("click", function(event){
+	new Ajax.Updater('result','/sharedCal/getAllRelevantCis.do',
+		  {
+			method:'get',
+		    onSuccess: function(transport){
+		      var response = transport.responseText || "no response text";
+		      //alert("Success! \n\n" + response);
+		      var ajResp = eval("(" + response + ")");
+		      var cisList = ajResp.calendarList; 
+		      $('cisTableBody').update("");
+		      $('cissTableBody').insert({
+		    	  bottom: new Element('tr').update("<th>Cis ID</th><th>Cis Summary</th>")
+		      });
+		      for (var index = 0, len = calList.length; index < len; ++index) {
+		    	  var item = calList[index];
+		    	  $('cisTableBody').insert({
+			    	  bottom: new Element('tr', {id:item.calendarId}).update("<td>"+item.calendarId+"</td><td>"+item.summary+"</td>")
+			      });
+		    	  Event.observe(item.calendarId, 'click', function(event) {
+		    		    $('cisId').value = item.calendarId;
+		    	  });
+		      }
+		    },
+		    onFailure: function(){ alert('Something went wrong...'); }
+		  }
+	);			
+});
+
+
 $("getAllCisCalendarsAjax").on("click", function(event){
 	new Ajax.Updater('result','/sharedCal/getAllCisCalendarsAjax.do',
 		  {
@@ -204,14 +244,19 @@ $("getAllCisCalendarsAjax").on("click", function(event){
 		      //alert("Success! \n\n" + response);
 		      var ajResp = eval("(" + response + ")");
 		      var calList = ajResp.calendarList; 
-		      var result = "<table border='1'><tr><th>Calendar ID</th><th>Calendar Summary</th></tr>";
-		      for (var calIndex=0; calIndex < calList.length; calIndex++){
-		    	  result = result + "<tr><td>"+
-		    	  	calList[calIndex].calendarId+"</td><td>"+
-		    	  	calList[calIndex].summary+"</td></tr>";
-			  }
-			  result += "</table>";
-			  $('result').replace(result);
+		      $('calendarsTableBody').update("");
+		      $('calendarsTableBody').insert({
+		    	  bottom: new Element('tr').update("<th>Calendar ID</th><th>Calendar Summary</th>")
+		      });
+		      for (var index = 0, len = calList.length; index < len; ++index) {
+		    	  var item = calList[index];
+		    	  $('calendarsTableBody').insert({
+			    	  bottom: new Element('tr', {id:item.calendarId}).update("<td>"+item.calendarId+"</td><td>"+item.summary+"</td>")
+			      });
+		    	  Event.observe(item.calendarId, 'click', function(event) {
+		    		    $('calId').value = item.calendarId;
+		    	  });
+		      }
 		    },
 		    onFailure: function(){ alert('Something went wrong...'); }
 		  }

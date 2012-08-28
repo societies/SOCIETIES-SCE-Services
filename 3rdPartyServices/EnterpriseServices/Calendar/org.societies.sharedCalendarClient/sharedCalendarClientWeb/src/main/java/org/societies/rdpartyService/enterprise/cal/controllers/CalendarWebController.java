@@ -1,7 +1,10 @@
 package org.societies.rdpartyService.enterprise.cal.controllers;
 
+import java.util.List;
 import java.util.concurrent.Semaphore;
 
+import org.societies.api.cis.management.ICis;
+import org.societies.api.cis.management.ICisManager;
 import org.societies.api.ext3p.schema.sharedcalendar.SharedCalendarResult;
 import org.societies.rdpartyService.enterprise.interfaces.ISharedCalendarClientRich;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,15 +32,25 @@ public class CalendarWebController {
 	@Autowired
 	private ISharedCalendarClientRich calClientService = null;
 	
+	@Autowired
+	private ICisManager cisManagerService = null;
+	
 	private CalendarWebResultCallback cb = null;
 
 	public ISharedCalendarClientRich getCalClientService() {
 		return calClientService;
 	}
 	
-	//@ServiceR eference(cardinality=ServiceReferenceCardinality.C0__1)
 	public void setCalClientService(ISharedCalendarClientRich calClientService) {
 		this.calClientService = calClientService;
+	}
+	
+	public ICisManager getCisManagerService() {
+		return cisManagerService;
+	}
+
+	public void setCisManagerService(ICisManager cisManagerService) {
+		this.cisManagerService = cisManagerService;
 	}
 	
 	/*
@@ -72,6 +85,18 @@ public class CalendarWebController {
 				//Do nothing
 			}
 		}		
+	}
+	
+	@RequestMapping("/getAllRelevantCis.do")
+	public @ResponseBody String getRelevantCis() {
+		//calClientService.retrieveEventsPrivateCalendar(this.cb);
+		this.cb = new CalendarWebResultCallback(this);
+		//TODO remove hard-coded string
+		List<ICis> foundCiss = this.cisManagerService.getCisList();
+		//this.calClientService.retrieveCISCalendars(this.cb, cisId);
+		//this.wait4semaphore();
+		String ajaxResult = this.gson.toJson(foundCiss);
+		return ajaxResult;
 	}
 	
 	@RequestMapping("/getAllCisCalendarsAjax.do")

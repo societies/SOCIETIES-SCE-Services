@@ -623,8 +623,8 @@ public class SharedCalendarClientRich extends EventListener implements ICommCall
       */
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSZ");
 		Gson gson = new GsonBuilder().create();
-		String result = gson.toJson(eventListToRender);
-		log.debug("JSON Representation1:"+result);
+		String result = "";//gson.toJson(eventListToRender);
+		//log.debug("JSON Representation1:"+result);
 		
 		JsonArray jsonArray=new JsonArray();
 		JsonObject object= null;

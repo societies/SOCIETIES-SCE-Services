@@ -39,6 +39,19 @@ import org.societies.api.ext3p.schema.sharedcalendar.Event;
  */
 public interface ISharedCalendar {
 	
+	//The following are the verbs for the Activity Stream Entries
+	
+	public static final String VERB_CIS_CALENDAR_CREATED = "CIS Calendar Created";
+	public static final String VERB_CIS_CALENDAR_DELETED = "CIS Calendar Deleted";
+	public static final String VERB_CIS_CALENDAR_EVENT_CREATED = "CIS Calendar Event Created";
+	public static final String VERB_CIS_CALENDAR_EVENT_DELETED = "CIS Calendar Deleted";
+	public static final String VERB_CSS_CALENDAR_CREATED = "CSS Calendar Created";
+	public static final String VERB_CSS_CALENDAR_DELETED = "CSS Calendar Deleted";
+	public static final String VERB_CSS_CALENDAR_EVENT_CREATED = "CSS Calendar Event Created";
+	public static final String VERB_CSS_CALENDAR_EVENT_DELETED = "CSS Calendar Event Deleted";
+	public static final String VERB_CALENDAR_EVENT_SUBSCRIPTION = "Calendar Event Subscription";
+	public static final String VERB_CALENDAR_EVENT_UNSUBSCRIPTION = "Calendar Event Unsubscription";
+	
 	/**
 	 * This method create a private calendar for a CIS
 	 * @param CISId

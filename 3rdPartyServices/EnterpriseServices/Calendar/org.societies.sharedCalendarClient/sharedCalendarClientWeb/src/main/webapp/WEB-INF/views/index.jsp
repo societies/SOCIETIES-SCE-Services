@@ -17,13 +17,42 @@
 	Cis ID: <input type="text" id="cisId" /><br/>
 	Cis/Css Calendar Summary: <input type="text" id="cisSummary" /><br/>
 	Calendar ID: <input type="text" id="calId" /><br/>
+	<button id="getAllRelevantCIS">Show all CISs I belong to/own</button><br/>
 	<button id="getAllCisCalendarsAjax">Show all Cis Calendars</button><br/>
 	<button id="createCisCalendarButton">Create Cis Calendar</button><button id="deleteCisCalendarButton">Delete Cis Calendar</button><button id="getCisCalendarEventsButton">Get Cis Calendar Events</button><br/>
 	<button id="createCssCalendarButton">Create CSS Calendar</button><button id="deleteCssCalendarButton">Delete CSS Calendar</button><br/>	
 	<button id="retrieveCssCalendarEvents">Get Private (CSS) Events</button><br/>
+	
+	
+	
 	<br/>Result:<br/>
 	<div id="result"></div>
 	</div>
-	<div id='calendar'></div>	
+	
+	<div id="cis">
+	<br/>Relevant Cis:<br/>	
+		<table id='cisTable' border='1'>
+	 		<tbody id='cisTableBody'>
+	 		</tbody>
+	 	</table>
+	 </div>
+	 
+	<div id="calendars">
+	<br/>Calendars:<br/>	
+		<table id='calendarsTable' border='1'>
+	 		<tbody id='calendarsTableBody'>
+	 		</tbody>
+	 	</table>
+	 </div>
+	
+	<div id="calEvents">
+		 <br/>Calendar Events:<br/>
+		 <table id='eventsTable' border='1'>
+		 	<tbody id='eventsTableBody'>
+		 	</tbody>
+		 </table>
+	</div>	
+	<div id='calendar'>		
+	</div>
 </body>
 </html>

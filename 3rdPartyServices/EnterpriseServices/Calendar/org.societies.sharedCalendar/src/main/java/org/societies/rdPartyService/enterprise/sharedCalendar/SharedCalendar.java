@@ -81,7 +81,7 @@ public class SharedCalendar implements ISharedCalendar, IPrivateCalendarUtil {
 	private Set<IDevice> availableDevices;
 	private IServices serviceMetadataUtil;
 	private ICisManager cisManager;
-	private IActivityFeed activityFeed;
+	//private IActivityFeed activityFeed;
 	
 	/*Start constants definition*/
 	String CIS_MANAGER_CSS_ID ;
@@ -116,6 +116,34 @@ public class SharedCalendar implements ISharedCalendar, IPrivateCalendarUtil {
 	public void setUtil(SharedCalendarUtil util) {
 		this.util = util;
 	}
+	
+	private void notifyCisCalendarCreation(String calendarSummary, String CISId){
+		if (cisManager != null) {
+			ICisOwned iCis = cisManager.getOwnedCis(CISId);
+			if (iCis != null) {
+				IActivityFeed activityFeed = iCis.getActivityFeed();
+				if (activityFeed!=null){
+					IActivity notifyActivity = activityFeed.getEmptyIActivity();
+					// notifyActivity.setId(new Long(1));
+					notifyActivity.setActor(CISId);
+					notifyActivity.setVerb(ISharedCalendar.VERB_CIS_CALENDAR_CREATED);
+					notifyActivity.setObject(calendarSummary);
+					// IActivityFeed activityFeed=iCis.getActivityFeed();
+					activityFeed.addActivity(notifyActivity,
+							new IActivityFeedCallback() {
+								@Override
+								public void receiveResult(
+										Activityfeed activityFeedObject) {
+									log.debug("Added a 'Create CIS Calendar' activity to the Activity Feed.");
+								}
+							}
+					);
+				}
+			}
+		} else {
+			log.debug("CIS manager or ActivityFeed service not available.");
+		}
+	}
 
 	/* (non-Javadoc)
 	 * @see org.societies.rdPartyService.enterprise.sharedCalendar.ISharedCalendar#createCISCalendar(java.lang.String, java.lang.String)
@@ -142,29 +170,8 @@ public class SharedCalendar implements ISharedCalendar, IPrivateCalendarUtil {
 				t.commit();
 				result = true;
 				
-				/*Notify to CIS that a new calendar is created*/
-				
-				if (cisManager!=null && activityFeed!=null){
-				ICisOwned iCis=cisManager.getOwnedCis(CISId);
-					// CISActivity notifyActivity= new CISActivity();
-				IActivity notifyActivity=activityFeed.getEmptyIActivity();
-				//notifyActivity.setId(new Long(1));
-						notifyActivity.setObject("A new calendar for the CIS is created with summary: "+calendarSummary);
-					IActivityFeed activityFeed=iCis.getActivityFeed();
-					activityFeed.addActivity(notifyActivity,new IActivityFeedCallback() {
-						
-						@Override
-						public void receiveResult(Activityfeed activityFeedObject) {
-							// TODO Auto-generated method stub
-							
-						}
-					});
-				}else{
-					log.debug("CIS manager or ActivityFeed service not available.");
-				}
-				
-				
-			 
+			/*Notify to CIS that a new calendar is created*/				
+			this.notifyCisCalendarCreation(calendarSummary, CISId);
 		} catch (HibernateException he) {
 			log.error(he.getMessage());
 			if (t != null) {
@@ -188,6 +195,32 @@ public class SharedCalendar implements ISharedCalendar, IPrivateCalendarUtil {
 		return result;
 	}
 	
+	private void notifyCisCalendarDeletion(String calendarId, String CISId){
+		if (cisManager != null) {
+			ICisOwned iCis = cisManager.getOwnedCis(CISId);
+			if (iCis != null) {
+				IActivityFeed activityFeed = iCis.getActivityFeed();
+				if (activityFeed!=null){
+					IActivity notifyActivity = activityFeed.getEmptyIActivity();
+					notifyActivity.setActor(CISId);
+					notifyActivity.setVerb(ISharedCalendar.VERB_CIS_CALENDAR_DELETED);
+					notifyActivity.setObject(calendarId);
+					activityFeed.addActivity(notifyActivity,
+							new IActivityFeedCallback() {
+								@Override
+								public void receiveResult(
+										Activityfeed activityFeedObject) {
+									log.debug("Added a 'Delete CIS Calendar' activity to the Activity Feed.");
+								}
+							}
+					);
+				}
+			}
+		} else {
+			log.debug("CIS manager or ActivityFeed service not available.");
+		}
+	}
+	
 	@Override
 	public boolean deleteCISCalendar(String calendarId) {
 		
@@ -205,10 +238,12 @@ public class SharedCalendar implements ISharedCalendar, IPrivateCalendarUtil {
 						.add(Example.create(template)).list();
 				if (results.size() == 1) {					
 					t = session.beginTransaction();
-					session.delete(results.get(0));
+					CISCalendarDAO d = results.get(0);
+					session.delete(d);
 					util.deleteCalendar(calendarId);
 					t.commit();										
-					result = true;					
+					result = true;		
+					this.notifyCisCalendarDeletion(calendarId, d.getCISId());
 				} else {
 					log.info("The CIS has not been found.");
 				}
@@ -243,13 +278,9 @@ public class SharedCalendar implements ISharedCalendar, IPrivateCalendarUtil {
 	public List<Calendar> retrieveCISCalendarList(String CISId) {
 		List<Calendar> returnedCalendarList = new ArrayList<Calendar>();
 		try {
-			List<CalendarListEntry> tmpCalendarList=util.retrieveAllCISCalendar(CISId);
-			
+			List<CalendarListEntry> tmpCalendarList=util.retrieveAllCISCalendar(CISId);			
 			returnedCalendarList = calendarListFromCalendarEntry(filterCISCalendar(tmpCalendarList, CISId));
-			
-
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			log.error(e.getMessage());
 		}
 		return returnedCalendarList;
@@ -266,13 +297,42 @@ public class SharedCalendar implements ISharedCalendar, IPrivateCalendarUtil {
 	public List<Event> retrieveCISCalendarEvents(String calendarId) {
 		List<Event> returnedEventList = new ArrayList<Event>();
 		try {
-			returnedEventList = eventListFromGoogleEventList(util
-					.retrieveAllEvents(calendarId));
-			
+			returnedEventList = eventListFromGoogleEventList(util.retrieveAllEvents(calendarId));			
 		} catch (Exception e) {
 			log.error(e.getMessage());
 		}
 		return returnedEventList;
+	}
+	
+	private void notifyCisCalendarEvtCreation(String newEvtId, String calendarId, String CISId){
+		if (CISId==null){
+			log.debug("CIS ID parameter not provided, skipping activity creation.");
+			return;
+		}
+		if (cisManager != null) {
+			ICisOwned iCis = cisManager.getOwnedCis(CISId);
+			if (iCis != null) {
+				IActivityFeed activityFeed = iCis.getActivityFeed();
+				if (activityFeed!=null){
+					IActivity notifyActivity = activityFeed.getEmptyIActivity();
+					notifyActivity.setActor(CISId);
+					notifyActivity.setVerb(ISharedCalendar.VERB_CIS_CALENDAR_EVENT_CREATED);
+					notifyActivity.setObject(newEvtId);
+					notifyActivity.setTarget(calendarId);
+					activityFeed.addActivity(notifyActivity,
+							new IActivityFeedCallback() {
+								@Override
+								public void receiveResult(
+										Activityfeed activityFeedObject) {
+									log.debug("Added a 'Create CIS Event' activity to the Activity Feed.");
+								}
+							}
+					);
+				}
+			}
+		} else {
+			log.debug("CIS manager or ActivityFeed service not available.");
+		}
 	}
 
 	/* (non-Javadoc)
@@ -288,14 +348,119 @@ public class SharedCalendar implements ISharedCalendar, IPrivateCalendarUtil {
 							.getStartDate()), XMLGregorianCalendarConverter
 							.asDate(newEvent.getEndDate()), newEvent
 							.getLocation());
-
+			this.notifyCisCalendarEvtCreation(returnedEventId, calendarId, this.getCisIdFromCalendarId(calendarId));
 		} catch (IOException e) {
-
 			log.error(e.getMessage());
 		}
 		return returnedEventId;
 	}
-
+	
+	
+	/**
+	 * Returns the CisId of the CIS that owns the calendar with the provided id, or null if not found
+	 * @param calendarId the CIS Calendar Id to search for
+	 * @return The CisId (or null if not found)
+	 */
+	private String getCisIdFromCalendarId(String calendarId){
+		String result = null;
+		Transaction t = null;
+		Session session = null;
+		try {
+			session = sessionFactory.openSession();
+			CISCalendarDAO template = new CISCalendarDAO();
+			template.setCalendarId(calendarId);
+			List<CISCalendarDAO> results = session
+					.createCriteria(CISCalendarDAO.class)
+					.add(Example.create(template)).list();
+			if (results.size() == 1) {					
+				t = session.beginTransaction();
+				CISCalendarDAO d = results.get(0);
+				result = d.getCISId();
+				t.commit();
+			} else {
+				log.info("The CIS has not been found.");
+			}
+		} catch (HibernateException he) {
+			log.error(he.getMessage());
+			if (t != null) {
+				t.rollback();
+			}
+		} finally {
+			if (session != null) {
+				session.close();
+			}
+		}	
+		return result;
+	}
+	
+	/**
+	 * Returns the CssId of the Css that owns the calendar with the provided id, or null if not found
+	 * @param calendarId the Css Calendar Id to search for
+	 * @return The CssId (or null if not found)
+	 */
+	private String getCssIdFromCalendarId(String calendarId){
+		String result = null;
+		Transaction t = null;
+		Session session = null;
+		try {
+			session = sessionFactory.openSession();
+			CSSCalendarDAO template = new CSSCalendarDAO();
+			template.setCalendarId(calendarId);
+			List<CSSCalendarDAO> results = session
+					.createCriteria(CSSCalendarDAO.class)
+					.add(Example.create(template)).list();
+			if (results.size() == 1) {					
+				t = session.beginTransaction();
+				CSSCalendarDAO d = results.get(0);
+				result = d.getCSSId();
+				t.commit();
+			} else {
+				log.info("The CSS has not been found.");
+			}
+		} catch (HibernateException he) {
+			log.error(he.getMessage());
+			if (t != null) {
+				t.rollback();
+			}
+		} finally {
+			if (session != null) {
+				session.close();
+			}
+		}	
+		return result;
+	}
+	
+	private void notifyCisCalendarEvtDeletion(String deletedEvtId, String calendarId, String CISId){
+		if (CISId==null){
+			log.debug("CIS ID parameter not provided, skipping activity creation.");
+			return;
+		}
+		if (cisManager != null) {
+			ICisOwned iCis = cisManager.getOwnedCis(CISId);
+			if (iCis != null) {
+				IActivityFeed activityFeed = iCis.getActivityFeed();
+				if (activityFeed!=null){
+					IActivity notifyActivity = activityFeed.getEmptyIActivity();
+					notifyActivity.setActor(CISId);
+					notifyActivity.setVerb(ISharedCalendar.VERB_CIS_CALENDAR_EVENT_DELETED);
+					notifyActivity.setObject(deletedEvtId);
+					notifyActivity.setTarget(calendarId);
+					activityFeed.addActivity(notifyActivity,
+							new IActivityFeedCallback() {
+								@Override
+								public void receiveResult(
+										Activityfeed activityFeedObject) {
+									log.debug("Added a 'Delete CIS Event' activity to the Activity Feed.");
+								}
+							}
+					);
+				}
+			}
+		} else {
+			log.debug("CIS manager or ActivityFeed service not available.");
+		}
+	}
+	
 	/* (non-Javadoc)
 	 * @see org.societies.rdPartyService.enterprise.sharedCalendar.ISharedCalendar#deleteEventOnCISCalendar(java.lang.String, java.lang.String)
 	 */
@@ -304,11 +469,43 @@ public class SharedCalendar implements ISharedCalendar, IPrivateCalendarUtil {
 		boolean deletionOk=false;
 		try {
 			util.deleteEvent(calendarId, eventId);
+			this.notifyCisCalendarEvtDeletion(eventId, calendarId, this.getCisIdFromCalendarId(calendarId));
 			deletionOk=true;
 		} catch (Exception e) {
 			log.error("Error during deletion of CIS calendar event: "+e.getMessage());
 		}
 		return deletionOk;
+	}
+	
+	private void notifyCalendarEvtSubscription(String subscribedEvtId, String calendarId, String CISId){
+		if (CISId==null){
+			log.debug("CIS ID parameter not provided, skipping activity creation.");
+			return;
+		}
+		if (cisManager != null) {
+			ICisOwned iCis = cisManager.getOwnedCis(CISId);
+			if (iCis != null) {
+				IActivityFeed activityFeed = iCis.getActivityFeed();
+				if (activityFeed!=null){
+					IActivity notifyActivity = activityFeed.getEmptyIActivity();
+					notifyActivity.setActor(CISId);
+					notifyActivity.setVerb(ISharedCalendar.VERB_CALENDAR_EVENT_SUBSCRIPTION);
+					notifyActivity.setObject(subscribedEvtId);
+					notifyActivity.setTarget(calendarId);
+					activityFeed.addActivity(notifyActivity,
+							new IActivityFeedCallback() {
+								@Override
+								public void receiveResult(
+										Activityfeed activityFeedObject) {
+									log.debug("Added a 'Subscription to Calendar Event' activity to the Activity Feed.");
+								}
+							}
+					);
+				}
+			}
+		} else {
+			log.debug("CIS manager or ActivityFeed service not available.");
+		}
 	}
 	
 	/*
@@ -337,6 +534,7 @@ public class SharedCalendar implements ISharedCalendar, IPrivateCalendarUtil {
 			}
 
 			util.updateEvent(calendarId, event);
+			this.notifyCalendarEvtSubscription(eventId, calendarId, this.getCisIdFromCalendarId(calendarId));
 			returnedValue = true;
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -356,6 +554,37 @@ public class SharedCalendar implements ISharedCalendar, IPrivateCalendarUtil {
 	public List<Event> findEvents(String calendarId, String keyWord) {
 		// TODO Auto-generated method stub
 		return null;
+	}
+	
+	private void notifyCalendarEvtUnsubscription(String subscribedEvtId, String calendarId, String CISId){
+		if (CISId==null){
+			log.debug("CIS ID parameter not provided, skipping activity creation.");
+			return;
+		}
+		if (cisManager != null) {
+			ICisOwned iCis = cisManager.getOwnedCis(CISId);
+			if (iCis != null) {
+				IActivityFeed activityFeed = iCis.getActivityFeed();
+				if (activityFeed!=null){
+					IActivity notifyActivity = activityFeed.getEmptyIActivity();
+					notifyActivity.setActor(CISId);
+					notifyActivity.setVerb(ISharedCalendar.VERB_CALENDAR_EVENT_UNSUBSCRIPTION);
+					notifyActivity.setObject(subscribedEvtId);
+					notifyActivity.setTarget(calendarId);
+					activityFeed.addActivity(notifyActivity,
+							new IActivityFeedCallback() {
+								@Override
+								public void receiveResult(
+										Activityfeed activityFeedObject) {
+									log.debug("Added a 'Unsubscription from Calendar Event' activity to the Activity Feed.");
+								}
+							}
+					);
+				}
+			}
+		} else {
+			log.debug("CIS manager or ActivityFeed service not available.");
+		}
 	}
 
 	/*
@@ -387,6 +616,7 @@ public class SharedCalendar implements ISharedCalendar, IPrivateCalendarUtil {
 			boolean foundAndRemoved = attendeeToRemove != null && tmpAttendeeList.remove(attendeeToRemove);
 			event.setAttendees(tmpAttendeeList);
 			util.updateEvent(calendarId, event);
+			this.notifyCalendarEvtUnsubscription(eventId, calendarId, this.getCisIdFromCalendarId(calendarId));
 			returnedValue = true;
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
