@@ -1,7 +1,7 @@
 package org.societies.rdpartyService.enterprise.cal.controllers;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.Semaphore;
 
@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 @Controller
 public class CalendarWebController {
@@ -92,10 +93,15 @@ public class CalendarWebController {
 	public @ResponseBody String getRelevantCis() {
 		this.cb = new CalendarWebResultCallback(this);
 		List<ICis> foundCiss = new ArrayList<ICis>();
+		List<MyCisRecord> foundCisRecords = new ArrayList<MyCisRecord>();
+		Type listType = new TypeToken<List<MyCisRecord>>(){}.getType();
 		if (this.cisManagerService!=null){
 			foundCiss = this.cisManagerService.getCisList();
 		}
-		String ajaxResult = this.gson.toJson(foundCiss);
+		for (ICis currentCis : foundCiss) {
+			foundCisRecords.add(new MyCisRecord(currentCis.getName(), currentCis.getCisId()));
+		}
+		String ajaxResult = this.gson.toJson(foundCisRecords, listType);
 		return ajaxResult;
 	}
 	

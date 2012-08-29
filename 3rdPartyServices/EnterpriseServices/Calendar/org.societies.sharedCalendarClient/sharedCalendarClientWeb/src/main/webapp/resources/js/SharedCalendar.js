@@ -142,7 +142,7 @@ $("getCisCalendarEventsButton").on("click", function(event){
 				    	  bottom: new Element('tr', {id:item.id}).update("<td>"+item.id+"</td><td>"+item.start+"</td><td>"+item.end+"</td><td>"+item.title+"</td>")
 				      });
 			    	  Event.observe(item.id, 'click', function(event) {
-			    		    $('cisSummary').value = item.id;
+			    		    $('cisSummary').value = this.id;
 			    	  });
 			      }			      
 			    },
@@ -213,18 +213,17 @@ $("getAllRelevantCIS").on("click", function(event){
 		      var response = transport.responseText || "no response text";
 		      //alert("Success! \n\n" + response);
 		      var ajResp = eval("(" + response + ")");
-		      var cisList = ajResp.calendarList; 
 		      $('cisTableBody').update("");
-		      $('cissTableBody').insert({
-		    	  bottom: new Element('tr').update("<th>Cis ID</th><th>Cis Summary</th>")
+		      $('cisTableBody').insert({
+		    	  bottom: new Element('tr').update("<th>Cis ID</th><th>Cis Name</th>")
 		      });
-		      for (var index = 0, len = calList.length; index < len; ++index) {
-		    	  var item = calList[index];
+		      for (var index = 0, len = ajResp.length; index < len; ++index) {
+		    	  var item = ajResp[index];
 		    	  $('cisTableBody').insert({
-			    	  bottom: new Element('tr', {id:item.calendarId}).update("<td>"+item.calendarId+"</td><td>"+item.summary+"</td>")
+			    	  bottom: new Element('tr', {id:item.id}).update("<td>"+item.id+"</td><td>"+item.name+"</td>")
 			      });
-		    	  Event.observe(item.calendarId, 'click', function(event) {
-		    		    $('cisId').value = item.calendarId;
+		    	  Event.observe(item.id, 'click', function(event) {
+		    		    $('cisId').value = this.id;
 		    	  });
 		      }
 		    },
@@ -253,8 +252,8 @@ $("getAllCisCalendarsAjax").on("click", function(event){
 		    	  $('calendarsTableBody').insert({
 			    	  bottom: new Element('tr', {id:item.calendarId}).update("<td>"+item.calendarId+"</td><td>"+item.summary+"</td>")
 			      });
-		    	  Event.observe(item.calendarId, 'click', function(event) {
-		    		    $('calId').value = item.calendarId;
+		    	  Event.observe($(item.calendarId), 'click', function(event) {
+		    		    $('calId').value = this.id;
 		    	  });
 		      }
 		    },
