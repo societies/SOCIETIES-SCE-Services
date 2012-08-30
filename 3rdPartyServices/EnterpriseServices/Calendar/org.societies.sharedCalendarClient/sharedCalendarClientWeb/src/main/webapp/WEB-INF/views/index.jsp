@@ -14,9 +14,9 @@
 <body>	
 <div id="divHeader">
 	<h2>SOCIETIES Shared Calendar Web UI</h2>
-	Cis ID: <input type="text" id="cisId" /><br/>
-	Cis/Css Calendar Summary: <input type="text" id="cisSummary" /><br/>
-	Calendar ID: <input type="text" id="calId" /><br/>
+	<span id="cisId_span">Cis ID: <input type="text" id="cisId" /><br/></span>
+	<span id="calId_span">Calendar ID: <input type="text" id="calId" /><br/></span>
+	<span id="evtId_span">Event ID: <input type="text" id="evtId" /><br/></span>
 	<button id="getAllRelevantCIS">Show all CISs I belong to/own</button><br/>
 	<button id="getAllCisCalendarsAjax">Show all Cis Calendars</button><br/>
 	<button id="createCisCalendarButton">Create Cis Calendar</button><button id="deleteCisCalendarButton">Delete Cis Calendar</button><button id="getCisCalendarEventsButton">Get Cis Calendar Events</button><br/>

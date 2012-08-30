@@ -142,9 +142,10 @@ $("getCisCalendarEventsButton").on("click", function(event){
 				    	  bottom: new Element('tr', {id:item.id}).update("<td>"+item.id+"</td><td>"+item.start+"</td><td>"+item.end+"</td><td>"+item.title+"</td>")
 				      });
 			    	  Event.observe(item.id, 'click', function(event) {
-			    		    $('cisSummary').value = this.id;
+			    		    $('evtId').value = this.id;
 			    	  });
-			      }			      
+			      }
+			      $('evtId_span').show();
 			    },
 			    onFailure: function(){ alert('Something went wrong...'); }
 			  });			
@@ -226,6 +227,8 @@ $("getAllRelevantCIS").on("click", function(event){
 		    		    $('cisId').value = this.id;
 		    	  });
 		      }
+		      $('cisId_span').show();
+		      $('cisSummary_span').show();
 		    },
 		    onFailure: function(){ alert('Something went wrong...'); }
 		  }
@@ -256,10 +259,17 @@ $("getAllCisCalendarsAjax").on("click", function(event){
 		    		    $('calId').value = this.id;
 		    	  });
 		      }
+		      $('calId_span').show();
 		    },
 		    onFailure: function(){ alert('Something went wrong...'); }
 		  }
 	);			
+});
+
+Event.observe(window, 'load', function() {
+	  $('cisId_span').hide();
+	  $('calId_span').hide();
+	  $('evtId_span').hide();
 });
 
 //First time initializations
