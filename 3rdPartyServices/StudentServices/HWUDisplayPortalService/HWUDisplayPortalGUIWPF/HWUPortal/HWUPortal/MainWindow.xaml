@@ -1,0 +1,69 @@
+﻿<Window x:Class="HWUPortal.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="MainWindow" xmlns:WinForms="clr-namespace:System.Windows.Forms;assembly=System.Windows.Forms"
+        xmlns:WindowsFormsIntegration="clr-namespace:System.Windows.Forms.Integration;assembly=WindowsFormsIntegration" SizeToContent="WidthAndHeight" mc:Ignorable="d" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" d:DesignHeight="539" d:DesignWidth="870" Height="730" MaxWidth="1360" MaxHeight="730" Width="1360" ResizeMode="NoResize" MinWidth="1360" MinHeight="730" Closing="AppClosing" Closed="AppClosed">
+    <Window.Background>
+        <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+            <GradientStop Color="White" Offset="0.014000000000000012" />
+            <GradientStop Color="#FF7F7F7F" Offset="0.921" />
+            <GradientStop Color="DimGray" Offset="1" />
+        </LinearGradientBrush>
+    </Window.Background>
+    <Grid MinWidth="1360" MinHeight="730" MaxWidth="1360" MaxHeight="730">
+        <Button Content="Service 1" Height="55" HorizontalAlignment="Left" Margin="57,131,0,0" Name="serviceButton1" VerticalAlignment="Top" Width="201" Click="serviceButton1_Click">
+            <Button.Background>
+                <ImageBrush ImageSource="/HWUPortal;component/Images/buttonImg.png" />
+            </Button.Background>
+        </Button>
+        <Button Content="Service 2" Height="55" HorizontalAlignment="Left" Margin="57,221,0,0" Name="serviceButton2" VerticalAlignment="Top" Width="201">
+            <Button.Background>
+                <ImageBrush ImageSource="/HWUPortal;component/Images/buttonImg.png" />
+            </Button.Background>
+        </Button>
+        <Button Content="Service 3" Height="55" HorizontalAlignment="Left" Margin="57,311,0,0" Name="serviceButton3" VerticalAlignment="Top" Width="201">
+            <Button.Background>
+                <ImageBrush ImageSource="/HWUPortal;component/Images/buttonImg.png" />
+            </Button.Background>
+        </Button>
+        <Button Content="Service 4" Height="55" HorizontalAlignment="Left" Margin="57,406,0,0" Name="serviceButton4" VerticalAlignment="Top" Width="201">
+            <Button.Background>
+                <ImageBrush ImageSource="/HWUPortal;component/Images/buttonImg.png" />
+            </Button.Background>
+        </Button>
+        <Button Content="Service 5" Height="55" HorizontalAlignment="Left" Margin="57,500,0,0" Name="serviceButton5" VerticalAlignment="Top" Width="201">
+            <Button.Background>
+                <ImageBrush ImageSource="/HWUPortal;component/Images/buttonImg.png" />
+            </Button.Background>
+        </Button>
+        <WindowsFormsHost Name="wfhDate"  
+                    HorizontalAlignment="Center" 
+                    VerticalAlignment="Stretch" Width="1000" Height="600" Margin="348,12,12,118" Background="{x:Null}">
+            <WinForms:FlowLayoutPanel/>
+        </WindowsFormsHost>
+        <Button Content="Log out" Height="55" HorizontalAlignment="Left" Margin="1125,624,0,0" Name="logoutButton" VerticalAlignment="Top" Width="201">
+            
+            <Button.Background>
+                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                    <GradientStop Color="#FFF8F7FF" Offset="0.299" />
+                    <GradientStop Color="White" Offset="0.984" />
+                    <GradientStop Color="#FFD1D0C9" Offset="0.795" />
+                    <GradientStop Color="#FFFFEACA" Offset="0.575" />
+                </LinearGradientBrush>
+            </Button.Background>
+        </Button>
+        <Button Content="Close Running Service" Height="55" HorizontalAlignment="Left" Margin="855,624,0,0" Name="closeShowingServiceBtn" VerticalAlignment="Top" Width="201">
+            <Button.Background>
+                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                    <GradientStop Color="#FFF8F7FF" Offset="0.299" />
+                    <GradientStop Color="White" Offset="0.984" />
+                    <GradientStop Color="#FFD1D0C9" Offset="0.795" />
+                    <GradientStop Color="#FFFFEACA" Offset="0.575" />
+                </LinearGradientBrush>
+            </Button.Background>
+        </Button>
+        <Image HorizontalAlignment="Left" Margin="6,611,0,0" Name="image1" Stretch="UniformToFill" VerticalAlignment="Top" Source="/HWUPortal;component/Images/logo.png" Height="100" Width="480" />
+    </Grid>
+    
+    
+</Window>
