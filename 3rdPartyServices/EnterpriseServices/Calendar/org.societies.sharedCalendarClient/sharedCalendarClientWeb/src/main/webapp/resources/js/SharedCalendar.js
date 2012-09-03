@@ -10,10 +10,13 @@ var eventData = {
 		{"id":2, "start": new Date(year, month, day, 14), "end": new Date(year, month, day, 14, 45),"title":"Dev Meeting"}
 		]
 		};
+
+
 //JQuery Stuff
 jQuery.noConflict();	
 jQuery(document).ready(function($) {
 	var ua = navigator.userAgent.toLowerCase();
+	
 	var isAndroid = ua.indexOf("android") > -1; //&& ua.indexOf("mobile");
 	if(isAndroid) {
 		$('#calendar').weekCalendar({
@@ -98,7 +101,7 @@ jQuery(document).ready(function($) {
 	}
 
 	$("<div id=\"message\" class=\"ui-corner-all\"></div>").prependTo($("body"));
-	
+		
 });    	
 
 
@@ -266,10 +269,33 @@ $("getAllCisCalendarsAjax").on("click", function(event){
 	);			
 });
 
+$("add_CIS_Evt").on("click", function(event){
+	new Ajax.Updater('result','/sharedCal/createCisCalendarEvent.do',
+		  {
+			parameters: { 
+					calendarId: $F('calId'), 
+					evt_start: $F('evt_start'),
+					evt_end: $F('evt_end'),
+					evtDescr: $F('evtDescr'),
+					evtSummary: $F('evtSummary'),
+					evtLocation: $F('evtLocation')
+					},
+		    method:'get',
+		    onSuccess: function(transport){
+		      var response = transport.responseText || "no response text";
+		      $('result').replace(response);
+		    },
+		    onFailure: function(){ alert('Something went wrong...'); }
+		  }
+	);			
+});
+
+
 Event.observe(window, 'load', function() {
-	  $('cisId_span').hide();
+	  /*$('cisId_span').hide();
 	  $('calId_span').hide();
-	  $('evtId_span').hide();
+	  $('evtId_span').hide();*/
+		
 });
 
 //First time initializations
