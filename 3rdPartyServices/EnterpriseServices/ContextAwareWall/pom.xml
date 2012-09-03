@@ -122,66 +122,92 @@
 			<version>${release.version}</version>
 			<scope>provided</scope>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>org.societies.platform</groupId>
-	        <artifactId>socialdata</artifactId>
-	         <version>${release.version}</version>
+			<artifactId>socialdata</artifactId>
+			<version>${release.version}</version>
 			<scope>provided</scope>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>org.apache.shindig</groupId>
 			<artifactId>shindig-social-api</artifactId>
 			<version>3.0.0-beta4</version>
 			<scope>provided</scope>
 		</dependency>
-		
 		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-simple</artifactId>
-			<version>${slf4j.version}</version>
+			<groupId>org.societies.cis</groupId>
+			<artifactId>CisDirectoryClient</artifactId>
+			<version>${release.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>com.springsource.slf4j.org.apache.commons.logging</artifactId>
-		</dependency>
-		 <dependency>
-                <groupId>commons-codec</groupId>
-                <artifactId>commons-codec</artifactId>
-                <version>1.6</version>
-            </dependency>
-		 <dependency>
-                <groupId>commons-logging</groupId>
-                <artifactId>commons-logging</artifactId>
-                <version>1.1.1</version>
-         </dependency>
-		<dependency>
-			<groupId>org.apache.httpcomponents</groupId>
-			<artifactId>httpcore</artifactId>
-			<version>4.2</version>
+			<groupId>org.societies</groupId>
+			<artifactId>activityfeed</artifactId>
+			<version>${version.cis}</version>
 			<scope>provided</scope>
 		</dependency>
-		<dependency>
-			<groupId>org.apache.httpcomponents</groupId>
-			<artifactId>httpclient</artifactId>
-			<version>4.2</version>
-			<scope>provided</scope>
-		</dependency>
-            
-		<dependency>
-    		<groupId>org.json</groupId>
-    		<artifactId>com.springsource.org.json</artifactId>
-    		<version>1.0.0</version>
-		</dependency>
-		
-	</dependencies>
-	
-	
 
+		<!-- <dependency> <groupId>org.societies.api.schema</groupId> <artifactId>societies-api-schema</artifactId> 
+			<version>${release.version}</version> <scope>provided</scope> </dependency> -->
+			<dependency>
+				<groupId>org.slf4j</groupId>
+				<artifactId>slf4j-simple</artifactId>
+				<version>${slf4j.version}</version>
+				<scope>provided</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.slf4j</groupId>
+				<artifactId>com.springsource.slf4j.org.apache.commons.logging</artifactId>
+			</dependency>
+		<dependency>
+			<groupId>org.jfree.chart</groupId>
+			<artifactId>org.jfree.chart-library</artifactId>
+			<type>libd</type>
+			<version>1.0.9</version>
+			<!--scope>provided</scope -->
+		</dependency>
+		<dependency>
+			<groupId>org.jfree.chart</groupId>
+			<artifactId>com.springsource.org.jfree.chart</artifactId>
+			<version>1.0.9</version>
+		</dependency>
+		<dependency>
+			<groupId>org.jfree</groupId>
+			<artifactId>com.springsource.org.jfree</artifactId>
+			<version>1.0.12</version>
+		</dependency>
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>com.springsource.javax.servlet</artifactId>
+			<version>2.5.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.simpleframework</groupId>
+			<artifactId>simple-xml</artifactId>
+			<version>2.6.4</version>
+			<scope>provided</scope>
+			<exclusions>
+				<!-- StAX is not available on Android -->
+				<exclusion>
+					<artifactId>stax</artifactId>
+					<groupId>stax</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>stax-api</artifactId>
+					<groupId>stax</groupId>
+				</exclusion>
+				<!-- Provided by Android -->
+				<exclusion>
+					<artifactId>xpp3</artifactId>
+					<groupId>xpp3</groupId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+	</dependencies>
 	<build>
-		<finalName>ContextAwareWall</finalName>
+		<finalName>societies-webapp</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.felix</groupId>
@@ -206,12 +232,13 @@
 						<Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
 						<Export-Package>!*</Export-Package>
 						<Import-Package>
-							<!--  org.apache.http*;version="4.2", -->
-							org.json;version="1.0.0",
-							org.apache.http*;version="4.2", 
+							org.simpleframework.xml;resolution:=optional,
+							org.simpleframework.xml.convert;resolution:=optional,
+							org.societies.maven.converters;resolution:=optional,
 							javax.servlet.jsp.jstl.core;version="[1.2.0,2.0.0)",
 							javax.servlet;version="[3.0.0, 4.0.0)",
-							javax.servlet.resources;version="[2.4.0, 4.0.0)",
+							javax.servlet.resources;
+							version="[2.4.0, 4.0.0)",
 							<!-- spring DM -->
 							org.springframework.beans.factory.config,
 							org.springframework.osgi.web.context.support,
@@ -260,8 +287,18 @@
 							org.apache.taglibs.standard.tei; version="[1.2.0,2)",
 							org.apache.taglibs.standard.tlv; version="[1.2.0,2)",
 							org.osgi.framework,
+							org.jfree.chart,
+							org.jfree.chart.axis,
+							org.jfree.chart.entity,
+							org.jfree.chart.labels,
+							org.jfree.chart.plot,
+							org.jfree.chart.renderer.category,
+							org.jfree.chart.urls,
+							org.jfree.data.category,
+							org.jfree.data.general,
 							<!-- Form validation -->
-							javax.validation,*;resolution:=optional
+							javax.validation,
+							*;resolution:=optional
 						</Import-Package>
 						<Bundle-ClassPath>WEB-INF/classes,.</Bundle-ClassPath>
 						<Webapp-Context>VG</Webapp-Context>
@@ -312,6 +349,29 @@
 									<artifactId>org.springframework.osgi.web</artifactId>
 									<version>1.2.1</version>
 									<type>jar</type>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.jfree.chart</groupId>
+									<artifactId>org.jfree.chart-library</artifactId>
+									<version>1.0.9</version>
+									<type>libd</type>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.jfree.chart</groupId>
+									<artifactId>com.springsource.org.jfree.chart</artifactId>
+									<version>1.0.9</version>
+									<type>jar</type>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.jfree</groupId>
+									<artifactId>com.springsource.org.jfree</artifactId>
+									<version>1.0.12</version>
+									<type>jar</type>
+								</artifactItem>
+								<artifactItem>
+									<groupId>javax.servlet</groupId>
+									<artifactId>com.springsource.javax.servlet</artifactId>
+									<version>2.5.0</version>
 								</artifactItem>
 							</artifactItems>
 							<outputDirectory>${spring.osgi.deploy.dir}</outputDirectory>
