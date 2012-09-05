@@ -40,6 +40,7 @@
 	<mvc:annotation-driven />	
     
     <context:component-scan base-package="org.societies.rdpartyService.enterprise.cal.controllers"/>
+    <context:component-scan base-package="org.societies.api"/>
     
  
 	<bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">

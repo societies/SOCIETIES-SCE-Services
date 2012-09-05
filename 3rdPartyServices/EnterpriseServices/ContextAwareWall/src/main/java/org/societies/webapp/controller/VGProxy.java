@@ -28,9 +28,14 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 import javax.validation.Valid;
 
@@ -46,8 +51,12 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.societies.api.cis.attributes.MembershipCriteria;
 import org.societies.api.cis.management.ICis;
 import org.societies.api.cis.management.ICisManager;
+import org.societies.api.internal.css.management.ICSSLocalManager;
+import org.societies.api.schema.cssmanagement.CssInterfaceResult;
+import org.societies.api.schema.cssmanagement.CssRecord;
 import org.societies.webapp.model.MessageForm;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -56,6 +65,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.ModelAndView;
 
 
 /**
@@ -86,8 +96,8 @@ public class VGProxy {
 	 * 
 	 */
 	
-	@Autowired
-	private ICisManager cisManager;
+	@Autowired private ICisManager cisManager;
+	@Autowired private ICSSLocalManager cssManager;
 	
 	public VGProxy(){
 		LOG.info(LOG_PREFIX + "Ctor");
@@ -95,9 +105,87 @@ public class VGProxy {
 	private String serverURL;
 	
 	
+	private List<ICis> fillCisObjectforTesting(){
+		LOG.debug("Start method 'fillCisObjectforTesting'");
+		
+		List<ICis> cisList = null;
+		try {
+			Future<CssInterfaceResult> cssInterfaceResultFuture = cssManager.getCssRecord();
+			CssInterfaceResult cssInterfaceResult2 = cssInterfaceResultFuture.get();
+			CssRecord cssRecord = cssInterfaceResult2.getProfile();
+			
+			LOG.debug("creating CIS for testing (in case no CIS if found):  CSS ID \t\t" + cssRecord.getCssIdentity());
+			
+			Hashtable<String, MembershipCriteria> cisCriteria = new Hashtable<String, MembershipCriteria>();
+			/*
+			MembershipCriteria m = new MembershipCriteria();
+			
+		
+				Rule r = new Rule("equals",new ArrayList<String>(Arrays.asList("married")));
+				m.setRule(r);
+				cisCriteria.put(CtxAttributeTypes.STATUS, m);
+				r = new Rule("equals",new ArrayList<String>(Arrays.asList("Brazil")));
+				m.setRule(r);
+				cisCriteria.put(CtxAttributeTypes.ADDRESS_HOME_COUNTRY, m);
+			*/
+			
+			
+			cisManager.createCis("Guy CIS1","",cisCriteria, "description: test guy1");
+			cisManager.createCis("Guy CIS2","",cisCriteria, "description: test guy2");
+			cisList = cisManager.getCisList();
+			if (cisList.size() > 0){
+				LOG.debug("there are "+cisList.size() +" CIS in the system - first one is : "+(cisList.get(0)).getName() + " \t id " + (cisList.get(0)).getCisId());
+			}else{
+				LOG.debug("Error! although just been created for testing, there are no CIS in the system");
+			}
+			
+			
+		} catch (InterruptedException e) {
+			LOG.error(LOG_PREFIX +"exception caught: \t"+e.getMessage() + " \t get cause: "+e.getCause(),e);
+		} catch (ExecutionException e) {
+			LOG.error(LOG_PREFIX +"exception caught: \t"+e.getMessage() + " \t get cause: "+e.getCause(),e);		
+		}catch (Exception e) {
+			LOG.error(LOG_PREFIX +"exception caught: \t"+e.getMessage() + " \t get cause: "+e.getCause(),e);
+		}
+		LOG.debug("Start method 'fillCisObjectforTesting'");
+		
+		return cisList;
+	}
+	
+	@RequestMapping(value="/test/createCIS.html",method = RequestMethod.GET)
+	public void testCreateCIS(@RequestParam String cisName,@RequestParam String description) {
+		Future<CssInterfaceResult> cssInterfaceResultFuture = cssManager.getCssRecord();
+		CssInterfaceResult cssInterfaceResult2;
+		CssRecord cssRecord=null;
+		try {
+			cssInterfaceResult2 = cssInterfaceResultFuture.get();
+			cssRecord = cssInterfaceResult2.getProfile();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ExecutionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		Hashtable<String, MembershipCriteria> cisCriteria = new Hashtable<String, MembershipCriteria>();
+		cisManager.createCis(cisName,"",cisCriteria, description);	
+		
+		
+	}
+	
+	
+	
+	@RequestMapping(value="/contextAwareWall.html",method = RequestMethod.GET)
+	public ModelAndView pageLoad() {
+		//model is nothing but a standard Map object
+		Map<String, Object> model = new HashMap<String, Object>();
+		return new ModelAndView("mobile", model) ;
+	}
+	
 	
 	/**
-	 * Posting user message to the centrelized context aware wall server
+	 * Posting user message to the centralized context aware wall server
 	 * 
 	 * @param form
 	 * @param result
@@ -132,54 +220,61 @@ public class VGProxy {
 	
 	@RequestMapping(value="/initialUserDetails.html",method = RequestMethod.GET)
 	public @ResponseBody String getCIS() {
-	
 		List<ICis> cisList = new ArrayList<ICis>();
-		//List<ICis> cisList = cisManager.getCisList();
-		JSONObject userJsonObject = new JSONObject();
-		JSONArray jsonArray = new JSONArray();
-		JSONObject jsonObject; 
-		/*
-		for (ICis cis : cisList){
-			jsonObject = new JSONObject();
-			try {
-				jsonObject.put("name", cis.getName());
-				jsonObject.put("id", cis.getCisId());
-			} catch (JSONException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			jsonArray.put(jsonObject);
-		}
-		*/
-		if (cisList.isEmpty()){
-			try {
-				for (int i=1; i <= 4; i++){
-					jsonObject = new JSONObject();
-					jsonObject.put("name", "name"+Integer.toString(i));
-					jsonObject.put("id", Integer.toString(i));
-					jsonArray.put(jsonObject);
-				}
-			} catch (JSONException e) {
-				LOG.error(LOG_PREFIX +"exception caught while getting user details",e);
+		JSONObject userDetailsObject = new JSONObject();
+		try{
+			cisList = cisManager.getCisList();
+			if (cisList.isEmpty()){
+				cisList = fillCisObjectforTesting();
 			}
 			
+			JSONArray jsonArray = new JSONArray();
+			JSONObject jsonObject; 
+			
+			for (ICis cis : cisList){
+				jsonObject = new JSONObject();
+				try {
+					jsonObject.put("name", cis.getName());
+					jsonObject.put("id", cis.getCisId());
+				} catch (JSONException e) {
+					LOG.error(LOG_PREFIX + "\t Json exception while iterating over CIS list \t msg: "+e.getMessage() +" cause: "+e.getCause(),e);
+				}
+				jsonArray.put(jsonObject);
+			}
+			/*
+			if (cisList.isEmpty()){
+				try {
+					for (int i=1; i <= 4; i++){
+						jsonObject = new JSONObject();
+						jsonObject.put("name", "name"+Integer.toString(i));
+						jsonObject.put("id", Integer.toString(i));
+						jsonArray.put(jsonObject);
+					}
+				} catch (JSONException e) {
+					LOG.error(LOG_PREFIX +"exception caught while getting user details",e);
+				}
+			}*/
+			
+			try{
+				userDetailsObject.put("messages", jsonArray);			
+				userDetailsObject.put("userId", "guy-phone");
+				
+				LOG.debug(LOG_PREFIX+ " \t User details Json object "+userDetailsObject.toString());
+			}catch (JSONException e) {
+				LOG.error(LOG_PREFIX + "\t Json exception msg: "+e.getMessage() +" cause: "+e.getCause(),e);
+			}
+			
+		}catch (Exception e) {
+			LOG.error(LOG_PREFIX + "\t general exception msg: "+e.getMessage() +" cause: "+e.getCause(),e);
 		}
-		
-		try{
-			userJsonObject.put("messages", jsonArray);			
-			userJsonObject.put("userId", "guy-phone");
-		}catch (JSONException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		 
-		return userJsonObject.toString();
+		return userDetailsObject.toString();
 	}
 	
 	/**
 	 * Executing rest call to post the given message (as Json object) 
 	 * @param jsonMsg
 	 */
+	
 	private void postMessageInternal(String jsonMsg){
 		
 		LOG.debug(LOG_PREFIX + " enter postMessageInternal");
@@ -236,13 +331,20 @@ public class VGProxy {
 	 * @return
 	 */
 	private String getMessagesInternal(String userId, String cis, String number){
-		LOG.debug(LOG_PREFIX + " enter postMessageInternal");
+ 		LOG.debug(LOG_PREFIX + " enter postMessageInternal");
 		
 		String responseString="";
 		int statusCode;
+		
+		String url = "";
 		try {
-	    	
-			HttpGet httpGetRequest = new HttpGet("http://ta-proj02:9082/VG4SWeb/vg/message/"+userId+"/"+ cis+ "/"+number);
+			
+			url =  "http://ta-proj02:9082/VG4SWeb/vg/message/";
+			String cisParam = URLEncoder.encode(cis, "UTF-8").replace("+", "%20");
+			url = url + userId+"/"+ cisParam+ "/"+number;
+			
+			LOG.debug("before executing HTTP get- url:\t "+ url);
+			HttpGet httpGetRequest = new HttpGet(url);
 			httpGetRequest.addHeader("accept", "application/json");
 	    	HttpClient httpclient = new DefaultHttpClient();
 	    	HttpResponse response = httpclient.execute(httpGetRequest);
@@ -256,7 +358,7 @@ public class VGProxy {
 			}
 	    	LOG.info(LOG_PREFIX +"after executing rest call to: "+httpGetRequest.getURI()+ "\t status code- "+statusCode+"\t response: "+responseString);
 	    }catch (Exception e) {
-			e.printStackTrace();
+	    	LOG.error(LOG_PREFIX + " exception in method 'getMessagesInternal' ; generated URL is "+url);
 		}
 		
 		LOG.debug(LOG_PREFIX + " finish postMessageInternal");

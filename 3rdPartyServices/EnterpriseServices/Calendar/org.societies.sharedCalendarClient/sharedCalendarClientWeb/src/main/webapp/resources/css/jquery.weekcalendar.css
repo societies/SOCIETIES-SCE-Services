@@ -1,4 +1,7 @@
-
+#eventsTable{
+	border-width: 1px;
+	border-color: black;
+}
 
 .wc-container {
 	font-size: 14px;	

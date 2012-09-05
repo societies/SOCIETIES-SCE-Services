@@ -89,12 +89,12 @@ function initialUserDetails(){
      	var option = document.createElement('option');
      	option.setAttribute("id", thisMsg.id);
      	option.innerHTML=thisMsg.name;
-     	option.setAttribute("value", thisMsg.id);
+     	option.setAttribute("value", thisMsg.name);
      	mc.appendChild(option);
      }
      	
      getMessages();
-     myInterval = window.setInterval("getMessages()",60000);
+     myInterval = window.setInterval("getMessages()",10000);
      
     },
     
@@ -136,13 +136,22 @@ function submitMessage(){
 var lastUpdateMsgId = 0;
 function getMessages(){
 
+var cis = dojo.byId('cisBox').value;
+
  var xhrArgs = {
 
-    //url: "vg/message/"+dojo.byId('userId').value+"/1,2,3/0",
-    //url: "getMsg.html/guy-phone/1/0",
-    url: "getMsg.html?userID="+dojo.byId('userId').value+"&cis=" + dojo.byId('cisBox').value + "&number="+lastUpdateMsgId,
+    <!--url: "getMsg.html?userID="+dojo.byId('userId').value+"&cis=" +cis  + "&number="+lastUpdateMsgId,-->
+    url: "getMsg.html",
     handleAs: "text",
     preventCache: true,
+    
+    content: {
+      cis: cis,
+      userID: dojo.byId('userId').value,
+      number: lastUpdateMsgId
+    },
+    
+    
     load: function(data){
     
      messages=dojo.fromJson(data);
@@ -193,7 +202,7 @@ function getMessages(){
 <div id="settings" dojoType="dojox.mobile.View" selected="true">
  
     <!-- a sample heading -->
-    <h1 dojoType="dojox.mobile.Heading">Virtual Grafitti</h1>
+    <h1 dojoType="dojox.mobile.Heading">Context Aware Wall</h1>
  	<div>
 		<IMG SRC="images/logo1.png" ALT=""> 
 	</div>
@@ -202,12 +211,14 @@ function getMessages(){
     height:200px;
     margin: 10px 0 0;
     position: relative; background-image: url('images/wall.jpg');overflow : auto; " id="messagesContainer">
+	    <!-- static example
 	    <p  class = 'msg' style="color: red;">
 	    Omri writes: Hey Everybody, this is a graffiti!!
 	    </p>
 	     <p  class = 'msg' style=";color: aqua;">
 	    Guy writes: Welcome to the meeting :)
 	    </p>
+	    -->
     </div>
 <div>
 <div id="response2"></div>

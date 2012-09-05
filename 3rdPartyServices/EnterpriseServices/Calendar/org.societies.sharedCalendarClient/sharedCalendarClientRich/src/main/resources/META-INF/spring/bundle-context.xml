@@ -17,7 +17,8 @@
     <bean id="sharedCalendarClientRich"	class="org.societies.rdpartyService.enterprise.SharedCalendarClientRich" init-method="InitService">
         <property name="evtMgr" ref="eventManager" />
 		<property name="availableDevices" ref="availableDevicesSet" />
-		<property name="commManager" ref="CommManagerBundle" />	
+		<property name="commManager" ref="CommManagerBundle" />
+		<property name="displayDriverService" ref="displayDriverServiceRef" />	
 		<constructor-arg value="${serverJid}" />		
 	</bean>
 </beans>

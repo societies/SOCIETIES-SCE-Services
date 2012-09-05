@@ -39,5 +39,10 @@
         id="ISharedCalendarClientRich"
         cardinality="0..1"
         interface="org.societies.rdpartyService.enterprise.interfaces.ISharedCalendarClientRich" />
+    
+    <osgi:reference 
+    	id="CisManagementBundle"
+    	cardinality="0..1" 
+    	interface="org.societies.api.cis.management.ICisManager" />
 
 </beans>

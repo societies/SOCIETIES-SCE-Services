@@ -38,4 +38,6 @@
 -->
 	<osgi:reference id="CisManagementBundle" interface="org.societies.api.cis.management.ICisManager" cardinality="0..1"/>
 	
+	<osgi:reference id="CSSManager" interface="org.societies.api.internal.css.management.ICSSLocalManager" cardinality="0..1"/>
+	
 </beans>

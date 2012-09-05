@@ -5,11 +5,13 @@
 	<parent>
 		<groupId>org.societies</groupId>
 		<artifactId>spring-osgi-parent</artifactId>
-		<version>0.1</version>
+		<version>RELEASE</version>
 	</parent>
 	<groupId>org.societies.rdpartyService.enterprise</groupId>
 	<artifactId>sharedCalendarClientRich</artifactId>
+	<version>0.1.0</version>
 	<packaging>bundle</packaging>
+	<name>Shared Calendar Client Proxy</name>
 	<properties>
 		<slf4j-version>1.6.4</slf4j-version>
 		<spring.maven.artifact.version>2.5.6.SEC01</spring.maven.artifact.version>
@@ -21,13 +23,24 @@
 		<dependency>
 			<groupId>org.societies.api.external</groupId>
 			<artifactId>societies-api</artifactId>
-			<version>${release.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.societies.api.ext3p</groupId>
 			<artifactId>societies-api-ext3p</artifactId>
 			<version>${release.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.osgi</groupId>
+			<artifactId>org.osgi.core</artifactId>
+			<version>4.1.0</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.osgi</groupId>
+			<artifactId>org.osgi.compendium</artifactId>
+			<version>4.1.0</version>
 			<scope>provided</scope>
 		</dependency>
 		<!-- Communication Manager  -->
@@ -78,6 +91,8 @@
 				<extensions>true</extensions>
 				<configuration>
 					<instructions>
+						<Bundle-Name>${project.name}</Bundle-Name>
+						<Bundle-Version>${project.version}</Bundle-Version>
 						<Export-Package>
 							org.societies.rdpartyService.enterprise.interfaces
 						</Export-Package>
@@ -92,7 +107,7 @@
 						<artifactItem>
 							<groupId>${project.groupId}</groupId>
 							<artifactId>${project.artifactId}</artifactId>
-							<version>${release.version}</version>
+							<version>${project.version}</version>
 							<type>jar</type>
 							<overWrite>true</overWrite>
 							<outputDirectory>${spring.osgi.deploy.dir}</outputDirectory>

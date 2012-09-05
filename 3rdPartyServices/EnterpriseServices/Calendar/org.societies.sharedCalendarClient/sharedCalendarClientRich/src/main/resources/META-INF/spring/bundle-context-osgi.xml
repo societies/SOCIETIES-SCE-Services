@@ -21,6 +21,7 @@
 
 	<osgi:reference id="CommManagerBundle" interface="org.societies.api.comm.xmpp.interfaces.ICommManager" cardinality="1..1" />
 	<osgi:reference id="eventManager" interface="org.societies.api.osgi.event.IEventMgr"/>
+	<osgi:reference id="displayDriverServiceRef" interface="org.societies.api.css.devicemgmt.display.IDisplayDriver" cardinality="0..1"/>
 	
 	<osgi:service id="calClientRichInterface" ref="sharedCalendarClientRich" interface="org.societies.rdpartyService.enterprise.interfaces.ISharedCalendarClientRich">
 		<osgi:service-properties>
