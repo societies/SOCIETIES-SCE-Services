@@ -13,7 +13,6 @@
 	<!-- Calendar Client Artifacts - Start -->
 	<artifact type="configuration" name="sharedCalClient"/>
 	<artifact type="bundle" name="org.societies.rdpartyService.enterprise.sharedCalendarClientRich"/>	
-	<artifact type="bundle" name="sharedCalendarClientWeb"/>	
-	<!-- Calendar Client Artifacts - End -->
-	
+	<artifact type="bundle" name="sharedCalendarClientWeb"/>
+	<!-- Calendar Client Artifacts - End -->	
 </plan>

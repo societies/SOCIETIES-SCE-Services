@@ -10,7 +10,7 @@
 	<artifactId>sharedCalendarClientWeb</artifactId>
 	<version>0.1.0</version>
 	<packaging>war</packaging>
-	<name>sharedCalendarClientWeb Maven Webapp</name>
+	<name>Shared Calendar Web App</name>
 	<url>http://maven.apache.org</url>
 	
 	<properties>
@@ -150,6 +150,7 @@
 					</supportedProjectTypes>
 					<instructions>						
 						<Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
+						<Bundle-Name>${project.name}</Bundle-Name>
 						<Bundle-Version>${project.version}</Bundle-Version>
 						<Web-ContextPath>sharedCal</Web-ContextPath>
 						<Bundle-ClassPath>WEB-INF/classes,.</Bundle-ClassPath>

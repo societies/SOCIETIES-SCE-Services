@@ -3,6 +3,7 @@
 var year = new Date().getFullYear();
 var month = new Date().getMonth();
 var day = new Date().getDate();
+var highlightColor = "yellow";
 
 var eventData = {
 		events : [
@@ -124,6 +125,19 @@ new Ajax.Updater('result','/sharedCal/createCisCalendarAjax.do',
 		  });			
 });
 
+/*Highlight mandatory input fields*/
+$("createCisCalendarButton").on("mouseover", function(event){
+	$("cisId").style.backgroundColor=highlightColor;	
+	$("calId").style.backgroundColor=highlightColor;
+	$("cisSummary").style.backgroundColor=highlightColor;
+});
+$("createCisCalendarButton").on("mouseout", function(event){
+	$("cisId").style.backgroundColor="";
+	$("calId").style.backgroundColor="";
+	$("cisSummary").style.backgroundColor="";
+});
+
+
 $("getCisCalendarEventsButton").on("click", function(event){
 	new Ajax.Updater('result','/sharedCal/getCisCalendarEvents.do',
 			  {
@@ -142,7 +156,7 @@ $("getCisCalendarEventsButton").on("click", function(event){
 			      for (var index = 0, len = ajResp.length; index < len; ++index) {
 			    	  var item = ajResp[index];
 			    	  $('eventsTableBody').insert({
-				    	  bottom: new Element('tr', {id:item.id}).update("<td>"+item.id+"</td><td>"+item.start+"</td><td>"+item.end+"</td><td>"+item.title+"</td>")
+				    	  bottom: new Element('tr', {id:item.id, title:"Click to copy this value to the correct input field"}).update("<td>"+item.id+"</td><td>"+item.start+"</td><td>"+item.end+"</td><td>"+item.title+"</td>")
 				      });
 			    	  Event.observe(item.id, 'click', function(event) {
 			    		    $('evtId').value = this.id;
@@ -153,6 +167,17 @@ $("getCisCalendarEventsButton").on("click", function(event){
 			    onFailure: function(){ alert('Something went wrong...'); }
 			  });			
 	});
+
+/*Highlight mandatory input fields*/
+$("getCisCalendarEventsButton").on("mouseover", function(event){
+	$("cisId").style.backgroundColor=highlightColor;	
+	$("calId").style.backgroundColor=highlightColor;
+});
+$("getCisCalendarEventsButton").on("mouseout", function(event){
+	$("cisId").style.backgroundColor="";
+	$("calId").style.backgroundColor="";
+});
+
 
 $("deleteCisCalendarButton").on("click", function(event){
 	new Ajax.Updater('result','/sharedCal/deleteCisCalendar.do',
@@ -167,6 +192,16 @@ $("deleteCisCalendarButton").on("click", function(event){
 			  });			
 	});
 
+/*Highlight mandatory input fields*/
+$("deleteCisCalendarButton").on("mouseover", function(event){
+	$("cisId").style.backgroundColor=highlightColor;	
+	$("calId").style.backgroundColor=highlightColor;
+});
+$("deleteCisCalendarButton").on("mouseout", function(event){
+	$("cisId").style.backgroundColor="";
+	$("calId").style.backgroundColor="";
+});
+
 $("createCssCalendarButton").on("click", function(event){
 	new Ajax.Updater('result','/sharedCal/createCssCalendarAjax.do',
 			  {
@@ -179,6 +214,14 @@ $("createCssCalendarButton").on("click", function(event){
 			    onFailure: function(){ alert('Something went wrong...'); }
 			  });			
 	});
+
+/*Highlight mandatory input fields*/
+$("createCssCalendarButton").on("mouseover", function(event){
+	$("cisSummary").style.backgroundColor=highlightColor;
+});
+$("createCssCalendarButton").on("mouseout", function(event){
+	$("cisSummary").style.backgroundColor="";
+});
 
 $("deleteCssCalendarButton").on("click", function(event){
 	new Ajax.Updater('result','/sharedCal/deletePrivateCalendar.do',
@@ -202,8 +245,21 @@ new Ajax.Updater('result','/sharedCal/getPrivateEvents.do',
 		      //alert("Success! \n\n" + response);
 		      eventData.events = ajResp;
 		      jQuery("#calendar").show();
-		      jQuery("#calendar").weekCalendar('refresh'); 
-		     
+		      jQuery("#calendar").weekCalendar('refresh');
+		      $('eventsTableBody').update("");
+		      $('eventsTableBody').insert({
+		    	  bottom: new Element('tr').update("<th>Event Id</th><th>Event Start</th><th>Event End</th><th>Title</th>")
+		      });
+		      for (var index = 0, len = ajResp.length; index < len; ++index) {
+		    	  var item = ajResp[index];
+		    	  $('eventsTableBody').insert({
+			    	  bottom: new Element('tr', {id:item.id, title:"Click to copy this value to the correct input field"}).update("<td>"+item.id+"</td><td>"+item.start+"</td><td>"+item.end+"</td><td>"+item.title+"</td>")
+			      });
+		    	  Event.observe(item.id, 'click', function(event) {
+		    		    $('evtId').value = this.id;
+		    	  });
+		      }
+		      $('evtId_span').show();		     
 		    },
 		    onFailure: function(){ alert('Something went wrong...'); }
 		  });			
@@ -224,7 +280,7 @@ $("getAllRelevantCIS").on("click", function(event){
 		      for (var index = 0, len = ajResp.length; index < len; ++index) {
 		    	  var item = ajResp[index];
 		    	  $('cisTableBody').insert({
-			    	  bottom: new Element('tr', {id:item.id}).update("<td>"+item.id+"</td><td>"+item.name+"</td>")
+			    	  bottom: new Element('tr', {id:item.id, title:"Click to copy this value to the correct input field"}).update("<td>"+item.id+"</td><td>"+item.name+"</td>")
 			      });
 		    	  Event.observe(item.id, 'click', function(event) {
 		    		    $('cisId').value = this.id;
@@ -256,7 +312,7 @@ $("getAllCisCalendarsAjax").on("click", function(event){
 		      for (var index = 0, len = calList.length; index < len; ++index) {
 		    	  var item = calList[index];
 		    	  $('calendarsTableBody').insert({
-			    	  bottom: new Element('tr', {id:item.calendarId}).update("<td>"+item.calendarId+"</td><td>"+item.summary+"</td>")
+			    	  bottom: new Element('tr', {id:item.calendarId, title:"Click to copy this value to the correct input field"}).update("<td>"+item.calendarId+"</td><td>"+item.summary+"</td>")
 			      });
 		    	  Event.observe($(item.calendarId), 'click', function(event) {
 		    		    $('calId').value = this.id;
@@ -268,6 +324,15 @@ $("getAllCisCalendarsAjax").on("click", function(event){
 		  }
 	);			
 });
+
+/*Highlight mandatory input fields*/
+$("getAllCisCalendarsAjax").on("mouseover", function(event){
+	$("cisId").style.backgroundColor=highlightColor;			
+});
+$("getAllCisCalendarsAjax").on("mouseout", function(event){
+	$("cisId").style.backgroundColor="";			
+});
+
 
 $("add_CIS_Evt").on("click", function(event){
 	new Ajax.Updater('result','/sharedCal/createCisCalendarEvent.do',
@@ -289,6 +354,113 @@ $("add_CIS_Evt").on("click", function(event){
 		  }
 	);			
 });
+
+/*Highlight mandatory input fields*/
+$("add_CIS_Evt").on("mouseover", function(event){
+	$("calId").style.backgroundColor=highlightColor;	
+	$("evt_start").style.backgroundColor=highlightColor;
+	$("evt_end").style.backgroundColor=highlightColor;
+	$("evtDescr").style.backgroundColor=highlightColor;
+	$("evtSummary").style.backgroundColor=highlightColor;
+	$("evtLocation").style.backgroundColor=highlightColor;
+});
+$("add_CIS_Evt").on("mouseout", function(event){
+	$("calId").style.backgroundColor="";	
+	$("evt_start").style.backgroundColor="";
+	$("evt_end").style.backgroundColor="";
+	$("evtDescr").style.backgroundColor="";
+	$("evtSummary").style.backgroundColor="";
+	$("evtLocation").style.backgroundColor="";
+});
+
+$("del_CIS_Evt").on("click", function(event){
+	new Ajax.Updater('result','/sharedCal/deleteCisCalendarEvent.do',
+		  {
+			parameters: { 
+					calendarId: $F('calId'), 
+					evtId: $F('evtId')
+					},
+		    method:'get',
+		    onSuccess: function(transport){
+		      var response = transport.responseText || "no response text";
+		      $('result').update("").replace(response);
+		    },
+		    onFailure: function(){ alert('Something went wrong...'); }
+		  }
+	);			
+});
+
+/*Highlight mandatory input fields*/
+$("del_CIS_Evt").on("mouseover", function(event){
+	$("calId").style.backgroundColor=highlightColor;	
+	$("evtId").style.backgroundColor=highlightColor;
+});
+$("del_CIS_Evt").on("mouseout", function(event){
+	$("calId").style.backgroundColor="";	
+	$("evtId").style.backgroundColor="";	
+});
+
+$("add_CSS_Evt").on("click", function(event){
+	new Ajax.Updater('result','/sharedCal/createCssCalendarEvent.do',
+		  {
+			parameters: { 
+					evt_start: $F('evt_start'),
+					evt_end: $F('evt_end'),
+					evtDescr: $F('evtDescr'),
+					evtSummary: $F('evtSummary'),
+					evtLocation: $F('evtLocation')
+					},
+		    method:'get',
+		    onSuccess: function(transport){
+		      var response = transport.responseText || "no response text";
+		      $('result').update("").replace(response);
+		    },
+		    onFailure: function(){ alert('Something went wrong...'); }
+		  }
+	);			
+});
+
+/*Highlight mandatory input fields*/
+$("add_CSS_Evt").on("mouseover", function(event){
+	$("evt_start").style.backgroundColor=highlightColor;
+	$("evt_end").style.backgroundColor=highlightColor;
+	$("evtDescr").style.backgroundColor=highlightColor;
+	$("evtSummary").style.backgroundColor=highlightColor;
+	$("evtLocation").style.backgroundColor=highlightColor;
+});
+$("add_CSS_Evt").on("mouseout", function(event){
+	$("evt_start").style.backgroundColor="";
+	$("evt_end").style.backgroundColor="";
+	$("evtDescr").style.backgroundColor="";
+	$("evtSummary").style.backgroundColor="";
+	$("evtLocation").style.backgroundColor="";
+});
+
+
+$("del_CSS_Evt").on("click", function(event){
+	new Ajax.Updater('result','/sharedCal/deleteCssCalendarEvent.do',
+		  {
+			parameters: { 
+					evtId: $F('evtId')
+					},
+		    method:'get',
+		    onSuccess: function(transport){
+		      var response = transport.responseText || "no response text";
+		      $('result').update("").replace(response);
+		    },
+		    onFailure: function(){ alert('Something went wrong...'); }
+		  }
+	);			
+});
+
+/*Highlight mandatory input fields*/
+$("del_CSS_Evt").on("mouseover", function(event){
+	$("evtId").style.backgroundColor=highlightColor;
+});
+$("del_CSS_Evt").on("mouseout", function(event){
+	$("evtId").style.backgroundColor="";	
+});
+
 
 
 Event.observe(window, 'load', function() {
