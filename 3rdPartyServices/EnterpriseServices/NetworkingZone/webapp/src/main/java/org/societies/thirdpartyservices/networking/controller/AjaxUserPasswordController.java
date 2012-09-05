@@ -1,17 +1,13 @@
-package org.societies.schmoozer.controller;
+package org.societies.thirdpartyservices.networking.controller;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 
-import org.societies.schmoozer.model.AjaxUserDetails;
-import org.societies.schmoozer.model.AjaxUserPasswordDetails;
-import org.societies.schmoozer.model.AjaxUserPublicDetails;
-import org.societies.schmoozer.model.JsonResponse;
-import org.societies.thirdpartyservices.networking.NetworkBackEnd;
-import org.societies.thirdpartyservices.schema.networking.directory.UserRecord;
-import org.societies.thirdpartyservices.schema.networking.directory.UserRecordResult;
+
+
+import org.societies.thirdpartyservices.networking.client.NetworkClient;
+import org.societies.thirdpartyservices.networking.model.AjaxUserPasswordDetails;
+import org.societies.thirdpartyservices.networking.model.AjaxUserDetails;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -24,20 +20,19 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 
 
-
 @Controller
 public class AjaxUserPasswordController {
 	
 	
 	
 	@Autowired
-	NetworkBackEnd networkingBackEnd;
+	NetworkClient networkClient;
 	
-	public NetworkBackEnd getNetworkingBackEnd() {
-		return networkingBackEnd;
+	public NetworkClient getNetworkClient() {
+		return networkClient;
 	}
-	public void setNetworkingBackEnd(NetworkBackEnd networkingBackEnd) {
-		this.networkingBackEnd = networkingBackEnd;
+	public void setNetworkClient(NetworkClient networkClient) {
+		this.networkClient = networkClient;
 	}
 	
 	@RequestMapping(value="/updatepassword.html",method=RequestMethod.GET)
@@ -54,21 +49,18 @@ public class AjaxUserPasswordController {
 		
 		if(!result.hasErrors()){
 			
-			Future<UserRecordResult> userRecResFut = getNetworkingBackEnd().getNetworkingDirectory().getUserRecord(details.getUserid());
+			//TODO : Sort out asynch stuff!
 			try {
-				UserRecordResult userRecRes = userRecResFut.get();
-				userRecRes.getUserRec().setPassword(details.getFirstPassword());
-				getNetworkingBackEnd().getNetworkingDirectory().updateUserRecord(userRecRes.getUserRec());
+				
+				/*
+				UserRecordResult userRecRes = getNetworkingBackEnd().getNetworkingDirectory().getUserRecord(details.getUserid());
+				
+					userRecRes.getUserRec().setPassword(details.getFirstPassword());
+					getNetworkingBackEnd().getNetworkingDirectory().updateUserRecord(userRecRes.getUserRec());
+			*/
+					res.setStatus("SUCCESS");
 			
-			
-			res.setStatus("SUCCESS");
-			
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-				res.setStatus("FAIL");
-				res.setResult(result.getAllErrors());
-			} catch (ExecutionException e) {
+			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 				res.setStatus("FAIL");
@@ -104,17 +96,15 @@ public class AjaxUserPasswordController {
 	public @ResponseBody JsonResponse getUsers( ){
 		JsonResponse res = new JsonResponse();
 		
+		
 		// Get users from database
 		 List<AjaxUserDetails> userList = new ArrayList<AjaxUserDetails>(); 
-		
-		 Future<List<UserRecord>> dbUserListfut = getNetworkingBackEnd().getNetworkingDirectory().getRecords();
-		List<UserRecord> dbuserList = null;
+		/*
+		 List<UserRecord> dbuserList = null;
+
 		try {
-			dbuserList = dbUserListfut.get();
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ExecutionException e) {
+			dbuserList = getNetworkingBackEnd().getNetworkingDirectory().getRecords();
+		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -127,7 +117,7 @@ public class AjaxUserPasswordController {
 			usrDet.setUsername(dbuserList.get(i).getDisplayName());
 			userList.add(usrDet);
 		}
-		
+		*/
 		res.setStatus("SUCCESS");
 		res.setResult(userList);
 		return res;

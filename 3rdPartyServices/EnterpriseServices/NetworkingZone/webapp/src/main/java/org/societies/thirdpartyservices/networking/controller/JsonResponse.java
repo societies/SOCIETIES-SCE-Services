@@ -1,4 +1,4 @@
-package org.societies.schmoozer.model;
+package org.societies.thirdpartyservices.networking.controller;
 
 public class JsonResponse {
 	private String status = null;

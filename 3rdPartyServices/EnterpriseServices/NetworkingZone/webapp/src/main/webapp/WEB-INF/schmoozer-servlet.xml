@@ -44,7 +44,7 @@
 	<mvc:annotation-driven />	
 
 	<!-- Scans the classpath for annotated components that will be auto-registered as Spring beans. -->
-	<ctx:component-scan base-package="org.societies.schmoozer.controller" />
+	<ctx:component-scan base-package="org.societies.thirdpartyservices.networking.controller" />
 	
 	<bean id="viewResolver"
 		class="org.springframework.web.servlet.view.InternalResourceViewResolver">

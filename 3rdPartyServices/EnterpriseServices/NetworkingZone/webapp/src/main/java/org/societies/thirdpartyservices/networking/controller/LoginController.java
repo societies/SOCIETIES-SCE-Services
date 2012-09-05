@@ -1,4 +1,4 @@
-package org.societies.schmoozer.controller;
+package org.societies.thirdpartyservices.networking.controller;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -7,8 +7,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
-import org.societies.schmoozer.model.LoginForm;
-import org.societies.schmoozer.model.NewAccountForm;
+import org.societies.thirdpartyservices.networking.model.LoginForm;
+import org.societies.thirdpartyservices.networking.model.NewAccountForm;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.RequestMapping;

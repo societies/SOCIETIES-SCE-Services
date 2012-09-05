@@ -23,9 +23,5 @@
 				<form id="form_0" class="appnitro" method="post" action="">
 
 			<ul>
-
-				<li class="buttons"><input type="hidden" name="form_id"
-					value="0" /> <input id="CreateNewAccount" class="button_text"
-					type="submit" name="submit" value="Create New Account" /></li>
 			</ul>
 		</form>

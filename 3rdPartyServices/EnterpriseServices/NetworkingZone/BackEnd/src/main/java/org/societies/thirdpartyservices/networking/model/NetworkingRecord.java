@@ -22,63 +22,54 @@
  * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.societies.thirdpartyservices.networking;
+package org.societies.thirdpartyservices.networking.model;
 
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-
-import org.societies.domainauthority.registry.DaRegistry;
-
-import org.societies.thirdpartyservices.networking.NetworkingDirectory;
-import org.societies.thirdpartyservices.schema.networking.directory.UserRecordResult;
-import org.societies.thirdpartyservices.schema.networking.directory.UserResult;
-
-
-public class NetworkBackEnd {
-
-	public DaRegistry daRegistry;
-	public NetworkingDirectory networkingDirectory;
+/**
+ * @author Maria Mannion
+ *
+ */
+public class NetworkingRecord {
+	private int id;
+	private int friendid;
+	private int shareHash;
+	/**
+	 * @return the id
+	 */
+	public int getId() {
+		return id;
+	}
+	/**
+	 * @param id the id to set
+	 */
+	public void setId(int id) {
+		this.id = id;
+	}
+	/**
+	 * @return the friendid
+	 */
+	public int getFriendid() {
+		return friendid;
+	}
+	/**
+	 * @param friendid the friendid to set
+	 */
+	public void setFriendid(int friendid) {
+		this.friendid = friendid;
+	}
+	/**
+	 * @return the shareHash
+	 */
+	public int getShareHash() {
+		return shareHash;
+	}
+	/**
+	 * @param shareHash the shareHash to set
+	 */
+	public void setShareHash(int shareHash) {
+		this.shareHash = shareHash;
+	}
 	
-	public DaRegistry getDaRegistry() {
-		return daRegistry;
-	}
-
-	public void setDaRegistry(DaRegistry daRegistry) {
-		this.daRegistry = daRegistry;
-	}
-
-	public NetworkingDirectory getNetworkingDirectory() {
-		return networkingDirectory;
-	}
-
-	public void setNetworkingDirectory(NetworkingDirectory networkingDirectory) {
-		this.networkingDirectory = networkingDirectory;
-	}
-
-	public NetworkBackEnd()	{};
 	
 	
-	public boolean checkUser(String userid)
-	{
-		boolean result = false;
-		
-		Future<UserRecordResult> userRecResFut = getNetworkingDirectory().getUserRecord(userid);
-		try {
-			UserRecordResult userRecRes = userRecResFut.get();
-			if (userRecRes.getResult() == UserResult.USER_NOT_FOUND)
-				result = getDaRegistry().isUserActive(userid);
-			
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ExecutionException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-		return result;
-		
-	}
 	
 }
-

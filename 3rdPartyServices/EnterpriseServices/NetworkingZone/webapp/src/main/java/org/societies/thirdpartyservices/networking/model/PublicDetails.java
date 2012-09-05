@@ -1,5 +1,5 @@
 
-package org.societies.schmoozer.model;
+package org.societies.thirdpartyservices.networking.model;
 
 public class PublicDetails {
 

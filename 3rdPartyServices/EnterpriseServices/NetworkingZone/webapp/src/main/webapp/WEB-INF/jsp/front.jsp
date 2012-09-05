@@ -1,6 +1,8 @@
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1" pageEncoding="ISO-8859-1"%>
 <%@ taglib prefix="forms" uri="http://www.springframework.org/tags/form"%>
 
+<%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="xc"%>
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 
 
@@ -19,13 +21,20 @@
 	<!-- END HEADER -->
 	<jsp:include page="left_empty.jsp" />
 
+<script language="javascript">
+function updateDetails(selected) {    
+	document.forms["frontForm"]["selectedCis"].value = selected;
+} 
+</script>
+
 	
 	<img id="top" src="images/top.png" alt=""/>
 	
 	<forms:form method="POST" action="front.html" commandName="frontForm">
+	<input type="hidden" name="selectedCis" id="selectedCis">
 	<div id="form_container">
 	
-		<h1><a>Select A Zone to Enter</a></h1>
+		<h1><a></a></h1>
 		
 	
 		<form id="form_0" class="appnitro"  method="post" action="" >
@@ -35,16 +44,20 @@
 			<ul >
 			
 					<li id="li_1" >
-		<label class="description" for="element_1">Societies Userid</label>
-		<div>
-			<forms:input id="name" name="name" class="element text medium" type="text" maxlength="255" path="userId" value="maria.societies.local"/> 
-		</div><p class="guidelines" id="guide_1"><small>Your societies idenity</small></p> 
-		</li>		<li id="li_2" >
-		<label class="description" for="element_2">Password</label>
-		<div>
-			<forms:input id="password" name="password" class="element text medium" type="password" maxlength="255" path="password" value=""/> 
-		</div><p class="guidelines" id="guide_2"><small>Your Schmoozer Password</small></p> 
-		</li>		<li class="section_break">	</li>
+		<table>
+		 <xc:forEach var="zones" items="${frontForm.zoneList}">
+        		<tr>
+					<td>
+						<input id="element_zone" name="element_zone" class="element radio" type="radio" value="${zones}" onclick="updateDetails('${zones}')" />
+						<label class="choice" for="element_zone">${zones}</label>
+					</td>
+				</tr>			
+        </xc:forEach>
+        </table>
+		</li> 
+		
+			
+		<li class="section_break">	</li>
 		
 			
 		<li class="buttons">

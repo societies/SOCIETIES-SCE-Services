@@ -1,5 +1,5 @@
+package org.societies.thirdpartyservices.networking.model;
 
-package org.societies.schmoozer.model;
 
 import javax.validation.constraints.Size;
 

@@ -14,13 +14,12 @@
 	<context:annotation-config />
 
 	<tx:annotation-driven />
-
+ 
 	<bean id="NetworkingDirectoryPropConfig"
 		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
 		<property name="ignoreResourceNotFound" value="true"></property>
 		<property name="locations">
 			<list>
-				<!-- <value>classpath:META-INF/spring/derby_database.properties</value> -->
 				<value>file:${CONFIG_DIR}\org.societies.platform.properties</value>
 			</list>
 		</property>
@@ -33,9 +32,9 @@
 
 		<property name="annotatedClasses">
 			<list>
-				<value>org.societies.thirdpartyservices.networking.model.NetworkingRecordEntry
+				<value>org.societies.thirdpartyservices.networking.directory.model.NetworkingRecordEntry
 				</value>
-				<value>org.societies.thirdpartyservices.networking.model.UserRecordEntry
+				<value>org.societies.thirdpartyservices.networking.directory.model.UserRecordEntry
 				</value>
 			</list>
 		</property>
@@ -43,15 +42,13 @@
 		<property name="annotatedPackages">
 			<list>
 
-				<value>org.societies.thirdpartyservices.networking.model
+				<value>org.societies.thirdpartyservices.networking.directory.model
 				</value>
 			</list>
 		</property>
 
 		<property name="hibernateProperties">
 			<props>
-				<!-- <prop key="hibernate.dialect">${hibernate.dialect}</prop> <prop 
-					key="hibernate.hbm2ddl.auto">create-drop</prop> <prop key="hibernate.jdbc.batch_size">0</prop> -->
 				<prop key="hibernate.show_sql">true</prop>
 				<prop key="hibernate.cache.use_second_level_cache">false</prop>
 				<prop key="hibernate.hbm2ddl.auto">update</prop>
@@ -59,7 +56,6 @@
 			</props>
 		</property>
 	</bean>
-
 	<!-- enable the configuration of transactional behavior based on annotations -->
 	<tx:annotation-driven transaction-manager="transactionManager" />
 
@@ -67,16 +63,25 @@
 		class="org.springframework.orm.hibernate3.HibernateTransactionManager">
 		<property name="sessionFactory" ref="sessionFactory" />
 	</bean>
-
+	
 	<bean id="networkingDirectory"
-		class="org.societies.thirdpartyservices.networking.NetworkingDirectory">
+		class="org.societies.thirdpartyservices.networking.directory.NetworkingDirectory">
 		<property name="sessionFactory" ref="sessionFactory" />
-	</bean>
+	</bean> 
+	
 	
 	<bean id="NetworkingBackEnd" 
-		class="org.societies.thirdpartyservices.networking.NetworkBackEnd">
-		<property name="daRegistry" ref="DaRegistry" />
-		<property name="networkingDirectory" ref="networkingDirectory" />
+		class="org.societies.thirdpartyservices.networking.server.NetworkBackEnd"
+		 init-method="init_service">
+	 	<property name="networkingDirectory" ref="networkingDirectory" /> 
+		<property name="cisManager" ref="cisManager" />
+	</bean>
+	
+	<bean id="NetworkingCommsServer" 
+		class="org.societies.thirdpartyservices.networking.server.NetworkingCommsServer"
+		 init-method="InitService">
+	 	<property name="commManager" ref="commManager" /> 
+	 	<property name="netServer" ref="NetworkingBackEnd" /> 
 	</bean>
 
 

@@ -1,12 +1,13 @@
-package org.societies.schmoozer.controller;
+package org.societies.thirdpartyservices.networking.controller;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.validation.Valid;
 
+import org.societies.thirdpartyservices.networking.model.NewAccountForm;
+import org.societies.thirdpartyservices.networking.client.NetworkClient;
 
-import org.societies.schmoozer.model.NewAccountForm;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
@@ -14,23 +15,19 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
 
-import org.societies.thirdpartyservices.networking.NetworkBackEnd;
-import org.societies.thirdpartyservices.schema.networking.directory.UserRecord;
-
-
 
 @Controller
 public class NewAccountController {
 
 	
 	@Autowired
-	NetworkBackEnd networkingBackEnd;
+	NetworkClient networkClient;
 	
-	public NetworkBackEnd getNetworkingBackEnd() {
-		return networkingBackEnd;
+	public NetworkClient getNetworkClient() {
+		return networkClient;
 	}
-	public void setNetworkingBackEnd(NetworkBackEnd networkingBackEnd) {
-		this.networkingBackEnd = networkingBackEnd;
+	public void setNetworkClient(NetworkClient networkClient) {
+		this.networkClient = networkClient;
 	}
 	/**
 	 * This method get called when user request for login page by using
@@ -73,9 +70,12 @@ public class NewAccountController {
 			// Then if ok, we want to create a network account
 			// then we want the users to enter more details
 			model.put("name", displayName);
-			boolean isActive=getNetworkingBackEnd().checkUser(userid);
+			//boolean isActive=getNetworkingBackEnd().checkUser(userid);
+			
+			boolean isActive=false;
+			
 			//TODO : do validation
-			if(isActive){
+/*		if(isActive){
 				
 				UserRecord userRec = new UserRecord();
 				userRec.setLogin(userid);
@@ -85,7 +85,9 @@ public class NewAccountController {
 				getNetworkingBackEnd().getNetworkingDirectory().updateUserRecord(userRec);
 				model.put("result", "New Account Created Successfull");
 				return new ModelAndView("main", model);	
-			}else{					
+			}else
+			*/
+			{					
 				model.put("result", "New Account Creation UnSuccessfull");
 				return new ModelAndView("newaccount", model);
 			}			
