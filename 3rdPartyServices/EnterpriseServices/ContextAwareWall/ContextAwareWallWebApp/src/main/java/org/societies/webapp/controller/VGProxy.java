@@ -46,6 +46,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.protocol.HTTP;
+import org.jfree.util.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -54,6 +55,7 @@ import org.slf4j.LoggerFactory;
 import org.societies.api.cis.attributes.MembershipCriteria;
 import org.societies.api.cis.management.ICis;
 import org.societies.api.cis.management.ICisManager;
+import org.societies.api.comm.xmpp.interfaces.ICommManager;
 import org.societies.api.internal.css.management.ICSSLocalManager;
 import org.societies.api.schema.cssmanagement.CssInterfaceResult;
 import org.societies.api.schema.cssmanagement.CssRecord;
@@ -98,6 +100,7 @@ public class VGProxy {
 	
 	@Autowired private ICisManager cisManager;
 	@Autowired private ICSSLocalManager cssManager;
+	@Autowired private ICommManager commManager;
 	
 	public VGProxy(){
 		LOG.info(LOG_PREFIX + "Ctor");
@@ -108,13 +111,17 @@ public class VGProxy {
 	private List<ICis> fillCisObjectforTesting(){
 		LOG.debug("Start method 'fillCisObjectforTesting'");
 		
-		List<ICis> cisList = null;
+		List<ICis> cisList = new ArrayList<ICis>();
 		try {
 			Future<CssInterfaceResult> cssInterfaceResultFuture = cssManager.getCssRecord();
 			CssInterfaceResult cssInterfaceResult2 = cssInterfaceResultFuture.get();
 			CssRecord cssRecord = cssInterfaceResult2.getProfile();
 			
-			LOG.debug("creating CIS for testing (in case no CIS if found):  CSS ID \t\t" + cssRecord.getCssIdentity());
+			try{
+				LOG.debug("creating CIS for testing (in case no CIS if found):  CSS ID \t\t" + cssRecord.getCssIdentity());
+			}catch (Exception e) {
+				e.printStackTrace();
+			}
 			
 			Hashtable<String, MembershipCriteria> cisCriteria = new Hashtable<String, MembershipCriteria>();
 			/*
@@ -130,8 +137,9 @@ public class VGProxy {
 			*/
 			
 			
-			cisManager.createCis("Guy CIS1","",cisCriteria, "description: test guy1");
-			cisManager.createCis("Guy CIS2","",cisCriteria, "description: test guy2");
+			
+			cisManager.createCis("Guy CIS_"+generateRand(),"",cisCriteria, "description: test guy1");
+			cisManager.createCis("Guy CIS_"+generateRand(),"",cisCriteria, "description: test guy2");
 			cisList = cisManager.getCisList();
 			if (cisList.size() > 0){
 				LOG.debug("there are "+cisList.size() +" CIS in the system - first one is : "+(cisList.get(0)).getName() + " \t id " + (cisList.get(0)).getCisId());
@@ -151,6 +159,13 @@ public class VGProxy {
 		
 		return cisList;
 	}
+	
+	private int generateRand(){
+		double rand = Math.random()*1000;
+		rand = Math.round(rand);
+		return (int)rand;
+	}
+	
 	
 	@RequestMapping(value="/test/createCIS.html",method = RequestMethod.GET)
 	public void testCreateCIS(@RequestParam String cisName,@RequestParam String description) {
@@ -197,26 +212,57 @@ public class VGProxy {
 		
 		LOG.debug(LOG_PREFIX + " enter postMsg1.html");
 		
-		String jsonMsg="";
 		try{
-			JSONObject jsonObject = new JSONObject();
-			jsonObject.put("cis", form.getCisBox());
-			jsonObject.put("userId", form.getUserId());
-			jsonObject.put("style", form.getStyle());
-			jsonObject.put("msg", form.getMsg());
-			jsonMsg = jsonObject.toString();
+			if (validateForm(form)){
+				String jsonMsg="";
+				try{
+					JSONObject jsonObject = new JSONObject();
+					jsonObject.put("cis", form.getCisBox());
+					jsonObject.put("userId", form.getUserId());
+					jsonObject.put("style", form.getStyle());
+					
+					String postedMsg = form.getMsg();
+					postedMsg= postedMsg.replace("\n", "");
+					jsonObject.put("msg", postedMsg);
+					jsonMsg = jsonObject.toString();
+					
+					LOG.info(LOG_PREFIX + " created JSON msg object :\t" +jsonMsg);
+					
+					postMessageInternal(jsonMsg);
+				}catch (Exception e) {
+					LOG.error(LOG_PREFIX +"exception caught while posting the following msg: \n"+jsonMsg+"\n "+e.getMessage(),e);
+				}
+			}
+			LOG.debug(LOG_PREFIX + " finish postMsg1.html");
 			
-			LOG.info(LOG_PREFIX + " created JSON msg object :\t" +jsonMsg);
-			
-			postMessageInternal(jsonMsg);
 		}catch (Exception e) {
-			LOG.error(LOG_PREFIX +"exception caught while posting the following msg: \n"+jsonMsg+"\n "+e.getMessage(),e);
+			LOG.error(LOG_PREFIX +"exception caught: \t"+e.getMessage() + " \t get cause: "+e.getCause(),e);
 		}
 		
-		LOG.debug(LOG_PREFIX + " finish postMsg1.html");
-		
 		return "";
-	} 
+	}
+	
+	private boolean validateForm(MessageForm form){
+		boolean flag = true;
+		if (form.getCisBox() == null || form.getCisBox().length() == 0){
+			Log.warn("Selected CIs can't be null or Empty \t form.getCisBox()='"+form.getCisBox()+"'");
+			flag = false;
+		}
+		if (form.getUserId() == null || form.getUserId().length() == 0){
+			Log.warn("UserId can't be null or Empty \t form.getUserId()='"+form.getUserId()+"'");
+			flag = false;
+		}
+		if (form.getMsg() == null || form.getMsg().trim().length() == 0){
+			Log.warn("UserId can't be null or Empty \t form.getMsg()='"+form.getMsg()+"'");
+			flag = false;
+		}
+		if (form.getStyle() == null ||  form.getStyle().length() == 0){
+			Log.warn("UserId can't be null or Empty \t form.getStyle()='"+form.getStyle()+"'");
+			flag = false;
+		}
+		return flag;
+		
+	}
 	
 	@RequestMapping(value="/initialUserDetails.html",method = RequestMethod.GET)
 	public @ResponseBody String getCIS() {
@@ -256,8 +302,10 @@ public class VGProxy {
 			}*/
 			
 			try{
+				String jid = commManager.getIdManager().getThisNetworkNode().getJid();
+				
 				userDetailsObject.put("messages", jsonArray);			
-				userDetailsObject.put("userId", "guy-phone");
+				userDetailsObject.put("userId",jid);
 				
 				LOG.debug(LOG_PREFIX+ " \t User details Json object "+userDetailsObject.toString());
 			}catch (JSONException e) {
@@ -341,7 +389,8 @@ public class VGProxy {
 			
 			url =  "http://ta-proj02:9082/VG4SWeb/vg/message/";
 			String cisParam = URLEncoder.encode(cis, "UTF-8").replace("+", "%20");
-			url = url + userId+"/"+ cisParam+ "/"+number;
+			String userIdParam = URLEncoder.encode(userId, "UTF-8").replace("+", "%20");
+			url = url + userIdParam+"/"+ cisParam+ "/"+number;
 			
 			LOG.debug("before executing HTTP get- url:\t "+ url);
 			HttpGet httpGetRequest = new HttpGet(url);
@@ -372,6 +421,10 @@ public class VGProxy {
 	public void setServerURL(String serverURL) {
 		this.serverURL = serverURL;
 		
+	}
+	
+	public void setCommManager(ICommManager commManager){
+		this.commManager = commManager;
 	}
 	
 	/*

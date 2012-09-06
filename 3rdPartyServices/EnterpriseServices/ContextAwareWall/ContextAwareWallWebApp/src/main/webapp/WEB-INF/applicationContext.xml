@@ -40,4 +40,6 @@
 	
 	<osgi:reference id="CSSManager" interface="org.societies.api.internal.css.management.ICSSLocalManager" cardinality="0..1"/>
 	
+	<osgi:reference id="CommManager" interface="org.societies.api.comm.xmpp.interfaces.ICommManager"/>
+	
 </beans>

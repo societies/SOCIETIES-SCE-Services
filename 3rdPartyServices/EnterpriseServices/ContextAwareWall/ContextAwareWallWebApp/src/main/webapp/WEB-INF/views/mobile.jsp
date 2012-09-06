@@ -240,7 +240,7 @@ var cis = dojo.byId('cisBox').value;
 <td>color:</td><td><input type="text" name ='style'></td>
 </tr>
 <tr>
-<td>Text:</td><td><input type="text" name='msg'></td>
+<td>Text:</td><td><input type="text" name='msg' maxlength="50" ></td>
 </tr>
 <tr>
 <td>CIs:</td><td><select name="cisBox" id="cisBox" /></td>
