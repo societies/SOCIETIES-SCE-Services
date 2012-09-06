@@ -42,7 +42,7 @@
             this.serviceButton2 = new System.Windows.Forms.Button();
             this.serviceButton1 = new System.Windows.Forms.Button();
             this.lblServices = new System.Windows.Forms.Label();
-            this.applicationControl = new HWUPortal.ApplicationControl();
+            this.applicationControl = new ApplicationControl();
             this.lowerPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
@@ -263,7 +263,7 @@
         private System.Windows.Forms.Button logoutButton;
         private System.Windows.Forms.Button closeShowingServiceBtn;
         private System.Windows.Forms.PictureBox pictureBox2;
-        private HWUPortal.ApplicationControl applicationControl;
+        private ApplicationControl applicationControl;
         private System.Windows.Forms.NotifyIcon notifyIcon1;
         private System.Windows.Forms.Label lblServices;
     }

@@ -12,6 +12,7 @@ namespace HWUPortal
         public String serviceURL;
         public Button button;
         public ServiceType serviceType;
+        public Boolean requiresKinect;
 
         public ServiceInfo()
         {
@@ -19,6 +20,8 @@ namespace HWUPortal
             this.serviceExe = string.Empty;
             this.serviceURL = string.Empty;
             this.serviceType = ServiceType.EXE;
+            this.requiresKinect = false;
+
         }
         public override String ToString()
         {

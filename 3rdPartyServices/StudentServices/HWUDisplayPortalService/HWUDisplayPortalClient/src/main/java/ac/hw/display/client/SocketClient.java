@@ -100,8 +100,16 @@ public class SocketClient {
 			out.println(message);
 			out.flush();
 			System.out.println("Sent message: "+message);
+			String input = in.readLine();
 			disconnect();
-			return true;
+			System.out.println("received: "+input);
+			if (input.contains("OK")){
+				return true;
+			}else{
+				return false;
+			}
+			
+			
 		}catch(Exception e){
 			e.printStackTrace();
 			return false;
@@ -126,7 +134,8 @@ public class SocketClient {
 		
 		for (ServiceInfo sInfo : userSession.getServices()){
 			String serviceMsg = sInfo.getServiceName()+"\n"+
-				sInfo.getExe()+"\n"; 
+				sInfo.getExe()+"\n"+
+					"RequiresKinect="+sInfo.isKinectRequired()+"\n"; 
 			message = message.concat(serviceMsg);
 		}
 		
@@ -160,7 +169,8 @@ public class SocketClient {
 		String message = "SHOW_TEXT\n"+
 				userSession.getUserIdentity()+"\n"+
 				serviceName+"\n"+
-				text;
+				text+"\n"+
+				"END_TEXT";
 		this.sendMessage(message);	
 		
 	}
@@ -183,8 +193,8 @@ public class SocketClient {
 		SocketClient c = new SocketClient("127.0.0.1");
 		
 		UserSession userSession = new UserSession("eliza@societies.local");
-		ServiceInfo sInfo = new ServiceInfo("Pixar Birds", "http://www.macs.hw.ac.uk/~ceeep1/societies/services/MockWindowsExecutable.exe");
-		ServiceInfo sInfo2 = new ServiceInfo ("PolicyEditor", "http://www.macs.hw.ac.uk/~ceeep1/societies/services/POLICY~1.JAR");
+		ServiceInfo sInfo = new ServiceInfo("Social Learning", "http://www.macs.hw.ac.uk/~ceeep1/societies/services/SocialLearning.exe", true);
+		ServiceInfo sInfo2 = new ServiceInfo ("PolicyEditor", "http://www.macs.hw.ac.uk/~ceeep1/societies/services/POLICY~1.JAR", false);
 		userSession.addService(sInfo);
 		userSession.addService(sInfo2);
 	
@@ -195,7 +205,10 @@ public class SocketClient {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-/*		URL url;
+		
+		//c.startService(userSession, sInfo.getServiceName());
+		/*
+		URL url;
 		try {
 			url = new URL("http://images.google.com/intl/en_ALL/images/logos/images_logo_lg.gif");
 			c.sendImage(userSession, url);
@@ -209,9 +222,11 @@ public class SocketClient {
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
+		}*/
 		
-		for (int i = 0; i<5; i++){
+		//c.sendText("HWUService", userSession, getSampleText(0));
+		//userSession.setUserIdentity("other@societies.local");
+/*		for (int i = 0; i<5; i++){
 			c.sendText("HWUService", userSession, getSampleText(i));
 			try {
 				Thread.sleep(1000);
@@ -220,6 +235,7 @@ public class SocketClient {
 				e.printStackTrace();
 			}
 		}
+		
 		for (int i = 0; i<5; i++){
 			c.sendText("HWUService", userSession, getSampleText(i));
 			try {
@@ -258,15 +274,16 @@ public class SocketClient {
 		/*message = "START SERVICE\n" +
 				"MockService2\n";
 		c.sendMessage(message);
+		*/
 		try {
 			Thread.sleep(8000);
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		message = "LOGOUT\n" +
+		String message = "LOGOUT\n" +
 				"eliza@societies.local\n";
-		c.sendMessage(message);*/
+		//c.sendMessage(message);
 
 	}
 
@@ -274,7 +291,7 @@ public class SocketClient {
 
 	private static String getSampleText(int n){
 		if (n==0){
-			return "The lab was started in 2001 with research in the area of personalisation in the context of pervasive and ubiquitous systems. Personalisation is the adaptation of systems to provide different views to different users according to their needs and preferences. For instance, in searching for information on the web, different users have different needs (e.g. within any particular domain some users can deal with detailed technical information, others cannot). If an information provider wants the provided information to be effective, the type of information selected and the way in which it is presented must be adapted to meet the preferences and requirements of the individual user. Early work on this was done in the EU FP5 project Youngster.\n";
+			return "The lab was started in 2001 with research in the area of personalisation in the context of pervasive and ubiquitous systems. Personalisation is the adaptation of systems to provide different views to different users according to their needs and preferences. For instance, in searching for information on the web, different users have different needs (e.g. within any particular domain some users can deal with detailed technical information, others cannot). If an information provider wants the provided information to be effective, the type of information selected and the way in which it is presented must be adapted to meet the preferences and requirements of the individual user. Early work on this was done in the EU FP5 project Youngster.";
 		}
 		if (n==1){
 			return "In the context of pervasive systems, personalisation can be very effective as user preferences can be applied in areas such as service ranking, service selection and adaptation of services and resources. One important characteristic of pervasive systems is the amount of information that becomes available about the environment of their users through the use of sensors. These can range from conventional indoor and outdoor temperature sensors to GPS sensors that indicate location information or even activity sensors that suggest walking, sitting and standing positions of the user. This information is generally referred to as context information. Context aware personalisation takes advantage of the context information available and uses it to adapt a system accordingly. For instance, as the user moves from one location to another, user preferences can be used to select what type of communication network should be used. Early work on context-aware personalisation was done in the context of the EU FP6 projects Daidalos I and II."; 

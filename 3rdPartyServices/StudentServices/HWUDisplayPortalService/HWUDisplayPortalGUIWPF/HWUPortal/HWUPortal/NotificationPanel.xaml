@@ -3,13 +3,18 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             mc:Ignorable="d" Height="193" Width="390">
-    <Grid Height="173" Width="345" Background="#FFFFF7DD">
+             mc:Ignorable="d" Height="193" Width="499"
+             xmlns:my="clr-namespace:Microsoft.Samples.Kinect.WpfViewers;assembly=Microsoft.Samples.Kinect.WpfViewers">
+    <Grid Height="173" Width="480" Background="#FFFFF7DD">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="3*" />
+            <RowDefinition Height="170*" />
+        </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="226*" />
             <ColumnDefinition Width="142*" />
         </Grid.ColumnDefinitions>
-        <Label Content="Label" Height="53" HorizontalAlignment="Left" Margin="12,7,0,0" Name="lblNotifications" VerticalAlignment="Top" Width="320" Grid.ColumnSpan="2">
+        <Label Content="Label" Height="53" HorizontalAlignment="Left" Margin="12,4,0,0" Name="lblNotifications" VerticalAlignment="Top" Width="385" Grid.ColumnSpan="2" Grid.Row="1">
             <Label.Background>
                 <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
                     <GradientStop Color="#FFEFEFF0" Offset="0" />
@@ -20,6 +25,12 @@
                 </LinearGradientBrush>
             </Label.Background>
         </Label>
-        <TextBox Height="95" HorizontalAlignment="Left" Margin="12,66,0,0" Name="txtNotifications" VerticalAlignment="Top" Width="321" Grid.ColumnSpan="2" BorderBrush="#FFFFF7DD" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" IsReadOnly="True" />
+        <TextBox Height="95" HorizontalAlignment="Left" Margin="12,63,0,0" Name="txtNotifications" VerticalAlignment="Top" Width="385" Grid.ColumnSpan="2" BorderBrush="#FFFFF7DD" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" IsReadOnly="True" Grid.Row="1" />
+        <Button Content="" Grid.Column="1" Grid.Row="1" Height="56" HorizontalAlignment="Left" Margin="117,44,0,0" Name="button1" VerticalAlignment="Top" Width="56" Click="button1_Click">
+            <Button.Background>
+                <ImageBrush ImageSource="/HWUPortal;component/Images/dep_5389759-Delete-button..jpg" />
+            </Button.Background>
+        </Button>
+        
     </Grid>
 </UserControl>

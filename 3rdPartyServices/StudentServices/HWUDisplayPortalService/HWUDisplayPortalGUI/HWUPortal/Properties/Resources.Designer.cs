@@ -73,12 +73,5 @@ namespace HWUPortal.Properties {
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
-        
-        internal static System.Drawing.Bitmap Win7_Chrome_1920x1200 {
-            get {
-                object obj = ResourceManager.GetObject("Win7 Chrome 1920x1200", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
     }
 }

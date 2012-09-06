@@ -13,6 +13,11 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Threading;
 using ApplicationControl;
+using Microsoft.Kinect;
+using Microsoft.Kinect.Interop;
+using Coding4Fun.Kinect.Wpf;
+using Coding4Fun.Kinect;
+using Coding4Fun.Kinect.Wpf.Controls;
 
 namespace HWUPortal
 {
@@ -27,6 +32,11 @@ namespace HWUPortal
 
         System.Windows.Forms.WebBrowser webBrowser;
 
+        /*
+         * */
+
+        /*
+         * */
         private ServiceInfo runningService;
         private UserSession userSession = new UserSession();
         private List<Button> myButtons;
@@ -35,33 +45,50 @@ namespace HWUPortal
         BinaryDataTransfer binaryDataTransferServer;
         ImageViewer iViewer;
         private Boolean loggedIn = false;
-        TextNotificationsWindow notificationsWindow;
-        System.Windows.Forms.NotifyIcon notifyIcon1;
-        ApplicationControl.ApplicationControl appControl;
+
+
+
         Thread socketThread;
         Thread binaryTransferThread;
-        System.Windows.Forms.FlowLayoutPanel flpPanel;
+
+
+        ApplicationWindow appWindow;
+
+        #region Kinectvariables
+        KinectSensor kinect;
+
+        const int skeletonCount = 6;
+        Skeleton[] allSkeletons = new Skeleton[skeletonCount];
+        //variables used to detect hand over close button
+        private static double _topBoundary;
+        private static double _bottomBoundary;
+        private static double _leftBoundary;
+        private static double _rightBoundary;
+        private static double _itemLeft;
+        private static double _itemTop;
+        private bool onButtonWaiting = false;
+        #endregion Kinectvariables
         /*
          * 
          */
         public MainWindow()
         {
+            Thread.CurrentThread.Name = "MainWindowThread";
             InitializeComponent();
-            
-            flpPanel = this.wfhDate.Child as System.Windows.Forms.FlowLayoutPanel;
-            appControl = new ApplicationControl.ApplicationControl();
-            appControl.Width = 1000;
-            appControl.Height = 600;
-            flpPanel.Controls.Add(appControl);
+            RightHand.BringIntoView();
+            /* 
+             * kinect initialisation */
+            this.StartKinectST();
 
             /*
              *
              */
-            iViewer = new ImageViewer();
+
             InitializeComponent();
             this.runningService = new ServiceInfo();
             //this.binaryDataTransferServer = new BinaryDataTransfer();
             socketServer = new SocketServer(this);
+
             socketThread = new Thread(socketServer.run);
             socketThread.Start();
 
@@ -75,7 +102,8 @@ namespace HWUPortal
             myButtons.Add(this.serviceButton3);
             myButtons.Add(this.serviceButton4);
             myButtons.Add(this.serviceButton5);
-            notificationsWindow = new TextNotificationsWindow();
+
+
             foreach (Button button in myButtons)
             {
                 button.Visibility = System.Windows.Visibility.Hidden;
@@ -91,52 +119,54 @@ namespace HWUPortal
             /*
              * 
              */
-            notifyIcon1 = new System.Windows.Forms.NotifyIcon();
+
+            this.Visibility = System.Windows.Visibility.Hidden;
         }
 
         internal delegate void showImageDelegate(String location);
         internal void showImage(String location)
         {
-            if (this.Dispatcher.CheckAccess()){
-                                if (iViewer.IsDisposed)
+            if (this.Dispatcher.CheckAccess())
+            {
+                if (iViewer.IsDisposed)
                 {
                     iViewer = new ImageViewer();
                 }
                 iViewer.setImage(location);
 
                 iViewer.Show();
-            }else{
-                this.Dispatcher.Invoke(new showImageDelegate(showImage),location);
+            }
+            else
+            {
+                this.Dispatcher.Invoke(new showImageDelegate(showImage), location);
             }
             //if (this.InvokeRequired)
             //{
-               // this.Invoke(new showImageDelegate(this.showImage), location);
+            // this.Invoke(new showImageDelegate(this.showImage), location);
             //}
             //else
             //{
-                //if (iViewer.IsDisposed)
-                //{
-                //    iViewer = new ImageViewer();
-                //}
-                //iViewer.setImage(location);
+            //if (iViewer.IsDisposed)
+            //{
+            //    iViewer = new ImageViewer();
+            //}
+            //iViewer.setImage(location);
 
-                //iViewer.Show();
+            //iViewer.Show();
             //}
         }
 
         internal delegate void addNewNotificationDelegate(String serviceName, String text);
         internal void addNewNotification(String serviceName, string text)
         {
-            if (this.Dispatcher.CheckAccess()){
-                                if (!this.notificationsWindow.IsInitialized)
-                {
-                    this.notificationsWindow = new TextNotificationsWindow();
+            if (this.Dispatcher.CheckAccess())
+            {
 
-
-                }
                 this.notificationsWindow.addNewNotification(serviceName, text);
-                this.notificationsWindow.Show();
-            }else{
+
+            }
+            else
+            {
                 this.Dispatcher.Invoke(new addNewNotificationDelegate(addNewNotification), serviceName, text);
             }
             //if (this.InvokeRequired)
@@ -145,14 +175,14 @@ namespace HWUPortal
             //}
             //else
             //{
-                //if (this.notificationsWindow.IsDisposed)
-                //{
-                //    this.notificationsWindow = new TextNotificationsWindow();
+            //if (this.notificationsWindow.IsDisposed)
+            //{
+            //    this.notificationsWindow = new TextNotificationsWindow();
 
 
-                //}
-                //this.notificationsWindow.addNewNotification(serviceName, text);
-                //this.notificationsWindow.Show();
+            //}
+            //this.notificationsWindow.addNewNotification(serviceName, text);
+            //this.notificationsWindow.Show();
             //}
 
         }
@@ -171,11 +201,15 @@ namespace HWUPortal
             {
                 Console.WriteLine(serviceName + " starting now");
 
-                if (sInfo.button.Dispatcher.CheckAccess()){
+                if (sInfo.button.Dispatcher.CheckAccess())
+                {
+                    //sInfo.button.Release();
                     sInfo.button.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
-                }else{
+                }
+                else
+                {
                     sInfo.button.Dispatcher.Invoke(new startServiceDelegate(startService), serviceName);
-                    
+
                 }
                 //if (sInfo.button.InvokeRequired)
                 //{
@@ -183,8 +217,8 @@ namespace HWUPortal
                 //}
                 //else
                 //{
-                    //sInfo.button.PerformClick();
-                    //sInfo.button.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+                //sInfo.button.PerformClick();
+                //sInfo.button.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
                 //}
 
                 this.runningService = sInfo;
@@ -196,18 +230,16 @@ namespace HWUPortal
         }
         private void startExe(EventArgs e, ServiceInfo sInfo)
         {
+            appWindow = new ApplicationWindow(this, sInfo);
+            appWindow.Show();
+            appWindow.startExe(e);
 
-            appControl.ExeName = sInfo.serviceExe;
-            appControl.LoadExe(e);
 
         }
 
         private void startWeb(ServiceInfo sInfo)
         {
             webBrowser = new System.Windows.Forms.WebBrowser();
-            webBrowser.Size = flpPanel.Size;
-           
-            flpPanel.Controls.Add(webBrowser);
             //appControl.Controls.Add(webBrowser);
             webBrowser.Url = new Uri(sInfo.serviceURL);
             webBrowser.Show();
@@ -215,9 +247,17 @@ namespace HWUPortal
         }
         private void startService(EventArgs e, ServiceInfo sInfo)
         {
+            KinectSensor.KinectSensors.StatusChanged -= KinectSensors_StatusChanged;
             if (sInfo.serviceType == ServiceType.EXE || sInfo.serviceType == ServiceType.JAR)
             {
+                if (sInfo.requiresKinect)
+                {
+                    this.kinect.Stop();
+                    Console.WriteLine("Service requires kinect. Kinect stopped");
+                    this.kinect = null;
+                }
                 this.startExe(e, sInfo);
+
 
             }
             else if (sInfo.serviceType == ServiceType.WEB)
@@ -231,6 +271,8 @@ namespace HWUPortal
             this.enableThisButton(this.closeShowingServiceBtn, true);
 
         }
+
+
         internal delegate void logOutDelegate();
         internal void logOut()
         {
@@ -250,32 +292,50 @@ namespace HWUPortal
             //}
             //else
             //{
-                //logoutButton.PerformClick();
-                //logoutButton.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
-                
-                
+            //logoutButton.PerformClick();
+            //logoutButton.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+
+
             //}
 
         }
 
+        internal delegate void setApplicationVisibleDelegate(Boolean enabled);
 
+        internal void setApplicationVisible(Boolean enabled)
+        {
+            if (this.Dispatcher.CheckAccess())
+            {
+                if (enabled)
+                {
+                    this.Visibility = System.Windows.Visibility.Visible;
+                }
+                else
+                {
+                    this.Visibility = System.Windows.Visibility.Hidden;
+                }
+
+            }
+            else
+            {
+                this.Dispatcher.Invoke(new setApplicationVisibleDelegate(setApplicationVisible), enabled);
+            }
+        }
         internal delegate void loginDelegate(UserSession userSession);
 
         internal void Login(UserSession userSession)
         {
+            this.setApplicationVisible(true);
             if (this.Dispatcher.CheckAccess())
             {
                 Console.WriteLine("User: " + userSession.getUserIdentity() + " logging in and loading " + userSession.getServices().Count + " services");
 
                 if (!this.loggedIn)
                 {
-                    this.notifyIcon1.Text = "Current User: " + userSession.getUserIdentity();
-                    this.notifyIcon1.ShowBalloonTip(5000, "SOCIETIES Display Portal", "User " + userSession.getUserIdentity() + " is logging in.", System.Windows.Forms.ToolTipIcon.Info);
-                    this.notifyIcon1.Visible = true;
 
                     //this.enableThisButton(this.closeShowingServiceBtn, true);
                     this.enableThisButton(this.logoutButton, true);
-                    this.enableViewingPanel(this.appControl, true);
+
 
                     this.userSession = userSession;
                     this.loggedIn = true;
@@ -324,12 +384,14 @@ namespace HWUPortal
 
         public void setServiceInfo(Button button, ServiceInfo sInfo)
         {
-            if (button.Dispatcher.CheckAccess()){
-               button.Tag = sInfo;
+            if (button.Dispatcher.CheckAccess())
+            {
+                button.Tag = sInfo;
                 button.Content = sInfo.serviceName;
             }
-            else{
-                button.Dispatcher.Invoke(new setServiceInfoDelegate(setServiceInfo),button,sInfo);
+            else
+            {
+                button.Dispatcher.Invoke(new setServiceInfoDelegate(setServiceInfo), button, sInfo);
             }
             //if (button.InvokeRequired)
             //{
@@ -337,19 +399,20 @@ namespace HWUPortal
             //}
             //else
             //{
-                //button.Tag = sInfo;
-                //button.Content = sInfo.serviceName;
-                //button.Text = sInfo.serviceName;
+            //button.Tag = sInfo;
+
+            //button.Text = sInfo.serviceName;
             //}
         }
-        
+
 
         public delegate void enableThisButtonDelegate(Button button, Boolean enabled);
 
         public void enableThisButton(Button button, Boolean enabled)
         {
-            if (button.Dispatcher.CheckAccess()){
-                                button.IsEnabled = enabled;
+            if (button.Dispatcher.CheckAccess())
+            {
+                button.IsEnabled = enabled;
                 if (enabled)
                 {
                     button.Visibility = System.Windows.Visibility.Visible;
@@ -358,8 +421,10 @@ namespace HWUPortal
                 {
                     button.Visibility = System.Windows.Visibility.Hidden;
                 }
-            }else{
-                button.Dispatcher.Invoke(new enableThisButtonDelegate(enableThisButton),button,enabled);
+            }
+            else
+            {
+                button.Dispatcher.Invoke(new enableThisButtonDelegate(enableThisButton), button, enabled);
             }
             //if (button.InvokeRequired)
             //{
@@ -367,35 +432,38 @@ namespace HWUPortal
             //}
             //else
             //{
-                //button.IsEnabled = enabled;
-                //if (enabled)
-                //{
-                //    button.Visibility = System.Windows.Visibility.Visible;
-                //}
-                //else
-                //{
-                //    button.Visibility = System.Windows.Visibility.Hidden;
-                //}
-                //button.Enabled = enabled;
-                //button.Visible = enabled;
+            //button.IsEnabled = enabled;
+            //if (enabled)
+            //{
+            //    button.Visibility = System.Windows.Visibility.Visible;
+            //}
+            //else
+            //{
+            //    button.Visibility = System.Windows.Visibility.Hidden;
+            //}
+            //button.Enabled = enabled;
+            //button.Visible = enabled;
             //}
         }
 
         public delegate void enableViewingPanelDelegate(Panel panel, Boolean enabled);
         public void enableViewingPanel(Panel panel, Boolean enabled)
         {
-            if (panel.Dispatcher.CheckAccess()){
-                            panel.IsEnabled = enabled;
-            if (enabled)
+            if (panel.Dispatcher.CheckAccess())
             {
-                panel.Visibility = System.Windows.Visibility.Visible;
+                panel.IsEnabled = enabled;
+                if (enabled)
+                {
+                    panel.Visibility = System.Windows.Visibility.Visible;
+                }
+                else
+                {
+                    panel.Visibility = System.Windows.Visibility.Hidden;
+                }
             }
             else
             {
-                panel.Visibility = System.Windows.Visibility.Hidden;
-            }
-            }else{
-                panel.Dispatcher.Invoke(new enableViewingPanelDelegate(enableViewingPanel), panel,enabled);
+                panel.Dispatcher.Invoke(new enableViewingPanelDelegate(enableViewingPanel), panel, enabled);
             }
             //if (panel.InvokeRequired)
             //{
@@ -412,19 +480,24 @@ namespace HWUPortal
             //{
             //    panel.Visibility = System.Windows.Visibility.Hidden;
             //}
-                //panel.Enabled = enabled;
-                //panel.Visible = enabled;
+            //panel.Enabled = enabled;
+            //panel.Visible = enabled;
             //}
         }
 
         public delegate void enableApplicationControlDelegate(ApplicationControl.ApplicationControl appCtrl, Boolean enabled);
 
-        public void enableViewingPanel(ApplicationControl.ApplicationControl appCtrl, Boolean enabled){
-            if (appCtrl.InvokeRequired){
+        public void enableViewingPanel(ApplicationControl.ApplicationControl appCtrl, Boolean enabled)
+        {
+            if (appCtrl.InvokeRequired)
+            {
                 appCtrl.Invoke(new enableApplicationControlDelegate(enableViewingPanel), appCtrl, enabled);
-            }else{
+            }
+            else
+            {
                 appCtrl.Visible = enabled;
                 appCtrl.Enabled = enabled;
+
             }
         }
 
@@ -449,30 +522,537 @@ namespace HWUPortal
             return false;
         }
 
-        private void AppClosing(object sender, System.ComponentModel.CancelEventArgs e)
+        private void WindowClosing(object sender, System.ComponentModel.CancelEventArgs e)
         {
+            kinectSensorChooser1.KinectSensorChanged -= kinectSensorChooser1_KinectSensorChanged;
+            this.StopKinect(this.kinect);
             if (socketServer != null)
             {
                 this.logOut();
                 this.socketServer.close();
+
                 this.binaryDataTransferServer.close();
+
                 this.loggedIn = false;
-                
+
+                if (this.socketServer == null)
+                {
+                    Console.WriteLine("socket server destroyed");
+
+                }
+                if (this.binaryDataTransferServer == null)
+                {
+                    Console.WriteLine("binary data transfer socket server destroyed");
+                }
+
             }
             else
             {
                 Console.WriteLine("SocketService is already null");
             }
+
+
         }
 
-        private void AppClosed(object sender, EventArgs e)
+        private void WindowClosed(object sender, EventArgs e)
         {
-            Console.WriteLine("application closed");
+            Console.WriteLine("window closed");
+        }
+
+
+
+        private void closeShowingServiceBtn_Click(object sender, RoutedEventArgs e)
+        {
+            if (!this.runningService.serviceName.Equals(string.Empty))
+            {
+                this.stopService(e, this.runningService);
+                this.runningService = new ServiceInfo();
+                this.closeShowingServiceBtn.Content = "";
+                //this.closeShowingServiceBtn.Text = "";
+                this.enableThisButton(this.closeShowingServiceBtn, false);
+                this.onButtonWaiting = false;
+            }
+        }
+
+        private void logoutButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (this.loggedIn)
+            {
+
+                String user = this.userSession.getUserIdentity();
+                Console.WriteLine("logging out user");
+
+                Console.WriteLine("Stopping service");
+
+                if (!this.runningService.serviceName.Equals(string.Empty))
+                {
+                    this.stopService(e, this.runningService);
+                    this.runningService = new ServiceInfo();
+                }
+
+                this.userSession = new UserSession();
+                foreach (Button button in myButtons)
+                {
+                    this.enableThisButton(button, false);
+                }
+
+                this.enableThisButton(this.closeShowingServiceBtn, false);
+                this.enableThisButton(this.logoutButton, false);
+
+                Console.WriteLine("User: " + user + " is logged out");
+                //this.notifyIcon1.ShowBalloonTip(5000, "SOCIETIES Display Portal", "User: " + user + " has logged out", ToolTipIcon.Info);
+                if (iViewer != null)
+                {
+                    if (!iViewer.IsDisposed)
+                    {
+                        iViewer.Dispose();
+
+
+                    }
+                }
+
+                this.loggedIn = false;
+
+                this.socketServer.helperLogoutMethod();
+                this.setApplicationVisible(false);
+            }
+            else
+            {
+                Console.WriteLine("user already logged out");
+            }
+            this.onButtonWaiting = false;
+
+        }
+
+        public void onExeServiceStopped(ServiceInfo sInfo)
+        {
+            KinectSensor.KinectSensors.StatusChanged += KinectSensors_StatusChanged;
+            this.DiscoverKinectSensor();
+            if (sInfo.serviceExe.Equals(this.runningService.serviceExe))
+            {
+
+                appWindow.Close();
+            }
+        }
+        private void stopService(RoutedEventArgs e, ServiceInfo sInfo)
+        {
+            if (sInfo.serviceType == ServiceType.EXE || sInfo.serviceType == ServiceType.JAR)
+            {
+                appWindow.Close();
+                KinectSensor.KinectSensors.StatusChanged += KinectSensors_StatusChanged;
+                DiscoverKinectSensor();
+            }
+            else if (sInfo.serviceType == ServiceType.WEB)
+            {
+                if (this.webBrowser != null)
+                {
+                    if (!this.webBrowser.IsDisposed)
+                    {
+                        this.webBrowser.Dispose();
+
+
+                    }
+                }
+            }
+
+            this.runningService = new ServiceInfo();
         }
 
         private void serviceButton1_Click(object sender, RoutedEventArgs e)
         {
-            
+            this.startService(e, (ServiceInfo)serviceButton1.Tag);
+            this.onButtonWaiting = false;
         }
+
+        private void serviceButton2_Click(object sender, RoutedEventArgs e)
+        {
+            this.startService(e, (ServiceInfo)serviceButton2.Tag);
+            this.onButtonWaiting = false;
+        }
+
+        private void serviceButton3_Click(object sender, RoutedEventArgs e)
+        {
+            this.startService(e, (ServiceInfo)serviceButton3.Tag);
+            this.onButtonWaiting = false;
+        }
+
+        private void serviceButton4_Click(object sender, RoutedEventArgs e)
+        {
+            this.startService(e, (ServiceInfo)serviceButton4.Tag);
+            this.onButtonWaiting = false;
+        }
+
+        private void serviceButton5_Click(object sender, RoutedEventArgs e)
+        {
+            this.startService(e, (ServiceInfo)serviceButton5.Tag);
+            this.onButtonWaiting = false;
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+        /**
+         * kinect code
+         * */
+        #region kinect processing
+        void StartKinectST()
+        {
+            Console.WriteLine("starting kinect");
+
+
+            DiscoverKinectSensor();
+
+            kinectSensorChooser1.KinectSensorChanged += new DependencyPropertyChangedEventHandler(kinectSensorChooser1_KinectSensorChanged);
+            //kinect = KinectSensor.KinectSensors.FirstOrDefault(s => s.Status == KinectStatus.Connected); // Get first Kinect Sensor
+            //kinect.SkeletonStream.Enable(); // Enable skeletal tracking
+
+            //skeletonData = new Skeleton[kinect.SkeletonStream.FrameSkeletonArrayLength]; // Allocate ST data
+
+            //kinect.SkeletonFrameReady += new EventHandler<SkeletonFrameReadyEventArgs>(kinect_SkeletonFrameReady); // Get Ready for Skeleton Ready Events
+
+            //kinect.Start(); // Start Kinect sensor
+        }
+
+        private void DiscoverKinectSensor()
+        {
+            KinectSensor.KinectSensors.StatusChanged += KinectSensors_StatusChanged;
+            this.kinect = KinectSensor.KinectSensors.FirstOrDefault(s => s.Status == KinectStatus.Connected); // Get first Kinect Sensor
+            this.InitialiseKinectSensor();
+            Console.WriteLine("Discovered kinect");
+
+        }
+
+        private void KinectSensors_StatusChanged(object sender, StatusChangedEventArgs args)
+        {
+            Console.WriteLine("Kinect status changed");
+            switch (args.Status)
+            {
+                case KinectStatus.Connected:
+                    if (this.kinect == null)
+                    {
+                        this.kinect = args.Sensor;
+                    }
+                    break;
+                case KinectStatus.Disconnected:
+                    if (this.kinect == args.Sensor)
+                    {
+                        this.kinect = null;
+                        this.kinect = KinectSensor.KinectSensors.FirstOrDefault(s => s.Status == KinectStatus.Connected);
+                        if (this.kinect == null)
+                        {
+                            Console.WriteLine("Kinect is disconnected"); //show a visual box and exit application
+                        }
+                    }
+                    break;
+            }
+        }
+
+        private void InitialiseKinectSensor()
+        {
+
+            if (this.kinect != null)
+            {
+                this.kinect.Start();
+                Console.WriteLine("Kinect started");
+            }
+        }
+        private void UninitialiseKinectSensor()
+        {
+            if (this.kinect != null)
+            {
+                this.kinect.Stop();
+                Console.WriteLine("Kinect stopped");
+            }
+        }
+
+
+
+
+
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+
+
+        }
+
+        private void Window_Unloaded(object sender, RoutedEventArgs e)
+        {
+            Console.WriteLine("Unloaded window!");
+
+
+
+        }
+
+        void kinectSensorChooser1_KinectSensorChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            KinectSensor old = (KinectSensor)e.OldValue;
+
+            StopKinect(old);
+
+            KinectSensor sensor = (KinectSensor)e.NewValue;
+
+            if (sensor == null)
+            {
+                return;
+            }
+
+            var parameters = new TransformSmoothParameters
+            {
+                Smoothing = 0.3f,
+                Correction = 0.0f,
+                Prediction = 0.0f,
+                JitterRadius = 1.0f,
+                MaxDeviationRadius = 0.5f
+            };
+            sensor.SkeletonStream.Enable(parameters);
+
+            //sensor.SkeletonStream.Enable();
+
+            sensor.AllFramesReady += new EventHandler<AllFramesReadyEventArgs>(sensor_AllFramesReady);
+            sensor.DepthStream.Enable(DepthImageFormat.Resolution640x480Fps30);
+            sensor.ColorStream.Enable(ColorImageFormat.RgbResolution640x480Fps30);
+
+            try
+            {
+                sensor.Start();
+            }
+            catch (InvalidOperationException)
+            {
+                kinectSensorChooser1.AppConflictOccurred();
+            }
+        }
+
+
+        private void StopKinect(KinectSensor sensor)
+        {
+
+            if (sensor != null)
+            {
+                if (sensor.IsRunning)
+                {
+                    //stop sensor 
+                    sensor.Stop();
+
+
+                    //stop audio if not null
+                    if (sensor.AudioSource != null)
+                    {
+                        sensor.AudioSource.Stop();
+                    }
+
+                }
+                sensor.Dispose();
+            }
+        }
+
+        void sensor_AllFramesReady(object sender, AllFramesReadyEventArgs e)
+        {
+            if (this.kinect == null)
+            {
+                return;
+            }
+
+            //Get a skeleton
+            Skeleton first = GetFirstSkeleton(e);
+
+            if (first == null)
+            {
+                return;
+            }
+
+            GetCameraPoint(first, e);
+            ScalePosition(RightHand, first.Joints[JointType.HandRight]);
+
+            //CheckButton(playButton, RightHand);
+            //CheckButton(challengeButton, RightHand);
+            //CheckButton(categoriesButton, RightHand);
+            //CheckButton(scoreboardButton, RightHand);
+            //CheckButton(quitButton, RightHand);
+            foreach (Button hButton in myButtons)
+            {
+                CheckButton(hButton, RightHand);
+            }
+
+            CheckButton(this.logoutButton, RightHand);
+
+            if (!this.runningService.serviceName.Equals(String.Empty))
+            {
+                CheckButton(this.closeShowingServiceBtn, RightHand);
+            }
+        }
+
+        #region buttons
+        private void CheckButton(Button button, Ellipse thumbStick)
+        {
+            if (this.kinect != null)
+            {
+                try
+                {
+                    if (IsItemMidpointInContainer(button, thumbStick))
+                    {
+                        Console.WriteLine("button hovering");
+                        
+                        //button.RaiseEvent(new RoutedEventArgs(Button.MouseEnterEvent));
+                        //button.Hovering();
+                        if (!onButtonWaiting)
+                        {
+                            onButtonWaiting = true;
+                            ButtonWaitThread thread = new ButtonWaitThread(this, button, thumbStick);
+                            thread.run();
+                            Console.WriteLine("Button thread started");
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine("button release");
+                        // button.Release();
+
+                    }
+                }
+                catch (System.InvalidOperationException e)
+                {
+                    Console.WriteLine("Error: " + e);
+                }
+            }
+        }
+
+        public static bool IsItemMidpointInContainer(FrameworkElement container, FrameworkElement target)
+        {
+            FindValues(container, target);
+
+            if (_itemTop < _topBoundary || _bottomBoundary < _itemTop)
+            {
+                //Midpoint of target is outside of top or bottom
+                return false;
+            }
+
+            if (_itemLeft < _leftBoundary || _rightBoundary < _itemLeft)
+            {
+                //Midpoint of target is outside of left or right
+                return false;
+            }
+
+            return true;
+        }
+        //this has to be checked.
+        private static void FindValues(FrameworkElement container, FrameworkElement target)
+        {
+            var containerTopLeft = container.PointToScreen(new Point());
+            var itemTopLeft = target.PointToScreen(new Point());
+
+            _topBoundary = containerTopLeft.Y;
+            _bottomBoundary = _topBoundary + container.ActualHeight;
+            _leftBoundary = containerTopLeft.X;
+            _rightBoundary = _leftBoundary + container.ActualWidth;
+
+            //use midpoint of item (width or height divided by 2)
+            _itemLeft = itemTopLeft.X + (target.ActualWidth / 2);
+            _itemTop = itemTopLeft.Y + (target.ActualHeight / 2);
+        }
+        #endregion buttons
+        #region gesture processing
+        Skeleton GetFirstSkeleton(AllFramesReadyEventArgs e)
+        {
+            using (SkeletonFrame skeletonFrameData = e.OpenSkeletonFrame())
+            {
+                if (skeletonFrameData == null)
+                {
+                    return null;
+                }
+
+                skeletonFrameData.CopySkeletonDataTo(allSkeletons);
+
+                //get the first tracked skeleton
+                Skeleton first = (from s in allSkeletons
+                                  where s.TrackingState == SkeletonTrackingState.Tracked
+                                  select s).FirstOrDefault();
+
+                return first;
+
+            }
+        }
+
+        private void ScalePosition(FrameworkElement element, Joint joint)
+        {
+            Console.WriteLine("Unscaled joint: " + joint.Position.X + "," + joint.Position.Y);
+            //convert the value to X/Y
+            //Joint scaledJoint = joint.ScaleTo(360, 730, .3f, .3f);
+            Joint scaledJoint = joint.ScaleTo(1360, 730, .3f, .3f);
+            //Joint scaledJoint = joint.ScaleTo(mainWindow.WindowStartupLocation);
+            Console.WriteLine("Scaled Joint: " + scaledJoint.Position.X + "," + scaledJoint.Position.Y);
+            Canvas.SetLeft(element, scaledJoint.Position.X);
+            Canvas.SetTop(element, scaledJoint.Position.Y);
+
+        }
+        #endregion gesture processing
+        #region camera stuff
+        void GetCameraPoint(Skeleton first, AllFramesReadyEventArgs e)
+        {
+
+            using (DepthImageFrame depth = e.OpenDepthImageFrame())
+            {
+                if (depth == null ||
+                    kinectSensorChooser1.Kinect == null)
+                {
+                    return;
+                }
+
+
+                //Map a joint location to a point on the depth map
+                //right hand
+                DepthImagePoint rightDepthPoint =
+                    depth.MapFromSkeletonPoint(first.Joints[JointType.HandRight].Position);
+
+                //Map a depth point to a point on the color image
+                //right hand
+                ColorImagePoint rightColorPoint =
+                    depth.MapToColorImagePoint(rightDepthPoint.X, rightDepthPoint.Y,
+                    ColorImageFormat.RgbResolution640x480Fps30);
+
+
+                //Set location
+                CameraPosition(RightHand, rightColorPoint);
+
+            }
+        }
+
+        private void CameraPosition(FrameworkElement element, ColorImagePoint point)
+        {
+            //Divide by 2 for width and height so point is right in the middle 
+            // instead of in top/left corner
+            Canvas.SetLeft(element, point.X - element.Width / 2);
+            Canvas.SetTop(element, point.Y - element.Height / 2);
+
+        }
+        #endregion camera stuff
     }
+
+        #endregion kinect processing
+
+
+    //private void Kinect_ColorFrameReady(object sender, ColorImageFrameReadyEventArgs args)
+    //{
+    //    Console.WriteLine("color frame ready");
+    //    using (ColorImageFrame frame = args.OpenColorImageFrame())
+    //    {
+    //        if (frame != null)
+    //        {
+    //            byte[] pixelData = new byte[frame.PixelDataLength];
+    //            frame.CopyPixelDataTo(pixelData);
+
+    //            kinectTest.Show();
+    //            kinectTest.setImageSource(BitmapImage.Create(frame.Width, frame.Height, 96, 96, PixelFormats.Bgr32, null, pixelData, frame.Width * frame.BytesPerPixel));
+    //            //BitmapSource source = BitmapImage.Create(frame.Width, frame.Height, 96, 96, PixelFormats.Bgr32, null, pixelData, frame.Width * frame.BytesPerPixel);
+    //            //kinectTest.setImageSource(source);
+    //        }
+    //    }
+    //}
 }

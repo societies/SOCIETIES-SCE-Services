@@ -20,6 +20,10 @@ namespace ApplicationControl
     public class ApplicationControl : System.Windows.Forms.Panel
     {
 
+        public delegate void ApplicationExitedHandler(object sender, ApplicationControlArgs args);
+
+
+        public event ApplicationExitedHandler appExit;
         /// <summary>
         /// Track if the application has been created
         /// </summary>
@@ -35,6 +39,20 @@ namespace ApplicationControl
         /// </summary>
         private string exeName = "";
 
+
+        private bool isExeRunning = false;
+
+        public bool IsApplicationRunning
+        {
+            get
+            {
+                return this.isExeRunning;
+            }
+            set
+            {
+                this.isExeRunning = value;
+            }
+        }
         /// <summary>
         /// Get/Set if we draw the tick marks
         /// </summary>
@@ -171,11 +189,22 @@ namespace ApplicationControl
                 MoveWindow(appWin, 0, 0, this.Width, this.Height, true);
                 Console.WriteLine("started exe" + exeName);
 
+                p.EnableRaisingEvents = true;
+                p.Exited += new EventHandler(p_Exited);
+                this.isExeRunning = true;
+
+                
+
             }
 
             base.OnVisibleChanged(e);
         }
 
+        private void p_Exited(object sender, EventArgs args)
+        {
+            ApplicationControlArgs cArgs = new ApplicationControlArgs(this.exeName);
+            appExit(this, cArgs);
+        }
         public void DestroyExe(EventArgs e)
         {
             Console.WriteLine("Destroying exe");

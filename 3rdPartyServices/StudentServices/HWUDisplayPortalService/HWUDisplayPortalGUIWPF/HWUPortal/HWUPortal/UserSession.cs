@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Windows.Controls;
+using Coding4Fun.Kinect.Wpf.Controls;
 
 namespace HWUPortal
 {

@@ -57,6 +57,20 @@
     <Reference Include="ApplicationControl">
       <HintPath>..\..\..\ApplicationControl\ApplicationControl\bin\Release\ApplicationControl.dll</HintPath>
     </Reference>
+    <Reference Include="Coding4Fun.Kinect.WinForm">
+      <HintPath>References\Coding4Fun.Kinect.WinForm.dll</HintPath>
+    </Reference>
+    <Reference Include="Coding4Fun.Kinect.Wpf">
+      <HintPath>References\Coding4Fun.Kinect.Wpf.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Expression.Drawing">
+      <HintPath>References\Microsoft.Expression.Drawing.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Kinect, Version=1.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
+    <Reference Include="Microsoft.Samples.Kinect.WpfViewers, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>References\Microsoft.Samples.Kinect.WpfViewers.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
@@ -79,7 +93,11 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="ApplicationWindow.xaml.cs">
+      <DependentUpon>ApplicationWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="BinaryDataTransfer.cs" />
+    <Compile Include="ButtonWaitThread.cs" />
     <Compile Include="ImageViewer.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -91,10 +109,17 @@
     </Compile>
     <Compile Include="ServiceInfo.cs" />
     <Compile Include="SocketServer.cs" />
-    <Compile Include="TextNotificationsWindow.xaml.cs">
-      <DependentUpon>TextNotificationsWindow.xaml</DependentUpon>
+    <Compile Include="TxtNotificationsWindow.xaml.cs">
+      <DependentUpon>TxtNotificationsWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="UserSession.cs" />
+    <Compile Include="KinectTest.xaml.cs">
+      <DependentUpon>KinectTest.xaml</DependentUpon>
+    </Compile>
+    <Page Include="ApplicationWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -111,7 +136,11 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="TextNotificationsWindow.xaml">
+    <Page Include="KinectTest.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="TxtNotificationsWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -130,10 +159,14 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <EmbeddedResource Include="ImageViewer.resx">
+      <DependentUpon>ImageViewer.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <None Include="app.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -173,6 +206,12 @@
       <ProductName>Windows Installer 3.1</ProductName>
       <Install>true</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\dep_5389759-Delete-button..jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\hand.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

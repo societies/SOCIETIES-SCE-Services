@@ -34,10 +34,12 @@ public class ServiceInfo {
 
 	private final String exe;
 	private final String serviceName;
-
-	public ServiceInfo(String name, String exe){
+	private final boolean requiresKinect;
+	
+	public ServiceInfo(String name, String exe, boolean requiresKinect){
 		this.serviceName = name;
 		this.exe = exe;
+		this.requiresKinect = requiresKinect;
 		
 	}
 
@@ -53,5 +55,12 @@ public class ServiceInfo {
 	 */
 	public String getServiceName() {
 		return serviceName;
+	}
+
+	/**
+	 * @return the requiresKinect
+	 */
+	public boolean isKinectRequired() {
+		return requiresKinect;
 	}
 }

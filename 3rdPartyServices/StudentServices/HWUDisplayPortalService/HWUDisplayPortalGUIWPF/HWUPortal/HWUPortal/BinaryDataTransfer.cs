@@ -29,6 +29,7 @@ namespace HWUPortal
         }
         public void run()
         {
+            System.Threading.Thread.CurrentThread.Name = "BinaryDataTransferThread";
             try
             {
                 int port = 2113;

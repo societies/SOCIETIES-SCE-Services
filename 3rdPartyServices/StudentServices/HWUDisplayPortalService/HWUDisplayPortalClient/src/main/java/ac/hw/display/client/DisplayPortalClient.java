@@ -217,8 +217,8 @@ public class DisplayPortalClient implements IDisplayDriver{
 	}
 
 	@Override
-	public void registerDisplayableService(ServiceResourceIdentifier serviceID, String serviceName, URL executableLocation){
-		ServiceInfo sInfo  = new ServiceInfo(serviceName, executableLocation.toString());
+	public void registerDisplayableService(ServiceResourceIdentifier serviceID, String serviceName, URL executableLocation, boolean requiresKinect){
+		ServiceInfo sInfo  = new ServiceInfo(serviceName, executableLocation.toString(), requiresKinect);
 		this.userSession.addService(sInfo);
 	}
 	
