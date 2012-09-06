@@ -1,0 +1,59 @@
+<xs:schema elementFormDefault="qualified" version="1.0"
+	xmlns="http://societies.org/api/ext3p/schema/networking"
+	targetNamespace="http://societies.org/api/ext3p/schema/networking"
+	xmlns:tns="http://societies.org/api/ext3p/schema/networking"
+	xmlns:tni="http://societies.org/api/schema/activity"
+	xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+<!-- TODO: Need another way of do this!! -->
+<xs:import namespace="http://societies.org/api/schema/activity" 
+           schemaLocation="../../../../../../../SOCIETIES-Platform/api/schema/external/src/main/resources/org.societies.api.schema.activity.xsd"/>
+           
+
+		<xs:element name="networkingBean">
+			<xs:complexType>
+				<xs:sequence>
+					<xs:element name="method" type="tns:method" minOccurs="0" />
+					<xs:element name="lastActivtyCount" type="xs:int" minOccurs="0" />
+				</xs:sequence>
+			</xs:complexType>
+		</xs:element>
+
+		<xs:element name="networkingBeanResult">
+			<xs:complexType>
+				<xs:sequence>
+					<xs:element name="networkingCis" type="xs:string"
+					minOccurs="0" />
+					<xs:element name="zones" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
+				</xs:sequence>
+			</xs:complexType>
+		</xs:element>
+
+
+		<xs:complexType name="userDetails">
+			<xs:sequence>
+				<xs:element name="displayName" type="xs:string"
+					minOccurs="0" />
+				<xs:element name="id" type="xs:int" />
+			</xs:sequence>
+		</xs:complexType>
+
+		<xs:complexType name="zoneDetails">
+			<xs:sequence>
+				<xs:element name="zoneDisplayName" type="xs:string"
+					minOccurs="0" />
+				<xs:element name="zoneId" type="xs:int" />
+			</xs:sequence>
+		</xs:complexType>
+		
+
+		<xs:simpleType name="method">
+			<xs:restriction base="xs:string">
+				<xs:enumeration value="whoareyou" />
+				<xs:enumeration value="getZoneList" />
+				<xs:enumeration value="getlatestevents" />
+			</xs:restriction>
+		</xs:simpleType>
+
+	</xs:schema>
+

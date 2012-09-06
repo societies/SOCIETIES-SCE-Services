@@ -461,6 +461,37 @@ public class SharedCalendar implements ISharedCalendar, IPrivateCalendarUtil {
 		}
 	}
 	
+//	private void notifyCssCalendarEvtDeletion(String deletedEvtId, String calendarId, String CISId){
+//		if (CISId==null){
+//			log.debug("CIS ID parameter not provided, skipping activity creation.");
+//			return;
+//		}
+//		if (cisManager != null) {
+//			ICisOwned iCis = cisManager.getOwnedCis(CISId);
+//			if (iCis != null) {
+//				IActivityFeed activityFeed = iCis.getActivityFeed();
+//				if (activityFeed!=null){
+//					IActivity notifyActivity = activityFeed.getEmptyIActivity();
+//					notifyActivity.setActor(CISId);
+//					notifyActivity.setVerb(ISharedCalendar.VERB_CSS_CALENDAR_EVENT_DELETED);
+//					notifyActivity.setObject(deletedEvtId);
+//					notifyActivity.setTarget(calendarId);
+//					activityFeed.addActivity(notifyActivity,
+//							new IActivityFeedCallback() {
+//								@Override
+//								public void receiveResult(
+//										Activityfeed activityFeedObject) {
+//									log.debug("Added a 'Delete CSS Event' activity to the Activity Feed.");
+//								}
+//							}
+//					);
+//				}
+//			}
+//		} else {
+//			log.debug("CIS manager or ActivityFeed service not available.");
+//		}
+//	}
+	
 	/* (non-Javadoc)
 	 * @see org.societies.rdPartyService.enterprise.sharedCalendar.ISharedCalendar#deleteEventOnCISCalendar(java.lang.String, java.lang.String)
 	 */
@@ -473,6 +504,18 @@ public class SharedCalendar implements ISharedCalendar, IPrivateCalendarUtil {
 			deletionOk=true;
 		} catch (Exception e) {
 			log.error("Error during deletion of CIS calendar event: "+e.getMessage());
+		}
+		return deletionOk;
+	}
+	
+	public boolean deleteEventOnCSSCalendar(String eventId, String calendarId) {
+		boolean deletionOk=false;
+		try {
+			util.deleteEvent(calendarId, eventId);
+//			this.notifyCssCalendarEvtDeletion(eventId, calendarId, this.getCssIdFromCalendarId(calendarId));
+			deletionOk=true;
+		} catch (Exception e) {
+			log.error("Error during deletion of CSS calendar event: "+e.getMessage());
 		}
 		return deletionOk;
 	}
@@ -815,7 +858,6 @@ public class SharedCalendar implements ISharedCalendar, IPrivateCalendarUtil {
 	 */
 	@Override
 	public boolean deleteEventOnPrivateCalendar(String eventId) {
-		// TODO Auto-generated method stub
 		return false;
 	}
 

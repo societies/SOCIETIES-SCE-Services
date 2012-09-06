@@ -22,15 +22,15 @@
 	
 	<img id="top" src="images/top.png" alt=""/>
 	
-	<forms:form method="POST" action="login.html" commandName="loginForm">
+	<forms:form method="POST" action="front.html" commandName="frontForm">
 	<div id="form_container">
 	
-		<h1><a>Login to Schmoozer</a></h1>
+		<h1><a>Select A Zone to Enter</a></h1>
 		
 	
 		<form id="form_0" class="appnitro"  method="post" action="" >
 		<div class="form_description">
-			<h2>Login Details</h2>
+			<h2>Zone Details</h2>
 		</div>						
 			<ul >
 			

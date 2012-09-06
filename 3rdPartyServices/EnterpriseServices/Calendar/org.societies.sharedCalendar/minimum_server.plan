@@ -15,6 +15,7 @@
 	<!-- Calendar Server Artifacts - Start -->
 	<artifact type="bundle" name="org.societies.rdpartyService.enterprise.sharedCalendar"/>
 	<artifact type="configuration" name="bk"/>
+	<artifact type="bundle" name="org.societies.activityfeed"/>
 	<!-- Calendar Server Artifacts - End -->
 	
 </plan>

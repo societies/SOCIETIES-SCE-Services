@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+     android:background="@drawable/wall"
+    >
+   
+    <ImageView
+       android:layout_width="wrap_content"
+       android:layout_height="wrap_content"
+       android:src="@drawable/societies_header"
+       android:layout_marginTop="3dp" 
+       android:layout_gravity="center_vertical|center_horizontal"/>
+    
+   <TextView android:id="@+id/welcome_text"
+        android:text = "Settings"           
+        android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                  android:textStyle="bold"
+				android:textSize="25dip" 
+				android:layout_marginTop="50dip"
+				android:textColor="@android:color/white"
+				android:layout_gravity="center_vertical|center_horizontal"
+				 /> 
+        
+       
+    <TextView android:id="@+id/url_text"
+        android:layout_centerHorizontal="true"  
+        android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/welcome_text"
+            android:textColor="@android:color/white"
+				android:textSize="15dip" 
+				android:padding="3dip" android:text="@string/URL"
+				android:layout_gravity="center_vertical|center_horizontal"/> 
+        
+   
+    <EditText android:id="@+id/txt_url"
+             android:layout_height="wrap_content"
+             android:layout_width="250dp"
+             android:layout_centerHorizontal="true"
+             android:layout_below="@+id/url_text"
+             android:singleLine="true" 
+             android:layout_gravity="center_vertical|center_horizontal"/>
+             
+             
+    <TextView android:id="@+id/entity_text"
+        android:layout_centerHorizontal="true"  
+        android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/txt_url"
+               android:textColor="@android:color/white"
+				android:textSize="15dip" 
+				android:padding="3dip" android:text="@string/entity"
+				android:layout_gravity="center_vertical|center_horizontal"/> 
+      
+   
+    <EditText android:id="@+id/txt_entity"
+                  
+             android:layout_height="wrap_content"
+             android:layout_width="250dp"
+             android:layout_centerHorizontal="true"
+             android:layout_below="@+id/entity_text"
+             android:singleLine="true" 
+             android:layout_gravity="center_vertical|center_horizontal"/>
+   
+      <TextView android:id="@+id/cis_text"
+        android:layout_centerHorizontal="true"  
+        android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/txt_entity"
+               android:textColor="@android:color/white"
+				android:textSize="15dip" 
+				android:padding="3dip" android:text="@string/cis"
+				android:layout_gravity="center_vertical|center_horizontal"/> 
+      		
+         <Spinner android:id="@+id/cis_list"
+    		 android:layout_height="wrap_content"
+             android:layout_width="250dp"
+             android:layout_centerHorizontal="true"
+             android:layout_below="@+id/cis_text"
+             android:layout_gravity="center_vertical|center_horizontal"/>
+         
+       
+        <Button android:id="@+id/set_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:layout_below="@+id/cis_list"
+                android:text="@string/Set"
+                android:layout_gravity="center_vertical|center_horizontal"/>
+                 
+                 
+
+</LinearLayout>
