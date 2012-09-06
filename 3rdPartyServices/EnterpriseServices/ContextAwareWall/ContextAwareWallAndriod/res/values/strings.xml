@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="hello">Hello World, Act1!</string>
+    <string name="app_name">Context Aware Wall</string>
+    <string name="main_screen">PZ Registrar</string>
+    <string name="splash_screen">SplashScreen</string>
+    <string name="URL">URL</string>
+    <string name="entity">entity</string>
+    <string name="cis">CIS</string>
+    <string name="Set">Set</string>
+</resources>
