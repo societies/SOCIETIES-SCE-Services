@@ -1,0 +1,74 @@
+﻿<Page x:Class="SocialLearningGame.Pages.HomePage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:Controls="clr-namespace:Coding4Fun.Kinect.Wpf.Controls;assembly=Coding4Fun.Kinect.Wpf"
+      xmlns:my="clr-namespace:Microsoft.Samples.Kinect.WpfViewers;assembly=Microsoft.Samples.Kinect.WpfViewers"
+      mc:Ignorable="d" 
+      d:DesignHeight="600" d:DesignWidth="1000"
+      Title="HomePage" Loaded="Window_Loaded" Unloaded="Window_Closing" Height="600" Width="1000">
+
+        <Canvas Background="Transparent" Height="600" VerticalAlignment="Top" Grid.ColumnSpan="2" Margin="0">
+            <TextBlock Height="76" HorizontalAlignment="Left" Margin="353,44,0,0" Name="textBlock1" Text="Menu" VerticalAlignment="Top" Width="304" TextAlignment="Center" FontSize="48" Canvas.Left="-4" Canvas.Top="-4" />
+            
+            <!-- images for the different options -->
+            <Ellipse Name="ellipse1" Height="75" Width="75" Margin="222,172,717,377">
+                <Ellipse.Fill>
+                <ImageBrush ImageSource="/SocialLearningGame;component/Resources/play.png" />
+                </Ellipse.Fill>
+            </Ellipse>
+            <Ellipse Name="ellipse2" Height="75" Width="75" Margin="651,172,289,377" Canvas.Left="-73" Canvas.Top="0">
+                <Ellipse.Fill>
+                <ImageBrush ImageSource="/SocialLearningGame;component/Resources/scoreboard.png" />
+                </Ellipse.Fill>
+            </Ellipse>
+            <Ellipse Name="ellipse3" Height="75" Width="75" Margin="222,420,717,377">
+                <Ellipse.Fill>
+                <ImageBrush ImageSource="/SocialLearningGame;component/Resources/challenge.png" />
+                </Ellipse.Fill>
+            </Ellipse>
+            <Ellipse Name="ellipse4" Height="75" Width="75" Margin="650,420,289,377" Canvas.Left="-72" Canvas.Top="0">
+                <Ellipse.Fill>
+                <ImageBrush ImageSource="/SocialLearningGame;component/Resources/cat.png" />
+                </Ellipse.Fill>
+            </Ellipse>
+            
+            <!-- Titles for the different options -->
+            <TextBlock Canvas.Left="180" Canvas.Top="374" Height="40" Name="textBlock2" Text="Challenge" Width="147" TextAlignment="Center" FontSize="28" />
+            <TextBlock Canvas.Left="519" Canvas.Top="374" Height="40" Name="textBlock3" Text="Categories" Width="174" TextAlignment="Center" FontSize="28" />
+            <TextBlock Canvas.Left="180" Canvas.Top="130" Height="40" Name="textBlock4" Text="Play" Width="147" TextAlignment="Center" FontSize="28" />
+            <TextBlock Canvas.Left="519" Canvas.Top="130" Height="40" Name="textBlock5" Text="Scoreboard" Width="174" TextAlignment="Center" FontSize="28" />
+            <my:KinectSensorChooser Canvas.Left="193" Canvas.Top="203" Name="kinectSensorChooser1" Width="693" Height="211" />
+            
+            <!-- Status Bar - display messages to the user -->
+            <StatusBar Height="Auto" Name="statusBar" Width="Auto" Background="Transparent" Canvas.Left="29" Canvas.Top="498">
+                <StatusBarItem Padding="10">
+                    <TextBlock Name="statusBarText" FontSize="32" />
+                </StatusBarItem>
+            </StatusBar>
+            
+            <!-- quit button -->
+            <Ellipse x:Name="ellipse5" Height="75" Width="75" Fill="Black" Canvas.Left="597" Canvas.Top="29"/>
+            <Controls:HoverButton x:Name="quitButton" ImageSize="100" TimeInterval="1500" Height="75" Width="75" Canvas.Left="597" Canvas.Top="29" />
+            <TextBlock Canvas.Left="597" Canvas.Top="40" Height="56" Name="textBlock6" Text="Quit" Width="75" Foreground="White" FontSize="32" TextAlignment="Center" />
+            
+            <!-- Right hand -->
+            <Ellipse Height="80" Width="80" Name="RightHand" Canvas.Left="305" Canvas.Top="0" >
+                <Ellipse.Fill>
+                <ImageBrush ImageSource="/SocialLearningGame;component/Resources/hand.png" />
+                </Ellipse.Fill>
+            </Ellipse>
+            
+        <!-- hover button controls for the 4 options -->
+        <Controls:HoverButton x:Name="playButton" ImageSize="100" TimeInterval="1500" Height="75" Width="75" Margin="222,172,718,378" />
+        <Controls:HoverButton x:Name="scoreboardButton" ImageSize="100" TimeInterval="1500" Height="75" Width="75" Margin="580,172,290,378" Canvas.Left="-2" />
+        <Controls:HoverButton x:Name="challengeButton" ImageSize="100" TimeInterval="1500" Height="75" Width="75" Margin="222,420,718,378" />
+        <Controls:HoverButton x:Name="categoriesButton" ImageSize="100" TimeInterval="1500" Height="75" Width="75" Margin="580,420,718,378" Canvas.Left="-2" />
+        <TextBlock Canvas.Left="37" Canvas.Top="21" Height="67" Name="name" Text="TextBlock" Width="250" FontSize="20" />
+    </Canvas>
+    
+    <Page.Background>
+        <ImageBrush ImageSource="/SocialLearningGame;component/Resources/background.jpg" />
+    </Page.Background>
+</Page>

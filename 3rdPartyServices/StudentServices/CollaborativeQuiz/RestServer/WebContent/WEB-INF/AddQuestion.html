@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="ISO-8859-1">
+	<title>Social Learning Game Question Page</title>
+	<link rel="stylesheet" type="text/css" href="bootstrap.css" />
+</head>
+<body>
+	<h1>Social Learning Game</h1>
+	<p>Please complete this form to add a question to the social learning game</p>
+	<form class="form-horizontal" action="http://societies.local.macs.hw.ac.uk:5678/laura.rest.server/question" method="POST">
+		<div class="control-group">
+			<label class="control-label" for="question">Question</label>
+			<div class="controls">
+				<input name="question" required/>
+			</div>
+		</div>
+		<div class="control-group">
+			<label class="control-label" for="answer1">Answer 1</label>
+			<div class="controls">
+				<input name="answer1" required/>
+			</div>
+		</div>
+		<div class="control-group">
+			<label class="control-label" for="answer2">Answer 2</label>
+			<div class="controls">
+				<input name="answer2" required/>
+			</div>
+		</div>
+		<div class="control-group">
+			<label class="control-label" for="answer3">Answer 3</label>
+			<div class="controls">
+				<input name="answer3" required/>
+			</div>
+		</div>
+		<div class="control-group">
+			<label class="control-label" for="answer4">Answer 4</label>
+			<div class="controls">
+				<input name="answer4" required/>
+			</div>
+		</div>
+		<div class="control-group">
+			<label class="control-label" for="correctAnswer">Correct Answer</label>
+			<div class="controls">
+				<select name="correctAnswer">
+					<option>Answer 1</option>
+					<option>Answer 2</option>
+					<option>Answer 3</option>
+					<option>Answer 4</option>
+				</select>
+			</div>
+		</div>
+		<div class="control-group">
+			<label class="control-label" for="category">Category</label>
+			<div class="controls">
+				<select name ="category">
+					<option>general knowledge</option>
+					<option>course related</option>
+					<option>music</option>
+					<option>video games</option>
+					<option>sports</option>
+					<option>history</option>
+					<option>science</option>
+					<option>technology</option>			
+				</select>
+			</div>
+			
+		</div>
+		<div class="control-group">
+			
+			<div class="controls controls-row">
+				<div class="span2"></div>
+				<input type="submit" value="Submit" />
+			</div>
+		</div>
+		
+	</form>
+</body>
+</html>

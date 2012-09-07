@@ -1,0 +1,12 @@
+﻿<Window x:Class="SocialLearningGame.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:Controls="clr-namespace:Coding4Fun.Kinect.Wpf.Controls;assembly=Coding4Fun.Kinect.Wpf"
+        xmlns:my="clr-namespace:Microsoft.Samples.Kinect.WpfViewers;assembly=Microsoft.Samples.Kinect.WpfViewers"
+        Title="MainWindow" Height="600" Width="1000" Closing="WindowClosing" WindowState="Maximized">
+
+    <Grid>
+        <Frame x:Name="_mainFrame" NavigationUIVisibility="Hidden" />
+    </Grid>
+
+</Window>

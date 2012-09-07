@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="ISO-8859-1">
+	<title>Social Learning Game Registration Page</title>
+	<link rel="stylesheet" type="text/css" href="bootstrap.css" />
+</head>
+<body>
+	<h1>Social Learning Game Registration</h1>
+	<div>
+		<p>Please submit this form to register for the Social Learning Game</p>
+	</div>
+	<form class="form-horizontal" action="http://localhost:5678/laura.rest.server/student" method="POST">
+	<div class="control-group">
+			<label class="control-label" for="jid">JID</label>
+			<div class="controls">
+				<input name="jid" required/>
+			</div>
+		</div>
+		<div class="control-group">
+			<label class="control-label" for="name">Name</label>
+			<div class="controls">
+				<input name="name" required/>
+			</div>
+		</div>
+		<div class="control-group">
+			
+			<div class="controls controls-row">
+				<div class="span2"></div>
+				<input type="submit" value="Submit" />
+			</div>
+		</div>
+	</form>
+</body>
+</html>
