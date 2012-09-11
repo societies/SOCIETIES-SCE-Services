@@ -99,6 +99,7 @@
       <DependentUpon>Service1.cs</DependentUpon>
     </Compile>
     <Compile Include="ServiceInfo.cs" />
+    <Compile Include="ServiceInformationSocketClient.cs" />
     <Compile Include="SocketServer.cs" />
     <Compile Include="SocketServerv2.cs" />
     <Compile Include="ImageViewer.cs">

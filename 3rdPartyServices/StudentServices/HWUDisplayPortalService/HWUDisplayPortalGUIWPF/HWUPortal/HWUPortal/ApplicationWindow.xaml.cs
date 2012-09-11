@@ -46,6 +46,10 @@ namespace HWUPortal
 
         private void onExeDestroyed(object sender, ApplicationControlArgs args)
         {
+            if (!args.GracefullyExited)
+            {
+                Console.WriteLine("Service did not exit gracefully");
+            }
             if (!this.currentService.serviceName.Equals(string.Empty))
             {
                 this.currentService = new ServiceInfo();

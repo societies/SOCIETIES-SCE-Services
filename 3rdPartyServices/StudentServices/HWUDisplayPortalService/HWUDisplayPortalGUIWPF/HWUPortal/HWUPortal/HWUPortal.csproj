@@ -54,7 +54,8 @@
     <ApplicationIcon>PUMAlogo.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="ApplicationControl">
+    <Reference Include="ApplicationControl, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\ApplicationControl\ApplicationControl\bin\Release\ApplicationControl.dll</HintPath>
     </Reference>
     <Reference Include="Coding4Fun.Kinect.WinForm">
@@ -108,6 +109,7 @@
       <DependentUpon>NotificationPanel.xaml</DependentUpon>
     </Compile>
     <Compile Include="ServiceInfo.cs" />
+    <Compile Include="ServiceSocketServer.cs" />
     <Compile Include="SocketServer.cs" />
     <Compile Include="TxtNotificationsWindow.xaml.cs">
       <DependentUpon>TxtNotificationsWindow.xaml</DependentUpon>

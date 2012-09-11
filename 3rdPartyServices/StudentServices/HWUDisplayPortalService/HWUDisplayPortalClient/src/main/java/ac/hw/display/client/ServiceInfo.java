@@ -24,6 +24,8 @@
  */
 package ac.hw.display.client;
 
+import org.societies.api.css.devicemgmt.display.IDisplayableService;
+
 /**
  * Describe your class here...
  *
@@ -35,8 +37,10 @@ public class ServiceInfo {
 	private final String exe;
 	private final String serviceName;
 	private final boolean requiresKinect;
+	private final IDisplayableService service;
 	
-	public ServiceInfo(String name, String exe, boolean requiresKinect){
+	public ServiceInfo(IDisplayableService service, String name, String exe, boolean requiresKinect){
+		this.service = service;
 		this.serviceName = name;
 		this.exe = exe;
 		this.requiresKinect = requiresKinect;
@@ -62,5 +66,12 @@ public class ServiceInfo {
 	 */
 	public boolean isKinectRequired() {
 		return requiresKinect;
+	}
+
+	/**
+	 * @return the service
+	 */
+	public IDisplayableService getService() {
+		return service;
 	}
 }

@@ -230,7 +230,9 @@ namespace HWUPortal
         }
         private void startExe(EventArgs e, ServiceInfo sInfo)
         {
+
             appWindow = new ApplicationWindow(this, sInfo);
+            
             appWindow.Show();
             appWindow.startExe(e);
 
@@ -256,8 +258,15 @@ namespace HWUPortal
                     Console.WriteLine("Service requires kinect. Kinect stopped");
                     this.kinect = null;
                 }
-                this.startExe(e, sInfo);
+                try
+                {
+                    this.startExe(e, sInfo);
 
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                }
 
             }
             else if (sInfo.serviceType == ServiceType.WEB)

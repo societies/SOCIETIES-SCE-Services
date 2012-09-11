@@ -24,8 +24,12 @@
  */
 package ac.hw.display.client;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.ServerSocket;
+import java.net.Socket;
 
 /**
  * Describe your class here...
@@ -33,54 +37,79 @@ import java.util.List;
  * @author Eliza
  *
  */
-public class UserSession {
+public class ServiceRuntimeSocketServer extends Thread{
 
-	private String userIdentity;
-	private List<ServiceInfo> services;
-	
-	public UserSession(String userIdentity){
-		this.setUserIdentity(userIdentity);
-		services = new ArrayList<ServiceInfo>();
-	}
-	
-	public void addService(ServiceInfo sInfo){
-		this.services.add(sInfo);
-	}
 
-	/**
-	 * @return the userIdentity
-	 */
-	public String getUserIdentity() {
-		return userIdentity;
+	private DisplayPortalClient displayService;
+	private ServerSocket server;
+	private Socket client;
+	private BufferedReader in;
+	private PrintWriter out;
+	public static final String started_Service = "STARTED_SERVICE";
+	public static final String stopped_Service = "STOPPED_SERVICE";
+
+	public ServiceRuntimeSocketServer(DisplayPortalClient displayService){
+		this.displayService = displayService;
+
 	}
 
-	/**
-	 * @param userIdentity the userIdentity to set
-	 */
-	public void setUserIdentity(String userIdentity) {
-		this.userIdentity = userIdentity;
+	@Override
+	public void run(){
+		this.listenSocket();
 	}
+	public void listenSocket(){
 
-	public List<ServiceInfo> getServices() {
-		
-		return this.services;
-	}
+		try{
+			server = new ServerSocket(2121); 
+		} catch (IOException e) {
+			System.out.println("Could not listen on port 4444");
+			
+		}
 
-	public boolean containsService(String serviceName) {
-		for (ServiceInfo sInfo : services){
-			if (sInfo.getServiceName().equalsIgnoreCase(serviceName)){
-				return true;
+		try{
+			client = server.accept();
+		} catch (IOException e) {
+			System.out.println("Accept failed: 4444");
+			
+		}
+
+		try{
+			in = new BufferedReader(new InputStreamReader(client.getInputStream()));
+			out = new PrintWriter(client.getOutputStream(), true);
+		} catch (IOException e) {
+			System.out.println("Accept failed: 4444");
+			System.exit(-1);
+		}
+
+		while(true){
+			try{
+				String line = in.readLine();
+				if (line.contains(started_Service)){
+					String serviceName = line.substring(started_Service.length()+1);
+					this.displayService.notifyServiceStarted(serviceName);
+				}else if (line.contains(stopped_Service)){
+					String serviceName = line.substring(stopped_Service.length()+1);
+					this.displayService.notifyServiceStopped(serviceName);
+				}
+				//Send data back to client
+				//out.println(line);
+			} catch (IOException e) {
+				System.out.println("Read failed");
+				finalize();
 			}
 		}
-		return false;
 	}
-	
-	public ServiceInfo getService(String serviceName){
-		for (ServiceInfo sInfo: services){
-			if (sInfo.getServiceName().equalsIgnoreCase(serviceName)){
-				return sInfo;
-			}
+
+
+	@Override
+	protected void finalize(){
+		//Clean up 
+		try{
+			in.close();
+			out.close();
+			server.close();
+		} catch (IOException e) {
+			System.out.println("Could not close.");
 		}
-		return null;
 	}
 }

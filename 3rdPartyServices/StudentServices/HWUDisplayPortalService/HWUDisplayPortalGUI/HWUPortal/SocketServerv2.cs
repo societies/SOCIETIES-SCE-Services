@@ -20,6 +20,7 @@ namespace HWUPortal
         private byte[] okBytes;
         private byte[] notOKBytes;
         private volatile bool acceptingConnections = true;
+        private IPAddress remoteIPAddress;
         public SocketServerV2(portalGUI portalGui)
         {
             this.gui = portalGui;
@@ -58,7 +59,8 @@ namespace HWUPortal
 
                     // Get a stream object for reading and writing
                     stream = client.GetStream();
-
+                    this.remoteIPAddress = ((IPEndPoint) client.Client.RemoteEndPoint).Address;
+                    
                     int i;
 
                     // Loop to receive all the data sent by the client.
@@ -249,7 +251,7 @@ namespace HWUPortal
 
         private bool createUserSession(String input)
         {
-            this.userSession = new UserSession();
+            this.userSession = new UserSession(this.remoteIPAddress);
             String[] lines = input.Split('\n');
             if (lines.Length > 0)
             {

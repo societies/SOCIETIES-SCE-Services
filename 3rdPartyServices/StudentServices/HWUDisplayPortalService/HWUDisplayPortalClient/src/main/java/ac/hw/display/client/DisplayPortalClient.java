@@ -38,6 +38,7 @@ import org.societies.api.context.broker.ICtxBroker;
 import org.societies.api.css.devicemgmt.display.DisplayEvent;
 import org.societies.api.css.devicemgmt.display.DisplayEventConstants;
 import org.societies.api.css.devicemgmt.display.IDisplayDriver;
+import org.societies.api.css.devicemgmt.display.IDisplayableService;
 import org.societies.api.identity.IIdentity;
 import org.societies.api.identity.IIdentityManager;
 import org.societies.api.identity.InvalidFormatException;
@@ -73,11 +74,14 @@ public class DisplayPortalClient implements IDisplayDriver{
 	private String currentUsedScreen = "";
 	private static Logger LOG = LoggerFactory.getLogger(DisplayPortalClient.class);
 
+	private ServiceRuntimeSocketServer servRuntimeSocketThread;
 
 	private UserSession userSession;
 	
 	public DisplayPortalClient(){
 		this.screenLocations = new ArrayList<String>();
+		this.servRuntimeSocketThread = new ServiceRuntimeSocketServer(this);
+		this.servRuntimeSocketThread.start();
 	}
 	
 	//this method should be called after the bundle has started so it should be called by the OsgiContextListener when the event has been received
@@ -145,7 +149,7 @@ public class DisplayPortalClient implements IDisplayDriver{
 				//TODO: send services TO DISPLAY
 				this.currentUsedScreen = location;
 				this.hasSession = true;
-				DisplayEvent dEvent = new DisplayEvent(DisplayEventConstants.DEVICE_AVAILABLE);
+				DisplayEvent dEvent = new DisplayEvent(this.currentUsedScreen, DisplayEventConstants.DEVICE_AVAILABLE);
 				InternalEvent iEvent = new InternalEvent(EventTypes.DISPLAY_EVENT, "displayUpdate", "org/societies/css/device", dEvent);
 				try {
 					this.evMgr.publishInternalEvent(iEvent);
@@ -162,9 +166,13 @@ public class DisplayPortalClient implements IDisplayDriver{
 			if (this.hasSession){
 				//release resource
 				this.portalServerRemote.releaseResource(serverIdentity, userIdentity.getJid(), currentUsedScreen);
-				this.currentUsedScreen = "";
+				
 				this.hasSession = false;
-				DisplayEvent dEvent = new DisplayEvent(DisplayEventConstants.DEVICE_UNAVAILABLE);
+				DisplayEvent dEvent = new DisplayEvent(this.currentUsedScreen, DisplayEventConstants.DEVICE_UNAVAILABLE);
+				
+				this.currentUsedScreen = "";
+				
+				
 				InternalEvent iEvent = new InternalEvent(EventTypes.DISPLAY_EVENT, "displayUpdate", "org/societies/css/device", dEvent);
 				try {
 					this.evMgr.publishInternalEvent(iEvent);
@@ -217,8 +225,8 @@ public class DisplayPortalClient implements IDisplayDriver{
 	}
 
 	@Override
-	public void registerDisplayableService(ServiceResourceIdentifier serviceID, String serviceName, URL executableLocation, boolean requiresKinect){
-		ServiceInfo sInfo  = new ServiceInfo(serviceName, executableLocation.toString(), requiresKinect);
+	public void registerDisplayableService(IDisplayableService service, String serviceName, URL executableLocation, boolean requiresKinect){
+		ServiceInfo sInfo  = new ServiceInfo(service, serviceName, executableLocation.toString(), requiresKinect);
 		this.userSession.addService(sInfo);
 	}
 	
@@ -300,6 +308,30 @@ public class DisplayPortalClient implements IDisplayDriver{
 		this.evMgr = evMgr;
 	}
 
+	public void notifyServiceStarted(String serviceName) {
+		if (this.userSession.containsService(serviceName)){
+			ServiceInfo sInfo = this.userSession.getService(serviceName);
+			if (sInfo!=null){
+				IDisplayableService service = sInfo.getService();
+				if (service!=null){
+					service.serviceStarted(currentUsedScreen);
+				}
+			}
+		}
+		
+	}
+	public void notifyServiceStopped(String serviceName) {
+		if (this.userSession.containsService(serviceName)){
+			ServiceInfo sInfo = this.userSession.getService(serviceName);
+			if (sInfo!=null){
+				IDisplayableService service = sInfo.getService();
+				if (service!=null){
+					service.serviceStopped(currentUsedScreen);
+				}
+			}
+		}
+		
+	}
 
 
 }

@@ -173,25 +173,28 @@ namespace ApplicationControl
                     }
                     // Get the main handle
                     appWin = p.MainWindowHandle;
+                    // Put it into this form
+                    SetParent(appWin, this.Handle);
+
+                    // Remove border 
+                    SetWindowLong(appWin, GWL_STYLE, WS_VISIBLE);
+
+                    // Move the window to overlay it on this window
+                    MoveWindow(appWin, 0, 0, this.Width, this.Height, true);
+                    Console.WriteLine("started exe" + exeName);
+                    p.Exited += new EventHandler(p_Exited);
+                    p.EnableRaisingEvents = true;
+                    
+                    this.isExeRunning = true;
+
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show(this, ex.Message, "Error");
+                    //MessageBox.Show(this, ex.Message, "Error");
+                    ApplicationControlArgs cArgs = new ApplicationControlArgs(this.exeName, false);
+                    this.appExit(this, cArgs);
                 }
 
-                // Put it into this form
-                SetParent(appWin, this.Handle);
-
-                // Remove border 
-                SetWindowLong(appWin, GWL_STYLE, WS_VISIBLE);
-
-                // Move the window to overlay it on this window
-                MoveWindow(appWin, 0, 0, this.Width, this.Height, true);
-                Console.WriteLine("started exe" + exeName);
-
-                p.EnableRaisingEvents = true;
-                p.Exited += new EventHandler(p_Exited);
-                this.isExeRunning = true;
 
                 
 
@@ -202,7 +205,8 @@ namespace ApplicationControl
 
         private void p_Exited(object sender, EventArgs args)
         {
-            ApplicationControlArgs cArgs = new ApplicationControlArgs(this.exeName);
+            
+            ApplicationControlArgs cArgs = new ApplicationControlArgs(this.exeName, true);
             appExit(this, cArgs);
         }
         public void DestroyExe(EventArgs e)

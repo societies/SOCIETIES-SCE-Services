@@ -252,6 +252,9 @@ namespace HWUPortal
             this.runningService = sInfo;
             this.closeShowingServiceBtn.Text = "Close " + sInfo.serviceName;
             this.enableThisButton(this.closeShowingServiceBtn, true);
+
+            ServiceInformationSocketClient sClient = new ServiceInformationSocketClient();
+            sClient.sendServiceInformationEvent(userSession.getIPAddress(), sInfo.serviceName, ServiceInformationSocketClient.ServiceRuntimeInformation.STARTED_SERVICE);
             
         }
         private void serviceButton1_Click(object sender, EventArgs e)
@@ -289,6 +292,8 @@ namespace HWUPortal
                 this.runningService = new ServiceInfo();
                 this.closeShowingServiceBtn.Text = "";
                 this.enableThisButton(this.closeShowingServiceBtn, false);
+                ServiceInformationSocketClient socket = new ServiceInformationSocketClient();
+                socket.sendServiceInformationEvent(this.userSession.getIPAddress(), this.runningService.serviceName, ServiceInformationSocketClient.ServiceRuntimeInformation.STOPPED_SERVICE);
             }
         }
 
