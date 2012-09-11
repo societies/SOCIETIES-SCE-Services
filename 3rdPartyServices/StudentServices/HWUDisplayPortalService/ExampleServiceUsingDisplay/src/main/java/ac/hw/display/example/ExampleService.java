@@ -36,6 +36,7 @@ import org.societies.api.comm.xmpp.interfaces.ICommManager;
 import org.societies.api.css.devicemgmt.display.DisplayEvent;
 import org.societies.api.css.devicemgmt.display.DisplayEventConstants;
 import org.societies.api.css.devicemgmt.display.IDisplayDriver;
+import org.societies.api.css.devicemgmt.display.IDisplayableService;
 import org.societies.api.identity.IIdentity;
 import org.societies.api.identity.IIdentityManager;
 import org.societies.api.osgi.event.CSSEvent;
@@ -50,7 +51,7 @@ import org.societies.api.osgi.event.InternalEvent;
  * @author Eliza
  *
  */
-public class ExampleService extends EventListener implements IExampleService{
+public class ExampleService extends EventListener implements IExampleService, IDisplayableService{
 
 	private IDisplayDriver displayDriverService;
 	private Logger logging = LoggerFactory.getLogger(this.getClass());
@@ -76,7 +77,7 @@ public class ExampleService extends EventListener implements IExampleService{
 			
 			this.myServiceExeURL = new URL("http://www.macs.hw.ac.uk/~ceeep1/societies/services/MockWindowsExecutable.exe");
 			this.myServiceName = "ExamplePortalDisplayService";
-			this.displayDriverService.registerDisplayableService(null, myServiceName, myServiceExeURL);
+			this.displayDriverService.registerDisplayableService(this, myServiceName, myServiceExeURL, false);
 		} catch (MalformedURLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -189,6 +190,18 @@ public class ExampleService extends EventListener implements IExampleService{
 		this.commMgr = commMgr;
 		this.idMgr = commMgr.getIdManager();
 		this.userIdentity = this.idMgr.getThisNetworkNode();
+	}
+
+	@Override
+	public void serviceStarted(String ipAddr) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void serviceStopped(String ipAddr) {
+		// TODO Auto-generated method stub
+		
 	}
 
 
