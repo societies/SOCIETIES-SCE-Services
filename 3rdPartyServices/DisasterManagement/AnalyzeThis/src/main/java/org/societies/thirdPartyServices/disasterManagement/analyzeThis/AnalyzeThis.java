@@ -56,7 +56,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class AnalyzeThis implements IAnalyzeThis, ActionListener {
 	
-	/** The logging facility. */
+	/** The logging facility! */ 
 	private static final Logger LOG = LoggerFactory.getLogger(AnalyzeThis.class);
 	
 	private XMLRPCClient xmlrpcClient;

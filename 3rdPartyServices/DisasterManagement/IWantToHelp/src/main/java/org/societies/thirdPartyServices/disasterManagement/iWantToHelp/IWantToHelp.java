@@ -54,7 +54,7 @@ public class IWantToHelp implements IIWantToHelp, BundleActivator {
 	private GetUserDataThread getUserDataThread;
 	
 	private JFrame frame;
-	private JTextArea feedbackTextArea;
+	private JTextArea feedbackTextArea; 
 
 	public IWantToHelp() {
 
