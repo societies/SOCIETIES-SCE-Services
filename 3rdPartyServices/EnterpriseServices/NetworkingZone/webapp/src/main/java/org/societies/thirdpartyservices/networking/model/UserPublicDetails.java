@@ -1,7 +1,7 @@
 package org.societies.thirdpartyservices.networking.model;
 
 
-public class ZonePageForm {
+public class UserPublicDetails {
    
 	private String displayName;
 	private String companyName;
@@ -21,39 +21,46 @@ public class ZonePageForm {
 	private String showEduHist;
 	private String showEmpHist;
 	
-	/**
-	 * @return the displayName
-	 */
+	
+	
+	
+	public UserPublicDetails(String displayName, String companyName,
+			String deptName, String emphistCompany, String emphistDept,
+			String eduhistCollege, String eduhistGradYear,
+			String eduhistCourse, String showEduHist, String showEmpHist) {
+		super();
+		this.displayName = displayName;
+		this.companyName = companyName;
+		this.deptName = deptName;
+		this.emphistCompany = emphistCompany;
+		this.emphistDept = emphistDept;
+		this.eduhistCollege = eduhistCollege;
+		this.eduhistGradYear = eduhistGradYear;
+		this.eduhistCourse = eduhistCourse;
+		this.showEduHist = showEduHist;
+		this.showEmpHist = showEmpHist;
+	}
+	
+	public UserPublicDetails() {
+		super();
+		
+	}
+	
 	public String getDisplayName() {
 		return displayName;
 	}
-	/**
-	 * @param displayName the displayName to set
-	 */
 	public void setDisplayName(String displayName) {
 		this.displayName = displayName;
 	}
-	/**
-	 * @return the companyName
-	 */
 	public String getCompanyName() {
 		return companyName;
 	}
-	/**
-	 * @param companyName the companyName to set
-	 */
 	public void setCompanyName(String companyName) {
 		this.companyName = companyName;
 	}
-	/**
-	 * @return the deptName
-	 */
 	public String getDeptName() {
 		return deptName;
 	}
-	/**
-	 * @param deptName the deptName to set
-	 */
 	public void setDeptName(String deptName) {
 		this.deptName = deptName;
 	}
@@ -66,6 +73,7 @@ public class ZonePageForm {
 	public String getEmphistDept() {
 		return emphistDept;
 	}
+	
 	public void setEmphistDept(String emphistDept) {
 		this.emphistDept = emphistDept;
 	}
@@ -87,32 +95,19 @@ public class ZonePageForm {
 	public void setEduhistCourse(String eduhistCourse) {
 		this.eduhistCourse = eduhistCourse;
 	}
-	/**
-	 * @return the showEduHist
-	 */
 	public String getShowEduHist() {
 		return showEduHist;
 	}
-	/**
-	 * @param showEduHist the showEduHist to set
-	 */
 	public void setShowEduHist(String showEduHist) {
 		this.showEduHist = showEduHist;
 	}
-	/**
-	 * @return the showEmpHist
-	 */
 	public String getShowEmpHist() {
 		return showEmpHist;
 	}
-	/**
-	 * @param showEmpHist the showEmpHist to set
-	 */
 	public void setShowEmpHist(String showEmpHist) {
 		this.showEmpHist = showEmpHist;
 	}
-
 	
-    
-    
+	
+	
 }

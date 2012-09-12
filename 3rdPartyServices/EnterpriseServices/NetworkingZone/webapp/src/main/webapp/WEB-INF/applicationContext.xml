@@ -13,6 +13,7 @@
 	<osgi:reference id="commManager" interface="org.societies.api.comm.xmpp.interfaces.ICommManager"/> 
 	<osgi:reference id="ctxBroker" interface="org.societies.api.context.broker.ICtxBroker" />
 	<osgi:reference id="cssManager" interface="org.societies.api.internal.css.management.ICSSLocalManager" />
+	<osgi:reference id="socialData" interface="org.societies.api.internal.sns.ISocialData" /> 
 	
 	<bean id="commsClient" 
 		class="org.societies.thirdpartyservices.networking.client.NetworkingClientComms"
@@ -28,6 +29,8 @@
 		<property name="commsClient" ref="commsClient" /> 
 		<property name="ctxBroker" ref="ctxBroker" />
 		<property name="commManager" ref="commManager" />
+		<property name="cssManager" ref="cssManager" />
+		<property name="socialData" ref="socialData" />
 	</bean>
 	
 	
