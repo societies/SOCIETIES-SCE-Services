@@ -44,7 +44,7 @@ public class MainActivity extends Activity {
         webView.setScrollbarFadingEnabled(false);
         webView.setWebViewClient(new MyWebViewClient());
         webView.getSettings().setDefaultZoom(WebSettings.ZoomDensity.FAR);
-        webView.loadUrl("http://crowdtasking.appspot.com/mobile.html");
+        webView.loadUrl("http://crowdtasking.appspot.com/mobile");
      }
 
     @Override
@@ -70,8 +70,18 @@ public class MainActivity extends Activity {
                 //scan;
                 IntentIntegrator integrator = new IntentIntegrator(MainActivity.this);
                 integrator.initiateScan(IntentIntegrator.QR_CODE_TYPES);
-
                 return true;
+
+            case R.id.home:
+                //scan;
+            	webView.loadUrl("http://crowdtasking.appspot.com/index.html");
+                return true;
+            
+            case R.id.profile:
+                //scan;
+            	webView.loadUrl("http://crowdtasking.appspot.com/profile.html");
+                return true;
+
             default:
                 return super.onOptionsItemSelected(item);
         }
