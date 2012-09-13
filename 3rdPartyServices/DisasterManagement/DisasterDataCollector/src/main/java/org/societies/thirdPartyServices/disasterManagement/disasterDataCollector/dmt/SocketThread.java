@@ -28,8 +28,6 @@ package org.societies.thirdPartyServices.disasterManagement.disasterDataCollecto
 import java.net.ServerSocket;
 import java.net.Socket;
 
-import org.apache.xmlrpc.webserver.ServletWebServer;
-
 /**
  * use case 1: view
  * - on restore view notify CSS (users loads view)
@@ -119,7 +117,8 @@ public class SocketThread extends Thread implements IProcessMessage {
 //			e.printStackTrace();
 		}
 
-		writer.stop();
+		if (writer != null)
+			writer.stop();
 		
 		run = false;
 	}

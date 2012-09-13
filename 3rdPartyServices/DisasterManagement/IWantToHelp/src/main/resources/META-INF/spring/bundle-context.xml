@@ -5,10 +5,15 @@
 		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd"
 	xmlns:context="http://www.springframework.org/schema/context">
 	
-  <!-- regular spring configuration file defining the beans for this
-       bundle. We've kept the osgi definitions in a separate 
-       configuration file so that this file can easily be used
-       for integration testing outside of an OSGi environment -->
-
-
+    <!-- regular spring configuration file defining the beans for this
+        bundle. We've kept the osgi definitions in a separate 
+        configuration file so that this file can easily be used
+        for integration testing outside of an OSGi environment -->
+    
+    
+    
+    
+    
+    
+    <context:component-scan base-package="org.societies.thirdPartyServices.disasterManagement.wantToHelp"></context:component-scan>
 </beans>

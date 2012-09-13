@@ -9,9 +9,11 @@
        bundle. We've kept the osgi definitions in a separate 
        configuration file so that this file can easily be used
        for integration testing outside of an OSGi environment -->
-
-<!--
-  <bean id="DisasterDataCollector" class="org.societies.thirdPartyServices.disasterManagement.disasterDataCollector.DisasterDataCollector"  name="_name_" init-method="activate" destroy-method="deactivate">
-  </bean>
-   -->
+    
+    
+    
+    
+    
+    
+    <context:component-scan base-package="org.societies.thirdPartyServices.disasterManagement.disasterDataCollector"></context:component-scan>
 </beans>

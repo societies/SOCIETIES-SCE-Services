@@ -7,7 +7,7 @@
 		<version>0.1</version>
 	</parent>
 	<groupId>org.societies.thirdPartyServices.disasterManagement</groupId>
-	<artifactId>IWantToHelp</artifactId>
+	<artifactId>WantToHelp</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>bundle</packaging>
 	<name>IWantToHelp</name>
@@ -100,8 +100,10 @@
 				<extensions>true</extensions>
 				<configuration>
 					<instructions>
-						<Export-Package>org.societies.thirdPartyServices.disasterManagement.iWantToHelp</Export-Package>
-						<Bundle-Activator>org.societies.thirdPartyServices.disasterManagement.iWantToHelp.IWantToHelp</Bundle-Activator>
+						<Export-Package></Export-Package>
+						<!-- 
+						<Bundle-Activator>org.societies.thirdPartyServices.disasterManagement.wantToHelp.wantToHelp</Bundle-Activator>
+						-->
 						<Bundle-SymbolicName>${project.groupId}.${project.artifactId}</Bundle-SymbolicName>
 						<Bundle-Name>${project.name}</Bundle-Name>
 						<Bundle-Version>${project.version}</Bundle-Version>                        

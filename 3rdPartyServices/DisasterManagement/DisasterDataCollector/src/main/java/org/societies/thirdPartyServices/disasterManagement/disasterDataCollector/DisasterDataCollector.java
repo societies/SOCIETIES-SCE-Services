@@ -25,12 +25,12 @@
 
 package org.societies.thirdPartyServices.disasterManagement.disasterDataCollector;
 
-import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.awt.GridLayout;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -38,69 +38,84 @@ import javax.swing.JTextArea;
 import javax.swing.UIManager;
 import javax.swing.text.DefaultCaret;
 
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
+import net.miginfocom.swing.MigLayout;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.societies.api.comm.xmpp.interfaces.ICommManager;
+import org.societies.api.context.broker.ICtxBroker;
 import org.societies.thirdPartyServices.disasterManagement.disasterDataCollector.dmt.IDataToCSSFromDMT;
 import org.societies.thirdPartyServices.disasterManagement.disasterDataCollector.dmt.SocketThread;
+import org.springframework.stereotype.Service;
 
-public class DisasterDataCollector implements BundleActivator, IDataToCSSFromDMT {
+@Service
+public class DisasterDataCollector implements IDisasterDataCollector, IDataToCSSFromDMT {
+
+	/** The logging facility. */
+	private static final Logger LOG = LoggerFactory.getLogger(DisasterDataCollector.class);
+	
+	private SocketThread socketThread;
 	
 	private JFrame frame;
 	private JTextArea feedbackTextArea;
 	
+	public static final String LAYOUT_CONSTRAINTS = "hidemode 3, gap 0 0, novisualpadding, ins 4, wrap 1"; //, debug 2000";
+	public static final String COLUMN_CONTSTRAINTS = "[fill, grow]";
+	public static final String ROW_CONSTRAINTS = "[fill, grow]";
+	
+	//@Autowired(required=true)	
+	private ICtxBroker externalCtxBroker;
+	//@Autowired(required=true)
+	private ICommManager commMgr;
+	
 	public DisasterDataCollector() {
+		LOG.info("*** " + this.getClass() + " instantiated");
+		
+		socketThread = new SocketThread(6957, this);
 		
 		// otherwise it does not startup in VIRGO
 		UIManager.put("ClassLoader", ClassLoader.getSystemClassLoader());
 		
-		frame = new JFrame("DisasterDataCollectorFrame");
+		frame = new JFrame("DisasterDataCollector");
 		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		frame.addWindowListener(new WindowEventHandler());
 
 		JPanel panel = new JPanel();
-		panel.setLayout(new GridLayout(0, 1, 10, 10));
-		frame.getContentPane().add(panel, BorderLayout.CENTER);
-		
+		panel.setLayout(new MigLayout(LAYOUT_CONSTRAINTS, COLUMN_CONTSTRAINTS, ROW_CONSTRAINTS));
+		Dimension panelDimension = new Dimension(1200, 768); 
+		panel.setPreferredSize(panelDimension);
+		frame.getContentPane().add(panel);
 		
 		feedbackTextArea = new JTextArea();
 		feedbackTextArea.setEditable(false);
 		DefaultCaret caret = (DefaultCaret)feedbackTextArea.getCaret();
 		caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
 	    JScrollPane scrollPane = new JScrollPane(feedbackTextArea);
-	    JPanel feedbackPanel = new JPanel(new BorderLayout());
-		Dimension feedbackDimension = new Dimension(600,400);
-		feedbackPanel.setMinimumSize(feedbackDimension);
-		feedbackPanel.setPreferredSize(feedbackDimension);
-		feedbackPanel.setMaximumSize(feedbackDimension);
+	    JPanel feedbackPanel = new JPanel(new MigLayout(LAYOUT_CONSTRAINTS, COLUMN_CONTSTRAINTS, ROW_CONSTRAINTS));
 	    feedbackPanel.add(scrollPane);
 	    
 	    panel.add(feedbackPanel);
 	}
-	
-	private SocketThread socketThread;
-	public void start(BundleContext context) throws Exception {
-//	public void activate() {
-		feedbackTextArea.append("!!! DisasterDataCollector Service started !!!\n");
+
+	@PostConstruct
+	public void activate() {
+		feedbackTextArea.append("on activate -> DisasterDataCollector service started\n");
+		
 		frame.pack();
 		frame.setVisible(true);
 		
-		socketThread = new SocketThread(6957, this);
 		socketThread.start();
 	}
-
-	public void stop(BundleContext context) throws Exception {
-//	public void deactivate() {		
-		feedbackTextArea.append("### DisasterDataCollector Service stopped ###\n");
+	
+	@PreDestroy
+	public void deactivate() {
+		feedbackTextArea.append("on deactivate -> DisasterDataCollector service stopped ... \n");
+		
 		frame.dispose();
+		
 		socketThread.shutdown();
 	}
 	
-	public static void main(String[] args) throws Exception {
-		DisasterDataCollector disasterDataCollector = new DisasterDataCollector();
-		disasterDataCollector.start(null);
-//		disasterDataCollector.activate();
-	}
-
 	@Override
 	public void setPosition(double latitude, double longitude, double elevation, int satNumber) {
 		feedbackTextArea.append("setPosition "+latitude+" "+longitude+" "+elevation+" "+satNumber+" \n");
@@ -131,13 +146,38 @@ public class DisasterDataCollector implements BundleActivator, IDataToCSSFromDMT
 		feedbackTextArea.append("poisSent"+" \n");
 	}
 	
+	/**
+	 * main method for testing
+	 */
+	public static void main(String[] args) throws Exception {
+		DisasterDataCollector disasterDataCollector = new DisasterDataCollector();
+		disasterDataCollector.activate();
+	}
+
 	private class WindowEventHandler extends WindowAdapter {
 		public void windowClosing(WindowEvent evt) {
 			try {
-				stop(null);
+				deactivate();
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
+	}
+	
+	public ICommManager getCommMgr() {
+		return commMgr;
+	}
+
+	public void setCommMgr(ICommManager commMgr) {
+		this.commMgr = commMgr;
+	}
+
+	public ICtxBroker getExternalCtxBroker() {
+		return externalCtxBroker;
+	}
+
+	public void setExternalCtxBroker(ICtxBroker externalCtxBroker) {
+		//textArea.append("got externalCtxBroker: " + externalCtxBroker+" \n");
+		this.externalCtxBroker = externalCtxBroker;
 	}
 }

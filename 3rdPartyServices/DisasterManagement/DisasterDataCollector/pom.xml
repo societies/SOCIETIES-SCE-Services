@@ -67,6 +67,23 @@
 			<version>3.1.3</version>
 		</dependency>
 		
+		<!-- MiGLayout -->
+		<dependency>
+			<groupId>com.miglayout</groupId>
+			<artifactId>miglayout-swing</artifactId>
+			<version>4.2</version>
+		</dependency>
+		<dependency>
+			<groupId>com.miglayout</groupId>
+			<artifactId>miglayout-ideutil</artifactId>
+			<version>4.2</version>
+		</dependency>
+		<dependency>
+			<groupId>com.miglayout</groupId>
+			<artifactId>miglayout-core</artifactId>
+			<version>4.2</version>
+		</dependency>
+		
 		<!-- SOCIETIES PLATFORM -->
 		<dependency>
 			<groupId>org.societies.api.external</groupId>
@@ -84,7 +101,9 @@
 				<configuration>
 					<instructions>
 						<Export-Package>org.societies.thirdPartyServices.disasterManagement.disasterDataCollector</Export-Package>
+						<!-- 
 						<Bundle-Activator>org.societies.thirdPartyServices.disasterManagement.disasterDataCollector.DisasterDataCollector</Bundle-Activator>
+						-->
 						<Bundle-SymbolicName>${project.groupId}.${project.artifactId}</Bundle-SymbolicName>
 						<Bundle-Name>${project.name}</Bundle-Name>
 						<Bundle-Version>${project.version}</Bundle-Version>                        

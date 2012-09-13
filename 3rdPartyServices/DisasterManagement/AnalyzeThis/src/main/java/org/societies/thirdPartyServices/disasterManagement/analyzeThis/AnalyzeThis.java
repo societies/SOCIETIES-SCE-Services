@@ -27,9 +27,10 @@ package org.societies.thirdPartyServices.disasterManagement.analyzeThis;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -40,6 +41,8 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.UIManager;
 import javax.swing.text.DefaultCaret;
+
+import net.miginfocom.swing.MigLayout;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,7 +58,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class AnalyzeThis implements IAnalyzeThis, ActionListener {
 	
-	/** The logging facility! */ 
+	/** The logging facility. */
 	private static final Logger LOG = LoggerFactory.getLogger(AnalyzeThis.class);
 	
 	private XMLRPCClient xmlrpcClient;
@@ -70,14 +73,19 @@ public class AnalyzeThis implements IAnalyzeThis, ActionListener {
 	private JButton addrequest;
 	private JTextArea textTextArea;
 	
+	public static final String LAYOUT_CONSTRAINTS = "hidemode 3, gap 0 0, novisualpadding, ins 4, wrap 1"; //, debug 2000";
+	public static final String COLUMN_CONTSTRAINTS = "[fill, grow]";
+	public static final String ROW_CONSTRAINTS = "[][fill, grow]";
+	
 	private String emailAddress = "korbinian@doe.ar";
 	private String password = "password";	
 	private String firstname = "firstname";
 	private String lastname = "lastname";
 	private String institute = "institute";
-
+	
+	//@Autowired(required=true)	
 	private ICtxBroker externalCtxBroker;
-
+	//@Autowired(required=true)
 	private ICommManager commMgr;
 
 	public AnalyzeThis() {
@@ -90,17 +98,16 @@ public class AnalyzeThis implements IAnalyzeThis, ActionListener {
 		
 		frame = new JFrame("AnalyzeThis");
 		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		frame.addWindowListener(new WindowEventHandler());
 		
 		JPanel panel = new JPanel();
-		panel.setLayout(new GridLayout(0,1,10,10));
-		frame.getContentPane().add(panel, BorderLayout.CENTER);
+		panel.setLayout(new MigLayout(LAYOUT_CONSTRAINTS, COLUMN_CONTSTRAINTS, ROW_CONSTRAINTS));
+		Dimension panelDimension = new Dimension(1200, 768); 
+		panel.setPreferredSize(panelDimension);
+		frame.getContentPane().add(panel);
 		
 		subscribe = new JButton("subscribe");
 		subscribe.setActionCommand(subscribeCommand);
-		Dimension buttonDimension = new Dimension(800,80);
-		subscribe.setMinimumSize(buttonDimension);
-		subscribe.setPreferredSize(buttonDimension);
-		subscribe.setMaximumSize(buttonDimension);
 		subscribe.addActionListener(this);
 
 		headlineTextArea = new JTextArea();
@@ -117,9 +124,6 @@ public class AnalyzeThis implements IAnalyzeThis, ActionListener {
 		
 		addrequest = new JButton("add request");
 		addrequest.setActionCommand(addrequestCommand);
-		addrequest.setMinimumSize(buttonDimension);
-		addrequest.setPreferredSize(buttonDimension);
-		addrequest.setMaximumSize(buttonDimension);
 		addrequest.addActionListener(this);
 
 		feedbackTextArea = new JTextArea("");
@@ -139,19 +143,24 @@ public class AnalyzeThis implements IAnalyzeThis, ActionListener {
 	
 	@PostConstruct
 	public void activate() throws Exception {
-		feedbackTextArea.append(" on activate callback -> AnalyzeThis service started\n");
-		frame.pack();
-		frame.setVisible(true);
+		feedbackTextArea.append("on activate -> AnalyzeThis service started\n");
 		
+		frame.pack();
+		frame.setVisible(true);	
+	}
+
+	@PreDestroy
+	public void deactivate() throws Exception {
+		feedbackTextArea.append("on deactivate ->AnalyzeThis service stopped ... \n");
+		
+		frame.dispose();
 	}
 
 	public void retrieveData () throws Exception{
 		feedbackTextArea.append("retrieveData from CSS ... ");
 		
-		
 		IIdentity cssOwnerId = commMgr.getIdManager().fromJid(commMgr.getIdManager().getThisNetworkNode().getBareJid());
 		Requestor requestor = new Requestor(cssOwnerId);
-		
 		
 		CtxEntityIdentifier ownerEntityIdentifier = externalCtxBroker.retrieveIndividualEntityId(requestor, cssOwnerId).get();
 		CtxEntity ownerEntity = (CtxEntity) externalCtxBroker.retrieve(requestor, ownerEntityIdentifier).get();
@@ -164,13 +173,6 @@ public class AnalyzeThis implements IAnalyzeThis, ActionListener {
 		password = firstname+"__"+lastname;
 		institute = "institute";
 		feedbackTextArea.append("email: "+emailAddress+"\n");
-	}
-	
-
-	@PreDestroy
-	public void deactivate() throws Exception {
-		feedbackTextArea.append("AnalyzeThis service stopped ... \n");
-		frame.dispose();
 	}
 
 	@Override
@@ -191,17 +193,26 @@ public class AnalyzeThis implements IAnalyzeThis, ActionListener {
 	public XMLRPCClient getXmlrpcClient() {
 		return xmlrpcClient;
 	}
+	
 
 	/**
 	 * main method for testing
 	 */
 	public static void main(String[] args) throws Exception {
 		AnalyzeThis analyzeThis = new AnalyzeThis();
-//		analyzeThis.start(null);
 		analyzeThis.activate();
 	}
 	
-
+	private class WindowEventHandler extends WindowAdapter {
+		public void windowClosing(WindowEvent evt) {
+			try {
+				deactivate();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
 	public ICommManager getCommMgr() {
 		return commMgr;
 	}
@@ -218,5 +229,4 @@ public class AnalyzeThis implements IAnalyzeThis, ActionListener {
 		//textArea.append("got externalCtxBroker: " + externalCtxBroker+" \n");
 		this.externalCtxBroker = externalCtxBroker;
 	}
-
 }

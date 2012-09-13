@@ -9,8 +9,20 @@
                       http://www.springframework.org/schema/osgi-compendium 
                       http://www.springframework.org/schema/osgi-compendium/spring-osgi-compendium-1.2.xsd"
 	xmlns:context="http://www.springframework.org/schema/context">
-	
-<!-- -->
-  <bean id="DisasterDataCollectorBean" class="org.societies.thirdPartyServices.disasterManagement.disasterDataCollector.DisasterDataCollector" />
 
+	
+	<osgi:service ref="disasterDataCollector" interface="org.societies.thirdPartyServices.disasterManagement.disasterDataCollector.IDisasterDataCollector" />
+	<!--
+		<osgi:service-properties>
+			<entry key="TargetPlatform" value="SOCIETIES" />
+			<entry key="ServiceProvider" value="ICT-SOCIETIES" />
+		</osgi:service-properties>
+	</osgi:service>  
+	-->
+	
+	<!-- <bean id="DisasterDataCollectorBean" class="org.societies.thirdPartyServices.disasterManagement.disasterDataCollector.DisasterDataCollector" /> -->
+<!--   
+	<osgi:reference id="externalCtxBroker" interface="org.societies.api.context.broker.ICtxBroker" cardinality="1..1" />
+	<osgi:reference id="commMgr" interface="org.societies.api.comm.xmpp.interfaces.ICommManager" cardinality="1..1" />
+-->	
 </beans>

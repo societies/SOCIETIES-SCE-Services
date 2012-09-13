@@ -5,20 +5,15 @@
 		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd"
 	xmlns:context="http://www.springframework.org/schema/context">
 	
-  <!-- regular spring configuration file defining the beans for this
-       bundle. We've kept the osgi definitions in a separate 
-       configuration file so that this file can easily be used
-       for integration testing outside of an OSGi environment -->
-
-<!--
-  <bean id="AnalyzeThisServiceBean" class="org.societies.thirdPartyServices.disasterManagement.analyzeThis.AnalyzeThis"  depends-on="ctxBroker" name="_name_" init-method="activate">
-		  <property name="externalCtxBroker" ref="externalCtxBroker"></property>
-  </bean>
- -->
-
-
-   
-
-   
-   <context:component-scan base-package="org.societies.thirdPartyServices.disasterManagement.analyzeThis"></context:component-scan>
+    <!-- regular spring configuration file defining the beans for this
+        bundle. We've kept the osgi definitions in a separate 
+        configuration file so that this file can easily be used
+        for integration testing outside of an OSGi environment -->
+    <!--
+    <bean id="AnalyzeThisServiceBean" class="org.societies.thirdPartyServices.disasterManagement.analyzeThis.AnalyzeThis"  depends-on="ctxBroker" name="_name_" init-method="activate">
+	    <property name="externalCtxBroker" ref="externalCtxBroker"></property>
+    </bean>
+    -->
+    <!-- <context:component-scan base-package="org.societies.personalisation.management.impl"></context:component-scan> -->
+    <context:component-scan base-package="org.societies.thirdPartyServices.disasterManagement.analyzeThis"></context:component-scan>
 </beans>
