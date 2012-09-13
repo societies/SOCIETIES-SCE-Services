@@ -1,4 +1,4 @@
-package org.societies.thirdPartyServices.disasterManagement.iWantToHelp;
+package org.societies.thirdPartyServices.disasterManagement.iWantToHelp.data;
 
 public class UserData {
 	private String firstName = "";

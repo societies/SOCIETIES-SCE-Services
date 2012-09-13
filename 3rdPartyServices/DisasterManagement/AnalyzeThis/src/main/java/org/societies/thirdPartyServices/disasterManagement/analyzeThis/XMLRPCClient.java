@@ -43,7 +43,6 @@ public class XMLRPCClient {
 			client = new XmlRpcClient();
 			client.setConfig(config);
 		} catch (MalformedURLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -54,7 +53,6 @@ public class XMLRPCClient {
 			Object[] params = new Object[] { email, password, lastname, firstname, institute };
 			returnString = (String) client.execute("societies.addUser", params);
 		} catch (XmlRpcException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return returnString;
@@ -71,6 +69,9 @@ public class XMLRPCClient {
 		return returnString;
 	}
 	
+	/**
+	 * main method for testing
+	 */
 	public static void main(String[] args) {
 		System.out.println("Starting JavaXMLRPCClient in AnalyzeThis service ...");
 		XMLRPCClient xmlrpcClient = new XMLRPCClient();

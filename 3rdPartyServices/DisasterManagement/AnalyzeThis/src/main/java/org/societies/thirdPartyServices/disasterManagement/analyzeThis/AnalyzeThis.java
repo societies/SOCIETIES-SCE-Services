@@ -50,7 +50,6 @@ import org.societies.api.context.model.CtxEntity;
 import org.societies.api.context.model.CtxEntityIdentifier;
 import org.societies.api.identity.IIdentity;
 import org.societies.api.identity.Requestor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -89,7 +88,7 @@ public class AnalyzeThis implements IAnalyzeThis, ActionListener {
 		// otherwise it does not startup in VIRGO
 		UIManager.put("ClassLoader", ClassLoader.getSystemClassLoader());
 		
-		frame = new JFrame("AnalyzeThisFrame");
+		frame = new JFrame("AnalyzeThis");
 		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		
 		JPanel panel = new JPanel();
@@ -137,23 +136,17 @@ public class AnalyzeThis implements IAnalyzeThis, ActionListener {
 	    //panel.add(addrequest);
 	    panel.add(feedbackPanel);
 	}
-
-	public void sayHello(String string) {
-		feedbackTextArea.append("analyze this: " + string+" \n");
-
-	}
 	
 	@PostConstruct
 	public void activate() throws Exception {
-	    
-		feedbackTextArea.append("!!! AnalyzeThis Service started --- !!!\n");
+		feedbackTextArea.append(" on activate callback -> AnalyzeThis service started\n");
 		frame.pack();
 		frame.setVisible(true);
 		
 	}
 
 	public void retrieveData () throws Exception{
-		feedbackTextArea.append("!!! retrieveData !!!\n");
+		feedbackTextArea.append("retrieveData from CSS ... ");
 		
 		
 		IIdentity cssOwnerId = commMgr.getIdManager().fromJid(commMgr.getIdManager().getThisNetworkNode().getBareJid());
@@ -170,13 +163,13 @@ public class AnalyzeThis implements IAnalyzeThis, ActionListener {
 		emailAddress = firstname+"."+lastname+"@societies.eu";
 		password = firstname+"__"+lastname;
 		institute = "institute";
-		feedbackTextArea.append("!!! data "+emailAddress+" !!!\n");
+		feedbackTextArea.append("email: "+emailAddress+"\n");
 	}
 	
 
 	@PreDestroy
 	public void deactivate() throws Exception {
-		feedbackTextArea.append("### org.societies.thirdPartyServices.disasterManagement.AnalyzeThis Service stopped ###\n");
+		feedbackTextArea.append("AnalyzeThis service stopped ... \n");
 		frame.dispose();
 	}
 
@@ -184,20 +177,24 @@ public class AnalyzeThis implements IAnalyzeThis, ActionListener {
 	public void actionPerformed(ActionEvent e) {
 		String command = e.getActionCommand();
 		if (command.equalsIgnoreCase(subscribeCommand)) {
-			feedbackTextArea.append("%%% login: "+getXmlrpcClient().addUser(emailAddress, password, lastname, firstname, institute)+" %%%\n");
-			try {
-				retrieveData();
-			} catch (Exception e1) {
-				e1.printStackTrace();
-			}
+			feedbackTextArea.append("xmlrpc on 'login' > "+getXmlrpcClient().addUser(emailAddress, password, lastname, firstname, institute)+"\n");
+			// TODO retrieve data from CSS
+//			try {
+//				retrieveData();
+//			} catch (Exception e1) {
+//				e1.printStackTrace();
+//			}
 		} else if (command.equalsIgnoreCase(addrequestCommand))
-			feedbackTextArea.append("%%% add request> "+getXmlrpcClient().addRequest(headlineTextArea.getText(), textTextArea.getText())+" %%%\n");
+			feedbackTextArea.append("xmlrpc on 'add request' > "+getXmlrpcClient().addRequest(headlineTextArea.getText(), textTextArea.getText())+"\n");
 	}
 	
 	public XMLRPCClient getXmlrpcClient() {
 		return xmlrpcClient;
 	}
 
+	/**
+	 * main method for testing
+	 */
 	public static void main(String[] args) throws Exception {
 		AnalyzeThis analyzeThis = new AnalyzeThis();
 //		analyzeThis.start(null);

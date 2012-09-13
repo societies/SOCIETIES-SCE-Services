@@ -27,9 +27,11 @@ package org.societies.thirdPartyServices.disasterManagement.iWantToHelp;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.awt.GridLayout;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Vector;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -38,10 +40,13 @@ import javax.swing.JTextArea;
 import javax.swing.UIManager;
 import javax.swing.text.DefaultCaret;
 
+import net.miginfocom.swing.MigLayout;
+
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.societies.thirdPartyServices.disasterManagement.iWantToHelp.data.TicketData;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -50,11 +55,17 @@ public class IWantToHelp implements IIWantToHelp, BundleActivator {
 	/** The logging facility. */
 	private static final Logger LOG = LoggerFactory.getLogger(IWantToHelp.class);
 	
+	private SimpleDateFormat mysqlFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+	
 	private XMLRPCClient xmlrpcClient;
 	private GetUserDataThread getUserDataThread;
 	
 	private JFrame frame;
 	private JTextArea feedbackTextArea; 
+	
+	public static final String LAYOUT_CONSTRAINTS = "hidemode 3, gap 0 0, novisualpadding, ins 4, wrap 1, debug 2000";
+	public static final String COLUMN_CONTSTRAINTS = "[fill, grow]";
+	public static final String ROW_CONSTRAINTS = "[fill, grow]";
 
 	public IWantToHelp() {
 
@@ -63,12 +74,12 @@ public class IWantToHelp implements IIWantToHelp, BundleActivator {
 		
 		xmlrpcClient = new XMLRPCClient();
 
-		frame = new JFrame("IWantToHelpFrame");
+		frame = new JFrame("IWantToHelp");
 		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		frame.addWindowListener(new WindowEventHandler());
 
 		JPanel panel = new JPanel();
-		panel.setLayout(new GridLayout(0, 1, 10, 10));
+		panel.setLayout(new MigLayout(LAYOUT_CONSTRAINTS, COLUMN_CONTSTRAINTS, ROW_CONSTRAINTS));
 		frame.getContentPane().add(panel, BorderLayout.CENTER);
 		
 		feedbackTextArea = new JTextArea("");
@@ -87,7 +98,7 @@ public class IWantToHelp implements IIWantToHelp, BundleActivator {
 	}
 	
 	public void start(BundleContext context) throws Exception {
-		feedbackTextArea.append("!!! org.societies.thirdPartyServices.disasterManagement.IWantToHelp Service started !!!\n");
+		feedbackTextArea.append("start callback -> IWantToHelp service started\n");
 		
 		getUserDataThread = new GetUserDataThread();
 		getUserDataThread.start();
@@ -97,11 +108,14 @@ public class IWantToHelp implements IIWantToHelp, BundleActivator {
 	}
 
 	public void stop(BundleContext context) throws Exception {
-		feedbackTextArea.append("### org.societies.thirdPartyServices.disasterManagement.IWantToHelp Service stopped ###\n");
+		feedbackTextArea.append("stop callback -> IWantToHelp service stopped\n");
 		frame.dispose();
 		getUserDataThread.setRun(false);
 	}
 	
+	/**
+	 * main method for testing
+	 */
 	public static void main(String[] args) throws Exception {
 		IWantToHelp iWantToHelp = new IWantToHelp();
 		iWantToHelp.start(null);
@@ -115,13 +129,35 @@ public class IWantToHelp implements IIWantToHelp, BundleActivator {
 	private class GetUserDataThread extends Thread {
 		
 		private boolean run = true;
-
+		private int pullIntervalInSeconds = 10;
+		
 		@Override
 		public void run() {
+			String response = "";
 			while(run){
-				feedbackTextArea.append(xmlrpcClient.getUserData("user@test.de") + "\n");
+				Calendar cal = Calendar.getInstance();
+				cal.add(Calendar.MONTH, -pullIntervalInSeconds);
+				response = xmlrpcClient.getRequests(mysqlFormat.format(cal.getTime()));
+				
+				if (!response.equalsIgnoreCase("")) {
+					String[] responseLines = response.split("\n");
+//					System.out.println("responseLine: "+responseLines[0]);
+					Vector<TicketData> tickets = new Vector<TicketData>();
+					
+					for (String line : responseLines) {
+//						System.out.println("line: "+line);
+						String[] ticket = line.split("---");
+//						System.out.println("ticket: "+ticket[0]);
+						tickets.add(new TicketData(new Integer(ticket[0]), ticket[1]));
+					}
+					
+					for (TicketData ticketData : tickets) {
+						feedbackTextArea.append("new request> "+ ticketData + "\n");
+					}
+				}
+				response = "";
 				try {
-					sleep(500);
+					sleep(pullIntervalInSeconds*1000);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}

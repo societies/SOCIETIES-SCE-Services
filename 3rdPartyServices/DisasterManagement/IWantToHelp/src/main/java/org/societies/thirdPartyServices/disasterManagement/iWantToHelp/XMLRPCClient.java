@@ -31,6 +31,7 @@ import java.net.URL;
 import org.apache.xmlrpc.XmlRpcException;
 import org.apache.xmlrpc.client.XmlRpcClient;
 import org.apache.xmlrpc.client.XmlRpcClientConfigImpl;
+import org.societies.thirdPartyServices.disasterManagement.iWantToHelp.data.UserData;
 
 public class XMLRPCClient {
 	private XmlRpcClient client;
@@ -57,9 +58,26 @@ public class XMLRPCClient {
 		return new UserData(returnString);
 	}
 	
+
+	
+	public String getRequests(String startingDate) {
+		String returnString = null;
+		try {
+			Object[] getRequestsParams= new Object[] {startingDate};
+			returnString = (String) client.execute("societies.getRequests", getRequestsParams);
+		} catch (XmlRpcException e) {
+			e.printStackTrace();
+		}
+		return returnString;
+	}
+	
+	/**
+	 * main method for testing
+	 */
 	public static void main(String[] args) {
 		System.out.println("Starting JavaXMLRPCClient in IWantToHelp service ...");
 		XMLRPCClient xmlrpcClient = new XMLRPCClient();
-		System.out.println("getUserData: "+xmlrpcClient.getUserData("user@test.de"));
+		System.out.println("getUserData> "+xmlrpcClient.getUserData("user@test.de"));
+		System.out.println("getRequests> "+xmlrpcClient.getRequests("2012-04-24"));
 	}
 }
