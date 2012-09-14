@@ -207,6 +207,7 @@ public class CommsClient implements IDisplayPortalServer, ICommCallback{
 	@Override
 	public void releaseResource(IIdentity serverIdentity, String identity, String location) {
 		
+		this.logging.debug("Releasing resource");
 		DisplayPortalServerBean bean = new DisplayPortalServerBean();
 		bean.setIdentity(identity);
 		bean.setLocation(location);
@@ -215,7 +216,8 @@ public class CommsClient implements IDisplayPortalServer, ICommCallback{
 		Stanza stanza = new Stanza(serverIdentity);
 		
 		try {
-			this.commManager.sendIQGet(stanza, bean, this);
+			this.commManager.sendMessage(stanza, bean);
+			//this.commManager.sendIQGet(stanza, bean, this);
 		} catch (CommunicationException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

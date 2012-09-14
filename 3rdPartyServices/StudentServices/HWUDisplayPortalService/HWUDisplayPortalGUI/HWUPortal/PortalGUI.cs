@@ -331,7 +331,8 @@ namespace HWUPortal
                     this.stopService(e, this.runningService);
                     this.runningService = new ServiceInfo();
                 }
-
+                ServiceInformationSocketClient client = new ServiceInformationSocketClient();
+                client.sendLogoutEvent(userSession.getIPAddress());
                 this.userSession = new UserSession();
                 foreach (Button button in myButtons)
                 {
@@ -344,6 +345,8 @@ namespace HWUPortal
                 Console.WriteLine("User: " + user + " is logged out");
                 this.notifyIcon1.ShowBalloonTip(5000, "SOCIETIES Display Portal", "User: " + user + " has logged out", ToolTipIcon.Info);
                 this.loggedIn = false;
+                this.notificationsWindow = new TextNotificationsWindow();
+
             }
             else
             {

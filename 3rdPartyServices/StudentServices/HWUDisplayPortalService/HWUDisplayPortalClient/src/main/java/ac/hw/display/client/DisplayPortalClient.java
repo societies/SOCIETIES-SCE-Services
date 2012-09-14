@@ -71,7 +71,8 @@ public class DisplayPortalClient implements IDisplayDriver{
 	private IServices services;
 	private boolean hasSession;
 	private IEventMgr evMgr;
-	private String currentUsedScreen = "";
+	private String currentUsedScreenIP = "";
+	private String currentUsedScreenLocation = "";
 	private static Logger LOG = LoggerFactory.getLogger(DisplayPortalClient.class);
 
 	private ServiceRuntimeSocketServer servRuntimeSocketThread;
@@ -140,16 +141,17 @@ public class DisplayPortalClient implements IDisplayDriver{
 				if (this.hasSession){
 					this.LOG.debug("Releasing previous screen session");
 					//release currently used screen
-					this.portalServerRemote.releaseResource(serverIdentity, userIdentity.getJid(), currentUsedScreen);
+					this.portalServerRemote.releaseResource(serverIdentity, userIdentity.getJid(), currentUsedScreenIP);
 				}
 				//now setup new screen
 				SocketClient socketClient = new SocketClient(reply);
 				
 				socketClient.startSession(userSession);
 				//TODO: send services TO DISPLAY
-				this.currentUsedScreen = location;
+				this.currentUsedScreenIP = reply;
+				this.currentUsedScreenLocation = location;
 				this.hasSession = true;
-				DisplayEvent dEvent = new DisplayEvent(this.currentUsedScreen, DisplayEventConstants.DEVICE_AVAILABLE);
+				DisplayEvent dEvent = new DisplayEvent(this.currentUsedScreenIP, DisplayEventConstants.DEVICE_AVAILABLE);
 				InternalEvent iEvent = new InternalEvent(EventTypes.DISPLAY_EVENT, "displayUpdate", "org/societies/css/device", dEvent);
 				try {
 					this.evMgr.publishInternalEvent(iEvent);
@@ -165,14 +167,17 @@ public class DisplayPortalClient implements IDisplayDriver{
 			//if he's using a screen
 			if (this.hasSession){
 				//release resource
-				this.portalServerRemote.releaseResource(serverIdentity, userIdentity.getJid(), currentUsedScreen);
+				this.portalServerRemote.releaseResource(serverIdentity, userIdentity.getJid(), currentUsedScreenLocation);
 				
 				this.hasSession = false;
-				DisplayEvent dEvent = new DisplayEvent(this.currentUsedScreen, DisplayEventConstants.DEVICE_UNAVAILABLE);
-				
-				this.currentUsedScreen = "";
 				
 				
+				SocketClient socketClient = new SocketClient(this.currentUsedScreenIP);
+				socketClient.endSession(this.userSession.getUserIdentity());
+				this.currentUsedScreenIP = "";
+				this.currentUsedScreenLocation = "";
+				
+				DisplayEvent dEvent = new DisplayEvent(this.currentUsedScreenIP, DisplayEventConstants.DEVICE_UNAVAILABLE);
 				InternalEvent iEvent = new InternalEvent(EventTypes.DISPLAY_EVENT, "displayUpdate", "org/societies/css/device", dEvent);
 				try {
 					this.evMgr.publishInternalEvent(iEvent);
@@ -189,7 +194,7 @@ public class DisplayPortalClient implements IDisplayDriver{
 	public void displayImage(String serviceName, String pathToFile){
 		if (this.hasSession){
 			
-				BinaryDataTransfer dataTransfer = new BinaryDataTransfer(currentUsedScreen);
+				BinaryDataTransfer dataTransfer = new BinaryDataTransfer(currentUsedScreenIP);
 				dataTransfer.sendImage(this.userIdentity.getJid(), pathToFile);
 				
 			
@@ -201,7 +206,7 @@ public class DisplayPortalClient implements IDisplayDriver{
 	public void displayImage(String serviceName, URL remoteImageLocation){
 		if (this.hasSession){
 			
-				SocketClient socketClient = new SocketClient(currentUsedScreen);
+				SocketClient socketClient = new SocketClient(currentUsedScreenIP);
 				
 				socketClient.sendImage(userSession, remoteImageLocation);
 				
@@ -215,7 +220,7 @@ public class DisplayPortalClient implements IDisplayDriver{
 	public void sendNotification(String serviceName, String text){
 		if (this.hasSession){
 			if (this.userSession.containsService(serviceName)){
-				SocketClient socketClient = new SocketClient(currentUsedScreen);
+				SocketClient socketClient = new SocketClient(currentUsedScreenIP);
 				socketClient.sendText(serviceName, userSession, text);
 				
 				
@@ -314,7 +319,7 @@ public class DisplayPortalClient implements IDisplayDriver{
 			if (sInfo!=null){
 				IDisplayableService service = sInfo.getService();
 				if (service!=null){
-					service.serviceStarted(currentUsedScreen);
+					service.serviceStarted(currentUsedScreenIP);
 				}
 			}
 		}
@@ -326,8 +331,31 @@ public class DisplayPortalClient implements IDisplayDriver{
 			if (sInfo!=null){
 				IDisplayableService service = sInfo.getService();
 				if (service!=null){
-					service.serviceStopped(currentUsedScreen);
+					service.serviceStopped(currentUsedScreenIP);
 				}
+			}
+		}
+		
+	}
+
+	public void notifyLogOutEvent() {
+		
+		if (this.hasSession){
+			//release resource
+			this.portalServerRemote.releaseResource(serverIdentity, userIdentity.getJid(), currentUsedScreenLocation);
+			
+			this.hasSession = false;
+			DisplayEvent dEvent = new DisplayEvent(this.currentUsedScreenIP, DisplayEventConstants.DEVICE_UNAVAILABLE);
+			
+			this.currentUsedScreenIP = "";
+			this.currentUsedScreenLocation = "";
+			
+			InternalEvent iEvent = new InternalEvent(EventTypes.DISPLAY_EVENT, "displayUpdate", "org/societies/css/device", dEvent);
+			try {
+				this.evMgr.publishInternalEvent(iEvent);
+			} catch (EMSException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
 		}
 		
