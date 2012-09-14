@@ -26,11 +26,14 @@
 package org.societies.thirdPartyServices.disasterManagement.disasterDataCollector;
 
 import java.awt.Dimension;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -49,24 +52,36 @@ import org.societies.thirdPartyServices.disasterManagement.disasterDataCollector
 import org.springframework.stereotype.Service;
 
 @Service
-public class DisasterDataCollector implements IDisasterDataCollector, IDataToCSSFromDMT {
+public class DisasterDataCollector implements IDisasterDataCollector, IDataToCSSFromDMT, ActionListener {
 
 	/** The logging facility. */
 	private static final Logger LOG = LoggerFactory.getLogger(DisasterDataCollector.class);
 	
 	private SocketThread socketThread;
+
+	public static final String sendViewCommand = "sendview";
+	public static final String syncPOIsCommand = "syncPOIs";
 	
 	private JFrame frame;
 	private JTextArea feedbackTextArea;
+	private JButton sendViewButton;
+	private JButton syncPOIsButton;
 	
-	public static final String LAYOUT_CONSTRAINTS = "hidemode 3, gap 0 0, novisualpadding, ins 4, wrap 1"; //, debug 2000";
-	public static final String COLUMN_CONTSTRAINTS = "[fill, grow]";
-	public static final String ROW_CONSTRAINTS = "[fill, grow]";
+	public static final String PANEL_LAYOUT_CONSTRAINTS = "hidemode 3, gap 0 10, novisualpadding, ins 4, wrap 1"; //, debug 2000";
+	public static final String PANEL_COLUMN_CONTSTRAINTS = "[fill, grow]";
+	public static final String PANEL_ROW_CONSTRAINTS = "[fill, grow][]";
+	
+	public static final String FEEDBACK_LAYOUT_CONSTRAINTS = "hidemode 3, gap 0 0, novisualpadding, ins 0, wrap 1"; //, debug 2000";
+	public static final String FEEDBACK_COLUMN_CONTSTRAINTS = "[fill, grow]";
+	public static final String FEEDBACK_ROW_CONSTRAINTS = "[fill, grow]";
+	
 	
 	//@Autowired(required=true)	
 	private ICtxBroker externalCtxBroker;
 	//@Autowired(required=true)
 	private ICommManager commMgr;
+	
+	private String lastView = null;
 	
 	public DisasterDataCollector() {
 		LOG.info("*** " + this.getClass() + " instantiated");
@@ -81,20 +96,31 @@ public class DisasterDataCollector implements IDisasterDataCollector, IDataToCSS
 		frame.addWindowListener(new WindowEventHandler());
 
 		JPanel panel = new JPanel();
-		panel.setLayout(new MigLayout(LAYOUT_CONSTRAINTS, COLUMN_CONTSTRAINTS, ROW_CONSTRAINTS));
+		panel.setLayout(new MigLayout(PANEL_LAYOUT_CONSTRAINTS, PANEL_COLUMN_CONTSTRAINTS, PANEL_ROW_CONSTRAINTS));
 		Dimension panelDimension = new Dimension(1200, 768); 
 		panel.setPreferredSize(panelDimension);
 		frame.getContentPane().add(panel);
+		
+		sendViewButton = new JButton("send view to DMT");
+		sendViewButton.setActionCommand(sendViewCommand);
+		sendViewButton.addActionListener(this);
+		sendViewButton.setEnabled(false);
+
+		syncPOIsButton = new JButton("syncronise all Points Of Interest (POI) on DMT");
+		syncPOIsButton.setActionCommand(syncPOIsCommand);
+		syncPOIsButton.addActionListener(this);
 		
 		feedbackTextArea = new JTextArea();
 		feedbackTextArea.setEditable(false);
 		DefaultCaret caret = (DefaultCaret)feedbackTextArea.getCaret();
 		caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
 	    JScrollPane scrollPane = new JScrollPane(feedbackTextArea);
-	    JPanel feedbackPanel = new JPanel(new MigLayout(LAYOUT_CONSTRAINTS, COLUMN_CONTSTRAINTS, ROW_CONSTRAINTS));
+	    JPanel feedbackPanel = new JPanel(new MigLayout(FEEDBACK_LAYOUT_CONSTRAINTS, FEEDBACK_COLUMN_CONTSTRAINTS, FEEDBACK_ROW_CONSTRAINTS));
 	    feedbackPanel.add(scrollPane);
 	    
 	    panel.add(feedbackPanel);
+	    panel.add(sendViewButton);
+	    panel.add(syncPOIsButton);
 	}
 
 	@PostConstruct
@@ -118,32 +144,45 @@ public class DisasterDataCollector implements IDisasterDataCollector, IDataToCSS
 	
 	@Override
 	public void setPosition(double latitude, double longitude, double elevation, int satNumber) {
-		feedbackTextArea.append("setPosition "+latitude+" "+longitude+" "+elevation+" "+satNumber+" \n");
+		feedbackTextArea.append("received from DMT > new position ( "+latitude+" "+longitude+" "+elevation+" "+satNumber+" ) \n");
 	}
 
 	@Override
 	public void setDirection(double roll, double pitch, double yaw) {
-		feedbackTextArea.append("setDirection "+roll+" "+pitch+" "+yaw+" \n");
+		feedbackTextArea.append("received from DMT > new direction ( "+roll+" "+pitch+" "+yaw+" ) \n");
 	}
 
 	@Override
 	public void gpsConnected(boolean connected) {
-		feedbackTextArea.append("setDirection "+connected+" \n");
+		feedbackTextArea.append("received from DMT > GPS connected ( "+connected+" ) \n");
 	}
 
 	@Override
 	public void compassConnected(boolean connected) {
-		feedbackTextArea.append("compassConnected "+connected+" \n");
+		feedbackTextArea.append("received from DMT > compass connected ( "+connected+" ) \n");
 	}
 
 	@Override
 	public void viewLoaded(String viewXML) {
-		feedbackTextArea.append("viewLoaded "+viewXML+" \n");
+		feedbackTextArea.append("received from DMT > new view \n"); //> "+viewXML+" \n");
+		lastView = viewXML;
+		sendViewButton.setEnabled(true);
 	}
 
 	@Override
 	public void poisSent() {
-		feedbackTextArea.append("poisSent"+" \n");
+		feedbackTextArea.append("received from DMT > sync request \n");
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		String command = e.getActionCommand();
+//		System.out.println("action command: "+command);
+		if (command.equalsIgnoreCase(sendViewCommand)) {
+			socketThread.setView(lastView);
+		} else if (command.equalsIgnoreCase(syncPOIsCommand)) {
+			socketThread.sendPOIs();
+		}
 	}
 	
 	/**

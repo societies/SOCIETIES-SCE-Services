@@ -23,17 +23,13 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.societies.thirdPartyServices.disasterManagement.analyzeThis;
+package org.societies.thirdPartyServices.disasterManagement.wantToHelp;
 
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.Map;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -56,27 +52,25 @@ import org.societies.api.context.model.CtxEntity;
 import org.societies.api.context.model.CtxEntityIdentifier;
 import org.societies.api.identity.IIdentity;
 import org.societies.api.identity.Requestor;
-import org.societies.thirdPartyServices.disasterManagement.analyzeThis.data.TicketData;
+import org.societies.thirdPartyServices.disasterManagement.wantToHelp.data.UserData;
 import org.springframework.stereotype.Service;
 
 @Service
-public class AnalyzeThis implements IAnalyzeThis, ActionListener {
-	
+public class WantToHelp implements IWantToHelp, ActionListener {
+
 	/** The logging facility. */
-	private static final Logger LOG = LoggerFactory.getLogger(AnalyzeThis.class);
+	private static final Logger LOG = LoggerFactory.getLogger(WantToHelp.class);
 	
-	private XMLRPCClient_AT xmlRpcClient_AT;
+	private XMLRPCClient_IWTH xmlRpcClient_IWTH;
 	private PullThread pullThread;
-	
+
 	public static final String subscribeCommand = "subscribe";
 	public static final String unsubscribeCommand = "unsubscribe";
-	public static final String addticketCommand = "addticket";
-
+	
 	private JFrame frame;
+	private JTextArea feedbackTextArea; 
 	private JButton subscribe;
 	private JButton unsubscribe;
-	private JTextArea feedbackTextArea;
-	private JButton addticket;
 	
 	public static final String PANEL_LAYOUT_CONSTRAINTS = "hidemode 3, gap 0 10, novisualpadding, ins 4, wrap 1"; //, debug 2000";
 	public static final String PANEL_COLUMN_CONTSTRAINTS = "[fill, grow]";
@@ -86,43 +80,35 @@ public class AnalyzeThis implements IAnalyzeThis, ActionListener {
 	public static final String FEEDBACK_COLUMN_CONTSTRAINTS = "[fill, grow]";
 	public static final String FEEDBACK_ROW_CONSTRAINTS = "[fill, grow]";
 	
-	
+	private String testUserEmail = "korbinian.frank@dlr.de";
+	private String testUserPassword = "password";	
+	private String testUserFirstname = "firstname";
+	private String testUserLastname = "lastname";
+	private String testUserInstitute = "institute";
 	
 	//@Autowired(required=true)	
 	private ICtxBroker externalCtxBroker;
 	//@Autowired(required=true)
 	private ICommManager commMgr;
-
-	public AnalyzeThis() {
+	
+	public WantToHelp() {
 		LOG.info("*** " + this.getClass() + " instantiated");
 		
-		xmlRpcClient_AT = new XMLRPCClient_AT();
-		
+		xmlRpcClient_IWTH = new XMLRPCClient_IWTH();
+
 		// otherwise it does not startup in VIRGO
 		UIManager.put("ClassLoader", ClassLoader.getSystemClassLoader());
 		
-		frame = new JFrame("AnalyzeThis");
+		frame = new JFrame("IWantToHelp");
 		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		frame.addWindowListener(new WindowEventHandler());
-		
+
 		JPanel panel = new JPanel();
 		panel.setLayout(new MigLayout(PANEL_LAYOUT_CONSTRAINTS, PANEL_COLUMN_CONTSTRAINTS, PANEL_ROW_CONSTRAINTS));
 		Dimension panelDimension = new Dimension(1200, 768); 
 		panel.setPreferredSize(panelDimension);
 		frame.getContentPane().add(panel);
 		
-		subscribe = new JButton("subscribe to recent CSDM requests");
-		subscribe.setActionCommand(subscribeCommand);
-		subscribe.addActionListener(this);
-		unsubscribe = new JButton("I am done");
-		unsubscribe.setActionCommand(unsubscribeCommand);
-		unsubscribe.addActionListener(this);
-		unsubscribe.setVisible(false);
-		
-		addticket = new JButton("add ticket");
-		addticket.setActionCommand(addticketCommand);
-		addticket.addActionListener(this);
-
 		feedbackTextArea = new JTextArea("");
 		feedbackTextArea.setEditable(false);
 		DefaultCaret caret = (DefaultCaret)feedbackTextArea.getCaret();
@@ -130,52 +116,79 @@ public class AnalyzeThis implements IAnalyzeThis, ActionListener {
 	    JScrollPane scrollPane = new JScrollPane(feedbackTextArea);
 	    JPanel feedbackPanel = new JPanel(new MigLayout(FEEDBACK_LAYOUT_CONSTRAINTS, FEEDBACK_COLUMN_CONTSTRAINTS, FEEDBACK_ROW_CONSTRAINTS));
 	    feedbackPanel.add(scrollPane);
+		
+		subscribe = new JButton("I want to help: subscribe to CSDM platform");
+		subscribe.setActionCommand(subscribeCommand);
+		subscribe.addActionListener(this);
+		unsubscribe = new JButton("I am done");
+		unsubscribe.setActionCommand(unsubscribeCommand);
+		unsubscribe.addActionListener(this);
+		unsubscribe.setVisible(false);
 
-	    panel.add(subscribe);
-	    panel.add(unsubscribe);
+		panel.add(subscribe);
+		panel.add(unsubscribe);
 	    panel.add(feedbackPanel);
 	}
 	
 	@PostConstruct
 	public void activate() throws Exception {
-		feedbackTextArea.append("on activate -> AnalyzeThis service started\n");
+		feedbackTextArea.append("on activate -> WantToHelp service started\n");
 
 		pullThread = new PullThread();
 		pullThread.start();
 		pullThread.setCheckData(false);
 		
 		frame.pack();
-		frame.setVisible(true);	
+		frame.setVisible(true);
 	}
 
 	@PreDestroy
 	public void deactivate() throws Exception {
-		feedbackTextArea.append("on deactivate ->AnalyzeThis service stopped ... \n");
+		feedbackTextArea.append("on deactivate -> WantToHelp service stopped\n");
 
 		pullThread.setRun(false);
 		
 		frame.dispose();
 	}
-
-	@SuppressWarnings("unused")
-	public void retrieveData () throws Exception{
-//		feedbackTextArea.append("retrieveData from CSS ... ");
+	
+	public void getUserDataFromCSS() throws Exception{
+//		feedbackTextArea.append("retrieve user data from CSS ... ");
 		IIdentity cssOwnerId = commMgr.getIdManager().fromJid(commMgr.getIdManager().getThisNetworkNode().getBareJid());
 		Requestor requestor = new Requestor(cssOwnerId);
 		
 		CtxEntityIdentifier ownerEntityIdentifier = externalCtxBroker.retrieveIndividualEntityId(requestor, cssOwnerId).get();
 		CtxEntity ownerEntity = (CtxEntity) externalCtxBroker.retrieve(requestor, ownerEntityIdentifier).get();
 		
-		String testUserLastname = ownerEntity.getAttributes(CtxAttributeTypes.NAME_LAST).iterator().next().getStringValue();
-		String testUserFirstname = ownerEntity.getAttributes(CtxAttributeTypes.NAME_FIRST).iterator().next().getStringValue();
-		String testUserEmail = "korbinian.frank@dlr.de";
+		testUserLastname = ownerEntity.getAttributes(CtxAttributeTypes.NAME_LAST).iterator().next().getStringValue();
+		testUserFirstname = ownerEntity.getAttributes(CtxAttributeTypes.NAME_FIRST).iterator().next().getStringValue();
 
+		// TODO replace following strings by getting CtxAttributeTypes
+		testUserEmail = testUserFirstname+"."+testUserLastname+"@societies.eu";
+		testUserPassword = testUserFirstname+"__"+testUserLastname;
+		testUserInstitute = "institute";
+		feedbackTextArea.append("email: "+testUserEmail+"\n");
+	}
+	
+	public void updateUserDataInCSS() {
+		// TODO update user data in CSS
 	}
 
+	@Override
+	public void provideHelp() {
+		LOG.info("provide help");
+	}
+	
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		String command = e.getActionCommand();
 		if (command.equalsIgnoreCase(subscribeCommand)) {
+			feedbackTextArea.append("xmlrpc on 'login' > "+xmlRpcClient_IWTH.signInUser(testUserEmail, testUserPassword, testUserLastname, testUserFirstname, testUserInstitute)+"\n");
+			// TODO retrieve data from CSS
+//			try {
+//				getUserDataFromCSS();
+//			} catch (Exception e1) {
+//				e1.printStackTrace();
+//			}
 			pullThread.setCheckData(true);
 			subscribe.setVisible(false);
 			unsubscribe.setVisible(true);
@@ -183,7 +196,7 @@ public class AnalyzeThis implements IAnalyzeThis, ActionListener {
 			pullThread.setCheckData(false);
 			subscribe.setVisible(true);
 			unsubscribe.setVisible(false);
-		} else if (command.equalsIgnoreCase(addticketCommand)) {}
+		}  
 	}
 	
 	private class PullThread extends Thread {
@@ -192,21 +205,15 @@ public class AnalyzeThis implements IAnalyzeThis, ActionListener {
 		private boolean checkData = false;
 		private int pullIntervalInSeconds = 1;
 		
-		private final SimpleDateFormat mysqlFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		private Map<Integer, TicketData> ticketDataMap = new HashMap<Integer, TicketData>();
-		
 		@Override
 		public void run() {
+			UserData userData = null;
 			while(run){
 				if (checkData) {
-					Calendar cal = Calendar.getInstance();
-					cal.add(Calendar.SECOND, pullIntervalInSeconds);
-					
-					for (TicketData ticketData : xmlRpcClient_AT.getTickets(mysqlFormat.format(cal.getTime()))) 
-						if (!ticketDataMap.containsKey(ticketData.getID())) {
-							feedbackTextArea.append("new request> "+ ticketData + "\n");
-							ticketDataMap.put(ticketData.getID(), ticketData);
-						}
+					userData = xmlRpcClient_IWTH.getUserData(testUserEmail);
+					feedbackTextArea.append(testUserEmail + " settings from webDLRPHP> "+ userData + "\n");
+					if (userData != null)
+						updateUserDataInCSS();
 				}
 				try {
 					sleep(pullIntervalInSeconds*1000);
@@ -224,13 +231,14 @@ public class AnalyzeThis implements IAnalyzeThis, ActionListener {
 			this.checkData = check;
 		}
 	}
-
+	
+	
 	/**
 	 * main method for testing
 	 */
 	public static void main(String[] args) throws Exception {
-		AnalyzeThis analyzeThis = new AnalyzeThis();
-		analyzeThis.activate();
+		WantToHelp iWantToHelp = new WantToHelp();
+		iWantToHelp.activate();
 	}
 	
 	private class WindowEventHandler extends WindowAdapter {

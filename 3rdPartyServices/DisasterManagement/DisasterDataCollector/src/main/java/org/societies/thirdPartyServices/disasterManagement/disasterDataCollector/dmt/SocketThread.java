@@ -142,7 +142,7 @@ public class SocketThread extends Thread implements IProcessMessage {
 		if (protocolType.equals(DMTCSSProtocol.SENDPOIS_MANUALLY_TRIGGERED)){
 			dataToCSSinterface.poisSent();
 			
-		} else if (protocolType.equals(DMTCSSProtocol.VIEW_LOADED)){
+		} else if (protocolType.equals(DMTCSSProtocol.VIEW_LOADED) || protocolType.equals(DMTCSSProtocol.SEND_VIEW)){
 			dataToCSSinterface.viewLoaded(message);
 			
 		} else if (protocolType.equals(DMTCSSProtocol.GPS_STATUS)){
