@@ -97,7 +97,7 @@ public class DisplayPortalClient implements IDisplayDriver{
 		UIManager.put("ClassLoader", ClassLoader.getSystemClassLoader());
 
 		this.requestor = new RequestorService(serverIdentity, serviceId);
-		ContextEventListener ctxEvListener = new ContextEventListener(this, getCtxBroker(), serverIdentity, requestor);
+		ContextEventListener ctxEvListener = new ContextEventListener(this, getCtxBroker(), userIdentity, requestor);
 		String[] locs = this.portalServerRemote.getScreenLocations(serverIdentity);
 		
 		for (int i=0; i<locs.length; i++){
@@ -112,11 +112,13 @@ public class DisplayPortalClient implements IDisplayDriver{
 
 
 	private void requestServerIdentityFromUser(){
+		
 		if (this.serverIdentity==null){
 			String serverIdentityStr = JOptionPane.showInputDialog("Please enter the JID of the CSS hosting the server application", "xcmanager.societies.local");
 			
 			try {
 				this.serverIdentity = this.idMgr.fromJid(serverIdentityStr);
+				
 				
 			} catch (InvalidFormatException e) {
 				// TODO Auto-generated catch block
