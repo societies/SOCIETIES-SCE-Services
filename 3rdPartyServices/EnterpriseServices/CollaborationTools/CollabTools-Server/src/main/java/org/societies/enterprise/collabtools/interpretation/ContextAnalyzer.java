@@ -22,7 +22,7 @@
  * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.societies.enterprise.collabtools.Interpretation;
+package org.societies.enterprise.collabtools.interpretation;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -94,6 +94,51 @@ public class ContextAnalyzer implements IContextReasoning {
     		String[] newInterests = ctxEnrichedByConcept(friend.getInterests());
     		friend.setLongTermCtx(LongTermCtxTypes.INTERESTS, newInterests);
     	}		
+	}
+	
+	static public float personInterestsSimilarity (int similarCtx, Person personA, Person personB) {
+		//Similarity Formula is: similar interests/ min(personA, personB)
+		//Check if there is no similarity between both
+		if (similarCtx != 0) {
+			float weight = similarCtx/ Math.min((float)personA.getInterests().length,personB.getInterests().length );
+			return weight;
+		}
+		else
+			throw new IllegalArgumentException("There is no similarity between this individuals");
+	}
+	
+	static public float automaticThresholding(ArrayList<Float> elements ) {
+		float initialThreshold = 0;
+		for (float value : elements)
+	    {
+			initialThreshold += value;
+	    }
+		initialThreshold = initialThreshold / elements.size();
+		float finalThreshold = 0;
+		boolean done = false;
+		while (!done) {
+			float avgG1 = 0,  avgG2 = 0; 
+			int nG1 = 0, nG2 = 0;
+			for (int i = 0; i < elements.size(); i++) {
+				if (elements.get(i) > initialThreshold) {
+					avgG1 = elements.get(i) + avgG1;
+					nG1++;
+				}
+				else {
+					avgG2 = elements.get(i) + avgG2;
+					nG2++;
+				}
+			}
+			avgG1 = avgG1 / nG1;
+			avgG2 = avgG2 / nG2;
+			finalThreshold = (avgG1 + avgG2) / 2;
+			if (initialThreshold == finalThreshold) {
+				done = true;
+			}
+			else
+				initialThreshold = finalThreshold;
+		}
+		return finalThreshold;
 	}
 
 }

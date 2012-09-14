@@ -30,12 +30,11 @@ import java.util.Hashtable;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.societies.enterprise.collabtools.Interpretation.Rules;
 import org.societies.enterprise.collabtools.acquisition.LongTermCtxTypes;
-import org.societies.enterprise.collabtools.acquisition.ShortTermCtxTypes;
-import org.societies.enterprise.collabtools.acquisition.ContextUpdates;
 import org.societies.enterprise.collabtools.acquisition.Person;
 import org.societies.enterprise.collabtools.acquisition.PersonRepository;
+import org.societies.enterprise.collabtools.acquisition.ShortTermCtxTypes;
+import org.societies.enterprise.collabtools.interpretation.Rules;
 
 
 /**
@@ -63,22 +62,29 @@ public class CtxMonitor extends Thread{
 				System.out.println("Checking if people context match");
 
 
-				//First rule is location
+				//First rule: location
 				Hashtable<String, HashSet<Person>> personsSameLocation = conditions.getPersonsSameLocation();
 				if (!personsSameLocation.isEmpty()) {
 					Enumeration<String> iterator = personsSameLocation.keys();
 					//For each different location, apply the follow rules...
 					while(iterator.hasMoreElements()) {
+						//Session name = actual location
 						String sessionName = iterator.nextElement();
+						
 						//Second rule: Company
 						//Check company
 						Hashtable<String, HashSet<Person>> personsWithSameCompany = conditions.getPersonsWithMatchingLongTermCtx(LongTermCtxTypes.COMPANY, personsSameLocation.get(sessionName));
-						System.out.println(personsWithSameCompany.toString());
+						System.out.println("Second rule: Company "+personsWithSameCompany.toString());
 						
-						//Third rule: Status
+						//Third rule: Interest
+						//Check similar interest
+						Hashtable<String, HashSet<Person>> personsWithSameInterests = conditions.getPersonsByWeight(sessionName, personsSameLocation.get(sessionName));
+						System.out.println("Third rule: Interests "+personsWithSameInterests.toString());
+						
+						//Fourth rule: Status
 						//Check status of the user e.g busy, on phone, driving...
 						Hashtable<String, HashSet<Person>> personsWithSameStatus = conditions.getPersonsWithMatchingShortTermCtx(ShortTermCtxTypes.STATUS, personsSameLocation.get(sessionName));
-						System.out.println(personsWithSameStatus.toString());
+						System.out.println("Fourth rule: Status "+personsWithSameStatus.toString());
 						
 						logger.info("If session still doesn't exist, create one");
 						if (!sessionRepository.containSession(sessionName)) {

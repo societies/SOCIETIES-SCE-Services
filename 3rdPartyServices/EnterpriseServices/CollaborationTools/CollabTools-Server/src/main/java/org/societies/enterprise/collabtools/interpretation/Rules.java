@@ -22,7 +22,7 @@
  * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.societies.enterprise.collabtools.Interpretation;
+package org.societies.enterprise.collabtools.interpretation;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -33,11 +33,13 @@ import java.util.List;
 import java.util.Set;
 
 import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.index.Index;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.societies.enterprise.collabtools.acquisition.Person;
 import org.societies.enterprise.collabtools.acquisition.PersonRepository;
+import org.societies.enterprise.collabtools.acquisition.RelTypes;
 import org.societies.enterprise.collabtools.acquisition.ShortTermCtxTypes;
 import org.societies.enterprise.collabtools.acquisition.ContextUpdates;
 import org.societies.enterprise.collabtools.runtime.ContextActivity;
@@ -217,6 +219,46 @@ public class Rules {
 	//        }
 	//        return true;
 	//	}
+	
+	/**
+	 * @param interests
+	 * @param hashSet
+	 * @return
+	 */
+	public Hashtable<String, HashSet<Person>> getPersonsByWeight(String sessionName, HashSet<Person> hashsetPersons) {
+		//For long term context types
+				Person[] person = new Person[hashsetPersons.size()];
+				hashsetPersons.toArray(person);
+				ArrayList<Float> elements = new ArrayList<Float>(); 
+				for (Person p : person) {
+					Iterable<Relationship> knows = p.getUnderlyingNode().getRelationships(RelTypes.KNOWS);
+					while (knows.iterator().hasNext()) {
+						Relationship rel = knows.iterator().next();
+						elements.add((Float) rel.getProperty("weight"));
+					}
+				}
+				float weight = ContextAnalyzer.automaticThresholding(elements);
+				System.out.println("automaticThresholding: "+ContextAnalyzer.automaticThresholding(elements));
+				HashSet<Person> newHashsetPersons = new HashSet<Person>();
+				HashSet<Long> hashsetTemp = new HashSet<Long>();
+				for (Person individual : person) {
+					for (Person otherPerson : person) {
+						Relationship rel = individual.getFriendRelationshipTo(otherPerson);
+						//Check by relationship ID if the weight was included in the hashset
+						if (rel != null &&  !hashsetTemp.contains(rel.getId())) {
+//							System.out.println(((Float)rel.getProperty("weight")));
+							hashsetTemp.add(rel.getId());
+							if ((Float)rel.getProperty("weight") >= weight) {
+								newHashsetPersons.add(individual);
+								newHashsetPersons.add(otherPerson);
+							}
+						}
+					}
+				}
+				Hashtable<String, HashSet<Person>> hashCtxList1 = new Hashtable<String, HashSet<Person>>(10,10);
+				hashCtxList1.put(sessionName, newHashsetPersons);
+				return hashCtxList1;
+	}
 
 	public static <T> List<T> getDuplicate(Collection<T> list) {
 

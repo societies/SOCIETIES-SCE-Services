@@ -1,4 +1,4 @@
-package org.societies.enterprise.collabtools.Interpretation;
+package org.societies.enterprise.collabtools.interpretation;
 
 import java.net.URLEncoder;
 import java.io.UnsupportedEncodingException;

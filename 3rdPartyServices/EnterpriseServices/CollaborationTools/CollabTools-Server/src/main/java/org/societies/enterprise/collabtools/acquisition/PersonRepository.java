@@ -142,12 +142,13 @@ public class PersonRepository
     	return persons;
     }
     
-    public Person[] getPersonsByProperty(String property )
+    public Person[] getPersonsByProperty(String property, String value)
     {
     	List<Person> persons = new ArrayList<Person>();
-    	for ( Node personNode : index.query(LongTermCtxTypes.COMPANY, "TI") )
+    	//E.g. LongTermCtxTypes.COMPANY
+    	for ( Node personNode : index.query(property, value) )
     	{
-    		Person person = new Person( personNode );
+    		Person person = new Person(personNode);
     		persons.add(person);
     	}
 //        IndexManager indexManager =  graphDb.index();
@@ -164,7 +165,7 @@ public class PersonRepository
 		return (Person[]) persons.toArray();
     }
 
-    public void deletePerson( Person person )
+    public void deletePerson(Person person)
     {
         Transaction tx = graphDb.beginTx();
         try

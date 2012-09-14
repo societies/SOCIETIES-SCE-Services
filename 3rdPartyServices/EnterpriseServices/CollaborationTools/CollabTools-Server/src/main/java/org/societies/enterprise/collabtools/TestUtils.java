@@ -18,10 +18,10 @@ import org.neo4j.graphdb.factory.GraphDatabaseSetting;
 import org.neo4j.helpers.collection.IteratorUtil;
 import org.neo4j.kernel.EmbeddedGraphDatabase;
 import org.neo4j.kernel.impl.util.FileUtils;
-import org.societies.enterprise.collabtools.Interpretation.ContextAnalyzer;
 import org.societies.enterprise.collabtools.acquisition.LongTermCtxTypes;
 import org.societies.enterprise.collabtools.acquisition.Person;
 import org.societies.enterprise.collabtools.acquisition.PersonRepository;
+import org.societies.enterprise.collabtools.interpretation.ContextAnalyzer;
 import org.societies.enterprise.collabtools.runtime.SessionRepository;
 import org.xml.sax.SAXException;
 
@@ -67,8 +67,11 @@ public class TestUtils {
         {
 //                person.addFriend( getRandomPerson() );
         	Map<Person, Integer> persons = personRepository.getPersonWithSimilarInterests(person);
-			for (Map.Entry<Person, Integer> entry : persons.entrySet())
-        		person.addFriend(entry.getKey(),entry.getValue());    
+			for (Map.Entry<Person, Integer> entry : persons.entrySet()) {
+				//Similarity Formula is: similar interests/ min(personA, personB)
+				float weight = ContextAnalyzer.personInterestsSimilarity(entry.getValue(), entry.getKey(), person);
+        		person.addFriend(entry.getKey(),weight);  
+			}
         }
     }
 

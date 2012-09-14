@@ -3,16 +3,20 @@
  */
 package org.societies.enterprise.collabtools;
 
+import java.util.ArrayList;
+
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 import org.neo4j.graphdb.index.Index;
 import org.neo4j.index.impl.lucene.LuceneIndex;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.societies.enterprise.collabtools.Interpretation.YouMightKnow;
+import org.societies.enterprise.collabtools.acquisition.Person;
 import org.societies.enterprise.collabtools.acquisition.PersonRepository;
+import org.societies.enterprise.collabtools.acquisition.RelTypes;
+import org.societies.enterprise.collabtools.interpretation.ContextAnalyzer;
 import org.societies.enterprise.collabtools.runtime.CtxMonitor;
 import org.societies.enterprise.collabtools.runtime.SessionRepository;
 
@@ -54,12 +58,24 @@ public class MainTest {
 		test.deleteSocialGraph();
 		
 //		test.menu();
-		test.createPersons(25); //5 people by default
+		test.createPersons(5); //5 people by default
 //		Creating some updates
 		test.createMockLongTermCtx();
 		test.createMockShortTermCtx();
 		test.enrichedCtx();
 		test.setupFriendsBetweenPeople();
+//		for ( Person person : personRepository.getAllPersons() )
+//    	{
+//			Iterable<Relationship> knows = person.getUnderlyingNode().getRelationships(RelTypes.KNOWS);
+//			ArrayList<Float> elements = new ArrayList<Float>(); 
+//			while (knows.iterator().hasNext()) {
+//				Relationship rel = knows.iterator().next();
+//				System.out.println(rel.getProperty("weight"));
+//				elements.add((Float) rel.getProperty("weight"));
+//
+//			}
+//			System.out.println("automaticThresholding: "+ContextAnalyzer.automaticThresholding(elements));
+//    	}
 		
 //		YouMightKnow ymn = new YouMightKnow(personRepository.getPersonByName("person#"+3), new String[] {"project planning"}, 5);
 //		ymn.printMightKnow(ymn.findYouMightKnow(personRepository.getPersonByName("person#"+3)) , new String[] {"project planning"} );

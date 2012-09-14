@@ -1,4 +1,4 @@
-package org.societies.enterprise.collabtools.Interpretation;
+package org.societies.enterprise.collabtools.interpretation;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;

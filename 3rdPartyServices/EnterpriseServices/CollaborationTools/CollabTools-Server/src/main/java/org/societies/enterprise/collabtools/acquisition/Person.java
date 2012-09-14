@@ -151,7 +151,7 @@ public class Person extends Observable
 
     // END SNIPPET: override
 
-    public void addFriend( Person otherPerson, Integer weight )
+    public void addFriend( Person otherPerson, float weight )
     {
         Transaction tx = underlyingNode.getGraphDatabase().beginTx();
         try
@@ -422,7 +422,7 @@ public class Person extends Observable
         return retVal;
     }
 
-    private Relationship getFriendRelationshipTo( Person otherPerson )
+    public Relationship getFriendRelationshipTo( Person otherPerson )
     {
         Node otherNode = otherPerson.getUnderlyingNode();
         for ( Relationship rel : underlyingNode.getRelationships( KNOWS ) )

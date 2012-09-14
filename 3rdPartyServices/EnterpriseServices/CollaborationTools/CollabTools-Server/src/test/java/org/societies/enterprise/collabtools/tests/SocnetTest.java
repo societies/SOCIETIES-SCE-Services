@@ -223,9 +223,9 @@ public class SocnetTest
 
         // Start -> middleMan1 -> middleMan2 -> endMan
 
-        start.addFriend( middleMan1, null );
-        middleMan1.addFriend( middleMan2, null );
-        middleMan2.addFriend( endMan, null );
+        start.addFriend( middleMan1, 0 );
+        middleMan1.addFriend( middleMan2, 0 );
+        middleMan2.addFriend( endMan, 0 );
 
         Iterable<Person> path = start.getShortestPathTo( endMan, 4 );
 
@@ -244,14 +244,14 @@ public class SocnetTest
         Person e = personRepository.createPerson( "e" );
 
         // A is friends with B,C and D
-        a.addFriend( b, null );
-        a.addFriend( c, null );
-        a.addFriend( d, null );
+        a.addFriend( b, 0 );
+        a.addFriend( c, 0 );
+        a.addFriend( d, 0 );
 
         // E is also friend with B, C and D
-        e.addFriend( b, null );
-        e.addFriend( c, null );
-        e.addFriend( d, null );
+        e.addFriend( b, 0 );
+        e.addFriend( c, 0 );
+        e.addFriend( d, 0 );
         
         Person recommendation = IteratorUtil.single( a.getFriendRecommendation( 1 ).iterator() );
 
@@ -271,17 +271,17 @@ public class SocnetTest
 
 
         // A is friends with B,C and D
-        a.addFriend( b, null );
-        a.addFriend( c, null );
-        a.addFriend( d, null );
+        a.addFriend( b, 0 );
+        a.addFriend( c, 0 );
+        a.addFriend( d, 0 );
 
         // E is only friend with B
-        e.addFriend( b, null );
+        e.addFriend( b, 0 );
 
         // F is friend with B, C, D
-        f.addFriend( b, null );
-        f.addFriend( c, null );
-        f.addFriend( d, null );
+        f.addFriend( b, 0 );
+        f.addFriend( c, 0 );
+        f.addFriend( d, 0 );
 
         ArrayList<Person> recommendations = fromIterableToArrayList( a.getFriendRecommendation( 2 ).iterator() );
 

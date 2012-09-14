@@ -60,7 +60,7 @@ public class Activator implements BundleActivator
  
         //the OSGi registration
         serviceRegistration = context.registerService(GraphDatabaseService.class.getName(), graphDb, new Hashtable<String,String>() );
-        System.out.println( "registered " + serviceRegistration.getReference() );
+        logger.info("registered " + serviceRegistration.getReference() );
         
         indexServiceRegistration = context.registerService(
                 Index.class.getName(), indexPerson,
@@ -71,9 +71,10 @@ public class Activator implements BundleActivator
         test.createPersons(5);
         test.setupFriendsBetweenPeople();
         
-        System.out.println("Starting Context Monitor..." );
-        CtxMonitor thread = new CtxMonitor(personRepository, sessionRepository);
-		thread.start();
+//        //Starting Context Monitor
+//        logger.info("Starting Context Monitor..." );
+//        CtxMonitor thread = new CtxMonitor(personRepository, sessionRepository);
+//		thread.start();
      
  
     }
