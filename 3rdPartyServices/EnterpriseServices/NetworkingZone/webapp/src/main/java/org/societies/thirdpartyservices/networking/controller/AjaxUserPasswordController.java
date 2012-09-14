@@ -8,6 +8,7 @@ import java.util.List;
 import org.societies.thirdpartyservices.networking.client.NetworkClient;
 import org.societies.thirdpartyservices.networking.model.AjaxUserPasswordDetails;
 import org.societies.thirdpartyservices.networking.model.AjaxUserDetails;
+import org.societies.thirdpartyservices.networking.model.ZonePageForm;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -122,5 +123,7 @@ public class AjaxUserPasswordController {
 		res.setResult(userList);
 		return res;
 	}
+	
+		
 
 }

@@ -34,15 +34,13 @@ import java.util.concurrent.Future;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.societies.thirdpartyservices.networking.directory.NetworkingDirectory;
-import org.societies.thirdpartyservices.networking.model.UserRecordResult;
-import org.societies.thirdpartyservices.networking.model.UserResult;
 import org.societies.api.activity.IActivityFeedCallback;
 import org.societies.api.cis.attributes.MembershipCriteria;
 import org.societies.api.cis.attributes.Rule;
-import org.societies.api.cis.directory.ICisAdvertisementRecord;
 import org.societies.api.cis.management.ICis;
 import org.societies.api.cis.management.ICisManager;
 import org.societies.api.cis.management.ICisOwned;
+import org.societies.api.ext3p.schema.networking.UserDetails;
 import org.societies.api.schema.activity.Activity;
 import org.societies.api.schema.activityfeed.Activityfeed;
 
@@ -56,11 +54,11 @@ public class NetworkBackEnd {
 	//TODO : Probably move to somehwere
 	private String schmoozerUser = "schmoozer";
 	// TODO : have to have all critieria the same until
-	// cis fixed ( issue : 
+	// cis fixed ( issue :  Bug #1459)
 	private String locationZoneA = "ZoneA";
-	private String locationZoneB = "ZoneB";
-	private String locationZoneC = "ZoneC";
-	private String locationZoneD = "ZoneD";
+	private String locationZoneB = "ZoneA";
+	private String locationZoneC = "ZoneA";
+	private String locationZoneD = "ZoneA";
 	
 
 	//private ICis netCis;
@@ -221,28 +219,6 @@ public class NetworkBackEnd {
 		log.info("NetworkBackEnd init_service finished.");
 	}
 	
-	public boolean checkUser(String userid)
-	{
-		boolean result = false;
-		
-		try {
-			UserRecordResult userRecRes = getNetworkingDirectory().getUserRecord(userid);
-
-			if (userRecRes.getResult() == UserResult.USER_NOT_FOUND)
-			{
-				// Create the user account
-			}
-			//	result = getDaRegistry().isUserActive(userid);
-			
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-		return result;
-		
-	}
-
 	public String  getMyMainCisId() {
 		
 		return netZoneCis.get(0).getCisId();
@@ -343,8 +319,16 @@ public class NetworkBackEnd {
 		return resultList;
 	}
 	
+
+	public UserDetails getMyDetails(String userid)
+	{
+		return getNetworkingDirectory().getUserRecord(userid);
+		
+	}
 	
-	
-	
+	public UserDetails updateMyDetails(UserDetails newDetails)
+	{
+		return getNetworkingDirectory().updateUserRecord(newDetails);
+	} 
 }
 

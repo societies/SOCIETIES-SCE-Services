@@ -10,7 +10,7 @@ function doAjaxUpdatePassword() {
 	  $.ajax({  
 	    type: "POST",  
 	    url: contexPath + "/updatepassword.html",  
-	    data: "userid=" + userid + "&firstPassword=" + firstPassword + "&secondPassword=" + secondPassword,  
+	    data: "userid=" + userid + "&firstPassword=" + firstPassword + "&secondPassword=" + secondPassword,
 	    success: function(response){
 	      // we have the response 
 	      if(response.status == "SUCCESS"){
@@ -81,6 +81,350 @@ function doAjaxUpdateInfo() {
 	    }  
 	  });  
 	}  
+
+
+function doAjaxUpdateAllInfo() {  
+	
+		var displayName = $('#element_displayname').val();
+		var companyName = $('#element_companyname').val();
+		var deptName = $('#element_department').val();
+	
+	  var showEmpHist = $('input:radio[name=element_employment_radio]:checked').val();
+	  var emphistCompany = $('#element_employment_history_company').val();
+	  var emphistDept = $('#element_employment_history_department').val();
+	  
+	  var showEduHist = $('input:radio[name=element_education_radio]:checked').val();
+	
+	  var eduhistCollege = $('#element_education_history_college').val();
+	  var eduhistGradYear = $('#element_employment_history_when').val();
+	  var eduhistCourse = $('#element_employment_history_course').val();
+	  
+	  
+	  $.ajax({  
+	    type: "POST",  
+	    url: contexPath + "/updateallinfo.html",
+	    contentType: "application/json",
+	    data: "displayName=" + displayName + "&companyName=" + companyName + "&deptName=" + deptName + 
+		  "&emphistCompany=" + emphistCompany + "&emphistDept=" + emphistDept + 
+		  "&eduhistCollege=" + eduhistCollege + "&eduhistGradYear=" + eduhistGradYear + "&eduhistCourse=" + eduhistCourse + 
+		  "&showEduHist=" + showEduHist + "&showEmpHist=" + showEmpHist ,
+		  dataType: "json",
+	  	success: function(response){
+	      // we have the response 
+	    	
+	    	if(response.status == "SUCCESS"){
+		    	  $('#publicinfo_info').html("Information saved " );
+			      $('#publicinfo_error').hide('slow');
+			      $('#publicinfo_info').show('slow');
+		      }else{
+		    	  
+		    	  errorInfo = "";
+		    	  for(i =0 ; i < response.result.length ; i++){
+		    		  errorInfo += "<br>" + (i + 1) +". " + response.result[i].code;
+		    	  }
+		    	  
+		    	  $('#publicinfo_error').html("Problem!! " + errorInfo);
+		    	  $('#publicinfo_info').hide('slow');
+		    	  $('#publicinfo_error').show('slow');
+		      }	      
+	    	
+	     
+	    },  
+	    error: function(e){  
+	      alert('Error: ' + e);  
+	    }  
+	  });  
+	}  
+
+
+function doAjaxUpdateAllInfotemp() {  
+	
+	var displayName = $('#element_displayname').val();
+	var companyName = $('#element_companyname').val();
+	var deptName = $('#element_department').val();
+
+  var showEmpHist = $('input:radio[name=element_employment_radio]:checked').val();
+  var emphistCompany = $('#element_employment_history_company').val();
+  var emphistDept = $('#element_employment_history_department').val();
+  
+  var showEduHist = $('input:radio[name=element_education_radio]:checked').val();
+
+  var eduhistCollege = $('#element_education_history_college').val();
+  var eduhistGradYear = $('#element_employment_history_when').val();
+  var eduhistCourse = $('#element_employment_history_course').val();
+  
+  
+  $.ajax({  
+    type: "POST",  
+    url: contexPath + "/updateallinfo.html",
+    contentType: "application/json",
+    data: "displayName=" + displayName ,
+	dataType: "json",
+  	success: function(response){
+      // we have the response 
+    	
+    	if(response.status == "SUCCESS"){
+	    	  $('#publicinfo_info').html("Inforamtion saved " );
+		      $('#publicinfo_error').hide('slow');
+		      $('#publicinfo_info').show('slow');
+	      }else{
+	    	  
+	    	  errorInfo = "";
+	    	  for(i =0 ; i < response.result.length ; i++){
+	    		  errorInfo += "<br>" + (i + 1) +". " + response.result[i].code;
+	    	  }
+	    	  
+	    	  $('#publicinfo_error').html("Problem!! " + errorInfo);
+	    	  $('#publicinfo_info').hide('slow');
+	    	  $('#publicinfo_error').show('slow');
+	      }	      
+    	
+     
+    },  
+    error: function(e){  
+      alert('Error: ' + e);  
+    }  
+  });  
+}  
+
+function doAjaxUpdateDisplayName() {  
+	
+	var displayName = $('#element_displayname').val();
+	
+  
+  
+  $.ajax({  
+    type: "POST",  
+    url: contexPath + "/updatedisplayname.html",
+    data: "displayName=" + displayName,
+  	success: function(response){
+      // we have the response 
+    	
+    	if(response.status == "SUCCESS"){
+	    	  $('#publicinfo_info').html("Information saved " );
+		      $('#publicinfo_error').hide('slow');
+		      $('#publicinfo_info').show('slow');
+	      }else{
+	    	  
+	    	  errorInfo = "";
+	    	  for(i =0 ; i < response.result.length ; i++){
+	    		  errorInfo += "<br>" + (i + 1) +". " + response.result[i].code;
+	    	  }
+	    	  
+	    	  $('#publicinfo_error').html("Problem!! " + errorInfo);
+	    	  $('#publicinfo_info').hide('slow');
+	    	  $('#publicinfo_error').show('slow');
+	      }	      
+    	
+     
+    },  
+    error: function(e){  
+      alert('Error: ' + e);  
+    }  
+  });  
+}  
+
+function doAjaxUpdatePersonalDetails() {  
+	
+	var displayName = $('#element_displayname').val();
+	var companyName = $('#element_companyname').val();
+	var deptName = $('#element_department').val();
+  
+  
+  $.ajax({  
+    type: "POST",  
+    url: contexPath + "/updatepersonaldetails.html",
+    data: "displayName=" + displayName + "&companyName=" + companyName + "&deptName=" + deptName,
+  	success: function(response){
+      // we have the response 
+    	
+    	if(response.status == "SUCCESS"){
+	    	  $('#publicinfo_info_userdetails').html("User Details Information saved " );
+		      $('#publicinfo_error_userdetails').hide('slow');
+		      $('#publicinfo_info_userdetails').show('slow');
+	      }else{
+	    	  
+	    	  errorInfo = "";
+	    	  for(i =0 ; i < response.result.length ; i++){
+	    		  errorInfo += "<br>" + (i + 1) +". " + response.result[i].code;
+	    	  }
+	    	  
+	    	  $('#publicinfo_error_userdetails').html("Problem saving details !! " + errorInfo);
+	    	  $('#publicinfo_info_userdetails').hide('slow');
+	    	  $('#publicinfo_error_userdetails').show('slow');
+	      }	      
+    	
+     
+    },  
+    error: function(e){  
+      alert('Error: ' + e);  
+    }  
+  });  
+}  
+
+function doAjaxAddEmploymentHistory() {  
+	
+	var company = $('#element_employment_history_company').val();
+	var department = $('#element_employment_history_department').val();
+  
+	$("#employdetailslist").show();
+	$("#employdetailslist").fadeIn(400).html('<span class="loading">Adding new Employment Histroy Item </span>');
+
+
+	
+  
+  $.ajax({  
+    type: "POST",  
+    url: contexPath + "/addemploymenthistoryitem.html",
+    data: "company=" + company + "&department=" + department, 
+  	success: function(response){
+      // we have the response 
+    	
+    	if(response.status == "SUCCESS"){
+	    	  $('#publicinfo_info_employdetails').html("Employment History Item Added" );
+		      $('#publicinfo_error_employdetails').hide('slow');
+		      $('#publicinfo_info_employdetails').show('slow');
+		      
+		      $("ol#listdata").prepend("<tr><td>" + company + "</td><td>" + department + "</td><tr>");
+		      $("ol#listdata li:first").slideDown("slow");
+		      $("#employdetailslist").hide();
+		      
+	      }else{
+	    	  
+	    	  errorInfo = "";
+	    	  for(i =0 ; i < response.result.length ; i++){
+	    		  errorInfo += "<br>" + (i + 1) +". " + response.result[i].code;
+	    	  }
+	    	  
+	    	  $("#employdetailslist").hide();
+	    	  $('#publicinfo_error_userdetails').html("Problem saving details !! " + errorInfo);
+	    	  $('#publicinfo_info_userdetails').hide('slow');
+	    	  $('#publicinfo_error_userdetails').show('slow');
+	      }	      
+    	
+     
+    },  
+    error: function(e){  
+      alert('Error: ' + e);  
+    }  
+  });  
+}  
+
+function doAjaxAddEducationHistory() {  
+	
+	var college = $('#element_education_history_college').val();
+	var course = $('#element_education_history_course').val();
+  
+	$("#edudetailslist").show();
+	$("#edudetailslist").fadeIn(400).html('<span class="loading">Adding new Education Histroy Item </span>');
+
+
+	
+  
+  $.ajax({  
+    type: "POST",  
+    url: contexPath + "/addeducationhistoryitem.html",
+    data: "college=" + college + "&course=" + course, 
+  	success: function(response){
+      // we have the response 
+    	
+    	if(response.status == "SUCCESS"){
+	    	  $('#publicinfo_info_edudetails').html("Educational History Item Added" );
+		      $('#publicinfo_error_edudetails').hide('slow');
+		      $('#publicinfo_info_edudetails').show('slow');
+		      
+		      $("ol#edulistdata").prepend("<tr><td>" + college + "</td><td>" + course + "</td><tr>");
+		      $("ol#edulistdata li:first").slideDown("slow");
+		      $("#edudetailslist").hide();
+		      
+	      }else{
+	    	  
+	    	  errorInfo = "";
+	    	  for(i =0 ; i < response.result.length ; i++){
+	    		  errorInfo += "<br>" + (i + 1) +". " + response.result[i].code;
+	    	  }
+	    	  
+	    	  $("#edudetailslist").hide();
+	    	  $('#publicinfo_error_edudetails').html("Problem saving details !! " + errorInfo);
+	    	  $('#publicinfo_info_edudetails').hide('slow');
+	    	  $('#publicinfo_error_edudetails').show('slow');
+	      }	      
+    	
+     
+    },  
+    error: function(e){  
+      alert('Error: ' + e);  
+    }  
+  });  
+}  
+
+function doAjaxSetEducationHistoryVisible() {  
+	
+	var showeduhist = $('input:radio[name=element_education_radio]:checked').val();
+  
+		
+  
+  $.ajax({  
+    type: "POST",  
+    url: contexPath + "/educationhistoryvisible.html",
+    data: "showeduhist=" + showeduhist , 
+  	success: function(response){
+      // we have the response 
+    	
+    	if(response.status == "SUCCESS"){
+	    	  $('#publicinfo_info_edudetails').html("Educational History - Visibility Changed" );
+		      $('#publicinfo_error_edudetails').hide('slow');
+		      $('#publicinfo_info_edudetails').show('slow');
+		      
+	      }else{
+	    	  
+	    	  $("#edudetailslist").hide();
+	    	  $('#publicinfo_error_edudetails').html("Problem changing visibility !! ");
+	    	  $('#publicinfo_info_edudetails').hide('slow');
+	    	  $('#publicinfo_error_edudetails').show('slow');
+	      }	      
+    	
+     
+    },  
+    error: function(e){  
+      alert('Error: ' + e);  
+    }  
+  });  
+}  
+
+function doAjaxSetEmploymentHistoryVisible() {  
+	
+	var showemphist = $('input:radio[name=element_employment_radio]:checked').val();
+  
+		
+  
+  $.ajax({  
+    type: "POST",  
+    url: contexPath + "/employmenthistoryvisible.html",
+    data: "showemphist=" + showemphist , 
+  	success: function(response){
+      // we have the response 
+    	
+    	if(response.status == "SUCCESS"){
+	    	  $('#publicinfo_info_empdetails').html("Employment History - Visibility Changed" );
+		      $('#publicinfo_error_empdetails').hide('slow');
+		      $('#publicinfo_info_empdetails').show('slow');
+		      
+	      }else{
+	    	  
+	    	  $("#edudetailslist").hide();
+	    	  $('#publicinfo_error_empdetails').html("Problem changing visibility !! ");
+	    	  $('#publicinfo_info_empdetails').hide('slow');
+	    	  $('#publicinfo_error_empdetails').show('slow');
+	      }	      
+    	
+     
+    },  
+    error: function(e){  
+      alert('Error: ' + e);  
+    }  
+  });  
+}  
 
 
 function doAjaxGetUsers() {  
@@ -185,3 +529,8 @@ function doAjaxCheckMatchingPassword() {
 	    }  
 	  });  
 	} 
+
+
+
+
+

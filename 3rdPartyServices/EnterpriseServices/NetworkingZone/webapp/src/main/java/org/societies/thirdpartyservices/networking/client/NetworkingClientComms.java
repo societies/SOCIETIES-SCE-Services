@@ -44,6 +44,7 @@ import org.societies.api.identity.InvalidFormatException;
 import org.societies.api.ext3p.schema.networking.NetworkingBean;
 import org.societies.api.ext3p.schema.networking.Method;
 import org.societies.api.ext3p.schema.networking.NetworkingBeanResult;
+import org.societies.api.ext3p.schema.networking.UserDetails;
 /**
  * Comms Client that initiates the remote communication for the networking zone
  * 
@@ -59,7 +60,7 @@ public class NetworkingClientComms implements ICommCallback {
 					.asList("org.societies.api.ext3p.schema.networking"));
 
 	//TODO : Temporary while testing
-	private int TEST_TIME_MULTIPLER = 10;
+	private int TEST_TIME_MULTIPLER = 1;
 	
 	// PRIVATE VARIABLES
 	private ICommManager commManager;
@@ -275,6 +276,97 @@ public class NetworkingClientComms implements ICommCallback {
 		return null;
 	}
 
+	public UserDetails getMyDetails()
+	{
+		// We want to sent all messages for Netowrking Client to the metworking server
+		// hardcode for now TODO : Read from properties
+		IIdentity toIdentity = null;
+		commsResult = null;
+		try {
+			toIdentity = getCommManager().getIdManager().fromJid("jane.societies.local");
+		} catch (InvalidFormatException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		Stanza stanza = new Stanza(toIdentity);
+		
+		// CREATE MESSAGE BEAN
+		NetworkingBean netBean = new NetworkingBean();
+		netBean.setMethod(Method.GETMYDETAILS);
+		netBean.setMyuserid(getCommManager().getIdManager().getThisNetworkNode().getBareJid());
+		
+		try {
+			getCommManager().sendIQGet(stanza, netBean, this);
+				
+		} catch (CommunicationException e) {
+			LOG.warn(e.getMessage());
+		};
 
+				// TYuck, another TODO this properly, for now, wait up to 5 secs
+				int i= 0;
+				while (commsResult == null && (i < (5 * TEST_TIME_MULTIPLER))){
+					try {
+						i++;
+						Thread.sleep(1000);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+				
+		if (commsResult != null)
+			return this.commsResult.getUserDetails();
+		
+		return null;
+	}
+	
+	public UserDetails updateMyDetails(UserDetails newDetails)
+	{
+		// We want to sent all messages for Netowrking Client to the metworking server
+		// hardcode for now TODO : Read from properties
+		IIdentity toIdentity = null;
+		commsResult = null;
+		try {
+			toIdentity = getCommManager().getIdManager().fromJid("jane.societies.local");
+		} catch (InvalidFormatException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		Stanza stanza = new Stanza(toIdentity);
+		
+		// CREATE MESSAGE BEAN
+		NetworkingBean netBean = new NetworkingBean();
+		netBean.setMethod(Method.UPDATEMYDETAILS);
+		netBean.setMyuserid(getCommManager().getIdManager().getThisNetworkNode().getBareJid());
+		
+		LOG.info("updateMyDetails : newDetails.getDisplayName() " +newDetails.getDisplayName());
+		
+		netBean.setMyDetails(newDetails);
+		
+		try {
+			getCommManager().sendIQGet(stanza, netBean, this);
+				
+		} catch (CommunicationException e) {
+			LOG.warn(e.getMessage());
+		};
+
+				// TYuck, another TODO this properly, for now, wait up to 5 secs
+				int i= 0;
+				while (commsResult == null && (i < (5 * TEST_TIME_MULTIPLER))){
+					try {
+						i++;
+						Thread.sleep(1000);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+				
+		if (commsResult != null)
+			return this.commsResult.getUserDetails();
+		
+		return null;
+	}
+	
 
 }

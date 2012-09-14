@@ -34,8 +34,6 @@ package org.societies.thirdpartyservices.networking.server;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.Future;
-
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -125,25 +123,44 @@ public class NetworkingCommsServer implements IFeatureServer {
 
 			NetworkingBean messageBean = (NetworkingBean) payload;
 			NetworkingBeanResult messageResult = new NetworkingBeanResult();
-			
+			messageResult.setResult(false);
 
 			try {
 				switch (messageBean.getMethod()) {
 
 					case WHOAREYOU: {
 						messageResult.setNetworkingCis(netServer.getMyMainCisId());
+						messageResult.setResult(true);
+						break;
 					}
-					break;
 					case GET_ZONE_LIST: {
 						messageResult.setZones(netServer.getZoneCisIDs());
+						messageResult.setResult(true);
+						break;
 					}
-					break;
-			
+					case GETMYDETAILS:	{
+						// We need to check that the user only is allowed update their own record 
+						if (stanza.getFrom().getBareJid().contains(messageBean.getMyuserid()))
+						{
+							messageResult.setUserDetails(netServer.getMyDetails(messageBean.getMyuserid()));
+							messageResult.setResult(true);
+						}
+						break;
+					}
+					case UPDATEMYDETAILS:
+					{
+						// We need to check that the user only is allowed update their own record 
+						if (stanza.getFrom().getBareJid().contains(messageBean.getMyuserid()))
+						{
+							messageResult.setUserDetails(netServer.updateMyDetails(messageBean.getMyDetails()));
+							messageResult.setResult(true);
+						}
+						break;
+					}
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
-			}
-			;
+			};
 
 			return messageResult;
 

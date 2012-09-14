@@ -7,6 +7,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import org.societies.api.ext3p.schema.networking.UserDetails;
 import org.societies.thirdpartyservices.networking.client.NetworkClient;
 import org.societies.thirdpartyservices.networking.model.FrontPageForm;
 import org.societies.thirdpartyservices.networking.model.LoginForm;
@@ -78,14 +79,17 @@ public class FrontPageController {
 		ZonePageForm zoneForm  = new ZonePageForm();
 		
 		
-		zoneForm.setDisplayName(getNetworkClient().getDisplayName());
-		zoneForm.setCompanyName(getNetworkClient().getCompanyName());
-		zoneForm.setDeptName(getNetworkClient().getDeptName());
+		UserDetails userDet = getNetworkClient().getMyDetails();
+		
+		zoneForm.setDisplayName(userDet.getDisplayName());
+		zoneForm.setCompanyName(userDet.getCompany());
+		zoneForm.setDeptName(userDet.getDept());
 		
 		model.put("zoneForm", zoneForm);
-		model.put("displayname", getNetworkClient().getDisplayName());
-		model.put("companyname", getNetworkClient().getCompanyName());
-		model.put("dept", getNetworkClient().getDeptName());
+	
+		model.put("displayname", userDet.getDisplayName());
+		model.put("companyname", userDet.getCompany());
+		model.put("dept", userDet.getDept());
 		
 		
 		

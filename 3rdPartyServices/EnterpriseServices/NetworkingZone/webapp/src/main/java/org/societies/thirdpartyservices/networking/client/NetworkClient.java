@@ -25,46 +25,45 @@
 package org.societies.thirdpartyservices.networking.client;
 
 import java.util.ArrayList;
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.societies.api.activity.IActivityFeed;
+import org.societies.api.cis.directory.ICisDirectoryCallback;
+import org.societies.api.cis.directory.ICisDirectoryRemote;
 import org.societies.api.cis.management.ICis;
 import org.societies.api.cis.management.ICisManager;
 import org.societies.api.cis.management.ICisManagerCallback;
-import org.societies.api.cis.management.ICisOwned;
-import org.societies.api.cis.attributes.MembershipCriteria;
-import org.societies.api.cis.attributes.Rule;
-import org.societies.api.cis.directory.ICisAdvertisementRecord;
-import org.societies.api.cis.directory.ICisDirectoryCallback;
-import org.societies.api.cis.directory.ICisDirectoryRemote;
 import org.societies.api.comm.xmpp.interfaces.ICommManager;
 import org.societies.api.context.CtxException;
 import org.societies.api.context.broker.ICtxBroker;
 import org.societies.api.context.model.CtxAttribute;
-import org.societies.api.context.model.CtxAttributeTypes;
 import org.societies.api.context.model.CtxAttributeValueType;
 import org.societies.api.context.model.CtxEntityIdentifier;
 import org.societies.api.context.model.CtxIdentifier;
 import org.societies.api.context.model.CtxModelObject;
 import org.societies.api.context.model.CtxModelType;
+import org.societies.api.ext3p.schema.networking.UserDetails;
 import org.societies.api.identity.Requestor;
+import org.societies.api.internal.css.management.ICSSLocalManager;
+import org.societies.api.internal.sns.ISocialConnector;
+import org.societies.api.internal.sns.ISocialData;
 import org.societies.api.schema.cis.community.Community;
 import org.societies.api.schema.cis.community.CommunityMethods;
 import org.societies.api.schema.cis.community.Criteria;
 import org.societies.api.schema.cis.community.MembershipCrit;
 import org.societies.api.schema.cis.community.Participant;
 import org.societies.api.schema.cis.directory.CisAdvertisementRecord;
-import org.societies.api.internal.css.management.ICSSLocalManager;
+import org.societies.api.schema.cssmanagement.CssInterfaceResult;
 
 public class NetworkClient {
 
+
 	//TODO : Temporary while testing
-	private int TEST_TIME_MULTIPLER = 10;
+	private int TEST_TIME_MULTIPLER = 1;
 	
 	
 	//TODO : Probably move to somehwere
@@ -77,7 +76,8 @@ public class NetworkClient {
 	private ICtxBroker ctxBroker;
 	private ICommManager commManager;
 	private ICSSLocalManager cssManager;
-
+	private ISocialData socialData;
+	
 	public NetworkingClientComms commsClient;
 	
 
@@ -85,6 +85,8 @@ public class NetworkClient {
 	private ICis currentZoneCis;
 	private List<CisAdvertisementRecord> netZoneCisAds = new ArrayList<CisAdvertisementRecord>();
 	List<Participant> memberList;
+	
+	public UserDetails userdetails;
 	
 
 	private static Logger log = LoggerFactory.getLogger(NetworkClient.class);
@@ -246,7 +248,16 @@ public class NetworkClient {
 			log.info("getZoneList adding" +cisAdvertList.get(0).getName());
 				
 		}
-			
+		
+		//Temp comment out as it takes too long to timeout
+	//	doSocialConnectorTestStuff();
+		
+		
+		
+		getMyDetails();
+		
+		
+		
 	
 	}
 
@@ -308,7 +319,8 @@ public class NetworkClient {
 	};
 	
 	private void updateContextAtributeNetUser(){
-		log.info("updateContextAtribute Start");
+		
+		log.info("updateContextAtributeNetUser Start");
 		Requestor requestor = new Requestor(getCommManager().getIdManager().getThisNetworkNode());
 
 		
@@ -316,7 +328,28 @@ public class NetworkClient {
 			//retrieve the CtxEntityIdentifier of the CSS owner context entity
 			CtxEntityIdentifier ownerEntityId = this.ctxBroker.retrieveIndividualEntityId(requestor, getCommManager().getIdManager().getThisNetworkNode()).get();
 			// create a context attribute under the CSS owner context entity
-			 CtxAttribute netUserAttr = this.ctxBroker.createAttribute(requestor, ownerEntityId, "MEMBER_OF").get();
+			
+			
+			Future<List<CtxIdentifier>> memberCtxLookupFut = this.ctxBroker.lookup(requestor, ownerEntityId, CtxModelType.ATTRIBUTE, "MEMBER_OF");
+			Thread.sleep(1000);
+			List<CtxIdentifier> memberCtxLookup =  memberCtxLookupFut.get();
+			CtxIdentifier memberCtx  = null;
+			CtxAttribute netUserAttr = null;
+			
+			if ((memberCtxLookup != null) && (memberCtxLookup.size() > 0))
+				memberCtx = memberCtxLookup.get(0);
+		
+			
+			if (memberCtx == null)
+			{
+				netUserAttr = this.ctxBroker.createAttribute(requestor, ownerEntityId, "MEMBER_OF").get();
+			}
+			else 
+			{
+				Future<CtxModelObject> netUserAttrFut = this.ctxBroker.retrieve(requestor, memberCtx);
+				Thread.sleep(1000);
+				netUserAttr = (CtxAttribute) netUserAttrFut.get();
+			}
 			 // assign a String value to the attribute 
 			 netUserAttr.setStringValue(schmoozerUser);
 			 netUserAttr.setValueType(CtxAttributeValueType.STRING);
@@ -334,9 +367,6 @@ public class NetworkClient {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
-		
-		log.info("updateContextAtribute End");
 
 		
 	}
@@ -554,41 +584,108 @@ public class NetworkClient {
 	}
 
 	
-	
-	// User Details
-	// TODO: Move to another class, database ??
-	private String displayName = "My Display name";
-	private String companyName = "My Company";
-	private String deptName = "My Department";
-
-
-	public String getDisplayName() {
-		log.info("NetworkClient getDisplayName called." + displayName);
-		return displayName;
-	}
-
-	public void setDisplayName(String displayName) {
-		this.displayName = displayName;
-	}
-
-	public String getCompanyName() {
-		log.info("NetworkClient getCompanyName called." + companyName);
-		return companyName;
-	}
-
-	public void setCompanyName(String companyName) {
-		this.companyName = companyName;
-	}
-
-	public String getDeptName() {
-		log.info("NetworkClient getDeptName called." + deptName);
-		return deptName;
-	}
-
-	public void setDeptName(String deptName) {
-		this.deptName = deptName;
+	private void initMyDetails()
+	{
+		Future<CssInterfaceResult> cssDetailsFut = getCssManager().getCssRecord();
+		CssInterfaceResult cssDetails;
+		try {
+			cssDetails = cssDetailsFut.get();
+			userdetails = new UserDetails();
+			userdetails.setDisplayName(cssDetails.getProfile().getName());
+			userdetails.setUserid(getCommManager().getIdManager().getThisNetworkNode().getBareJid());
+			
+			getCommsClient().updateMyDetails(userdetails);
+			
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ExecutionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
+	public UserDetails getMyDetails()
+	{
+		userdetails = getCommsClient().getMyDetails();
+		
+		if ((userdetails == null) || (userdetails.getDisplayName() == null)) 
+			initMyDetails();
+		
+		return userdetails;
+		
+	}
+	
+	public UserDetails getUserdetails() {
+		return userdetails;
+	}
+
+	public void setUserdetails(UserDetails userdetails) {
+		this.userdetails = userdetails;
+	}
+
+	public UserDetails saveMyDetails()
+	{
+		getUserdetails().setUserid(getCommManager().getIdManager().getThisNetworkNode().getBareJid());
+		
+		return getCommsClient().updateMyDetails(getUserdetails());
+		
+	}
+
+
+	
+	
+	// Social Connector, TODO : Move this out on it's own
+	//a nd tidy up. 
+	
+	
+
+	/**
+	 * @return the socialData
+	 */
+	public ISocialData getSocialData() {
+		return socialData;
+	}
+
+	/**
+	 * @param socialData the socialData to set
+	 */
+	public void setSocialData(ISocialData socialData) {
+		this.socialData = socialData;
+	}
+
+	public void doSocialConnectorTestStuff()
+	{
+		log.info("doSocialConnectorTestStuff : start " );
+		
+		//Properties pros = System.getProperties();
+		//pros.
+		//.setProperty("http.proxyHost","");
+    //    System.setProperty("http.proxyPort","");
+    //    System.setProperty("https.proxyHost","");
+    //    System.setProperty("https.proxyPort","");
+    //    System.setProperty("proxySet","true");
+
+
+        
+		
+		HashMap <String, String> params = new HashMap<String, String>();
+		String token = new String("AAAFs43XOj3IBAGZCLZAstKwdt9hYilGrHlTcXZA22rO98CfkgI4Ghw66wWXcVMfRB179FgsXwVUCfLu1B4nk9gyJRSDYbdQ0qplZB4jgngZDZD");
+		params.put(ISocialConnector.AUTH_TOKEN, token);
+		ISocialConnector con = getSocialData().createConnector(ISocialConnector.SocialNetwork.Facebook, params);
+		
+		String profileData = con.getUserProfile();
+		
+		String friendData = con.getUserFriends();
+		// getUser friends only returns id and name, 
+		// what we need is a list of their friends and their emails address!
+		
+		
+		log.info("profileData : " + profileData);
+		log.info("friendData : " + friendData);
+		
+		log.info("doSocialConnectorTestStuff : end " );
+	}
 	
 	
 	

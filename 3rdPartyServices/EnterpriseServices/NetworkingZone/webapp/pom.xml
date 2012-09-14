@@ -157,6 +157,7 @@
 			<version>1.0.0.GA</version>
 		</dependency>
 
+		
 	</dependencies>
 
 
@@ -254,6 +255,11 @@
 							org.societies.api.context;resolution:=optional,
 							org.societies.api.context.model;resolution:=optional,
 							org.societies.api.internal.css.management;resolution:=optional,
+							org.societies.api.internal.sns;resolution:=optional,
+							org.societies.api.schema.cssmanagement;resolution:=optional,
+<!-- 						org.codehaus.jackson;resolution:=optional,
+							org.codehaus.jackson.map;resolution:=optional, -->
+							org.springframework.web.servlet.view.json;resolution:=optional,
 							<!-- Form validation -->
 							javax.validation,*;resolution:=optional
 						</Import-Package>
@@ -273,7 +279,7 @@
 						<manifestFile>${project.build.directory}/META-INF/MANIFEST.MF</manifestFile>
 					</archive>
 					<!-- Make a skinny WAR -->
-					<packagingExcludes></packagingExcludes>
+					<packagingExcludes>WEB-INF/lib/*.jar</packagingExcludes>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -313,6 +319,10 @@
 									<artifactId>com.springsource.javax.servlet</artifactId>
 									<version>2.5.0</version>
 								</artifactItem>
+								
+									
+		
+		
 							</artifactItems>
 							<outputDirectory>${spring.osgi.deploy.dir}</outputDirectory>
 						</configuration>

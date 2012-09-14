@@ -32,9 +32,17 @@
 
 		<property name="annotatedClasses">
 			<list>
-				<value>org.societies.thirdpartyservices.networking.directory.model.NetworkingRecordEntry
+				<value>org.societies.thirdpartyservices.networking.directory.model.NZUserDetails
 				</value>
-				<value>org.societies.thirdpartyservices.networking.directory.model.UserRecordEntry
+				<value>org.societies.thirdpartyservices.networking.directory.model.NZEducation
+				</value>
+				<value>org.societies.thirdpartyservices.networking.directory.model.NZEmployment
+				</value>
+				<value>org.societies.thirdpartyservices.networking.directory.model.Config
+				</value>
+				<value>org.societies.thirdpartyservices.networking.directory.model.ShareInfo
+				</value>
+				<value>org.societies.thirdpartyservices.networking.directory.model.SocialNetworkConnections
 				</value>
 			</list>
 		</property>
