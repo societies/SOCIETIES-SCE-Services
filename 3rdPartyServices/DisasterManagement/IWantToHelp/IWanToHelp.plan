@@ -7,6 +7,6 @@
                 http://www.eclipse.org/virgo/schema/plan/eclipse-virgo-plan.xsd">
 
     <!-- Example 3rd Party Services -->
-	<artifact type="bundle" name="org.societies.thirdPartyServices.disasterManagement.IWantToHelp"/>
+	<artifact type="bundle" name="org.societies.thirdPartyServices.disasterManagement.WantToHelp"/>
 	
 </plan>
