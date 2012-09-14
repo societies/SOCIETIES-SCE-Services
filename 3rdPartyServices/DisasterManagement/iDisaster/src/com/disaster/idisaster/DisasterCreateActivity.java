@@ -125,16 +125,13 @@ public class DisasterCreateActivity extends Activity implements OnClickListener 
 	    		return;
 	   		}
 	
-//TODO: Refresh list of disasters? - so it is displayed in the previous activity
-    		
-//TODO: remove test code
-    	    iDisasterApplication.getInstance().disasterNameList.add(disasterName);
-
-// TODO: remove: only used for screenshot  
-    	    // report data change to adapter
-    	    iDisasterApplication.getInstance().disasterAdapter.notifyDataSetChanged();
-
-    		
+    		// Test case: Refresh list of disasters for display in the DisasterListActivity
+    		if (iDisasterApplication.testDataUsed) {
+    	   	    iDisasterApplication.getInstance().disasterNameList.add(disasterName);
+        	    // report data change to adapter
+        	    iDisasterApplication.getInstance().disasterAdapter.notifyDataSetChanged();
+   			}
+     		
 // TODO: Remove code for testing the correct setting of preferences 
     	    Toast.makeText(this, "Debug: "  + disasterName + " " + disasterDescription, 
     			Toast.LENGTH_LONG).show();

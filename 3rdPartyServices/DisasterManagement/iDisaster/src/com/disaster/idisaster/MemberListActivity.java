@@ -24,13 +24,20 @@
  */
 package com.disaster.idisaster;
 
-import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.ListActivity;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.AdapterView.OnItemClickListener;
 
 /**
  * This activity allows the user to look up members
@@ -39,16 +46,79 @@ import android.widget.Toast;
  * @author Jacqueline.Floch@sintef.no
  *
  */
-public class MemberListActivity extends Activity {
+public class MemberListActivity extends ListActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 	// TODO Auto-generated method stub
 	super.onCreate(savedInstanceState);
 
-	TextView textview = new TextView(this);
-        textview.setText("No Members yet. Select menu to add members.");
-        setContentView(textview);
+	
+//TODO: query Content Provider
+	
+	boolean noMember = false;
+	
+	if (noMember) {
+		// Create dialog if no member in disaster team						
+    	AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this);
+    	alertBuilder.setMessage(getString(R.string.memberListDialog))
+    		.setCancelable(false)
+    		.setPositiveButton (getString(R.string.dialogOK), new DialogInterface.OnClickListener() {
+    			public void onClick(DialogInterface dialog, int id) {
+    				// add code
+    				return;
+    			}
+    		});
+	    AlertDialog alert = alertBuilder.create();
+	    alert.show();
+	    return;
+	    
+	} else {
+		// Display members in disaster team						
+    	setContentView (R.layout.member_list_layout);
+    	ListView listView = getListView();
+    	
+    	// Enable filtering for the contents of the list view.
+    	// The filtering logic should be provided
+    	// listView.setTextFilterEnabled(true);  
+    	
+    	
+// TODO: Get the list from the Societies Content Provider
+
+
+    	// The Adapter provides access to the data items.
+    	// The Adapter is also responsible for making a View for each item in the data set.
+    	//  Parameters: Context, Layout for the row, ID of the View to which the data is written, Array of data
+
+//TODO: customize the layout for the row is necessary
+// At the moment a simple string is used as for disaster.
+
+    	iDisasterApplication.getInstance().memberAdapter = new ArrayAdapter<String> (this,
+		R.layout.disaster_list_item, R.id.disaster_item, iDisasterApplication.getInstance().memberNameList);
+
+    	// Assign adapter to ListView
+
+    	listView.setAdapter(iDisasterApplication.getInstance().memberAdapter);
+
+    	// Add listener for short click.
+    	// 
+    	listView.setOnItemClickListener(new OnItemClickListener() {
+    		public void onItemClick (AdapterView<?> parent, View view,
+    			int position, long id) {
+// TODO: Remove code for testing the correct setting of preferences 
+    			Toast.makeText(getApplicationContext(),
+    				"Click ListItem Number   " + (position+1) + "   " + iDisasterApplication.getInstance().memberNameList.get (position), Toast.LENGTH_LONG)
+    				.show();
+
+    			// Start the ServiceDetails Activity
+//    			startActivity (new Intent(ServiceListActivity.this, ServiceDetailsActivity.class));
+    			
+// The activity is kept on stack (check also that "noHistory" is not set in Manifest
+//    			finish();
+    			}
+    		});
+
+		}	
     }
 
 /**

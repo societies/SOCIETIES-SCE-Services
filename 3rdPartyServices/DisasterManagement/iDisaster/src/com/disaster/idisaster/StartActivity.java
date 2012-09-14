@@ -39,7 +39,8 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.TextView;
 
-import com.disaster.idisaster.SocialContract;
+import org.societies.android.api.cis.SocialContract;
+//import com.disaster.idisaster.SocialContract;
 import android.net.Uri;
 import android.content.ContentValues;
 import android.content.ContentResolver;
@@ -61,7 +62,10 @@ import android.database.Cursor;
 
 public class StartActivity extends Activity implements OnClickListener {
 
-	Boolean loggedIn = false;
+	Boolean loggedIn;		// when true the user is logged
+
+	// Constant keys used for user Loging
+	public static final String USER_NOT_IDENTFIED = "USER_NOT_IDENTFIED";
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -88,7 +92,9 @@ public class StartActivity extends Activity implements OnClickListener {
     	super.onResume();
     	
     
-    	loggedIn = false;
+    	loggedIn = false;	// Always reset when starting activity since the user may have logged out in
+    						// this App or another App
+    								
     		
     	// check is the user is logged in
     	// if logged in display the user name
@@ -96,17 +102,12 @@ public class StartActivity extends Activity implements OnClickListener {
 		TextView startView = (TextView) findViewById(R.id.startInfo);
 
 		
-		if (iDisasterApplication.testDataUsed) {			// Test data
+		if (iDisasterApplication.testDataUsed) {							// Use test data (no SocialProvider)
 			startView.setText(getString(R.string.startInfoNotLogged));			
-		} else {														// Fetch data from SocialProvider
+		} else {															// Fetch data from SocialProvider
 			String userName = getUserIdentity();
-			if (userName == null) {											// No data returned by Social provider
-				iDisasterApplication.getInstance().showDialog (this,
-						"Unable to retrieve user information from SocialProvider",
-						 getString(R.string.dialogOK));
-			} else if (userName == "Your Name") {							// User is not identified
+			if (userName == USER_NOT_IDENTFIED) {					// No data returned by Social provider
 				startView.setText(getString(R.string.startInfoNotLogged));
-			
 			} else {														// User is identified
 				startView.setText(getString(R.string.startInfoLogged) + userName);
 				loggedIn = true;
@@ -131,11 +132,12 @@ public class StartActivity extends Activity implements OnClickListener {
 
 
 /**
- * getUserIdentity is to add the user information in SocialProvider
+ * getUserIdentity retrieves the user information from SocialProvider
+ * 		Returns USER_NOT_IDENTFIED if the user is not registered
  */
 
 	private String getUserIdentity () {
-		String displayName = null;
+		String displayName = USER_NOT_IDENTFIED;
 		
 		Uri uri = SocialContract.Me.CONTENT_URI;
 
@@ -159,11 +161,14 @@ public class StartActivity extends Activity implements OnClickListener {
 					"Unable to retrieve user information from SocialProvider",
 					 getString(R.string.dialogOK));
 		} else {
-// TODO: Add a check? : Should it be a single user (stored in Me).
-//			int i= cursor.getCount(); was used for debug
+// TODO: There may be different logging info for user (stored in ContentProvider in Me).
+// 		The first row is always Societies, other rows may be used for Facebook, etc...
+//		To get the number of entries, use:
+//			int i= cursor.getCount(); 
 			if (cursor.moveToFirst()){
 				displayName = cursor.getString(cursor
-						.getColumnIndex(SocialContract.Me.DISPLAY_NAME));			}
+						.getColumnIndex(SocialContract.Me.DISPLAY_NAME));
+			}
 		}
 		return displayName;
 	}

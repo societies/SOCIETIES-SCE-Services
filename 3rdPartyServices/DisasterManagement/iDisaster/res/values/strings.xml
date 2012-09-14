@@ -50,11 +50,15 @@
     <string name="loginUserNameLabel">Name:</string>
 <!-- <string name="loginUserNameLabel">Login as:</string>  -->
 
+    <string name="memberListDialog">No members yet. Select menu to add members.</string>
+
 	<string name="serviceAddButton">Add</string>
-    <string name="serviceAddHeading">Search service</string>   
+    <string name="serviceAddHeading">Select a service</string>   
     <string name="serviceDetailsHeading">Service information</string>
     <string name="serviceDescriptionHint">Enter keywords</string>
     <string name="serviceDescriptionLabel">Description:</string>
+    <string name="serviceListDialog">No services in the repository yet.</string>
+    <string name="serviceListDialogCIS">No services yet. Select menu to add services.</string>
     <string name="serviceNameHint">Service name</string>
     <string name="serviceNameLabel">Name:</string>
     

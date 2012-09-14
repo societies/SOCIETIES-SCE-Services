@@ -29,12 +29,15 @@ package com.disaster.idisaster;
 
 import java.util.ArrayList;
 
-import com.disaster.idisaster.R;
+import org.societies.android.api.cis.SocialContract;
 
 import android.app.ListActivity;
+import android.content.ContentResolver;
 import android.content.Intent;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
-import android.provider.ContactsContract;
+//import android.provider.ContactsContract;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -43,26 +46,6 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
-
-
-
-
-
-
-//TODO: Add import
-//import org.societies.android.platform.SocialContract;
-import android.database.Cursor;
-import android.net.Uri;
-
-
-
-
-import android.content.ContentResolver;
-import android.database.Cursor;
-import android.net.Uri;
-import android.os.Bundle;
-import android.provider.ContactsContract;
-import android.widget.TextView;
 
 
 
@@ -92,11 +75,13 @@ public class DisasterListActivity extends ListActivity {
     	resolver = getContentResolver();
     	
 		if (iDisasterApplication.testDataUsed) {			// Test data
+															// The adapter should not be set in onResume since the Android Adapter 
+															// mechanism is used for update. See DisasterCreateactivity.
 			iDisasterApplication.getInstance().disasterAdapter = new ArrayAdapter<String> (this,
 					R.layout.disaster_list_item, R.id.disaster_item, iDisasterApplication.getInstance().disasterNameList);
 
 			listView.setAdapter(iDisasterApplication.getInstance().disasterAdapter);
-		}
+		} 													// Otherwise the data are fetched in onResume
     	
 
     	// Add listener for short click.
@@ -105,7 +90,7 @@ public class DisasterListActivity extends ListActivity {
     			int position, long id) {
     			if (iDisasterApplication.testDataUsed) {			// Test data  			
     				iDisasterApplication.getInstance().disasterTeamName = iDisasterApplication.getInstance().disasterNameList.get(position);
-// Store the selected disaster in preferences
+// Store the selected disaster in application preferences
 //    				iDisasterApplication.getInstance().setDisasterTeamName (name);
     			} else {											// Fetch data from Social Provide
 //TODO: get name in from Social Provider
@@ -143,12 +128,12 @@ public class DisasterListActivity extends ListActivity {
 	protected void onResume() {
 		super.onResume();
 	
-		if (! iDisasterApplication.testDataUsed) {			// If test data not used
+		if (! iDisasterApplication.testDataUsed) {			// Test data are set in onCreate - see explanation above
+															// Data from content provider are fetched every time the activity becomes visible
 
 			if (disasterAdapter!= null) disasterAdapter.clear();
 
 // All information is fetched from the Social Provider. Preferences are no longer used.
-//
 //			iDisasterApplication.getInstance().setDisasterTeamName // reset user preferences
 //			(getString(R.string.noPreference));
 		
@@ -178,12 +163,14 @@ public class DisasterListActivity extends ListActivity {
 /**
  * getDisasters retrieves the list of disaster teams from Social Provider.
  */
-	private Cursor getDisasterTeams () {
+	
+	// TODO: The following retrieve the list of communities - not the ones I am member of
+	private void getDisasterTeams () {
 
-		Uri uri = SocialContract.MyCommunity.CONTENT_URI;
+		Uri uri = SocialContract.Communities.CONTENT_URI;
 
 		String[] projection = new String[] { 
-				SocialContract.MyCommunity.DISPLAY_NAME };
+				SocialContract.Communities.NAME };
 
 //		String[] projection = new String[] { SocialContract.MyCommunity._ID,
 //				SocialContract.MyCommunity.DISPLAY_NAME };
@@ -196,12 +183,12 @@ public class DisasterListActivity extends ListActivity {
 		String[] selectionArgs = null;
 
 // TODO: check that ordering is OK
-		String sortOrder = SocialContract.MyCommunity.DISPLAY_NAME
+		String sortOrder = SocialContract.Communities.NAME
 				+ " COLLATE LOCALIZED ASC";
 
 		cursor = resolver.query(uri, projection, selection, selectionArgs,sortOrder);
 
-		return cursor;
+		return;
 
 //
 // When using managedQuery(), the activity keeps a reference to the cursor and close it
@@ -239,7 +226,7 @@ public class DisasterListActivity extends ListActivity {
 				ArrayList<String> disasterList = new ArrayList<String> ();
 				while (cursor.moveToNext()) {
 					String displayName = cursor.getString(cursor
-							.getColumnIndex(ContactsContract.Data.DISPLAY_NAME));
+							.getColumnIndex(SocialContract.Communities.NAME));
 					disasterList.add (displayName);
 
 				}

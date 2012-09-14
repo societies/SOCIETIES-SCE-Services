@@ -59,7 +59,7 @@ public class iDisasterApplication extends Application {
 //	Editor editor;												// Editor for changing preferences
 
 
-	static final Boolean testDataUsed = false;		// When set to true do not used SocialProvider
+	static final Boolean testDataUsed = true;		// When set to true do not used SocialProvider
 	String disasterTeamName = "n/a";
 
 //TODO: remove test code
@@ -72,7 +72,10 @@ public class iDisasterApplication extends Application {
 	ArrayList <String> memberDescriptionList = new ArrayList<String> ();
 
 	ArrayList <String> serviceNameList = new ArrayList<String> ();
-	ArrayList <String> serviceDescriptionList = new ArrayList<String> ();
+	ArrayList <String> serviceDescriptionList = new ArrayList<String> ();	
+
+	ArrayList <String> CISserviceNameList = new ArrayList<String> ();
+	ArrayList <String> CISserviceDescriptionList = new ArrayList<String> ();	
 
 	
 //TODO: discuss design. Are these common adapter resources needed (performance)?	
@@ -80,6 +83,7 @@ public class iDisasterApplication extends Application {
 	ArrayAdapter<String> feedAdapter;
 	ArrayAdapter<String> memberAdapter;
 	ArrayAdapter<String> serviceAdapter;
+	ArrayAdapter<String> CISserviceAdapter;
 
 // Turn off debugging before RELEASE! Set DEBUG to 0.
 //	 -1: ALWAYS PRINT (Not debug, but plain ERROR)
@@ -132,12 +136,21 @@ public class iDisasterApplication extends Application {
 	    	memberDescriptionList.add ("Doctor.");
 	    	memberDescriptionList.add ("Civil Engineer.");
 
+	    	CISserviceNameList.add ("Share data");
+	    	CISserviceDescriptionList.add ("This service allows data sharing with your team.");
+	    	CISserviceNameList.add ("Send alert");
+	    	CISserviceDescriptionList.add ("This service allows you to send an alert team members.");
+	    	
 	    	serviceNameList.add ("Share picture");
 	    	serviceDescriptionList.add ("This service allows picture sharing with your team.");
-	    	serviceNameList.add ("Jacket control");
+	    	serviceNameList.add ("iJacket");
 	    	serviceDescriptionList.add ("This service allows people in your team to remote control your jacket.");
 	    	serviceNameList.add ("Ask for help");
 	    	serviceDescriptionList.add ("This service allows you to request help from volunteers.");
+	    	
+	    	
+	    	
+	    	
 	    }
 // end of removed
 			    

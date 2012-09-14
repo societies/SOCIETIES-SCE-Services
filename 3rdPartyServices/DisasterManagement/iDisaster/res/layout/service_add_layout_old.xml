@@ -1,27 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
- 
+
 <RelativeLayout 
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
 	android:layout_height="fill_parent">
 
- 		<TextView android:id="@+id/serviceDetailsLabel" android:layout_width="fill_parent"
-     		android:text="@string/serviceDetailsHeading" 
+ 		<TextView android:id="@+id/OLDserviceAddLabel" android:layout_width="fill_parent"
+     		android:text="@string/serviceAddHeading" 
      		android:textSize="20dip" android:textStyle="bold"
      		android:textColor="@color/white" android:background="@color/orange"
 			android:layout_height="wrap_content" 
 			android:paddingLeft="5dip"
 			android:paddingTop="2dip" android:paddingBottom="2dip" />
  				
-	 	<TableLayout android:id="@+id/serviceDetailsTable"
+	 	<TableLayout android:id="@+id/OLDserviceAddTable"
 			android:layout_width="fill_parent" android:layout_height="fill_parent"
 			xmlns:android="http://schemas.android.com/apk/res/android"
-			android:layout_below="@id/serviceDetailsLabel"
+			android:layout_below="@id/OLDserviceAddLabel"
 			android:background="@color/white"
 			>
 			
 			<TableRow>
-				<TextView android:id="@+id/showServiceDetailsNameLabel"
+				<TextView android:id="@+id/OLDeditServiceAddNameLabel"
 					android:text="@string/serviceNameLabel" android:textColor="@color/black"
 					android:textStyle="bold" android:width="100dp" 
 					android:layout_width="wrap_content" android:layout_height="wrap_content"
@@ -30,69 +30,72 @@
 					/>
 
 				<!-- Not sure if android:text is needed below -->
-				<TextView
-				    android:id="@+id/showServiceDetailsName"
-				    android:text="@string/emptyText" android:textColor="@color/black"
-				    android:layout_width="wrap_content" android:layout_height="wrap_content"
-				    android:paddingLeft="2dip" android:paddingRight="2dip"
+				<EditText
+				    android:id="@+id/OLDeditServiceAddName"
+				    android:text="@string/emptyText"
+				    android:hint="@string/serviceNameHint" android:textColor="@color/black"
+				    android:background="@android:drawable/editbox_background"
+				    android:width="200dp" android:maxWidth="200dp"
+				    android:layout_width="fill_parent" android:layout_height="wrap_content"
+				    android:paddingRight="2dip"
 				    android:paddingTop="10dip" android:paddingBottom="10dip" 
 				    />
+				
+<!--			    android:layout_toRightOf="@id/editUserNameLabel"  -->
 				
 			</TableRow>
 
 			<TableRow>
 
 				<TextView
-				    android:id="@+id/showServiceDetailsDescriptionLabel"
+				    android:id="@+id/OLDeditServiceAddDescriptionLabel"
 				    android:text="@string/serviceDescriptionLabel" android:textColor= "@color/black" 
 					android:textStyle="bold" android:width="100dp" 
 					android:layout_width="wrap_content" android:layout_height="wrap_content"
 					android:paddingLeft="2dip" android:paddingRight="2dip"
 					android:paddingTop="2dip" android:paddingBottom="2dip" 
 					/>
+<!-- 				android:layout_below="@id/editUserNameLabel"  -->
 
-				<!-- Not sure if android:text is needed below -->
-				<TextView
-				    android:id="@+id/showServiceDetailsDescription"
-				    android:text="@string/emptyText" android:textColor="@color/black"
-				    android:layout_width="wrap_content" android:layout_height="wrap_content"
-				    android:paddingLeft="2dip" android:paddingRight="2dip"
+<!-- Not sure if android:text is needed below -->
+				<EditText
+				    android:id="@+id/OLDeditServiceAddDescription"
+				    android:text="@string/emptyText"
+				    android:hint= "@string/serviceDescriptionHint" android:textColor="@color/black"
+				    android:background="@android:drawable/editbox_background"
+				    android:width="200dp"    
+				    android:layout_width="fill_parent" android:layout_height="wrap_content"
+				    android:paddingRight="2dip"
 				    android:paddingTop="10dip" android:paddingBottom="10dip" />
+<!-- 
+android:maxWidth="140dp"
+ -->
+<!-- 				    android:layout_toRightOf="@id/editPasswordLabel" -->				
 			</TableRow>
-			
-			
+
 			<TableRow>
 
-<!--			    <TextView
-				    android:id="@+id/showServiceDetailsDummy"
+			    <TextView
+				    android:id="@+id/OLDserviceAddDummy1"
 				    android:text="@string/emptyText" android:textColor= "@color/black"
 					android:textStyle="bold" android:width="100dp" 
 					android:layout_width="wrap_content" android:layout_height="wrap_content"
 					android:paddingLeft="2dip" android:paddingRight="2dip"
 					android:paddingTop="2dip" android:paddingBottom="2dip" />					
- 					android:layout_below="@id/editPasswordLabel" -->
+<!-- 				android:layout_below="@id/editPasswordLabel" -->
 
 				<Button
-				    android:id="@+id/showServiceDetailsButton" 
+				    android:id="@+id/OLDserviceAddButton" 
 				    android:layout_width="wrap_content" android:layout_height="wrap_content"
-				    android:text="@string/emptyText"
-				    android:textColor="@color/black" />
+				    android:text="@string/serviceAddButton"
+				    android:textColor="@color/black" 
+				/>
+<!-- 				android:layout_toRightOf="@id/loginDummy1" -->
 
-<!-- Was not able to set the right width for this button					
-				<Button 
-	    			android:id="@+id/showServiceDetailsButton"
-	    			android:text="@string/emptyText"
-	    			android:layout_width="100dp" android:layout_height="50dp"
-	    			android:textColor="@android:color/white" android:textSize="20dip" android:textStyle="bold"
-	    			android:background="@drawable/button_idisaster"
-	    		/>
- -->					
-					
+<!-- The button style of the start page is not kept yet - see lgin_layout -->
+
 			</TableRow>
-					
-			
  						
 		</TableLayout> 
  
 	</RelativeLayout>
- 

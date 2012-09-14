@@ -24,7 +24,9 @@
  */
 package com.disaster.idisaster;
 
+import android.app.AlertDialog;
 import android.app.ListActivity;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
@@ -41,29 +43,48 @@ import android.widget.AdapterView.OnItemClickListener;
 // import org.societies.android.platform.SocialContract;
 
 /**
- * This activity allows the user to browse available
- * DDC applications on the device, add DDC applications 
- * to a disaster, etc.
+ * This activity allows the user to list the services
+ * recommended, shared or installed in the disaster team.
  * 
  * @author Jacqueline.Floch@sintef.no
  *
  */
+
+// TODO: Classified services in the list according to whether they are
+// recommended, shared or installed.
+
 public class ServiceListActivity extends ListActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
     super.onCreate(savedInstanceState);
 
-//TODO: query Content Provider
-    
-    
-    
+    //TODO: query Content Provider for services in the CIS
+	
+  	boolean noService = false;
+  	
+  	if (noService) {
+  		//  TextView cannot be used here as the Activity is a ListActivity
+  		//  TextView textview = new TextView(this);
+  		//	textview.setText("This is the Services tab");
+  		//  setContentView(textview);
 
-//TODO: if no service in the CIS create a simple TextView
-//	TextView textview = new TextView(this);
-//        textview.setText("This is the Services tab");
-//        setContentView(textview);
+  		// Create dialog if no service in disaster team						
+      	AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this);
+      	alertBuilder.setMessage(getString(R.string.serviceListDialogCIS))
+      		.setCancelable(false)
+      		.setPositiveButton (getString(R.string.dialogOK), new DialogInterface.OnClickListener() {
+      			public void onClick(DialogInterface dialog, int id) {
+      				// add code
+      				return;
+      			}
+      		});
+  	    AlertDialog alert = alertBuilder.create();
+  	    alert.show();
+  	    return;
 
+  	} else {
+    
     	setContentView (R.layout.service_list_layout);
     	ListView listView = getListView();
     	
@@ -72,7 +93,7 @@ public class ServiceListActivity extends ListActivity {
     	// listView.setTextFilterEnabled(true);  
     	
     	
-// TODO: Get the list from the Societies Content Provide
+// TODO: Get the list from the Societies Content Provider
 
 
     	// The Adapter provides access to the data items.
@@ -82,12 +103,12 @@ public class ServiceListActivity extends ListActivity {
 //TODO: customize the layout for the row is necessary
 // At the moment a simple string is used as for disaster.
 
-    	iDisasterApplication.getInstance().serviceAdapter = new ArrayAdapter<String> (this,
-		R.layout.disaster_list_item, R.id.disaster_item, iDisasterApplication.getInstance().serviceNameList);
+    	iDisasterApplication.getInstance().CISserviceAdapter = new ArrayAdapter<String> (this,
+		R.layout.disaster_list_item, R.id.disaster_item, iDisasterApplication.getInstance().CISserviceNameList);
 
     	// Assign adapter to ListView
 
-    	listView.setAdapter(iDisasterApplication.getInstance().serviceAdapter);
+    	listView.setAdapter(iDisasterApplication.getInstance().CISserviceAdapter);
 
     	// Add listener for short click.
     	// 
@@ -96,16 +117,20 @@ public class ServiceListActivity extends ListActivity {
     			int position, long id) {
 // TODO: Remove code for testing the correct setting of preferences 
     			Toast.makeText(getApplicationContext(),
-    				"Click ListItem Number   " + (position+1) + "   " + iDisasterApplication.getInstance().serviceNameList.get (position), Toast.LENGTH_LONG)
+    				"Click ListItem Number   " + (position+1) + "   " + iDisasterApplication.getInstance().CISserviceNameList.get (position), Toast.LENGTH_LONG)
     				.show();
 
     			// Start the ServiceDetails Activity
+    			// TODO: Provide CIS_ID and SERVICE_ID as parameters... 
     			startActivity (new Intent(ServiceListActivity.this, ServiceDetailsActivity.class));
     			
-// The activity is kept on stack (check also that "noHistory" is not set in Manifest
+// The activity is kept on stack (check also that "noHistory" is not set in Manifest)
+// Should it be removed?
 //    			finish();
-    		}
-    	});
+    			}
+    		
+    		});
+  		}
     }
 
 /**
