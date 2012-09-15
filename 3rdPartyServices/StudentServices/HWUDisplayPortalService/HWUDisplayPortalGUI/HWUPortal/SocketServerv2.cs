@@ -359,7 +359,10 @@ namespace HWUPortal
             }
             else
             {
+
                 sInfo.serviceType = ServiceType.WEB;
+                this.userSession.addService(sInfo);
+                this.downloadedServices++;
             }
             Console.WriteLine(sInfo.ToString());
         }

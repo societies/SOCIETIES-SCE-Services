@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Controls;
 using Coding4Fun.Kinect.Wpf.Controls;
+using System.Net;
 
 namespace HWUPortal
 {
@@ -16,7 +17,7 @@ namespace HWUPortal
         //item2: remote location
         //item3: local drive location (set after downloading the file)
         private List<ServiceInfo> services;
-
+        private IPAddress userIPAddress;
 
         public UserSession()
         {
@@ -33,7 +34,13 @@ namespace HWUPortal
         {
             return this.userIdentity;
         }
+        public UserSession(IPAddress ipAddr)
+        {
+            this.userIdentity = string.Empty;
+            services = new List<ServiceInfo>();
+            this.userIPAddress = ipAddr;
 
+        }
 
         public void addService(String name, String service, String locationInDrive)
         {
@@ -86,6 +93,16 @@ namespace HWUPortal
             }
 
             return null;
+        }
+
+        internal IPAddress getIPAddress()
+        {
+            return this.userIPAddress;
+        }
+
+        public void setIPAddress(IPAddress userIPAddr)
+        {
+            this.userIPAddress = userIPAddr;
         }
     }
 }

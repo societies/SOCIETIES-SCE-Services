@@ -278,6 +278,8 @@ namespace HWUPortal
             this.runningService = sInfo;
             this.closeShowingServiceBtn.Content = "Close " + sInfo.serviceName;
             this.enableThisButton(this.closeShowingServiceBtn, true);
+            ServiceInformationSocketClient sClient = new ServiceInformationSocketClient();
+            sClient.sendServiceInformationEvent(userSession.getIPAddress(), sInfo.serviceName, ServiceInformationSocketClient.ServiceRuntimeInformation.STARTED_SERVICE);
 
         }
 
@@ -575,6 +577,8 @@ namespace HWUPortal
             if (!this.runningService.serviceName.Equals(string.Empty))
             {
                 this.stopService(e, this.runningService);
+                ServiceInformationSocketClient socket = new ServiceInformationSocketClient();
+                socket.sendServiceInformationEvent(this.userSession.getIPAddress(), this.runningService.serviceName, ServiceInformationSocketClient.ServiceRuntimeInformation.STOPPED_SERVICE);
                 this.runningService = new ServiceInfo();
                 this.closeShowingServiceBtn.Content = "";
                 //this.closeShowingServiceBtn.Text = "";
@@ -598,6 +602,8 @@ namespace HWUPortal
                     this.stopService(e, this.runningService);
                     this.runningService = new ServiceInfo();
                 }
+                ServiceInformationSocketClient client = new ServiceInformationSocketClient();
+                client.sendLogoutEvent(userSession.getIPAddress());
 
                 this.userSession = new UserSession();
                 foreach (Button button in myButtons)
