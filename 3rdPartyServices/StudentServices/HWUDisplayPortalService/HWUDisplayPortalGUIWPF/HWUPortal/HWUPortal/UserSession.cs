@@ -66,7 +66,7 @@ namespace HWUPortal
                 }
             }
         }
-        public void setButton(String serviceName, Button button)
+        public void setButton(String serviceName, HoverButton button)
         {
             foreach (ServiceInfo s in services)
             {

@@ -19,55 +19,65 @@
         </LinearGradientBrush>
     </Window.Background>
     <Canvas MinWidth="1340" MinHeight="700" MaxWidth="1340" MaxHeight="700" Name="MainCanvas">
-        <Button Content="Service 1" TextBlock.TextAlignment="Center" VerticalContentAlignment="Center" Height="55" HorizontalAlignment="Left" Margin="57,131,0,0" Name="serviceButton1" VerticalAlignment="Top" Width="201" Click="serviceButton1_Click">
-            <Button.Background>
+        <Controls:HoverButton TimeInterval="3000" Content="Service 1" TextBlock.TextAlignment="Center" VerticalContentAlignment="Center" Height="55" HorizontalAlignment="Left" Margin="57,131,0,0" Name="serviceButton1" VerticalAlignment="Top" Width="201" Click="serviceButton1_Click">
+            <Controls:HoverButton.Background>
                 <ImageBrush ImageSource="/HWUPortal;component/Images/buttonImg.png" />
-            </Button.Background>
-        </Button>
-        <Button Content="Service 2" TextBlock.TextAlignment="Center" VerticalContentAlignment="Center" Height="55" HorizontalAlignment="Left" Margin="57,221,0,0" Name="serviceButton2" VerticalAlignment="Top" Width="201" Click="serviceButton2_Click">
-            <Button.Background>
+            </Controls:HoverButton.Background>
+        </Controls:HoverButton>
+        <Controls:HoverButton TimeInterval="3000" Content="Service 2" TextBlock.TextAlignment="Center" VerticalContentAlignment="Center" Height="55" HorizontalAlignment="Left" Margin="57,221,0,0" Name="serviceButton2" VerticalAlignment="Top" Width="201" Click="serviceButton2_Click">
+            <Controls:HoverButton.Background>
                 <ImageBrush ImageSource="/HWUPortal;component/Images/buttonImg.png" />
-            </Button.Background>
-        </Button>
-        <Button Content="Service 3" TextBlock.TextAlignment="Center" VerticalContentAlignment="Center" Height="55" HorizontalAlignment="Left" Margin="57,311,0,0" Name="serviceButton3" VerticalAlignment="Top" Width="201" Click="serviceButton3_Click">
-            <Button.Background>
+            </Controls:HoverButton.Background>
+        </Controls:HoverButton>
+        <Controls:HoverButton TimeInterval="3000" Content="Service 3" TextBlock.TextAlignment="Center" VerticalContentAlignment="Center" Height="55" HorizontalAlignment="Left" Margin="57,311,0,0" Name="serviceButton3" VerticalAlignment="Top" Width="201" Click="serviceButton3_Click">
+            <Controls:HoverButton.Background>
                 <ImageBrush ImageSource="/HWUPortal;component/Images/buttonImg.png" />
-            </Button.Background>
-        </Button>
-        <Button Content="Service 4" TextBlock.TextAlignment="Center" VerticalContentAlignment="Center" Height="55" HorizontalAlignment="Left" Margin="57,406,0,0" Name="serviceButton4" VerticalAlignment="Top" Width="201" Click="serviceButton4_Click">
-            <Button.Background>
+            </Controls:HoverButton.Background>
+        </Controls:HoverButton>
+        <Controls:HoverButton TimeInterval="3000" Content="Service 4" TextBlock.TextAlignment="Center" VerticalContentAlignment="Center" Height="55" HorizontalAlignment="Left" Margin="57,406,0,0" Name="serviceButton4" VerticalAlignment="Top" Width="201" Click="serviceButton4_Click">
+            <Controls:HoverButton.Background>
                 <ImageBrush ImageSource="/HWUPortal;component/Images/buttonImg.png" />
-            </Button.Background>
-        </Button>
-        <Button Content="Service 5" TextBlock.TextAlignment="Center" VerticalContentAlignment="Center" Height="55" HorizontalAlignment="Left" Margin="57,500,0,0" Name="serviceButton5" VerticalAlignment="Top" Width="201" Click="serviceButton5_Click">
-            <Button.Background>
+            </Controls:HoverButton.Background>
+        </Controls:HoverButton>
+        <Controls:HoverButton TimeInterval="3000" Content="Service 5" TextBlock.TextAlignment="Center" VerticalContentAlignment="Center" Height="55" HorizontalAlignment="Left" Margin="57,500,0,0" Name="serviceButton5" VerticalAlignment="Top" Width="201" Click="serviceButton5_Click">
+            <Controls:HoverButton.Background>
                 <ImageBrush ImageSource="/HWUPortal;component/Images/buttonImg.png" />
-            </Button.Background>
-        </Button>
+            </Controls:HoverButton.Background>
+        </Controls:HoverButton>
         <hwu:TxtNotificationsWindow x:Name="notificationsWindow" Width="1000" Height="600" Canvas.Left="320" Canvas.Top="20">
             
         </hwu:TxtNotificationsWindow>
-        <Button Content="Log out" TextBlock.TextAlignment="Center" VerticalContentAlignment="Center" Height="55" HorizontalAlignment="Left" Margin="1125,624,0,0" Name="logoutButton" VerticalAlignment="Top" Width="201" Click="logoutButton_Click">
+        <!-- <WrapPanel Name="ContentCanvas" Width="1000" Height="600" Canvas.Left="320" HorizontalAlignment="Center" VerticalAlignment="Stretch" Canvas.Top="20"> -->
+            
+             <!--<WindowsFormsHost Name="wfhDate" 
+                    HorizontalAlignment="Center" 
+                    VerticalAlignment="Stretch" Width="1000" Height="600"  Background="{x:Null}" Canvas.Left="320" Visibility="Hidden">
+                <WinForms:FlowLayoutPanel/>
+            </WindowsFormsHost>-->
+        
+            <hwu:WpfApplicationControl x:Name="wpfAppControl" Canvas.Left="320" Canvas.Top="20"></hwu:WpfApplicationControl>
+        
+        <Controls:HoverButton TimeInterval="3000" Content="Log out" TextBlock.TextAlignment="Center" VerticalContentAlignment="Center" Height="55" HorizontalAlignment="Left" Margin="1125,624,0,0" Name="logoutButton" VerticalAlignment="Top" Width="201" Click="logoutButton_Click">
 
-            <Button.Background>
+            <Controls:HoverButton.Background>
                 <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
                     <GradientStop Color="#FFF8F7FF" Offset="0.299" />
                     <GradientStop Color="White" Offset="0.984" />
                     <GradientStop Color="#FFD1D0C9" Offset="0.795" />
                     <GradientStop Color="#FFFFEACA" Offset="0.575" />
                 </LinearGradientBrush>
-            </Button.Background>
-        </Button>
-        <Button Content="Close Running Service" TextBlock.TextAlignment="Center" VerticalContentAlignment="Center" Height="55" HorizontalAlignment="Left" Margin="855,624,0,0" Name="closeShowingServiceBtn" VerticalAlignment="Top" Width="201" Click="closeShowingServiceBtn_Click">
-            <Button.Background>
+            </Controls:HoverButton.Background>
+        </Controls:HoverButton>
+        <Controls:HoverButton TimeInterval="3000" Content="Close Running Service" TextBlock.TextAlignment="Center" VerticalContentAlignment="Center" Height="55" HorizontalAlignment="Left" Margin="855,624,0,0" Name="closeShowingServiceBtn" VerticalAlignment="Top" Width="201" Click="closeShowingServiceBtn_Click">
+            <Controls:HoverButton.Background>
                 <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
                     <GradientStop Color="#FFF8F7FF" Offset="0.299" />
                     <GradientStop Color="White" Offset="0.984" />
                     <GradientStop Color="#FFD1D0C9" Offset="0.795" />
                     <GradientStop Color="#FFFFEACA" Offset="0.575" />
                 </LinearGradientBrush>
-            </Button.Background>
-        </Button>
+            </Controls:HoverButton.Background>
+        </Controls:HoverButton>
         <Image HorizontalAlignment="Left" Margin="6,611,0,0" Name="image1" Stretch="UniformToFill" VerticalAlignment="Top" Source="/HWUPortal;component/Images/logo.png" Height="100" Width="480" />
         
         <my:KinectSensorChooser Canvas.Left="320" Canvas.Top="160" Name="kinectSensorChooser1" Width="693" Height="211" />

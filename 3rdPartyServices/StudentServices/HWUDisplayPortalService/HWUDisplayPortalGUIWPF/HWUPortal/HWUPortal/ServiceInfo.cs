@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Windows.Controls;
+using Coding4Fun.Kinect.Wpf.Controls;
 namespace HWUPortal
 {
     public class ServiceInfo
@@ -10,7 +11,7 @@ namespace HWUPortal
         public String serviceName;
         public String serviceExe;
         public String serviceURL;
-        public Button button;
+        public HoverButton button;
         public ServiceType serviceType;
         public Boolean requiresKinect;
 
