@@ -22,16 +22,18 @@
  * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.disaster.idisaster.data;
+
+package org.societies.thirdpartyservices.idisaster.data;
 
 /**
  *  Common resource used by iDisaster application components.
- *  Used to store the team (community) selected by the user.
+ *  Used to store the user identity.
  *
- * @author jacquelinefloch
+ * @author Jacqueline.Floch@sintef.no
  *
  */
-public class SelectedTeam {
-	String globalId;		// CIS ID
-	String name;			// name of the team
+public class Me {
+		String globalId;		// CSS ID
+		String displayName;		// nickname - if not available "name" is used for display
+		String name;
 }

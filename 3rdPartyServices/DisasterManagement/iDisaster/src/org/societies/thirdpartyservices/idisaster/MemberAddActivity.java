@@ -22,9 +22,9 @@
  * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.disaster.idisaster;
+package org.societies.thirdpartyservices.idisaster;
 
-import com.disaster.idisaster.R;
+import org.societies.thirdpartyservices.idisaster.R;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -39,35 +39,32 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 
 /**
- * Activity for creating a new disaster team (community).
+ * Activity for creating a new member to the selected disaster team (community).
  * 
  * @author Jacqueline.Floch@sintef.no
  *
  */
-public class DisasterCreateActivity extends Activity implements OnClickListener {
+public class MemberAddActivity extends Activity implements OnClickListener {
 
-	private EditText disasterNameView;
-	private EditText disasterDescriptionView;
-	private String disasterName;
-	private String disasterDescription;
+	private EditText memberNameView;
+	private EditText memberDescriptionView;
+	private String memberName;
+	private String memberDescription;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.disaster_create_layout);
+		setContentView(R.layout.member_add_layout);
 
 		// Get editable fields
-		disasterNameView = (EditText) findViewById(R.id.editDisasterCreateName);
-		disasterDescriptionView = (EditText) findViewById(R.id.editDisasterCreateDescription);
+		memberNameView = (EditText) findViewById(R.id.editMemberAddName);
+		memberDescriptionView = (EditText) findViewById(R.id.editMemberAddDescription);
 
     	// Add click listener to button
-    	final Button button = (Button) findViewById(R.id.disasterCreateButton);
+    	final Button button = (Button) findViewById(R.id.memberAddButton);
     	button.setOnClickListener(this);
-
-//	    Test dialog
-//    	iDisasterApplication.getInstance().showDialog (this, getString(R.string.DisasterCreateTestDialog), getString(R.string.dialogOK));
 
     }
 
@@ -79,69 +76,52 @@ public class DisasterCreateActivity extends Activity implements OnClickListener 
 
 	public void onClick(View view) {
 
-    	if (disasterNameView.getText().length() == 0) {					// check input for disaster name
+    	if (memberNameView.getText().length() == 0) {					// check input for member name
 
     		// Hide the soft keyboard otherwise the toast message does appear more clearly.
     	    InputMethodManager mgr = (InputMethodManager) getSystemService(this.INPUT_METHOD_SERVICE);
-    	    mgr.hideSoftInputFromWindow(disasterNameView.getWindowToken(), 0);
+    	    mgr.hideSoftInputFromWindow(memberNameView.getWindowToken(), 0);
 	    
-    		Toast.makeText(this, getString(R.string.toastDisasterName), 
+    		Toast.makeText(this, getString(R.string.toastMemberName), 
     				Toast.LENGTH_LONG).show();
     		return;
 
-    	} else if (disasterDescriptionView.getText().length() == 0) {	// check input for description (or any obligatory field)
+    	} else if (memberDescriptionView.getText().length() == 0) {	// check input for description (or any obligatory field)
 
     		// Hide the soft keyboard otherwise the toast message does appear more clearly.
     	    InputMethodManager mgr = (InputMethodManager) getSystemService(this.INPUT_METHOD_SERVICE);
-    	    mgr.hideSoftInputFromWindow(disasterDescriptionView.getWindowToken(), 0);
+    	    mgr.hideSoftInputFromWindow(memberDescriptionView.getWindowToken(), 0);
 
-    	    Toast.makeText(this, getString(R.string.toastDisasterDescription), 
+    	    Toast.makeText(this, getString(R.string.toastMemberDescription), 
 	    			Toast.LENGTH_LONG).show();
 	    	return;
 
-    	} else {														// add disaster to directory
+    	} else {
 
-    		disasterName = disasterNameView.getText().toString();
-    		disasterDescription = disasterDescriptionView.getText().toString();
+    		memberName = memberNameView.getText().toString();
+    		memberDescription = memberDescriptionView.getText().toString();
+
+    		//TODO: Add call for search to the Social Provider
+	    		
+//TODO: Refresh list of members? - so it is displayed in the previous activity
     		
-//TODO: Add call to the Social Provider
+//TODO: remove test code
+    	    iDisasterApplication.getInstance().memberNameList.add(memberName);
+    	    
+    	    // report data change to adapter
+// TODO: Add to adapter
+//    	    iDisasterApplication.getInstance().disasterAdapter.notifyDataSetChanged();
+
     		
-    		boolean disasterCreationCode = false;	// TODO: replace by code returned by Societes API
-    			    		
-    		// Create dialog for error
-    		if (disasterCreationCode) { 							
-    			AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this);
-    			alertBuilder.setMessage(getString(R.string.disasterCreateDialog))
-    				.setCancelable(false)
-    				.setPositiveButton (getString(R.string.dialogOK), new DialogInterface.OnClickListener() {
-    					public void onClick(DialogInterface dialog, int id) {
-    						disasterNameView.setText(getString(R.string.emptyText));
-    						disasterNameView.setHint(getString(R.string.loginUserNameHint));
-	    		           return;
-    					}
-    				});
-	    		AlertDialog alert = alertBuilder.create();
-	    		alert.show();
-	    		return;
-	   		}
-	
-    		// Test case: Refresh list of disasters for display in the DisasterListActivity
-    		if (iDisasterApplication.testDataUsed) {
-    	   	    iDisasterApplication.getInstance().disasterNameList.add(disasterName);
-        	    // report data change to adapter
-        	    iDisasterApplication.getInstance().disasterAdapter.notifyDataSetChanged();
-   			}
-     		
 // TODO: Remove code for testing the correct setting of preferences 
-    	    Toast.makeText(this, "Debug: "  + disasterName + " " + disasterDescription, 
-    			Toast.LENGTH_LONG).show();
+    	    Toast.makeText(this, "Debug: "  + memberName + " " + memberDescription, Toast.LENGTH_LONG).show();
 
     	    // Hide the soft keyboard:
 			// - the soft keyboard will not appear on next activity window!
     	    InputMethodManager mgr = (InputMethodManager) getSystemService(this.INPUT_METHOD_SERVICE);
-    	    mgr.hideSoftInputFromWindow(disasterNameView.getWindowToken(), 0);
+    	    mgr.hideSoftInputFromWindow(memberNameView.getWindowToken(), 0);
 
-	    	finish();
+	    	finish ();
     	    // Go back to the previous activity
 	    }
     }

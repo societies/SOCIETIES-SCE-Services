@@ -1,10 +1,10 @@
-package com.disaster.idisaster;
+package org.societies.thirdpartyservices.idisaster;
 
 //import org.societies.api.css.management.ICssRecord;
 //import org.societies.api.css.management.ISocietiesApp;
 // import org.societies.cis.android.client.SocietiesApp;
 
-import com.disaster.idisaster.R;
+import org.societies.thirdpartyservices.idisaster.R;
 
 import android.app.TabActivity;
 import android.content.Intent;

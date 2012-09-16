@@ -22,7 +22,9 @@
  * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.disaster.idisaster;
+package org.societies.thirdpartyservices.idisaster;
+
+import org.societies.thirdpartyservices.idisaster.R;
 
 import android.app.AlertDialog;
 import android.app.ListActivity;
@@ -39,43 +41,53 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.AdapterView.OnItemClickListener;
 
+// TODO: Add import
+// import org.societies.android.platform.SocialContract;
+
 /**
- * This activity allows the user to look up members
- * in a directory, more to be added.
+ * This activity allows the user to list the services
+ * recommended, shared or installed in the disaster team.
  * 
  * @author Jacqueline.Floch@sintef.no
  *
  */
-public class MemberListActivity extends ListActivity {
 
+// TODO: Classified services in the list according to whether they are
+// recommended, shared or installed.
+
+public class ServiceListActivity extends ListActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-	// TODO Auto-generated method stub
-	super.onCreate(savedInstanceState);
 
+    super.onCreate(savedInstanceState);
+
+    //TODO: query Content Provider for services in the CIS
 	
-//TODO: query Content Provider
-	
-	boolean noMember = false;
-	
-	if (noMember) {
-		// Create dialog if no member in disaster team						
-    	AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this);
-    	alertBuilder.setMessage(getString(R.string.memberListDialog))
-    		.setCancelable(false)
-    		.setPositiveButton (getString(R.string.dialogOK), new DialogInterface.OnClickListener() {
-    			public void onClick(DialogInterface dialog, int id) {
-    				// add code
-    				return;
-    			}
-    		});
-	    AlertDialog alert = alertBuilder.create();
-	    alert.show();
-	    return;
-	    
-	} else {
-		// Display members in disaster team						
-    	setContentView (R.layout.member_list_layout);
+  	boolean noService = false;
+  	
+  	if (noService) {
+  		//  TextView cannot be used here as the Activity is a ListActivity
+  		//  TextView textview = new TextView(this);
+  		//	textview.setText("This is the Services tab");
+  		//  setContentView(textview);
+
+  		// Create dialog if no service in disaster team						
+      	AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this);
+      	alertBuilder.setMessage(getString(R.string.serviceListDialogCIS))
+      		.setCancelable(false)
+      		.setPositiveButton (getString(R.string.dialogOK), new DialogInterface.OnClickListener() {
+      			public void onClick(DialogInterface dialog, int id) {
+      				// add code
+      				return;
+      			}
+      		});
+  	    AlertDialog alert = alertBuilder.create();
+  	    alert.show();
+  	    return;
+
+  	} else {
+    
+    	setContentView (R.layout.service_list_layout);
     	ListView listView = getListView();
     	
     	// Enable filtering for the contents of the list view.
@@ -93,12 +105,12 @@ public class MemberListActivity extends ListActivity {
 //TODO: customize the layout for the row is necessary
 // At the moment a simple string is used as for disaster.
 
-    	iDisasterApplication.getInstance().memberAdapter = new ArrayAdapter<String> (this,
-		R.layout.disaster_list_item, R.id.disaster_item, iDisasterApplication.getInstance().memberNameList);
+    	iDisasterApplication.getInstance().CISserviceAdapter = new ArrayAdapter<String> (this,
+		R.layout.disaster_list_item, R.id.disaster_item, iDisasterApplication.getInstance().CISserviceNameList);
 
     	// Assign adapter to ListView
 
-    	listView.setAdapter(iDisasterApplication.getInstance().memberAdapter);
+    	listView.setAdapter(iDisasterApplication.getInstance().CISserviceAdapter);
 
     	// Add listener for short click.
     	// 
@@ -107,64 +119,65 @@ public class MemberListActivity extends ListActivity {
     			int position, long id) {
 // TODO: Remove code for testing the correct setting of preferences 
     			Toast.makeText(getApplicationContext(),
-    				"Click ListItem Number   " + (position+1) + "   " + iDisasterApplication.getInstance().memberNameList.get (position), Toast.LENGTH_LONG)
+    				"Click ListItem Number   " + (position+1) + "   " + iDisasterApplication.getInstance().CISserviceNameList.get (position), Toast.LENGTH_LONG)
     				.show();
 
     			// Start the ServiceDetails Activity
-//    			startActivity (new Intent(ServiceListActivity.this, ServiceDetailsActivity.class));
+    			// TODO: Provide CIS_ID and SERVICE_ID as parameters... 
+    			startActivity (new Intent(ServiceListActivity.this, ServiceDetailsActivity.class));
     			
-// The activity is kept on stack (check also that "noHistory" is not set in Manifest
+// The activity is kept on stack (check also that "noHistory" is not set in Manifest)
+// Should it be removed?
 //    			finish();
     			}
+    		
     		});
-
-		}	
+  		}
     }
 
 /**
  * onCreateOptionsMenu expands the activity menu for this activity tab.
  */
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu){
+@Override
+	public boolean onCreateOptionsMenu(Menu menu){
 
 		//The FIXED menu is set by the TabActivity.
 // I am uncertain why the call to the super class leads to the creation
 // of the fixed menu set by the TabActivity (DisasterActivity)
+		super.onCreateOptionsMenu(menu);
+		
+		menu.setGroupVisible(R.id.disasterMenuService, true);
+		return true;
+}
 
-    	super.onCreateOptionsMenu(menu);
-    	
-    	menu.setGroupVisible(R.id.disasterMenuMember, true);
-    	return true;
-    }
-
-    /**
-    * onOptionsItemSelected handles the selection of an item in the activity menu.
-    */
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+/**
+ * onOptionsItemSelected handles the selection of an item in the activity menu. 
+ */
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
 
 		// The TabActivity handles items in the FIXED menu.
 // I am uncertain why the call to the super class leads to handling
 // of a command in the fixed menu by the TabActivity (DisasterActivity)
+		super.onOptionsItemSelected(item);
 
-    	super.onOptionsItemSelected(item);
+		switch (item.getItemId()) {
 
-    	switch (item.getItemId()) {
+			case R.id.disasterMenuAddService:
 
-    		case R.id.disasterMenuAddMember:
 ////TODO: Remove code for testing the correct setting of preferences 
-//    			Toast.makeText(getApplicationContext(),
-//    				"Menu item chosen: Add member", Toast.LENGTH_LONG)
-//    				.show();
-    			
-    			startActivity(new Intent(MemberListActivity.this, MemberAddActivity.class));
-    		break;
-    		
-    		default:
-    		break;
-    	}
-    	return true;
-    }
+//				Toast.makeText(getApplicationContext(),
+//						"Menu item chosen: Add service", Toast.LENGTH_LONG)
+//						.show();			
+
+				startActivity(new Intent(ServiceListActivity.this, ServiceAddActivity.class));
+			break;
+		
+			default:
+			break;
+		}
+		return true;
+	}
 
 }

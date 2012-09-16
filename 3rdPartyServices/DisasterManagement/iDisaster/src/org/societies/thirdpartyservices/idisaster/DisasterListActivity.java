@@ -22,7 +22,7 @@
  * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.disaster.idisaster;
+package org.societies.thirdpartyservices.idisaster;
 
 //import org.societies.api.cis.management.ICisManager;
 //import org.societies.api.cis.management.ICisOwned;
@@ -30,6 +30,8 @@ package com.disaster.idisaster;
 import java.util.ArrayList;
 
 import org.societies.android.api.cis.SocialContract;
+
+import org.societies.thirdpartyservices.idisaster.R;
 
 import android.app.ListActivity;
 import android.content.ContentResolver;

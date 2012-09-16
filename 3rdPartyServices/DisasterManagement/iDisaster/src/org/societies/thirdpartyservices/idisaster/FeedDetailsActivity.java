@@ -22,16 +22,38 @@
  * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.disaster.idisaster;
+package org.societies.thirdpartyservices.idisaster;
+
+import org.societies.thirdpartyservices.idisaster.R;
 
 import android.app.Activity;
+import android.os.Bundle;
+import android.widget.TextView;
 
 /**
- * Allows user to view and update account data.
+ * Activity for Activity for showing an activity feed details.
  * 
- * @author Babak.Farshchian@sintef.no
+ * @author Jacqueline.Floch@sintef.no
  *
  */
-public class AccountManagerActivity extends Activity {
+public class FeedDetailsActivity extends Activity {
+
+	private TextView feedContentView;
+	private String feedContent = "feedTestContent";
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.feed_details_layout);
+		
+		// Get text fields
+//TODO : find error!
+//		feedContentView = (TextView) findViewById (R.id.showFeedDetailsContent);
+
+//	    Test dialog
+//    	iDisasterApplication.getInstance().showDialog (this, getString(R.string.newDisasterTestDialog), getString(R.string.dialogOK));
+
+    }
 
 }

@@ -22,14 +22,11 @@
  * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.disaster.idisaster;
+package org.societies.thirdpartyservices.idisaster;
 
-import com.disaster.idisaster.R;
+import org.societies.thirdpartyservices.idisaster.R;
 
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.content.DialogInterface;
-import android.content.Intent;
 import android.os.Bundle;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -39,33 +36,28 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 
 /**
- * Activity for creating a new member to the selected disaster team (community).
+ * Activity for adding a new feed to the selected disaster team (community).
  * 
  * @author Jacqueline.Floch@sintef.no
  *
  */
-public class MemberAddActivity extends Activity implements OnClickListener {
+public class FeedAddActivity extends Activity implements OnClickListener {
 
-	private EditText memberNameView;
-	private EditText memberDescriptionView;
-	private String memberName;
-	private String memberDescription;
-
+	private EditText feedContentView;
+	private String feedContent;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.member_add_layout);
+		setContentView(R.layout.feed_add_layout);
 
 		// Get editable fields
-		memberNameView = (EditText) findViewById(R.id.editMemberAddName);
-		memberDescriptionView = (EditText) findViewById(R.id.editMemberAddDescription);
+		feedContentView = (EditText) findViewById(R.id.editFeedAddContent);
 
     	// Add click listener to button
-    	final Button button = (Button) findViewById(R.id.memberAddButton);
+    	final Button button = (Button) findViewById(R.id.feedAddButton);
     	button.setOnClickListener(this);
-
     }
 
 
@@ -76,52 +68,42 @@ public class MemberAddActivity extends Activity implements OnClickListener {
 
 	public void onClick(View view) {
 
-    	if (memberNameView.getText().length() == 0) {					// check input for member name
+    	if (feedContentView.getText().length() == 0) {					// check input for content
 
     		// Hide the soft keyboard otherwise the toast message does appear more clearly.
     	    InputMethodManager mgr = (InputMethodManager) getSystemService(this.INPUT_METHOD_SERVICE);
-    	    mgr.hideSoftInputFromWindow(memberNameView.getWindowToken(), 0);
+    	    mgr.hideSoftInputFromWindow(feedContentView.getWindowToken(), 0);
 	    
-    		Toast.makeText(this, getString(R.string.toastMemberName), 
+    		Toast.makeText(this, getString(R.string.toastFeedContent), 
     				Toast.LENGTH_LONG).show();
     		return;
 
-    	} else if (memberDescriptionView.getText().length() == 0) {	// check input for description (or any obligatory field)
+    	} else {														// add activity to feed
 
-    		// Hide the soft keyboard otherwise the toast message does appear more clearly.
-    	    InputMethodManager mgr = (InputMethodManager) getSystemService(this.INPUT_METHOD_SERVICE);
-    	    mgr.hideSoftInputFromWindow(memberDescriptionView.getWindowToken(), 0);
+    		feedContent = feedContentView.getText().toString();
 
-    	    Toast.makeText(this, getString(R.string.toastMemberDescription), 
-	    			Toast.LENGTH_LONG).show();
-	    	return;
-
-    	} else {
-
-    		memberName = memberNameView.getText().toString();
-    		memberDescription = memberDescriptionView.getText().toString();
-
-    		//TODO: Add call for search to the Social Provider
+//TODO: Add call to the Social Provider
 	    		
-//TODO: Refresh list of members? - so it is displayed in the previous activity
+//TODO: Refresh list of feeds? - so it is displayed in the previous activity
     		
 //TODO: remove test code
-    	    iDisasterApplication.getInstance().memberNameList.add(memberName);
+    	    iDisasterApplication.getInstance().feedContentList.add(feedContent);
     	    
-    	    // report data change to adapter
+    	    // Notify data change to adapter
 // TODO: Add to adapter
-//    	    iDisasterApplication.getInstance().disasterAdapter.notifyDataSetChanged();
+//    	    iDisasterApplication.getInstance().feedAdapter.notifyDataSetChanged();
 
     		
 // TODO: Remove code for testing the correct setting of preferences 
-    	    Toast.makeText(this, "Debug: "  + memberName + " " + memberDescription, Toast.LENGTH_LONG).show();
+    	    Toast.makeText(this, "Debug: "  + feedContent, 
+    			Toast.LENGTH_LONG).show();
 
     	    // Hide the soft keyboard:
 			// - the soft keyboard will not appear on next activity window!
     	    InputMethodManager mgr = (InputMethodManager) getSystemService(this.INPUT_METHOD_SERVICE);
-    	    mgr.hideSoftInputFromWindow(memberNameView.getWindowToken(), 0);
+    	    mgr.hideSoftInputFromWindow(feedContentView.getWindowToken(), 0);
 
-	    	finish ();
+	    	finish();
     	    // Go back to the previous activity
 	    }
     }

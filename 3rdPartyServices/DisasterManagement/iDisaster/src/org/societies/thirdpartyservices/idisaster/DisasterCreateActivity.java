@@ -22,11 +22,14 @@
  * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.disaster.idisaster;
+package org.societies.thirdpartyservices.idisaster;
 
-import com.disaster.idisaster.R;
+import org.societies.thirdpartyservices.idisaster.R;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -36,28 +39,36 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 
 /**
- * Activity for adding a new feed to the selected disaster team (community).
+ * Activity for creating a new disaster team (community).
  * 
  * @author Jacqueline.Floch@sintef.no
  *
  */
-public class FeedAddActivity extends Activity implements OnClickListener {
+public class DisasterCreateActivity extends Activity implements OnClickListener {
 
-	private EditText feedContentView;
-	private String feedContent;
+	private EditText disasterNameView;
+	private EditText disasterDescriptionView;
+	private String disasterName;
+	private String disasterDescription;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.feed_add_layout);
+		setContentView(R.layout.disaster_create_layout);
 
 		// Get editable fields
-		feedContentView = (EditText) findViewById(R.id.editFeedAddContent);
+		disasterNameView = (EditText) findViewById(R.id.editDisasterCreateName);
+		disasterDescriptionView = (EditText) findViewById(R.id.editDisasterCreateDescription);
 
     	// Add click listener to button
-    	final Button button = (Button) findViewById(R.id.feedAddButton);
+    	final Button button = (Button) findViewById(R.id.disasterCreateButton);
     	button.setOnClickListener(this);
+
+//	    Test dialog
+//    	iDisasterApplication.getInstance().showDialog (this, getString(R.string.DisasterCreateTestDialog), getString(R.string.dialogOK));
+
     }
 
 
@@ -68,40 +79,67 @@ public class FeedAddActivity extends Activity implements OnClickListener {
 
 	public void onClick(View view) {
 
-    	if (feedContentView.getText().length() == 0) {					// check input for content
+    	if (disasterNameView.getText().length() == 0) {					// check input for disaster name
 
     		// Hide the soft keyboard otherwise the toast message does appear more clearly.
     	    InputMethodManager mgr = (InputMethodManager) getSystemService(this.INPUT_METHOD_SERVICE);
-    	    mgr.hideSoftInputFromWindow(feedContentView.getWindowToken(), 0);
+    	    mgr.hideSoftInputFromWindow(disasterNameView.getWindowToken(), 0);
 	    
-    		Toast.makeText(this, getString(R.string.toastFeedContent), 
+    		Toast.makeText(this, getString(R.string.toastDisasterName), 
     				Toast.LENGTH_LONG).show();
     		return;
 
-    	} else {														// add activity to feed
+    	} else if (disasterDescriptionView.getText().length() == 0) {	// check input for description (or any obligatory field)
 
-    		feedContent = feedContentView.getText().toString();
+    		// Hide the soft keyboard otherwise the toast message does appear more clearly.
+    	    InputMethodManager mgr = (InputMethodManager) getSystemService(this.INPUT_METHOD_SERVICE);
+    	    mgr.hideSoftInputFromWindow(disasterDescriptionView.getWindowToken(), 0);
 
+    	    Toast.makeText(this, getString(R.string.toastDisasterDescription), 
+	    			Toast.LENGTH_LONG).show();
+	    	return;
+
+    	} else {														// add disaster to directory
+
+    		disasterName = disasterNameView.getText().toString();
+    		disasterDescription = disasterDescriptionView.getText().toString();
+    		
 //TODO: Add call to the Social Provider
-	    		
-//TODO: Refresh list of feeds? - so it is displayed in the previous activity
     		
-//TODO: remove test code
-    	    iDisasterApplication.getInstance().feedContentList.add(feedContent);
-    	    
-    	    // Notify data change to adapter
-// TODO: Add to adapter
-//    	    iDisasterApplication.getInstance().feedAdapter.notifyDataSetChanged();
-
-    		
+    		boolean disasterCreationCode = false;	// TODO: replace by code returned by Societes API
+    			    		
+    		// Create dialog for error
+    		if (disasterCreationCode) { 							
+    			AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this);
+    			alertBuilder.setMessage(getString(R.string.disasterCreateDialog))
+    				.setCancelable(false)
+    				.setPositiveButton (getString(R.string.dialogOK), new DialogInterface.OnClickListener() {
+    					public void onClick(DialogInterface dialog, int id) {
+    						disasterNameView.setText(getString(R.string.emptyText));
+    						disasterNameView.setHint(getString(R.string.loginUserNameHint));
+	    		           return;
+    					}
+    				});
+	    		AlertDialog alert = alertBuilder.create();
+	    		alert.show();
+	    		return;
+	   		}
+	
+    		// Test case: Refresh list of disasters for display in the DisasterListActivity
+    		if (iDisasterApplication.testDataUsed) {
+    	   	    iDisasterApplication.getInstance().disasterNameList.add(disasterName);
+        	    // report data change to adapter
+        	    iDisasterApplication.getInstance().disasterAdapter.notifyDataSetChanged();
+   			}
+     		
 // TODO: Remove code for testing the correct setting of preferences 
-    	    Toast.makeText(this, "Debug: "  + feedContent, 
+    	    Toast.makeText(this, "Debug: "  + disasterName + " " + disasterDescription, 
     			Toast.LENGTH_LONG).show();
 
     	    // Hide the soft keyboard:
 			// - the soft keyboard will not appear on next activity window!
     	    InputMethodManager mgr = (InputMethodManager) getSystemService(this.INPUT_METHOD_SERVICE);
-    	    mgr.hideSoftInputFromWindow(feedContentView.getWindowToken(), 0);
+    	    mgr.hideSoftInputFromWindow(disasterNameView.getWindowToken(), 0);
 
 	    	finish();
     	    // Go back to the previous activity
