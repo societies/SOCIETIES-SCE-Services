@@ -122,8 +122,26 @@ public class ServiceAddActivity extends ListActivity {
     				"Click ListItem Number   " + (position+1) + "   " + iDisasterApplication.getInstance().serviceNameList.get (position), Toast.LENGTH_LONG)
     				.show();
 
+    			
     			// Start the ServiceDetails Activity
-    			startActivity (new Intent(ServiceAddActivity.this, ServiceDetailsActivity.class));
+    			// TODO: Provide CIS_ID and SERVICE_ID as parameters... 
+
+ //    			startActivity (new Intent(ServiceAddActivity.this, ServiceDetailsActivity.class));
+    			    			
+    			Intent intent = new Intent(ServiceAddActivity.this, ServiceDetailsActivity.class);
+				intent.putExtra("CODE", "ADD_TO_CIS");			// The service is not yet related to CIS
+    			if (iDisasterApplication.testDataUsed) {
+// Needed? This is a global resource that is retrieved from iDisaster App
+//    				intent.putExtra("CIS_ID", iDisasterApplication.getInstance().selectedTeam.globalId);
+    				intent.putExtra("SERVICE_ID", Integer.toString(position));    				
+    			} else {
+    			// TODO: use service information returned by SocialProvider	
+// Needed? This is a global resource that is retrieved from iDisaster App
+//    				intent.putExtra("CIS_ID", iDisasterApplication.getInstance().selectedTeam.globalId);
+    				intent.putExtra("SERVICE_ID", Integer.toString(position));    				    				
+    			}
+    			startActivity(intent);
+
 
     			// The activity is kept on stack (check also that "noHistory" is not set in Manifest)
 //    			finish();

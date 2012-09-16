@@ -62,7 +62,10 @@ import android.widget.Toast;
 public class DisasterListActivity extends ListActivity {
 
 	ContentResolver resolver;
-	Cursor cursor;
+	Cursor ownTeamCursor;				// used for the teams the user owns
+	Cursor memberTeamCursor;			// used for the teams the user is member of
+	
+	Cursor cursor;	//TODO: remove
 	
 	ArrayAdapter<String> disasterAdapter;
 	ListView listView;
@@ -90,17 +93,19 @@ public class DisasterListActivity extends ListActivity {
        	listView.setOnItemClickListener(new OnItemClickListener() {
     		public void onItemClick (AdapterView<?> parent, View view,
     			int position, long id) {
-    			if (iDisasterApplication.testDataUsed) {			// Test data  			
-    				iDisasterApplication.getInstance().disasterTeamName = iDisasterApplication.getInstance().disasterNameList.get(position);
+    			if (iDisasterApplication.testDataUsed) {			// Test data
+    				iDisasterApplication.getInstance().selectedTeam.name = iDisasterApplication.getInstance().disasterNameList.get(position);
+    				iDisasterApplication.getInstance().selectedTeam.globalId = Integer.toString(position);
 // Store the selected disaster in application preferences
 //    				iDisasterApplication.getInstance().setDisasterTeamName (name);
     			} else {											// Fetch data from Social Provide
 //TODO: get name in from Social Provider
-    				iDisasterApplication.getInstance().disasterTeamName = "Name will be be fetched";
+    				iDisasterApplication.getInstance().selectedTeam.name = "Name will be fetched";
+    				iDisasterApplication.getInstance().selectedTeam.globalId = "Id will be fetched";
     			}
     			
     			Toast.makeText(getApplicationContext(),
-        				"Click ListItem Number   " + (position+1) + "   " + iDisasterApplication.getInstance().disasterTeamName,
+        				"Click ListItem Number   " + (position+1) + "   " + iDisasterApplication.getInstance().selectedTeam.name,
         				Toast.LENGTH_LONG).show();
 
     			// Start the Disaster Activity
@@ -119,8 +124,10 @@ public class DisasterListActivity extends ListActivity {
     
 /**
  * onResume is called at start of the active lifetime.
- * The lists of disaster is retrieved from SocialProvider and assigned to 
+ * The list of disaster teams is retrieved from SocialProvider and assigned to 
  * view.
+ * The data are fetched each time the activity becomes visible as these data
+ * may be changed by other users (info fetched from the Cloud)
 */
 
 // TODO: check if it is necessary to use an adaptater as the list of disasters is
@@ -130,16 +137,12 @@ public class DisasterListActivity extends ListActivity {
 	protected void onResume() {
 		super.onResume();
 	
-		if (! iDisasterApplication.testDataUsed) {			// Test data are set in onCreate - see explanation above
-															// Data from content provider are fetched every time the activity becomes visible
+		// Test data are set in onCreate - see explanation above
 
-			if (disasterAdapter!= null) disasterAdapter.clear();
-
-// All information is fetched from the Social Provider. Preferences are no longer used.
-//			iDisasterApplication.getInstance().setDisasterTeamName // reset user preferences
-//			(getString(R.string.noPreference));
-		
-			getDisasterTeams();
+		if (! iDisasterApplication.testDataUsed) {
+			if (disasterAdapter!= null) disasterAdapter.clear();		
+			getOwnDisasterTeams();		// Retrieve teams I am owner of
+			getMemberDisasterTeams();	// Retrieve teams I am member of
 			assignAdapter ();
 		}
 	}
@@ -153,7 +156,9 @@ public class DisasterListActivity extends ListActivity {
     protected void onPause() {
     	super.onPause ();
     	
-//    	cursor.close();    	
+//    	ownTeamCursor.close();
+//    	memberTeamCursor.close();    	
+
     }
 
     /** Called when resuming a previous activity (for instance using back button) */
@@ -163,24 +168,23 @@ public class DisasterListActivity extends ListActivity {
 //    }
 
 /**
- * getDisasters retrieves the list of disaster teams from Social Provider.
+ * getOwnDisasterTeams retrieves the list of disaster teams owned by the user
+ * from Social Provider.
  */
 	
 	// TODO: The following retrieve the list of communities - not the ones I am member of
-	private void getDisasterTeams () {
+	private void getOwnDisasterTeams () {
 
 		Uri uri = SocialContract.Communities.CONTENT_URI;
+		
+		String[] projection = new String[] {
+				SocialContract.Communities.GLOBAL_ID,
+				SocialContract.Communities.NAME};
 
-		String[] projection = new String[] { 
-				SocialContract.Communities.NAME };
-
-//		String[] projection = new String[] { SocialContract.MyCommunity._ID,
-//				SocialContract.MyCommunity.DISPLAY_NAME };
-//		String selection = ContactsContract.Contacts.IN_VISIBLE_GROUP + " = '"
-//				+ ("1") + "'";
-
-// TODO: select only string I am member of		
-		String selection = null;
+// TODO: test selection of communities I am owning		
+//		String selection = null;
+		String selection = SocialContract.Communities.OWNER_ID + " = " + 
+				iDisasterApplication.getInstance().me.globalId; 
 
 		String[] selectionArgs = null;
 
@@ -188,7 +192,7 @@ public class DisasterListActivity extends ListActivity {
 		String sortOrder = SocialContract.Communities.NAME
 				+ " COLLATE LOCALIZED ASC";
 
-		cursor = resolver.query(uri, projection, selection, selectionArgs,sortOrder);
+		ownTeamCursor = resolver.query(uri, projection, selection, selectionArgs,sortOrder);
 
 		return;
 
@@ -201,10 +205,80 @@ public class DisasterListActivity extends ListActivity {
 //
 	}
 
+	
+/**
+ * getMemberDisasterTeams retrieves the list of disaster teams owned by the user
+ * from Social Provider.
+ */
+		
+// TODO: The following retrieve the list of communities - not the ones I am member of
+	private void getMemberDisasterTeams () {
+
+		// Get GLOBAL_IDs for CIS I am member of
+		Uri membershipUri = SocialContract.Membership.CONTENT_URI;
+					
+		String[] membershipProjection = new String[] {
+				SocialContract.Membership.GLOBAL_ID_COMMUNITY};
+
+// TODO: test selection of communities I am member of		
+//		String selection = null;
+		String membershipSelection = SocialContract.Membership.GLOBAL_ID_MEMBER + " = " + 
+				iDisasterApplication.getInstance().me.globalId; 
+		
+		Cursor membershipCursor= resolver.query(membershipUri, membershipProjection,
+				membershipSelection, null /* selectionArgs */, null /* sortOrder*/);
+
+	
+		if (membershipCursor == null) {		// The user is not member of any community
+			memberTeamCursor = null;
+			return;
+		} else {							// Get GLOBAL_ID and NAME for CIS I am member of
+			// 
+			Uri communitiesUri = SocialContract.Communities.CONTENT_URI;
+				
+			String[] communitiesprojection = new String[] {
+					SocialContract.Communities.GLOBAL_ID,
+					SocialContract.Communities.NAME};
+
+	// TODO: select only string I am member of		
+			String communitiesSelection ="";
+			if (membershipCursor.getCount() != 0) {
+				// assign an empty List to Adapter
+				iDisasterApplication.debug (2, "No information can be retrieved in membershipCursor");
+			} else {
+				while (membershipCursor.moveToNext()) {
+					communitiesSelection = communitiesSelection + " OR " +
+							SocialContract.Communities.GLOBAL_ID + " = " +
+							membershipCursor.getString (membershipCursor.
+									getColumnIndex(SocialContract.Membership.GLOBAL_ID_COMMUNITY));
+				}
+			}
+			memberTeamCursor = resolver.query(communitiesUri, communitiesprojection,
+					communitiesSelection, null /* selectionArgs */, null /* sortOrder*/);
+			return;
+	
+			
+			
+		}
+		
+		
+	//
+	// When using managedQuery(), the activity keeps a reference to the cursor and close it
+	// whenever needed (in onDestroy() for instance.) 
+	// When using a contentResolver's query(), the developer has to manage the cursor as a sensitive
+	// resource. If you forget, for instance, to close() it in onDestroy(), you will leak 
+	// underlying resources (logcat will warn you about it.)
+	//
+	}
+
 /**
  * assignAdapter assigns data to display to adapter and adapter to view.
  */
 	private void assignAdapter () {
+		
+// TODO: extend with structured adapter		
+		cursor = ownTeamCursor;
+//		cursor = memberTeamCursor;
 		
 		if (cursor == null) {
 			// assign an empty List to Adapter

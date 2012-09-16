@@ -112,8 +112,8 @@ public class MemberListActivity extends ListActivity {
     				"Click ListItem Number   " + (position+1) + "   " + iDisasterApplication.getInstance().memberNameList.get (position), Toast.LENGTH_LONG)
     				.show();
 
-    			// Start the ServiceDetails Activity
-//    			startActivity (new Intent(ServiceListActivity.this, ServiceDetailsActivity.class));
+// TODO: Start the MemberDetails Activity
+//    			startActivity (new Intent(MemberListActivity.this, MemberDetailsActivity.class));
     			
 // The activity is kept on stack (check also that "noHistory" is not set in Manifest
 //    			finish();

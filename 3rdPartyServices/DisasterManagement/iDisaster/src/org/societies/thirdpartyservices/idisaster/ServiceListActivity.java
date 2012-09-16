@@ -124,7 +124,23 @@ public class ServiceListActivity extends ListActivity {
 
     			// Start the ServiceDetails Activity
     			// TODO: Provide CIS_ID and SERVICE_ID as parameters... 
-    			startActivity (new Intent(ServiceListActivity.this, ServiceDetailsActivity.class));
+
+ //    			startActivity (new Intent(ServiceListActivity.this, ServiceDetailsActivity.class));
+    			
+    			Intent intent = new Intent(ServiceListActivity.this, ServiceDetailsActivity.class);
+				intent.putExtra("CODE", "RELATED_TO_CIS");		// The service is already related to CIS: either recommended or shared or ???
+    			if (iDisasterApplication.testDataUsed) {
+// Needed? This is a global resource that is retrieved from iDisaster App
+//    				intent.putExtra("CIS_ID", iDisasterApplication.getInstance().selectedTeam.globalId);
+    				intent.putExtra("SERVICE_ID", Integer.toString(position));    				
+    			} else {
+    			// TODO: use service information returned by SocialProvider	
+// Needed? This is a global resource that is retrieved from iDisaster App
+//    				intent.putExtra("CIS_ID", iDisasterApplication.getInstance().selectedTeam.globalId);
+    				intent.putExtra("SERVICE_ID", Integer.toString(position));    				    				
+    			}
+    			startActivity(intent);
+
     			
 // The activity is kept on stack (check also that "noHistory" is not set in Manifest)
 // Should it be removed?

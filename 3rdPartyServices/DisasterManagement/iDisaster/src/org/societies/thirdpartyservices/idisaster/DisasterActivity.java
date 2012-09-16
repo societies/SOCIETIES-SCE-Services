@@ -40,7 +40,7 @@ public class DisasterActivity extends TabActivity {
 
 		TextView title = (TextView)findViewById(R.id.disasterLabel);
 
-		title.setText (iDisasterApplication.getInstance().disasterTeamName);
+		title.setText (iDisasterApplication.getInstance().selectedTeam.name);
         
         Resources res = getResources();		// Resource object to get Drawables
         TabHost tabHost = getTabHost();		// The activity TabHost

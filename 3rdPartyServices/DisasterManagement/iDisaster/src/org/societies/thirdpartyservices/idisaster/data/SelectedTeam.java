@@ -32,6 +32,6 @@ package org.societies.thirdpartyservices.idisaster.data;
  *
  */
 public class SelectedTeam {
-	String globalId;		// CIS ID
-	String name;			// name of the team
+	public String globalId;		// CIS ID
+	public String name;			// name of the team
 }

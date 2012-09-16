@@ -27,10 +27,7 @@ package org.societies.thirdpartyservices.idisaster;
 import org.societies.thirdpartyservices.idisaster.R;
 
 import android.app.Activity;
-import android.content.ContentResolver;
 import android.content.Intent;
-import android.database.Cursor;
-import android.net.Uri;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -38,13 +35,6 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.TextView;
-
-import org.societies.android.api.cis.SocialContract;
-//import org.societies.thirdpartyservices.idisaster.SocialContract;
-import android.net.Uri;
-import android.content.ContentValues;
-import android.content.ContentResolver;
-import android.database.Cursor;
 
 
 /**
@@ -63,9 +53,6 @@ import android.database.Cursor;
 public class StartActivity extends Activity implements OnClickListener {
 
 	Boolean loggedIn;		// when true the user is logged
-
-	// Constant keys used for user Loging
-	public static final String USER_NOT_IDENTFIED = "USER_NOT_IDENTFIED";
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -90,26 +77,24 @@ public class StartActivity extends Activity implements OnClickListener {
     public void onResume () {
     	
     	super.onResume();
-    	
     
     	loggedIn = false;	// Always reset when starting activity since the user may have logged out in
     						// this App or another App
-    								
-    		
+    									
     	// check is the user is logged in
     	// if logged in display the user name
     	// if not tell the user he is not logged in.
 		TextView startView = (TextView) findViewById(R.id.startInfo);
 
-		
 		if (iDisasterApplication.testDataUsed) {							// Use test data (no SocialProvider)
 			startView.setText(getString(R.string.startInfoNotLogged));			
 		} else {															// Fetch data from SocialProvider
-			String userName = getUserIdentity();
-			if (userName == USER_NOT_IDENTFIED) {					// No data returned by Social provider
+			
+			if (iDisasterApplication.getInstance().checkUserIdentity(this)) {	// No data returned by Social provider
 				startView.setText(getString(R.string.startInfoNotLogged));
 			} else {														// User is identified
-				startView.setText(getString(R.string.startInfoLogged) + userName);
+				startView.setText(getString(R.string.startInfoLogged) + 
+						iDisasterApplication.getInstance().me.displayName);
 				loggedIn = true;
 			}
 		}
@@ -129,49 +114,6 @@ public class StartActivity extends Activity implements OnClickListener {
 	    	return;
 		}
    	}
-
-
-/**
- * getUserIdentity retrieves the user information from SocialProvider
- * 		Returns USER_NOT_IDENTFIED if the user is not registered
- */
-
-	private String getUserIdentity () {
-		String displayName = USER_NOT_IDENTFIED;
-		
-		Uri uri = SocialContract.Me.CONTENT_URI;
-
-		//What to get:
-		String[] projection = new String [] {
-				SocialContract.Me.GLOBAL_ID,
-				SocialContract.Me.NAME,
-				SocialContract.Me.DISPLAY_NAME
-			};
-		
-//		String selection = "";
-		String selection = SocialContract.Me._ID + " = 1";
-
-		String[] selectionArgs = null;
-		String sortOrder = null;
-		
-		Cursor cursor = getContentResolver().query(uri, projection, selection, selectionArgs, sortOrder);
-		
-		if (cursor == null) {
-			iDisasterApplication.getInstance().showDialog (this,
-					"Unable to retrieve user information from SocialProvider",
-					 getString(R.string.dialogOK));
-		} else {
-// TODO: There may be different logging info for user (stored in ContentProvider in Me).
-// 		The first row is always Societies, other rows may be used for Facebook, etc...
-//		To get the number of entries, use:
-//			int i= cursor.getCount(); 
-			if (cursor.moveToFirst()){
-				displayName = cursor.getString(cursor
-						.getColumnIndex(SocialContract.Me.DISPLAY_NAME));
-			}
-		}
-		return displayName;
-	}
 
 	
 /**

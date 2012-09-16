@@ -32,13 +32,14 @@
 
     <string name="feedAddButton">Add</string>
     <string name="feedAddHeading">Edit Feed</string>
-    <string name="feedDetailsHeading">Feed details</string>
-    <string name="feedContentHint">Enter a short status</string>
+	<string name="feedContentHint">Enter a short status</string>
     <string name="feedContentLabel">Content:</string>
+    <string name="feedDetailsHeading">Feed details</string>
+    <string name="feedListDialogCIS">No feeds yet. Select menu to add feeds.</string>
     
     <string name="loginButton">Log In</string>
     <string name="loginDialog">Please re-enter your user name and password.</string>
-    <string name="loginEmailHint">jackie@societies.org</string>
+    <string name="loginEmailHint">knut@societies.org</string>
     <string name="loginEmailLabel">Email:</string>
     <string name="loginHeading">iDisaster</string>
     <string name="loginInfo">Sign up for Societies.</string>
@@ -46,7 +47,7 @@
     <string name="loginPasswordHint">*********</string>    
     <string name="loginPasswordLabel">Password:</string>
 <!-- <string name="loginUserNameHint">Name</string>  -->
-    <string name="loginUserNameHint">Jacqueline F</string>
+    <string name="loginUserNameHint">Knut</string>
     <string name="loginUserNameLabel">Name:</string>
 <!-- <string name="loginUserNameLabel">Login as:</string>  -->
 

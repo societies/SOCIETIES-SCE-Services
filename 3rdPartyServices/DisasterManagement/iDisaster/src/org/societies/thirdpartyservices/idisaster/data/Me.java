@@ -33,7 +33,7 @@ package org.societies.thirdpartyservices.idisaster.data;
  *
  */
 public class Me {
-		String globalId;		// CSS ID
-		String displayName;		// nickname - if not available "name" is used for display
-		String name;
+		public String globalId;		// CSS ID
+		public String displayName;		// nickname - if not available "name" is used for display
+		public String name;
 }

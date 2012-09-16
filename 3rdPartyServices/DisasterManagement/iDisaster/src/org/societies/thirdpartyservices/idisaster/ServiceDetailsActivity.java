@@ -57,8 +57,8 @@ public class ServiceDetailsActivity extends Activity implements OnClickListener 
 	private TextView serviceNameView;
 	private TextView serviceDescriptionView;
 	
-	private String serviceName = "iJacket";
-	private String serviceDescription = "This service allows people in your team to remotely control your jacket";
+	private String serviceName;
+	private String serviceDescription;
 	
 	// Constant keys for servicAction
 	public static final String SERVICE_INSTALL = "Install";
@@ -84,6 +84,31 @@ public class ServiceDetailsActivity extends Activity implements OnClickListener 
 		setContentView(R.layout.service_details_layout);
 
 
+		Intent intent= getIntent(); 						// Get the intent that created activity
+		String actionCode = intent.getStringExtra("CODE"); 	// Retrieve first parameter
+															// Describes whether or not the service is related to the CIS
+// Needed? This is a global resource that is retrieved from iDisaster App
+//		String cisID = intent.getStringExtra("CIS_ID"); 		// Retrieve second parameter 
+		String serviceID = intent.getStringExtra("SERVICE_ID"); // Retrieve third parameter: service ID
+		
+		
+		
+		if (iDisasterApplication.testDataUsed) {
+			int position = Integer.parseInt(serviceID);
+			if (actionCode.equals("ADD_TO_CIS")){
+				serviceName = iDisasterApplication.getInstance().serviceNameList.get (position);
+				serviceDescription = iDisasterApplication.getInstance().serviceDescriptionList.get (position);
+				} else if (actionCode.equals("RELATED_TO_CIS")) {
+				serviceName = iDisasterApplication.getInstance().CISserviceNameList.get (position);
+				serviceDescription = iDisasterApplication.getInstance().CISserviceDescriptionList.get (position);
+			} // else: should not happened. Feil action code was used
+		} else {
+			// TODO: fetch data from Content Provider
+			int position = Integer.parseInt(serviceID);
+			serviceName = iDisasterApplication.getInstance().serviceNameList.get (position);
+			serviceDescription = iDisasterApplication.getInstance().serviceDescriptionList.get (position);	
+		}
+		
 		// Get text fields
 		serviceNameView = (TextView) findViewById(R.id.showServiceDetailsName);
 		serviceNameView.setText(serviceName);
@@ -189,12 +214,11 @@ public class ServiceDetailsActivity extends Activity implements OnClickListener 
     	   ApplicationInfo ai;
     	   try {
     		   ai = pm.getApplicationInfo(pi.packageName, 0);
-    		   System.out.println(">>>>>>packages is<<<<<<<<" + ai.publicSourceDir);
-    		   
-//    		   if ((ai.flags & ApplicationInfo.FLAG_SYSTEM) != 0)
-    		   if (!((ai.flags & ApplicationInfo.FLAG_SYSTEM) != 0)) {			// Only consider 3rd party Apps - Ignore Apps installed in the device's system image. 
-    			   Log.d(getClass().getSimpleName(), ">>>>>>packages is NOT system package " + pi.packageName);
-    			   System.out.println(">>>>>>packages is<<<<<<<<" + ai.publicSourceDir);
+//    		   System.out.println(">>>>>>packages is<<<<<<<<" + ai.publicSourceDir);   		   
+    		   if (!((ai.flags & ApplicationInfo.FLAG_SYSTEM) != 0)) {			// Only consider 3rd party Apps
+    			   																// Ignore Apps installed in the device's system image. 
+//    			   Log.d(getClass().getSimpleName(), ">>>>>>packages is NOT system package " + pi.packageName);
+//    			   System.out.println(">>>>>>packages is<<<<<<<<" + ai.publicSourceDir);
     			   if (appName.equals(pi.packageName)) {
     				   return (true);
     			   }    	        	 

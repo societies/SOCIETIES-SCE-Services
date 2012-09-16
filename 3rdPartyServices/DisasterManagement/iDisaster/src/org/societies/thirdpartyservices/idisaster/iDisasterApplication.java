@@ -26,12 +26,18 @@ package org.societies.thirdpartyservices.idisaster;
 
 import java.util.ArrayList;
 
+import org.societies.android.api.cis.SocialContract;
+import org.societies.thirdpartyservices.idisaster.data.Me;
+import org.societies.thirdpartyservices.idisaster.data.SelectedTeam;
+
 //import org.societies.android.platform.client.SocietiesApp;
 
 import android.app.AlertDialog;
 import android.app.Application;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.database.Cursor;
+import android.net.Uri;
 import android.util.Log;
 import android.widget.ArrayAdapter;
 
@@ -40,9 +46,6 @@ import android.widget.ArrayAdapter;
 //
 //import android.content.SharedPreferences;
 //import android.content.SharedPreferences.Editor;
-
-
-
 
 
 /**
@@ -68,30 +71,30 @@ public class iDisasterApplication extends Application {
 
 // All information is fetched from the Social Provider. Preferences are no longer used.
 //
-
 //	static final String PREFS_NAME = "iDisasterPreferences"; 	// File for storing preferences
 //	SharedPreferences preferences;								// Preferences shared with all activities
 //	Editor editor;												// Editor for changing preferences
 
-
 	static final Boolean testDataUsed = true;		// When set to true do not used SocialProvider
-	String disasterTeamName = "n/a";
 
-//TODO: remove test code
-	ArrayList <String> disasterNameList = new ArrayList<String> ();
-	ArrayList <String> disasterDescriptionList = new ArrayList<String> ();
+	Me me = new Me();										// Store user identity
+	SelectedTeam selectedTeam = new SelectedTeam ();		// Store team selected by the user
+	
+	// Constant keys used for user Logging
+	public static final String USER_NOT_IDENTFIED = "USER_NOT_IDENTFIED";
 
-	ArrayList <String> feedContentList = new ArrayList<String> ();
+	
 
-	ArrayList <String> memberNameList = new ArrayList<String> ();
-	ArrayList <String> memberDescriptionList = new ArrayList<String> ();
-
-	ArrayList <String> serviceNameList = new ArrayList<String> ();
-	ArrayList <String> serviceDescriptionList = new ArrayList<String> ();	
-
-	ArrayList <String> CISserviceNameList = new ArrayList<String> ();
-	ArrayList <String> CISserviceDescriptionList = new ArrayList<String> ();	
-
+// test data
+	ArrayList <String> disasterNameList;
+	ArrayList <String> disasterDescriptionList;
+	ArrayList <String> feedContentList ;
+	ArrayList <String> memberNameList;
+	ArrayList <String> memberDescriptionList;
+	ArrayList <String> serviceNameList;
+	ArrayList <String> serviceDescriptionList;	
+	ArrayList <String> CISserviceNameList;
+	ArrayList <String> CISserviceDescriptionList;	
 	
 //TODO: discuss design. Are these common adapter resources needed (performance)?	
 	ArrayAdapter<String> disasterAdapter;
@@ -109,7 +112,7 @@ public class iDisasterApplication extends Application {
 //	 4: EVEN_EVEN_MORE_DEBUG
 //	 5: EVEN_EVEN_EVEN_MORE_DEBUG
 //	 6: ...
-	public static final int DEBUG = 0;
+	public static final int DEBUG = 1;
 	public static final String DEBUG_Context = "iDisaster";
 
 
@@ -136,40 +139,73 @@ public class iDisasterApplication extends Application {
 //	    editor.putString ("pref.dummy", "");
 //	    editor.commit ();
 
-//TODO: remove test code
-
 	    if (testDataUsed) {   
-	    	disasterNameList.add ("Nicosia Team");
-	    	disasterNameList.add ("Larnaka Team");
-	    	disasterNameList.add ("Limassol Team");
-	    	disasterDescriptionList.add ("Team assigned to the Nicosia region.");
-	    	disasterDescriptionList.add ("Team assigned to the Larnaka region.");
-	    	disasterDescriptionList.add ("Team assigned to the Limassol region.");
-
-	    	memberNameList.add ("Tim");
-	    	memberNameList.add ("Tom");
-	    	memberDescriptionList.add ("Doctor.");
-	    	memberDescriptionList.add ("Civil Engineer.");
-
-	    	CISserviceNameList.add ("Share data");
-	    	CISserviceDescriptionList.add ("This service allows data sharing with your team.");
-	    	CISserviceNameList.add ("Send alert");
-	    	CISserviceDescriptionList.add ("This service allows you to send an alert team members.");
-	    	
-	    	serviceNameList.add ("Share picture");
-	    	serviceDescriptionList.add ("This service allows picture sharing with your team.");
-	    	serviceNameList.add ("iJacket");
-	    	serviceDescriptionList.add ("This service allows people in your team to remote control your jacket.");
-	    	serviceNameList.add ("Ask for help");
-	    	serviceDescriptionList.add ("This service allows you to request help from volunteers.");
-	    	
-	    	
-	    	
-	    	
+	    	setTestData ();	    	
 	    }
-// end of removed
 			    
 	} //onCreate
+
+/**
+ * 	getUserIdentity retrieves the user information from SocialProvider
+ * 	Returns false if the user is not registered
+ * 
+ *  This method is defined by iDisaster such as a check can be made in any
+ *  activity. 
+ */
+	public boolean checkUserIdentity (Context ctx) {
+		
+		if (me == null) { // should never happened!
+			me = new Me();
+			me.displayName = USER_NOT_IDENTFIED;
+			debug (2, "No instance of Me");
+
+		} else {
+			Uri uri = SocialContract.Me.CONTENT_URI;
+
+			//What to get:
+			String[] projection = new String [] {
+				SocialContract.Me.GLOBAL_ID,
+				SocialContract.Me.NAME,
+				SocialContract.Me.DISPLAY_NAME
+			};
+			
+			//		String selection = "";
+			String selection = SocialContract.Me._ID + " = 1"; //TODO: or should it be " =0"? - wait for code from Babak
+			String[] selectionArgs = null;
+			String sortOrder = null;
+	
+			Cursor cursor = getContentResolver().query(uri, projection, selection, selectionArgs, sortOrder);
+			
+			if (cursor == null) {
+				showDialog (ctx, "Unable to retrieve user information from SocialProvider", getString(R.string.dialogOK));
+				me.displayName = USER_NOT_IDENTFIED;
+				debug (2, "No instance of Me");
+				
+			} else {
+
+// TODO: There may be different logging info for user (stored in ContentProvider in Me).
+//	 		The first row is always Societies, other rows may be used for Facebook, etc...
+//			To get the number of entries, use:
+//				int i= cursor.getCount(); 
+				if (cursor.moveToFirst()){
+					me.globalId = cursor.getString(cursor		// TODO: check that GLOBAL_ID is correct?
+							.getColumnIndex(SocialContract.Me.GLOBAL_ID));
+					me.name = cursor.getString(cursor
+							.getColumnIndex(SocialContract.Me.NAME));
+					
+					if (cursor.getString(cursor					//TODO: check with Babak: what is returned if no name?
+							.getColumnIndex(SocialContract.Me.DISPLAY_NAME)) == null) {
+						me.displayName = me.name;		// use name as display name
+					} else {
+						me.displayName = cursor.getString(cursor
+							.getColumnIndex(SocialContract.Me.DISPLAY_NAME));
+					}
+					return true;		// The only case wher true is returned
+				}
+			}
+		}
+		return false;
+	}
 
 // All information is fetched from the Social Provider. Preferences are no longer used.
 //
@@ -183,6 +219,8 @@ public class iDisasterApplication extends Application {
 //		
 //	}
 
+	
+	
 /**
 * showDialog is used under testing
 * parameters: activity context, message to be displayed, button text
@@ -224,5 +262,53 @@ public class iDisasterApplication extends Application {
 			}
 		}
 	}
+	
+/**
+ * setTestData is used for setting test data.
+ * Test data are used instead of data provided SoicalProvider
+ */
+	private void setTestData () {
+		
+		me.displayName = "Knut";
+
+		disasterNameList = new ArrayList<String> ();
+		disasterDescriptionList = new ArrayList<String> ();
+		disasterNameList.add ("Nicosia Team");
+		disasterNameList.add ("Larnaka Team");
+		disasterNameList.add ("Limassol Team");
+		disasterDescriptionList.add ("Team assigned to the Nicosia region.");
+		disasterDescriptionList.add ("Team assigned to the Larnaka region.");
+		disasterDescriptionList.add ("Team assigned to the Limassol region.");
+
+
+		feedContentList = new ArrayList<String> ();
+		feedContentList.add ("Images sent");
+		feedContentList.add ("Lakarna assessment postponed");
+		feedContentList.add ("Translation Request: Kren-douar");
+
+		memberNameList = new ArrayList<String> ();
+		memberDescriptionList = new ArrayList<String> ();
+		memberNameList.add ("Tim");
+		memberNameList.add ("Tom");
+		memberDescriptionList.add ("Doctor.");
+		memberDescriptionList.add ("Civil Engineer.");
+
+		serviceNameList = new ArrayList<String> ();
+		serviceDescriptionList = new ArrayList<String> ();	
+		serviceNameList.add ("Share picture");
+		serviceDescriptionList.add ("This service allows picture sharing with your team.");
+		serviceNameList.add ("iJacket");
+		serviceDescriptionList.add ("This service allows people in your team to remote control your jacket.");
+		serviceNameList.add ("Ask for help");
+		serviceDescriptionList.add ("This service allows you to request help from volunteers.");
+			
+		CISserviceNameList = new ArrayList<String> ();
+		CISserviceDescriptionList = new ArrayList<String> ();	
+		CISserviceNameList.add ("Share data");
+		CISserviceDescriptionList.add ("This service allows data sharing with your team.");
+		CISserviceNameList.add ("Send alert");
+		CISserviceDescriptionList.add ("This service allows you to send an alert team members.");
+		
+	} // end setTestData
 
 }
