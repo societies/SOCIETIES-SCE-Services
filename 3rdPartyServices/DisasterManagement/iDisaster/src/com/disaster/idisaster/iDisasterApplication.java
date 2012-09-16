@@ -26,26 +26,41 @@ package com.disaster.idisaster;
 
 import java.util.ArrayList;
 
-import com.disaster.idisaster.R;
-
 //import org.societies.android.platform.client.SocietiesApp;
 
 import android.app.AlertDialog;
 import android.app.Application;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
 import android.util.Log;
 import android.widget.ArrayAdapter;
+
+// Previously some information was store in a preference file.
+// Currently: If information is not available, it is retrieved from the SocialProvider
+//
+//import android.content.SharedPreferences;
+//import android.content.SharedPreferences.Editor;
+
+
+
+
 
 /**
  * The application for managing common resources used by 
  * iDisaster application components.
  * 
+ * The Android Application class is a base class for maintaining
+ * the global application state.
+ * The Application class is instantiated when the application/package
+ * process is created (providing that the class implementation is 
+ * specified in the Manifest). 
+ * The Application object is deleted when there is no more instantiated 
+ * activity in the application.
+ * 
  * @author 	Jacqueline.Floch@sintef.no
  *
  */
+
 public class iDisasterApplication extends Application {
 	
 
