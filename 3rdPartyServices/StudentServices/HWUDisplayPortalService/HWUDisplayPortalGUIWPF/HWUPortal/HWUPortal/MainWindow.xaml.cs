@@ -41,16 +41,22 @@ namespace HWUPortal
         private UserSession userSession = new UserSession();
         private List<HoverButton> myButtons;
         //SocketServer socketServer;
+
+        #region sockets
         SocketServer socketServer;
         BinaryDataTransfer binaryDataTransferServer;
+        ServiceSocketServer serviceSocketServer;
+        Thread socketThread;
+        Thread binaryTransferThread;
+        Thread serviceSocketThread;
+        #endregion sockets
+
         ImageViewer iViewer;
         private Boolean loggedIn = false;
 
         
 
-        Thread socketThread;
-        Thread binaryTransferThread;
-
+        
 
         System.Windows.Forms.FlowLayoutPanel flpPanel;
         //ApplicationControl.ApplicationControl appControl;
@@ -89,14 +95,18 @@ namespace HWUPortal
             InitializeComponent();
             this.runningService = new ServiceInfo();
             //this.binaryDataTransferServer = new BinaryDataTransfer();
-            socketServer = new SocketServer(this);
 
+            socketServer = new SocketServer(this);
             socketThread = new Thread(socketServer.run);
             socketThread.Start();
 
             binaryDataTransferServer = new BinaryDataTransfer(this);
             binaryTransferThread = new Thread(binaryDataTransferServer.run);
             binaryTransferThread.Start();
+
+            serviceSocketServer = new ServiceSocketServer();
+            serviceSocketThread = new Thread(serviceSocketServer.run);
+            serviceSocketThread.Start();
 
 
             //flpPanel = this.wfhDate.Child as System.Windows.Forms.FlowLayoutPanel;

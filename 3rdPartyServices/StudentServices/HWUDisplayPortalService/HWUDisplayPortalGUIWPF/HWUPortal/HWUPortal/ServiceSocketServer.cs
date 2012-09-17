@@ -6,14 +6,14 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 
-namespace ServiceSocketServer
+namespace HWUPortal
 {
     class ServiceSocketServer
     {
 
 
 
-
+        private UserSession currentUserSession;
 
         private Socket listener;
 
@@ -21,7 +21,12 @@ namespace ServiceSocketServer
 
         private Socket socket;
 
+        public void setUserSession(UserSession session)
+        {
+            this.currentUserSession = session;
+        }
 
+        
         public void run()
         {
 
@@ -63,8 +68,14 @@ namespace ServiceSocketServer
                         }
                         else if (receivedValue.IndexOf("CURRENT_USER") > -1)
                         {
-                            byte[] jidInBytes = Encoding.ASCII.GetBytes("laura@societies.local");
+                            byte[] jidInBytes = Encoding.ASCII.GetBytes(this.currentUserSession.getUserIdentity());
                             socket.Send(jidInBytes);
+                            finishedReceiving = true;
+                        }
+                        else if (receivedValue.IndexOf("VIRGO_ENDPOINT_IPADDRESS") > -1)
+                        {
+                            byte[] addressInBytes = this.currentUserSession.getIPAddress().GetAddressBytes();
+                            socket.Send(addressInBytes);
                             finishedReceiving = true;
                         }
                         receivedBytes = new byte[1024];
