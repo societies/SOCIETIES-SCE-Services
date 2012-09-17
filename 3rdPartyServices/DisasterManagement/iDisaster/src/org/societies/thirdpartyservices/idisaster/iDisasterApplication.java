@@ -64,7 +64,7 @@ import android.widget.ArrayAdapter;
  *
  */
 
-public class iDisasterApplication extends Application {
+ublic class iDisasterApplication extends Application {
 	
 
 	private static iDisasterApplication singleton; // Reference to the single instance of the Application
@@ -75,10 +75,10 @@ public class iDisasterApplication extends Application {
 //	SharedPreferences preferences;								// Preferences shared with all activities
 //	Editor editor;												// Editor for changing preferences
 
-	static final Boolean testDataUsed = true;		// When set to true do not used SocialProvider
+	static final Boolean testDataUsed = false;		// When set to true do not used SocialProvider
 
-	Me me = new Me();										// Store user identity
-	SelectedTeam selectedTeam = new SelectedTeam ();		// Store team selected by the user
+	Me me = new Me();										// Store user identity - not persistent data (can be retrieved from Social Provider)
+	SelectedTeam selectedTeam = new SelectedTeam ();		// Store team selected by the user - not persistent data (can be retrieved from Social Provider)
 	
 	// Constant keys used for user Logging
 	public static final String USER_NOT_IDENTFIED = "USER_NOT_IDENTFIED";
@@ -169,9 +169,13 @@ public class iDisasterApplication extends Application {
 				SocialContract.Me.DISPLAY_NAME
 			};
 			
-			//		String selection = "";
-			String selection = SocialContract.Me._ID + " = 1"; //TODO: or should it be " =0"? - wait for code from Babak
+			String selection = SocialContract.Me._ID + " = 1"; // Use the first user identity for Societies
 			String[] selectionArgs = null;
+
+//  Alternative query:
+//			String selection = SocialContract.Me._ID + "= ?"; // Use the first user identity for Societies
+//			String[] selectionArgs = new String[] {"1"};
+			
 			String sortOrder = null;
 	
 			Cursor cursor = getContentResolver().query(uri, projection, selection, selectionArgs, sortOrder);
@@ -200,7 +204,7 @@ public class iDisasterApplication extends Application {
 						me.displayName = cursor.getString(cursor
 							.getColumnIndex(SocialContract.Me.DISPLAY_NAME));
 					}
-					return true;		// The only case wher true is returned
+					return true;		// The only case where true is returned
 				}
 			}
 		}
