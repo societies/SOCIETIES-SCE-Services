@@ -24,6 +24,7 @@ implements IContextSubscriber, Observer
 	private SessionRepository sessionRepository;
 	private int counter = 0;
 	private Person lastIndivudal;
+	private String cis;
 
 	public ContextSubscriber(PersonRepository personRepository, SessionRepository sessionRepository)
 	{
@@ -39,17 +40,18 @@ implements IContextSubscriber, Observer
 		String context = msg[1];
 		String type = msg[0];
 		if (type == "location")
-			individual.setLongTermCtx("location", context);
+			individual.addContextStatus( individual.getLastStatus().getShortTermCtx(ShortTermCtxTypes.STATUS), context, sessionRepository );
 		else if (type == "status")
-			individual.setLongTermCtx("status", context);
+			individual.addContextStatus( context, individual.getLastStatus().getShortTermCtx(ShortTermCtxTypes.LOCATION), sessionRepository );
 	}
 
 	public void setContext(String type, String context, String person) throws Exception {
 		logger.info("******************************* Changing Context: " + person + ", " + type + ", " + context);
 		Person individual = null;
 		if (type == "name") {
-			this.counter += 1;
-			if (this.counter > 5) {
+			this.counter++;
+			logger.info("counter..."+this.counter);
+			if (this.counter >= 5) {
 				enrichedCtx();
 				setupWeightBetweenPeople(this.lastIndivudal);
 				if (this.counter == 5) {
@@ -73,9 +75,14 @@ implements IContextSubscriber, Observer
 		else if (type == "company")
 			individual.setLongTermCtx("company", context);
 		else if (type == "location")
-			individual.setLongTermCtx("location", context);
+			individual.addContextStatus( (individual.getLastStatus() == null ? "" : individual.getLastStatus().getShortTermCtx(ShortTermCtxTypes.STATUS)), context, sessionRepository );
 		else if (type == "status")
-			individual.setLongTermCtx("status", context);
+			individual.addContextStatus( context, (individual.getLastStatus() == null ? "" : individual.getLastStatus().getShortTermCtx(ShortTermCtxTypes.LOCATION)), sessionRepository );
+	}
+	
+	public void setCommunity(String cis)
+	{
+		this.cis = cis;
 	}
 
 	public void setContext(String type, String[] context, String person)

@@ -100,7 +100,7 @@ public class Rules {
 		Person[] person = new Person[hashsetPersons.size()];
 		hashsetPersons.toArray(person);
 		for (Person p : person) {
-			System.out.println(p.getLongTermCtx(ctxAtributte));
+			log.info(p.getLongTermCtx(ctxAtributte));
 		}
 		Person[] temp = new Person[person.length]; // null array of persons
 		int count = 0;
@@ -108,7 +108,7 @@ public class Rules {
 			if(hasSameLongTermCtx(person[j], temp, ctxAtributte))
 				temp[count++] = person[j];
 		}
-		System.out.println("Number of persons with context "+ctxAtributte);
+		log.info("Number of persons with context "+ctxAtributte);
 		Hashtable<String, HashSet<Person>>  hashCtxList = new Hashtable<String, HashSet<Person>>(10,10);
 		hashCtxList = (Hashtable<String, HashSet<Person>>) this.hashCtxList.clone();
 		return hashCtxList;
@@ -144,7 +144,7 @@ public class Rules {
 	 * @return
 	 */
 	public Hashtable<String, HashSet<Person>> getPersonsSameLocation() {
-		System.out.println("Checking last short term context...");
+		log.info("Checking last short term context...");
 		HashSet<Person> personHashSet = new HashSet<Person>();
 		for (Person person : personRepository.getAllPersons() ) {
 			personHashSet.add(person);
@@ -174,7 +174,7 @@ public class Rules {
 	 */
 	private Hashtable<String, HashSet<Person>>  getUniqueElements(ContextUpdates[] statusArray, final String ctxAttribute) {
 		ContextUpdates[] temp = new ContextUpdates[statusArray.length]; // null elements
-		System.out.println("Number of persons: "+temp.length+" with context "+ctxAttribute);
+		log.info("Number of persons: "+temp.length+" with context "+ctxAttribute);
 		int count = 0;
 		for(int j = 0; j < statusArray.length; j++) {
 			if(hasSameShortTermCtx(statusArray[j], temp, ctxAttribute))
@@ -238,7 +238,7 @@ public class Rules {
 					}
 				}
 				float weight = ContextAnalyzer.automaticThresholding(elements);
-				System.out.println("automaticThresholding: "+ContextAnalyzer.automaticThresholding(elements));
+				log.info("automaticThresholding: "+ContextAnalyzer.automaticThresholding(elements));
 				HashSet<Person> newHashsetPersons = new HashSet<Person>();
 				HashSet<Long> hashsetTemp = new HashSet<Long>();
 				for (Person individual : person) {
@@ -246,7 +246,7 @@ public class Rules {
 						Relationship rel = individual.getFriendRelationshipTo(otherPerson);
 						//Check by relationship ID if the weight was included in the hashset
 						if (rel != null &&  !hashsetTemp.contains(rel.getId())) {
-//							System.out.println(((Float)rel.getProperty("weight")));
+//							log.info(((Float)rel.getProperty("weight")));
 							hashsetTemp.add(rel.getId());
 							if ((Float)rel.getProperty("weight") >= weight) {
 								newHashsetPersons.add(individual);

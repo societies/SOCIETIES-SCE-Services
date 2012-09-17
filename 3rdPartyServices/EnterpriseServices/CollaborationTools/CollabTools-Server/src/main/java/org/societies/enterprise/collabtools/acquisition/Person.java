@@ -84,7 +84,7 @@ public class Person extends Observable
     // END SNIPPET: delegate-to-the-node
     
 	public String getLongTermCtx(String property){
-		return (String) underlyingNode.getProperty( property );
+		return (String) underlyingNode.getProperty( property, "" );
 	}
 	
 	//Array of interests

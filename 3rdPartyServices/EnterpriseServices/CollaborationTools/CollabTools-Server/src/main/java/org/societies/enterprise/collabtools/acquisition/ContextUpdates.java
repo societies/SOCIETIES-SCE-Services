@@ -78,7 +78,7 @@ public class ContextUpdates extends Observable
 
     public String getShortTermCtx(final String property)
     {
-        return (String)underlyingNode.getProperty(property);
+        return (String)underlyingNode.getProperty(property, "");
     }
 
     
