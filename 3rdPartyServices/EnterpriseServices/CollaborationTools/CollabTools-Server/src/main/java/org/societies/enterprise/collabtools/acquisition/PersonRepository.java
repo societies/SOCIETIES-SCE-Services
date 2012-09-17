@@ -37,6 +37,9 @@ import org.neo4j.graphdb.index.IndexManager;
 import org.neo4j.helpers.collection.IterableWrapper;
 import org.neo4j.helpers.collection.MapUtil;
 import org.neo4j.index.lucene.QueryContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.societies.enterprise.collabtools.Activator;
 import org.societies.enterprise.collabtools.runtime.SessionRepository;
 
 import scala.actors.threadpool.Arrays;
@@ -47,6 +50,8 @@ public class PersonRepository
     private final Index<Node> index;
     private final Node personRefNode;
 	private SessionRepository sessionRep;
+	
+	private static final Logger logger  = LoggerFactory.getLogger(PersonRepository.class);
 
     public PersonRepository(GraphDatabaseService graphDb, Index<Node> index)
     {
@@ -103,12 +108,14 @@ public class PersonRepository
             tx.success();
             Person person = new Person( newPersonNode );
             //TODO:VERIFIY OBSERVER
+            logger.info("Person added: "+name);
             return person;
         }
         finally
         {
             tx.finish();
         }
+
     }
 
     public Person getPersonByName( String name )

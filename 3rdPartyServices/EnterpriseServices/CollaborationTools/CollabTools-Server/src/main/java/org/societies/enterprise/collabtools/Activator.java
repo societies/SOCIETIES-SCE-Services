@@ -17,6 +17,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.societies.enterprise.collabtools.acquisition.ContextSubscriber;
 import org.societies.enterprise.collabtools.acquisition.PersonRepository;
 import org.societies.enterprise.collabtools.runtime.CtxMonitor;
 import org.societies.enterprise.collabtools.runtime.SessionRepository;
@@ -29,8 +30,7 @@ public class Activator implements BundleActivator
  
     private static GraphDatabaseService graphDb;
     private static Index<Node> indexPerson;
-    private ServiceRegistration serviceRegistration;
-    private ServiceRegistration indexServiceRegistration;
+    private ServiceRegistration serviceRegistration, indexServiceRegistration, ctxSubServiceRegistration;
     
     private SessionRepository sessionRepository = new SessionRepository();
     private PersonRepository personRepository;
@@ -54,22 +54,26 @@ public class Activator implements BundleActivator
         GraphDatabaseFactory gdbf = new GraphDatabaseFactory();
         gdbf.setIndexProviders( providers );
         gdbf.setCacheProviders( cacheList );
-        graphDb = gdbf.newEmbeddedDatabase( "target/PersonsGraphDb" );
+        graphDb = gdbf.newEmbeddedDatabase( "databases/PersonsGraphDb" );
         indexPerson = graphDb.index().forNodes( "PersonNodes" );
         personRepository = new PersonRepository( graphDb, indexPerson);
+        
+        ContextSubscriber ctxSub = new ContextSubscriber(personRepository, sessionRepository);
  
         //the OSGi registration
         serviceRegistration = context.registerService(GraphDatabaseService.class.getName(), graphDb, new Hashtable<String,String>() );
         logger.info("registered " + serviceRegistration.getReference() );
         
-        indexServiceRegistration = context.registerService(
-                Index.class.getName(), indexPerson,
-                new Hashtable<String,String>() );
+        indexServiceRegistration = context.registerService(Index.class.getName(), indexPerson, new Hashtable<String,String>() );
+        
+        ctxSubServiceRegistration =context.registerService(ContextSubscriber.class.getName(), ctxSub, null);
+        
+
         
         //Setting up GraphDB
-        TestUtils test = new TestUtils(personRepository, sessionRepository);
-        test.createPersons(5);
-        test.setupFriendsBetweenPeople();
+//        TestUtils test = new TestUtils(personRepository, sessionRepository);
+//        test.createPersons(5);
+//        test.setupFriendsBetweenPeople();
         
 //        //Starting Context Monitor
 //        logger.info("Starting Context Monitor..." );
@@ -82,6 +86,7 @@ public class Activator implements BundleActivator
     @Override
     public void stop( BundleContext context ) throws Exception
     {
+    	ctxSubServiceRegistration.unregister();
         serviceRegistration.unregister();
         indexServiceRegistration.unregister();
         graphDb.shutdown();

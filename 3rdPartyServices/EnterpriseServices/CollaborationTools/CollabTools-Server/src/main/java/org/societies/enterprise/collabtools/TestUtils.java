@@ -79,14 +79,6 @@ public class TestUtils {
 	 * 
 	 */
     public void createMockShortTermCtx() {
-    	//        Person person = getRandomPersonWithFriends();
-    	//        int numberOfStatuses = 10;
-    	//
-    	//        for ( int i = 0; i < numberOfStatuses; i++ )
-    	//        {
-    	//            Person friend = getRandomFriendOf( person );
-    	//            friend.addContextStatus( "Dum-deli-dum..."+i, getRandomLocation() );
-    	//        }
     	for (Person friend :personRepository.getAllPersons()) {
     		friend.addContextStatus( getRandomStatus(), getRandomLocation(), sessionRep );
     	}

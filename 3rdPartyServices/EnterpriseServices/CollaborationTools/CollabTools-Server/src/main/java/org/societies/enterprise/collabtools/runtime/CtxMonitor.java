@@ -58,7 +58,8 @@ public class CtxMonitor extends Thread{
 	public synchronized void run(){
 		try {
 			while (true) {
-
+				//Sleep in seconds
+				Thread.sleep(SECONDS);
 				System.out.println("Checking if people context match");
 
 
@@ -108,8 +109,7 @@ public class CtxMonitor extends Thread{
 					}
 				}
 				System.out.println(sessionRepository.sessionsTable.toString());
-				//Sleep in seconds
-				Thread.sleep(SECONDS);
+
 			}
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
