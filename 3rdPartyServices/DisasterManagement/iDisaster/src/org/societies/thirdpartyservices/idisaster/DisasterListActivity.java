@@ -63,7 +63,9 @@ public class DisasterListActivity extends ListActivity {
 
 	ContentResolver resolver;
 	Cursor ownTeamCursor;				// used for the teams the user owns
+	int ownTeams;						// keep track of number of own teams
 	Cursor memberTeamCursor;			// used for the teams the user is member of
+	int memberTeams;					// keep track of number of member teams
 	
 	Cursor cursor;	//TODO: remove
 	
@@ -98,6 +100,7 @@ public class DisasterListActivity extends ListActivity {
     				iDisasterApplication.getInstance().selectedTeam.globalId = Integer.toString(position);
 // Store the selected disaster in application preferences
 //    				iDisasterApplication.getInstance().setDisasterTeamName (name);
+    				
     			} else {											// Fetch data from Social Provide
 //TODO: get name in from Social Provider
     				iDisasterApplication.getInstance().selectedTeam.name = "Name will be fetched";
@@ -141,9 +144,9 @@ public class DisasterListActivity extends ListActivity {
 
 		if (! iDisasterApplication.testDataUsed) {
 			if (disasterAdapter!= null) disasterAdapter.clear();		
-			getOwnDisasterTeams();		// Retrieve teams I am owner of
+			getOwnDisasterTeams();		// Retrieve disaster teams I am owner of
 			getMemberDisasterTeams();	// Retrieve teams I am member of
-			assignAdapter ();
+			assignAdapter ();			// Display them
 		}
 	}
 
@@ -178,19 +181,31 @@ public class DisasterListActivity extends ListActivity {
 		Uri uri = SocialContract.Communities.CONTENT_URI;
 		
 		String[] projection = new String[] {
-				SocialContract.Communities.GLOBAL_ID,
-				SocialContract.Communities.NAME};
+				SocialContract.Communities.GLOBAL_ID,	// Retrieve CIS global ID
+				SocialContract.Communities.NAME};		// Retrieve CIS name (will be displayed to the user)
 
-// TODO: test selection of communities I am owning		
+//		All communities
 //		String selection = null;
-		String selection = SocialContract.Communities.OWNER_ID + " = " + 
-				iDisasterApplication.getInstance().me.globalId; 
+//		String[] selectionArgs = null;
 
-		String[] selectionArgs = null;
+//		TEST CODE: communities of type disaster
+//		String selection = SocialContract.Communities.TYPE + " = disaster";
+//		String[] selectionArgs = null;
+
+//		TEST CODE: communities I am owning
+//		String selection = SocialContract.Communities.OWNER_ID + "= ?"; 
+//		String[] selectionArgs = new String[] {iDisasterApplication.getInstance().me.globalId};
+
+// TODO: Add a check on user identity? 
+
+		String selection = SocialContract.Communities.TYPE + "= ? AND " 
+					     + SocialContract.Communities.OWNER_ID + "= ?";
+		String[] selectionArgs = new String[] {"disaster",											// The CIS type is "disaster"
+												iDisasterApplication.getInstance().me.globalId};	// The user is owner
 
 // TODO: check that ordering is OK
 		String sortOrder = SocialContract.Communities.NAME
-				+ " COLLATE LOCALIZED ASC";
+				+ " COLLATE LOCALIZED ASC";					// Alphabetic order (to reverse order, use "DESC" instead of "ASC"
 
 		ownTeamCursor = resolver.query(uri, projection, selection, selectionArgs,sortOrder);
 
@@ -207,28 +222,30 @@ public class DisasterListActivity extends ListActivity {
 
 	
 /**
- * getMemberDisasterTeams retrieves the list of disaster teams owned by the user
- * from Social Provider.
+ * getMemberDisasterTeams retrieves the list of disaster teams the user is
+ * member of from Social Provider.
  */
 		
 // TODO: The following retrieve the list of communities - not the ones I am member of
 	private void getMemberDisasterTeams () {
 
-		// Get GLOBAL_IDs for CIS I am member of
-		Uri membershipUri = SocialContract.Membership.CONTENT_URI;
+		// Step 1: get GLOBAL_IDs for CIS I am member of
+//		Uri membershipUri = SocialContract.Membership.CONTENT_URI;
+		Uri membershipUri = Uri.parse ("content://org.societies.android.SocialProvider/membership");
 					
 		String[] membershipProjection = new String[] {
 				SocialContract.Membership.GLOBAL_ID_COMMUNITY};
 
-// TODO: test selection of communities I am member of		
-//		String selection = null;
-		String membershipSelection = SocialContract.Membership.GLOBAL_ID_MEMBER + " = " + 
-				iDisasterApplication.getInstance().me.globalId; 
+		String membershipSelection = SocialContract.Membership.GLOBAL_ID_MEMBER + "= ?";
+		String[] membershipSelectionArgs = new String[] {iDisasterApplication.getInstance().me.globalId};	// The user is owner
+		
+//		String[] membershipSelectionArgs = new String[] {"knut@redcross.org"};	// The user is owner
 		
 		Cursor membershipCursor= resolver.query(membershipUri, membershipProjection,
-				membershipSelection, null /* selectionArgs */, null /* sortOrder*/);
+				membershipSelection, membershipSelectionArgs, null /* sortOrder*/);
 
-	
+
+		// Step 1: retrieve the communities with the GLOBAL_IDs retrieved above
 		if (membershipCursor == null) {		// The user is not member of any community
 			memberTeamCursor = null;
 			return;
@@ -239,28 +256,38 @@ public class DisasterListActivity extends ListActivity {
 			String[] communitiesprojection = new String[] {
 					SocialContract.Communities.GLOBAL_ID,
 					SocialContract.Communities.NAME};
-
-	// TODO: select only string I am member of		
-			String communitiesSelection ="";
-			if (membershipCursor.getCount() != 0) {
-				// assign an empty List to Adapter
+			
+			// Build selection string and selectionArgs string
+			
+			if (membershipCursor.getCount() == 0) {		// should not happen?
 				iDisasterApplication.debug (2, "No information can be retrieved in membershipCursor");
+				memberTeamCursor = null;
+				return;
 			} else {
+				boolean first = true;
+				String communitiesSelection = new String();
+				ArrayList <String> communitiesSelectionArgs = new ArrayList <String> ();
 				while (membershipCursor.moveToNext()) {
-					communitiesSelection = communitiesSelection + " OR " +
-							SocialContract.Communities.GLOBAL_ID + " = " +
-							membershipCursor.getString (membershipCursor.
-									getColumnIndex(SocialContract.Membership.GLOBAL_ID_COMMUNITY));
+					if (first) {
+						first = false;
+						communitiesSelection = SocialContract.Communities.GLOBAL_ID + "= ?";
+						communitiesSelectionArgs.add (membershipCursor.getString(
+										(membershipCursor.getColumnIndex(SocialContract.Membership.GLOBAL_ID_COMMUNITY))
+										));
+					} else {
+						communitiesSelection = communitiesSelection + " AND " +
+													   SocialContract.Communities.GLOBAL_ID + "= ?";
+						communitiesSelectionArgs.add (membershipCursor.getString(
+								(membershipCursor.getColumnIndex(SocialContract.Membership.GLOBAL_ID_COMMUNITY))
+								));
+					}
 				}
-			}
-			memberTeamCursor = resolver.query(communitiesUri, communitiesprojection,
-					communitiesSelection, null /* selectionArgs */, null /* sortOrder*/);
+				memberTeamCursor = resolver.query (communitiesUri, communitiesprojection,
+						communitiesSelection, communitiesSelectionArgs.toArray(new String[communitiesSelectionArgs.size()])
+						, null /* sortOrder*/);
+				}
 			return;
-	
-			
-			
 		}
-		
 		
 	//
 	// When using managedQuery(), the activity keeps a reference to the cursor and close it
@@ -276,41 +303,69 @@ public class DisasterListActivity extends ListActivity {
  */
 	private void assignAdapter () {
 		
-// TODO: extend with structured adapter		
-		cursor = ownTeamCursor;
-//		cursor = memberTeamCursor;
-		
-		if (cursor == null) {
+		ownTeams= 0;
+		memberTeams= 0;
+		ArrayList<String> disasterList = new ArrayList<String> ();
+	
+		if ((ownTeamCursor == null) && (memberTeamCursor == null)) {
 			// assign an empty List to Adapter
 	    	disasterAdapter = new ArrayAdapter<String> (this,
 	    			R.layout.disaster_list_item, R.id.disaster_item, new ArrayList<String> ());
 
 	    	// associate adapter to list (in order to be able to display text?)
-	    	listView.setAdapter(disasterAdapter);    	
-
-	    	iDisasterApplication.getInstance().showDialog (this,
-					"Unable to retrieve user information from SocialProvider",
-					 getString(R.string.dialogOK));
-// TODO: should terminate somehow here
-		} else {
-			if (cursor.getCount() == 0) {
-				// assign an empty List to Adapter
-		    	disasterAdapter = new ArrayAdapter<String> (this,
-		    			R.layout.disaster_list_item, R.id.disaster_item, new ArrayList<String> ());		
-		    	listView.setAdapter(disasterAdapter);
-			} else {				
-				ArrayList<String> disasterList = new ArrayList<String> ();
-				while (cursor.moveToNext()) {
-					String displayName = cursor.getString(cursor
-							.getColumnIndex(SocialContract.Communities.NAME));
-					disasterList.add (displayName);
-
-				}
-		    	disasterAdapter = new ArrayAdapter<String> (this,
-		    			R.layout.disaster_list_item, R.id.disaster_item, disasterList);
-		    	listView.setAdapter(disasterAdapter);
+		}
+		if ((ownTeamCursor != null) && (memberTeamCursor != null)) {
+			if ((ownTeamCursor.getCount() == 0) && (memberTeamCursor.getCount() == 0)) {
+				disasterAdapter = new ArrayAdapter<String> (this,
+	    			R.layout.disaster_list_item, R.id.disaster_item, new ArrayList<String> ());	    
 			}
 		}
+		if (ownTeamCursor != null) {
+			if (ownTeamCursor.getCount() != 0) {
+				while (ownTeamCursor.moveToNext()) {
+					ownTeams++;
+					String displayName = "owned: " + ownTeamCursor.getString(ownTeamCursor
+							.getColumnIndex(SocialContract.Communities.NAME));
+					disasterList.add (displayName);
+				}
+			}
+		}
+		if (memberTeamCursor != null) {
+			if (memberTeamCursor.getCount() != 0) {
+				while (memberTeamCursor.moveToNext()) {
+					memberTeams++;
+					String displayName = "member of: " + memberTeamCursor.getString(memberTeamCursor
+							.getColumnIndex(SocialContract.Communities.NAME));
+					disasterList.add (displayName);
+				}
+			}
+		}
+    	disasterAdapter = new ArrayAdapter<String> (this,
+	    			R.layout.disaster_list_item, R.id.disaster_item, disasterList);
+		
+		listView.setAdapter(disasterAdapter);
+
+//			
+//			
+//			
+//			&&
+//			if (cursor.getCount() == 0) {
+//				// assign an empty List to Adapter
+//		    	disasterAdapter = new ArrayAdapter<String> (this,
+//		    			R.layout.disaster_list_item, R.id.disaster_item, new ArrayList<String> ());		
+//		    	listView.setAdapter(disasterAdapter);
+//			} else {				
+//				ArrayList<String> disasterList = new ArrayList<String> ();
+//				while (cursor.moveToNext()) {
+//					String displayName = cursor.getString(cursor
+//							.getColumnIndex(SocialContract.Communities.NAME));
+//					disasterList.add (displayName);
+//
+//				}
+//		    	disasterAdapter = new ArrayAdapter<String> (this,
+//		    			R.layout.disaster_list_item, R.id.disaster_item, disasterList);
+//		    	listView.setAdapter(disasterAdapter);
+//			}
 	}
 
     
