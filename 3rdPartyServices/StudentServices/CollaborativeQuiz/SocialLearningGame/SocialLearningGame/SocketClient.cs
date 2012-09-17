@@ -33,32 +33,94 @@ namespace SocialLearningGame
 {
     class SocketClient
     {
+        String userIdentity = string.Empty;
+        String serverIPAddress = "";
+        String userName = "";
         public String getUserIdentity()
         {
-            IPEndPoint ip = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 2114);
-            Socket server = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            if (this.userIdentity == string.Empty)
+            {
+                IPEndPoint ip = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 2114);
+                Socket server = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
-            try
-            {
-                server.Connect(ip);
+                try
+                {
+                    server.Connect(ip);
+                }
+                catch (SocketException e)
+                {
+                    Console.WriteLine("Unable to connect to server.");
+                    return "";
+                }
+                //string input = Console.ReadLine();
+                //if (input == "exit")
+                //    break;
+                server.Send(Encoding.ASCII.GetBytes("CURRENT_USER"));
+                byte[] data = new byte[1024];
+                int receivedDataLength = server.Receive(data);
+                string stringData = Encoding.ASCII.GetString(data, 0, receivedDataLength);
+                Console.WriteLine("Received user identity from server: " + stringData);
+
+                server.Send(Encoding.ASCII.GetBytes("VIRGO_ENDPOINT_IPADDRESS"));
+                receivedDataLength = server.Receive(data);
+                string endPointData = Encoding.ASCII.GetString(data, 0, receivedDataLength);
+                Console.Write("Received IPAddress from server: " + endPointData);
+
+                
+                server.Close();
+                this.userIdentity = stringData;
+                this.serverIPAddress = endPointData;
+                return stringData;
             }
-            catch (SocketException e)
-            {
-                Console.WriteLine("Unable to connect to server.");
-                return "";
-            }
-            //string input = Console.ReadLine();
-            //if (input == "exit")
-            //    break;
-            server.Send(Encoding.ASCII.GetBytes("CURRENT_USER"));
-            byte[] data = new byte[1024];
-            int receivedDataLength = server.Receive(data);
-            string stringData = Encoding.ASCII.GetString(data, 0, receivedDataLength);
-            Console.WriteLine("Received user identity from server: "+ stringData);
-            server.Close();
-            return stringData;
+            
+                return this.userIdentity;
+            
         }
 
+        public String getUserName()
+        {
+            if (this.userName == string.Empty)
+            {
+                if (this.serverIPAddress == string.Empty)
+                {
+                    this.getUserIdentity();
+                }
+
+                IPEndPoint ip = new IPEndPoint(IPAddress.Parse(this.serverIPAddress), 2131);
+                Socket server = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                try
+                {
+                    server.Connect(ip);
+                }
+                catch (SocketException e)
+                {
+                    Console.WriteLine("Unable to connect to socket server on virgo ");
+                    return "";
+                }
+
+                server.Send(Encoding.ASCII.GetBytes("SOCIAL_LEARNING_GET_INFO"));
+                byte[] data = new byte[1024];
+                int receivedDataLength = server.Receive(data);
+                string stringData = Encoding.ASCII.GetString(data, 0, receivedDataLength);
+                Console.WriteLine("Received username from virgo app");
+
+                server.Close();
+                this.userName = stringData;
+            }
+            return this.userName;
+
+        }
+
+        public String getServerIPAddress()
+        {
+            if (this.serverIPAddress == string.Empty)
+            {
+                this.getUserIdentity();
+
+            }
+
+            return this.serverIPAddress;
+        }
     }
 
     
