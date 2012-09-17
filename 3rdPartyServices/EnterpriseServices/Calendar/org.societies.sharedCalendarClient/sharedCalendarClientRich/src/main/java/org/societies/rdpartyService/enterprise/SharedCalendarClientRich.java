@@ -43,6 +43,7 @@ import org.societies.api.css.devicemgmt.IDevice;
 import org.societies.api.css.devicemgmt.display.DisplayEvent;
 import org.societies.api.css.devicemgmt.display.DisplayEventConstants;
 import org.societies.api.css.devicemgmt.display.IDisplayDriver;
+import org.societies.api.css.devicemgmt.display.IDisplayableService;
 import org.societies.api.ext3p.schema.sharedcalendar.Event;
 import org.societies.api.ext3p.schema.sharedcalendar.MethodType;
 import org.societies.api.ext3p.schema.sharedcalendar.SharedCalendarBean;
@@ -69,7 +70,7 @@ import com.google.gson.JsonObject;
  * @author solutanet
  * 
  */
-public class SharedCalendarClientRich extends EventListener implements ICommCallback,	ISharedCalendarClientRich {
+public class SharedCalendarClientRich extends EventListener implements ICommCallback, ISharedCalendarClientRich, IDisplayableService {
 	
 	private static Logger log = LoggerFactory.getLogger(SharedCalendarClientRich.class);
 	private ICommManager commManager;
@@ -712,6 +713,18 @@ public class SharedCalendarClientRich extends EventListener implements ICommCall
 
 	public void setMyServiceExeURL(URL myServiceExeURL) {
 		this.myServiceExeURL = myServiceExeURL;
+	}
+
+	@Override
+	public void serviceStarted(String arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void serviceStopped(String arg0) {
+		// TODO Auto-generated method stub
+		
 	}
 	
 }
