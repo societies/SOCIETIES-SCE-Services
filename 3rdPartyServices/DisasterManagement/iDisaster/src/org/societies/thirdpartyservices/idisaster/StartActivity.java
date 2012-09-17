@@ -90,12 +90,14 @@ public class StartActivity extends Activity implements OnClickListener {
 			startView.setText(getString(R.string.startInfoNotLogged));			
 		} else {															// Fetch data from SocialProvider
 			
-			if (iDisasterApplication.getInstance().checkUserIdentity(this)) {	// No data returned by Social provider
-				startView.setText(getString(R.string.startInfoNotLogged));
-			} else {														// User is identified
-				startView.setText(getString(R.string.startInfoLogged) + 
-						iDisasterApplication.getInstance().me.displayName);
+			if (iDisasterApplication.getInstance().checkUserIdentity(this)) {	// User is identified
+				startView.setText(getString(R.string.startInfoLogged) 
+						+ " " 													// Not sure end space in the predefined string is ignored
+						+ iDisasterApplication.getInstance().me.displayName);
 				loggedIn = true;
+		
+			} else {															// No data returned by Social provider
+				startView.setText(getString(R.string.startInfoNotLogged));
 			}
 		}
 	}
@@ -106,11 +108,15 @@ public class StartActivity extends Activity implements OnClickListener {
  */
 	 public void onClick (View view) {
 		
-		if (!loggedIn) {		// no user name
+		if (!loggedIn) {													// User was not identified
+			//TODO: Replace this logging by a call to CSS Management?
+			// I am not sure how this should be handled as handling logging
+			// should be under the responsibility of Social Provider
+
     		startActivity(new Intent(StartActivity.this, LoginActivity.class));
     		return;			
 		} else {
-	    	startActivity(new Intent(StartActivity.this, DisasterActivity.class));
+	    	startActivity(new Intent(StartActivity.this, DisasterListActivity.class));
 	    	return;
 		}
    	}
@@ -174,10 +180,10 @@ public class StartActivity extends Activity implements OnClickListener {
 		switch (item.getItemId()) {
 		
     	case R.id.startMenuLogoff:
-//TODO: Call the Social Provider
-// reset user preferences - not used anymore
-//    		iDisasterApplication.getInstance().setDisasterTeamName // reset user preferences
-//    		(getString(R.string.noPreference));					
+    		
+//TODO: Call CSS Management?
+// I am not sure how this should be handled as many Apps may be "logged in".
+// Handling logging should be under the responsibility of Social Provider
 
     		break;
     		
