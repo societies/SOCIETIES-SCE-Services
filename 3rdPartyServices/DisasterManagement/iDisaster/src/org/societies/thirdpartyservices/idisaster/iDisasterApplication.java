@@ -64,7 +64,7 @@ import android.widget.ArrayAdapter;
  *
  */
 
-ublic class iDisasterApplication extends Application {
+public class iDisasterApplication extends Application {
 	
 
 	private static iDisasterApplication singleton; // Reference to the single instance of the Application
