@@ -19,6 +19,7 @@
 		<property name="availableDevices" ref="availableDevicesSet" />
 		<property name="commManager" ref="CommManagerBundle" />
 		<property name="displayDriverService" ref="displayDriverServiceRef" />	
+		<property name="myServiceExeURL" value="${webAppEntryPoint}" />	
 		<constructor-arg value="${serverJid}" />		
 	</bean>
 </beans>

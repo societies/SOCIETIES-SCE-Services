@@ -24,7 +24,6 @@
  */
 package org.societies.rdpartyService.enterprise;
 
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -41,6 +40,8 @@ import org.societies.api.comm.xmpp.exceptions.XMPPError;
 import org.societies.api.comm.xmpp.interfaces.ICommCallback;
 import org.societies.api.comm.xmpp.interfaces.ICommManager;
 import org.societies.api.css.devicemgmt.IDevice;
+import org.societies.api.css.devicemgmt.display.DisplayEvent;
+import org.societies.api.css.devicemgmt.display.DisplayEventConstants;
 import org.societies.api.css.devicemgmt.display.IDisplayDriver;
 import org.societies.api.ext3p.schema.sharedcalendar.Event;
 import org.societies.api.ext3p.schema.sharedcalendar.MethodType;
@@ -151,14 +152,14 @@ public class SharedCalendarClientRich extends EventListener implements ICommCall
 		if (this.displayDriverService != null) {
 			// register for display events
 			this.registerForDisplayEvents();
-			try {
-				this.myServiceExeURL = new URL("http://www.macs.hw.ac.uk/~ceeep1/societies/services/MockWindowsExecutable.exe");
-				this.myServiceName = "ExamplePortalDisplayService";
-				//this.displayDriverService.registerDisplayableService(null, myServiceName, myServiceExeURL);
-			} catch (MalformedURLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+//			try {
+				//this.myServiceExeURL = new URL("http://www.macs.hw.ac.uk/~ceeep1/societies/services/MockWindowsExecutable.exe");
+				this.myServiceName = "Shared Calendar Client";
+				this.displayDriverService.registerDisplayableService(null, myServiceName, myServiceExeURL, false);
+//			} catch (MalformedURLException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
 		}else{
 			this.log.debug("Display Driver Service not available");
 		}
@@ -332,7 +333,8 @@ public class SharedCalendarClientRich extends EventListener implements ICommCall
 		calendarBean.setCalendarSummary(calendarSummary);
 		calendarBean.setCISId(CISId);
 		this.sendMsg(stanza, calendarBean, callback, "The message was sent to XMPP server for create a CSS calendar with summary: "
-					+ calendarSummary + ".");		
+					+ calendarSummary + ".");
+		if (this.deviceAvailable) this.displayDriverService.sendNotification(this.getClass().getSimpleName(), "Created CIS Calendar '"+calendarSummary+"' with ID:"+CISId);
 	}
 
 	/* (non-Javadoc)
@@ -402,7 +404,8 @@ public class SharedCalendarClientRich extends EventListener implements ICommCall
 		calendarBean.setCalendarId(calendarId);
 		calendarBean.setNewEvent(newEvent);
 		this.sendMsg(stanza, calendarBean, callback, "The message was sent to XMPP server for create an event on CIS calendar with id: "
-				+ calendarId + ".");		
+				+ calendarId + ".");	
+		if (this.deviceAvailable) this.displayDriverService.sendNotification(this.getClass().getSimpleName(), "Created event '"+newEvent.getEventSummary()+"' on Calendar with ID:"+calendarId);
 	}
 
 	/* (non-Javadoc)
@@ -426,7 +429,8 @@ public class SharedCalendarClientRich extends EventListener implements ICommCall
 		calendarBean.setCalendarId(calendarId);
 		calendarBean.setEventId(eventId);
 		this.sendMsg(stanza, calendarBean, callback, "The message was sent to XMPP server for delete an event with id: "+eventId+" on CIS calendar with id: "
-				+ calendarId + ".");		
+				+ calendarId + ".");
+		if (this.deviceAvailable) this.displayDriverService.sendNotification(this.getClass().getSimpleName(), "Deleted event with id '"+eventId+"' on Calendar with ID:"+calendarId);
 	}
 	/* (non-Javadoc)
 	 * @see org.societies.rdpartyService.enterprise.interfaces.ISharedCalendarClientRich#subscribeToEvent(org.societies.rdpartyService.enterprise.interfaces.IReturnedResultCallback, java.lang.String, java.lang.String, java.lang.String)
@@ -450,6 +454,8 @@ public class SharedCalendarClientRich extends EventListener implements ICommCall
 		calendarBean.setEventId(eventId);
 		calendarBean.setSubscriberId(subscriberId);
 		this.sendMsg(stanza, calendarBean, callback, "The message was sent to XMPP server for subscribe to an event with id: "+eventId+" on CIS calendar with id: "
+				+ calendarId + " and subscriber id: "+subscriberId+".");
+		if (this.deviceAvailable) this.displayDriverService.sendNotification(this.getClass().getSimpleName(), "Subscribed to event with id '"+eventId+" on CIS calendar with id: "
 				+ calendarId + " and subscriber id: "+subscriberId+".");
 	}
 
@@ -475,6 +481,7 @@ public class SharedCalendarClientRich extends EventListener implements ICommCall
 		calendarBean.setKeyWord(keyWord);
 		this.sendMsg(stanza, calendarBean, callback, "The message was sent to XMPP server for retrieve events on CIS calendar with id: "
 				+ calendarId + " using keyword: "+keyWord+".");
+		
 	}
 
 	/* (non-Javadoc)
@@ -499,6 +506,8 @@ public class SharedCalendarClientRich extends EventListener implements ICommCall
 		calendarBean.setEventId(eventId);
 		calendarBean.setSubscriberId(subscriberId);
 		this.sendMsg(stanza, calendarBean, callback, "The message was sent to XMPP server for unsubscribe to an event with id: "+eventId+" on CIS calendar with id: "
+				+ calendarId + " and subscriber id: "+subscriberId+".");
+		if (this.deviceAvailable) this.displayDriverService.sendNotification(this.getClass().getSimpleName(), "Unsubscribed from event with id '"+eventId+" on CIS calendar with id: "
 				+ calendarId + " and subscriber id: "+subscriberId+".");
 	}
 	
@@ -546,6 +555,7 @@ public class SharedCalendarClientRich extends EventListener implements ICommCall
 		calendarBean.setCalendarSummary(calendarSummary);
 		this.sendMsg(stanza, calendarBean, callback, "The message was sent to XMPP server for create a CSS calendar with summary: "
 				+ calendarSummary + ".");
+		if (this.deviceAvailable) this.displayDriverService.sendNotification(this.getClass().getSimpleName(), "Created Private (CSS) Calendar with summary '"+calendarSummary+"'");
 	}
 	
 	
@@ -568,6 +578,7 @@ public class SharedCalendarClientRich extends EventListener implements ICommCall
 
 		calendarBean.setMethod(MethodType.DELETE_PRIVATE_CALENDAR);
 		this.sendMsg(stanza, calendarBean, callback, "The message was sent to XMPP server for delete a CSS calendar.");
+		if (this.deviceAvailable) this.displayDriverService.sendNotification(this.getClass().getSimpleName(), "Deleted Private (CSS) Calendar");
 	}
 
 	/* (non-Javadoc)
@@ -588,6 +599,7 @@ public class SharedCalendarClientRich extends EventListener implements ICommCall
 		calendarBean.setMethod(MethodType.CREATE_EVENT_ON_PRIVATE_CALENDAR);
 		calendarBean.setNewEvent(newEvent);
 		this.sendMsg(stanza, calendarBean, callback, "The message was sent to XMPP server for create a CSS calendar events.");
+		if (this.deviceAvailable) this.displayDriverService.sendNotification(this.getClass().getSimpleName(), "Created event on Private (CSS) Calendar with summary '"+newEvent.getEventSummary()+"'");
 	}
 	/* (non-Javadoc)
 	 * @see org.societies.rdpartyService.enterprise.interfaces.ISharedCalendarClientRich#deleteEventOnPrivateCalendar(java.lang.String)
@@ -606,6 +618,7 @@ public class SharedCalendarClientRich extends EventListener implements ICommCall
 		calendarBean.setMethod(MethodType.DELETE_EVENT_ON_PRIVATE_CALENDAR);
 		calendarBean.setEventId(eventId);
 		this.sendMsg(stanza, calendarBean, callback, "The message was sent to XMPP server for delete a CSS calendar event.");
+		if (this.deviceAvailable) this.displayDriverService.sendNotification(this.getClass().getSimpleName(), "Deleted event on Private (CSS) Calendar with id '"+eventId+"'");
 	}
 	
 	//UTILITY METHODS//
@@ -663,8 +676,17 @@ public class SharedCalendarClientRich extends EventListener implements ICommCall
 	 */
 	@Override
 	public void handleInternalEvent(InternalEvent event) {
+		if (event.geteventInfo() instanceof DisplayEvent){			
+			DisplayEvent eventObj  = (DisplayEvent) event.geteventInfo();
+			log.debug("Handling display event:"+eventObj);
+			if (eventObj.getDisplayStatus().equals(DisplayEventConstants.DEVICE_AVAILABLE)){
+				this.deviceAvailable = true;
+			}else{
+				this.deviceAvailable  = false;
+			}
+		}
 		// TODO Auto-generated method stub
-		
+		//this.displayDriverService.sendNotification(myServiceName, "Hello, I am an example service and I wanted to notify you that I can send you notifications!");		
 	}
 
 	/* (non-Javadoc)
@@ -682,6 +704,14 @@ public class SharedCalendarClientRich extends EventListener implements ICommCall
 
 	public void setDisplayDriverService(IDisplayDriver displayDriverService) {
 		this.displayDriverService = displayDriverService;
+	}
+
+	public URL getMyServiceExeURL() {
+		return myServiceExeURL;
+	}
+
+	public void setMyServiceExeURL(URL myServiceExeURL) {
+		this.myServiceExeURL = myServiceExeURL;
 	}
 	
 }
