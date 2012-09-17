@@ -363,6 +363,16 @@ namespace HWUPortal
                 sInfo.serviceType = ServiceType.WEB;
                 this.userSession.addService(sInfo);
                 this.downloadedServices++;
+                if (this.numOfServices > this.downloadedServices)
+                {
+                    Console.WriteLine("Waiting for download to finish");
+                }
+                else
+                {
+                    this.gui.Login(userSession);
+                    stream.Write(okBytes, 0, okBytes.Length);
+
+                }
             }
             Console.WriteLine(sInfo.ToString());
         }

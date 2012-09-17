@@ -309,7 +309,7 @@ namespace HWUPortal
                         this.downloadFile(sInfo);
                     }
 
-                    if (this.numOfServices == 0)
+                    if (this.numOfServices >= this.downloadedServices)
                     {
                         this.gui.Login(userSession);
                     }
