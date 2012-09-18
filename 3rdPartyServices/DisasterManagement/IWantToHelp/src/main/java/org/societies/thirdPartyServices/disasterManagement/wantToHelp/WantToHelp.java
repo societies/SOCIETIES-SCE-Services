@@ -47,12 +47,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.societies.api.comm.xmpp.interfaces.ICommManager;
 import org.societies.api.context.broker.ICtxBroker;
+import org.societies.api.context.model.CtxAttribute;
 import org.societies.api.context.model.CtxAttributeTypes;
 import org.societies.api.context.model.CtxEntity;
 import org.societies.api.context.model.CtxEntityIdentifier;
 import org.societies.api.identity.IIdentity;
 import org.societies.api.identity.Requestor;
 import org.societies.thirdPartyServices.disasterManagement.wantToHelp.data.UserData;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -86,9 +88,9 @@ public class WantToHelp implements IWantToHelp, ActionListener {
 	private String testUserLastname = "lastname";
 	private String testUserInstitute = "institute";
 	
-	//@Autowired(required=true)	
+	@Autowired(required=true)	
 	private ICtxBroker externalCtxBroker;
-	//@Autowired(required=true)
+	@Autowired(required=true)
 	private ICommManager commMgr;
 	
 	public WantToHelp() {
@@ -140,6 +142,7 @@ public class WantToHelp implements IWantToHelp, ActionListener {
 		
 		frame.pack();
 		frame.setVisible(true);
+		
 	}
 
 	@PreDestroy
@@ -152,21 +155,39 @@ public class WantToHelp implements IWantToHelp, ActionListener {
 	}
 	
 	public void getUserDataFromCSS() throws Exception{
-//		feedbackTextArea.append("retrieve user data from CSS ... ");
+		feedbackTextArea.append("retrieve user data from CSS ... \n");
 		IIdentity cssOwnerId = commMgr.getIdManager().fromJid(commMgr.getIdManager().getThisNetworkNode().getBareJid());
 		Requestor requestor = new Requestor(cssOwnerId);
 		
+		
 		CtxEntityIdentifier ownerEntityIdentifier = externalCtxBroker.retrieveIndividualEntityId(requestor, cssOwnerId).get();
+		
+
+		CtxAttribute nameLast = externalCtxBroker.createAttribute(requestor, ownerEntityIdentifier, CtxAttributeTypes.NAME_LAST).get();
+		nameLast.setStringValue("Test");
+		externalCtxBroker.update(requestor, nameLast).get();
+		CtxAttribute nameFirst = externalCtxBroker.createAttribute(requestor, ownerEntityIdentifier, CtxAttributeTypes.NAME_FIRST).get();
+		nameFirst.setStringValue("First");
+		nameFirst = (CtxAttribute) externalCtxBroker.update(requestor, nameFirst).get();
+//		feedbackTextArea.append("nameFirst="+nameFirst.getStringValue()+"\n");	
+		
 		CtxEntity ownerEntity = (CtxEntity) externalCtxBroker.retrieve(requestor, ownerEntityIdentifier).get();
+//		feedbackTextArea.append("retrieve completed\n");
 		
 		testUserLastname = ownerEntity.getAttributes(CtxAttributeTypes.NAME_LAST).iterator().next().getStringValue();
+//		feedbackTextArea.append(testUserLastname+"\n");
 		testUserFirstname = ownerEntity.getAttributes(CtxAttributeTypes.NAME_FIRST).iterator().next().getStringValue();
+//		feedbackTextArea.append(testUserFirstname+"\n");	
+
+		//testUserEmail = cssOwnerId.toString();
+		testUserEmail = testUserFirstname+"."+testUserLastname+"@ict-societies.eu";
 
 		// TODO replace following strings by getting CtxAttributeTypes
-		testUserEmail = testUserFirstname+"."+testUserLastname+"@societies.eu";
 		testUserPassword = testUserFirstname+"__"+testUserLastname;
 		testUserInstitute = "institute";
 		feedbackTextArea.append("email: "+testUserEmail+"\n");
+		
+		// TODO retrieve data from CSS
 	}
 	
 	public void updateUserDataInCSS() {
@@ -182,13 +203,16 @@ public class WantToHelp implements IWantToHelp, ActionListener {
 	public void actionPerformed(ActionEvent e) {
 		String command = e.getActionCommand();
 		if (command.equalsIgnoreCase(subscribeCommand)) {
-			feedbackTextArea.append("xmlrpc on 'login' > "+xmlRpcClient_IWTH.signInUser(testUserEmail, testUserPassword, testUserLastname, testUserFirstname, testUserInstitute)+"\n");
 			// TODO retrieve data from CSS
-//			try {
-//				getUserDataFromCSS();
-//			} catch (Exception e1) {
-//				e1.printStackTrace();
-//			}
+			try {
+				//feedbackTextArea.append("before\n");
+				getUserDataFromCSS();
+				//feedbackTextArea.append("after\n\n\n\n\n\n\n\n\n\n\n");
+			} catch (Exception e1) {
+				e1.printStackTrace();
+			}
+			feedbackTextArea.append("xmlrpc on 'login' > "+xmlRpcClient_IWTH.signInUser(testUserEmail, testUserPassword, testUserLastname, testUserFirstname, testUserInstitute)+"\n");
+			
 			pullThread.setCheckData(true);
 			subscribe.setVisible(false);
 			unsubscribe.setVisible(true);
