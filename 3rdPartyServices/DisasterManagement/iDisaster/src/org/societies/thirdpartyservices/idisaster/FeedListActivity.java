@@ -24,6 +24,9 @@
  */
 package org.societies.thirdpartyservices.idisaster;
 
+import java.util.ArrayList;
+
+import org.societies.android.api.cis.SocialContract;
 import org.societies.thirdpartyservices.idisaster.R;
 
 import android.app.AlertDialog;
@@ -32,6 +35,7 @@ import android.content.ContentResolver;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -53,7 +57,9 @@ import android.widget.Toast;
 public class FeedListActivity extends ListActivity {
 	
 	ContentResolver resolver;
-	Cursor cursor;
+	Cursor feedCursor;			// used for the activities in the feed
+	int feeds;					// keep track of number of feeds
+
 	
 	ArrayAdapter<String> feedAdapter;
 	ListView listView;
@@ -61,108 +67,179 @@ public class FeedListActivity extends ListActivity {
  
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-	super.onCreate(savedInstanceState);
-	
-    //TODO: query Content Provider for services in the CIS
-	
-  	boolean noFeed = false;
-  	
-  	if (noFeed) {
-  		//  TextView cannot be used here as the Activity is a ListActivity
-  		//  TextView textview = new TextView(this);
-  		//	textview.setText("This is the Services tab");
-  		//  setContentView(textview);
-
-  		// Create dialog if no service in disaster team						
-      	AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this);
-      	alertBuilder.setMessage(getString(R.string.feedListDialogCIS))
-      		.setCancelable(false)
-      		.setPositiveButton (getString(R.string.dialogOK), new DialogInterface.OnClickListener() {
-      			public void onClick(DialogInterface dialog, int id) {
-      				// add code
-      				return;
-      			}
-      		});
-  	    AlertDialog alert = alertBuilder.create();
-  	    alert.show();
-  	    return;
-
-  	} else {
-    
+    	
+    	super.onCreate(savedInstanceState);
     	setContentView (R.layout.feed_list_layout);
-    	ListView listView = getListView();
+    	listView = getListView();
+    	resolver = getContentResolver();
     	
-    	// Enable filtering for the contents of the list view.
-    	// The filtering logic should be provided
-    	// listView.setTextFilterEnabled(true);  
-    	
-    	
-// TODO: Get the list from the Societies Content Provider
+    	//TODO: customize the layout for the row is necessary
+    	// At the moment a simple string is used as for disaster.
 
+		if (iDisasterApplication.testDataUsed) {			// Test data
+															// TODO: check this: The adapter should not be set in onResume since the Android Adapter 
+															// mechanism is used for update? See DisasterCreateactivity.
+			iDisasterApplication.getInstance().feedAdapter = new ArrayAdapter<String> (this,
+					R.layout.disaster_list_item, R.id.disaster_item, iDisasterApplication.getInstance().feedContentList);
+	    	// Assign adapter to ListView
+	    	listView.setAdapter(iDisasterApplication.getInstance().feedAdapter);
+	    }
 
-    	// The Adapter provides access to the data items.
-    	// The Adapter is also responsible for making a View for each item in the data set.
-    	//  Parameters: Context, Layout for the row, ID of the View to which the data is written, Array of data
-
-//TODO: customize the layout for the row is necessary
-// At the moment a simple string is used as for disaster.
-
-    	iDisasterApplication.getInstance().feedAdapter = new ArrayAdapter<String> (this,
-		R.layout.disaster_list_item, R.id.disaster_item, iDisasterApplication.getInstance().feedContentList);
-
-    	// Assign adapter to ListView
-
-    	listView.setAdapter(iDisasterApplication.getInstance().feedAdapter);
 
     	// Add listener for short click.
     	// 
     	listView.setOnItemClickListener(new OnItemClickListener() {
     		public void onItemClick (AdapterView<?> parent, View view,
     			int position, long id) {
+    			if (iDisasterApplication.testDataUsed) {
 // TODO: Remove code for testing the correct setting of preferences 
     			Toast.makeText(getApplicationContext(),
     				"Click ListItem Number   " + (position+1) + "   " + iDisasterApplication.getInstance().feedContentList.get (position), Toast.LENGTH_LONG)
     				.show();
-
-// TODO: Eventually start new activity if something more to show about the feed.    			
-
+    			} else {
+// TODO: Eventually start new activity if something more to show about the feed.
+    				
+				}
 // The activity is kept on stack (check also that "noHistory" is not set in Manifest)
 // Should it be removed?
 //    			finish();
     			}
-    		
     		});
-  		}
-  
+       	
+//TODO:  Add listener for long click
+    	// listView.setOnItemLongClickListener(new DrawPopup());
+
+    } // onCreate
+
+/**
+ * onResume is called at start of the active lifetime.
+ * The list of feeds is retrieved from SocialProvider and assigned to 
+ * view.
+ * The data are fetched each time the activity becomes visible as these data
+ * may be changed by other users (info fetched from the Cloud)
+ */
+        
+	@Override
+    protected void onResume() {
+		super.onResume();
+		
+		// Test data are set in onCreate - see explanation above
+		
+    	if (! iDisasterApplication.testDataUsed) {
+    		if (feedAdapter!= null) feedAdapter.clear();
+    		getFeed();
+    		assignAdapter ();
+    			
+			Toast.makeText(getApplicationContext(),
+    				"Bug when getting data from Social Provider: the implementation of this activity is not complete", Toast.LENGTH_LONG /*Toast.LENGTH_SHORT*/ )
+    				.show();
+			}
+
+//		// Create dialog if no feed in disaster team						
+//  	AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this);
+//  	alertBuilder.setMessage(getString(R.string.feedListDialogCIS))
+//  		.setCancelable(false)
+//  		.setPositiveButton (getString(R.string.dialogOK), new DialogInterface.OnClickListener() {
+//  			public void onClick(DialogInterface dialog, int id) {
+//  				// add code
+//  				return;
+//  			}
+//  		});
+//	    AlertDialog alert = alertBuilder.create();
+//	    alert.show();
+//	    return;
+
+    }
+
+/**
+ * onPause releases all data.
+ * Called when resuming a previous activity (for instance using back button)
+ */		       
+	@Override
+	protected void onPause() {
+		
+		super.onPause ();
+		
+// TODO: check the following:
+	// When using managedQuery(), the activity keeps a reference to the cursor and close it
+    // whenever needed (in onDestroy() for instance.) 
+    // When using a contentResolver's query(), the developer has to manage the cursor as a sensitive
+    // resource. If you forget, for instance, to close() it in onDestroy(), you will leak 
+    // underlying resources (logcat will warn you about it.)
+    //
+
+//		feedCursor.close();
 	}
 
-    /**
-     * onResume is called at start of the active lifetime.
-     * The lists of disaster is retrieved from SocialProvider and assigned to 
-     * view.
-    */
 
-    // TODO: check if it is necessary to use an adaptater as the list of disasters is
-    // retrieved anyway.
-        
-        @Override
-    	protected void onResume() {
-    		super.onResume();
-    	
-    		if (! iDisasterApplication.testDataUsed) {			// Test data are set in onCreate - see explanation above
-    															// Data from content provider are fetched every time the activity becomes visible
+/**
+ * getFeed retrieves the list of activity feeds for the selected disaster team
+ * from Social Provider.
+ */
+	private void getFeed () {
+//		Uri communityActivityUri = SocialContract.CommunityActivity.CONTENT_URI;
 
-    			if (feedAdapter!= null) feedAdapter.clear();
+//TODO: remove this Uri - waiting for new version of Social Provider
+			Uri communityActivityUri = Uri.parse ("content://org.societies.android.SocialProvider/communities_activity");
+		
+		String[] communityActivityprojection = new String[] {
+// TODO: Find out what you be retrieved
+			SocialContract.CommunityActivity.GLOBAL_ID_OBJECT	// ?? No content?
+//		, SocialContract.CommunityActivity.+++
+		};		
 
-    // All information is fetched from the Social Provider. Preferences are no longer used.
-//    			iDisasterApplication.getInstance().setDisasterTeamName // reset user preferences
-//    			(getString(R.string.noPreference));
-    		
-//    			getFeeds();
-//    			assignAdapter ();
-    		}
-    	}
 
+//TODO: Add a check on selected community? 
+		String communityActivitySelection = SocialContract.CommunityActivity.GLOBAL_ID_FEED_OWNER + "= ?";
+		String[] communityActivitySelectionArgs = new String[] {iDisasterApplication.getInstance().
+														selectedTeam.globalId};		// The feed belongs to the CIS
+
+//TODO: Classify according to date
+		String communityActivitysortOrder = null;
+
+//TODO: Remove comment - currently bug in SOcialProvider
+//		feedCursor = resolver.query(communityActivityUri, communityActivityprojection,
+//									communityActivitySelection, communityActivitySelectionArgs,
+//									communityActivitysortOrder);
+		feedCursor =null;
+
+	}
+
+
+/**
+ * assignAdapter assigns data to display to adapter and adapter to view.
+ */
+	private void assignAdapter () {
+			
+		feeds= 0;
+			
+		ArrayList<String> feedList = new ArrayList<String> ();
+
+//		An empty List will be assigned to Adapter
+//		if (feedCursor == null) {
+
+//		An empty List will be assigned to Adapter
+//			if (feedCursor == null) {
+//				if (feedCursor.getCount() == 0) {
+			
+		if (feedCursor != null) {
+			if (feedCursor.getCount() != 0) {
+				while (feedCursor.moveToNext()) {
+					feeds++;
+					String displayName = feedCursor.getString(feedCursor
+							.getColumnIndex(SocialContract.CommunityActivity.GLOBAL_ID_OBJECT));
+					feedList.add (displayName);
+				}
+			}
+		}
+	    feedAdapter = new ArrayAdapter<String> (this,
+			R.layout.disaster_list_item, R.id.disaster_item, feedList);
+			
+		listView.setAdapter(feedAdapter);
+
+	}
+	
+	
 /**
  * onCreateOptionsMenu expands the activity menu for this activity tab.
 */
@@ -206,4 +283,6 @@ public class FeedListActivity extends ListActivity {
     	return true;
     }
 
+    
+    
 }
