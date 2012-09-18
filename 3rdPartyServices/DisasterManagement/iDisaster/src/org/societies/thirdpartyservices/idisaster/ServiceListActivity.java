@@ -24,12 +24,18 @@
  */
 package org.societies.thirdpartyservices.idisaster;
 
+import java.util.ArrayList;
+
+import org.societies.android.api.cis.SocialContract;
 import org.societies.thirdpartyservices.idisaster.R;
 
 import android.app.AlertDialog;
 import android.app.ListActivity;
+import android.content.ContentResolver;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -56,100 +62,281 @@ import android.widget.AdapterView.OnItemClickListener;
 // recommended, shared or installed.
 
 public class ServiceListActivity extends ListActivity {
+
+	ContentResolver resolver;
+	Cursor recommendedServiceCursor;	// used for services that are recommended to the team members
+	int recommendedServices;			// keep track of number of recommended services
+	Cursor sharedServiceCursor;		// used for services that are shared by team members
+	int sharedServices;					// keep track of number of shared services
+	Cursor myServiceCursor;			// used for services that are used in the team by the user
+	int myServices;						// keep track of number of services used by the user
+		
+	ArrayAdapter<String> serviceAdapter;
+	ListView listView;
+
+
+	
+	
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
-    super.onCreate(savedInstanceState);
-
-    //TODO: query Content Provider for services in the CIS
-	
-  	boolean noService = false;
-  	
-  	if (noService) {
-  		//  TextView cannot be used here as the Activity is a ListActivity
-  		//  TextView textview = new TextView(this);
-  		//	textview.setText("This is the Services tab");
-  		//  setContentView(textview);
-
-  		// Create dialog if no service in disaster team						
-      	AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this);
-      	alertBuilder.setMessage(getString(R.string.serviceListDialogCIS))
-      		.setCancelable(false)
-      		.setPositiveButton (getString(R.string.dialogOK), new DialogInterface.OnClickListener() {
-      			public void onClick(DialogInterface dialog, int id) {
-      				// add code
-      				return;
-      			}
-      		});
-  	    AlertDialog alert = alertBuilder.create();
-  	    alert.show();
-  	    return;
-
-  	} else {
-    
+    	super.onCreate(savedInstanceState);
     	setContentView (R.layout.service_list_layout);
-    	ListView listView = getListView();
-    	
-    	// Enable filtering for the contents of the list view.
-    	// The filtering logic should be provided
-    	// listView.setTextFilterEnabled(true);  
-    	
-    	
-// TODO: Get the list from the Societies Content Provider
+    	listView = getListView();
+    	resolver = getContentResolver();
+	
+    	if (iDisasterApplication.testDataUsed) {			// Test data
+															// The adapter should not be set in onResume since the Android Adapter 
+															// mechanism is used for update. See DisasterCreateactivity.
+        	iDisasterApplication.getInstance().serviceAdapter = new ArrayAdapter<String> (this,
+        			R.layout.disaster_list_item, R.id.disaster_item, iDisasterApplication.getInstance().CISserviceNameList);
 
-
-    	// The Adapter provides access to the data items.
-    	// The Adapter is also responsible for making a View for each item in the data set.
-    	//  Parameters: Context, Layout for the row, ID of the View to which the data is written, Array of data
-
-//TODO: customize the layout for the row is necessary
-// At the moment a simple string is used as for disaster.
-
-    	iDisasterApplication.getInstance().CISserviceAdapter = new ArrayAdapter<String> (this,
-		R.layout.disaster_list_item, R.id.disaster_item, iDisasterApplication.getInstance().CISserviceNameList);
-
-    	// Assign adapter to ListView
-
-    	listView.setAdapter(iDisasterApplication.getInstance().CISserviceAdapter);
+        	listView.setAdapter(iDisasterApplication.getInstance().serviceAdapter);
+    	} 													// Otherwise the data are fetched in onResume
+	
 
     	// Add listener for short click.
-    	// 
     	listView.setOnItemClickListener(new OnItemClickListener() {
     		public void onItemClick (AdapterView<?> parent, View view,
-    			int position, long id) {
-// TODO: Remove code for testing the correct setting of preferences 
-    			Toast.makeText(getApplicationContext(),
-    				"Click ListItem Number   " + (position+1) + "   " + iDisasterApplication.getInstance().CISserviceNameList.get (position), Toast.LENGTH_LONG)
-    				.show();
-
-    			// Start the ServiceDetails Activity
-    			// TODO: Provide CIS_ID and SERVICE_ID as parameters... 
-
- //    			startActivity (new Intent(ServiceListActivity.this, ServiceDetailsActivity.class));
-    			
+    				int position, long id) {
+ //TODO: revise test data
     			Intent intent = new Intent(ServiceListActivity.this, ServiceDetailsActivity.class);
-				intent.putExtra("CODE", "RELATED_TO_CIS");		// The service is already related to CIS: either recommended or shared or ???
-    			if (iDisasterApplication.testDataUsed) {
-// Needed? This is a global resource that is retrieved from iDisaster App
-//    				intent.putExtra("CIS_ID", iDisasterApplication.getInstance().selectedTeam.globalId);
-    				intent.putExtra("SERVICE_ID", Integer.toString(position));    				
-    			} else {
-    			// TODO: use service information returned by SocialProvider	
-// Needed? This is a global resource that is retrieved from iDisaster App
-//    				intent.putExtra("CIS_ID", iDisasterApplication.getInstance().selectedTeam.globalId);
-    				intent.putExtra("SERVICE_ID", Integer.toString(position));    				    				
-    			}
-    			startActivity(intent);
+				intent.putExtra("CONTEXT", "RELATED_TO_CIS");			// The service is already related to CIS
 
-    			
-// The activity is kept on stack (check also that "noHistory" is not set in Manifest)
-// Should it be removed?
-//    			finish();
-    			}
+
+    			if (iDisasterApplication.testDataUsed) {					// Test data    				
+        				intent.putExtra("ACTION", "RECOMMENDED");					// For test: The service is recommended in the CIS
+        				intent.putExtra("SERVICE_ID", Integer.toString(position));  // For test: service identity
+				
+        			} else {
+        				String serviceGlobalId;
+        				if (position < recommendedServices) {							// Retrieve information from list of recommended services in the team
+    						recommendedServiceCursor.moveToPosition(position);
+        					serviceGlobalId =  recommendedServiceCursor.getString(recommendedServiceCursor
+    							.getColumnIndex(SocialContract.Services.GLOBAL_ID));
+               				intent.putExtra("ACTION", "RECOMMENDED");       					
+        				} else if ((position-recommendedServices) < sharedServices) {	// Retrieve information from list of shared services in the team
+        					sharedServiceCursor.moveToPosition(position-recommendedServices);
+        					serviceGlobalId =  sharedServiceCursor.getString(sharedServiceCursor
+    							.getColumnIndex(SocialContract.Services.GLOBAL_ID));
+               				intent.putExtra("ACTION", "SHARED");       					
+        				} else if ((position-recommendedServices-sharedServices) < myServices) {
+        					myServiceCursor.moveToPosition(position-recommendedServices - sharedServices);
+        					serviceGlobalId =  sharedServiceCursor.getString(sharedServiceCursor
+    							.getColumnIndex(SocialContract.Services.GLOBAL_ID));
+               				intent.putExtra("ACTION", "OWN");       					
+        				} else {	// should never happen
+        					iDisasterApplication.debug (2, "No service id can be retrieved from position in onClickListener");
+        					return;
+        				}
+        				intent.putExtra("SERVICE_ID", serviceGlobalId);    				    				
+        			}
+    			// Start the ServiceDetails activity
+        		startActivity(intent);
+// The activity is kept on stack (check also that "noHistory" is not set in Manifest
+//        		finish();
+    		}
+    	});
+    	
+//TODO:  Add listener for long click
+    	// listView.setOnItemLongClickListener(new DrawPopup());
+       	
+    } // onCreate
+    				
+    
+/**
+ * onResume is called at start of the active lifetime.
+ * The list of services in the team is retrieved from SocialProvider
+ * and assigned to the view.
+ * The data are fetched each time the activity becomes visible as these data
+ * may be changed by other users (info fetched from the Cloud)
+ */
+            
+	@Override
+	protected void onResume() {
+		super.onResume();
+    	
+		// Test data are set in onCreate - see explanation above
     		
-    		});
-  		}
-    }
+        if (! iDisasterApplication.testDataUsed) {
+        	if (serviceAdapter!= null) serviceAdapter.clear();
+        	recommendedServiceCursor = getServices ("Full access");		// TODO: Replaced by the type "Recommended"
+        	sharedServiceCursor = getServices ("Monitor");				// TODO: Replaced by the type "Shared"
+//        	getMyServices ();
+        	assignAdapter ();
+        	
+//        	Toast.makeText(getApplicationContext(),
+//				"Bug when getting data from Social Provider: the implementation of this activity is not complete", Toast.LENGTH_LONG /*Toast.LENGTH_SHORT*/ )
+//				.show();
+        }
+
+//    		// Create dialog if no member in disaster team						
+//      	AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this);
+//      	alertBuilder.setMessage(getString(R.string.memberListDialog))
+//      		.setCancelable(false)
+//      		.setPositiveButton (getString(R.string.dialogOK), new DialogInterface.OnClickListener() {
+//      			public void onClick(DialogInterface dialog, int id) {
+//      				// add code
+//      				return;
+//      			}
+//      		});
+//    	    AlertDialog alert = alertBuilder.create();
+//    	    alert.show();
+//    	    return;
+	}
+
+/**
+ * onPause releases all data.
+ * Called when resuming a previous activity (for instance using back button)
+ */		       
+	@Override
+	protected void onPause() {
+			
+		super.onPause ();
+			
+// TODO: check the following:
+	// When using managedQuery(), the activity keeps a reference to the cursor and close it
+    // whenever needed (in onDestroy() for instance.) 
+    // When using a contentResolver's query(), the developer has to manage the cursor as a sensitive
+    // resource. If you forget, for instance, to close() it in onDestroy(), you will leak 
+    // underlying resources (logcat will warn you about it.)
+
+//		recommendedServiceCursor.close();
+//		sharedServiceCursor.close();
+//		myServiceCursor.close();
+	}
+
+/**
+ * getServices retrieves the list of services of a sepcifc type (e.g. Recommended, Shared) 
+ * in the team from Social Provider.
+ */
+
+	private Cursor getServices (String serviceType) {
+
+		// Step 1: get GLOBAL_ID_SERVICES for recommended services in the selected CIS
+//			Uri sharingUri = SocialContract.Sharing.CONTENT_URI;
+
+//	//TODO: remove this Uri - waiting for new version of Social Provider
+			Uri sharingUri = Uri.parse ("content://org.societies.android.SocialProvider/sharing");
+						
+			String[] sharingProjection = new String[] {
+					SocialContract.Sharing.GLOBAL_ID_SERVICE};
+
+			String sharingSelection = SocialContract.Sharing.GLOBAL_ID_COMMUNITY + "= ?" +
+					"AND " + SocialContract.Sharing.TYPE + "= ?";
+			String[] sharingSelectionArgs = new String[] 
+						{iDisasterApplication.getInstance().selectedTeam.globalId, // For the selected CIS
+						serviceType};											   // Retrieve services of that type
+			
+			Cursor sharingCursor= resolver.query(sharingUri, sharingProjection,
+					sharingSelection, sharingSelectionArgs, null /* sortOrder*/);
+
+			// Step 2: retrieve the services with the GLOBAL_ID_SERVICEs retrieved above
+//TODO: We assume that a service can only be recommended once in a CIS...
+			if (sharingCursor == null) {			// No cursor was set - should not happen?
+				iDisasterApplication.debug (2, "sharingCursor was not set to any value");
+				return null;
+			}
+			
+			if (sharingCursor.getCount() == 0) {	// No service is recommended in the team community
+				recommendedServiceCursor = null;
+				return null;
+			}			
+			
+			// Get GLOBAL_ID and NAME for recommended services
+				// 
+			Uri servicesUri = SocialContract.Services.CONTENT_URI;
+					
+			String[] servicesProjection = new String[] {
+						SocialContract.Services.GLOBAL_ID,
+						SocialContract.Services.NAME};
+				
+			boolean first = true;
+			String servicesSelection = new String();
+			ArrayList <String> servicesSelectionArgs = new ArrayList <String> ();
+			while (sharingCursor.moveToNext()) {
+				if (first) {
+					first = false;
+					servicesSelection = SocialContract.Services.GLOBAL_ID + "= ?";
+					servicesSelectionArgs.add (sharingCursor.getString(
+									(sharingCursor.getColumnIndex(SocialContract.Sharing.GLOBAL_ID_SERVICE))));
+				} else {
+					servicesSelection = servicesSelection + 
+										" AND " +  SocialContract.Services.GLOBAL_ID + "= ?";
+					servicesSelectionArgs.add (sharingCursor.getString(
+							(sharingCursor.getColumnIndex(SocialContract.Sharing.GLOBAL_ID_SERVICE))));
+				}
+			}
+			return resolver.query (servicesUri, servicesProjection, servicesSelection,
+								   servicesSelectionArgs.toArray(new String[servicesSelectionArgs.size()]),
+								   null /* sortOrder*/);
+			
+		//
+		// When using managedQuery(), the activity keeps a reference to the cursor and close it
+		// whenever needed (in onDestroy() for instance.) 
+		// When using a contentResolver's query(), the developer has to manage the cursor as a sensitive
+		// resource. If you forget, for instance, to close() it in onDestroy(), you will leak 
+		// underlying resources (logcat will warn you about it.)
+		//
+	}
+
+/**
+ * assignAdapter assigns data to display to adapter and adapter to view.
+ */
+	private void assignAdapter () {
+		recommendedServices = 0;
+		sharedServices = 0;
+//		myServices = 0;
+		
+		ArrayList<String> serviceList = new ArrayList<String> ();
+		
+		
+//				 recommendedServiceCursor
+//		 sharedServiceCursor = null;
+		 myServiceCursor = null;
+
+//			An empty List will be assigned to Adapter
+//			if ((recommendedServiceCursor == null) && (sharedServiceCursor == null)
+//				&& (myServiceCursor == null)) {
+
+//			An empty List will be assigned to Adapter
+//			if ((recommendedServiceCursor != null) && (recommendedServiceCursor != null)
+//				&& (recommendedServiceCursor != null)) {
+//				if ((recommendedServiceCursor.getCount() == 0) && (recommendedServiceCursor.getCount() == 0)
+//					&& (myServiceCursor.getCount() == 0)) {
+			
+			if (recommendedServiceCursor != null) {
+				if (recommendedServiceCursor.getCount() != 0) {
+					while (recommendedServiceCursor.moveToNext()) {
+						recommendedServices++;
+						String displayName = "recommended: " + recommendedServiceCursor.getString(recommendedServiceCursor
+								.getColumnIndex(SocialContract.Services.NAME));
+						serviceList.add (displayName);
+					}
+				}
+			}
+			if (sharedServiceCursor != null) {
+				if (sharedServiceCursor.getCount() != 0) {
+					while (sharedServiceCursor.moveToNext()) {
+						sharedServices++;
+						String displayName = "shared: " + sharedServiceCursor.getString(sharedServiceCursor
+								.getColumnIndex(SocialContract.Services.NAME));
+						serviceList.add (displayName);
+					}
+				}
+			}
+
+// TODO: do the same for own services
+//			if (memberTeamCursor != null) {
+//			....
+//			}
+	    serviceAdapter = new ArrayAdapter<String> (this,
+		    			R.layout.disaster_list_item, R.id.disaster_item, serviceList);
+			
+		listView.setAdapter(serviceAdapter);
+	}
+	
+	
 
 /**
  * onCreateOptionsMenu expands the activity menu for this activity tab.

@@ -127,7 +127,7 @@ public class FeedListActivity extends ListActivity {
 		
     	if (! iDisasterApplication.testDataUsed) {
     		if (feedAdapter!= null) feedAdapter.clear();
-    		getFeed();
+    		getFeeds();
     		assignAdapter ();
     			
 			Toast.makeText(getApplicationContext(),
@@ -176,11 +176,11 @@ public class FeedListActivity extends ListActivity {
  * getFeed retrieves the list of activity feeds for the selected disaster team
  * from Social Provider.
  */
-	private void getFeed () {
+	private void getFeeds () {
 //		Uri communityActivityUri = SocialContract.CommunityActivity.CONTENT_URI;
 
 //TODO: remove this Uri - waiting for new version of Social Provider
-			Uri communityActivityUri = Uri.parse ("content://org.societies.android.SocialProvider/communities_activity");
+		Uri communityActivityUri = Uri.parse ("content://org.societies.android.SocialProvider/communities_activity");
 		
 		String[] communityActivityprojection = new String[] {
 // TODO: Find out what you be retrieved

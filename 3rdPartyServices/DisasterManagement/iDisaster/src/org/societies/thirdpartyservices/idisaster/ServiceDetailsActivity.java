@@ -24,17 +24,22 @@
  */
 package org.societies.thirdpartyservices.idisaster;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import org.societies.android.api.cis.SocialContract;
 import org.societies.thirdpartyservices.idisaster.R;
 
 import android.app.Activity;
+import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 
 import android.widget.TextView;
@@ -57,8 +62,16 @@ public class ServiceDetailsActivity extends Activity implements OnClickListener 
 	private TextView serviceNameView;
 	private TextView serviceDescriptionView;
 	
+	private ContentResolver resolver;
+	
+	private String serviceGlobalId;
 	private String serviceName;
 	private String serviceDescription;
+	
+	//TODO: will be fetched from SocialProvider when available...
+	private String servicePackage ="org.ubicompforall.cityexplorer";  // can be found
+	private String serviceIntent =".gui.CalendarActivity";	// can be found
+//	privat String serviceIntent ="org.ubicompforall.cityexplorer.gui.PlanPoiTab";  // can be found
 	
 	// Constant keys for servicAction
 	public static final String SERVICE_INSTALL = "Install";
@@ -67,46 +80,38 @@ public class ServiceDetailsActivity extends Activity implements OnClickListener 
 
 	private String serviceAction = SERVICE_INSTALL;
 
-	
-	// Where to download from
-	String serviceMarketURL ="iJacket";
-	// How to invoke the service
-	String serviceIntent ="org.ubicompforall.cityexplorer.gui.PlanPoiTab";  // can be found
-//	String serviceIntent =".gui.CalendarActivity";	// can be found
-	String servicePackage ="org.ubicompforall.cityexplorer";  // can be found
-
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.service_details_layout);
+    	resolver = getContentResolver();
+
 
 
 		Intent intent= getIntent(); 						// Get the intent that created activity
-		String actionCode = intent.getStringExtra("CODE"); 	// Retrieve first parameter
-															// Describes whether or not the service is related to the CIS
+		String actionContext = intent.getStringExtra("CONTEXT"); 	// Retrieve first parameter (service related to a CIS?)
+		
+		String action = intent.getStringExtra("ACTION"); 			// Retrieve second parameter (what kind of relation?)
+		
 // Needed? This is a global resource that is retrieved from iDisaster App
-//		String cisID = intent.getStringExtra("CIS_ID"); 		// Retrieve second parameter 
+//		String cisID = intent.getStringExtra("CIS_ID");
 		String serviceID = intent.getStringExtra("SERVICE_ID"); // Retrieve third parameter: service ID
 		
 		
 		
 		if (iDisasterApplication.testDataUsed) {
 			int position = Integer.parseInt(serviceID);
-			if (actionCode.equals("ADD_TO_CIS")){
+			if (actionContext.equals("ADD_TO_CIS")){
 				serviceName = iDisasterApplication.getInstance().serviceNameList.get (position);
 				serviceDescription = iDisasterApplication.getInstance().serviceDescriptionList.get (position);
-				} else if (actionCode.equals("RELATED_TO_CIS")) {
+				} else if (actionContext.equals("RELATED_TO_CIS")) {
 				serviceName = iDisasterApplication.getInstance().CISserviceNameList.get (position);
 				serviceDescription = iDisasterApplication.getInstance().CISserviceDescriptionList.get (position);
 			} // else: should not happened. Feil action code was used
 		} else {
-			// TODO: fetch data from Content Provider
-			int position = Integer.parseInt(serviceID);
-			serviceName = iDisasterApplication.getInstance().serviceNameList.get (position);
-			serviceDescription = iDisasterApplication.getInstance().serviceDescriptionList.get (position);	
+			getServiceInformation (serviceID);
+			// TODO: Add a check that some info was retrieved
 		}
 		
 		// Get text fields
@@ -177,19 +182,55 @@ public class ServiceDetailsActivity extends Activity implements OnClickListener 
 		
 	}
 
-	
-	/**
-	 * Update service data in Content provider.
-	 */
+
+
+/**
+ * getServiceInformation retrieves the information about the service 
+ * from Social Provider.
+ */
+
+	private void getServiceInformation (String id) {
+
+		serviceGlobalId ="";
+		serviceName ="";
+		serviceDescription ="";
+
+		Uri serviceUri = SocialContract.Services.CONTENT_URI;
+						
+		String[] serviceProjection = new String[] {
+							SocialContract.Services.GLOBAL_ID,
+							SocialContract.Services.NAME,
+							SocialContract.Services.DESCRIPTION};
+		String serviceSelection = SocialContract.Services.GLOBAL_ID + "= ?";
+		String [] serviceSelectionArgs = new String [] {id} ;
+		
+		Cursor serviceCursor = resolver.query (serviceUri, serviceProjection, serviceSelection,
+									   serviceSelectionArgs,
+									   null /* sortOrder*/);
+		if (serviceCursor != null) {
+			if (serviceCursor.moveToFirst()){		// Should not be several matches; anyway only select the first
+				serviceGlobalId = serviceCursor.getString(serviceCursor		// should be the same as "id"
+						.getColumnIndex(SocialContract.Services.GLOBAL_ID));
+				serviceName = serviceCursor.getString(serviceCursor
+						.getColumnIndex(SocialContract.Services.NAME));
+				serviceDescription = serviceCursor.getString(serviceCursor
+						.getColumnIndex(SocialContract.Services.DESCRIPTION));				
+			}
+		}
+	}
+
+/**
+ * Update service data in Content provider.
+ */
 
 	public void updateServiceAction () {
 		// TODO: Update data in Content provider
 		// Check that the service (App) is installed
 	}
 
-	/**
-	 * Check if any installed App can answer the Intent given as a parameter.
-	 */
+/**
+ * Check if any installed App can answer the Intent given as a parameter.
+ */
 	
     private boolean isCallable (Intent intent1) {    
         List<ResolveInfo> list = getPackageManager().queryIntentActivities(intent1, PackageManager.MATCH_DEFAULT_ONLY);    
@@ -200,9 +241,9 @@ public class ServiceDetailsActivity extends Activity implements OnClickListener 
   
     }  
 
-	/**
-	 * Check if any installed App has the package name given as a parameter.
-	 */
+/**
+ * Check if any installed App has the package name given as a parameter.
+ */
 
     private boolean isInstalled (String appName) {
     	
@@ -232,8 +273,6 @@ public class ServiceDetailsActivity extends Activity implements OnClickListener 
 	}
     
     
-
-	
 //	final Intent mainIntent = new Intent(Intent.ACTION_MAIN, null);
 //	mainIntent.addCategory(Intent.CATEGORY_LAUNCHER);
 //	final List pkgAppsList = context.getPackageManager().queryIntentActivities( mainIntent, 0);

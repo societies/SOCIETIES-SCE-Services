@@ -66,9 +66,7 @@ public class DisasterListActivity extends ListActivity {
 	int ownTeams;						// keep track of number of own teams
 	Cursor memberTeamCursor;			// used for the teams the user is member of
 	int memberTeams;					// keep track of number of member teams
-	
-	Cursor cursor;	//TODO: remove
-	
+		
 	ArrayAdapter<String> disasterAdapter;
 	ListView listView;
 	
@@ -103,7 +101,7 @@ public class DisasterListActivity extends ListActivity {
 //    				iDisasterApplication.getInstance().setDisasterTeamName (name);
     				
     			} else {
-    				if ((position) < ownTeams) {	// Retrieve information from list of teams the user owns
+    				if (position < ownTeams) {	// Retrieve information from list of teams the user owns
     					ownTeamCursor.moveToPosition(position);
     					iDisasterApplication.getInstance().selectedTeam.name =  ownTeamCursor.getString(ownTeamCursor
     							.getColumnIndex(SocialContract.Communities.NAME));
@@ -119,10 +117,10 @@ public class DisasterListActivity extends ListActivity {
         				iDisasterApplication.getInstance().selectedTeam.ownFlag = false;
     				}
     			}
-    			
-    			Toast.makeText(getApplicationContext(),
-        				"Click ListItem Number   " + (position+1) + "   " + iDisasterApplication.getInstance().selectedTeam.name,
-        				Toast.LENGTH_LONG).show();
+// TODO: Remove test code    			
+//    			Toast.makeText(getApplicationContext(),
+//        				"Click ListItem Number   " + (position+1) + "   " + iDisasterApplication.getInstance().selectedTeam.name,
+//        				Toast.LENGTH_LONG).show();
 
     			// Start the Disaster Activity
     			startActivity (new Intent(DisasterListActivity.this, DisasterActivity.class));
@@ -157,6 +155,21 @@ public class DisasterListActivity extends ListActivity {
 			getMemberDisasterTeams();	// Retrieve teams I am member of
 			assignAdapter ();			// Display them
 		}
+		
+//		// Create dialog if no team						
+//  	AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this);
+//  	alertBuilder.setMessage(getString(R.string.disasterListDialogCIS))
+//  		.setCancelable(false)
+//  		.setPositiveButton (getString(R.string.dialogOK), new DialogInterface.OnClickListener() {
+//  			public void onClick(DialogInterface dialog, int id) {
+//  				// add code
+//  				return;
+//  			}
+//  		});
+//	    AlertDialog alert = alertBuilder.create();
+//	    alert.show();
+//	    return;
+
 	}
 
 
@@ -248,48 +261,48 @@ public class DisasterListActivity extends ListActivity {
 
 
 		// Step 2: retrieve the communities with the GLOBAL_IDs retrieved above
-		if (membershipCursor == null) {		// The user is not member of any community
+		
+		if (membershipCursor == null) {		// No cursor was set - should not happen?
+			iDisasterApplication.debug (2, "No information can be retrieved in membershipCursor");
 			memberTeamCursor = null;
 			return;
-		} else {							// Get GLOBAL_ID and NAME for CIS I am member of
-			// 
-			Uri communitiesUri = SocialContract.Communities.CONTENT_URI;
+		} 
+		
+		if (membershipCursor.getCount() == 0) {		// The user is not member of any community
+			memberTeamCursor = null;
+			return;
+		}
+		
+		
+		// Get GLOBAL_ID and NAME for CIS I am member of
+			 
+		Uri communitiesUri = SocialContract.Communities.CONTENT_URI;
 				
-			String[] communitiesProjection = new String[] {
+		String[] communitiesProjection = new String[] {
 					SocialContract.Communities.GLOBAL_ID,
 					SocialContract.Communities.NAME};
 			
-			// Build selection string and selectionArgs string
-			
-			if (membershipCursor.getCount() == 0) {		// should not happen?
-				iDisasterApplication.debug (2, "No information can be retrieved in membershipCursor");
-				memberTeamCursor = null;
-				return;
+		// Build selection string and selectionArgs string
+		boolean first = true;
+		String communitiesSelection = new String();
+		ArrayList <String> communitiesSelectionArgs = new ArrayList <String> ();
+		while (membershipCursor.moveToNext()) {
+			if (first) {
+				first = false;
+				communitiesSelection = SocialContract.Communities.GLOBAL_ID + "= ?";
+				communitiesSelectionArgs.add (membershipCursor.getString(
+								(membershipCursor.getColumnIndex(SocialContract.Membership.GLOBAL_ID_COMMUNITY))));
 			} else {
-				boolean first = true;
-				String communitiesSelection = new String();
-				ArrayList <String> communitiesSelectionArgs = new ArrayList <String> ();
-				while (membershipCursor.moveToNext()) {
-					if (first) {
-						first = false;
-						communitiesSelection = SocialContract.Communities.GLOBAL_ID + "= ?";
-						communitiesSelectionArgs.add (membershipCursor.getString(
-										(membershipCursor.getColumnIndex(SocialContract.Membership.GLOBAL_ID_COMMUNITY))
-										));
-					} else {
-						communitiesSelection = communitiesSelection + " AND " +
-													   SocialContract.Communities.GLOBAL_ID + "= ?";
-						communitiesSelectionArgs.add (membershipCursor.getString(
-								(membershipCursor.getColumnIndex(SocialContract.Membership.GLOBAL_ID_COMMUNITY))
-								));
-					}
-				}
-				memberTeamCursor = resolver.query (communitiesUri, communitiesProjection,
-						communitiesSelection, communitiesSelectionArgs.toArray(new String[communitiesSelectionArgs.size()])
-						, null /* sortOrder*/);
-				}
-			return;
+				communitiesSelection = communitiesSelection +
+									   " AND " +  SocialContract.Communities.GLOBAL_ID + "= ?";
+				communitiesSelectionArgs.add (membershipCursor.getString(
+								(membershipCursor.getColumnIndex(SocialContract.Membership.GLOBAL_ID_COMMUNITY))));
+			}
 		}
+		memberTeamCursor = resolver.query (communitiesUri, communitiesProjection, communitiesSelection, 
+											communitiesSelectionArgs.toArray(new String[communitiesSelectionArgs.size()]),
+											null /* sortOrder*/);
+		return;
 		
 	//
 	// When using managedQuery(), the activity keeps a reference to the cursor and close it

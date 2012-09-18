@@ -8,8 +8,10 @@
     <string name="dialogOK">OK</string>
 
     <string name="disaster_list_menu_createCommunity">Create disaster team</string>
-    <string name="disasterListTestDialog">The application is in DisasterList Activity.</string>
+	<string name="disasterListDialogCIS">No teams yet. Select menu to add teams.</string>
     <string name="disasterListHeading">Disaster teams</string>
+    <string name="disasterListTestDialog">The application is in DisasterList Activity.</string>
+	
     
     <string name="emptyText"></string>
     <string name="noPreference">n/a</string>

@@ -89,7 +89,6 @@ public class StartActivity extends Activity implements OnClickListener {
 		if (iDisasterApplication.testDataUsed) {							// Use test data (no SocialProvider)
 			startView.setText(getString(R.string.startInfoNotLogged));			
 		} else {															// Fetch data from SocialProvider
-			
 			if (iDisasterApplication.getInstance().checkUserIdentity(this)) {	// User is identified
 				startView.setText(getString(R.string.startInfoLogged) 
 						+ " " 													// Not sure end space in the predefined string is ignored

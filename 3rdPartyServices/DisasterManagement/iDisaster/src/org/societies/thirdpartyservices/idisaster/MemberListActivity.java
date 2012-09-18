@@ -213,50 +213,52 @@ public class MemberListActivity extends ListActivity {
 				membershipSelection, membershipSelectionArgs, null /* sortOrder*/);
 
 		// Step 2: retrieve the members with the GLOBAL_ID_MEMBERs retrieved above
-		if (membershipCursor == null) {		// The user is not member of any community
-			memberCursor = null;
-			return;
-		} else {							// Get GLOBAL_ID and NAME for members in the selected CIS
-			// 
-			Uri peopleUri = SocialContract.People.CONTENT_URI;
-				
-			String[] membersProjection = new String[] {
-					SocialContract.People.GLOBAL_ID,
-					SocialContract.People.NAME};
-			
-			// Build selection string and selectionArgs string
-			
-			if (membershipCursor.getCount() == 0) {		// should not happen?
-				iDisasterApplication.debug (2, "No information can be retrieved in membershipCursor");
-				memberCursor = null;
-				return;
-			} else {
-				boolean first = true;
-				String membersSelection = new String();
-				ArrayList <String> membersSelectionArgs = new ArrayList <String> ();
-				while (membershipCursor.moveToNext()) {
-					if (first) {
-						first = false;
-						membersSelection = SocialContract.People.GLOBAL_ID + "= ?";
-						membersSelectionArgs.add (membershipCursor.getString(
-										(membershipCursor.getColumnIndex(SocialContract.Membership.GLOBAL_ID_MEMBER))
-										));
-					} else {
-						membersSelection = membersSelection + " AND " +
-													   SocialContract.People.GLOBAL_ID + "= ?";
-						membersSelectionArgs.add (membershipCursor.getString(
-								(membershipCursor.getColumnIndex(SocialContract.Membership.GLOBAL_ID_MEMBER))
-								));
-					}
-				}
-//TODO: Remove comment - currently bug in SOcialProvider
-//				memberCursor = resolver.query (peopleUri, membersProjection,
-//						membersSelection, membersSelectionArgs.toArray(new String[membersSelectionArgs.size()]),
-//						SocialContract.People.NAME + " COLLATE LOCALIZED ASC" );
-				}
+		
+		if (membershipCursor == null) {		// No cursor was set - should not happen?
+			iDisasterApplication.debug (2, "membershipCursor was not set to any value");
 			memberCursor = null;
 			return;
 		}
+		
+		if (membershipCursor.getCount() == 0) {		// The user is not member of any community
+			memberCursor = null;
+			return;
+		}
+		
+		// Get GLOBAL_ID and NAME for members in the selected CIS
+			 
+		Uri peopleUri = SocialContract.People.CONTENT_URI;
+				
+		String[] membersProjection = new String[] {
+					SocialContract.People.GLOBAL_ID,
+					SocialContract.People.NAME};
+			
+		// Build selection string and selectionArgs string
+			
+		boolean first = true;
+		String membersSelection = new String();
+		ArrayList <String> membersSelectionArgs = new ArrayList <String> ();
+		while (membershipCursor.moveToNext()) {
+			if (first) {
+				first = false;
+				membersSelection = SocialContract.People.GLOBAL_ID + "= ?";
+				membersSelectionArgs.add (membershipCursor.getString(
+								(membershipCursor.getColumnIndex(SocialContract.Membership.GLOBAL_ID_MEMBER))));
+			} else {
+				membersSelection = membersSelection + " AND " +
+											   SocialContract.People.GLOBAL_ID + "= ?";
+				membersSelectionArgs.add (membershipCursor.getString(
+						(membershipCursor.getColumnIndex(SocialContract.Membership.GLOBAL_ID_MEMBER))));
+			}
+		}
+//TODO: Remove comment - currently bug in SocialProvider
+//		memberCursor = resolver.query (peopleUri, membersProjection,membersSelection, 
+//										membersSelectionArgs.toArray(new String[membersSelectionArgs.size()]),
+//										SocialContract.People.NAME + " COLLATE LOCALIZED ASC" );
+			
+		memberCursor = null;
+		return;
+
 	}
 
 /**
