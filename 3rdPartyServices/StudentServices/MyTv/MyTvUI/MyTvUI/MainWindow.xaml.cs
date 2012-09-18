@@ -85,7 +85,7 @@ namespace MyTvUI
             Console.WriteLine("Initialising SocketClient");
             //initialiseSocketClient();
             
-        }       
+        }
 
         //when window loaded
         private void Window_Loaded(object sender, RoutedEventArgs e)
