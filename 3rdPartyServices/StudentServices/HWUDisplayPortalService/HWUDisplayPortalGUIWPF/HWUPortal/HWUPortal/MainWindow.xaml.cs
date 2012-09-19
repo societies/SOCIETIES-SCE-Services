@@ -377,7 +377,7 @@ namespace HWUPortal
 
                 if (!this.loggedIn)
                 {
-
+                    this.serviceSocketServer.setUserSession(userSession);
                     //this.enableThisButton(this.closeShowingServiceBtn, true);
                     this.enableThisButton(this.logoutButton, true);
 
