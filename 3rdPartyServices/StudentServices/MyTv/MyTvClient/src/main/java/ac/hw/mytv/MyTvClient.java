@@ -48,6 +48,8 @@ public class MyTvClient implements IDisplayableService, IActionConsumer{
 	List<String> myServiceTypes;
 	
 	//personalisable parameters
+	int channel;
+	int mute;
 
 	public MyTvClient(){
 		initialiseMyTvClient();  //just for testing!!!
