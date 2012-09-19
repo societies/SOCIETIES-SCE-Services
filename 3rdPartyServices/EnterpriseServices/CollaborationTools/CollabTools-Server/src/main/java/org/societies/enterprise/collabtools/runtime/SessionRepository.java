@@ -49,15 +49,15 @@ public class SessionRepository implements Observer {
 	@Override
 	public synchronized void update(Observable o, Object arg) {
 		Person person = (Person) arg;
-		System.out.println("Person has change location : " + person.getName());
+//		System.out.println("Person has change location : " + person.getName());
 		if (isInSession(person)) {
 			//Remove person from session
-			System.out.println(person.getLastStatus().getShortTermCtx(ShortTermCtxTypes.LOCATION));
+//			System.out.println("Person leaves session: "+person.getLastStatus().getShortTermCtx(ShortTermCtxTypes.LOCATION));
 			HashSet<Person> persons = sessionsTable.get(person.getLastStatus().getShortTermCtx(ShortTermCtxTypes.LOCATION));
-			System.out.println("Session table before: "+persons.toString());
+//			System.out.println("Session table before: "+persons.toString());
 			persons.remove(person);
 			sessionsTable.put(person.getLastStatus().getShortTermCtx(ShortTermCtxTypes.LOCATION), persons);
-			System.out.println("Session table after: "+persons.toString());
+//			System.out.println("Session table after: "+persons.toString());
 		}
 	}
 	

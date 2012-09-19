@@ -227,37 +227,44 @@ public class Rules {
 	 */
 	public Hashtable<String, HashSet<Person>> getPersonsByWeight(String sessionName, HashSet<Person> hashsetPersons) {
 		//For long term context types
-				Person[] person = new Person[hashsetPersons.size()];
-				hashsetPersons.toArray(person);
-				ArrayList<Float> elements = new ArrayList<Float>(); 
-				for (Person p : person) {
-					Iterable<Relationship> knows = p.getUnderlyingNode().getRelationships(RelTypes.KNOWS);
-					while (knows.iterator().hasNext()) {
-						Relationship rel = knows.iterator().next();
-						elements.add((Float) rel.getProperty("weight"));
-					}
+		Hashtable<String, HashSet<Person>> hashCtxListTemp = new Hashtable<String, HashSet<Person>>(10,10);
+		if (!hashsetPersons.isEmpty()) {
+			Person[] person = new Person[hashsetPersons.size()];
+			hashsetPersons.toArray(person);
+			ArrayList<Float> elements = new ArrayList<Float>(); 
+			for (Person p : person) {
+				Iterable<Relationship> knows = p.getUnderlyingNode().getRelationships(RelTypes.KNOWS);
+				while (knows.iterator().hasNext()) {
+					Relationship rel = knows.iterator().next();
+					elements.add((Float) rel.getProperty("weight"));
 				}
-				float weight = ContextAnalyzer.automaticThresholding(elements);
-				log.info("automaticThresholding: "+ContextAnalyzer.automaticThresholding(elements));
-				HashSet<Person> newHashsetPersons = new HashSet<Person>();
-				HashSet<Long> hashsetTemp = new HashSet<Long>();
-				for (Person individual : person) {
-					for (Person otherPerson : person) {
-						Relationship rel = individual.getFriendRelationshipTo(otherPerson);
-						//Check by relationship ID if the weight was included in the hashset
-						if (rel != null &&  !hashsetTemp.contains(rel.getId())) {
-//							log.info(((Float)rel.getProperty("weight")));
-							hashsetTemp.add(rel.getId());
-							if ((Float)rel.getProperty("weight") >= weight) {
-								newHashsetPersons.add(individual);
-								newHashsetPersons.add(otherPerson);
-							}
+			}
+			float weight = ContextAnalyzer.automaticThresholding(elements);
+			log.info("automaticThresholding: "+ContextAnalyzer.automaticThresholding(elements));
+			HashSet<Person> newHashsetPersons = new HashSet<Person>();
+			HashSet<Long> hashsetTemp = new HashSet<Long>();
+			for (Person individual : person) {
+				for (Person otherPerson : person) {
+					Relationship rel = individual.getFriendRelationshipTo(otherPerson);
+					//Check by relationship ID if the weight was included in the hashset
+					if (rel != null &&  !hashsetTemp.contains(rel.getId())) {
+						//							log.info(((Float)rel.getProperty("weight")));
+						hashsetTemp.add(rel.getId());
+						if ((Float)rel.getProperty("weight") >= weight) {
+							newHashsetPersons.add(individual);
+							newHashsetPersons.add(otherPerson);
 						}
 					}
 				}
-				Hashtable<String, HashSet<Person>> hashCtxList1 = new Hashtable<String, HashSet<Person>>(10,10);
-				hashCtxList1.put(sessionName, newHashsetPersons);
-				return hashCtxList1;
+			}
+			hashCtxListTemp.put(sessionName, newHashsetPersons);
+			return hashCtxListTemp;
+		}
+		else {
+			hashCtxListTemp.put(sessionName, hashsetPersons);
+		}
+		return hashCtxListTemp;
+
 	}
 
 	public static <T> List<T> getDuplicate(Collection<T> list) {

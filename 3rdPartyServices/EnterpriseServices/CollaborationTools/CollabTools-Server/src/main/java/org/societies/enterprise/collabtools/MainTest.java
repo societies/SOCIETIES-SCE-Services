@@ -59,23 +59,13 @@ public class MainTest {
 		
 //		test.menu();
 		test.createPersons(5); //5 people by default
+		
 //		Creating some updates
 		test.createMockLongTermCtx();
 		test.createMockShortTermCtx();
 		test.enrichedCtx();
 		test.setupFriendsBetweenPeople();
-//		for ( Person person : personRepository.getAllPersons() )
-//    	{
-//			Iterable<Relationship> knows = person.getUnderlyingNode().getRelationships(RelTypes.KNOWS);
-//			ArrayList<Float> elements = new ArrayList<Float>(); 
-//			while (knows.iterator().hasNext()) {
-//				Relationship rel = knows.iterator().next();
-//				System.out.println(rel.getProperty("weight"));
-//				elements.add((Float) rel.getProperty("weight"));
-//
-//			}
-//			System.out.println("automaticThresholding: "+ContextAnalyzer.automaticThresholding(elements));
-//    	}
+
 		
 //		YouMightKnow ymn = new YouMightKnow(personRepository.getPersonByName("person#"+3), new String[] {"project planning"}, 5);
 //		ymn.printMightKnow(ymn.findYouMightKnow(personRepository.getPersonByName("person#"+3)) , new String[] {"project planning"} );
@@ -88,10 +78,11 @@ public class MainTest {
 		CtxMonitor thread = new CtxMonitor(personRepository, sessionRepository);
 		thread.start();
 
-//		Thread.sleep(7 * 1000);
 //		//Creating more updates
-//		test.createMockShortTermCtx();
-//		Thread.sleep(3 * 1000);
+		while (true) {
+			Thread.sleep(3 * 1000);
+			test.createMockShortTermCtx();
+		}
 
 		//        logger.info("Shutting down graphDb" );
 		//        registerShutdownHook();

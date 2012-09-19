@@ -179,7 +179,7 @@ public class TestUtils {
 	}
 	
 	public void changeLocation(){
-		
+		this.createMockShortTermCtx();
 	}
 
 	

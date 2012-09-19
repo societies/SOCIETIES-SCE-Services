@@ -1,20 +1,23 @@
 Manifest-Version: 1.0
 Export-Package: org.societies.enterprise.collabtools.acquisition;uses:
- ="javax.xml.xpath,javax.xml.parsers,org.slf4j,org.xml.sax";version="0
- .0.1.SNAPSHOT"
+ ="org.osgi.framework,org.societies.context.externalBrokerConnector,ja
+ vax.xml.xpath,javax.xml.parsers,org.slf4j,org.xml.sax";version="0.0.1
+ .SNAPSHOT"
 Bundle-ClassPath: .,neo4j-kernel-1.8.M04.jar,neo4j-graph-algo-1.8.M04.
- jar,neo4j-lucene-index-1.8.M04.jar,geronimo-jta_1.1_spec-1.1.1.jar,or
- g.osgi.core-4.3.0.jar,neo4j-udc-1.8.M04.jar,neo4j-1.8.M04.jar,commons
- -cli-1.2.jar,neo4j-jmx-1.8.M04.jar,neo4j-cypher-1.8.M04.jar,neo4j-gra
- ph-matching-1.8.M04.jar,lucene-core-3.5.0.jar,scala-library-2.9.1-1.j
- ar
+ jar,neo4j-lucene-index-1.8.M04.jar,classes,geronimo-jta_1.1_spec-1.1.
+ 1.jar,org.osgi.core-4.3.0.jar,neo4j-udc-1.8.M04.jar,neo4j-1.8.M04.jar
+ ,commons-cli-1.2.jar,neo4j-jmx-1.8.M04.jar,neo4j-cypher-1.8.M04.jar,n
+ eo4j-graph-matching-1.8.M04.jar,lucene-core-3.5.0.jar,scala-library-2
+ .9.1-1.jar
 Built-By: cviana
 Tool: Bnd-1.43.0
 Bundle-Name: Collaboration Tools
 Created-By: Apache Maven Bundle Plugin
+Import-Bundle: org.societies.context.externalBrokerConnector;version="
+ 0.0.1.SNAPSHOT"
 Build-Jdk: 1.7.0_03
 Bundle-Version: 0.0.1.SNAPSHOT
-Bnd-LastModified: 1347902361228
+Bnd-LastModified: 1348088105050
 Embed-Transitive: true
 Bundle-ManifestVersion: 2
 Bundle-Activator: org.societies.enterprise.collabtools.Activator
@@ -35,9 +38,19 @@ Import-Package: ch.qos.logback.classic;resolution:=optional,ch.qos.log
  avax.xml.parsers;resolution:=optional,javax.xml.xpath;resolution:=opt
  ional,org.osgi.framework;version="[1.6,2)",org.slf4j;resolution:=opti
  onal;version="[1.6,2)",org.slf4j.impl;resolution:=optional;version="[
- 1.6,2)",org.w3c.dom;resolution:=optional,org.xml.sax;resolution:=opti
- onal,org.xml.sax.ext;resolution:=optional,org.xml.sax.helpers;resolut
- ion:=optional,sun.misc;resolution:=optional
+ 1.6,2)",org.societies.api.cis.management;resolution:=optional,org.soc
+ ieties.api.comm.xmpp.interfaces;resolution:=optional,org.societies.ap
+ i.context;resolution:=optional,org.societies.api.context.broker;resol
+ ution:=optional,org.societies.api.context.event;resolution:=optional,
+ org.societies.api.context.model;resolution:=optional,org.societies.ap
+ i.identity;resolution:=optional,org.societies.api.internal.context.br
+ oker;resolution:=optional,org.societies.api.schema.servicelifecycle.m
+ odel;resolution:=optional,org.societies.context.externalBrokerConnect
+ or;resolution:=optional;version="[0.1,1)",org.springframework.beans.f
+ actory.annotation;resolution:=optional,org.springframework.stereotype
+ ;resolution:=optional,org.w3c.dom;resolution:=optional,org.xml.sax;re
+ solution:=optional,org.xml.sax.ext;resolution:=optional,org.xml.sax.h
+ elpers;resolution:=optional,sun.misc;resolution:=optional
 Embed-Dependency: *;scope=compile|runtime
 Originally-Created-By: Apache Maven Bundle Plugin
 

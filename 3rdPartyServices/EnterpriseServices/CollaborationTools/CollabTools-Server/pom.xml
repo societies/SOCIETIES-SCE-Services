@@ -54,6 +54,11 @@
 			<artifactId>org.osgi.core</artifactId>
 			<version>4.3.0</version>
 		</dependency>
+		<dependency>
+			<groupId>org.societies.context-management</groupId>
+			<artifactId>context-3pbroker-connector</artifactId>
+			<version>0.1-SNAPSHOT</version>
+		</dependency>
 	</dependencies>
 	<build>
 		<plugins>
@@ -70,11 +75,12 @@
 <!-- 							javax.lang.model.element,javax.lang.model.type,javax.lang.model.util, -->
 <!-- 							javax.management,javax.management.remote,javax.tools,javax.xml.parsers, -->
 <!-- 							org.osgi.framework,org.xml.sax,org.xml.sax.ext,org.xml.sax.helpers -->
-						  org.osgi.framework, *;resolution:=optional</Import-Package> 
+						  org.osgi.framework, !ch.qos.logback, *;resolution:=optional</Import-Package> 
  				          <Export-Package>org.societies.enterprise.collabtools.acquisition</Export-Package> 
 <!-- 				      <Private-Package>no privates either</Private-Package> -->
 				      <Embed-Transitive>true</Embed-Transitive>
 		           	  <Embed-Dependency>*;scope=compile|runtime</Embed-Dependency>
+		           	  <Import-Bundle>org.societies.context.externalBrokerConnector;version="0.0.1.SNAPSHOT"</Import-Bundle>
 				      <Bundle-Activator>org.societies.enterprise.collabtools.Activator</Bundle-Activator>
 				    </instructions> 
 				</configuration>

@@ -1,12 +1,15 @@
 package org.societies.enterprise.collabtools.acquisition;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Observable;
 import java.util.Observer;
+
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathExpressionException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.societies.enterprise.collabtools.Activator;
@@ -16,16 +19,43 @@ import org.societies.enterprise.collabtools.runtime.CtxMonitor;
 import org.societies.enterprise.collabtools.runtime.SessionRepository;
 import org.xml.sax.SAXException;
 
-public class ContextSubscriber
-implements IContextSubscriber, Observer
+public class ContextSubscriber implements IContextSubscriber, Observer
 {
 	private static final Logger logger = LoggerFactory.getLogger(Activator.class);
 	private PersonRepository personRepository;
 	private SessionRepository sessionRepository;
-	private int counter = 0;
-	private Person lastIndivudal;
-	private String cis;
+	ContextConector ctxConnector = new ContextConector(this);
+	private String cisID;
+	
 
+	public void initialCtx () {
+		HashMap<String, HashMap<String, String[]>> persons = ctxConnector.getInitialContext(cisID);
+		Iterator<String> personIterator = persons.keySet().iterator();
+
+		   
+		while (personIterator.hasNext()) {  
+		   String personKey = personIterator.next().toString();  
+		   HashMap<String, String[]> ctxAttributes = persons.get(personKey);
+		   Iterator<String> ctxIterator = ctxAttributes.keySet().iterator();
+		   logger.info("Person with context attributes: "+personKey + " " + ctxAttributes);  
+		   while (ctxIterator.hasNext()) {  
+			   String ctxKey = ctxIterator.next().toString(); 
+			   String[] ctxArray = ctxAttributes.get(ctxKey);
+			   try {
+				this.setContext(ctxKey, ctxArray, personKey);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		   }
+		   
+		}
+		
+		logger.info("Starting Context Monitor...");
+		CtxMonitor thread = new CtxMonitor(this.personRepository, this.sessionRepository);
+		thread.start();
+	}
+	
 	public ContextSubscriber(PersonRepository personRepository, SessionRepository sessionRepository)
 	{
 		this.personRepository = personRepository;
@@ -45,59 +75,38 @@ implements IContextSubscriber, Observer
 			individual.addContextStatus( context, individual.getLastStatus().getShortTermCtx(ShortTermCtxTypes.LOCATION), sessionRepository );
 	}
 
-	public void setContext(String type, String context, String person) throws Exception {
-		logger.info("******************************* Changing Context: " + person + ", " + type + ", " + context);
+	private void setContext(String type, String[] context, String person) throws Exception {
+		logger.info("******************************* Adding Context for: " + person + ", " + type + ", " + context);
+		//TODO: FIX THIS
 		Person individual = null;
 		if (type == "name") {
-			this.counter++;
-			logger.info("counter..."+this.counter);
-			if (this.counter >= 5) {
-				enrichedCtx();
-				setupWeightBetweenPeople(this.lastIndivudal);
-				if (this.counter == 5) {
-					logger.info("Starting Context Monitor...");
-					CtxMonitor thread = new CtxMonitor(this.personRepository, this.sessionRepository);
-
-					thread.start();
-				}
-			}
 			individual = this.personRepository.createPerson(person);
 			individual.setLongTermCtx("name", context);
-			logger.info("******************************* Person.NAME: " + this.personRepository.getPersonByName(person).getName());
 		}
-
-		individual = this.personRepository.getPersonByName(person);
-		this.lastIndivudal = individual;
-		if (type == "interests")
+		else if (type == "interests")
 			individual.setLongTermCtx("interests", context);
 		else if (type == "work")
-			individual.setLongTermCtx("work", context);
+			individual.setLongTermCtx("work", context[0]);
 		else if (type == "company")
-			individual.setLongTermCtx("company", context);
+			individual.setLongTermCtx("company", context[0]);
 		else if (type == "location")
-			individual.addContextStatus( (individual.getLastStatus() == null ? "" : individual.getLastStatus().getShortTermCtx(ShortTermCtxTypes.STATUS)), context, sessionRepository );
+			individual.addContextStatus( (individual.getLastStatus() == null ? "" : individual.getLastStatus().getShortTermCtx(ShortTermCtxTypes.STATUS)), context[0], sessionRepository );
 		else if (type == "status")
-			individual.addContextStatus( context, (individual.getLastStatus() == null ? "" : individual.getLastStatus().getShortTermCtx(ShortTermCtxTypes.LOCATION)), sessionRepository );
+			individual.addContextStatus( context[0], (individual.getLastStatus() == null ? "" : individual.getLastStatus().getShortTermCtx(ShortTermCtxTypes.LOCATION)), sessionRepository );
 	}
 	
-	public void setCommunity(String cis)
+	public void setCommunity(String cisID)
 	{
-		this.cis = cis;
+		this.cisID = cisID;
 	}
 
-	public void setContext(String type, String[] context, String person)
-	{
-		Person individual = this.personRepository.getPersonByName(person);
-		individual.setLongTermCtx("interests", context);
-	}
-
-	public void enrichedCtx() throws XPathExpressionException, IOException, SAXException, ParserConfigurationException
+	private void enrichedCtx() throws XPathExpressionException, IOException, SAXException, ParserConfigurationException
 	{
 		ContextAnalyzer ctxRsn = new ContextAnalyzer(this.personRepository);
 		ctxRsn.incrementInterests();
 	}
 
-	public void setupWeightBetweenPeople(Person person)
+	private void setupWeightBetweenPeople(Person person)
 	{
 		Map<Person, Integer> persons = this.personRepository.getPersonWithSimilarInterests(person);
 		for (Map.Entry<Person, Integer> entry : persons.entrySet()) {
