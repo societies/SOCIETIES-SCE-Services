@@ -3,16 +3,15 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="MyTV" Height="600" Width="1000" Loaded="Window_Loaded" Closing="Window_Closing" 
         xmlns:my="clr-namespace:Microsoft.Samples.Kinect.WpfViewers;assembly=Microsoft.Samples.Kinect.WpfViewers" 
-        xmlns:Controls="clr-namespace:Coding4Fun.Kinect.Wpf.Controls;assembly=Coding4Fun.Kinect.Wpf"
-        WindowStartupLocation="CenterScreen" Name="MyTV">
+        xmlns:Controls="clr-namespace:Coding4Fun.Kinect.Wpf.Controls;assembly=Coding4Fun.Kinect.Wpf">
     
     <Canvas>
-        <DockPanel Canvas.Left="668" Canvas.Top="64" Height="485" Name="dockPanel1" Width="298">
+        <DockPanel Canvas.Left="692" Canvas.Top="64" Height="485" Name="dockPanel1" Width="274">
             <Label Content="My Updates" Height="49" Name="label6" Width="221" DockPanel.Dock="Top" FontSize="28" />
-            <ListBox Height="424" Name="listBox1" Width="275" DockPanel.Dock="Bottom" />
+            <ListBox Height="424" Name="listBox1" Width="255" DockPanel.Dock="Bottom" DataContext="{Binding}" FontSize="14" FontWeight="Bold" Foreground="Green" Background="LightGray" ScrollViewer.HorizontalScrollBarVisibility="Hidden" ScrollViewer.VerticalScrollBarVisibility="Hidden"/>
         </DockPanel>
         
-        <WebBrowser Canvas.Left="68" Canvas.Top="12" Height="360" Name="tvBrowser" Width="580" Loaded="tvBrowser_WindowLoaded" Navigated="tvBrowser_Navigated" Cursor="None" DataContext="{Binding}" />
+        <WebBrowser Canvas.Left="68" Canvas.Top="12" Height="360" Name="tvBrowser" Width="605" Loaded="tvBrowser_WindowLoaded" Navigated="tvBrowser_Navigated" Cursor="None" DataContext="{Binding}" />
    
         <my:KinectSensorChooser HorizontalAlignment="Left" Margin="503,379,0,0" Name="kinectSensorChooser1" VerticalAlignment="Top" Width="460" Canvas.Left="-369" Canvas.Top="-342" Height="295"/>
         
@@ -80,6 +79,21 @@
                 <ImageBrush ImageSource="Images/pointer.png"/>
             </Ellipse.Fill>
         </Ellipse>
-        <DockPanel Canvas.Left="12" Canvas.Top="444" Height="104" Name="dockPanel2" Width="650" />
+        <DockPanel Canvas.Left="12" Canvas.Top="444" Height="104" Name="dockPanel2" Width="661">
+            
+        </DockPanel>
     </Canvas>
+    
+    <Window.Resources>
+        <DataTemplate x:Key="listBoxTemplate">
+            <StackPanel Margin="3">
+                <DockPanel >
+                    <TextBlock Text="{Binding}" Foreground="Black" Background="LightBlue" FontWeight="Bold" />
+                </DockPanel>
+                <DockPanel >
+                    <TextBlock Text="{Binding}" Foreground ="Black" Background="LightGray" FontWeight="Bold"/> 
+                </DockPanel>
+            </StackPanel>
+        </DataTemplate>
+    </Window.Resources>
 </Window>
