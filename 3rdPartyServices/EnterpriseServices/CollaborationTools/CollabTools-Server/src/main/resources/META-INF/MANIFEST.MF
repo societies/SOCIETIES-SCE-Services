@@ -17,7 +17,7 @@ Import-Bundle: org.societies.context.externalBrokerConnector;version="
  0.0.1.SNAPSHOT"
 Build-Jdk: 1.7.0_03
 Bundle-Version: 0.0.1.SNAPSHOT
-Bnd-LastModified: 1348088105050
+Bnd-LastModified: 1348088354175
 Embed-Transitive: true
 Bundle-ManifestVersion: 2
 Bundle-Activator: org.societies.enterprise.collabtools.Activator
