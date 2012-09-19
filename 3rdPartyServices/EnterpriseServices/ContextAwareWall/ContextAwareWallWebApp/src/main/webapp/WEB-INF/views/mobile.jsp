@@ -3,6 +3,14 @@
 	language="java" contentType="text/html; charset=ISO-8859-1"
 	pageEncoding="ISO-8859-1"%>
 
+<%
+	String userId = request.getParameter("id");
+	if (userId == null){
+		userId = "";
+	}
+%>
+	
+
 <html>
     <head>
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no"/>
@@ -165,14 +173,15 @@ var cis = dojo.byId('cisBox').value;
    		}
    		catch(err){}
       
-    ///  alert(c.toHex());
-      
      	thisMsg = messages[msg];
      	var p = document.createElement('p');
-     //	p.setAttribute("style", 'color:'+c.toCss());
      	p.setAttribute("style", 'color:'+thisMsg.style);
      	p.setAttribute("class", "msg");
-     	p.innerHTML=thisMsg.userId+' says: '+thisMsg.msg;
+     	
+     	var name = thisMsg.userId.split(".");
+     	
+     	//p.innerHTML=thisMsg.userId+thisMsg.msg;
+     	p.innerHTML=name[0] + ': '+thisMsg.msg;
      	
      	mc.appendChild(p); ////----reverse
      	
@@ -221,42 +230,29 @@ var cis = dojo.byId('cisBox').value;
 	    -->
     </div>
 <div>
-<div id="response2"></div>
+	<div id="response2"></div>
 
-
-<form id='MessageForm' name ='MessageForm' action="postMsg1.html" >
-<table>
-<tbody>
-<tr>
-<td>Id:</td><td><input type="text" id='userId' name='userId'value='<%=request.getParameter("id") %>' /></td>
-
-</tr>
-<!--
-<tr>
-<td>Group:</td><td><input type="text" value='1' id="cis" name="cis"></td>
-</tr>
--->
-<tr>
-<td>color:</td><td><input type="text" name ='style'></td>
-</tr>
-<tr>
-<td>Text:</td><td><input type="text" name='msg' maxlength="50" ></td>
-</tr>
-<tr>
-<td>CIs:</td><td><select name="cisBox" id="cisBox" /></td>
-</tr>
-
-</tbody>
-</table>
-<a onclick="submitMessage();" style="cursor: hand">Spray Graffiti!</a>
-</form>
-</div>
+	<form id='MessageForm' name ='MessageForm' action="postMsg1.html" >
+		<table>
+		<tbody>
+		<tr>
+			<td>Id:</td><td><input type="text" id='userId' name='userId' value='<%=userId%>' /></td> <!-- readonly="readonly"-->
+		</tr>
+		<tr>
+			<td>color:</td><td><input type="text" name ='style'></td>
+		</tr>
+		<tr>
+			<td>Text:</td><td><input type="text" name='msg' maxlength="50" ></td>
+		</tr>
+		<tr>
+			<td>CIs:</td><td><select name="cisBox" id="cisBox" /></td>
+		</tr>
+		</tbody>
+		</table>
+		<a onclick="submitMessage();" style="cursor: hand">Spray Graffiti!</a>
+	</form>
+	</div>
 </div>
 
-
-
-
-
- 
-    </body>
+</body>
 </html>
