@@ -308,11 +308,6 @@ namespace HWUPortal
                         this.numOfServices++;
                         this.downloadFile(sInfo);
                     }
-
-                    if (this.numOfServices >= this.downloadedServices)
-                    {
-                        this.gui.Login(userSession);
-                    }
                     Console.WriteLine(userSession.ToString());
                     return true;
                 }
@@ -366,6 +361,11 @@ namespace HWUPortal
                 sInfo.serviceType = ServiceType.WEB;
                 this.userSession.addService(sInfo);
                 this.downloadedServices++;
+                if (this.downloadedServices>=this.numOfServices)
+                {
+                    this.gui.Login(this.userSession);
+                    stream.Write(okBytes, 0, okBytes.Length);
+                }
             }
             Console.WriteLine(sInfo.ToString());
         }

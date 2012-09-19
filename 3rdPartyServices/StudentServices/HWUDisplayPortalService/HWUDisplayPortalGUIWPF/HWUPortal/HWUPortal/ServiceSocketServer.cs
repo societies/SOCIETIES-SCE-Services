@@ -69,6 +69,7 @@ namespace HWUPortal
                         else if (receivedValue.IndexOf("CURRENT_USER") > -1)
                         {
                             byte[] jidInBytes = Encoding.ASCII.GetBytes(this.currentUserSession.getUserIdentity());
+                            
                             socket.Send(jidInBytes);
                             finishedReceiving = true;
                         }
