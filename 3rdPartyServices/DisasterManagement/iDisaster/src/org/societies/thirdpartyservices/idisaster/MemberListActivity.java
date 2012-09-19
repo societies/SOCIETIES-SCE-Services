@@ -26,9 +26,6 @@ package org.societies.thirdpartyservices.idisaster;
 
 import java.util.ArrayList;
 
-import org.societies.android.api.cis.SocialContract;
-import org.societies.thirdpartyservices.idisaster.R;
-
 import android.app.AlertDialog;
 import android.app.ListActivity;
 import android.content.ContentResolver;
@@ -43,9 +40,16 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.AdapterView.OnItemClickListener;
+
+//Related to the creation of a dialog box
+//import android.app.AlertDialog;
+//import android.content.DialogInterface;
+
+import org.societies.android.api.cis.SocialContract;
+import org.societies.thirdpartyservices.idisaster.R;
+
 
 /**
  * This activity allows the user to look up members
@@ -146,11 +150,16 @@ public class MemberListActivity extends ListActivity {
     		
         if (! iDisasterApplication.testDataUsed) {
         	if (memberAdapter!= null) memberAdapter.clear();
-       	getMembers();
+			if (getMembers()						// Retrieve members from the selected team
+					.equals(iDisasterApplication.getInstance().QUERY_EXCEPTION)) {
+				showQueryExceptionDialog ();	// Exception: Display dialog and terminates activity
+			}
+
         assignAdapter ();
-		Toast.makeText(getApplicationContext(),
-				"Bug when getting data from Social Provider: the implementation of this activity is not complete", Toast.LENGTH_LONG /*Toast.LENGTH_SHORT*/ )
-				.show();
+        
+//		Toast.makeText(getApplicationContext(),
+//				"Bug when getting data from Social Provider: the implementation of this activity is not complete", Toast.LENGTH_LONG /*Toast.LENGTH_SHORT*/ )
+//				.show();
 
     }
 
@@ -195,7 +204,7 @@ public class MemberListActivity extends ListActivity {
  * getFeed retrieves the list of activity feeds for the selected disaster team
  * from Social Provider.
  */
-	private void getMembers () {
+	private String getMembers () {
 		
 		// Step 1: get GLOBAL_ID_MEMBERs for members in the selected CIS
 //		Uri membershipUri = SocialContract.Membership.CONTENT_URI;
@@ -208,21 +217,27 @@ public class MemberListActivity extends ListActivity {
 
 		String membershipSelection = SocialContract.Membership.GLOBAL_ID_COMMUNITY + "= ?";
 		String[] membershipSelectionArgs = new String[] {iDisasterApplication.getInstance().selectedTeam.globalId};	// For the selected CIS
-		
-		Cursor membershipCursor= resolver.query(membershipUri, membershipProjection,
-				membershipSelection, membershipSelectionArgs, null /* sortOrder*/);
-
+	
+		Cursor membershipCursor = null;
+		try {
+			membershipCursor= resolver.query(membershipUri, membershipProjection,
+					membershipSelection, membershipSelectionArgs, null /* sortOrder*/);			
+		} catch (Exception e) {
+			iDisasterApplication.getInstance().debug (2, "Query to "+ membershipUri + "causes an exception");
+			return iDisasterApplication.getInstance().QUERY_EXCEPTION;
+		}
+	
 		// Step 2: retrieve the members with the GLOBAL_ID_MEMBERs retrieved above
 		
 		if (membershipCursor == null) {		// No cursor was set - should not happen?
-			iDisasterApplication.debug (2, "membershipCursor was not set to any value");
+			iDisasterApplication.getInstance().debug (2, "membershipCursor was not set to any value");
 			memberCursor = null;
-			return;
+			return iDisasterApplication.getInstance().QUERY_EMPTY;
 		}
 		
 		if (membershipCursor.getCount() == 0) {		// The user is not member of any community
 			memberCursor = null;
-			return;
+			return iDisasterApplication.getInstance().QUERY_EMPTY;
 		}
 		
 		// Get GLOBAL_ID and NAME for members in the selected CIS
@@ -252,12 +267,17 @@ public class MemberListActivity extends ListActivity {
 			}
 		}
 //TODO: Remove comment - currently bug in SocialProvider
-//		memberCursor = resolver.query (peopleUri, membersProjection,membersSelection, 
-//										membersSelectionArgs.toArray(new String[membersSelectionArgs.size()]),
-//										SocialContract.People.NAME + " COLLATE LOCALIZED ASC" );
-			
 		memberCursor = null;
-		return;
+		try {
+			memberCursor = resolver.query (peopleUri, membersProjection,membersSelection, 
+					membersSelectionArgs.toArray(new String[membersSelectionArgs.size()]),
+					SocialContract.People.NAME + " COLLATE LOCALIZED ASC" );	
+		} catch (Exception e) {
+			iDisasterApplication.getInstance().debug (2, "Query to "+ peopleUri + "causes an exception");
+			return iDisasterApplication.getInstance().QUERY_EXCEPTION;
+		}
+			
+		return iDisasterApplication.getInstance().QUERY_EMPTY;
 
 	}
 
@@ -341,5 +361,24 @@ public class MemberListActivity extends ListActivity {
     	}
     	return true;
     }
+
+/**
+ * showQueryExceptionDialog displays a dialog to the user.
+ * In this case, the activity does not terminate since the other
+ * activities in the TAB may still work.
+ */
+        			
+	private void showQueryExceptionDialog () {
+    	AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this);
+        alertBuilder.setMessage(getString(R.string.dialogMemberQueryException))
+        			.setCancelable(false)
+          			.setPositiveButton (getString(R.string.dialogOK), new DialogInterface.OnClickListener() {
+          				public void onClick(DialogInterface dialog, int id) {
+          					return;
+          				}
+          			});
+        AlertDialog alert = alertBuilder.create();
+        alert.show();	
+	}
 
 }

@@ -26,11 +26,6 @@ package org.societies.thirdpartyservices.idisaster;
 
 import java.util.ArrayList;
 
-import org.societies.android.api.cis.SocialContract;
-import org.societies.thirdpartyservices.idisaster.data.Me;
-import org.societies.thirdpartyservices.idisaster.data.SelectedTeam;
-
-//import org.societies.android.platform.client.SocietiesApp;
 
 import android.app.AlertDialog;
 import android.app.Application;
@@ -40,6 +35,10 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.util.Log;
 import android.widget.ArrayAdapter;
+
+import org.societies.android.api.cis.SocialContract;
+import org.societies.thirdpartyservices.idisaster.data.Me;
+import org.societies.thirdpartyservices.idisaster.data.SelectedTeam;
 
 // Previously some information was store in a preference file.
 // Currently: If information is not available, it is retrieved from the SocialProvider
@@ -81,7 +80,12 @@ public class iDisasterApplication extends Application {
 	SelectedTeam selectedTeam = new SelectedTeam ();		// Store team selected by the user - not persistent data (can be retrieved from Social Provider)
 	
 	// Constant keys used for user Logging
-	public static final String USER_NOT_IDENTFIED = "USER_NOT_IDENTFIED";
+	public final String USER_NOT_IDENTFIED = "USER_NOT_IDENTFIED";
+
+	// Constant keys used for query
+	public final String QUERY_EMPTY = "QUERY_EMPTY";
+	public final String QUERY_EXCEPTION = "QUERY_EXCEPTION";
+	public final String QUERY_SUCCESS = "QUERY_SUCCESS";
 
 	
 
@@ -146,91 +150,94 @@ public class iDisasterApplication extends Application {
 	} //onCreate
 
 /**
- * 	getUserIdentity retrieves the user information from SocialProvider
- * 	Returns false if the user is not registered
+ * 	checkUserIdentity retrieves the user information from SocialProvider
+ * 	Returns a query code:
+ * 			QUERY_SUCCESS if the user is registered
+ * 			QUERY_EMPTY if the user is not registered
+ * 			QUERY_EXECPTION if the query fails
  * 
  *  This method is defined by iDisaster such as a check can be made in any
  *  activity. 
  */
-	public boolean checkUserIdentity (Context ctx) {
+	public String checkUserIdentity (Context ctx) {
+		
+		Cursor cursor = null;
 		
 		if (me == null) { // should never happened!
 			me = new Me();
 			me.displayName = USER_NOT_IDENTFIED;
 			debug (2, "No instance of Me");
+		}
+		
+		Uri uri = SocialContract.Me.CONTENT_URI;
 
-		} else {
-			Uri uri = SocialContract.Me.CONTENT_URI;
-
-			//What to get:
-			String[] projection = new String [] {
-				SocialContract.Me.GLOBAL_ID,
-				SocialContract.Me.NAME,
-				SocialContract.Me.DISPLAY_NAME
-			};
+		//What to get:
+		String[] projection = new String [] {
+			SocialContract.Me.GLOBAL_ID,
+			SocialContract.Me.NAME,
+			SocialContract.Me.DISPLAY_NAME
+		};
 			
-			String selection = SocialContract.Me._ID + " = 1"; // Use the first user identity for Societies
-			String[] selectionArgs = null;
+		String selection = SocialContract.Me._ID + " = 1"; // Use the first user identity for Societies
+		String[] selectionArgs = null;
 
 //  Alternative query:
-//			String selection = SocialContract.Me._ID + "= ?"; // Use the first user identity for Societies
-//			String[] selectionArgs = new String[] {"1"};
+//		String selection = SocialContract.Me._ID + "= ?"; // Use the first user identity for Societies
+//		String[] selectionArgs = new String[] {"1"};
 			
-			String sortOrder = null;
+		String sortOrder = null;
 	
-			Cursor cursor = getContentResolver().query(uri, projection, selection, selectionArgs, sortOrder);
+        try{
+        	cursor = getContentResolver().query(uri, projection, selection, selectionArgs, sortOrder);
+        } catch (Exception e) {
+			debug (2, "Query to "+ uri + "causes an exception");
+        	return QUERY_EXCEPTION;
+        }
 			
-			if (cursor == null) {
-				showDialog (ctx, "Unable to retrieve user information from SocialProvider", getString(R.string.dialogOK));
-				me.displayName = USER_NOT_IDENTFIED;
-				debug (2, "No instance of Me");
-				
-			} else {
+		if (cursor == null) {
+			showDialog (ctx, "Unable to retrieve user information from SocialProvider", getString(R.string.dialogOK));
+			me.displayName = USER_NOT_IDENTFIED;
+			debug (2, "No instance of Me");
+			return QUERY_EMPTY;
+		}
+			
+		if (cursor.getCount() == 0) {
+			showDialog (ctx, "Unable to retrieve user information from SocialProvider", getString(R.string.dialogOK));
+			me.displayName = USER_NOT_IDENTFIED;
+			debug (2, "No instance of Me");
+			return QUERY_EMPTY;
+		}
 
 // TODO: There may be different logging info for user (stored in ContentProvider in Me).
 //	 		The first row is always Societies, other rows may be used for Facebook, etc...
 //			To get the number of entries, use:
 //				int i= cursor.getCount(); 
-				if (cursor.moveToFirst()){
-					me.globalId = cursor.getString(cursor		// TODO: check that GLOBAL_ID is correct?
+		if (cursor.moveToFirst()){
+			me.globalId = cursor.getString(cursor		// TODO: check that GLOBAL_ID is correct?
 							.getColumnIndex(SocialContract.Me.GLOBAL_ID));
-					me.name = cursor.getString(cursor
+			me.name = cursor.getString(cursor
 							.getColumnIndex(SocialContract.Me.NAME));
-					
-					if (cursor.getString(cursor					//TODO: check with Babak: what is returned if no name?
-							.getColumnIndex(SocialContract.Me.DISPLAY_NAME)) == null) {
-						me.displayName = me.name;		// use name as display name
-					} else {
-						me.displayName = cursor.getString(cursor
-							.getColumnIndex(SocialContract.Me.DISPLAY_NAME));
-					}
-					return true;		// The only case where true is returned
-				}
+				
+			if (cursor.getString(cursor					//TODO: check with Babak: what is returned if no name?
+					.getColumnIndex(SocialContract.Me.DISPLAY_NAME)) == null) {
+				me.displayName = me.name;		// use name as display name
+			} else {
+				me.displayName = cursor.getString(cursor
+					.getColumnIndex(SocialContract.Me.DISPLAY_NAME));
 			}
+			return QUERY_SUCCESS;		// The only case where true is returned
 		}
-		return false;
+		// should not happen
+		return QUERY_EMPTY;
 	}
 
-// All information is fetched from the Social Provider. Preferences are no longer used.
-//
-//	public String getDisasterTeamName () {
-//		return preferences.getString ("pref.disasterteamname", getString(R.string.noPreference));
-//	}
-//
-//	public void setDisasterTeamName (String name) {
-//    	editor.putString ("pref.disasterteamname", name);
-//    	editor.commit ();
-//		
-//	}
-
-	
 	
 /**
 * showDialog is used under testing
 * parameters: activity context, message to be displayed, button text
 */
-	public void showDialog (Context c, String displayMessage, String buttonText) {	
-		AlertDialog.Builder builder = new AlertDialog.Builder(c);
+	public void showDialog (Context ctx, String displayMessage, String buttonText) {	
+		AlertDialog.Builder builder = new AlertDialog.Builder(ctx);
 		builder.setMessage(displayMessage)
 			.setCancelable(false)
 			.setPositiveButton (buttonText, new DialogInterface.OnClickListener() {
@@ -243,12 +250,14 @@ public class iDisasterApplication extends Application {
 	}
 //  Example for using Test dialog
 //	iDisasterApplication.getInstance().showDialog (this, getString(R.string.loginTestDialog), getString(R.string.dialogOK));
+	
+
 
 
 /***
  * Debug method to include the filename, line-number and method of the caller
  */
-	public static void debug(int d, String msg) {
+	public void debug(int d, String msg) {
 
 		if (DEBUG >= d) {
 			StackTraceElement[] st = Thread.currentThread().getStackTrace();
@@ -314,5 +323,18 @@ public class iDisasterApplication extends Application {
 		CISserviceDescriptionList.add ("This service allows you to send an alert team members.");
 		
 	} // end setTestData
+
+
+// All information is fetched from the Social Provider. Preferences are no longer used.
+//
+//		public String getDisasterTeamName () {
+//			return preferences.getString ("pref.disasterteamname", getString(R.string.noPreference));
+//		}
+//
+//		public void setDisasterTeamName (String name) {
+//	    	editor.putString ("pref.disasterteamname", name);
+//	    	editor.commit ();
+//			
+//		}
 
 }

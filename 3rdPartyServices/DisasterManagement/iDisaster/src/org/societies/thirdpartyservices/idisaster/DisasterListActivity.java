@@ -24,22 +24,16 @@
  */
 package org.societies.thirdpartyservices.idisaster;
 
-//import org.societies.api.cis.management.ICisManager;
-//import org.societies.api.cis.management.ICisOwned;
 
-import java.util.ArrayList;
 
-import org.societies.android.api.cis.SocialContract;
-
-import org.societies.thirdpartyservices.idisaster.R;
-
+import android.app.AlertDialog;
 import android.app.ListActivity;
 import android.content.ContentResolver;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-//import android.provider.ContactsContract;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -47,9 +41,11 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import android.widget.Toast;
 
+import java.util.ArrayList;
 
+import org.societies.android.api.cis.SocialContract;
+import org.societies.thirdpartyservices.idisaster.R;
 
 /**
  * This activity allows the users to manage the disaster teams they own and
@@ -61,14 +57,14 @@ import android.widget.Toast;
 
 public class DisasterListActivity extends ListActivity {
 
-	ContentResolver resolver;
-	Cursor ownTeamCursor;				// used for the teams the user owns
-	int ownTeams;						// keep track of number of own teams
-	Cursor memberTeamCursor;			// used for the teams the user is member of
-	int memberTeams;					// keep track of number of member teams
+	private ContentResolver resolver;
+	private Cursor ownTeamCursor;				// used for the teams the user owns
+	private int ownTeams;						// keep track of number of own teams
+	private Cursor memberTeamCursor;			// used for the teams the user is member of
+	private int memberTeams;					// keep track of number of member teams
 		
-	ArrayAdapter<String> disasterAdapter;
-	ListView listView;
+	private ArrayAdapter<String> disasterAdapter;
+	private ListView listView;
 	
 
     @Override
@@ -108,7 +104,7 @@ public class DisasterListActivity extends ListActivity {
     					iDisasterApplication.getInstance().selectedTeam.globalId = ownTeamCursor.getString(ownTeamCursor
     							.getColumnIndex(SocialContract.Communities.GLOBAL_ID));
         				iDisasterApplication.getInstance().selectedTeam.ownFlag = true;
-    				} else {						// Retrieve information from list of teams the user is member of
+    				} else if ((position-ownTeams) < memberTeams){						// Retrieve information from list of teams the user is member of
     					memberTeamCursor.moveToPosition(position-ownTeams);
     					iDisasterApplication.getInstance().selectedTeam.name =  memberTeamCursor.getString(memberTeamCursor
     							.getColumnIndex(SocialContract.Communities.NAME));
@@ -151,25 +147,16 @@ public class DisasterListActivity extends ListActivity {
 
 		if (! iDisasterApplication.testDataUsed) {
 			if (disasterAdapter!= null) disasterAdapter.clear();		
-			getOwnDisasterTeams();		// Retrieve disaster teams I am owner of
-			getMemberDisasterTeams();	// Retrieve teams I am member of
+			if (getOwnDisasterTeams()			// Retrieve disaster teams I am owner of
+					.equals(iDisasterApplication.getInstance().QUERY_EXCEPTION)) {
+				showQueryExceptionDialog ();	// Exception: Display dialog and terminates activity
+			}			
+			if (getMemberDisasterTeams()		// Retrieve teams I am member of
+					.equals(iDisasterApplication.getInstance().QUERY_EXCEPTION)) {
+				showQueryExceptionDialog ();	// Exception: Display dialog and terminates activity
+			}
 			assignAdapter ();			// Display them
-		}
-		
-//		// Create dialog if no team						
-//  	AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this);
-//  	alertBuilder.setMessage(getString(R.string.disasterListDialogCIS))
-//  		.setCancelable(false)
-//  		.setPositiveButton (getString(R.string.dialogOK), new DialogInterface.OnClickListener() {
-//  			public void onClick(DialogInterface dialog, int id) {
-//  				// add code
-//  				return;
-//  			}
-//  		});
-//	    AlertDialog alert = alertBuilder.create();
-//	    alert.show();
-//	    return;
-
+		}		
 	}
 
 
@@ -200,7 +187,7 @@ public class DisasterListActivity extends ListActivity {
  * from Social Provider.
  */
 	
-	private void getOwnDisasterTeams () {
+	private String getOwnDisasterTeams () {
 
 		Uri uri = SocialContract.Communities.CONTENT_URI;
 		
@@ -230,9 +217,14 @@ public class DisasterListActivity extends ListActivity {
 		String sortOrder = SocialContract.Communities.NAME
 				+ " COLLATE LOCALIZED ASC";					// Alphabetic order (to reverse order, use "DESC" instead of "ASC"
 
-		ownTeamCursor = resolver.query(uri, projection, selection, selectionArgs,sortOrder);
+		try {
+			ownTeamCursor = resolver.query(uri, projection, selection, selectionArgs,sortOrder);			
+		} catch (Exception e) {
+			iDisasterApplication.getInstance().debug (2, "Query to "+ uri + "causes an exception");
+    		return iDisasterApplication.getInstance().QUERY_EXCEPTION;
+		}
 
-		return;
+		return iDisasterApplication.getInstance().QUERY_SUCCESS;
 
 	}
 
@@ -242,7 +234,7 @@ public class DisasterListActivity extends ListActivity {
  * member of from Social Provider.
  */
 
-	private void getMemberDisasterTeams () {
+	private String getMemberDisasterTeams () {
 
 		// Step 1: get GLOBAL_IDs for CIS I am member of
 //		Uri membershipUri = SocialContract.Membership.CONTENT_URI;
@@ -256,23 +248,27 @@ public class DisasterListActivity extends ListActivity {
 		String membershipSelection = SocialContract.Membership.GLOBAL_ID_MEMBER + "= ?";
 		String[] membershipSelectionArgs = new String[] {iDisasterApplication.getInstance().me.globalId};	// The user is owner
 		
-		Cursor membershipCursor= resolver.query(membershipUri, membershipProjection,
-				membershipSelection, membershipSelectionArgs, null /* sortOrder*/);
-
+		Cursor membershipCursor = null;
+		try {
+			membershipCursor = resolver.query(membershipUri, membershipProjection,
+					membershipSelection, membershipSelectionArgs, null /* sortOrder*/);
+		} catch (Exception e) {
+			iDisasterApplication.getInstance().debug (2, "Query to "+ membershipUri + "causes an exception");
+    		return iDisasterApplication.getInstance().QUERY_EXCEPTION;
+		}
 
 		// Step 2: retrieve the communities with the GLOBAL_IDs retrieved above
-		
+
 		if (membershipCursor == null) {		// No cursor was set - should not happen?
-			iDisasterApplication.debug (2, "No information can be retrieved in membershipCursor");
+			iDisasterApplication.getInstance().debug (2, "No information can be retrieved in membershipCursor");
 			memberTeamCursor = null;
-			return;
+			return iDisasterApplication.getInstance().QUERY_EMPTY;
 		} 
 		
 		if (membershipCursor.getCount() == 0) {		// The user is not member of any community
 			memberTeamCursor = null;
-			return;
+			return iDisasterApplication.getInstance().QUERY_EMPTY;
 		}
-		
 		
 		// Get GLOBAL_ID and NAME for CIS I am member of
 			 
@@ -299,10 +295,18 @@ public class DisasterListActivity extends ListActivity {
 								(membershipCursor.getColumnIndex(SocialContract.Membership.GLOBAL_ID_COMMUNITY))));
 			}
 		}
-		memberTeamCursor = resolver.query (communitiesUri, communitiesProjection, communitiesSelection, 
-											communitiesSelectionArgs.toArray(new String[communitiesSelectionArgs.size()]),
-											null /* sortOrder*/);
-		return;
+		
+		memberTeamCursor = null;
+		try {
+			memberTeamCursor = resolver.query (communitiesUri, communitiesProjection, communitiesSelection, 
+					communitiesSelectionArgs.toArray(new String[communitiesSelectionArgs.size()]),
+					null /* sortOrder*/);			
+		} catch (Exception e) {
+			iDisasterApplication.getInstance().debug (2, "Query to "+ membershipUri + "causes an exception");
+    		return iDisasterApplication.getInstance().QUERY_EXCEPTION;
+		}
+		
+		return iDisasterApplication.getInstance().QUERY_SUCCESS;
 		
 	//
 	// When using managedQuery(), the activity keeps a reference to the cursor and close it
@@ -386,6 +390,25 @@ public class DisasterListActivity extends ListActivity {
 			break;
 		}
 		return true;
+	}
+
+/**
+ * showQueryExceptionDialog displays a dialog to the user and terminates activity.
+ */
+			
+	private void showQueryExceptionDialog () {
+		AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this);
+		alertBuilder.setMessage(getString(R.string.dialogQueryException))
+  				.setCancelable(false)
+  				.setPositiveButton (getString(R.string.dialogOK), new DialogInterface.OnClickListener() {
+  					public void onClick(DialogInterface dialog, int id) {
+  						// add termination code code eventually
+  						finish ();
+  						return;
+  					}
+  				});
+		AlertDialog alert = alertBuilder.create();
+	    alert.show();	
 	}
 
 }

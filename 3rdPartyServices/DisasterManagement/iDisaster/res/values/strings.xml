@@ -6,7 +6,11 @@
     <string name="app_name">iDisaster</string>
 
     <string name="dialogOK">OK</string>
-
+    <string name="dialogQueryException">EXCEPTION: Cannot retrieve information from Social Provider </string>
+    <string name="dialogFeedQueryException">EXCEPTION: Cannot retrieve activities from Social Provider </string>
+    <string name="dialogMemberQueryException">EXCEPTION: Cannot retrieve members from Social Provider </string>
+    <string name="dialogServiceQueryException">EXCEPTION: Cannot retrieve services from Social Provider </string>
+    
     <string name="disaster_list_menu_createCommunity">Create disaster team</string>
 	<string name="disasterListDialogCIS">No teams yet. Select menu to add teams.</string>
     <string name="disasterListHeading">Disaster teams</string>

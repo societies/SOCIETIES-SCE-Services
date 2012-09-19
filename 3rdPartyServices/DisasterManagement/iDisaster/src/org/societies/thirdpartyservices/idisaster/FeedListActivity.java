@@ -127,12 +127,15 @@ public class FeedListActivity extends ListActivity {
 		
     	if (! iDisasterApplication.testDataUsed) {
     		if (feedAdapter!= null) feedAdapter.clear();
-    		getFeeds();
+			if (getFeeds()						// Retrieve feeds from the selected team
+					.equals(iDisasterApplication.getInstance().QUERY_EXCEPTION)) {
+				showQueryExceptionDialog ();	// Exception: Display dialog and terminates activity
+			}
     		assignAdapter ();
     			
-			Toast.makeText(getApplicationContext(),
-    				"Bug when getting data from Social Provider: the implementation of this activity is not complete", Toast.LENGTH_LONG /*Toast.LENGTH_SHORT*/ )
-    				.show();
+//			Toast.makeText(getApplicationContext(),
+//    				"Bug when getting data from Social Provider: the implementation of this activity is not complete", Toast.LENGTH_LONG /*Toast.LENGTH_SHORT*/ )
+//    				.show();
 			}
 
 //		// Create dialog if no feed in disaster team						
@@ -176,7 +179,7 @@ public class FeedListActivity extends ListActivity {
  * getFeed retrieves the list of activity feeds for the selected disaster team
  * from Social Provider.
  */
-	private void getFeeds () {
+	private String getFeeds () {
 //		Uri communityActivityUri = SocialContract.CommunityActivity.CONTENT_URI;
 
 //TODO: remove this Uri - waiting for new version of Social Provider
@@ -197,12 +200,17 @@ public class FeedListActivity extends ListActivity {
 //TODO: Classify according to date
 		String communityActivitysortOrder = null;
 
-//TODO: Remove comment - currently bug in SOcialProvider
-//		feedCursor = resolver.query(communityActivityUri, communityActivityprojection,
-//									communityActivitySelection, communityActivitySelectionArgs,
-//									communityActivitysortOrder);
 		feedCursor =null;
-
+		try {
+			feedCursor = resolver.query(communityActivityUri, communityActivityprojection,
+					communityActivitySelection, communityActivitySelectionArgs,
+					communityActivitysortOrder);			
+		} catch (Exception e) {
+			iDisasterApplication.getInstance().debug (2, "Query to "+ communityActivityUri + "causes an exception");
+    		return iDisasterApplication.getInstance().QUERY_EXCEPTION;
+		}
+		
+		return iDisasterApplication.getInstance().QUERY_SUCCESS;
 	}
 
 
@@ -283,6 +291,24 @@ public class FeedListActivity extends ListActivity {
     	return true;
     }
 
-    
+/**
+ * showQueryExceptionDialog displays a dialog to the user.
+ * In this case, the activity does not terminate since the other
+ * activities in the TAB may still work.
+*/
+    			
+    	private void showQueryExceptionDialog () {
+    		AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this);
+    		alertBuilder.setMessage(getString(R.string.dialogFeedQueryException))
+      				.setCancelable(false)
+      				.setPositiveButton (getString(R.string.dialogOK), new DialogInterface.OnClickListener() {
+      					public void onClick(DialogInterface dialog, int id) {
+      						return;
+      					}
+      				});
+    		AlertDialog alert = alertBuilder.create();
+    	    alert.show();	
+    	}
+  
     
 }

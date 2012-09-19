@@ -24,9 +24,10 @@
  */
 package org.societies.thirdpartyservices.idisaster;
 
-import org.societies.thirdpartyservices.idisaster.R;
-
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
@@ -35,6 +36,8 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.TextView;
+
+import org.societies.thirdpartyservices.idisaster.R;
 
 
 /**
@@ -89,15 +92,17 @@ public class StartActivity extends Activity implements OnClickListener {
 		if (iDisasterApplication.testDataUsed) {							// Use test data (no SocialProvider)
 			startView.setText(getString(R.string.startInfoNotLogged));			
 		} else {															// Fetch data from SocialProvider
-			if (iDisasterApplication.getInstance().checkUserIdentity(this)) {	// User is identified
+			String userQueryCode = iDisasterApplication.getInstance().checkUserIdentity(this);
+			if (userQueryCode.equals(iDisasterApplication.getInstance().QUERY_SUCCESS)) {	// User is identified
 				startView.setText(getString(R.string.startInfoLogged) 
 						+ " " 													// Not sure end space in the predefined string is ignored
 						+ iDisasterApplication.getInstance().me.displayName);
 				loggedIn = true;
-		
-			} else {															// No data returned by Social provider
+			} else if (userQueryCode.equals(iDisasterApplication.getInstance().QUERY_EMPTY)) {	// No data returned by Social provider
 				startView.setText(getString(R.string.startInfoNotLogged));
-			}
+			} else {
+				showQueryExceptionDialog ();	// Exception: Display dialog and terminates activity
+	        }
 		}
 	}
 
@@ -119,39 +124,6 @@ public class StartActivity extends Activity implements OnClickListener {
 	    	return;
 		}
    	}
-
-	
-/**
- * getPreferences retrieves the preferences stored in the preferences file.
- */
-// All information is fetched from the Social Provider. Preferences are no longer used.
-//
-//    private void getPreferences () {
-//
-//    	userName = iDisasterApplication.getInstance().getUserName ();
-//    	disasterTeamName = iDisasterApplication.getInstance().getDisasterTeamName ();
-//	}
-		
-/**
- * startNextActivity is called when to select the next activity.
- * 
- * If the user is not registered, it starts the LoginActivity,
- * otherwise if no disaster is selected, it starts the DisasterActivity
- * otherwise it starts the HomeActivity.
- */
-//	private void startNextActivity () {
-//		
-//    	if (userName == getString(R.string.noPreference)) {							// no user name (no password)
-//    		startActivity(new Intent(StartActivity.this, LoginActivity.class));
-//    		return;
-//    	} else if (disasterTeamName == getString(R.string.noPreference)) {			// no disaster selected
-//    		startActivity(new Intent(StartActivity.this, DisasterListActivity.class));
-//    		return;
-//    	} else {   		
-//    		startActivity(new Intent(StartActivity.this, DisasterActivity.class));
-//    		return;
-//    	}
-//    }
 
 
 /**
@@ -191,5 +163,58 @@ public class StartActivity extends Activity implements OnClickListener {
     	}
     	return true;
     }
+
+/**
+ * showQueryExceptionDialog displays a dialog to the user and terminates activity.
+ */
+		
+	private void showQueryExceptionDialog () {
+		AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this);
+		alertBuilder.setMessage(getString(R.string.dialogQueryException))
+  				.setCancelable(false)
+  				.setPositiveButton (getString(R.string.dialogOK), new DialogInterface.OnClickListener() {
+  					public void onClick(DialogInterface dialog, int id) {
+  						// add termination code code eventually
+  						finish ();
+  						return;
+  					}
+  				});
+		AlertDialog alert = alertBuilder.create();
+	    alert.show();	
+	}
+
+
+
+/**
+ * getPreferences retrieves the preferences stored in the preferences file.
+ */
+// All information is fetched from the Social Provider. Preferences are no longer used.
+//
+//    private void getPreferences () {
+//
+//    	userName = iDisasterApplication.getInstance().getUserName ();
+//    	disasterTeamName = iDisasterApplication.getInstance().getDisasterTeamName ();
+//	}
+		
+/**
+ * startNextActivity is called when to select the next activity.
+ * 
+ * If the user is not registered, it starts the LoginActivity,
+ * otherwise if no disaster is selected, it starts the DisasterActivity
+ * otherwise it starts the HomeActivity.
+ */
+//	private void startNextActivity () {
+//		
+//    	if (userName == getString(R.string.noPreference)) {							// no user name (no password)
+//    		startActivity(new Intent(StartActivity.this, LoginActivity.class));
+//    		return;
+//    	} else if (disasterTeamName == getString(R.string.noPreference)) {			// no disaster selected
+//    		startActivity(new Intent(StartActivity.this, DisasterListActivity.class));
+//    		return;
+//    	} else {   		
+//    		startActivity(new Intent(StartActivity.this, DisasterActivity.class));
+//    		return;
+//    	}
+//    }
 
 }

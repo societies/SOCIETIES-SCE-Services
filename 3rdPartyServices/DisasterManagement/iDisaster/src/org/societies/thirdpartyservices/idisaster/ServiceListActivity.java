@@ -126,7 +126,7 @@ public class ServiceListActivity extends ListActivity {
     							.getColumnIndex(SocialContract.Services.GLOBAL_ID));
                				intent.putExtra("ACTION", "OWN");       					
         				} else {	// should never happen
-        					iDisasterApplication.debug (2, "No service id can be retrieved from position in onClickListener");
+        					iDisasterApplication.getInstance().debug (2, "No service id can be retrieved from position in onClickListener");
         					return;
         				}
         				intent.putExtra("SERVICE_ID", serviceGlobalId);    				    				
@@ -234,7 +234,7 @@ public class ServiceListActivity extends ListActivity {
 			// Step 2: retrieve the services with the GLOBAL_ID_SERVICEs retrieved above
 //TODO: We assume that a service can only be recommended once in a CIS...
 			if (sharingCursor == null) {			// No cursor was set - should not happen?
-				iDisasterApplication.debug (2, "sharingCursor was not set to any value");
+				iDisasterApplication.getInstance().debug (2, "sharingCursor was not set to any value");
 				return null;
 			}
 			
