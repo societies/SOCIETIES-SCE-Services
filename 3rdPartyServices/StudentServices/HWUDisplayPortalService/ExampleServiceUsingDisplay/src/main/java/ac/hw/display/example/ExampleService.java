@@ -75,7 +75,8 @@ public class ExampleService extends EventListener implements IExampleService, ID
 		this.registerForDisplayEvents();
 		try {
 			
-			this.myServiceExeURL = new URL("http://www.macs.hw.ac.uk/~ceeep1/societies/services/MockWindowsExecutable.exe");
+			//this.myServiceExeURL = new URL("http://www.macs.hw.ac.uk/~ceeep1/societies/services/MockWindowsExecutable.exe");
+			this.myServiceExeURL = new URL("http://www.macs.hw.ac.uk/~ceeep1/societies");
 			this.myServiceName = "ExamplePortalDisplayService";
 			this.displayDriverService.registerDisplayableService(this, myServiceName, myServiceExeURL, false);
 		} catch (MalformedURLException e) {

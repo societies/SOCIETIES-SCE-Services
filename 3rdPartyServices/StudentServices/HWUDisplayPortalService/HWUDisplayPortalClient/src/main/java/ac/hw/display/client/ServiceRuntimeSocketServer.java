@@ -47,7 +47,8 @@ public class ServiceRuntimeSocketServer extends Thread{
 	private PrintWriter out;
 	public static final String started_Service = "STARTED_SERVICE";
 	public static final String stopped_Service = "STOPPED_SERVICE";
-
+	private static final String logged_Out = "LOGGED_OUT";
+	
 	public ServiceRuntimeSocketServer(DisplayPortalClient displayService){
 		this.displayService = displayService;
 
@@ -62,14 +63,14 @@ public class ServiceRuntimeSocketServer extends Thread{
 		try{
 			server = new ServerSocket(2121); 
 		} catch (IOException e) {
-			System.out.println("Could not listen on port 4444");
+			System.out.println("Could not listen on port 2121");
 			
 		}
 
 		try{
 			client = server.accept();
 		} catch (IOException e) {
-			System.out.println("Accept failed: 4444");
+			System.out.println("Accept failed: 2121");
 			
 		}
 
@@ -77,7 +78,7 @@ public class ServiceRuntimeSocketServer extends Thread{
 			in = new BufferedReader(new InputStreamReader(client.getInputStream()));
 			out = new PrintWriter(client.getOutputStream(), true);
 		} catch (IOException e) {
-			System.out.println("Accept failed: 4444");
+			System.out.println("Accept failed: 2121");
 			System.exit(-1);
 		}
 
@@ -90,6 +91,9 @@ public class ServiceRuntimeSocketServer extends Thread{
 				}else if (line.contains(stopped_Service)){
 					String serviceName = line.substring(stopped_Service.length()+1);
 					this.displayService.notifyServiceStopped(serviceName);
+				}else if (line.contains(logged_Out)){
+					this.displayService.notifyLogOutEvent();
+					this.server.close();
 				}
 				//Send data back to client
 				//out.println(line);

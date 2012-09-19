@@ -20,6 +20,9 @@ namespace HWUPortal
         private byte[] okBytes;
         private byte[] notOKBytes;
         private volatile bool acceptingConnections = true;
+
+        private IPAddress remoteIPAddress;
+
         public SocketServer(MainWindow portalGui)
         {
             this.gui = portalGui;
@@ -58,7 +61,7 @@ namespace HWUPortal
 
                     // Get a stream object for reading and writing
                     stream = client.GetStream();
-
+                    this.remoteIPAddress = ((IPEndPoint)client.Client.RemoteEndPoint).Address;
                     int i;
 
                     // Loop to receive all the data sent by the client.
@@ -252,7 +255,7 @@ namespace HWUPortal
 
         private bool createUserSession(String input)
         {
-            this.userSession = new UserSession();
+            this.userSession = new UserSession(this.remoteIPAddress);
             String[] lines = input.Split('\n');
             if (lines.Length > 0)
             {
@@ -306,7 +309,7 @@ namespace HWUPortal
                         this.downloadFile(sInfo);
                     }
 
-                    if (this.numOfServices == 0)
+                    if (this.numOfServices >= this.downloadedServices)
                     {
                         this.gui.Login(userSession);
                     }
@@ -361,6 +364,8 @@ namespace HWUPortal
             else
             {
                 sInfo.serviceType = ServiceType.WEB;
+                this.userSession.addService(sInfo);
+                this.downloadedServices++;
             }
             Console.WriteLine(sInfo.ToString());
         }

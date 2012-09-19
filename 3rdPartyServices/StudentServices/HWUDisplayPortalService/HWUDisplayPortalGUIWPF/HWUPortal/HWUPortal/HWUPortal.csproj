@@ -94,6 +94,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="ApplicationControlArgs.cs" />
     <Compile Include="ApplicationWindow.xaml.cs">
       <DependentUpon>ApplicationWindow.xaml</DependentUpon>
     </Compile>
@@ -109,6 +110,7 @@
       <DependentUpon>NotificationPanel.xaml</DependentUpon>
     </Compile>
     <Compile Include="ServiceInfo.cs" />
+    <Compile Include="ServiceInformationSocketClient.cs" />
     <Compile Include="ServiceSocketServer.cs" />
     <Compile Include="SocketServer.cs" />
     <Compile Include="TxtNotificationsWindow.xaml.cs">
@@ -118,6 +120,7 @@
     <Compile Include="KinectTest.xaml.cs">
       <DependentUpon>KinectTest.xaml</DependentUpon>
     </Compile>
+    <Compile Include="WpfApplicationControl.cs" />
     <Page Include="ApplicationWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

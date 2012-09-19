@@ -36,6 +36,7 @@ import org.societies.api.context.event.CtxChangeEvent;
 import org.societies.api.context.event.CtxChangeEventListener;
 import org.societies.api.context.model.CtxAttribute;
 import org.societies.api.context.model.CtxAttributeTypes;
+import org.societies.api.context.model.CtxEntityIdentifier;
 import org.societies.api.context.model.CtxIdentifier;
 import org.societies.api.context.model.CtxModelObject;
 import org.societies.api.context.model.CtxModelType;
@@ -73,15 +74,21 @@ public class ContextEventListener implements CtxChangeEventListener{
 	
 		try {
 
-			Future<List<CtxIdentifier>> fLookupList = this.ctxBroker.lookup(requestor, userIdentity, CtxModelType.ATTRIBUTE, CtxAttributeTypes.LOCATION_SYMBOLIC);
-			List<CtxIdentifier> lookupList = fLookupList.get();
 			
-			if (lookupList.size()==0){
-				return;
-			}else{
-				this.ctxBroker.registerForChanges(requestor, this, lookupList.get(0));
+			Future<CtxEntityIdentifier> futureCtxEntityId = this.ctxBroker.retrieveIndividualEntityId(requestor, userIdentity);
+			CtxEntityIdentifier ctxEntityId =futureCtxEntityId.get();
+			
+			//Future<List<CtxIdentifier>> fLookupList = this.ctxBroker.lookup(requestor, userIdentity, CtxModelType.ATTRIBUTE, CtxAttributeTypes.LOCATION_SYMBOLIC);
+			//List<CtxIdentifier> lookupList = fLookupList.get();
+			
+			
+			//if (lookupList.size()==0){
+			//	this.LOG.debug("Did not find attribute of type : "+CtxAttributeTypes.LOCATION_SYMBOLIC);
+			//	return;
+			//}else{
+				this.ctxBroker.registerForChanges(requestor, this, ctxEntityId, CtxAttributeTypes.LOCATION_SYMBOLIC);
 				this.LOG.debug("Registered for symloc events");
-			}
+			//}
 		} catch (CtxException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

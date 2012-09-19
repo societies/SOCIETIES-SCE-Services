@@ -39,20 +39,28 @@ namespace HWUPortal
          * */
         private ServiceInfo runningService;
         private UserSession userSession = new UserSession();
-        private List<Button> myButtons;
+        private List<HoverButton> myButtons;
         //SocketServer socketServer;
+
+        #region sockets
         SocketServer socketServer;
         BinaryDataTransfer binaryDataTransferServer;
+        ServiceSocketServer serviceSocketServer;
+        Thread socketThread;
+        Thread binaryTransferThread;
+        Thread serviceSocketThread;
+        #endregion sockets
+
         ImageViewer iViewer;
         private Boolean loggedIn = false;
 
+        
 
+        
 
-        Thread socketThread;
-        Thread binaryTransferThread;
-
-
-        ApplicationWindow appWindow;
+        System.Windows.Forms.FlowLayoutPanel flpPanel;
+        //ApplicationControl.ApplicationControl appControl;
+        //WpfApplicationControl wpfAppControl;
 
         #region Kinectvariables
         KinectSensor kinect;
@@ -83,12 +91,12 @@ namespace HWUPortal
             /*
              *
              */
-
+            
             InitializeComponent();
             this.runningService = new ServiceInfo();
             //this.binaryDataTransferServer = new BinaryDataTransfer();
-            socketServer = new SocketServer(this);
 
+            socketServer = new SocketServer(this);
             socketThread = new Thread(socketServer.run);
             socketThread.Start();
 
@@ -96,7 +104,27 @@ namespace HWUPortal
             binaryTransferThread = new Thread(binaryDataTransferServer.run);
             binaryTransferThread.Start();
 
-            myButtons = new List<Button>();
+            serviceSocketServer = new ServiceSocketServer();
+            serviceSocketThread = new Thread(serviceSocketServer.run);
+            serviceSocketThread.Start();
+
+
+            //flpPanel = this.wfhDate.Child as System.Windows.Forms.FlowLayoutPanel;
+
+            
+            //wpfAppControl = new WpfApplicationControl();
+            wpfAppControl.appExit += new WpfApplicationControl.ApplicationExitedHandler(onExeDestroyed);
+            //appControl = new ApplicationControl.ApplicationControl();
+            //appControl.appExit += new ApplicationControl.ApplicationControl.ApplicationExitedHandler(onExeDestroyed);
+
+            wpfAppControl.Width = 1000;
+            wpfAppControl.Height = 600;
+            //appControl.Width = 1000;
+            //appControl.Height = 600;
+            //flpPanel.Controls.Add(appControl);
+
+
+            myButtons = new List<HoverButton>();
             myButtons.Add(this.serviceButton1);
             myButtons.Add(this.serviceButton2);
             myButtons.Add(this.serviceButton3);
@@ -104,7 +132,7 @@ namespace HWUPortal
             myButtons.Add(this.serviceButton5);
 
 
-            foreach (Button button in myButtons)
+            foreach (HoverButton button in myButtons)
             {
                 button.Visibility = System.Windows.Visibility.Hidden;
                 //button.Visible = false;
@@ -231,12 +259,18 @@ namespace HWUPortal
         private void startExe(EventArgs e, ServiceInfo sInfo)
         {
 
-            appWindow = new ApplicationWindow(this, sInfo);
+            //appWindow = new ApplicationWindow(this, sInfo);
             
-            appWindow.Show();
-            appWindow.startExe(e);
+            //appWindow.Show();
+            //appWindow.startExe(e);
 
-
+            wpfAppControl.ExeName = sInfo.serviceExe;
+            wpfAppControl.LoadExe(e);
+            Canvas.SetLeft(wpfAppControl, 320);
+            Canvas.SetTop(wpfAppControl, 20);
+            //appControl.ExeName = sInfo.serviceExe;
+            //appControl.LoadExe(e);
+            //wfhDate.Visibility = System.Windows.Visibility.Visible;
         }
 
         private void startWeb(ServiceInfo sInfo)
@@ -278,6 +312,8 @@ namespace HWUPortal
             this.runningService = sInfo;
             this.closeShowingServiceBtn.Content = "Close " + sInfo.serviceName;
             this.enableThisButton(this.closeShowingServiceBtn, true);
+            ServiceInformationSocketClient sClient = new ServiceInformationSocketClient();
+            sClient.sendServiceInformationEvent(userSession.getIPAddress(), sInfo.serviceName, ServiceInformationSocketClient.ServiceRuntimeInformation.STARTED_SERVICE);
 
         }
 
@@ -357,7 +393,7 @@ namespace HWUPortal
                         if (i < services.Count)
                         {
                             ServiceInfo sInfo = services.ElementAt(i);
-                            Button button = myButtons.ElementAt(i);
+                            HoverButton button = myButtons.ElementAt(i);
                             this.enableThisButton(button, true);
                             sInfo.button = button;
                             this.setServiceInfo(button, sInfo);
@@ -389,9 +425,9 @@ namespace HWUPortal
             //}
         }
 
-        public delegate void setServiceInfoDelegate(Button button, ServiceInfo serviceInfo);
+        public delegate void setServiceInfoDelegate(HoverButton button, ServiceInfo serviceInfo);
 
-        public void setServiceInfo(Button button, ServiceInfo sInfo)
+        public void setServiceInfo(HoverButton button, ServiceInfo sInfo)
         {
             if (button.Dispatcher.CheckAccess())
             {
@@ -415,9 +451,9 @@ namespace HWUPortal
         }
 
 
-        public delegate void enableThisButtonDelegate(Button button, Boolean enabled);
+        public delegate void enableThisButtonDelegate(HoverButton button, Boolean enabled);
 
-        public void enableThisButton(Button button, Boolean enabled)
+        public void enableThisButton(HoverButton button, Boolean enabled)
         {
             if (button.Dispatcher.CheckAccess())
             {
@@ -568,13 +604,28 @@ namespace HWUPortal
             Console.WriteLine("window closed");
         }
 
+        private void onExeDestroyed(object sender, ApplicationControlArgs args)
+        {
+            if (!args.GracefullyExited)
+            {
+                Console.WriteLine("Service did not exit gracefully");
+            }
+            if (!this.runningService.serviceName.Equals(string.Empty))
+            {
+                //raise close service event;
+                this.closeShowingServiceBtn.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+            }
 
+
+        }
 
         private void closeShowingServiceBtn_Click(object sender, RoutedEventArgs e)
         {
             if (!this.runningService.serviceName.Equals(string.Empty))
             {
                 this.stopService(e, this.runningService);
+                ServiceInformationSocketClient socket = new ServiceInformationSocketClient();
+                socket.sendServiceInformationEvent(this.userSession.getIPAddress(), this.runningService.serviceName, ServiceInformationSocketClient.ServiceRuntimeInformation.STOPPED_SERVICE);
                 this.runningService = new ServiceInfo();
                 this.closeShowingServiceBtn.Content = "";
                 //this.closeShowingServiceBtn.Text = "";
@@ -598,9 +649,11 @@ namespace HWUPortal
                     this.stopService(e, this.runningService);
                     this.runningService = new ServiceInfo();
                 }
+                ServiceInformationSocketClient client = new ServiceInformationSocketClient();
+                client.sendLogoutEvent(userSession.getIPAddress());
 
                 this.userSession = new UserSession();
-                foreach (Button button in myButtons)
+                foreach (HoverButton button in myButtons)
                 {
                     this.enableThisButton(button, false);
                 }
@@ -640,14 +693,17 @@ namespace HWUPortal
             if (sInfo.serviceExe.Equals(this.runningService.serviceExe))
             {
 
-                appWindow.Close();
+                //appWindow.Close();
             }
         }
         private void stopService(RoutedEventArgs e, ServiceInfo sInfo)
         {
             if (sInfo.serviceType == ServiceType.EXE || sInfo.serviceType == ServiceType.JAR)
             {
-                appWindow.Close();
+                //appWindow.Close();
+                wpfAppControl.DestroyExe(e);
+                //appControl.DestroyExe(e);
+                //wfhDate.Visibility = System.Windows.Visibility.Hidden;
                 KinectSensor.KinectSensors.StatusChanged += KinectSensors_StatusChanged;
                 DiscoverKinectSensor();
             }
@@ -885,7 +941,7 @@ namespace HWUPortal
             //CheckButton(categoriesButton, RightHand);
             //CheckButton(scoreboardButton, RightHand);
             //CheckButton(quitButton, RightHand);
-            foreach (Button hButton in myButtons)
+            foreach (HoverButton hButton in myButtons)
             {
                 CheckButton(hButton, RightHand);
             }
@@ -899,7 +955,7 @@ namespace HWUPortal
         }
 
         #region buttons
-        private void CheckButton(Button button, Ellipse thumbStick)
+        private void CheckButton(HoverButton button, Ellipse thumbStick)
         {
             if (this.kinect != null)
             {
@@ -907,22 +963,22 @@ namespace HWUPortal
                 {
                     if (IsItemMidpointInContainer(button, thumbStick))
                     {
-                        Console.WriteLine("button hovering");
+                        //Console.WriteLine("button hovering");
                         
                         //button.RaiseEvent(new RoutedEventArgs(Button.MouseEnterEvent));
-                        //button.Hovering();
-                        if (!onButtonWaiting)
-                        {
-                            onButtonWaiting = true;
-                            ButtonWaitThread thread = new ButtonWaitThread(this, button, thumbStick);
-                            thread.run();
-                            Console.WriteLine("Button thread started");
-                        }
+                        button.Hovering();
+                        //if (!onButtonWaiting)
+                        //{
+                            //onButtonWaiting = true;
+                            //ButtonWaitThread thread = new ButtonWaitThread(this, button, thumbStick);
+                            //thread.run();
+                            //Console.WriteLine("Button thread started");
+                        //}
                     }
                     else
                     {
-                        Console.WriteLine("button release");
-                        // button.Release();
+                        //Console.WriteLine("button release");
+                        button.Release();
 
                     }
                 }
@@ -991,12 +1047,12 @@ namespace HWUPortal
 
         private void ScalePosition(FrameworkElement element, Joint joint)
         {
-            Console.WriteLine("Unscaled joint: " + joint.Position.X + "," + joint.Position.Y);
+            //Console.WriteLine("Unscaled joint: " + joint.Position.X + "," + joint.Position.Y);
             //convert the value to X/Y
             //Joint scaledJoint = joint.ScaleTo(360, 730, .3f, .3f);
             Joint scaledJoint = joint.ScaleTo(1360, 730, .3f, .3f);
             //Joint scaledJoint = joint.ScaleTo(mainWindow.WindowStartupLocation);
-            Console.WriteLine("Scaled Joint: " + scaledJoint.Position.X + "," + scaledJoint.Position.Y);
+            //Console.WriteLine("Scaled Joint: " + scaledJoint.Position.X + "," + scaledJoint.Position.Y);
             Canvas.SetLeft(element, scaledJoint.Position.X);
             Canvas.SetTop(element, scaledJoint.Position.Y);
 
@@ -1042,6 +1098,7 @@ namespace HWUPortal
 
         }
         #endregion camera stuff
+
     }
 
         #endregion kinect processing

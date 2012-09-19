@@ -128,12 +128,10 @@ new Ajax.Updater('result','/sharedCal/createCisCalendarAjax.do',
 /*Highlight mandatory input fields*/
 $("createCisCalendarButton").on("mouseover", function(event){
 	$("cisId").style.backgroundColor=highlightColor;	
-	$("calId").style.backgroundColor=highlightColor;
 	$("cisSummary").style.backgroundColor=highlightColor;
 });
 $("createCisCalendarButton").on("mouseout", function(event){
 	$("cisId").style.backgroundColor="";
-	$("calId").style.backgroundColor="";
 	$("cisSummary").style.backgroundColor="";
 });
 
