@@ -6,7 +6,7 @@
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{80C93F75-E25D-4A07-83FB-E5DE1E0F8AB5}</ProjectGuid>
-    <OutputType>Exe</OutputType>
+    <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>MyTvUI</RootNamespace>
     <AssemblyName>MyTvUI</AssemblyName>
@@ -58,15 +58,19 @@
     <Reference Include="Coding4Fun.Kinect.Wpf, Version=1.5.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>dll\Coding4Fun.Kinect.Wpf.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="Microsoft.Expression.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>dll\Microsoft.Expression.Drawing.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="Microsoft.Kinect, Version=1.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
     <Reference Include="Microsoft.Samples.Kinect.WpfViewers, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>dll\Microsoft.Samples.Kinect.WpfViewers.dll</HintPath>
+      <Private>False</Private>
+      <EmbedInteropTypes>False</EmbedInteropTypes>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -87,6 +91,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="ActivityFeedManager.cs" />
     <Compile Include="Settings.cs" />
     <Compile Include="SocketClient.cs" />
     <Compile Include="SocketServer.cs" />
@@ -172,13 +177,13 @@
     <Resource Include="Images\close_button.png" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="dll\Microsoft.Expression.Drawing.dll" />
-  </ItemGroup>
-  <ItemGroup>
     <EmbeddedResource Include="dll\Microsoft.Samples.Kinect.WpfViewers.dll" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="dll\Coding4Fun.Kinect.Wpf.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="dll\Microsoft.Expression.Drawing.dll" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

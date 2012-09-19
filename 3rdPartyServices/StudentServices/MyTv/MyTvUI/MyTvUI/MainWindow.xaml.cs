@@ -20,6 +20,7 @@ using System.Threading;
 using System.Runtime.InteropServices;
 using System.Net;
 using Microsoft.Kinect;
+using System.Collections;
 
 namespace MyTvUI
 {
@@ -54,14 +55,15 @@ namespace MyTvUI
         //Volume variables
         //int masterVolume;
         //int muteState;
+
+        //activity feed variables
+        //ArrayList activities;
+
         #endregion variables
 
         #region window
         public MainWindow()
         {
-            //Initialise assemblies
-            AppDomain.CurrentDomain.AssemblyResolve += new ResolveEventHandler(ResolveAssembly);
-
             //initialise GUI
             Console.WriteLine("Initialising GUI");
             InitializeComponent();
@@ -76,6 +78,11 @@ namespace MyTvUI
             tvBrowser.Navigated += new NavigatedEventHandler(tvBrowser_Navigated);
 
             //initialise volume
+
+            //initialise activity feeds
+            ArrayList activities = new ArrayList();
+            listBox1.ItemsSource = activities;
+            ActivityFeedManager afMgr = new ActivityFeedManager(activities);
 
             //initialise socket server to listen for service client connections
             Console.WriteLine("Initialising SocketServer");
@@ -203,6 +210,9 @@ namespace MyTvUI
             CheckHoverButton(channel3HoverRegion, rightEllipse);
             CheckHoverButton(channel4HoverRegion, rightEllipse);
             CheckHoverButton(offHoverRegion, rightEllipse);
+            CheckHoverButton(volumeUpHoverRegion, rightEllipse);
+            CheckHoverButton(volumeDownHoverRegion, rightEllipse);
+            CheckHoverButton(exitHoverRegion, rightEllipse);
         }
         #endregion kinect
 
@@ -343,17 +353,37 @@ namespace MyTvUI
 
         void volumeDownHoverRegion_Click(object sender, RoutedEventArgs e)
         {
-            throw new NotImplementedException();
+            //throw new NotImplementedException();
         }
 
         void volumeUpHoverRegion_Click(object sender, RoutedEventArgs e)
         {
-            throw new NotImplementedException();
+            //throw new NotImplementedException();
         }
 
         void exitHoverRegion_Click(object sender, RoutedEventArgs e)
         {
-            throw new NotImplementedException();
+            closing = true;
+            StopKinect(kinectSensorChooser1.Kinect);
+            try
+            {
+                //if the application was opened by another window close the current window not the other application
+                if (Application.Current.Windows.Count > 1)
+                {
+                    for (int i = 0; i < Application.Current.Windows.Count; i++)
+                    {
+                        if (Application.Current.Windows[i].GetType().ToString().Equals("MyTvUI.MainWindow"))
+                            Application.Current.Windows[i].Close();
+                    }
+                }
+                //otherwise close the main window
+                else
+                    Application.Current.MainWindow.Close();
+            }
+            catch (InvalidOperationException e2)
+            {
+                Console.WriteLine("Exception: " + e2);
+            }
         }
 
         #endregion hoverbutton
@@ -368,21 +398,6 @@ namespace MyTvUI
         void tvBrowser_Navigated(object sender, NavigationEventArgs e)
         {
             SetSilent(tvBrowser, true);
-        }
-
-        private void image1_ImageFailed(object sender, ExceptionRoutedEventArgs e)
-        {
-
-        }
-
-        private void kinectColorViewer1_Loaded(object sender, RoutedEventArgs e)
-        {
-
-        }
-
-        private void showImageHoverRegion_Loaded(object sender, RoutedEventArgs e)
-        {
-
         }
         #endregion additional
 
@@ -415,43 +430,6 @@ namespace MyTvUI
         {
             [PreserveSig]
             int QueryService([In] ref Guid guidService, [In] ref Guid riid, [MarshalAs(UnmanagedType.IDispatch)] out object ppvObject);
-        }
-
-
-
-
-
-
-        //Code to get assemblies when running as a single executable
-        static Assembly ResolveAssembly(object sender, ResolveEventArgs args)
-        {
-            Console.WriteLine("Resolving assembly...");
-            Assembly parentAssembly = Assembly.GetExecutingAssembly();
-
-            String parentName = parentAssembly.ToString().Substring(0, parentAssembly.ToString().IndexOf(','));
-
-            var temp = args.Name.Substring(0, args.Name.IndexOf(','))/* + ".dll"*/;
-            var name = parentName+".dll."+temp.Substring(0, temp.LastIndexOf('.')) + ".dll";
-            Console.WriteLine(name);
-
-            string[] names = parentAssembly.GetManifestResourceNames();
-            for (int i = 0; i < names.Length; i++)
-            {
-                Console.WriteLine(names[i]);
-            }
-
-            var resourceName = parentAssembly.GetManifestResourceNames()
-                .First(s => s.EndsWith(name));
-            //Console.WriteLine(resourceName);
-
-            using (Stream stream = parentAssembly.GetManifestResourceStream(resourceName))
-            {
-                byte[] block = new byte[stream.Length];
-                stream.Read(block, 0, block.Length);
-                Console.WriteLine("Loading..." + block.ToString());
-                return Assembly.Load(block);
-            }
-        }
-
+        }        
     }
 }
