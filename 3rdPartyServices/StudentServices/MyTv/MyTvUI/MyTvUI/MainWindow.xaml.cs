@@ -86,11 +86,11 @@ namespace MyTvUI
 
             //initialise socket server to listen for service client connections
             Console.WriteLine("Initialising SocketServer");
-            //initialiseSocketServer();
+            initialiseSocketServer();
             
             //Connect to service client - on user cloud node
             Console.WriteLine("Initialising SocketClient");
-            //initialiseSocketClient();
+            initialiseSocketClient();
             
         }
 

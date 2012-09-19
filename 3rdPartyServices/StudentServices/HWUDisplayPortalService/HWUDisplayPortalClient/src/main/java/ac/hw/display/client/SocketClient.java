@@ -196,8 +196,10 @@ public class SocketClient {
 		//ServiceInfo sInfo = new ServiceInfo(null, "Social Learning", "http://www.macs.hw.ac.uk/~ceeep1/societies/services/SocialLearningGame.exe", true);
 		ServiceInfo sInfo = new ServiceInfo(null, "Social Learning", "http://www.macs.hw.ac.uk/~ceeep1/societies/services/", true);
 		ServiceInfo sInfo2 = new ServiceInfo (null, "PolicyEditor", "http://www.macs.hw.ac.uk/~ceeep1/societies/services/POLICY~1.JAR", false);
+		ServiceInfo sInfo3 = new ServiceInfo(null, "MyTv", "http://www.macs.hw.ac.uk/~ceesmm1/societies/mytv/MyTvUI.exe", true);
 		userSession.addService(sInfo);
 		userSession.addService(sInfo2);
+		userSession.addService(sInfo3);
 	
 		c.startSession(userSession);
 		try {

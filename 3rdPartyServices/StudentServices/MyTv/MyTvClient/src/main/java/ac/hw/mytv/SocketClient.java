@@ -39,32 +39,32 @@ import org.slf4j.LoggerFactory;
 public class SocketClient {
 
 	private static Logger LOG = LoggerFactory.getLogger(SocketClient.class);
-	String ipAddress;
+	String guiIpAddress;
 	Socket echoSocket;
 	PrintWriter out;
 	BufferedReader in;
 	boolean connected;
 
-	public SocketClient(String ipAddress){
-		this.ipAddress = ipAddress;
+	public SocketClient(String guiIpAddress){
+		this.guiIpAddress = guiIpAddress;
 		connected = false;
 	}
 
 	public boolean connect(){
 		try{
-			InetAddress address = InetAddress.getByName(ipAddress);
+			InetAddress address = InetAddress.getByName(guiIpAddress);
 			echoSocket = new Socket(address, 2112);
 			out = new PrintWriter(echoSocket.getOutputStream(), true);
 			in = new BufferedReader(new InputStreamReader(echoSocket.getInputStream()));
 			connected = true;
 			return  true;
 		} catch (UnknownHostException e) {
-			LOG.debug("Don't know about host: "+ipAddress);
+			LOG.debug("Don't know about host: "+guiIpAddress);
 		} catch (IOException e) {
 			System.err.println("Couldn't get I/O for "
-					+ "the connection to: "+ipAddress);
+					+ "the connection to: "+guiIpAddress);
 			LOG.debug("Couldn't get I/O for "
-					+ "the connection to: "+ipAddress);
+					+ "the connection to: "+guiIpAddress);
 		} 
 		return false;
 	}

@@ -25,64 +25,90 @@
 package ac.hw.mytv;
 
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.List;
 
+import org.societies.api.css.devicemgmt.display.IDisplayableService;
 import org.societies.api.identity.IIdentity;
+import org.societies.api.personalisation.model.Action;
+import org.societies.api.personalisation.model.IAction;
+import org.societies.api.personalisation.model.IActionConsumer;
 import org.societies.api.schema.servicelifecycle.model.ServiceResourceIdentifier;
 import org.societies.api.useragent.monitoring.IUserActionMonitor;
 
-public class MyTvClient{ //implements IDisplayableService
+public class MyTvClient implements IDisplayableService, IActionConsumer{
 
 	SocketClient socketClient;
 	SocketServer socketServer;
-	String myIpAddress;
+	CommandHandler commandHandler;
 	IUserActionMonitor uam;
 	IIdentity userID;
-	ServiceResourceIdentifier myServiceId;
+	ServiceResourceIdentifier myServiceID;
 	String myServiceType;
+	List<String> myServiceTypes;
+	
+	//personalisable parameters
 
 	public MyTvClient(){
+		initialiseMyTvClient();  //just for testing!!!
+	}
+
+	public void initialiseMyTvClient(){
+
+		//set service type
+		myServiceType = "Multimedia";
+		myServiceTypes = new ArrayList<String>();
+		myServiceTypes.add(myServiceType);
+
+		//get user ID
+
+		//get service ID
+		
 		//start server listening for connections from GUI
-		socketServer = new SocketServer();
+		commandHandler = new CommandHandler();
+		socketServer = new SocketServer(commandHandler);
 		socketServer.start();
 	}
 
-	/*public void serviceStarted(String guiIpAddress){
-		//connect to server - service GUI
-		if(socketClient != null){
-			if (socketClient.isConnected()){
-				socketClient.disconnect();
-			}
-		}
-		socketClient = new SocketClient(guiIpAddress);
-		socketClient.connect();
-
-		//send ipAddress details
-		if(!socketClient.sendMessage
-				("START_MSG\n" +
-						"CLIENT_IP\n"+
-						myIpAddress+"\n"+
-						"END_MSG")){
-			System.out.println("Error - client IP address not sent to GUI");
-		}
-		
-		//send preference update
-		if(!socketClient.sendMessage
-				("START_MSG\n" +
-						"PREF_OUTCOME\n" +
-						"volume = mute\n" +
-						"END_MSG")){
-			System.out.println("Error - could not send preference update to GUI");
-		}
+	@Override
+	public void serviceStarted(String guiIpAddress){
+		//service is started
 	}
 
+	@Override
 	public void serviceStopped(String guiIpAddress){
-		//disconnect from server - service GUI
-		if(socketClient != null && socketClient.isConnected()){
-			socketClient.disconnect();
-		}
-	}*/
+		//service is stopped
+	}
+
+
+	@Override
+	public ServiceResourceIdentifier getServiceIdentifier() {
+		return myServiceID;
+	}
+
+	@Override
+	public String getServiceType() {
+		return myServiceType;
+	}
+
+	@Override
+	public List<String> getServiceTypes() {
+		return myServiceTypes;
+	}
+
+	@Override
+	public boolean setIAction(IIdentity identity, IAction action) {
+
+		return false;
+	}
+	
+	private void setChannel(int channel){
+		
+	}
+	
+	private void setVolume(int volume){
+		
+	}
 
 	public void setUam(IUserActionMonitor uam){
 		this.uam = uam;
@@ -90,5 +116,34 @@ public class MyTvClient{ //implements IDisplayableService
 
 	public static void main(String[] args) throws IOException{
 		new MyTvClient();
+	}
+
+
+
+
+	/*
+	 * Handle commands from GUI
+	 */
+	public class CommandHandler{
+		public void connectToGUI(String gui_ip){
+			System.out.println("Connecting to service GUI on IP address: "+gui_ip);
+			if(socketClient != null){
+				if(socketClient.isConnected()){
+				}
+			}
+			socketClient = new SocketClient(gui_ip);
+			socketClient.connect();
+		}
+		
+		public void processUserAction(String actionString){
+			System.out.println("Processing user action: "+actionString);
+			String[] actionParts = actionString.split("\n");
+			String parameterName = actionParts[0];
+			String value = actionParts[1];
+			
+			//create action object and send to uam
+			IAction action = new Action(myServiceID, myServiceType, parameterName, value);
+			uam.monitor(userID, action);
+		}
 	}
 }

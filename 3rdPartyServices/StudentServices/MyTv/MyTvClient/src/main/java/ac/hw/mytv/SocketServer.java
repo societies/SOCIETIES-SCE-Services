@@ -32,6 +32,10 @@ import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+import org.societies.api.useragent.monitoring.IUserActionMonitor;
+
+import ac.hw.mytv.MyTvClient.CommandHandler;
+
 public class SocketServer extends Thread{
 
 	private ServerSocket server;
@@ -44,7 +48,13 @@ public class SocketServer extends Thread{
 	private static final String GUI_STOPPED = "GUI_STOPPED";
 	private static final String RECEIVED = "RECEIVED";
 	private static final String FAILED = "FAILED";
-
+	
+	private CommandHandler commandHandler;
+		
+	public SocketServer(CommandHandler commandHandler){
+		this.commandHandler = commandHandler;
+	}
+	
 	@Override
 	public void run(){
 		while(true){
@@ -87,12 +97,12 @@ public class SocketServer extends Thread{
 					System.out.println(GUI_STARTED+" message received");
 					out.println(RECEIVED);
 					String gui_ip = splitData[1];
-					connectToGUI(gui_ip);
+					commandHandler.connectToGUI(gui_ip);
 				}else if (command.equalsIgnoreCase(USER_ACTION)){
 					System.out.println(USER_ACTION+" message received");
 					out.println(RECEIVED);
 					String action = splitData[1];
-					processUserAction(action);
+					commandHandler.processUserAction(action);
 				}else if (command.equalsIgnoreCase(GUI_STOPPED)){
 					System.out.println(GUI_STOPPED+" message received");
 					out.println(RECEIVED);
@@ -109,17 +119,6 @@ public class SocketServer extends Thread{
 		}
 	}
 	
-	
-	public boolean connectToGUI(String gui_ip){
-		System.out.println("Connecting to service GUI on IP address: "+gui_ip);
-		return true;
-	}
-	
-	
-	public boolean processUserAction(String action){
-		System.out.println("Processing user action: "+action);
-		return true;
-	}
 	
 	@Override
 	protected void finalize(){
