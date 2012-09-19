@@ -8,12 +8,7 @@
        configuration file so that this file can easily be used
        for integration testing outside of an OSGi environment -->
 
-  <!-- 
-   <bean id="VgProxy" 
-       		 class="org.societies.webapp.controller.VGProxy" 
-       		 depends-on="CisManagementBundle">
-       		<property name="serverURL" value="http://localhost:8080/VG"/>
-   </bean>
- -->
+   
+  
    
 </beans>
