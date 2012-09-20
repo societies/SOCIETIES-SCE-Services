@@ -37,7 +37,6 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
-import javax.annotation.PostConstruct;
 import javax.validation.Valid;
 
 import org.apache.http.HttpResponse;
@@ -60,7 +59,6 @@ import org.societies.api.comm.xmpp.interfaces.ICommManager;
 import org.societies.api.internal.css.management.ICSSLocalManager;
 import org.societies.api.schema.cssmanagement.CssInterfaceResult;
 import org.societies.api.schema.cssmanagement.CssRecord;
-import org.societies.webapp.ConfigurationHelper;
 import org.societies.webapp.model.MessageForm;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;

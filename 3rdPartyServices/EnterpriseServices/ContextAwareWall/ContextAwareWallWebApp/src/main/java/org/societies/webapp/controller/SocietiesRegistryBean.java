@@ -28,9 +28,4 @@ public class SocietiesRegistryBean implements ISocietiesRegistryBean {
 	public void setMockEntityActive(boolean mockEntityActive) {
 		this.mockEntityActive = mockEntityActive;
 	}
-	
-	
-	
-	
-	
 }

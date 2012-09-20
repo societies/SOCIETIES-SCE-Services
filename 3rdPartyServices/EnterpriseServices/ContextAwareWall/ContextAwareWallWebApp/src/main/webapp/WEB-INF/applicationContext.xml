@@ -54,7 +54,7 @@
           <entry key="ServiceMetaModel" value-ref="serMetamodel" />
           <entry key="ServiceClient" value="http://societies.local/client.jar" />
       </osgi:service-properties>
-  </osgi:service>
+  	</osgi:service>
   
   	<bean id="serMetamodel" class="org.societies.api.schema.servicelifecycle.model.Service">
      <property name="authorSignature" value="guy feigenblat" />
@@ -63,7 +63,7 @@
      <property name="serviceType" value="THIRD_PARTY_WEB" />
      <property name="privacyPolicy" value="http://societies.local/local_file" />
      <property name="serviceCategory" value="location" />
- </bean>
+ 	</bean>
  
 	
 </beans>
