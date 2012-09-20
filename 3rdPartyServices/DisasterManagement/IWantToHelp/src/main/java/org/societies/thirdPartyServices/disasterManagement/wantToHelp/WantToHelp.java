@@ -30,6 +30,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.util.Iterator;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -81,6 +82,8 @@ public class WantToHelp implements IWantToHelp, ActionListener {
 	public static final String FEEDBACK_LAYOUT_CONSTRAINTS = "hidemode 3, gap 0 0, novisualpadding, ins 0, wrap 1"; //, debug 2000";
 	public static final String FEEDBACK_COLUMN_CONTSTRAINTS = "[fill, grow]";
 	public static final String FEEDBACK_ROW_CONSTRAINTS = "[fill, grow]";
+
+	private static final String SOCIETIES_IDENTIFIER = "ict-societies.eu";
 	
 	private String testUserEmail = "korbinian.frank@dlr.de";
 	private String testUserPassword = "password";	
@@ -174,18 +177,26 @@ public class WantToHelp implements IWantToHelp, ActionListener {
 		CtxEntity ownerEntity = (CtxEntity) externalCtxBroker.retrieve(requestor, ownerEntityIdentifier).get();
 //		feedbackTextArea.append("retrieve completed\n");
 		
-		testUserLastname = ownerEntity.getAttributes(CtxAttributeTypes.NAME_LAST).iterator().next().getStringValue();
+		Iterator<CtxAttribute> foundAttrsIt = ownerEntity.getAttributes(CtxAttributeTypes.NAME_LAST).iterator();
+		if (foundAttrsIt.hasNext())
+			testUserLastname = foundAttrsIt.next().getStringValue();
 //		feedbackTextArea.append(testUserLastname+"\n");
-		testUserFirstname = ownerEntity.getAttributes(CtxAttributeTypes.NAME_FIRST).iterator().next().getStringValue();
+		
+		foundAttrsIt = ownerEntity.getAttributes(CtxAttributeTypes.NAME_FIRST).iterator();
+		if (foundAttrsIt.hasNext())
+			testUserFirstname = foundAttrsIt.next().getStringValue();
 //		feedbackTextArea.append(testUserFirstname+"\n");	
 
-		//testUserEmail = cssOwnerId.toString();
-		testUserEmail = testUserFirstname+"."+testUserLastname+"@ict-societies.eu";
+		testUserEmail = cssOwnerId + "@" + SOCIETIES_IDENTIFIER;
+		foundAttrsIt = ownerEntity.getAttributes(CtxAttributeTypes.EMAIL).iterator();
+		if (foundAttrsIt.hasNext())
+			testUserEmail = foundAttrsIt.next().getStringValue();
+		//testUserEmail = testUserFirstname+"."+testUserLastname+"@ict-societies.eu";
+		feedbackTextArea.append("email: "+testUserEmail+"\n");
 
 		// TODO replace following strings by getting CtxAttributeTypes
 		testUserPassword = testUserFirstname+"__"+testUserLastname;
 		testUserInstitute = "institute";
-		feedbackTextArea.append("email: "+testUserEmail+"\n");
 		
 		// TODO retrieve data from CSS
 	}
