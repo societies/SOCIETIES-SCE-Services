@@ -1,3 +1,6 @@
+/*
+ * 
+ */
 package com.asocom.activities;
 
 import java.util.ArrayList;
@@ -12,41 +15,33 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.*;
 
+// TODO: Auto-generated Javadoc
 /**
- * 
+ * The Class OpenAccount.
  */
 public class OpenAccount extends Activity implements View.OnClickListener {
 
-	/**
-	 * 
-	 */
+	/** The list. */
 	private Spinner list;
 
-	/**
-	 * 
-	 */
+	/** The password. */
 	private EditText password;
 
-	/**
-	 * 
-	 */
+	/** The ok. */
 	private Button ok;
 
-	/**
-	 * 
-	 */
+	/** The cancel. */
 	private Button cancel;
 
-	/**
-	 * 
-	 */
+	/** The delete. */
 	private Button delete;
 
 	//
+	/** The Constant ACTIVITY_NAME. */
 	private static final String ACTIVITY_NAME = "OpenAccount";
 
-	/**
-	 * 
+	/* (non-Javadoc)
+	 * @see android.app.Activity#onCreate(android.os.Bundle)
 	 */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -73,9 +68,9 @@ public class OpenAccount extends Activity implements View.OnClickListener {
 
 	}
 
-	/**
-	*
-	*/
+	/* (non-Javadoc)
+	 * @see android.view.View.OnClickListener#onClick(android.view.View)
+	 */
 	public void onClick(View v) {
 		switch (v.getId()) {
 		case (R.id.open_account_ok):
@@ -92,19 +87,19 @@ public class OpenAccount extends Activity implements View.OnClickListener {
 	}
 
 	/**
-     * 
-     */
+	 * Open account.
+	 */
 	private void openAccount() {
 
 		if (this.password.getText().toString().equals("")) {
-			Tools.alertDialog(this, "Autentication", "Your password is empty");
+			Tools.alertDialog(this, "Authentication", "Your password is empty");
 			return;
 		}
 
 		try {
 			((String) list.getSelectedItem()).equals(null);
 		} catch (Exception e) {
-			Tools.alertDialog(this, "Autentication", "Crear una cuenta");
+			Tools.alertDialog(this, "Authentication", "Crear una cuenta");
 			return;
 		}
 
@@ -130,15 +125,15 @@ public class OpenAccount extends Activity implements View.OnClickListener {
 			}
 
 		} else {
-			Tools.alertDialog(this, "Autentication",
+			Tools.alertDialog(this, "Authentication",
 					"The password you entered is incorrect");
 			this.password.setText("");
 		}
 	}
 
 	/**
-     *  
-     */
+	 * Delete account.
+	 */
 	private void deleteAccount() {
 		new AlertDialog.Builder(this)
 				.setTitle("Confirm user deletion")
@@ -159,8 +154,8 @@ public class OpenAccount extends Activity implements View.OnClickListener {
 	}
 
 	/**
-     * 
-     */
+	 * Refresh list.
+	 */
 	private void refreshList() {
 		String array_spinner[] = new String[Manager.getPhoneUsers().size()
 				/ Manager.getDb().NUMBER_OF_FIELD];
@@ -176,17 +171,25 @@ public class OpenAccount extends Activity implements View.OnClickListener {
 	}
 
 	/**
-	 * cerrar la actividad actual
+	 * cerrar la actividad actual.
 	 */
 	private void exitActivity() {
 		finish();
 	}
 
+	/* (non-Javadoc)
+	 * @see android.content.ContextWrapper#clearWallpaper()
+	 */
 	public void clearWallpaper() {
 
 	}
 
 	//
+	/**
+	 * Gets the activity name.
+	 *
+	 * @return the activity name
+	 */
 	public static String getActivityName() {
 		return ACTIVITY_NAME;
 	}

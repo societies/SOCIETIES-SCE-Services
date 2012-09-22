@@ -1,3 +1,6 @@
+/*
+ * 
+ */
 package com.asocom.activities;
 
 import com.asocom.components.UserProfileComponent;
@@ -9,13 +12,22 @@ import android.widget.LinearLayout;
 import com.asocom.components.TopTitre;
 import com.asocom.model.Manager;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class UserProfile.
+ */
 public class UserProfile extends Activity implements View.OnClickListener {
 
+	/** The user profile component. */
 	private UserProfileComponent userProfileComponent;
 
 	//
+	/** The Constant ACTIVITY_NAME. */
 	private static final String ACTIVITY_NAME = "UserProfile";
 
+	/* (non-Javadoc)
+	 * @see android.app.Activity#onCreate(android.os.Bundle)
+	 */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -35,9 +47,9 @@ public class UserProfile extends Activity implements View.OnClickListener {
 
 	}
 
-	/**
-	*
-	*/
+	/* (non-Javadoc)
+	 * @see android.view.View.OnClickListener#onClick(android.view.View)
+	 */
 	public void onClick(View v) {
 		userProfileComponent.onClick(v);
 
@@ -49,10 +61,18 @@ public class UserProfile extends Activity implements View.OnClickListener {
 
 	}
 
+	/* (non-Javadoc)
+	 * @see android.content.ContextWrapper#clearWallpaper()
+	 */
 	public void clearWallpaper() {
 
 	}
 
+	/**
+	 * Gets the activity name.
+	 *
+	 * @return the activity name
+	 */
 	public static String getActivityName() {
 		return ACTIVITY_NAME;
 	}

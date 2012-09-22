@@ -1,3 +1,6 @@
+/*
+ * 
+ */
 package com.asocom.activities;
 
 import com.asocom.components.Menu;
@@ -17,24 +20,39 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.widget.*;
 
+// TODO: Auto-generated Javadoc
 /**
- * 
+ * The Class UserOptions.
  */
 public class UserOptions extends Activity implements View.OnClickListener {
 
+	/** The menu. */
 	private Menu menu;
+	
+	/** The layout. */
 	private LinearLayout layout;
+	
+	/** The options chat. */
 	private OptionsChat optionsChat;
+	
+	/** The options leave. */
 	private OptionsLeave optionsLeave;
+	
+	/** The options add friend. */
 	private OptionsAddFriend optionsAddFriend;
+	
+	/** The CONTEX t_ men u_ id. */
 	private final int CONTEXT_MENU_ID = 7;
+	
+	/** The options. */
 	private Options options;
 
 	//
+	/** The Constant ACTIVITY_NAME. */
 	private static final String ACTIVITY_NAME = "UserOptions";
 
-	/**
-	 * 
+	/* (non-Javadoc)
+	 * @see android.app.Activity#onCreate(android.os.Bundle)
 	 */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -93,6 +111,11 @@ public class UserOptions extends Activity implements View.OnClickListener {
 		Manager.setCurrentActivity(this);
 	}
 
+	/**
+	 * Options_icon.
+	 *
+	 * @param v the v
+	 */
 	public void options_icon(View v) {
 		if (optionsChat.getCode() == v.hashCode()) {
 			Manager.getCurrentUser().getChat().resetNewMessages();
@@ -131,9 +154,9 @@ public class UserOptions extends Activity implements View.OnClickListener {
 		}
 	}
 
-	/**
-	* 
-	*/
+	/* (non-Javadoc)
+	 * @see android.view.View.OnClickListener#onClick(android.view.View)
+	 */
 	public void onClick(View v) {
 		if (v.getId() == R.id.options_button_03) {
 			Manager.setIntValue(-1);
@@ -146,7 +169,10 @@ public class UserOptions extends Activity implements View.OnClickListener {
 	}
 
 	/**
-	 * create context menu
+	 * create context menu.
+	 *
+	 * @param id the id
+	 * @return the dialog
 	 */
 	@Override
 	protected Dialog onCreateDialog(int id) {
@@ -156,6 +182,9 @@ public class UserOptions extends Activity implements View.OnClickListener {
 	}
 
 	//
+	/* (non-Javadoc)
+	 * @see android.app.Activity#onKeyDown(int, android.view.KeyEvent)
+	 */
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		if (keyCode == KeyEvent.KEYCODE_BACK) {
 			Intent homeMenu = new Intent(this, HomeMenu.class);
@@ -166,11 +195,19 @@ public class UserOptions extends Activity implements View.OnClickListener {
 		return super.onKeyDown(keyCode, event);
 	}
 
+	/* (non-Javadoc)
+	 * @see android.content.ContextWrapper#clearWallpaper()
+	 */
 	public void clearWallpaper() {
 
 	}
 
 	//
+	/**
+	 * Gets the activity name.
+	 *
+	 * @return the activity name
+	 */
 	public static String getActivityName() {
 		return ACTIVITY_NAME;
 	}

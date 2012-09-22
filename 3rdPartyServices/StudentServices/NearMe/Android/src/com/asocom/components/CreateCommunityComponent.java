@@ -1,3 +1,6 @@
+/*
+ * 
+ */
 package com.asocom.components;
 
 import com.asocom.activities.R;
@@ -15,45 +18,86 @@ import android.widget.LinearLayout;
 import android.widget.RadioGroup;
 import android.widget.Spinner;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class CreateCommunityComponent.
+ */
 public class CreateCommunityComponent extends LinearLayout {
 
-	/**
-	 * Numero maximo de caracteres del campo nombre
-	 */
-	private static final int NAME_MAX_LENGTH = 8;
+	/** Numero maximo de caracteres del campo nombre. */
+	private static final int NAME_MAX_LENGTH = 15;
 
-	/**
-	 * Numero maximo de caracteres del campo description
-	 */
+	/** Numero maximo de caracteres del campo description. */
 	private static final int DESCRIPTION_MAX_LENGTH = 200;
 
-	/**
-	 * Numero maximo de caracteres del campo date
-	 */
+	/** Numero maximo de caracteres del campo password. */
 	public static final int PASSWORD_MAX_LENGTH = 8;
 
+	/** The image. */
 	private ImageView image;
+	
+	/** The community name. */
 	private EditText communityName;
+	
+	/** The community description. */
 	private EditText communityDescription;
+	
+	/** The radio group. */
 	private RadioGroup radioGroup;
+	
+	/** The radio group2. */
 	private RadioGroup radioGroup2;
+	
+	/** The category. */
 	private Spinner category;
+	
+	/** The interest. */
 	private Spinner interest;
+	
+	/** The preference. */
 	private Spinner preference;
+	
+	/** The save. */
 	private Button save;
+	
+	/** The cancel. */
 	private Button cancel;
+	
+	/** The context. */
 	private Context context;
 
+	/** The pos category. */
 	private int posCategory;
+	
+	/** The pos interest. */
 	private int posInterest;
+	
+	/** The pos preference. */
 	private int posPreference;
+	
+	/** The array category. */
 	private String[] arrayCategory;
+	
+	/** The array interest. */
 	private String[][] arrayInterest;
+	
+	/** The array preference. */
 	private String[][] arrayPreference;
+	
+	/** The list interest. */
 	private String[] listInterest;
+	
+	/** The list preference. */
 	private String[] listPreference;
+	
+	/** The profile. */
 	private String profile;
 
+	/**
+	 * Instantiates a new creates the community component.
+	 *
+	 * @param context the context
+	 */
 	public CreateCommunityComponent(Context context) {
 		super(context);
 		this.context = context;
@@ -61,6 +105,11 @@ public class CreateCommunityComponent extends LinearLayout {
 
 	}
 
+	/**
+	 * Inits the.
+	 *
+	 * @param context the context
+	 */
 	private void init(Context context) {
 		String infService = Context.LAYOUT_INFLATER_SERVICE;
 		LayoutInflater li = (LayoutInflater) getContext().getSystemService(
@@ -90,6 +139,9 @@ public class CreateCommunityComponent extends LinearLayout {
 
 	}
 
+	/**
+	 * Sets the array category.
+	 */
 	private void setArrayCategory() {
 
 		posCategory = 0;
@@ -124,6 +176,9 @@ public class CreateCommunityComponent extends LinearLayout {
 
 	}
 
+	/**
+	 * Sets the array interest.
+	 */
 	private void setArrayInterest() {
 
 		arrayInterest = new String[5][3];
@@ -173,6 +228,9 @@ public class CreateCommunityComponent extends LinearLayout {
 
 	}
 
+	/**
+	 * Sets the array preference.
+	 */
 	private void setArrayPreference() {
 
 		arrayPreference = new String[11][3];
@@ -239,50 +297,110 @@ public class CreateCommunityComponent extends LinearLayout {
 
 	}
 
+	/**
+	 * Gets the profile.
+	 *
+	 * @return the profile
+	 */
 	public String getProfile() {
 		return profile;
 	}
 
+	/**
+	 * Sets the spinner.
+	 *
+	 * @param array_spinner the new spinner
+	 */
 	public void setSpinner(String[] array_spinner) {
 
 	}
 
+	/**
+	 * Sets the image.
+	 *
+	 * @param icon the new image
+	 */
 	public void setImage(int icon) {
 		image.setImageResource(Tools.userImage(icon));
 	}
 
+	/**
+	 * Gets the community name.
+	 *
+	 * @return the community name
+	 */
 	public String getCommunityName() {
 		return communityName.getText().toString();
 	}
 
+	/**
+	 * Sets the community name.
+	 *
+	 * @param text the new community name
+	 */
 	public void setCommunityName(String text) {
 		this.communityName.setText(text);
 	}
 
+	/**
+	 * Gets the community description.
+	 *
+	 * @return the community description
+	 */
 	public String getCommunityDescription() {
 		return communityDescription.getText().toString();
 	}
 
+	/**
+	 * Sets the community description.
+	 *
+	 * @param text the new community description
+	 */
 	public void setCommunityDescription(String text) {
 		this.communityDescription.setText(text);
 	}
 
+	/**
+	 * Gets the radio group.
+	 *
+	 * @return the radio group
+	 */
 	public RadioGroup getRadioGroup() {
 		return radioGroup;
 	}
 
+	/**
+	 * Gets the radio group2.
+	 *
+	 * @return the radio group2
+	 */
 	public RadioGroup getRadioGroup2() {
 		return radioGroup2;
 	}
 
+	/**
+	 * Gets the category.
+	 *
+	 * @return the category
+	 */
 	public Spinner getCategory() {
 		return category;
 	}
 
+	/**
+	 * Gets the save.
+	 *
+	 * @return the save
+	 */
 	public Button getSave() {
 		return save;
 	}
 
+	/**
+	 * Gets the cancel.
+	 *
+	 * @return the cancel
+	 */
 	public Button getCancel() {
 		return cancel;
 	}

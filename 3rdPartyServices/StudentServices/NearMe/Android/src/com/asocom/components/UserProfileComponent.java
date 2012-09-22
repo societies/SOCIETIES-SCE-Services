@@ -1,3 +1,6 @@
+/*
+ * 
+ */
 package com.asocom.components;
 
 import com.asocom.activities.R;
@@ -15,38 +18,85 @@ import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class UserProfileComponent.
+ */
 public class UserProfileComponent extends LinearLayout {
 
-	/**
-	 * Numero maximo de caracteres del campo nombre
-	 */
-	private static final int NAME_MAX_LENGTH = 8;
+	/** Numero maximo de caracteres del campo nombre. */
+	private static final int NAME_MAX_LENGTH = 16;
 
+	/** The name. */
 	private EditText name;
+	
+	/** The category. */
 	private Spinner category;
+	
+	/** The interest. */
 	private Spinner interest;
+	
+	/** The preference. */
 	private Spinner preference;
+	
+	/** The save. */
 	private Button save;
+	
+	/** The ok. */
 	private Button ok;
+	
+	/** The text. */
 	private TextView text;
+	
+	/** The context. */
 	private Context context;
+	
+	/** The pos category. */
 	private int posCategory;
+	
+	/** The pos interest. */
 	private int posInterest;
+	
+	/** The pos preference. */
 	private int posPreference;
+	
+	/** The array category. */
 	private String[] arrayCategory;
+	
+	/** The array interest. */
 	private String[][] arrayInterest;
+	
+	/** The array preference. */
 	private String[][] arrayPreference;
+	
+	/** The list interest. */
 	private String[] listInterest;
+	
+	/** The list preference. */
 	private String[] listPreference;
+	
+	/** The profile. */
 	private String profile;
+	
+	/** The show profile. */
 	private String showProfile;
 
+	/**
+	 * Instantiates a new user profile component.
+	 *
+	 * @param context the context
+	 */
 	public UserProfileComponent(Context context) {
 		super(context);
 		this.context = context;
 		init(context);
 	}
 
+	/**
+	 * Inits the.
+	 *
+	 * @param context the context
+	 */
 	private void init(Context context) {
 		String infService = Context.LAYOUT_INFLATER_SERVICE;
 		LayoutInflater li = (LayoutInflater) getContext().getSystemService(
@@ -74,8 +124,9 @@ public class UserProfileComponent extends LinearLayout {
 	}
 
 	/**
-	 * 
-	 * @throws Exception
+	 * On click.
+	 *
+	 * @param v the v
 	 */
 	public void onClick(View v) {
 
@@ -174,6 +225,9 @@ public class UserProfileComponent extends LinearLayout {
 		}
 	}
 
+	/**
+	 * Sets the array category.
+	 */
 	private void setArrayCategory() {
 
 		posCategory = 0;
@@ -208,6 +262,9 @@ public class UserProfileComponent extends LinearLayout {
 
 	}
 
+	/**
+	 * Sets the array interest.
+	 */
 	private void setArrayInterest() {
 
 		arrayInterest = new String[5][3];
@@ -257,6 +314,9 @@ public class UserProfileComponent extends LinearLayout {
 
 	}
 
+	/**
+	 * Sets the array preference.
+	 */
 	private void setArrayPreference() {
 
 		arrayPreference = new String[11][3];
@@ -320,22 +380,47 @@ public class UserProfileComponent extends LinearLayout {
 
 	}
 
+	/**
+	 * Gets the profile.
+	 *
+	 * @return the profile
+	 */
 	public String getProfile() {
 		return profile;
 	}
 
+	/**
+	 * Sets the profile.
+	 *
+	 * @param profile the new profile
+	 */
 	public void setProfile(String profile) {
 		this.profile = profile;
 	}
 
+	/**
+	 * Sets the spinner.
+	 *
+	 * @param array_spinner the new spinner
+	 */
 	public void setSpinner(String[] array_spinner) {
 
 	}
 
+	/**
+	 * Gets the category.
+	 *
+	 * @return the category
+	 */
 	public Spinner getCategory() {
 		return category;
 	}
 
+	/**
+	 * Gets the save.
+	 *
+	 * @return the save
+	 */
 	public Button getSave() {
 		return save;
 	}
