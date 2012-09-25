@@ -45,7 +45,9 @@ import javax.swing.JTextField;
 import org.societies.api.context.CtxException;
 import org.societies.api.context.broker.ICtxBroker;
 import org.societies.api.context.model.CtxAttribute;
+import org.societies.api.context.model.CtxAttributeTypes;
 import org.societies.api.context.model.CtxEntity;
+import org.societies.api.context.model.CtxEntityIdentifier;
 import org.societies.api.context.model.CtxIdentifier;
 import org.societies.api.context.model.CtxModelType;
 import org.societies.api.context.model.IndividualCtxEntity;
@@ -227,11 +229,16 @@ public class ClientGUIFrame extends JFrame
 		 */
 		
 		try {
-			Future<IndividualCtxEntity> futureOperatorEntity = ctxBroker.retrieveIndividualEntity(me, userIdentity);
-			CtxEntity operator = futureOperatorEntity.get();
+			Future<CtxEntityIdentifier> futureOperatorEntityId = ctxBroker.retrieveIndividualEntityId(me, userIdentity);
+			CtxEntityIdentifier operatorId = futureOperatorEntityId.get();
 					//broker.retrievebroker.retrieveOperator(this.myPublicDPI, userIdentity);
-			Set<CtxAttribute> attrs = operator.getAttributes(RFIDCtxType);
-			if(attrs.isEmpty()){
+			
+			Future<List<CtxIdentifier>> futureAttributeIds= this.ctxBroker.lookup(me, operatorId, CtxModelType.ATTRIBUTE, RFIDCtxType);
+			List<CtxIdentifier> attributes = futureAttributeIds.get();
+			if (attributes.size()==0){
+				
+				
+			
 				 this.rfidTagNumber = "";
 				while (this.rfidTagNumber==null || this.rfidTagNumber.equalsIgnoreCase("")){
 				this.rfidTagNumber = (String)JOptionPane.showInputDialog(
@@ -256,7 +263,7 @@ public class ClientGUIFrame extends JFrame
 					                    "");
 					}
 				
-					attr = ctxBroker.createAttribute(me, operator.getId(), RFIDCtxType).get();
+					attr = ctxBroker.createAttribute(me, operatorId, RFIDCtxType).get();
 				
 				
 					//rfidAPI.registerRFIDTag(this.rfidTagNumber, userIdentity.toUriString(), password);
@@ -266,7 +273,7 @@ public class ClientGUIFrame extends JFrame
 					
 				
 			}else{
-				attr = attrs.iterator().next();
+				attr = (CtxAttribute) this.ctxBroker.retrieve(me, attributes.get(0)).get();
 				this.rfidTagNumber = attr.getStringValue();
 			}
 			

@@ -25,22 +25,19 @@
 	<parent>
 		<groupId>org.societies</groupId>
 		<artifactId>spring-osgi-parent</artifactId>
-		<version>0.1</version>
+		<version>RELEASE</version>
 	</parent>
+
 
 	<dependencies>
 		<!-- add your dependencies here -->
 		<dependency>
 			<groupId>org.societies.api.external</groupId>
 			<artifactId>societies-api</artifactId>
-			<version>${release.version}</version>
-			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.societies.api.internal</groupId>
 			<artifactId>societies-api-internal</artifactId>
-			<version>${release.version}</version>
-			<scope>provided</scope>
 		</dependency>
 		<dependency>
 		    <groupId>org.societies.api.ext3p</groupId>
@@ -61,9 +58,8 @@
 			</exclusions>
 		</dependency>
 		<dependency>
-			<groupId>org.societies.comm.xmpp.pubsub</groupId>
-			<artifactId>PubsubClientBundle</artifactId>
-			<version>${version.comm}</version>
+			<groupId>org.societies</groupId>
+			<artifactId>common-ext-libs</artifactId>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
