@@ -27,7 +27,12 @@ p.msg{font-family: Comic Sans MS,Brush Script MT,cursive;
 </style>
  <script src="http://ajax.googleapis.com/ajax/libs/dojo/1.6.0/dojo/dojo.xd.js"
     djConfig="isDebug:true, parseOnLoad:true"></script>
+    
+    
     <script type="text/javascript">
+    
+    var msgIds = {}
+    
     // Load the widget parser
 	dojo.require("dojox.mobile.parser");
 	// Load the base lib
@@ -121,24 +126,16 @@ function initialUserDetails(){
 function submitMessage(){
 
  var xhrArgs = {
-      //url: "mobile.html",
-      //postData: dojo.formToJson("MessageForm"),
       form: dojo.byId("MessageForm"),
         handleAs: "text",
       load: function(data){
-        //alert( "Message posted." + data);
-        //addMsg(data)
          getMessages();
       },
       error: function(error){
         alert( "Message error. "+error);
       	}
     };
-  // alert(1);
-    // Call the asynchronous xhrPost
-    //alert(xhrArgs.postData);
     var deferred = dojo.xhrPost(xhrArgs);
-    //var deferred = dojo.xhrGet(xhrArgs);
 }
 
 var lastUpdateMsgId = 0;
@@ -161,35 +158,38 @@ var cis = dojo.byId('cisBox').value;
     
     
     load: function(data){
-    
-     messages=dojo.fromJson(data);
-     mc=dojo.byId('messagesContainer');
-     
-     for (msg in messages)	{
-     	 var c = new dojo.Color("red");
-   		try{
-   		sp=thisMsg.style.split('-');
-   		c.setColor(sp[0],sp[1],sp[2]);
-   		}
-   		catch(err){}
-      
-     	thisMsg = messages[msg];
-     	var p = document.createElement('p');
-     	p.setAttribute("style", 'color:'+thisMsg.style);
-     	p.setAttribute("class", "msg");
-     	
-     	var name = thisMsg.userId.split(".");
-     	
-     	//p.innerHTML=thisMsg.userId+thisMsg.msg;
-     	p.innerHTML=name[0] + ': '+thisMsg.msg;
-     	
-     	mc.appendChild(p); ////----reverse
-     	
-     	if (lastUpdateMsgId < thisMsg.messageId){
-     		lastUpdateMsgId = thisMsg.messageId;
-     	}
-     }
-     	mc.scrollTop = mc.scrollHeight;
+	    		
+	     messages=dojo.fromJson(data);
+	     mc=dojo.byId('messagesContainer');
+	     
+	     for (msg in messages)	{
+	        
+	        thisMsg = messages[msg];
+	        
+	        
+	        if (msgIds[thisMsg.messageId] != null && msgIds[thisMsg.messageId] != "" ){
+	        	continue;
+	        }else{
+	        	msgIds[thisMsg.messageId] = thisMsg.messageId;
+	        }
+	        
+	     	
+	     	var p = document.createElement('p');
+	     	p.setAttribute("style", 'color:'+thisMsg.style);
+	     	p.setAttribute("class", "msg");
+	     	
+	     	var name = thisMsg.userId.split(".");
+	     	
+	     	//p.innerHTML=thisMsg.userId+thisMsg.msg;
+	     	p.innerHTML=name[0] + ': '+thisMsg.msg;
+	     	
+	     	mc.appendChild(p); ////----reverse
+	     	
+	     	if (lastUpdateMsgId < thisMsg.messageId){
+	     		lastUpdateMsgId = thisMsg.messageId;
+	     	}
+	     }
+	     mc.scrollTop = mc.scrollHeight;
     },
     
     error: function(error){
