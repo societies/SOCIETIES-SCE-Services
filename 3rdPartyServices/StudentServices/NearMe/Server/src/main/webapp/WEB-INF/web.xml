@@ -2,7 +2,7 @@
 <web-app xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
 	version="2.5">
-	
+<!--	
 	<welcome-file-list>
    		<welcome-file>/views/default.jsp</welcome-file>
 	</welcome-file-list>
@@ -11,7 +11,7 @@
 
 	<description>Societies Platforn webapplication using Spring MVC </description>
 
-<!-- OSGI aware web application context declaration -->
+ OSGI aware web application context declaration -->
 	<context-param>
 		<param-name>contextClass</param-name>
 		<param-value>org.eclipse.virgo.web.dm.ServerOsgiBundleXmlWebApplicationContext</param-value>
@@ -42,14 +42,14 @@
 	under servlet declaration -->
 	
 	<servlet>
-		<servlet-name>societies</servlet-name>
-		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+		<servlet-name>WebAPPNearMe</servlet-name>
+		<servlet-class>org.temp.MockCIS</servlet-class>
 		<load-on-startup>1</load-on-startup>
 	</servlet>
 
 	<servlet-mapping>
-		<servlet-name>societies</servlet-name>
-		<url-pattern>*.html</url-pattern>
+		<servlet-name>WebAPPNearMe</servlet-name>
+		<url-pattern>MockCIS</url-pattern>
 	</servlet-mapping>
 
 </web-app>
