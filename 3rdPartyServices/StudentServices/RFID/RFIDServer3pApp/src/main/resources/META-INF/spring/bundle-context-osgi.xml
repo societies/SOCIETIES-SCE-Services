@@ -19,7 +19,7 @@
 			<entry key="TargetPlatform" value="SOCIETIES" />
 			<entry key="ServiceProvider" value="ICT-SOCIETIES" />
 			<entry key="ServiceMetaModel" value-ref="serMetamodel" />
-			<entry key="ServiceClient" value="file://%virgo_home%/repository/usr/RFIDClientApp.jar" />
+			<entry key="ServiceClient" value="http://societies.local.macs.hw.ac.uk:18080/3p-service/RFIDClientApp.jar" />
 		</osgi:service-properties>
         </osgi:service>
        
