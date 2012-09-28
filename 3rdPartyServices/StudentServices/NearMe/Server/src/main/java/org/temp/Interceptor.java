@@ -7,7 +7,7 @@ import org.temp.CISIntegeration.CISData;
 
 public class Interceptor {
 	
-	public void after(String cmd){
+	public static void after(String cmd){
 		try {
 			JSONObject jobj= new JSONObject(cmd);
 			int opt=jobj.getInt("opetationType");
@@ -19,15 +19,15 @@ public class Interceptor {
 				new CISData(comm.getString("name"),
 						comm.getString("nameAdministrator"),
 						comm.getString("description"));
-			}else if(opt==4){//join
+			}else if(opt==4){//join group
 				JSONObject comm=jobj.getJSONObject("communitiesData");
 				CISData.getCISData(comm.getString("name")).participants.add(
 						jobj.getString("senderId"));
-			}else if(opt==5){//leave
+			}else if(opt==5){//leave group
 				JSONObject comm=jobj.getJSONObject("communitiesData");
 				CISData.getCISData(comm.getString("name")).participants.remove(
 						jobj.getString("senderId"));
-			}else if(opt==6){//chat
+			}else if(opt==6){//chat in group
 				JSONObject comm=jobj.getJSONObject("communitiesData");
 				if(CISData.getCISData(comm.getString("name")).owner.equals(
 						jobj.getString("senderId"))){
