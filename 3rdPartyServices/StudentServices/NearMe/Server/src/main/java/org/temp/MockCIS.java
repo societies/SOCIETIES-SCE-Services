@@ -9,6 +9,12 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import mockplatform.MockCISManager;
+import mockplatform.MockCommManager;
+import mockplatform.MockCtxBroker;
+
+import org.temp.CISIntegeration.ContextBinder;
+
 /**
  * Servlet implementation class MockCIS
  */
@@ -23,6 +29,10 @@ public class MockCIS extends HttpServlet {
      */
     public MockCIS() {
         // TODO Auto-generated constructor stub
+		ContextBinder cb=new ContextBinder();
+		cb.setCisMgm(new MockCISManager());
+		cb.setComMgt(new MockCommManager());
+		cb.setCtxBrk(new MockCtxBroker());
     }
 
 	/**
@@ -42,6 +52,7 @@ public class MockCIS extends HttpServlet {
 		String json=request.getParameter("json");
 		String ssid=request.getParameter("ssid");
 		System.err.println(uid+":"+json+"@"+ssid);
+		Listener.LastUpdate.getLastUpdate(uid, ssid);
 		if(opt==1){
 			writer.write(server.pushEvent(uid, json, ssid)?"1":"0");
 		}else if(opt==2){

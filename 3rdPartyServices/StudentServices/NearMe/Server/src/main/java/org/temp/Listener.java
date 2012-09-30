@@ -19,7 +19,7 @@ public class Listener {
 	public static ConcurrentHashMap<String, LastUpdate> lastUpdateUsr = new ConcurrentHashMap<String, LastUpdate>();
 
 	public static ReentrantLock lock = new ReentrantLock(false);
-	public static ConcurrentSkipListSet<String> removals=new ConcurrentSkipListSet<String>();
+	public static ConcurrentSkipListSet<String> removals = new ConcurrentSkipListSet<String>();
 
 	public static class DemonThread implements Runnable {
 		@Override
@@ -27,8 +27,8 @@ public class Listener {
 			// TODO Auto-generated method stub
 			while (true) {
 				try {
-
-					Thread.sleep(1000 * 60 * 2);
+					System.err.println("sleeping");
+					Thread.sleep(1000 * 5);
 					Listener.lock.lock();
 					Date now = new Date();
 					for (LastUpdate up : Listener.lastUpdateUsr.values()) {
@@ -60,21 +60,24 @@ public class Listener {
 		}
 		return copies;
 	}
-	
+
 	public static class PushThread implements Runnable {
 		@Override
 		public void run() {
 			// TODO Auto-generated method stub
 			try {
-				Thread.sleep(1000);
-				List<String> cpl=new ArrayList<String>(Listener.removals);
-				Listener.removals.removeAll(cpl);
-				for(String rm:cpl){
-					CtxBrokerBridge.getBridge(rm).cleanProximityData();
-				}
-				HashMap<String, Set<String>> cp = Listener.getCopy();
-				for (String loc : cp.keySet()) {
-					new ProximityData(loc,cp.get(loc)).store();
+				while (true) {
+					System.err.println("sleeping2");
+					Thread.sleep(1000);
+					List<String> cpl = new ArrayList<String>(Listener.removals);
+					Listener.removals.removeAll(cpl);
+					for (String rm : cpl) {
+						CtxBrokerBridge.getBridge(rm).cleanProximityData();
+					}
+					HashMap<String, Set<String>> cp = Listener.getCopy();
+					for (String loc : cp.keySet()) {
+						new ProximityData(loc, cp.get(loc)).store();
+					}
 				}
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
@@ -83,7 +86,7 @@ public class Listener {
 		}
 	}
 
-	public static class LastUpdate {
+	public static class LastUpdate implements Comparable {
 		public String location;
 		public String uid;
 		public Date lastUpdate;
@@ -126,6 +129,12 @@ public class Listener {
 			} finally {
 				lock.unlock();
 			}
+		}
+
+		@Override
+		public int compareTo(Object arg0) {
+			// TODO Auto-generated method stub
+			return this.hashCode() - arg0.hashCode();
 		}
 	}
 

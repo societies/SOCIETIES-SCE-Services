@@ -11,7 +11,6 @@ public class NearMeServer {
 	}
 	
 	public String[] getEvents(String uid, String ssid) {
-		Listener.LastUpdate.getLastUpdate(uid, ssid);
 		Date last_time = conn.getLastCheckInTime(uid, ssid);
 		if(last_time==null){
 			last_time=new Date(0);//from 1970
@@ -25,7 +24,6 @@ public class NearMeServer {
 	}
 	
 	public String[] getAllEvents(String uid, String ssid) {
-		Listener.LastUpdate.getLastUpdate(uid, ssid);
 		System.out.println("from A");
 //		if(!ActiveStatus.getCurrentStatus(ssid).isActive()){
 			//initiate the activity from now

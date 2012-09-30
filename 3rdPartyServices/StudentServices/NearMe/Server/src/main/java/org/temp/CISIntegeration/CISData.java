@@ -17,6 +17,7 @@ public class CISData {
 		this.cisName = cisName;
 		this.owner = owner;
 		this.cisDescription = cisDescription;
+		System.err.println("establish:\t"+cisName);
 		cisMap.put(cisName, this);
 	}
 

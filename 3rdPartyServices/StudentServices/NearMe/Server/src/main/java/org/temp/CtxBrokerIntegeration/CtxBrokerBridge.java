@@ -1,6 +1,5 @@
 package org.temp.CtxBrokerIntegeration;
 
-import org.societies.api.context.CtxException;
 import org.societies.api.context.model.CtxAttribute;
 import org.societies.api.context.model.CtxEntity;
 import org.societies.api.context.model.CtxIdentifier;
@@ -8,17 +7,14 @@ import org.societies.api.context.model.CtxIdentifier;
 import org.societies.api.schema.servicelifecycle.model.ServiceResourceIdentifier;
 
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutionException;
 
 import org.societies.api.context.model.CtxModelType;
 import org.societies.api.identity.RequestorService;
 
 import org.societies.api.identity.IIdentity;
-import org.societies.api.identity.InvalidFormatException;
 import org.societies.api.identity.Requestor;
 import org.temp.CISIntegeration.ContextBinder;
 
@@ -34,20 +30,15 @@ public class CtxBrokerBridge {
 			synchronized (sync) {
 				if (myServiceID == null) {
 					myServiceID = new ServiceResourceIdentifier();
-					myServiceID
-							.setServiceInstanceIdentifier("css://nikosk@societies.org/ContextAware3pService");
 					try {
 						myServiceID
 								.setIdentifier(new URI(
 										"css://nikosk@societies.org/ContextAware3pService"));
-						serviceIdentity=ContextBinder.getComMgt().getIdManager().fromJid("haoyi@societies.org");
-					} catch (URISyntaxException e) {
+						serviceIdentity=ContextBinder.getComMgt().getIdManager().fromJid("nikosk@societies.org");
+					} catch (Exception e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
-					} catch (InvalidFormatException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
+					} 
 					requestorService = new RequestorService(serviceIdentity,
 							myServiceID);
 				}
@@ -80,19 +71,10 @@ public class CtxBrokerBridge {
 			}
 			ctxv.setStringValue(data.toString());
 			ContextBinder.getCtxBrk().update(requestorService, ctxv).get();
-		} catch (InvalidFormatException e) {
+		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ExecutionException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (CtxException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		} 
 
 	}
 
@@ -113,19 +95,10 @@ public class CtxBrokerBridge {
 			}
 			ctxv.setStringValue("");
 			ContextBinder.getCtxBrk().update(requestorService, ctxv).get();
-		} catch (InvalidFormatException e) {
+		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ExecutionException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (CtxException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		} 
 
 	}
 }

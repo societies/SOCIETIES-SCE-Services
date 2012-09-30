@@ -51,6 +51,8 @@ public class DBConnections {
 			List<String> result = new ArrayList<String>();
 			PreparedStatement stmt = conn
 					.prepareStatement(DBConnections.GET_UPDATE_SQL_BYDATE);
+			if(time==null)
+				time=new Date();
 			stmt.setLong(1, time.getTime());
 			stmt.setString(2, ssid);
 			ResultSet res = stmt.executeQuery();
