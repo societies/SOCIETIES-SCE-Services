@@ -6,6 +6,8 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.Window;
+import android.webkit.CookieManager;
+import android.webkit.CookieSyncManager;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -72,8 +74,10 @@ public class MainActivity extends Activity {
                 return true;
 
             case R.id.logout:
-            	webView.clearCache(true);
-            	webView.loadUrl("http://crowdtasking.appspot.com/");
+            	CookieSyncManager.createInstance(this);
+            	CookieManager cookieManager = CookieManager.getInstance();
+            	cookieManager.removeAllCookie();
+            	webView.loadUrl("http://crowdtasking.appspot.com/index.html");
                 return true;
 
             default:
