@@ -53,7 +53,7 @@ public class SocketClient {
 	public boolean connect(){
 		try{
 			InetAddress address = InetAddress.getByName(guiIpAddress);
-			echoSocket = new Socket(address, 2112);
+			echoSocket = new Socket(address, 4322);
 			out = new PrintWriter(echoSocket.getOutputStream(), true);
 			in = new BufferedReader(new InputStreamReader(echoSocket.getInputStream()));
 			connected = true;

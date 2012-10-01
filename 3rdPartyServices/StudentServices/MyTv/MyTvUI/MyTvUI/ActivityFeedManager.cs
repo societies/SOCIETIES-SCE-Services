@@ -14,6 +14,7 @@ namespace MyTvUI
         {
             this.activities = activities;
 
+            //testing only
             addActivities();
         }
 

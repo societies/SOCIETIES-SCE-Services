@@ -43,25 +43,31 @@ public class SocketServer extends Thread{
 	private PrintWriter out;
 	private BufferedReader in;
 	private int port = 4321;
+	private boolean listening = true;
+
 	private static final String GUI_STARTED = "GUI_STARTED";
-	private static final String USER_ACTION = "USER_ACTION";
 	private static final String GUI_STOPPED = "GUI_STOPPED";
+	private static final String USER_ACTION = "USER_ACTION";
+	private static final String CHANNEL_REQUEST = "CHANNEL_REQUEST";
+	private static final String MUTED_REQUEST = "MUTED_REQUEST";
 	private static final String RECEIVED = "RECEIVED";
 	private static final String FAILED = "FAILED";
-	
+	private static final String START_MSG = "START_MSG";
+	private static final String END_MSG = "END_MSG";
+
 	private CommandHandler commandHandler;
-		
+
 	public SocketServer(CommandHandler commandHandler){
 		this.commandHandler = commandHandler;
 	}
-	
+
 	@Override
 	public void run(){
-		while(true){
+		while(listening){
 			listenSocket();
 		}
 	}
-	
+
 	public void listenSocket(){
 		try {
 			server = new ServerSocket(port);
@@ -78,6 +84,7 @@ public class SocketServer extends Thread{
 			e.printStackTrace();
 		}
 
+		System.out.println("Connection accepted from GUI!");
 
 		try {
 			out = new PrintWriter(client.getOutputStream(), true);
@@ -86,40 +93,69 @@ public class SocketServer extends Thread{
 			System.out.println("Accept failed: "+port);
 			e.printStackTrace();
 		}
-		
-		boolean receiving = true;
-		while(receiving){
-			try{
-				String line = in.readLine();
-				String[] splitData = line.split("\n");
+
+		try{
+			String start = in.readLine();
+			System.out.println("Got new input: "+start);
+			if(start.equalsIgnoreCase(START_MSG)){
+				System.out.println("Processing new message...");
+
+				//loop to get rest of message
+				String message = "";
+				boolean reading = true;
+				while(reading){
+					String next = in.readLine();
+					System.out.println("next = "+next);
+					if(!next.equalsIgnoreCase(END_MSG)){
+						message = message+next+"\n";
+					}else{
+						reading  = false;
+					}
+				}
+				System.out.println("message = "+message);
+
+				//handle message
+				String[] splitData = message.split("\n");
+				System.out.println("splitData length = "+splitData.length);
 				String command = splitData[0];
 				if (command.equalsIgnoreCase(GUI_STARTED)){
 					System.out.println(GUI_STARTED+" message received");
 					out.println(RECEIVED);
 					String gui_ip = splitData[1];
 					commandHandler.connectToGUI(gui_ip);
+
 				}else if (command.equalsIgnoreCase(USER_ACTION)){
 					System.out.println(USER_ACTION+" message received");
 					out.println(RECEIVED);
-					String action = splitData[1];
-					commandHandler.processUserAction(action);
+					String parameterName = splitData[1];
+					String value = splitData[2];
+					commandHandler.processUserAction(parameterName, value);
+
+				}else if(command.equalsIgnoreCase(CHANNEL_REQUEST)){
+					System.out.println(CHANNEL_REQUEST+" message received");
+					String response = commandHandler.getChannelPreference();
+					out.println(response);
+
+				}else if(command.equalsIgnoreCase(MUTED_REQUEST)){
+					System.out.println(MUTED_REQUEST+" message received");
+					String response = commandHandler.getMutedPreference();
+					out.println(response);
+
 				}else if (command.equalsIgnoreCase(GUI_STOPPED)){
 					System.out.println(GUI_STOPPED+" message received");
 					out.println(RECEIVED);
-					//close connection
-					finalize();
-					receiving = false;
-					System.out.println("Socket closed");
+					commandHandler.disconnectFromGUI();
 				}
-			} catch (IOException e) {
-				System.out.println("Read failed");
-				out.println(FAILED);
 				finalize();
 			}
+		} catch (IOException e) {
+			System.out.println("Read failed");
+			out.println(FAILED);
+			finalize();
 		}
 	}
-	
-	
+
+
 	@Override
 	protected void finalize(){
 		//Clean up 

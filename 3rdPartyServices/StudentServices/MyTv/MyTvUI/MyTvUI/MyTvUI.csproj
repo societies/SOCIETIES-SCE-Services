@@ -65,7 +65,10 @@
       <HintPath>dll\Microsoft.Expression.Drawing.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="Microsoft.Kinect, Version=1.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
+    <Reference Include="Microsoft.Kinect, Version=1.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\..\..\..\Program Files\Microsoft SDKs\Kinect\v1.5\Assemblies\Microsoft.Kinect.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.Samples.Kinect.WpfViewers, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>dll\Microsoft.Samples.Kinect.WpfViewers.dll</HintPath>
@@ -134,6 +137,7 @@
     <AppDesigner Include="Properties\" />
   </ItemGroup>
   <ItemGroup>
+    <Resource Include="Images\close_button.png" />
     <Resource Include="Images\me.JPG" />
   </ItemGroup>
   <ItemGroup>
@@ -159,22 +163,11 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Images\off_button.jpg" />
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="Images\channel_background.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Images\volume_down.JPG" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Images\volume_up.JPG" />
-  </ItemGroup>
-  <ItemGroup>
+    <Resource Include="Images\off_button.jpg" />
     <Resource Include="Images\pointer.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Images\close_button.png" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="dll\Microsoft.Samples.Kinect.WpfViewers.dll" />
@@ -184,6 +177,24 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="dll\Microsoft.Expression.Drawing.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="dll\Microsoft.Kinect.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\logo1.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\speech-bubble.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\orange-button.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\volume_down.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\volume_up.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

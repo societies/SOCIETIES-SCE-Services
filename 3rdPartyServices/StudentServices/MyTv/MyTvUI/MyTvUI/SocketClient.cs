@@ -61,6 +61,9 @@ namespace MyTvUI
         {
             if (echoSocket != null)
             {
+                Console.WriteLine("Sending message to service client:");
+                Console.WriteLine(message);
+
                 echoSocket.Send(Encoding.ASCII.GetBytes(message));
                 byte[] data = new byte[1024];
                 int receivedDataLength = echoSocket.Receive(data);
@@ -79,6 +82,43 @@ namespace MyTvUI
         }
 
 
+        public String getChannelPreference()
+        {
+            String response = "";
+            if (echoSocket != null)
+            {
+                Console.WriteLine("Getting channel preference from service client");
+
+                String request = "START_MSG\n" +
+                    "CHANNEL_REQUEST\n" +
+                    "END_MSG";
+                echoSocket.Send(Encoding.ASCII.GetBytes(request));
+                byte[] data = new byte[1024];
+                int receivedDataLength = echoSocket.Receive(data);
+                response = Encoding.ASCII.GetString(data, 0, receivedDataLength);
+            }
+            return response;
+        }
+
+
+        public String getMutedPreference()
+        {
+            String response = "";
+            if (echoSocket != null)
+            {
+                Console.WriteLine("Getting muted preference from service client");
+
+                String request = "START_MSG\n" +
+                    "MUTED_REQUEST\n" +
+                    "END_MSG";
+                echoSocket.Send(Encoding.ASCII.GetBytes(request));
+                byte[] data = new byte[1024];
+                int receivedDataLength = echoSocket.Receive(data);
+                response = Encoding.ASCII.GetString(data, 0, receivedDataLength);
+            }
+            return response;
+        }
+
 
         public void disconnectFromServiceClient()
         {
@@ -94,9 +134,20 @@ namespace MyTvUI
 
         public Boolean getSessionParameters()
         {
+            if (retrieveUserID() && retrieveEndPoint())
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+
+        }
+
+        private Boolean retrieveUserID(){
             IPEndPoint ip = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 2114);
             Socket server = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-
             try
             {
                 server.Connect(ip);
@@ -112,16 +163,44 @@ namespace MyTvUI
             Console.WriteLine("Retrieving user ID");
             server.Send(Encoding.ASCII.GetBytes("CURRENT_USER"));
             byte[] data = new byte[1024];
-            int receivedDataLength = server.Receive(data);
+            int receivedDataLength = 0;
+            receivedDataLength = server.Receive(data);
+            if (receivedDataLength < 1)
+            {
+                return false;
+            }
             userID = Encoding.ASCII.GetString(data, 0, receivedDataLength);
             Console.WriteLine("Received user identity from server: " + userID);
+
+            server.Close();
+            return true;
+        }
+
+        private Boolean retrieveEndPoint(){
+            IPEndPoint ip = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 2114);
+            Socket server = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            try
+            {
+                server.Connect(ip);
+            }
+            catch (SocketException e)
+            {
+                Console.WriteLine("Unable to connect to server.");
+                Console.WriteLine(e.ToString());
+                return false;
+            }
 
             //get current end point
             Console.WriteLine("Retrieving endpoint of service client");
             server.Send(Encoding.ASCII.GetBytes("VIRGO_ENDPOINT_IPADDRESS"));
-            data = new byte[1024];
+            byte[] data = new byte[1024];
+            int receivedDataLength = 0;
             receivedDataLength = server.Receive(data);
-            endPoint = Encoding.ASCII.GetString(data, 0, receivedDataLength);
+            if (receivedDataLength < 1)
+            {
+                return false;
+            }
+            endPoint = data[0] + "." + data[1] + "." + data[2] + "." + data[3];
             Console.WriteLine("Received end point of service client: " + endPoint);
 
             server.Close();

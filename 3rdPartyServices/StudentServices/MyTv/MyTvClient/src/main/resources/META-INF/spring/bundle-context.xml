@@ -13,9 +13,14 @@
 	<bean id="mytv" 
 	    class="ac.hw.mytv.MyTvClient"
 		name="mytv" 
-		depends-on="uam" 
+		depends-on="uam, persoMgr, serviceMgmt, eventMgr, commsMgr, displayDriver" 
 		init-method="initialiseMyTvClient">
 		<property name="uam" ref="uam"/>
+		<property name="persoMgr" ref="persoMgr"/>
+		<property name="serviceMgmt" ref="serviceMgmt"/>
+		<property name="eventMgr" ref="eventMgr"/>
+		<property name="commsMgr" ref="commsMgr"/>
+		<property name="displayDriver" ref="displayDriver"/>
 	</bean>	
 	
 </beans>
