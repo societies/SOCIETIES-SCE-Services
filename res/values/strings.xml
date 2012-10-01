@@ -4,6 +4,7 @@
     <string name="scanQRcode">Scan QR code</string>
     <string name="profile">Profile</string>
     <string name="home">Go home</string>
+    <string name="logout">Logout</string>
     <string name="title_activity_main">Crowd tasking</string>
 	<string name="result_failed">No barcode found</string>
 	<string name="result_failed_why">"The user gave up and pressed Back"</string>

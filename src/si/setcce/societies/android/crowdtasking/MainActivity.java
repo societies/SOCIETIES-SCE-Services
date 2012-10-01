@@ -74,6 +74,11 @@ public class MainActivity extends Activity {
             	webView.loadUrl("http://crowdtasking.appspot.com/profile.html");
                 return true;
 
+            case R.id.logout:
+                //scan;
+            	webView.loadUrl("http://crowdtasking.appspot.com/logout");
+                return true;
+
             default:
                 return super.onOptionsItemSelected(item);
         }
