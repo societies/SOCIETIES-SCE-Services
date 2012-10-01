@@ -59,24 +59,21 @@ public class MainActivity extends Activity {
         // Handle item selection
         switch (item.getItemId()) {
             case R.id.scanQRcode:
-                //scan;
                 IntentIntegrator integrator = new IntentIntegrator(MainActivity.this);
                 integrator.initiateScan(IntentIntegrator.QR_CODE_TYPES);
                 return true;
 
             case R.id.home:
-                //scan;
             	webView.loadUrl("http://crowdtasking.appspot.com/index.html");
                 return true;
             
             case R.id.profile:
-                //scan;
             	webView.loadUrl("http://crowdtasking.appspot.com/profile.html");
                 return true;
 
             case R.id.logout:
-                //scan;
-            	webView.loadUrl("http://crowdtasking.appspot.com/logout");
+            	webView.clearCache(true);
+            	webView.loadUrl("http://crowdtasking.appspot.com/");
                 return true;
 
             default:
