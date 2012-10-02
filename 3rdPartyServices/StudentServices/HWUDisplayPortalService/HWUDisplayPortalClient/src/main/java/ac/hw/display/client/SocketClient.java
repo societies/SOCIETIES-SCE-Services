@@ -193,14 +193,15 @@ public class SocketClient {
 		SocketClient c = new SocketClient("127.0.0.1");
 		
 		UserSession userSession = new UserSession("eliza@societies.local");
-		//ServiceInfo sInfo = new ServiceInfo(null, "Social Learning", "http://www.macs.hw.ac.uk/~ceeep1/societies/services/SocialLearningGame.exe", true);
-		ServiceInfo sInfo = new ServiceInfo(null, "Social Learning", "http://www.macs.hw.ac.uk/~ceeep1/societies/services/", true);
+		ServiceInfo sInfo = new ServiceInfo(null, "Social Learning", "http://www.macs.hw.ac.uk/~ceeep1/societies/services/SocialLearningGame.exe", true);
+		
 		ServiceInfo sInfo2 = new ServiceInfo (null, "PolicyEditor", "http://www.macs.hw.ac.uk/~ceeep1/societies/services/POLICY~1.JAR", false);
-		ServiceInfo sInfo3 = new ServiceInfo(null, "MyTv", "http://www.macs.hw.ac.uk/~ceesmm1/societies/mytv/MyTvUI.exe", true);
+		ServiceInfo sInfo3 = new ServiceInfo(null, "Youtube", "http://www.youtube.com/watch?v=3OnnDqH6Wj8", false);
+		ServiceInfo sInfo4 = new ServiceInfo(null, "MyTV", "http://www.macs.hw.ac.uk/~ceesmm1/societies/mytv/MyTvUI.exe", true);
+		userSession.addService(sInfo4);
 		userSession.addService(sInfo);
-		userSession.addService(sInfo2);
-		userSession.addService(sInfo3);
-	
+		//userSession.addService(sInfo2);
+		//userSession.addService(sInfo3);
 		c.startSession(userSession);
 		try {
 			Thread.sleep(5000);

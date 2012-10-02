@@ -3,6 +3,14 @@
 	language="java" contentType="text/html; charset=ISO-8859-1"
 	pageEncoding="ISO-8859-1"%>
 
+<%
+	String userId = request.getParameter("id");
+	if (userId == null){
+		userId = "";
+	}
+%>
+	
+
 <html>
     <head>
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no"/>
@@ -19,7 +27,12 @@ p.msg{font-family: Comic Sans MS,Brush Script MT,cursive;
 </style>
  <script src="http://ajax.googleapis.com/ajax/libs/dojo/1.6.0/dojo/dojo.xd.js"
     djConfig="isDebug:true, parseOnLoad:true"></script>
+    
+    
     <script type="text/javascript">
+    
+    var msgIds = {}
+    
     // Load the widget parser
 	dojo.require("dojox.mobile.parser");
 	// Load the base lib
@@ -113,24 +126,16 @@ function initialUserDetails(){
 function submitMessage(){
 
  var xhrArgs = {
-      //url: "mobile.html",
-      //postData: dojo.formToJson("MessageForm"),
       form: dojo.byId("MessageForm"),
         handleAs: "text",
       load: function(data){
-        //alert( "Message posted." + data);
-        //addMsg(data)
          getMessages();
       },
       error: function(error){
         alert( "Message error. "+error);
       	}
     };
-  // alert(1);
-    // Call the asynchronous xhrPost
-    //alert(xhrArgs.postData);
     var deferred = dojo.xhrPost(xhrArgs);
-    //var deferred = dojo.xhrGet(xhrArgs);
 }
 
 var lastUpdateMsgId = 0;
@@ -153,34 +158,38 @@ var cis = dojo.byId('cisBox').value;
     
     
     load: function(data){
-    
-     messages=dojo.fromJson(data);
-     mc=dojo.byId('messagesContainer');
-     
-     for (msg in messages)	{
-     	 var c = new dojo.Color("red");
-   		try{
-   		sp=thisMsg.style.split('-');
-   		c.setColor(sp[0],sp[1],sp[2]);
-   		}
-   		catch(err){}
-      
-    ///  alert(c.toHex());
-      
-     	thisMsg = messages[msg];
-     	var p = document.createElement('p');
-     //	p.setAttribute("style", 'color:'+c.toCss());
-     	p.setAttribute("style", 'color:'+thisMsg.style);
-     	p.setAttribute("class", "msg");
-     	p.innerHTML=thisMsg.userId+' says: '+thisMsg.msg;
-     	
-     	mc.appendChild(p); ////----reverse
-     	
-     	if (lastUpdateMsgId < thisMsg.messageId){
-     		lastUpdateMsgId = thisMsg.messageId;
-     	}
-     }
-     	mc.scrollTop = mc.scrollHeight;
+	    		
+	     messages=dojo.fromJson(data);
+	     mc=dojo.byId('messagesContainer');
+	     
+	     for (msg in messages)	{
+	        
+	        thisMsg = messages[msg];
+	        
+	        
+	        if (msgIds[thisMsg.messageId] != null && msgIds[thisMsg.messageId] != "" ){
+	        	continue;
+	        }else{
+	        	msgIds[thisMsg.messageId] = thisMsg.messageId;
+	        }
+	        
+	     	
+	     	var p = document.createElement('p');
+	     	p.setAttribute("style", 'color:'+thisMsg.style);
+	     	p.setAttribute("class", "msg");
+	     	
+	     	var name = thisMsg.userId.split(".");
+	     	
+	     	//p.innerHTML=thisMsg.userId+thisMsg.msg;
+	     	p.innerHTML=name[0] + ': '+thisMsg.msg;
+	     	
+	     	mc.appendChild(p); ////----reverse
+	     	
+	     	if (lastUpdateMsgId < thisMsg.messageId){
+	     		lastUpdateMsgId = thisMsg.messageId;
+	     	}
+	     }
+	     mc.scrollTop = mc.scrollHeight;
     },
     
     error: function(error){
@@ -221,42 +230,29 @@ var cis = dojo.byId('cisBox').value;
 	    -->
     </div>
 <div>
-<div id="response2"></div>
+	<div id="response2"></div>
 
-
-<form id='MessageForm' name ='MessageForm' action="postMsg1.html" >
-<table>
-<tbody>
-<tr>
-<td>Id:</td><td><input type="text" id='userId' name='userId'value='<%=request.getParameter("id") %>' /></td>
-
-</tr>
-<!--
-<tr>
-<td>Group:</td><td><input type="text" value='1' id="cis" name="cis"></td>
-</tr>
--->
-<tr>
-<td>color:</td><td><input type="text" name ='style'></td>
-</tr>
-<tr>
-<td>Text:</td><td><input type="text" name='msg' maxlength="50" ></td>
-</tr>
-<tr>
-<td>CIs:</td><td><select name="cisBox" id="cisBox" /></td>
-</tr>
-
-</tbody>
-</table>
-<a onclick="submitMessage();" style="cursor: hand">Spray Graffiti!</a>
-</form>
-</div>
+	<form id='MessageForm' name ='MessageForm' action="postMsg1.html" >
+		<table>
+		<tbody>
+		<tr>
+			<td>Id:</td><td><input type="text" id='userId' name='userId' value='<%=userId%>' /></td> <!-- readonly="readonly"-->
+		</tr>
+		<tr>
+			<td>color:</td><td><input type="text" name ='style'></td>
+		</tr>
+		<tr>
+			<td>Text:</td><td><input type="text" name='msg' maxlength="50" ></td>
+		</tr>
+		<tr>
+			<td>CIs:</td><td><select name="cisBox" id="cisBox" /></td>
+		</tr>
+		</tbody>
+		</table>
+		<a onclick="submitMessage();" style="cursor: hand">Spray Graffiti!</a>
+	</form>
+	</div>
 </div>
 
-
-
-
-
- 
-    </body>
+</body>
 </html>

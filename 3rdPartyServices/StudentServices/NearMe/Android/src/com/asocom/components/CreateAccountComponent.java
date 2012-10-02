@@ -1,3 +1,6 @@
+/*
+ * 
+ */
 package com.asocom.components;
 
 import com.asocom.activities.R;
@@ -13,43 +16,62 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RadioGroup;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class CreateAccountComponent.
+ */
 public class CreateAccountComponent extends LinearLayout {
 
+	/** The password. */
 	private EditText name, description, date, email, password;
+	
+	/** The gender. */
 	private RadioGroup gender;
+	
+	/** The cancel. */
 	private Button save, cancel;
+	
+	/** The image. */
 	private ImageView image;
 
-	/**
-	 * Numero maximo de caracteres del campo nombre
-	 */
-	public static final int NAME_MAX_LENGTH = 8;
+	/** Numero maximo de caracteres del campo nombre. */
+	public static final int NAME_MAX_LENGTH = 16;
 
-	/**
-	 * Numero maximo de caracteres del campo description
-	 */
+	/** Numero maximo de caracteres del campo description. */
 	public static final int DESCRIPTION_MAX_LENGTH = 200;
 
-	/**
-	 * Numero maximo de caracteres del campo date
-	 */
+	/** Numero maximo de caracteres del campo date. */
 	public static final int DATE_MAX_LENGTH = 10;
 
-	/**
-	 * Numero maximo de caracteres del campo date
-	 */
+	/** Numero maximo de caracteres del campo date. */
 	public static final int PASSWORD_MAX_LENGTH = 8;
 
+	/**
+	 * Instantiates a new creates the account component.
+	 *
+	 * @param context the context
+	 */
 	public CreateAccountComponent(Context context) {
 		super(context);
 		init(context);
 	}
 
+	/**
+	 * Instantiates a new creates the account component.
+	 *
+	 * @param context the context
+	 * @param attrs the attrs
+	 */
 	public CreateAccountComponent(Context context, AttributeSet attrs) {
 		super(context, attrs);
 		init(context);
 	}
 
+	/**
+	 * Inits the.
+	 *
+	 * @param context the context
+	 */
 	private void init(Context context) {
 		String infService = Context.LAYOUT_INFLATER_SERVICE;
 		LayoutInflater li = (LayoutInflater) getContext().getSystemService(
@@ -85,40 +107,45 @@ public class CreateAccountComponent extends LinearLayout {
 	}
 
 	/**
-	 * 
-	 * @return
+	 * Gets the name.
+	 *
+	 * @return the name
 	 */
 	public String getName() {
 		return name.getText().toString();
 	}
 
 	/**
-	 * 
-	 * @return
+	 * Sets the name.
+	 *
+	 * @param text the new name
 	 */
 	public void setName(String text) {
 		name.setText(text);
 	}
 
 	/**
-	 * 
-	 * @return
+	 * Gets the description.
+	 *
+	 * @return the description
 	 */
 	public String getDescription() {
 		return description.getText().toString();
 	}
 
 	/**
-	 * 
-	 * @return
+	 * Sets the description.
+	 *
+	 * @param name the new description
 	 */
 	public void setDescription(String name) {
 		this.description.setText(name);
 	}
 
 	/**
-	 * 
-	 * @return
+	 * Gets the date.
+	 *
+	 * @return the date
 	 */
 	public String getDate() {
 
@@ -126,16 +153,18 @@ public class CreateAccountComponent extends LinearLayout {
 	}
 
 	/**
-	 * 
-	 * @return
+	 * Sets the date.
+	 *
+	 * @param name the new date
 	 */
 	public void setDate(String name) {
 		this.date.setText(name);
 	}
 
 	/**
-	 * 
-	 * @return
+	 * Gets the email.
+	 *
+	 * @return the email
 	 */
 	public String getEmail() {
 
@@ -143,20 +172,27 @@ public class CreateAccountComponent extends LinearLayout {
 	}
 
 	/**
-	 * 
-	 * @return
+	 * Sets the email.
+	 *
+	 * @param name the new email
 	 */
 	public void setEmail(String name) {
 		this.email.setText(name);
 	}
 
+	/**
+	 * Gets the email edit text.
+	 *
+	 * @return the email edit text
+	 */
 	public EditText getEmailEditText() {
 		return email;
 	}
 
 	/**
-	 * 
-	 * @return
+	 * Gets the password.
+	 *
+	 * @return the password
 	 */
 	public String getPassword() {
 
@@ -164,40 +200,45 @@ public class CreateAccountComponent extends LinearLayout {
 	}
 
 	/**
-	 * 
-	 * @return
+	 * Sets the password.
+	 *
+	 * @param name the new password
 	 */
 	public void setPassword(String name) {
 		this.password.setText(name);
 	}
 
 	/**
-	 * 
-	 * @return
+	 * Sets the image.
+	 *
+	 * @param icon the new image
 	 */
 	public void setImage(int icon) {
 		this.image.setImageResource(Tools.userImage(icon));
 	}
 
 	/**
-	 * 
-	 * @return
+	 * Gets the button save.
+	 *
+	 * @return the button save
 	 */
 	public Button getButtonSave() {
 		return save;
 	}
 
 	/**
-	 * 
-	 * @return
+	 * Gets the button cancel.
+	 *
+	 * @return the button cancel
 	 */
 	public Button getButtonCancel() {
 		return cancel;
 	}
 
 	/**
-	 * 
-	 * @return
+	 * Gets the radio group gender.
+	 *
+	 * @return the radio group gender
 	 */
 	public RadioGroup getRadioGroupGender() {
 		return gender;

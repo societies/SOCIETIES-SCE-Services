@@ -33,26 +33,35 @@ import android.widget.AbsListView;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
+// TODO: Auto-generated Javadoc
 /**
+ * The Class IconContextMenu.
+ *
  * @author nguyendt
- * 
  */
 public class IconContextMenu implements DialogInterface.OnCancelListener,
 		DialogInterface.OnDismissListener {
 
+	/** The Constant LIST_PREFERED_HEIGHT. */
 	private static final int LIST_PREFERED_HEIGHT = 65;
 
+	/** The menu adapter. */
 	private IconMenuAdapter menuAdapter = null;
+	
+	/** The parent activity. */
 	private Activity parentActivity = null;
+	
+	/** The dialog id. */
 	private int dialogId = 0;
 
+	/** The click handler. */
 	private IconContextMenuOnClickListener clickHandler = null;
 
 	/**
-	 * constructor
-	 * 
-	 * @param parent
-	 * @param id
+	 * constructor.
+	 *
+	 * @param parent the parent
+	 * @param id the id
 	 */
 	public IconContextMenu(Activity parent, int id) {
 		this.parentActivity = parent;
@@ -62,9 +71,12 @@ public class IconContextMenu implements DialogInterface.OnCancelListener,
 	}
 
 	/**
-	 * Add menu item
-	 * 
-	 * @param menuItem
+	 * Add menu item.
+	 *
+	 * @param res the res
+	 * @param title the title
+	 * @param imageResourceId the image resource id
+	 * @param actionTag the action tag
 	 */
 	public void addItem(Resources res, CharSequence title, int imageResourceId,
 			int actionTag) {
@@ -72,6 +84,14 @@ public class IconContextMenu implements DialogInterface.OnCancelListener,
 				imageResourceId, actionTag));
 	}
 
+	/**
+	 * Adds the item.
+	 *
+	 * @param res the res
+	 * @param textResourceId the text resource id
+	 * @param imageResourceId the image resource id
+	 * @param actionTag the action tag
+	 */
 	public void addItem(Resources res, int textResourceId, int imageResourceId,
 			int actionTag) {
 		menuAdapter.addItem(new IconContextMenuItem(res, textResourceId,
@@ -79,18 +99,19 @@ public class IconContextMenu implements DialogInterface.OnCancelListener,
 	}
 
 	/**
-	 * Set menu onclick listener
-	 * 
-	 * @param listener
+	 * Set menu onclick listener.
+	 *
+	 * @param listener the new on click listener
 	 */
 	public void setOnClickListener(IconContextMenuOnClickListener listener) {
 		clickHandler = listener;
 	}
 
 	/**
-	 * Create menu
-	 * 
-	 * @return
+	 * Create menu.
+	 *
+	 * @param menuItitle the menu ititle
+	 * @return the dialog
 	 */
 	public Dialog createMenu(String menuItitle) {
 		final AlertDialog.Builder builder = new AlertDialog.Builder(
@@ -116,58 +137,95 @@ public class IconContextMenu implements DialogInterface.OnCancelListener,
 		return dialog;
 	}
 
+	/* (non-Javadoc)
+	 * @see android.content.DialogInterface.OnCancelListener#onCancel(android.content.DialogInterface)
+	 */
 	public void onCancel(DialogInterface dialog) {
 		cleanup();
 	}
 
+	/* (non-Javadoc)
+	 * @see android.content.DialogInterface.OnDismissListener#onDismiss(android.content.DialogInterface)
+	 */
 	public void onDismiss(DialogInterface dialog) {
 	}
 
+	/**
+	 * Cleanup.
+	 */
 	private void cleanup() {
 		parentActivity.dismissDialog(dialogId);
 	}
 
 	/**
-	 * IconContextMenu On Click Listener interface
+	 * IconContextMenu On Click Listener interface.
+	 *
+	 * @see IconContextMenuOnClickEvent
 	 */
 	public interface IconContextMenuOnClickListener {
+		
+		/**
+		 * On click.
+		 *
+		 * @param menuId the menu id
+		 */
 		public abstract void onClick(int menuId);
 	}
 
 	/**
-	 * Menu-like list adapter with icon
+	 * Menu-like list adapter with icon.
 	 */
 	protected class IconMenuAdapter extends BaseAdapter {
+		
+		/** The context. */
 		private Context context = null;
 
+		/** The m items. */
 		private ArrayList<IconContextMenuItem> mItems = new ArrayList<IconContextMenuItem>();
 
+		/**
+		 * Instantiates a new icon menu adapter.
+		 *
+		 * @param context the context
+		 */
 		public IconMenuAdapter(Context context) {
 			this.context = context;
 		}
 
 		/**
-		 * add item to adapter
-		 * 
-		 * @param menuItem
+		 * add item to adapter.
+		 *
+		 * @param menuItem the menu item
 		 */
 		public void addItem(IconContextMenuItem menuItem) {
 			mItems.add(menuItem);
 		}
 
+		/* (non-Javadoc)
+		 * @see android.widget.Adapter#getCount()
+		 */
 		public int getCount() {
 			return mItems.size();
 		}
 
+		/* (non-Javadoc)
+		 * @see android.widget.Adapter#getItem(int)
+		 */
 		public Object getItem(int position) {
 			return mItems.get(position);
 		}
 
+		/* (non-Javadoc)
+		 * @see android.widget.Adapter#getItemId(int)
+		 */
 		public long getItemId(int position) {
 			IconContextMenuItem item = (IconContextMenuItem) getItem(position);
 			return item.actionTag;
 		}
 
+		/* (non-Javadoc)
+		 * @see android.widget.Adapter#getView(int, android.view.View, android.view.ViewGroup)
+		 */
 		public View getView(int position, View convertView, ViewGroup parent) {
 			IconContextMenuItem item = (IconContextMenuItem) getItem(position);
 
@@ -205,6 +263,13 @@ public class IconContextMenu implements DialogInterface.OnCancelListener,
 			return textView;
 		}
 
+		/**
+		 * To pixel.
+		 *
+		 * @param res the res
+		 * @param dip the dip
+		 * @return the float
+		 */
 		private float toPixel(Resources res, int dip) {
 			float px = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
 					dip, res.getDisplayMetrics());
@@ -213,24 +278,26 @@ public class IconContextMenu implements DialogInterface.OnCancelListener,
 	}
 
 	/**
-	 * menu-like list item with icon
+	 * menu-like list item with icon.
 	 */
 	protected class IconContextMenuItem {
+		
+		/** The text. */
 		public final CharSequence text;
+		
+		/** The image. */
 		public final Drawable image;
+		
+		/** The action tag. */
 		public final int actionTag;
 
 		/**
-		 * public constructor
-		 * 
-		 * @param res
-		 *            resource handler
-		 * @param textResourceId
-		 *            id of title in resource
-		 * @param imageResourceId
-		 *            id of icon in resource
-		 * @param actionTag
-		 *            indicate action of menu item
+		 * public constructor.
+		 *
+		 * @param res resource handler
+		 * @param textResourceId id of title in resource
+		 * @param imageResourceId id of icon in resource
+		 * @param actionTag indicate action of menu item
 		 */
 		public IconContextMenuItem(Resources res, int textResourceId,
 				int imageResourceId, int actionTag) {
@@ -244,16 +311,12 @@ public class IconContextMenu implements DialogInterface.OnCancelListener,
 		}
 
 		/**
-		 * public constructor
-		 * 
-		 * @param res
-		 *            resource handler
-		 * @param title
-		 *            menu item title
-		 * @param imageResourceId
-		 *            id of icon in resource
-		 * @param actionTag
-		 *            indicate action of menu item
+		 * public constructor.
+		 *
+		 * @param res resource handler
+		 * @param title menu item title
+		 * @param imageResourceId id of icon in resource
+		 * @param actionTag indicate action of menu item
 		 */
 		public IconContextMenuItem(Resources res, CharSequence title,
 				int imageResourceId, int actionTag) {

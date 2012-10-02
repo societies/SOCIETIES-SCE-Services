@@ -1,3 +1,6 @@
+/*
+ * 
+ */
 package com.asocom.activities;
 
 import java.util.Calendar;
@@ -18,51 +21,43 @@ import android.widget.DatePicker;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
+// TODO: Auto-generated Javadoc
 /**
- * 
+ * The Class Profile.
  */
 public class Profile extends Activity implements View.OnClickListener {
 
-	/**
-	 * dialog de imagenes
-	 */
+	/** dialog de imagenes. */
 	private IconContextMenu iconContextMenu = null;
 
-	/**
-	 * identificacion del dialogo de imagenes
-	 */
+	/** identificacion del dialogo de imagenes. */
 	private final int CONTEXT_MENU_ID = 1;
 
-	/**
-	 * dialogo de fecha
-	 */
+	/** dialogo de fecha. */
 	private final int DATE_DIALOG_ID = 2;
 
-	/**
-	 * numero de imagen del usuario
-	 */
+	/** numero de imagen del usuario. */
 	private int image;
 
-	/**
-	 * contenedor de objeto user profile
-	 */
+	/** contenedor de objeto user profile. */
 	CreateAccountComponent createAccount;
-	/**
-     * 
-     */
+	
+	/** The m year. */
 	private int mYear;
-	/**
-     * 
-     */
+	
+	/** The m month. */
 	private int mMonth;
-	/**
-     * 
-     */
+	
+	/** The m day. */
 	private int mDay;
 
 	//
+	/** The Constant ACTIVITY_NAME. */
 	private static final String ACTIVITY_NAME = "Profile";
 
+	/* (non-Javadoc)
+	 * @see android.app.Activity#onCreate(android.os.Bundle)
+	 */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -91,6 +86,9 @@ public class Profile extends Activity implements View.OnClickListener {
 
 	}
 
+	/**
+	 * Sets the profile.
+	 */
 	public void SetProfile() {
 		createAccount.setImage(Integer.parseInt(Manager.getCurrentPhoneUser()
 				.get(6)));
@@ -111,21 +109,27 @@ public class Profile extends Activity implements View.OnClickListener {
 	}
 
 	/**
-	 * se llama cuando hace click la imagen para modificarla
+	 * se llama cuando hace click la imagen para modificarla.
+	 *
+	 * @param view the view
 	 */
 	public void userProfileImage(View view) {
 		initDialog();
 	}
 
 	/**
-	 * se llama cuando hace click el cuadro de dialogo date
+	 * se llama cuando hace click el cuadro de dialogo date.
+	 *
+	 * @param view the view
 	 */
 	public void userProfileDate(View view) {
 		showDialog(DATE_DIALOG_ID);
 	}
 
 	/**
-	 * eventos de la actividad
+	 * eventos de la actividad.
+	 *
+	 * @param v the v
 	 */
 	public void onClick(View v) {
 		switch (v.getId()) {
@@ -141,8 +145,8 @@ public class Profile extends Activity implements View.OnClickListener {
 	}
 
 	/**
-     * 
-     */
+	 * Creates the account.
+	 */
 	private void createAccount() {
 		if (image == 0) {
 			Toast.makeText(this, "Select one image", 5).show();
@@ -194,14 +198,14 @@ public class Profile extends Activity implements View.OnClickListener {
 	}
 
 	/**
-	 * cerrar actividad
+	 * cerrar actividad.
 	 */
 	private void exitActivity() {
 		finish();
 	}
 
 	/**
-	 * Inicializar Dialog
+	 * Inicializar Dialog.
 	 */
 	protected void initDialog() {
 
@@ -225,7 +229,10 @@ public class Profile extends Activity implements View.OnClickListener {
 	}
 
 	/**
-	 * create context menu
+	 * create context menu.
+	 *
+	 * @param id the id
+	 * @return the dialog
 	 */
 	@Override
 	protected Dialog onCreateDialog(int id) {
@@ -240,9 +247,7 @@ public class Profile extends Activity implements View.OnClickListener {
 		return super.onCreateDialog(id);
 	}
 
-	/**
-	 * 
-	 */
+	/** The m date set listener. */
 	private DatePickerDialog.OnDateSetListener mDateSetListener = new DatePickerDialog.OnDateSetListener() {
 		public void onDateSet(DatePicker view, int year, int monthOfYear,
 				int dayOfMonth) {
@@ -254,6 +259,9 @@ public class Profile extends Activity implements View.OnClickListener {
 	};
 
 	//
+	/* (non-Javadoc)
+	 * @see android.app.Activity#onKeyDown(int, android.view.KeyEvent)
+	 */
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		if (keyCode == KeyEvent.KEYCODE_BACK) {
 			Intent homeMenu = new Intent(this, HomeMenu.class);
@@ -263,11 +271,19 @@ public class Profile extends Activity implements View.OnClickListener {
 		return super.onKeyDown(keyCode, event);
 	}
 
+	/* (non-Javadoc)
+	 * @see android.content.ContextWrapper#clearWallpaper()
+	 */
 	public void clearWallpaper() {
 
 	}
 
 	//
+	/**
+	 * Gets the activity name.
+	 *
+	 * @return the activity name
+	 */
 	public static String getActivityName() {
 		return ACTIVITY_NAME;
 	}

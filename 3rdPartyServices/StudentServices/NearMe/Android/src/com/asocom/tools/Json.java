@@ -1,3 +1,6 @@
+/*
+ * 
+ */
 package com.asocom.tools;
 
 import java.util.Arrays;
@@ -12,14 +15,24 @@ import com.asocom.activities.ShowMessage;
 import com.asocom.activities.ShowMessageFriend;
 import com.asocom.model.Community;
 import com.asocom.model.Manager;
-import com.asocom.model.SmsChat;
+import com.asocom.model.ChatMsg;
 import com.asocom.model.User;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class Json.
+ */
 public class Json {
 
+	/** The j son object. */
 	private static JSONObject jSonObject;
 
 	// opetationType=0 -- datos de coneccion
+	/**
+	 * Connect.
+	 *
+	 * @return the string
+	 */
 	public static String connect() {
 		JSONObject jObject = new JSONObject();
 		try {
@@ -55,6 +68,11 @@ public class Json {
 	}
 	
 	// opetationType=1 -- desconectarse
+	/**
+	 * Disconnect.
+	 *
+	 * @return the string
+	 */
 	public static String disconnect() {
 		JSONObject jObject = new JSONObject();
 		try {
@@ -82,6 +100,11 @@ public class Json {
 	}
 
 	// opetationType=2 -- Actualizar
+	/**
+	 * Update user information.
+	 *
+	 * @return the string
+	 */
 	public static String updateUserInformation() {
 		try {
 			JSONObject jObject = new JSONObject();
@@ -117,6 +140,11 @@ public class Json {
 	}
 	
 	// opetationType=3 -- Crear comunidad
+	/**
+	 * Creates the community.
+	 *
+	 * @return the string
+	 */
 	public static String createCommunity() {
 		try {
 			JSONObject jObject = new JSONObject();
@@ -168,6 +196,12 @@ public class Json {
 	}
 	
 	// opetationType=4 -- Unirse a una comunidad
+	/**
+	 * Join community.
+	 *
+	 * @param idComunity the id comunity
+	 * @return the string
+	 */
 	public static String joinCommunity(String idComunity) {
 		try {
 			JSONObject jObject = new JSONObject();
@@ -195,6 +229,12 @@ public class Json {
 	}
 
 	// opetationType=5 -- dejar comunidad comunidad
+	/**
+	 * Leave community.
+	 *
+	 * @param idCoomunity the id coomunity
+	 * @return the string
+	 */
 	public static String leaveCommunity(String idCoomunity) {
 		try {
 			JSONObject jObject = new JSONObject();
@@ -222,6 +262,13 @@ public class Json {
 	}
 
 	// opetationType=6 -- chat de comunidad
+	/**
+	 * Send community chat.
+	 *
+	 * @param idCommunity the id community
+	 * @param sms the sms
+	 * @return the string
+	 */
 	public static String sendCommunityChat(String idCommunity, String sms) {
 		try {
 			JSONObject jObject = new JSONObject();
@@ -248,6 +295,13 @@ public class Json {
 	}
 
 	// opetationType=7 -- chat privado
+	/**
+	 * Send private chat.
+	 *
+	 * @param idUser the id user
+	 * @param sms the sms
+	 * @return the string
+	 */
 	public static String sendPrivateChat(String idUser, String sms) {
 			try {
 				JSONObject jObject = new JSONObject();
@@ -275,6 +329,12 @@ public class Json {
 	
 	
 	// opetationType=8 -- pedir amistad
+	/**
+	 * Friend request.
+	 *
+	 * @param idUser the id user
+	 * @return the string
+	 */
 	public static String friendRequest(String idUser) {
 		try {
 			JSONObject jObject = new JSONObject();
@@ -301,6 +361,13 @@ public class Json {
 	}
 	
 	// opetationType=9 -- responder amistad	
+	/**
+	 * Friend request response.
+	 *
+	 * @param reponse the reponse
+	 * @param friendId the friend id
+	 * @return the string
+	 */
 	public static String friendRequestResponse(String reponse, String friendId){
 		try {
 			JSONObject jObject = new JSONObject();
@@ -328,10 +395,21 @@ public class Json {
 	}
 	
 	// opetationType=10 -- eliminar amigo	
+	/**
+	 * Delete friend.
+	 *
+	 * @param friendId the friend id
+	 * @return the string
+	 */
 	public static String deleteFriend(String friendId){
 		return "";
 	}	
 	
+	/**
+	 * User data.
+	 *
+	 * @return the string
+	 */
 	public static String userData() {
 		try {
 			JSONObject jObject = new JSONObject();
@@ -401,13 +479,115 @@ public class Json {
 // ===========================================================================================================
 		
 		
-	public static void receiver(String[] json) throws Exception {	
+	/**
+ * Receiver.
+ *
+ * @param json the json
+ * @throws Exception the exception
+ */
+public static void receiver(String[] json) throws Exception {	
 		for (int i = 0; i < json.length-1; i++) {
 			Log.i("Json", "Json.receiver(json[i]): " + json[i]);
 			process(json[i]);			
 		}
 	}
-	
+
+public static void reestablishConnection(String[] json) throws Exception {	
+	for (int i = 0; i < json.length-1; i++) {
+		Log.i("Json", "Json.receiver(json[i]): " + json[i]);
+		reProcess(json[i]);			
+	}
+}
+	/**
+	 * Process.
+	 *
+	 * @param json the json
+	 * @throws Exception the exception
+	 */
+	public static void reProcess(String json) throws Exception {		
+		switch (jSonObject.getInt("opetationType")) {
+		case 0:
+			// Connect
+			Log.i("Json", "Json.process(): reiverType = connect()");
+			processConnect(jSonObject);
+			break;
+			
+		case 1:
+			// Disconnect
+			if (jSonObject.getString("senderId").equals(Manager.getCurrentUserIP())) 
+				break;
+			Log.i("Json", "Json.process(): reiverType = disconnect()");
+			processDisconnect(jSonObject);
+			break;
+
+		case 2:
+			// 
+			Log.i("Json", "Json.process(): reiverType = processUpdateUserInformation()");
+			processUpdateUserInformation(jSonObject);
+			break;
+			
+		case 3:
+			// 
+			Log.i("Json", "Json.process(): reiverType = processCreateCommunity()");
+			processCreateCommunity(jSonObject);
+			break;
+			
+		case 4:
+			// 
+			Log.i("Json", "Json.process(): reiverType = processJoinCommunity()");
+			processJoinCommunity(jSonObject);
+			break;
+			
+		case 5:
+			// 
+			Log.i("Json", "Json.process(): reiverType = processLeaveCommunity()");
+			processLeaveCommunity(jSonObject);
+			break;
+			
+		case 6:
+			// 
+			Log.i("Json", "Json.process(): reiverType = processCommunityChat()");
+			processCommunityChat(jSonObject);
+			break;
+			
+		case 7:
+			// 
+			Log.i("Json", "Json.process(): reiverType = processPrivateChat()");
+			processPrivateChat(jSonObject);
+			break;
+		
+		case 8:
+			// 
+			Log.i("Json", "Json.process(): reiverType = processfriendRequest()");
+			processfriendRequest(jSonObject);
+			break;
+		
+		case 9:
+			// 
+			Log.i("Json", "Json.process(): reiverType = processfriendRequestResponse()");
+			processfriendRequestResponse(jSonObject);
+			break;
+		
+		case 10:
+			// 
+			Log.i("Json", "Json.process(): reiverType = processDeleteFriend()");
+				processDeleteFriend(jSonObject);
+			break;
+			
+		case 11:
+			// 
+			Log.i("Json", "Json.process(): reiverType = processUserData()");
+				processUserData(jSonObject);
+			break;
+			
+			default:
+				break;
+		}	
+		
+		
+// ********************************************************************************************************
+
+	}
 	
 	public static void process(String json) throws Exception {		
 		Log.i("Json", "Json.process(String json): OK");
@@ -415,8 +595,7 @@ public class Json {
 
 		if (jSonObject.getString("senderId").equals(Manager.getCurrentUserIP())) {
 			return;
-		}
-		else if(jSonObject.getInt("receiverType")==1){
+		}else if(jSonObject.getInt("receiverType")==1){
 			int exist = 0;
 			for (int i = 0; i < Manager.getCommunities().size(); i++) {
 				if (Manager.getCommunities().get(i).getId().equals(jSonObject.getString("receiver"))) {
@@ -512,20 +691,14 @@ public class Json {
 			default:
 				break;
 		}
+		}
 
-		
-		
-		
-		
-		
-		
-		
-		
-		
-// ********************************************************************************************************
-
-	}
-
+	/**
+	 * Process connect.
+	 *
+	 * @param jSonObject the j son object
+	 * @throws Exception the exception
+	 */
 	private static void processConnect(JSONObject jSonObject) throws Exception{
 
 		Log.i("Json", "Json.processConnect(): ok");
@@ -553,6 +726,12 @@ public class Json {
 
 	}	
 	
+	/**
+	 * Process disconnect.
+	 *
+	 * @param jSonObject the j son object
+	 * @throws Exception the exception
+	 */
 	private static void processDisconnect(JSONObject jSonObject) throws Exception{
 		Log.i("Json", "Entro1");
 		
@@ -589,6 +768,12 @@ public class Json {
 	}
 		
 	
+	/**
+	 * Process update user information.
+	 *
+	 * @param jSonObject the j son object
+	 * @throws Exception the exception
+	 */
 	public static void processUpdateUserInformation(JSONObject jSonObject) throws Exception {			
 
 		JSONObject updateUserJson = new JSONObject(jSonObject.get("userData").toString());
@@ -614,6 +799,12 @@ public class Json {
 	}	
 	
 	
+	/**
+	 * Process create community.
+	 *
+	 * @param jSonObject the j son object
+	 * @throws Exception the exception
+	 */
 	public static void processCreateCommunity(JSONObject jSonObject) throws Exception{
 
 		String sender = jSonObject.getString("senderId");
@@ -622,11 +813,11 @@ public class Json {
 		JSONArray communityArray = new JSONArray(communityData.getString("allCommunitiesArray").toString());
 		JSONObject community = new JSONObject(communityArray.get(0).toString());
 
-		for (int i = 0; i < Manager.getCommunities().size(); i++) {
-			if (Manager.getCommunities().get(i).getCommunityName().equals(community.getString("name"))) {
-				return;
-			}
-		}
+//		for (int i = 0; i < Manager.getCommunities().size(); i++) {
+//			if (Manager.getCommunities().get(i).getCommunityName().equals(community.getString("name"))) {
+//				return;
+//			}
+//		}
 
 		Community newCommunity = new Community(community.getString("name"),
 				community.getString("description"),
@@ -650,8 +841,8 @@ public class Json {
 				}
 			}
 		}	
-		
-		Manager.getCommunities().add(newCommunity);
+		newCommunity.lastUpdatedTime=Long.parseLong(jSonObject.getString("lastupdate"));
+		Manager.addCommunity(newCommunity);
 		Activity act1 = (Activity) Manager.getCurrentActivity();
 		act1.clearWallpaper();
 
@@ -679,6 +870,12 @@ public class Json {
 	}
 	
 
+	/**
+	 * Process join community.
+	 *
+	 * @param jSonObject the j son object
+	 * @throws Exception the exception
+	 */
 	public static void processJoinCommunity(JSONObject jSonObject) throws Exception{
 	
 	JSONObject joinCommunityJson = new JSONObject(jSonObject.get("communitiesData").toString());
@@ -706,6 +903,12 @@ public class Json {
 	}
 		
 
+	/**
+	 * Process leave community.
+	 *
+	 * @param jSonObject the j son object
+	 * @throws Exception the exception
+	 */
 	public static void processLeaveCommunity(JSONObject jSonObject) throws Exception{
 
 	JSONObject leaveCommunityJson = new JSONObject(jSonObject.get("communitiesData").toString());
@@ -734,6 +937,12 @@ public class Json {
 	
 	
 	
+	/**
+	 * Process community chat.
+	 *
+	 * @param jSonObject the j son object
+	 * @throws Exception the exception
+	 */
 	public static void processCommunityChat(JSONObject jSonObject) throws Exception{
 
 		int community = 0;
@@ -755,7 +964,7 @@ public class Json {
         String dt;
         Date cal=Calendar.getInstance().getTime();
         dt=cal.toLocaleString();  
-		SmsChat sms = new SmsChat(Manager.getAllUsers().get(user).getImage(), dt, Manager.getAllUsers().get(user).getName(), jSonObject.getString("chatData"));
+		ChatMsg sms = new ChatMsg(Manager.getAllUsers().get(user).getImage(), dt, Manager.getAllUsers().get(user).getName(), jSonObject.getString("chatData"));
 		Manager.getCommunities().get(community).getChat().addSms(sms);
 		
 		if (!(Manager.getNameCurrentActivity().equals("ComunityChatActivity"))) {
@@ -766,6 +975,12 @@ public class Json {
 		Log.i("Json", "processCommunityChat(): ok");	
 	}
 
+	/**
+	 * Process private chat.
+	 *
+	 * @param jSonObject the j son object
+	 * @throws Exception the exception
+	 */
 	public static void processPrivateChat(JSONObject jSonObject) throws Exception{
 
 		int user = 0;		
@@ -779,7 +994,7 @@ public class Json {
         String dt;
         Date cal=Calendar.getInstance().getTime();
         dt=cal.toLocaleString();  
-		SmsChat sms = new SmsChat(Manager.getAllUsers().get(user).getImage(), dt, Manager.getAllUsers().get(user).getName(), jSonObject.getString("chatData"));
+		ChatMsg sms = new ChatMsg(Manager.getAllUsers().get(user).getImage(), dt, Manager.getAllUsers().get(user).getName(), jSonObject.getString("chatData"));
 		Manager.getAllUsers().get(user).getChat().addSms(sms);
 		
 		if (!(Manager.getNameCurrentActivity().equals("UserChatActivity"))) {
@@ -791,6 +1006,12 @@ public class Json {
 		
 	}
 	
+	/**
+	 * Processfriend request.
+	 *
+	 * @param jSonObject the j son object
+	 * @throws Exception the exception
+	 */
 	public static void processfriendRequest(JSONObject jSonObject) throws Exception{
 
 		Manager.setIntValue(0);
@@ -810,6 +1031,12 @@ public class Json {
 		
 	}
 	
+	/**
+	 * Processfriend request response.
+	 *
+	 * @param jSonObject the j son object
+	 * @throws Exception the exception
+	 */
 	public static void processfriendRequestResponse(JSONObject jSonObject) throws Exception{
 
 		JSONObject userData = new JSONObject(jSonObject.get("userData").toString());
@@ -831,11 +1058,23 @@ public class Json {
 		
 	}
 	
+	/**
+	 * Process delete friend.
+	 *
+	 * @param jSonObject the j son object
+	 * @throws Exception the exception
+	 */
 	private static void processDeleteFriend(JSONObject jSonObject) throws Exception{
 
 	}
 	
 	
+	/**
+	 * Process user data.
+	 *
+	 * @param jSonObject the j son object
+	 * @throws Exception the exception
+	 */
 	private static void processUserData(JSONObject jSonObject) throws Exception{
 		JSONObject userData = new JSONObject(jSonObject.get("userData").toString());
 	
@@ -867,16 +1106,16 @@ public class Json {
 			JSONObject community = new JSONObject(communityArray.get(k).toString());
 
 			// existe la comunidad ???
-			int i;
-			for (i = 0; i < Manager.getCommunities().size(); i++) {
-				if (Manager.getCommunities().get(i).getCommunityName().equals(community.getString("name"))) {
-					i = Manager.getCommunities().size() + 10;
-				}
-			}
-
-			if (i == Manager.getCommunities().size() + 10) {
-				continue;
-			}
+//			int i;
+//			for (i = 0; i < Manager.getCommunities().size(); i++) {
+//				if (Manager.getCommunities().get(i).getCommunityName().equals(community.getString("name"))) {
+//					i = Manager.getCommunities().size() + 10;
+//				}
+//			}
+//
+//			if (i == Manager.getCommunities().size() + 10) {
+//				continue;
+//			}
 			
 			Community newCommunity = new Community(community.getString("name"),
 					community.getString("description"),
@@ -886,7 +1125,8 @@ public class Json {
 					community.getString("dateOfCreation"),
 					community.getInt("image"),community.getString("recommend"));
 			newCommunity.setId(community.getString("id"));
-			Manager.getCommunities().add(newCommunity);
+			newCommunity.lastUpdatedTime=Long.parseLong(jSonObject.getString("lastupdate"));
+			Manager.addCommunity(newCommunity);
 		} // end for k
 		
 		for (int k = 0; k < communityArray.length(); k++) {

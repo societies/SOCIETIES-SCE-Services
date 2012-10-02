@@ -51,7 +51,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 // ----------------------------------------------------------------------
-
+ 
 @SuppressLint("NewApi")
 public class CameraPreview extends Activity {
 
@@ -75,6 +75,7 @@ public class CameraPreview extends Activity {
 	
 	private LinkedList<JSONObject> messagesInClient = new LinkedList<JSONObject>();
 	private HashSet<Integer> messageIdsInClient = new HashSet<Integer>();
+	private HashSet<String> messagesZonesIds = new HashSet<String>();
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -85,6 +86,8 @@ public class CameraPreview extends Activity {
 		//getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
 		getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 		setContentView(R.layout.main);
+		
+		messagesZonesIds = new HashSet<String>();
 		
 		initialUserPrefVars();
 		
@@ -361,6 +364,41 @@ public class CameraPreview extends Activity {
 						JSONObject lastMsgObject = null;
 						int currentMsgId;
 						synchronized (messagesInClient) {
+							boolean resetFlag = false;
+							HashSet<String>currZonesIdsSet = new HashSet<String>();
+							
+							if (result.length() > 0){
+								JSONArray retZoneIDs = ((JSONObject)result.get(0)).getJSONArray("zoneId");
+								if (retZoneIDs != null){
+									for (int i=0; i < retZoneIDs.length(); i++){
+										currZonesIdsSet.add(retZoneIDs.getString(i));
+									}
+								}
+								
+								for (String zoneId : currZonesIdsSet){
+									if (!messagesZonesIds.contains(zoneId)){
+										resetFlag = true;
+										break;
+									}
+								}
+								
+								for (String zoneId : messagesZonesIds){
+									if (!currZonesIdsSet.contains(zoneId)){
+										resetFlag = true;
+										break;
+									}
+								}
+								
+								if (resetFlag){
+									messagesInClient.clear();
+									messageIdsInClient.clear();
+									messagesZonesIds.clear();
+									messagesZonesIds.addAll(currZonesIdsSet);
+								}
+								
+							}
+							
+							
 							for (int i=0; i < result.length(); i++){
 								lastMsgObject = (JSONObject) result.get(i);
 								currentMsgId = lastMsgObject.getInt("messageId");
@@ -369,8 +407,10 @@ public class CameraPreview extends Activity {
 									messageIdsInClient.add(currentMsgId);
 								}
 							}
+							displayText();
+							lastProcessedMsgId = 0;
 						}
-						displayText();
+						
 					}else if (error != null){
 						Toast.makeText(getBaseContext(), "connection to server was lost", Toast.LENGTH_SHORT).show();
 						Log.e("error", "showing error msg - getMessages - onPostExecute ",error);

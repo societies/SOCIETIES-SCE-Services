@@ -85,7 +85,10 @@ public class VGProxy {
 	/** The logging facility. */
 	private static final Logger LOG = LoggerFactory.getLogger(VGProxy.class);
 	
-	//http://ta-proj02:9082/VG4SWeb/vg/message
+	String SERVER_URL = "http://ta-proj02:9082/VG4SWeb/vg/message";
+	String MOCK_ENTITY = "";
+	boolean MOCK_ENTITY_ACTIVE = false;
+	
 	/*
 	 * {"userId" : "unknown7",  "cis": "111", "msg": "GuyGuyGuy", "style" : "", "zoneId":"1","messageId":"5","ts":null}
 	 * 
@@ -101,12 +104,11 @@ public class VGProxy {
 	@Autowired private ICisManager cisManager;
 	@Autowired private ICSSLocalManager cssManager;
 	@Autowired private ICommManager commManager;
+	@Autowired private SocietiesRegistryBean societiesRegistryBean;
 	
 	public VGProxy(){
 		LOG.info(LOG_PREFIX + "Ctor");
 	}
-	private String serverURL;
-	
 	
 	private List<ICis> fillCisObjectforTesting(){
 		LOG.debug("Start method 'fillCisObjectforTesting'");
@@ -222,7 +224,7 @@ public class VGProxy {
 					jsonObject.put("style", form.getStyle());
 					
 					String postedMsg = form.getMsg();
-					postedMsg= postedMsg.replace("\n", "");
+					postedMsg= postedMsg.replace("\n", " ");
 					jsonObject.put("msg", postedMsg);
 					jsonMsg = jsonObject.toString();
 					
@@ -304,8 +306,13 @@ public class VGProxy {
 			try{
 				String jid = commManager.getIdManager().getThisNetworkNode().getJid();
 				
-				userDetailsObject.put("messages", jsonArray);			
-				userDetailsObject.put("userId",jid);
+				userDetailsObject.put("messages", jsonArray);
+				
+				if (societiesRegistryBean.isMockEntityActive()){
+					userDetailsObject.put("userId",societiesRegistryBean.getMockEntity());
+				}else{
+					userDetailsObject.put("userId",jid);
+				}
 				
 				LOG.debug(LOG_PREFIX+ " \t User details Json object "+userDetailsObject.toString());
 			}catch (JSONException e) {
@@ -330,7 +337,7 @@ public class VGProxy {
 		String responseString="";
 		int statusCode;
 		try {
-			HttpPost httpPostRequest = new HttpPost("http://ta-proj02:9082/VG4SWeb/vg/message");
+			HttpPost httpPostRequest = new HttpPost(societiesRegistryBean.getServerURL());
 			
 			StringEntity entity = new StringEntity(jsonMsg, HTTP.UTF_8);
 			entity.setContentType("application/json");
@@ -387,7 +394,7 @@ public class VGProxy {
 		String url = "";
 		try {
 			
-			url =  "http://ta-proj02:9082/VG4SWeb/vg/message/";
+			url =  societiesRegistryBean.getServerURL() + "/";
 			String cisParam = URLEncoder.encode(cis, "UTF-8").replace("+", "%20");
 			String userIdParam = URLEncoder.encode(userId, "UTF-8").replace("+", "%20");
 			url = url + userIdParam+"/"+ cisParam+ "/"+number;
@@ -419,12 +426,22 @@ public class VGProxy {
 	}
 	
 	public void setServerURL(String serverURL) {
-		this.serverURL = serverURL;
+		this.SERVER_URL = serverURL;
 		
 	}
 	
 	public void setCommManager(ICommManager commManager){
 		this.commManager = commManager;
+	}
+
+
+	public SocietiesRegistryBean getSocietiesRegistryBean() {
+		return societiesRegistryBean;
+	}
+
+	@Autowired
+	public void setSocietiesRegistryBean(SocietiesRegistryBean societiesRegistryBean) {
+		this.societiesRegistryBean = societiesRegistryBean;
 	}
 	
 	/*

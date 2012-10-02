@@ -1,3 +1,6 @@
+/*
+ * 
+ */
 package com.asocom.tools;
 
 import java.net.InetAddress;
@@ -10,10 +13,17 @@ import android.content.DialogInterface;
 import com.asocom.activities.R;
 import com.asocom.model.Manager;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class Tools.
+ */
 public class Tools {
 
 	/**
-	 * 
+	 * User image.
+	 *
+	 * @param nbInage the nb inage
+	 * @return the int
 	 */
 	public static int userImage(int nbInage) {
 
@@ -69,6 +79,12 @@ public class Tools {
 
 	}
 
+	/**
+	 * Status image.
+	 *
+	 * @param icon the icon
+	 * @return the int
+	 */
 	public static int statusImage(int icon) {
 
 		switch (icon) {
@@ -85,8 +101,16 @@ public class Tools {
 		}
 	}
 
+	/** The value. */
 	public static boolean value = false;
 
+	/**
+	 * Alert dialog.
+	 *
+	 * @param context the context
+	 * @param titre the titre
+	 * @param setMessage the set message
+	 */
 	public static void alertDialog(Context context, String titre,
 			String setMessage) {
 		new AlertDialog.Builder(context).setTitle(titre).setMessage(setMessage)
@@ -98,6 +122,14 @@ public class Tools {
 		return;
 	}
 
+	/**
+	 * Alert dialog boolean.
+	 *
+	 * @param context the context
+	 * @param titre the titre
+	 * @param setMessage the set message
+	 * @return true, if successful
+	 */
 	public static boolean alertDialogBoolean(Context context, String titre,
 			String setMessage) {
 		new AlertDialog.Builder(context)
@@ -118,6 +150,11 @@ public class Tools {
 		return value;
 	}
 
+	/**
+	 * Gets the local ip address.
+	 *
+	 * @return the local ip address
+	 */
 	public static String getLocalIpAddress() {
 		try {
 			for (Enumeration<NetworkInterface> en = NetworkInterface

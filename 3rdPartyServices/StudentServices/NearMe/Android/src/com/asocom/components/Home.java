@@ -1,3 +1,6 @@
+/*
+ * 
+ */
 package com.asocom.components;
 
 import com.asocom.activities.AllUsers;
@@ -17,6 +20,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
 
+// TODO: Auto-generated Javadoc
 /**
  * Displays a set of six icons which allows users to explore and use all PVC
  * application functions.
@@ -25,34 +29,26 @@ import android.widget.LinearLayout;
  * 
  */
 public class Home extends LinearLayout {
-	/**
-	 * Allows to accede to the friends activity {@link}
-	 */
+	
+	/** Allows to accede to the friends activity {@link}. */
 	private Button friends_btn;
-	/**
-	 * Allows to accede to the allUsers activity {@link}
-	 */
+	
+	/** Allows to accede to the allUsers activity {@link}. */
 	private Button allUsers_btn;
-	/**
-	 * Allows to accede to the communities activity {@link}
-	 */
+	
+	/** Allows to accede to the communities activity {@link}. */
 	private Button communities_btn;
-	/**
-	 * Allows to accede to the profile activity {@link}
-	 */
+	
+	/** Allows to accede to the profile activity {@link}. */
 	private Button profile_btn;
-	/**
-	 * Allows to accede to the myCommunities activity {@link}
-	 */
+	
+	/** Allows to accede to the myCommunities activity {@link}. */
 	private Button my_communities_btn;
-	/**
-	 * Allows to accede to the createCommunity activity {@link}
-	 */
+	
+	/** Allows to accede to the createCommunity activity {@link}. */
 	private Button createCommunity_btn;
 
-	/**
-	 * 
-	 */
+	/** The context. */
 	private Context context;
 
 	/**
@@ -96,9 +92,9 @@ public class Home extends LinearLayout {
 	}
 
 	/**
-	 * 
-	 * 
-	 * @param v
+	 * On click.
+	 *
+	 * @param v the v
 	 */
 	public void onClick(View v) {
 		Intent intent;

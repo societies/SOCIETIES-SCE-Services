@@ -359,13 +359,10 @@ namespace HWUPortal
             else
             {
                 sInfo.serviceType = ServiceType.WEB;
-                this.userSession.addService(sInfo);
-                this.downloadedServices++;
-                if (this.downloadedServices>=this.numOfServices)
-                {
-                    this.gui.Login(this.userSession);
-                    stream.Write(okBytes, 0, okBytes.Length);
-                }
+                this.Completed(this, new AsyncCompletedEventArgs(null,false, sInfo));
+                //this.gui.Login(this.userSession);
+                
+                
             }
             Console.WriteLine(sInfo.ToString());
         }

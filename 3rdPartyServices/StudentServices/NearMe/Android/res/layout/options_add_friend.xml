@@ -27,7 +27,7 @@
 				android:layout_width="wrap_content"
 				android:layout_height="24.0dip"
 				android:layout_marginLeft="2.0dip"
-				android:text="add friend"
+				android:text="Add Friend"
 				android:gravity="center"
 				style="@style/PVC.style_07" />
 			<LinearLayout android:layout_height="fill_parent" android:layout_width="128.0dip"></LinearLayout>

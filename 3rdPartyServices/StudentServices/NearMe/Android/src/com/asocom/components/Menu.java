@@ -1,3 +1,6 @@
+/*
+ * 
+ */
 package com.asocom.components;
 
 import android.app.Activity;
@@ -20,25 +23,49 @@ import com.asocom.tools.Json;
 import com.asocom.tools.Server;
 import com.asocom.tools.Tools;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class Menu.
+ */
 public class Menu extends LinearLayout {
 
+	/** The my_communities. */
 	private Button my_communities;
+	
+	/** The menu_friends. */
 	private Button menu_friends;
+	
+	/** The menu_home. */
 	private Button menu_home;
+	
+	/** The status. */
 	private Button status;
+	
+	/** The context. */
 	private Context context;
+	
+	/** The icon context menu. */
 	private IconContextMenu iconContextMenu;
-	/**
-	 * identificacion del dialogo de imagenes
-	 */
+	
+	/** identificacion del dialogo de imagenes. */
 	private final int CONTEXT_MENU_ID = 7;
 
+	/**
+	 * Instantiates a new menu.
+	 *
+	 * @param context the context
+	 */
 	public Menu(Context context) {
 		super(context);
 		init(context);
 		this.context = context;
 	}
 
+	/**
+	 * Inits the.
+	 *
+	 * @param context the context
+	 */
 	private void init(Context context) {
 		String infService = Context.LAYOUT_INFLATER_SERVICE;
 		LayoutInflater li = (LayoutInflater) getContext().getSystemService(
@@ -99,8 +126,9 @@ public class Menu extends LinearLayout {
 	}
 
 	/**
-	 * 
-	 * @throws Exception
+	 * On click.
+	 *
+	 * @param v the v
 	 */
 	public void onClick(View v) {
 		Intent intent;
@@ -131,10 +159,20 @@ public class Menu extends LinearLayout {
 		}
 	}
 
+	/**
+	 * Gets the icon context menu.
+	 *
+	 * @return the icon context menu
+	 */
 	public IconContextMenu getIconContextMenu() {
 		return iconContextMenu;
 	}
 
+	/**
+	 * Gets the status.
+	 *
+	 * @return the status
+	 */
 	public Button getStatus() {
 		return status;
 	}
