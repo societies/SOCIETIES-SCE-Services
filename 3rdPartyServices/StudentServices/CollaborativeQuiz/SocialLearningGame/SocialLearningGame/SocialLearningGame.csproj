@@ -53,6 +53,7 @@
   <ItemGroup>
     <Reference Include="Coding4Fun.Kinect.Wpf">
       <HintPath>dll\Coding4Fun.Kinect.Wpf.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="Microsoft.Expression.Drawing">
       <HintPath>dll\Microsoft.Expression.Drawing.dll</HintPath>
@@ -63,6 +64,7 @@
     </Reference>
     <Reference Include="Microsoft.Samples.Kinect.WpfViewers">
       <HintPath>dll\Microsoft.Samples.Kinect.WpfViewers.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="Microsoft.Speech, Version=11.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
