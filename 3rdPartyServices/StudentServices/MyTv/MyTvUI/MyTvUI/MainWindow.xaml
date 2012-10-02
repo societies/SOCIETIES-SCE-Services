@@ -47,22 +47,22 @@
         <!-- Hover button rectangles -->
         <Rectangle Canvas.Left="108" Canvas.Top="378" Height="60" Name="channel1Button" Width="60">
             <Rectangle.Fill>
-                <ImageBrush ImageSource="Images/orange-button.png"/>
+                <ImageBrush ImageSource="Images/channel_background.png"/>
             </Rectangle.Fill>
         </Rectangle>
         <Rectangle Canvas.Left="218" Canvas.Top="378" Height="60" Name="channel2Button" Width="60">
             <Rectangle.Fill>
-                <ImageBrush ImageSource="Images/orange-button.png"/>
+                <ImageBrush ImageSource="Images/channel_background.png"/>
             </Rectangle.Fill>
         </Rectangle>
         <Rectangle Canvas.Left="328" Canvas.Top="378" Height="60" Name="channel3Button" Width="60">
             <Rectangle.Fill>
-                <ImageBrush ImageSource="Images/orange-button.png"/>
+                <ImageBrush ImageSource="Images/channel_background.png"/>
             </Rectangle.Fill>
         </Rectangle>
         <Rectangle Canvas.Left="438" Canvas.Top="378" Height="60" Name="channel4Button" Width="60">
             <Rectangle.Fill>
-                <ImageBrush ImageSource="Images/orange-button.png"/>
+                <ImageBrush ImageSource="Images/channel_background.png"/>
             </Rectangle.Fill>
         </Rectangle>
         <Rectangle Canvas.Left="548" Canvas.Top="378" Height="60" Name="offButton" Width="60">
