@@ -35,64 +35,45 @@
 		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd
 		http://www.springframework.org/schema/osgi http://www.springframework.org/schema/osgi/spring-osgi.xsd" >
 
-    <osgi:reference
-        id="ServiceDiscoveryBundle"
-        cardinality="0..1"
-        interface="org.societies.api.internal.servicelifecycle.IServiceDiscovery" />
-
-    <osgi:reference
-        id="ServiceControlBundle"
-        cardinality="0..1"
-        interface="org.societies.api.internal.servicelifecycle.IServiceControl" />
-
-    <osgi:reference
-        id="CssManagementBundle"
-        cardinality="0..1"
-        interface="org.societies.api.internal.css.management.ICSSLocalManager" />
 
     <osgi:reference
         id="CisManagementBundle"
         cardinality="0..1"
         interface="org.societies.api.cis.management.ICisManager" />
 
-    <osgi:reference
-        id="deviceregistryBundle"
-        cardinality="0..1"
-        interface="org.societies.api.internal.css.devicemgmt.IDeviceRegistry" />
-
-    <osgi:reference
-        id="SocialDataBundle"
-        cardinality="0..1"
-        interface="org.societies.api.internal.sns.ISocialData" />
 
     <osgi:reference
         id="commMngrRef"
         cardinality="0..1"
         interface="org.societies.api.comm.xmpp.interfaces.ICommManager" />
 
-    <osgi:reference
-        id="commMngrController"
-        cardinality="0..1"
-        interface="org.societies.api.internal.comm.ICommManagerController" />
 
-    <osgi:reference
-        id="CisDirectoryClientBundle"
-        cardinality="0..1"
-        interface="org.societies.api.cis.directory.ICisDirectoryRemote" />
-
-    <osgi:reference
-        id="PrivacyAssessment"
-        cardinality="0..1"
-        interface="org.societies.api.internal.privacytrust.privacyprotection.model.privacyassessment.IAssessment" />
-
-    <osgi:reference
-        id="privacyPolicyManager"
-        cardinality="0..1"
-        interface="org.societies.api.internal.privacytrust.privacyprotection.IPrivacyPolicyManager" />
-
-    <osgi:reference
+      <osgi:reference
         id="ctxBroker"
-        interface="org.societies.api.internal.context.broker.ICtxBroker" >
+        interface="org.societies.api.context.broker.ICtxBroker" >
     </osgi:reference>
+    
+      <osgi:reference id="servicesRef" 
+          interface="org.societies.api.services.IServices" cardinality="0..1">
+          
+      </osgi:reference>
 
+      <osgi:service ref="ctxBinder" >
+    <osgi:rservice-properties>
+        <entry key="TargetPlatform" value="SOCIETIES" />
+        <entry key="ServiceProvider" value="ICT-SOCIETIES" />
+        <entry key="ServiceMetaModel" value-ref="serMetamodel" />
+        <!-- <entry key="ServiceClient" value="http://societies.local/client.jar" />  -->
+    </osgi:service-properties>
+</osgi:service>
+
+<bean id="serMetamodel" class="org.societies.api.schema.servicelifecycle.model.Service">
+    <property name="authorSignature" value="Haoyi" />
+    <property name="serviceDescription" value="NearMe, proximity service" />
+    <property name="serviceName" value="NearMe" />
+    <property name="serviceType" value="THIRD_PARTY_SERVER" />
+    <!-- <property name="privacyPolicy" value="http://societies.local/local_file" /> -->
+    <property name="serviceCategory" value="Location-Based" />
+</bean>
+      
 </beans>

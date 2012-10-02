@@ -53,7 +53,21 @@
 	</parent>
 
 	<dependencies>
+	    
+	     
 		<dependency>
+			<groupId>org.societies.api.external</groupId>
+			<artifactId>societies-api</artifactId>
+			<scope>provided</scope>
+		</dependency>
+
+	    <dependency>
+			<groupId>org.societies</groupId>
+			<artifactId>common-ext-libs</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		
+<!-- 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>org.springframework.spring-library</artifactId>
 			<type>libd</type>
@@ -66,18 +80,8 @@
 			<version>1.6.2.RELEASE</version>
 			<scope>provided</scope>
 		</dependency>
-		<dependency>
-			<groupId>org.osgi</groupId>
-			<artifactId>org.osgi.compendium</artifactId>
-			<version>4.1.0</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.osgi</groupId>
-			<artifactId>org.osgi.core</artifactId>
-			<version>4.1.0</version>
-			<scope>provided</scope>
-		</dependency>
+
+
 		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>javax.servlet</artifactId>
@@ -95,18 +99,18 @@
 			<artifactId>joda-time</artifactId>
 			<version>1.5.2</version>
 		</dependency>
-		<!-- the following jars should be available in the repository/usr folder -->
+		the following jars should be available in the repository/usr folder
 		<dependency>
 			<groupId>javax.validation</groupId>
 			<artifactId>com.springsource.javax.validation</artifactId>
 			<version>1.0.0.GA</version>
 			<scope>provided</scope>
-		</dependency>
+		</dependency> -->
 		<!-- <dependency> <groupId>org.hibernate</groupId> <artifactId>com.springsource.org.hibernate.validator</artifactId> 
 			<version>4.2.0.Final</version> <scope>provided</scope> </dependency> <dependency> 
 			<groupId>javax.servlet</groupId> <artifactId>jstl</artifactId> <version>1.2</version> 
 			</dependency> -->
-		<dependency>
+<!-- 		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>com.springsource.javax.servlet.jsp.jstl</artifactId>
 			<version>1.2.0.v20110728</version>
@@ -116,67 +120,15 @@
 			<artifactId>org.springframework.osgi.web</artifactId>
 			<version>1.2.1</version>
 		</dependency>
-		<dependency>
-			<groupId>org.societies.comm.xmpp</groupId>
-			<artifactId>XCCommunicationMgr</artifactId>
-			<version>${version.comm}</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.societies.api.external</groupId>
-			<artifactId>societies-api</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.societies.api.internal</groupId>
-			<artifactId>societies-api-internal</artifactId>
-			<scope>provided</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>org.societies.platform</groupId>
-			<artifactId>socialdata</artifactId>
-			<version>${release.version}</version>
-			<scope>provided</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>org.apache.shindig</groupId>
-			<artifactId>shindig-social-api</artifactId>
-			<version>3.0.0-beta4</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.societies.cis</groupId>
-			<artifactId>CisDirectoryClient</artifactId>
-			<version>${release.version}</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.societies</groupId>
-			<artifactId>activityfeed</artifactId>
-			<version>${version.cis}</version>
-			<scope>provided</scope>
-		</dependency>
 
 		<!-- <dependency> <groupId>org.societies.api.schema</groupId> <artifactId>societies-api-schema</artifactId> 
 			<version>${release.version}</version> <scope>provided</scope> </dependency> -->
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-simple</artifactId>
-			<version>${slf4j.version}</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>com.springsource.slf4j.org.apache.commons.logging</artifactId>
-		</dependency>
-		<dependency>
+<!-- 		<dependency>
 			<groupId>org.jfree.chart</groupId>
 			<artifactId>org.jfree.chart-library</artifactId>
 			<type>libd</type>
 			<version>1.0.9</version>
-			<!--scope>provided</scope -->
+			scope>provided</scope
 		</dependency>
 		<dependency>
 			<groupId>org.jfree.chart</groupId>
@@ -199,7 +151,7 @@
 			<version>2.6.4</version>
 			<scope>provided</scope>
 			<exclusions>
-				<!-- StAX is not available on Android -->
+				StAX is not available on Android
 				<exclusion>
 					<artifactId>stax</artifactId>
 					<groupId>stax</groupId>
@@ -208,16 +160,16 @@
 					<artifactId>stax-api</artifactId>
 					<groupId>stax</groupId>
 				</exclusion>
-				<!-- Provided by Android -->
+				Provided by Android
 				<exclusion>
 					<artifactId>xpp3</artifactId>
 					<groupId>xpp3</groupId>
 				</exclusion>
 			</exclusions>
 		</dependency>
-	</dependencies>
+ -->	</dependencies>
 	<build>
-		<finalName>societies-webapp</finalName>
+		<finalName>nearme-webapp</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.felix</groupId>

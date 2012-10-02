@@ -34,7 +34,7 @@ public class CtxBrokerBridge {
 						myServiceID
 								.setIdentifier(new URI(
 										"css://nikosk@societies.org/ContextAware3pService"));
-						serviceIdentity=ContextBinder.getComMgt().getIdManager().fromJid("nikosk@societies.org");
+						serviceIdentity= ContextBinder.getComMgt().getIdManager().getThisNetworkNode();
 					} catch (Exception e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
