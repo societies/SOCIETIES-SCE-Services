@@ -10,12 +10,12 @@
 		is to facilitate integration testing of the bundle outside of an OSGi container -->
 
 
-	<osgi:service ref="MyTv" interface="ac.hw.mytv.MyTvClient" >
+	<osgi:service ref="mytv" interface="ac.hw.mytv.IMyTv">
       <osgi:service-properties>
           <entry key="TargetPlatform" value="SOCIETIES" />
           <entry key="ServiceProvider" value="ICT-SOCIETIES" />
           <entry key="ServiceMetaModel" value-ref="serMetamodel" />
-          <entry key="ServiceClient" value="" />
+          <!-- <entry key="ServiceClient" value="" />  -->
       </osgi:service-properties>
   	</osgi:service>
   	
@@ -24,7 +24,7 @@
      	<property name="serviceDescription" value="MyTv personalised display service" />
      	<property name="serviceName" value="MyTv" />
      	<property name="serviceType" value="THIRD_PARTY_CLIENT" />
-     	<property name="privacyPolicy" value="" />
+<!--      	<property name="privacyPolicy" value="" /> -->
      	<property name="serviceCategory" value="media" />
  	</bean>
 

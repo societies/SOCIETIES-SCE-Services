@@ -52,7 +52,7 @@ import org.societies.api.schema.servicelifecycle.model.ServiceResourceIdentifier
 import org.societies.api.services.IServices;
 import org.societies.api.useragent.monitoring.IUserActionMonitor;
 
-public class MyTvClient extends EventListener implements IDisplayableService, IActionConsumer{
+public class MyTvClient extends EventListener implements IDisplayableService, IActionConsumer, IMyTv{
 
 	SocketClient socketClient;
 	SocketServer socketServer;
