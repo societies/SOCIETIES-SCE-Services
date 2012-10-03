@@ -62,6 +62,9 @@
 		<property name="services" ref="servicesRef" />
 	</bean>
 	<osgi:service ref="ctxBinder">
+	    <osgi:interfaces>
+        <value>org.temp.CISIntegeration.ContextBinderInf</value>
+        </osgi:interfaces>
 		<osgi:service-properties>
 			<entry key="TargetPlatform" value="SOCIETIES" />
 			<entry key="ServiceProvider" value="ICT-SOCIETIES" />

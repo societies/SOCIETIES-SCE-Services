@@ -5,7 +5,7 @@ import org.societies.api.comm.xmpp.interfaces.ICommManager;
 import org.societies.api.context.broker.ICtxBroker;
 import org.societies.api.services.IServices;
 
-public class ContextBinder{
+public class ContextBinder implements ContextBinderInf{
 private static ICisManager cisMgm;
 private static ICtxBroker ctxBrk;
 private static ICommManager comMgt;
