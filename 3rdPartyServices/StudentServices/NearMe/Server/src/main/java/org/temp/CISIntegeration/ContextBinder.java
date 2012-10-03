@@ -39,6 +39,6 @@ public void setDataSource(DataSource source){
 	this.dataSource=source;
 }
 public static DataSource getDataSource(){
-	return this.dataSource;
+	return dataSource;
 }
 }
