@@ -65,7 +65,10 @@
       <HintPath>dll\Microsoft.Expression.Drawing.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="Microsoft.Kinect, Version=1.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
+    <Reference Include="Microsoft.Kinect, Version=1.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\..\..\..\Program Files\Microsoft SDKs\Kinect\v1.5\Assemblies\Microsoft.Kinect.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.Samples.Kinect.WpfViewers, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>dll\Microsoft.Samples.Kinect.WpfViewers.dll</HintPath>
@@ -122,6 +125,7 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <EmbeddedResource Include="dll\Microsoft.Kinect.dll" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
@@ -134,7 +138,12 @@
     <AppDesigner Include="Properties\" />
   </ItemGroup>
   <ItemGroup>
+    <Resource Include="Images\channel_background.png" />
+    <Resource Include="Images\close_button.png" />
     <Resource Include="Images\me.JPG" />
+    <Resource Include="Images\speech-bubble.png" />
+    <Resource Include="Images\volume_down.png" />
+    <Resource Include="Images\volume_up.png" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.0,Profile=Client">
@@ -160,21 +169,7 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Images\off_button.jpg" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Images\channel_background.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Images\volume_down.JPG" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Images\volume_up.JPG" />
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="Images\pointer.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Images\close_button.png" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="dll\Microsoft.Samples.Kinect.WpfViewers.dll" />

@@ -10,12 +10,12 @@
 		is to facilitate integration testing of the bundle outside of an OSGi container -->
 
 
-	<osgi:service ref="mytv" interface="ac.hw.mytv.IMyTv">
+	<osgi:service ref="MyTv" interface="ac.hw.mytv.MyTvServer" >
       <osgi:service-properties>
           <entry key="TargetPlatform" value="SOCIETIES" />
           <entry key="ServiceProvider" value="ICT-SOCIETIES" />
           <entry key="ServiceMetaModel" value-ref="serMetamodel" />
-          <!-- <entry key="ServiceClient" value="" />  -->
+          <entry key="ServiceClient" value="" />
       </osgi:service-properties>
   	</osgi:service>
   	
@@ -23,29 +23,17 @@
      	<property name="authorSignature" value="sgallacher" />
      	<property name="serviceDescription" value="MyTv personalised display service" />
      	<property name="serviceName" value="MyTv" />
-     	<property name="serviceType" value="THIRD_PARTY_CLIENT" />
-<!--      	<property name="privacyPolicy" value="" /> -->
+     	<property name="serviceType" value="THIRD_PARTY_SERVER" />
+     	<property name="privacyPolicy" value="" />
      	<property name="serviceCategory" value="media" />
  	</bean>
 
 	<!-- Import External services -->
-	<!-- uam -->
-	<osgi:reference id="uam" interface="org.societies.api.useragent.monitoring.IUserActionMonitor">
-	</osgi:reference>
-	
-	<osgi:reference id="persoMgr" interface="org.societies.api.personalisation.mgmt.IPersonalisationManager">
-	</osgi:reference>
-	
+	<!-- uam -->	
 	<osgi:reference id="serviceMgmt" interface="org.societies.api.services.IServices">
 	</osgi:reference>
 	
-	<osgi:reference id="eventMgr" interface="org.societies.api.osgi.event.IEventMgr">
-	</osgi:reference>
-	
 	<osgi:reference id="commsMgr" interface="org.societies.api.comm.xmpp.interfaces.ICommManager">
-	</osgi:reference>
-	
-	<osgi:reference id="displayDriver" interface="org.societies.api.css.devicemgmt.display.IDisplayDriver">
 	</osgi:reference>
 	
 </beans>

@@ -21,6 +21,7 @@ using System.Runtime.InteropServices;
 using System.Net;
 using Microsoft.Kinect;
 using System.Collections;
+using System.Net.Sockets;
 
 namespace MyTvUI
 {
@@ -52,9 +53,12 @@ namespace MyTvUI
         const int skeletonCount = 6;
         Skeleton[] allSkeletons = new Skeleton[skeletonCount];
 
-        //Volume variables
-        //int masterVolume;
-        //int muteState;
+        //Channel constants
+        private static String channel0 = "http://www.macs.hw.ac.uk/~ceesmm1/societies/mytv/channels/splashScreen.html";
+        private static String channel1 = "http://www.macs.hw.ac.uk/~ceesmm1/societies/mytv/channels/channel1.html";
+        private static String channel2 = "http://www.macs.hw.ac.uk/~ceesmm1/societies/mytv/channels/channel2.html";
+        private static String channel3 = "http://www.macs.hw.ac.uk/~ceesmm1/societies/mytv/channels/channel3.html";
+        private static String channel4 = "http://www.macs.hw.ac.uk/~ceesmm1/societies/mytv/channels/channel4.html";
 
         //activity feed variables
         //ArrayList activities;
@@ -64,34 +68,42 @@ namespace MyTvUI
         #region window
         public MainWindow()
         {
-            //initialise GUI
-            Console.WriteLine("Initialising GUI");
-            InitializeComponent();
-            channel1HoverRegion.Click += new RoutedEventHandler(channel1HoverRegion_Click);
-            channel2HoverRegion.Click += new RoutedEventHandler(channel2HoverRegion_Click);
-            channel3HoverRegion.Click += new RoutedEventHandler(channel3HoverRegion_Click);
-            channel4HoverRegion.Click += new RoutedEventHandler(channel4HoverRegion_Click);
-            offHoverRegion.Click += new RoutedEventHandler(offHoverRegion_Click);
-            volumeUpHoverRegion.Click += new RoutedEventHandler(volumeUpHoverRegion_Click);
-            volumeDownHoverRegion.Click += new RoutedEventHandler(volumeDownHoverRegion_Click);
-            exitHoverRegion.Click += new RoutedEventHandler(exitHoverRegion_Click);
-            tvBrowser.Navigated += new NavigatedEventHandler(tvBrowser_Navigated);
+            try
+            {
+                //initialise GUI
+                Console.WriteLine("Initialising GUI");
+                InitializeComponent();
+                channel1HoverRegion.Click += new RoutedEventHandler(channel1HoverRegion_Click);
+                channel2HoverRegion.Click += new RoutedEventHandler(channel2HoverRegion_Click);
+                channel3HoverRegion.Click += new RoutedEventHandler(channel3HoverRegion_Click);
+                channel4HoverRegion.Click += new RoutedEventHandler(channel4HoverRegion_Click);
+                offHoverRegion.Click += new RoutedEventHandler(offHoverRegion_Click);
+                volumeUpHoverRegion.Click += new RoutedEventHandler(volumeUpHoverRegion_Click);
+                volumeDownHoverRegion.Click += new RoutedEventHandler(volumeDownHoverRegion_Click);
+                exitHoverRegion.Click += new RoutedEventHandler(exitHoverRegion_Click);
+                tvBrowser.Navigated += new NavigatedEventHandler(tvBrowser_Navigated);
 
-            //initialise volume
+                //initialise socket server to listen for service client connections
+                Console.WriteLine("Initialising SocketServer");
+                initialiseSocketServer();
 
-            //initialise activity feeds
-            ArrayList activities = new ArrayList();
-            listBox1.ItemsSource = activities;
-            ActivityFeedManager afMgr = new ActivityFeedManager(activities);
+                //Connect to service client - on user cloud node
+                Console.WriteLine("Initialising SocketClient");
+                initialiseSocketClient();
 
-            //initialise socket server to listen for service client connections
-            Console.WriteLine("Initialising SocketServer");
-            //initialiseSocketServer();
-            
-            //Connect to service client - on user cloud node
-            Console.WriteLine("Initialising SocketClient");
-            //initialiseSocketClient();
-            
+                //get preferences
+                Console.WriteLine("Initialising preferences");
+                initialisePreferences();
+
+                //initialise activity feeds
+                ArrayList activities = new ArrayList();
+                listBox1.ItemsSource = activities;
+                ActivityFeedManager afMgr = new ActivityFeedManager(activities);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.ToString());
+            }
         }
 
         //when window loaded
@@ -109,10 +121,61 @@ namespace MyTvUI
         }
         #endregion window
 
+        #region preference updates
+        public int setChannel(int channel)
+        {
+            int result;
+            switch (channel)
+            {
+                case 0: 
+                    tvBrowser.Navigate(channel0);
+                    result = 0;
+                    break;
+                case 1: 
+                    tvBrowser.Navigate(channel1);
+                    result = 1;
+                    break;
+                case 2: 
+                    tvBrowser.Navigate(channel2);
+                    result = 2;
+                    break;
+                case 3: 
+                    tvBrowser.Navigate(channel3);
+                    result = 3;
+                    break;
+                case 4: 
+                    tvBrowser.Navigate(channel4);
+                    result = 4;
+                    break;
+                default:
+                    tvBrowser.Navigate(channel0);
+                    result = 0;
+                    break;
+            }
+            return result;
+        }
+
+        public Boolean setMuted(Boolean muted)
+        {
+            Boolean result;
+            if (muted)
+            {
+                //mute volume
+                result = true;
+            }
+            else
+            {
+                //unmute volume
+                result = false;
+            }
+            return result;
+        }
+        #endregion preference updates
+
         #region sockets
         private void initialiseSocketServer()
         {
-            socketServer = new SocketServer();
+            socketServer = new SocketServer(this);
             Thread serverThread = new Thread(new ThreadStart(socketServer.run));
             serverThread.Start();
         }
@@ -125,34 +188,81 @@ namespace MyTvUI
                 userID = socketClient.getUserID();
                 Console.WriteLine("Received user identity: " + userID);
 
-                if (socketClient.connectToServiceClient())
-                {
-                    Console.WriteLine("Connected to service client on user cloud node!");
                     //send handshake message with GUI IP address
-                    IPAddress[] localIPAddresses = Dns.GetHostAddresses(Dns.GetHostName());
-                    String myIP = localIPAddresses[0].ToString();
-                    if (socketClient.sendMessage(
-                        "GUI_STARTED\n" +
-                        myIP))
+                    String myIP = this.getLocalIPAddress();
+                    if (myIP != null)
                     {
-                        Console.WriteLine("Handshake complete");
+                        Console.WriteLine("Starting handshake");
+                        Console.WriteLine("Sending service client my local IP address: " + myIP);
+                        if(socketClient.connect())
+                        {
+                            if (socketClient.sendMessage(
+                            "START_MSG\n" +
+                            "GUI_STARTED\n" +
+                            myIP+"\n" +
+                            "END_MSG\n"))
+                            {
+                                Console.WriteLine("Handshake complete");
+                            }
+                            else
+                            {
+                                Console.WriteLine("Handshake failed");
+                            }
+                        }
+                        else{
+                            Console.WriteLine("Could not connect to service client");
+                        }
                     }
                     else
                     {
-                        Console.WriteLine("Handshake failed");
-                    }
+                        Console.WriteLine("Error - could not get IP address of local machine");
+                    } 
                 }
-                else
-                {
-                    Console.WriteLine("Could not connect to service client on user cloud node");
-                }
-            }
             else
             {
                 Console.WriteLine("Error - could not get session parameters - userID and endpoint");
             }
         }
         #endregion sockets
+
+
+        private void initialisePreferences()
+        {
+            //set channel
+            String channelPref = socketClient.getChannelPreference();
+            if(channelPref.Equals("1"))
+            {
+                tvBrowser.Navigate(channel1);
+            }
+            else if (channelPref.Equals("2"))
+            {
+                tvBrowser.Navigate(channel2);
+            }
+            else if (channelPref.Equals("3"))
+            {
+                tvBrowser.Navigate(channel3);
+            }
+            else if (channelPref.Equals("4"))
+            {
+                tvBrowser.Navigate(channel4);
+            }
+            else  //default channel is 0
+            {
+                tvBrowser.Navigate(channel0);
+            }
+
+            //set muted
+            String mutedPref = socketClient.getMutedPreference();
+            if (mutedPref.Equals("false"))
+            {
+                //unmute tv
+            }
+            else  //default state is muted
+            {
+                //mute tv
+            }
+        }
+
 
         #region kinect
         //listener for kinect sensor change events
@@ -326,39 +436,83 @@ namespace MyTvUI
         //listener for channel1 hover button click events
         void channel1HoverRegion_Click(object sender, RoutedEventArgs e)
         {
-            tvBrowser.Navigate("http://www.macs.hw.ac.uk/~ceesmm1/societies/mytv/channels/channel1.html");
+            tvBrowser.Navigate(channel1);
+            socketClient.sendMessage(
+                "START_MSG\n" +
+                "USER_ACTION\n" +
+                "channel\n" +
+                "1\n" +
+                "END_MSG");
         }
 
         //listener for channel2 hover button click events
         void channel2HoverRegion_Click(object sender, RoutedEventArgs e)
         {
-            tvBrowser.Navigate("http://www.macs.hw.ac.uk/~ceesmm1/societies/mytv/channels/channel2.html");
+            tvBrowser.Navigate(channel2);
+            socketClient.sendMessage(
+                "START_MSG\n" +
+                "USER_ACTION\n" +
+                "channel\n" +
+                "2\n" +
+                "END_MSG");
         }
 
         //listener for channel3 hover button click events
         void channel3HoverRegion_Click(object sender, RoutedEventArgs e)
         {
-            tvBrowser.Navigate("http://www.macs.hw.ac.uk/~ceesmm1/societies/mytv/channels/channel3.html");
+            tvBrowser.Navigate(channel3);
+            socketClient.sendMessage(
+                "START_MSG\n" +
+                "USER_ACTION\n" +
+                "channel\n" +
+                "3\n" +
+                "END_MSG");
         }
 
         void channel4HoverRegion_Click(object sender, RoutedEventArgs e)
         {
-            tvBrowser.Navigate("http://www.macs.hw.ac.uk/~ceesmm1/societies/mytv/channels/channel4.html");
+            tvBrowser.Navigate(channel4);
+            socketClient.sendMessage(
+                "START_MSG\n" +
+                "USER_ACTION\n" +
+                "channel\n" +
+                "4\n" +
+                "END_MSG");
         }
 
         void offHoverRegion_Click(object sender, RoutedEventArgs e)
         {
-            tvBrowser.Navigate("http://www.macs.hw.ac.uk/~ceesmm1/societies/mytv/channels/splashScreen.html");
+            tvBrowser.Navigate(channel0);
+            socketClient.sendMessage(
+                "START_MSG\n" +
+                "USER_ACTION\n" +
+                "channel\n" +
+                "0\n" +
+                "END_MSG");
         }
 
         void volumeDownHoverRegion_Click(object sender, RoutedEventArgs e)
         {
-            //throw new NotImplementedException();
+            //change volume
+
+            socketClient.sendMessage(
+                "START_MSG\n" +
+                "USER_ACTION\n" +
+                "muted\n" +
+                "true\n" +
+                "END_MSG");
         }
 
         void volumeUpHoverRegion_Click(object sender, RoutedEventArgs e)
         {
-            //throw new NotImplementedException();
+            //change volume
+
+            socketClient.sendMessage(
+                "START_MSG\n" +
+                "USER_ACTION\n" +
+                "muted\n" +
+                "false\n" +
+                "END_MSG");
         }
 
         void exitHoverRegion_Click(object sender, RoutedEventArgs e)
@@ -430,6 +584,21 @@ namespace MyTvUI
         {
             [PreserveSig]
             int QueryService([In] ref Guid guidService, [In] ref Guid riid, [MarshalAs(UnmanagedType.IDispatch)] out object ppvObject);
-        }        
+        }  
+      
+        private String getLocalIPAddress()
+        {
+            string localIP = null;
+            IPHostEntry host = Dns.GetHostEntry(Dns.GetHostName());
+            foreach (IPAddress ip in host.AddressList)
+            {
+                if (ip.AddressFamily == AddressFamily.InterNetwork)
+                {
+                    localIP = ip.ToString();
+                    break;
+                }
+            }
+            return localIP;
+        }
     }
 }

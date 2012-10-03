@@ -7,8 +7,27 @@
     
     <Canvas>
         <DockPanel Canvas.Left="692" Canvas.Top="64" Height="485" Name="dockPanel1" Width="274">
-            <Label Content="My Updates" Height="49" Name="label6" Width="221" DockPanel.Dock="Top" FontSize="28" />
-            <ListBox Height="424" Name="listBox1" Width="255" DockPanel.Dock="Bottom" DataContext="{Binding}" FontSize="14" FontWeight="Bold" Foreground="Green" Background="LightGray" ScrollViewer.HorizontalScrollBarVisibility="Hidden" ScrollViewer.VerticalScrollBarVisibility="Hidden"/>
+            <Label Content="My Updates" Height="49" Name="label6" Width="221" DockPanel.Dock="Top" FontSize="28" Foreground="DarkRed"/>
+            <ListBox Height="436" Name="listBox1" Width="255" DockPanel.Dock="Bottom" DataContext="{Binding}" FontSize="12" FontWeight="Bold" Foreground="Black" Background="LightGray" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Hidden">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <DockPanel Name="activities_list">
+                                <Grid DockPanel.Dock="Top">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="35"/>
+                                        <ColumnDefinition Width="5"/>
+                                        <ColumnDefinition Width="205"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="45"/>
+                                    </Grid.RowDefinitions>
+                                    <Image Source="Images/speech-bubble.png" Grid.Column="0" Grid.Row="0" VerticalAlignment="Top"/>
+                                    <TextBlock Text="{Binding}" Grid.Column="2" Grid.Row="0" TextWrapping="WrapWithOverflow" VerticalAlignment="Top"/>
+                                </Grid>
+                        </DockPanel>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
         </DockPanel>
         
         <WebBrowser Canvas.Left="68" Canvas.Top="12" Height="360" Name="tvBrowser" Width="605" Loaded="tvBrowser_WindowLoaded" Navigated="tvBrowser_Navigated" Cursor="None" DataContext="{Binding}" />
@@ -21,8 +40,8 @@
         <Controls:HoverButton Canvas.Left="328" Canvas.Top="378" Name="channel3HoverRegion" Height="60" ImageSize="100" TimeInterval="1500" Width="60" Canvas.ZIndex="1" FontSize="11" />
         <Controls:HoverButton Canvas.Left="438" Canvas.Top="378" Name="channel4HoverRegion" Height="60" ImageSize="100" TimeInterval="1500" Width="60" Canvas.ZIndex="1" />
         <Controls:HoverButton Canvas.Left="548" Canvas.Top="378" Name="offHoverRegion" Height="60" ImageSize="100" TimeInterval="1500" Width="60" Canvas.ZIndex="1" />
-        <Controls:HoverButton Name="volumeUpHoverRegion" Height="60" Width="60" TimeInterval="1500" Canvas.ZIndex="1" Canvas.Left="0" Canvas.Top="121" />
-        <Controls:HoverButton Name="volumeDownHoverRegion" Height="60" Width="60" TimeInterval="1500" Canvas.ZIndex="1" Canvas.Left="0" Canvas.Top="231" />
+        <Controls:HoverButton Name="volumeUpHoverRegion" Height="60" Width="60" TimeInterval="1500" Canvas.ZIndex="1" Canvas.Left="6" Canvas.Top="121" />
+        <Controls:HoverButton Name="volumeDownHoverRegion" Height="60" Width="60" TimeInterval="1500" Canvas.ZIndex="1" Canvas.Left="6" Canvas.Top="231" />
         <Controls:HoverButton Name="exitHoverRegion" Height="60" Width="60" TimeInterval="1500" Canvas.ZIndex="1" Canvas.Left="918" Canvas.Top="0" />
 
         <!-- Hover button rectangles -->
@@ -51,14 +70,14 @@
                 <ImageBrush ImageSource="Images/off_button.jpg"/>
             </Rectangle.Fill>
         </Rectangle>
-        <Rectangle Height="60" Width="60" Name="volumeUp" Canvas.Left="0" Canvas.Top="121">
+        <Rectangle Height="60" Width="60" Name="volumeUp" Canvas.Left="6" Canvas.Top="121">
             <Rectangle.Fill>
-                <ImageBrush ImageSource="Images/volume_up.JPG"/>
+                <ImageBrush ImageSource="Images/volume_up.png"/>
             </Rectangle.Fill>
         </Rectangle>
-        <Rectangle Height="60" Width="60" Name="volumeDown" Canvas.Left="0" Canvas.Top="231">
+        <Rectangle Height="60" Width="60" Name="volumeDown" Canvas.Left="6" Canvas.Top="231">
             <Rectangle.Fill>
-                <ImageBrush ImageSource="Images/volume_down.JPG"/>
+                <ImageBrush ImageSource="Images/volume_down.png"/>
             </Rectangle.Fill>
         </Rectangle>
         <Rectangle Height="60" Width="60" Name="quit" Canvas.Left="918" Canvas.Top="0">
@@ -68,10 +87,10 @@
         </Rectangle>
         
         <!-- Hover button labels -->
-        <Label Canvas.Left="108" Canvas.Top="378" Content="NEWS" Height="60" Name="label1" Width="60" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontSize="16" Foreground="White" />
-        <Label Canvas.Left="218" Canvas.Top="378" Content="SPORT" FontSize="16" Height="60" HorizontalContentAlignment="Center" Name="label2" VerticalContentAlignment="Center" Width="60" Foreground="White" />
-        <Label Canvas.Left="328" Canvas.Top="378" Content="CARTOONS" FontSize="9" Height="60" HorizontalContentAlignment="Center" Name="label3" VerticalContentAlignment="Center" Width="60" Foreground="White" />
-        <Label Canvas.Left="438" Canvas.Top="378" Content="MUSIC" FontSize="16" Height="60" HorizontalContentAlignment="Center" Name="label4" VerticalContentAlignment="Center" Width="60" Foreground="White" />
+        <Label Canvas.Left="108" Canvas.Top="378" Content="NEWS" Height="60" Name="label1" Width="60" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontSize="16" Foreground="DarkRed" />
+        <Label Canvas.Left="218" Canvas.Top="378" Content="SPORT" FontSize="16" Height="60" HorizontalContentAlignment="Center" Name="label2" VerticalContentAlignment="Center" Width="60" Foreground="DarkRed" />
+        <Label Canvas.Left="328" Canvas.Top="378" Content="CARTOONS" FontSize="9" Height="60" HorizontalContentAlignment="Center" Name="label3" VerticalContentAlignment="Center" Width="60" Foreground="DarkRed" />
+        <Label Canvas.Left="438" Canvas.Top="378" Content="MUSIC" FontSize="16" Height="60" HorizontalContentAlignment="Center" Name="label4" VerticalContentAlignment="Center" Width="60" Foreground="DarkRed" />
         <!--Label Canvas.Left="526" Canvas.Top="378" Content="OFF" FontSize="16" Height="60" HorizontalContentAlignment="Center" Name="label5" VerticalContentAlignment="Center" Width="60" /-->
         
         <Ellipse Canvas.Left="936" Canvas.Top="519" Height="25" Name="rightEllipse" Width="25">
@@ -79,21 +98,8 @@
                 <ImageBrush ImageSource="Images/pointer.png"/>
             </Ellipse.Fill>
         </Ellipse>
-        <DockPanel Canvas.Left="12" Canvas.Top="444" Height="104" Name="dockPanel2" Width="661">
+        <DockPanel Canvas.Left="12" Canvas.Top="464" Height="84" Name="dockPanel2" Width="661" Background="LightGray">
             
         </DockPanel>
     </Canvas>
-    
-    <Window.Resources>
-        <DataTemplate x:Key="listBoxTemplate">
-            <StackPanel Margin="3">
-                <DockPanel >
-                    <TextBlock Text="{Binding}" Foreground="Black" Background="LightBlue" FontWeight="Bold" />
-                </DockPanel>
-                <DockPanel >
-                    <TextBlock Text="{Binding}" Foreground ="Black" Background="LightGray" FontWeight="Bold"/> 
-                </DockPanel>
-            </StackPanel>
-        </DataTemplate>
-    </Window.Resources>
 </Window>

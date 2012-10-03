@@ -36,97 +36,209 @@ namespace MyTvUI
         Socket echoSocket;
         String userID;
         String endPoint;
+        Boolean connected;
+
+        public SocketClient()
+        {
+            connected = false;
+        }
 
 
-        public Boolean connectToServiceClient()
+        public Boolean connect()
         {
             IPEndPoint ip = new IPEndPoint(IPAddress.Parse(endPoint), 4321);
             echoSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             try
             {
                 echoSocket.Connect(ip);
+                connected = true;
+                return true;
             }
             catch (SocketException e)
             {
-                Console.WriteLine("Unable to connect to service client on node: "+endPoint);
+                Console.WriteLine("SOCKET_CLIENT: Unable to connect to service client on node: "+endPoint);
                 Console.WriteLine(e.ToString());
-                return false;
             }
-            return true;
+            return false;
+        }
+
+
+        public void disconnect()
+        {
+            if (echoSocket!=null){
+                echoSocket.Shutdown(SocketShutdown.Both);
+                echoSocket.Close();
+                echoSocket = null;
+			} 
+		    connected = false;
         }
 
 
 
         public Boolean sendMessage(String message)
         {
-            if (echoSocket != null)
+            if (connected)
             {
+                Console.WriteLine("SOCKET_CLIENT: Sending message to service client:");
+                Console.WriteLine(message);
+
                 echoSocket.Send(Encoding.ASCII.GetBytes(message));
                 byte[] data = new byte[1024];
                 int receivedDataLength = echoSocket.Receive(data);
                 String response = Encoding.ASCII.GetString(data, 0, receivedDataLength);
-                if (!response.Contains("RECEIVED"))
+                disconnect();
+                Console.WriteLine("SOCKET_CLIENT: received -> " + response);
+                if (response.Contains("RECEIVED"))
+                {
+                    return true;
+                }
+                else
                 {
                     return false;
                 }
             }
             else
             {
-                Console.WriteLine("Error - echoSocket is null");
-                return false;
+                if (connect())
+                {
+                    sendMessage(message);
+                    return true;
+                }
             }
-            return true;
+            return false;
         }
 
 
-
-        public void disconnectFromServiceClient()
+        public String getChannelPreference()
         {
-            if (echoSocket != null)
+            String response = "";
+            if (connected)
             {
-                echoSocket.Shutdown(SocketShutdown.Both);
-                echoSocket.Close();
-                echoSocket = null;
+                Console.WriteLine("SOCKET_CLIENT: Getting channel preference from service client");
+
+                String request = "START_MSG\n" +
+                    "CHANNEL_REQUEST\n" +
+                    "END_MSG";
+                echoSocket.Send(Encoding.ASCII.GetBytes(request));
+                byte[] data = new byte[1024];
+                int receivedDataLength = echoSocket.Receive(data);
+                response = Encoding.ASCII.GetString(data, 0, receivedDataLength);
+                disconnect();
             }
+            else
+            {
+                if (connect())
+                {
+                    response = getChannelPreference();
+                }
+            }
+            return response;
         }
 
-        
 
+        public String getMutedPreference()
+        {
+            String response = "";
+            if (connected)
+            {
+                Console.WriteLine("SOCKET_CLIENT: Getting muted preference from service client");
+
+                String request = "START_MSG\n" +
+                    "MUTED_REQUEST\n" +
+                    "END_MSG";
+                echoSocket.Send(Encoding.ASCII.GetBytes(request));
+                byte[] data = new byte[1024];
+                int receivedDataLength = echoSocket.Receive(data);
+                response = Encoding.ASCII.GetString(data, 0, receivedDataLength);
+                disconnect();
+            }
+            else
+            {
+                if (connect())
+                {
+                    response = getMutedPreference();
+                }
+            }
+            return response;
+        }
+
+
+        #region connection parameters
         public Boolean getSessionParameters()
         {
+            if (retrieveUserID() && retrieveEndPoint())
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+
+        }
+
+        private Boolean retrieveUserID(){
             IPEndPoint ip = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 2114);
             Socket server = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-
             try
             {
                 server.Connect(ip);
             }
             catch (SocketException e)
             {
-                Console.WriteLine("Unable to connect to server.");
+                Console.WriteLine("SOCKET_CLIENT: Unable to connect to server.");
                 Console.WriteLine(e.ToString());
                 return false;
             }
 
             //get current user
-            Console.WriteLine("Retrieving user ID");
+            Console.WriteLine("SOCKET_CLIENT: Retrieving user ID");
             server.Send(Encoding.ASCII.GetBytes("CURRENT_USER"));
             byte[] data = new byte[1024];
-            int receivedDataLength = server.Receive(data);
-            userID = Encoding.ASCII.GetString(data, 0, receivedDataLength);
-            Console.WriteLine("Received user identity from server: " + userID);
-
-            //get current end point
-            Console.WriteLine("Retrieving endpoint of service client");
-            server.Send(Encoding.ASCII.GetBytes("VIRGO_ENDPOINT_IPADDRESS"));
-            data = new byte[1024];
+            int receivedDataLength = 0;
             receivedDataLength = server.Receive(data);
-            endPoint = Encoding.ASCII.GetString(data, 0, receivedDataLength);
-            Console.WriteLine("Received end point of service client: " + endPoint);
+            if (receivedDataLength < 1)
+            {
+                return false;
+            }
+            userID = Encoding.ASCII.GetString(data, 0, receivedDataLength);
+            Console.WriteLine("SOCKET_CLIENT: Received user identity from server: " + userID);
 
             server.Close();
             return true;
         }
+
+        private Boolean retrieveEndPoint(){
+            IPEndPoint ip = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 2114);
+            Socket server = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            try
+            {
+                server.Connect(ip);
+            }
+            catch (SocketException e)
+            {
+                Console.WriteLine("SOCKET_CLIENT: Unable to connect to server.");
+                Console.WriteLine(e.ToString());
+                return false;
+            }
+
+            //get current end point
+            Console.WriteLine("SOCKET_CLIENT: Retrieving endpoint of service client");
+            server.Send(Encoding.ASCII.GetBytes("VIRGO_ENDPOINT_IPADDRESS"));
+            byte[] data = new byte[1024];
+            int receivedDataLength = 0;
+            receivedDataLength = server.Receive(data);
+            if (receivedDataLength < 1)
+            {
+                return false;
+            }
+            endPoint = data[0] + "." + data[1] + "." + data[2] + "." + data[3];
+            Console.WriteLine("SOCKET_CLIENT: Received end point of service client: " + endPoint);
+
+            server.Close();
+            return true;
+        }
+        #endregion connection parameters
 
         public String getUserID()
         {

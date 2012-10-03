@@ -25,70 +25,278 @@
 package ac.hw.mytv;
 
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.societies.api.comm.xmpp.interfaces.ICommManager;
+import org.societies.api.css.devicemgmt.display.IDisplayDriver;
+import org.societies.api.css.devicemgmt.display.IDisplayableService;
 import org.societies.api.identity.IIdentity;
+import org.societies.api.identity.Requestor;
+import org.societies.api.osgi.event.CSSEvent;
+import org.societies.api.osgi.event.CSSEventConstants;
+import org.societies.api.osgi.event.EventListener;
+import org.societies.api.osgi.event.EventTypes;
+import org.societies.api.osgi.event.IEventMgr;
+import org.societies.api.osgi.event.InternalEvent;
+import org.societies.api.personalisation.mgmt.IPersonalisationManager;
+import org.societies.api.personalisation.model.Action;
+import org.societies.api.personalisation.model.IAction;
+import org.societies.api.personalisation.model.IActionConsumer;
 import org.societies.api.schema.servicelifecycle.model.ServiceResourceIdentifier;
+import org.societies.api.services.IServices;
 import org.societies.api.useragent.monitoring.IUserActionMonitor;
 
-public class MyTvClient{ //implements IDisplayableService
+public class MyTvClient extends EventListener implements IDisplayableService, IActionConsumer, IMyTv{
 
 	SocketClient socketClient;
 	SocketServer socketServer;
-	String myIpAddress;
+	CommandHandler commandHandler;
 	IUserActionMonitor uam;
+	IPersonalisationManager persoMgr;
 	IIdentity userID;
-	ServiceResourceIdentifier myServiceId;
+	IServices serviceMgmt;
+	IEventMgr eventMgr;
+	ICommManager commsMgr;
+	IDisplayDriver displayDriver;
+	ServiceResourceIdentifier myServiceID;
+	String myServiceName;
 	String myServiceType;
+	URL myUIExeLocation;
+	List<String> myServiceTypes;
+	Logger LOG = LoggerFactory.getLogger(MyTvClient.class);
+	
+	//personalisable parameters
+	int currentChannel;
+	boolean mutedState;
 
 	public MyTvClient(){
+	}
+
+	public void initialiseMyTvClient(){
+		//set service descriptors
+		myServiceName = "MyTv";
+		myServiceType = "media";
+		myServiceTypes = new ArrayList<String>();
+		myServiceTypes.add(myServiceType);
+
+		//initialise settings
+		currentChannel = 0;
+		mutedState = true;
+
+		//register as a displayable service
+		try {
+			myUIExeLocation = new URL("http://www.macs.hw.ac.uk/~ceesmm1/societies/mytv/MyTvUI.exe");
+			displayDriver.registerDisplayableService(
+					this, 
+					myServiceName, 
+					myUIExeLocation, 
+					true);
+		} catch (MalformedURLException e) {
+			LOG.error("Could not register as displayable service with display driver");
+			e.printStackTrace();
+		}
+
+		//register for portal started events
+		registerForDisplayEvents();
+
 		//start server listening for connections from GUI
-		socketServer = new SocketServer();
+		commandHandler = new CommandHandler();
+		socketServer = new SocketServer(commandHandler);
 		socketServer.start();
 	}
 
-	/*public void serviceStarted(String guiIpAddress){
-		//connect to server - service GUI
-		if(socketClient != null){
-			if (socketClient.isConnected()){
-				socketClient.disconnect();
-			}
-		}
-		socketClient = new SocketClient(guiIpAddress);
-		socketClient.connect();
-
-		//send ipAddress details
-		if(!socketClient.sendMessage
-				("START_MSG\n" +
-						"CLIENT_IP\n"+
-						myIpAddress+"\n"+
-						"END_MSG")){
-			System.out.println("Error - client IP address not sent to GUI");
-		}
-		
-		//send preference update
-		if(!socketClient.sendMessage
-				("START_MSG\n" +
-						"PREF_OUTCOME\n" +
-						"volume = mute\n" +
-						"END_MSG")){
-			System.out.println("Error - could not send preference update to GUI");
-		}
+	/*
+	 * Register for display events from portal
+	 */
+	private void registerForDisplayEvents(){
+		String eventFilter = "(&" + 
+				"(" + CSSEventConstants.EVENT_NAME + "=displayUpdate)" +
+				"(" + CSSEventConstants.EVENT_SOURCE + "=org/societies/css/device)" +
+				")";
+		this.eventMgr.subscribeInternalEvent(this, new String[]{EventTypes.DISPLAY_EVENT}, eventFilter);
+		LOG.debug("Subscribed to "+EventTypes.DISPLAY_EVENT+" events");
 	}
 
+
+
+	/*
+	 * These methods handle events from the Portal
+	 */
+	@Override
+	public void handleExternalEvent(CSSEvent arg0) {
+		LOG.debug("Received external display event from portal");
+	}
+
+	@Override
+	public void handleInternalEvent(InternalEvent arg0) {
+		LOG.debug("Received internal display event from portal");
+
+		//get user ID
+		userID = commsMgr.getIdManager().getThisNetworkNode();
+		LOG.debug("userID = "+userID.toString());
+
+		//get service ID
+		myServiceID = serviceMgmt.getMyServiceId(MyTvClient.class);
+		LOG.debug("client serviceID = "+myServiceID.toString());
+	}
+
+
+
+	/*
+	 * These methods are called by the Portal when my GUI is displayed/hidden
+	 */
+	@Override
+	public void serviceStarted(String guiIpAddress){
+		//service is started
+	}
+
+	@Override
 	public void serviceStopped(String guiIpAddress){
-		//disconnect from server - service GUI
-		if(socketClient != null && socketClient.isConnected()){
-			socketClient.disconnect();
-		}
+		//service is stopped
+	}
+
+
+	/*
+	 * These methods are called by PersonalisationManager and User Agent
+	 * (non-Javadoc)
+	 * @see org.societies.api.personalisation.model.IActionConsumer#getServiceIdentifier()
+	 */
+	@Override
+	public ServiceResourceIdentifier getServiceIdentifier() {
+		return myServiceID;
+	}
+
+	@Override
+	public String getServiceType() {
+		return myServiceType;
+	}
+
+	@Override
+	public List<String> getServiceTypes() {
+		return myServiceTypes;
+	}
+
+	@Override
+	public boolean setIAction(IIdentity identity, IAction action) {
+
+		return false;
+	}
+
+	/*private void setChannel(int channel){
+
+	}
+
+	private void setMuted(String muted){
+
 	}*/
 
 	public void setUam(IUserActionMonitor uam){
 		this.uam = uam;
 	}
 
+	public void setPersoMgr(IPersonalisationManager persoMgr){
+		this.persoMgr = persoMgr;
+	}
+
+	public void setServiceMgmt(IServices serviceMgmt){
+		this.serviceMgmt = serviceMgmt;
+	}
+
+	public void setEventMgr(IEventMgr eventMgr){
+		this.eventMgr = eventMgr;
+	}
+
+	public void setCommsMgr(ICommManager commsMgr){
+		this.commsMgr = commsMgr;
+	}
+
+	public void setDisplayDriver(IDisplayDriver displayDriver){
+		this.displayDriver = displayDriver;
+	}
+
 	public static void main(String[] args) throws IOException{
 		new MyTvClient();
+	}
+
+
+
+
+	/*
+	 * Handle commands from GUI
+	 */
+	public class CommandHandler{
+		public void connectToGUI(String gui_ip){
+			System.out.println("Connecting to service GUI on IP address: "+gui_ip);
+			//disconnect any existing connections
+			if(socketClient != null){
+				if(socketClient.isConnected()){
+					socketClient.disconnect();
+				}
+			}
+			//create new connection
+			socketClient = new SocketClient(gui_ip);
+			if(socketClient.connect()){
+				if(socketClient.sendMessage(
+						"START_MSG\n" +
+						"USER_SESSION_STARTED\n" +
+						"END_MSG")){
+					LOG.debug("Handshake complete:  ServiceClient -> GUI");
+				}else{
+					LOG.error("Handshake failed: ServiceClient -> GUI");
+				}
+			}else{
+				LOG.error("Could not connect to service GUI");
+			}
+		}
+
+		public void disconnectFromGUI(){
+			socketClient.disconnect();
+		}
+
+		public void processUserAction(String parameterName, String value){
+			System.out.println("Processing user action: "+parameterName+" = "+value);
+
+			if(parameterName.equalsIgnoreCase("channel")){
+				currentChannel = new Integer(value).intValue();
+			}else if(parameterName.equalsIgnoreCase("muted")){
+				mutedState = new Boolean(value).booleanValue();
+			}
+
+			//create action object and send to uam
+			IAction action = new Action(myServiceID, myServiceType, parameterName, value);
+			uam.monitor(userID, action);
+		}
+
+		public String getChannelPreference(){
+			String result = "PREFERENCE-ERROR";
+			try {
+				IAction outcome = persoMgr.getPreference((Requestor)userID, userID, myServiceType, myServiceID, "channel").get();
+				result = outcome.getvalue();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			} catch (ExecutionException e) {
+				e.printStackTrace();
+			}
+			return result;
+		}
+
+		public String getMutedPreference(){
+			String result = "PREFERENCE-ERROR";
+			try {
+				IAction action = persoMgr.getPreference((Requestor)userID, userID, myServiceType, myServiceID, "muted").get();
+				result = action.getvalue();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			} catch (ExecutionException e) {
+				e.printStackTrace();
+			}
+			return result;
+		}
 	}
 }

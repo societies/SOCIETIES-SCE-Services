@@ -29,6 +29,14 @@ namespace MyTvUI
             Assembly parentAssembly = Assembly.GetExecutingAssembly();
 
             var name = args.Name.Substring(0, args.Name.IndexOf(',')) + ".dll";
+
+            Console.WriteLine("Searching for dependency: " + name.ToString()+" in ->");
+            string[] resourceList = parentAssembly.GetManifestResourceNames();
+            for (int i = 0; i < resourceList.Length; i++)
+            {
+                Console.WriteLine(resourceList[i]);
+            }
+
             var resourceName = parentAssembly.GetManifestResourceNames()
                 .First(s => s.EndsWith(name));
 
