@@ -40,7 +40,7 @@ public class Interceptor {
 
 				if (content.startsWith("migrate ")) {
 						String[] givenName = content.split(" ");
-						if (givenName.length > 1) {
+						if (givenName.length > 1&&!givenName[1].equals("")) {
 							CISData inst = CISData.getCISData(comm
 									.getString("receiver"));
 							inst.givenName=givenName[1];
