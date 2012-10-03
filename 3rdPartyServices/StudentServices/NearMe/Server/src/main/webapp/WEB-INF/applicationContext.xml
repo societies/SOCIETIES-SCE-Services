@@ -57,8 +57,8 @@
           interface="org.societies.api.services.IServices" cardinality="0..1">
           
       </osgi:reference>
-
-      <osgi:service ref="ctxBinder" >
+<!--  <bean name="ctxBinder" class="org.temp.CISIntegeration.ContextBinder" />-->
+<osgi:service ref="ctxBinder" >
     <osgi:service-properties>
         <entry key="TargetPlatform" value="SOCIETIES" />
         <entry key="ServiceProvider" value="ICT-SOCIETIES" />

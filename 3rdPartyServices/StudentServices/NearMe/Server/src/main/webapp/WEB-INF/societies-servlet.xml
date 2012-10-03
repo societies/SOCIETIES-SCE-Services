@@ -51,7 +51,7 @@
     <!--  ctx:component-scan base-package="org.societies.webapp.controller" /-->
 
     <bean
-        id="ctxBinder"
+        name="ctxBinder"
         class="org.temp.CISIntegeration.ContextBinder" >
 
         <property
