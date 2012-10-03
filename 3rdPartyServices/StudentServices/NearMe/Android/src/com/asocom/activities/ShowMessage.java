@@ -1,3 +1,6 @@
+/*
+ * 
+ */
 package com.asocom.activities;
 
 import java.io.IOException;
@@ -11,33 +14,26 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.*;
 
+// TODO: Auto-generated Javadoc
 /**
- * 
+ * The Class ShowMessage.
  */
 public class ShowMessage extends Activity implements View.OnClickListener {
 
-	/**
-	 * 
-	 */
+	/** The accept. */
 	private Button accept;
 
-	/**
-	 * 
-	 */
+	/** The cancel. */
 	private Button cancel;
 
-	/**
-     * 
-     */
+	/** The text. */
 	private TextView text;
 
-	/**
-     * 
-     */
+	/** The Constant ACTIVITY_NAME. */
 	private static final String ACTIVITY_NAME = "Message";
 
-	/**
-	 * 
+	/* (non-Javadoc)
+	 * @see android.app.Activity#onCreate(android.os.Bundle)
 	 */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -61,9 +57,9 @@ public class ShowMessage extends Activity implements View.OnClickListener {
 						.getCommunityName() + " community ?");
 	}
 
-	/**
-	*
-	*/
+	/* (non-Javadoc)
+	 * @see android.view.View.OnClickListener#onClick(android.view.View)
+	 */
 	public void onClick(View v) {
 
 		switch (v.getId()) {
@@ -89,14 +85,27 @@ public class ShowMessage extends Activity implements View.OnClickListener {
 
 	}
 
+	/**
+	 * Sets the message.
+	 *
+	 * @param text the new message
+	 */
 	public void setMessage(String text) {
 		this.text.setText(text);
 	}
 
+	/* (non-Javadoc)
+	 * @see android.content.ContextWrapper#clearWallpaper()
+	 */
 	public void clearWallpaper() {
 
 	}
 
+	/**
+	 * Gets the activity name.
+	 *
+	 * @return the activity name
+	 */
 	public static String getActivityName() {
 		return ACTIVITY_NAME;
 	}

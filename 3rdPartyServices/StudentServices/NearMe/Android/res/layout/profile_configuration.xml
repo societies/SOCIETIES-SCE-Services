@@ -40,17 +40,16 @@
 			<TextView
 			    android:id="@id/profile_configuration_user_identifier"
 			    android:layout_marginLeft="30dip"
-				android:layout_width="150.0dip"
 				android:layout_height="30.0dip"
-				android:text="useridentifier"
-				style="@style/PVC.style_04"/>
+				android:text=""
+				style="@style/PVC.style_04" android:layout_width="174dp"/>
 					
 		</LinearLayout>
 		
 		<TextView
 			android:layout_width="255.0dip"
 			android:layout_height="30.0dip"
-			android:text="Select profile:                                     "
+			android:text="Select Profile:                                     "
 			android:gravity="center"
 			android:layout_marginTop="1dip"
 			style="@style/PVC.style_04"/>
@@ -87,7 +86,7 @@
 				android:layout_width="133dip"
 				android:layout_height="40dip"
 				android:layout_marginRight="18dip"
-				android:text="Add profile"/>
+				android:text="Add Profile"/>
 			<Button
 				android:id="@id/profile_configuration_cancel"
 				android:layout_width="133dip"

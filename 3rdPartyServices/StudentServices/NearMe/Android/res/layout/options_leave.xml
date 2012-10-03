@@ -27,7 +27,7 @@
 				android:layout_width="wrap_content"
 				android:layout_height="24.0dip"
 				android:layout_marginLeft="2.0dip"
-				android:text="Delete"
+				android:text="Leave"
 				android:gravity="center"
 				style="@style/PVC.style_07" />
 			<LinearLayout 

@@ -1,3 +1,6 @@
+/*
+ * 
+ */
 package com.asocom.activities;
 
 import com.asocom.model.Manager;
@@ -6,49 +9,39 @@ import com.asocom.tools.Server;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.*;
 
+// TODO: Auto-generated Javadoc
 /**
- * 
+ * The Class ProfileConfiguration.
  */
 public class ProfileConfiguration extends Activity implements
 		View.OnClickListener {
 
-	/**
-	 * 
-	 */
+	/** The list. */
 	private Spinner list;
 
-	/**
-	 * 
-	 */
+	/** The add profile. */
 	private Button addProfile;
 
-	/**
-	 * 
-	 */
+	/** The cancel. */
 	private Button cancel;
 
-	/**
-	 * 
-	 */
+	/** The connect. */
 	private Button connect;
 
-	/**
-     * 
-     */
+	/** The useridentifier. */
 	private TextView useridentifier;
 
-	/**
-     * 
-     */
+	/** The Constant ACTIVITY_NAME. */
 	private static final String ACTIVITY_NAME = "ProfileConfiguration";
 
-	/**
-	 * 
+	/* (non-Javadoc)
+	 * @see android.app.Activity#onCreate(android.os.Bundle)
 	 */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -82,9 +75,9 @@ public class ProfileConfiguration extends Activity implements
 
 	}
 
-	/**
-	*
-	*/
+	/* (non-Javadoc)
+	 * @see android.view.View.OnClickListener#onClick(android.view.View)
+	 */
 	public void onClick(View v) {
 
 		switch (v.getId()) {
@@ -100,7 +93,6 @@ public class ProfileConfiguration extends Activity implements
 			break;
 
 		case (R.id.profile_configuration_connect):
-
 			Log.v("select", select);
 			Manager.setCurrentUserProfile(select);
 			Manager.getAllUsers().get(0).setProfile(select);
@@ -114,9 +106,15 @@ public class ProfileConfiguration extends Activity implements
 
 	}
 
+	/** The profiles string. */
 	private String[] profilesString;
+	
+	/** The select. */
 	private String select;
 
+	/**
+	 * Sets the list.
+	 */
 	private void setList() {
 
 		String profileString = (Manager.getDb().getUserAsArray(Manager
@@ -149,10 +147,18 @@ public class ProfileConfiguration extends Activity implements
 
 	}
 
+	/* (non-Javadoc)
+	 * @see android.content.ContextWrapper#clearWallpaper()
+	 */
 	public void clearWallpaper() {
 
 	}
 
+	/**
+	 * Gets the activity name.
+	 *
+	 * @return the activity name
+	 */
 	public static String getActivityName() {
 		return ACTIVITY_NAME;
 	}

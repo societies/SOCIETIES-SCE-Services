@@ -1,3 +1,6 @@
+/*
+ * 
+ */
 package com.asocom.tools;
 
 import java.util.ArrayList;
@@ -9,47 +12,93 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
+// TODO: Auto-generated Javadoc
 /**
- *
+ * The Class DatabaseManager.
  */
 public class DatabaseManager {
 	// the Activity or Application that is creating an object from this class.
+	/** The context. */
 	Context context;
 
 	// a reference to the database used by this application/object
+	/** The db. */
 	private SQLiteDatabase db;
 
 	// These constants are specific to the database. They should be
 	// changed to suit your needs.
+	/** The D b_ name. */
 	private final String DB_NAME = "PVCDataBase";
+	
+	/** The D b_ version. */
 	private final int DB_VERSION = 1;
 
 	// These constants are specific to the database table. They should be
 	// changed to suit your needs.
+	/** The TABL e1_ name. */
 	private final String TABLE1_NAME = "users";
+	
+	/** The TABL e1_ ro w_ id. */
 	private final String TABLE1_ROW_ID = "id";
+	
+	/** The TABL e1_ ro w_ name. */
 	private final String TABLE1_ROW_NAME = "name";
+	
+	/** The TABL e1_ ro w_ description. */
 	private final String TABLE1_ROW_DESCRIPTION = "description";
+	
+	/** The TABL e1_ ro w_ dat e_ o f_ birth. */
 	private final String TABLE1_ROW_DATE_OF_BIRTH = "date_of_birth";
+	
+	/** The TABL e1_ ro w_ gender. */
 	private final String TABLE1_ROW_GENDER = "gender";
+	
+	/** The TABL e1_ ro w_ email. */
 	private final String TABLE1_ROW_EMAIL = "email";
+	
+	/** The TABL e1_ ro w_ password. */
 	private final String TABLE1_ROW_PASSWORD = "password";
+	
+	/** The TABL e1_ ro w_ image. */
 	private final String TABLE1_ROW_IMAGE = "image";
+	
+	/** The TABL e1_ ro w_ profile. */
 	private final String TABLE1_ROW_PROFILE = "profile";
+	
+	/** The NUMBE r_ o f_ field. */
 	public final int NUMBER_OF_FIELD = 8;
 
+	/** The TABL e2_ name. */
 	private final String TABLE2_NAME = "friends";
+	
+	/** The TABL e2_ ro w_ id. */
 	private final String TABLE2_ROW_ID = "id";
+	
+	/** The TABL e2_ ro w_ name. */
 	private final String TABLE2_ROW_NAME = "name";
+	
+	/** The TABL e2_ ro w_ description. */
 	private final String TABLE2_ROW_DESCRIPTION = "description";
+	
+	/** The TABL e2_ ro w_ dat e_ o f_ birth. */
 	private final String TABLE2_ROW_DATE_OF_BIRTH = "date_of_birth";
+	
+	/** The TABL e2_ ro w_ gender. */
 	private final String TABLE2_ROW_GENDER = "gender";
+	
+	/** The TABL e2_ ro w_ email. */
 	private final String TABLE2_ROW_EMAIL = "email";
+	
+	/** The TABL e2_ ro w_ use r_ email. */
 	private final String TABLE2_ROW_USER_EMAIL = "user_email";
+	
+	/** The TABL e2_ ro w_ image. */
 	private final String TABLE2_ROW_IMAGE = "image";
 
 	/**
+	 * Instantiates a new database manager.
 	 *
+	 * @param context the context
 	 */
 	public DatabaseManager(Context context) {
 		this.context = context;
@@ -58,12 +107,23 @@ public class DatabaseManager {
 		this.db = helper.getWritableDatabase();
 	}
 
+	/**
+	 * Closedb.
+	 */
 	public void closedb() {
 		db.close();
 	}
 
 	/**
-	 * 
+	 * Adds the user.
+	 *
+	 * @param name the name
+	 * @param description the description
+	 * @param date_of_birth the date_of_birth
+	 * @param gender the gender
+	 * @param email the email
+	 * @param password the password
+	 * @param image the image
 	 */
 	public void addUser(String name, String description, String date_of_birth,
 			String gender, String email, String password, String image) {
@@ -89,7 +149,15 @@ public class DatabaseManager {
 	}
 
 	/**
+	 * Adds the friend.
 	 *
+	 * @param name the name
+	 * @param description the description
+	 * @param date_of_birth the date_of_birth
+	 * @param gender the gender
+	 * @param email the email
+	 * @param user_email the user_email
+	 * @param image the image
 	 */
 	public void addFriend(String name, String description,
 			String date_of_birth, String gender, String email,
@@ -115,7 +183,9 @@ public class DatabaseManager {
 	}
 
 	/**
-	 * 
+	 * Delete user.
+	 *
+	 * @param email the email
 	 */
 	public void deleteUser(String email) {
 
@@ -133,7 +203,9 @@ public class DatabaseManager {
 	}
 
 	/**
-	 * 
+	 * Delete friend.
+	 *
+	 * @param email the email
 	 */
 	public void deleteFriend(String email) {
 		// ask the database manager to delete the row of given id
@@ -147,7 +219,15 @@ public class DatabaseManager {
 	}
 
 	/**
-	 * 
+	 * Update user.
+	 *
+	 * @param name the name
+	 * @param description the description
+	 * @param date_of_birth the date_of_birth
+	 * @param gender the gender
+	 * @param email the email
+	 * @param password the password
+	 * @param image the image
 	 */
 	public void updateUser(String name, String description,
 			String date_of_birth, String gender, String email, String password,
@@ -173,7 +253,10 @@ public class DatabaseManager {
 	}
 
 	/**
-	 * 
+	 * Adds the profile.
+	 *
+	 * @param email the email
+	 * @param profile the profile
 	 */
 	public void addProfile(String email, String profile) {
 		// this is a key value pair holder used by android's SQLite functions
@@ -191,7 +274,15 @@ public class DatabaseManager {
 	}
 
 	/**
-	 * 
+	 * Update friend.
+	 *
+	 * @param name the name
+	 * @param description the description
+	 * @param date_of_birth the date_of_birth
+	 * @param gender the gender
+	 * @param email the email
+	 * @param user_email the user_email
+	 * @param image the image
 	 */
 	public void updateFriend(String name, String description,
 			String date_of_birth, String gender, String email,
@@ -217,7 +308,10 @@ public class DatabaseManager {
 	}
 
 	/**
-	 * 
+	 * Gets the user as array.
+	 *
+	 * @param email the email
+	 * @return the user as array
 	 */
 	public ArrayList<String> getUserAsArray(String email) {
 
@@ -252,7 +346,10 @@ public class DatabaseManager {
 	}
 
 	/**
-	 * 
+	 * Gets the friend as array.
+	 *
+	 * @param email the email
+	 * @return the friend as array
 	 */
 	public ArrayList<String> getFriendAsArray(String email) {
 
@@ -286,7 +383,9 @@ public class DatabaseManager {
 	}
 
 	/**
-	 * 
+	 * Gets the users.
+	 *
+	 * @return the users
 	 */
 	public ArrayList<String> getUsers() {
 
@@ -321,7 +420,9 @@ public class DatabaseManager {
 	}
 
 	/**
-	 * 
+	 * Gets the friends.
+	 *
+	 * @return the friends
 	 */
 	public ArrayList<String> getFriends() {
 
@@ -355,13 +456,22 @@ public class DatabaseManager {
 	}
 
 	/**
-	 *
+	 * The Class CustomSQLiteOpenHelper.
 	 */
 	private class CustomSQLiteOpenHelper extends SQLiteOpenHelper {
+		
+		/**
+		 * Instantiates a new custom sq lite open helper.
+		 *
+		 * @param context the context
+		 */
 		public CustomSQLiteOpenHelper(Context context) {
 			super(context, DB_NAME, null, DB_VERSION);
 		}
 
+		/* (non-Javadoc)
+		 * @see android.database.sqlite.SQLiteOpenHelper#onCreate(android.database.sqlite.SQLiteDatabase)
+		 */
 		@Override
 		public void onCreate(SQLiteDatabase db) {
 
@@ -395,6 +505,9 @@ public class DatabaseManager {
 			db.execSQL(newTableQueryString2);
 		}
 
+		/* (non-Javadoc)
+		 * @see android.database.sqlite.SQLiteOpenHelper#onUpgrade(android.database.sqlite.SQLiteDatabase, int, int)
+		 */
 		@Override
 		public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 

@@ -1,3 +1,6 @@
+/*
+ * 
+ */
 package com.asocom.activities;
 
 import com.asocom.components.Menu;
@@ -20,24 +23,39 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.widget.*;
 
+// TODO: Auto-generated Javadoc
 /**
- * 
+ * The Class CommunityOptions.
  */
 public class CommunityOptions extends Activity implements View.OnClickListener {
 
+	/** The menu. */
 	private Menu menu;
+	
+	/** The layout. */
 	private LinearLayout layout;
+	
+	/** The options chat. */
 	private OptionsChat optionsChat;
+	
+	/** The options leave. */
 	private OptionsLeave optionsLeave;
+	
+	/** The options members. */
 	private OptionsMembers optionsMembers;
+	
+	/** The options recommend. */
 	private OptionsRecommend optionsRecommend;
+	
+	/** The CONTEX t_ men u_ id. */
 	private final int CONTEXT_MENU_ID = 7;
 
 	//
+	/** The Constant ACTIVITY_NAME. */
 	private static final String ACTIVITY_NAME = "CommunityOptions";
 
-	/**
-	 * 
+	/* (non-Javadoc)
+	 * @see android.app.Activity#onCreate(android.os.Bundle)
 	 */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -83,6 +101,11 @@ public class CommunityOptions extends Activity implements View.OnClickListener {
 
 	}
 
+	/**
+	 * Options_icon.
+	 *
+	 * @param v the v
+	 */
 	public void options_icon(View v) {
 		if (optionsChat.getCode() == v.hashCode()) {
 			Intent in = new Intent(this, ComunityChatActivity.class);
@@ -160,9 +183,9 @@ public class CommunityOptions extends Activity implements View.OnClickListener {
 		}
 	}
 
-	/**
-	* 
-	*/
+	/* (non-Javadoc)
+	 * @see android.view.View.OnClickListener#onClick(android.view.View)
+	 */
 	public void onClick(View v) {
 		if (v.getId() == R.id.options_button_03) {
 			Intent in = new Intent(this, CommunityProfileActivity.class);
@@ -174,7 +197,10 @@ public class CommunityOptions extends Activity implements View.OnClickListener {
 	}
 
 	/**
-	 * create context menu
+	 * create context menu.
+	 *
+	 * @param id the id
+	 * @return the dialog
 	 */
 	@Override
 	protected Dialog onCreateDialog(int id) {
@@ -184,6 +210,9 @@ public class CommunityOptions extends Activity implements View.OnClickListener {
 	}
 
 	//
+	/* (non-Javadoc)
+	 * @see android.app.Activity#onKeyDown(int, android.view.KeyEvent)
+	 */
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		if (keyCode == KeyEvent.KEYCODE_BACK) {
 			Intent homeMenu = new Intent(this, HomeMenu.class);
@@ -193,11 +222,19 @@ public class CommunityOptions extends Activity implements View.OnClickListener {
 		return super.onKeyDown(keyCode, event);
 	}
 
+	/* (non-Javadoc)
+	 * @see android.content.ContextWrapper#clearWallpaper()
+	 */
 	public void clearWallpaper() {
 
 	}
 
 	//
+	/**
+	 * Gets the activity name.
+	 *
+	 * @return the activity name
+	 */
 	public static String getActivityName() {
 		return ACTIVITY_NAME;
 	}

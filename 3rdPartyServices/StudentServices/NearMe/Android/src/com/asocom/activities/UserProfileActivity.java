@@ -1,3 +1,6 @@
+/*
+ * 
+ */
 package com.asocom.activities;
 
 import com.asocom.components.MemberProfile;
@@ -13,16 +16,29 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.widget.LinearLayout;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class UserProfileActivity.
+ */
 public class UserProfileActivity extends Activity implements
 		View.OnClickListener {
 
+	/** The menu. */
 	private Menu menu;
+	
+	/** The mp. */
 	private MemberProfile mp;
+	
+	/** The CONTEX t_ men u_ id. */
 	private final int CONTEXT_MENU_ID = 7;
 
 	//
+	/** The Constant ACTIVITY_NAME. */
 	private static final String ACTIVITY_NAME = "UserProfileActivity";
 
+	/* (non-Javadoc)
+	 * @see android.app.Activity#onCreate(android.os.Bundle)
+	 */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -76,9 +92,9 @@ public class UserProfileActivity extends Activity implements
 
 	}
 
-	/**
-	*
-	*/
+	/* (non-Javadoc)
+	 * @see android.view.View.OnClickListener#onClick(android.view.View)
+	 */
 	public void onClick(View v) {
 		if (v.getId() == R.id.options_button_01) {
 			Intent i = new Intent(this, UserOptions.class);
@@ -90,7 +106,10 @@ public class UserProfileActivity extends Activity implements
 	}
 
 	/**
-	 * create context menu
+	 * create context menu.
+	 *
+	 * @param id the id
+	 * @return the dialog
 	 */
 	@Override
 	protected Dialog onCreateDialog(int id) {
@@ -100,6 +119,9 @@ public class UserProfileActivity extends Activity implements
 	}
 
 	//
+	/* (non-Javadoc)
+	 * @see android.app.Activity#onKeyDown(int, android.view.KeyEvent)
+	 */
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		if (keyCode == KeyEvent.KEYCODE_BACK) {
 			Intent homeMenu = new Intent(this, HomeMenu.class);
@@ -109,11 +131,19 @@ public class UserProfileActivity extends Activity implements
 		return super.onKeyDown(keyCode, event);
 	}
 
+	/* (non-Javadoc)
+	 * @see android.content.ContextWrapper#clearWallpaper()
+	 */
 	public void clearWallpaper() {
 
 	}
 
 	//
+	/**
+	 * Gets the activity name.
+	 *
+	 * @return the activity name
+	 */
 	public static String getActivityName() {
 		return ACTIVITY_NAME;
 	}

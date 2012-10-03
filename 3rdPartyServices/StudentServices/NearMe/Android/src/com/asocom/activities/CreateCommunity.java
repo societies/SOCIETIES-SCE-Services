@@ -1,3 +1,6 @@
+/*
+ * 
+ */
 package com.asocom.activities;
 
 import java.util.Calendar;
@@ -21,31 +24,37 @@ import com.asocom.tools.Json;
 import com.asocom.tools.Server;
 import com.asocom.tools.Tools;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class CreateCommunity.
+ */
 public class CreateCommunity extends Activity implements View.OnClickListener {
 
-	/**
-	 * dialog de imagenes
-	 */
+	/** dialog de imagenes. */
 	private IconContextMenu iconContextMenu = null;
 
-	/**
-	 * identificacion del dialogo de imagenes
-	 */
+	/** identificacion del dialogo de imagenes. */
 	private final int CONTEXT_MENU2_ID = 2;
 
+	/** The CONTEX t_ men u_ id. */
 	private final int CONTEXT_MENU_ID = 7;
 
-	/**
-	 * numero de imagen del usuario
-	 */
+	/** numero de imagen del usuario. */
 	private int image;
 
+	/** The cc. */
 	private CreateCommunityComponent cc;
+	
+	/** The menu. */
 	private Menu menu;
 
 	//
+	/** The Constant ACTIVITY_NAME. */
 	private static final String ACTIVITY_NAME = "CreateCommunity";
 
+	/* (non-Javadoc)
+	 * @see android.app.Activity#onCreate(android.os.Bundle)
+	 */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -74,14 +83,18 @@ public class CreateCommunity extends Activity implements View.OnClickListener {
 	}
 
 	/**
-	 * se llama cuando hace click la imagen para modificarla
+	 * se llama cuando hace click la imagen para modificarla.
+	 *
+	 * @param view the view
 	 */
 	public void communityimage(View view) {
 		initDialog();
 	}
 
 	/**
-	 * eventos de la actividad
+	 * eventos de la actividad.
+	 *
+	 * @param v the v
 	 */
 	public void onClick(View v) {
 
@@ -99,8 +112,8 @@ public class CreateCommunity extends Activity implements View.OnClickListener {
 	}
 
 	/**
-     * 
-     */
+	 * Creates the community.
+	 */
 	private void createCommunity() {
 		if (image == -1) {
 			Toast.makeText(this, "Select one image", 5).show();
@@ -111,7 +124,7 @@ public class CreateCommunity extends Activity implements View.OnClickListener {
 			return;
 		}
 		if (cc.getCommunityDescription().toString().equals(new String(""))) {
-			Toast.makeText(this, "The field description is empty", 5).show();
+			Toast.makeText(this, "The field community message is empty", 5).show();
 			return;
 		}
 		if (cc.getRadioGroup().getCheckedRadioButtonId() == -1) {
@@ -155,14 +168,14 @@ public class CreateCommunity extends Activity implements View.OnClickListener {
 	}
 
 	/**
-	 * cerrar actividad
+	 * cerrar actividad.
 	 */
 	private void exitActivity() {
 		finish();
 	}
 
 	/**
-	 * Inicializar Dialog
+	 * Inicializar Dialog.
 	 */
 	protected void initDialog() {
 
@@ -186,7 +199,10 @@ public class CreateCommunity extends Activity implements View.OnClickListener {
 	}
 
 	/**
-	 * create context menu
+	 * create context menu.
+	 *
+	 * @param id the id
+	 * @return the dialog
 	 */
 	@Override
 	protected Dialog onCreateDialog(int id) {
@@ -201,6 +217,9 @@ public class CreateCommunity extends Activity implements View.OnClickListener {
 	}
 
 	//
+	/* (non-Javadoc)
+	 * @see android.app.Activity#onKeyDown(int, android.view.KeyEvent)
+	 */
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		if (keyCode == KeyEvent.KEYCODE_BACK) {
 			Intent homeMenu = new Intent(this, HomeMenu.class);
@@ -210,11 +229,19 @@ public class CreateCommunity extends Activity implements View.OnClickListener {
 		return super.onKeyDown(keyCode, event);
 	}
 
+	/* (non-Javadoc)
+	 * @see android.content.ContextWrapper#clearWallpaper()
+	 */
 	public void clearWallpaper() {
 
 	}
 
 	//
+	/**
+	 * Gets the activity name.
+	 *
+	 * @return the activity name
+	 */
 	public static String getActivityName() {
 		return ACTIVITY_NAME;
 	}
