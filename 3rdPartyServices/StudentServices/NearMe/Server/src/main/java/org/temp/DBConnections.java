@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
-import com.mysql.jdbc.Driver;
+import org.temp.CISIntegeration.ContextBinder;
 
 public class DBConnections {
 	public String dblink = "jdbc:mysql://localhost:3306/asocom";
@@ -39,7 +39,7 @@ public class DBConnections {
 		try {
 		//	Class.forName("com.mysql.jdbc.Driver");
 		//	Connection temp = DriverManager.getConnection(dblink, dbusr, dbpwd);
-			Connection temp =CtxBinder.getDataSource().getConnection();
+			Connection temp =ContextBinder.getDataSource().getConnection();
 			return temp;
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
