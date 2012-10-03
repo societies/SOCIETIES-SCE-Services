@@ -83,6 +83,13 @@
 
 -->
 		<dependency>
+	      <groupId>mysql</groupId>
+	       <artifactId>mysql-connector-java</artifactId>
+	      <version>5.1.6</version>
+	      <scope>provided</scope>
+        </dependency>
+		
+		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>javax.servlet</artifactId>
 			<version>3.0.0.v201103241009</version>
@@ -106,8 +113,20 @@
 			<version>1.0.0.GA</version>
 			<scope>provided</scope>
 		</dependency> -->
-		<!-- <dependency> <groupId>org.hibernate</groupId> <artifactId>com.springsource.org.hibernate.validator</artifactId> 
-			<version>4.2.0.Final</version> <scope>provided</scope> </dependency> <dependency> 
+		
+		<dependency>
+           <groupId>org.societies</groupId>
+           <artifactId>hibernate_classes</artifactId>
+           <scope>provided</scope>
+        </dependency>
+		
+	<!--  <dependency> 
+		    <groupId>org.hibernate</groupId> 
+		    <artifactId>com.springsource.org.hibernate.validator</artifactId> 
+			<version>4.2.0.Final</version> 
+			<scope>provided</scope> 
+		</dependency> -->	
+			<!--  <dependency> 
 			<groupId>javax.servlet</groupId> <artifactId>jstl</artifactId> <version>1.2</version> 
 			</dependency> -->
 <!-- 		<dependency>

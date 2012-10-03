@@ -50,26 +50,6 @@
 
     <!--  ctx:component-scan base-package="org.societies.webapp.controller" /-->
 
-    <bean
-        id="ctxBinder"
-        class="org.temp.CISIntegeration.ContextBinder" >
-
-        <property
-            name="cisMgm"
-            ref="CisManagementBundle" />
-
-        <property
-            name="ctxBrk"
-            ref="ctxBroker" />
-
-        <property
-            name="comMgt"
-            ref="commMngrRef" />
-        
-        <property
-            name="services"
-            ref="servicesRef"
-        />
-    </bean>
+ 
 
 </beans>

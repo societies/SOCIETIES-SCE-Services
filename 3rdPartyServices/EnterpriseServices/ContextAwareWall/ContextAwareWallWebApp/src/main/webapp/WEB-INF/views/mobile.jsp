@@ -31,7 +31,8 @@ p.msg{font-family: Comic Sans MS,Brush Script MT,cursive;
     
     <script type="text/javascript">
     
-    var msgIds = {}
+    var msgIds = {};
+    var zoneId = '';
     
     // Load the widget parser
 	dojo.require("dojox.mobile.parser");
@@ -145,7 +146,6 @@ var cis = dojo.byId('cisBox').value;
 
  var xhrArgs = {
 
-    <!--url: "getMsg.html?userID="+dojo.byId('userId').value+"&cis=" +cis  + "&number="+lastUpdateMsgId,-->
     url: "getMsg.html",
     handleAs: "text",
     preventCache: true,
@@ -153,7 +153,8 @@ var cis = dojo.byId('cisBox').value;
     content: {
       cis: cis,
       userID: dojo.byId('userId').value,
-      number: lastUpdateMsgId
+      <!-- number: lastUpdateMsgId -->
+      number: 0
     },
     
     
@@ -162,16 +163,21 @@ var cis = dojo.byId('cisBox').value;
 	     messages=dojo.fromJson(data);
 	     mc=dojo.byId('messagesContainer');
 	     
+	     <!-- Test clear -->
+	     mc.innerHTML = ''; 
+	     
+	     
 	     for (msg in messages)	{
 	        
 	        thisMsg = messages[msg];
 	        
-	        
+	        <%--
 	        if (msgIds[thisMsg.messageId] != null && msgIds[thisMsg.messageId] != "" ){
 	        	continue;
 	        }else{
 	        	msgIds[thisMsg.messageId] = thisMsg.messageId;
 	        }
+	        --%>
 	        
 	     	
 	     	var p = document.createElement('p');
