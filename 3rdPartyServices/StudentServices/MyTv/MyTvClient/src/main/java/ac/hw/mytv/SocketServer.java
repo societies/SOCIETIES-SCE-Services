@@ -32,8 +32,6 @@ import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-import org.societies.api.useragent.monitoring.IUserActionMonitor;
-
 import ac.hw.mytv.MyTvClient.CommandHandler;
 
 public class SocketServer extends Thread{
@@ -120,17 +118,17 @@ public class SocketServer extends Thread{
 				String command = splitData[0];
 				if (command.equalsIgnoreCase(GUI_STARTED)){
 					System.out.println(GUI_STARTED+" message received");
-					out.println(RECEIVED);
 					String gui_ip = splitData[1];
 					commandHandler.connectToGUI(gui_ip);
-
+					out.println(RECEIVED);
+					
 				}else if (command.equalsIgnoreCase(USER_ACTION)){
 					System.out.println(USER_ACTION+" message received");
-					out.println(RECEIVED);
 					String parameterName = splitData[1];
 					String value = splitData[2];
 					commandHandler.processUserAction(parameterName, value);
-
+					out.println(RECEIVED);
+					
 				}else if(command.equalsIgnoreCase(CHANNEL_REQUEST)){
 					System.out.println(CHANNEL_REQUEST+" message received");
 					String response = commandHandler.getChannelPreference();
@@ -143,8 +141,8 @@ public class SocketServer extends Thread{
 
 				}else if (command.equalsIgnoreCase(GUI_STOPPED)){
 					System.out.println(GUI_STOPPED+" message received");
-					out.println(RECEIVED);
 					commandHandler.disconnectFromGUI();
+					out.println(RECEIVED);
 				}
 				finalize();
 			}

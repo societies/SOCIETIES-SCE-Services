@@ -70,13 +70,12 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 	URL myUIExeLocation;
 	List<String> myServiceTypes;
 	Logger LOG = LoggerFactory.getLogger(MyTvClient.class);
-
+	
 	//personalisable parameters
 	int currentChannel;
 	boolean mutedState;
 
 	public MyTvClient(){
-		initialiseMyTvClient();  //just for testing!!!
 	}
 
 	public void initialiseMyTvClient(){

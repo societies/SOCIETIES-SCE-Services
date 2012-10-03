@@ -19,6 +19,9 @@ namespace MyTvUI
         int port = 4322;
         private volatile bool listening = true;
 
+        private static String USER_SESSION_STARTED = "USER_SESSION_STARTED";
+        private static String USER_SESSION_ENDED = "USER_SESSION_ENDED";
+
         private MainWindow window;
 
         public SocketServer(MainWindow window)
@@ -48,23 +51,23 @@ namespace MyTvUI
             }
             catch (Exception e)
             {
-                Console.WriteLine("Could not listen on port: " + port);
+                Console.WriteLine("SOCKET_SERVER: Could not listen on port: " + port);
                 Console.WriteLine(e.ToString());
             }
 
 
             try
             {
-                Console.Write("Waiting for connection from service client on port: " + port);
+                Console.Write("SOCKET_SERVER: Waiting for connection from service client on port: " + port);
                 client = server.AcceptTcpClient();
             }
             catch (Exception e)
             {
-                Console.WriteLine("Accept failed: " + port);
+                Console.WriteLine("SOCKET_SERVER: Accept failed: " + port);
                 Console.WriteLine(e.ToString());
             }
 
-            Console.WriteLine("Connected accepted from service client!");
+            Console.WriteLine("SOCKET_SERVER: Connected accepted from service client!");
 
             // Buffer for reading data
             byte[] bytes = new byte[1024];
@@ -79,25 +82,40 @@ namespace MyTvUI
                 {
                     // Translate data bytes to a ASCII string.
                     data = System.Text.Encoding.ASCII.GetString(bytes, 0, i);
-                    Console.WriteLine(String.Format("Received: {0}", data));
+                    Console.WriteLine(String.Format("SOCKET_SERVER: got new input: {0}", data));
 
                     if (data.IndexOf("START_MSG") > -1)
                     {
-                        Console.WriteLine("Processing new message...");
+                        Console.WriteLine("SOCKET_SERVER: Processing new message...");
 
-                        //loop to get rest of message
-                        String message = "";
-                        Boolean reading = false;  //CHANGE!
-                        while (reading)
+                        String[] splitData = data.Split('\n');
+                        String command = splitData[1];
+
+                        if (command.Equals(USER_SESSION_STARTED))
                         {
-
+                            Console.WriteLine("SOCKET_SERVER: "+USER_SESSION_STARTED + " message received");
+                            stream.Write(okBytes, 0, okBytes.Length);
+                        }
+                        else if (command.Equals(USER_SESSION_ENDED))
+                        {
+                            Console.WriteLine("SOCKET_SERVER: "+USER_SESSION_ENDED + "message received");
+                            stream.Write(okBytes, 0, okBytes.Length);
+                        }
+                        else
+                        {
+                            Console.WriteLine("SOCKET_SERVER: Unknown command received from service client");
+                            stream.Write(notOKBytes, 0, notOKBytes.Length);
                         }
                     }
+                    client.Close();
+                    server.Stop();
                 }
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.ToString());
+                client.Close();
+                server.Stop();
             }
         }
                         

@@ -91,7 +91,7 @@ public class SocketClient {
 				String input = in.readLine();
 				disconnect();
 				System.out.println("received: "+input);
-				if (input.contains("OK")){
+				if (input.contains("RECEIVED")){
 					return true;
 				}else{
 					return false;

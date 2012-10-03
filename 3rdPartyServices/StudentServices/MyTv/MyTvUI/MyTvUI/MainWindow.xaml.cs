@@ -68,35 +68,42 @@ namespace MyTvUI
         #region window
         public MainWindow()
         {
-            //initialise GUI
-            Console.WriteLine("Initialising GUI");
-            InitializeComponent();
-            channel1HoverRegion.Click += new RoutedEventHandler(channel1HoverRegion_Click);
-            channel2HoverRegion.Click += new RoutedEventHandler(channel2HoverRegion_Click);
-            channel3HoverRegion.Click += new RoutedEventHandler(channel3HoverRegion_Click);
-            channel4HoverRegion.Click += new RoutedEventHandler(channel4HoverRegion_Click);
-            offHoverRegion.Click += new RoutedEventHandler(offHoverRegion_Click);
-            volumeUpHoverRegion.Click += new RoutedEventHandler(volumeUpHoverRegion_Click);
-            volumeDownHoverRegion.Click += new RoutedEventHandler(volumeDownHoverRegion_Click);
-            exitHoverRegion.Click += new RoutedEventHandler(exitHoverRegion_Click);
-            tvBrowser.Navigated += new NavigatedEventHandler(tvBrowser_Navigated);
+            try
+            {
+                //initialise GUI
+                Console.WriteLine("Initialising GUI");
+                InitializeComponent();
+                channel1HoverRegion.Click += new RoutedEventHandler(channel1HoverRegion_Click);
+                channel2HoverRegion.Click += new RoutedEventHandler(channel2HoverRegion_Click);
+                channel3HoverRegion.Click += new RoutedEventHandler(channel3HoverRegion_Click);
+                channel4HoverRegion.Click += new RoutedEventHandler(channel4HoverRegion_Click);
+                offHoverRegion.Click += new RoutedEventHandler(offHoverRegion_Click);
+                volumeUpHoverRegion.Click += new RoutedEventHandler(volumeUpHoverRegion_Click);
+                volumeDownHoverRegion.Click += new RoutedEventHandler(volumeDownHoverRegion_Click);
+                exitHoverRegion.Click += new RoutedEventHandler(exitHoverRegion_Click);
+                tvBrowser.Navigated += new NavigatedEventHandler(tvBrowser_Navigated);
 
-            //initialise socket server to listen for service client connections
-            Console.WriteLine("Initialising SocketServer");
-            initialiseSocketServer();
-            
-            //Connect to service client - on user cloud node
-            Console.WriteLine("Initialising SocketClient");
-            initialiseSocketClient();
+                //initialise socket server to listen for service client connections
+                Console.WriteLine("Initialising SocketServer");
+                initialiseSocketServer();
 
-            //get preferences
-            Console.WriteLine("Initialising preferences");
-            initialisePreferences();
-            
-            //initialise activity feeds
-            ArrayList activities = new ArrayList();
-            listBox1.ItemsSource = activities;
-            ActivityFeedManager afMgr = new ActivityFeedManager(activities);
+                //Connect to service client - on user cloud node
+                Console.WriteLine("Initialising SocketClient");
+                initialiseSocketClient();
+
+                //get preferences
+                Console.WriteLine("Initialising preferences");
+                initialisePreferences();
+
+                //initialise activity feeds
+                ArrayList activities = new ArrayList();
+                listBox1.ItemsSource = activities;
+                ActivityFeedManager afMgr = new ActivityFeedManager(activities);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.ToString());
+            }
         }
 
         //when window loaded
@@ -181,25 +188,29 @@ namespace MyTvUI
                 userID = socketClient.getUserID();
                 Console.WriteLine("Received user identity: " + userID);
 
-                if (socketClient.connectToServiceClient())
-                {
-                    Console.WriteLine("Connected to service client on user cloud node!");
                     //send handshake message with GUI IP address
                     String myIP = this.getLocalIPAddress();
-                    Console.WriteLine("My local IP address is: " + myIP);
                     if (myIP != null)
                     {
-                        if (socketClient.sendMessage(
+                        Console.WriteLine("Starting handshake");
+                        Console.WriteLine("Sending service client my local IP address: " + myIP);
+                        if(socketClient.connect())
+                        {
+                            if (socketClient.sendMessage(
                             "START_MSG\n" +
                             "GUI_STARTED\n" +
                             myIP+"\n" +
                             "END_MSG\n"))
-                        {
-                            Console.WriteLine("Handshake complete");
+                            {
+                                Console.WriteLine("Handshake complete");
+                            }
+                            else
+                            {
+                                Console.WriteLine("Handshake failed");
+                            }
                         }
-                        else
-                        {
-                            Console.WriteLine("Handshake failed");
+                        else{
+                            Console.WriteLine("Could not connect to service client");
                         }
                     }
                     else
@@ -207,11 +218,6 @@ namespace MyTvUI
                         Console.WriteLine("Error - could not get IP address of local machine");
                     } 
                 }
-                else
-                {
-                    Console.WriteLine("Could not connect to service client on user cloud node");
-                }
-            }
             else
             {
                 Console.WriteLine("Error - could not get session parameters - userID and endpoint");

@@ -36,58 +36,85 @@ namespace MyTvUI
         Socket echoSocket;
         String userID;
         String endPoint;
+        Boolean connected;
+
+        public SocketClient()
+        {
+            connected = false;
+        }
 
 
-        public Boolean connectToServiceClient()
+        public Boolean connect()
         {
             IPEndPoint ip = new IPEndPoint(IPAddress.Parse(endPoint), 4321);
             echoSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             try
             {
                 echoSocket.Connect(ip);
+                connected = true;
+                return true;
             }
             catch (SocketException e)
             {
-                Console.WriteLine("Unable to connect to service client on node: "+endPoint);
+                Console.WriteLine("SOCKET_CLIENT: Unable to connect to service client on node: "+endPoint);
                 Console.WriteLine(e.ToString());
-                return false;
             }
-            return true;
+            return false;
+        }
+
+
+        public void disconnect()
+        {
+            if (echoSocket!=null){
+                echoSocket.Shutdown(SocketShutdown.Both);
+                echoSocket.Close();
+                echoSocket = null;
+			} 
+		    connected = false;
         }
 
 
 
         public Boolean sendMessage(String message)
         {
-            if (echoSocket != null)
+            if (connected)
             {
-                Console.WriteLine("Sending message to service client:");
+                Console.WriteLine("SOCKET_CLIENT: Sending message to service client:");
                 Console.WriteLine(message);
 
                 echoSocket.Send(Encoding.ASCII.GetBytes(message));
                 byte[] data = new byte[1024];
                 int receivedDataLength = echoSocket.Receive(data);
                 String response = Encoding.ASCII.GetString(data, 0, receivedDataLength);
-                if (!response.Contains("RECEIVED"))
+                disconnect();
+                Console.WriteLine("SOCKET_CLIENT: received -> " + response);
+                if (response.Contains("RECEIVED"))
+                {
+                    return true;
+                }
+                else
                 {
                     return false;
                 }
             }
             else
             {
-                Console.WriteLine("Error - echoSocket is null");
-                return false;
+                if (connect())
+                {
+                    sendMessage(message);
+                    return true;
+                }
             }
-            return true;
+            return false;
         }
 
 
         public String getChannelPreference()
         {
             String response = "";
-            if (echoSocket != null)
+            if (connected)
             {
-                Console.WriteLine("Getting channel preference from service client");
+                Console.WriteLine("SOCKET_CLIENT: Getting channel preference from service client");
 
                 String request = "START_MSG\n" +
                     "CHANNEL_REQUEST\n" +
@@ -96,6 +123,14 @@ namespace MyTvUI
                 byte[] data = new byte[1024];
                 int receivedDataLength = echoSocket.Receive(data);
                 response = Encoding.ASCII.GetString(data, 0, receivedDataLength);
+                disconnect();
+            }
+            else
+            {
+                if (connect())
+                {
+                    response = getChannelPreference();
+                }
             }
             return response;
         }
@@ -104,9 +139,9 @@ namespace MyTvUI
         public String getMutedPreference()
         {
             String response = "";
-            if (echoSocket != null)
+            if (connected)
             {
-                Console.WriteLine("Getting muted preference from service client");
+                Console.WriteLine("SOCKET_CLIENT: Getting muted preference from service client");
 
                 String request = "START_MSG\n" +
                     "MUTED_REQUEST\n" +
@@ -115,23 +150,20 @@ namespace MyTvUI
                 byte[] data = new byte[1024];
                 int receivedDataLength = echoSocket.Receive(data);
                 response = Encoding.ASCII.GetString(data, 0, receivedDataLength);
+                disconnect();
+            }
+            else
+            {
+                if (connect())
+                {
+                    response = getMutedPreference();
+                }
             }
             return response;
         }
 
 
-        public void disconnectFromServiceClient()
-        {
-            if (echoSocket != null)
-            {
-                echoSocket.Shutdown(SocketShutdown.Both);
-                echoSocket.Close();
-                echoSocket = null;
-            }
-        }
-
-        
-
+        #region connection parameters
         public Boolean getSessionParameters()
         {
             if (retrieveUserID() && retrieveEndPoint())
@@ -154,13 +186,13 @@ namespace MyTvUI
             }
             catch (SocketException e)
             {
-                Console.WriteLine("Unable to connect to server.");
+                Console.WriteLine("SOCKET_CLIENT: Unable to connect to server.");
                 Console.WriteLine(e.ToString());
                 return false;
             }
 
             //get current user
-            Console.WriteLine("Retrieving user ID");
+            Console.WriteLine("SOCKET_CLIENT: Retrieving user ID");
             server.Send(Encoding.ASCII.GetBytes("CURRENT_USER"));
             byte[] data = new byte[1024];
             int receivedDataLength = 0;
@@ -170,7 +202,7 @@ namespace MyTvUI
                 return false;
             }
             userID = Encoding.ASCII.GetString(data, 0, receivedDataLength);
-            Console.WriteLine("Received user identity from server: " + userID);
+            Console.WriteLine("SOCKET_CLIENT: Received user identity from server: " + userID);
 
             server.Close();
             return true;
@@ -185,13 +217,13 @@ namespace MyTvUI
             }
             catch (SocketException e)
             {
-                Console.WriteLine("Unable to connect to server.");
+                Console.WriteLine("SOCKET_CLIENT: Unable to connect to server.");
                 Console.WriteLine(e.ToString());
                 return false;
             }
 
             //get current end point
-            Console.WriteLine("Retrieving endpoint of service client");
+            Console.WriteLine("SOCKET_CLIENT: Retrieving endpoint of service client");
             server.Send(Encoding.ASCII.GetBytes("VIRGO_ENDPOINT_IPADDRESS"));
             byte[] data = new byte[1024];
             int receivedDataLength = 0;
@@ -201,11 +233,12 @@ namespace MyTvUI
                 return false;
             }
             endPoint = data[0] + "." + data[1] + "." + data[2] + "." + data[3];
-            Console.WriteLine("Received end point of service client: " + endPoint);
+            Console.WriteLine("SOCKET_CLIENT: Received end point of service client: " + endPoint);
 
             server.Close();
             return true;
         }
+        #endregion connection parameters
 
         public String getUserID()
         {
