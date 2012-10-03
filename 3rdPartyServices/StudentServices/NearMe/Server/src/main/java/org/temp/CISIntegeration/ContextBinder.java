@@ -38,7 +38,7 @@ public void setServices(IServices services) {
 public void setDataSource(DataSource source){
 	this.dataSource=source;
 }
-public DataSource getDataSource(){
+public static DataSource getDataSource(){
 	return this.dataSource;
 }
 }
