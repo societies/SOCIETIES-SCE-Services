@@ -39,8 +39,9 @@
 
 	<osgi:reference id="commMngrRef" cardinality="0..1"
 		interface="org.societies.api.comm.xmpp.interfaces.ICommManager" />
-
-
+    <!-- don't remove it -->
+    <osgi:reference id="dataSource" interface="javax.sql.DataSource" />
+	
 	<osgi:reference id="ctxBroker"
 		interface="org.societies.api.context.broker.ICtxBroker">
 	</osgi:reference>

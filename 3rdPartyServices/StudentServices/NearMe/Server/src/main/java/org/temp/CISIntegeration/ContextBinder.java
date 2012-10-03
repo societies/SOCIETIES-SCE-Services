@@ -10,7 +10,7 @@ private static ICisManager cisMgm;
 private static ICtxBroker ctxBrk;
 private static ICommManager comMgt;
 private static IServices services;
-
+private static DataSource dataSource;
 public static ICisManager getCisMgm() {
 	return cisMgm;
 }
@@ -35,5 +35,10 @@ public static IServices getServices() {
 public void setServices(IServices services) {
 	this.services = services;
 }
-
+public void setDataSource(DataSource source){
+	this.dataSource=source;
+}
+public DataSource getDataSource(){
+	return this.dataSource;
+}
 }
