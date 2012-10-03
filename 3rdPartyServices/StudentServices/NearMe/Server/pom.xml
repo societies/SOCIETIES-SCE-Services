@@ -120,12 +120,12 @@
            <scope>provided</scope>
         </dependency>
 		
-		<dependency> 
+	<!--  <dependency> 
 		    <groupId>org.hibernate</groupId> 
 		    <artifactId>com.springsource.org.hibernate.validator</artifactId> 
 			<version>4.2.0.Final</version> 
 			<scope>provided</scope> 
-		</dependency> 
+		</dependency> -->	
 			<!--  <dependency> 
 			<groupId>javax.servlet</groupId> <artifactId>jstl</artifactId> <version>1.2</version> 
 			</dependency> -->

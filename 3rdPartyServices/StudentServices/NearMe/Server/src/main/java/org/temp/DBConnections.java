@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
+import com.mysql.jdbc.Driver;
 
 public class DBConnections {
 	public String dblink = "jdbc:mysql://localhost:3306/asocom";
@@ -36,7 +37,6 @@ public class DBConnections {
 
 	private Connection getConnection() {
 		try {
-		    Class.forName("com.mysql.jdbc.Driver");
 			Connection temp = DriverManager.getConnection(dblink, dbusr, dbpwd);
 			return temp;
 		} catch (Exception e) {
