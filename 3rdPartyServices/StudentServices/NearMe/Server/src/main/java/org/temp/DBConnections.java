@@ -13,7 +13,7 @@ import java.util.concurrent.locks.ReentrantLock;
 public class DBConnections {
 	public String dblink = "jdbc:mysql://localhost:3306/asocom";
 	public String dbusr = "root";
-	public String dbpwd = "xhyccc";
+	public String dbpwd = "123qwe";
 	public static String GET_UPDATE_SQL_BYDATE = "select * from main where Time>=? and SSID=?";
 	public static String GET_USTATUS_SQL = "select * from ustatus where uid=?";
 	public static String GET_LSTATUS_SQL = "select * from lstatus where SSID=?";
