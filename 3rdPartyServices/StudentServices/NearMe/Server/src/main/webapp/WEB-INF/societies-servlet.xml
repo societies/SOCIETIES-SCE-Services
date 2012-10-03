@@ -65,6 +65,11 @@
         <property
             name="comMgt"
             ref="commMngrRef" />
+        
+        <property
+            name="services"
+            ref="servicesRef"
+        />
     </bean>
 
 </beans>

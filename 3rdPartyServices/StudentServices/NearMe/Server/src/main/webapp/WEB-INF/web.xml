@@ -42,14 +42,14 @@
 	under servlet declaration -->
 	
 	<servlet>
-		<servlet-name>WebAPPNearMe</servlet-name>
+		<servlet-name>nearme</servlet-name>
 		<servlet-class>org.temp.MockCIS</servlet-class>
 		<load-on-startup>1</load-on-startup>
 	</servlet>
 
 	<servlet-mapping>
-		<servlet-name>WebAPPNearMe</servlet-name>
-		<url-pattern>MockCIS</url-pattern>
+		<servlet-name>nearme</servlet-name>
+		<url-pattern>/*</url-pattern>
 	</servlet-mapping>
 
 </web-app>

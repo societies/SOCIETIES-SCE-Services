@@ -29,10 +29,10 @@ public class MockCIS extends HttpServlet {
      */
     public MockCIS() {
         // TODO Auto-generated constructor stub
-		ContextBinder cb=new ContextBinder();
-		cb.setCisMgm(new MockCISManager());
-		cb.setComMgt(new MockCommManager());
-		cb.setCtxBrk(new MockCtxBroker());
+	//	ContextBinder cb=new ContextBinder();
+	//	cb.setCisMgm(new MockCISManager());
+	//	cb.setComMgt(new MockCommManager());
+	//	cb.setCtxBrk(new MockCtxBroker());
     }
 
 	/**

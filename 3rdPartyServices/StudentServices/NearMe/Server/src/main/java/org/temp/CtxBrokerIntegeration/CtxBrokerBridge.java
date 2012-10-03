@@ -16,6 +16,7 @@ import org.societies.api.identity.RequestorService;
 
 import org.societies.api.identity.IIdentity;
 import org.societies.api.identity.Requestor;
+import org.societies.api.services.IServices;
 import org.temp.CISIntegeration.ContextBinder;
 
 public class CtxBrokerBridge {
@@ -29,12 +30,9 @@ public class CtxBrokerBridge {
 		if (myServiceID == null) {
 			synchronized (sync) {
 				if (myServiceID == null) {
-					myServiceID = new ServiceResourceIdentifier();
+					myServiceID = ContextBinder.getServices().getMyServiceId(ContextBinder.class);
 					try {
-						myServiceID
-								.setIdentifier(new URI(
-										"css://nikosk@societies.org/ContextAware3pService"));
-						serviceIdentity=ContextBinder.getComMgt().getIdManager().fromJid("nikosk@societies.org");
+						serviceIdentity=ContextBinder.getComMgt().getIdManager().getThisNetworkNode();
 					} catch (Exception e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();

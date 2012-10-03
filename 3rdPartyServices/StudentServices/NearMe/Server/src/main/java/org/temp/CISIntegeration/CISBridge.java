@@ -26,10 +26,13 @@ public class CISBridge {
 				cis.addMember(uid, "participant");
 			cis.addMember(owner, "owner");
 			return true;
-		} catch (InterruptedException | ExecutionException e) {
+		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} catch (CommunicationException e) {
+		}  catch (ExecutionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}catch (CommunicationException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
