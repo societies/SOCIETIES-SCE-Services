@@ -59,7 +59,7 @@
       </osgi:reference>
 
       <osgi:service ref="ctxBinder" >
-    <osgi:rservice-properties>
+    <osgi:service-properties>
         <entry key="TargetPlatform" value="SOCIETIES" />
         <entry key="ServiceProvider" value="ICT-SOCIETIES" />
         <entry key="ServiceMetaModel" value-ref="serMetamodel" />
