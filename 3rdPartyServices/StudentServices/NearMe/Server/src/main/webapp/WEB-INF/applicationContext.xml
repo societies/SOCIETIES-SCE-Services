@@ -61,6 +61,8 @@
 		<property name="comMgt" ref="commMngrRef" />
 
 		<property name="services" ref="servicesRef" />
+		
+		<property name="dataSource" ref="dataSource" />
 	</bean>
 	<osgi:service ref="ctxBinder">
 	    <osgi:interfaces>
