@@ -33,6 +33,7 @@ public class MockCIS extends HttpServlet {
 	//	cb.setCisMgm(new MockCISManager());
 	//	cb.setComMgt(new MockCommManager());
 	//	cb.setCtxBrk(new MockCtxBroker());
+    	Class.forName("com.mysql.jdbc.Driver");
     }
 
 	/**
