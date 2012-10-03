@@ -39,7 +39,7 @@ public class DBConnections {
 		    Class.forName("com.mysql.jdbc.Driver");
 			Connection temp = DriverManager.getConnection(dblink, dbusr, dbpwd);
 			return temp;
-		} catch (SQLException e) {
+		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
