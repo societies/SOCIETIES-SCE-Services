@@ -85,7 +85,8 @@ public class VGProxy {
 	/** The logging facility. */
 	private static final Logger LOG = LoggerFactory.getLogger(VGProxy.class);
 	
-	String SERVER_URL = "http://ta-proj02:9082/VG4SWeb/vg/message";
+	//String SERVER_URL = "http://ta-proj02:9082/VG4SWeb/vg/message";
+	String SERVER_URL = "http://societies.local.macs.hw.ac.uk:9080/VG4SWeb/vg/message";
 	String MOCK_ENTITY = "";
 	boolean MOCK_ENTITY_ACTIVE = false;
 	
@@ -187,8 +188,6 @@ public class VGProxy {
 		
 		Hashtable<String, MembershipCriteria> cisCriteria = new Hashtable<String, MembershipCriteria>();
 		cisManager.createCis(cisName,"",cisCriteria, description);	
-		
-		
 	}
 	
 	
@@ -243,6 +242,8 @@ public class VGProxy {
 		
 		return "";
 	}
+	
+	
 	
 	private boolean validateForm(MessageForm form){
 		boolean flag = true;
@@ -379,6 +380,37 @@ public class VGProxy {
 	}
 	
 	/**
+	 * 
+	 * @param zoneId
+	 * @return
+	 */
+	@RequestMapping(value="/getZoneDetails.html",method = RequestMethod.GET)
+	public @ResponseBody String getZoneDetails(@RequestParam String zoneId){
+		Log.info("Start 'getZoneDetails'");
+		if (zoneId == null || zoneId.trim().length() == 0){
+			Log.warn("in getZoneDetails method; zoneId is null or empty zoneId='"+zoneId+"'");
+			return "";
+		}
+		
+		String url =  societiesRegistryBean.getPzQueriesURL() + "/Admin/zone/"+zoneId;
+		Log.info("creating URL -->  "+url);
+	
+		String response  = perfromGetHttpRequest(url);
+		
+		if (response == null ||  response.length() == 0){
+			Log.warn("no response for '"+url+"' !!" );
+		}else{
+			Log.info("response for '"+url+"' is : "+response);
+		}
+		
+		
+		
+		Log.info("End 'getZoneDetails'");
+		return "";
+	}
+	
+	
+	/**
 	 * Getting messages from the centralized VG server
 	 * @param userId
 	 * @param cis
@@ -386,10 +418,8 @@ public class VGProxy {
 	 * @return
 	 */
 	private String getMessagesInternal(String userId, String cis, String number){
- 		LOG.debug(LOG_PREFIX + " enter postMessageInternal");
-		
+ 		LOG.debug(LOG_PREFIX + " enter getMessagesInternal");
 		String responseString="";
-		int statusCode;
 		
 		String url = "";
 		try {
@@ -398,7 +428,27 @@ public class VGProxy {
 			String cisParam = URLEncoder.encode(cis, "UTF-8").replace("+", "%20");
 			String userIdParam = URLEncoder.encode(userId, "UTF-8").replace("+", "%20");
 			url = url + userIdParam+"/"+ cisParam+ "/"+number;
+			responseString = perfromGetHttpRequest(url);
 			
+	    }catch (Exception e) {
+	    	LOG.error(LOG_PREFIX + " exception in method 'getMessagesInternal' ; generated URL is "+url);
+		}
+		
+		LOG.debug(LOG_PREFIX + " finish postMessageInternal");
+	    return responseString;
+	}
+	
+	
+	
+	/**
+	 * Internal Helper to perform HTTP request
+	 * @param url
+	 * @return
+	 */
+	private String perfromGetHttpRequest(String url){
+		String responseString="";
+		int statusCode;
+		try{
 			LOG.debug("before executing HTTP get- url:\t "+ url);
 			HttpGet httpGetRequest = new HttpGet(url);
 			httpGetRequest.addHeader("accept", "application/json");
@@ -413,12 +463,11 @@ public class VGProxy {
 				}
 			}
 	    	LOG.info(LOG_PREFIX +"after executing rest call to: "+httpGetRequest.getURI()+ "\t status code- "+statusCode+"\t response: "+responseString);
-	    }catch (Exception e) {
-	    	LOG.error(LOG_PREFIX + " exception in method 'getMessagesInternal' ; generated URL is "+url);
+		}catch (Exception e) {
+			LOG.error(LOG_PREFIX + " exception in method 'perfromGetHttpRequest' ; generated URL is "+url);
 		}
 		
-		LOG.debug(LOG_PREFIX + " finish postMessageInternal");
-	    return responseString;
+		return responseString;
 	}
 	
 	public void setICisManager(ICisManager cisManager){

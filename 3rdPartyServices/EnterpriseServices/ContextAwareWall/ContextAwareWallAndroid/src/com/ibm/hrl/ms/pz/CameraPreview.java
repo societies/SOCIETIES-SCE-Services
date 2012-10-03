@@ -26,7 +26,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.annotation.SuppressLint;
+//import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
@@ -49,10 +50,11 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-
+ 
 // ----------------------------------------------------------------------
  
-@SuppressLint("NewApi")
+//@SuppressLint("NewApi")
+@TargetApi(9)
 public class CameraPreview extends Activity {
 
 	CustomCameraView cv;
@@ -132,8 +134,8 @@ public class CameraPreview extends Activity {
 					postMessages(sprayText);
 				}
 				ImageButton sendNow =(ImageButton) findViewById(R.id.sendNow);
-				sendNow.setVisibility(ImageButton.INVISIBLE);
-				editText.setVisibility(EditText.INVISIBLE);
+				//sendNow.setVisibility(ImageButton.INVISIBLE);
+				//editText.setVisibility(EditText.INVISIBLE);
 				editText.setText("");	
 				
 				//hide keyboard
@@ -201,13 +203,17 @@ public class CameraPreview extends Activity {
 		displayText();
 	}
 	
-	public synchronized void displayText() {
+	/*
+	private void hideMessagesContainer(){
 		LinearLayout messagesLayoutContainer = (LinearLayout) findViewById(R.id.messagesContainer);
-		
 		for (int i=0; i < messagesLayoutContainer.getChildCount() ; i++){
 			TextView view = (TextView)messagesLayoutContainer.getChildAt(i);
 			view.setVisibility(View.INVISIBLE);
 		}
+	}*/
+	
+	public synchronized void displayText() {
+		LinearLayout messagesLayoutContainer = (LinearLayout) findViewById(R.id.messagesContainer);
 		
 		int iterateOver;
 		JSONObject singleMessage;
@@ -233,12 +239,17 @@ public class CameraPreview extends Activity {
 				}
 				tv.setTextSize(textSize);
 				tv.setVisibility(View.VISIBLE);
-				
-				Integer currentMsgId =  (Integer) singleMessage.get("messageId");
-				lastProcessedMsgId = Math.max(lastProcessedMsgId, currentMsgId);
-				
+				//Integer currentMsgId =  (Integer) singleMessage.get("messageId");
+				//lastProcessedMsgId = Math.max(lastProcessedMsgId, currentMsgId);
 				index++;
 			}
+			
+			while (index < messagesLayoutContainer.getChildCount()){
+				TextView tv =(TextView) messagesLayoutContainer.getChildAt(messagesLayoutContainer.getChildCount()-index-1);
+				tv.setVisibility(View.GONE);
+				index++;
+			}
+			
 		}catch (JSONException e) {
 			Log.e("error", "JSONException ; msg= "+e.getMessage(), e);
 		}
@@ -367,6 +378,7 @@ public class CameraPreview extends Activity {
 							boolean resetFlag = false;
 							HashSet<String>currZonesIdsSet = new HashSet<String>();
 							
+							lastProcessedMsgId = 0;
 							if (result.length() > 0){
 								JSONArray retZoneIDs = ((JSONObject)result.get(0)).getJSONArray("zoneId");
 								if (retZoneIDs != null){
@@ -396,6 +408,10 @@ public class CameraPreview extends Activity {
 									messagesZonesIds.addAll(currZonesIdsSet);
 								}
 								
+							}else{
+								messagesInClient.clear();
+								messageIdsInClient.clear();
+								messagesZonesIds.clear();
 							}
 							
 							
@@ -408,7 +424,6 @@ public class CameraPreview extends Activity {
 								}
 							}
 							displayText();
-							lastProcessedMsgId = 0;
 						}
 						
 					}else if (error != null){
@@ -450,7 +465,11 @@ public class CameraPreview extends Activity {
 			            }
 			            in.close();
 			            Log.v("tag", sb.toString());
-			            JSONArray ja = new JSONArray( sb.toString());
+			            JSONArray ja = new JSONArray();
+			            if (sb.length() > 3){
+			            	ja =  new JSONArray(sb.toString());
+			            }
+			            
 			            result =ja;// ja.getJSONObject(ja.length()-1);
 			            
 					}  catch (Exception e) {
