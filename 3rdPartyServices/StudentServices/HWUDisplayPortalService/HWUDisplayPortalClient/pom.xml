@@ -35,6 +35,11 @@
 			<artifactId>societies-api</artifactId>
 			<scope>provided</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.societies.api.internal</groupId>
+			<artifactId>societies-api-internal</artifactId>
+			<scope>provided</scope>
+		</dependency>
 
 		<dependency>
 		    <groupId>org.societies.api.ext3p</groupId>
@@ -113,7 +118,7 @@
                     <instructions>
                         <Bundle-Activator></Bundle-Activator>
                         <Embed-Dependency>*;scope=compile|runtime</Embed-Dependency>
-                        <Embed-Transitive>true</Embed-Transitive>
+                        <Embed-Transitive>false</Embed-Transitive>
                     </instructions>
                     </configuration>
                     </plugin>
