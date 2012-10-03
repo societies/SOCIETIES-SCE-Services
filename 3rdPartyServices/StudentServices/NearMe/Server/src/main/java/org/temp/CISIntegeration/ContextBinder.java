@@ -4,7 +4,7 @@ import org.societies.api.cis.management.ICisManager;
 import org.societies.api.comm.xmpp.interfaces.ICommManager;
 import org.societies.api.context.broker.ICtxBroker;
 import org.societies.api.services.IServices;
-
+import javax.sql.DataSource;
 public class ContextBinder implements ContextBinderInf{
 private static ICisManager cisMgm;
 private static ICtxBroker ctxBrk;
