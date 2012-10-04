@@ -37,9 +37,20 @@ public class Community {
 	
 	/** The chat. */
 	private Chat chat;
+    
+	public static class UserLst extends ArrayList<User>{
+		public boolean add(User u){
+			for(User us:this){
+				if(us.getIp().equals(u.getIp())){
+					return true;
+				}
+			}
+			return super.add(u);
+		}
+	}
 	
 	/** The users. */
-	private ArrayList<User> users;
+	private UserLst users;
 	
 	/** The my community. */
 	private boolean myCommunity;
@@ -77,7 +88,7 @@ public class Community {
 		this.dateOfCreation = dateOfCreation;
 		this.image = image;
 		this.chat = new Chat();
-		this.users = new ArrayList<User>();
+		this.users = new UserLst();
 		this.myCommunity = false;
 		this.code = 0;
 		this.id = " ";
@@ -96,7 +107,7 @@ public class Community {
 		this.dateOfCreation = "dateOfCreation";
 		this.image = 21;
 		this.chat = new Chat();
-		this.users = new ArrayList<User>();
+		this.users = new UserLst();
 		myCommunity = false;
 		this.id = " ";
 	}
@@ -223,8 +234,10 @@ public class Community {
 	 *
 	 * @param users the new user list
 	 */
-	public void setUserList(ArrayList<User> users) {
-		this.users = users;
+	public void setUserList(ArrayList<User> usrs) {
+		this.users=new UserLst();
+		for(User uu:usrs)
+			this.users.add(uu);
 	}
 
 	/**
@@ -252,7 +265,7 @@ public class Community {
 	 * Reset user list.
 	 */
 	public void resetUserList() {
-		users = new ArrayList<User>();
+		users = new UserLst();
 	}
 
 	/**
