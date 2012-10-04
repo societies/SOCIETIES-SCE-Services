@@ -35,7 +35,7 @@ import android.util.Log;
 public class Server {
 
 	/** The address. */
-	public static String address = "http://109.246.99.64:8080/nearme/";
+	public static String address = "http://137.195.108.202:8080/nearme/";
 	//"http://societies.local.macs.hw.ac.uk:18080/nearme/";
 	// public static String address = "http://192.168.191.1/asocom.php";
 	// public static String address = "http://todotest.netau.net/index2.php";
