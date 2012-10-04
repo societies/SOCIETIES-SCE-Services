@@ -32,7 +32,7 @@ public class NearMeServer {
 //			return this.getEvents(uid, ssid);
 //		}
 		System.out.println("from C");
-		Date last_time=ActiveStatus.getCurrentStatus(ssid).start_active;//from 1970
+		Date last_time=ActiveStatus.getCurrentStatus(ssid).getStartTime();//from 1970
 		String[] cp = conn.getUpdatesFromTime(ssid, last_time);
 		for(String c:cp){
 			System.out.println("all rev:"+c);

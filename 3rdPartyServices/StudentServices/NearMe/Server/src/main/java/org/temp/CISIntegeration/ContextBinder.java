@@ -4,13 +4,13 @@ import org.societies.api.cis.management.ICisManager;
 import org.societies.api.comm.xmpp.interfaces.ICommManager;
 import org.societies.api.context.broker.ICtxBroker;
 import org.societies.api.services.IServices;
-
-public class ContextBinder{
+import javax.sql.DataSource;
+public class ContextBinder implements ContextBinderInf{
 private static ICisManager cisMgm;
 private static ICtxBroker ctxBrk;
 private static ICommManager comMgt;
 private static IServices services;
-
+private static DataSource dataSource;
 public static ICisManager getCisMgm() {
 	return cisMgm;
 }
@@ -35,5 +35,10 @@ public static IServices getServices() {
 public void setServices(IServices services) {
 	this.services = services;
 }
-
+public void setDataSource(DataSource source){
+	this.dataSource=source;
+}
+public static DataSource getDataSource(){
+	return dataSource;
+}
 }

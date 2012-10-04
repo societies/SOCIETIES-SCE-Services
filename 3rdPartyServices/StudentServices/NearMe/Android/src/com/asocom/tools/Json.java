@@ -486,15 +486,15 @@ public class Json {
  * @throws Exception the exception
  */
 public static void receiver(String[] json) throws Exception {	
-		for (int i = 0; i < json.length-1; i++) {
+		for (int i = 0; i < json.length; i++) {
 			Log.i("Json", "Json.receiver(json[i]): " + json[i]);
 			process(json[i]);			
 		}
 	}
 
 public static void reestablishConnection(String[] json) throws Exception {	
-	for (int i = 0; i < json.length-1; i++) {
-		Log.i("Json", "Json.receiver(json[i]): " + json[i]);
+	for (int i = 0; i < json.length; i++) {
+		Log.i("XIONG1", "Json.receiver(json[i]): " + json.length);
 		reProcess(json[i]);			
 	}
 }
@@ -504,79 +504,82 @@ public static void reestablishConnection(String[] json) throws Exception {
 	 * @param json the json
 	 * @throws Exception the exception
 	 */
-	public static void reProcess(String json) throws Exception {		
+	public static void reProcess(String json) throws Exception {
+		Log.i("XIONG2", "Json.reprocess(String json): OK");
+		jSonObject = new JSONObject(json);
 		switch (jSonObject.getInt("opetationType")) {
 		case 0:
 			// Connect
-			Log.i("Json", "Json.process(): reiverType = connect()");
+			Log.i("XIONG2", "Json.process(): reiverType = connect()");
 			processConnect(jSonObject);
 			break;
 			
 		case 1:
 			// Disconnect
+			Log.i("XIONG2", "Json.process(): reiverType = Nondisconnect()");
 			if (jSonObject.getString("senderId").equals(Manager.getCurrentUserIP())) 
 				break;
-			Log.i("Json", "Json.process(): reiverType = disconnect()");
+			Log.i("XIONG2", "Json.process(): reiverType = disconnect()");
 			processDisconnect(jSonObject);
 			break;
 
 		case 2:
 			// 
-			Log.i("Json", "Json.process(): reiverType = processUpdateUserInformation()");
+			Log.i("XIONG2", "Json.process(): reiverType = processUpdateUserInformation()");
 			processUpdateUserInformation(jSonObject);
 			break;
 			
 		case 3:
 			// 
-			Log.i("Json", "Json.process(): reiverType = processCreateCommunity()");
-			processCreateCommunity(jSonObject);
+			Log.i("XIONG2", "Json.process(): reiverType = processCreateCommunity()");
+			reProcessCreateCommunity(jSonObject);
 			break;
 			
 		case 4:
 			// 
-			Log.i("Json", "Json.process(): reiverType = processJoinCommunity()");
+			Log.i("XIONG2", "Json.process(): reiverType = processJoinCommunity()");
 			processJoinCommunity(jSonObject);
 			break;
 			
 		case 5:
 			// 
-			Log.i("Json", "Json.process(): reiverType = processLeaveCommunity()");
+			Log.i("XIONG2", "Json.process(): reiverType = processLeaveCommunity()");
 			processLeaveCommunity(jSonObject);
 			break;
 			
 		case 6:
 			// 
-			Log.i("Json", "Json.process(): reiverType = processCommunityChat()");
+			Log.i("XIONG2", "Json.process(): reiverType = processCommunityChat()");
 			processCommunityChat(jSonObject);
 			break;
 			
 		case 7:
 			// 
-			Log.i("Json", "Json.process(): reiverType = processPrivateChat()");
+			Log.i("XIONG2", "Json.process(): reiverType = processPrivateChat()");
 			processPrivateChat(jSonObject);
 			break;
 		
 		case 8:
 			// 
-			Log.i("Json", "Json.process(): reiverType = processfriendRequest()");
+			Log.i("XIONG2", "Json.process(): reiverType = processfriendRequest()");
 			processfriendRequest(jSonObject);
 			break;
 		
 		case 9:
 			// 
-			Log.i("Json", "Json.process(): reiverType = processfriendRequestResponse()");
+			Log.i("XIONG2", "Json.process(): reiverType = processfriendRequestResponse()");
 			processfriendRequestResponse(jSonObject);
 			break;
 		
 		case 10:
 			// 
-			Log.i("Json", "Json.process(): reiverType = processDeleteFriend()");
+			Log.i("XIONG2", "Json.process(): reiverType = processDeleteFriend()");
 				processDeleteFriend(jSonObject);
 			break;
 			
 		case 11:
 			// 
-			Log.i("Json", "Json.process(): reiverType = processUserData()");
+			Log.i("XIONG2", "Json.process(): reiverType = processUserData()");
 				processUserData(jSonObject);
 			break;
 			
@@ -797,6 +800,58 @@ public static void reestablishConnection(String[] json) throws Exception {
 	Log.i("Json", "processUpdateUserInformation(): ok");
 	
 	}	
+	
+
+	
+	public static void reProcessCreateCommunity(JSONObject jSonObject) throws Exception{
+
+		String sender = jSonObject.getString("senderId");
+		
+		JSONObject communityData = new JSONObject(jSonObject.get("communitiesData").toString());
+		JSONArray communityArray = new JSONArray(communityData.getString("allCommunitiesArray").toString());
+		JSONObject community = new JSONObject(communityArray.get(0).toString());
+
+//		for (int i = 0; i < Manager.getCommunities().size(); i++) {
+//			if (Manager.getCommunities().get(i).getCommunityName().equals(community.getString("name"))) {
+//				return;
+//			}
+//		}
+
+		Community newCommunity = new Community(community.getString("name"),
+				community.getString("description"),
+				community.getString("nameAdministrator"),
+				community.getString("profile"),
+				community.getString("visibility"),
+				community.getString("dateOfCreation"),
+				community.getInt("image"),community.getString("recommend"));
+		newCommunity.setId(community.getString("id"));
+
+		JSONArray communityUsers = new JSONArray(community.getString("users"));
+		for (int j = 1; j < Manager.getAllUsers().size(); j++) {
+			
+			if(sender.equals(Manager.getAllUsers().get(j).getIp())){
+				if(!sender.equals(Manager.getCurrentUserIP()))
+					newCommunity.getUserList().add(Manager.getAllUsers().get(j));
+			}
+			
+			for (int i = 1; i < communityUsers.length(); i++) {	
+				if (Manager.getAllUsers().get(j).getIp().equals(communityUsers.get(i))) {
+					if(!Manager.getAllUsers().get(j).getIp().equals(Manager.getCurrentUserIP()))
+					   newCommunity.getUserList().add(Manager.getAllUsers().get(j));
+				}
+			}
+		}
+		
+		newCommunity.lastUpdatedTime=Long.parseLong(jSonObject.getString("lastupdate"));
+		Manager.addCommunity(newCommunity);
+		Activity act1 = (Activity) Manager.getCurrentActivity();
+		act1.clearWallpaper();
+		Log.i("Json", "reProcessCreateCommunity(): ok");
+		return;
+	}
+	
+	
+	
 	
 	
 	/**

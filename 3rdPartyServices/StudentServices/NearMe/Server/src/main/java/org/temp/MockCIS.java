@@ -54,8 +54,10 @@ public class MockCIS extends HttpServlet {
 		System.err.println(uid+":"+json+"@"+ssid);
 		Listener.LastUpdate.getLastUpdate(uid, ssid);
 		if(opt==1){
+			System.err.println("update message\t"+uid+"\t"+json);
 			writer.write(server.pushEvent(uid, json, ssid)?"1":"0");
 		}else if(opt==2){
+			System.err.println("refresh connection\t"+uid);
 			String[] content=server.getEvents(uid, ssid);
 			StringBuilder jsons=new StringBuilder();
 			for(String cnt:content){
@@ -66,6 +68,7 @@ public class MockCIS extends HttpServlet {
 		}else if(opt==3){
 			writer.write("1");
 		}else if(opt==4){
+			System.err.println("establish a new connection\t"+uid+"\t"+json);
 			String[] content=server.getAllEvents(uid, ssid);
 			StringBuilder jsons=new StringBuilder();
 			for(String cnt:content){

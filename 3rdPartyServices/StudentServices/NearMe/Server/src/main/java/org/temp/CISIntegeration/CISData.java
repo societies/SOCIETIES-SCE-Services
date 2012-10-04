@@ -7,6 +7,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class CISData {
+	public String givenName;
 	public String cisName;
 	public String cisDescription;
 	public String owner;

@@ -12,7 +12,7 @@ import java.util.concurrent.Future;
 public class CISBridge {
 	
 	public static boolean migrateCIS(CISData data){
-		return migrateCIS(data.owner,data.participants,data.cisName,data.cisDescription);
+		return migrateCIS(data.owner,data.participants,data.givenName,data.cisDescription);
 	}
 	
 	private static boolean migrateCIS(String owner, Set<String> uids, String cisname,String cisdep) {

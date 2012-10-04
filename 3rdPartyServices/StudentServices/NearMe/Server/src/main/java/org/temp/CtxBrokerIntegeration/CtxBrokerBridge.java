@@ -54,6 +54,7 @@ public class CtxBrokerBridge {
 
 	public void renewProximityData(ProximityData data) {
 		try {
+			System.err.println("proximity:"+data);
 			IIdentity cssid = ContextBinder.getComMgt().getIdManager()
 					.fromJid(uid);
 			List<CtxIdentifier> ids 

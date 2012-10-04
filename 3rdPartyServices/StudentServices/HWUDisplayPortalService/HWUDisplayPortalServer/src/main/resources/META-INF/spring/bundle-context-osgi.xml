@@ -19,7 +19,7 @@
 			<entry key="TargetPlatform" value="SOCIETIES" />
 			<entry key="ServiceProvider" value="ICT-SOCIETIES" />
 			<entry key="ServiceMetaModel" value-ref="serMetamodel" />
-			<entry key="ServiceClient" value="http://www.macs.hw.ac.uk/~ceeep1/societies/services/DisplayPortalClientApp.jar" />
+			<entry key="ServiceClient" value="http://societies.local:8080/3p-service/DisplayPortalClientApp.jar" />
 		</osgi:service-properties>
         </osgi:service>
        

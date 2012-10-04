@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<!-- change the artifactid to your project artifactid -->
 	<groupId>ac.hw.mytv</groupId>
-	<artifactId>MyTV</artifactId>
+	<artifactId>MyTVClient</artifactId>
 	<packaging>bundle</packaging>
 	<version>0.0.1-SNAPSHOT</version>
 
@@ -25,7 +25,7 @@
 	<parent>
 		<groupId>org.societies</groupId>
 		<artifactId>spring-osgi-parent</artifactId>
-		<version>0.1</version>
+		<version>RELEASE</version>
 	</parent>
 
 	<dependencies>
@@ -33,15 +33,22 @@
 		<dependency>
 			<groupId>org.societies.api.external</groupId>
 			<artifactId>societies-api</artifactId>
-			<version>${release.version}</version>
 			<scope>provided</scope>
 		</dependency>
-		<!-- <dependency>
+				
+		<dependency>
+			<groupId>org.societies</groupId>
+			<artifactId>common-ext-libs</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		
+		<dependency>
 		    <groupId>org.societies.api.ext3p</groupId>
 		    <artifactId>societies-api-ext3p</artifactId>
 		    <version>${release.version}</version>
 		    <scope>provided</scope>
-		</dependency> -->
+		</dependency>
+		
 		<!-- <dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>org.springframework.context</artifactId>
@@ -118,7 +125,7 @@
                     <instructions>
                         <Bundle-Activator></Bundle-Activator>
                         <Embed-Dependency>*;scope=compile|runtime</Embed-Dependency>
-                        <Embed-Transitive>true</Embed-Transitive>
+                        <Embed-Transitive>false</Embed-Transitive>
                     </instructions>
                     </configuration>
                     </plugin>

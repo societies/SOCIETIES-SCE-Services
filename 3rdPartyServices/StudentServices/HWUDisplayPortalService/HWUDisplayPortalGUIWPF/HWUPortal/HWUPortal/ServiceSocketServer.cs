@@ -88,6 +88,7 @@ namespace HWUPortal
                 {
                     Console.WriteLine(exc.ToString());
                     listener.Close();
+                    alive = false;
                 }
             }
 

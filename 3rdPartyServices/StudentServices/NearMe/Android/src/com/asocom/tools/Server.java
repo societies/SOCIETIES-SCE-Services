@@ -35,7 +35,9 @@ import android.util.Log;
 public class Server {
 
 	/** The address. */
-	public static String address = "http://192.168.42.67:8080/WebAPPNearMe/MockCIS";
+	public static String address = "http://societies.local.macs.hw.ac.uk:18080/nearme/";
+	//"http://137.195.108.202:8080/nearme/";
+	//"http://societies.local.macs.hw.ac.uk:18080/nearme/";
 	// public static String address = "http://192.168.191.1/asocom.php";
 	// public static String address = "http://todotest.netau.net/index2.php";
 	
@@ -136,6 +138,7 @@ public class Server {
 			String[] resp1 = str.split("<");
 			String[] resp2 = resp1[0].split("x1Z7w");
 			Log.i("Server.getData()", str);
+			Log.i("XIONG0", "init: " + resp2.length);
 			Json.reestablishConnection(resp2);
 		} catch (ClientProtocolException e) {
 			e.printStackTrace();

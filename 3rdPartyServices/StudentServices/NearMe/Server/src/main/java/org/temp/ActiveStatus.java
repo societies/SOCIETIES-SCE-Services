@@ -4,15 +4,19 @@ import java.util.Date;
 import java.util.HashMap;
 
 public class ActiveStatus {
-	public Date start_active;
-	public Date last_update;
-	public String loc;
-	public static HashMap<String, ActiveStatus> status = new HashMap<String, ActiveStatus>();
-	public static Object sync = new Object();
+	private Date start_active;
+	private Date last_update;
+	private String loc;
+	private static HashMap<String, ActiveStatus> status = new HashMap<String, ActiveStatus>();
+	private static Object sync = new Object();
 
-	public boolean isActive() {
+	public Date getStartTime(){
+		return start_active;
+	}
+	
+	private boolean isActive() {
 		return start_active != null
-				&& ((new Date()).getTime() - this.start_active.getTime() < 1000 * 60 * 60);
+				&& (new Date().getTime() - this.last_update.getTime() < 1000 * 60 * 60);
 	}
 
 	public void update() {
