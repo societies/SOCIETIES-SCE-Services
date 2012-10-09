@@ -30,7 +30,7 @@ namespace HWUPortal
          * 
          */
 
-        System.Windows.Forms.WebBrowser webBrowser;
+        
 
         /*
          * */
@@ -82,7 +82,9 @@ namespace HWUPortal
         public MainWindow()
         {
             Thread.CurrentThread.Name = "MainWindowThread";
+            
             InitializeComponent();
+            this.webBrowser.Visibility = System.Windows.Visibility.Hidden;
             RightHand.BringIntoView();
             /* 
              * kinect initialisation */
@@ -117,8 +119,7 @@ namespace HWUPortal
             //appControl = new ApplicationControl.ApplicationControl();
             //appControl.appExit += new ApplicationControl.ApplicationControl.ApplicationExitedHandler(onExeDestroyed);
 
-            wpfAppControl.Width = 1000;
-            wpfAppControl.Height = 600;
+
             //appControl.Width = 1000;
             //appControl.Height = 600;
             //flpPanel.Controls.Add(appControl);
@@ -266,8 +267,8 @@ namespace HWUPortal
 
             wpfAppControl.ExeName = sInfo.serviceExe;
             wpfAppControl.LoadExe(e);
-            Canvas.SetLeft(wpfAppControl, 320);
-            Canvas.SetTop(wpfAppControl, 20);
+            //Canvas.SetLeft(wpfAppControl, 320);
+            //Canvas.SetTop(wpfAppControl, 20);
             //appControl.ExeName = sInfo.serviceExe;
             //appControl.LoadExe(e);
             //wfhDate.Visibility = System.Windows.Visibility.Visible;
@@ -275,10 +276,14 @@ namespace HWUPortal
 
         private void startWeb(ServiceInfo sInfo)
         {
-            webBrowser = new System.Windows.Forms.WebBrowser();
+            Console.WriteLine("Starting web service");
+            //webBrowser = new System.Windows.Controls.WebBrowser();
             //appControl.Controls.Add(webBrowser);
-            webBrowser.Url = new Uri(sInfo.serviceURL);
-            webBrowser.Show();
+            webBrowser.Navigate(new Uri(sInfo.serviceURL));
+            //webBrowser.Url = new Uri(sInfo.serviceURL);
+            webBrowser.Visibility = System.Windows.Visibility.Visible;
+            Console.WriteLine(webBrowser.IsVisible);
+            webBrowser.Focus();
 
         }
         private void startService(EventArgs e, ServiceInfo sInfo)
@@ -312,8 +317,15 @@ namespace HWUPortal
             this.runningService = sInfo;
             this.closeShowingServiceBtn.Content = "Close " + sInfo.serviceName;
             this.enableThisButton(this.closeShowingServiceBtn, true);
-            ServiceInformationSocketClient sClient = new ServiceInformationSocketClient();
-            sClient.sendServiceInformationEvent(userSession.getIPAddress(), sInfo.serviceName, ServiceInformationSocketClient.ServiceRuntimeInformation.STARTED_SERVICE);
+            try
+            {
+                ServiceInformationSocketClient sClient = new ServiceInformationSocketClient();
+                sClient.sendServiceInformationEvent(userSession.getIPAddress(), sInfo.serviceName, ServiceInformationSocketClient.ServiceRuntimeInformation.STARTED_SERVICE);
+            }
+            catch (System.Net.Sockets.SocketException exc)
+            {
+                Console.WriteLine("Exception in socket while trying to send started service event");
+            }
 
         }
 
@@ -709,15 +721,8 @@ namespace HWUPortal
             }
             else if (sInfo.serviceType == ServiceType.WEB)
             {
-                if (this.webBrowser != null)
-                {
-                    if (!this.webBrowser.IsDisposed)
-                    {
-                        this.webBrowser.Dispose();
-
-
-                    }
-                }
+                this.webBrowser.Navigate("about:blank");
+                this.webBrowser.Visibility = System.Windows.Visibility.Hidden;
             }
 
             this.runningService = new ServiceInfo();

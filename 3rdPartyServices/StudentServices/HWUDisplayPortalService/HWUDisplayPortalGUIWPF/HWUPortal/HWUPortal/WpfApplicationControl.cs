@@ -166,11 +166,11 @@ namespace HWUPortal
                     
 
                     // Wait for process to be created and enter idle condition
-                    p.WaitForInputIdle();
-
+                    bool idle = p.WaitForInputIdle();
+                    Console.WriteLine("process entered idle state: "+idle);
                     //BUG fix for windows vista/7
                     System.Threading.Thread.Sleep(50);
-
+                    p.OutputDataReceived += new DataReceivedEventHandler(outputDataReceived);
                     while (p.MainWindowHandle == IntPtr.Zero)
                     {
                         Thread.Sleep(1000);
@@ -220,6 +220,11 @@ namespace HWUPortal
 
             ApplicationControlArgs cArgs = new ApplicationControlArgs(this.exeName, true);
             appExit(this, cArgs);
+        }
+
+        private void outputDataReceived(object sender, DataReceivedEventArgs args)
+        {
+            Console.WriteLine("Process: " + args.Data);
         }
         public void DestroyExe(EventArgs e)
         {

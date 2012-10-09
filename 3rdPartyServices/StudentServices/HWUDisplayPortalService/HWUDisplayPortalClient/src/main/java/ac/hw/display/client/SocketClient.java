@@ -200,6 +200,8 @@ public class SocketClient {
 		ServiceInfo sInfo4 = new ServiceInfo(null, "MyTV", "http://www.macs.hw.ac.uk/~ceesmm1/societies/mytv/MyTvUI.exe", true);
 		userSession.addService(sInfo4);
 		userSession.addService(sInfo);
+		userSession.addService(sInfo3);
+		userSession.addService(sInfo2);
 		//userSession.addService(sInfo2);
 		//userSession.addService(sInfo3);
 		c.startSession(userSession);

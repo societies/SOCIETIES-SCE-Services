@@ -174,7 +174,7 @@ namespace ApplicationControl
                     // Get the main handle
                     appWin = p.MainWindowHandle;
                     // Put it into this form
-                    SetParent(appWin, this.Handle);
+                    //SetParent(appWin, this.Handle);
 
                     // Remove border 
                     SetWindowLong(appWin, GWL_STYLE, WS_VISIBLE);
