@@ -19,7 +19,8 @@
 	    android:paddingLeft="1dp"
 	    android:paddingRight="1dp"
 	    android:orientation="vertical" 
-	    android:layout_alignParentLeft="true">
+	    android:layout_alignParentLeft="true" 
+	    android:gravity="top">
 	
          <!--
          <TextView
@@ -49,7 +50,8 @@
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
-        android:textSize="30sp"  />
+        android:textSize="30sp" 
+        android:gravity="top" />
 	
     
     <LinearLayout

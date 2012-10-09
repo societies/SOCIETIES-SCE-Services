@@ -39,6 +39,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
@@ -141,6 +142,7 @@ public class CameraPreview extends Activity {
 				//hide keyboard
 				InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE); 
 				imm.hideSoftInputFromWindow(editText.getWindowToken(), 0);
+				setTopGravityMsgContainer();
 			}
 		});
 		
@@ -212,8 +214,16 @@ public class CameraPreview extends Activity {
 		}
 	}*/
 	
+	
+	private synchronized void setTopGravityMsgContainer(){
+		LinearLayout messagesLayoutContainer = (LinearLayout) findViewById(R.id.messagesContainer);
+		messagesLayoutContainer.setGravity(Gravity.TOP);
+	}
+	
+	
 	public synchronized void displayText() {
 		LinearLayout messagesLayoutContainer = (LinearLayout) findViewById(R.id.messagesContainer);
+		setTopGravityMsgContainer();
 		
 		int iterateOver;
 		JSONObject singleMessage;
@@ -302,6 +312,7 @@ public class CameraPreview extends Activity {
 		}
 
 		dialog.dismiss();
+		setTopGravityMsgContainer();
 	}
 	
 	private void createPreferencesDialog(){

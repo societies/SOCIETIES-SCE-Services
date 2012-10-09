@@ -129,14 +129,14 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 	 * These methods handle events from the Portal
 	 */
 	@Override
-	public void handleExternalEvent(CSSEvent arg0) {
-		LOG.debug("Received external display event from portal");
+	public void handleExternalEvent(CSSEvent event) {
+		LOG.debug("Received external display event from portal: "+event.geteventName());
 	}
 
 	@Override
-	public void handleInternalEvent(InternalEvent arg0) {
-		LOG.debug("Received internal display event from portal");
-
+	public void handleInternalEvent(InternalEvent event) {
+		LOG.debug("Received internal display event from portal: "+event.geteventName());
+		
 		//get user ID
 		userID = commsMgr.getIdManager().getThisNetworkNode();
 		LOG.debug("userID = "+userID.toString());
@@ -277,7 +277,9 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 			String result = "PREFERENCE-ERROR";
 			try {
 				IAction outcome = persoMgr.getPreference((Requestor)userID, userID, myServiceType, myServiceID, "channel").get();
-				result = outcome.getvalue();
+				if(outcome!=null){
+					result = outcome.getvalue();
+				}
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			} catch (ExecutionException e) {
@@ -290,7 +292,9 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 			String result = "PREFERENCE-ERROR";
 			try {
 				IAction action = persoMgr.getPreference((Requestor)userID, userID, myServiceType, myServiceID, "muted").get();
-				result = action.getvalue();
+				if(action!=null){
+					result = action.getvalue();
+				}
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			} catch (ExecutionException e) {

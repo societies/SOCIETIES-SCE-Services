@@ -92,7 +92,7 @@ namespace MyTvUI
                 initialiseSocketClient();
 
                 //get preferences
-                Console.WriteLine("Initialising preferences");
+                //Console.WriteLine("Initialising preferences");
                 initialisePreferences();
 
                 //initialise activity feeds
