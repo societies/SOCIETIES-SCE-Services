@@ -287,26 +287,32 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 					LOG.debug("No channel preference was found");
 				}
 			} catch (InterruptedException e) {
-				LOG.debug("Error retrieving preference");
+				LOG.debug("Error retrieving channel preference");
 			} catch (ExecutionException e) {
-				LOG.debug("Error retrieving preference");
+				LOG.debug("Error retrieving channel preference");
 			}
 			LOG.debug("Preference request result = "+result);
 			return result;
 		}
 
 		public String getMutedPreference(){
+			LOG.debug("Getting mute preference from personalisation manager");
 			String result = "PREFERENCE-ERROR";
 			try {
-				IAction action = persoMgr.getPreference((Requestor)userID, userID, myServiceType, myServiceID, "muted").get();
+				RequestorService requestor = new RequestorService(userID, myServiceID);
+				IAction action = persoMgr.getPreference(requestor, userID, myServiceType, myServiceID, "muted").get();
 				if(action!=null){
+					LOG.debug("Successfully retrieved mute preference outcome: "+action.getvalue());
 					result = action.getvalue();
+				}else{
+					LOG.debug("No mute preference was found");
 				}
 			} catch (InterruptedException e) {
-				LOG.debug("Error retrieving preference");
+				LOG.debug("Error retrieving mute preference");
 			} catch (ExecutionException e) {
-				LOG.debug("Error retrieving preference");
+				LOG.debug("Error retrieving mute preference");
 			}
+			LOG.debug("Preference request result = "+result);
 			return result;
 		}
 	}
