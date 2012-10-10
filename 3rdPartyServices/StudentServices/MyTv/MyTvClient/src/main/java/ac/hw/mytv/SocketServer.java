@@ -109,8 +109,10 @@ public class SocketServer extends Thread{
 					String next = in.readLine();
 					LOG.debug("next = "+next);
 					if(!next.equalsIgnoreCase(END_MSG)){
+						LOG.debug("Inside if");
 						message = message+next+"\n";
 					}else{
+						LOG.debug("Inside else");
 						reading  = false;
 					}
 				}
