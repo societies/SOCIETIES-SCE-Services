@@ -269,6 +269,7 @@ namespace HWUPortal
 
             wpfAppControl.ExeName = sInfo.serviceExe;
             wpfAppControl.LoadExe(e);
+            wpfAppControl.Visibility = System.Windows.Visibility.Visible;
             //Canvas.SetLeft(wpfAppControl, 320);
             //Canvas.SetTop(wpfAppControl, 20);
             //appControl.ExeName = sInfo.serviceExe;
@@ -735,35 +736,35 @@ namespace HWUPortal
 
         private void serviceButton1_Click(object sender, RoutedEventArgs e)
         {
-            Console.WriteLine(e.Source + " button was pushed");
+
             this.startService(e, (ServiceInfo)serviceButton1.Tag);
          
         }
 
         private void serviceButton2_Click(object sender, RoutedEventArgs e)
         {
-            Console.WriteLine(e.Source + " button was pushed");
+
             this.startService(e, (ServiceInfo)serviceButton2.Tag);
             
         }
 
         private void serviceButton3_Click(object sender, RoutedEventArgs e)
         {
-            Console.WriteLine(e.Source + " button was pushed");
+
             this.startService(e, (ServiceInfo)serviceButton3.Tag);
            
         }
 
         private void serviceButton4_Click(object sender, RoutedEventArgs e)
         {
-            Console.WriteLine(e.Source + " button was pushed");
+
             this.startService(e, (ServiceInfo)serviceButton4.Tag);
           
         }
 
         private void serviceButton5_Click(object sender, RoutedEventArgs e)
         {
-            Console.WriteLine(e.Source + " button was pushed");
+
             this.startService(e, (ServiceInfo)serviceButton5.Tag);
           
         }
