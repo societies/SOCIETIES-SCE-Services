@@ -84,21 +84,18 @@ namespace MyTvUI
                 tvBrowser.Navigated += new NavigatedEventHandler(tvBrowser_Navigated);
 
                 //initialise socket server to listen for service client connections
-                Console.WriteLine("Initialising SocketServer");
-                initialiseSocketServer();
+                Console.WriteLine("Initialising SocketServer and SocketClient");
+                if(initialiseSocketServer() && initialiseSocketClient())
+                {
+                    //get preferences
+                    Console.WriteLine("Initialising preferences");
+                    initialisePreferences();
 
-                //Connect to service client - on user cloud node
-                Console.WriteLine("Initialising SocketClient");
-                initialiseSocketClient();
-
-                //get preferences
-                //Console.WriteLine("Initialising preferences");
-                initialisePreferences();
-
-                //initialise activity feeds
-                ArrayList activities = new ArrayList();
-                listBox1.ItemsSource = activities;
-                ActivityFeedManager afMgr = new ActivityFeedManager(activities);
+                    //initialise activity feeds
+                    ArrayList activities = new ArrayList();
+                    listBox1.ItemsSource = activities;
+                    ActivityFeedManager afMgr = new ActivityFeedManager(activities);
+                }                
             }
             catch (Exception e)
             {
@@ -173,14 +170,24 @@ namespace MyTvUI
         #endregion preference updates
 
         #region sockets
-        private void initialiseSocketServer()
+        private Boolean initialiseSocketServer()
         {
-            socketServer = new SocketServer(this);
-            Thread serverThread = new Thread(new ThreadStart(socketServer.run));
-            serverThread.Start();
+            try
+            {
+                socketServer = new SocketServer(this);
+                Thread serverThread = new Thread(new ThreadStart(socketServer.run));
+                serverThread.Start();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Error initialising SocketServer");
+                Console.WriteLine(e.ToString());
+                return false;
+            }
+            return true;
         }
 
-        private void initialiseSocketClient()
+        private Boolean initialiseSocketClient()
         {
             socketClient = new SocketClient();
             if (socketClient.getSessionParameters())
@@ -203,6 +210,7 @@ namespace MyTvUI
                             "END_MSG\n"))
                             {
                                 Console.WriteLine("Handshake complete");
+                                return true;
                             }
                             else
                             {
@@ -222,6 +230,7 @@ namespace MyTvUI
             {
                 Console.WriteLine("Error - could not get session parameters - userID and endpoint");
             }
+            return false;
         }
         #endregion sockets
 
