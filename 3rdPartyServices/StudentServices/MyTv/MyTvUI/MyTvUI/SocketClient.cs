@@ -118,7 +118,7 @@ namespace MyTvUI
 
                 String request = "START_MSG\n" +
                     "CHANNEL_REQUEST\n" +
-                    "END_MSG";
+                    "END_MSG\n";
                 echoSocket.Send(Encoding.ASCII.GetBytes(request));
                 byte[] data = new byte[1024];
                 int receivedDataLength = echoSocket.Receive(data);
@@ -145,7 +145,7 @@ namespace MyTvUI
 
                 String request = "START_MSG\n" +
                     "MUTED_REQUEST\n" +
-                    "END_MSG";
+                    "END_MSG\n";
                 echoSocket.Send(Encoding.ASCII.GetBytes(request));
                 byte[] data = new byte[1024];
                 int receivedDataLength = echoSocket.Receive(data);
