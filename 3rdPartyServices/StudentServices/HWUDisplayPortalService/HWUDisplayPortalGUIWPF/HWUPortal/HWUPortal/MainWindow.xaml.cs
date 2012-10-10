@@ -74,7 +74,6 @@ namespace HWUPortal
         private static double _rightBoundary;
         private static double _itemLeft;
         private static double _itemTop;
-        private bool onButtonWaiting = false;
         #endregion Kinectvariables
         /*
          * 
@@ -232,11 +231,14 @@ namespace HWUPortal
 
                 if (sInfo.button.Dispatcher.CheckAccess())
                 {
+                    Console.WriteLine("dispatcher has access. raising event");
                     //sInfo.button.Release();
-                    sInfo.button.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+                    //sInfo.button.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+                    this.startService(new RoutedEventArgs(Button.ClickEvent), sInfo);
                 }
                 else
                 {
+                    Console.WriteLine("dispatcher doesn't have access. using delegate");
                     sInfo.button.Dispatcher.Invoke(new startServiceDelegate(startService), serviceName);
 
                 }
@@ -288,12 +290,16 @@ namespace HWUPortal
         }
         private void startService(EventArgs e, ServiceInfo sInfo)
         {
+            Console.WriteLine("Starting service: " + sInfo.serviceName);
             KinectSensor.KinectSensors.StatusChanged -= KinectSensors_StatusChanged;
             if (sInfo.serviceType == ServiceType.EXE || sInfo.serviceType == ServiceType.JAR)
             {
                 if (sInfo.requiresKinect)
                 {
-                    this.kinect.Stop();
+                    if (this.kinect != null)
+                    {
+                        this.kinect.Stop();
+                    }
                     Console.WriteLine("Service requires kinect. Kinect stopped");
                     this.kinect = null;
                 }
@@ -642,7 +648,7 @@ namespace HWUPortal
                 this.closeShowingServiceBtn.Content = "";
                 //this.closeShowingServiceBtn.Text = "";
                 this.enableThisButton(this.closeShowingServiceBtn, false);
-                this.onButtonWaiting = false;
+               
             }
         }
 
@@ -694,8 +700,7 @@ namespace HWUPortal
             {
                 Console.WriteLine("user already logged out");
             }
-            this.onButtonWaiting = false;
-
+           
         }
 
         public void onExeServiceStopped(ServiceInfo sInfo)
@@ -730,32 +735,37 @@ namespace HWUPortal
 
         private void serviceButton1_Click(object sender, RoutedEventArgs e)
         {
+            Console.WriteLine(e.Source + " button was pushed");
             this.startService(e, (ServiceInfo)serviceButton1.Tag);
-            this.onButtonWaiting = false;
+         
         }
 
         private void serviceButton2_Click(object sender, RoutedEventArgs e)
         {
+            Console.WriteLine(e.Source + " button was pushed");
             this.startService(e, (ServiceInfo)serviceButton2.Tag);
-            this.onButtonWaiting = false;
+            
         }
 
         private void serviceButton3_Click(object sender, RoutedEventArgs e)
         {
+            Console.WriteLine(e.Source + " button was pushed");
             this.startService(e, (ServiceInfo)serviceButton3.Tag);
-            this.onButtonWaiting = false;
+           
         }
 
         private void serviceButton4_Click(object sender, RoutedEventArgs e)
         {
+            Console.WriteLine(e.Source + " button was pushed");
             this.startService(e, (ServiceInfo)serviceButton4.Tag);
-            this.onButtonWaiting = false;
+          
         }
 
         private void serviceButton5_Click(object sender, RoutedEventArgs e)
         {
+            Console.WriteLine(e.Source + " button was pushed");
             this.startService(e, (ServiceInfo)serviceButton5.Tag);
-            this.onButtonWaiting = false;
+          
         }
 
 
