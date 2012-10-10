@@ -192,7 +192,7 @@ namespace HWUPortal
                     
                     MoveWindow(appWin, 320, 20, (int) this.Width, (int) this.Height, true);
 
-                    Console.WriteLine("started exe" + exeName);
+                    Console.WriteLine("started exe " + exeName);
                     p.Exited += new EventHandler(p_Exited);
                     p.EnableRaisingEvents = true;
 
@@ -201,9 +201,11 @@ namespace HWUPortal
                 }
                 catch (Exception ex)
                 {
+                    Console.WriteLine("exception occured: " + ex.Message);
                     //MessageBox.Show(this, ex.Message, "Error");
                     ApplicationControlArgs cArgs = new ApplicationControlArgs(this.exeName, false);
                     this.appExit(this, cArgs);
+
                 }
 
 

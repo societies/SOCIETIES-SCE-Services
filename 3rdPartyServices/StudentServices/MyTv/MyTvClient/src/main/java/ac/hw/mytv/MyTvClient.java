@@ -279,7 +279,10 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 			String result = "PREFERENCE-ERROR";
 			try {
 				RequestorService requestor = new RequestorService(userID, myServiceID);
-				IAction outcome = persoMgr.getPreference(requestor, userID, myServiceType, myServiceID, "channel").get();
+				Future<IAction> futureOutcome = persoMgr.getPreference(requestor, userID, myServiceType, myServiceID, "channel");
+				LOG.debug("Requested preference from personalisationManager");
+				IAction outcome = futureOutcome.get();
+				LOG.debug("Called .get()");
 				if(outcome!=null){
 					LOG.debug("Successfully retrieved channel preference outcome: "+outcome.getvalue());
 					result = outcome.getvalue();
