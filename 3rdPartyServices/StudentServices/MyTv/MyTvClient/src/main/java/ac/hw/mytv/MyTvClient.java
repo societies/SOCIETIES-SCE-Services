@@ -30,6 +30,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -303,10 +304,13 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 			String result = "PREFERENCE-ERROR";
 			try {
 				RequestorService requestor = new RequestorService(userID, myServiceID);
-				IAction action = persoMgr.getPreference(requestor, userID, myServiceType, myServiceID, "muted").get();
-				if(action!=null){
-					LOG.debug("Successfully retrieved mute preference outcome: "+action.getvalue());
-					result = action.getvalue();
+				Future<IAction> futureOutcome = persoMgr.getPreference(requestor, userID, myServiceType, myServiceID, "channel");
+				LOG.debug("Requested preference from personalisationManager");
+				IAction outcome = futureOutcome.get();
+				LOG.debug("Called .get()");
+				if(outcome!=null){
+					LOG.debug("Successfully retrieved mute preference outcome: "+outcome.getvalue());
+					result = outcome.getvalue();
 				}else{
 					LOG.debug("No mute preference was found");
 				}
