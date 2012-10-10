@@ -30,6 +30,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -290,26 +291,35 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 					LOG.debug("No channel preference was found");
 				}
 			} catch (InterruptedException e) {
-				LOG.debug("Error retrieving preference");
+				LOG.debug("Error retrieving channel preference");
 			} catch (ExecutionException e) {
-				LOG.debug("Error retrieving preference");
+				LOG.debug("Error retrieving channel preference");
 			}
 			LOG.debug("Preference request result = "+result);
 			return result;
 		}
 
 		public String getMutedPreference(){
+			LOG.debug("Getting mute preference from personalisation manager");
 			String result = "PREFERENCE-ERROR";
 			try {
-				IAction action = persoMgr.getPreference((Requestor)userID, userID, myServiceType, myServiceID, "muted").get();
-				if(action!=null){
-					result = action.getvalue();
+				RequestorService requestor = new RequestorService(userID, myServiceID);
+				Future<IAction> futureOutcome = persoMgr.getPreference(requestor, userID, myServiceType, myServiceID, "channel");
+				LOG.debug("Requested preference from personalisationManager");
+				IAction outcome = futureOutcome.get();
+				LOG.debug("Called .get()");
+				if(outcome!=null){
+					LOG.debug("Successfully retrieved mute preference outcome: "+outcome.getvalue());
+					result = outcome.getvalue();
+				}else{
+					LOG.debug("No mute preference was found");
 				}
 			} catch (InterruptedException e) {
-				LOG.debug("Error retrieving preference");
+				LOG.debug("Error retrieving mute preference");
 			} catch (ExecutionException e) {
-				LOG.debug("Error retrieving preference");
+				LOG.debug("Error retrieving mute preference");
 			}
+			LOG.debug("Preference request result = "+result);
 			return result;
 		}
 	}
