@@ -71,7 +71,7 @@ namespace MyTvUI
             try
             {
                 //initialise GUI
-                Console.WriteLine("Initialising GUI");
+                System.IO.File.WriteAllText(@".\logs.txt", "Initialising GUI");
                 InitializeComponent();
                 channel1HoverRegion.Click += new RoutedEventHandler(channel1HoverRegion_Click);
                 channel2HoverRegion.Click += new RoutedEventHandler(channel2HoverRegion_Click);
@@ -84,11 +84,11 @@ namespace MyTvUI
                 tvBrowser.Navigated += new NavigatedEventHandler(tvBrowser_Navigated);
 
                 //initialise socket server to listen for service client connections
-                Console.WriteLine("Initialising SocketServer and SocketClient");
+                System.IO.File.WriteAllText(@".\logs.txt", "Initialising SocketServer and SocketClient");
                 if(initialiseSocketServer() && initialiseSocketClient())
                 {
                     //get preferences
-                    Console.WriteLine("Initialising preferences");
+                    System.IO.File.WriteAllText(@".\logs.txt", "Initialising preferences");
                     initialisePreferences();
 
                     //initialise activity feeds
@@ -99,7 +99,7 @@ namespace MyTvUI
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.ToString());
+                System.IO.File.WriteAllText(@".\logs.txt", e.ToString());
             }
         }
 
@@ -180,8 +180,8 @@ namespace MyTvUI
             }
             catch (Exception e)
             {
-                Console.WriteLine("Error initialising SocketServer");
-                Console.WriteLine(e.ToString());
+                System.IO.File.WriteAllText(@".\logs.txt", "Error initialising SocketServer");
+                System.IO.File.WriteAllText(@".\logs.txt", e.ToString());
                 return false;
             }
             return true;
@@ -193,14 +193,14 @@ namespace MyTvUI
             if (socketClient.getSessionParameters())
             {
                 userID = socketClient.getUserID();
-                Console.WriteLine("Received user identity: " + userID);
+                System.IO.File.WriteAllText(@".\logs.txt", "Received user identity: " + userID);
 
                     //send handshake message with GUI IP address
                     String myIP = this.getLocalIPAddress();
                     if (myIP != null)
                     {
-                        Console.WriteLine("Starting handshake");
-                        Console.WriteLine("Sending service client my local IP address: " + myIP);
+                        System.IO.File.WriteAllText(@".\logs.txt", "Starting handshake");
+                        System.IO.File.WriteAllText(@".\logs.txt", "Sending service client my local IP address: " + myIP);
                         if(socketClient.connect())
                         {
                             if (socketClient.sendMessage(
@@ -209,26 +209,26 @@ namespace MyTvUI
                             myIP+"\n" +
                             "END_MSG\n"))
                             {
-                                Console.WriteLine("Handshake complete");
+                                System.IO.File.WriteAllText(@".\logs.txt", "Handshake complete");
                                 return true;
                             }
                             else
                             {
-                                Console.WriteLine("Handshake failed");
+                                System.IO.File.WriteAllText(@".\logs.txt", "Handshake failed");
                             }
                         }
                         else{
-                            Console.WriteLine("Could not connect to service client");
+                            System.IO.File.WriteAllText(@".\logs.txt", "Could not connect to service client");
                         }
                     }
                     else
                     {
-                        Console.WriteLine("Error - could not get IP address of local machine");
+                        System.IO.File.WriteAllText(@".\logs.txt", "Error - could not get IP address of local machine");
                     } 
                 }
             else
             {
-                Console.WriteLine("Error - could not get session parameters - userID and endpoint");
+                System.IO.File.WriteAllText(@".\logs.txt", "Error - could not get session parameters - userID and endpoint");
             }
             return false;
         }
@@ -545,7 +545,7 @@ namespace MyTvUI
             }
             catch (InvalidOperationException e2)
             {
-                Console.WriteLine("Exception: " + e2);
+                System.IO.File.WriteAllText(@".\logs.txt", "Exception: " + e2);
             }
         }
 
