@@ -106,6 +106,7 @@ public class SocketServer extends Thread{
 				String message = "";
 				boolean reading = true;
 				while(reading){
+					LOG.debug("running through while again...");
 					String next = in.readLine();
 					LOG.debug("next = "+next);
 					if(!next.equalsIgnoreCase(END_MSG)){
