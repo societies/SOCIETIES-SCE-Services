@@ -274,17 +274,22 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 		}
 
 		public String getChannelPreference(){
+			LOG.debug("Getting channel preference from personalisation manager");
 			String result = "PREFERENCE-ERROR";
 			try {
 				IAction outcome = persoMgr.getPreference((Requestor)userID, userID, myServiceType, myServiceID, "channel").get();
 				if(outcome!=null){
+					LOG.debug("Successfully retrieved channel preference outcome: "+outcome.getvalue());
 					result = outcome.getvalue();
+				}else{
+					LOG.debug("No channel preference was found");
 				}
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			} catch (ExecutionException e) {
 				e.printStackTrace();
 			}
+			LOG.debug("Preference request result = "+result);
 			return result;
 		}
 
