@@ -1117,6 +1117,36 @@ namespace HWUPortal
         }
         #endregion camera stuff
 
+        private void wpfAppControl_FocusableChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            Console.WriteLine("exePanel FocusableChanged()");
+        }
+
+        private void wpfAppControl_GotFocus(object sender, RoutedEventArgs e)
+        {
+            Console.WriteLine("exePanel gotFocus()");
+        }
+
+        private void wpfAppControl_Initialized(object sender, EventArgs e)
+        {
+            Console.WriteLine("exePanel initialised");
+        }
+
+        private void wpfAppControl_IsEnabledChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            Console.WriteLine("exePanel isEnabledChanged: " + e.NewValue);
+        }
+
+        private void wpfAppControl_LayoutUpdated(object sender, EventArgs e)
+        {
+            Console.WriteLine("exePanel layOutUpdated");
+        }
+
+        private void wpfAppControl_LostFocus(object sender, RoutedEventArgs e)
+        {
+            Console.WriteLine("exePanel lost focus");
+        }
+
     }
 
         #endregion kinect processing

@@ -197,7 +197,8 @@ namespace HWUPortal
                     p.EnableRaisingEvents = true;
 
                     this.isExeRunning = true;
-
+                    this.Visibility = System.Windows.Visibility.Visible;
+                    this.Focus();
                 }
                 catch (Exception ex)
                 {
@@ -210,7 +211,7 @@ namespace HWUPortal
 
 
 
-
+                Console.WriteLine("Finished starting exe");
             }
 
             //base.OnVisibleChanged(e);
@@ -298,6 +299,8 @@ namespace HWUPortal
                 MoveWindow(appWin, 0, 0, (int)this.Width, (int)this.Height, true);
             }
             base.OnRender(dc);
+            this.Visibility = System.Windows.Visibility.Visible;
+            this.Focus();
         }
     }
 
