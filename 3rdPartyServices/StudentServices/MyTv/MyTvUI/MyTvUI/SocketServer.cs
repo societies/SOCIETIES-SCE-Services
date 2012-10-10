@@ -51,23 +51,23 @@ namespace MyTvUI
             }
             catch (Exception e)
             {
-                Console.WriteLine("SOCKET_SERVER: Could not listen on port: " + port);
-                Console.WriteLine(e.ToString());
+                System.IO.File.WriteAllText(@".\logs.txt", "SOCKET_SERVER: Could not listen on port: " + port);
+                System.IO.File.WriteAllText(@".\logs.txt", e.ToString());
             }
 
 
             try
             {
-                Console.Write("SOCKET_SERVER: Waiting for connection from service client on port: " + port);
+                System.IO.File.WriteAllText(@".\logs.txt", "SOCKET_SERVER: Waiting for connection from service client on port: " + port);
                 client = server.AcceptTcpClient();
             }
             catch (Exception e)
             {
-                Console.WriteLine("SOCKET_SERVER: Accept failed: " + port);
-                Console.WriteLine(e.ToString());
+                System.IO.File.WriteAllText(@".\logs.txt", "SOCKET_SERVER: Accept failed: " + port);
+                System.IO.File.WriteAllText(@".\logs.txt", e.ToString());
             }
 
-            Console.WriteLine("SOCKET_SERVER: Connected accepted from service client!");
+            System.IO.File.WriteAllText(@".\logs.txt", "SOCKET_SERVER: Connected accepted from service client!");
 
             // Buffer for reading data
             byte[] bytes = new byte[1024];
@@ -82,28 +82,28 @@ namespace MyTvUI
                 {
                     // Translate data bytes to a ASCII string.
                     data = System.Text.Encoding.ASCII.GetString(bytes, 0, i);
-                    Console.WriteLine(String.Format("SOCKET_SERVER: got new input: {0}", data));
+                    System.IO.File.WriteAllText(@".\logs.txt", String.Format("SOCKET_SERVER: got new input: {0}", data));
 
                     if (data.IndexOf("START_MSG") > -1)
                     {
-                        Console.WriteLine("SOCKET_SERVER: Processing new message...");
+                        System.IO.File.WriteAllText(@".\logs.txt", "SOCKET_SERVER: Processing new message...");
 
                         String[] splitData = data.Split('\n');
                         String command = splitData[1];
 
                         if (command.Equals(USER_SESSION_STARTED))
                         {
-                            Console.WriteLine("SOCKET_SERVER: "+USER_SESSION_STARTED + " message received");
+                            System.IO.File.WriteAllText(@".\logs.txt", "SOCKET_SERVER: "+USER_SESSION_STARTED + " message received");
                             stream.Write(okBytes, 0, okBytes.Length);
                         }
                         else if (command.Equals(USER_SESSION_ENDED))
                         {
-                            Console.WriteLine("SOCKET_SERVER: "+USER_SESSION_ENDED + "message received");
+                            System.IO.File.WriteAllText(@".\logs.txt", "SOCKET_SERVER: "+USER_SESSION_ENDED + "message received");
                             stream.Write(okBytes, 0, okBytes.Length);
                         }
                         else
                         {
-                            Console.WriteLine("SOCKET_SERVER: Unknown command received from service client");
+                            System.IO.File.WriteAllText(@".\logs.txt", "SOCKET_SERVER: Unknown command received from service client");
                             stream.Write(notOKBytes, 0, notOKBytes.Length);
                         }
                     }
@@ -113,7 +113,7 @@ namespace MyTvUI
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.ToString());
+                System.IO.File.WriteAllText(@".\logs.txt", e.ToString());
                 client.Close();
                 server.Stop();
             }
