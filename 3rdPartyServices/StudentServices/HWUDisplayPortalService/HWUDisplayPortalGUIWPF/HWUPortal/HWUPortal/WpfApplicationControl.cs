@@ -35,7 +35,7 @@ namespace HWUPortal
         /// Handle to the application Window
         /// </summary>
         IntPtr appWin;
-        IntPtr oldAppWin;
+        
         /// <summary>
         /// The name of the exe to launch
         /// </summary>
