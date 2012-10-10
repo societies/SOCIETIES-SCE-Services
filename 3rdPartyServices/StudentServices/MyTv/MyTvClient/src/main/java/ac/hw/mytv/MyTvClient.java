@@ -38,6 +38,7 @@ import org.societies.api.css.devicemgmt.display.IDisplayDriver;
 import org.societies.api.css.devicemgmt.display.IDisplayableService;
 import org.societies.api.identity.IIdentity;
 import org.societies.api.identity.Requestor;
+import org.societies.api.identity.RequestorService;
 import org.societies.api.osgi.event.CSSEvent;
 import org.societies.api.osgi.event.CSSEventConstants;
 import org.societies.api.osgi.event.EventListener;
@@ -232,7 +233,7 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 	 */
 	public class CommandHandler{
 		public void connectToGUI(String gui_ip){
-			System.out.println("Connecting to service GUI on IP address: "+gui_ip);
+			LOG.debug("Connecting to service GUI on IP address: "+gui_ip);
 			//disconnect any existing connections
 			if(socketClient != null){
 				if(socketClient.isConnected()){
@@ -260,7 +261,7 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 		}
 
 		public void processUserAction(String parameterName, String value){
-			System.out.println("Processing user action: "+parameterName+" = "+value);
+			LOG.debug("Processing user action: "+parameterName+" = "+value);
 
 			if(parameterName.equalsIgnoreCase("channel")){
 				currentChannel = new Integer(value).intValue();
@@ -277,7 +278,8 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 			LOG.debug("Getting channel preference from personalisation manager");
 			String result = "PREFERENCE-ERROR";
 			try {
-				IAction outcome = persoMgr.getPreference((Requestor)userID, userID, myServiceType, myServiceID, "channel").get();
+				RequestorService requestor = new RequestorService(userID, myServiceID);
+				IAction outcome = persoMgr.getPreference(requestor, userID, myServiceType, myServiceID, "channel").get();
 				if(outcome!=null){
 					LOG.debug("Successfully retrieved channel preference outcome: "+outcome.getvalue());
 					result = outcome.getvalue();
@@ -285,9 +287,9 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 					LOG.debug("No channel preference was found");
 				}
 			} catch (InterruptedException e) {
-				e.printStackTrace();
+				LOG.debug("Error retrieving preference");
 			} catch (ExecutionException e) {
-				e.printStackTrace();
+				LOG.debug("Error retrieving preference");
 			}
 			LOG.debug("Preference request result = "+result);
 			return result;
@@ -301,9 +303,9 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 					result = action.getvalue();
 				}
 			} catch (InterruptedException e) {
-				e.printStackTrace();
+				LOG.debug("Error retrieving preference");
 			} catch (ExecutionException e) {
-				e.printStackTrace();
+				LOG.debug("Error retrieving preference");
 			}
 			return result;
 		}
