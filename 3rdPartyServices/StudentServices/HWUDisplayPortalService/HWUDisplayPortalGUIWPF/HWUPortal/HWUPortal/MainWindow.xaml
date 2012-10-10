@@ -54,9 +54,7 @@
                     VerticalAlignment="Stretch" Width="1000" Height="600"  Background="{x:Null}" Canvas.Left="320" Visibility="Hidden">
                 <WinForms:FlowLayoutPanel/>
             </WindowsFormsHost>-->
-        
-        <hwu:WpfApplicationControl x:Name="wpfAppControl" Canvas.Left="320" Canvas.Top="20" MinWidth="1000" MinHeight="600" MaxWidth="1000" MaxHeight="600"></hwu:WpfApplicationControl>
-        <WebBrowser x:Name="webBrowser" Canvas.Left="320" Canvas.Top="20" MinWidth="1000" MinHeight="600"></WebBrowser>
+        <WebBrowser x:Name="webBrowser" Canvas.Left="320" Canvas.Top="20" MinWidth="1000" MinHeight="600"></WebBrowser> 
         <Controls:HoverButton TimeInterval="3000" Content="Log out" TextBlock.TextAlignment="Center" VerticalContentAlignment="Center" Height="55" HorizontalAlignment="Left" Margin="1125,624,0,0" Name="logoutButton" VerticalAlignment="Top" Width="201" Click="logoutButton_Click">
 
             <Controls:HoverButton.Background>
@@ -86,6 +84,7 @@
                 <ImageBrush ImageSource="/HWUPortal;component/Images/hand.png" />
             </Ellipse.Fill>
         </Ellipse>
+        <hwu:WpfApplicationControl x:Name="wpfAppControl" Canvas.Left="320" Canvas.Top="20" MinWidth="1000" MinHeight="600" MaxWidth="1000" MaxHeight="600"></hwu:WpfApplicationControl>
     </Canvas>
     
     

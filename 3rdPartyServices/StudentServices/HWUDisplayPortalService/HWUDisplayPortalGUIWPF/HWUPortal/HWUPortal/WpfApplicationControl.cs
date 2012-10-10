@@ -282,6 +282,7 @@ namespace HWUPortal
 
         protected override void ParentLayoutInvalidated(UIElement child)
         {
+            Console.WriteLine("ParentLayoutInvalidated");
             if (this.appWin != IntPtr.Zero)
             {
                 MoveWindow(appWin, 0, 0, (int)this.Width, (int)this.Height, true);
@@ -291,6 +292,7 @@ namespace HWUPortal
 
         protected override void OnRender(System.Windows.Media.DrawingContext dc)
         {
+            Console.WriteLine("onRender");
             if (this.appWin != IntPtr.Zero)
             {
                 MoveWindow(appWin, 0, 0, (int)this.Width, (int)this.Height, true);
