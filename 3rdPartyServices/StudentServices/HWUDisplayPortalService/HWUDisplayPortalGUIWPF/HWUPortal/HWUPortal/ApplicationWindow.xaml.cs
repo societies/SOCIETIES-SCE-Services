@@ -13,6 +13,8 @@ using System.Windows.Shapes;
 using ApplicationControl;
 namespace HWUPortal
 {
+
+    //THIS CLASS IS NOT BEING USED IN THE PROJECT
     /// <summary>
     /// Interaction logic for ApplicationWindow.xaml
     /// </summary>

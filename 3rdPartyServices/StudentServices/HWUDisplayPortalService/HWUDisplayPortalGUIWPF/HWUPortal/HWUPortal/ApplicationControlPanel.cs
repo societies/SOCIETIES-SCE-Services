@@ -4,7 +4,6 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
 using System.Data;
-using System.Windows.Controls;
 using System.Windows;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -17,14 +16,13 @@ namespace HWUPortal
     /// Application Display Control
     /// </summary>
     [
-    ToolboxBitmap(typeof(WpfApplicationControl), "AppControl.bmp"),
+    ToolboxBitmap(typeof(ApplicationControlPanel), "AppControl.bmp"),
     ]
-    public class WpfApplicationControl : System.Windows.Controls.Panel
+    public class ApplicationControlPanel : System.Windows.Forms.Panel
     {
 
         public delegate void ApplicationExitedHandler(object sender, ApplicationControlArgs args);
-
-
+        
         public event ApplicationExitedHandler appExit;
         /// <summary>
         /// Track if the application has been created
@@ -79,7 +77,7 @@ namespace HWUPortal
         /// <summary>
         /// Constructor
         /// </summary>
-        public WpfApplicationControl()
+        public ApplicationControlPanel()
         {
         }
 
@@ -132,14 +130,26 @@ namespace HWUPortal
         /// Force redraw of control when size changes
         /// </summary>
         /// <param name="e">Not used</param>
-        protected override void OnRenderSizeChanged(SizeChangedInfo sInfo)
+        protected override void OnSizeChanged(EventArgs e)
         {
-            this.InvalidateVisual();
-            
-            base.OnRenderSizeChanged(sInfo);
+            this.Invalidate();
+            base.OnSizeChanged(e);
         }
 
 
+
+        //protected override void OnRenderSizeChanged(SizeChangedInfo sInfo)
+        //{
+        //    this.InvalidateVisual();
+            
+        //    base.OnRenderSizeChanged(sInfo);
+        //}
+
+        public void setSize(int width, int height)
+        {
+            this.Width = width;
+            this.Height = height;
+        }
         /// <summary>
         /// Creeate control when visibility changes
         /// </summary>
@@ -182,23 +192,21 @@ namespace HWUPortal
 
                     // Put it into this form
                     
-                    IntPtr parentWindowHandle = new WindowInteropHelper(Application.Current.MainWindow).Handle;
-                    SetParent(appWin, parentWindowHandle);
+                   
+                    SetParent(appWin, this.Handle);
 
                     // Remove border 
                     SetWindowLong(appWin, GWL_STYLE, WS_VISIBLE);
 
                     // Move the window to overlay it on this window
                     
-                    MoveWindow(appWin, 320, 20, (int) this.Width, (int) this.Height, true);
+                    MoveWindow(appWin, 0, 0, (int) this.Width, (int) this.Height, true);
 
                     Console.WriteLine("started exe " + exeName);
                     p.Exited += new EventHandler(p_Exited);
                     p.EnableRaisingEvents = true;
 
                     this.isExeRunning = true;
-                    this.Visibility = System.Windows.Visibility.Visible;
-                    this.Focus();
                 }
                 catch (Exception ex)
                 {
@@ -268,40 +276,61 @@ namespace HWUPortal
         }
 
 
-        /// <summary>
-        /// Update display of the executable
-        /// </summary>
-        /// <param name="e">Not used</param>
-        //protected override void OnResize(EventArgs e)
-        //{
-        //    if (this.appWin != IntPtr.Zero)
-        //    {
-        //        MoveWindow(appWin, 0, 0, (int)this.Width, (int)this.Height, true);
-        //    }
-        //    //base.OnResize(e);
-        //}
+         //<summary>
+         //Update display of the executable
+         //</summary>
+         /// <summary>
+         /// 
+         /// </summary>
+         /// <param name="e"></param>
+        //<param name="e">Not used</param>
 
-        protected override void ParentLayoutInvalidated(UIElement child)
+        protected override void OnResize(EventArgs e)
         {
-            Console.WriteLine("ParentLayoutInvalidated");
             if (this.appWin != IntPtr.Zero)
             {
                 MoveWindow(appWin, 0, 0, (int)this.Width, (int)this.Height, true);
             }
-            base.ParentLayoutInvalidated(child);
+            //base.OnResize(e);
         }
 
-        protected override void OnRender(System.Windows.Media.DrawingContext dc)
+        private void InitializeComponent()
         {
-            Console.WriteLine("onRender");
-            if (this.appWin != IntPtr.Zero)
-            {
-                MoveWindow(appWin, 0, 0, (int)this.Width, (int)this.Height, true);
-            }
-            base.OnRender(dc);
-            this.Visibility = System.Windows.Visibility.Visible;
-            this.Focus();
+            this.SuspendLayout();
+            // 
+            // ApplicationControlPanel
+            // 
+            this.Size = new System.Drawing.Size(1300, 690);
+           
+            this.ResumeLayout(false);
+
         }
+
+
+    //    protected override void ParentLayoutInvalidated(UIElement child)
+    //    {
+    //        Console.WriteLine("ParentLayoutInvalidated");
+    //        if (this.appWin != IntPtr.Zero)
+    //        {
+    //            MoveWindow(appWin, 0, 0, (int)this.Width, (int)this.Height, true);
+    //        }
+    //        base.ParentLayoutInvalidated(child);
+    //    }
+
+    //    protected override void OnRender(System.Windows.Media.DrawingContext dc)
+    //    {
+    //        Console.WriteLine("onRender");
+    //        if (this.appWin != IntPtr.Zero)
+    //        {
+    //            MoveWindow(appWin, 0, 0, (int)this.Width, (int)this.Height, true);
+    //        }
+    //        base.OnRender(dc);
+    //        this.Visibility = System.Windows.Visibility.Visible;
+    //        this.Focus();
+    //    }
+    
+    
+    
     }
 
 

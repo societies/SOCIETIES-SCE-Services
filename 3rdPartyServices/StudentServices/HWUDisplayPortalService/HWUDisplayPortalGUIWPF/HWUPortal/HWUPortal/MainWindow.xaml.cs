@@ -26,14 +26,6 @@ namespace HWUPortal
     /// </summary>
     public partial class MainWindow : Window
     {
-        /*
-         * 
-         */
-
-        
-
-        /*
-         * */
 
         /*
          * */
@@ -59,8 +51,8 @@ namespace HWUPortal
         
 
         System.Windows.Forms.FlowLayoutPanel flpPanel;
-        //ApplicationControl.ApplicationControl appControl;
-        //WpfApplicationControl wpfAppControl;
+      
+        StandaloneAppControl standaloneAppControl;
 
         #region Kinectvariables
         KinectSensor kinect;
@@ -112,9 +104,9 @@ namespace HWUPortal
 
             //flpPanel = this.wfhDate.Child as System.Windows.Forms.FlowLayoutPanel;
 
+
+            standaloneAppControl = new StandaloneAppControl();
             
-            //wpfAppControl = new WpfApplicationControl();
-            wpfAppControl.appExit += new WpfApplicationControl.ApplicationExitedHandler(onExeDestroyed);
             //appControl = new ApplicationControl.ApplicationControl();
             //appControl.appExit += new ApplicationControl.ApplicationControl.ApplicationExitedHandler(onExeDestroyed);
 
@@ -266,17 +258,13 @@ namespace HWUPortal
             
             //appWindow.Show();
             //appWindow.startExe(e);
-            wpfAppControl.Focusable = true;
-            wpfAppControl.ExeName = sInfo.serviceExe;
-            wpfAppControl.LoadExe(e);
-            wpfAppControl.Visibility = System.Windows.Visibility.Visible;
-            wpfAppControl.Focus();
-            wpfAppControl.BringIntoView();
             
-            Console.WriteLine("Visible: "+wpfAppControl.IsVisible);
-            Console.WriteLine("Focused: "+wpfAppControl.IsFocused);
-            //Canvas.SetLeft(wpfAppControl, 320);
-            //Canvas.SetTop(wpfAppControl, 20);
+            standaloneAppControl.ExeName = sInfo.serviceExe;
+            
+            standaloneAppControl.LoadExe(e);
+            
+            //Canvas.SetLeft(appControlPanelStdAlone, 320);
+            //Canvas.SetTop(appControlPanelStdAlone, 20);
             //appControl.ExeName = sInfo.serviceExe;
             //appControl.LoadExe(e);
             //wfhDate.Visibility = System.Windows.Visibility.Visible;
@@ -628,7 +616,7 @@ namespace HWUPortal
             Console.WriteLine("window closed");
         }
 
-        private void onExeDestroyed(object sender, ApplicationControlArgs args)
+        public void onExeDestroyed(object sender, ApplicationControlArgs args)
         {
             if (!args.GracefullyExited)
             {
@@ -724,7 +712,7 @@ namespace HWUPortal
             if (sInfo.serviceType == ServiceType.EXE || sInfo.serviceType == ServiceType.JAR)
             {
                 //appWindow.Close();
-                wpfAppControl.DestroyExe(e);
+                standaloneAppControl.DestroyExe(e);
                 //appControl.DestroyExe(e);
                 //wfhDate.Visibility = System.Windows.Visibility.Hidden;
                 KinectSensor.KinectSensors.StatusChanged += KinectSensors_StatusChanged;
@@ -1120,56 +1108,9 @@ namespace HWUPortal
         }
         #endregion camera stuff
 
-        private void wpfAppControl_FocusableChanged(object sender, DependencyPropertyChangedEventArgs e)
-        {
-            Console.WriteLine("exePanel FocusableChanged()");
-        }
-
-        private void wpfAppControl_GotFocus(object sender, RoutedEventArgs e)
-        {
-            Console.WriteLine("exePanel gotFocus()");
-        }
-
-        private void wpfAppControl_Initialized(object sender, EventArgs e)
-        {
-            Console.WriteLine("exePanel initialised");
-        }
-
-        private void wpfAppControl_IsEnabledChanged(object sender, DependencyPropertyChangedEventArgs e)
-        {
-            Console.WriteLine("exePanel isEnabledChanged: " + e.NewValue);
-        }
-
-        private void wpfAppControl_LayoutUpdated(object sender, EventArgs e)
-        {
-            Console.WriteLine("exePanel layOutUpdated");
-        }
-
-        private void wpfAppControl_LostFocus(object sender, RoutedEventArgs e)
-        {
-            Console.WriteLine("exePanel lost focus");
-        }
 
     }
 
         #endregion kinect processing
 
-
-    //private void Kinect_ColorFrameReady(object sender, ColorImageFrameReadyEventArgs args)
-    //{
-    //    Console.WriteLine("color frame ready");
-    //    using (ColorImageFrame frame = args.OpenColorImageFrame())
-    //    {
-    //        if (frame != null)
-    //        {
-    //            byte[] pixelData = new byte[frame.PixelDataLength];
-    //            frame.CopyPixelDataTo(pixelData);
-
-    //            kinectTest.Show();
-    //            kinectTest.setImageSource(BitmapImage.Create(frame.Width, frame.Height, 96, 96, PixelFormats.Bgr32, null, pixelData, frame.Width * frame.BytesPerPixel));
-    //            //BitmapSource source = BitmapImage.Create(frame.Width, frame.Height, 96, 96, PixelFormats.Bgr32, null, pixelData, frame.Width * frame.BytesPerPixel);
-    //            //kinectTest.setImageSource(source);
-    //        }
-    //    }
-    //}
 }

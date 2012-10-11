@@ -84,7 +84,7 @@
                 <ImageBrush ImageSource="/HWUPortal;component/Images/hand.png" />
             </Ellipse.Fill>
         </Ellipse>
-        <hwu:WpfApplicationControl x:Name="wpfAppControl" Canvas.Left="320" Canvas.Top="20" MinWidth="1000" MinHeight="600" MaxWidth="1000" MaxHeight="600" FocusableChanged="wpfAppControl_FocusableChanged" GotFocus="wpfAppControl_GotFocus" Initialized="wpfAppControl_Initialized" IsEnabledChanged="wpfAppControl_IsEnabledChanged" LayoutUpdated="wpfAppControl_LayoutUpdated" LostFocus="wpfAppControl_LostFocus"></hwu:WpfApplicationControl>
+        
     </Canvas>
     
     
