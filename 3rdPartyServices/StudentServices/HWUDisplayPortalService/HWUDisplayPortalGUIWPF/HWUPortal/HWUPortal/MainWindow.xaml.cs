@@ -266,12 +266,15 @@ namespace HWUPortal
             
             //appWindow.Show();
             //appWindow.startExe(e);
-
+            wpfAppControl.Focusable = true;
             wpfAppControl.ExeName = sInfo.serviceExe;
             wpfAppControl.LoadExe(e);
             wpfAppControl.Visibility = System.Windows.Visibility.Visible;
             wpfAppControl.Focus();
-            Console.WriteLine(wpfAppControl.IsVisible);
+            wpfAppControl.BringIntoView();
+            
+            Console.WriteLine("Visible: "+wpfAppControl.IsVisible);
+            Console.WriteLine("Focused: "+wpfAppControl.IsFocused);
             //Canvas.SetLeft(wpfAppControl, 320);
             //Canvas.SetTop(wpfAppControl, 20);
             //appControl.ExeName = sInfo.serviceExe;

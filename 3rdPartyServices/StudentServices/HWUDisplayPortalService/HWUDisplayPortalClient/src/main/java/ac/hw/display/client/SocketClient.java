@@ -198,10 +198,10 @@ public class SocketClient {
 		ServiceInfo sInfo2 = new ServiceInfo (null, "PolicyEditor", "http://www.macs.hw.ac.uk/~ceeep1/societies/services/POLICY~1.JAR", false);
 		ServiceInfo sInfo3 = new ServiceInfo(null, "Youtube", "http://www.youtube.com/watch?v=3OnnDqH6Wj8", false);
 		ServiceInfo sInfo4 = new ServiceInfo(null, "MyTV", "http://www.macs.hw.ac.uk/~ceesmm1/societies/mytv/MyTvUI.exe", true);
-		userSession.addService(sInfo4);
-		userSession.addService(sInfo);
-		userSession.addService(sInfo3);
 		userSession.addService(sInfo2);
+		//userSession.addService(sInfo);
+		//userSession.addService(sInfo3);
+		//userSession.addService(sInfo2);
 		//userSession.addService(sInfo2);
 		//userSession.addService(sInfo3);
 		c.startSession(userSession);
@@ -212,7 +212,8 @@ public class SocketClient {
 			e.printStackTrace();
 		}
 		
-		//c.startService(userSession, sInfo.getServiceName());
+		
+		c.startService(userSession, sInfo2.getServiceName());
 		/*
 		URL url;
 		try {
