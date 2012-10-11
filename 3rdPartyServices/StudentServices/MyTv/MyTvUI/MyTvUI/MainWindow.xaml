@@ -1,14 +1,28 @@
 ﻿<Window x:Class="MyTvUI.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="MyTV" Height="600" Width="1000" Loaded="Window_Loaded" Closing="Window_Closing" 
+        Title="MyTV" Height="700" Width="1340" Loaded="Window_Loaded" Closing="Window_Closing" 
         xmlns:my="clr-namespace:Microsoft.Samples.Kinect.WpfViewers;assembly=Microsoft.Samples.Kinect.WpfViewers" 
         xmlns:Controls="clr-namespace:Coding4Fun.Kinect.Wpf.Controls;assembly=Coding4Fun.Kinect.Wpf">
-    
     <Canvas>
-        <DockPanel Canvas.Left="692" Canvas.Top="64" Height="485" Name="dockPanel1" Width="274">
-            <Label Content="My Updates" Height="49" Name="label6" Width="221" DockPanel.Dock="Top" FontSize="28" Foreground="DarkRed"/>
-            <ListBox Height="436" Name="listBox1" Width="255" DockPanel.Dock="Bottom" DataContext="{Binding}" FontSize="12" FontWeight="Bold" Foreground="Black" Background="LightGray" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Hidden">
+        
+        <Canvas.Background>
+            <ImageBrush ImageSource="/MyTvUI;component/Images/grey.jpg" />
+        </Canvas.Background>
+        
+        <Ellipse Height="80" Name="rightEllipse" Width="80" Panel.ZIndex="1" Canvas.Left="1226" Canvas.Top="568">
+            <Ellipse.Fill>
+                <ImageBrush ImageSource="Images/pointer.png" />
+            </Ellipse.Fill>
+        </Ellipse>
+        
+        
+
+        <DockPanel Canvas.Left="1052" Canvas.Top="90" Height="558" Name="dockPanel1" Width="254">
+            <DockPanel.Background>
+                <ImageBrush ImageSource="/MyTvUI;component/Images/group_background.png" />
+            </DockPanel.Background>
+            <ListBox Height="503" Name="listBox1" Width="237" DockPanel.Dock="Bottom"  DataContext="{Binding}" FontSize="12" FontWeight="Bold" Foreground="Black" Background="{x:Null}" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Hidden" BorderBrush="{x:Null}">
                 <ListBox.ItemTemplate>
                     <DataTemplate>
                         <DockPanel Name="activities_list">
@@ -29,77 +43,106 @@
                 </ListBox.ItemTemplate>
             </ListBox>
         </DockPanel>
-        
-        <WebBrowser Canvas.Left="68" Canvas.Top="12" Height="360" Name="tvBrowser" Width="605" Loaded="tvBrowser_WindowLoaded" Navigated="tvBrowser_Navigated" Cursor="None" DataContext="{Binding}" />
-   
-        <my:KinectSensorChooser HorizontalAlignment="Left" Margin="503,379,0,0" Name="kinectSensorChooser1" VerticalAlignment="Top" Width="460" Canvas.Left="-369" Canvas.Top="-342" Height="295"/>
-        
+                
         <!-- Hover button regions -->
-        <Controls:HoverButton Canvas.Left="108" Canvas.Top="378" Name="channel1HoverRegion" ImageSize="100" TimeInterval="1500" Height="60" Width="60" Canvas.ZIndex="1" />
-        <Controls:HoverButton Canvas.Left="218" Canvas.Top="378" Name="channel2HoverRegion" ImageSize="100" TimeInterval="1500" Height="60" Width="60" Canvas.ZIndex="1" />
-        <Controls:HoverButton Canvas.Left="328" Canvas.Top="378" Name="channel3HoverRegion" Height="60" ImageSize="100" TimeInterval="1500" Width="60" Canvas.ZIndex="1" FontSize="11" />
-        <Controls:HoverButton Canvas.Left="438" Canvas.Top="378" Name="channel4HoverRegion" Height="60" ImageSize="100" TimeInterval="1500" Width="60" Canvas.ZIndex="1" />
-        <Controls:HoverButton Canvas.Left="548" Canvas.Top="378" Name="offHoverRegion" Height="60" ImageSize="100" TimeInterval="1500" Width="60" Canvas.ZIndex="1" />
-        <Controls:HoverButton Name="volumeUpHoverRegion" Height="60" Width="60" TimeInterval="1500" Canvas.ZIndex="1" Canvas.Left="6" Canvas.Top="121" />
-        <Controls:HoverButton Name="volumeDownHoverRegion" Height="60" Width="60" TimeInterval="1500" Canvas.ZIndex="1" Canvas.Left="6" Canvas.Top="231" />
-        <Controls:HoverButton Name="exitHoverRegion" Height="60" Width="60" TimeInterval="1500" Canvas.ZIndex="1" Canvas.Left="918" Canvas.Top="0" />
+        <Controls:HoverButton Name="exitHoverRegion" Height="60" Width="60" TimeInterval="1500" Canvas.ZIndex="1" Canvas.Left="1258" Canvas.Top="0" />
 
         <!-- Hover button rectangles -->
-        <Rectangle Canvas.Left="108" Canvas.Top="378" Height="60" Name="channel1Button" Width="60">
-            <Rectangle.Fill>
-                <ImageBrush ImageSource="Images/channel_background.png"/>
-            </Rectangle.Fill>
-        </Rectangle>
-        <Rectangle Canvas.Left="218" Canvas.Top="378" Height="60" Name="channel2Button" Width="60">
-            <Rectangle.Fill>
-                <ImageBrush ImageSource="Images/channel_background.png"/>
-            </Rectangle.Fill>
-        </Rectangle>
-        <Rectangle Canvas.Left="328" Canvas.Top="378" Height="60" Name="channel3Button" Width="60">
-            <Rectangle.Fill>
-                <ImageBrush ImageSource="Images/channel_background.png"/>
-            </Rectangle.Fill>
-        </Rectangle>
-        <Rectangle Canvas.Left="438" Canvas.Top="378" Height="60" Name="channel4Button" Width="60">
-            <Rectangle.Fill>
-                <ImageBrush ImageSource="Images/channel_background.png"/>
-            </Rectangle.Fill>
-        </Rectangle>
-        <Rectangle Canvas.Left="548" Canvas.Top="378" Height="60" Name="offButton" Width="60">
-            <Rectangle.Fill>
-                <ImageBrush ImageSource="Images/off_button.jpg"/>
-            </Rectangle.Fill>
-        </Rectangle>
-        <Rectangle Height="60" Width="60" Name="volumeUp" Canvas.Left="6" Canvas.Top="121">
-            <Rectangle.Fill>
-                <ImageBrush ImageSource="Images/volume_up.png"/>
-            </Rectangle.Fill>
-        </Rectangle>
-        <Rectangle Height="60" Width="60" Name="volumeDown" Canvas.Left="6" Canvas.Top="231">
-            <Rectangle.Fill>
-                <ImageBrush ImageSource="Images/volume_down.png"/>
-            </Rectangle.Fill>
-        </Rectangle>
-        <Rectangle Height="60" Width="60" Name="quit" Canvas.Left="918" Canvas.Top="0">
+        <Rectangle Height="60" Width="60" Name="quit" Canvas.Left="1258" Canvas.Top="0">
             <Rectangle.Fill>
                 <ImageBrush ImageSource="Images/close_button.png"/>
             </Rectangle.Fill>
         </Rectangle>
-        
-        <!-- Hover button labels -->
-        <Label Canvas.Left="108" Canvas.Top="378" Content="NEWS" Height="60" Name="label1" Width="60" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontSize="16" Foreground="DarkRed" />
-        <Label Canvas.Left="218" Canvas.Top="378" Content="SPORT" FontSize="16" Height="60" HorizontalContentAlignment="Center" Name="label2" VerticalContentAlignment="Center" Width="60" Foreground="DarkRed" />
-        <Label Canvas.Left="328" Canvas.Top="378" Content="CARTOONS" FontSize="9" Height="60" HorizontalContentAlignment="Center" Name="label3" VerticalContentAlignment="Center" Width="60" Foreground="DarkRed" />
-        <Label Canvas.Left="438" Canvas.Top="378" Content="MUSIC" FontSize="16" Height="60" HorizontalContentAlignment="Center" Name="label4" VerticalContentAlignment="Center" Width="60" Foreground="DarkRed" />
-        <!--Label Canvas.Left="526" Canvas.Top="378" Content="OFF" FontSize="16" Height="60" HorizontalContentAlignment="Center" Name="label5" VerticalContentAlignment="Center" Width="60" /-->
-        
-        <Ellipse Canvas.Left="936" Canvas.Top="519" Height="25" Name="rightEllipse" Width="25">
-            <Ellipse.Fill>
-                <ImageBrush ImageSource="Images/pointer.png"/>
-            </Ellipse.Fill>
-        </Ellipse>
-        <DockPanel Canvas.Left="12" Canvas.Top="464" Height="84" Name="dockPanel2" Width="661" Background="LightGray">
-            
+      
+        <DockPanel Canvas.Left="492" Canvas.Top="552" Height="97" Name="dockPanel2" Width="542">
+            <DockPanel.Background>
+                <ImageBrush ImageSource="/MyTvUI;component/Images/group_background.png" />
+            </DockPanel.Background>
         </DockPanel>
+
+        <DockPanel Canvas.Left="12" Canvas.Top="550" Height="97" Name="dockPanel3" Width="458">
+            <DockPanel.Background>
+                <ImageBrush ImageSource="/MyTvUI;component/Images/group_background.png" />
+            </DockPanel.Background>
+        </DockPanel>
+
+        <Canvas Canvas.Left="12" Canvas.Top="57" Height="453" Name="canvas1" Width="1020">
+            <WebBrowser Canvas.Left="70" Canvas.Top="18" Height="418" Name="tvBrowser" Width="737" Loaded="tvBrowser_WindowLoaded" Navigated="tvBrowser_Navigated" Cursor="None" DataContext="{Binding}" />
+            <my:KinectSensorChooser HorizontalAlignment="Left" Margin="503,379,0,0" Name="kinectSensorChooser1" VerticalAlignment="Top" Width="460" Canvas.Left="-297" Canvas.Top="-305" Height="295"/>
+            <Controls:HoverButton Name="volumeUpHoverRegion" Height="60" Width="60" TimeInterval="1500" Canvas.ZIndex="1" Canvas.Left="925" Canvas.Top="343" />
+            <Controls:HoverButton Name="volumeDownHoverRegion" Height="60" Width="60" TimeInterval="1500" Canvas.ZIndex="1" Canvas.Left="835" Canvas.Top="343" />
+            <Rectangle Height="60" Width="60" Name="volumeUp" Canvas.Left="925" Canvas.Top="343">
+                <Rectangle.Fill>
+                    <ImageBrush ImageSource="Images/volume_up.png"/>
+                </Rectangle.Fill>
+            </Rectangle>
+            <Rectangle Height="60" Width="60" Name="volumeDown" Canvas.Left="835" Canvas.Top="343">
+                <Rectangle.Fill>
+                    <ImageBrush ImageSource="Images/volume_down.png"/>
+                </Rectangle.Fill>
+            </Rectangle>
+            <Rectangle Canvas.Left="835" Canvas.Top="143" Height="60" Name="channel4Button" Width="60">
+                <Rectangle.Fill>
+                    <ImageBrush ImageSource="Images/channel_background.png" />
+                </Rectangle.Fill>
+            </Rectangle>
+            <Rectangle Canvas.Left="925" Canvas.Top="143" Height="60" Name="channel3Button" Width="60">
+                <Rectangle.Fill>
+                    <ImageBrush ImageSource="Images/channel_background.png" />
+                </Rectangle.Fill>
+            </Rectangle>
+            <Rectangle Canvas.Left="835" Canvas.Top="60" Height="60" Name="channel2Button" Width="60">
+                <Rectangle.Fill>
+                    <ImageBrush ImageSource="Images/channel_background.png" />
+                </Rectangle.Fill>
+            </Rectangle>
+            <Rectangle Canvas.Left="925" Canvas.Top="60" Height="60" Name="channel1Button" Width="60">
+                <Rectangle.Fill>
+                    <ImageBrush ImageSource="Images/channel_background.png" />
+                </Rectangle.Fill>
+            </Rectangle>
+            <Controls:HoverButton Canvas.Left="835" Canvas.Top="60" Name="channel2HoverRegion" ImageSize="100" TimeInterval="1500" Height="60" Width="60" Canvas.ZIndex="1" />
+            <Label Canvas.Left="835" Canvas.Top="60" Content="SPORT" FontSize="16" Height="60" HorizontalContentAlignment="Center" Name="label2" VerticalContentAlignment="Center" Width="60" Foreground="Black"/>
+            
+            <Controls:HoverButton Canvas.Left="925" Canvas.Top="60" Name="channel1HoverRegion" ImageSize="100" TimeInterval="1500" Height="60" Width="60" Canvas.ZIndex="1" />
+            <Label Canvas.Left="925" Canvas.Top="60" Content="NEWS" Height="60" Name="label1" Width="60" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontSize="16" Foreground="Black" />
+            
+            <Controls:HoverButton Canvas.Left="835" Canvas.Top="143" Name="channel4HoverRegion" Height="60" ImageSize="100" TimeInterval="1500" Width="60" Canvas.ZIndex="1" />
+            <Label Canvas.Left="835" Canvas.Top="143" Content="MUSIC" FontSize="16" Height="60" HorizontalContentAlignment="Center" Name="label4" VerticalContentAlignment="Center" Width="60" Foreground="Black" />
+            
+            <Controls:HoverButton Canvas.Left="925" Canvas.Top="143" Name="channel3HoverRegion" Height="60" ImageSize="100" TimeInterval="1500" Width="60" Canvas.ZIndex="1" FontSize="11" />
+            <Label Canvas.Left="925" Canvas.Top="143" Content="CARTOONS" FontSize="9" Height="60" HorizontalContentAlignment="Center" Name="label3" VerticalContentAlignment="Center" Width="60" Foreground="Black" />
+            
+            <Controls:HoverButton Canvas.Left="877" Canvas.Top="238" Name="offHoverRegion" Height="70" ImageSize="100" TimeInterval="1500" Width="70" Canvas.ZIndex="1" />
+            <Rectangle Canvas.Left="877" Canvas.Top="238" Height="70" Name="offButton" Width="70">
+                <Rectangle.Fill>
+                    <ImageBrush ImageSource="Images/off_button.png" />
+                </Rectangle.Fill>
+            </Rectangle>
+            <!-- Hover button labels -->
+            <Canvas.Background>
+                <ImageBrush ImageSource="/MyTvUI;component/Images/group_background.png" />
+            </Canvas.Background>
+        </Canvas>
+        <Rectangle Canvas.Left="1082" Canvas.Top="65" Height="35" Name="rectangle3" Width="165">
+            <Rectangle.Fill>
+                <ImageBrush ImageSource="/MyTvUI;component/Images/my_updates.png" />
+            </Rectangle.Fill>
+        </Rectangle>
+        <Rectangle Canvas.Left="98" Canvas.Top="-35" Height="130" Name="rectangle1" Width="218">
+            <Rectangle.Fill>
+                <ImageBrush ImageSource="/MyTvUI;component/Images/mytv.png" />
+            </Rectangle.Fill>
+        </Rectangle>
+        <Rectangle Canvas.Left="0" Canvas.Top="0" Height="37" Name="rectangle2" Stroke="Black" Width="38">
+            <Rectangle.Fill>
+                <ImageBrush ImageSource="/MyTvUI;component/Images/logo.png" />
+            </Rectangle.Fill>
+        </Rectangle>
+        <Rectangle Canvas.Left="542" Canvas.Top="525" Height="35" Name="rectangle4" Width="200">
+            <Rectangle.Fill>
+                <ImageBrush ImageSource="/MyTvUI;component/Images/my_schedule.png" />
+            </Rectangle.Fill>
+        </Rectangle>
     </Canvas>
 </Window>

@@ -138,14 +138,6 @@
     <AppDesigner Include="Properties\" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Images\channel_background.png" />
-    <Resource Include="Images\close_button.png" />
-    <Resource Include="Images\me.JPG" />
-    <Resource Include="Images\speech-bubble.png" />
-    <Resource Include="Images\volume_down.png" />
-    <Resource Include="Images\volume_up.png" />
-  </ItemGroup>
-  <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.0,Profile=Client">
       <Visible>False</Visible>
       <ProductName>Microsoft .NET Framework 4 Client Profile %28x86 and x64%29</ProductName>
@@ -168,10 +160,6 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Images\off_button.jpg" />
-    <Resource Include="Images\pointer.png" />
-  </ItemGroup>
-  <ItemGroup>
     <EmbeddedResource Include="dll\Microsoft.Samples.Kinect.WpfViewers.dll" />
   </ItemGroup>
   <ItemGroup>
@@ -179,6 +167,31 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="dll\Microsoft.Expression.Drawing.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\channel_background.png" />
+    <Resource Include="Images\close_button.png" />
+    <Resource Include="Images\me.JPG" />
+    <Resource Include="Images\pointer.png" />
+    <Resource Include="Images\logo.png" />
+    <Resource Include="Images\speech-bubble.png" />
+    <Resource Include="Images\volume_down.png" />
+    <Resource Include="Images\volume_up.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\off_button.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\grey.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\mytv.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\my_updates.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\group_background.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

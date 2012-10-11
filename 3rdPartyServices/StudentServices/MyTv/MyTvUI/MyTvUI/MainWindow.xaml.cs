@@ -90,12 +90,12 @@ namespace MyTvUI
                     //get preferences
                     System.IO.File.WriteAllText(@".\logs.txt", "Initialising preferences");
                     initialisePreferences();
+                }
 
-                    //initialise activity feeds
-                    ArrayList activities = new ArrayList();
-                    listBox1.ItemsSource = activities;
-                    ActivityFeedManager afMgr = new ActivityFeedManager(activities);
-                }                
+                //initialise activity feeds
+                ArrayList activities = new ArrayList();
+                listBox1.ItemsSource = activities;
+                ActivityFeedManager afMgr = new ActivityFeedManager(activities);
             }
             catch (Exception e)
             {
