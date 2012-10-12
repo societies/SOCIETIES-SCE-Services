@@ -56,8 +56,8 @@ namespace MyTvUI
             }
             catch (SocketException e)
             {
-                System.IO.File.WriteAllText(@".\logs.txt", "SOCKET_CLIENT: Unable to connect to service client on node: "+endPoint);
-                System.IO.File.WriteAllText(@".\logs.txt", e.ToString());
+                Console.WriteLine("SOCKET_CLIENT: Unable to connect to service client on node: "+endPoint);
+                Console.WriteLine(e.ToString());
             }
             return false;
         }
@@ -79,15 +79,15 @@ namespace MyTvUI
         {
             if (connected)
             {
-                System.IO.File.WriteAllText(@".\logs.txt", "SOCKET_CLIENT: Sending message to service client:");
-                System.IO.File.WriteAllText(@".\logs.txt", message);
+                Console.WriteLine("SOCKET_CLIENT: Sending message to service client:");
+                Console.WriteLine(message);
 
                 echoSocket.Send(Encoding.ASCII.GetBytes(message));
                 byte[] data = new byte[1024];
                 int receivedDataLength = echoSocket.Receive(data);
                 String response = Encoding.ASCII.GetString(data, 0, receivedDataLength);
                 disconnect();
-                System.IO.File.WriteAllText(@".\logs.txt", "SOCKET_CLIENT: received -> " + response);
+                Console.WriteLine("SOCKET_CLIENT: received -> " + response);
                 if (response.Contains("RECEIVED"))
                 {
                     return true;
@@ -114,7 +114,7 @@ namespace MyTvUI
             String response = "";
             if (connected)
             {
-                System.IO.File.WriteAllText(@".\logs.txt", "SOCKET_CLIENT: Getting channel preference from service client");
+                Console.WriteLine("SOCKET_CLIENT: Getting channel preference from service client");
 
                 String request = "START_MSG\n" +
                     "CHANNEL_REQUEST\n" +
@@ -141,7 +141,7 @@ namespace MyTvUI
             String response = "";
             if (connected)
             {
-                System.IO.File.WriteAllText(@".\logs.txt", "SOCKET_CLIENT: Getting muted preference from service client");
+                Console.WriteLine("SOCKET_CLIENT: Getting muted preference from service client");
 
                 String request = "START_MSG\n" +
                     "MUTED_REQUEST\n" +
@@ -186,13 +186,13 @@ namespace MyTvUI
             }
             catch (SocketException e)
             {
-                System.IO.File.WriteAllText(@".\logs.txt", "SOCKET_CLIENT: Unable to connect to server.");
-                System.IO.File.WriteAllText(@".\logs.txt", e.ToString());
+                Console.WriteLine("SOCKET_CLIENT: Unable to connect to server.");
+                Console.WriteLine(e.ToString());
                 return false;
             }
 
             //get current user
-            System.IO.File.WriteAllText(@".\logs.txt", "SOCKET_CLIENT: Retrieving user ID");
+            Console.WriteLine("SOCKET_CLIENT: Retrieving user ID");
             server.Send(Encoding.ASCII.GetBytes("CURRENT_USER"));
             byte[] data = new byte[1024];
             int receivedDataLength = 0;
@@ -202,7 +202,7 @@ namespace MyTvUI
                 return false;
             }
             userID = Encoding.ASCII.GetString(data, 0, receivedDataLength);
-            System.IO.File.WriteAllText(@".\logs.txt", "SOCKET_CLIENT: Received user identity from server: " + userID);
+            Console.WriteLine("SOCKET_CLIENT: Received user identity from server: " + userID);
 
             server.Close();
             return true;
@@ -217,13 +217,13 @@ namespace MyTvUI
             }
             catch (SocketException e)
             {
-                System.IO.File.WriteAllText(@".\logs.txt", "SOCKET_CLIENT: Unable to connect to server.");
-                System.IO.File.WriteAllText(@".\logs.txt", e.ToString());
+                Console.WriteLine("SOCKET_CLIENT: Unable to connect to server.");
+                Console.WriteLine(e.ToString());
                 return false;
             }
 
             //get current end point
-            System.IO.File.WriteAllText(@".\logs.txt", "SOCKET_CLIENT: Retrieving endpoint of service client");
+            Console.WriteLine("SOCKET_CLIENT: Retrieving endpoint of service client");
             server.Send(Encoding.ASCII.GetBytes("VIRGO_ENDPOINT_IPADDRESS"));
             byte[] data = new byte[1024];
             int receivedDataLength = 0;
@@ -233,7 +233,7 @@ namespace MyTvUI
                 return false;
             }
             endPoint = data[0] + "." + data[1] + "." + data[2] + "." + data[3];
-            System.IO.File.WriteAllText(@".\logs.txt", "SOCKET_CLIENT: Received end point of service client: " + endPoint);
+            Console.WriteLine("SOCKET_CLIENT: Received end point of service client: " + endPoint);
 
             server.Close();
             return true;

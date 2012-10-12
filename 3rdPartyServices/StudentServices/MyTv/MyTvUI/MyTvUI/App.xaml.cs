@@ -30,7 +30,7 @@ namespace MyTvUI
 
             var name = args.Name.Substring(0, args.Name.IndexOf(',')) + ".dll";
 
-            Console.WriteLine("Searching for dependency: " + name.ToString()+" in ->");
+            Console.WriteLine("Searching for dependency: " + name.ToString() + " in ->");
             string[] resourceList = parentAssembly.GetManifestResourceNames();
             for (int i = 0; i < resourceList.Length; i++)
             {
@@ -46,6 +46,11 @@ namespace MyTvUI
                 stream.Read(block, 0, block.Length);
                 return Assembly.Load(block);
             }
+        }
+
+        private void Application_Exit(object sender, ExitEventArgs e)
+        {
+            Console.WriteLine("Application exit event recieved");
         }
     }
 }
