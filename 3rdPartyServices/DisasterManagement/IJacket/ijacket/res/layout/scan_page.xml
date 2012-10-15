@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:layout_width="fill_parent"
+              android:layout_height="fill_parent"
+        >
+   <!--   <Button android:id="@+id/buttonMacScan"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="Scan MAC Address"
+            />
+    <Button android:id="@+id/buttonConnect"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="Connect"
+            />
+    <Button android:id="@+id/buttonLED"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="Test LED"
+            />
+    <Button android:id="@+id/buttonLCDDisplay"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="Test LCD display"
+            />
+    <Button android:id="@+id/buttonVibrator"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="Test Vibrator"
+            />
+    <Button android:id="@+id/buttonSpeaker"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="Test Speaker"
+            />-->
+</LinearLayout>
