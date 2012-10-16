@@ -39,12 +39,14 @@ import org.hibernate.criterion.Restrictions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.societies.api.ext3p.schema.networking.Education;
-import org.societies.api.ext3p.schema.networking.Employment;
-import org.societies.api.ext3p.schema.networking.UserDetails;
+import org.societies.api.ext3p.networking.Education;
+import org.societies.api.ext3p.networking.Employment;
+import org.societies.api.ext3p.networking.UserDetails;
+import org.societies.api.ext3p.networking.ShareInfo;
 import org.societies.thirdpartyservices.networking.directory.model.NZEducation;
 import org.societies.thirdpartyservices.networking.directory.model.NZEmployment;
 import org.societies.thirdpartyservices.networking.directory.model.NZUserDetails;
+import org.societies.thirdpartyservices.networking.directory.model.NZShareInfo;
 
 
 
@@ -102,30 +104,35 @@ public class NetworkingDirectory {
 				userRec.setTwitterID(tmpRegistryEntryList.get(0).getTwitterID());
 				
 				List<Education> eduList = new ArrayList<Education>();
-				Iterator<NZEducation> eduIt = tmpRegistryEntryList.get(0).education.iterator();
-				while (eduIt.hasNext())
+				if (tmpRegistryEntryList.get(0).education != null)
 				{
-					Education edu = new Education();
-					NZEducation eduDb = eduIt.next();
-					edu.setWhere(eduDb.getCollege());
-					edu.setWhat(eduDb.getCourse());
-					edu.setLevel(eduDb.getLevel());
-					eduList.add(edu);
+					Iterator<NZEducation> eduIt = tmpRegistryEntryList.get(0).education.iterator();
+					while (eduIt.hasNext())
+					{
+						Education edu = new Education();
+						NZEducation eduDb = eduIt.next();
+						edu.setWhere(eduDb.getCollege());
+						edu.setWhat(eduDb.getCourse());
+						edu.setLevel(eduDb.getLevel());
+						eduList.add(edu);
+					}
+					userRec.setEducationhistory(eduList);
 				}
-				userRec.setEducationhistory(eduList);
 				
-				List<Employment> empList = new ArrayList<Employment>();
-				Iterator<NZEmployment> empIt = tmpRegistryEntryList.get(0).employment.iterator();
-				while (eduIt.hasNext())
+				if (tmpRegistryEntryList.get(0).employment != null)
 				{
-					Employment emp = new Employment();
-					NZEmployment empDb = empIt.next();
-					emp.setWhat(empDb.getPosition());
-					emp.setWhere(empDb.getEmployer());
-					empList.add(emp);
-				}
-				userRec.setEmploymenthistory(empList);
-				
+					List<Employment> empList = new ArrayList<Employment>();
+					Iterator<NZEmployment> empIt = tmpRegistryEntryList.get(0).employment.iterator();
+					while (empIt.hasNext())
+					{
+						Employment emp = new Employment();
+						NZEmployment empDb = empIt.next();
+						emp.setWhat(empDb.getPosition());
+						emp.setWhere(empDb.getEmployer());
+						empList.add(emp);
+					}
+					userRec.setEmploymenthistory(empList);
+				}				
 			}
 			
 		} catch (Exception e) {
@@ -157,45 +164,66 @@ public class NetworkingDirectory {
 			
 			if (tmpRegistryEntryList != null && tmpRegistryEntryList.size() > 0)
 			{
+				tmpRegistryEntryList.get(0).getEducation().clear();
+				tmpRegistryEntryList.get(0).getEmployment().clear();
 				session.delete(tmpRegistryEntryList.get(0));
 			}
 			
 			NZUserDetails userDb = new NZUserDetails();
 			
 			userDb.setUserid(userRec.getUserid());
-			userDb.setCompany(userRec.getCompany());
-			userDb.setDisplayName(userRec.getDisplayName());
-			userDb.setDept(userRec.getDept());
-			userDb.setPosition(userRec.getPosition());
-			userDb.setFacebookID(userRec.getFacebookID());
-			userDb.setLinkedInID(userRec.getLinkedInID());
-			userDb.setTwitterID(userRec.getTwitterID());
+			if (userRec.getCompany() != null)
+				userDb.setCompany(userRec.getCompany());
 			
-			session.save(userDb);
+			if (userRec.getDisplayName() != null)
+				userDb.setDisplayName(userRec.getDisplayName());
+			
+			if (userRec.getDept() != null)
+				userDb.setDept(userRec.getDept());
+			
+			if (userRec.getPosition() != null)
+				userDb.setPosition(userRec.getPosition());
+			
+			if (userRec.getFacebookID() != null)
+				userDb.setFacebookID(userRec.getFacebookID());
+			
+			if (userRec.getLinkedInID() != null)
+				userDb.setLinkedInID(userRec.getLinkedInID());
+			
+			if (userRec.getTwitterID() != null)
+				userDb.setTwitterID(userRec.getTwitterID());
 			
 			Set<NZEducation> eduDbColl = userDb.education;
 			Set<NZEmployment> emplDbColl = userDb.employment;
 			
-			for (Education edu : userRec.getEducationhistory())
+			if (userRec.getEducationhistory() != null)
 			{
-				NZEducation eduDb = new NZEducation();
-				eduDb.setCourse(edu.getWhat());
-				eduDb.setLevel(edu.getLevel());
-				eduDb.setCollege(edu.getWhere());
-				eduDb.setUserdetails(userDb);
-				eduDbColl.add(eduDb);
-				session.save(eduDb);
+				for (Education edu : userRec.getEducationhistory())
+				{
+					NZEducation eduDb = new NZEducation();
+					eduDb.setCourse(edu.getWhat());
+					eduDb.setLevel(edu.getLevel());
+					eduDb.setCollege(edu.getWhere());
+					eduDb.setUserdetails(userDb);
+					eduDbColl.add(eduDb);
+				}
+				userDb.employment = emplDbColl;
 			}
 			
-			for (Employment empl : userRec.getEmploymenthistory())
+			if (userRec.getEmploymenthistory() != null)
 			{
-				NZEmployment empDb = new NZEmployment();
-				empDb.setPosition(empl.getWhat());
-				empDb.setEmployer(empl.getWhere());
-				empDb.setUserdetails(userDb);
-				emplDbColl.add(empDb);
-				session.save(empDb);
+				for (Employment empl : userRec.getEmploymenthistory())
+				{
+					NZEmployment empDb = new NZEmployment();
+					empDb.setPosition(empl.getWhat());
+					empDb.setEmployer(empl.getWhere());
+					empDb.setUserdetails(userDb);
+					emplDbColl.add(empDb);
+				}
+				userDb.education = eduDbColl;
 			}
+			
+			session.save(userDb);
 			t.commit();
 			
 		} catch (Exception e) {
@@ -209,6 +237,113 @@ public class NetworkingDirectory {
 		
 		
 		return userRec;
+	}
+	
+
+	
+	@SuppressWarnings("unchecked")
+	public ShareInfo getShareInfo(String userid, String friendid) {
+		
+		Session session = sessionFactory.openSession();
+		ShareInfo info = new ShareInfo();
+		
+		// Default to everything just in case
+		info.setUserid(userid);
+		info.setFriendid(friendid);
+		info.setShareHash(0);
+		try {
+			
+			
+			List<NZShareInfo> tmpRegistryEntryList = session.createCriteria(NZShareInfo.class)
+				.add(Restrictions.eq("userid", userid).ignoreCase())
+				.add(Restrictions.eq("friendid", friendid).ignoreCase()).list();
+			 
+			
+			if (tmpRegistryEntryList != null && tmpRegistryEntryList.size() > 0)
+			{
+				info.setShareHash(tmpRegistryEntryList.get(0).getShareHash());
+			} else
+			{
+				// check for default
+				session.clear();
+				tmpRegistryEntryList = session.createCriteria(NZShareInfo.class)
+						.add(Restrictions.eq("userid", userid).ignoreCase())
+						.add(Restrictions.eq("friendid", "0").ignoreCase()).list();
+				
+				if (tmpRegistryEntryList != null && tmpRegistryEntryList.size() > 0)
+				{
+					info.setShareHash(tmpRegistryEntryList.get(0).getShareHash());
+				}
+			}
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			if (session != null) {
+				session.close();
+			}
+		}
+		
+		
+		return info;
+	}
+	
+	
+	@SuppressWarnings("unchecked")
+	public ShareInfo updateshareInfoUser(ShareInfo info) {
+		
+		Session session = sessionFactory.openSession();
+		Transaction t = session.beginTransaction();
+		
+		
+		try {
+			
+			
+			
+			List<NZShareInfo> tmpRegistryEntryList = session.createCriteria(NZShareInfo.class)
+					.add(Restrictions.eq("userid", info.getUserid()).ignoreCase())
+					.add(Restrictions.eq("friendid", info.getFriendid()).ignoreCase()).list();
+			 
+			
+			if (tmpRegistryEntryList != null && tmpRegistryEntryList.size() > 0)
+			{
+				session.delete(tmpRegistryEntryList.get(0));
+				t.commit();
+				t = session.beginTransaction();
+				session.clear();
+				session.close();
+				 session = sessionFactory.openSession();
+			}
+			
+			
+			NZShareInfo infoDB = new NZShareInfo();
+			
+			log.info("Networking Directory bundle info.getUserid() returns. : " + info.getUserid());
+			
+			infoDB.setUserid(info.getUserid());
+			log.info("Networking Directory bundle infoDB.getUserid returns. : " + infoDB.getUserid());
+			infoDB.setFriendid(info.getFriendid());
+			infoDB.setShareHash(info.getShareHash());
+			
+			
+			
+			session.save(infoDB);
+			
+			
+		
+			t.commit();
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+			t.rollback();
+		} finally {
+			if (session != null) {
+				session.close();
+			}
+		}
+		
+		
+		return info;
 	}
 	
 	

@@ -65,6 +65,7 @@ public class NZUserDetails implements Serializable {
 	private String company;
 	private String dept;
 	private String position;
+	private String about;
 	
 	private String facebookID;
 	private String twitterID;
@@ -165,6 +166,22 @@ public class NZUserDetails implements Serializable {
 	
 	public void setPosition(String position) {
 		this.position = position;
+	}
+	
+	/**
+	 * @return the about
+	 */
+	@Column(name = "About")
+	public String getAbout() {
+		return about;
+	}
+
+	/**
+	 * @param about the about
+	 */
+	
+	public void setAbout(String about) {
+		this.about = about;
 	}
 
 	/**
