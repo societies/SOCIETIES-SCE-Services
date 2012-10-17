@@ -1,7 +1,7 @@
 <xs:schema elementFormDefault="qualified" version="1.0"
-	xmlns="http://societies.org/api/ext3p/schema/networking"
-	targetNamespace="http://societies.org/api/ext3p/schema/networking"
-	xmlns:tns="http://societies.org/api/ext3p/schema/networking"
+	xmlns="http://societies.org/api/ext3p/networking"
+	targetNamespace="http://societies.org/api/ext3p/networking"
+	xmlns:tns="http://societies.org/api/ext3p/networking"
 	xmlns:tni="http://societies.org/api/schema/activity"
 	xmlns:xs="http://www.w3.org/2001/XMLSchema">
 
