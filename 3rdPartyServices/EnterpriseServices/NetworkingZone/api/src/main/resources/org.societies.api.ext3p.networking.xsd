@@ -1,13 +1,13 @@
 <xs:schema elementFormDefault="qualified" version="1.0"
-	xmlns="http://societies.org/api/ext3p/schema/networking"
-	targetNamespace="http://societies.org/api/ext3p/schema/networking"
-	xmlns:tns="http://societies.org/api/ext3p/schema/networking"
+	xmlns="http://societies.org/api/ext3p/networking"
+	targetNamespace="http://societies.org/api/ext3p/networking"
+	xmlns:tns="http://societies.org/api/ext3p/networking"
 	xmlns:tni="http://societies.org/api/schema/activity"
 	xmlns:xs="http://www.w3.org/2001/XMLSchema">
 
 <!-- TODO: Need another way of do this!! -->
 <xs:import namespace="http://societies.org/api/schema/activity" 
-           schemaLocation="../../../../../../../SOCIETIES-Platform/api/schema/external/src/main/resources/org.societies.api.schema.activity.xsd"/>
+           schemaLocation="../../../../../../../../SOCIETIES-Platform/api/schema/external/src/main/resources/org.societies.api.schema.activity.xsd"/>
            
 
 		<xs:element name="networkingBean">
@@ -17,6 +17,8 @@
 					<xs:element name="lastActivtyCount" type="xs:int" minOccurs="0" />
 					<xs:element name="myuserid" type="xs:string" minOccurs="0"/>
 					<xs:element name="myDetails" type="tns:userDetails" minOccurs="0"/>
+					<xs:element name="frienduserid" type="xs:string" minOccurs="0"/>
+					<xs:element name="sharedInfo" type="tns:shareInfo" minOccurs="0"/>
 				</xs:sequence>
 			</xs:complexType>
 		</xs:element>
@@ -29,6 +31,7 @@
 					<xs:element name="zones" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
 					<xs:element name="userDetails" type="tns:userDetails" minOccurs="0"/>
 					<xs:element name="userDetailsList" type="tns:userDetails" minOccurs="0"  maxOccurs="unbounded"/>
+					<xs:element name="sharedInfo" type="tns:shareInfo" minOccurs="0"/>
 				</xs:sequence>
 			</xs:complexType>
 		</xs:element>
@@ -42,6 +45,7 @@
 				<xs:element name="company" type="xs:string" minOccurs="0" />
 				<xs:element name="dept" type="xs:string" minOccurs="0" />
 				<xs:element name="position" type="xs:string" minOccurs="0" />
+				<xs:element name="about" type="xs:string" minOccurs="0" />
 				<xs:element name="facebookID" type="xs:string" minOccurs="0" />
 				<xs:element name="twitterID" type="xs:string" minOccurs="0" />
 				<xs:element name="linkedInID" type="xs:string" minOccurs="0" />
@@ -49,6 +53,15 @@
 				<xs:element name="employmenthistory" type="tns:employment" minOccurs="0" maxOccurs="unbounded"/>
 			</xs:sequence>
 		</xs:complexType>
+		
+		<xs:complexType name="shareInfo">
+			<xs:sequence>
+				<xs:element name="userid" type="xs:string" minOccurs="0" />
+				<xs:element name="friendid" type="xs:string" minOccurs="0" />
+				<xs:element name="shareHash" type="xs:int" minOccurs="0" />
+			</xs:sequence>
+		</xs:complexType>
+		
 
 		<xs:complexType name="education">
 			<xs:sequence>
@@ -74,6 +87,8 @@
 				<xs:enumeration value="getuserdetails" />
 				<xs:enumeration value="getmydetails" />
 				<xs:enumeration value="updatemydetails" />
+				<xs:enumeration value="getshareinfo" />
+				<xs:enumeration value="updateshareinfo" />
 			</xs:restriction>
 		</xs:simpleType>
 
