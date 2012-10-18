@@ -108,7 +108,7 @@ namespace MyTvUI
                 {
                     //get preferences
                     Console.WriteLine("Initialising preferences");
-                    initialisePreferences();
+                    //initialisePreferences();
                 }
 
                 //initialise activity feeds
