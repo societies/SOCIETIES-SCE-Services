@@ -101,6 +101,7 @@ public class JacketMenuActivity extends Activity {
 		} else {
 			Log.d(LOG_TAG, "empty CIS list query result");
 		}
+		if(null != cursor) cursor.close();
 	}catch (Exception e) {
 		// TODO Auto-generated catch block
 		Log.d(LOG_TAG, "exception in the create");
