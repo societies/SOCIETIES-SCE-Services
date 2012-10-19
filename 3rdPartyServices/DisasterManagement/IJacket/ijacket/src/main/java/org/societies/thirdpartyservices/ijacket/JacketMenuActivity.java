@@ -9,14 +9,17 @@ import org.societies.android.api.cis.SocialContract;
 import org.societies.thirdpartyservices.ijacket.com.BluetoothConnection;
 
 
+
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.database.ContentObserver;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.Vibrator;
 import android.util.Log;
 import android.view.View;
@@ -34,6 +37,9 @@ public class JacketMenuActivity extends Activity {
 	
 	ContentResolver cr;
 	
+	ActivityContentObserver actObs;
+	private Handler handler = new Handler();
+	
 	private static final String LOG_TAG = JacketMenuActivity.class.getName();
 	
 	   /**
@@ -44,6 +50,8 @@ public class JacketMenuActivity extends Activity {
      super.onCreate(savedInstanceState);
 
      Log.d(LOG_TAG, "on create JacketMenu");
+
+     registerContentObservers();
      
      layout = new TableLayout(this);
      layout.setLayoutParams( new TableLayout.LayoutParams(TableLayout.LayoutParams.FILL_PARENT, TableLayout.LayoutParams.FILL_PARENT) );
@@ -82,10 +90,10 @@ public class JacketMenuActivity extends Activity {
     	 
     	 Log.d(LOG_TAG, "JacketMenuActivity buttons added");
      }
-     Log.d(LOG_TAG, "going to query the social provider");
-     Uri COMUNITIES_URI = Uri.parse(SocialContract.AUTHORITY_STRING + SocialContract.UriPathIndex.COMMINITIES);
+     Log.d(LOG_TAG, "going to query the activities provider");
+     Uri Activity_URI = Uri.parse(SocialContract.AUTHORITY_STRING + SocialContract.UriPathIndex.COMMUNITY_ACTIVITIY);
      try{
-    	 Cursor cursor = cr.query(COMUNITIES_URI,null,null,null,null);
+    	 Cursor cursor = cr.query(Activity_URI,null,null,null,null);
 		if (cursor != null && cursor.getCount() >0) {
 			// Determine the column index of the column named "word"
 			//int index = cursor.getColumnIndex(SocialContract.Community.DISPLAY_NAME);
@@ -96,7 +104,7 @@ public class JacketMenuActivity extends Activity {
 		     * exception.
 		     */
 		    while (cursor.moveToNext()) {
-		        Log.d("LOG_TAG", "found community " + cursor.getColumnIndex(SocialContract.Communities.NAME));
+		        Log.d("LOG_TAG", "found activity " + cursor.getColumnIndex(SocialContract.CommunityActivity.GLOBAL_ID));
 		    }
 		} else {
 			Log.d(LOG_TAG, "empty CIS list query result");
@@ -139,6 +147,7 @@ public class JacketMenuActivity extends Activity {
  protected void onDestroy() {
      super.onDestroy();
      // The activity is about to be destroyed.
+	 unregisterContentObservers();
  }
  
  
@@ -157,6 +166,22 @@ public class JacketMenuActivity extends Activity {
 		if(con != null) con.disconnect();
   }
 
+ 
+ 	private void registerContentObservers() {
+	  ContentResolver cr = getContentResolver();
+	  
+	  actObs = new ActivityContentObserver( handler );
+	  Uri activURI = Uri.parse(SocialContract.AUTHORITY_STRING + SocialContract.UriPathIndex.COMMUNITY_ACTIVITIY);
+	  cr.registerContentObserver(activURI , true, actObs );
+	}
+
+	private void unregisterContentObservers() {
+	  ContentResolver cr = getContentResolver();
+	  if( actObs != null ) {	
+		cr.unregisterContentObserver( actObs );
+		actObs = null;
+	  }
+	}
 
  /**
   * SERVICE_LED
@@ -226,6 +251,23 @@ public class JacketMenuActivity extends Activity {
 		}
  	
  }
+ 
+ /**
+  * Activity observer
+  */
+ 
+ 
+	class ActivityContentObserver extends ContentObserver {
+		  public ActivityContentObserver( Handler h ) {
+			super( h );
+		  }
+
+		  public void onChange(boolean selfChange) {
+			Log.d( LOG_TAG, "ActivityContentObserver.onChange( "+selfChange+")" );
+		  }
+		}
+ 
+ 
  
  /**
   * SERVICE_VIBRATION
