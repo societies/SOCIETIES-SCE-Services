@@ -13,6 +13,71 @@ public class IJacketApp extends Application {
 	int ledPin = -1;
 	int vibrationPin = -1;
 	int speakersPin = -1;
+	
+	String selectedCommunityLocalId = "";
+	
+	String selectCommunityJid = "";
+	
+	static final int MAX_RETRY = 5;
+	
+	int retrycounter = 0;
+	boolean conectStatus = false;
+	
+	
+	
+	
+
+	public boolean isConectStatus() {
+		return conectStatus;
+	}
+
+	/*public void setConectStatus(boolean conectStatus) {
+		this.conectStatus = conectStatus;
+	}*/
+	
+	public void registerConnect(){
+		conectStatus = true;
+		retrycounter = 0;
+	}
+
+	public void registerDisconnect(){
+		conectStatus = false;
+	}
+
+
+	public int getRetrycounter() {
+		return retrycounter;
+	}
+
+	public void clearRetryCounter(){
+		retrycounter = 0;
+	}
+
+	
+	public void incRetryCounter(){
+		retrycounter++;
+	}
+	
+	public boolean testMaxRetryCounter(){
+		if(retrycounter<MAX_RETRY) return false;
+		else return true;
+	}
+	
+	public String getSelectedCommunityLocalId() {
+		return selectedCommunityLocalId;
+	}
+
+	public void setSelectedCommunityLocalId(String selectedCommunityLocalId) {
+		this.selectedCommunityLocalId = selectedCommunityLocalId;
+	}
+
+	public String getSelectCommunityJid() {
+		return selectCommunityJid;
+	}
+
+	public void setSelectCommunityJid(String selectCommunityJid) {
+		this.selectCommunityJid = selectCommunityJid;
+	}
 
 	public BluetoothConnection getCon() {
 		return con;

@@ -1,9 +1,12 @@
 package org.societies.thirdpartyservices.ijacket;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.TimeoutException;
 
+import org.societies.android.api.cis.SocialContract;
 import org.societies.thirdpartyservices.ijacket.com.BluetoothConnection;
 import org.societies.thirdpartyservices.ijacket.com.ComLibException;
 import org.societies.thirdpartyservices.ijacket.com.ConnectionListener;
@@ -12,21 +15,30 @@ import org.societies.thirdpartyservices.ijacket.com.ConnectionMetadata.DefaultSe
 
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Vibrator;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup.LayoutParams;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemSelectedListener;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.SimpleCursorAdapter;
+import android.widget.Spinner;
+import android.widget.SpinnerAdapter;
 import android.widget.TableLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class IJacketScanActiv extends Activity {
+public class IJacketScanActiv extends Activity implements OnItemSelectedListener {
 
     private static final int CUSTOM_REQUEST_QR_SCANNER = 0;
     
@@ -35,7 +47,8 @@ public class IJacketScanActiv extends Activity {
     private TableLayout layout;
     private Button disconnectButton;
     private Button scanButton;
-    
+    ContentResolver cr;
+    private Spinner spinnerCIS;
 	
     private static final String LOG_TAG = IJacketScanActiv.class.getName();
 
@@ -46,6 +59,11 @@ public class IJacketScanActiv extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Log.d(LOG_TAG, "IJacketScanActiv onCreate");
+        cr = this.getApplication().getContentResolver();
+        
+
+        
+        
         
         
 		IJacketApp appState = ((IJacketApp)getApplicationContext());
@@ -99,6 +117,53 @@ public class IJacketScanActiv extends Activity {
     
 
     
+    private void addItemsOnCISSpinner(){
+    		spinnerCIS = new Spinner(IJacketScanActiv.this);
+    		spinnerCIS.setLayoutParams(new LayoutParams(LayoutParams.FILL_PARENT,LayoutParams.WRAP_CONTENT));
+    		
+    		//List<String> SpinnerArray = new ArrayList<String>();	
+    	        Log.d(LOG_TAG, "going to query the social provider");
+    	        cr = this.getApplication().getContentResolver();
+    	       
+    	        Uri COMUNITIES_URI = Uri.parse(SocialContract.AUTHORITY_STRING + SocialContract.UriPathIndex.COMMINITIES);
+    	        try{
+	    	       	 Cursor cursor = cr.query(COMUNITIES_URI,null,null,null,null);
+	    	       	startManagingCursor(cursor);
+	    	   		/*if (cursor != null && cursor.getCount() >0) {
+	    	   			
+	    	   		    while (cursor.moveToNext()) {
+	    	   		    	int i  = cursor.getColumnIndex(SocialContract.Communities.NAME);
+	    	   		    	String commName = cursor.getString(i);
+	    	   		    	SpinnerArray.add(commName);
+	    	   		        Log.d("LOG_TAG", "found community " + commName);
+	    	   		    }
+	    	   		} else {
+	    	   			Log.d(LOG_TAG, "empty CIS list query result");
+	    		   	}*/
+	    	       	String[] columns = new String[] {SocialContract.Communities.NAME}; // field to display
+	    	       	int to[] = new int[] {android.R.id.text1}; // display item to bind the data
+	    	       	SimpleCursorAdapter ad =  new SimpleCursorAdapter(this,android.R.layout.simple_spinner_item,cursor ,columns ,to);
+	    	        ad.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+	    	       	spinnerCIS.setAdapter(ad);
+	    	  
+	    	        spinnerCIS.setOnItemSelectedListener(this);
+	    	        Log.d(LOG_TAG, "spiner filled up");
+	    	        
+	    	        layout.addView(spinnerCIS);  		
+	    	   		
+	    	   		//if(null != cursor) cursor.close();
+    		   	}catch (Exception e) {
+    		   		// TODO Auto-generated catch block
+    		   		Log.d(LOG_TAG, "exception in the create");
+    		   		e.printStackTrace();
+    		   	}
+
+    	        //ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, SpinnerArray);
+    	        //adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+
+    }
+    
     private void clearUI() {
         runOnUiThread(new Runnable() {
              public void run() {
@@ -112,10 +177,17 @@ public class IJacketScanActiv extends Activity {
              public void run() {
             	 layout.removeAllViews();
             	 
-            	 IJacketScanActiv.super.setTitle("OSNAP - Generic Prototype Application");
+            	 IJacketScanActiv.super.setTitle("IJacket");
 
+            	 TextView text0 = new TextView(IJacketScanActiv.this);
+            	 text0.setText("Please choose the Community to share your jacket updates.");
+            	 text0.setTextSize(24);
+            	 layout.addView(text0);
+            	 
+            	 addItemsOnCISSpinner();
+            	 
             	 TextView text1 = new TextView(IJacketScanActiv.this);
-            	 text1.setText("Please scan the QR tag on your OSNAP product.");
+            	 text1.setText("Please scan the QR tag of your jacket");
             	 text1.setTextSize(24);
             	 layout.addView(text1);
             	 
@@ -144,9 +216,7 @@ public class IJacketScanActiv extends Activity {
     }
     
     public class myConList implements ConnectionListener {
-    	private static final int MAX_RETRY = 5;
-    	
-    	private int retry_counter = 0;
+
     	
     	private Activity parentActivity;
     	
@@ -157,7 +227,8 @@ public class IJacketScanActiv extends Activity {
     	}
     	
         public void onConnect(BluetoothConnection bluetoothConnection) {
-        	retry_counter = 0;
+    		IJacketApp appState = ((IJacketApp)getApplicationContext());
+    		appState.registerConnect();
         	Log.d(LOG_TAG, "Blueetooth onconnect");
             quickToastMessage("Connected! (" + bluetoothConnection.toString() + ")");
             clearUI();
@@ -190,23 +261,24 @@ public class IJacketScanActiv extends Activity {
         }
 
         public void onDisconnect(BluetoothConnection bluetoothConnection) {
-        	if(retry_counter < MAX_RETRY){
+    		IJacketApp appState = ((IJacketApp)getApplicationContext());
+
+        	if(false == appState.isConectStatus() && false == appState.testMaxRetryCounter()){
         		
-				IJacketApp appState = ((IJacketApp)getApplicationContext());
-				quickToastMessage("Disconnected, going to retry with " + appState.getMacAddress() + ", iteration " + retry_counter);
-				Log.d(LOG_TAG, "Disconnected, going to retry with " + appState.getMacAddress() + ", iteration " + retry_counter);
+				quickToastMessage("Disconnected, going to retry with " + appState.getMacAddress());
+				Log.d(LOG_TAG, "Disconnected, going to retry with " + appState.getMacAddress() + ", iteration " + appState.getRetrycounter());
 				BluetoothConnection con = appState.getCon();
 				
-				boolean success = false;
-				if (null != con) success = con.isConnected(); // double check if it is really disconnected
-            	
-				while(retry_counter < MAX_RETRY && false == success){
+				if (null != con) 
+					if(con.isConnected()) // double check if it is really disconnected
+						appState.registerConnect();
+						
+				//while(false == appState.isConectStatus() && false == appState.testMaxRetryCounter()){
 	            	try {
 						con = new BluetoothConnection(appState.getMacAddress(), parentActivity, this);
 						con.connect();
 						appState.setCon(con);
-						success = true;
-						retry_counter  = 0;
+						//appState.registerConnect();
 					} catch (IllegalArgumentException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
@@ -214,14 +286,14 @@ public class IJacketScanActiv extends Activity {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
-	            	retry_counter ++;
+	            	appState.incRetryCounter();
 	            	Log.d(LOG_TAG, "retry counter iterated");
-				}
+				//}
 
         	}else{
                 quickToastMessage("Disconnected for good");
                 setTitle("Not connected");
-                retry_counter = 0;
+                
         	}
         }
     }
@@ -255,16 +327,22 @@ public class IJacketScanActiv extends Activity {
         	
         	//Successful scan
             if (resultCode == RESULT_OK) {
+            	Log.d("LOG_TAG", "scan OK" );
                 String macAddress = intent.getStringExtra("SCAN_RESULT");
                 
                 // Handle successful scan
                 try {
                 	BluetoothConnection con = new BluetoothConnection(macAddress, this, getConnectionListener(this));
-					con.connect();
-					IJacketApp appState = ((IJacketApp)getApplicationContext());
+                	Log.d("LOG_TAG", "trying to connect" );
+                	IJacketApp appState = ((IJacketApp)getApplicationContext());
+                	appState.clearRetryCounter();
+                	con.connect();
+					
 					appState.setCon(con);
 					appState.setMacAddress(macAddress);
+					
 				} catch (Exception e) {
+					Log.d("LOG_TAG", "exception trying to connect" );
 					quickToastMessage(e.getMessage());
 	            	resetUI();
 				}
@@ -278,6 +356,35 @@ public class IJacketScanActiv extends Activity {
             }
         }
     }
+
+
+
+	@Override
+	public void onItemSelected(AdapterView<?> parent, View view, int pos,
+			long id) {
+		
+		Cursor cursor = (Cursor) parent.getItemAtPosition(pos);
+		int i = cursor.getColumnIndex(SocialContract.Communities.GLOBAL_ID); 
+		String comJid = cursor.getString(i);
+		i = cursor.getColumnIndex(SocialContract.Communities._ID); 
+		String comLocalId = cursor.getString(i);
+	    Log.d("LOG_TAG", "found community with JID " + comJid + " and id " + comLocalId);
+	    
+		IJacketApp appState = ((IJacketApp)getApplicationContext());
+		appState.setSelectCommunityJid(comJid);
+		appState.setSelectedCommunityLocalId(comLocalId);
+
+		
+	}
+
+	
+
+
+	@Override
+	public void onNothingSelected(AdapterView<?> arg0) {
+		// TODO Auto-generated method stub
+		
+	}
 
 }
 
