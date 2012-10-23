@@ -43,7 +43,7 @@ public class SocketServer extends Thread{
 	private Socket client;
 	private PrintWriter out;
 	private BufferedReader in;
-	private int port = 4321;
+	private int port;
 	private boolean listening = true;
 
 	private static final String GUI_STARTED = "GUI_STARTED";
@@ -59,8 +59,9 @@ public class SocketServer extends Thread{
 	private CommandHandler commandHandler;
 	private Logger LOG = LoggerFactory.getLogger(SocketServer.class);
 
-	public SocketServer(CommandHandler commandHandler){
+	public SocketServer(CommandHandler commandHandler, int port){
 		this.commandHandler = commandHandler;
+		this.port = port;
 	}
 
 	@Override

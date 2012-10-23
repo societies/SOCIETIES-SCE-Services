@@ -42,6 +42,22 @@ namespace MyTvUI
             }
         }
 
+        public void stopSocketServer()
+        {
+            listening = false;
+            try{
+                if (client != null)
+                {
+                    client.Close();
+                }
+                server.Stop();
+            }
+            catch(Exception e)
+            {
+                Console.WriteLine(e.ToString());
+            }
+        }
+
         public void listenSocket()
         {
             try
@@ -51,23 +67,26 @@ namespace MyTvUI
             }
             catch (Exception e)
             {
-                System.IO.File.WriteAllText(@".\logs.txt", "SOCKET_SERVER: Could not listen on port: " + port);
-                System.IO.File.WriteAllText(@".\logs.txt", e.ToString());
+                Console.WriteLine("SOCKET_SERVER: Could not listen on port: " + port);
+                Console.WriteLine(e.ToString());
+                return;
             }
 
 
             try
             {
-                System.IO.File.WriteAllText(@".\logs.txt", "SOCKET_SERVER: Waiting for connection from service client on port: " + port);
+                Console.WriteLine("SOCKET_SERVER: Waiting for connection from service client on port: " + port);
                 client = server.AcceptTcpClient();
             }
             catch (Exception e)
             {
-                System.IO.File.WriteAllText(@".\logs.txt", "SOCKET_SERVER: Accept failed: " + port);
-                System.IO.File.WriteAllText(@".\logs.txt", e.ToString());
+                Console.WriteLine("SOCKET_SERVER: Accept failed: " + port);
+                Console.WriteLine(e.ToString());
+                server.Stop();
+                return;
             }
 
-            System.IO.File.WriteAllText(@".\logs.txt", "SOCKET_SERVER: Connected accepted from service client!");
+            Console.WriteLine("SOCKET_SERVER: Connected accepted from service client!");
 
             // Buffer for reading data
             byte[] bytes = new byte[1024];
@@ -82,28 +101,28 @@ namespace MyTvUI
                 {
                     // Translate data bytes to a ASCII string.
                     data = System.Text.Encoding.ASCII.GetString(bytes, 0, i);
-                    System.IO.File.WriteAllText(@".\logs.txt", String.Format("SOCKET_SERVER: got new input: {0}", data));
+                    Console.WriteLine(String.Format("SOCKET_SERVER: got new input: {0}", data));
 
                     if (data.IndexOf("START_MSG") > -1)
                     {
-                        System.IO.File.WriteAllText(@".\logs.txt", "SOCKET_SERVER: Processing new message...");
+                        Console.WriteLine("SOCKET_SERVER: Processing new message...");
 
                         String[] splitData = data.Split('\n');
                         String command = splitData[1];
 
                         if (command.Equals(USER_SESSION_STARTED))
                         {
-                            System.IO.File.WriteAllText(@".\logs.txt", "SOCKET_SERVER: "+USER_SESSION_STARTED + " message received");
+                            Console.WriteLine("SOCKET_SERVER: "+USER_SESSION_STARTED + " message received");
                             stream.Write(okBytes, 0, okBytes.Length);
                         }
                         else if (command.Equals(USER_SESSION_ENDED))
                         {
-                            System.IO.File.WriteAllText(@".\logs.txt", "SOCKET_SERVER: "+USER_SESSION_ENDED + "message received");
+                            Console.WriteLine("SOCKET_SERVER: "+USER_SESSION_ENDED + "message received");
                             stream.Write(okBytes, 0, okBytes.Length);
                         }
                         else
                         {
-                            System.IO.File.WriteAllText(@".\logs.txt", "SOCKET_SERVER: Unknown command received from service client");
+                            Console.WriteLine("SOCKET_SERVER: Unknown command received from service client");
                             stream.Write(notOKBytes, 0, notOKBytes.Length);
                         }
                     }
@@ -113,7 +132,7 @@ namespace MyTvUI
             }
             catch (Exception e)
             {
-                System.IO.File.WriteAllText(@".\logs.txt", e.ToString());
+                Console.WriteLine(e.ToString());
                 client.Close();
                 server.Stop();
             }

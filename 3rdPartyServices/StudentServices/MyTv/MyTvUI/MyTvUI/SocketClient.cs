@@ -36,6 +36,7 @@ namespace MyTvUI
         Socket echoSocket;
         String userID;
         String endPoint;
+        int port;
         Boolean connected;
 
         public SocketClient()
@@ -46,7 +47,7 @@ namespace MyTvUI
 
         public Boolean connect()
         {
-            IPEndPoint ip = new IPEndPoint(IPAddress.Parse(endPoint), 4321);
+            IPEndPoint ip = new IPEndPoint(IPAddress.Parse(endPoint), port);
             echoSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             try
             {
@@ -56,8 +57,8 @@ namespace MyTvUI
             }
             catch (SocketException e)
             {
-                System.IO.File.WriteAllText(@".\logs.txt", "SOCKET_CLIENT: Unable to connect to service client on node: "+endPoint);
-                System.IO.File.WriteAllText(@".\logs.txt", e.ToString());
+                Console.WriteLine("SOCKET_CLIENT: Unable to connect to service client on node: "+endPoint);
+                Console.WriteLine(e.ToString());
             }
             return false;
         }
@@ -79,15 +80,15 @@ namespace MyTvUI
         {
             if (connected)
             {
-                System.IO.File.WriteAllText(@".\logs.txt", "SOCKET_CLIENT: Sending message to service client:");
-                System.IO.File.WriteAllText(@".\logs.txt", message);
+                Console.WriteLine("SOCKET_CLIENT: Sending message to service client:");
+                Console.WriteLine(message);
 
                 echoSocket.Send(Encoding.ASCII.GetBytes(message));
                 byte[] data = new byte[1024];
                 int receivedDataLength = echoSocket.Receive(data);
                 String response = Encoding.ASCII.GetString(data, 0, receivedDataLength);
                 disconnect();
-                System.IO.File.WriteAllText(@".\logs.txt", "SOCKET_CLIENT: received -> " + response);
+                Console.WriteLine("SOCKET_CLIENT: received -> " + response);
                 if (response.Contains("RECEIVED"))
                 {
                     return true;
@@ -114,7 +115,7 @@ namespace MyTvUI
             String response = "";
             if (connected)
             {
-                System.IO.File.WriteAllText(@".\logs.txt", "SOCKET_CLIENT: Getting channel preference from service client");
+                Console.WriteLine("SOCKET_CLIENT: Getting channel preference from service client");
 
                 String request = "START_MSG\n" +
                     "CHANNEL_REQUEST\n" +
@@ -141,7 +142,7 @@ namespace MyTvUI
             String response = "";
             if (connected)
             {
-                System.IO.File.WriteAllText(@".\logs.txt", "SOCKET_CLIENT: Getting muted preference from service client");
+                Console.WriteLine("SOCKET_CLIENT: Getting muted preference from service client");
 
                 String request = "START_MSG\n" +
                     "MUTED_REQUEST\n" +
@@ -166,7 +167,7 @@ namespace MyTvUI
         #region connection parameters
         public Boolean getSessionParameters()
         {
-            if (retrieveUserID() && retrieveEndPoint())
+            if (retrieveUserID() && retrieveEndPoint() && retrievePort())
             {
                 return true;
             }
@@ -186,23 +187,24 @@ namespace MyTvUI
             }
             catch (SocketException e)
             {
-                System.IO.File.WriteAllText(@".\logs.txt", "SOCKET_CLIENT: Unable to connect to server.");
-                System.IO.File.WriteAllText(@".\logs.txt", e.ToString());
+                Console.WriteLine("SOCKET_CLIENT: Unable to connect to server.");
+                Console.WriteLine(e.ToString());
                 return false;
             }
 
             //get current user
-            System.IO.File.WriteAllText(@".\logs.txt", "SOCKET_CLIENT: Retrieving user ID");
+            Console.WriteLine("SOCKET_CLIENT: Retrieving user ID");
             server.Send(Encoding.ASCII.GetBytes("CURRENT_USER"));
             byte[] data = new byte[1024];
             int receivedDataLength = 0;
             receivedDataLength = server.Receive(data);
             if (receivedDataLength < 1)
             {
+                server.Close();
                 return false;
             }
             userID = Encoding.ASCII.GetString(data, 0, receivedDataLength);
-            System.IO.File.WriteAllText(@".\logs.txt", "SOCKET_CLIENT: Received user identity from server: " + userID);
+            Console.WriteLine("SOCKET_CLIENT: Received user identity from server: " + userID);
 
             server.Close();
             return true;
@@ -217,27 +219,73 @@ namespace MyTvUI
             }
             catch (SocketException e)
             {
-                System.IO.File.WriteAllText(@".\logs.txt", "SOCKET_CLIENT: Unable to connect to server.");
-                System.IO.File.WriteAllText(@".\logs.txt", e.ToString());
+                Console.WriteLine("SOCKET_CLIENT: Unable to connect to server.");
+                Console.WriteLine(e.ToString());
                 return false;
             }
 
             //get current end point
-            System.IO.File.WriteAllText(@".\logs.txt", "SOCKET_CLIENT: Retrieving endpoint of service client");
+            Console.WriteLine("SOCKET_CLIENT: Retrieving endpoint of service client");
             server.Send(Encoding.ASCII.GetBytes("VIRGO_ENDPOINT_IPADDRESS"));
             byte[] data = new byte[1024];
             int receivedDataLength = 0;
             receivedDataLength = server.Receive(data);
             if (receivedDataLength < 1)
             {
+                server.Close();
                 return false;
             }
             endPoint = data[0] + "." + data[1] + "." + data[2] + "." + data[3];
-            System.IO.File.WriteAllText(@".\logs.txt", "SOCKET_CLIENT: Received end point of service client: " + endPoint);
+            Console.WriteLine("SOCKET_CLIENT: Received end point of service client: " + endPoint);
 
             server.Close();
             return true;
         }
+
+        private Boolean retrievePort()
+        {
+            IPEndPoint ip = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 2114);
+            Socket server = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            try
+            {
+                server.Connect(ip);
+            }
+            catch (SocketException e)
+            {
+                Console.WriteLine("SOCKET_CLIENT: Unable to connect to server.");
+                Console.WriteLine(e.ToString());
+                return false;
+            }
+
+            //get current end point
+            Console.WriteLine("SOCKET_CLIENT: Retrieving port of service client");
+            server.Send(Encoding.ASCII.GetBytes("VIRGO_ENDPOINT_PORT"));
+            byte[] data = new byte[1024];
+            int receivedDataLength = 0;
+            receivedDataLength = server.Receive(data);
+            if (receivedDataLength < 1)
+            {
+                server.Close();
+                return false;
+            }
+
+            try
+            {
+                port = Convert.ToInt32(Encoding.ASCII.GetString(data, 0, receivedDataLength));
+                Console.WriteLine("SOCKET_CLIENT: Received port of service client: " + port);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Received data is not a valid port number");
+                Console.WriteLine(e.ToString());
+                server.Close();
+                return false;
+            }
+       
+            server.Close();
+            return true;
+        }
+
         #endregion connection parameters
 
         public String getUserID()

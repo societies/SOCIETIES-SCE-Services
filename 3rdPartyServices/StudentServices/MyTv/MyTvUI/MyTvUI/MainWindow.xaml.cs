@@ -41,6 +41,11 @@ namespace MyTvUI
         //window variables
         bool closing = false;
 
+        //console variables
+        FileStream ostrm;
+        StreamWriter writer;
+        TextWriter oldOut = Console.Out;
+
         //variables used to detect hand over hover button area
         private static double _topBoundary;
         private static double _bottomBoundary;
@@ -68,10 +73,24 @@ namespace MyTvUI
         #region window
         public MainWindow()
         {
+            //redirect console output
+            try
+            {
+                ostrm = new FileStream("./logs.txt", FileMode.OpenOrCreate, FileAccess.Write);
+                writer = new StreamWriter(ostrm);
+                Console.SetOut(writer);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Cannot open logs.txt for writing");
+                Console.WriteLine(e.Message);
+                //return;
+            }
+
             try
             {
                 //initialise GUI
-                System.IO.File.WriteAllText(@".\logs.txt", "Initialising GUI");
+                Console.WriteLine("Initialising GUI");
                 InitializeComponent();
                 channel1HoverRegion.Click += new RoutedEventHandler(channel1HoverRegion_Click);
                 channel2HoverRegion.Click += new RoutedEventHandler(channel2HoverRegion_Click);
@@ -84,12 +103,12 @@ namespace MyTvUI
                 tvBrowser.Navigated += new NavigatedEventHandler(tvBrowser_Navigated);
 
                 //initialise socket server to listen for service client connections
-                System.IO.File.WriteAllText(@".\logs.txt", "Initialising SocketServer and SocketClient");
+                Console.WriteLine("Initialising SocketServer and SocketClient");
                 if(initialiseSocketServer() && initialiseSocketClient())
                 {
                     //get preferences
-                    System.IO.File.WriteAllText(@".\logs.txt", "Initialising preferences");
-                    initialisePreferences();
+                    Console.WriteLine("Initialising preferences");
+                    //initialisePreferences();
                 }
 
                 //initialise activity feeds
@@ -99,7 +118,7 @@ namespace MyTvUI
             }
             catch (Exception e)
             {
-                System.IO.File.WriteAllText(@".\logs.txt", e.ToString());
+                Console.WriteLine(e.ToString());
             }
         }
 
@@ -113,6 +132,16 @@ namespace MyTvUI
         //close window
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
+            //stop sockets
+            socketClient.disconnect();
+            socketServer.stopSocketServer();
+
+            if (writer != null)
+            {
+                Console.SetOut(oldOut);
+                writer.Close();
+                ostrm.Close();
+            }
             closing = true;
             StopKinect(kinectSensorChooser1.Kinect);
         }
@@ -180,8 +209,8 @@ namespace MyTvUI
             }
             catch (Exception e)
             {
-                System.IO.File.WriteAllText(@".\logs.txt", "Error initialising SocketServer");
-                System.IO.File.WriteAllText(@".\logs.txt", e.ToString());
+                Console.WriteLine("Error initialising SocketServer");
+                Console.WriteLine(e.ToString());
                 return false;
             }
             return true;
@@ -193,14 +222,14 @@ namespace MyTvUI
             if (socketClient.getSessionParameters())
             {
                 userID = socketClient.getUserID();
-                System.IO.File.WriteAllText(@".\logs.txt", "Received user identity: " + userID);
+                Console.WriteLine("Received user identity: " + userID);
 
                     //send handshake message with GUI IP address
                     String myIP = this.getLocalIPAddress();
                     if (myIP != null)
                     {
-                        System.IO.File.WriteAllText(@".\logs.txt", "Starting handshake");
-                        System.IO.File.WriteAllText(@".\logs.txt", "Sending service client my local IP address: " + myIP);
+                        Console.WriteLine("Starting handshake");
+                        Console.WriteLine("Sending service client my local IP address: " + myIP);
                         if(socketClient.connect())
                         {
                             if (socketClient.sendMessage(
@@ -209,26 +238,26 @@ namespace MyTvUI
                             myIP+"\n" +
                             "END_MSG\n"))
                             {
-                                System.IO.File.WriteAllText(@".\logs.txt", "Handshake complete");
+                                Console.WriteLine("Handshake complete");
                                 return true;
                             }
                             else
                             {
-                                System.IO.File.WriteAllText(@".\logs.txt", "Handshake failed");
+                                Console.WriteLine("Handshake failed");
                             }
                         }
                         else{
-                            System.IO.File.WriteAllText(@".\logs.txt", "Could not connect to service client");
+                            Console.WriteLine("Could not connect to service client");
                         }
                     }
                     else
                     {
-                        System.IO.File.WriteAllText(@".\logs.txt", "Error - could not get IP address of local machine");
+                        Console.WriteLine("Error - could not get IP address of local machine");
                     } 
                 }
             else
             {
-                System.IO.File.WriteAllText(@".\logs.txt", "Error - could not get session parameters - userID and endpoint");
+               Console.WriteLine("Error - could not get session parameters - userID, endpoint IP and port");
             }
             return false;
         }
@@ -381,7 +410,7 @@ namespace MyTvUI
 
         private void ScalePosition(FrameworkElement element, Joint joint)
         {
-            Joint scaledJoint = joint.ScaleTo(1000, 600, .3f, .3f);
+            Joint scaledJoint = joint.ScaleTo(1340, 700, .3f, .3f);
 
             Canvas.SetLeft(element, scaledJoint.Position.X);
             Canvas.SetTop(element, scaledJoint.Position.Y);
@@ -451,7 +480,7 @@ namespace MyTvUI
                 "USER_ACTION\n" +
                 "channel\n" +
                 "1\n" +
-                "END_MSG");
+                "END_MSG\n");
         }
 
         //listener for channel2 hover button click events
@@ -463,7 +492,7 @@ namespace MyTvUI
                 "USER_ACTION\n" +
                 "channel\n" +
                 "2\n" +
-                "END_MSG");
+                "END_MSG\n");
         }
 
         //listener for channel3 hover button click events
@@ -475,7 +504,7 @@ namespace MyTvUI
                 "USER_ACTION\n" +
                 "channel\n" +
                 "3\n" +
-                "END_MSG");
+                "END_MSG\n");
         }
 
         void channel4HoverRegion_Click(object sender, RoutedEventArgs e)
@@ -486,7 +515,7 @@ namespace MyTvUI
                 "USER_ACTION\n" +
                 "channel\n" +
                 "4\n" +
-                "END_MSG");
+                "END_MSG\n");
         }
 
         void offHoverRegion_Click(object sender, RoutedEventArgs e)
@@ -497,7 +526,7 @@ namespace MyTvUI
                 "USER_ACTION\n" +
                 "channel\n" +
                 "0\n" +
-                "END_MSG");
+                "END_MSG\n");
         }
 
         void volumeDownHoverRegion_Click(object sender, RoutedEventArgs e)
@@ -509,7 +538,7 @@ namespace MyTvUI
                 "USER_ACTION\n" +
                 "muted\n" +
                 "true\n" +
-                "END_MSG");
+                "END_MSG\n");
         }
 
         void volumeUpHoverRegion_Click(object sender, RoutedEventArgs e)
@@ -521,32 +550,38 @@ namespace MyTvUI
                 "USER_ACTION\n" +
                 "muted\n" +
                 "false\n" +
-                "END_MSG");
+                "END_MSG\n");
         }
 
         void exitHoverRegion_Click(object sender, RoutedEventArgs e)
         {
-            closing = true;
-            StopKinect(kinectSensorChooser1.Kinect);
-            try
+            if (writer != null)
             {
-                //if the application was opened by another window close the current window not the other application
-                if (Application.Current.Windows.Count > 1)
-                {
-                    for (int i = 0; i < Application.Current.Windows.Count; i++)
-                    {
-                        if (Application.Current.Windows[i].GetType().ToString().Equals("MyTvUI.MainWindow"))
-                            Application.Current.Windows[i].Close();
-                    }
-                }
-                //otherwise close the main window
-                else
-                    Application.Current.MainWindow.Close();
+                Console.SetOut(oldOut);
+                writer.Close();
+                ostrm.Close();
             }
-            catch (InvalidOperationException e2)
-            {
-                System.IO.File.WriteAllText(@".\logs.txt", "Exception: " + e2);
-            }
+            mytvWindow.Close();
+            
+            //try
+            //{
+            //    //if the application was opened by another window close the current window not the other application
+            //    if (Application.Current.Windows.Count > 1)
+            //    {
+            //        for (int i = 0; i < Application.Current.Windows.Count; i++)
+            //        {
+            //            if (Application.Current.Windows[i].GetType().ToString().Equals("MyTvUI.MainWindow"))
+            //                Application.Current.Windows[i].Close();
+            //        }
+            //    }
+            //    //otherwise close the main window
+            //    else
+                    //Application.Current.MainWindow.Close();
+            //}
+            //catch (InvalidOperationException e2)
+            //{
+            //    System.IO.File.AppendAllText(@".\logs.txt", "Exception: " + e2);
+            //}
         }
 
         #endregion hoverbutton

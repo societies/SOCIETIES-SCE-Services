@@ -123,7 +123,7 @@ public class IJacketScanActiv extends Activity implements OnItemSelectedListener
     		
     		//List<String> SpinnerArray = new ArrayList<String>();	
     	        Log.d(LOG_TAG, "going to query the social provider");
-    	       
+    	        cr = this.getApplication().getContentResolver();
     	       
     	        Uri COMUNITIES_URI = Uri.parse(SocialContract.AUTHORITY_STRING + SocialContract.UriPathIndex.COMMINITIES);
     	        try{
@@ -377,6 +377,7 @@ public class IJacketScanActiv extends Activity implements OnItemSelectedListener
 		
 	}
 
+	
 
 
 	@Override
