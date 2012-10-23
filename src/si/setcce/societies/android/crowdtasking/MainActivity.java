@@ -1,5 +1,7 @@
 package si.setcce.societies.android.crowdtasking;
 
+import java.util.Date;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -28,7 +30,6 @@ public class MainActivity extends Activity {
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_main);
 		webView = (WebView) findViewById(R.id.webView1);
-		webView.getSettings().setJavaScriptEnabled(true);
         webView.setInitialScale(1);
         webView.getSettings().setJavaScriptEnabled(true);
         webView.getSettings().setLoadWithOverviewMode(true);
@@ -38,7 +39,8 @@ public class MainActivity extends Activity {
         webView.setScrollbarFadingEnabled(false);
         webView.setWebViewClient(new MyWebViewClient());
         webView.getSettings().setDefaultZoom(WebSettings.ZoomDensity.FAR);
-        webView.loadUrl("http://crowdtasking.appspot.com/mobile");
+        webView.loadData("<h1>Application is loading...</h1>", "text/html", "utf-8");
+        webView.loadUrl("http://crowdtasking.appspot.com/");
      }
 
     @Override
@@ -66,18 +68,25 @@ public class MainActivity extends Activity {
                 return true;
 
             case R.id.home:
-            	webView.loadUrl("http://crowdtasking.appspot.com/index.html");
-                return true;
+            	//webView.loadUrl("http://crowdtasking.appspot.com/");
+            	Intent intent = new Intent(Intent.ACTION_EDIT);  
+            	intent.setType("vnd.android.cursor.item/event");
+            	intent.putExtra("title", "Some title");
+            	intent.putExtra("description", "Some description");
+            	intent.putExtra("beginTime", new Date().getTime());
+            	intent.putExtra("endTime", new Date().getTime()+7*24*60*60*1000);
+            	startActivity(intent);            	
+            	return true;
             
             case R.id.profile:
-            	webView.loadUrl("http://crowdtasking.appspot.com/profile.html");
+            	webView.loadUrl("http://crowdtasking.appspot.com/profile");
                 return true;
 
             case R.id.logout:
             	CookieSyncManager.createInstance(this);
             	CookieManager cookieManager = CookieManager.getInstance();
             	cookieManager.removeAllCookie();
-            	webView.loadUrl("http://crowdtasking.appspot.com/index.html");
+            	webView.loadUrl("http://crowdtasking.appspot.com/");
                 return true;
 
             default:
@@ -112,8 +121,14 @@ public class MainActivity extends Activity {
     private class MyWebViewClient extends WebViewClient {
         @Override
         public boolean shouldOverrideUrlLoading(WebView view, String url) {
-            view.loadUrl(url);
-            return true;
+        	if (url.equalsIgnoreCase("http://crowdtasking.appspot.com/AndroidMenu")) {
+        		openOptionsMenu();
+        		return true;
+        	}
+        	System.out.println(String.format("Url: %s",url));
+        	//TextUtils.equals(request.getAuthority(), "");
+            //view.loadUrl(url);
+            return false;
         }
         
         public void onPageFinished(WebView view, String url) {
