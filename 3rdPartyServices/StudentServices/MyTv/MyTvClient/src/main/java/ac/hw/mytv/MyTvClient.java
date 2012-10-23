@@ -26,6 +26,7 @@ package ac.hw.mytv;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.ServerSocket;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -38,7 +39,6 @@ import org.societies.api.comm.xmpp.interfaces.ICommManager;
 import org.societies.api.css.devicemgmt.display.IDisplayDriver;
 import org.societies.api.css.devicemgmt.display.IDisplayableService;
 import org.societies.api.identity.IIdentity;
-import org.societies.api.identity.Requestor;
 import org.societies.api.identity.RequestorService;
 import org.societies.api.osgi.event.CSSEvent;
 import org.societies.api.osgi.event.CSSEventConstants;
@@ -106,13 +106,22 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 
 		//register for portal started events
 		registerForDisplayEvents();
-
-		//start server listening for connections from GUI
-		commandHandler = new CommandHandler();
-		socketServer = new SocketServer(commandHandler);
-		socketServer.start();
+		
+		//find available port and register with DPSC
+		int port = findAvailablePort(2161, 2191);
+		if(port != -1){
+			//register port with DSPC
+			LOG.debug("Registering MyTvClient to listen on port: "+port);
+			//TODO
+			
+			//start server listening for connections from GUI
+			commandHandler = new CommandHandler();
+			socketServer = new SocketServer(commandHandler, port);
+			socketServer.start();
+		}
 	}
 
+	
 	/*
 	 * Register for display events from portal
 	 */
@@ -123,6 +132,25 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 				")";
 		this.eventMgr.subscribeInternalEvent(this, new String[]{EventTypes.DISPLAY_EVENT}, eventFilter);
 		LOG.debug("Subscribed to "+EventTypes.DISPLAY_EVENT+" events");
+	}
+	
+	
+	/*
+	 * Find available port for SocketServer to listen on
+	 */
+	private int findAvailablePort(int first, int last){
+		//search between 2161 - 2191
+		for (int i = first; i<=last; i++){
+	        try {
+	            new ServerSocket(i);
+	            return i;
+	        } catch (IOException ex) {
+	            continue; // try next port
+	        }
+	    }
+	    // if the program gets here, no port in the range was found
+	    LOG.error("No free ports found!!");
+	    return -1;
 	}
 
 

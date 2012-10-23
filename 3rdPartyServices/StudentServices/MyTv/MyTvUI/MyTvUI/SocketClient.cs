@@ -36,6 +36,7 @@ namespace MyTvUI
         Socket echoSocket;
         String userID;
         String endPoint;
+        int port;
         Boolean connected;
 
         public SocketClient()
@@ -46,7 +47,7 @@ namespace MyTvUI
 
         public Boolean connect()
         {
-            IPEndPoint ip = new IPEndPoint(IPAddress.Parse(endPoint), 4321);
+            IPEndPoint ip = new IPEndPoint(IPAddress.Parse(endPoint), port);
             echoSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             try
             {
@@ -166,7 +167,7 @@ namespace MyTvUI
         #region connection parameters
         public Boolean getSessionParameters()
         {
-            if (retrieveUserID() && retrieveEndPoint())
+            if (retrieveUserID() && retrieveEndPoint() && retrievePort())
             {
                 return true;
             }
@@ -199,6 +200,7 @@ namespace MyTvUI
             receivedDataLength = server.Receive(data);
             if (receivedDataLength < 1)
             {
+                server.Close();
                 return false;
             }
             userID = Encoding.ASCII.GetString(data, 0, receivedDataLength);
@@ -230,6 +232,7 @@ namespace MyTvUI
             receivedDataLength = server.Receive(data);
             if (receivedDataLength < 1)
             {
+                server.Close();
                 return false;
             }
             endPoint = data[0] + "." + data[1] + "." + data[2] + "." + data[3];
@@ -238,6 +241,51 @@ namespace MyTvUI
             server.Close();
             return true;
         }
+
+        private Boolean retrievePort()
+        {
+            IPEndPoint ip = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 2114);
+            Socket server = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            try
+            {
+                server.Connect(ip);
+            }
+            catch (SocketException e)
+            {
+                Console.WriteLine("SOCKET_CLIENT: Unable to connect to server.");
+                Console.WriteLine(e.ToString());
+                return false;
+            }
+
+            //get current end point
+            Console.WriteLine("SOCKET_CLIENT: Retrieving port of service client");
+            server.Send(Encoding.ASCII.GetBytes("VIRGO_ENDPOINT_PORT"));
+            byte[] data = new byte[1024];
+            int receivedDataLength = 0;
+            receivedDataLength = server.Receive(data);
+            if (receivedDataLength < 1)
+            {
+                server.Close();
+                return false;
+            }
+
+            try
+            {
+                port = Convert.ToInt32(Encoding.ASCII.GetString(data, 0, receivedDataLength));
+                Console.WriteLine("SOCKET_CLIENT: Received port of service client: " + port);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Received data is not a valid port number");
+                Console.WriteLine(e.ToString());
+                server.Close();
+                return false;
+            }
+       
+            server.Close();
+            return true;
+        }
+
         #endregion connection parameters
 
         public String getUserID()

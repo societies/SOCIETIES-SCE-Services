@@ -257,7 +257,7 @@ namespace MyTvUI
                 }
             else
             {
-               Console.WriteLine("Error - could not get session parameters - userID and endpoint");
+               Console.WriteLine("Error - could not get session parameters - userID, endpoint IP and port");
             }
             return false;
         }
