@@ -135,6 +135,7 @@ public class SocketClient {
 		for (ServiceInfo sInfo : userSession.getServices()){
 			String serviceMsg = sInfo.getServiceName()+"\n"+
 				sInfo.getExe()+"\n"+
+					"PORT:"+sInfo.getServicePortNumber()+"\n"+
 					"RequiresKinect="+sInfo.isKinectRequired()+"\n"; 
 			message = message.concat(serviceMsg);
 		}

@@ -43,7 +43,10 @@ import org.societies.api.identity.IIdentity;
 import org.societies.api.identity.IIdentityManager;
 import org.societies.api.identity.InvalidFormatException;
 import org.societies.api.identity.RequestorService;
+import org.societies.api.osgi.event.CSSEvent;
+import org.societies.api.osgi.event.CSSEventConstants;
 import org.societies.api.osgi.event.EMSException;
+import org.societies.api.osgi.event.EventListener;
 import org.societies.api.osgi.event.EventTypes;
 import org.societies.api.osgi.event.IEventMgr;
 import org.societies.api.osgi.event.InternalEvent;
@@ -58,7 +61,7 @@ import ac.hw.display.server.api.remote.IDisplayPortalServer;
  * @author Eliza
  *
  */
-public class DisplayPortalClient implements IDisplayDriver{
+public class DisplayPortalClient extends EventListener implements IDisplayDriver{
 
 	private ICommManager commManager;
 	private IIdentityManager idMgr;
@@ -85,9 +88,9 @@ public class DisplayPortalClient implements IDisplayDriver{
 		this.servRuntimeSocketThread.start();
 	}
 	
-	//this method should be called after the bundle has started so it should be called by the OsgiContextListener when the event has been received
+	
 	public void Init(){
-		JOptionPane.showMessageDialog(null, "Initialising DisplayPortalClient");
+		this.LOG.debug("Initialising DisplayPortalClient");
 		//ServiceResourceIdentifier serviceId = getServices().getMyServiceId(this.getClass());
 		
 			this.requestServerIdentityFromUser();
@@ -106,13 +109,54 @@ public class DisplayPortalClient implements IDisplayDriver{
 		
 		userSession = new UserSession(this.userIdentity.getJid());
 		
-		JOptionPane.showMessageDialog(null, "DisplayPortalClient initialised");
+		this.LOG.debug("DisplayPortalClient initialised");
 		//return true;
 	}
 
+	private void registerForSLMEvents() {
+		String eventFilter = "(&" + 
+				"(" + CSSEventConstants.EVENT_NAME + "=newservice)" +
+				"(" + CSSEventConstants.EVENT_SOURCE + "=org/societies/servicemgmt/service)" +
+				")";
+		
+		this.evMgr.subscribeInternalEvent(this, new String[]{EventTypes.NEW_SERVICE_EVENT}, eventFilter);
+		this.LOG.debug("Subscribed to "+EventTypes.UIM_EVENT+" events");
 
+	}
+
+	/*
+	 * NOT USED
+	 * (non-Javadoc)
+	 * @see org.societies.api.osgi.event.EventListener#handleExternalEvent(org.societies.api.osgi.event.CSSEvent)
+	 */
+	@Override
+	public void handleExternalEvent(CSSEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	/*
+	 * Used to receive SLM events and specifically, to know that this bundle has been started in osgi 
+	 * so that it can retrieve it's generated SRI.
+	 * (non-Javadoc)
+	 * @see org.societies.api.osgi.event.EventListener#handleInternalEvent(org.societies.api.osgi.event.InternalEvent)
+	 */
+	@Override
+	public void handleInternalEvent(InternalEvent arg0) {
+		// 
+		
+	}
 	private void requestServerIdentityFromUser(){
 		
+		if (this.idMgr.getThisNetworkNode().getJid().endsWith("macs.hw.ac.uk")){
+			try {
+				this.serverIdentity = this.idMgr.fromJid("university.societies.local.macs.hw.ac.uk");
+			} catch (InvalidFormatException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 		if (this.serverIdentity==null){
 			String serverIdentityStr = JOptionPane.showInputDialog("Please enter the JID of the CSS hosting the server application", "xcmanager.societies.local");
 			
@@ -233,10 +277,18 @@ public class DisplayPortalClient implements IDisplayDriver{
 
 	@Override
 	public void registerDisplayableService(IDisplayableService service, String serviceName, URL executableLocation, boolean requiresKinect){
-		ServiceInfo sInfo  = new ServiceInfo(service, serviceName, executableLocation.toString(), requiresKinect);
+		ServiceInfo sInfo  = new ServiceInfo(service, serviceName, executableLocation.toString(), 0, requiresKinect);
 		this.userSession.addService(sInfo);
 	}
 	
+	@Override
+	public void registerDisplayableService(IDisplayableService service, String serviceName, URL executableLocation, int servicePortNumber, boolean requiresKinect) {
+		ServiceInfo sInfo  = new ServiceInfo(service, serviceName, executableLocation.toString(), servicePortNumber, requiresKinect);
+		this.userSession.addService(sInfo);
+		
+	}
+
+
 	/*
 	 * get/set methods
 	 */
@@ -362,6 +414,10 @@ public class DisplayPortalClient implements IDisplayDriver{
 		}
 		
 	}
+
+
+
+
 
 
 }
