@@ -81,7 +81,7 @@ namespace HWUPortal
                         }
                         else if (receivedValue.IndexOf("SERVICE_PORT") > -1)
                         {
-
+                            String serviceName = receivedValue.Remove(0, "SERVICE_PORT->".Length);
                             byte[] portInBytes = BitConverter.GetBytes(currentUserSession.getPort());
                             socket.Send(portInBytes);
                             finishedReceiving = true;
