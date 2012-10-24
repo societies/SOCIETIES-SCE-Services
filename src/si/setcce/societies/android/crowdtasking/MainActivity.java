@@ -1,10 +1,14 @@
 package si.setcce.societies.android.crowdtasking;
 
+import java.util.Calendar;
 import java.util.Date;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.provider.CalendarContract;
+import android.provider.CalendarContract.Events;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.Window;
@@ -40,7 +44,7 @@ public class MainActivity extends Activity {
         webView.setWebViewClient(new MyWebViewClient());
         webView.getSettings().setDefaultZoom(WebSettings.ZoomDensity.FAR);
         webView.loadData("<h1>Application is loading...</h1>", "text/html", "utf-8");
-        webView.loadUrl("http://crowdtasking.appspot.com/");
+        webView.loadUrl("http://crowdtasking.appspot.com/start.html");
      }
 
     @Override
@@ -58,7 +62,8 @@ public class MainActivity extends Activity {
             super.onBackPressed();
     }    
 
-    @Override
+    @TargetApi(14)
+	@Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle item selection
         switch (item.getItemId()) {
@@ -69,13 +74,23 @@ public class MainActivity extends Activity {
 
             case R.id.home:
             	//webView.loadUrl("http://crowdtasking.appspot.com/");
-            	Intent intent = new Intent(Intent.ACTION_EDIT);  
-            	intent.setType("vnd.android.cursor.item/event");
-            	intent.putExtra("title", "Some title");
-            	intent.putExtra("description", "Some description");
-            	intent.putExtra("beginTime", new Date().getTime());
-            	intent.putExtra("endTime", new Date().getTime()+7*24*60*60*1000);
-            	startActivity(intent);            	
+				Calendar beginTime = Calendar.getInstance();
+				beginTime.set(2012, 9, 24, 12, 30);
+				Calendar endTime = Calendar.getInstance();
+				endTime.set(2012, 9, 24, 13, 30);
+				Intent intent = new Intent(Intent.ACTION_INSERT)
+						.setData(Events.CONTENT_URI)
+						.putExtra(CalendarContract.EXTRA_EVENT_BEGIN_TIME,
+								beginTime.getTimeInMillis())
+						.putExtra(CalendarContract.EXTRA_EVENT_END_TIME,
+								endTime.getTimeInMillis())
+						.putExtra(Events.TITLE, "SOCIETIES Crowd Tasking - evaluation - final steps")
+						.putExtra(Events.DESCRIPTION, "Kako popraviti navodila + evaluacijo, ...")
+						.putExtra(Events.EVENT_LOCATION, "Laboratorij za Am I in wisdom of the crowds")
+						.putExtra(Events.AVAILABILITY, Events.AVAILABILITY_BUSY)
+						.putExtra(Intent.EXTRA_EMAIL,
+								"helena.halas@setcce.si, jan.porekar@setcce.si, simon.juresa@setcce.si");
+				startActivity(intent);
             	return true;
             
             case R.id.profile:
