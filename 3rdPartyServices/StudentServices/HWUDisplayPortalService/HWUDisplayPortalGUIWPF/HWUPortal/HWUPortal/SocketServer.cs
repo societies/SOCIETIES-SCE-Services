@@ -259,55 +259,135 @@ namespace HWUPortal
             String[] lines = input.Split('\n');
             if (lines.Length > 0)
             {
-                if (lines[0].IndexOf("LOGIN") > -1)
+                if ((lines[0].IndexOf("LOGIN") > -1) && (lines[1].IndexOf("USER")>-1))
                 {
-                    if (lines.Length < 4)
+
+                    
+                    userSession.setUserIdentity(lines[1].Trim());
+                    
+
+
+                    userSession.setUserIdentity(lines[1].Trim().Remove(0, "USER:".Length));
+
+                    if (lines[2].IndexOf("PORTAL_PORT") > -1)
                     {
-                        Console.WriteLine("message not in correct format");
-                        return false;
+                        int portalPort = Int32.Parse(lines[2].Trim().Remove(0, "PORTAL_PORT:".Length));
+                        Console.WriteLine("Parsed portal port: " + portalPort);
+                        userSession.setPort(portalPort);
+
                     }
 
-                    int lineStart = 2;
-                    int lineEnd = 0;
-                    for (int i = 0; i < lines.Length; i++)
+                    int servicesToFollow = 0;
+                    if (lines[3].IndexOf("NUM_SERVICES") > -1)
                     {
-                        Console.WriteLine("Line: " + i + " " + lines[i]);
-                        if (lines[i].IndexOf("END_SERVICES") > -1)
+                        servicesToFollow = Int32.Parse(lines[3].Trim().Remove(0, "NUM_SERVICES:".Length));
+                        Console.WriteLine("Parsed number of services: " + servicesToFollow);
+                    }
+
+                    if (servicesToFollow == 0)
+                    {
+                        Console.WriteLine(userSession.ToString());
+                        return true;
+                    }
+
+
+                    if (lines[4].IndexOf("START_SERVICES") > -1)
+                    {
+                        Console.WriteLine("Reading services ");
+                        int pointer = 5;
+                        String line = lines[pointer];
+                        while (line.IndexOf("END_SERVICES") == -1)
                         {
-                            lineEnd = i;
+                            Console.WriteLine("step 1, processing line: " + line);
+                            if (line.IndexOf("START_SERVICE_INFO:") > -1)
+                            {
+                                
+                                int readingServiceNumber = Int32.Parse((line.Remove(0, "START_SERVICE_INFO:".Length)));
+                                Console.WriteLine("Reading service: " + readingServiceNumber);
+                                ServiceInfo sInfo = new ServiceInfo();
+                                line = lines[pointer++];
+                                while (line.IndexOf("END_SERVICE_INFO:"+readingServiceNumber) == -1)
+                                {
+                                    if (line.IndexOf("SERVICE_NAME_" + readingServiceNumber + ":") > -1)
+                                    {
+                                        sInfo.serviceName = line.Remove(0, ("SERVICE_NAME_" + readingServiceNumber + ":").Length);
+                                    }
+                                    else if (line.IndexOf("SERVICE_EXE_" + readingServiceNumber + ":") >-1)
+                                    {
+                                        sInfo.serviceURL = line.Remove(0, ("SERVICE_EXE_" + readingServiceNumber + ":").Length);
+                                    }
+                                    else if (line.IndexOf("SERVICE_PORT_" + readingServiceNumber + ":") > -1)
+                                    {
+                                        sInfo.servicePortNumber = Int32.Parse(line.Remove(0, ("SERVICE_PORT_" + readingServiceNumber + ":").Length));
+                                    }
+                                    else if (line.IndexOf("RequiresKinect_" + readingServiceNumber + ":") > -1)
+                                    {
+                                        String value = line.Remove(0, ("RequiresKinect_" + readingServiceNumber + ":").Length);
+                                        if (value.IndexOf("true") > -1)
+                                        {
+                                            sInfo.requiresKinect = true;
+                                        }
+                                        else
+                                        {
+                                            sInfo.requiresKinect = false;
+                                        }
+                                    }
+
+                                   
+                                    line = lines[pointer++];
+                                }
+
+                                Console.WriteLine("Read service info " + readingServiceNumber);
+
+                                this.numOfServices++;
+                                this.downloadFile(sInfo);
+                            }
+                            line = lines[pointer++];
                         }
 
+                        Console.WriteLine("read all services");
                     }
 
-                    if (lines[0].IndexOf("LOGIN") > -1)
-                    {
-                        userSession.setUserIdentity(lines[1].Trim());
-                    }
+                    //int startServicesLineNumber = 0;
+                    //int endServicesLineNumber = 0;
+
+                    //for (int i = 4; i < lines.Length; i++)
+                    //{
+                    //    Console.WriteLine("Line: " + i + " " + lines[i]);
+                    //    if (lines[i].IndexOf("END_SERVICES") > -1)
+                    //    {
+                    //        endServicesLineNumber = i;
+                    //    }else if (lines[i].IndexOf("START_SERVICES") > -1)
+                    //    {
+                    //        startServicesLineNumber = i;
+                    //    }
+
+                    //}
 
 
-                    for (int i = lineStart; i < lineEnd; i += 3)
-                    {
-                        ServiceInfo sInfo = new ServiceInfo();
-                        sInfo.serviceName = lines[i];
-                        sInfo.serviceURL = lines[i + 1];
-                        string requiresKinect = lines[i + 2];
-                        string command = "RequiresKinect=";
-                        if (requiresKinect.IndexOf(command) > -1)
-                        {
+                    //for (int i = lineStart; i < lineEnd; i += 6)
+                    //{
+                    //    ServiceInfo sInfo = new ServiceInfo();
+                    //    sInfo.serviceName = lines[i]; 
+                    //    sInfo.serviceURL = lines[i + 1]; 
+                    //    string requiresKinect = lines[i + 2];
+                    //    string command = "RequiresKinect:";
+                    //    if (requiresKinect.IndexOf(command) > -1)
+                    //    {
 
-                            //requiresKinect = requiresKinect.Remove(0, command.Count());
-                            if (requiresKinect.IndexOf("true") > -1)
-                            {
-                                sInfo.requiresKinect = true;
-                            }
-                            else
-                            {
-                                sInfo.requiresKinect = false;
-                            }
-                        }
-                        this.numOfServices++;
-                        this.downloadFile(sInfo);
-                    }
+                    //        //requiresKinect = requiresKinect.Remove(0, command.Count());
+                    //        if (requiresKinect.IndexOf("true") > -1)
+                    //        {
+                    //            sInfo.requiresKinect = true;
+                    //        }
+                    //        else
+                    //        {
+                    //            sInfo.requiresKinect = false;
+                    //        }
+                    //    }
+                    //    this.numOfServices++;
+                    //    this.downloadFile(sInfo);
+                    //}
                     Console.WriteLine(userSession.ToString());
                     return true;
                 }

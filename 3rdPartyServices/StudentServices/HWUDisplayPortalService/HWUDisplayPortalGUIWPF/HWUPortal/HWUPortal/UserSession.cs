@@ -18,6 +18,7 @@ namespace HWUPortal
         //item3: local drive location (set after downloading the file)
         private List<ServiceInfo> services;
         private IPAddress userIPAddress;
+        private int port;
 
         public UserSession()
         {
@@ -103,6 +104,16 @@ namespace HWUPortal
         public void setIPAddress(IPAddress userIPAddr)
         {
             this.userIPAddress = userIPAddr;
+        }
+
+        internal int getPort()
+        {
+            return this.port;
+        }
+
+        public void setPort(int port)
+        {
+            this.port = port;
         }
     }
 }

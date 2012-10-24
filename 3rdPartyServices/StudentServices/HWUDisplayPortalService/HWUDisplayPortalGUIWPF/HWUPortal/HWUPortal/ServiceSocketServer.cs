@@ -79,6 +79,13 @@ namespace HWUPortal
                             socket.Send(addressInBytes);
                             finishedReceiving = true;
                         }
+                        else if (receivedValue.IndexOf("SERVICE_PORT") > -1)
+                        {
+
+                            byte[] portInBytes = BitConverter.GetBytes(currentUserSession.getPort());
+                            socket.Send(portInBytes);
+                            finishedReceiving = true;
+                        }
                         receivedBytes = new byte[1024];
                     }
 

@@ -130,14 +130,23 @@ public class SocketClient {
 
 	public void startSession(UserSession userSession){
 		String message = "LOGIN\n" +
-				userSession.getUserIdentity()+"\n";
+				"USER:"+userSession.getUserIdentity()+"\n"+
+				"PORTAL_PORT:"+userSession.getServiceRuntimeSocketPort()+"\n"+
+				"NUM_SERVICES:"+userSession.getServices().size()+"\n"+
+				"START_SERVICES\n";
 		
+		int count = 0;
 		for (ServiceInfo sInfo : userSession.getServices()){
-			String serviceMsg = sInfo.getServiceName()+"\n"+
-				sInfo.getExe()+"\n"+
-					"PORT:"+sInfo.getServicePortNumber()+"\n"+
-					"RequiresKinect="+sInfo.isKinectRequired()+"\n"; 
+			
+			String serviceMsg = 
+					"START_SERVICE_INFO:"+count+"\n"+
+					"SERVICE_NAME_"+count+":"+sInfo.getServiceName()+"\n"+
+					"SERVICE_EXE_"+count+":"+sInfo.getExe()+"\n"+
+					"SERVICE_PORT_"+count+":"+sInfo.getServicePortNumber()+"\n"+
+					"RequiresKinect_"+count+":"+sInfo.isKinectRequired()+"\n"+
+					"END_SERVICE_INFO:"+count+"\n";
 			message = message.concat(serviceMsg);
+			count++;
 		}
 		
 		message = message.concat("END_SERVICES\n");
@@ -193,15 +202,15 @@ public class SocketClient {
 		
 		SocketClient c = new SocketClient("127.0.0.1");
 		
-		UserSession userSession = new UserSession("eliza@societies.local");
-		ServiceInfo sInfo = new ServiceInfo(null, "Social Learning", "http://www.macs.hw.ac.uk/~ceeep1/societies/services/SocialLearningGame.exe", true);
+		UserSession userSession = new UserSession("eliza@societies.local", 10001);
+		ServiceInfo sInfo = new ServiceInfo(null, "Social Learning", "http://www.macs.hw.ac.uk/~ceeep1/societies/services/SocialLearningGame.exe", 0 , true);
 		
-		ServiceInfo sInfo2 = new ServiceInfo (null, "PolicyEditor", "http://www.macs.hw.ac.uk/~ceeep1/societies/services/POLICY~1.JAR", false);
-		ServiceInfo sInfo3 = new ServiceInfo(null, "Youtube", "http://www.youtube.com/watch?v=3OnnDqH6Wj8", false);
-		ServiceInfo sInfo4 = new ServiceInfo(null, "MyTV", "http://www.macs.hw.ac.uk/~ceesmm1/societies/mytv/MyTvUI.exe", true);
+		ServiceInfo sInfo2 = new ServiceInfo (null, "PolicyEditor", "http://www.macs.hw.ac.uk/~ceeep1/societies/services/POLICY~1.JAR", 0, false);
+		ServiceInfo sInfo3 = new ServiceInfo(null, "Youtube", "http://www.youtube.com/watch?v=3OnnDqH6Wj8", 0, false);
+		ServiceInfo sInfo4 = new ServiceInfo(null, "MyTV", "http://www.macs.hw.ac.uk/~ceesmm1/societies/mytv/MyTvUI.exe", 0, true);
 		userSession.addService(sInfo2);
-		//userSession.addService(sInfo);
-		//userSession.addService(sInfo3);
+		userSession.addService(sInfo);
+		userSession.addService(sInfo3);
 		//userSession.addService(sInfo2);
 		//userSession.addService(sInfo2);
 		//userSession.addService(sInfo3);

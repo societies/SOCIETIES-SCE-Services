@@ -14,6 +14,7 @@ namespace HWUPortal
         public HoverButton button;
         public ServiceType serviceType;
         public Boolean requiresKinect;
+        public int servicePortNumber;
 
         public ServiceInfo()
         {
@@ -29,7 +30,8 @@ namespace HWUPortal
             return "ServiceName: " + serviceName + "\n" +
                 "ServiceExe: " + serviceExe + "\n" +
                 "Service URL " + serviceURL + "\n" +
-                "Service Type: " + serviceType + "\n";
+                "Service Type: " + serviceType + "\n"+
+                "Service Port Number" +"\n";
             //"Button: " + button.Name;
         }
     }

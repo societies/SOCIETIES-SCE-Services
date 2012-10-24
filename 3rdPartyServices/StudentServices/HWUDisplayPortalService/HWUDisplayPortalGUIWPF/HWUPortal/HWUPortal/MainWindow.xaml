@@ -1,4 +1,4 @@
-﻿<Window x:Class="HWUPortal.MainWindow" Name="mainWindow"
+﻿<Window x:Class="HWUPortal.MainWindow" Name="mainWindow" MinWidth="1340" MinHeight="700" MaxWidth="1340" MaxHeight="700"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="SOCIETIES Display Portal Service" xmlns:WinForms="clr-namespace:System.Windows.Forms;assembly=System.Windows.Forms"
@@ -18,7 +18,7 @@
             <GradientStop Color="DimGray" Offset="1" />
         </LinearGradientBrush>
     </Window.Background>
-    <Canvas MinWidth="1340" MinHeight="700" MaxWidth="1340" MaxHeight="700" Name="MainCanvas">
+    <Canvas MinWidth="1340" MinHeight="690" MaxWidth="1330" MaxHeight="700" Name="MainCanvas">
         <Controls:HoverButton TimeInterval="3000" Content="Service 1" TextBlock.TextAlignment="Center" VerticalContentAlignment="Center" Height="55" HorizontalAlignment="Left" Margin="57,131,0,0" Name="serviceButton1" VerticalAlignment="Top" Width="201" Click="serviceButton1_Click">
             <Controls:HoverButton.Background>
                 <ImageBrush ImageSource="/HWUPortal;component/Images/buttonImg.png" />

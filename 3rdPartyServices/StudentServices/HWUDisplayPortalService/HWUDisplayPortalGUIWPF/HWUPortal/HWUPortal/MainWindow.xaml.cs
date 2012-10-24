@@ -12,7 +12,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Threading;
-using ApplicationControl;
+
 using Microsoft.Kinect;
 using Microsoft.Kinect.Interop;
 using Coding4Fun.Kinect.Wpf;
@@ -542,21 +542,21 @@ namespace HWUPortal
             //}
         }
 
-        public delegate void enableApplicationControlDelegate(ApplicationControl.ApplicationControl appCtrl, Boolean enabled);
+        //public delegate void enableApplicationControlDelegate(ApplicationControl.ApplicationControl appCtrl, Boolean enabled);
 
-        public void enableViewingPanel(ApplicationControl.ApplicationControl appCtrl, Boolean enabled)
-        {
-            if (appCtrl.InvokeRequired)
-            {
-                appCtrl.Invoke(new enableApplicationControlDelegate(enableViewingPanel), appCtrl, enabled);
-            }
-            else
-            {
-                appCtrl.Visible = enabled;
-                appCtrl.Enabled = enabled;
+        //public void enableViewingPanel(ApplicationControl.ApplicationControl appCtrl, Boolean enabled)
+        //{
+        //    if (appCtrl.InvokeRequired)
+        //    {
+        //        appCtrl.Invoke(new enableApplicationControlDelegate(enableViewingPanel), appCtrl, enabled);
+        //    }
+        //    else
+        //    {
+        //        appCtrl.Visible = enabled;
+        //        appCtrl.Enabled = enabled;
 
-            }
-        }
+        //    }
+        //}
 
 
         internal Boolean isUserLoggedIn(String user)
@@ -662,7 +662,7 @@ namespace HWUPortal
                     this.runningService = new ServiceInfo();
                 }
                 ServiceInformationSocketClient client = new ServiceInformationSocketClient();
-                client.sendLogoutEvent(userSession.getIPAddress());
+                client.sendLogoutEvent(userSession.getIPAddress(), userSession.getPort());
 
                 this.userSession = new UserSession();
                 foreach (HoverButton button in myButtons)
@@ -1071,7 +1071,12 @@ namespace HWUPortal
         void GetCameraPoint(Skeleton first, AllFramesReadyEventArgs e)
         {
 
-            using (DepthImageFrame depth = e.OpenDepthImageFrame())
+            CoordinateMapper cm = new CoordinateMapper(this.kinect);
+            DepthImagePoint rightDepthPoint = cm.MapSkeletonPointToDepthPoint(first.Joints[JointType.HandRight].Position, DepthImageFormat.Resolution640x480Fps30);
+            ColorImagePoint rightColorPoint = cm.MapSkeletonPointToColorPoint(first.Joints[JointType.HandRight].Position, ColorImageFormat.RgbResolution640x480Fps30);
+            CameraPosition(RightHand, rightColorPoint);
+
+            /* using (DepthImageFrame depth = e.OpenDepthImageFrame())
             {
                 if (depth == null ||
                     kinectSensorChooser1.Kinect == null)
@@ -1080,22 +1085,24 @@ namespace HWUPortal
                 }
 
 
+
                 //Map a joint location to a point on the depth map
                 //right hand
-                DepthImagePoint rightDepthPoint =
-                    depth.MapFromSkeletonPoint(first.Joints[JointType.HandRight].Position);
+                //DepthImagePoint rightDepthPoint =
+                    
+                //    depth.MapFromSkeletonPoint(first.Joints[JointType.HandRight].Position);
 
                 //Map a depth point to a point on the color image
                 //right hand
-                ColorImagePoint rightColorPoint =
-                    depth.MapToColorImagePoint(rightDepthPoint.X, rightDepthPoint.Y,
-                    ColorImageFormat.RgbResolution640x480Fps30);
+                //ColorImagePoint rightColorPoint =
+                //    depth.MapToColorImagePoint(rightDepthPoint.X, rightDepthPoint.Y,
+                //    ColorImageFormat.RgbResolution640x480Fps30);
 
 
                 //Set location
-                CameraPosition(RightHand, rightColorPoint);
+                //CameraPosition(RightHand, rightColorPoint);
 
-            }
+            } */
         }
 
         private void CameraPosition(FrameworkElement element, ColorImagePoint point)
