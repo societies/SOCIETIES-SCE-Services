@@ -81,10 +81,21 @@ namespace HWUPortal
                         }
                         else if (receivedValue.IndexOf("SERVICE_PORT") > -1)
                         {
+
                             String serviceName = receivedValue.Remove(0, "SERVICE_PORT->".Length);
-                            byte[] portInBytes = BitConverter.GetBytes(currentUserSession.getPort());
-                            socket.Send(portInBytes);
-                            finishedReceiving = true;
+                            ServiceInfo sInfo = currentUserSession.getService(serviceName);
+                            if (sInfo == null)
+                            {
+                                byte[] errorInBytes = Encoding.ASCII.GetBytes("Invalid_Service_Name");
+                                socket.Send(errorInBytes);
+                                finishedReceiving = true;
+                            }
+                            else
+                            {
+                                byte[] portInBytes = BitConverter.GetBytes(sInfo.servicePortNumber);
+                                socket.Send(portInBytes);
+                                finishedReceiving = true;
+                            }
                         }
                         receivedBytes = new byte[1024];
                     }
