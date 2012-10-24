@@ -37,10 +37,12 @@ public class UserSession {
 
 	private String userIdentity;
 	private List<ServiceInfo> services;
+	private final int serviceRuntimeSocketPort;
 	
-	public UserSession(String userIdentity){
+	public UserSession(String userIdentity, int port){
 		this.setUserIdentity(userIdentity);
 		services = new ArrayList<ServiceInfo>();
+		this.serviceRuntimeSocketPort = port;
 	}
 	
 	public void addService(ServiceInfo sInfo){
@@ -83,4 +85,9 @@ public class UserSession {
 		}
 		return null;
 	}
+
+	public int getServiceRuntimeSocketPort() {
+		return serviceRuntimeSocketPort;
+	}
+
 }

@@ -18,9 +18,9 @@ namespace HWUPortal
         }
 
 
-        public void sendLogoutEvent(IPAddress remoteIPAddress)
+        public void sendLogoutEvent(IPAddress remoteIPAddress, int port)
         {
-            IPEndPoint ip = new IPEndPoint(remoteIPAddress, 2121);
+            IPEndPoint ip = new IPEndPoint(remoteIPAddress, port);
             Socket server = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
             try

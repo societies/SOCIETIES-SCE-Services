@@ -52,6 +52,8 @@ import org.societies.api.osgi.event.IEventMgr;
 import org.societies.api.osgi.event.InternalEvent;
 import org.societies.api.schema.servicelifecycle.model.ServiceResourceIdentifier;
 import org.societies.api.services.IServices;
+import org.societies.api.services.ServiceMgmtEvent;
+import org.societies.api.services.ServiceMgmtEventType;
 
 import ac.hw.display.server.api.remote.IDisplayPortalServer;
 
@@ -81,49 +83,48 @@ public class DisplayPortalClient extends EventListener implements IDisplayDriver
 	private ServiceRuntimeSocketServer servRuntimeSocketThread;
 
 	private UserSession userSession;
-	
+	private ContextEventListener ctxEvListener;
+	private int serviceRuntimeSocketPort;
+
 	public DisplayPortalClient(){
 		this.screenLocations = new ArrayList<String>();
 		this.servRuntimeSocketThread = new ServiceRuntimeSocketServer(this);
 		this.servRuntimeSocketThread.start();
 	}
-	
-	
+
+
 	public void Init(){
 		this.LOG.debug("Initialising DisplayPortalClient");
+		this.registerForSLMEvents();
 		//ServiceResourceIdentifier serviceId = getServices().getMyServiceId(this.getClass());
-		
-			this.requestServerIdentityFromUser();
-			ServiceResourceIdentifier serviceId = this.portalServerRemote.getServerServiceId(serverIdentity);
-		
-		//this.serverIdentity = this.services.getServer(serviceId);
-		UIManager.put("ClassLoader", ClassLoader.getSystemClassLoader());
 
-		this.requestor = new RequestorService(serverIdentity, serviceId);
-		ContextEventListener ctxEvListener = new ContextEventListener(this, getCtxBroker(), userIdentity, requestor);
-		String[] locs = this.portalServerRemote.getScreenLocations(serverIdentity);
-		
-		for (int i=0; i<locs.length; i++){
-			this.screenLocations.add(locs[i]);
-		}
-		
-		userSession = new UserSession(this.userIdentity.getJid());
-		
+
 		this.LOG.debug("DisplayPortalClient initialised");
 		//return true;
 	}
 
 	private void registerForSLMEvents() {
 		String eventFilter = "(&" + 
-				"(" + CSSEventConstants.EVENT_NAME + "=newservice)" +
-				"(" + CSSEventConstants.EVENT_SOURCE + "=org/societies/servicemgmt/service)" +
+				"(" + CSSEventConstants.EVENT_NAME + "=lifecycle)" +
+				"(" + CSSEventConstants.EVENT_SOURCE + "=org/societies/service)" +
 				")";
-		
-		this.evMgr.subscribeInternalEvent(this, new String[]{EventTypes.NEW_SERVICE_EVENT}, eventFilter);
-		this.LOG.debug("Subscribed to "+EventTypes.UIM_EVENT+" events");
+
+		this.evMgr.subscribeInternalEvent(this, new String[]{EventTypes.SERVICE_LIFECYCLE_EVENT}, eventFilter);
+		this.LOG.debug("Subscribed to "+EventTypes.SERVICE_LIFECYCLE_EVENT+" events");
 
 	}
 
+	private void unRegisterFromSLMEvents()
+	{
+		String eventFilter = "(&" + 
+				"(" + CSSEventConstants.EVENT_NAME + "=lifecycle)" +
+				"(" + CSSEventConstants.EVENT_SOURCE + "=org/societies/service)" +
+				")";
+
+		this.evMgr.unSubscribeInternalEvent(this, new String[]{EventTypes.SERVICE_LIFECYCLE_EVENT}, eventFilter);
+		//this.evMgr.subscribeInternalEvent(this, new String[]{EventTypes.SERVICE_LIFECYCLE_EVENT}, eventFilter);
+		this.LOG.debug("Unsubscribed from "+EventTypes.SERVICE_LIFECYCLE_EVENT+" events");
+	}
 	/*
 	 * NOT USED
 	 * (non-Javadoc)
@@ -132,7 +133,7 @@ public class DisplayPortalClient extends EventListener implements IDisplayDriver
 	@Override
 	public void handleExternalEvent(CSSEvent arg0) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 
@@ -143,33 +144,39 @@ public class DisplayPortalClient extends EventListener implements IDisplayDriver
 	 * @see org.societies.api.osgi.event.EventListener#handleInternalEvent(org.societies.api.osgi.event.InternalEvent)
 	 */
 	@Override
-	public void handleInternalEvent(InternalEvent arg0) {
-		// 
-		
-	}
-	private void requestServerIdentityFromUser(){
-		
-		if (this.idMgr.getThisNetworkNode().getJid().endsWith("macs.hw.ac.uk")){
-			try {
-				this.serverIdentity = this.idMgr.fromJid("university.societies.local.macs.hw.ac.uk");
-			} catch (InvalidFormatException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+	public void handleInternalEvent(InternalEvent event) {
+		ServiceMgmtEvent slmEvent = (ServiceMgmtEvent) event.geteventInfo();
+
+		if (slmEvent.getBundleSymbolName().equalsIgnoreCase("ac.hw.display.DisplayPortalClientApp")){
+			this.LOG.debug("Received SLM event for my bundle");
+
+			if (slmEvent.getEventType().equals(ServiceMgmtEventType.NEW_SERVICE)){
+				ServiceResourceIdentifier myClientServiceID = slmEvent.getServiceId();
+				this.serverIdentity = services.getServer(myClientServiceID);
+				this.LOG.debug("Retrieved my server's identity: "+this.serverIdentity.getJid());
+				//this.requestServerIdentityFromUser();
+				//ServiceResourceIdentifier serviceId = this.portalServerRemote.getServerServiceId(serverIdentity);
+				
+				//UIManager.put("ClassLoader", ClassLoader.getSystemClassLoader());
+
+				ServiceResourceIdentifier serviceId = this.services.getServerServiceIdentifier(myClientServiceID);
+				this.LOG.debug("Retrieved my server's serviceID: "+serviceId.getIdentifier().toASCIIString());
+				this.requestor = new RequestorService(serverIdentity, serviceId);
+				ctxEvListener = new ContextEventListener(this, getCtxBroker(), userIdentity, requestor);
+				String[] locs = this.portalServerRemote.getScreenLocations(serverIdentity);
+				this.LOG.debug("Retrieved screen locations from my server");
+				for (int i=0; i<locs.length; i++){
+					this.screenLocations.add(locs[i]);
+				}
 			}
-		}
-		if (this.serverIdentity==null){
-			String serverIdentityStr = JOptionPane.showInputDialog("Please enter the JID of the CSS hosting the server application", "xcmanager.societies.local");
+			userSession = new UserSession(this.userIdentity.getJid(), this.serviceRuntimeSocketPort);
 			
-			try {
-				this.serverIdentity = this.idMgr.fromJid(serverIdentityStr);
-				
-				
-			} catch (InvalidFormatException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+		}else{
+			this.LOG.debug("Received SLM event but was not related to my bundle. Related to: "+slmEvent.getBundleSymbolName());
 		}
+
 	}
+
 	public void updateUserLocation(String location){
 		//if near a screen
 		if (this.screenLocations.contains(location)){
@@ -191,7 +198,7 @@ public class DisplayPortalClient extends EventListener implements IDisplayDriver
 				}
 				//now setup new screen
 				SocketClient socketClient = new SocketClient(reply);
-				
+
 				socketClient.startSession(userSession);
 				//TODO: send services TO DISPLAY
 				this.currentUsedScreenIP = reply;
@@ -205,7 +212,7 @@ public class DisplayPortalClient extends EventListener implements IDisplayDriver
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				
+
 			}
 		}//user is not near a screen
 		else{
@@ -214,15 +221,15 @@ public class DisplayPortalClient extends EventListener implements IDisplayDriver
 			if (this.hasSession){
 				//release resource
 				this.portalServerRemote.releaseResource(serverIdentity, userIdentity.getJid(), currentUsedScreenLocation);
-				
+
 				this.hasSession = false;
-				
-				
+
+
 				SocketClient socketClient = new SocketClient(this.currentUsedScreenIP);
 				socketClient.endSession(this.userSession.getUserIdentity());
 				this.currentUsedScreenIP = "";
 				this.currentUsedScreenLocation = "";
-				
+
 				DisplayEvent dEvent = new DisplayEvent(this.currentUsedScreenIP, DisplayEventConstants.DEVICE_UNAVAILABLE);
 				InternalEvent iEvent = new InternalEvent(EventTypes.DISPLAY_EVENT, "displayUpdate", "org/societies/css/device", dEvent);
 				try {
@@ -234,31 +241,31 @@ public class DisplayPortalClient extends EventListener implements IDisplayDriver
 			}
 		}
 	}
-	
-	
+
+
 	@Override
 	public void displayImage(String serviceName, String pathToFile){
 		if (this.hasSession){
-			
-				BinaryDataTransfer dataTransfer = new BinaryDataTransfer(currentUsedScreenIP);
-				dataTransfer.sendImage(this.userIdentity.getJid(), pathToFile);
-				
-			
+
+			BinaryDataTransfer dataTransfer = new BinaryDataTransfer(currentUsedScreenIP);
+			dataTransfer.sendImage(this.userIdentity.getJid(), pathToFile);
+
+
 		}
-		
+
 	}
 
 	@Override
 	public void displayImage(String serviceName, URL remoteImageLocation){
 		if (this.hasSession){
-			
-				SocketClient socketClient = new SocketClient(currentUsedScreenIP);
-				
-				socketClient.sendImage(userSession, remoteImageLocation);
-				
-			
+
+			SocketClient socketClient = new SocketClient(currentUsedScreenIP);
+
+			socketClient.sendImage(userSession, remoteImageLocation);
+
+
 		}
-		
+
 	}
 
 
@@ -268,11 +275,11 @@ public class DisplayPortalClient extends EventListener implements IDisplayDriver
 			if (this.userSession.containsService(serviceName)){
 				SocketClient socketClient = new SocketClient(currentUsedScreenIP);
 				socketClient.sendText(serviceName, userSession, text);
-				
-				
+
+
 			}
 		}
-		
+
 	}
 
 	@Override
@@ -280,20 +287,20 @@ public class DisplayPortalClient extends EventListener implements IDisplayDriver
 		ServiceInfo sInfo  = new ServiceInfo(service, serviceName, executableLocation.toString(), 0, requiresKinect);
 		this.userSession.addService(sInfo);
 	}
-	
+
 	@Override
 	public void registerDisplayableService(IDisplayableService service, String serviceName, URL executableLocation, int servicePortNumber, boolean requiresKinect) {
 		ServiceInfo sInfo  = new ServiceInfo(service, serviceName, executableLocation.toString(), servicePortNumber, requiresKinect);
 		this.userSession.addService(sInfo);
-		
+
 	}
 
 
 	/*
 	 * get/set methods
 	 */
-	
-	
+
+
 	/**
 	 * @return the commManager
 	 */
@@ -308,7 +315,7 @@ public class DisplayPortalClient extends EventListener implements IDisplayDriver
 		this.idMgr = commManager.getIdManager();
 		this.userIdentity = idMgr.getThisNetworkNode();
 	}
-	
+
 
 
 	/**
@@ -377,7 +384,7 @@ public class DisplayPortalClient extends EventListener implements IDisplayDriver
 				}
 			}
 		}
-		
+
 	}
 	public void notifyServiceStopped(String serviceName) {
 		if (this.userSession.containsService(serviceName)){
@@ -389,21 +396,21 @@ public class DisplayPortalClient extends EventListener implements IDisplayDriver
 				}
 			}
 		}
-		
+
 	}
 
 	public void notifyLogOutEvent() {
-		
+
 		if (this.hasSession){
 			//release resource
 			this.portalServerRemote.releaseResource(serverIdentity, userIdentity.getJid(), currentUsedScreenLocation);
-			
+
 			this.hasSession = false;
 			DisplayEvent dEvent = new DisplayEvent(this.currentUsedScreenIP, DisplayEventConstants.DEVICE_UNAVAILABLE);
-			
+
 			this.currentUsedScreenIP = "";
 			this.currentUsedScreenLocation = "";
-			
+
 			InternalEvent iEvent = new InternalEvent(EventTypes.DISPLAY_EVENT, "displayUpdate", "org/societies/css/device", dEvent);
 			try {
 				this.evMgr.publishInternalEvent(iEvent);
@@ -412,12 +419,38 @@ public class DisplayPortalClient extends EventListener implements IDisplayDriver
 				e.printStackTrace();
 			}
 		}
-		
+
 	}
 
 
+	/*	private void requestServerIdentityFromUser(){
+
+	if (this.idMgr.getThisNetworkNode().getJid().endsWith("macs.hw.ac.uk")){
+		try {
+			this.serverIdentity = this.idMgr.fromJid("university.societies.local.macs.hw.ac.uk");
+		} catch (InvalidFormatException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	if (this.serverIdentity==null){
+		String serverIdentityStr = JOptionPane.showInputDialog("Please enter the JID of the CSS hosting the server application", "xcmanager.societies.local");
+
+		try {
+			this.serverIdentity = this.idMgr.fromJid(serverIdentityStr);
 
 
+		} catch (InvalidFormatException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+}*/
 
+
+	public void setServiceRuntimeSocketPort(int port){
+		this.serviceRuntimeSocketPort = port;
+		
+	}
 
 }

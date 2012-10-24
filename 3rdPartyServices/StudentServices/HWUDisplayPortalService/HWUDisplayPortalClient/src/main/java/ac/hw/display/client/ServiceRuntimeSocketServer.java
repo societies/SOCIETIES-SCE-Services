@@ -49,7 +49,7 @@ public class ServiceRuntimeSocketServer extends Thread{
 	public static final String stopped_Service = "STOPPED_SERVICE";
 	private static final String logged_Out = "LOGGED_OUT";
 	
-	private int[] ports = new int[]{2121,2122,2123,2124,2125,2126,2127,2128,2129,2130,2131,2132,2133,2134,2135,2136,2137,2138,2139,2140,2141,2142, 2143,2144,2145,2146,2147,2148,2149,2150,2151};
+	//private int[] ports = new int[]{2121,2122,2123,2124,2125,2126,2127,2128,2129,2130,2131,2132,2133,2134,2135,2136,2137,2138,2139,2140,2141,2142, 2143,2144,2145,2146,2147,2148,2149,2150,2151};
 	
 	public ServiceRuntimeSocketServer(DisplayPortalClient displayService){
 		this.displayService = displayService;
@@ -62,19 +62,18 @@ public class ServiceRuntimeSocketServer extends Thread{
 	}
 	public void listenSocket(){
 
-		int serverPort = 2121;
-		for (int port :ports){
+		int serverPort = 0;
 			try{
-				System.out.println("Trying port: "+port);
-				server = new ServerSocket(port); 
-				System.out.println("Found free port. Listening on port: "+port);
-				serverPort = port;
-				break;
+				
+				server = new ServerSocket(0); 
+				
+				serverPort = server.getLocalPort();
+				System.out.println("Found free port. Listening on port: "+serverPort);
 			} catch (IOException e) {
-				System.out.println("Could not listen on port "+port);
+				System.out.println("Could not listen on port "+serverPort);
 				
 			}
-		}
+		
 
 		try{
 			client = server.accept();
