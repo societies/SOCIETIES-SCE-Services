@@ -135,7 +135,7 @@
                 <ImageBrush ImageSource="/MyTvUI;component/Images/mytv.png" />
             </Rectangle.Fill>
         </Rectangle>
-        <Rectangle Canvas.Left="0" Canvas.Top="0" Height="37" Name="rectangle2" Stroke="Black" Width="38">
+        <Rectangle Canvas.Left="0" Canvas.Top="0" Height="37" Name="rectangle2" Width="38">
             <Rectangle.Fill>
                 <ImageBrush ImageSource="/MyTvUI;component/Images/logo.png" />
             </Rectangle.Fill>

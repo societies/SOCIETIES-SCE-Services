@@ -60,6 +60,9 @@
       <HintPath>dll\Coding4Fun.Kinect.Wpf.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="CoreAudioApi">
+      <HintPath>..\..\..\..\..\..\..\Downloads\CoreAudio2_Src\CoreAudioApi\bin\Debug\CoreAudioApi.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.Expression.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>dll\Microsoft.Expression.Drawing.dll</HintPath>
@@ -194,6 +197,21 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Images\my_schedule.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="dll\CoreAudioApi.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\channel_background_selected.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\volume_down_selected.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\volume_up_selected.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\off_button_selected.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
