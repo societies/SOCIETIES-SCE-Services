@@ -106,7 +106,7 @@ public class FeedListActivity extends ListActivity {
     			}
     		});
        	
-//TODO:  Add listener for long click
+//TODO:  Eventually add listener for long click
     	// listView.setOnItemLongClickListener(new DrawPopup());
 
     } // onCreate
@@ -180,14 +180,11 @@ public class FeedListActivity extends ListActivity {
  * from Social Provider.
  */
 	private String getFeeds () {
-//		Uri communityActivityUri = SocialContract.CommunityActivity.CONTENT_URI;
-
-//TODO: remove this Uri - waiting for new version of Social Provider
-		Uri communityActivityUri = Uri.parse ("content://org.societies.android.SocialProvider/communities_activity");
+		Uri communityActivityUri = SocialContract.CommunityActivity.CONTENT_URI;
 		
 		String[] communityActivityprojection = new String[] {
-// TODO: Find out what you be retrieved
-			SocialContract.CommunityActivity.GLOBAL_ID_OBJECT	// ?? No content?
+// TODO: Find out what information is relevant and should be retrieved
+			SocialContract.CommunityActivity.GLOBAL_ID_OBJECT
 //		, SocialContract.CommunityActivity.+++
 		};		
 

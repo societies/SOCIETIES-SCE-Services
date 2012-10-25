@@ -104,7 +104,7 @@ public class MemberListActivity extends ListActivity {
     			} else {
     				if ((position) < members) {			// Retrieve information from members in the team
     					memberCursor.moveToPosition(position);
-     					String memberGlobalId = memberCursor.getString(memberCursor		// WHy is this variable in "blue"
+     					String memberGlobalId = memberCursor.getString(memberCursor
     							.getColumnIndex(SocialContract.People.GLOBAL_ID));
        					String memberName =  memberCursor.getString(memberCursor
     							.getColumnIndex(SocialContract.People.NAME));
@@ -157,10 +157,6 @@ public class MemberListActivity extends ListActivity {
 
         assignAdapter ();
         
-//		Toast.makeText(getApplicationContext(),
-//				"Bug when getting data from Social Provider: the implementation of this activity is not complete", Toast.LENGTH_LONG /*Toast.LENGTH_SHORT*/ )
-//				.show();
-
     }
 
 //    		// Create dialog if no member in disaster team						
@@ -207,10 +203,10 @@ public class MemberListActivity extends ListActivity {
 	private String getMembers () {
 		
 		// Step 1: get GLOBAL_ID_MEMBERs for members in the selected CIS
-//		Uri membershipUri = SocialContract.Membership.CONTENT_URI;
+		Uri membershipUri = SocialContract.Membership.CONTENT_URI;
 
 //TODO: remove this Uri - waiting for new version of Social Provider
-		Uri membershipUri = Uri.parse ("content://org.societies.android.SocialProvider/membership");
+//		Uri membershipUri = Uri.parse ("content://org.societies.android.SocialProvider/membership");
 					
 		String[] membershipProjection = new String[] {
 				SocialContract.Membership.GLOBAL_ID_MEMBER};
@@ -259,25 +255,26 @@ public class MemberListActivity extends ListActivity {
 				membersSelection = SocialContract.People.GLOBAL_ID + "= ?";
 				membersSelectionArgs.add (membershipCursor.getString(
 								(membershipCursor.getColumnIndex(SocialContract.Membership.GLOBAL_ID_MEMBER))));
-			} else {
-				membersSelection = membersSelection + " AND " +
+			} 
+			else {
+				membersSelection = membersSelection + " OR " +
 											   SocialContract.People.GLOBAL_ID + "= ?";
 				membersSelectionArgs.add (membershipCursor.getString(
 						(membershipCursor.getColumnIndex(SocialContract.Membership.GLOBAL_ID_MEMBER))));
 			}
 		}
-//TODO: Remove comment - currently bug in SocialProvider
+		
 		memberCursor = null;
 		try {
 			memberCursor = resolver.query (peopleUri, membersProjection,membersSelection, 
 					membersSelectionArgs.toArray(new String[membersSelectionArgs.size()]),
-					SocialContract.People.NAME + " COLLATE LOCALIZED ASC" );	
+					SocialContract.People.NAME + " COLLATE LOCALIZED ASC" );
 		} catch (Exception e) {
 			iDisasterApplication.getInstance().debug (2, "Query to "+ peopleUri + "causes an exception");
 			return iDisasterApplication.getInstance().QUERY_EXCEPTION;
 		}
-			
-		return iDisasterApplication.getInstance().QUERY_EMPTY;
+		
+		return iDisasterApplication.getInstance().QUERY_SUCCESS;
 
 	}
 
@@ -302,7 +299,7 @@ public class MemberListActivity extends ListActivity {
 				while (memberCursor.moveToNext()) {
 					members++;
 					String displayName = memberCursor.getString(memberCursor
-							.getColumnIndex(SocialContract.CommunityActivity.GLOBAL_ID_OBJECT));
+							.getColumnIndex(SocialContract.People.GLOBAL_ID));
 					memberList.add (displayName);
 				}
 			}

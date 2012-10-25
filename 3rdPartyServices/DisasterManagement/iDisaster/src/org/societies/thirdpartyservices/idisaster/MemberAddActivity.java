@@ -24,49 +24,196 @@
  */
 package org.societies.thirdpartyservices.idisaster;
 
+import java.util.ArrayList;
+
+import org.societies.android.api.cis.SocialContract;
 import org.societies.thirdpartyservices.idisaster.R;
 
-import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.ListActivity;
+import android.content.ContentResolver;
 import android.content.DialogInterface;
-import android.content.Intent;
+import android.content.DialogInterface.OnMultiChoiceClickListener;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
-import android.widget.EditText;
-import android.widget.Toast;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.inputmethod.InputMethodManager;
-import android.widget.Button;
 
 /**
- * Activity for creating a new member to the selected disaster team (community).
+ * Activity for adding members to the selected disaster team (community).
  * 
  * @author Jacqueline.Floch@sintef.no
  *
  */
-public class MemberAddActivity extends Activity implements OnClickListener {
+public class MemberAddActivity extends ListActivity implements OnClickListener {
+//implements OnMultiChoiceClickListener {
 
-	private EditText memberNameView;
-	private EditText memberDescriptionView;
-	private String memberName;
-	private String memberDescription;
+	ContentResolver resolver;
+	Cursor peopleCursor;			// used for the persons in the registry
+	int people;						// keep track of number of persons
+	
+	ArrayAdapter<String> peopleAdapter;
+	ListView listView;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.member_add_layout);
+		
+    	setContentView (R.layout.member_list_layout);		// TODO: check if a new layout is needed
+    	listView = getListView();
+    	resolver = getContentResolver();
 
-		// Get editable fields
-		memberNameView = (EditText) findViewById(R.id.editMemberAddName);
-		memberDescriptionView = (EditText) findViewById(R.id.editMemberAddDescription);
+//    	// Add listener for short click.
+//    	listView.setOnItemClickListener(new OnItemClickListener() {
+//    		public void onItemClick (AdapterView<?> parent, View view,
+//    			int position, long id) {
+//    			
+//    			if ((position) < people) {			// Retrieve information from members in the team
+//    				peopleCursor.moveToPosition(position);
+//    				String memberGlobalId = peopleCursor.getString(peopleCursor
+//    						.getColumnIndex(SocialContract.People.GLOBAL_ID));
+//     				String memberName =  peopleCursor.getString(peopleCursor
+//    						.getColumnIndex(SocialContract.People.NAME));
+//    
+//// The activity is kept on stack (check also that "noHistory" is not set in Manifest)
+//// Should it be removed?
+////       				finish();
+//    					
+//    					// Test code
+//            			Toast.makeText(getApplicationContext(),
+//                				"Selected: " + memberName + " " + memberGlobalId, Toast.LENGTH_LONG)
+//                				.show();    				
+//
+//    				} else {
+//    					// Should never happen..
+//    				}
+//    			}
+//
+//    	});
 
-    	// Add click listener to button
-    	final Button button = (Button) findViewById(R.id.memberAddButton);
-    	button.setOnClickListener(this);
+    	// TODO: Add SAVE button in the view and click listener to the button
+//    	final Button button = (Button) findViewById(R.id.feedAddButton);
+//    	button.setOnClickListener(this);
+
+    	
+    	
+    	//TODO:  Add listener for long click
+    	// listView.setOnItemLongClickListener(new DrawPopup());
+		// TODO: Start the MemberDetails Activity
+		// TODO: Add parameters to Intent
+		// startActivity (new Intent(MemberListActivity.this, MemberDetailsActivity.class));
 
     }
+
+    
+    
+    
+/**
+ * onResume is called at start of the active lifetime.
+ * The list of people is retrieved from SocialProvider and assigned to 
+ * view.
+ * The data are fetched each time the activity becomes visible as these data
+ * may be changed by other users (info fetched from the Cloud)
+ */
+                
+    @Override
+    protected void onResume() {
+    	super.onResume();
+    	
+        if (peopleAdapter!= null) peopleAdapter.clear();
+    	if (getPeople()						// Retrieve people from the registry
+    				.equals(iDisasterApplication.getInstance().QUERY_EXCEPTION)) {
+    		showQueryExceptionDialog ();	// Exception: Display dialog and terminates activity
+   		}
+
+    	assignAdapter ();
+    }
+
+    /**
+     * onPause releases all data.
+     * Called when resuming a previous activity (for instance using back button)
+     */		       
+    	@Override
+    	protected void onPause() {
+    			
+    		super.onPause ();
+    			
+    // TODO: check the following:
+    	// When using managedQuery(), the activity keeps a reference to the cursor and close it
+        // whenever needed (in onDestroy() for instance.) 
+        // When using a contentResolver's query(), the developer has to manage the cursor as a sensitive
+        // resource. If you forget, for instance, to close() it in onDestroy(), you will leak 
+        // underlying resources (logcat will warn you about it.)
+        //
+
+//    		memberCursor.close();
+    	}
+
+
+/**
+ * getFeed retrieves the list of activity feeds for the selected disaster team
+ * from Social Provider.
+ */
+    private String getPeople () {
+    		
+    	Uri peopleUri = SocialContract.People.CONTENT_URI;
+    					
+    	String[] peopleProjection = new String[] {
+    				SocialContract.People.GLOBAL_ID,
+    				SocialContract.People.NAME};
+
+    	//TODO: Add filter. Remove those alraedy members in the selected CIS...
+    	
+    	peopleCursor = null;
+    	try {
+    		peopleCursor= resolver.query(peopleUri, peopleProjection,
+    					null /* selection */, null /* selectionArgs */, null /* sortOrder*/);			
+    		} catch (Exception e) {
+    			iDisasterApplication.getInstance().debug (2, "Query to "+ peopleUri + "causes an exception");
+    			return iDisasterApplication.getInstance().QUERY_EXCEPTION;
+    		}
+    	
+     	return iDisasterApplication.getInstance().QUERY_SUCCESS;
+
+    	}
+
+    /**
+     * assignAdapter assigns data to display to adapter and adapter to view.
+     */
+    	private void assignAdapter () {
+    				
+    		people= 0;
+    				
+    		ArrayList<String> peopleList = new ArrayList<String> ();
+
+//    			An empty List will be assigned to Adapter
+//    			if (peopleCursor == null) {
+
+//    			An empty List will be assigned to Adapter
+//    				if (peopleCursor == null) {
+//    					if (peopleCursor.getCount() == 0) {
+    				
+    		if (peopleCursor != null) {
+    			if (peopleCursor.getCount() != 0) {
+    				while (peopleCursor.moveToNext()) {
+    		    		people++;
+    					String displayName = peopleCursor.getString(peopleCursor
+    							.getColumnIndex(SocialContract.CommunityActivity.GLOBAL_ID_OBJECT));
+    					peopleList.add (displayName);
+    				}
+    			}
+    		}
+    		peopleAdapter = new ArrayAdapter<String> (this,
+    				R.layout.disaster_list_item, R.id.disaster_item, peopleList);
+    				
+    		listView.setAdapter(peopleAdapter);
+
+    	}
 
 
 /**
@@ -76,54 +223,35 @@ public class MemberAddActivity extends Activity implements OnClickListener {
 
 	public void onClick(View view) {
 
-    	if (memberNameView.getText().length() == 0) {					// check input for member name
-
-    		// Hide the soft keyboard otherwise the toast message does appear more clearly.
-    	    InputMethodManager mgr = (InputMethodManager) getSystemService(this.INPUT_METHOD_SERVICE);
-    	    mgr.hideSoftInputFromWindow(memberNameView.getWindowToken(), 0);
-	    
-    		Toast.makeText(this, getString(R.string.toastMemberName), 
-    				Toast.LENGTH_LONG).show();
-    		return;
-
-    	} else if (memberDescriptionView.getText().length() == 0) {	// check input for description (or any obligatory field)
-
-    		// Hide the soft keyboard otherwise the toast message does appear more clearly.
-    	    InputMethodManager mgr = (InputMethodManager) getSystemService(this.INPUT_METHOD_SERVICE);
-    	    mgr.hideSoftInputFromWindow(memberDescriptionView.getWindowToken(), 0);
-
-    	    Toast.makeText(this, getString(R.string.toastMemberDescription), 
-	    			Toast.LENGTH_LONG).show();
-	    	return;
-
-    	} else {
-
-    		memberName = memberNameView.getText().toString();
-    		memberDescription = memberDescriptionView.getText().toString();
-
-    		//TODO: Add call for search to the Social Provider
-	    		
-//TODO: Refresh list of members? - so it is displayed in the previous activity
-    		
-//TODO: remove test code
-    	    iDisasterApplication.getInstance().memberNameList.add(memberName);
-    	    
-    	    // report data change to adapter
-// TODO: Add to adapter
-//    	    iDisasterApplication.getInstance().disasterAdapter.notifyDataSetChanged();
-
-    		
-// TODO: Remove code for testing the correct setting of preferences 
-    	    Toast.makeText(this, "Debug: "  + memberName + " " + memberDescription, Toast.LENGTH_LONG).show();
-
-    	    // Hide the soft keyboard:
-			// - the soft keyboard will not appear on next activity window!
-    	    InputMethodManager mgr = (InputMethodManager) getSystemService(this.INPUT_METHOD_SERVICE);
-    	    mgr.hideSoftInputFromWindow(memberNameView.getWindowToken(), 0);
-
-	    	finish ();
-    	    // Go back to the previous activity
-	    }
     }
+
+
+/* (non-Javadoc)
+ * @see android.content.DialogInterface.OnMultiChoiceClickListener#onClick(android.content.DialogInterface, int, boolean)
+ */
+//@Override
+//public void onClick (DialogInterface arg0, int arg1, boolean arg2) {
+//	// TODO Auto-generated method stub
+//	
+//}
+
+/**
+ * showQueryExceptionDialog displays a dialog to the user.
+ * In this case, the activity does not terminate since the other
+ * activities in the TAB may still work.
+ */
+        			
+	private void showQueryExceptionDialog () {
+    	AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this);
+        alertBuilder.setMessage(getString(R.string.dialogPeopleQueryException))
+        			.setCancelable(false)
+          			.setPositiveButton (getString(R.string.dialogOK), new DialogInterface.OnClickListener() {
+          				public void onClick(DialogInterface dialog, int id) {
+          					return;
+          				}
+          			});
+        AlertDialog alert = alertBuilder.create();
+        alert.show();	
+	}
 
 }

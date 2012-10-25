@@ -6,6 +6,7 @@
     <string name="app_name">iDisaster</string>
 
     <string name="dialogOK">OK</string>
+    <string name="dialogPeopleQueryException">EXCEPTION: Cannot retrieve information in people registry from Social Provider </string>
     <string name="dialogQueryException">EXCEPTION: Cannot retrieve information from Social Provider </string>
     <string name="dialogFeedQueryException">EXCEPTION: Cannot retrieve activities from Social Provider </string>
     <string name="dialogMemberQueryException">EXCEPTION: Cannot retrieve members from Social Provider </string>
@@ -20,7 +21,7 @@
     <string name="emptyText"></string>
     <string name="noPreference">n/a</string>
 
-    <string name="disaster_menu_add_feed">Add feed</string>
+    <string name="disaster_menu_add_feed">Add activity</string>
     <string name="disaster_menu_add_service">Add service</string>
     <string name="disaster_menu_add_member">Add member</string>
     <string name="disaster_menu_selectDisaster">Select new team</string>
@@ -36,13 +37,14 @@
 
     <string name="disasterHeading">Selected team</string>
 
-    <string name="feedAddButton">Add</string>
-    <string name="feedAddHeading">Edit Feed</string>
+    <string name="feedAddButton">Add activity</string>
+    <string name="feedAddHeading">Edit Activity</string>
+	<string name="feedCancelButton">Cancel</string>
 	<string name="feedContentHint">Enter a short status</string>
-    <string name="feedContentLabel">Content:</string>
-    <string name="feedDetailsHeading">Feed details</string>
+	<string name="feedContentLabel">Status:</string>
+<!--
     <string name="feedListDialogCIS">No feeds yet. Select menu to add feeds.</string>
-    
+ -->    
     <string name="loginButton">Log In</string>
     <string name="loginDialog">Please re-enter your user name and password.</string>
     <string name="loginEmailHint">knut@societies.org</string>

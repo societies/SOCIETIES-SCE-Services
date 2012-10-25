@@ -237,11 +237,8 @@ public class DisasterListActivity extends ListActivity {
 	private String getMemberDisasterTeams () {
 
 		// Step 1: get GLOBAL_IDs for CIS I am member of
-//		Uri membershipUri = SocialContract.Membership.CONTENT_URI;
-
-//TODO: remove this Uri - waiting for new version of Social Provider
-		Uri membershipUri = Uri.parse ("content://org.societies.android.SocialProvider/membership");
-					
+		Uri membershipUri = SocialContract.Membership.CONTENT_URI;		
+		
 		String[] membershipProjection = new String[] {
 				SocialContract.Membership.GLOBAL_ID_COMMUNITY};
 
