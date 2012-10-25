@@ -117,7 +117,7 @@ public class DisplayPortalClient extends EventListener implements IDisplayDriver
 	{
 		String eventFilter = "(&" + 
 				"(" + CSSEventConstants.EVENT_NAME + "=lifecycle)" +
-				"(" + CSSEventConstants.EVENT_SOURCE + "=org/societies/service)" +
+				"(" + CSSEventConstants.EVENT_SOURCE + "=org/societies/servicelifecycle)" +
 				")";
 
 		this.evMgr.unSubscribeInternalEvent(this, new String[]{EventTypes.SERVICE_LIFECYCLE_EVENT}, eventFilter);
