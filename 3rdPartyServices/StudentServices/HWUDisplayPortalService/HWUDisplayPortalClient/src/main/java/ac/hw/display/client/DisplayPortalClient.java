@@ -106,7 +106,7 @@ public class DisplayPortalClient extends EventListener implements IDisplayDriver
 	private void registerForSLMEvents() {
 		  String eventFilter = "(&" + 
 				    "(" + CSSEventConstants.EVENT_NAME + "="+ServiceMgmtEventType.NEW_SERVICE+")" +
-				    "(" + CSSEventConstants.EVENT_SOURCE + "=org/societies/service)" +
+				    "(" + CSSEventConstants.EVENT_SOURCE + "=org/societies/servicelifecycle)" +
 				    ")";
 		this.evMgr.subscribeInternalEvent(this, new String[]{EventTypes.SERVICE_LIFECYCLE_EVENT}, eventFilter);
 		this.LOG.debug("Subscribed to "+EventTypes.SERVICE_LIFECYCLE_EVENT+" events");
@@ -116,7 +116,7 @@ public class DisplayPortalClient extends EventListener implements IDisplayDriver
 	private void unRegisterFromSLMEvents()
 	{
 		String eventFilter = "(&" + 
-				"(" + CSSEventConstants.EVENT_NAME + "=lifecycle)" +
+				 "(" + CSSEventConstants.EVENT_NAME + "="+ServiceMgmtEventType.NEW_SERVICE+")" +
 				"(" + CSSEventConstants.EVENT_SOURCE + "=org/societies/servicelifecycle)" +
 				")";
 
