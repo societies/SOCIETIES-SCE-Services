@@ -72,7 +72,7 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 	URL myUIExeLocation;
 	List<String> myServiceTypes;
 	Logger LOG = LoggerFactory.getLogger(MyTvClient.class);
-	
+
 	//personalisable parameters
 	int currentChannel;
 	boolean mutedState;
@@ -91,13 +91,22 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 		currentChannel = 0;
 		mutedState = true;
 
-		//register as a displayable service
+		//start server listening for connections from GUI
+		commandHandler = new CommandHandler();
+		socketServer = new SocketServer(commandHandler);
+		//find available port
+		int listenPort = socketServer.setListenPort();
+		//start listening
+		socketServer.start();
+
+		//register as a displayable service with port number
 		try {
 			myUIExeLocation = new URL("http://www.macs.hw.ac.uk/~ceesmm1/societies/mytv/MyTvUI.exe");
 			displayDriver.registerDisplayableService(
 					this, 
 					myServiceName, 
 					myUIExeLocation, 
+					listenPort,
 					true);
 		} catch (MalformedURLException e) {
 			LOG.error("Could not register as displayable service with display driver");
@@ -106,22 +115,9 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 
 		//register for portal started events
 		registerForDisplayEvents();
-		
-		//find available port and register with DPSC
-		int port = findAvailablePort(2161, 2191);
-		if(port != -1){
-			//register port with DSPC
-			LOG.debug("Registering MyTvClient to listen on port: "+port);
-			//TODO
-			
-			//start server listening for connections from GUI
-			commandHandler = new CommandHandler();
-			socketServer = new SocketServer(commandHandler, port);
-			socketServer.start();
-		}
 	}
 
-	
+
 	/*
 	 * Register for display events from portal
 	 */
@@ -133,26 +129,6 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 		this.eventMgr.subscribeInternalEvent(this, new String[]{EventTypes.DISPLAY_EVENT}, eventFilter);
 		LOG.debug("Subscribed to "+EventTypes.DISPLAY_EVENT+" events");
 	}
-	
-	
-	/*
-	 * Find available port for SocketServer to listen on
-	 */
-	private int findAvailablePort(int first, int last){
-		//search between 2161 - 2191
-		for (int i = first; i<=last; i++){
-	        try {
-	            new ServerSocket(i);
-	            return i;
-	        } catch (IOException ex) {
-	            continue; // try next port
-	        }
-	    }
-	    // if the program gets here, no port in the range was found
-	    LOG.error("No free ports found!!");
-	    return -1;
-	}
-
 
 
 	/*
@@ -166,7 +142,7 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 	@Override
 	public void handleInternalEvent(InternalEvent event) {
 		LOG.debug("Received internal display event from portal: "+event.geteventName());
-		
+
 		//get user ID
 		userID = commsMgr.getIdManager().getThisNetworkNode();
 		LOG.debug("userID = "+userID.toString());
@@ -274,7 +250,7 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 			if(socketClient.connect()){
 				if(socketClient.sendMessage(
 						"START_MSG\n" +
-						"USER_SESSION_STARTED\n" +
+								"USER_SESSION_STARTED\n" +
 						"END_MSG")){
 					LOG.debug("Handshake complete:  ServiceClient -> GUI");
 				}else{

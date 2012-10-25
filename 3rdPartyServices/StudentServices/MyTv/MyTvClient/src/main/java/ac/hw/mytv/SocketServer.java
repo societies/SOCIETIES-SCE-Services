@@ -59,9 +59,20 @@ public class SocketServer extends Thread{
 	private CommandHandler commandHandler;
 	private Logger LOG = LoggerFactory.getLogger(SocketServer.class);
 
-	public SocketServer(CommandHandler commandHandler, int port){
+	public SocketServer(CommandHandler commandHandler){
 		this.commandHandler = commandHandler;
-		this.port = port;
+	}
+	
+	public int setListenPort(){
+		try {
+			ServerSocket portLocator = new ServerSocket(0);
+			port = portLocator.getLocalPort();
+			LOG.debug("Found available port: "+port);
+			return port;
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return -1;
 	}
 
 	@Override

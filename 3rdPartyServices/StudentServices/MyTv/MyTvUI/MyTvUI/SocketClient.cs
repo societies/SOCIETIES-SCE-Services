@@ -257,9 +257,9 @@ namespace MyTvUI
                 return false;
             }
 
-            //get current end point
-            Console.WriteLine("SOCKET_CLIENT: Retrieving port of service client");
-            server.Send(Encoding.ASCII.GetBytes("VIRGO_ENDPOINT_PORT"));
+            //get service client listen port
+            Console.WriteLine("SOCKET_CLIENT: Retrieving listen port of service client");
+            server.Send(Encoding.ASCII.GetBytes("SERVICE_PORT->MyTv"));
             byte[] data = new byte[1024];
             int receivedDataLength = 0;
             receivedDataLength = server.Receive(data);
@@ -272,7 +272,7 @@ namespace MyTvUI
             try
             {
                 port = Convert.ToInt32(Encoding.ASCII.GetString(data, 0, receivedDataLength));
-                Console.WriteLine("SOCKET_CLIENT: Received port of service client: " + port);
+                Console.WriteLine("SOCKET_CLIENT: Received listen port of service client: " + port);
             }
             catch (Exception e)
             {
