@@ -117,7 +117,7 @@ public class DisplayPortalClient extends EventListener implements IDisplayDriver
 	private void unRegisterFromSLMEvents()
 	{
 		String eventFilter = "(&" + 
-				"(" + CSSEventConstants.EVENT_NAME + "="+ServiceMgmtEventType.NEW_SERVICE+")" +
+				"(" + CSSEventConstants.EVENT_NAME + "=lifecycle)" +
 				"(" + CSSEventConstants.EVENT_SOURCE + "=org/societies/service)" +
 				")";
 
