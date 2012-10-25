@@ -6,10 +6,11 @@
     <string name="app_name">iDisaster</string>
 
     <string name="dialogOK">OK</string>
-    <string name="dialogPeopleQueryException">EXCEPTION: Cannot retrieve information in people registry from Social Provider </string>
+    <string name="dialogFeedInsertException">EXCEPTION: Cannot store the new activity in Social Provider </string>
     <string name="dialogQueryException">EXCEPTION: Cannot retrieve information from Social Provider </string>
     <string name="dialogFeedQueryException">EXCEPTION: Cannot retrieve activities from Social Provider </string>
     <string name="dialogMemberQueryException">EXCEPTION: Cannot retrieve members from Social Provider </string>
+    <string name="dialogPeopleQueryException">EXCEPTION: Cannot retrieve information in people registry from Social Provider </string>
     <string name="dialogServiceQueryException">EXCEPTION: Cannot retrieve services from Social Provider </string>
     
     <string name="disaster_list_menu_createCommunity">Create disaster team</string>
@@ -42,9 +43,9 @@
 	<string name="feedCancelButton">Cancel</string>
 	<string name="feedContentHint">Enter a short status</string>
 	<string name="feedContentLabel">Status:</string>
-<!--
-    <string name="feedListDialogCIS">No feeds yet. Select menu to add feeds.</string>
- -->    
+	
+	<string name="feedListNoActivity">No activity yet</string>
+	
     <string name="loginButton">Log In</string>
     <string name="loginDialog">Please re-enter your user name and password.</string>
     <string name="loginEmailHint">knut@societies.org</string>
@@ -59,7 +60,9 @@
     <string name="loginUserNameLabel">Name:</string>
 <!-- <string name="loginUserNameLabel">Login as:</string>  -->
 
-    <string name="memberListDialog">No members yet. Select menu to add members.</string>
+<!-- <string name="memberListDialog">No members yet. Select menu to add members.</string>  -->
+    <string name="memberAddNoPeople">No people to add</string>
+    
 
 	<string name="serviceAddButton">Add</string>
     <string name="serviceAddHeading">Select a service</string>   
@@ -89,7 +92,7 @@
     <string name="toastServiceDescription">Please enter keywords.</string>
     
 	<string name="memberAddButton">Add</string>
-    <string name="memberAddHeading">Search member</string>
+    <string name="memberAddHeading">Select new members</string>
 	<string name="memberDetailsHeading">Member profile</string>
 	<string name="memberDescriptionHint">Enter keywords</string>
     <string name="memberDescriptionLabel">Description:</string>

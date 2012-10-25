@@ -24,9 +24,16 @@
  */
 package org.societies.thirdpartyservices.idisaster;
 
+import org.societies.android.api.cis.SocialContract;
 import org.societies.thirdpartyservices.idisaster.R;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.ContentResolver;
+import android.content.ContentValues;
+import android.content.DialogInterface;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -68,44 +75,87 @@ public class FeedAddActivity extends Activity implements OnClickListener {
 
 	public void onClick(View view) {
 
-    	if (feedContentView.getText().length() == 0) {					// check input for content
+    	// Hide the soft keyboard:
+		// - the soft keyboard will not hide any message and will not appear on next activity window!
+		InputMethodManager mgr = (InputMethodManager) getSystemService(this.INPUT_METHOD_SERVICE);
+    	mgr.hideSoftInputFromWindow(feedContentView.getWindowToken(), 0);
 
-    		// Hide the soft keyboard otherwise the toast message does appear more clearly.
-    	    InputMethodManager mgr = (InputMethodManager) getSystemService(this.INPUT_METHOD_SERVICE);
-    	    mgr.hideSoftInputFromWindow(feedContentView.getWindowToken(), 0);
-	    
+    	if (feedContentView.getText().length() == 0) {					// check input for content	    
     		Toast.makeText(this, getString(R.string.toastFeedContent), 
-    				Toast.LENGTH_LONG).show();
+    				Toast.LENGTH_SHORT).show();
     		return;
 
     	} else {														// add activity to feed
 
+
     		feedContent = feedContentView.getText().toString();
-
-//TODO: Add call to the Social Provider
-	    		
-//TODO: Refresh list of feeds? - so it is displayed in the previous activity
     		
-//TODO: remove test code
-    	    iDisasterApplication.getInstance().feedContentList.add(feedContent);
-    	    
-    	    // Notify data change to adapter
-// TODO: Add to adapter
-//    	    iDisasterApplication.getInstance().feedAdapter.notifyDataSetChanged();
-
     		
-// TODO: Remove code for testing the correct setting of preferences 
-    	    Toast.makeText(this, "Debug: "  + feedContent, 
-    			Toast.LENGTH_LONG).show();
-
-    	    // Hide the soft keyboard:
-			// - the soft keyboard will not appear on next activity window!
-    	    InputMethodManager mgr = (InputMethodManager) getSystemService(this.INPUT_METHOD_SERVICE);
-    	    mgr.hideSoftInputFromWindow(feedContentView.getWindowToken(), 0);
-
-	    	finish();
-    	    // Go back to the previous activity
-	    }
+    		if (iDisasterApplication.testDataUsed) {			// Test data
+        	    iDisasterApplication.getInstance().feedContentList.add(feedContent);
+        	    iDisasterApplication.getInstance().feedAdapter.notifyDataSetChanged(); // Notify data change to adapter
+        	    finish ();							// Terminates and go back to previous activity
+    		} else {
+    			if (addFeed()						// Insert activity to the activity feed for the selected team
+					.equals(iDisasterApplication.getInstance().INSERT_EXCEPTION)) {
+    				showQueryExceptionDialog ();	// Exception: Display dialog (and terminates activity)
+    				// Go back to the previous activity
+    			} else {
+    				// The activity will be added to the adapter (and adapter to view) on resume of FeedListActivity 
+    				finish ();
+    			}
+			}
+		}
     }
 
+/**
+ * addFeed inserts a new activity to the activity feed for the selected disaster team
+ * in Social Provider.
+ */
+	private String addFeed () {
+
+		// Set the values related to the activity to store in Social Provider
+		ContentValues activityValues = new ContentValues ();
+		activityValues.put(SocialContract.CommunityActivity.GLOBAL_ID_ACTOR,		// Me
+							iDisasterApplication.getInstance().me.globalId);
+		activityValues.put(SocialContract.CommunityActivity.GLOBAL_ID_FEED_OWNER,	// Selected team
+							iDisasterApplication.getInstance().selectedTeam.globalId);
+		activityValues.put(SocialContract.CommunityActivity.GLOBAL_ID_VERB,			// Activity intent
+							iDisasterApplication.getInstance().DISPLAY);
+		activityValues.put(SocialContract.CommunityActivity.GLOBAL_ID_OBJECT, feedContent); // Text entered by the user
+//		No target - shared with all members in the community
+//		activityValues.put(SocialContract.CommunityActivity.GLOBAL_ID_TARGET, "?"); // Activity target
+		 
+		try {
+// The Uri value returned is not used.
+//			Uri activityNewUri = getContentResolver().insert( SocialContract.CommunityActivity.CONTENT_URI,
+//										activityValues);
+			getContentResolver().insert( SocialContract.CommunityActivity.CONTENT_URI, 
+										activityValues);
+		} catch (Exception e) {
+			iDisasterApplication.getInstance().debug (2, "Insert to "+ 
+								SocialContract.CommunityActivity.CONTENT_URI + "causes an exception");
+	    	return iDisasterApplication.getInstance().INSERT_EXCEPTION;
+		}
+		
+		return iDisasterApplication.getInstance().INSERT_SUCCESS;
+	}
+
+/**
+ * showQueryExceptionDialog displays a dialog to the user.
+ */
+	    			
+   	private void showQueryExceptionDialog () {
+   		AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this);
+   		alertBuilder.setMessage(getString(R.string.dialogFeedInsertException))
+      				.setCancelable(false)
+      				.setPositiveButton (getString(R.string.dialogOK), new DialogInterface.OnClickListener() {
+      					public void onClick(DialogInterface dialog, int id) {
+      						finish ();
+      						return;
+      					}
+     			});
+    	AlertDialog alert = alertBuilder.create();
+        alert.show();	
+   	}
 }

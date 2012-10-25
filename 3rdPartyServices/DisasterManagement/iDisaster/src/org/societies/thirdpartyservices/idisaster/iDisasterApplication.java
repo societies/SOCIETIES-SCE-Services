@@ -86,8 +86,12 @@ public class iDisasterApplication extends Application {
 	public final String QUERY_EMPTY = "QUERY_EMPTY";
 	public final String QUERY_EXCEPTION = "QUERY_EXCEPTION";
 	public final String QUERY_SUCCESS = "QUERY_SUCCESS";
-
+	// Constant keys used for insert
+	public final String INSERT_EXCEPTION = "INSERT_EXCEPTION";
+	public final String INSERT_SUCCESS = "INSERT_SUCCESS";
 	
+	// Constant keys used for activity feeds
+	public final String DISPLAY = "DISPLAY";
 
 // test data
 	ArrayList <String> disasterNameList;

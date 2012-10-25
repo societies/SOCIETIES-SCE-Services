@@ -149,8 +149,8 @@ public class DisasterListActivity extends ListActivity {
 			if (disasterAdapter!= null) disasterAdapter.clear();		
 			if (getOwnDisasterTeams()			// Retrieve disaster teams I am owner of
 					.equals(iDisasterApplication.getInstance().QUERY_EXCEPTION)) {
-				showQueryExceptionDialog ();	// Exception: Display dialog and terminates activity
-			}			
+				showQueryExceptionDialog ();	 // Exception: Display dialog and terminates activity
+			} 
 			if (getMemberDisasterTeams()		// Retrieve teams I am member of
 					.equals(iDisasterApplication.getInstance().QUERY_EXCEPTION)) {
 				showQueryExceptionDialog ();	// Exception: Display dialog and terminates activity
@@ -188,6 +188,11 @@ public class DisasterListActivity extends ListActivity {
  */
 	
 	private String getOwnDisasterTeams () {
+		
+		if (ownTeamCursor != null) {
+			ownTeamCursor.close();		// "close" releases data but does not set to null
+			ownTeamCursor = null;
+		}
 
 		Uri uri = SocialContract.Communities.CONTENT_URI;
 		
@@ -207,7 +212,7 @@ public class DisasterListActivity extends ListActivity {
 //		String selection = SocialContract.Communities.OWNER_ID + "= ?"; 
 //		String[] selectionArgs = new String[] {iDisasterApplication.getInstance().me.globalId};
 
-// TODO: Add a check on user identity? 
+// TODO: Add a check on user identity?
 
 		String selection = SocialContract.Communities.TYPE + "= ? AND " 
 					     + SocialContract.Communities.OWNER_ID + "= ?";
@@ -216,7 +221,7 @@ public class DisasterListActivity extends ListActivity {
 
 		String sortOrder = SocialContract.Communities.NAME
 				+ " COLLATE LOCALIZED ASC";					// Alphabetic order (to reverse order, use "DESC" instead of "ASC"
-
+		
 		try {
 			ownTeamCursor = resolver.query(uri, projection, selection, selectionArgs,sortOrder);			
 		} catch (Exception e) {
@@ -235,6 +240,11 @@ public class DisasterListActivity extends ListActivity {
  */
 
 	private String getMemberDisasterTeams () {
+		
+		if (memberTeamCursor != null) {
+			memberTeamCursor.close();		// "close" releases data but does not set to null
+			memberTeamCursor = null;
+		}
 
 		// Step 1: get GLOBAL_IDs for CIS I am member of
 		Uri membershipUri = SocialContract.Membership.CONTENT_URI;		
@@ -245,7 +255,7 @@ public class DisasterListActivity extends ListActivity {
 		String membershipSelection = SocialContract.Membership.GLOBAL_ID_MEMBER + "= ?";
 		String[] membershipSelectionArgs = new String[] {iDisasterApplication.getInstance().me.globalId};	// The user is owner
 		
-		Cursor membershipCursor = null;
+		Cursor membershipCursor;
 		try {
 			membershipCursor = resolver.query(membershipUri, membershipProjection,
 					membershipSelection, membershipSelectionArgs, null /* sortOrder*/);
@@ -256,14 +266,12 @@ public class DisasterListActivity extends ListActivity {
 
 		// Step 2: retrieve the communities with the GLOBAL_IDs retrieved above
 
-		if (membershipCursor == null) {		// No cursor was set - should not happen?
+		if (membershipCursor == null) {		// No cursor was set
 			iDisasterApplication.getInstance().debug (2, "No information can be retrieved in membershipCursor");
-			memberTeamCursor = null;
 			return iDisasterApplication.getInstance().QUERY_EMPTY;
 		} 
 		
 		if (membershipCursor.getCount() == 0) {		// The user is not member of any community
-			memberTeamCursor = null;
 			return iDisasterApplication.getInstance().QUERY_EMPTY;
 		}
 		
@@ -292,8 +300,9 @@ public class DisasterListActivity extends ListActivity {
 								(membershipCursor.getColumnIndex(SocialContract.Membership.GLOBAL_ID_COMMUNITY))));
 			}
 		}
-		
-		memberTeamCursor = null;
+		membershipCursor.close();		// "close" releases no more needed data
+
+//TODO: not sure the current cursor, if any, should be close first		
 		try {
 			memberTeamCursor = resolver.query (communitiesUri, communitiesProjection, communitiesSelection, 
 					communitiesSelectionArgs.toArray(new String[communitiesSelectionArgs.size()]),
@@ -302,7 +311,7 @@ public class DisasterListActivity extends ListActivity {
 			iDisasterApplication.getInstance().debug (2, "Query to "+ membershipUri + "causes an exception");
     		return iDisasterApplication.getInstance().QUERY_EXCEPTION;
 		}
-		
+
 		return iDisasterApplication.getInstance().QUERY_SUCCESS;
 		
 	//

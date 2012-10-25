@@ -64,7 +64,7 @@ public class MemberAddActivity extends ListActivity implements OnClickListener {
 
 		super.onCreate(savedInstanceState);
 		
-    	setContentView (R.layout.member_list_layout);		// TODO: check if a new layout is needed
+    	setContentView (R.layout.member_add_layout);
     	listView = getListView();
     	resolver = getContentResolver();
 
@@ -130,7 +130,6 @@ public class MemberAddActivity extends ListActivity implements OnClickListener {
     				.equals(iDisasterApplication.getInstance().QUERY_EXCEPTION)) {
     		showQueryExceptionDialog ();	// Exception: Display dialog and terminates activity
    		}
-
     	assignAdapter ();
     }
 
@@ -160,6 +159,11 @@ public class MemberAddActivity extends ListActivity implements OnClickListener {
  * from Social Provider.
  */
     private String getPeople () {
+    	
+		if (peopleCursor != null) {
+			peopleCursor.close();		// "close" releases data but does not set to null
+			peopleCursor = null;
+		}
     		
     	Uri peopleUri = SocialContract.People.CONTENT_URI;
     					
@@ -167,9 +171,8 @@ public class MemberAddActivity extends ListActivity implements OnClickListener {
     				SocialContract.People.GLOBAL_ID,
     				SocialContract.People.NAME};
 
-    	//TODO: Add filter. Remove those alraedy members in the selected CIS...
+    	//TODO: Add filter. Remove those already members in the selected CIS...
     	
-    	peopleCursor = null;
     	try {
     		peopleCursor= resolver.query(peopleUri, peopleProjection,
     					null /* selection */, null /* selectionArgs */, null /* sortOrder*/);			
@@ -203,15 +206,28 @@ public class MemberAddActivity extends ListActivity implements OnClickListener {
     				while (peopleCursor.moveToNext()) {
     		    		people++;
     					String displayName = peopleCursor.getString(peopleCursor
-    							.getColumnIndex(SocialContract.CommunityActivity.GLOBAL_ID_OBJECT));
+    							.getColumnIndex(SocialContract.People.NAME));
     					peopleList.add (displayName);
     				}
     			}
     		}
-    		peopleAdapter = new ArrayAdapter<String> (this,
-    				R.layout.disaster_list_item, R.id.disaster_item, peopleList);
-    				
-    		listView.setAdapter(peopleAdapter);
+//    		peopleAdapter = new ArrayAdapter<String> (this,
+//    				R.layout.disaster_list_item, R.id.disaster_item, peopleList);
+
+    	    listView.setAdapter(new ArrayAdapter<String>(this,
+    	            android.R.layout.simple_list_item_multiple_choice, peopleList));
+    	    
+    	    listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
+
+    	    
+//            <CheckBox android:id="@+id/checkbox"
+//            android:layout_width="wrap_content" android:layout_height="wrap_content"
+//            android:checked="false"
+//            android:text="test">
+//            </CheckBox>
+
+    		
+//    		listView.setAdapter(peopleAdapter);
 
     	}
 

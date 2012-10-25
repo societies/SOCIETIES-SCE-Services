@@ -175,7 +175,7 @@ public class ServiceListActivity extends ListActivity {
 
 			if (getMyServices ()						// Retrieve services from the selected team
 					.equals(iDisasterApplication.getInstance().QUERY_EXCEPTION)) {
-				showQueryExceptionDialog ();	// Exception: Display dialog and terminates activity
+				showQueryExceptionDialog ();	// Exception: Display dialog
 			}
 
         	assignAdapter ();
@@ -235,8 +235,16 @@ public class ServiceListActivity extends ListActivity {
 		// Check serviceType
 		if (serviceType.equals("Full access")){				// TODO: Replaced by the type "Recommended"
 			recommendedFlag = false;
+			if (sharedServiceCursor != null) {
+				sharedServiceCursor.close();		// "close" releases data but does not set to null
+				sharedServiceCursor = null;
+			}
 		} else if (serviceType.equals("Monitor")) {			// TODO: Replaced by the type "Shared"
 			recommendedFlag = true;
+			if (recommendedServiceCursor != null) {
+				recommendedServiceCursor.close();		// "close" releases data but does not set to null
+				recommendedServiceCursor = null;
+			}
 		} else{																	// Should never happen
 			return iDisasterApplication.getInstance().QUERY_EXCEPTION;
 		}
@@ -244,9 +252,6 @@ public class ServiceListActivity extends ListActivity {
 
 		// Step 1: get GLOBAL_ID_SERVICES for recommended services in the selected CIS
 			Uri sharingUri = SocialContract.Sharing.CONTENT_URI;
-
-//TODO: remove this Uri - waiting for new version of Social Provider
-//			Uri sharingUri = Uri.parse ("content://org.societies.android.SocialProvider/sharing");
 						
 			String[] sharingProjection = new String[] {
 					SocialContract.Sharing.GLOBAL_ID_SERVICE};
@@ -258,17 +263,12 @@ public class ServiceListActivity extends ListActivity {
 					{iDisasterApplication.getInstance().selectedTeam.globalId, // For the selected CIS
 					serviceType};											   // Retrieve services of that type
 	
-			Cursor sharingCursor = null;
+			Cursor sharingCursor;
 			try {
 				sharingCursor= resolver.query(sharingUri, sharingProjection,
 						sharingSelection, sharingSelectionArgs, null /* sortOrder*/);
 			} catch (Exception e) {
 				iDisasterApplication.getInstance().debug (2, "Query to "+ sharingUri + "causes an exception");
-				if (recommendedFlag){
-					recommendedServiceCursor = null;
-				} else {
-					sharedServiceCursor = null;
-				}
 				return iDisasterApplication.getInstance().QUERY_EXCEPTION;
 
 			}
@@ -277,20 +277,10 @@ public class ServiceListActivity extends ListActivity {
 //TODO: We assume that a service can only be recommended once in a CIS...
 			if (sharingCursor == null) {			// No cursor was set - should not happen?
 				iDisasterApplication.getInstance().debug (2, "sharingCursor was not set to any value");
-				if (recommendedFlag){
-					recommendedServiceCursor = null;
-				} else {
-					sharedServiceCursor = null;
-				}
 				return iDisasterApplication.getInstance().QUERY_EMPTY;
 			}
 			
 			if (sharingCursor.getCount() == 0) {	// No service is recommended or shared in the team community
-				if (recommendedFlag){
-					recommendedServiceCursor = null;
-				} else {
-					sharedServiceCursor = null;
-				}
 				return iDisasterApplication.getInstance().QUERY_EMPTY;
 			}			
 			
@@ -313,24 +303,19 @@ public class ServiceListActivity extends ListActivity {
 									(sharingCursor.getColumnIndex(SocialContract.Sharing.GLOBAL_ID_SERVICE))));
 				} else {
 					servicesSelection = servicesSelection + 
-										" AND " +  SocialContract.Services.GLOBAL_ID + "= ?";
+										" OR " +  SocialContract.Services.GLOBAL_ID + "= ?";
 					servicesSelectionArgs.add (sharingCursor.getString(
 							(sharingCursor.getColumnIndex(SocialContract.Sharing.GLOBAL_ID_SERVICE))));
 				}
 			}
 			
-			Cursor serviceCursor = null;			
+			Cursor serviceCursor;			
 			try {
 				serviceCursor = resolver.query (servicesUri, servicesProjection, servicesSelection,
 						   servicesSelectionArgs.toArray(new String[servicesSelectionArgs.size()]),
 						   null /* sortOrder*/);				
 			} catch (Exception e) {
 				iDisasterApplication.getInstance().debug (2, "Query to "+ servicesUri + "causes an exception");
-				if (recommendedFlag){
-					recommendedServiceCursor = null;
-				} else {
-					sharedServiceCursor = null;
-				}
 				return iDisasterApplication.getInstance().QUERY_EXCEPTION;
 			}
 			
@@ -364,7 +349,12 @@ public class ServiceListActivity extends ListActivity {
  * Return value:		Query status code
  */
 
-	private String getMyServices () {	
+	private String getMyServices () {
+		
+		if (myServiceCursor != null) {
+			myServiceCursor.close();		// "close" releases data but does not set to null
+			myServiceCursor = null;
+		}
 
 		// Step 1: get GLOBAL_IDs for services installed by the user
 			Uri serviceUri = SocialContract.Services.CONTENT_URI;
@@ -378,7 +368,6 @@ public class ServiceListActivity extends ListActivity {
 			String[] serviceSelectionArgs = new String[] 
 					{iDisasterApplication.getInstance().me.globalId}; // Services installed by the user
 		
-			myServiceCursor = null;
 			try {
 				myServiceCursor = resolver.query(serviceUri, sharingProjection,
 						serviceSelection, serviceSelectionArgs, null /* sortOrder*/);

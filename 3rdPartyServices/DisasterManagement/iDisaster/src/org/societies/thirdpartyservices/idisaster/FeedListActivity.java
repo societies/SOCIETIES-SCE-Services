@@ -40,11 +40,12 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ListView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 /**
@@ -54,7 +55,7 @@ import android.widget.Toast;
  * @author Jacqueline.Floch@sintef.no
  *
  */
-public class FeedListActivity extends ListActivity {
+public class FeedListActivity extends ListActivity implements OnClickListener{
 	
 	ContentResolver resolver;
 	Cursor feedCursor;			// used for the activities in the feed
@@ -109,6 +110,10 @@ public class FeedListActivity extends ListActivity {
 //TODO:  Eventually add listener for long click
     	// listView.setOnItemLongClickListener(new DrawPopup());
 
+	    // Add click listener to button
+	    final Button button = (Button) findViewById(R.id.feedButton);
+	    button.setOnClickListener(this);
+
     } // onCreate
 
 /**
@@ -129,29 +134,10 @@ public class FeedListActivity extends ListActivity {
     		if (feedAdapter!= null) feedAdapter.clear();
 			if (getFeeds()						// Retrieve feeds from the selected team
 					.equals(iDisasterApplication.getInstance().QUERY_EXCEPTION)) {
-				showQueryExceptionDialog ();	// Exception: Display dialog and terminates activity
+				showQueryExceptionDialog ();	// Exception: Display dialog
 			}
     		assignAdapter ();
-    			
-//			Toast.makeText(getApplicationContext(),
-//    				"Bug when getting data from Social Provider: the implementation of this activity is not complete", Toast.LENGTH_LONG /*Toast.LENGTH_SHORT*/ )
-//    				.show();
-			}
-
-//		// Create dialog if no feed in disaster team						
-//  	AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this);
-//  	alertBuilder.setMessage(getString(R.string.feedListDialogCIS))
-//  		.setCancelable(false)
-//  		.setPositiveButton (getString(R.string.dialogOK), new DialogInterface.OnClickListener() {
-//  			public void onClick(DialogInterface dialog, int id) {
-//  				// add code
-//  				return;
-//  			}
-//  		});
-//	    AlertDialog alert = alertBuilder.create();
-//	    alert.show();
-//	    return;
-
+    	}
     }
 
 /**
@@ -174,12 +160,27 @@ public class FeedListActivity extends ListActivity {
 //		feedCursor.close();
 	}
 
+/**
+ * onClick is called when button is clicked because
+ * the OnClickListener is assigned to the button
+ */
+	public void onClick (View view) {
+		startActivity(new Intent(FeedListActivity.this, FeedAddActivity.class));
+   		return;			
+	}
+
 
 /**
  * getFeed retrieves the list of activity feeds for the selected disaster team
  * from Social Provider.
  */
 	private String getFeeds () {
+		
+		if (feedCursor != null) {
+			feedCursor.close();		// "close" releases data but does not set to null
+			feedCursor = null;
+		}
+
 		Uri communityActivityUri = SocialContract.CommunityActivity.CONTENT_URI;
 		
 		String[] communityActivityprojection = new String[] {
@@ -197,7 +198,6 @@ public class FeedListActivity extends ListActivity {
 //TODO: Classify according to date
 		String communityActivitysortOrder = null;
 
-		feedCursor =null;
 		try {
 			feedCursor = resolver.query(communityActivityUri, communityActivityprojection,
 					communityActivitySelection, communityActivitySelectionArgs,

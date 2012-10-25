@@ -61,8 +61,8 @@ import org.societies.thirdpartyservices.idisaster.R;
 public class MemberListActivity extends ListActivity {
 	
 	ContentResolver resolver;
-	Cursor memberCursor;			// used for the activities in the feed
-	int members;					// keep track of number of feeds
+	Cursor memberCursor;			// used for the members in the selected team
+	int members;					// keep track of number of members
 
 	
 	ArrayAdapter<String> memberAdapter;
@@ -152,28 +152,13 @@ public class MemberListActivity extends ListActivity {
         	if (memberAdapter!= null) memberAdapter.clear();
 			if (getMembers()						// Retrieve members from the selected team
 					.equals(iDisasterApplication.getInstance().QUERY_EXCEPTION)) {
-				showQueryExceptionDialog ();	// Exception: Display dialog and terminates activity
+				showQueryExceptionDialog ();	// Exception: Display dialog
 			}
 
         assignAdapter ();
         
-    }
-
-//    		// Create dialog if no member in disaster team						
-//      	AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this);
-//      	alertBuilder.setMessage(getString(R.string.memberListDialog))
-//      		.setCancelable(false)
-//      		.setPositiveButton (getString(R.string.dialogOK), new DialogInterface.OnClickListener() {
-//      			public void onClick(DialogInterface dialog, int id) {
-//      				// add code
-//      				return;
-//      			}
-//      		});
-//    	    AlertDialog alert = alertBuilder.create();
-//    	    alert.show();
-//    	    return;
-
         }
+	}
 
 /**
  * onPause releases all data.
@@ -202,11 +187,13 @@ public class MemberListActivity extends ListActivity {
  */
 	private String getMembers () {
 		
+		if (memberCursor != null) {
+			memberCursor.close();		// "close" releases data but does not set to null
+			memberCursor = null;
+		}
+		
 		// Step 1: get GLOBAL_ID_MEMBERs for members in the selected CIS
 		Uri membershipUri = SocialContract.Membership.CONTENT_URI;
-
-//TODO: remove this Uri - waiting for new version of Social Provider
-//		Uri membershipUri = Uri.parse ("content://org.societies.android.SocialProvider/membership");
 					
 		String[] membershipProjection = new String[] {
 				SocialContract.Membership.GLOBAL_ID_MEMBER};
@@ -214,7 +201,7 @@ public class MemberListActivity extends ListActivity {
 		String membershipSelection = SocialContract.Membership.GLOBAL_ID_COMMUNITY + "= ?";
 		String[] membershipSelectionArgs = new String[] {iDisasterApplication.getInstance().selectedTeam.globalId};	// For the selected CIS
 	
-		Cursor membershipCursor = null;
+		Cursor membershipCursor;
 		try {
 			membershipCursor= resolver.query(membershipUri, membershipProjection,
 					membershipSelection, membershipSelectionArgs, null /* sortOrder*/);			
@@ -225,14 +212,12 @@ public class MemberListActivity extends ListActivity {
 	
 		// Step 2: retrieve the members with the GLOBAL_ID_MEMBERs retrieved above
 		
-		if (membershipCursor == null) {		// No cursor was set - should not happen?
+		if (membershipCursor == null) {		// No cursor was set
 			iDisasterApplication.getInstance().debug (2, "membershipCursor was not set to any value");
-			memberCursor = null;
 			return iDisasterApplication.getInstance().QUERY_EMPTY;
 		}
 		
 		if (membershipCursor.getCount() == 0) {		// The user is not member of any community
-			memberCursor = null;
 			return iDisasterApplication.getInstance().QUERY_EMPTY;
 		}
 		
@@ -264,7 +249,6 @@ public class MemberListActivity extends ListActivity {
 			}
 		}
 		
-		memberCursor = null;
 		try {
 			memberCursor = resolver.query (peopleUri, membersProjection,membersSelection, 
 					membersSelectionArgs.toArray(new String[membersSelectionArgs.size()]),
@@ -299,7 +283,7 @@ public class MemberListActivity extends ListActivity {
 				while (memberCursor.moveToNext()) {
 					members++;
 					String displayName = memberCursor.getString(memberCursor
-							.getColumnIndex(SocialContract.People.GLOBAL_ID));
+							.getColumnIndex(SocialContract.People.NAME));
 					memberList.add (displayName);
 				}
 			}
