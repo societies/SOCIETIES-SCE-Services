@@ -7,11 +7,7 @@
             file="toc.xml"
             primary="true">
       </toc>
-      
-       <toc
-            file="tocTest.xml">
-       </toc>
-     	 
+    	 
       <toc
             file="tocDevEnv.xml">
       </toc>
