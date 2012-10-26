@@ -2,13 +2,22 @@
 <?NLS TYPE="org.eclipse.help.toc"?>
 
 <toc label="SOCIETIES Documentation" topic="html/toc.html">
-   <topic label="Development Environment and Toolkit Setup">
+  
+   <topic label="Development Environment2 and Toolkit Setup">
       <anchor id="devEnv"/>
    </topic>
+  
    <topic label="Third Party Service APIs">
       <anchor id="apis"/>
    </topic>
+  
    <topic label="Samples">
       <anchor id="samples"/>
    </topic>
+  
+   <topic label="Android">
+      <anchor id="android"/>
+   </topic>
+
+ 
 </toc>
