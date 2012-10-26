@@ -1,0 +1,201 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<title>Societies Platform - Tips to Manage the JSON Format -
+	Societies Redmine</title>
+<meta name="description" content="Redmine" />
+<meta name="keywords" content="issue,bug,tracker" />
+<meta name="csrf-param" content="authenticity_token" />
+<meta name="csrf-token"
+	content="JMAfmcSzh9nqByMBkqpzD7RzT3uWZzg7qmINPKbMSTE=" />
+<link rel='shortcut icon' href='/favicon.ico?1310384844' />
+<link href="/themes/red-andy/stylesheets/application.css?1304377159"
+	media="all" rel="stylesheet" type="text/css" />
+
+<script src="/javascripts/prototype.js?1310384844"
+	type="text/javascript"></script>
+<script src="/javascripts/effects.js?1310384844" type="text/javascript"></script>
+<script src="/javascripts/dragdrop.js?1310384844" type="text/javascript"></script>
+<script src="/javascripts/controls.js?1310384844" type="text/javascript"></script>
+<script src="/javascripts/application.js?1310384844"
+	type="text/javascript"></script>
+<script type="text/javascript">
+	//         
+
+	//
+</script>
+
+<!--[if IE 6]>
+    <style type="text/css">
+      * html body{ width: expression( document.documentElement.clientWidth < 900 ? '900px' : '100%' ); }
+      body {behavior: url(/stylesheets/csshover.htc?1310384844);}
+    </style>
+<![endif]-->
+<link rel="stylesheet"
+	href="/plugin_assets/redmine_backlogs/javascripts/jquery/jquery.jqplot/jquery.jqplot.min.css"
+	type="text/css" />
+
+<script
+	src="/plugin_assets/redmine_backlogs/javascripts/jquery/jquery-1.4.2.min.js?1318533980"
+	type="text/javascript"></script>
+<script
+	src="/plugin_assets/redmine_backlogs/javascripts/jquery/jquery-ui-1.8rc3.custom.min.js?1318533980"
+	type="text/javascript"></script>
+<script
+	src="/plugin_assets/redmine_backlogs/javascripts/jquery/jquery.jeditable.mini.js?1318533980"
+	type="text/javascript"></script>
+<script
+	src="/plugin_assets/redmine_backlogs/javascripts/jquery/jquery.cookie.js?1318533980"
+	type="text/javascript"></script>
+<!--[if IE]><script src="/plugin_assets/redmine_backlogs/javascripts/jquery/jquery.jqplot/excanvas.js?1318533980" type="text/javascript"></script><![endif]-->
+<script
+	src="/plugin_assets/redmine_backlogs/javascripts/jquery/jquery.jqplot/jquery.jqplot.js?1318533980"
+	type="text/javascript"></script>
+<script
+	src="/plugin_assets/redmine_backlogs/javascripts/jquery/jquery.jqplot/plugins/jqplot.highlighter.js?1318533980"
+	type="text/javascript"></script>
+<script
+	src="/plugin_assets/redmine_backlogs/javascripts/jquery/jquery.jqplot/plugins/jqplot.canvasTextRenderer.min.js?1318533980"
+	type="text/javascript"></script>
+<script
+	src="/plugin_assets/redmine_backlogs/javascripts/jquery/jquery.jqplot/plugins/jqplot.canvasAxisTickRenderer.min.js?1318533980"
+	type="text/javascript"></script>
+<script
+	src="/plugin_assets/redmine_backlogs/javascripts/jquery/jquery.jqplot/plugins/jqplot.enhancedLegendRenderer.min.js?1318533980"
+	type="text/javascript"></script>
+
+<script
+	src="/plugin_assets/redmine_backlogs/javascripts/common.js?1318533980"
+	type="text/javascript"></script>
+<script
+	src="/plugin_assets/redmine_backlogs/javascripts/burndown.js?1318533980"
+	type="text/javascript"></script>
+
+
+<!-- page specific tags -->
+
+<link href="/stylesheets/scm.css?1310384844" media="screen"
+	rel="stylesheet" type="text/css" />
+</head>
+<body class="theme-Red-andy controller-wiki action-show">
+	<div id="wrapper">
+		<div id="wrapper2">
+			<div class="" id="main">
+				<div id="content">
+
+					<div class="wiki">
+						<a name="Tips-to-Manage-the-JSON-Format"></a>
+						<h1>
+							Tips to Manage the JSON Format<a
+								href="#Tips-to-Manage-the-JSON-Format" class="wiki-anchor">&para;</a>
+						</h1>
+						<p>The purpose of this tutorial is to learn some best
+							practices to use more easily the JSON format. JSON is a string
+							format used very often in Web technologies and particularly with
+							Javascript because it is so easy to manipulate this format in
+							this language (it has been created for that). This format is used
+							in the light client to use native calls (e.g. Android calls)
+							through Javascript on the GUI component.</p>
+						<a name="JSON-Format-and-Javascript"></a>
+						<h2>
+							JSON Format and Javascript<a href="#JSON-Format-and-Javascript"
+								class="wiki-anchor">&para;</a>
+						</h2>
+						"JSON" means "Javascript Object Notation". So, the JSON format is
+						very easy to use in Javascript. As you can see in the JSON website
+						(<a href="http://www.json.org/js.html" class="external">Page
+							dedicated to Javascript on the JSON website</a>), a lot of objects
+						simplify the use of JSON in Javascript:
+						<ul>
+							<li><strong>JSON.parse(string)</strong> to convert a string
+								into a JSON object</li>
+							<li>eventually <strong>eval('('+string+')')</strong> to
+								convert a string into a JSON object, but it is not safe, the
+								previous method is better
+							</li>
+							<li><strong>JSON.stringify(json object)</strong> to convert
+								a JSON object into a string</li>
+						</ul>
+						<a name="JSON-Format-and-Java-and-Android"></a>
+						<h2>
+							JSON Format and Java (and Android)<a
+								href="#JSON-Format-and-Java-and-Android" class="wiki-anchor">&para;</a>
+						</h2>
+						<p>
+							JSON is natively supported by Java. As you can see in the JSON
+							website (<a href="http://www.json.org/java/" class="external">Page
+								dedicated to Java on the JSON website</a>), a lot of objects
+							simplify the use of JSON in Java. . Other libraries may help to
+							manipulate this format. We propose to follow best practices
+							bellow:
+						</p>
+						<ul>
+							<li>Use the <strong>native library</strong>: to simple
+								manipulation only. E.g. fill a JSON object with values...
+								JSONObject and JSONArray are usually used.
+							</li>
+							<li>Use <strong><a
+									href="http://code.google.com/p/google-gson/" class="external">GSON</a></strong>
+								library: to easily create a JSON object from a Java object
+								(toJson(java object)), or fill a Java object from a JSON object
+								(fromJson(json string)).
+								<ul>
+									<li><a
+										href="http://sites.google.com/site/gson/gson-user-guide"
+										class="external">GSON user guide</a></li>
+									<li><a
+										href="http://www.mkyong.com/java/how-do-convert-java-object-to-from-json-format-gson-api/"
+										class="external">How to Use GSON</a> (tutorial for beginners)</li>
+								</ul>
+							</li>
+							<li>Or maybe use the <a href="http://jackson.codehaus.org/"
+								class="external">Jackson</a> library: equivalent to GSON, but a
+								little bit more complicated to use for the same performance.
+								Proposition: use GSON.
+							</li>
+						</ul>
+
+
+						<a name="Maven-Dependency-to-Use-GSON"></a>
+						<h3>
+							Maven Dependency to Use GSON<a
+								href="#Maven-Dependency-to-Use-GSON" class="wiki-anchor">&para;</a>
+						</h3>
+
+
+						<pre>
+&lt;dependency&gt;
+    &lt;groupId&gt;com.google.code.gson&lt;/groupId&gt;
+    &lt;artifactId&gt;gson&lt;/artifactId&gt;
+    &lt;version&gt;1.7.1&lt;/version&gt;
+&lt;/dependency&gt;
+</pre>
+
+						<a name="Best-Practices-to-Exchange-JSON-Formatted-Data"></a>
+						<h2>
+							Best Practices to Exchange JSON Formatted Data<a
+								href="#Best-Practices-to-Exchange-JSON-Formatted-Data"
+								class="wiki-anchor">&para;</a>
+						</h2>
+
+
+						<p>
+							Use <a href="http://json-schema.org/" class="external">JSON
+								Schemas</a>?<br />To be completed...
+						</p>
+					</div>
+
+					<div style="clear: both;"></div>
+				</div>
+			</div>
+
+			<div id="ajax-indicator" style="display: none;">
+				<span>Loading...</span>
+			</div>
+		
+		</div>
+	</div>
+
+</body>
+</html>

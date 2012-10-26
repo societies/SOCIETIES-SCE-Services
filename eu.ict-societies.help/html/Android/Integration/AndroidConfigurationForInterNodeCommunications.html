@@ -1,0 +1,608 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<title>Societies Platform - Android Communications - Societies
+	Redmine</title>
+<meta name="description" content="Redmine" />
+<meta name="keywords" content="issue,bug,tracker" />
+<meta name="csrf-param" content="authenticity_token" />
+<meta name="csrf-token"
+	content="JMAfmcSzh9nqByMBkqpzD7RzT3uWZzg7qmINPKbMSTE=" />
+<link rel='shortcut icon' href='/favicon.ico?1310384844' />
+<link href="/themes/red-andy/stylesheets/application.css?1304377159"
+	media="all" rel="stylesheet" type="text/css" />
+
+<script src="/javascripts/prototype.js?1310384844"
+	type="text/javascript"></script>
+<script src="/javascripts/effects.js?1310384844" type="text/javascript"></script>
+<script src="/javascripts/dragdrop.js?1310384844" type="text/javascript"></script>
+<script src="/javascripts/controls.js?1310384844" type="text/javascript"></script>
+<script src="/javascripts/application.js?1310384844"
+	type="text/javascript"></script>
+<script type="text/javascript">
+	//         
+
+	//
+</script>
+
+<!--[if IE 6]>
+    <style type="text/css">
+      * html body{ width: expression( document.documentElement.clientWidth < 900 ? '900px' : '100%' ); }
+      body {behavior: url(/stylesheets/csshover.htc?1310384844);}
+    </style>
+<![endif]-->
+<link rel="stylesheet"
+	href="/plugin_assets/redmine_backlogs/javascripts/jquery/jquery.jqplot/jquery.jqplot.min.css"
+	type="text/css" />
+
+<script
+	src="/plugin_assets/redmine_backlogs/javascripts/jquery/jquery-1.4.2.min.js?1318533980"
+	type="text/javascript"></script>
+<script
+	src="/plugin_assets/redmine_backlogs/javascripts/jquery/jquery-ui-1.8rc3.custom.min.js?1318533980"
+	type="text/javascript"></script>
+<script
+	src="/plugin_assets/redmine_backlogs/javascripts/jquery/jquery.jeditable.mini.js?1318533980"
+	type="text/javascript"></script>
+<script
+	src="/plugin_assets/redmine_backlogs/javascripts/jquery/jquery.cookie.js?1318533980"
+	type="text/javascript"></script>
+<!--[if IE]><script src="/plugin_assets/redmine_backlogs/javascripts/jquery/jquery.jqplot/excanvas.js?1318533980" type="text/javascript"></script><![endif]-->
+<script
+	src="/plugin_assets/redmine_backlogs/javascripts/jquery/jquery.jqplot/jquery.jqplot.js?1318533980"
+	type="text/javascript"></script>
+<script
+	src="/plugin_assets/redmine_backlogs/javascripts/jquery/jquery.jqplot/plugins/jqplot.highlighter.js?1318533980"
+	type="text/javascript"></script>
+<script
+	src="/plugin_assets/redmine_backlogs/javascripts/jquery/jquery.jqplot/plugins/jqplot.canvasTextRenderer.min.js?1318533980"
+	type="text/javascript"></script>
+<script
+	src="/plugin_assets/redmine_backlogs/javascripts/jquery/jquery.jqplot/plugins/jqplot.canvasAxisTickRenderer.min.js?1318533980"
+	type="text/javascript"></script>
+<script
+	src="/plugin_assets/redmine_backlogs/javascripts/jquery/jquery.jqplot/plugins/jqplot.enhancedLegendRenderer.min.js?1318533980"
+	type="text/javascript"></script>
+
+<script
+	src="/plugin_assets/redmine_backlogs/javascripts/common.js?1318533980"
+	type="text/javascript"></script>
+<script
+	src="/plugin_assets/redmine_backlogs/javascripts/burndown.js?1318533980"
+	type="text/javascript"></script>
+
+
+<!-- page specific tags -->
+
+<link href="/stylesheets/scm.css?1310384844" media="screen"
+	rel="stylesheet" type="text/css" />
+</head>
+<body class="theme-Red-andy controller-wiki action-show">
+	<div id="wrapper">
+		<div id="wrapper2">
+			
+
+
+			<div class="" id="main">
+
+				<div id="content">
+
+
+					<div class="wiki">
+						<a name="Android-Configuration-38-Communications"></a>
+						<h1>
+							Android Configuration &#38; Communications<a
+								href="#Android-Configuration-38-Communications"
+								class="wiki-anchor">&para;</a>
+						</h1>
+
+
+						<p>This article covers Android configuration and required
+							components necesary to successfully use the Societies Android
+							App.</p>
+
+
+						<a name="Android-AVD-Configuration"></a>
+						<h2>
+							Android AVD Configuration<a href="#Android-AVD-Configuration"
+								class="wiki-anchor">&para;</a>
+						</h2>
+
+
+						<p>
+							When testing an Android project use the latest Android release
+							(4.1 Jelly Bean) to create your AVD. If you do not have this
+							installed use the Android SDK Manager add this release to your
+							SDK. Use the <strong>WXGA720</strong> Skin to ensure that your
+							AVD's resolution matches the target Societies Android phone
+							(Samsung S3).
+						</p>
+
+
+						<p>
+							If you have problems starting your VM with <strong>WXGA720</strong>
+							as some others had <a
+								href="http://code.google.com/p/android/issues/detail?id=33930"
+								class="external">here</a> try setting it manually to 1280x720
+							and decreasing the RAM
+						</p>
+
+
+						<a name="Openfire-and-Virgo-configuration"></a>
+						<h2>
+							Openfire and Virgo configuration<a
+								href="#Openfire-and-Virgo-configuration" class="wiki-anchor">&para;</a>
+						</h2>
+
+
+						<p>
+							Until recently, the Android client had been assuming <strong>societies.local</strong>
+							as the XMPP domain and <strong>xcmanager</strong> as the cloud
+							node. It was also using a properties file which used by default,
+							user: android password: android and this user should have been
+							created on Openfire as a user. These hardcoded defaults are no
+							longer required as the login process solicits the user
+							credentials and the XMPP Identity server domain. The cloud node,
+							used for the destination of message stanzas, is acquired from the
+							Android Communication components.
+						</p>
+
+
+						<p>
+							As a result, if the username is "frank" and the XMPP Identity
+							server domain is "crazygroup.ireland", then the JID of the
+							Android device will be
+							"frank.crazygroup.ireland/&lt;resource&gt;. Unless the CSS cloud
+							node is "<a class="email" href="mailto:frank@crazygroup.ireland">frank@crazygroup.ireland</a>"
+							no communications will be sent to the cloud node. To ensure that
+							the cloud node has this format, the cloud node's external XMPP
+							component must be registered as "frank" (cf. xc.properties file
+							and Openfire instance configuration).
+						</p>
+
+
+						<p>
+							The reverse also applies, i.e. setting up an XMPP user such as
+							"john" and logging into the domain "crazygroup.ireland" and
+							trying to send stanzas to "<a class="email"
+								href="mailto:frank@crazygroup.ireland">frank@crazygroup.ireland</a>"
+							will not work.
+						</p>
+
+
+						<p>
+							In order to determine the cloud node of a CSS on Android use the
+							following code:<br />
+							<pre>
+    private ClientCommunicationMgr ccm;
+    private String commsDestination;
+                .
+                .
+                .
+    this.ccm = new ClientCommunicationMgr(this);
+                .
+                .
+                .
+    INetworkNode cloudNode = this.ccm.getIdManager().getCloudNode();
+    this.commsDestination = cloudNode.getJid();
+</pre>
+						</p>
+
+
+						<a name="Hosts-file-Configuration"></a>
+						<h2>
+							Hosts file Configuration<a href="#Hosts-file-Configuration"
+								class="wiki-anchor">&para;</a>
+						</h2>
+
+
+						<p>
+							The Android Emulator uses Android Virtual Devices (<a
+								class="external"
+								href="http://developer.android.com/guide/developing/devices/index.html">http://developer.android.com/guide/developing/devices/index.html</a>)
+							to provide emulated devices on which to test applications. A
+							suitable AVD, i.e. correctly set up and with a suitable Android
+							version, must be configured and started prior to deploying and
+							running an application. The important point to note is that an
+							AVD is a virtual machine running its own version of
+							Android/Linux. As a result, an application that needs to access a
+							resource on your host machine cannot rely on the settings
+							configured on your host machine's <strong>hosts</strong> file. An
+							AVD has its <strong>hosts</strong> file located in /etc/hosts.
+						</p>
+
+
+						<p>
+							The AndroidConfiguration (<a class="external"
+								href="https://github.com/societies/SOCIETIES-Platform/tree/development/platform-infrastructure/client-frwk/AndroidConfiguration">https://github.com/societies/SOCIETIES-Platform/tree/development/platform-infrastructure/client-frwk/AndroidConfiguration</a>)
+							directory has a default hosts file to configure a relevant AVD.
+							This hosts file must be modified to ensure that the 10.0.2.2 IP
+							address corresponds to the XMPP Identity server domain. This file
+							must be either copied to an AVD on every startup or the AVD hosts
+							file modified.
+						</p>
+
+
+						<a name="AVD-scripts"></a>
+						<h3>
+							AVD scripts<a href="#AVD-scripts" class="wiki-anchor">&para;</a>
+						</h3>
+
+
+						<p>In order to start and provision the newly started AVD use
+							the following commands:</p>
+
+
+						<a name="Linux"></a>
+						<h4>
+							Linux<a href="#Linux" class="wiki-anchor">&para;</a>
+						</h4>
+
+
+						<p>$ sh startTestAVD.sh &lt;name of AVD&gt; //name of AVD must
+							match the AVD used in Maven Android settings.xml file</p>
+
+
+						<p>Allow some time to elapse while the AVD starts and
+							configures itself. Failure to so results in adb connection
+							errors. The appearance of the normal Android start page on the
+							AVD screen is usually a good indication that that the AVD's adb
+							server is ready.</p>
+
+
+						<p>$ sh initTestAVD.sh</p>
+
+
+						<a name="Windows"></a>
+						<h4>
+							Windows<a href="#Windows" class="wiki-anchor">&para;</a>
+						</h4>
+
+
+						<p>Install Cygwin (provides *nix Bash script and environment
+							support for Windows). In order to determine your DNS server use
+							the following command:</p>
+
+
+						<p>$ ipconfig /all</p>
+
+
+						<p>and use the "DNS Server" IP address in the next command:</p>
+
+
+						<p>$ sh startWindowsTestAVD.sh &lt;name of AVD&gt; &lt;DNS
+							Server&gt; //name of AVD must match the AVD used in Maven Android
+							settings.xml file and DNS server is required for internet access</p>
+
+
+						<p>Allow some time to elapse while the AVD starts and
+							configures itself. Failure to so results in adb connection
+							errors. The appearance of the normal Android start page on the
+							AVD screen is usually a good indication that that the AVD's adb
+							server is ready.</p>
+
+
+						<p>$ sh initTestAVD.sh</p>
+
+
+						<p>
+							As is usual, Windows doesn't play ball with scripts, especially
+							after you modify them with editors. If the script crashes with
+							something like "\r command not found", use run the <strong>d2u</strong>
+							(Cygwin command) to remove Windows text formatting and re-run the
+							script.
+						</p>
+
+
+						<p>
+							$ d2u &lt;target script&gt;<br />$ sh &lt;target script&gt;
+						</p>
+
+
+						<p>If you want to modify these scripts and your editor has
+							problems:</p>
+
+
+						<p>$ u2d &lt;target script&gt;</p>
+
+
+						<p>Windows formatting has also been found to cause problems
+							with the two files that are currently required on the AVD - hosts
+							and AndroidAgent.properties. These files also require conversion
+							using the d2u Cygwin utility.</p>
+
+
+						<a name="Important-Requirement"></a>
+						<h4>
+							Important Requirement<a href="#Important-Requirement"
+								class="wiki-anchor">&para;</a>
+						</h4>
+
+
+						<p>Once this procedure has been carried out it will have to
+							repeated in the case where the particular AVD is re-started. It
+							will also have to be carried out on new AVDs.</p>
+
+
+						<a name="Virgo-Configuration"></a>
+						<h2>
+							Virgo Configuration<a href="#Virgo-Configuration"
+								class="wiki-anchor">&para;</a>
+						</h2>
+
+
+						<p>Prior to starting any Android to Virgo communication, the
+							following is required:</p>
+
+
+						<ol>
+							<li>Start Openfire</li>
+							<li>Start Virgo container with -clean command line option
+								and no Societies plan in the $VIRGO_HOME/pickup directory</li>
+							<li>When the Virgo container has started successfully,
+								deploy the relevant Societies plan to the $VIRGO_HOME/pickup
+								directory.</li>
+							<li>Monitor the deployment of the various plans and ensure
+								that all bundles start successfully</li>
+							<li>Monitor the logging file(s) to ensure that Android
+								remote call invocations are being responded to by the relevant
+								Virgo components.</li>
+						</ol>
+
+
+						<a name="Android-Configuration"></a>
+						<h2>
+							Android Configuration<a href="#Android-Configuration"
+								class="wiki-anchor">&para;</a>
+						</h2>
+
+
+						<ol>
+							<li>Deploy but do <strong>not</strong> run the AndroidAgent
+								APK ($ mvn clean install android:deploy)
+							</li>
+							<li>Deploy but do <strong>not</strong> run the AndroidPubsub
+								APK ($ mvn clean install android:deploy)
+							</li>
+							<li>Deploy and run the SocietiesAndroidApp APK ($ mvn clean
+								install android:deploy android:run)</li>
+						</ol>
+
+
+						<a name="Process-flow-to-run-test-apps"></a>
+						<h2>
+							Process flow to run test apps<a
+								href="#Process-flow-to-run-test-apps" class="wiki-anchor">&para;</a>
+						</h2>
+
+
+						<p>
+							1. Start your emulator with command:<br />
+							<pre>
+								<code class="XML syntaxhl">
+<span class="CodeRay"><span class="no">1</span>  emulator -avd <span
+										class="ta">&lt;name_of_AVD&gt;</span> -partition-size 128
+</span>
+								</code>
+							</pre>
+						</p>
+
+
+						<p>
+							2. Edit the hosts file on your emulator as detailed above or push
+							the attached file<br />
+							<pre>
+								<code class="XML syntaxhl">
+<span class="CodeRay"><span class="no">1</span>  cd C:\android-sdk\platform-tools
+<span class="no">2</span>  adb remount
+<span class="no">3</span>  adb push hosts /etc/hosts
+</span>
+								</code>
+							</pre>
+						</p>
+
+
+						<p>
+							3. Go to the <em>AndroidAgent</em> directory and execute <br />
+							<pre>
+								<code class="XML syntaxhl">
+<span class="CodeRay"><span class="no">1</span>  mvn android:deploy
+</span>
+								</code>
+							</pre>
+
+							4. Go to the <em>AndroidPubsub</em> directory and execute<br />
+							<pre>
+								<code class="XML syntaxhl">
+<span class="CodeRay"><span class="no">1</span>  mvn android:deploy
+</span>
+								</code>
+							</pre>
+						</p>
+
+
+						<p>
+							5. Depending on which app you wish to test, change to the <em>AndroidAgentTester</em>
+							or the <em>AndroidPubsubTester</em><br />
+							<pre>
+								<code class="XML syntaxhl">
+<span class="CodeRay"><span class="no">1</span>  mvn android:deploy
+</span>
+								</code>
+							</pre>
+						</p>
+
+
+						<p>
+							6. The output of the applications are currently onto a log file.
+							You need to start up the <em>logcat</em> service and point it to
+							some log location.<br />
+							<pre>
+								<code class="XML syntaxhl">
+<span class="CodeRay"><span class="no">1</span> cd C:\android-sdk\platform-tools
+<span class="no">2</span> adb logcat <span class="er">&gt;</span><span
+										class="er">&gt;</span> c:\android_testing.log
+</span>
+								</code>
+							</pre>
+						</p>
+
+
+						<p>
+							7. Within your emulator, start the <em>AndroidAgentTester</em> or
+							the <em>AndroidPubsubTester</em>. Give it a minute to complete
+							the tests. Then consult the logfile for success/fails.
+						</p>
+
+
+						<p>
+							Depending on what your requirements are, you should use either
+							the <em>AndroidAgentTester</em> or the <em>AndroidPubsubTester</em>
+							or both as a basis for your component.
+						</p>
+
+
+						<a name="Basic-Android-Communication-invoking-remote-methods"></a>
+						<h2>
+							Basic Android Communication (invoking remote methods)<a
+								href="#Basic-Android-Communication-invoking-remote-methods"
+								class="wiki-anchor">&para;</a>
+						</h2>
+
+
+						<p>
+							In order to see a basic example of an Android - Remote node
+							remote method invocation, consult <a class="external"
+								href="https://github.com/societies/SOCIETIES-Platform/tree/development/platform-infrastructure/client-frwk/AndroidCSSManager">https://github.com/societies/SOCIETIES-Platform/tree/development/platform-infrastructure/client-frwk/AndroidCSSManager</a>
+						</p>
+
+
+						<p>
+							The most important constants are:<br />
+							<pre>
+    private static final List&lt;String&gt; ELEMENT_NAMES = Arrays.asList("cssManagerMessageBean", "cssManagerResultBean");
+    private static final List&lt;String&gt; NAME_SPACES = Arrays.asList(
+            "http://societies.org/api/schema/cssmanagement");
+    private static final List&lt;String&gt; PACKAGES = Arrays.asList(
+        "org.societies.api.schema.cssmanagement");
+
+    private static final String DESTINATION = "xcmanager.societies.local";
+
+</pre>
+						</p>
+
+
+						<ol>
+							<li>ELEMENT_NAMES are the message and result beans as
+								described in the relevant namespace (NAME_SPACES)</li>
+							<li>NAME_SPACES are the namespaces that will be used in the
+								XMPP communication</li>
+							<li>PACKAGES are the corresponding Java packages that
+								support the namespaces</li>
+							<li>DESTINATION is the XMPP JID of the destination of the
+								XMP message</li>
+						</ol>
+
+
+						<p>In order to successfully communicate with a remote node the
+							following steps are required:</p>
+
+
+						<ol>
+							<li>Start Openfire and ensure that the user <a class="email"
+								href="mailto:android@societies.local">android@societies.local</a>
+								and the external component xcmanager.societies.local are
+								correctly configured
+							</li>
+							<li>Start Virgo and ensure that the correct plan is in the
+								$VIRGO_HOME/pickup directory. The OSGi communication bundles and
+								the relevant Group Comms Manager and corresponding component are
+								started correctly</li>
+							<li>Start an Android emulator</li>
+							<li>Ensure that the Android emulator's hosts file is
+								configured correctly (see above)</li>
+							<li>Deploy the AndroidAgent and relevant component(s) ($mvn
+								android:deploy)</li>
+							<li>Start the relevant component</li>
+							<li>Use the Android logger ($adb logcat) to get basic
+								logging information concerning the communications</li>
+						</ol>
+
+
+						<a name="Android-Societies-Client"></a>
+						<h2>
+							Android Societies Client<a href="#Android-Societies-Client"
+								class="wiki-anchor">&para;</a>
+						</h2>
+
+
+						<p>The Android Societies client is an Android application that
+							consists of the following:</p>
+
+
+						<ul>
+							<li>HTML5 based Login and functionality menus and screens</li>
+							<li>Preference and About Activities</li>
+							<li>App and Service monitors</li>
+							<li>CSSManager (provides support for logging into the chosen
+								XMPP Identity server, registering the CSS node with its cloud
+								node, the logout process and getting notifications of other
+								add/removed CSS nodes)</li>
+						</ul>
+
+
+						<p>In order to start and use this client the following steps
+							are required:</p>
+
+
+						<ol>
+							<li>Ensure that the local Societies Git repository is up to
+								date ($ git branch development; $git pull)</li>
+							<li>Invoke the Societies nightly builder POMs
+								(virgo-full-build.xml and android-full-build.xml) using $mvn
+								clean install -f &lt;relevant POM&gt;</li>
+							<li>See above for Virgo and Android Configuration</li>
+						</ol>
+
+
+						<p>Use the Virgo OSGi and Android logging outputs to diagnose
+							or confirm that the messages are being sent from the Android
+							client to OSGi and back.</p>
+
+
+						<a name="Societies-Android-App"></a>
+						<h2>
+							Societies Android App<a href="#Societies-Android-App"
+								class="wiki-anchor">&para;</a>
+						</h2>
+
+
+						<a name="Login-Process"></a>
+						<h3>
+							Login Process<a href="#Login-Process" class="wiki-anchor">&para;</a>
+						</h3>
+
+
+						<p>User credentials are required at the initial login page.
+							The username must exist as a valid user on the chosen XMPP
+							Identity domain and the password must match the existing user's
+							password. The user must also enter a valid XMPP Identity domain.</p>
+					</div>
+
+
+
+
+						<div style="clear: both;"></div>
+				</div>
+			</div>
+
+			<div id="ajax-indicator" style="display: none;">
+				<span>Loading...</span>
+			</div>
+
+		</div>
+	</div>
+
+</body>
+</html>

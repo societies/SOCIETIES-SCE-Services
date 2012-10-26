@@ -1,0 +1,1062 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<title>Societies Platform - Android GUI example - Societies
+	Redmine</title>
+
+<link rel="stylesheet"
+	href="/plugin_assets/redmine_backlogs/javascripts/jquery/jquery.jqplot/jquery.jqplot.min.css"
+	type="text/css" />
+
+
+<!-- page specific tags -->
+
+<link href="/stylesheets/scm.css?1310384844" media="screen"
+	rel="stylesheet" type="text/css" />
+</head>
+<body class="theme-Red-andy controller-wiki action-show">
+	<div id="wrapper">
+		<div id="wrapper2">
+
+
+			
+			</div>
+
+			<div class="" id="main">
+
+
+				<div id="content">
+
+					<div class="wiki">
+						<a name="Step-by-step-guide-Service-Discovery-example"></a>
+						<h1>
+							Step-by-step guide - Service Discovery example<a
+								href="#Step-by-step-guide-Service-Discovery-example"
+								class="wiki-anchor">&para;</a>
+						</h1>
+
+
+						<ul class="toc">
+							<li><a href="#Step-by-step-guide-Service-Discovery-example">Step-by-step
+									guide - Service Discovery example</a></li>
+							<li><a href="#Introduction">Introduction</a></li>
+							<li><a href="#Architecture">Architecture</a></li>
+							<li><a href="#Android-Parcelable-Beans">Android
+									Parcelable Beans</a></li>
+							<li><a href="#Service-Interface">Service Interface</a></li>
+							<li><a href="#APK-Library">APK Library</a></li>
+							<li><a href="#Test-Container-optional">Test Container
+									(optional)</a></li>
+							<li><a href="#Phonegap-Plugin">Phonegap Plugin</a></li>
+							<li><a href="#Javascript-JSON">Javascript / JSON</a></li>
+							<li><a
+								href="#Referencing-your-GUI-in-the-main-Android-project">Referencing
+									your GUI in the main Android project</a></li>
+							<li><a href="#Phonegap-Desktop-mode">Phonegap Desktop
+									mode</a></li>
+						</ul>
+
+
+						<a name="Introduction"></a>
+						<h1>
+							Introduction<a href="#Introduction" class="wiki-anchor">&para;</a>
+						</h1>
+
+
+						<p>The article is a step by step guide on how to connect the
+							user interface of the SOCIETIES android application to a native
+							component. Although the native component in this example is quite
+							light - it is merely a proxy to the Virgo node - in the future,
+							richer features can be added over time, eg, caching results,
+							offline usage.</p>
+
+
+						This article does not go into low level detail on the technologies
+						used such as Android, Phonegap, inter-process comms on Android
+						such as Intents/AIDL. For detailed articles and troubleshooting,
+						you should read:
+						<ul>
+							<li><a href="/projects/sp/wiki/Android_GUI_Development"
+								class="wiki-page"> Android GUI Development</a></li>
+							<li><a
+								href="/projects/sp/wiki/How_to_Create_a_PhoneGap_Plugin"
+								class="wiki-page">How to write a phonegap plugin</a></li>
+							<li><a href="/projects/sp/wiki/Android_Services"
+								class="wiki-page">Creating Android Services</a></li>
+						</ul>
+
+
+						<p>To implement your own feature in a speedy fashion, you
+							should simply copy each java file mentioned below and edit to
+							your own requirements.</p>
+
+
+						<p style="text-align: right;">.</p>
+
+
+						<a name="Architecture"></a>
+						<h1>
+							Architecture<a href="#Architecture" class="wiki-anchor">&para;</a>
+						</h1>
+
+
+						<img src="../../../img/Architecture.png" alt="" /> <br />The Android
+						client uses a layered architecture.
+						<ul>
+							<li>Your features are in a native component and developed as
+								an APK library (APKlib).</li>
+							<li>A Phonegap plugin exposes the API of your APKlib to
+								javascript.</li>
+							<li>A javascript file will hold a function calling that
+								phonegap plugin with result recieved in a JSON array</li>
+							<li>The JSON array is then rendered in a HTML table to the
+								user.</li>
+							<li>A seperate application contains the comms services</li>
+						</ul>
+
+
+						<p>The example documented is for Service Management. A
+							recordset of 3P services is retrieved from the Virgo node and
+							displayed in a HTML table in the User interface.</p>
+
+
+						<p style="text-align: right;">.</p>
+
+
+						<a name="Android-Parcelable-Beans"></a>
+						<h1>
+							Android Parcelable Beans<a href="#Android-Parcelable-Beans"
+								class="wiki-anchor">&para;</a>
+						</h1>
+
+
+						<p>
+							All Parcelable beans should be added to the Android API project
+							under the relevant namespace eg, <em>org.societies.android.api.internal.servicelifecycle</em>
+							of the <em>GIT/API/Android/Internal</em> project
+						</p>
+
+
+						<p>
+							Unfortunately, Android requires the use of the <em>Parcelable</em>
+							interface on objects passed between native components. This is
+							the Android equivalent of <em>Serialisable</em>. It means the
+							existing "Schema Beans" cannot be used in their current form.
+							Developers will need to create an Android version of these beans
+							that extend their equivalent schema (so you don't need to add all
+							the properties again!). The recommendation is to prefix your bean
+							name with the letter 'A' The below example is the <em>AServiceImplementation</em>
+							bean which implements <em>Parcelable</em>. To save coding each
+							property again, we simply extend the original <em>ServiceImplementation</em>.<br />
+							<pre>
+								<code class="java syntaxhl">
+<span class="CodeRay"><span class="no">1</span> <span
+										class="di">public</span> <span class="ty">class</span> <span
+										class="cl">AServiceImplementation</span> <span class="di">extends</span> ServiceImplementation <span
+										class="di">implements</span> Parcelable {
+<span class="no">2</span>     <span class="di">public</span> AServiceImplementation() {
+<span class="no">3</span>         <span class="lv">super</span>();
+<span class="no">4</span>     }
+<span class="no">5</span> }
+</span>
+								</code>
+							</pre>
+						</p>
+
+
+						<ul>
+							<li>Parcelable is not an empty interface like Serialisable.
+								It does have methods that you need to provide an implementation
+								for. The method <em>writeToParcel()</em> requires you to write
+								out each property of your bean (copy/paste from original bean).<br />
+							<pre>
+									<code class="java syntaxhl">
+<span class="CodeRay"><span class="no">1</span> <span
+											class="c">/* @see android.os.Parcelable#writeToParcel(android.os.Parcel, int) */</span>
+<span class="no">2</span> <span class="di">public</span> <span
+											class="ty">void</span> writeToParcel(Parcel dest, <span
+											class="ty">int</span> flags) {
+<span class="no">3</span>     dest.writeString(<span class="lv">this</span>.getServiceNameSpace());
+<span class="no">4</span>     dest.writeString(<span class="lv">this</span>.getServiceProvider());
+<span class="no">5</span>     dest.writeString(<span class="lv">this</span>.getServiceVersion());
+<span class="no">6</span> }
+</span>
+									</code>
+								</pre>
+							</li>
+						</ul>
+
+
+						<ul>
+							<li>Private Constructor: You must provide a private
+								constructor for your bean. The order of setting each property is
+								important! The properties must match the property order of the <em>writeToParcel()</em>
+								method <br />
+							<pre>
+									<code class="java syntaxhl">
+<span class="CodeRay"><span class="no">1</span> <span
+											class="di">private</span> AServiceImplementation(Parcel in) {
+<span class="no">2</span>     <span class="lv">super</span>();
+<span class="no">3</span>     <span class="lv">this</span>.setServiceNameSpace(in.readString());
+<span class="no">4</span>     <span class="lv">this</span>.setServiceProvider(in.readString());
+<span class="no">5</span>     <span class="lv">this</span>.setServiceVersion(in.readString());
+<span class="no">6</span> }
+</span>
+									</code>
+								</pre>
+							</li>
+						</ul>
+
+
+						<ul>
+							<li>CREATOR: A static creator is required for the Parceling
+								process. You should add the below boiler plate code from the
+								AServiceImplementaion class and simply rename to your object
+								type.<br />
+							<pre>
+									<code class="java syntaxhl">
+<span class="CodeRay"><span class="no">1</span> <span
+											class="di">public</span> <span class="di">static</span> <span
+											class="di">final</span> Parcelable.Creator&lt;AServiceImplementation&gt; CREATOR = <span
+											class="kw">new</span> <span class="di">public</span> <span
+											class="di">static</span> <span class="di">final</span> Parcelable.Creator&lt;AServiceImplementation&gt; CREATOR = <span
+											class="kw">new</span> Parcelable.Creator&lt;AServiceImplementation&gt;() {
+<span class="no">2</span>     <span class="di">public</span> AServiceImplementation createFromParcel(Parcel in) {
+<span class="no">3</span>         <span class="kw">return</span> <span
+											class="kw">new</span> AServiceImplementation(in);
+<span class="no">4</span>     }
+<span class="no">5</span>     <span class="di">public</span> AServiceImplementation<span
+											class="ty">[]</span> newArray(<span class="ty">int</span> size) {
+<span class="no">6</span>         <span class="kw">return</span> <span
+											class="kw">new</span> AServiceImplementation[size];
+<span class="no">7</span>     }
+<span class="no">8</span> };
+</span>
+									</code>
+								</pre>
+							</li>
+						</ul>
+
+
+						<ul>
+							<li>If your bean uses other beans from your namespace, eg, <em>Service</em>
+								has a property <em>ServiceResourceIdentifier</em>, then that
+								other bean also needs to be added to the Android API folder and
+								implement <em>Parcelable</em>. Follow the above steps for each
+								bean. You should see the <em>ServiceLifecycle</em> folder for
+								examples to follow.
+							</li>
+						</ul>
+
+
+						<p style="text-align: right;">.</p>
+
+
+						<a name="Service-Interface"></a>
+						<h1>
+							Service Interface<a href="#Service-Interface" class="wiki-anchor">&para;</a>
+						</h1>
+
+
+						<p>
+							Add the interface of your service to the Android API project. In
+							this example, the <em>IServiceDiscovery</em> interface was added
+							to the <em>API/Android/Internal</em> project.
+						</p>
+
+
+						<ul>
+							<li>List the methods of your interace in a array object.
+								Required for Android's <em>Intent</em> system (inter-process
+								comms)<br />
+							<pre>
+									<code class="java syntaxhl">
+<span class="CodeRay"><span class="no">1</span> <span
+											class="di">public</span> <span class="pt">String</span> methodsArray<span
+											class="ty">[]</span> = {
+<span class="no">2</span>         <span class="s"><span
+												class="dl">&quot;</span><span class="k">getServices(String client, String identity)</span><span
+												class="dl">&quot;</span></span>, 
+<span class="no">3</span>         <span class="s"><span
+												class="dl">&quot;</span><span class="k">searchService(String client, Service filter, String identity)</span><span
+												class="dl">&quot;</span></span> };
+</span>
+									</code>
+								</pre>
+							</li>
+						</ul>
+
+
+						<ul>
+							<li>You cannot reuse the interface from Virgo as the first
+								parameter of each method is the client component package that is
+								calling this method. Also, the return type needs to be the
+								Parcelable object created earlier, eg, <em>AService</em> not <em>Service</em>.
+								You should return an array object not List as this will be
+								easier when it comes to converting to a JSON array later.<br />
+							<pre>
+									<code class="java syntaxhl">
+<span class="CodeRay"><span class="no">1</span> <span
+											class="c"> Gets list of 3rd party services available from a CSS or CIS
+<span class="no">2</span>       @param client component package calling this method
+<span class="no">3</span>       @param identity The target node where search is to occur
+<span class="no">4</span>      </span>
+<span class="no">5</span>     <span class="di">public</span> AService<span
+											class="ty">[]</span> getServices(<span class="pt">String</span> client, <span
+											class="pt">String</span> identity);
+</span>
+									</code>
+								</pre>
+							</li>
+						</ul>
+
+
+						<p style="text-align: right;">.</p>
+
+
+						<a name="APK-Library"></a>
+						<h1>
+							APK Library<a href="#APK-Library" class="wiki-anchor">&para;</a>
+						</h1>
+
+
+						<p>
+							A seperate project is required for each API Lib, <em>SocietiesServiceMonitor</em>
+							is the API lib for this example. The <em>ServiceManagement</em>
+							class implements the <em>IServiceDiscovery</em> interface
+						</p>
+
+
+						<ul>
+							<li>Update your NAMESPACE and PACKAGES and new ELEMENT
+								required for communications</li>
+							<li>Implement the methods of your interface</li>
+							<li>As communication with Virgo is asynchronous, your
+								results will arrive in the Callback object</li>
+							<li>After processing your MessageBeanResult object, you need
+								to notify your caller that the results are now ready.</li>
+							<li>What was returned from the MessageBeanResult is the
+								"Schema Bean". You cannot send this up the stack. You must
+								convert it your Parcelable equivalent object type.<br />
+							<pre>
+									<code class="java syntaxhl">
+<span class="CodeRay"><span class="no"> 1</span> <span
+											class="c">//GET SCHEMA BEAN RESULT</span>
+<span class="no"> 2</span> ServiceDiscoveryResultBean discoResult = (ServiceDiscoveryResultBean) msgBean;
+<span class="no"> 3</span> <span class="pt">List</span>&lt;Service&gt; serviceList = discoResult.getServices();
+<span class="no"> 4</span> <span class="c">//CONVERT TO PARCEL BEANS</span>
+<span class="no"> 5</span> <span class="ty">int</span> i=<span class="i">0</span>;
+<span class="no"> 6</span> AService serviceArray<span class="ty">[]</span> = AService.CREATOR.newArray(serviceList.size());
+<span class="no"> 7</span> <span class="kw">for</span>(Service tmpService: serviceList) {
+<span class="no"> 8</span>     serviceArray[i] = (AService)tmpService;
+<span class="no"> 9</span>     i++;
+<span class="no"><strong>10</strong></span> }
+</span>
+									</code>
+								</pre>
+							</li>
+							<li>Add the return object of your service interface method
+								(ie, <em>AService[] getServices()</em> ) into the return intent.
+								In this case, I add the <em>AServices[]</em> object.<br />
+							<pre>
+									<code class="java syntaxhl">
+<span class="CodeRay"><span class="no">1</span> <span
+											class="c">//NOTIFY CALLING CLIENT</span>
+<span class="no">2</span> intent.putExtra(INTENT_RETURN_VALUE, (Parcelable) serviceList);
+<span class="no">3</span> intent.setPackage(client);
+<span class="no">4</span> ServiceManagement.this.sendBroadcast(intent);
+</span>
+									</code>
+								</pre>
+							</li>
+						</ul>
+
+
+						<ul>
+							<li>You need to add your service advertisement to the
+								AndroidManifest.xml <br />
+							<pre>
+									<code class="xml syntaxhl">
+<span class="CodeRay"><span class="no">1</span> <span
+											class="ta">&lt;service</span> <span class="an">android:name</span>=<span
+											class="s"><span class="dl">&quot;</span><span
+												class="k">org.societies.android.platform.servicemonitor.ServiceManagement</span><span
+												class="dl">&quot;</span></span> <span class="ta">/&gt;</span>
+</span>
+									</code>
+								</pre>
+							</li>
+						</ul>
+
+
+						<p style="text-align: right;">.</p>
+
+
+						<a name="Test-Container-optional"></a>
+						<h1>
+							Test Container (optional)<a href="#Test-Container-optional"
+								class="wiki-anchor">&para;</a>
+						</h1>
+
+
+						<p>Before creating the Phonegap plugin, you should ensure that
+							your service is working correctly by creating a testing container
+							that consumes the API of your service. This will make development
+							easier, as if problems arrive with your UI, debugging through the
+							Javascript -> Phonegap plugin -> your Service will prove
+							complicated (not impossible). So if bugs can be found at this
+							stage, it will make troubleshooting later much easier.</p>
+
+
+						<p>
+							Create a standard android application. You should name it <em>TestContainer***</em>.
+							For this example, refer to the <em>TestContainerSLM</em>
+						</p>
+
+
+						<p style="text-align: right;">.</p>
+
+
+						<a name="Phonegap-Plugin"></a>
+						<h1>
+							Phonegap Plugin<a href="#Phonegap-Plugin" class="wiki-anchor">&para;</a>
+						</h1>
+
+
+						<p>
+							All the phonegap plugins are located in the new <em>Societies
+								Android App</em> project, under the <em>org.societies.android.platform.phongegap</em>
+							namespace. Each component's plugin gets its own class. Service
+							Discovery uses the <em>PluginCoreServiceMonitor</em>
+						</p>
+
+
+						Add class level variables for:
+						<ul>
+							<li>service you are comsuming, eg, <em>IServiceDisco</em></li>
+							<li>boolean tracking if you service is connected, <br />
+							<pre>
+									<code class="java syntaxhl">
+<span class="CodeRay"><span class="no">1</span> <span
+											class="di">public</span> <span class="ty">class</span> <span
+											class="cl">PluginCoreServiceMonitor</span> <span class="di">extends</span> Plugin {
+<span class="no">2</span>     <span class="di">private</span> IServiceDiscovery serviceDisco;
+<span class="no">3</span>     <span class="di">private</span> <span
+											class="ty">boolean</span> serviceDiscoConnected = <span
+											class="pc">false</span>;
+</span>
+									</code>
+								</pre></li>
+						</ul>
+
+
+						<ul>
+							<li>Implement the Service Connection interface for your
+								service<br />
+							<pre>
+									<code class="java syntaxhl">
+<span class="CodeRay"><span class="no"> 1</span> <span
+											class="c">/**IServiceDiscovery service connection*/</span>
+<span class="no"> 2</span>     <span class="di">private</span> ServiceConnection serviceDiscoConnection = <span
+											class="kw">new</span> ServiceConnection() {
+<span class="no"> 3</span> 
+<span class="no"> 4</span>         <span class="di">public</span> <span
+											class="ty">void</span> onServiceConnected(ComponentName name, IBinder service) {
+<span class="no"> 5</span>             LocalBinder binder = (LocalBinder) service;
+<span class="no"> 6</span>             <span class="c">//OBTAIN SERVICE DISCOVERY API</span>
+<span class="no"> 7</span>             serviceDisco = (IServiceDiscovery) binder.getService();
+<span class="no"> 8</span>             serviceDiscoConnected = <span
+											class="pc">true</span>;
+<span class="no"> 9</span>         }
+<span class="no"><strong>10</strong></span>         <span class="di">public</span> <span
+											class="ty">void</span> onServiceDisconnected(ComponentName name) {
+<span class="no">11</span>             serviceDiscoConnected = <span
+											class="pc">false</span>;
+<span class="no">12</span>         }
+<span class="no">13</span>     };
+</span>
+									</code>
+								</pre>
+							</li>
+						</ul>
+
+
+						<ul>
+							<li>In the <em>IntialiseServiceBinding()</em> method, you
+								must bind to your target service and register the methods you
+								will send return values from<br />
+							<pre>
+									<code class="java syntaxhl">
+<span class="CodeRay"><span class="no"> 1</span>  <span
+											class="di">private</span> <span class="ty">void</span> initialiseServiceBinding() {
+<span class="no"> 2</span>         <span class="c">//CREATE INTENT FOR EACH SERVICE</span>
+<span class="no"> 3</span>         Intent intentServiceDisco = <span
+											class="kw">new</span> Intent(<span class="lv">this</span>.ctx.getContext(), ServiceManagement.class);
+<span class="no"> 4</span>         <span class="lv">this</span>.ctx.getContext().bindService(intentServiceDisco, serviceDiscoConnection, <span
+											class="pt">Context</span>.BIND_AUTO_CREATE);
+<span class="no"> 5</span> 
+<span class="no"> 6</span>         <span class="c">//REGISTER BROADCAST</span>
+<span class="no"> 7</span>         IntentFilter intentFilter = <span
+											class="kw">new</span> IntentFilter() ;
+<span class="no"> 8</span>         intentFilter.addAction(ServiceManagement.GET_SERVICES);
+<span class="no"> 9</span>         intentFilter.addAction(ServiceManagement.SEARCH_SERVICES);
+<span class="no"><strong>10</strong></span> 
+<span class="no">11</span>         <span class="lv">this</span>.ctx.getContext().registerReceiver(<span
+											class="kw">new</span> bReceiver(), intentFilter);
+<span class="no">12</span>     }
+</span>
+									</code>
+								</pre></li>
+						</ul>
+
+
+						In the <em>Execute()</em> method, you consume your native service.
+						<ul>
+							<li>The <em>action</em> parameter contains your method, so
+								you need to check which method is being invoked. <em>ServiceMethodTranslator</em>
+								is provided utitility to extract the method name from the array
+								of methods you specified in your Interface
+							</li>
+							<li>The <em>data</em> JSON array contains the parameters for
+								your method and will need to be extracted<br />
+							<pre>
+									<code class="java syntaxhl">
+<span class="CodeRay"><span class="no">1</span> <span
+											class="kw">if</span> (action.equals(ServiceMethodTranslator.getMethodName(IServiceDiscovery.methodsArray, <span
+											class="i">0</span>))) {
+<span class="no">2</span>     <span class="kw">try</span> {
+<span class="no">3</span>     <span class="lv">this</span>.serviceDisco.getServices(data.getString(<span
+											class="i">0</span>), data.getString(<span class="i">1</span>) );
+<span class="no">4</span>     } <span class="kw">catch</span> (JSONException e) {
+<span class="no">5</span>     e.printStackTrace();
+<span class="no">6</span> }
+</span>
+									</code>
+								</pre></li>
+						</ul>
+
+
+						In the <em>BroadcastReceiver</em>, you will receive your return
+						object from your native component via the Android Intent system.
+						<ul>
+							<li>Check which method is being returned. This will allow
+								you to convert to the correct return type<br />
+							<pre>
+									<code class="java syntaxhl">
+<span class="CodeRay"><span class="no">1</span> <span
+											class="c">/**Broadcast receiver to receive intent return values from service method calls*/</span>
+<span class="no">2</span> <span class="di">private</span> <span
+											class="ty">class</span> <span class="cl">bReceiver</span> <span
+											class="di">extends</span> BroadcastReceiver  {
+<span class="no">3</span> 
+<span class="no">4</span>     <span class="at">@Override</span>
+<span class="no">5</span>     <span class="di">public</span> <span
+											class="ty">void</span> onReceive(<span class="pt">Context</span> context, Intent intent) {
+<span class="no">6</span>         <span class="kw">if</span> (intent.getAction().equals(ServiceManagement.GET_SERVICES)) {
+<span class="no">7</span>         <span class="c">//...</span>
+</span>
+									</code>
+								</pre>
+							</li>
+						</ul>
+
+
+						<ul>
+							<li>The returned values are stored in <em>Parcelable</em>
+								arrays and need to be cast to a JSON object that can be
+								processed by Javascript. A utility function <em>convertToJSONArray()</em>
+								will help you convert any object to JSON format.<br />
+							<pre>
+									<code class="java syntaxhl">
+<span class="CodeRay"><span class="no">1</span> <span
+											class="c">//UNMARSHALL THE SERVICES FROM Parcels BACK TO Services</span>
+<span class="no">2</span> Parcelable parcels<span class="ty">[]</span> =  intent.getParcelableArrayExtra(ServiceManagement.INTENT_RETURN_VALUE);
+<span class="no">3</span> Service services<span class="ty">[]</span> = <span
+											class="kw">new</span> Service[parcels.length];
+<span class="no">4</span> <span class="kw">for</span> (<span class="ty">int</span> i = <span
+											class="i">0</span>; i &lt; parcels.length; i++) {
+<span class="no">5</span>     services[i] = (org.societies.api.schema.servicelifecycle.model.Service) parcels[i];
+<span class="no">6</span> }
+<span class="no">7</span> PluginResult result = <span class="kw">new</span> PluginResult(PluginResult.Status.OK, convertToJSONArray(services));
+<span class="no">8</span> PluginCoreServiceMonitor.this.success(result, methodCallbackId);
+</span>
+									</code>
+								</pre></li>
+						</ul>
+						<p style="text-align: right;">.</p>
+						<p>
+							The plugin must also be registered on the <a
+								href="https://github.com/societies/SOCIETIES-Platform/blob/development/platform-infrastructure/client-frwk/SocietiesAndroidApp/res/xml/plugins.xml"
+								class="external">plugins.xml file of the SocietiesAndroidApp</a>
+						</p>
+						<pre>
+<code class="xml syntaxhl">
+<span class="CodeRay"><span class="no"> 1</span> <span
+									class="ta">&lt;plugins&gt;</span>
+<span class="no"> 2</span>     <span class="ta">&lt;plugin</span> <span
+									class="an">name</span>=<span class="s"><span class="dl">&quot;</span><span
+										class="k">App</span><span class="dl">&quot;</span></span> <span
+									class="an">value</span>=<span class="s"><span class="dl">&quot;</span><span
+										class="k">org.apache.cordova.App</span><span class="dl">&quot;</span></span><span
+									class="ta">/&gt;</span>
+<span class="no"> 3</span>     <span class="ta">&lt;plugin</span> <span
+									class="an">name</span>=<span class="s"><span class="dl">&quot;</span><span
+										class="k">Geolocation</span><span class="dl">&quot;</span></span> <span
+									class="an">value</span>=<span class="s"><span class="dl">&quot;</span><span
+										class="k">org.apache.cordova.GeoBroker</span><span class="dl">&quot;</span></span><span
+									class="ta">/&gt;</span>
+<span class="no"> 4</span>     <span class="ta">&lt;plugin</span> <span
+									class="an">name</span>=<span class="s"><span class="dl">&quot;</span><span
+										class="k">Device</span><span class="dl">&quot;</span></span> <span
+									class="an">value</span>=<span class="s"><span class="dl">&quot;</span><span
+										class="k">org.apache.cordova.Device</span><span class="dl">&quot;</span></span><span
+									class="ta">/&gt;</span>
+<span class="no"> 5</span>     <span class="ta">&lt;plugin</span> <span
+									class="an">name</span>=<span class="s"><span class="dl">&quot;</span><span
+										class="k">Accelerometer</span><span class="dl">&quot;</span></span> <span
+									class="an">value</span>=<span class="s"><span class="dl">&quot;</span><span
+										class="k">org.apache.cordova.AccelListener</span><span
+										class="dl">&quot;</span></span><span class="ta">/&gt;</span>
+<span class="no"> 6</span>     <span class="ta">&lt;plugin</span> <span
+									class="an">name</span>=<span class="s"><span class="dl">&quot;</span><span
+										class="k">Compass</span><span class="dl">&quot;</span></span> <span
+									class="an">value</span>=<span class="s"><span class="dl">&quot;</span><span
+										class="k">org.apache.cordova.CompassListener</span><span
+										class="dl">&quot;</span></span><span class="ta">/&gt;</span>
+<span class="no"> 7</span>     <span class="ta">&lt;plugin</span> <span
+									class="an">name</span>=<span class="s"><span class="dl">&quot;</span><span
+										class="k">Media</span><span class="dl">&quot;</span></span> <span
+									class="an">value</span>=<span class="s"><span class="dl">&quot;</span><span
+										class="k">org.apache.cordova.AudioHandler</span><span
+										class="dl">&quot;</span></span><span class="ta">/&gt;</span>
+<span class="no"> 8</span>     <span class="ta">&lt;plugin</span> <span
+									class="an">name</span>=<span class="s"><span class="dl">&quot;</span><span
+										class="k">Camera</span><span class="dl">&quot;</span></span> <span
+									class="an">value</span>=<span class="s"><span class="dl">&quot;</span><span
+										class="k">org.apache.cordova.CameraLauncher</span><span
+										class="dl">&quot;</span></span><span class="ta">/&gt;</span>
+<span class="no"> 9</span>     <span class="ta">&lt;plugin</span> <span
+									class="an">name</span>=<span class="s"><span class="dl">&quot;</span><span
+										class="k">Contacts</span><span class="dl">&quot;</span></span> <span
+									class="an">value</span>=<span class="s"><span class="dl">&quot;</span><span
+										class="k">org.apache.cordova.ContactManager</span><span
+										class="dl">&quot;</span></span><span class="ta">/&gt;</span>
+<span class="no"><strong>10</strong></span>     <span class="ta">&lt;plugin</span> <span
+									class="an">name</span>=<span class="s"><span class="dl">&quot;</span><span
+										class="k">File</span><span class="dl">&quot;</span></span> <span
+									class="an">value</span>=<span class="s"><span class="dl">&quot;</span><span
+										class="k">org.apache.cordova.FileUtils</span><span class="dl">&quot;</span></span><span
+									class="ta">/&gt;</span>
+<span class="no">11</span>     <span class="ta">&lt;plugin</span> <span
+									class="an">name</span>=<span class="s"><span class="dl">&quot;</span><span
+										class="k">NetworkStatus</span><span class="dl">&quot;</span></span> <span
+									class="an">value</span>=<span class="s"><span class="dl">&quot;</span><span
+										class="k">org.apache.cordova.NetworkManager</span><span
+										class="dl">&quot;</span></span><span class="ta">/&gt;</span>
+<span class="no">12</span>     <span class="ta">&lt;plugin</span> <span
+									class="an">name</span>=<span class="s"><span class="dl">&quot;</span><span
+										class="k">Notification</span><span class="dl">&quot;</span></span> <span
+									class="an">value</span>=<span class="s"><span class="dl">&quot;</span><span
+										class="k">org.apache.cordova.Notification</span><span
+										class="dl">&quot;</span></span><span class="ta">/&gt;</span>
+<span class="no">13</span>     <span class="ta">&lt;plugin</span> <span
+									class="an">name</span>=<span class="s"><span class="dl">&quot;</span><span
+										class="k">Storage</span><span class="dl">&quot;</span></span> <span
+									class="an">value</span>=<span class="s"><span class="dl">&quot;</span><span
+										class="k">org.apache.cordova.Storage</span><span class="dl">&quot;</span></span><span
+									class="ta">/&gt;</span>
+<span class="no">14</span>     <span class="ta">&lt;plugin</span> <span
+									class="an">name</span>=<span class="s"><span class="dl">&quot;</span><span
+										class="k">Temperature</span><span class="dl">&quot;</span></span> <span
+									class="an">value</span>=<span class="s"><span class="dl">&quot;</span><span
+										class="k">org.apache.cordova.TempListener</span><span
+										class="dl">&quot;</span></span><span class="ta">/&gt;</span>
+<span class="no">15</span>     <span class="ta">&lt;plugin</span> <span
+									class="an">name</span>=<span class="s"><span class="dl">&quot;</span><span
+										class="k">FileTransfer</span><span class="dl">&quot;</span></span> <span
+									class="an">value</span>=<span class="s"><span class="dl">&quot;</span><span
+										class="k">org.apache.cordova.FileTransfer</span><span
+										class="dl">&quot;</span></span><span class="ta">/&gt;</span>
+<span class="no">16</span>     <span class="ta">&lt;plugin</span> <span
+									class="an">name</span>=<span class="s"><span class="dl">&quot;</span><span
+										class="k">Capture</span><span class="dl">&quot;</span></span> <span
+									class="an">value</span>=<span class="s"><span class="dl">&quot;</span><span
+										class="k">org.apache.cordova.Capture</span><span class="dl">&quot;</span></span><span
+									class="ta">/&gt;</span>
+<span class="no">17</span>     <span class="ta">&lt;plugin</span> <span
+									class="an">name</span>=<span class="s"><span class="dl">&quot;</span><span
+										class="k">Battery</span><span class="dl">&quot;</span></span> <span
+									class="an">value</span>=<span class="s"><span class="dl">&quot;</span><span
+										class="k">org.apache.cordova.BatteryListener</span><span
+										class="dl">&quot;</span></span><span class="ta">/&gt;</span>
+<span class="no">18</span>     <span class="ta">&lt;plugin</span> <span
+									class="an">name</span>=<span class="s"><span class="dl">&quot;</span><span
+										class="k">SplashScreen</span><span class="dl">&quot;</span></span> <span
+									class="an">value</span>=<span class="s"><span class="dl">&quot;</span><span
+										class="k">org.apache.cordova.SplashScreen</span><span
+										class="dl">&quot;</span></span><span class="ta">/&gt;</span>
+<span class="no">19</span>     <span class="ta">&lt;plugin</span> <span
+									class="an">name</span>=<span class="s"><span class="dl">&quot;</span><span
+										class="k">ConnectionPlugin</span><span class="dl">&quot;</span></span> <span
+									class="an">value</span>=<span class="s"><span class="dl">&quot;</span><span
+										class="k">org.societies.cft.ConnectionPlugin</span><span
+										class="dl">&quot;</span></span><span class="ta">/&gt;</span>
+<span class="no"><strong>20</strong></span>     <span class="c">&lt;!-- Societies Android plugins --&gt;</span>
+<span class="no">21</span>     <span class="ta">&lt;plugin</span> <span
+									class="an">name</span>=<span class="s"><span class="dl">&quot;</span><span
+										class="k">PluginCoreServiceMonitor</span><span class="dl">&quot;</span></span> <span
+									class="an">value</span>=<span class="s"><span class="dl">&quot;</span><span
+										class="k">org.societies.android.platform.phongegap.PluginCoreServiceMonitor</span><span
+										class="dl">&quot;</span></span><span class="ta">/&gt;</span>
+<span class="no">22</span>     <span class="ta">&lt;plugin</span> <span
+									class="an">name</span>=<span class="s"><span class="dl">&quot;</span><span
+										class="k">PluginCSSManager</span><span class="dl">&quot;</span></span> <span
+									class="an">value</span>=<span class="s"><span class="dl">&quot;</span><span
+										class="k">org.societies.android.platform.phongegap.PluginCSSManager</span><span
+										class="dl">&quot;</span></span><span class="ta">/&gt;</span>
+<span class="no">23</span>     <span class="ta">&lt;plugin</span> <span
+									class="an">name</span>=<span class="s"><span class="dl">&quot;</span><span
+										class="k">PluginPreferences</span><span class="dl">&quot;</span></span> <span
+									class="an">value</span>=<span class="s"><span class="dl">&quot;</span><span
+										class="k">org.societies.android.platform.phongegap.PreferencesPlugin</span><span
+										class="dl">&quot;</span></span><span class="ta">/&gt;</span>
+<span class="no">24</span> 
+<span class="no">25</span> <span class="ta">&lt;/plugins&gt;</span>
+</span>
+							</code>
+							<br />
+						</pre>
+
+						<a name="Javascript-JSON"></a>
+						<h1>
+							Javascript / JSON<a href="#Javascript-JSON" class="wiki-anchor">&para;</a>
+						</h1>
+
+
+						<p>
+							All the javascript required for you to interface with your
+							phonegap plugin should be located in a seperate javascript file.
+							For this example all javascript is in <em>ServiceManagement.js</em>
+							located in the <em>/Assets/www/javascript/pagespecific</em>
+							folder of the new <em>Soceities Android App</em> project.
+						</p>
+
+
+						<p>
+							Before you can invoke a phonegap plugin, you must first connect
+							to it. And for connecting you should create one more javascript
+							which will act as the connector between the javascript and your
+							plugin. You will create it at the <a
+								href="https://github.com/societies/SOCIETIES-Platform/tree/development/platform-infrastructure/client-frwk/SocietiesAndroidApp/assets/www/javascript/plugins"
+								class="external">javascript/plugins folder</a> There you have to
+							implement the connect function like the one below and which can
+							be found <a
+								href="https://github.com/societies/SOCIETIES-Platform/blob/development/platform-infrastructure/client-frwk/SocietiesAndroidApp/assets/www/javascript/plugins/coreservicemonitor_plugin.js"
+								class="external">here</a>
+						</p>
+
+
+						<ul>
+							<li>Our program flow is to call the <em>connectToCoreServiceMonitor()</em>
+								method, which will call the <em>connectService:
+									function(successCallback, failureCallback)</em> on the same
+								javascript, and the second function is the one really connecting
+								the javascript with the phonegap plugin. If successfull, the <em>success()</em>
+								function is invoked, it will call the action function passed as
+								input. In this case it will be the <em>getServices()</em>
+								javascript method, defined on <a
+								href="https://github.com/societies/SOCIETIES-Platform/blob/development/platform-infrastructure/client-frwk/SocietiesAndroidApp/assets/www/javascript/pagespecific/servicemanagement.js"
+								class="external">the pagespecific javascript</a> and glued in
+								the html button through the jquery code in the end of the
+								servicemanagement.js file. This connecting function would always
+								be called before invoking any of our native components service
+								methods and can be re-used.
+							</li>
+						</ul>
+
+
+						<p>
+							Top connect function (on <a
+								href="https://github.com/societies/SOCIETIES-Platform/blob/development/platform-infrastructure/client-frwk/SocietiesAndroidApp/assets/www/javascript/plugins/coreservicemonitor_plugin.js"
+								class="external">coreservicemonitor_plugin.js</a>)<br />
+							<pre>
+								<code class="javascript syntaxhl">
+<span class="CodeRay"><span class="no"> 1</span> <span
+										class="c">/** @description Connect to Service Monitor service
+<span class="no"> 2</span> * @param {Object} function to be executed if connection successful
+<span class="no"> 3</span> */</span>
+<span class="no"> 4</span> <span class="fu">connectToCoreServiceMonitor</span>: <span
+										class="kw">function</span>(actionFunction) {
+<span class="no"> 5</span>     window.plugins.CoreServiceMonitorService.connectService(success, failure); <span
+										class="c">// call to bottom connect function</span>
+<span class="no"> 6</span> 
+<span class="no"> 7</span>     <span class="kw">function</span> <span
+										class="fu">success</span>(data) {
+<span class="no"> 8</span>         actionFunction();
+<span class="no"> 9</span>     }
+<span class="no"><strong>10</strong></span> 
+<span class="no">11</span>     <span class="kw">function</span> <span
+										class="fu">failure</span>(data) {
+<span class="no">12</span>         alert(<span class="s"><span
+											class="dl">&quot;</span><span class="k">connectToCoreServiceMonitor - failure: </span><span
+											class="dl">&quot;</span></span> + data);
+<span class="no">13</span>     }
+<span class="no">14</span> }
+</span>
+								</code>
+							</pre>
+						</p>
+
+
+						<p>
+							Bottom connect function (still on <a
+								href="https://github.com/societies/SOCIETIES-Platform/blob/development/platform-infrastructure/client-frwk/SocietiesAndroidApp/assets/www/javascript/plugins/coreservicemonitor_plugin.js"
+								class="external">coreservicemonitor_plugin.js</a>)<br />Notice
+							below that the PluginCoreServiceMonitor correspond to the name of
+							your android implementation of the phonegap plugin <a
+								href="https://github.com/societies/SOCIETIES-Platform/blob/development/platform-infrastructure/client-frwk/SocietiesAndroidApp/src/org/societies/android/platform/phongegap/PluginCoreServiceMonitor.java"
+								class="external">PluginCoreServiceMonitor</a> and connectService
+							to the action being invoked there.<br />
+							<pre>
+								<code class="javascript syntaxhl">
+<span class="CodeRay"><span class="no"> 1</span>     <span
+										class="c">/**
+<span class="no"> 2</span>      * @methodOf SocietiesCoreServiceMonitor#
+<span class="no"> 3</span>      * @description Connects the GUI to native service implementation
+<span class="no"> 4</span>      * @param {Object} successCallback The callback which will be called when result is successful
+<span class="no"> 5</span>      * @param {Object} failureCallback The callback which will be called when result is unsuccessful
+<span class="no"> 6</span>      * @returns null
+<span class="no"> 7</span>      */</span>
+<span class="no"> 8</span>     <span class="fu">connectService</span>: <span
+										class="kw">function</span>(successCallback, failureCallback) {
+<span class="no"> 9</span> 
+<span class="no"><strong>10</strong></span>         console.log(<span
+										class="s"><span class="dl">&quot;</span><span class="k">Call CoreServiceMonitorService - connectService</span><span
+											class="dl">&quot;</span></span>);
+<span class="no">11</span> 
+<span class="no">12</span>         <span class="kw">return</span> cordova.exec(successCallback,    <span
+										class="c">//Callback which will be called when plugin action is successful</span>
+<span class="no">13</span>         failureCallback,     <span class="c">//Callback which will be called when plugin action encounters an error</span>
+<span class="no">14</span>         <span class="s"><span
+											class="dl">'</span><span class="k">PluginCoreServiceMonitor</span><span
+											class="dl">'</span></span>,  <span class="c">//Telling PhoneGap that we want to run specified plugin</span>
+<span class="no">15</span>         <span class="s"><span
+											class="dl">'</span><span class="k">connectService</span><span
+											class="dl">'</span></span>,              <span class="c">//Telling the plugin, which action we want to perform</span>
+<span class="no">16</span>         []);        <span class="c">//Passing a list of arguments to the plugin</span>
+<span class="no">17</span>     },
+</span>
+								</code>
+							</pre>
+						</p>
+
+
+						<ul>
+							<li>Assuming a successful connection, here is where we call
+								our service and populate the table with the list of returned
+								services from the getServices() method.<br />
+							<pre>
+									<code class="java syntaxhl">
+<span class="CodeRay"><span class="no"> 1</span> <span
+											class="c">/**@description Refresh the Services page with list of 3P Services */</span>
+<span class="no"> 2</span> refresh3PServices: function() {
+<span class="no"> 3</span>     function success(data) {
+<span class="no"> 4</span>         <span class="c">//empty table</span>
+<span class="no"> 5</span>         jQuery(<span class="s"><span
+												class="dl">'</span><span class="k">#societiesServicesTable tbody</span><span
+												class="dl">'</span></span>).remove();
+<span class="no"> 6</span>         <span class="c">//SERVICE</span>
+<span class="no"> 7</span>         <span class="kw">for</span> (i  = <span
+											class="i">0</span>; i &lt; data.length; i++) {
+<span class="no"> 8</span>             var tableEntry = <span class="s"><span
+												class="dl">&quot;</span><span class="k">&lt;tr&gt;</span><span
+												class="dl">&quot;</span></span> + 
+<span class="no"> 9</span>             <span class="s"><span
+												class="dl">&quot;</span><span class="k">&lt;td&gt;</span><span
+												class="dl">&quot;</span></span> + data[i].serviceName + <span
+											class="s"><span class="dl">&quot;</span><span
+												class="k">&lt;/td&gt;</span><span class="dl">&quot;</span></span> + 
+<span class="no"><strong>10</strong></span>             <span class="s"><span
+												class="dl">&quot;</span><span class="k">&lt;td&gt;</span><span
+												class="dl">&quot;</span></span> + data[i].serviceDescription + <span
+											class="s"><span class="dl">&quot;</span><span
+												class="k">&lt;/td&gt;</span><span class="dl">&quot;</span></span> + 
+<span class="no">11</span>             &lt;/tr&gt;<span class="s"><span
+												class="dl">&quot;</span><span class="k"> 
+<span class="no">12</span>             jQuery('#societiesServicesTable').append(tableEntry);
+<span class="no">13</span>         }
+<span class="no">14</span>     }
+<span class="no">15</span> 
+<span class="no">16</span>     function failure(data) {
+<span class="no">17</span>         alert(</span><span class="dl">&quot;</span></span>refresh3PServices - failure: <span
+											class="s"><span class="dl">&quot;</span><span
+												class="k"> + data);
+<span class="no">18</span>     }
+<span class="no">19</span> 
+<span class="no"><strong>20</strong></span>     window.plugins.CoreServiceMonitorService.getServices(success, failure);
+<span class="no">21</span> }
+<span class="no">22</span> </span></span></span>
+									</code>
+								</pre>
+							</li>
+						</ul>
+
+
+						<ul>
+							<li>Within the HTML of the <em>Apps</em> page of the user
+								interface, there is a button called <em>List3PServices</em> and
+								a table called <em>societiesServicesTable</em><br />
+							<pre>
+									<code class="html syntaxhl">
+<span class="CodeRay"><span class="no">1</span> <span
+											class="ta">&lt;button</span> <span class="an">id</span>=<span
+											class="s"><span class="dl">&quot;</span><span
+												class="k">List3PServices</span><span class="dl">&quot;</span></span> <span
+											class="an">value</span>=<span class="s"><span
+												class="dl">&quot;</span><span class="k">Get Services</span><span
+												class="dl">&quot;</span></span><span class="ta">/&gt;</span>
+<span class="no">2</span> <span class="ta">&lt;table</span> <span
+											class="an">id</span>=<span class="s"><span class="dl">&quot;</span><span
+												class="k">societiesServicesTable</span><span class="dl">&quot;</span></span><span
+											class="ta">&gt;</span> <span class="ta">&lt;/table&gt;</span>
+</span>
+									</code>
+								</pre></li>
+						</ul>
+
+
+						<ul>
+							<li>Attaching an event to the button that lists our services
+								is done in our javascript. First we call the connect method and
+								pass in the method we want invoked if successfull.<br />
+							<pre>
+									<code class="java syntaxhl">
+<span class="CodeRay"><span class="no">1</span> <span
+											class="er">$</span>(<span class="s"><span class="dl">'</span><span
+												class="k">#List3PServices</span><span class="dl">'</span></span>).click(function() {
+<span class="no">2</span>     SocietiesGUI.connectToCoreServiceMonitor(SocietiesGUI.refresh3PServices);;
+<span class="no">3</span> });
+</span>
+									</code>
+								</pre>
+							</li>
+						</ul>
+
+
+						<p style="text-align: right;">.</p>
+
+
+						<a name="Referencing-your-GUI-in-the-main-Android-project"></a>
+						<h1>
+							Referencing your GUI in the main Android project<a
+								href="#Referencing-your-GUI-in-the-main-Android-project"
+								class="wiki-anchor">&para;</a>
+						</h1>
+
+
+						<p>
+							Below are the steps to "glue" your gui in the <a
+								href="https://github.com/societies/SOCIETIES-Platform/tree/development/platform-infrastructure/client-frwk/SocietiesAndroidApp"
+								class="external">Main Android Project</a>
+						</p>
+
+
+						<p>
+							You must register your plugin API (the one located in the <a
+								href="https://github.com/societies/SOCIETIES-Platform/tree/development/platform-infrastructure/client-frwk/SocietiesAndroidApp/assets/www/javascript/plugins"
+								class="external">javascript/plugins folder</a> on the
+							onDeviceReady: function() at the <a
+								href="https://github.com/societies/SOCIETIES-Platform/tree/development/platform-infrastructure/client-frwk/SocietiesAndroidApp/assets/www/javascript/pagespecific"
+								class="external">mainpage.js</a> as below<br />
+							<pre>
+								<code class="javascript syntaxhl">
+<span class="CodeRay"><span class="no">1</span>             console.log(<span
+										class="s"><span class="dl">&quot;</span><span class="k">Register CoreServiceMonitorService plugin </span><span
+											class="dl">&quot;</span></span>);
+<span class="no">2</span>             cordova.addPlugin(<span class="s"><span
+											class="dl">'</span><span class="k">SocietiesCoreServiceMonitor</span><span
+											class="dl">'</span></span>, SocietiesCoreServiceMonitor);        
+</span>
+								</code>
+							</pre>
+						</p>
+
+
+						<a name="Phonegap-Desktop-mode"></a>
+						<h1>
+							Phonegap Desktop mode<a href="#Phonegap-Desktop-mode"
+								class="wiki-anchor">&para;</a>
+						</h1>
+
+
+						<p>Phonegap Desktop allows you to emulate a call to your
+							native service without leaving the javascript. This allows you to
+							have a seperate method that returns a JSON array of results that
+							will allow you to check the formatting of your HTML. This can all
+							be accomplished within the browser removing the need to compile,
+							deploy and running the Android emulator. This significantly
+							increases the development time.</p>
+
+
+						In this example, you should check the <em>/phonegapdesktop/pluginjs</em>
+						folder.
+						<ul>
+							<li>Create a JSON file which contains the result of your
+								call, see <em>ServiceManagement.json</em>
+							</li>
+							<li>Create a new javascript plugin file that will return
+								this recordset instead of connecting to your actual phonegap
+								plugin</li>
+						</ul>
+
+
+						Lastly, switch to Phonegap Desktop mode.
+						<ul>
+							<li>In the <a
+								href="https://github.com/societies/SOCIETIES-Platform/blob/development/platform-infrastructure/client-frwk/SocietiesAndroidApp/assets/www/index.html"
+								class="external">index HTML page</a>, comment the phonegap
+								javscript file and un-comment the phonegap-desktop.js file.
+								There are instructions in each file<br />
+							<pre>
+									<code class="html syntaxhl">
+<span class="CodeRay"><span class="no"> 1</span> <span
+											class="c">&lt;!-- PhoneGap plugins --&gt;</span>
+<span class="no"> 2</span> <span class="ta">&lt;script</span> <span
+											class="an">type</span>=<span class="s"><span
+												class="dl">&quot;</span><span class="k">text/javascript</span><span
+												class="dl">&quot;</span></span> <span class="an">charset</span>=<span
+											class="s"><span class="dl">&quot;</span><span
+												class="k">utf-8</span><span class="dl">&quot;</span></span> <span
+											class="an">src</span>=<span class="s"><span class="dl">&quot;</span><span
+												class="k">cordova-1.7.0.js</span><span class="dl">&quot;</span></span><span
+											class="ta">&gt;</span><span class="ta">&lt;/script&gt;</span>
+<span class="no"> 3</span> <span class="ta">&lt;script</span> <span
+											class="an">type</span>=<span class="s"><span
+												class="dl">&quot;</span><span class="k">text/javascript</span><span
+												class="dl">&quot;</span></span> <span class="an">src</span>=<span
+											class="s"><span class="dl">&quot;</span><span
+												class="k">javascript/plugins/coreservicemonitor_plugin.js</span><span
+												class="dl">&quot;</span></span><span class="ta">&gt;</span><span
+											class="ta">&lt;/script&gt;</span>
+<span class="no"> 4</span> 
+<span class="no"> 5</span> <span class="c">&lt;!-- Uncomment line below to enable PhoneGap desktop and comment out real PhoneGap jS library--&gt;</span>
+<span class="no"> 6</span> <span class="c">&lt;!--
+<span class="no"> 7</span> script type=&quot;text/javascript&quot; charset=&quot;utf-8&quot; src=&quot;javascript/phonegapdesktop/phonegap-desktop.js&quot;&gt;&lt;/script&gt;
+<span class="no"> 8</span> &lt;script type=&quot;text/javascript&quot; charset=&quot;utf-8&quot; src=&quot;javascript/phonegapdesktop/pluginjs/servicemanagement.js&quot;&gt;&lt;/script&gt;
+<span class="no"> 9</span> --&gt;</span>
+</span>
+									</code>
+								</pre></li>
+						</ul>
+
+					</div>
+
+
+					</div>
+					<div style="clear: both;"></div>
+				</div>
+			</div>
+
+</body>
+</html>
