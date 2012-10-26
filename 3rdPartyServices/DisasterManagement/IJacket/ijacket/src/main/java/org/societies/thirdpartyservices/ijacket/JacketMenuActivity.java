@@ -13,6 +13,7 @@ import org.societies.thirdpartyservices.ijacket.com.BluetoothConnection;
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.ContentResolver;
+import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
 import android.database.ContentObserver;
@@ -29,6 +30,9 @@ import android.widget.TableLayout;
 import android.widget.Toast;
 
 public class JacketMenuActivity extends Activity {
+
+	// TODO: update for content uris from babak
+	
 	
 	private TableLayout layout;
 	//private Button ledButton;
@@ -54,7 +58,7 @@ public class JacketMenuActivity extends Activity {
      registerContentObservers();
      
      layout = new TableLayout(this);
-     layout.setLayoutParams( new TableLayout.LayoutParams(TableLayout.LayoutParams.FILL_PARENT, TableLayout.LayoutParams.FILL_PARENT) );
+     layout.setLayoutParams( new TableLayout.LayoutParams(TableLayout.LayoutParams.MATCH_PARENT, TableLayout.LayoutParams.MATCH_PARENT) );
      layout.setOrientation(TableLayout.VERTICAL);
      IJacketApp appState = ((IJacketApp)getApplicationContext());
      cr = this.getApplication().getContentResolver();
@@ -263,8 +267,39 @@ public class JacketMenuActivity extends Activity {
 		  }
 
 		  public void onChange(boolean selfChange) {
-			Log.d( LOG_TAG, "ActivityContentObserver.onChange( "+selfChange+")" );
+			Log.d( LOG_TAG, "null onchange version called" );
+			onChange(selfChange, null);
 		  }
+		  
+		  @Override
+		  public void onChange(boolean selfChange, Uri uri) {
+			  if(null == uri) {
+				  Log.d( LOG_TAG, "null uri" );
+				  return;
+			  }
+			  Log.d( LOG_TAG, "uri path " +  uri.getPath()); 
+		     try{
+		    	 long row = ContentUris.parseId(uri);
+		    	 String mSelectionClause = SocialContract.CommunityActivity._ID + " = ?";
+		    	 String[] mSelectionArgs = {Long.toString(row)};
+		    	 Cursor cursor = cr.query(uri,null,mSelectionClause,mSelectionArgs,null);
+				if (cursor != null && cursor.getCount() >0) {
+				    while (cursor.moveToNext()) {
+				        Log.d("LOG_TAG", "found activity " + cursor.getColumnIndex(SocialContract.CommunityActivity.GLOBAL_ID_ACTOR));
+				    }
+				} else {
+					Log.d(LOG_TAG, "empty CIS list query result");
+				}
+				if(null != cursor) cursor.close();
+			}catch (Exception e) {
+				// TODO Auto-generated catch block
+				Log.d(LOG_TAG, "exception in the create");
+				e.printStackTrace();
+			}
+			  
+			  
+		  }
+		  
 		}
  
  

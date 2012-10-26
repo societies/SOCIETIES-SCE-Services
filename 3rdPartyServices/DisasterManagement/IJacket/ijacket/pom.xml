@@ -25,8 +25,16 @@
 					<groupId>xpp3</groupId>
 				</exclusion>
 			</exclusions>
+			<version>4.1.1.4</version>
             <scope>provided</scope>
         </dependency>
+		<dependency>
+			<groupId>com.google.android</groupId>
+			<artifactId>android-test</artifactId>
+			<version>4.1.1.4</version>
+			<scope>provided</scope>
+		</dependency>
+        
         
     <dependency>
 	    <groupId>org.societies.android.api.external</groupId>

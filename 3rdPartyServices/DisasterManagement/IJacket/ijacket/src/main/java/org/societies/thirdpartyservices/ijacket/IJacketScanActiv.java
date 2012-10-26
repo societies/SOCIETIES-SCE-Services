@@ -14,10 +14,16 @@ import org.societies.thirdpartyservices.ijacket.com.ConnectionMetadata;
 import org.societies.thirdpartyservices.ijacket.com.ConnectionMetadata.DefaultServices;
 
 import android.app.Activity;
+import android.app.Fragment;
+import android.app.FragmentTransaction;
+import android.app.ListFragment;
+import android.app.LoaderManager.LoaderCallbacks;
 import android.content.ActivityNotFoundException;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.CursorLoader;
 import android.content.Intent;
+import android.content.Loader;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -31,6 +37,7 @@ import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.Spinner;
 import android.widget.SpinnerAdapter;
@@ -38,17 +45,20 @@ import android.widget.TableLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class IJacketScanActiv extends Activity implements OnItemSelectedListener {
+
+
+public class IJacketScanActiv extends Activity{// implements OnItemSelectedListener {
 
     private static final int CUSTOM_REQUEST_QR_SCANNER = 0;
     
     //private BluetoothConnection con;
-
+    private static final int IJACK_SCAN_ACTV_CONTENT_VIEW_ID = 10101010;
     private TableLayout layout;
     private Button disconnectButton;
     private Button scanButton;
     ContentResolver cr;
-    private Spinner spinnerCIS;
+    //Loader l;
+    //private Spinner spinnerCIS;
 	
     private static final String LOG_TAG = IJacketScanActiv.class.getName();
 
@@ -63,17 +73,18 @@ public class IJacketScanActiv extends Activity implements OnItemSelectedListener
         
 
         
-        
-        
-        
 		IJacketApp appState = ((IJacketApp)getApplicationContext());
 		BluetoothConnection con = appState.getCon();
 		if(con == null || con.isConnected() == false){
 			Log.d(LOG_TAG, "connection does not exist on IJacketScanActiv onCreate");  
 	        layout = new TableLayout(this);
-	        layout.setLayoutParams( new TableLayout.LayoutParams(TableLayout.LayoutParams.FILL_PARENT, TableLayout.LayoutParams.FILL_PARENT) );
+	        layout.setId(IJACK_SCAN_ACTV_CONTENT_VIEW_ID);
+	        layout.setLayoutParams( new TableLayout.LayoutParams(TableLayout.LayoutParams.MATCH_PARENT, TableLayout.LayoutParams.MATCH_PARENT) );
 	        layout.setOrientation(TableLayout.VERTICAL);
 	
+	        
+	        
+	        
 	        //Initialize scan button
 	        scanButton = new Button(this);
 	        scanButton.setText("Scan QR Tag");
@@ -118,7 +129,15 @@ public class IJacketScanActiv extends Activity implements OnItemSelectedListener
 
     
     private void addItemsOnCISSpinner(){
-    		spinnerCIS = new Spinner(IJacketScanActiv.this);
+    	//if (savedInstanceState == null) {
+    	Log.d(LOG_TAG, "start of add items to spinner");
+    	Fragment newFragment = new MainActivityCursorLoader();
+    	FragmentTransaction ft = getFragmentManager().beginTransaction();
+    	ft.add(IJACK_SCAN_ACTV_CONTENT_VIEW_ID, newFragment).commit();
+    	Log.d(LOG_TAG, "end of add items to spinner");
+    	//}
+    
+    /*   		spinnerCIS = new Spinner(IJacketScanActiv.this);
     		spinnerCIS.setLayoutParams(new LayoutParams(LayoutParams.FILL_PARENT,LayoutParams.WRAP_CONTENT));
     		
     		//List<String> SpinnerArray = new ArrayList<String>();	
@@ -126,20 +145,11 @@ public class IJacketScanActiv extends Activity implements OnItemSelectedListener
     	        cr = this.getApplication().getContentResolver();
     	       
     	        Uri COMUNITIES_URI = Uri.parse(SocialContract.AUTHORITY_STRING + SocialContract.UriPathIndex.COMMINITIES);
-    	        try{
+    	        try{      
+    	        	
 	    	       	 Cursor cursor = cr.query(COMUNITIES_URI,null,null,null,null);
 	    	       	startManagingCursor(cursor);
-	    	   		/*if (cursor != null && cursor.getCount() >0) {
-	    	   			
-	    	   		    while (cursor.moveToNext()) {
-	    	   		    	int i  = cursor.getColumnIndex(SocialContract.Communities.NAME);
-	    	   		    	String commName = cursor.getString(i);
-	    	   		    	SpinnerArray.add(commName);
-	    	   		        Log.d("LOG_TAG", "found community " + commName);
-	    	   		    }
-	    	   		} else {
-	    	   			Log.d(LOG_TAG, "empty CIS list query result");
-	    		   	}*/
+
 	    	       	String[] columns = new String[] {SocialContract.Communities.NAME}; // field to display
 	    	       	int to[] = new int[] {android.R.id.text1}; // display item to bind the data
 	    	       	SimpleCursorAdapter ad =  new SimpleCursorAdapter(this,android.R.layout.simple_spinner_item,cursor ,columns ,to);
@@ -161,7 +171,7 @@ public class IJacketScanActiv extends Activity implements OnItemSelectedListener
     	        //ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, SpinnerArray);
     	        //adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
-
+*/
     }
     
     private void clearUI() {
@@ -175,6 +185,7 @@ public class IJacketScanActiv extends Activity implements OnItemSelectedListener
     private void resetUI() {
         runOnUiThread(new Runnable() {
              public void run() {
+            	 Log.d(LOG_TAG, "resetUI thread");
             	 layout.removeAllViews();
             	 
             	 IJacketScanActiv.super.setTitle("IJacket");
@@ -197,9 +208,9 @@ public class IJacketScanActiv extends Activity implements OnItemSelectedListener
             	 text2.setText("This will connect your Android via Bluetooth to the remote device and retrieve more information of your OSNAP product. You can test the functionality of the remote device and download a more specialized Application (if you are connected to the internet).");
             	 layout.addView(text2);
             	 
-            	 ImageView image = new ImageView(IJacketScanActiv.this);
-            	 image.setImageResource(R.drawable.scan);
-            	 layout.addView(image);
+            	 //ImageView image = new ImageView(IJacketScanActiv.this);
+            	 //image.setImageResource(R.drawable.scan);
+            	 //layout.addView(image);
              }
         });
     }
@@ -359,7 +370,7 @@ public class IJacketScanActiv extends Activity implements OnItemSelectedListener
 
 
 
-	@Override
+/*	@Override
 	public void onItemSelected(AdapterView<?> parent, View view, int pos,
 			long id) {
 		
@@ -384,7 +395,13 @@ public class IJacketScanActiv extends Activity implements OnItemSelectedListener
 	public void onNothingSelected(AdapterView<?> arg0) {
 		// TODO Auto-generated method stub
 		
-	}
+	}*/
 
+	
+	// LOADER CLASS
+//	public static class MyActivCursorLoader extends ListFragment implements LoaderCallbacks<Cursor> {
+
+	//}
+	
 }
 
