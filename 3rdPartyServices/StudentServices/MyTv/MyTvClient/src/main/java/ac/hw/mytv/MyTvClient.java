@@ -175,24 +175,31 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 
 	@Override
 	public void handleInternalEvent(InternalEvent event) {
-		LOG.debug("Received internal event from slm: "+event.geteventName());
+		LOG.debug("Received internal event: "+event.geteventName());
 		
-		ServiceMgmtEvent slmEvent = (ServiceMgmtEvent) event.geteventInfo();
-		if (slmEvent.getBundleSymbolName().equalsIgnoreCase("ac.hw.mytv.MyTVClient")){
-			this.LOG.debug("Received SLM event for my bundle");
-			if (slmEvent.getEventType().equals(ServiceMgmtEventType.NEW_SERVICE)){
-				
-				//get service ID
-				myServiceID = slmEvent.getServiceId();
-				LOG.debug("client serviceID = "+myServiceID.toString());
-				
-				//get user ID
-				userID = commsMgr.getIdManager().getThisNetworkNode();
-				LOG.debug("userID = "+userID.toString());
-				
-				//unregister for SLM events
-				unregisterForServiceEvents();
+		if(event.geteventName().equalsIgnoreCase("NEW_SERVICE")){
+			LOG.debug("Received SLM event");
+			ServiceMgmtEvent slmEvent = (ServiceMgmtEvent) event.geteventInfo();
+			if (slmEvent.getBundleSymbolName().equalsIgnoreCase("ac.hw.mytv.MyTVClient")){
+				this.LOG.debug("Received SLM event for my bundle");
+				if (slmEvent.getEventType().equals(ServiceMgmtEventType.NEW_SERVICE)){
+					
+					//get service ID
+					myServiceID = slmEvent.getServiceId();
+					LOG.debug("client serviceID = "+myServiceID.toString());
+					
+					//get user ID
+					userID = commsMgr.getIdManager().getThisNetworkNode();
+					LOG.debug("userID = "+userID.toString());
+					
+					//unregister for SLM events
+					unregisterForServiceEvents();
+				}
 			}
+		}else if(event.geteventName().equalsIgnoreCase("displayUpdate")){
+			LOG.debug("Received DisplayPortal event");
+		}else{
+			LOG.debug("Received unknown event with name: "+event.geteventName());
 		}
 	}
 

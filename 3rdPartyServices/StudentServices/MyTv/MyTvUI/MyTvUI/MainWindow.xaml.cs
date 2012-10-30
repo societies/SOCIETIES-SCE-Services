@@ -142,7 +142,7 @@ namespace MyTvUI
                     this.userID = socketClient.getUserID();
                     //if EMMA -> getPreferences
                     //if JOHN -> getUserIntent
-                    Console.WriteLine(userID);
+                    Console.WriteLine("Getting preferences for user: "+userID);
                     initialisePreferences();
                 }
 
