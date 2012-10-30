@@ -24,7 +24,9 @@
  */
 package org.societies.thirdpartyservices.idisaster;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
 import org.societies.android.api.cis.SocialContract;
 import org.societies.thirdpartyservices.idisaster.R;
@@ -32,13 +34,16 @@ import org.societies.thirdpartyservices.idisaster.R;
 import android.app.AlertDialog;
 import android.app.ListActivity;
 import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.DialogInterface;
-import android.content.DialogInterface.OnMultiChoiceClickListener;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ListView;
+import android.widget.Toast;
+import android.util.SparseBooleanArray;
 import android.view.View;
 import android.view.View.OnClickListener;
 
@@ -57,8 +62,12 @@ public class MemberAddActivity extends ListActivity implements OnClickListener {
 	
 	ArrayAdapter<String> peopleAdapter;
 	ListView listView;
+	
+	ArrayList <Integer> peopleMap = new ArrayList <Integer> ();		// Maps person position in list on UI with person cursor position
+																	// (Persons already members are not displayed)
 
-
+	Button memberAddButton;
+	
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -68,7 +77,6 @@ public class MemberAddActivity extends ListActivity implements OnClickListener {
     	listView = getListView();
     	resolver = getContentResolver();
 
-//    	// Add listener for short click.
 //    	listView.setOnItemClickListener(new OnItemClickListener() {
 //    		public void onItemClick (AdapterView<?> parent, View view,
 //    			int position, long id) {
@@ -96,11 +104,10 @@ public class MemberAddActivity extends ListActivity implements OnClickListener {
 //
 //    	});
 
-    	// TODO: Add SAVE button in the view and click listener to the button
-//    	final Button button = (Button) findViewById(R.id.feedAddButton);
-//    	button.setOnClickListener(this);
+	    // Add click listener to button
+    	memberAddButton = (Button) findViewById(R.id.memberButton);
+    	memberAddButton.setOnClickListener(this);
 
-    	
     	
     	//TODO:  Add listener for long click
     	// listView.setOnItemLongClickListener(new DrawPopup());
@@ -133,25 +140,51 @@ public class MemberAddActivity extends ListActivity implements OnClickListener {
     	assignAdapter ();
     }
 
-    /**
-     * onPause releases all data.
-     * Called when resuming a previous activity (for instance using back button)
-     */		       
-    	@Override
-    	protected void onPause() {
+/**
+ * onPause releases all data.
+ * Called when resuming a previous activity (for instance using back button)
+ */		       
+	@Override
+    protected void onPause() {
+    		
+    	super.onPause ();
     			
-    		super.onPause ();
-    			
-    // TODO: check the following:
+    	// TODO: check the following:
     	// When using managedQuery(), the activity keeps a reference to the cursor and close it
-        // whenever needed (in onDestroy() for instance.) 
+    	// whenever needed (in onDestroy() for instance.) 
         // When using a contentResolver's query(), the developer has to manage the cursor as a sensitive
         // resource. If you forget, for instance, to close() it in onDestroy(), you will leak 
         // underlying resources (logcat will warn you about it.)
         //
 
-//    		memberCursor.close();
+//    	memberCursor.close();
+    }
+
+/**
+ * onClick is called when button is clicked because
+ * the OnClickListener is assigned to the button
+ */
+
+	public void onClick(View view) {
+
+    	if(view == memberAddButton){
+    		// check if any member selected
+    		
+			if (addNewMembers()						// Insert members for the selected team
+				.equals(iDisasterApplication.getInstance().INSERT_EXCEPTION)) {
+				showQueryExceptionDialog ();	// Exception: Display dialog (and terminates activity)
+				// Go back to the previous activity
+			} else {
+				// The members will be added to the adapter (and adapter to view) on resume of MemberListActivity 
+				finish ();
+			}
+ 		
+    	} else { 				// Unknown button was clicked: should never happen
+			iDisasterApplication.getInstance().debug (2, "Button click error");
+    		finish();
+    		return;
     	}
+    }
 
 
 /**
@@ -191,6 +224,12 @@ public class MemberAddActivity extends ListActivity implements OnClickListener {
     	private void assignAdapter () {
     				
     		people= 0;
+    		if (peopleMap != null) {
+    			peopleMap.clear();	// Reset mapping between UI list and poeple list
+    			
+    		} else {				// Should never happen...
+    			peopleMap = new ArrayList <Integer> ();
+    		}
     				
     		ArrayList<String> peopleList = new ArrayList<String> ();
 
@@ -204,52 +243,98 @@ public class MemberAddActivity extends ListActivity implements OnClickListener {
     		if (peopleCursor != null) {
     			if (peopleCursor.getCount() != 0) {
     				while (peopleCursor.moveToNext()) {
-    		    		people++;
-    					String displayName = peopleCursor.getString(peopleCursor
-    							.getColumnIndex(SocialContract.People.NAME));
-    					peopleList.add (displayName);
+    					// Only display people that are not members in the selected team	
+    					if (! memberInTeam (peopleCursor.getString(peopleCursor
+    							.getColumnIndex(SocialContract.People.GLOBAL_ID)))) {
+	    						
+    						String displayName = peopleCursor.getString(peopleCursor
+    								.getColumnIndex(SocialContract.People.NAME));
+    						peopleList.add (displayName);
+    						people++;
+    						peopleMap.add (peopleCursor.getPosition()); // Maps person in UI list and cursor position 	
+    					}
     				}
     			}
     		}
-//    		peopleAdapter = new ArrayAdapter<String> (this,
-//    				R.layout.disaster_list_item, R.id.disaster_item, peopleList);
 
     	    listView.setAdapter(new ArrayAdapter<String>(this,
-    	            android.R.layout.simple_list_item_multiple_choice, peopleList));
+    	            R.layout.disaster_list_item_multiple_choice, peopleList));
     	    
     	    listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
 
-    	    
-//            <CheckBox android:id="@+id/checkbox"
-//            android:layout_width="wrap_content" android:layout_height="wrap_content"
-//            android:checked="false"
-//            android:text="test">
-//            </CheckBox>
-
-    		
-//    		listView.setAdapter(peopleAdapter);
-
     	}
+
+    	
+    	
+	/**
+     * check whether or ot a person is already member in a team.
+     */
+     private boolean memberInTeam (String m) {
+    	
+    	MemberListActivity.memberCursor.moveToFirst();
+    	if (m.equals(MemberListActivity.memberCursor.getString(
+    			MemberListActivity.memberCursor.getColumnIndex(SocialContract.People.GLOBAL_ID)))) {
+    		return true;
+    	}
+    	
+ 		while (MemberListActivity.memberCursor.moveToNext()) {
+ 	    	if (m.equals(MemberListActivity.memberCursor.getString(
+ 	    			MemberListActivity.memberCursor.getColumnIndex(SocialContract.People.GLOBAL_ID)))) {
+ 	    		return true; 	    		
+ 	    	}
+		}
+ 		return false;
+     }
 
 
 /**
- * onClick is called when button is clicked because
- * the OnClickListener is assigned to the button
- * */
-
-	public void onClick(View view) {
-
-    }
-
-
-/* (non-Javadoc)
- * @see android.content.DialogInterface.OnMultiChoiceClickListener#onClick(android.content.DialogInterface, int, boolean)
+ * add selected members to SoicalProvider
  */
-//@Override
-//public void onClick (DialogInterface arg0, int arg1, boolean arg2) {
-//	// TODO Auto-generated method stub
-//	
-//}
+	private String addNewMembers () {
+    
+		SparseBooleanArray checkedRows = listView.getCheckedItemPositions();
+		
+		String selected = "";
+
+		for (int i=0; i<people; ++i) {
+			if (checkedRows.get(i)) {
+				peopleCursor.moveToPosition(peopleMap.get(i));
+				selected = selected + " " + peopleCursor.getString(peopleCursor.getColumnIndex(SocialContract.People.NAME));
+				
+				// Set the values related to the activity to store in Social Provider
+				ContentValues membershipValues = new ContentValues ();
+				
+		//TODO: Remove the following once Social Provider has been corrected (Social Provider should insert the GLOBAL_ID)
+				SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss");
+				String currentDateandTime = sdf.format(new Date());
+				membershipValues.put(SocialContract.Membership.GLOBAL_ID, currentDateandTime);
+		// End remove		
+
+				membershipValues.put(SocialContract.Membership.GLOBAL_ID_MEMBER,		// Id of the member to be added
+						peopleCursor.getString(peopleCursor.getColumnIndex(SocialContract.People.GLOBAL_ID)));
+				membershipValues.put(SocialContract.Membership.GLOBAL_ID_COMMUNITY,		// Add member to the selected team
+									iDisasterApplication.getInstance().selectedTeam.globalId);
+				membershipValues.put(SocialContract.Membership.TYPE, "member");			// Activity intent
+				membershipValues.put(SocialContract.Membership.ORIGIN, "SOCIETIES");	// Social platform iDisaster is plugged into		
+				 
+				try {
+// The Uri value returned is not used.
+//					Uri activityNewUri = getContentResolver().insert( SocialContract.CommunityActivity.CONTENT_URI,
+//												activityValues);
+					getContentResolver().insert( SocialContract.Membership.CONTENT_URI, 
+							membershipValues);
+				} catch (Exception e) {
+					iDisasterApplication.getInstance().debug (2, "Insert to "+ 
+										SocialContract.Membership.CONTENT_URI + "causes an exception");
+			    	return iDisasterApplication.getInstance().INSERT_EXCEPTION;
+				}
+			}
+		}
+				
+		Toast.makeText(this, "selected:" + selected, Toast.LENGTH_SHORT).show();
+		return iDisasterApplication.getInstance().INSERT_SUCCESS;
+
+	}
 
 /**
  * showQueryExceptionDialog displays a dialog to the user.
@@ -263,6 +348,7 @@ public class MemberAddActivity extends ListActivity implements OnClickListener {
         			.setCancelable(false)
           			.setPositiveButton (getString(R.string.dialogOK), new DialogInterface.OnClickListener() {
           				public void onClick(DialogInterface dialog, int id) {
+          					finish ();
           					return;
           				}
           			});

@@ -120,7 +120,7 @@ public class iDisasterApplication extends Application {
 //	 4: EVEN_EVEN_MORE_DEBUG
 //	 5: EVEN_EVEN_EVEN_MORE_DEBUG
 //	 6: ...
-	public static final int DEBUG = 1;
+	public static final int DEBUG = 3;
 	public static final String DEBUG_Context = "iDisaster";
 
 

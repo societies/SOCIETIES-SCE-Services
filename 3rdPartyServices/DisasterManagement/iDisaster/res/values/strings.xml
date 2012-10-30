@@ -91,7 +91,7 @@
     <string name="toastServiceName">Please enter a service name.</string>
     <string name="toastServiceDescription">Please enter keywords.</string>
     
-	<string name="memberAddButton">Add</string>
+	<string name="memberAddButton">Add member(s)</string>
     <string name="memberAddHeading">Select new members</string>
 	<string name="memberDetailsHeading">Member profile</string>
 	<string name="memberDescriptionHint">Enter keywords</string>

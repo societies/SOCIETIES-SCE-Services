@@ -61,9 +61,10 @@ import org.societies.thirdpartyservices.idisaster.R;
 public class MemberListActivity extends ListActivity {
 	
 	ContentResolver resolver;
-	Cursor memberCursor;			// used for the members in the selected team
-	int members;					// keep track of number of members
-
+	int members;						// keep track of number of members
+	
+	// Static classes that can be accessed by othe activities e.g. MemberAddActivity
+	static Cursor memberCursor;			// used for the members in the selected team
 	
 	ArrayAdapter<String> memberAdapter;
 	ListView listView;

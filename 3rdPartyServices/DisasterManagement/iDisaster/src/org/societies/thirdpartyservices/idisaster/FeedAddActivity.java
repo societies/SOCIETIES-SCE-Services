@@ -24,6 +24,9 @@
  */
 package org.societies.thirdpartyservices.idisaster;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 import org.societies.android.api.cis.SocialContract;
 import org.societies.thirdpartyservices.idisaster.R;
 
@@ -116,6 +119,14 @@ public class FeedAddActivity extends Activity implements OnClickListener {
 
 		// Set the values related to the activity to store in Social Provider
 		ContentValues activityValues = new ContentValues ();
+		
+//TODO: Remove the following once Social Provider has been corrected (Social Provider should insert the GLOBAL_ID)
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss");
+		String currentDateandTime = sdf.format(new Date());
+		activityValues.put(SocialContract.CommunityActivity.GLOBAL_ID, currentDateandTime);
+// End remove		
+
+		activityValues.put(SocialContract.CommunityActivity.ORIGIN, "SOCIETIES");	// Social platform iDisaster is plugged into		
 		activityValues.put(SocialContract.CommunityActivity.GLOBAL_ID_ACTOR,		// Me
 							iDisasterApplication.getInstance().me.globalId);
 		activityValues.put(SocialContract.CommunityActivity.GLOBAL_ID_FEED_OWNER,	// Selected team
@@ -124,7 +135,7 @@ public class FeedAddActivity extends Activity implements OnClickListener {
 							iDisasterApplication.getInstance().DISPLAY);
 		activityValues.put(SocialContract.CommunityActivity.GLOBAL_ID_OBJECT, feedContent); // Text entered by the user
 //		No target - shared with all members in the community
-//		activityValues.put(SocialContract.CommunityActivity.GLOBAL_ID_TARGET, "?"); // Activity target
+		activityValues.put(SocialContract.CommunityActivity.GLOBAL_ID_TARGET, "ALL"); // Activity target
 		 
 		try {
 // The Uri value returned is not used.
