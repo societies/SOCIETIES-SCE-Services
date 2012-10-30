@@ -1,11 +1,18 @@
 package si.setcce.societies.android.crowdtasking;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Calendar;
-import java.util.Date;
 
+import org.apache.http.client.methods.HttpGet;
+
+import si.setcce.societies.android.rest.RestTask;
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.provider.CalendarContract;
 import android.provider.CalendarContract.Events;
@@ -24,6 +31,7 @@ import com.google.zxing.integration.android.IntentResult;
 //import android.annotation.SuppressLint;
 
 public class MainActivity extends Activity {
+	private static final String SEARCH_ACTION = "si.setcce.societies.android.rest.TEST";
 	private WebView webView;
 	
 	//@SuppressLint("SetJavaScriptEnabled")
@@ -43,10 +51,32 @@ public class MainActivity extends Activity {
         webView.setScrollbarFadingEnabled(false);
         webView.setWebViewClient(new MyWebViewClient());
         webView.getSettings().setDefaultZoom(WebSettings.ZoomDensity.FAR);
-        webView.loadData("<h1>Application is loading...</h1>", "text/html", "utf-8");
-        webView.loadUrl("http://crowdtasking.appspot.com/start.html");
+        webView.addJavascriptInterface(new JSInterface(webView), "android");
+        //webView.loadData("<h1>Application is loading...</h1>", "text/html", "utf-8");
+        webView.loadUrl("file:///android_asset/start.html");
+        //webView.loadUrl("file:///android_asset/test2.html");
+        
+        try {
+			HttpGet searchRequest = new HttpGet(new URI("http://crowdtasking.appspot.com"));
+			RestTask task = new RestTask(this,SEARCH_ACTION);
+			task.execute(searchRequest);
+		} catch (URISyntaxException e) {
+			e.printStackTrace();
+		}
      }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+    	registerReceiver(receiver, new IntentFilter(SEARCH_ACTION));	
+    }
+    
+    @Override
+    public void onPause() {
+        super.onPause();
+    	unregisterReceiver(receiver);
+    }
+  	
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.activity_main, menu);
@@ -132,25 +162,69 @@ public class MainActivity extends Activity {
         }
       }
     }
+
+    private BroadcastReceiver receiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+        	webView.loadUrl("javascript:window.location.replace('http://crowdtasking.appspot.com/menu')");
+        	//webView.loadUrl("http://crowdtasking.appspot.com/menu");
+        }
+    };
+
+	private class JSInterface {
+		private WebView mAppView;
+		public JSInterface(WebView appView) {
+			this.mAppView = appView;
+		}
+		public void doEchoTest(String echo) {
+			Toast toast = Toast.makeText(mAppView.getContext(), echo,
+					Toast.LENGTH_SHORT);
+			toast.show();
+		}
+	}
+    
     
     private class MyWebViewClient extends WebViewClient {
-        @Override
+		@SuppressWarnings("unused")
+		public void onRequestFocus(WebView view) {
+			synchronized (this) {
+				this.notify();
+			}
+		}
+
+    	@Override
         public boolean shouldOverrideUrlLoading(WebView view, String url) {
         	if (url.equalsIgnoreCase("http://crowdtasking.appspot.com/AndroidMenu")) {
-        		openOptionsMenu();
+                IntentIntegrator integrator = new IntentIntegrator(MainActivity.this);
+                integrator.initiateScan(IntentIntegrator.QR_CODE_TYPES);
         		return true;
         	}
-        	System.out.println(String.format("Url: %s",url));
-        	//TextUtils.equals(request.getAuthority(), "");
-            //view.loadUrl(url);
+        	/*System.out.println(String.format("Url: %s",url));
+        	if (url.contains("/rest/")) {
+        		return false;
+        	}
+        	if (url.contains("?")) {
+        		url += "&android=true";
+        	}
+        	else {
+        		url += "?android=true";
+        	}*/
+            view.loadUrl(url);
             return false;
         }
         
         public void onPageFinished(WebView view, String url) {
+        	webView.loadUrl("javascript:window.location.alert('bu!')");
         	if (url.contains("enter") || url.contains("leave")) {
         		webView.goBack();
         	}
-            view.setInitialScale((int)(25*view.getScale()));
-        }
+        	if (url.contains("/menu")) {
+        		//webView.loadUrl("javascript:$('#androidMenu').show()");
+        		webView.loadUrl("javascript:window.document.getElementById(androidMenu).style.display = 'block';");
+            	webView.loadUrl("javascript:window.location.alert('bu!')");
+        	}
+            //view.setInitialScale((int)(25*view.getScale()));
+    		webView.loadUrl("javascript:bu()");
+       }
     }
 }
