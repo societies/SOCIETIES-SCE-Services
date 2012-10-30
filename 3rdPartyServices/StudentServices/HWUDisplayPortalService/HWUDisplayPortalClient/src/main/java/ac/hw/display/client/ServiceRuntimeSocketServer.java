@@ -100,11 +100,11 @@ public class ServiceRuntimeSocketServer extends Thread{
 				this.logging.debug("Received from portal: "+line);
 				if (line.contains(started_Service)){
 					String serviceName = line.substring(started_Service.length()+1);
-					this.displayService.notifyServiceStarted(serviceName);
+					this.displayService.notifyServiceStarted(serviceName.trim());
 					this.logging.debug("Called serviceStarted method on"+serviceName);
 				}else if (line.contains(stopped_Service)){
 					String serviceName = line.substring(stopped_Service.length()+1);
-					this.displayService.notifyServiceStopped(serviceName);
+					this.displayService.notifyServiceStopped(serviceName.trim());
 					this.logging.debug("Called serviceStopped method on"+serviceName);
 				}else if (line.contains(logged_Out)){
 					this.displayService.notifyLogOutEvent();
