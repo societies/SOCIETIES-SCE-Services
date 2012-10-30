@@ -1071,12 +1071,12 @@ namespace HWUPortal
         void GetCameraPoint(Skeleton first, AllFramesReadyEventArgs e)
         {
 
-            CoordinateMapper cm = new CoordinateMapper(this.kinect);
-            DepthImagePoint rightDepthPoint = cm.MapSkeletonPointToDepthPoint(first.Joints[JointType.HandRight].Position, DepthImageFormat.Resolution640x480Fps30);
-            ColorImagePoint rightColorPoint = cm.MapSkeletonPointToColorPoint(first.Joints[JointType.HandRight].Position, ColorImageFormat.RgbResolution640x480Fps30);
-            CameraPosition(RightHand, rightColorPoint);
+           // CoordinateMapper cm = new CoordinateMapper(this.kinect);
+            // DepthImagePoint rightDepthPoint = cm.MapSkeletonPointToDepthPoint(first.Joints[JointType.HandRight].Position, DepthImageFormat.Resolution640x480Fps30);
+            // ColorImagePoint rightColorPoint = cm.MapSkeletonPointToColorPoint(first.Joints[JointType.HandRight].Position, ColorImageFormat.RgbResolution640x480Fps30);
+            //CameraPosition(RightHand, rightColorPoint);
 
-            /* using (DepthImageFrame depth = e.OpenDepthImageFrame())
+             using (DepthImageFrame depth = e.OpenDepthImageFrame())
             {
                 if (depth == null ||
                     kinectSensorChooser1.Kinect == null)
@@ -1088,21 +1088,21 @@ namespace HWUPortal
 
                 //Map a joint location to a point on the depth map
                 //right hand
-                //DepthImagePoint rightDepthPoint =
+                DepthImagePoint rightDepthPoint =
                     
-                //    depth.MapFromSkeletonPoint(first.Joints[JointType.HandRight].Position);
+                    depth.MapFromSkeletonPoint(first.Joints[JointType.HandRight].Position);
 
                 //Map a depth point to a point on the color image
                 //right hand
-                //ColorImagePoint rightColorPoint =
-                //    depth.MapToColorImagePoint(rightDepthPoint.X, rightDepthPoint.Y,
-                //    ColorImageFormat.RgbResolution640x480Fps30);
+                ColorImagePoint rightColorPoint =
+                    depth.MapToColorImagePoint(rightDepthPoint.X, rightDepthPoint.Y,
+                    ColorImageFormat.RgbResolution640x480Fps30);
 
 
                 //Set location
-                //CameraPosition(RightHand, rightColorPoint);
+                CameraPosition(RightHand, rightColorPoint);
 
-            } */
+            } 
         }
 
         private void CameraPosition(FrameworkElement element, ColorImagePoint point)
