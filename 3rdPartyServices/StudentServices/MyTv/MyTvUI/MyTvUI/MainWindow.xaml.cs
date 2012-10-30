@@ -56,9 +56,9 @@ namespace MyTvUI
         ImageBrush unmuteBg_selected;
 
         //console variables
-        //FileStream ostrm;
-        //StreamWriter writer;
-        //TextWriter oldOut = Console.Out;
+        FileStream ostrm;
+        StreamWriter writer;
+        TextWriter oldOut = Console.Out;
 
         //variables used to detect hand over hover button area
         private static double _topBoundary;
@@ -88,18 +88,18 @@ namespace MyTvUI
         public MainWindow()
         {
             //redirect console output
-            //try
-            //{
-            //    ostrm = new FileStream("./logs.txt", FileMode.OpenOrCreate, FileAccess.Write);
-            //    writer = new StreamWriter(ostrm);
-            //    Console.SetOut(writer);
-            //}
-            //catch (Exception e)
-            //{
-            //    Console.WriteLine("Cannot open logs.txt for writing");
-            //    Console.WriteLine(e.Message);
-            //    //return;
-            //}
+            try
+            {
+                ostrm = new FileStream("./logs.txt", FileMode.OpenOrCreate, FileAccess.Write);
+                writer = new StreamWriter(ostrm);
+                Console.SetOut(writer);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Cannot open logs.txt for writing");
+                Console.WriteLine(e.Message);
+                //return;
+            }
 
             try
             {
@@ -143,7 +143,7 @@ namespace MyTvUI
                     //if EMMA -> getPreferences
                     //if JOHN -> getUserIntent
                     Console.WriteLine(userID);
-                    //initialisePreferences();
+                    initialisePreferences();
                 }
 
                 //initialise activity feeds
@@ -171,12 +171,12 @@ namespace MyTvUI
             socketClient.disconnect();
             socketServer.stopSocketServer();
 
-            //if (writer != null)
-            //{
-            //    Console.SetOut(oldOut);
-            //    writer.Close();
-            //    ostrm.Close();
-            //}
+            if (writer != null)
+            {
+                Console.SetOut(oldOut);
+                writer.Close();
+                ostrm.Close();
+            }
             closing = true;
             StopKinect(kinectSensorChooser1.Kinect);
         }
@@ -720,12 +720,12 @@ namespace MyTvUI
 
         void exitHoverRegion_Click(object sender, RoutedEventArgs e)
         {
-            //if (writer != null)
-            //{
-            //    Console.SetOut(oldOut);
-            //    writer.Close();
-            //    ostrm.Close();
-            //}
+            if (writer != null)
+            {
+                Console.SetOut(oldOut);
+                writer.Close();
+                ostrm.Close();
+            }
             mytvWindow.Close();
             
             //try

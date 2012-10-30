@@ -26,7 +26,6 @@ package ac.hw.mytv;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.ServerSocket;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -52,6 +51,8 @@ import org.societies.api.personalisation.model.IAction;
 import org.societies.api.personalisation.model.IActionConsumer;
 import org.societies.api.schema.servicelifecycle.model.ServiceResourceIdentifier;
 import org.societies.api.services.IServices;
+import org.societies.api.services.ServiceMgmtEvent;
+import org.societies.api.services.ServiceMgmtEventType;
 import org.societies.api.useragent.monitoring.IUserActionMonitor;
 
 public class MyTvClient extends EventListener implements IDisplayableService, IActionConsumer, IMyTv{
@@ -113,9 +114,43 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 			e.printStackTrace();
 		}
 
-		//register for portal started events
+		//register for service events
+		registerForServiceEvents();
+
+		//register for portal events
 		registerForDisplayEvents();
 	}
+
+
+	/*
+	 * Register for events from SLM so I can get my service parameters and finish initialising
+	 */
+	private void registerForServiceEvents(){
+		String eventFilter = "(&" + 
+				"(" + CSSEventConstants.EVENT_NAME + "="+ServiceMgmtEventType.NEW_SERVICE+")" +
+				"(" + CSSEventConstants.EVENT_SOURCE + "=org/societies/servicelifecycle)" +
+				")";
+		this.eventMgr.subscribeInternalEvent(this, new String[]{EventTypes.SERVICE_LIFECYCLE_EVENT}, eventFilter);
+		this.LOG.debug("Subscribed to "+EventTypes.SERVICE_LIFECYCLE_EVENT+" events");
+	}
+	
+	private void unregisterForServiceEvents()
+	{
+		String eventFilter = "(&" + 
+				 "(" + CSSEventConstants.EVENT_NAME + "="+ServiceMgmtEventType.NEW_SERVICE+")" +
+				"(" + CSSEventConstants.EVENT_SOURCE + "=org/societies/servicelifecycle)" +
+				")";
+
+		this.eventMgr.unSubscribeInternalEvent(this, new String[]{EventTypes.SERVICE_LIFECYCLE_EVENT}, eventFilter);
+		//this.evMgr.subscribeInternalEvent(this, new String[]{EventTypes.SERVICE_LIFECYCLE_EVENT}, eventFilter);
+		this.LOG.debug("Unsubscribed from "+EventTypes.SERVICE_LIFECYCLE_EVENT+" events");
+	}
+
+	/*
+	 * Handle service events
+	 */
+	//get my service parameters
+	//register for activity feed updates
 
 
 	/*
@@ -130,7 +165,6 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 		LOG.debug("Subscribed to "+EventTypes.DISPLAY_EVENT+" events");
 	}
 
-
 	/*
 	 * These methods handle events from the Portal
 	 */
@@ -141,15 +175,25 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 
 	@Override
 	public void handleInternalEvent(InternalEvent event) {
-		LOG.debug("Received internal display event from portal: "+event.geteventName());
-
-		//get user ID
-		userID = commsMgr.getIdManager().getThisNetworkNode();
-		LOG.debug("userID = "+userID.toString());
-
-		//get service ID
-		myServiceID = serviceMgmt.getMyServiceId(MyTvClient.class);
-		LOG.debug("client serviceID = "+myServiceID.toString());
+		LOG.debug("Received internal event from slm: "+event.geteventName());
+		
+		ServiceMgmtEvent slmEvent = (ServiceMgmtEvent) event.geteventInfo();
+		if (slmEvent.getBundleSymbolName().equalsIgnoreCase("ac.hw.mytv.MyTVClient")){
+			this.LOG.debug("Received SLM event for my bundle");
+			if (slmEvent.getEventType().equals(ServiceMgmtEventType.NEW_SERVICE)){
+				
+				//get service ID
+				myServiceID = slmEvent.getServiceId();
+				LOG.debug("client serviceID = "+myServiceID.toString());
+				
+				//get user ID
+				userID = commsMgr.getIdManager().getThisNetworkNode();
+				LOG.debug("userID = "+userID.toString());
+				
+				//unregister for SLM events
+				unregisterForServiceEvents();
+			}
+		}
 	}
 
 
