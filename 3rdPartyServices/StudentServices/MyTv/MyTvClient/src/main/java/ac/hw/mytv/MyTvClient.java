@@ -72,7 +72,7 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 	String myServiceType;
 	URL myUIExeLocation;
 	List<String> myServiceTypes;
-	public int listenPort;
+	public int listenPort = -1;
 	Logger LOG = LoggerFactory.getLogger(MyTvClient.class);
 
 	//personalisable parameters
@@ -100,6 +100,34 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 		//find available port
 		//int listenPort = socketServer.setListenPort();
 		//start listening
+
+		//register as a displayable service with port number
+		while(listenPort == -1){
+			try {
+				Thread.sleep(500);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+		
+		try {
+			myUIExeLocation = new URL("http://www.macs.hw.ac.uk/~ceesmm1/societies/mytv/MyTvUI.exe");
+			displayDriver.registerDisplayableService(
+					this, 
+					myServiceName, 
+					myUIExeLocation, 
+					listenPort,
+					true);
+		} catch (MalformedURLException e) {
+			LOG.error("Could not register as displayable service with display driver");
+			e.printStackTrace();
+		}
+
+		//register for service events
+		registerForServiceEvents();
+
+		//register for portal events
+		registerForDisplayEvents();
 	}
 
 
@@ -114,11 +142,11 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 		this.eventMgr.subscribeInternalEvent(this, new String[]{EventTypes.SERVICE_LIFECYCLE_EVENT}, eventFilter);
 		this.LOG.debug("Subscribed to "+EventTypes.SERVICE_LIFECYCLE_EVENT+" events");
 	}
-	
+
 	private void unregisterForServiceEvents()
 	{
 		String eventFilter = "(&" + 
-				 "(" + CSSEventConstants.EVENT_NAME + "="+ServiceMgmtEventType.NEW_SERVICE+")" +
+				"(" + CSSEventConstants.EVENT_NAME + "="+ServiceMgmtEventType.NEW_SERVICE+")" +
 				"(" + CSSEventConstants.EVENT_SOURCE + "=org/societies/servicelifecycle)" +
 				")";
 
@@ -157,22 +185,22 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 	@Override
 	public void handleInternalEvent(InternalEvent event) {
 		LOG.debug("Received internal event: "+event.geteventName());
-		
+
 		if(event.geteventName().equalsIgnoreCase("NEW_SERVICE")){
 			LOG.debug("Received SLM event");
 			ServiceMgmtEvent slmEvent = (ServiceMgmtEvent) event.geteventInfo();
 			if (slmEvent.getBundleSymbolName().equalsIgnoreCase("ac.hw.mytv.MyTVClient")){
 				this.LOG.debug("Received SLM event for my bundle");
 				if (slmEvent.getEventType().equals(ServiceMgmtEventType.NEW_SERVICE)){
-					
+
 					//get service ID
 					myServiceID = slmEvent.getServiceId();
 					LOG.debug("client serviceID = "+myServiceID.toString());
-					
+
 					//get user ID
 					userID = commsMgr.getIdManager().getThisNetworkNode();
 					LOG.debug("userID = "+userID.toString());
-					
+
 					//unregister for SLM events
 					unregisterForServiceEvents();
 				}
@@ -358,7 +386,7 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 			LOG.debug("Preference request result = "+result);
 			return result;
 		}
-		
+
 		public void setPort(int port){
 			listenPort = port;
 		}
