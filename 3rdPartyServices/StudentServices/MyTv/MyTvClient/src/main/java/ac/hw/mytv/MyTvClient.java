@@ -207,6 +207,15 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 			}
 		}else if(event.geteventName().equalsIgnoreCase("displayUpdate")){
 			LOG.debug("Received DisplayPortal event");
+			
+			//get service ID
+			myServiceID = serviceMgmt.getMyServiceId(this.getClass());
+			LOG.debug("client serviceID = "+myServiceID.toString());
+
+			//get user ID
+			userID = commsMgr.getIdManager().getThisNetworkNode();
+			LOG.debug("userID = "+userID.toString());
+			
 		}else{
 			LOG.debug("Received unknown event with name: "+event.geteventName());
 		}
