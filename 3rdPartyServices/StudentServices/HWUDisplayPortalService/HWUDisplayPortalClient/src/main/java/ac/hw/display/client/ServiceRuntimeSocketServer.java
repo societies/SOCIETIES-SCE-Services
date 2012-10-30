@@ -69,6 +69,7 @@ public class ServiceRuntimeSocketServer extends Thread{
 				
 				serverPort = server.getLocalPort();
 				System.out.println("Found free port. Listening on port: "+serverPort);
+				this.displayService.setServiceRuntimeSocketPort(serverPort);
 			} catch (IOException e) {
 				System.out.println("Could not listen on port "+serverPort);
 				
