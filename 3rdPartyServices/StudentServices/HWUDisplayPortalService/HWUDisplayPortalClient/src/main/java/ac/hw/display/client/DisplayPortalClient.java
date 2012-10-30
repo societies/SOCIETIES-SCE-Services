@@ -169,7 +169,7 @@ public class DisplayPortalClient extends EventListener implements IDisplayDriver
 				}
 			}
 			userSession = new UserSession(this.userIdentity.getJid(), this.serviceRuntimeSocketPort);
-			
+			this.unRegisterFromSLMEvents();
 		}else{
 			this.LOG.debug("Received SLM event but was not related to my bundle. Related to: "+slmEvent.getBundleSymbolName());
 		}

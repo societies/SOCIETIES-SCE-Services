@@ -31,7 +31,7 @@ namespace HWUPortal
                 "ServiceExe: " + serviceExe + "\n" +
                 "Service URL " + serviceURL + "\n" +
                 "Service Type: " + serviceType + "\n"+
-                "Service Port Number" +"\n";
+                "Service Port Number" +servicePortNumber+"\n";
             //"Button: " + button.Name;
         }
     }

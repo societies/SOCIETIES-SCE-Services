@@ -17,6 +17,8 @@
 		<property name="rfidServerRemote" ref="rfidServerRemote"></property>
 		<property name="ctxSourceMgr" ref="ctxSourceMgr"></property>
 		<property name="ctxBroker" ref="ctxBroker"></property>
+		<property name="evMgr" ref="eventMgmtRef"></property>
+		<property name="services" ref="IServices"></property>
 	</bean>
 
 	<bean id="rfidServerRemote"
