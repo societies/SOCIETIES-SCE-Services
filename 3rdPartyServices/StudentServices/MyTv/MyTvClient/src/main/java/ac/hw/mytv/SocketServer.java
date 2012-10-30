@@ -63,17 +63,18 @@ public class SocketServer extends Thread{
 		this.commandHandler = commandHandler;
 	}
 	
-	public int setListenPort(){
+	/*public int setListenPort(){
 		try {
 			ServerSocket portLocator = new ServerSocket(0);
 			port = portLocator.getLocalPort();
+			portLocator.close();
 			LOG.debug("Found available port: "+port);
 			return port;
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		return -1;
-	}
+	}*/
 
 	@Override
 	public void run(){
@@ -84,7 +85,9 @@ public class SocketServer extends Thread{
 
 	public void listenSocket(){
 		try {
-			server = new ServerSocket(port);
+			server = new ServerSocket(0);
+			port = server.getLocalPort();
+			commandHandler.setPort(port);
 		} catch (IOException e) {
 			LOG.debug("Could not listen on port "+port);
 			e.printStackTrace();

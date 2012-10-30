@@ -72,6 +72,7 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 	String myServiceType;
 	URL myUIExeLocation;
 	List<String> myServiceTypes;
+	public int listenPort;
 	Logger LOG = LoggerFactory.getLogger(MyTvClient.class);
 
 	//personalisable parameters
@@ -95,30 +96,10 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 		//start server listening for connections from GUI
 		commandHandler = new CommandHandler();
 		socketServer = new SocketServer(commandHandler);
-		//find available port
-		int listenPort = socketServer.setListenPort();
-		//start listening
 		socketServer.start();
-
-		//register as a displayable service with port number
-		try {
-			myUIExeLocation = new URL("http://www.macs.hw.ac.uk/~ceesmm1/societies/mytv/MyTvUI.exe");
-			displayDriver.registerDisplayableService(
-					this, 
-					myServiceName, 
-					myUIExeLocation, 
-					listenPort,
-					true);
-		} catch (MalformedURLException e) {
-			LOG.error("Could not register as displayable service with display driver");
-			e.printStackTrace();
-		}
-
-		//register for service events
-		registerForServiceEvents();
-
-		//register for portal events
-		registerForDisplayEvents();
+		//find available port
+		//int listenPort = socketServer.setListenPort();
+		//start listening
 	}
 
 
@@ -376,6 +357,10 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 			}
 			LOG.debug("Preference request result = "+result);
 			return result;
+		}
+		
+		public void setPort(int port){
+			listenPort = port;
 		}
 	}
 }
