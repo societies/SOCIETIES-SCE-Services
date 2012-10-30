@@ -313,14 +313,15 @@ namespace HWUPortal
                 this.startWeb(sInfo);
 
             }
-
+            
             this.runningService = sInfo;
             this.closeShowingServiceBtn.Content = "Close " + sInfo.serviceName;
             this.enableThisButton(this.closeShowingServiceBtn, true);
+            Console.WriteLine("Service: " + sInfo.serviceName + " has started. Sending information messsage to display portal.");
             try
             {
                 ServiceInformationSocketClient sClient = new ServiceInformationSocketClient();
-                sClient.sendServiceInformationEvent(userSession.getIPAddress(), sInfo.serviceName, ServiceInformationSocketClient.ServiceRuntimeInformation.STARTED_SERVICE);
+                sClient.sendServiceInformationEvent(userSession.getIPAddress(), userSession.getPort(), sInfo.serviceName, ServiceInformationSocketClient.ServiceRuntimeInformation.STARTED_SERVICE);
             }
             catch (System.Net.Sockets.SocketException exc)
             {
@@ -637,7 +638,7 @@ namespace HWUPortal
             {
                 this.stopService(e, this.runningService);
                 ServiceInformationSocketClient socket = new ServiceInformationSocketClient();
-                socket.sendServiceInformationEvent(this.userSession.getIPAddress(), this.runningService.serviceName, ServiceInformationSocketClient.ServiceRuntimeInformation.STOPPED_SERVICE);
+                socket.sendServiceInformationEvent(this.userSession.getIPAddress(), userSession.getPort(), runningService.serviceName, ServiceInformationSocketClient.ServiceRuntimeInformation.STOPPED_SERVICE);
                 this.runningService = new ServiceInfo();
                 this.closeShowingServiceBtn.Content = "";
                 //this.closeShowingServiceBtn.Text = "";

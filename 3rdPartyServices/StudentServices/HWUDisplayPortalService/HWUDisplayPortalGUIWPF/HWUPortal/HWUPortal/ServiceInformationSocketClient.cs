@@ -35,9 +35,10 @@ namespace HWUPortal
             server.Send(Encoding.ASCII.GetBytes(logged_Out));
             server.Close();
         }
-        public void sendServiceInformationEvent(IPAddress remoteIPAddress, String serviceName, ServiceRuntimeInformation sInformation)
+        public void sendServiceInformationEvent(IPAddress remoteIPAddress, int port, String serviceName, ServiceRuntimeInformation sInformation)
         {
-            IPEndPoint ip = new IPEndPoint(remoteIPAddress, 2121);
+            Console.WriteLine("Sending serviceInformation message: "+sInformation+" for service: "+serviceName+" using: "+remoteIPAddress+":"+port);
+            IPEndPoint ip = new IPEndPoint(remoteIPAddress, port);
             Socket server = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
             try
@@ -46,7 +47,7 @@ namespace HWUPortal
             }
             catch (SocketException e)
             {
-                Console.WriteLine("Unable to connect to server.");
+                Console.WriteLine("Unable to connect to server:"+remoteIPAddress.ToString()+":"+port);
                 return;
             }
             //string input = Console.ReadLine();
