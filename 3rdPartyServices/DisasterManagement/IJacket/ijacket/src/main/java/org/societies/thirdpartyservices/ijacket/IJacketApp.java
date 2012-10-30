@@ -2,14 +2,14 @@ package org.societies.thirdpartyservices.ijacket;
 
 import org.societies.thirdpartyservices.ijacket.com.BluetoothConnection;
 
+import android.app.Activity;
 import android.app.Application;
 
 public class IJacketApp extends Application {
 	
-	BluetoothConnection con;
 	
-	String macAddress = "";
-	
+	//Activity currActiv = null;
+		
 	int ledPin = -1;
 	int vibrationPin = -1;
 	int speakersPin = -1;
@@ -18,22 +18,24 @@ public class IJacketApp extends Application {
 	
 	String selectCommunityJid = "";
 	
-	static final int MAX_RETRY = 5;
 	
-	int retrycounter = 0;
-	boolean conectStatus = false;
-	
-	
-	
+	// FINALS
+	public static final String MAC_PREFERENCE_TAG = "macaddress"; 
 	
 
-	public boolean isConectStatus() {
+/*	public Activity getCurrActiv() {
+		return currActiv;
+	}
+
+	public void setCurrActiv(Activity currActiv) {
+		this.currActiv = currActiv;
+	}*/
+
+/*	public boolean isConectStatus() {
 		return conectStatus;
 	}
 
-	/*public void setConectStatus(boolean conectStatus) {
-		this.conectStatus = conectStatus;
-	}*/
+
 	
 	public void registerConnect(){
 		conectStatus = true;
@@ -63,6 +65,24 @@ public class IJacketApp extends Application {
 		else return true;
 	}
 	
+	public BluetoothConnection getCon() {
+		return con;
+	}
+
+	public void setCon(BluetoothConnection con) {
+		this.con = con;
+	}
+
+	public String getMacAddress() {
+		return macAddress;
+	}
+
+	public void setMacAddress(String macAddress) {
+		this.macAddress = macAddress;
+	}*/
+
+	
+	
 	public String getSelectedCommunityLocalId() {
 		return selectedCommunityLocalId;
 	}
@@ -79,21 +99,6 @@ public class IJacketApp extends Application {
 		this.selectCommunityJid = selectCommunityJid;
 	}
 
-	public BluetoothConnection getCon() {
-		return con;
-	}
-
-	public void setCon(BluetoothConnection con) {
-		this.con = con;
-	}
-
-	public String getMacAddress() {
-		return macAddress;
-	}
-
-	public void setMacAddress(String macAddress) {
-		this.macAddress = macAddress;
-	}
 
 	public int getLedPin() {
 		return ledPin;

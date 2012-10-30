@@ -24,6 +24,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import android.app.Activity;
+import android.app.Service;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
@@ -47,6 +48,8 @@ public class BluetoothConnection extends Protocol {
 	
 	/** The Activity that created this instance of BluetoothConnection (others could still be using this instance) */
 	private Activity parentActivity;
+	
+	private Service parentService;
 	
 	/** We notify this listener on any connection state changes */
 	private ConnectionListener connectionListener;
@@ -85,15 +88,30 @@ public class BluetoothConnection extends Protocol {
 		this(device.getAddress(), parentActivity, listener);
 	}
 	
-	
 	/**
 	 * Default constructor for creating a new BluetoothConnection to a remote device.
 	 * @param address The Bluetooth MAC address of the remote device
-	 * @param parentActivity The Activity that wants exclusive access to the BluetoothConnection
+	 * @param Activity parentActivity is the activity managing the bluetooth connection
 	 * @throws ComLibException is thrown if the Android device does not support Bluetooth
 	 * @throws IllegalArgumentException is thrown if the specified address/remote device is invalid or if ConnectionListener is null
 	 */
 	public BluetoothConnection(String address, Activity parentActivity, ConnectionListener listener) throws ComLibException, IllegalArgumentException{
+		this( address,  listener);
+		this.parentActivity = parentActivity;
+	}
+	
+	/**
+	 * Same as the version with activity, but with a service
+	 * @see BluetoothConnection(String address, Activity parentActivity, ConnectionListener listener)
+	 */
+	public BluetoothConnection(String address, Service parentService, ConnectionListener listener) throws ComLibException, IllegalArgumentException{
+		this( address,  listener);
+		this.parentService = parentService;
+
+	}
+	
+
+	private BluetoothConnection(String address, ConnectionListener listener) throws ComLibException, IllegalArgumentException{
 		
 		//Validate the address
 		if( !BluetoothAdapter.checkBluetoothAddress(address) ){
@@ -112,7 +130,6 @@ public class BluetoothConnection extends Protocol {
 		}		
 		
 		this.connectionListener = listener;
-		this.parentActivity = parentActivity;
 		connectionState = ConnectionState.STATE_DISCONNECTED;
 		device = bluetooth.getRemoteDevice(address);
 		
@@ -209,14 +226,30 @@ public class BluetoothConnection extends Protocol {
 		}
     	
 		//Register broadcast receivers
-		parentActivity.registerReceiver(mReceiver, new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED));
-		parentActivity.registerReceiver(mReceiver, new IntentFilter(BluetoothAdapter.ACTION_DISCOVERY_FINISHED));    	
+		if(null != parentActivity){
+			parentActivity.registerReceiver(mReceiver, new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED));
+			parentActivity.registerReceiver(mReceiver, new IntentFilter(BluetoothAdapter.ACTION_DISCOVERY_FINISHED));
+		}else{
+			if(null != parentService){
+				parentService.registerReceiver(mReceiver, new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED));
+				parentService.registerReceiver(mReceiver, new IntentFilter(BluetoothAdapter.ACTION_DISCOVERY_FINISHED));
+			}
+		
+		}
 		
 		//Make sure bluetooth is enabled
 		if( !bluetooth.isEnabled() ) {
 			//wait until Bluetooth is enabled by the OS
 			Log.v("BluetoothConnection", "BluetoothDevice is DISABLED. Asking user to enable Bluetooth");
-			parentActivity.startActivityForResult(new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE), REQUEST_ENABLE_BT);
+			
+			if(null != parentActivity){
+				parentActivity.startActivityForResult(new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE), REQUEST_ENABLE_BT);
+			}else{
+				if(null != parentService){
+					parentService.startActivity(new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE));
+				}	
+			}
+			
 			connectionRequested = true;
 			return;
 		}
@@ -276,8 +309,16 @@ public class BluetoothConnection extends Protocol {
 		super.disconnect();
 
     	//Make sure activity is unregistered
-		try {
-			parentActivity.unregisterReceiver(mReceiver);
+		try {				
+			if(null != parentActivity){
+				parentActivity.unregisterReceiver(mReceiver);
+			}else{
+				if(null != parentService){
+					parentService.unregisterReceiver(mReceiver);
+				}
+			
+			}
+			
 		}
 		catch(IllegalArgumentException ex) {
 			//oh ok... the receiver is already unregistered so no harm done here

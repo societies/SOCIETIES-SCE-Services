@@ -6,21 +6,25 @@ import java.util.concurrent.TimeoutException;
 
 
 import org.societies.android.api.cis.SocialContract;
+import org.societies.thirdpartyservices.ijacket.IJackConnManager.IJackConnBinder;
 import org.societies.thirdpartyservices.ijacket.com.BluetoothConnection;
 
 
 
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
+import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.database.ContentObserver;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Vibrator;
 import android.util.Log;
 import android.view.View;
@@ -46,6 +50,11 @@ public class JacketMenuActivity extends Activity {
 	
 	private static final String LOG_TAG = JacketMenuActivity.class.getName();
 	
+    /** Flag indicating whether we have called bind on the service. */
+    boolean mBound = false;
+    IJackConnManager mService = null;
+    ReconnectButton rc;
+	
 	   /**
   * Called when the activity is first created.
   */
@@ -62,6 +71,7 @@ public class JacketMenuActivity extends Activity {
      layout.setOrientation(TableLayout.VERTICAL);
      IJacketApp appState = ((IJacketApp)getApplicationContext());
      cr = this.getApplication().getContentResolver();
+     //appState.setCurrActiv(this);
      
      Intent i = getIntent();
      if(null == i){
@@ -94,6 +104,14 @@ public class JacketMenuActivity extends Activity {
     	 
     	 Log.d(LOG_TAG, "JacketMenuActivity buttons added");
      }
+     rc = new ReconnectButton(JacketMenuActivity.this);
+     addButton(rc);
+     rc.setEnabled(false);
+     
+     Log.d(LOG_TAG, "binding with conManager");
+     Intent in = new Intent(this, IJackConnManager.class);
+     bindService(in, mConnection, Context.BIND_AUTO_CREATE);
+     
      Log.d(LOG_TAG, "going to query the activities provider");
      Uri Activity_URI = Uri.parse(SocialContract.AUTHORITY_STRING + SocialContract.UriPathIndex.COMMUNITY_ACTIVITIY);
      try{
@@ -165,9 +183,8 @@ public class JacketMenuActivity extends Activity {
  
  
  private void disconnect(){
-		IJacketApp appState = ((IJacketApp)getApplicationContext());
-		BluetoothConnection con = appState.getCon();
-		if(con != null) con.disconnect();
+		
+		//if(mBound) mService.stopSelf();
   }
 
  
@@ -205,10 +222,35 @@ public class JacketMenuActivity extends Activity {
 		public void onClick(View v) {
 			ledIsToggled = !ledIsToggled;
 			try {
-				IJacketApp appState = ((IJacketApp)getApplicationContext());
-				BluetoothConnection con = appState.getCon();
-				con.write(pin, ledIsToggled, false);
+				if(mBound && mService.getConStats()) mService.getConnector().write(pin, ledIsToggled, false);
 			} catch (TimeoutException e) {}
+		}
+ 	
+ }
+ 
+ 
+ /**
+  * Reconnect_LED
+  */
+ private class ReconnectButton extends Button implements View.OnClickListener{
+ 	
+		public ReconnectButton(Context context) {
+			super(context);
+			setOnClickListener(this);
+			setText("Reconnect");
+		}
+
+		public void onClick(View v) {
+			if(mBound && mService.getConStats()) this.setEnabled(false); // is already connected
+			else{
+				if(null != mService){
+					mService.btConnect();
+				}
+				else{
+					Log.d( LOG_TAG, "handler is null, I wont be able to call the service" );
+				}
+			}
+			
 		}
  	
  }
@@ -227,9 +269,7 @@ public class JacketMenuActivity extends Activity {
 
 		public void onClick(View v) {
 			try {
-				IJacketApp appState = ((IJacketApp)getApplicationContext());
-				BluetoothConnection con = appState.getCon();
-				con.print("Hello World! (" + timesClicked++ + ")", false);
+				if(mBound && mService.getConStats()) mService.getConnector().print("Hello World! (" + timesClicked++ + ")", false);
 			} catch (TimeoutException e) {}
 		}
  	
@@ -248,9 +288,9 @@ public class JacketMenuActivity extends Activity {
 
 		public void onClick(View v) {
 			try {
-				IJacketApp appState = ((IJacketApp)getApplicationContext());
-				BluetoothConnection con = appState.getCon();
-				con.data(new byte[]{100, 75, 52, 15}, false);
+				if(mBound && mService.getConStats()) mService.getConnector()
+				.data(new byte[]{100, 75, 52, 15}, false);
+				else rc.setEnabled(true);
 			} catch (TimeoutException e) {}
 		}
  	
@@ -282,10 +322,19 @@ public class JacketMenuActivity extends Activity {
 		    	 long row = ContentUris.parseId(uri);
 		    	 String mSelectionClause = SocialContract.CommunityActivity._ID + " = ?";
 		    	 String[] mSelectionArgs = {Long.toString(row)};
-		    	 Cursor cursor = cr.query(uri,null,mSelectionClause,mSelectionArgs,null);
+		    	 Uri FEED_URI = Uri.parse(SocialContract.AUTHORITY_STRING + SocialContract.UriPathIndex.COMMUNITY_ACTIVITIY);
+		    	 Cursor cursor = cr.query(FEED_URI,null,mSelectionClause,mSelectionArgs,null);
 				if (cursor != null && cursor.getCount() >0) {
 				    while (cursor.moveToNext()) {
-				        Log.d("LOG_TAG", "found activity " + cursor.getColumnIndex(SocialContract.CommunityActivity.GLOBAL_ID_ACTOR));
+				        String act = "";
+						int i = cursor.getColumnIndex(SocialContract.CommunityActivity.GLOBAL_ID_ACTOR); 
+				        act +=  cursor.getString(i) + " ";
+				        i = cursor.getColumnIndex(SocialContract.CommunityActivity.GLOBAL_ID_VERB); 
+				        act +=  cursor.getString(i) + " ";
+				        i = cursor.getColumnIndex(SocialContract.CommunityActivity.GLOBAL_ID_OBJECT); 
+				        act +=  cursor.getString(i);
+				    	
+				    	Log.d("LOG_TAG", "found activity " + act);
 				    }
 				} else {
 					Log.d(LOG_TAG, "empty CIS list query result");
@@ -319,6 +368,8 @@ public class JacketMenuActivity extends Activity {
 		}
 
 		public void onClick(View v) {
+			
+			if(mBound && mService.getConStats())
      	timer.schedule(new TimerTask(){
      		public void run(){
              	try {
@@ -327,8 +378,7 @@ public class JacketMenuActivity extends Activity {
              		Vibrator vib = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
              		vib.vibrate(2000);
              		
-             		IJacketApp appState = ((IJacketApp)getApplicationContext());
-            		BluetoothConnection con = appState.getCon();
+            		BluetoothConnection con =  mService.getConnector();
              		
              		//Vibrate remote module
 						con.write(pin, true, false);
@@ -353,5 +403,20 @@ public class JacketMenuActivity extends Activity {
      });
  }
  
+ /**
+  * Class for interacting with the main interface of the service.
+  */
+ private ServiceConnection mConnection = new ServiceConnection() {
+     public void onServiceConnected(ComponentName className, IBinder service) {
+     	
+     	IJackConnBinder binder = (IJackConnBinder) service;
+         mService = binder.getService();
+         mBound = true;
+     }
+
+     public void onServiceDisconnected(ComponentName className) {
+         mBound = false;
+     }
+ };
  
 }

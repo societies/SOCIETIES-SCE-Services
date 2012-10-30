@@ -14,13 +14,17 @@
     
   <application android:name="IJacketApp" android:icon="@drawable/icon" android:label="@string/app_name"
       android:debuggable="true">
-    <activity android:name=".IJacketScanActiv">
-              <intent-filter>
+    
+    <service android:name=".IJackConnManager" />  
+      
+    <activity android:name=".IJacketScanActiv" android:launchMode="singleTop">
+      <intent-filter>
         <action android:name="android.intent.action.MAIN" />
         <category android:name="android.intent.category.LAUNCHER" />
       </intent-filter>
     </activity>
-    <activity android:name=".JacketMenuActivity">
+    
+    <activity android:name=".JacketMenuActivity" android:launchMode="singleTop">
 
         
     </activity>
