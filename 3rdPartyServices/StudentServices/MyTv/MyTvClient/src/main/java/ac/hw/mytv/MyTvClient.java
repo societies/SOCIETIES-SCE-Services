@@ -354,6 +354,7 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 			String result = "PREFERENCE-ERROR";
 			try {
 				RequestorService requestor = new RequestorService(userID, myServiceID);
+				LOG.debug("Created RequestorService type for: "+userID.toString()+" with serviceID: "+myServiceID.toString());
 				Future<IAction> futureOutcome = persoMgr.getPreference(requestor, userID, myServiceType, myServiceID, "channel");
 				LOG.debug("Requested preference from personalisationManager");
 				IAction outcome = futureOutcome.get();
@@ -364,10 +365,9 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 				}else{
 					LOG.debug("No channel preference was found");
 				}
-			} catch (InterruptedException e) {
-				LOG.debug("Error retrieving channel preference");
-			} catch (ExecutionException e) {
-				LOG.debug("Error retrieving channel preference");
+			} catch (Exception e){
+				LOG.debug("Error retrieving preference");
+				LOG.debug(e.getStackTrace().toString());
 			}
 			LOG.debug("Preference request result = "+result);
 			return result;

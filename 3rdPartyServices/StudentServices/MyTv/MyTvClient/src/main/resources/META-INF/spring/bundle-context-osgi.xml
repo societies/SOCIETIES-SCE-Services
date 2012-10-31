@@ -23,7 +23,7 @@
      	<property name="authorSignature" value="sgallacher" />
      	<property name="serviceDescription" value="MyTv personalised display service" />
      	<property name="serviceName" value="MyTv" />
-     	<property name="serviceType" value="THIRD_PARTY_CLIENT" />
+     	<property name="serviceType" value="THIRD_PARTY_SERVER" />
 <!--      	<property name="privacyPolicy" value="" /> -->
      	<property name="serviceCategory" value="media" />
  	</bean>
