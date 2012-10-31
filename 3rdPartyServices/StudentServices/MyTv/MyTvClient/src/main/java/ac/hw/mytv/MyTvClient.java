@@ -118,6 +118,14 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 					myUIExeLocation, 
 					listenPort,
 					true);
+			LOG.debug("Registered as DisplayableService with the following info:");
+			LOG.debug("************************************************************");
+			LOG.debug("IDisplayableService = "+this);
+			LOG.debug("Service name = "+myServiceName);
+			LOG.debug("Exe location = "+myUIExeLocation.toString());
+			LOG.debug("SocketServer listen port = "+listenPort);
+			LOG.debug("Needs kinect = true");
+			LOG.debug("************************************************************");
 		} catch (MalformedURLException e) {
 			LOG.error("Could not register as displayable service with display driver");
 			e.printStackTrace();
@@ -209,13 +217,16 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 			LOG.debug("Received DisplayPortal event");
 			
 			//get service ID
-			myServiceID = serviceMgmt.getMyServiceId(this.getClass());
-			LOG.debug("client serviceID = "+myServiceID.toString());
+			if(myServiceID == null){
+				myServiceID = serviceMgmt.getMyServiceId(this.getClass());
+				LOG.debug("client serviceID = "+myServiceID.toString());
+			}
 
 			//get user ID
-			userID = commsMgr.getIdManager().getThisNetworkNode();
-			LOG.debug("userID = "+userID.toString());
-			
+			if(userID == null){
+				userID = commsMgr.getIdManager().getThisNetworkNode();
+				LOG.debug("userID = "+userID.toString());
+			}			
 		}else{
 			LOG.debug("Received unknown event with name: "+event.geteventName());
 		}
