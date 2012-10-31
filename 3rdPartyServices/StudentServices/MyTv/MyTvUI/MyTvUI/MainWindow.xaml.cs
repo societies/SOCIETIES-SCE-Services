@@ -90,7 +90,7 @@ namespace MyTvUI
             //redirect console output
             try
             {
-                ostrm = new FileStream("./logs.txt", FileMode.OpenOrCreate, FileAccess.Write);
+                ostrm = new FileStream("logs.txt", FileMode.Create, FileAccess.Write);
                 writer = new StreamWriter(ostrm);
                 Console.SetOut(writer);
             }
@@ -104,6 +104,10 @@ namespace MyTvUI
             try
             {
                 //initialise GUI
+                //using (StreamWriter writer = new StreamWriter("logs.txt", true))
+                //{
+                //    writer.WriteLine("Initialising GUI");
+                //}
                 Console.WriteLine("Initialising GUI");
                 InitializeComponent();
                 channel1HoverRegion.Click += new RoutedEventHandler(channel1HoverRegion_Click);

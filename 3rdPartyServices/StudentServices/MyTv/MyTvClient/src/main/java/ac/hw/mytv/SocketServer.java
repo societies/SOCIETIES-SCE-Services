@@ -78,12 +78,6 @@ public class SocketServer extends Thread{
 
 	@Override
 	public void run(){
-		while(listening){
-			listenSocket();
-		}
-	}
-
-	public void listenSocket(){
 		try {
 			server = new ServerSocket(0);
 			port = server.getLocalPort();
@@ -92,7 +86,13 @@ public class SocketServer extends Thread{
 			LOG.debug("Could not listen on port "+port);
 			e.printStackTrace();
 		}
+		
+		while(listening){
+			listenSocket();
+		}
+	}
 
+	public void listenSocket(){
 		try {
 			LOG.debug("Waiting for connection from GUI on port: "+port);
 			client = server.accept();

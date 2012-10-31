@@ -57,7 +57,7 @@ namespace MyTvUI
             }
             catch (SocketException e)
             {
-                Console.WriteLine("SOCKET_CLIENT: Unable to connect to service client on node: "+endPoint);
+                Console.WriteLine("SOCKET_CLIENT: Unable to connect to service client on node: "+endPoint+" on port: "+port);
                 Console.WriteLine(e.ToString());
             }
             return false;
@@ -271,12 +271,12 @@ namespace MyTvUI
 
             try
             {
-                port = Convert.ToInt32(Encoding.ASCII.GetString(data, 0, receivedDataLength));
-                Console.WriteLine("SOCKET_CLIENT: Received listen port of service client: " + port);
+                port = BitConverter.ToInt32(data, 0);
+                Console.WriteLine("SOCKET_CLIENT: Received listen port of service client: " + port.ToString());
             }
             catch (Exception e)
             {
-                Console.WriteLine("Received data is not a valid port number");
+                Console.WriteLine("Error converting bytes to port");
                 Console.WriteLine(e.ToString());
                 server.Close();
                 return false;
