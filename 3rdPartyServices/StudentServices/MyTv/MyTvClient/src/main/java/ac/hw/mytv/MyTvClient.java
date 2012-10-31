@@ -192,12 +192,17 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 				if (slmEvent.getEventType().equals(ServiceMgmtEventType.NEW_SERVICE)){
 
 					//get service ID
-					myServiceID = slmEvent.getServiceId();
-					LOG.debug("client serviceID = "+myServiceID.toString());
+					if(myServiceID == null){
+						myServiceID = slmEvent.getServiceId();
+						LOG.debug("client serviceID = "+myServiceID.toString());
+					}
 
 					//get user ID
-					userID = commsMgr.getIdManager().getThisNetworkNode();
-					LOG.debug("userID = "+userID.toString());
+					if(userID == null){
+						userID = commsMgr.getIdManager().getThisNetworkNode();
+						LOG.debug("userID = "+userID.toString());
+					}
+					
 
 					//unregister for SLM events
 					unregisterForServiceEvents();
