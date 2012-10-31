@@ -99,7 +99,7 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 		int listenPort = socketServer.setListenPort();
 		//start listening
 		socketServer.start();
-		
+
 		try {
 			myUIExeLocation = new URL("http://www.macs.hw.ac.uk/~ceesmm1/societies/mytv/MyTvUI.exe");
 			displayDriver.registerDisplayableService(
@@ -177,7 +177,7 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 	 */
 	@Override
 	public void handleExternalEvent(CSSEvent event) {
-		LOG.debug("Received external display event from portal: "+event.geteventName());
+		LOG.debug("Received external event: "+event.geteventName());
 	}
 
 	@Override
@@ -202,7 +202,7 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 						userID = commsMgr.getIdManager().getThisNetworkNode();
 						LOG.debug("userID = "+userID.toString());
 					}
-					
+
 
 					//unregister for SLM events
 					unregisterForServiceEvents();
@@ -210,18 +210,14 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 			}
 		}else if(event.geteventName().equalsIgnoreCase("displayUpdate")){
 			LOG.debug("Received DisplayPortal event");
-			
+
 			//get service ID
-			if(myServiceID == null){
-				myServiceID = serviceMgmt.getMyServiceId(this.getClass());
-				LOG.debug("client serviceID = "+myServiceID.toString());
-			}
+			myServiceID = serviceMgmt.getMyServiceId(this.getClass());
+			LOG.debug("client serviceID = "+myServiceID.toString());
 
 			//get user ID
-			if(userID == null){
-				userID = commsMgr.getIdManager().getThisNetworkNode();
-				LOG.debug("userID = "+userID.toString());
-			}			
+			userID = commsMgr.getIdManager().getThisNetworkNode();
+			LOG.debug("userID = "+userID.toString());
 		}else{
 			LOG.debug("Received unknown event with name: "+event.geteventName());
 		}
@@ -373,7 +369,6 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 				}
 			} catch (Exception e){
 				LOG.debug("Error retrieving preference");
-				LOG.debug(e.getStackTrace().toString());
 			}
 			LOG.debug("Preference request result = "+result);
 			return result;
@@ -384,6 +379,7 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 			String result = "PREFERENCE-ERROR";
 			try {
 				RequestorService requestor = new RequestorService(userID, myServiceID);
+				LOG.debug("Created RequestorService type for: "+userID.toString()+" with serviceID: "+myServiceID.toString());
 				Future<IAction> futureOutcome = persoMgr.getPreference(requestor, userID, myServiceType, myServiceID, "channel");
 				LOG.debug("Requested preference from personalisationManager");
 				IAction outcome = futureOutcome.get();
@@ -394,11 +390,9 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 				}else{
 					LOG.debug("No mute preference was found");
 				}
-			} catch (InterruptedException e) {
+			} catch (Exception e) {
 				LOG.debug("Error retrieving mute preference");
-			} catch (ExecutionException e) {
-				LOG.debug("Error retrieving mute preference");
-			}
+			} 
 			LOG.debug("Preference request result = "+result);
 			return result;
 		}
