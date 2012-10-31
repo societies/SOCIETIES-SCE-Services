@@ -351,6 +351,7 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 
 			//create action object and send to uam
 			IAction action = new Action(myServiceID, myServiceType, parameterName, value);
+			LOG.debug("Sending action to UAM: "+action.toString());
 			uam.monitor(userID, action);
 		}
 
