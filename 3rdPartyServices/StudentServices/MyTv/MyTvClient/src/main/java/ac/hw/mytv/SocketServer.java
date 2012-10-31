@@ -63,7 +63,7 @@ public class SocketServer extends Thread{
 		this.commandHandler = commandHandler;
 	}
 	
-	/*public int setListenPort(){
+	public int setListenPort(){
 		try {
 			ServerSocket portLocator = new ServerSocket(0);
 			port = portLocator.getLocalPort();
@@ -74,31 +74,32 @@ public class SocketServer extends Thread{
 			e.printStackTrace();
 		}
 		return -1;
-	}*/
+	}
 
 	@Override
 	public void run(){
-		try {
-			server = new ServerSocket(0);
-			port = server.getLocalPort();
-			commandHandler.setPort(port);
-		} catch (IOException e) {
-			LOG.debug("Could not listen on port "+port);
-			e.printStackTrace();
-		}
-		
 		while(listening){
 			listenSocket();
 		}
 	}
 
 	public void listenSocket(){
+		
+		try {
+			server = new ServerSocket(port);
+		} catch (IOException e) {
+			LOG.debug("ServerSocket creation failed: "+port);
+			LOG.debug(e.getStackTrace().toString());
+			return;
+		}
+		
 		try {
 			LOG.debug("Waiting for connection from GUI on port: "+port);
 			client = server.accept();
 		} catch (IOException e) {
 			LOG.debug("Accept failed: "+port);
-			e.printStackTrace();
+			LOG.debug(e.getStackTrace().toString());
+			return;
 		}
 
 		LOG.debug("Connection accepted from GUI!");
@@ -108,7 +109,8 @@ public class SocketServer extends Thread{
 			in = new BufferedReader(new InputStreamReader(client.getInputStream()));
 		} catch (IOException e) {
 			LOG.debug("Accept failed: "+port);
-			e.printStackTrace();
+			LOG.debug(e.getStackTrace().toString());
+			return;
 		}
 
 		try{

@@ -72,7 +72,6 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 	String myServiceType;
 	URL myUIExeLocation;
 	List<String> myServiceTypes;
-	public int listenPort = -1;
 	Logger LOG = LoggerFactory.getLogger(MyTvClient.class);
 
 	//personalisable parameters
@@ -96,19 +95,10 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 		//start server listening for connections from GUI
 		commandHandler = new CommandHandler();
 		socketServer = new SocketServer(commandHandler);
-		socketServer.start();
 		//find available port
-		//int listenPort = socketServer.setListenPort();
+		int listenPort = socketServer.setListenPort();
 		//start listening
-
-		//register as a displayable service with port number
-		while(listenPort == -1){
-			try {
-				Thread.sleep(500);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-		}
+		socketServer.start();
 		
 		try {
 			myUIExeLocation = new URL("http://www.macs.hw.ac.uk/~ceesmm1/societies/mytv/MyTvUI.exe");
@@ -405,10 +395,6 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 			}
 			LOG.debug("Preference request result = "+result);
 			return result;
-		}
-
-		public void setPort(int port){
-			listenPort = port;
 		}
 	}
 }
