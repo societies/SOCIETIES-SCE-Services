@@ -142,16 +142,16 @@ public class SocketServer extends Thread{
 				String command = splitData[0];
 				if (command.equalsIgnoreCase(GUI_STARTED)){
 					LOG.debug(GUI_STARTED+" message received");
+					out.println(RECEIVED);
 					String gui_ip = splitData[1];
 					commandHandler.connectToGUI(gui_ip);
-					out.println(RECEIVED);
 					
 				}else if (command.equalsIgnoreCase(USER_ACTION)){
 					LOG.debug(USER_ACTION+" message received");
+					out.println(RECEIVED);
 					String parameterName = splitData[1];
 					String value = splitData[2];
 					commandHandler.processUserAction(parameterName, value);
-					out.println(RECEIVED);
 					
 				}else if(command.equalsIgnoreCase(CHANNEL_REQUEST)){
 					LOG.debug(CHANNEL_REQUEST+" message received");
@@ -165,8 +165,8 @@ public class SocketServer extends Thread{
 
 				}else if (command.equalsIgnoreCase(GUI_STOPPED)){
 					LOG.debug(GUI_STOPPED+" message received");
-					commandHandler.disconnectFromGUI();
 					out.println(RECEIVED);
+					commandHandler.disconnectFromGUI();
 				}
 				finalize();
 			}
