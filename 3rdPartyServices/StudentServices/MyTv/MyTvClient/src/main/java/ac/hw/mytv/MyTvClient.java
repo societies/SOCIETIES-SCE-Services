@@ -228,12 +228,12 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 	 */
 	@Override
 	public void serviceStarted(String guiIpAddress){
-		//service is started
+		LOG.debug("Received serviceStarted call from Portal");
 	}
 
 	@Override
 	public void serviceStopped(String guiIpAddress){
-		//service is stopped
+		LOG.debug("Received serviceStopped call from Portal");
 	}
 
 
