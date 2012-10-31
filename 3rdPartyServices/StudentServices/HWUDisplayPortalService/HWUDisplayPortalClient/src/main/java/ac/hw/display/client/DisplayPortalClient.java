@@ -375,26 +375,32 @@ public class DisplayPortalClient extends EventListener implements IDisplayDriver
 
 	public void notifyServiceStarted(String serviceName) {
 		if (this.userSession.containsService(serviceName)){
+			this.LOG.debug("Found service: "+serviceName+". Calling serviceStarted method");
 			ServiceInfo sInfo = this.userSession.getService(serviceName);
 			if (sInfo!=null){
 				IDisplayableService service = sInfo.getService();
 				if (service!=null){
 					service.serviceStarted(currentUsedScreenIP);
+					return;
 				}
 			}
 		}
-
+		this.LOG.debug("Could not find service: "+serviceName);
 	}
 	public void notifyServiceStopped(String serviceName) {
 		if (this.userSession.containsService(serviceName)){
+			this.LOG.debug("Found service: "+serviceName+". Calling serviceStopped method");
 			ServiceInfo sInfo = this.userSession.getService(serviceName);
 			if (sInfo!=null){
 				IDisplayableService service = sInfo.getService();
 				if (service!=null){
 					service.serviceStopped(currentUsedScreenIP);
+					return;
 				}
 			}
 		}
+		
+		this.LOG.debug("Could not find service: "+serviceName);
 
 	}
 
