@@ -89,8 +89,6 @@ public class RfidClient extends EventListener implements IRfidClient {
 
 
 
-
-
 	public RfidClient() {
 		
 	}
@@ -148,6 +146,7 @@ public class RfidClient extends EventListener implements IRfidClient {
 
 	@Override
 	public void sendUpdate(String symLoc, String tagNumber) {
+		
 		this.clientGUI.sendSymLocUpdate(tagNumber, symLoc);
 		this.clientGUI.tfTagNumber.setText(tagNumber);
 
@@ -155,11 +154,16 @@ public class RfidClient extends EventListener implements IRfidClient {
 			boolean registered = this.register();
 			if (registered){
 				this.ctxSourceMgr.sendUpdate(this.myCtxSourceId, symLoc);
+				this.logging.debug("Sent new RFID information");
 			}else{
 				this.logging.debug("Received symloc update: "+symLoc+" but unable to register as a context source with the ICtxSourceMgr.");
 			}
 		}else{
-			this.ctxSourceMgr.sendUpdate(this.myCtxSourceId, symLoc);		}
+			//this.ctxSourceMgr.sendUpdate(this.myCtxSourceId, symLoc);		
+			
+			this.ctxSourceMgr.sendUpdate(myCtxSourceId, symLoc, null, false, 1.0, 1d/60);
+			this.logging.debug("Sent new RFID information");
+		}
 
 	}
 
