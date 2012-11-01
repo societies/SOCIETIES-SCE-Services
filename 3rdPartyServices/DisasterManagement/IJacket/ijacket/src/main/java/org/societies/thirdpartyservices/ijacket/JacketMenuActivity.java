@@ -379,8 +379,10 @@ public class JacketMenuActivity extends Activity {
 				if (cursor != null && cursor.getCount() >0) {
 				    while (cursor.moveToNext()) {
 				    	String actor = cursor.getString(cursor.getColumnIndex(SocialContract.CommunityActivity.GLOBAL_ID_ACTOR));
+				    	String verb  = cursor.getString(cursor.getColumnIndex(SocialContract.CommunityActivity.GLOBAL_ID_VERB));
+				    	String obj = cursor.getString(cursor.getColumnIndex(SocialContract.CommunityActivity.GLOBAL_ID_OBJECT));
 				        Log.d("LOG_TAG", "found activity " + actor);
-				        con.print("activity" + actor, false);
+				        con.print(actor + " " + verb + "" +obj, false);
 				    }
 				} else {
 					Log.d(LOG_TAG, "empty CIS list query result");
