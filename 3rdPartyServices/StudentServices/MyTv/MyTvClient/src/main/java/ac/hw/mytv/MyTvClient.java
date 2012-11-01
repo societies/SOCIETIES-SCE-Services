@@ -203,7 +203,6 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 						LOG.debug("userID = "+userID.toString());
 					}
 
-
 					//unregister for SLM events
 					unregisterForServiceEvents();
 				}
@@ -212,10 +211,12 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 			LOG.debug("Received DisplayPortal event");
 
 			//get service ID
+			LOG.debug("Getting my service ID....");
 			myServiceID = serviceMgmt.getMyServiceId(this.getClass());
 			LOG.debug("client serviceID = "+myServiceID.toString());
 
 			//get user ID
+			LOG.debug("Getting the user ID...");
 			userID = commsMgr.getIdManager().getThisNetworkNode();
 			LOG.debug("userID = "+userID.toString());
 		}else{
