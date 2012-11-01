@@ -73,6 +73,16 @@ public class IJacketScanActiv extends Activity{// implements OnItemSelectedListe
         super.onCreate(savedInstanceState);
         Log.d(LOG_TAG, "IJacketScanActiv onCreate");
         
+        
+        Intent intent = getIntent();
+        String cisJid = intent.getStringExtra("");// TODO: set the intent extra
+        if(null != cisJid && false !=cisJid.isEmpty()){
+            SharedPreferences mypref = getSharedPreferences(IJacketApp.PREF_FILE_NAME, Context.MODE_PRIVATE);
+            SharedPreferences.Editor e = mypref.edit();
+    		e.putString(IJacketApp.CIS_JID_PREFERENCE_TAG, cisJid);
+    		e.commit();
+
+        } 
 
 	        layout = new TableLayout(this);
 	        layout.setId(IJACK_SCAN_ACTV_CONTENT_VIEW_ID);
