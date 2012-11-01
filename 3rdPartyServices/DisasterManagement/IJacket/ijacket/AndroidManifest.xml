@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
   package="org.societies.thirdpartyservices.ijacket" android:versionCode="1" android:versionName="1.0-SNAPSHOT">
 
-    <uses-sdk android:minSdkVersion="8" />
+    <uses-sdk android:minSdkVersion="16" />
     <uses-feature android:name="android.hardware.bluetooth" android:required="true" />	
     <uses-permission android:name="android.permission.BLUETOOTH"/>
     <uses-permission android:name="android.permission.VIBRATE"/>
@@ -20,7 +20,7 @@
         <category android:name="android.intent.category.LAUNCHER" />
       </intent-filter>
     </activity>
-    <activity android:name=".JacketMenuActivity">
+    <activity android:name=".JacketMenuActivity" android:launchMode="singleTop" >
 
         
     </activity>

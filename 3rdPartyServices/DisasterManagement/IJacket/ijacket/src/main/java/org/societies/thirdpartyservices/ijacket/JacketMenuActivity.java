@@ -7,19 +7,26 @@ import java.util.concurrent.TimeoutException;
 
 import org.societies.android.api.cis.SocialContract;
 import org.societies.thirdpartyservices.ijacket.com.BluetoothConnection;
+import org.societies.thirdpartyservices.ijacket.com.ComLibException;
+import org.societies.thirdpartyservices.ijacket.com.ConnectionListener;
+import org.societies.thirdpartyservices.ijacket.com.ConnectionMetadata;
+import org.societies.thirdpartyservices.ijacket.com.ConnectionMetadata.DefaultServices;
 
 
 
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.ContentResolver;
+import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.ContentObserver;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Message;
 import android.os.Vibrator;
 import android.util.Log;
 import android.view.View;
@@ -29,18 +36,51 @@ import android.widget.TableLayout;
 import android.widget.Toast;
 
 public class JacketMenuActivity extends Activity {
+
+	
+	static final int MAX_RETRY = 5;
+	
+	int retrycounter = 0;
+	// TODO: update for content uris from babak
+	
 	
 	private TableLayout layout;
-	//private Button ledButton;
-	//private Button speakerButton;
-	//private Button lcdButton;
+	private LedButton ledButton;
+	private SpeakerButton speakerButton;
+	private LCDButton lcdButton;
+	private VibrationButton vibrationButton;
 	
-	ContentResolver cr;
+	private Button connectButton;
 	
-	ActivityContentObserver actObs;
-	private Handler handler = new Handler();
+	
+	BluetoothConnection con = null;
+	ActivityContentObserver actObs = null;
+	private Handler obsHandler = new Handler();
 	
 	private static final String LOG_TAG = JacketMenuActivity.class.getName();
+	
+	
+	public static final String METHOD_TAG = "method";
+	public static final String ENABLE_BUTTONS = "enableButtons";
+	
+	private myConList conList = new myConList();
+	
+	/*Handler handler = new Handler() {
+		  @Override
+		  public void handleMessage(Message msg) {
+			  Bundle b = msg.getData();
+			  String method =  b.getString(METHOD_TAG, "");
+			  if(method.isEmpty()){
+				  Log.d(LOG_TAG, "empty method on msg handler"); 
+			  }
+			  else{
+				  if(b.equals(ENABLE_BUTTONS))
+					  enableButtons();  
+			  }
+			  
+			  
+		     }
+		 };*/
 	
 	   /**
   * Called when the activity is first created.
@@ -53,75 +93,88 @@ public class JacketMenuActivity extends Activity {
 
      registerContentObservers();
      
-     layout = new TableLayout(this);
-     layout.setLayoutParams( new TableLayout.LayoutParams(TableLayout.LayoutParams.FILL_PARENT, TableLayout.LayoutParams.FILL_PARENT) );
-     layout.setOrientation(TableLayout.VERTICAL);
-     IJacketApp appState = ((IJacketApp)getApplicationContext());
-     cr = this.getApplication().getContentResolver();
-     
-     Intent i = getIntent();
-     if(null == i){
-    	 quickToastMessage("no intent");
-    	 Log.d(LOG_TAG, "no intent on onCreate JacketMenuActivity");
-    	 // recreate button based on already stored pin configuration
-    	 if(appState.getLedPin() != -1 ) addButton(new LedButton(JacketMenuActivity.this, appState.getLedPin()));
-    	 if(appState.getVibrationPin() != -1 ) addButton(new VibrationButton(JacketMenuActivity.this, appState.getVibrationPin()));
-    	 if(appState.getSpeakersPin() != -1 ) addButton(new SpeakerButton(JacketMenuActivity.this, appState.getSpeakersPin()));
-    	 
-     }else{
-    	 int pin = -1;
-    	 pin = i.getIntExtra("LED PIN",-1);
-    	 if(-1 != pin){
-    		 addButton(new LedButton(JacketMenuActivity.this, pin));
-    		 appState.setLedPin(pin);
-    	 }
-    	 pin = i.getIntExtra("VIBRATION PIN",-1);
-    	 if(-1 != pin){
-    		 addButton(new VibrationButton(JacketMenuActivity.this, pin));
-    		 appState.setVibrationPin(pin);
-    	 }
-    	 pin = i.getIntExtra("SPEAKER PIN",-1);
-    	 if(-1 != pin){
-    		 addButton(new SpeakerButton(JacketMenuActivity.this, pin));
-    		 appState.setSpeakersPin(pin);
-    	 }
- 
-    	 addButton(new LCDButton(JacketMenuActivity.this));
-    	 
-    	 Log.d(LOG_TAG, "JacketMenuActivity buttons added");
-     }
-     Log.d(LOG_TAG, "going to query the activities provider");
-     Uri Activity_URI = Uri.parse(SocialContract.AUTHORITY_STRING + SocialContract.UriPathIndex.COMMUNITY_ACTIVITIY);
-     try{
-    	 Cursor cursor = cr.query(Activity_URI,null,null,null,null);
-		if (cursor != null && cursor.getCount() >0) {
-			// Determine the column index of the column named "word"
-			//int index = cursor.getColumnIndex(SocialContract.Community.DISPLAY_NAME);
-			
-			/*
-		     * Moves to the next row in the cursor. Before the first movement in the cursor, the
-		     * "row pointer" is -1, and if you try to retrieve data at that position you will get an
-		     * exception.
-		     */
-		    while (cursor.moveToNext()) {
-		        Log.d("LOG_TAG", "found activity " + cursor.getColumnIndex(SocialContract.CommunityActivity.GLOBAL_ID));
-		    }
-		} else {
-			Log.d(LOG_TAG, "empty CIS list query result");
-		}
-		if(null != cursor) cursor.close();
-	}catch (Exception e) {
-		// TODO Auto-generated catch block
-		Log.d(LOG_TAG, "exception in the create");
-		e.printStackTrace();
-	}
 
-	Log.d(LOG_TAG, "content provider read");
+     
+     layout = new TableLayout(this);
+     layout.setLayoutParams( new TableLayout.LayoutParams(TableLayout.LayoutParams.MATCH_PARENT, TableLayout.LayoutParams.MATCH_PARENT) );
+     layout.setOrientation(TableLayout.VERTICAL);
+     
+     ledButton = new LedButton(JacketMenuActivity.this);
+     addButton(ledButton);
+     speakerButton = new SpeakerButton(JacketMenuActivity.this);
+     addButton(speakerButton);
+     vibrationButton = new VibrationButton(JacketMenuActivity.this);
+     addButton(vibrationButton);
+     lcdButton = new LCDButton(JacketMenuActivity.this);
+     addButton(lcdButton);
+     connectButton = new Button(this);
+     connectButton.setText("Reconnect");
+     connectButton.setOnClickListener( new View.OnClickListener() {
+         public void onClick(View view) {
+        	 connectBT();
+         }
+     } );
+     addButton(connectButton);
+     
+     Log.d(LOG_TAG, "done with buttons");
+     
+     connectBT();
+    
+
 
      
      super.setContentView(layout);         
  }
  
+ 	boolean connectBT(){
+ 		IJacketApp appState = (IJacketApp) (getApplication());
+ 		// first I retrieve from Application
+ 		if(null == con){
+ 			
+ 			con = appState.getCon();
+ 			Log.d("LOG_TAG", "con got from application" );
+ 		}
+ 		
+ 		Log.d(LOG_TAG, "starting connect");
+ 		if(null != con){
+ 			if(con.isConnected()){ // double check if it is really disconnected
+ 				Log.d("LOG_TAG", "connect instruction when we were already connected" );
+				retrycounter = 0;
+				return true;
+ 			}else{
+ 				Log.d("LOG_TAG", "con is not null but we are disconnected..." );
+ 			}
+
+       	}
+ 		else{ // con doesnt exist
+ 			SharedPreferences mypref = getSharedPreferences(IJacketApp.PREF_FILE_NAME, MODE_PRIVATE);
+			String mac = mypref.getString(IJacketApp.MAC_PREFERENCE_TAG, "");
+			if(mac.isEmpty()){
+				quickToastMessage("Go back and scan the jacket again");
+				Log.d("LOG_TAG", "no mac stored on preferences" );
+				return false;
+			}
+			try {            	
+				con = new BluetoothConnection(mac, this, conList);
+				appState.setCon(con);
+			} catch (Exception e) {
+				Log.d("LOG_TAG", "exception trying to create connection" );
+				quickToastMessage(e.getMessage());
+	        	return false;
+			}
+ 		}
+ 		
+		
+        	// get mac from preferences
+        	
+        	Log.d("LOG_TAG", "trying to connect" );
+        	retrycounter++;
+        	con.connect();
+
+	
+		
+		return true;
+ 	} 
  
  @Override
  protected void onStart() {
@@ -131,46 +184,79 @@ public class JacketMenuActivity extends Activity {
  @Override
  protected void onResume() {
      super.onResume();
+     Log.d( LOG_TAG, "on resume" );
      // The activity has become visible (it is now "resumed").
  }
  @Override
  protected void onPause() {
      super.onPause();
+     Log.d( LOG_TAG, "on pause called" );
      // Another activity is taking focus (this activity is about to be "paused").
  }
  @Override
  protected void onStop() {
      super.onStop();
      // The activity is no longer visible (it is now "stopped")
+     Log.d( LOG_TAG, "on stop called" );
+     //disconnect();
+	 //unregisterContentObservers();
  }
  @Override
  protected void onDestroy() {
      super.onDestroy();
-     // The activity is about to be destroyed.
+     Log.d( LOG_TAG, "on destroy called" );
+     disconnect();
 	 unregisterContentObservers();
  }
  
  
  private void addButton(final Button button) {
-     runOnUiThread(new Runnable() {
+     this.runOnUiThread(new Runnable() {
           public void run() {
+        	  button.setEnabled(false);
           	layout.addView(button);
+          }
+     });
+  }
+ 
+ private void buttonsOnConnect() {
+     this.runOnUiThread(new Runnable() {
+          public void run() {
+				ledButton.setEnabled(true);
+				vibrationButton.setEnabled(true);
+				speakerButton.setEnabled(true);
+				connectButton.setEnabled(false);
+				lcdButton.setEnabled(true);
+          }
+     });
+  }
+ 
+ private void buttonsOnDisconnect() {
+     this.runOnUiThread(new Runnable() {
+          public void run() {
+				ledButton.setEnabled(false);
+				vibrationButton.setEnabled(false);
+				speakerButton.setEnabled(false);
+				lcdButton.setEnabled(false);
+				connectButton.setEnabled(true);
           }
      });
   }
  
  
  private void disconnect(){
-		IJacketApp appState = ((IJacketApp)getApplicationContext());
-		BluetoothConnection con = appState.getCon();
 		if(con != null) con.disconnect();
+		con = null;
+		IJacketApp appState = (IJacketApp) (getApplication());
+		appState.setCon(null);
+		buttonsOnDisconnect();
   }
 
  
  	private void registerContentObservers() {
 	  ContentResolver cr = getContentResolver();
 	  
-	  actObs = new ActivityContentObserver( handler );
+	  actObs = new ActivityContentObserver( obsHandler );
 	  Uri activURI = Uri.parse(SocialContract.AUTHORITY_STRING + SocialContract.UriPathIndex.COMMUNITY_ACTIVITIY);
 	  cr.registerContentObserver(activURI , true, actObs );
 	}
@@ -190,21 +276,26 @@ public class JacketMenuActivity extends Activity {
  	boolean ledIsToggled;
  	int pin;
  	
-		public LedButton(Context context, int pin) {
+		public LedButton(Context context) {
 			super(context);
 			ledIsToggled = false;
 			setOnClickListener(this);
-			setText("Toggle LED (" + pin + ")");
-			this.pin = pin;
+			setText("Toggle LED ");
+		}
+		
+		public void setPin(int i){
+			this.pin = i;
 		}
 
 		public void onClick(View v) {
 			ledIsToggled = !ledIsToggled;
 			try {
-				IJacketApp appState = ((IJacketApp)getApplicationContext());
-				BluetoothConnection con = appState.getCon();
+				
 				con.write(pin, ledIsToggled, false);
-			} catch (TimeoutException e) {}
+			} catch (TimeoutException e) {
+				Log.d(LOG_TAG, "exception on led on click");
+				disconnect();
+			}
 		}
  	
  }
@@ -223,10 +314,11 @@ public class JacketMenuActivity extends Activity {
 
 		public void onClick(View v) {
 			try {
-				IJacketApp appState = ((IJacketApp)getApplicationContext());
-				BluetoothConnection con = appState.getCon();
 				con.print("Hello World! (" + timesClicked++ + ")", false);
-			} catch (TimeoutException e) {}
+			} catch (TimeoutException e) {
+				Log.d(LOG_TAG, "exception on lcd on click");
+				disconnect();
+			}
 		}
  	
  }
@@ -236,18 +328,20 @@ public class JacketMenuActivity extends Activity {
   */
  private class SpeakerButton extends Button implements View.OnClickListener {
  	
-		public SpeakerButton(Context context, int pin) {
+		public SpeakerButton(Context context) {
 			super(context);
 			setOnClickListener(this);
-			setText("Play Sound (" + pin + ")");
+			setText("Play Sound");
 		}
+		
 
 		public void onClick(View v) {
 			try {
-				IJacketApp appState = ((IJacketApp)getApplicationContext());
-				BluetoothConnection con = appState.getCon();
 				con.data(new byte[]{100, 75, 52, 15}, false);
-			} catch (TimeoutException e) {}
+			} catch (TimeoutException e) {
+				Log.d(LOG_TAG, "exception on speaker on click");
+				disconnect();
+			}
 		}
  	
  }
@@ -263,8 +357,46 @@ public class JacketMenuActivity extends Activity {
 		  }
 
 		  public void onChange(boolean selfChange) {
-			Log.d( LOG_TAG, "ActivityContentObserver.onChange( "+selfChange+")" );
+			Log.d( LOG_TAG, "null onchange version called" );
+			onChange(selfChange, null);
 		  }
+		  
+		  @Override
+		  public void onChange(boolean selfChange, Uri uri) {
+			  if(null == uri) {
+				  Log.d( LOG_TAG, "null uri" );
+				  return;
+			  }
+			  Log.d( LOG_TAG, "uri path " +  uri.getPath()); 
+		     try{
+		    	 long row = ContentUris.parseId(uri);
+		    	 String mSelectionClause = SocialContract.CommunityActivity._ID + " = ?";
+		    	 String[] mSelectionArgs = {Long.toString(row)};
+		    	 ContentResolver cr = getContentResolver();
+		    	 Uri otherUri =  Uri.parse(SocialContract.AUTHORITY_STRING + SocialContract.UriPathIndex.COMMUNITY_ACTIVITIY);
+		    	 Log.d("LOG_TAG", "test " +  uri.getAuthority() + uri.getPath());
+		    	 Cursor cursor = cr.query(otherUri,null,mSelectionClause,mSelectionArgs,null);
+				if (cursor != null && cursor.getCount() >0) {
+				    while (cursor.moveToNext()) {
+				    	String actor = cursor.getString(cursor.getColumnIndex(SocialContract.CommunityActivity.GLOBAL_ID_ACTOR));
+				    	String verb  = cursor.getString(cursor.getColumnIndex(SocialContract.CommunityActivity.GLOBAL_ID_VERB));
+				    	String obj = cursor.getString(cursor.getColumnIndex(SocialContract.CommunityActivity.GLOBAL_ID_OBJECT));
+				        Log.d("LOG_TAG", "found activity " + actor);
+				        con.print(actor + " " + verb + "" +obj, false);
+				    }
+				} else {
+					Log.d(LOG_TAG, "empty CIS list query result");
+				}
+				if(null != cursor) cursor.close();
+			}catch (Exception e) {
+				// TODO Auto-generated catch block
+				Log.d(LOG_TAG, "exception in the create");
+				e.printStackTrace();
+			}
+			  
+			  
+		  }
+		  
 		}
  
  
@@ -276,13 +408,16 @@ public class JacketMenuActivity extends Activity {
  	Timer timer = new Timer();
  	int pin;
  	
-		public VibrationButton(Context context, int pin) {
-			super(context);
+		public VibrationButton(Context contextn) {
+			super(contextn);
 			setOnClickListener(this);
-			setText("Vibration (" + pin + ")");
-			this.pin = pin;
+			setText("Vibration");
 		}
 
+		public void setPin(int i){
+			this.pin = i;
+		}
+		
 		public void onClick(View v) {
      	timer.schedule(new TimerTask(){
      		public void run(){
@@ -292,17 +427,17 @@ public class JacketMenuActivity extends Activity {
              		Vibrator vib = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
              		vib.vibrate(2000);
              		
-             		IJacketApp appState = ((IJacketApp)getApplicationContext());
-            		BluetoothConnection con = appState.getCon();
              		
              		//Vibrate remote module
-						con.write(pin, true, false);
+					con.write(pin, true, false);
                  	Thread.sleep(2000);
                  	con.write(pin, false, false);
                  	
 					} 
              	catch (Exception e) {
+             		 Log.d(LOG_TAG, "exception on vibration on click");
                      quickToastMessage(e.getMessage());
+                     disconnect();
 					}
      		}
      	}, 0);
@@ -318,5 +453,83 @@ public class JacketMenuActivity extends Activity {
      });
  }
  
+ 
+
+ public class myConList implements ConnectionListener {
+
+ 	
+ 	//private Activity parentActivity;
+ 	
+ 	public myConList(){
+ 		super();
+ 		//this.parentActivity = parentActivity;
+ 		Log.d(LOG_TAG, "conlist created");
+ 	}
+ 	
+     public void onConnect(BluetoothConnection bluetoothConnection) {
+     	retrycounter = 0;
+    	 Log.d(LOG_TAG, "Blueetooth onconnect");
+         quickToastMessage("Connected! (" + bluetoothConnection.toString() + ")");
+         
+         //Enable buttons for every service found
+         ConnectionMetadata meta = bluetoothConnection.getConnectionData();
+			for(String service : meta.getServicesSupported()) {
+				Integer pins[] = meta.getServicePins(service);
+				
+				//Pin controlled button
+				if(pins.length > 0) {
+					// ILL just add one button of each
+					
+					if(service.equals(DefaultServices.SERVICE_LED_LAMP.name())){
+						ledButton.setPin(pins[0]);
+					}
+					if(service.equals(DefaultServices.SERVICE_VIBRATION.name())){
+						vibrationButton.setPin(pins[0]);
+					} 
+					if(service.equals(DefaultServices.SERVICE_SPEAKER.name())){
+							;
+					} 
+				}
+				
+				
+			}
+			Log.d(LOG_TAG, "finished with the buttons");
+			buttonsOnConnect();
+			// TODO: do comething about the conenct
+         
+     }
+
+     public void onConnecting(BluetoothConnection bluetoothConnection) {
+         quickToastMessage("Connecting");
+     }
+
+     public void onDisconnect(BluetoothConnection bluetoothConnection) {
+    	 Log.d(LOG_TAG, "on disconnect");
+    	 
+    	 disconnect();
+    	 quickToastMessage("Disconnected");
+    	 
+     	/*if(retrycounter < MAX_RETRY){
+     		
+				quickToastMessage("Disconnected, going to retry " + retrycounter);
+				Log.d(LOG_TAG, "Disconnected, going to retry" + retrycounter);
+				BtConnectTask bt = new BtConnectTask();
+				Timer myTimer = new Timer();
+				myTimer.schedule(bt, 10000);
+     	}else{
+             quickToastMessage("Disconnected for good");
+             Log.d(LOG_TAG, "Disconnected for good");
+             
+     	}*/
+    	 
+     }
+     
+     class BtConnectTask extends TimerTask {
+		  public void run() {
+			  connectBT();
+
+		  }
+		}
+ }
  
 }

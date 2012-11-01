@@ -6,13 +6,13 @@ import android.app.Application;
 
 public class IJacketApp extends Application {
 	
-	BluetoothConnection con;
+	BluetoothConnection con = null;
 	
-	String macAddress = "";
+	//String macAddress = "";
 	
-	int ledPin = -1;
-	int vibrationPin = -1;
-	int speakersPin = -1;
+	//int ledPin = -1;
+	//int vibrationPin = -1;
+	//int speakersPin = -1;
 	
 	String selectedCommunityLocalId = "";
 	
@@ -21,48 +21,14 @@ public class IJacketApp extends Application {
 	static final int MAX_RETRY = 5;
 	
 	int retrycounter = 0;
-	boolean conectStatus = false;
 	
+	public static final String MAC_PREFERENCE_TAG = "MacAddress";
+	public static final String PREF_FILE_NAME = "ijackPref";
 	
 	
 	
 
-	public boolean isConectStatus() {
-		return conectStatus;
-	}
 
-	/*public void setConectStatus(boolean conectStatus) {
-		this.conectStatus = conectStatus;
-	}*/
-	
-	public void registerConnect(){
-		conectStatus = true;
-		retrycounter = 0;
-	}
-
-	public void registerDisconnect(){
-		conectStatus = false;
-	}
-
-
-	public int getRetrycounter() {
-		return retrycounter;
-	}
-
-	public void clearRetryCounter(){
-		retrycounter = 0;
-	}
-
-	
-	public void incRetryCounter(){
-		retrycounter++;
-	}
-	
-	public boolean testMaxRetryCounter(){
-		if(retrycounter<MAX_RETRY) return false;
-		else return true;
-	}
-	
 	public String getSelectedCommunityLocalId() {
 		return selectedCommunityLocalId;
 	}
@@ -87,7 +53,7 @@ public class IJacketApp extends Application {
 		this.con = con;
 	}
 
-	public String getMacAddress() {
+	/*	public String getMacAddress() {
 		return macAddress;
 	}
 
@@ -117,7 +83,7 @@ public class IJacketApp extends Application {
 
 	public void setSpeakersPin(int speakersPin) {
 		this.speakersPin = speakersPin;
-	}
+	}*/
 	
 	
 	

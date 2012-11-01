@@ -27,7 +27,7 @@ public class IJacketClient extends Activity implements OnItemSelectedListener {
     ContentResolver cr;
     String communityJid = "";
     String communityLocalID = "";
-    String cssID = "default";
+    String cssID = "defaultUser";
     
     /**
      * Called when the activity is first created.
@@ -76,7 +76,7 @@ public class IJacketClient extends Activity implements OnItemSelectedListener {
         	
         	this.runOnUiThread(new Runnable() {
                 public void run() {
-                    Toast.makeText(IJacketClient.this, "activity publishe", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(IJacketClient.this, "activity published", Toast.LENGTH_SHORT).show();
                 }
             });
         	
