@@ -14,21 +14,21 @@ public class IJacketApp extends Application {
 	//int vibrationPin = -1;
 	//int speakersPin = -1;
 	
-	String selectedCommunityLocalId = "";
+/*	String selectedCommunityLocalId = "";
 	
-	String selectCommunityJid = "";
+	String selectCommunityJid = "";*/
 	
-	static final int MAX_RETRY = 5;
+
 	
-	int retrycounter = 0;
-	
+	public static final String CIS_JID_PREFERENCE_TAG = "CisJID";
 	public static final String MAC_PREFERENCE_TAG = "MacAddress";
 	public static final String PREF_FILE_NAME = "ijackPref";
 	
 	
 	
+	
 
-
+/*
 	public String getSelectedCommunityLocalId() {
 		return selectedCommunityLocalId;
 	}
@@ -43,7 +43,7 @@ public class IJacketApp extends Application {
 
 	public void setSelectCommunityJid(String selectCommunityJid) {
 		this.selectCommunityJid = selectCommunityJid;
-	}
+	}*/
 
 	public BluetoothConnection getCon() {
 		return con;

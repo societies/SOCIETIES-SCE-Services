@@ -222,14 +222,17 @@ public abstract class Protocol implements Runnable {
 			lock();
 			
 			currentInstruction = pendingInstructions.poll();
-			Log.d(getClass().getName(), "Sending instruction: " + currentInstruction.getOpcode().name());
 			
-			try {
-				sendBytes(currentInstruction.getInstructionBytes());
-				waitingForAck = currentInstruction.getOpcode();
+			if(null!= currentInstruction){
+				Log.d(getClass().getName(), "Sending instruction: " + currentInstruction.getOpcode().name());
 				
-			} catch (IOException ex) {
-				Log.e("Protocol", "Send error: " + ex);
+				try {
+					sendBytes(currentInstruction.getInstructionBytes());
+					waitingForAck = currentInstruction.getOpcode();
+					
+				} catch (IOException ex) {
+					Log.e("Protocol", "Send error: " + ex);
+				}
 			}
 			
 			release();

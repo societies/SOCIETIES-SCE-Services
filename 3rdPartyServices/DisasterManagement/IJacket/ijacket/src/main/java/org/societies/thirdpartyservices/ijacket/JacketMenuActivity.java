@@ -370,8 +370,17 @@ public class JacketMenuActivity extends Activity {
 			  Log.d( LOG_TAG, "uri path " +  uri.getPath()); 
 		     try{
 		    	 long row = ContentUris.parseId(uri);
-		    	 String mSelectionClause = SocialContract.CommunityActivity._ID + " = ?";
-		    	 String[] mSelectionArgs = {Long.toString(row)};
+		    	 
+         		SharedPreferences mypref = getSharedPreferences(IJacketApp.PREF_FILE_NAME, MODE_PRIVATE);
+     			String jid = mypref.getString(IJacketApp.CIS_JID_PREFERENCE_TAG, "");
+     			if(jid.isEmpty()){
+     				Log.d("LOG_TAG", "no community on obersever..." );
+     				return;
+     			}
+		    	 
+		    	 
+		    	 String mSelectionClause = SocialContract.CommunityActivity._ID + " = ? and " + SocialContract.CommunityActivity.GLOBAL_ID_FEED_OWNER + " = ?";
+		    	 String[] mSelectionArgs = {Long.toString(row),jid};
 		    	 ContentResolver cr = getContentResolver();
 		    	 Uri otherUri =  Uri.parse(SocialContract.AUTHORITY_STRING + SocialContract.UriPathIndex.COMMUNITY_ACTIVITIY);
 		    	 Log.d("LOG_TAG", "test " +  uri.getAuthority() + uri.getPath());
@@ -382,7 +391,7 @@ public class JacketMenuActivity extends Activity {
 				    	String verb  = cursor.getString(cursor.getColumnIndex(SocialContract.CommunityActivity.GLOBAL_ID_VERB));
 				    	String obj = cursor.getString(cursor.getColumnIndex(SocialContract.CommunityActivity.GLOBAL_ID_OBJECT));
 				        Log.d("LOG_TAG", "found activity " + actor);
-				        con.print(actor + " " + verb + "" +obj, false);
+				        con.print(actor + " " + verb + " " +obj, false);
 				    }
 				} else {
 					Log.d(LOG_TAG, "empty CIS list query result");

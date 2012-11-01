@@ -4,8 +4,10 @@ import org.societies.android.api.cis.SocialContract;
 
 import android.app.ListFragment;
 import android.app.LoaderManager.LoaderCallbacks;
+import android.content.Context;
 import android.content.CursorLoader;
 import android.content.Loader;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -13,6 +15,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
+
 
 
 
@@ -62,11 +65,12 @@ public class MainActivityCursorLoader extends ListFragment implements
 	    Log.d("LOG_TAG", "found community with JID " + comJid + " and id " + comLocalId);
 	    
 	    
-		IJacketApp appState = (IJacketApp) (getActivity().getApplication());
-		appState.setSelectCommunityJid(comJid);
-		appState.setSelectedCommunityLocalId(comLocalId);
+        SharedPreferences mypref = getActivity().getSharedPreferences(IJacketApp.PREF_FILE_NAME, Context.MODE_PRIVATE);
+        SharedPreferences.Editor e = mypref.edit();
+		e.putString(IJacketApp.CIS_JID_PREFERENCE_TAG, comJid);
+		e.commit();
 
-        
+	        
         
     }
     

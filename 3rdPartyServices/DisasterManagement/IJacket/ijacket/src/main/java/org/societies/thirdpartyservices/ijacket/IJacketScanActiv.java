@@ -88,6 +88,16 @@ public class IJacketScanActiv extends Activity{// implements OnItemSelectedListe
 	        scanButton.setOnClickListener( new View.OnClickListener() {
 	            public void onClick(View view) {
 	            	try{
+	            		
+	            		SharedPreferences mypref = getSharedPreferences(IJacketApp.PREF_FILE_NAME, MODE_PRIVATE);
+	        			String jid = mypref.getString(IJacketApp.CIS_JID_PREFERENCE_TAG, "");
+	        			if(jid.isEmpty()){
+	        				quickToastMessage("Please first select a community");
+	        				Log.d("LOG_TAG", "no community selected" );
+	        				return;
+	        			}
+	            		
+	            		
 		                Intent intent = new Intent("com.google.zxing.client.android.SCAN");
 		                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
 		                intent.putExtra("SCAN_MODE", "QR_CODE_MODE");
@@ -171,12 +181,7 @@ public class IJacketScanActiv extends Activity{// implements OnItemSelectedListe
             	 
             	 IJacketScanActiv.super.setTitle("IJacket");
 
-            	 TextView text0 = new TextView(IJacketScanActiv.this);
-            	 text0.setText("Please choose the Community to share your jacket updates.");
-            	 text0.setTextSize(24);
-            	 layout.addView(text0);
-            	 
-            	 addItemsOnCISSpinner();
+
             	 
             	 TextView text1 = new TextView(IJacketScanActiv.this);
             	 text1.setText("Please scan the QR tag of your jacket");
@@ -185,9 +190,7 @@ public class IJacketScanActiv extends Activity{// implements OnItemSelectedListe
             	 
             	 layout.addView(scanButton);
             	 
-            	 TextView text2 = new TextView(IJacketScanActiv.this);
-            	 text2.setText("This will connect your Android via Bluetooth to the remote device and retrieve more information of your OSNAP product. You can test the functionality of the remote device and download a more specialized Application (if you are connected to the internet).");
-            	 layout.addView(text2);
+
             	 
             	 //ImageView image = new ImageView(IJacketScanActiv.this);
             	 //image.setImageResource(R.drawable.scan);
@@ -195,9 +198,15 @@ public class IJacketScanActiv extends Activity{// implements OnItemSelectedListe
             	 
             	 SharedPreferences mypref = getSharedPreferences(IJacketApp.PREF_FILE_NAME, MODE_PRIVATE);
             	 if(mypref.contains(IJacketApp.MAC_PREFERENCE_TAG)){
+            		 
+                	 TextView text2 = new TextView(IJacketScanActiv.this);
+                	 text2.setText("Or connect to previous jacket");
+                	 text2.setTextSize(24);
+                	 layout.addView(text2);
+            		 
             		 Log.d(LOG_TAG, "adding last jacket button");
             		 preferredJackButton = new Button(IJacketScanActiv.this);
-				 	 preferredJackButton.setText("Connect to last jacket");
+				 	 preferredJackButton.setText("Connect to previous jacket");
 		 		 	 preferredJackButton.setOnClickListener( new OnClickListener(){
 
 		 				public void onClick(View v) {
@@ -206,6 +215,13 @@ public class IJacketScanActiv extends Activity{// implements OnItemSelectedListe
 		 		 	 });
 		 		 	layout.addView(preferredJackButton);
 		 		 }
+            	 
+            	 TextView text0 = new TextView(IJacketScanActiv.this);
+            	 text0.setText("Please choose the Community to share your jacket updates.");
+            	 text0.setTextSize(24);
+            	 layout.addView(text0);
+            	 
+            	 addItemsOnCISSpinner();
 
              }
         });
