@@ -26,20 +26,37 @@ package ac.hw.rfid.server;
 
 import java.util.TimerTask;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import ac.hw.rfid.client.api.remote.IRfidClient;
+
 public class RFIDUpdateTimerTask extends TimerTask{
 
 
 	private String tagNumber;
-	private RfidServer rfidImpl;
+	private IRfidClient rfidClient;
+	private String symLoc;
+	private String userJid;
+	private boolean readyToSend = true;
+	private Logger logging = LoggerFactory.getLogger(this.getClass());
 	
-	public RFIDUpdateTimerTask(RfidServer impl, String tagNumber){
-		rfidImpl = impl;
+	
+	public RFIDUpdateTimerTask(IRfidClient client, String tagNumber, String symLoc, String userID){
+		this.rfidClient = client;
 		this.tagNumber = tagNumber;
+		this.symLoc = symLoc;
+		this.userJid = userID;
 	}
 	
 	@Override
 	public void run() {
-		getRfidImpl().sendUpdate("Unknown", this.tagNumber);
+		if (readyToSend){
+			this.rfidClient.sendUpdate(this.userJid, this.symLoc, this.tagNumber);	
+			this.logging.debug("Sent remote Symbolic Location update message [value:"+this.symLoc+"]");
+		}else{
+			this.logging.debug("Location updates no longer sent");
+		}
 		
 	}
 
@@ -50,12 +67,28 @@ public class RFIDUpdateTimerTask extends TimerTask{
 		return tagNumber;
 	}
 
-	public void setRfidImpl(RfidServer rfidImpl) {
-		this.rfidImpl = rfidImpl;
+	public String getSymLoc() {
+		return symLoc;
 	}
 
-	public RfidServer getRfidImpl() {
-		return rfidImpl;
+	public void setSymLoc(String newLocation) {
+		if (newLocation.equalsIgnoreCase("other")){
+			if (this.symLoc.equalsIgnoreCase("other")){
+				this.readyToSend = false;
+			}
+			this.symLoc = newLocation;
+		}else{
+			this.symLoc = newLocation;
+			this.readyToSend = true;
+		}
+	}
+
+	public String getUserJid() {
+		return userJid;
+	}
+
+	public void setUserJid(String userJid) {
+		this.userJid = userJid;
 	}
 
 }

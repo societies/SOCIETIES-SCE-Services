@@ -22,7 +22,7 @@
  * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package ac.hw.rfid.server;
+package ac.hw.rfid.server.gui;
 
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
@@ -47,6 +47,8 @@ import javax.swing.UnsupportedLookAndFeelException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import ac.hw.rfid.server.RfidServer;
 
 
 public class ServerGUIFrame extends JFrame implements ActionListener

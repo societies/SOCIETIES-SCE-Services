@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -69,6 +70,7 @@ import org.springframework.osgi.context.BundleContextAware;
 
 import ac.hw.rfid.client.api.remote.IRfidClient;
 import ac.hw.rfid.server.api.IRfidServer;
+import ac.hw.rfid.server.gui.ServerGUIFrame;
 
 public class RfidServer extends EventListener implements IRfidServer, ServiceTrackerCustomizer, BundleContextAware {
 
@@ -86,7 +88,7 @@ public class RfidServer extends EventListener implements IRfidServer, ServiceTra
 	private IEventMgr eventMgr;
 	
 	//private Hashtable<String, String> dpiToServiceID;
-	Hashtable<String, Timer> tagToTimerTable = new Hashtable<String, Timer>();
+	Hashtable<String, RFIDUpdateTimerTask> tagToTimerTable = new Hashtable<String, RFIDUpdateTimerTask>();
 
 	private IRfidClient rfidClientRemote;
 	
@@ -217,12 +219,43 @@ public class RfidServer extends EventListener implements IRfidServer, ServiceTra
 		this.eventMgr.subscribeInternalEvent(this, new String[]{EventTypes.RFID_UPDATE_EVENT}, eventFilter);
 	}
 	
+	
+	/*
+	 * This method is called by the RFIDUpdateTimerTask every minute to 
+	 * send the symbolic locations to the appropriate user
+	 */
+	public void sendRemoteUpdate(String symLoc, String rfidTagNumber){
+		if (this.tagtoIdentityTable.containsKey(rfidTagNumber)){
+			String jid = this.tagtoIdentityTable.get(rfidTagNumber);
+			//String clientServiceID = this.dpiToServiceID.get(dpi);
+			//this.sendUpdateMessage(dpi, clientServiceID, rfidTagNumber, symLoc);
+			this.rfidClientRemote.sendUpdate(jid, symLoc, rfidTagNumber);
+		}
+			
+	}
 	/*
 	 * Method called when an RFID_UPDATE_EVENT is received
 	 */
 	public void sendUpdate(String wUnit, String rfidTagNumber) {
 	
-		String symLoc = "other";
+		if (this.wUnitToSymlocTable.containsKey(wUnit)){
+			
+			if (this.tagToTimerTable.containsKey(rfidTagNumber)){
+				this.tagToTimerTable.get(rfidTagNumber).setSymLoc(this.wUnitToSymlocTable.get(wUnit));
+			}else{
+				if (this.tagtoIdentityTable.containsKey(rfidTagNumber)){
+					RFIDUpdateTimerTask task = new RFIDUpdateTimerTask(this.rfidClientRemote, rfidTagNumber, this.wUnitToSymlocTable.get(wUnit), this.tagtoIdentityTable.get(rfidTagNumber));
+					this.tagToTimerTable.put(rfidTagNumber, task);
+					Timer timer = new Timer();
+					timer.schedule(task, new Date(), 60000);
+				}
+			}
+			
+		}
+		
+		
+		//OLD CODE BELOW
+		/*String symLoc = "";
 		if (this.wUnitToSymlocTable.containsKey(wUnit)){
 			symLoc = this.wUnitToSymlocTable.get(wUnit);
 			if (this.tagToTimerTable.containsKey(rfidTagNumber)){
@@ -239,10 +272,10 @@ public class RfidServer extends EventListener implements IRfidServer, ServiceTra
 			}
 			
 		}
-		if (!symLoc.equalsIgnoreCase("other")){
+		if (!symLoc.equalsIgnoreCase("")){
 			Timer timer = new Timer();
 			RFIDUpdateTimerTask task = new RFIDUpdateTimerTask(this, rfidTagNumber);
-			timer.schedule(task, 3000);
+			timer.schedule(task, 1000);
 			this.tagToTimerTable.put(rfidTagNumber, timer);
 		}		
 		if (this.tagtoIdentityTable.containsKey(rfidTagNumber)){
@@ -256,7 +289,7 @@ public class RfidServer extends EventListener implements IRfidServer, ServiceTra
 			//JOptionPane.showMessageDialog(null, "Tag: "+rfidTagNumber+" in location "+symLoc+" not registered to a DPI");
 			logging.debug("Tag: "+rfidTagNumber+" in location "+symLoc+" not registered to a DPI");
 			this.frame.addRow("Unregistered", rfidTagNumber, wUnit, symLoc);
-		}
+		}*/
 		
 		
 	}
@@ -275,13 +308,8 @@ public class RfidServer extends EventListener implements IRfidServer, ServiceTra
 					//this.dpiToServiceID.put(dpiAsString, serviceID);
 					//this.sendAcknowledgeMessage(dpiAsString, serviceID, 0);
 					this.frame.setNewDPIRegistered(tagNumber, dpiAsString);
-					Timer timer = new Timer();
-					RFIDUpdateTimerTask task = new RFIDUpdateTimerTask(this,  tagNumber);
-					timer.schedule(task, 3000);
-					this.tagToTimerTable.put(tagNumber, timer);
 					logging.debug("Registration successfull. Sent Acknowledgement 0");
-					
-					
+
 				}else{
 					//this.sendAcknowledgeMessage(dpiAsString, serviceID, 1);
 					logging.debug("Registration unsuccessfull. Sent Ack 1");
@@ -344,21 +372,6 @@ public class RfidServer extends EventListener implements IRfidServer, ServiceTra
 		this.tagtoIdentityTable.remove(tagNumber);
 	}
 	
-	public static void main(String[] args) throws IOException{
-		RfidServer impl = new RfidServer();
-		System.out.println(impl.getPassword());
-		
-		
-		RFIDConfig config = new RFIDConfig();
-		impl.wUnitToSymlocTable = config.getUnitToSymloc();
-		
-		Hashtable<String, Timer> timerTable = new Hashtable<String, Timer>();
-		RFIDUpdateTimerTask task = new RFIDUpdateTimerTask(impl,"0071");
-		Timer timer = new Timer();
-		timer.schedule(task, 5000);
-		timerTable.put("0071", timer);
-		task.cancel();
-	}
 
 
 
