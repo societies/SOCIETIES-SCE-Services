@@ -87,7 +87,7 @@ public class ClientGUIFrame extends JFrame
 
 	private IIdentity userIdentity;
 
-	private ServiceResourceIdentifier CLIENTID;
+	private ServiceResourceIdentifier serviceID;
 	
 	private String rfidTagNumber = "";
 
@@ -106,14 +106,14 @@ public class ClientGUIFrame extends JFrame
 			ICtxBroker broker,
 			IIdentity userIdentity,  
 			IIdentity serverIdentity,
-			ServiceResourceIdentifier clientID) 
+			ServiceResourceIdentifier serviceID) 
 	{
 		super( "My RFID location monitoring application" );
 		this.rfidServer = server;
 		this.userIdentity = userIdentity;
 		this.serverIdentity = serverIdentity;
 		this.ctxBroker = broker;
-		this.CLIENTID = clientID;
+		this.serviceID = serviceID;
 		this.setUp();
 		
 		
@@ -221,7 +221,7 @@ public class ClientGUIFrame extends JFrame
 	} 
 	
 	private void setUp(){
-		me = new RequestorService(this.serverIdentity, this.CLIENTID);
+		me = new RequestorService(this.serverIdentity, this.serviceID);
 		
 		/*
 		 * first we need to retrieve the tag number if it exists in the db. 
@@ -306,11 +306,11 @@ public class ClientGUIFrame extends JFrame
 			
 		}
 		
-		if (this.CLIENTID==null){
-			JOptionPane.showMessageDialog(this, "clientID is null");
+		if (this.serviceID==null){
+			JOptionPane.showMessageDialog(this, "serviceID is null");
 		}else{
-			if (this.CLIENTID.getIdentifier()==null){
-				JOptionPane.showMessageDialog(this, "clientid.getid is null");
+			if (this.serviceID.getIdentifier()==null){
+				JOptionPane.showMessageDialog(this, "serviceID.getid is null");
 			}
 		}
 		

@@ -70,7 +70,6 @@ public class RfidClient extends EventListener implements IRfidClient {
 	/* 
 	 * serviceID of RfidClient
 	 */
-	private ServiceResourceIdentifier	clientID;
 
 
 
@@ -277,7 +276,7 @@ public class RfidClient extends EventListener implements IRfidClient {
 				boolean registered = this.register();
 				if (registered){
 					UIManager.put("ClassLoader", ClassLoader.getSystemClassLoader());
-					clientGUI = new ClientGUIFrame(this.rfidServerRemote, this.getCtxBroker(), this.userIdentity, this.serverIdentity, clientID);
+					clientGUI = new ClientGUIFrame(this.rfidServerRemote, this.getCtxBroker(), this.userIdentity, this.serverIdentity, serviceId);
 				}else{
 					this.logging.debug("unable to register as a context source with the ICtxSourceMgr");
 				}
