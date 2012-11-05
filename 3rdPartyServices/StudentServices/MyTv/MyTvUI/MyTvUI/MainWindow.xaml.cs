@@ -159,6 +159,8 @@ namespace MyTvUI
             {
                 Console.WriteLine(e.ToString());
             }
+
+            MessageBox.Show("Initialised");
         }
 
         //when window loaded
@@ -190,106 +192,121 @@ namespace MyTvUI
         private void setChannel1()
         {
             tvBrowser.Navigate(channel1);
-            if (commsInitialised)
-            {
-                socketClient.sendMessage(
-                "START_MSG\n" +
-                "USER_ACTION\n" +
-                "channel\n" +
-                "1\n" +
-                "END_MSG\n");
-            }
-            //set channel button backgrounds
             channel1Button.Fill = channelBg_selected;
             channel2Button.Fill = channelBg_deselected;
             channel3Button.Fill = channelBg_deselected;
             channel4Button.Fill = channelBg_deselected;
             offButton.Fill = offBg_deselected;
-            currentChannel = 1;
+            if (commsInitialised)
+            {
+                String response = socketClient.sendMessage(
+                "START_MSG\n" +
+                "USER_ACTION\n" +
+                "channel\n" +
+                "1\n" +
+                "END_MSG\n");
+                if (response.Contains("RECEIVED"))
+                {
+                    //set channel button backgrounds
+                    currentChannel = 1;
+                }
+            }
         }       
 
         private void setChannel2()
         {
             tvBrowser.Navigate(channel2);
-            if (commsInitialised)
-            {
-                socketClient.sendMessage(
-                "START_MSG\n" +
-                "USER_ACTION\n" +
-                "channel\n" +
-                "2\n" +
-                "END_MSG\n");
-            }
-            //set channel button backgrounds
             channel1Button.Fill = channelBg_deselected;
             channel2Button.Fill = channelBg_selected;
             channel3Button.Fill = channelBg_deselected;
             channel4Button.Fill = channelBg_deselected;
             offButton.Fill = offBg_deselected;
-            currentChannel = 2;
+            if (commsInitialised)
+            {
+                String response = socketClient.sendMessage(
+                "START_MSG\n" +
+                "USER_ACTION\n" +
+                "channel\n" +
+                "2\n" +
+                "END_MSG\n");
+                if (response.Contains("RECEIVED"))
+                {
+                    //set channel button backgrounds
+                    currentChannel = 2;
+                }
+            }
         }
 
         private void setChannel3()
         {
             tvBrowser.Navigate(channel3);
-            if (commsInitialised)
-            {
-                socketClient.sendMessage(
-                "START_MSG\n" +
-                "USER_ACTION\n" +
-                "channel\n" +
-                "3\n" +
-                "END_MSG\n");
-            }
-            //set channel button backgrounds
             channel1Button.Fill = channelBg_deselected;
             channel2Button.Fill = channelBg_deselected;
             channel3Button.Fill = channelBg_selected;
             channel4Button.Fill = channelBg_deselected;
             offButton.Fill = offBg_deselected;
-            currentChannel = 3;
+            if (commsInitialised)
+            {
+                String response = socketClient.sendMessage(
+                "START_MSG\n" +
+                "USER_ACTION\n" +
+                "channel\n" +
+                "3\n" +
+                "END_MSG\n");
+                if (response.Contains("RECEIVED"))
+                {
+                    //set channel button backgrounds
+                    currentChannel = 3;
+                }
+            }
         }
 
         private void setChannel4()
         {
             tvBrowser.Navigate(channel4);
-            if (commsInitialised)
-            {
-                socketClient.sendMessage(
-               "START_MSG\n" +
-               "USER_ACTION\n" +
-               "channel\n" +
-               "4\n" +
-               "END_MSG\n");
-            }
-            //set channel button backgrounds
             channel1Button.Fill = channelBg_deselected;
             channel2Button.Fill = channelBg_deselected;
             channel3Button.Fill = channelBg_deselected;
             channel4Button.Fill = channelBg_selected;
             offButton.Fill = offBg_deselected;
-            currentChannel = 4;
+            if (commsInitialised)
+            {
+                String response = socketClient.sendMessage(
+               "START_MSG\n" +
+               "USER_ACTION\n" +
+               "channel\n" +
+               "4\n" +
+               "END_MSG\n");
+                if (response.Contains("RECEIVED"))
+                {
+                    //set channel button backgrounds
+                    currentChannel = 4;
+                }
+            }
         }
 
         private void setChannel0()
         {
             tvBrowser.Navigate(channel0);
-            if (commsInitialised)
-            {
-                socketClient.sendMessage(
-                "START_MSG\n" +
-                "USER_ACTION\n" +
-                "channel\n" +
-                "0\n" +
-                "END_MSG\n");
-            }
-            //set channel button backgrounds
             channel1Button.Fill = channelBg_deselected;
             channel2Button.Fill = channelBg_deselected;
             channel3Button.Fill = channelBg_deselected;
             channel4Button.Fill = channelBg_deselected;
             offButton.Fill = offBg_selected;
-            currentChannel = 0;
+            if (commsInitialised)
+            {
+                String response = socketClient.sendMessage(
+                "START_MSG\n" +
+                "USER_ACTION\n" +
+                "channel\n" +
+                "0\n" +
+                "END_MSG\n");
+                if (response.Contains("RECEIVED"))
+                {
+                    //set channel button backgrounds
+                    currentChannel = 0;
+                }
+            }
         }
 
         private void setMute()
@@ -299,19 +316,23 @@ namespace MyTvUI
             MMDevice defaultDevice = devEnum.GetDefaultAudioEndpoint(EDataFlow.eRender, ERole.eMultimedia);
             defaultDevice.AudioEndpointVolume.Mute = true;
 
+            volumeDown.Fill = muteBg_selected;
+            volumeUp.Fill = unmuteBg_deselected;
+
             if (commsInitialised)
             {
-                socketClient.sendMessage(
+                String response = socketClient.sendMessage(
                "START_MSG\n" +
                "USER_ACTION\n" +
                "muted\n" +
                "true\n" +
                "END_MSG\n");
+                if (response.Contains("RECEIVED"))
+                {
+                    //set mute button backgrounds
+                    currentlyMuted = true;
+                }
             }
-            //set mute button backgrounds
-            volumeDown.Fill = muteBg_selected;
-            volumeUp.Fill = unmuteBg_deselected;
-            currentlyMuted = true;
         }
 
         private void setUnMute()
@@ -321,25 +342,34 @@ namespace MyTvUI
             MMDevice defaultDevice = devEnum.GetDefaultAudioEndpoint(EDataFlow.eRender, ERole.eMultimedia);
             defaultDevice.AudioEndpointVolume.Mute = false;
 
+            volumeDown.Fill = muteBg_deselected;
+            volumeUp.Fill = unmuteBg_selected;
+
             if (commsInitialised)
             {
-                socketClient.sendMessage(
+                String response = socketClient.sendMessage(
                 "START_MSG\n" +
                 "USER_ACTION\n" +
                 "muted\n" +
                 "false\n" +
                 "END_MSG\n");
+                if (response.Contains("RECEIVED"))
+                {
+                    //set mute button backgrounds
+                    currentlyMuted = false;
+                }
             }
-            //set mute button backgrounds
-            volumeDown.Fill = muteBg_deselected;
-            volumeUp.Fill = unmuteBg_selected;
-            currentlyMuted = false;
         }
 
         private void initialisePreferences()
         {
             //set channel
-            String channelPref = socketClient.getChannelPreference();
+            Console.WriteLine("Requesting channel preference");
+            String prefRequest = "START_MSG\n" +
+                    "CHANNEL_REQUEST\n" +
+                    "END_MSG\n";
+
+            String channelPref = socketClient.sendMessage(prefRequest);
             if (channelPref.Equals("1"))
             {
                 setChannel1();
@@ -360,9 +390,15 @@ namespace MyTvUI
             {
                 setChannel0();
             }
+            //MessageBox.Show("Got channel preference");
 
             //set muted
-            String mutedPref = socketClient.getMutedPreference();
+            Console.WriteLine("Requesting mute preference");
+            String muteRequest = "START_MSG\n" +
+                    "MUTED_REQUEST\n" +
+                    "END_MSG\n";
+
+            String mutedPref = socketClient.sendMessage(muteRequest);
             if (mutedPref.Equals("false"))
             {
                 //unmute tv
@@ -373,6 +409,7 @@ namespace MyTvUI
                 //mute tv
                 setMute();
             }
+            //MessageBox.Show("Got muted preference");
         }
         #endregion serviceactions
 
@@ -464,11 +501,12 @@ namespace MyTvUI
                         Console.WriteLine("Sending service client my local IP address: " + myIP);
                         if(socketClient.connect())
                         {
-                            if (socketClient.sendMessage(
+                            String response = socketClient.sendMessage(
                             "START_MSG\n" +
                             "GUI_STARTED\n" +
                             myIP+"\n" +
-                            "END_MSG\n"))
+                            "END_MSG\n");
+                            if(response.Contains("RECEIVED"))
                             {
                                 Console.WriteLine("Handshake complete");
                                 return true;

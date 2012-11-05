@@ -143,12 +143,14 @@ public class SocketServer extends Thread{
 				if (command.equalsIgnoreCase(GUI_STARTED)){
 					LOG.debug(GUI_STARTED+" message received");
 					out.println(RECEIVED);
+					finalize();
 					String gui_ip = splitData[1];
 					commandHandler.connectToGUI(gui_ip);
 					
 				}else if (command.equalsIgnoreCase(USER_ACTION)){
 					LOG.debug(USER_ACTION+" message received");
 					out.println(RECEIVED);
+					finalize();
 					String parameterName = splitData[1];
 					String value = splitData[2];
 					commandHandler.processUserAction(parameterName, value);
@@ -157,18 +159,20 @@ public class SocketServer extends Thread{
 					LOG.debug(CHANNEL_REQUEST+" message received");
 					String response = commandHandler.getChannelPreference();
 					out.println(response);
+					finalize();
 
 				}else if(command.equalsIgnoreCase(MUTED_REQUEST)){
 					LOG.debug(MUTED_REQUEST+" message received");
 					String response = commandHandler.getMutedPreference();
 					out.println(response);
+					finalize();
 
 				}else if (command.equalsIgnoreCase(GUI_STOPPED)){
 					LOG.debug(GUI_STOPPED+" message received");
 					out.println(RECEIVED);
+					finalize();
 					commandHandler.disconnectFromGUI();
 				}
-				finalize();
 			}
 		} catch (IOException e) {
 			LOG.debug("Read failed");
