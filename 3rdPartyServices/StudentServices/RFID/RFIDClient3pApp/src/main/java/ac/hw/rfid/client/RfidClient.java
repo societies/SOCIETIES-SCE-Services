@@ -27,6 +27,8 @@ package ac.hw.rfid.client;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
+import javax.swing.UIManager;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.societies.api.comm.xmpp.interfaces.ICommManager;
@@ -274,7 +276,7 @@ public class RfidClient extends EventListener implements IRfidClient {
 
 				boolean registered = this.register();
 				if (registered){
-
+					UIManager.put("ClassLoader", ClassLoader.getSystemClassLoader());
 					clientGUI = new ClientGUIFrame(this.rfidServerRemote, this.getCtxBroker(), this.userIdentity, this.serverIdentity, clientID);
 				}else{
 					this.logging.debug("unable to register as a context source with the ICtxSourceMgr");
