@@ -76,8 +76,9 @@ namespace MyTvUI
 
 
 
-        public Boolean sendMessage(String message)
+        public String sendMessage(String message)
         {
+            String response = "";
             if (connected)
             {
                 Console.WriteLine("SOCKET_CLIENT: Sending message to service client:");
@@ -86,82 +87,73 @@ namespace MyTvUI
                 echoSocket.Send(Encoding.ASCII.GetBytes(message));
                 byte[] data = new byte[1024];
                 int receivedDataLength = echoSocket.Receive(data);
-                String response = Encoding.ASCII.GetString(data, 0, receivedDataLength);
+                response = Encoding.ASCII.GetString(data, 0, receivedDataLength);
                 disconnect();
                 Console.WriteLine("SOCKET_CLIENT: received -> " + response);
-                if (response.Contains("RECEIVED"))
-                {
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
             }
             else
             {
                 if (connect())
                 {
-                    sendMessage(message);
-                    return true;
-                }
-            }
-            return false;
-        }
-
-
-        public String getChannelPreference()
-        {
-            String response = "";
-            if (connected)
-            {
-                Console.WriteLine("SOCKET_CLIENT: Getting channel preference from service client");
-
-                String request = "START_MSG\n" +
-                    "CHANNEL_REQUEST\n" +
-                    "END_MSG\n";
-                echoSocket.Send(Encoding.ASCII.GetBytes(request));
-                byte[] data = new byte[1024];
-                int receivedDataLength = echoSocket.Receive(data);
-                response = Encoding.ASCII.GetString(data, 0, receivedDataLength);
-                disconnect();
-            }
-            else
-            {
-                if (connect())
-                {
-                    response = getChannelPreference();
+                    response = sendMessage(message);
                 }
             }
             return response;
         }
 
 
-        public String getMutedPreference()
-        {
-            String response = "";
-            if (connected)
-            {
-                Console.WriteLine("SOCKET_CLIENT: Getting muted preference from service client");
+        //public String getChannelPreference()
+        //{
+        //    String response = "";
+        //    if (connected)
+        //    {
+        //        Console.WriteLine("SOCKET_CLIENT: Getting channel preference from service client");
 
-                String request = "START_MSG\n" +
-                    "MUTED_REQUEST\n" +
-                    "END_MSG\n";
-                echoSocket.Send(Encoding.ASCII.GetBytes(request));
-                byte[] data = new byte[1024];
-                int receivedDataLength = echoSocket.Receive(data);
-                response = Encoding.ASCII.GetString(data, 0, receivedDataLength);
-                disconnect();
-            }
-            else
-            {
-                if (connect())
-                {
-                    response = getMutedPreference();
-                }
-            }
-            return response;
-        }
+        //        String request = "START_MSG\n" +
+        //            "CHANNEL_REQUEST\n" +
+        //            "END_MSG\n";
+        //        echoSocket.Send(Encoding.ASCII.GetBytes(request));
+        //        byte[] data = new byte[1024];
+        //        int receivedDataLength = echoSocket.Receive(data);
+        //        response = Encoding.ASCII.GetString(data, 0, receivedDataLength);
+        //        disconnect();
+        //    }
+        //    else
+        //    {
+        //        if (connect())
+        //        {
+        //            response = getChannelPreference();
+        //        }
+        //    }
+        //    return response;
+        //}
+
+
+        //public String getMutedPreference()
+        //{
+        //    String response = "";
+        //    if (connected)
+        //    {
+        //        Console.WriteLine("SOCKET_CLIENT: Getting muted preference from service client");
+
+        //        String request = "START_MSG\n" +
+        //            "MUTED_REQUEST\n" +
+        //            "END_MSG\n";
+        //        echoSocket.Send(Encoding.ASCII.GetBytes(request));
+        //        byte[] data = new byte[1024];
+        //        int receivedDataLength = echoSocket.Receive(data);
+        //        response = Encoding.ASCII.GetString(data, 0, receivedDataLength);
+        //        disconnect();
+        //    }
+        //    else
+        //    {
+        //        if (connect())
+        //        {
+        //            response = getMutedPreference();
+        //        }
+        //    }
+        //    return response;
+        //}
 
 
         #region connection parameters
