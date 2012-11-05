@@ -185,6 +185,8 @@ public class RfidClient extends EventListener implements IRfidClient {
 	 */
 	public void setCommManager(ICommManager commManager) {
 		this.commManager = commManager;
+		this.idm = this.commManager.getIdManager();
+		this.userIdentity = this.idm.getThisNetworkNode();
 	}
 
 
