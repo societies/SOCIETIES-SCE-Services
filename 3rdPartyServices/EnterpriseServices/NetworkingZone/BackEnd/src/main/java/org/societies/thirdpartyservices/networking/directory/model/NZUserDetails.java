@@ -62,9 +62,13 @@ public class NZUserDetails implements Serializable {
 	
 	private String userid;
 	private String displayName;
+	private String email;
+	private String homelocation;
+	private String sex;
 	private String company;
 	private String dept;
 	private String position;
+	private String about;
 	
 	private String facebookID;
 	private String twitterID;
@@ -166,6 +170,22 @@ public class NZUserDetails implements Serializable {
 	public void setPosition(String position) {
 		this.position = position;
 	}
+	
+	/**
+	 * @return the about
+	 */
+	@Column(name = "About")
+	public String getAbout() {
+		return about;
+	}
+
+	/**
+	 * @param about the about
+	 */
+	
+	public void setAbout(String about) {
+		this.about = about;
+	}
 
 	/**
 	 * @return the facebookID
@@ -210,6 +230,51 @@ public class NZUserDetails implements Serializable {
 	 */
 	public void setLinkedInID(String linkedInID) {
 		this.linkedInID = linkedInID;
+	}
+
+	/**
+	 * @return the email
+	 */
+	@Column(name = "email")
+	public String getEmail() {
+		return email;
+	}
+
+	/**
+	 * @param email the email to set
+	 */
+	public void setEmail(String email) {
+		this.email = email;
+	}
+
+	/**
+	 * @return the homelocation
+	 */
+	@Column(name = "homelocation")
+	public String getHomelocation() {
+		return homelocation;
+	}
+
+	/**
+	 * @param homelocation the homelocation to set
+	 */
+	public void setHomelocation(String homelocation) {
+		this.homelocation = homelocation;
+	}
+
+	/**
+	 * @return the sex
+	 */
+	@Column(name = "sex")
+	public String getSex() {
+		return sex;
+	}
+
+	/**
+	 * @param sex the sex to set
+	 */
+	public void setSex(String sex) {
+		this.sex = sex;
 	}
 
 	public NZUserDetails() {

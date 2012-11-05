@@ -42,6 +42,9 @@
 			<xs:sequence>
 				<xs:element name="userid" type="xs:string" minOccurs="0" />
 				<xs:element name="displayName" type="xs:string" minOccurs="0" />
+				<xs:element name="email" type="xs:string" minOccurs="0" />
+				<xs:element name="homelocation" type="xs:string" minOccurs="0" />
+				<xs:element name="sex" type="xs:string" minOccurs="0" />
 				<xs:element name="company" type="xs:string" minOccurs="0" />
 				<xs:element name="dept" type="xs:string" minOccurs="0" />
 				<xs:element name="position" type="xs:string" minOccurs="0" />

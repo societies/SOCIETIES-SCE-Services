@@ -15,7 +15,7 @@
 
 	<tx:annotation-driven />
  
-	<bean id="NetworkingDirectoryPropConfig"
+ 	<bean id="NetworkingDirectoryPropConfig"
 		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
 		<property name="ignoreResourceNotFound" value="true"></property>
 		<property name="locations">
@@ -40,9 +40,13 @@
 				</value>
 				<value>org.societies.thirdpartyservices.networking.directory.model.Config
 				</value>
-				<value>org.societies.thirdpartyservices.networking.directory.model.ShareInfo
+				<value>org.societies.thirdpartyservices.networking.directory.model.NZShareInfo
 				</value>
 				<value>org.societies.thirdpartyservices.networking.directory.model.SocialNetworkConnections
+				</value>
+				<value>org.societies.thirdpartyservices.networking.directory.model.NZNotes
+				</value>
+				<value>org.societies.thirdpartyservices.networking.directory.model.NZZones
 				</value>
 			</list>
 		</property>
@@ -57,10 +61,10 @@
 
 		<property name="hibernateProperties">
 			<props>
-				<prop key="hibernate.show_sql">true</prop>
-				<prop key="hibernate.cache.use_second_level_cache">false</prop>
-				<prop key="hibernate.hbm2ddl.auto">update</prop>
-				<prop key="hibernate.format_sql">true</prop>
+				<prop key="hibernate.show_sql">${show_sql}</prop>
+				<prop key="hibernate.cache.use_second_level_cache">${cache.use_second_level_cache}</prop>
+				<prop key="hibernate.hbm2ddl.auto">${hbm2ddl.auto}</prop>
+				<prop key="hibernate.format_sql">${format_sql}</prop>
 			</props>
 		</property>
 	</bean>
@@ -81,7 +85,7 @@
 	<bean id="NetworkingBackEnd" 
 		class="org.societies.thirdpartyservices.networking.server.NetworkBackEnd"
 		 init-method="init_service">
-	 	<property name="networkingDirectory" ref="networkingDirectory" /> 
+		<property name="networkingDirectory" ref="networkingDirectory" />  
 		<property name="cisManager" ref="cisManager" />
 	</bean>
 	
@@ -89,8 +93,7 @@
 		class="org.societies.thirdpartyservices.networking.server.NetworkingCommsServer"
 		 init-method="InitService">
 	 	<property name="commManager" ref="commManager" /> 
-	 	<property name="netServer" ref="NetworkingBackEnd" /> 
+	 	<property name="netServer" ref="NetworkingBackEnd" />
 	</bean>
-
-
+	
 </beans>

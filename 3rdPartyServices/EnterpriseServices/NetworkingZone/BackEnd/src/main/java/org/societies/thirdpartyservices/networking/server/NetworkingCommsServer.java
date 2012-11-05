@@ -42,8 +42,8 @@ import org.societies.api.comm.xmpp.exceptions.CommunicationException;
 import org.societies.api.comm.xmpp.exceptions.XMPPError;
 import org.societies.api.comm.xmpp.interfaces.ICommManager;
 import org.societies.api.comm.xmpp.interfaces.IFeatureServer;
-import org.societies.api.ext3p.schema.networking.NetworkingBean;
-import org.societies.api.ext3p.schema.networking.NetworkingBeanResult;
+import org.societies.api.ext3p.networking.NetworkingBean;
+import org.societies.api.ext3p.networking.NetworkingBeanResult;
 
 public class NetworkingCommsServer implements IFeatureServer {
 
@@ -61,10 +61,10 @@ public class NetworkingCommsServer implements IFeatureServer {
 
 	private static final List<String> NAMESPACES = Collections
 			.unmodifiableList(Arrays
-					.asList("http://societies.org/api/ext3p/schema/networking"));
+					.asList("http://societies.org/api/ext3p/networking"));
 	private static final List<String> PACKAGES = Collections
 			.unmodifiableList(Arrays
-					.asList("org.societies.api.ext3p.schema.networking"));
+					.asList("org.societies.api.ext3p.networking"));
 
 	// PRIVATE VARIABLES
 	private ICommManager commManager;
@@ -88,11 +88,12 @@ public class NetworkingCommsServer implements IFeatureServer {
 		// Registry Networking Directory with the Comms Manager
 		try {
 			getCommManager().register(this);
+			LOG.info("Registered NetworkingCommsServer with the xc manager");
 		} catch (CommunicationException e) {
 			e.printStackTrace();
 		}
 	}
-
+	
 	@Override
 	public List<String> getJavaPackages() {
 		return PACKAGES;
@@ -147,16 +148,111 @@ public class NetworkingCommsServer implements IFeatureServer {
 						}
 						break;
 					}
-					case UPDATEMYDETAILS:
-					{
+					case GETUSERDETAILS:	{
 						// We need to check that the user only is allowed update their own record 
 						if (stanza.getFrom().getBareJid().contains(messageBean.getMyuserid()))
+						{
+							messageResult.setUserDetails(netServer.getUserDetails(messageBean.getMyuserid(), messageBean.getFrienduserid()));
+							messageResult.setResult(true);
+						}
+						break;
+					}
+					case UPDATEMYDETAILS:
+					{
+						LOG.info("UPDATEMYDETAILS for user " + messageBean.getMyDetails().getUserid());
+						
+						// We need to check that the user only is allowed update their own record 
+						if (stanza.getFrom().getBareJid().contains(messageBean.getMyDetails().getUserid()))
 						{
 							messageResult.setUserDetails(netServer.updateMyDetails(messageBean.getMyDetails()));
 							messageResult.setResult(true);
 						}
 						break;
 					}
+					case GETSHAREINFO:	{
+						// We need to check that the user only is allowed update their own record 
+						if (stanza.getFrom().getBareJid().contains(messageBean.getMyuserid()))
+						{
+							messageResult.setSharedInfo(netServer.getShareInfo(messageBean.getMyuserid(), messageBean.getFrienduserid()));
+							messageResult.setResult(true);
+						}
+						break;
+					}
+					case GETFRIENDSHAREINFO: {
+						
+						if (stanza.getFrom().getBareJid().contains(messageBean.getMyuserid()))
+						{
+							messageResult.setSharedInfo(netServer.getShareInfo(messageBean.getFrienduserid(), messageBean.getMyuserid()));
+							messageResult.setResult(true);
+						}
+						break;
+					}
+					case UPDATESHAREINFO:	{
+						// We need to check that the user only is allowed update their own record 
+						if (stanza.getFrom().getBareJid().contains(messageBean.getMyuserid()))
+						{
+							messageResult.setSharedInfo(netServer.updateShareInfo(messageBean.getSharedInfo()));
+							messageResult.setResult(true);
+						}
+						break;
+					}
+					case GETZONEEVENTS:
+					{
+						messageResult.setZoneeventlist(netServer.getCisActivity(messageBean.getMycurrentzone()));
+						messageResult.setResult(true);
+						break;
+					}
+					case GETMEMBERDETAILS:
+					{
+						messageResult.setMemberdetaillist(netServer.getMemberNames(messageBean.getUseridlist()));
+						messageResult.setResult(true);
+						break;
+					}
+					case GETNOTES: 
+					{
+						if (stanza.getFrom().getBareJid().contains(messageBean.getMyuserid()))
+						{
+							messageResult.setNotes(netServer.getNotes(messageBean.getMyuserid(), messageBean.getFrienduserid()));
+							messageResult.setResult(true);
+						}
+						break;
+					}
+					case ADDNOTE: 
+					{
+						if (stanza.getFrom().getBareJid().contains(messageBean.getMyuserid()))
+						{
+							messageResult.setNotes(netServer.addNote(messageBean.getMyuserid(), messageBean.getFrienduserid(), messageBean.getNote()));
+							messageResult.setResult(true);
+						}
+						break;
+					}
+					case GETZONEDETAILS: 
+					{
+						messageResult.setZonedetails(netServer.getZoneDetails());
+						messageResult.setResult(true);
+						break;
+					}
+					case GETSTARTUPINFO: 
+					{
+						if (stanza.getFrom().getBareJid().contains(messageBean.getMyuserid()))
+						{
+							messageResult.setNetworkingCis(netServer.getMyMainCisId());
+							messageResult.setZones(netServer.getZoneCisIDs());
+							messageResult.setZonedetails(netServer.getZoneDetails());
+							messageResult.setUserDetails(netServer.getMyDetails(messageBean.getMyuserid()));
+							messageResult.setResult(true);
+						}
+						break;
+					}
+					case GETUSERDETAILSLIST:
+					{
+						if (stanza.getFrom().getBareJid().contains(messageBean.getMyuserid()))
+						{
+							messageResult.setUserDetailsList(netServer.getUserDetailsList(messageBean.getMyuserid(), messageBean.getUseridlist()));
+							messageResult.setResult(true);
+						}
+					}
+					break;
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
