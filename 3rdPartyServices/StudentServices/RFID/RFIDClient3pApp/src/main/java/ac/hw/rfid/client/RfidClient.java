@@ -254,7 +254,7 @@ public class RfidClient extends EventListener implements IRfidClient {
 	public void handleInternalEvent(InternalEvent event) {
 		ServiceMgmtEvent slmEvent = (ServiceMgmtEvent) event.geteventInfo();
 
-		if (slmEvent.getBundleSymbolName().equalsIgnoreCase("ac.hw.display.DisplayPortalClientApp")){
+		if (slmEvent.getBundleSymbolName().equalsIgnoreCase("ac.hw.rfid.RFIDClientApp")){
 			this.logging.debug("Received SLM event for my bundle");
 
 			if (slmEvent.getEventType().equals(ServiceMgmtEventType.NEW_SERVICE)){
