@@ -216,6 +216,8 @@ public class RfidServer extends EventListener implements IRfidServer, ServiceTra
 				"(" + CSSEventConstants.EVENT_NAME + "=" + DeviceMgmtEventConstants.RFID_READER_EVENT + ")" +
 				"(" + CSSEventConstants.EVENT_SOURCE + "=" + deviceId + ")" +
 				")";
+		this.logging.debug("Registering for RFIDEvent: "+eventFilter);
+		
 		this.eventMgr.subscribeInternalEvent(this, new String[]{EventTypes.RFID_UPDATE_EVENT}, eventFilter);
 	}
 	
@@ -418,9 +420,11 @@ public class RfidServer extends EventListener implements IRfidServer, ServiceTra
 //			this.logging.debug("Received RFIDUpdateEvent: "+rfidEvent.getWakeupUnit()+" - "+rfidEvent.getRFIDTagNumber() );
 //		}
 		
+		
 		HashMap<String, String> payload = (HashMap<String, String>)event.geteventInfo();
-		this.sendUpdate(payload.get("wakeupUnit"), payload.get("tagNumber"));
 		this.logging.debug("Received RFIDUpdateEvent: "+payload.get("wakeupUnit")+" - "+ payload.get("tagNumber"));
+		this.sendUpdate(payload.get("wakeupUnit"), payload.get("tagNumber"));
+		this.logging.debug("Sent rfid update WU:"+payload.get("wakeupUnit")+" tag: "+payload.get("tagNumber"));
 		
 		
 	}
