@@ -24,27 +24,23 @@
  */
 package ac.hw.rfid.client.comm;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Properties;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.societies.api.identity.IIdentity;
-import org.societies.api.identity.IIdentityManager;
-import org.societies.api.identity.InvalidFormatException;
 import org.societies.api.comm.xmpp.datatypes.Stanza;
 import org.societies.api.comm.xmpp.datatypes.XMPPInfo;
 import org.societies.api.comm.xmpp.exceptions.CommunicationException;
 import org.societies.api.comm.xmpp.exceptions.XMPPError;
 import org.societies.api.comm.xmpp.interfaces.ICommCallback;
 import org.societies.api.comm.xmpp.interfaces.ICommManager;
-import org.societies.api.ext3p.schema.rfidclientbean.RfidClientBean;
-import org.societies.api.ext3p.schema.rfidclientbean.RfidClientMethodType;
 import org.societies.api.ext3p.schema.rfidserverbean.RfidServerBean;
 import org.societies.api.ext3p.schema.rfidserverbean.RfidServerMethodType;
+import org.societies.api.identity.IIdentity;
+import org.societies.api.identity.IIdentityManager;
+import org.societies.api.identity.InvalidFormatException;
 
 import ac.hw.rfid.server.api.remote.IRfidServer;
 
@@ -58,11 +54,9 @@ import ac.hw.rfid.server.api.remote.IRfidServer;
  */
 public class CommsClient implements IRfidServer, ICommCallback{
 	private static final List<String> NAMESPACES = Collections.unmodifiableList(
-			  Arrays.asList("http://societies.org/api/ext3p/schema/rfidclientbean", 
-				  		"http://societies.org/api/ext3p/schema/rfidserverbean"));
-private static final List<String> PACKAGES = Collections.unmodifiableList(
-		  Arrays.asList("org.societies.api.ext3p.schema.rfidserverbean",
-				  "org.societies.api.ext3p.schema.rfidclientbean"));
+			  Arrays.asList("http://societies.org/api/ext3p/schema/rfidserverbean"));
+	private static final List<String> PACKAGES = Collections.unmodifiableList(
+		  Arrays.asList("org.societies.api.ext3p.schema.rfidserverbean"));
 	//PRIVATE VARIABLES
 	private ICommManager commManager;
 	private static Logger logging = LoggerFactory.getLogger(CommsClient.class);

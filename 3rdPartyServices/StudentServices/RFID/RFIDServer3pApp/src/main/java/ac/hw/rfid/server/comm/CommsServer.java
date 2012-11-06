@@ -52,11 +52,9 @@ import ac.hw.rfid.server.api.IRfidServer;
 public class CommsServer implements IFeatureServer {
 
 	private static final List<String> NAMESPACES = Collections.unmodifiableList(
-			  Arrays.asList("http://societies.org/api/ext3p/schema/rfidclientbean", 
-				  		"http://societies.org/api/ext3p/schema/rfidserverbean"));
+			  Arrays.asList("http://societies.org/api/ext3p/schema/rfidserverbean"));
 private static final List<String> PACKAGES = Collections.unmodifiableList(
-		  Arrays.asList("org.societies.api.ext3p.schema.rfidserverbean",
-				  "org.societies.api.ext3p.schema.rfidclientbean"));
+		  Arrays.asList("org.societies.api.ext3p.schema.rfidserverbean"));
 	private IRfidServer rfidServer;
 	
 	//PRIVATE VARIABLES
