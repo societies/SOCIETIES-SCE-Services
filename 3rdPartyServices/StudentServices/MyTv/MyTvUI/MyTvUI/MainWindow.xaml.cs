@@ -159,8 +159,6 @@ namespace MyTvUI
             {
                 Console.WriteLine(e.ToString());
             }
-
-            MessageBox.Show("Initialised");
         }
 
         //when window loaded
@@ -189,8 +187,9 @@ namespace MyTvUI
         #endregion window
 
         #region serviceactions
-        private void setChannel1()
+        private Boolean setChannel1()
         {
+            Console.WriteLine("Setting channel to 1");
             tvBrowser.Navigate(channel1);
             channel1Button.Fill = channelBg_selected;
             channel2Button.Fill = channelBg_deselected;
@@ -199,6 +198,7 @@ namespace MyTvUI
             offButton.Fill = offBg_deselected;
             if (commsInitialised)
             {
+                Console.WriteLine("Sending channel 1 action to UAM");
                 String response = socketClient.sendMessage(
                 "START_MSG\n" +
                 "USER_ACTION\n" +
@@ -207,14 +207,17 @@ namespace MyTvUI
                 "END_MSG\n");
                 if (response.Contains("RECEIVED"))
                 {
+                    Console.WriteLine("UAM received channel 1 action");
                     //set channel button backgrounds
                     currentChannel = 1;
                 }
             }
+            return true;
         }       
 
-        private void setChannel2()
+        private Boolean setChannel2()
         {
+            Console.WriteLine("Setting channel to 2");
             tvBrowser.Navigate(channel2);
             channel1Button.Fill = channelBg_deselected;
             channel2Button.Fill = channelBg_selected;
@@ -223,6 +226,7 @@ namespace MyTvUI
             offButton.Fill = offBg_deselected;
             if (commsInitialised)
             {
+                Console.WriteLine("Sending channel 2 action to UAM");
                 String response = socketClient.sendMessage(
                 "START_MSG\n" +
                 "USER_ACTION\n" +
@@ -231,14 +235,17 @@ namespace MyTvUI
                 "END_MSG\n");
                 if (response.Contains("RECEIVED"))
                 {
+                    Console.WriteLine("UAM received channel 2 action");
                     //set channel button backgrounds
                     currentChannel = 2;
                 }
             }
+            return true;
         }
 
-        private void setChannel3()
+        private Boolean setChannel3()
         {
+            Console.WriteLine("Setting channel to 3");
             tvBrowser.Navigate(channel3);
             channel1Button.Fill = channelBg_deselected;
             channel2Button.Fill = channelBg_deselected;
@@ -247,6 +254,7 @@ namespace MyTvUI
             offButton.Fill = offBg_deselected;
             if (commsInitialised)
             {
+                Console.WriteLine("Sending channel 3 action to UAM");
                 String response = socketClient.sendMessage(
                 "START_MSG\n" +
                 "USER_ACTION\n" +
@@ -255,14 +263,17 @@ namespace MyTvUI
                 "END_MSG\n");
                 if (response.Contains("RECEIVED"))
                 {
+                    Console.WriteLine("UAM received channel 3 action");
                     //set channel button backgrounds
                     currentChannel = 3;
                 }
             }
+            return true;
         }
 
-        private void setChannel4()
+        private Boolean setChannel4()
         {
+            Console.WriteLine("Setting channel to 4");
             tvBrowser.Navigate(channel4);
             channel1Button.Fill = channelBg_deselected;
             channel2Button.Fill = channelBg_deselected;
@@ -271,6 +282,7 @@ namespace MyTvUI
             offButton.Fill = offBg_deselected;
             if (commsInitialised)
             {
+                Console.WriteLine("Sending channel 4 action to UAM");
                 String response = socketClient.sendMessage(
                "START_MSG\n" +
                "USER_ACTION\n" +
@@ -279,14 +291,17 @@ namespace MyTvUI
                "END_MSG\n");
                 if (response.Contains("RECEIVED"))
                 {
+                    Console.WriteLine("UAM received channel 4 action");
                     //set channel button backgrounds
                     currentChannel = 4;
                 }
             }
+            return true;
         }
 
-        private void setChannel0()
+        private Boolean setChannel0()
         {
+            Console.WriteLine("Setting channel to 0");
             tvBrowser.Navigate(channel0);
             channel1Button.Fill = channelBg_deselected;
             channel2Button.Fill = channelBg_deselected;
@@ -295,6 +310,7 @@ namespace MyTvUI
             offButton.Fill = offBg_selected;
             if (commsInitialised)
             {
+                Console.WriteLine("Sending channel 0 action to UAM");
                 String response = socketClient.sendMessage(
                 "START_MSG\n" +
                 "USER_ACTION\n" +
@@ -303,14 +319,17 @@ namespace MyTvUI
                 "END_MSG\n");
                 if (response.Contains("RECEIVED"))
                 {
+                    Console.WriteLine("UAM received channel 0 action");
                     //set channel button backgrounds
                     currentChannel = 0;
                 }
             }
+            return true;
         }
 
-        private void setMute()
+        private Boolean setMute()
         {
+            Console.WriteLine("Setting muted");
             //mute volume
             MMDeviceEnumerator devEnum = new MMDeviceEnumerator();
             MMDevice defaultDevice = devEnum.GetDefaultAudioEndpoint(EDataFlow.eRender, ERole.eMultimedia);
@@ -321,6 +340,7 @@ namespace MyTvUI
 
             if (commsInitialised)
             {
+                Console.WriteLine("Sending muted action to UAM");
                 String response = socketClient.sendMessage(
                "START_MSG\n" +
                "USER_ACTION\n" +
@@ -329,14 +349,17 @@ namespace MyTvUI
                "END_MSG\n");
                 if (response.Contains("RECEIVED"))
                 {
+                    Console.WriteLine("UAM received muted action");
                     //set mute button backgrounds
                     currentlyMuted = true;
                 }
             }
+            return true;
         }
 
-        private void setUnMute()
+        private Boolean setUnMute()
         {
+            Console.WriteLine("Setting unmuted");
             //unmute volume
             MMDeviceEnumerator devEnum = new MMDeviceEnumerator();
             MMDevice defaultDevice = devEnum.GetDefaultAudioEndpoint(EDataFlow.eRender, ERole.eMultimedia);
@@ -347,6 +370,7 @@ namespace MyTvUI
 
             if (commsInitialised)
             {
+                Console.WriteLine("Sending unmuted action to UAM");
                 String response = socketClient.sendMessage(
                 "START_MSG\n" +
                 "USER_ACTION\n" +
@@ -355,10 +379,12 @@ namespace MyTvUI
                 "END_MSG\n");
                 if (response.Contains("RECEIVED"))
                 {
+                    Console.WriteLine("UAM received unmuted action");
                     //set mute button backgrounds
                     currentlyMuted = false;
                 }
             }
+            return true;
         }
 
         private void initialisePreferences()
@@ -370,6 +396,7 @@ namespace MyTvUI
                     "END_MSG\n";
 
             String channelPref = socketClient.sendMessage(prefRequest);
+            Console.WriteLine("Got channel preference: " + channelPref);
             if (channelPref.Equals("1"))
             {
                 setChannel1();
@@ -399,6 +426,7 @@ namespace MyTvUI
                     "END_MSG\n";
 
             String mutedPref = socketClient.sendMessage(muteRequest);
+            Console.WriteLine("Got mute preference: " + mutedPref);
             if (mutedPref.Equals("false"))
             {
                 //unmute tv
