@@ -102,11 +102,13 @@ private static final List<String> PACKAGES = Collections.unmodifiableList(
 	/* Put your functionality here if there is NO return object, ie, VOID  */
 	@Override
 	public void receiveMessage(Stanza stanza, Object payload) {
+		this.LOG.debug("Received a message: "+payload);
 		if (payload instanceof RfidClientBean){
 			RfidClientBean clientBean = (RfidClientBean) payload;
 			if (clientBean.getMethod().equals(RfidClientMethodType.ACKNOWLEDGE_REGISTRATION)){
 				this.rfidClient.acknowledgeRegistration(clientBean.getRStatus());
 			}else if(clientBean.getMethod().equals(RfidClientMethodType.SEND_UPDATE)){
+				this.LOG.debug("Received rfid update: "+clientBean.getSymLoc()+" for my tag number: "+clientBean.getTagNumber());
 				this.rfidClient.sendUpdate(clientBean.getSymLoc(), clientBean.getTagNumber());
 			}else{
 				this.LOG.debug("Payload object not of type: "+RfidClientBean.class.getName()+". Ignoring message from: "+stanza.getFrom().getJid());

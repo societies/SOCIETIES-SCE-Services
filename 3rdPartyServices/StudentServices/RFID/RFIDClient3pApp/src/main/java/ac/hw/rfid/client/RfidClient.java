@@ -150,20 +150,24 @@ public class RfidClient extends EventListener implements IRfidClient {
 	public void sendUpdate(String symLoc, String tagNumber) {
 		
 		this.clientGUI.sendSymLocUpdate(tagNumber, symLoc);
+		this.logging.debug("updated gui");
 		this.clientGUI.tfTagNumber.setText(tagNumber);
-
+		
 		if (this.myCtxSourceId==null){
+			
 			boolean registered = this.register();
 			if (registered){
+				this.logging.debug("RFID is registered with ctx source mgr. Updating context db with: "+symLoc);
 				this.ctxSourceMgr.sendUpdate(this.myCtxSourceId, symLoc);
 				this.logging.debug("Sent new RFID information");
 			}else{
-				this.logging.debug("Received symloc update: "+symLoc+" but unable to register as a context source with the ICtxSourceMgr.");
+				this.logging.error("Received symloc update: "+symLoc+" but unable to register as a context source with the ICtxSourceMgr.");
 			}
 		}else{
 			//this.ctxSourceMgr.sendUpdate(this.myCtxSourceId, symLoc);		
+			this.logging.debug("Updating context database with: "+symLoc);
 			
-			this.ctxSourceMgr.sendUpdate(myCtxSourceId, symLoc, null, false, 1.0, 1d/60);
+			this.ctxSourceMgr.sendUpdate(myCtxSourceId, symLoc, null, false, 1.0, 1d/5);
 			this.logging.debug("Sent new RFID information");
 		}
 
@@ -172,6 +176,7 @@ public class RfidClient extends EventListener implements IRfidClient {
 	@Override
 	public void acknowledgeRegistration(Integer rStatus) {
 		this.clientGUI.acknowledgeRegistration(rStatus);
+		this.logging.debug("Registration succeeded.");
 
 	}
 
