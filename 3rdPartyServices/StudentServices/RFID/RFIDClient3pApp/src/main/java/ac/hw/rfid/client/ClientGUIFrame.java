@@ -42,6 +42,8 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.societies.api.context.CtxException;
 import org.societies.api.context.broker.ICtxBroker;
 import org.societies.api.context.model.CtxAttribute;
@@ -97,7 +99,7 @@ public class ClientGUIFrame extends JFrame
 	
 	private IRfidServer rfidServer;
 	private Requestor me;
-
+	private Logger logging = LoggerFactory.getLogger(this.getClass());
 
 	/**
 	 */
@@ -109,6 +111,7 @@ public class ClientGUIFrame extends JFrame
 			ServiceResourceIdentifier serviceID) 
 	{
 		super( "My RFID location monitoring application" );
+		this.logging.debug("Starting clientGUI");
 		this.rfidServer = server;
 		this.userIdentity = userIdentity;
 		this.serverIdentity = serverIdentity;
@@ -218,6 +221,7 @@ public class ClientGUIFrame extends JFrame
 		setContentPane( pnPanel0 );
 		pack();
 		setVisible( true );
+		this.logging.debug("Started client GUI");
 	} 
 	
 	private void setUp(){

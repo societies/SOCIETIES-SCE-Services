@@ -133,6 +133,7 @@ public class RfidClient extends EventListener implements IRfidClient {
 		try {
 			Future<String> fID = this.ctxSourceMgr.register("RFID", CtxAttributeTypes.LOCATION_SYMBOLIC);
 			myCtxSourceId = fID.get();
+			this.logging.debug("Successfully registered to ctxSourceMgr. Got my source ID: "+myCtxSourceId);
 			return true;
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
@@ -277,11 +278,13 @@ public class RfidClient extends EventListener implements IRfidClient {
 				if (registered){
 					UIManager.put("ClassLoader", ClassLoader.getSystemClassLoader());
 					clientGUI = new ClientGUIFrame(this.rfidServerRemote, this.getCtxBroker(), this.userIdentity, this.serverIdentity, serviceId);
+					this.logging.debug("Started client");
 				}else{
 					this.logging.debug("unable to register as a context source with the ICtxSourceMgr");
 				}
 
 				this.unRegisterFromSLMEvents();
+				
 			}
 		}else{
 			this.logging.debug("Received SLM event but it wasn't related to my bundle");
