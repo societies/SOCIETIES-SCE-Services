@@ -249,7 +249,7 @@ public class RfidServer extends EventListener implements IRfidServer, ServiceTra
 					RFIDUpdateTimerTask task = new RFIDUpdateTimerTask(this.rfidClientRemote, rfidTagNumber, this.wUnitToSymlocTable.get(wUnit), this.tagtoIdentityTable.get(rfidTagNumber));
 					this.tagToTimerTable.put(rfidTagNumber, task);
 					Timer timer = new Timer();
-					timer.schedule(task, new Date(), 60000);
+					timer.schedule(task, new Date(), 5000);
 				}
 			}
 			
