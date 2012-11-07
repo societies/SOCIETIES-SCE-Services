@@ -37,6 +37,8 @@ namespace MyTvUI
         int currentChannel = 0;
         Boolean currentlyMuted = true;
 
+        ActivityFeedManager afMgr;
+
         //socket variables
         SocketClient socketClient;
         SocketServer socketServer;
@@ -153,7 +155,7 @@ namespace MyTvUI
                 //initialise activity feeds
                 ArrayList activities = new ArrayList();
                 listBox1.ItemsSource = activities;
-                ActivityFeedManager afMgr = new ActivityFeedManager(activities);
+                afMgr = new ActivityFeedManager(activities);
             }
             catch (Exception e)
             {
@@ -171,6 +173,20 @@ namespace MyTvUI
         //close window
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
+            //send GUI_STOPPED message
+            if (commsInitialised)
+            {
+                Console.WriteLine("Sending GUI_STOPPED message to service client");
+                String response = socketClient.sendMessage(
+                "START_MSG\n" +
+                "GUI_STOPPED\n" +
+                "END_MSG\n");
+                if (!response.Contains("RECEIVED"))
+                {
+                    Console.WriteLine("GUI_STOPPED message was not received by service client");
+                }
+            }
+
             //stop sockets
             socketClient.disconnect();
             socketServer.stopSocketServer();
@@ -385,6 +401,11 @@ namespace MyTvUI
                 }
             }
             return true;
+        }
+
+        public void postActivity(String activity)
+        {
+            afMgr.handleNewActivity(activity);
         }
 
         private void initialisePreferences()
@@ -796,27 +817,27 @@ namespace MyTvUI
                 writer.Close();
                 ostrm.Close();
             }
-            mytvWindow.Close();
-            
-            //try
-            //{
-            //    //if the application was opened by another window close the current window not the other application
-            //    if (Application.Current.Windows.Count > 1)
-            //    {
-            //        for (int i = 0; i < Application.Current.Windows.Count; i++)
-            //        {
-            //            if (Application.Current.Windows[i].GetType().ToString().Equals("MyTvUI.MainWindow"))
-            //                Application.Current.Windows[i].Close();
-            //        }
-            //    }
-            //    //otherwise close the main window
-            //    else
-                    //Application.Current.MainWindow.Close();
-            //}
-            //catch (InvalidOperationException e2)
-            //{
-            //    System.IO.File.AppendAllText(@".\logs.txt", "Exception: " + e2);
-            //}
+            //mytvWindow.Close();
+
+            try
+            {
+                //if the application was opened by another window close the current window not the other application
+                if (Application.Current.Windows.Count > 1)
+                {
+                    for (int i = 0; i < Application.Current.Windows.Count; i++)
+                    {
+                        if (Application.Current.Windows[i].GetType().ToString().Equals("MyTvUI.MainWindow"))
+                            Application.Current.Windows[i].Close();
+                    }
+                }
+                //otherwise close the main window
+                else
+                    Application.Current.MainWindow.Close();
+            }
+            catch (InvalidOperationException e1)
+            {
+               Console.WriteLine("Exception: " + e1.ToString());
+            }
         }
 
         static internal ImageSource getImageSourceFromResource(string psAssemblyName, string psResourceName)

@@ -34,10 +34,18 @@ import java.util.concurrent.Future;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.societies.api.cis.management.ICis;
+import org.societies.api.cis.management.ICisManager;
+import org.societies.api.cis.management.ICisManagerCallback;
+import org.societies.api.comm.xmpp.exceptions.CommunicationException;
+import org.societies.api.comm.xmpp.exceptions.XMPPError;
 import org.societies.api.comm.xmpp.interfaces.ICommManager;
+import org.societies.api.comm.xmpp.pubsub.PubsubClient;
+import org.societies.api.comm.xmpp.pubsub.Subscriber;
 import org.societies.api.css.devicemgmt.display.IDisplayDriver;
 import org.societies.api.css.devicemgmt.display.IDisplayableService;
 import org.societies.api.identity.IIdentity;
+import org.societies.api.identity.InvalidFormatException;
 import org.societies.api.identity.RequestorService;
 import org.societies.api.osgi.event.CSSEvent;
 import org.societies.api.osgi.event.CSSEventConstants;
@@ -49,13 +57,15 @@ import org.societies.api.personalisation.mgmt.IPersonalisationManager;
 import org.societies.api.personalisation.model.Action;
 import org.societies.api.personalisation.model.IAction;
 import org.societies.api.personalisation.model.IActionConsumer;
+import org.societies.api.schema.activity.Activity;
+import org.societies.api.schema.cis.community.CommunityMethods;
 import org.societies.api.schema.servicelifecycle.model.ServiceResourceIdentifier;
 import org.societies.api.services.IServices;
 import org.societies.api.services.ServiceMgmtEvent;
 import org.societies.api.services.ServiceMgmtEventType;
 import org.societies.api.useragent.monitoring.IUserActionMonitor;
 
-public class MyTvClient extends EventListener implements IDisplayableService, IActionConsumer, IMyTv{
+public class MyTvClient extends EventListener implements IDisplayableService, IActionConsumer, IMyTv, ICisManagerCallback, Subscriber{
 
 	SocketClient socketClient;
 	SocketServer socketServer;
@@ -67,11 +77,15 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 	IEventMgr eventMgr;
 	ICommManager commsMgr;
 	IDisplayDriver displayDriver;
+	ICisManager cisManager;
+	PubsubClient pubsubClient;
 	ServiceResourceIdentifier myServiceID;
 	String myServiceName;
 	String myServiceType;
 	URL myUIExeLocation;
 	List<String> myServiceTypes;
+	boolean sessionConnected = false;
+	List<CommunityMethods> results = new ArrayList<CommunityMethods>();
 	Logger LOG = LoggerFactory.getLogger(MyTvClient.class);
 
 	//personalisable parameters
@@ -154,13 +168,6 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 	}
 
 	/*
-	 * Handle service events
-	 */
-	//get my service parameters
-	//register for activity feed updates
-
-
-	/*
 	 * Register for display events from portal
 	 */
 	private void registerForDisplayEvents(){
@@ -173,7 +180,47 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 	}
 
 	/*
-	 * These methods handle events from the Portal
+	 * Register for activity feed updates for all CIS that user is a member of or owns
+	 */
+	private void registerForActivityFeedUpdates(){
+		LOG.debug("Registering for activity updates for all CISs either owned or a member of");
+		//get all CISs that owner is a member of or owns
+		List<ICis> cisList = cisManager.getCisList();
+		for(ICis nextCIS: cisList){
+			//register for activity feed updates for this CIS
+			//get CIS ID
+			String cisID = nextCIS.getCisId();
+			//get CIS host ID
+			nextCIS.getInfo(this);
+			while(results.get(0) == null){
+				try{
+					synchronized(results){
+						this.results.wait();
+					}
+				}catch(InterruptedException e){
+					e.printStackTrace();
+				}
+			}
+			CommunityMethods commMeths = results.get(0);
+			results = new ArrayList<CommunityMethods>();
+			String cisHostID = commMeths.getGetInfoResponse().getCommunity().getOwnerJid();
+			
+			LOG.debug("Registering for activity updates for CIS: "+cisID+" with owner: "+cisHostID);
+			//register with pubsub
+			try {
+				this.pubsubClient.subscriberSubscribe(commsMgr.getIdManager().fromJid(cisHostID), cisID , this);
+			} catch (XMPPError e) {
+				e.printStackTrace();
+			} catch (CommunicationException e) {
+				e.printStackTrace();
+			} catch (InvalidFormatException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+	/*
+	 * Handle service events and display portal events
 	 */
 	@Override
 	public void handleExternalEvent(CSSEvent event) {
@@ -191,20 +238,22 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 				this.LOG.debug("Received SLM event for my bundle");
 				if (slmEvent.getEventType().equals(ServiceMgmtEventType.NEW_SERVICE)){
 
+					//get my service parameters
 					//get service ID
 					if(myServiceID == null){
 						myServiceID = slmEvent.getServiceId();
 						LOG.debug("client serviceID = "+myServiceID.toString());
 					}
-
 					//get user ID
 					if(userID == null){
 						userID = commsMgr.getIdManager().getThisNetworkNode();
 						LOG.debug("userID = "+userID.toString());
 					}
-
 					//unregister for SLM events
 					unregisterForServiceEvents();
+
+					//register for activity feed updates
+					registerForActivityFeedUpdates();
 				}
 			}
 		}else if(event.geteventName().equalsIgnoreCase("displayUpdate")){
@@ -214,6 +263,44 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 		}
 	}
 
+	/*
+	 * Handle CisManager callbacks
+	 * (non-Javadoc)
+	 * @see org.societies.api.cis.management.ICisManagerCallback#receiveResult(org.societies.api.schema.cis.community.CommunityMethods)
+	 */
+	@Override
+	public void receiveResult(CommunityMethods communityMethods) {
+		synchronized(results){
+			this.results.add(communityMethods);
+			this.results.notifyAll();
+		}
+	}
+
+	/*
+	 * Handle pubsub event
+	 * (non-Javadoc)
+	 * @see org.societies.api.comm.xmpp.pubsub.Subscriber#pubsubEvent(org.societies.api.identity.IIdentity, java.lang.String, java.lang.String, java.lang.Object)
+	 */
+	@Override
+	public void pubsubEvent(IIdentity pubsubService, String node, String itemID, Object item) {
+		if(item.getClass().equals(org.societies.api.schema.activity.Activity.class)){
+			Activity a = (Activity)item;
+			LOG.debug("Received pubsub event with activity " + a.getActor() + " " +a.getVerb());
+			//send to MyTvUI
+			if(sessionConnected){
+				String message = "START_MSG\n" +
+						"ACTIVITY\n" +
+						a.getActor()+"\n" +
+						a.getVerb()+"\n" +
+						"END_MSG";
+				if(!socketClient.sendMessage(message)){
+					LOG.debug("Error sending activity message to MyTvUI - not received");
+				}
+			}else{
+				LOG.debug("SocketClient is null - cannot send activity message to MyTvUI");
+			}
+		}
+	}
 
 
 	/*
@@ -256,14 +343,6 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 		return false;
 	}
 
-	/*private void setChannel(int channel){
-
-	}
-
-	private void setMuted(String muted){
-
-	}*/
-
 	public void setUam(IUserActionMonitor uam){
 		this.uam = uam;
 	}
@@ -288,9 +367,13 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 		this.displayDriver = displayDriver;
 	}
 
-	public static void main(String[] args) throws IOException{
-		new MyTvClient();
+	public void setCisManager(ICisManager cisManager){
+		this.cisManager = cisManager;
 	}
+
+	/*public static void main(String[] args) throws IOException{
+		new MyTvClient();
+	}*/
 
 
 
@@ -312,9 +395,10 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 			if(socketClient.connect()){
 				if(socketClient.sendMessage(
 						"START_MSG\n" +
-								"USER_SESSION_STARTED\n" +
+						"USER_SESSION_STARTED\n" +
 						"END_MSG")){
 					LOG.debug("Handshake complete:  ServiceClient -> GUI");
+					sessionConnected = true;
 				}else{
 					LOG.error("Handshake failed: ServiceClient -> GUI");
 				}
@@ -324,7 +408,16 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 		}
 
 		public void disconnectFromGUI(){
+			if(sessionConnected){
+				if(!socketClient.sendMessage(
+						"START_MSG\n" +
+						"USER_SESSION_ENDED\n" +
+						"END_MSG")){
+					LOG.debug("USER_SESSION_ENDED message not received by service GUI");
+				}
+			}
 			socketClient.disconnect();
+			sessionConnected = false;
 		}
 
 		public void processUserAction(String parameterName, String value){

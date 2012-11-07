@@ -21,6 +21,7 @@ namespace MyTvUI
 
         private static String USER_SESSION_STARTED = "USER_SESSION_STARTED";
         private static String USER_SESSION_ENDED = "USER_SESSION_ENDED";
+        private static String ACTIVITY = "ACTIVITY";
 
         private MainWindow window;
 
@@ -119,6 +120,14 @@ namespace MyTvUI
                         {
                             Console.WriteLine("SOCKET_SERVER: "+USER_SESSION_ENDED + "message received");
                             stream.Write(okBytes, 0, okBytes.Length);
+                        }
+                        else if (command.Equals(ACTIVITY))
+                        {
+                            Console.WriteLine("SOCKET_SERVER: " + ACTIVITY + " message received");
+                            stream.Write(okBytes, 0, okBytes.Length);
+                            String actor = splitData[2];
+                            String verb = splitData[3];
+                            window.postActivity(actor + " " + verb);
                         }
                         else
                         {

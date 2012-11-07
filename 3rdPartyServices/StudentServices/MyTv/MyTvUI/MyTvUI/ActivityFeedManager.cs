@@ -15,7 +15,7 @@ namespace MyTvUI
             this.activities = activities;
 
             //testing only
-            addActivities();
+            //addActivities();
         }
 
         public void handleNewActivity(String newActivity)
@@ -23,7 +23,9 @@ namespace MyTvUI
             activities.Add(newActivity);
         }
 
-        public void addActivities()
+
+        //Testing only
+        private void addActivities()
         {
             handleNewActivity("James has shared his PersonalCalendar service");
             handleNewActivity("Laura has joined the HWU Tennis CIS");
