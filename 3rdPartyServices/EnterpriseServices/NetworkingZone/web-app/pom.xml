@@ -136,6 +136,14 @@
 			<scope>provided</scope>
 		</dependency>
 
+
+		<dependency>
+			<groupId>org.societies.ext3p.networking</groupId>
+			<artifactId>networking-api</artifactId>
+			<version>${release.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		
 		<dependency>
 			<groupId>org.societies</groupId>
 			<artifactId>activityfeed</artifactId>
