@@ -60,7 +60,7 @@
 <section>
 <figure class="gravatar">
 <img alt="" src="images/webprofile_pic_sample1.jpg" height="48" width="48" />
-<a class="furtherinfo-link" href="makeconnection.html">MAKE CONNECTION</a>
+<a class="furtherinfo-link" href="makeconnection.html">Send Friend Request</a>
 </figure>
 <xc:if test="${profileForm.personalvisible == 1}">
 <div class="keyinfo_content">

@@ -58,6 +58,7 @@ import org.societies.api.ext3p.networking.ZoneDetails;
 import org.societies.api.ext3p.networking.ZoneEvent;
 
 import org.societies.api.identity.Requestor;
+import org.societies.api.internal.css.management.ICSSLocalManager;
 import org.societies.api.schema.cis.community.Community;
 import org.societies.api.schema.cis.community.CommunityMethods;
 import org.societies.api.schema.cis.community.Criteria;
@@ -106,6 +107,7 @@ public class NetworkClient {
 	private ICommManager commManager;
 	private ICtxBroker ctxBroker;
 	public ICisManager cisManager;
+	private ICSSLocalManager cssManager;
 	public ICisDirectoryRemote cisDirectoryClient;
 	public boolean bInitialise = false;
 
@@ -728,6 +730,16 @@ public class NetworkClient {
 
 	
 
+	public ICSSLocalManager getCssManager() {
+		return cssManager;
+	}
+
+
+	public void setCssManager(ICSSLocalManager cssManager) {
+		this.cssManager = cssManager;
+	}
+
+
 	public List<UserDetails> getCurrentZoneMemberList()
 	{
 		log.info("getCurrentZoneMemberList Start");
@@ -854,6 +866,15 @@ public class NetworkClient {
 	public List<String> getnotes(String friendid) {
 		
 		return getCommsClient().getnotes(friendid);
+	}
+
+
+	public void addfriend(String currentFriendid) {
+		// TODO Auto-generated method stub
+		getCssManager().sendCssFriendRequest(currentFriendid);
+		
+		
+		
 	}
 	
 }
