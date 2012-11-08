@@ -22,13 +22,12 @@
  * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.societies.enterprise.collabtools.Interpretation;
+package org.societies.enterprise.collabtools.interpretation;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -59,7 +58,9 @@ public class ContextAnalyzer implements IContextReasoning {
 		this.personRepository = personRepository;
 	}
 
+	//Concept enriched by Alchemy API
 	private final String[] ctxEnrichedByConcept(String[] interests) throws XPathExpressionException, IOException, SAXException, ParserConfigurationException{
+		//TODO: api key hardcoded....
 		final String APIKEY = "ca193cc1d3101c225266787a3d5fc1f810b52f02";
 		// Create an AlchemyAPI object.
 		//AlchemyAPI api key, enable to 1000 queries a day
@@ -94,6 +95,62 @@ public class ContextAnalyzer implements IContextReasoning {
     		String[] newInterests = ctxEnrichedByConcept(friend.getInterests());
     		friend.setLongTermCtx(LongTermCtxTypes.INTERESTS, newInterests);
     	}		
+	}
+	
+	static public float personInterestsSimilarity (int similarCtx, Person personA, Person personB) {
+		//Similarity Formula is: similar interests/ min(personA, personB)
+		//Check if there is no similarity between both
+		if (similarCtx != 0) {
+			float weight = similarCtx/ Math.min((float)personA.getInterests().length,personB.getInterests().length );
+			return weight;
+		}
+		else
+			throw new IllegalArgumentException("There is no similarity between this individuals");
+	}
+	
+	//Based on automatic thresholding for images
+	static public float automaticThresholding(ArrayList<Float> elements ) {
+		float initialThreshold = 0;
+		for (float value : elements)
+	    {
+			initialThreshold += value;
+	    }
+		initialThreshold = initialThreshold / elements.size();
+		float finalThreshold = 0;
+		boolean done = false;
+		while (!done) {
+			float avgG1 = 0,  avgG2 = 0;
+			int nG1 = 0, nG2 = 0;
+			for (int i = 0; i < elements.size(); i++) {
+				if (elements.get(i) > initialThreshold) {
+					avgG1 = elements.get(i) + avgG1;
+					nG1++;
+				}
+				else {
+					avgG2 = elements.get(i) + avgG2;
+					nG2++;
+				}
+			}
+			avgG1 = avgG1 / nG1;
+			avgG2 = avgG2 / nG2;
+			finalThreshold = (avgG1 + avgG2) / 2;
+			if (initialThreshold == finalThreshold) {
+				done = true;
+			}
+			else
+				initialThreshold = finalThreshold;
+		}
+		return finalThreshold;
+	}
+	
+	public void setupWeightBetweenPeople(Person person)
+	{
+		Map<Person, Integer> persons = this.personRepository.getPersonWithSimilarInterests(person);
+		for (Map.Entry<Person, Integer> entry : persons.entrySet()) {
+			//Similarity Formula is: similar interests/ min(personA, personB)
+			float weight = ContextAnalyzer.personInterestsSimilarity(entry.getValue(), entry.getKey(), person);
+			person.addFriend(entry.getKey(),weight);  
+		}
 	}
 
 }

@@ -22,7 +22,17 @@
  * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.societies.enterprise.collabtools.api;
+package org.societies.enterprise.collabtools.acquisition;
+
+import java.util.HashMap;
+
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkUtil;
+import org.osgi.framework.ServiceReference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.societies.context.externalBrokerConnector.ExternalCtxBrokerConnector;
+import org.societies.enterprise.collabtools.api.IContextConnector;
 
 /**
  * Describe your class here...
@@ -30,6 +40,38 @@ package org.societies.enterprise.collabtools.api;
  * @author cviana
  *
  */
-public interface ISessionApp {
+public class InternalContextConnector implements IContextConnector {
 
+//	private Logger logger = LoggerFactory.getLogger(this.getClass());
+	
+	BundleContext bundleContext = FrameworkUtil.getBundle(this.getClass()).getBundleContext();
+	ServiceReference connectorServiceReference= bundleContext.getServiceReference(ExternalCtxBrokerConnector.class.getName());
+	ExternalCtxBrokerConnector connector =(ExternalCtxBrokerConnector)bundleContext.getService(connectorServiceReference);
+	private ContextSubscriber contextSubscriber;
+	
+	
+	/**
+	 * @param contextSubscriber
+	 */
+	public InternalContextConnector(ContextSubscriber contextSubscriber) {
+		this.contextSubscriber = contextSubscriber;
+		this.connector.addObserver(this.contextSubscriber);
+//		this.connector.testEvent();
+	}
+
+	/**
+	 * @return persons and context attributes
+	 */
+	public HashMap<String, HashMap<String, String[]>> getInitialContext(Object cisID) {
+		HashMap<String, HashMap<String, String[]>> persons = connector.retrieveLookupMembersCtxAttributes(cisID);
+		if (persons.isEmpty())
+			throw new IllegalArgumentException("HashMap pf persons cannot be null! ");
+		return persons;
+	}
+	
+	public void shortTermCtxUpdates(Object parameter) {
+		connector.registerForContextChanges(parameter);
+	}
+
+	
 }

@@ -9,7 +9,7 @@
 	<groupId>org.societies.enterprise</groupId>
 	<artifactId>CollabTools</artifactId>
 	<packaging>bundle</packaging>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.1.0</version>
 	<name>Collaboration Tools</name>
 	<dependencies>
     
@@ -34,6 +34,12 @@
 			<version>${slf4j.version}</version>
 			<scope>provided</scope>
 		</dependency>
+		    <dependency>
+      		<groupId>org.slf4j</groupId>
+      		<artifactId>slf4j-jcl</artifactId>
+      		<version>${slf4j.version}</version>
+			<scope>provided</scope>
+    	</dependency>
 		<dependency>
 			<groupId>org.osgi</groupId>
 			<artifactId>org.osgi.compendium</artifactId>
@@ -53,6 +59,12 @@
 			<groupId>org.osgi</groupId>
 			<artifactId>org.osgi.core</artifactId>
 			<version>4.3.0</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.societies.context-management</groupId>
+			<artifactId>context-3pbroker-connector</artifactId>
+			<version>0.1.0</version>
 		</dependency>
 	</dependencies>
 	<build>
@@ -70,11 +82,12 @@
 <!-- 							javax.lang.model.element,javax.lang.model.type,javax.lang.model.util, -->
 <!-- 							javax.management,javax.management.remote,javax.tools,javax.xml.parsers, -->
 <!-- 							org.osgi.framework,org.xml.sax,org.xml.sax.ext,org.xml.sax.helpers -->
-						  org.osgi.framework, *;resolution:=optional</Import-Package> 
- 				          <Export-Package></Export-Package> 
+						  org.osgi.framework, !ch.qos.logback.*, *;resolution:=optional</Import-Package> 
+ 				          <Export-Package>org.societies.enterprise.collabtools.acquisition</Export-Package> 
 <!-- 				      <Private-Package>no privates either</Private-Package> -->
 				      <Embed-Transitive>true</Embed-Transitive>
 		           	  <Embed-Dependency>*;scope=compile|runtime</Embed-Dependency>
+		           	  <Import-Bundle>org.societies.context-management.context-3pbroker-connector;version="0.1.0"</Import-Bundle>
 				      <Bundle-Activator>org.societies.enterprise.collabtools.Activator</Bundle-Activator>
 				    </instructions> 
 				</configuration>
@@ -115,7 +128,7 @@
 						<artifactItem>
 							<groupId>${project.groupId}</groupId>
 							<artifactId>${project.artifactId}</artifactId>
-							<version>${project.version}</version>
+							<version>0.1.0</version>
 							<type>jar</type>
 							<overWrite>true</overWrite>
 							<outputDirectory>${env.VIRGO_HOME}/repository/usr</outputDirectory>

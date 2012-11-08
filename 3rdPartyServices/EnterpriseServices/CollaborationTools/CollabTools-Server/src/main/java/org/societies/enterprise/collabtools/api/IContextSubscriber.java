@@ -30,7 +30,7 @@ package org.societies.enterprise.collabtools.api;
  * @author cviana
  *
  */
-public class IContextSubscriber {
+public interface IContextSubscriber {
 	//Societies integration.... miner
 
 }

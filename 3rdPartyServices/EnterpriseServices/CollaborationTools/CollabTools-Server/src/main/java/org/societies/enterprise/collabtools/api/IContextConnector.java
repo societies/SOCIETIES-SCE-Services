@@ -24,12 +24,18 @@
  */
 package org.societies.enterprise.collabtools.api;
 
+import java.util.HashMap;
+
 /**
  * Describe your class here...
  *
  * @author cviana
  *
  */
-public interface ISessionApp {
+public interface IContextConnector {
+	
+	public HashMap<String, HashMap<String, String[]>> getInitialContext(Object parameter);
+	
+	public void shortTermCtxUpdates(Object parameter);
 
 }

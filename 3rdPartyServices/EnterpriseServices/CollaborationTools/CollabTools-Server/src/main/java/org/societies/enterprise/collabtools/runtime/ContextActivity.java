@@ -29,7 +29,7 @@ import java.util.Hashtable;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.societies.enterprise.collabtools.acquisition.ContextUpdates;
+import org.societies.enterprise.collabtools.acquisition.ShortTermContextUpdates;
 import org.societies.enterprise.collabtools.acquisition.Person;
 import org.societies.enterprise.collabtools.acquisition.PersonRepository;
 
@@ -44,8 +44,8 @@ public final class ContextActivity {
 	private static final Logger logger  = LoggerFactory.getLogger(ContextActivity.class);
 	
 	//Get context changes often
-	public static HashSet<ContextUpdates> getLastContextUpdates(PersonRepository personRepository) {
-		HashSet<ContextUpdates> ctxHashSet = new HashSet<ContextUpdates>();
+	public static HashSet<ShortTermContextUpdates> getLastContextUpdates(PersonRepository personRepository) {
+		HashSet<ShortTermContextUpdates> ctxHashSet = new HashSet<ShortTermContextUpdates>();
 		for (Person person : personRepository.getAllPersons() ) {
 			ctxHashSet.add(person.getLastStatus());
 		}

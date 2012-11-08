@@ -1,20 +1,26 @@
 /**
- * Licensed to Neo Technology under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Neo Technology licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Copyright (c) 2011, SOCIETIES Consortium (WATERFORD INSTITUTE OF TECHNOLOGY (TSSG), HERIOT-WATT UNIVERSITY (HWU), SOLUTA.NET 
+ * (SN), GERMAN AEROSPACE CENTRE (Deutsches Zentrum fuer Luft- und Raumfahrt e.V.) (DLR), Zavod za varnostne tehnologije
+ * informacijske družbe in elektronsko poslovanje (SETCCE), INSTITUTE OF COMMUNICATION AND COMPUTER SYSTEMS (ICCS), LAKE
+ * COMMUNICATIONS (LAKE), INTEL PERFORMANCE LEARNING SOLUTIONS LTD (INTEL), PORTUGAL TELECOM INOVAÇÃO, SA (PTIN), IBM Corp., 
+ * INSTITUT TELECOM (ITSUD), AMITEC DIACHYTI EFYIA PLIROFORIKI KAI EPIKINONIES ETERIA PERIORISMENIS EFTHINIS (AMITEC), TELECOM 
+ * ITALIA S.p.a.(TI),  TRIALOG (TRIALOG), Stiftelsen SINTEF (SINTEF), NEC EUROPE LTD (NEC))
+ * All rights reserved.
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following
+ * conditions are met:
  *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied. See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * 1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+ *
+ * 2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following
+ *    disclaimer in the documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING,
+ * BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT 
+ * SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+ * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 package org.societies.enterprise.collabtools.acquisition;
 
@@ -37,6 +43,9 @@ import org.neo4j.graphdb.index.IndexManager;
 import org.neo4j.helpers.collection.IterableWrapper;
 import org.neo4j.helpers.collection.MapUtil;
 import org.neo4j.index.lucene.QueryContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.societies.enterprise.collabtools.Activator;
 import org.societies.enterprise.collabtools.runtime.SessionRepository;
 
 import scala.actors.threadpool.Arrays;
@@ -47,6 +56,8 @@ public class PersonRepository
     private final Index<Node> index;
     private final Node personRefNode;
 	private SessionRepository sessionRep;
+	
+	private static final Logger logger  = LoggerFactory.getLogger(PersonRepository.class);
 
     public PersonRepository(GraphDatabaseService graphDb, Index<Node> index)
     {
@@ -103,12 +114,14 @@ public class PersonRepository
             tx.success();
             Person person = new Person( newPersonNode );
             //TODO:VERIFIY OBSERVER
+            logger.info("Person added: "+name);
             return person;
         }
         finally
         {
             tx.finish();
         }
+
     }
 
     public Person getPersonByName( String name )
@@ -120,6 +133,14 @@ public class PersonRepository
                     + "] not found" );
         }
         return new Person( personNode );
+    }
+    
+    public boolean hasPerson(String name)
+    {
+        Node personNode = index.get( Person.NAME, name ).getSingle();
+        if (personNode == null)
+        	return false;
+        return true;
     }
     
     public Map<Person, Integer> getPersonWithSimilarInterests(Person self)
@@ -142,12 +163,13 @@ public class PersonRepository
     	return persons;
     }
     
-    public Person[] getPersonsByProperty(String property )
+    public Person[] getPersonsByProperty(String property, String value)
     {
     	List<Person> persons = new ArrayList<Person>();
-    	for ( Node personNode : index.query(LongTermCtxTypes.COMPANY, "TI") )
+    	//E.g. LongTermCtxTypes.COMPANY
+    	for ( Node personNode : index.query(property, value) )
     	{
-    		Person person = new Person( personNode );
+    		Person person = new Person(personNode);
     		persons.add(person);
     	}
 //        IndexManager indexManager =  graphDb.index();
@@ -164,7 +186,7 @@ public class PersonRepository
 		return (Person[]) persons.toArray();
     }
 
-    public void deletePerson( Person person )
+    public void deletePerson(Person person)
     {
         Transaction tx = graphDb.beginTx();
         try
@@ -177,7 +199,7 @@ public class PersonRepository
             }
             personNode.getSingleRelationship( A_PERSON, Direction.INCOMING ).delete();
 
-            for ( ContextUpdates status : person.getStatus() )
+            for ( ShortTermContextUpdates status : person.getStatus() )
             {
                 Node statusNode = status.getUnderlyingNode();
                 for ( Relationship r : statusNode.getRelationships() )

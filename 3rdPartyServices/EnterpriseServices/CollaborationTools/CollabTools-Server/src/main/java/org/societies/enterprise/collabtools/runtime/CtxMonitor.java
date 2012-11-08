@@ -30,12 +30,9 @@ import java.util.Hashtable;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.societies.enterprise.collabtools.Interpretation.Rules;
-import org.societies.enterprise.collabtools.acquisition.LongTermCtxTypes;
-import org.societies.enterprise.collabtools.acquisition.ShortTermCtxTypes;
-import org.societies.enterprise.collabtools.acquisition.ContextUpdates;
 import org.societies.enterprise.collabtools.acquisition.Person;
 import org.societies.enterprise.collabtools.acquisition.PersonRepository;
+import org.societies.enterprise.collabtools.interpretation.Rules;
 
 
 /**
@@ -60,50 +57,54 @@ public class CtxMonitor extends Thread{
 		try {
 			while (true) {
 
-				System.out.println("Checking if people context match");
+				logger.info("Checking if people context match");
 
 
-				//First rule is location
+				//First rule: location
 				Hashtable<String, HashSet<Person>> personsSameLocation = conditions.getPersonsSameLocation();
+
 				if (!personsSameLocation.isEmpty()) {
 					Enumeration<String> iterator = personsSameLocation.keys();
 					//For each different location, apply the follow rules...
 					while(iterator.hasMoreElements()) {
+						//Session name = actual location
 						String sessionName = iterator.nextElement();
-						//Second rule: Company
-						//Check company
-						Hashtable<String, HashSet<Person>> personsWithSameCompany = conditions.getPersonsWithMatchingLongTermCtx(LongTermCtxTypes.COMPANY, personsSameLocation.get(sessionName));
-						System.out.println(personsWithSameCompany.toString());
+						logger.info("First rule: Location "+personsSameLocation.toString());
 						
-						//Third rule: Status
-						//Check status of the user e.g busy, on phone, driving...
-						Hashtable<String, HashSet<Person>> personsWithSameStatus = conditions.getPersonsWithMatchingShortTermCtx(ShortTermCtxTypes.STATUS, personsSameLocation.get(sessionName));
-						System.out.println(personsWithSameStatus.toString());
+//						//Second rule: Company
+//						//Check company
+//						Hashtable<String, HashSet<Person>> personsWithSameCompany = conditions.getPersonsWithMatchingLongTermCtx(LongTermCtxTypes.COMPANY, personsSameLocation.get(sessionName));
+//						logger.info("Second rule: Company "+personsWithSameCompany.toString());
 						
-						logger.info("If session still doesn't exist, create one");
-						if (!sessionRepository.containSession(sessionName)) {
+//						//Third rule: Interest
+//						//Check similar interest
+						Hashtable<String, HashSet<Person>> personsWithSameInterests = conditions.getPersonsByWeight(sessionName, personsSameLocation.get(sessionName));
+						logger.info("Third rule: Interests "+personsWithSameInterests.toString());
+//						
+//						//Fourth rule: Status
+//						//Check status of the user e.g busy, on phone, driving...
+//						Hashtable<String, HashSet<Person>> personsWithSameStatus = conditions.getPersonsWithMatchingShortTermCtx(ShortTermCtxTypes.STATUS, personsWithSameInterests.get(sessionName));
+//						logger.info("Fourth rule: Status "+personsWithSameStatus.toString());
+						
+
+						if (!sessionRepository.containSession(sessionName) && !personsWithSameInterests.isEmpty()) {
 							logger.info("Starting a new session..");
 							logger.info("Inviting people..");
-							sessionRepository.inviteMembers(sessionName, personsSameLocation.get(sessionName));
+							sessionRepository.inviteMembers(sessionName, personsWithSameInterests.get(sessionName));
 						} //Check conflict if actual users in the session
-						else if (sessionRepository.differenceBetweenSessionMembers(personsSameLocation.get(sessionName), sessionName)){
-							if (!personsSameLocation.get(sessionName).isEmpty()) {
-								//Compare persons in same location with members in this session
-								sessionRepository.inviteMembers(sessionName, personsSameLocation.get(sessionName));
+						else if (sessionRepository.differenceBetweenSessionMembers(personsWithSameInterests.get(sessionName), sessionName)){
+							if (!personsWithSameInterests.get(sessionName).isEmpty()) {
+								//Compare persons in same context with members in this session
+								sessionRepository.inviteMembers(sessionName, personsWithSameInterests.get(sessionName));
 								logger.info("Checking if users are in a session..");
 							}
-							//Second rule: Status
-							//Check status of the user e.g busy, on phone, driving...
-							//					checkStatus();
-							//						sessions.invite(sessionName, personsSameLocation.get(sessionName));
-							
-							//Check interests...
+
 						}
 					}
 				}
-				System.out.println(sessionRepository.sessionsTable.toString());
 				//Sleep in seconds
 				Thread.sleep(SECONDS);
+
 			}
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
