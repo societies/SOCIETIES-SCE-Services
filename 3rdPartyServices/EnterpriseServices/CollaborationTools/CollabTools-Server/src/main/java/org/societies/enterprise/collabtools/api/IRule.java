@@ -30,6 +30,6 @@ package org.societies.enterprise.collabtools.api;
  * @author cviana
  *
  */
-public interface ISessionApp {
+public interface IRule {
 
 }

@@ -22,14 +22,28 @@
  * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.societies.enterprise.collabtools.api;
+
+package org.societies.context.externalBrokerConnector;
+
+import java.util.HashMap;
+
+import org.societies.api.context.event.CtxChangeEventListener;
+import org.societies.api.identity.InvalidFormatException;
 
 /**
- * Describe your class here...
+ * This is a 3p service Ifc that needs to access context through the societies platform ...
  *
- * @author cviana
+ * @author nikosk and cviana
  *
  */
-public interface ISessionApp {
+public interface IContextAware3pService {
+	
+	public void registerForContextChanges(Object communityId) throws InvalidFormatException;
+	
+	public HashMap<String, HashMap<String, String[]>> retrieveLookupMembersCtxAttributes(Object communityId) throws InvalidFormatException;
 
+	/**
+	 * @param myCtxChangeEventListener
+	 */
+	public void setListener(CtxChangeEventListener myCtxChangeEventListener);
 }

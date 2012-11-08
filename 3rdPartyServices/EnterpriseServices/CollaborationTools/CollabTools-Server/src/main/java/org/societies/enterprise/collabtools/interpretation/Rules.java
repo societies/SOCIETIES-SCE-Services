@@ -22,7 +22,7 @@
  * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.societies.enterprise.collabtools.Interpretation;
+package org.societies.enterprise.collabtools.interpretation;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -33,14 +33,15 @@ import java.util.List;
 import java.util.Set;
 
 import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.index.Index;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.societies.enterprise.collabtools.acquisition.Person;
 import org.societies.enterprise.collabtools.acquisition.PersonRepository;
+import org.societies.enterprise.collabtools.acquisition.RelTypes;
+import org.societies.enterprise.collabtools.acquisition.ShortTermContextUpdates;
 import org.societies.enterprise.collabtools.acquisition.ShortTermCtxTypes;
-import org.societies.enterprise.collabtools.acquisition.ContextUpdates;
-import org.societies.enterprise.collabtools.runtime.ContextActivity;
 import org.societies.enterprise.collabtools.runtime.SessionRepository;
 
 /**
@@ -78,11 +79,11 @@ public class Rules {
 	public synchronized Hashtable<String, HashSet<Person>> getPersonsWithMatchingShortTermCtx(final String ctxAtributte, HashSet<Person> personHashSet) {
 		//Compare symbolic location
 		this.hashCtxList.clear();
-		HashSet<ContextUpdates> lastUpdates = new HashSet<ContextUpdates>();
+		HashSet<ShortTermContextUpdates> lastUpdates = new HashSet<ShortTermContextUpdates>();
 		Iterator<Person> it = personHashSet.iterator();
 		while(it.hasNext())
 			lastUpdates.add(it.next().getLastStatus());
-		ContextUpdates[] statusUpdateArray = new ContextUpdates[lastUpdates.size()];
+		ShortTermContextUpdates[] statusUpdateArray = new ShortTermContextUpdates[lastUpdates.size()];
 		lastUpdates.toArray(statusUpdateArray);
 		return  getUniqueElements(statusUpdateArray, ctxAtributte);	
 	}
@@ -98,7 +99,7 @@ public class Rules {
 		Person[] person = new Person[hashsetPersons.size()];
 		hashsetPersons.toArray(person);
 		for (Person p : person) {
-			System.out.println(p.getLongTermCtx(ctxAtributte));
+			log.info(p.getLongTermCtx(ctxAtributte));
 		}
 		Person[] temp = new Person[person.length]; // null array of persons
 		int count = 0;
@@ -106,7 +107,7 @@ public class Rules {
 			if(hasSameLongTermCtx(person[j], temp, ctxAtributte))
 				temp[count++] = person[j];
 		}
-		System.out.println("Number of persons with context "+ctxAtributte);
+		log.info("Number of persons with context "+ctxAtributte);
 		Hashtable<String, HashSet<Person>>  hashCtxList = new Hashtable<String, HashSet<Person>>(10,10);
 		hashCtxList = (Hashtable<String, HashSet<Person>>) this.hashCtxList.clone();
 		return hashCtxList;
@@ -142,7 +143,7 @@ public class Rules {
 	 * @return
 	 */
 	public Hashtable<String, HashSet<Person>> getPersonsSameLocation() {
-		System.out.println("Checking last short term context...");
+		log.info("Checking last short term context...");
 		HashSet<Person> personHashSet = new HashSet<Person>();
 		for (Person person : personRepository.getAllPersons() ) {
 			personHashSet.add(person);
@@ -170,9 +171,9 @@ public class Rules {
 	 * @param statusList
 	 * @return
 	 */
-	private Hashtable<String, HashSet<Person>>  getUniqueElements(ContextUpdates[] statusArray, final String ctxAttribute) {
-		ContextUpdates[] temp = new ContextUpdates[statusArray.length]; // null elements
-		System.out.println("Number of persons: "+temp.length+" with context "+ctxAttribute);
+	private Hashtable<String, HashSet<Person>>  getUniqueElements(ShortTermContextUpdates[] statusArray, final String ctxAttribute) {
+		ShortTermContextUpdates[] temp = new ShortTermContextUpdates[statusArray.length]; // null elements
+		log.info("Number of persons: "+temp.length+" with context "+ctxAttribute);
 		int count = 0;
 		for(int j = 0; j < statusArray.length; j++) {
 			if(hasSameShortTermCtx(statusArray[j], temp, ctxAttribute))
@@ -187,7 +188,7 @@ public class Rules {
 		//		return uniqueStrs;
 	}
 
-	private boolean hasSameShortTermCtx(ContextUpdates ctx, ContextUpdates[] temp, final String ctxAttribute) {
+	private boolean hasSameShortTermCtx(ShortTermContextUpdates ctx, ShortTermContextUpdates[] temp, final String ctxAttribute) {
 		HashSet<Person> hashsetTemp;
 		hashsetTemp = hashCtxList.get(ctx.getShortTermCtx(ctxAttribute));
 		for(int j = 0; j < temp.length; j++) {
@@ -217,6 +218,53 @@ public class Rules {
 	//        }
 	//        return true;
 	//	}
+	
+	/**
+	 * @param interests
+	 * @param hashSet
+	 * @return
+	 */
+	public Hashtable<String, HashSet<Person>> getPersonsByWeight(String sessionName, HashSet<Person> hashsetPersons) {
+		//For long term context types
+		Hashtable<String, HashSet<Person>> hashCtxListTemp = new Hashtable<String, HashSet<Person>>(10,10);
+		if (!hashsetPersons.isEmpty()) {
+			Person[] person = new Person[hashsetPersons.size()];
+			hashsetPersons.toArray(person);
+			ArrayList<Float> elements = new ArrayList<Float>(); 
+			for (Person p : person) {
+				Iterable<Relationship> knows = p.getUnderlyingNode().getRelationships(RelTypes.KNOWS);
+				while (knows.iterator().hasNext()) {
+					Relationship rel = knows.iterator().next();
+					elements.add((Float) rel.getProperty("weight"));
+				}
+			}
+			float weight = ContextAnalyzer.automaticThresholding(elements);
+			log.info("automaticThresholding: "+ContextAnalyzer.automaticThresholding(elements));
+			HashSet<Person> newHashsetPersons = new HashSet<Person>();
+			HashSet<Long> hashsetTemp = new HashSet<Long>();
+			for (Person individual : person) {
+				for (Person otherPerson : person) {
+					Relationship rel = individual.getFriendRelationshipTo(otherPerson);
+					//Check by relationship ID if the weight was included in the hashset
+					if (rel != null &&  !hashsetTemp.contains(rel.getId())) {
+						//							log.info(((Float)rel.getProperty("weight")));
+						hashsetTemp.add(rel.getId());
+						if ((Float)rel.getProperty("weight") >= weight) {
+							newHashsetPersons.add(individual);
+							newHashsetPersons.add(otherPerson);
+						}
+					}
+				}
+			}
+			hashCtxListTemp.put(sessionName, newHashsetPersons);
+			return hashCtxListTemp;
+		}
+		else {
+			hashCtxListTemp.put(sessionName, hashsetPersons);
+		}
+		return hashCtxListTemp;
+
+	}
 
 	public static <T> List<T> getDuplicate(Collection<T> list) {
 
@@ -244,7 +292,7 @@ public class Rules {
 		return true;
 	}
 
-	public static boolean checkDuplicate(List<ContextUpdates> list) {
+	public static boolean checkDuplicate(List<ShortTermContextUpdates> list) {
 		HashSet<String> set = new HashSet<String>();
 		for (int i = 0; i < list.size(); i++) {
 			boolean val = set.add(list.get(i).getShortTermCtx(ShortTermCtxTypes.STATUS));
