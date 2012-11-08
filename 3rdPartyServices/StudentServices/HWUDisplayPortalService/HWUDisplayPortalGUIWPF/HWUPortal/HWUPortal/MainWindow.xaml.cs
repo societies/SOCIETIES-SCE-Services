@@ -390,7 +390,7 @@ namespace HWUPortal
 
                 if (!this.loggedIn)
                 {
-                    this.serviceSocketServer.setUserSession(userSession);
+                    this.serviceSocketServer.setUserSession(userSession, this);
                     //this.enableThisButton(this.closeShowingServiceBtn, true);
                     this.enableThisButton(this.logoutButton, true);
 
@@ -708,7 +708,7 @@ namespace HWUPortal
                 //appWindow.Close();
             }
         }
-        private void stopService(RoutedEventArgs e, ServiceInfo sInfo)
+        public void stopService(RoutedEventArgs e, ServiceInfo sInfo)
         {
             if (sInfo.serviceType == ServiceType.EXE || sInfo.serviceType == ServiceType.JAR)
             {

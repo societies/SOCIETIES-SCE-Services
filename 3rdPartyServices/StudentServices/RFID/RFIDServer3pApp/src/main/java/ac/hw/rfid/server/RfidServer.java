@@ -235,24 +235,33 @@ public class RfidServer extends EventListener implements IRfidServer, ServiceTra
 		}
 			
 	}
+	
+	
+	
 	/*
 	 * Method called when an RFID_UPDATE_EVENT is received
 	 */
 	public void sendUpdate(String wUnit, String rfidTagNumber) {
 	
 		if (this.wUnitToSymlocTable.containsKey(wUnit)){
-			
+			this.logging.debug("wUnit: "+wUnit+" matches symloc: "+wUnitToSymlocTable.get(wUnit));
 			if (this.tagToTimerTable.containsKey(rfidTagNumber)){
+				
 				this.tagToTimerTable.get(rfidTagNumber).setSymLoc(this.wUnitToSymlocTable.get(wUnit));
+				this.logging.debug("setting symloc: "+this.wUnitToSymlocTable.get(wUnit)+" to: "+rfidTagNumber);
 			}else{
 				if (this.tagtoIdentityTable.containsKey(rfidTagNumber)){
+					this.logging.debug("tag "+rfidTagNumber+" registered to identity "+tagtoIdentityTable.get(rfidTagNumber));
 					RFIDUpdateTimerTask task = new RFIDUpdateTimerTask(this.rfidClientRemote, rfidTagNumber, this.wUnitToSymlocTable.get(wUnit), this.tagtoIdentityTable.get(rfidTagNumber));
 					this.tagToTimerTable.put(rfidTagNumber, task);
 					Timer timer = new Timer();
 					timer.schedule(task, new Date(), 5000);
+					this.logging.debug("Created timer");
 				}
 			}
 			
+		}else{
+			this.logging.debug("wUnit :"+wUnit+" doesn't match any symLoc");
 		}
 		
 		

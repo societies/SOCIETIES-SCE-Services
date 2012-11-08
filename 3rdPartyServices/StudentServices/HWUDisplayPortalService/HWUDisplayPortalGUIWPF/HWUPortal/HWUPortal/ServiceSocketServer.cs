@@ -5,6 +5,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
+using System.Windows.Controls;
 
 namespace HWUPortal
 {
@@ -21,9 +22,12 @@ namespace HWUPortal
 
         private Socket socket;
 
-        public void setUserSession(UserSession session)
+        private MainWindow mainWindow;
+
+        public void setUserSession(UserSession session, MainWindow mainWindow)
         {
             this.currentUserSession = session;
+            this.mainWindow = mainWindow;
         }
 
         
@@ -95,6 +99,26 @@ namespace HWUPortal
                                 byte[] portInBytes = BitConverter.GetBytes(sInfo.servicePortNumber);
                                 socket.Send(portInBytes);
                                 finishedReceiving = true;
+                            }
+                        }
+                        else if (receivedValue.IndexOf("STOP_SERVICE") > -1)
+                        {
+                            String serviceName = receivedValue.Remove(0, "STOP_SERVICE->".Length);
+                            ServiceInfo sInfo = currentUserSession.getService(serviceName);
+                            if (sInfo == null)
+                            {
+                                byte[] errorInBytes = Encoding.ASCII.GetBytes("Invalid_Service_Name");
+                                socket.Send(errorInBytes);
+                                finishedReceiving = true;
+                            }
+                            else
+                            {
+                                byte[] okInBytes = Encoding.ASCII.GetBytes("OK");
+                                
+                                Console.WriteLine("Stopping service: " + sInfo.serviceName);
+                                socket.Send(okInBytes);
+                                finishedReceiving = true;
+                                mainWindow.stopService(new System.Windows.RoutedEventArgs(Button.ClickEvent), sInfo);
                             }
                         }
                         receivedBytes = new byte[1024];
