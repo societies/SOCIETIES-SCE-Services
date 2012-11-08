@@ -86,7 +86,7 @@ public class NetworkingClientComms implements ICommCallback {
 	}
 
 	public NetworkingClientComms() {
-		netServerID = new String("jane.societies.local");
+		netServerID = new String("networking.societies.local");
 	}
 	
 	public NetworkingClientComms(String networkingserver) {

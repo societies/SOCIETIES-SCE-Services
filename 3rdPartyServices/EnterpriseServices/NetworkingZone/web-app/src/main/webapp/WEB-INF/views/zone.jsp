@@ -108,7 +108,7 @@
 <p><strong>Suggested Connections in Current Location</strong></p>
 <ul>
 <xc:forEach var="memberlistentry" items="${memberlist}">
-<li>${memberlistentry.displayName},${memberlistentry.company} <input type="button" value="Connect" onclick="submitform('${memberlistentry.userid}')" > </li>
+<li>${memberlistentry.displayName},${memberlistentry.company} <br/> <input type="button" value="Connect" onclick="submitform('${memberlistentry.userid}')" > </li>
 </xc:forEach>
 </ul>
 </article>
@@ -118,7 +118,7 @@
 <p><strong>All Members in Current Location</strong></p>
 <ul>
 <xc:forEach var="memberlistentry" items="${memberlist}">
-<li>${memberlistentry.displayName},${memberlistentry.company} <input type="button" value="Connect" onclick="submitform('${memberlistentry.userid}')" > </li>
+<li>${memberlistentry.displayName},${memberlistentry.company} <br/> <input type="button" value="Connect" onclick="submitform('${memberlistentry.userid}')" > </li>
 </xc:forEach>
 </ul>
 </article>
@@ -128,15 +128,8 @@
 <p><strong>Zone Activity Feed</strong></p>
 <ul>
 <xc:forEach var="zoneactivity" items="${zoneeventlist}">
-<li>${zoneactivity.username} : ${zoneactivity.useraction} <input type="button" value="Connect" onclick="submitform('${zoneactivity.userid}')" > </li>
+<li>${zoneactivity.username} : ${zoneactivity.useraction} <br/> <input type="button" value="Connect" onclick="submitform('${zoneactivity.userid}')" > </li>
 </xc:forEach>
-</ul>
-</article>
-</td>
-<td width = 25%>
-<article>
-<p><strong>My Activity Feed</strong></p>
-<ul>
 </ul>
 </article>
 </td>

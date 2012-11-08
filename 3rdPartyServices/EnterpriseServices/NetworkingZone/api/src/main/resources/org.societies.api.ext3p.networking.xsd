@@ -2,13 +2,8 @@
 	xmlns="http://societies.org/api/ext3p/networking"
 	targetNamespace="http://societies.org/api/ext3p/networking"
 	xmlns:tns="http://societies.org/api/ext3p/networking"
-	xmlns:tni="http://societies.org/api/schema/activity"
 	xmlns:xs="http://www.w3.org/2001/XMLSchema">
 
-<!-- TODO: Need another way of do this!! -->
-<xs:import namespace="http://societies.org/api/schema/activity" 
-           schemaLocation="../../../../../../../../SOCIETIES-Platform/api/schema/external/src/main/resources/org.societies.api.schema.activity.xsd"/>
-           
 
 		<xs:element name="networkingBean">
 			<xs:complexType>
@@ -19,6 +14,9 @@
 					<xs:element name="myDetails" type="tns:userDetails" minOccurs="0"/>
 					<xs:element name="frienduserid" type="xs:string" minOccurs="0"/>
 					<xs:element name="sharedInfo" type="tns:shareInfo" minOccurs="0"/>
+					<xs:element name="mycurrentzone" type="xs:string" minOccurs="0"/>
+					<xs:element name="useridlist" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
+					<xs:element name="note" type="xs:string" minOccurs="0"/>
 				</xs:sequence>
 			</xs:complexType>
 		</xs:element>
@@ -32,11 +30,30 @@
 					<xs:element name="userDetails" type="tns:userDetails" minOccurs="0"/>
 					<xs:element name="userDetailsList" type="tns:userDetails" minOccurs="0"  maxOccurs="unbounded"/>
 					<xs:element name="sharedInfo" type="tns:shareInfo" minOccurs="0"/>
+					<xs:element name="zoneeventlist" type="tns:zoneEvent" minOccurs="0" maxOccurs="unbounded"/>
+					<xs:element name="memberdetaillist" type="tns:memberDetails" minOccurs="0" maxOccurs="unbounded"/>
+					<xs:element name="notes" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
+					<xs:element name="zonedetails" type="tns:zoneDetails" minOccurs="0" maxOccurs="unbounded"/>
 				</xs:sequence>
 			</xs:complexType>
 		</xs:element>
 
     
+    	<xs:complexType name="zoneEvent">
+			<xs:sequence>
+				<xs:element name="userid" type="xs:string" minOccurs="0" />
+				<xs:element name="username" type="xs:string" minOccurs="0" />
+				<xs:element name="useraction" type="xs:string" minOccurs="0" />
+			</xs:sequence>
+		</xs:complexType>
+		
+		<xs:complexType name="memberDetails">
+			<xs:sequence>
+				<xs:element name="userid" type="xs:string" minOccurs="0" />
+				<xs:element name="displayName" type="xs:string" minOccurs="0" />
+			</xs:sequence>
+		</xs:complexType>
+		
 
 		<xs:complexType name="userDetails">
 			<xs:sequence>
@@ -92,8 +109,26 @@
 				<xs:enumeration value="updatemydetails" />
 				<xs:enumeration value="getshareinfo" />
 				<xs:enumeration value="updateshareinfo" />
+				<xs:enumeration value="getzoneevents" />
+				<xs:enumeration value="getmemberdetails" />
+				<xs:enumeration value="getfriendshareinfo" />
+				<xs:enumeration value="getnotes" />
+				<xs:enumeration value="addnote" />
+				<xs:enumeration value="getzonedetails" />
+				<xs:enumeration value="getstartupinfo" />
+				<xs:enumeration value="getuserdetailslist" />
 			</xs:restriction>
 		</xs:simpleType>
 
+		<xs:complexType name="zoneDetails">
+			<xs:sequence>
+				<xs:element name="zonename" type="xs:string" minOccurs="0" />
+				<xs:element name="zonelocation" type="xs:string" minOccurs="0" />
+				<xs:element name="zonelocationdisplay" type="xs:string" minOccurs="0" />
+				<xs:element name="zonetopics" type="xs:string" minOccurs="0" />
+				<xs:element name="zonemembercount" type="xs:int" minOccurs="0" />
+			</xs:sequence>
+		</xs:complexType>
+		
 	</xs:schema>
 
