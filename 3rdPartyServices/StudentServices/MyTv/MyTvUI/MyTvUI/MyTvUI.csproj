@@ -97,10 +97,13 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="ActivityFeedManager.cs" />
+    <Compile Include="Activities\ActivityFeedManager.cs" />
+    <Compile Include="Agenda\Timetable.cs" />
+    <Compile Include="Agenda\TimetableInstance.cs" />
     <Compile Include="Settings.cs" />
     <Compile Include="SocketClient.cs" />
     <Compile Include="SocketServer.cs" />
+    <Compile Include="Agenda\TimetableManager.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
