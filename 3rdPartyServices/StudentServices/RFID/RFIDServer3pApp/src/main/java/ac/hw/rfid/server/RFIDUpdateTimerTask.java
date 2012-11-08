@@ -24,6 +24,7 @@
  */
 package ac.hw.rfid.server;
 
+import java.util.Date;
 import java.util.TimerTask;
 
 import org.slf4j.Logger;
@@ -40,7 +41,8 @@ public class RFIDUpdateTimerTask extends TimerTask{
 	private String userJid;
 	private boolean readyToSend = true;
 	private Logger logging = LoggerFactory.getLogger(this.getClass());
-	
+	private Date timeStamp;
+	private long updateInterval = 5000;
 	
 	public RFIDUpdateTimerTask(IRfidClient client, String tagNumber, String symLoc, String userID){
 		this.rfidClient = client;
@@ -51,12 +53,17 @@ public class RFIDUpdateTimerTask extends TimerTask{
 	
 	@Override
 	public void run() {
-		if (readyToSend){
+		Date currentTimeStamp = new Date();
+		//if current time is more than 5s after the last update timestamp 
+		if ((currentTimeStamp.getTime()-updateInterval)>this.timeStamp.getTime()){
+			this.logging.debug("Location updates no longer sent");
+			return;
+		}
+		
+		
 			this.rfidClient.sendUpdate(this.userJid, this.symLoc, this.tagNumber);	
 			this.logging.debug("Sent remote Symbolic Location update message [value:"+this.symLoc+"]");
-		}else{
-			this.logging.debug("Location updates no longer sent");
-		}
+	
 		
 	}
 
@@ -72,15 +79,8 @@ public class RFIDUpdateTimerTask extends TimerTask{
 	}
 
 	public void setSymLoc(String newLocation) {
-		if (newLocation.equalsIgnoreCase("other")){
-			if (this.symLoc.equalsIgnoreCase("other")){
-				this.readyToSend = false;
-			}
-			this.symLoc = newLocation;
-		}else{
-			this.symLoc = newLocation;
-			this.readyToSend = true;
-		}
+		this.timeStamp = new Date();
+		this.symLoc = newLocation;
 	}
 
 	public String getUserJid() {
