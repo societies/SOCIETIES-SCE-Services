@@ -53,6 +53,7 @@ public class RFIDUpdateTimerTask extends TimerTask{
 	
 	@Override
 	public void run() {
+		this.logging.debug("trexo trexo !!! "+this.tagNumber);
 		Date currentTimeStamp = new Date();
 		//if current time is more than 5s after the last update timestamp 
 		if ((currentTimeStamp.getTime()-updateInterval)>this.timeStamp.getTime()){
@@ -79,6 +80,7 @@ public class RFIDUpdateTimerTask extends TimerTask{
 	}
 
 	public void setSymLoc(String newLocation) {
+		this.logging.debug("setting new symloc: "+newLocation+" for: "+this.tagNumber);
 		this.timeStamp = new Date();
 		this.symLoc = newLocation;
 	}
