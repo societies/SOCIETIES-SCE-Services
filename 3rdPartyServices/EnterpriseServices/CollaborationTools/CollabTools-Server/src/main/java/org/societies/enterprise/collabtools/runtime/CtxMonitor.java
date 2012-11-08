@@ -30,10 +30,8 @@ import java.util.Hashtable;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.societies.enterprise.collabtools.acquisition.LongTermCtxTypes;
 import org.societies.enterprise.collabtools.acquisition.Person;
 import org.societies.enterprise.collabtools.acquisition.PersonRepository;
-import org.societies.enterprise.collabtools.acquisition.ShortTermCtxTypes;
 import org.societies.enterprise.collabtools.interpretation.Rules;
 
 

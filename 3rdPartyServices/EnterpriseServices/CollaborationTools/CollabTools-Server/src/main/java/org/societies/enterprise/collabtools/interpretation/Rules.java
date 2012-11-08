@@ -40,9 +40,8 @@ import org.slf4j.LoggerFactory;
 import org.societies.enterprise.collabtools.acquisition.Person;
 import org.societies.enterprise.collabtools.acquisition.PersonRepository;
 import org.societies.enterprise.collabtools.acquisition.RelTypes;
-import org.societies.enterprise.collabtools.acquisition.ShortTermCtxTypes;
 import org.societies.enterprise.collabtools.acquisition.ShortTermContextUpdates;
-import org.societies.enterprise.collabtools.runtime.ContextActivity;
+import org.societies.enterprise.collabtools.acquisition.ShortTermCtxTypes;
 import org.societies.enterprise.collabtools.runtime.SessionRepository;
 
 /**
