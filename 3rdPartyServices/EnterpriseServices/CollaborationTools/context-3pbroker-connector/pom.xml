@@ -14,7 +14,7 @@
 	<!-- groupId is set in parent pom -->
 	<groupId>org.societies.context-management</groupId>
 	<artifactId>context-3pbroker-connector</artifactId>
-	<version>${version.cm}</version>
+	<version>0.1.0</version>
 	<packaging>bundle</packaging>
 
 	<developers>
@@ -67,6 +67,7 @@
 			<groupId>org.osgi</groupId>
 			<artifactId>org.osgi.core</artifactId>
 			<version>4.3.0</version>
+			<scope>provided</scope>
 		</dependency>
 		
 				
@@ -110,7 +111,7 @@
 						<artifactItem>
 							<groupId>${project.groupId}</groupId>
 							<artifactId>${project.artifactId}</artifactId>
-							<version>${version.cm}</version>
+							<version>0.1.0</version>
 							<type>jar</type>
 							<overWrite>true</overWrite>
 							<outputDirectory>${spring.osgi.deploy.dir}</outputDirectory>

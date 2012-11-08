@@ -27,18 +27,23 @@ package org.societies.context.externalBrokerConnector;
 
 import java.util.HashMap;
 
-import org.societies.api.identity.IIdentity;
+import org.societies.api.context.event.CtxChangeEventListener;
+import org.societies.api.identity.InvalidFormatException;
 
 /**
  * This is a 3p service Ifc that needs to access context through the societies platform ...
  *
- * @author nikosk
+ * @author nikosk and cviana
  *
  */
 public interface IContextAware3pService {
 	
-	public void registerForContextChanges(Object communityId);
+	public void registerForContextChanges(Object communityId) throws InvalidFormatException;
 	
-	public HashMap<String, HashMap<String, String[]>> retrieveLookupMembersCtxAttributes(Object communityId);
-	
+	public HashMap<String, HashMap<String, String[]>> retrieveLookupMembersCtxAttributes(Object communityId) throws InvalidFormatException;
+
+	/**
+	 * @param myCtxChangeEventListener
+	 */
+	public void setListener(CtxChangeEventListener myCtxChangeEventListener);
 }

@@ -38,7 +38,6 @@ import org.slf4j.LoggerFactory;
 import org.societies.api.comm.xmpp.interfaces.ICommManager;
 import org.societies.api.context.CtxException;
 import org.societies.api.context.broker.ICtxBroker;
-import org.societies.api.context.event.CtxChangeEvent;
 import org.societies.api.context.event.CtxChangeEventListener;
 import org.societies.api.context.model.CommunityCtxEntity;
 import org.societies.api.context.model.CtxAttribute;
@@ -56,7 +55,7 @@ import org.springframework.stereotype.Service;
 /**
  * Describe your class here...
  *
- * @author NikosK
+ * @author NikosK and cviana
  *
  */
 @Service
@@ -76,8 +75,11 @@ public class ContextAware3pService implements IContextAware3pService  {
 	private IIdentity serviceIdentity;
 	private ServiceResourceIdentifier myServiceID;
 
+	private CtxChangeEventListener myCtxChangeEventListener;
+	
+
 	@Autowired(required=true)
-	public ContextAware3pService( ICtxBroker ctxBroker, ICommManager commsMgr){
+	public ContextAware3pService(ICtxBroker ctxBroker, ICommManager commsMgr){
 		
 		LOG.info("*** ContextAware3pService started");
 
@@ -116,11 +118,13 @@ public class ContextAware3pService implements IContextAware3pService  {
 
 	/**
 	 * This method register for context change events in the context database
+	 * @throws InvalidFormatException 
 	 */
 	@Override
-	public void registerForContextChanges(Object communityId) {
+	public void registerForContextChanges(Object communityId) throws InvalidFormatException {
 		//Cast IIdentity for the societies platform
-		IIdentity cisID = (IIdentity)communityId;
+		IIdentity cisID = idMgr.fromJid(communityId.toString());
+		LOG.info("cisID retrieved: "+ cisID);
 			
 		LOG.info("*** registerForContextChanges");
 		
@@ -134,14 +138,16 @@ public class ContextAware3pService implements IContextAware3pService  {
 			 
 			while(members.hasNext()){
 				CtxEntityIdentifier member = members.next();
+				LOG.info("*** member.toString "+member.toString());
 				// 1b. Register listener by specifying the context attribute scope and type
 				CtxEntity retrievedCtxEntity = (CtxEntity) this.ctxBroker.retrieve(requestorService, member).get();
-				Set<CtxAttribute> location = retrievedCtxEntity.getAttributes(CtxAttributeTypes.LOCATION_SYMBOLIC);
-//				this.ctxBroker.registerForChanges(requestorService, new MyCtxChangeEventListener(), member, CtxAttributeTypes.ID);
-				this.ctxBroker.registerForChanges(requestorService, new MyCtxChangeEventListener(), location.iterator().next().getId());
-				
+//				Set<CtxAttribute> location = retrievedCtxEntity.getAttributes(CtxAttributeTypes.LOCATION_SYMBOLIC);
+				this.ctxBroker.registerForChanges(requestorService, this.myCtxChangeEventListener, member, CtxAttributeTypes.LOCATION_SYMBOLIC);
+				this.ctxBroker.registerForChanges(requestorService, this.myCtxChangeEventListener, member, CtxAttributeTypes.STATUS);
+
+
 //				Thread.sleep(3000);
-//				// 2. Update attribute to see some event action
+				// 2. Update attribute to see some event action
 //				CtxAttribute ctxAttr = (CtxAttribute) this.ctxBroker.retrieve(requestorService, location.iterator().next().getId()).get();
 //	
 //				ctxAttr.setStringValue("newDeviceLocation");
@@ -162,10 +168,10 @@ public class ContextAware3pService implements IContextAware3pService  {
 
 //		try {
 //			// 1a. Register listener by specifying the context attribute identifier
-//			this.ctxBroker.registerForChanges(requestorService, new MyCtxChangeEventListener(), ctxAttrDevLocationIdentifier);
+//			this.ctxBroker.registerForChanges(requestorService, myCtxChangeEventListener, ctxAttrDevLocationIdentifier);
 //
 //			// 1b. Register listener by specifying the context attribute scope and type
-//			this.ctxBroker.registerForChanges(requestorService, new MyCtxChangeEventListener(), deviceCtxEntity.getId(), CtxAttributeTypes.ID);
+//			this.ctxBroker.registerForChanges(requestorService, myCtxChangeEventListener, deviceCtxEntity.getId(), CtxAttributeTypes.ID);
 //
 //			// 2. Update attribute to see some event action
 //			CtxAttribute ctxAttr = (CtxAttribute) this.ctxBroker.retrieve(requestorService, ctxAttrDevLocationIdentifier).get();
@@ -186,71 +192,33 @@ public class ContextAware3pService implements IContextAware3pService  {
 	}
 
 
-	private class MyCtxChangeEventListener implements CtxChangeEventListener {
-
-		/* (non-Javadoc)
-		 * @see org.societies.api.context.event.CtxChangeEventListener#onCreation(org.societies.api.context.event.CtxChangeEvent)
-		 */
-		@Override
-		public void onCreation(CtxChangeEvent event) {
-
-			LOG.info(event.getId() + ": *** CREATED event ***");
-		}
-
-		/* (non-Javadoc)
-		 * @see org.societies.api.context.event.CtxChangeEventListener#onModification(org.societies.api.context.event.CtxChangeEvent)
-		 */
-		@Override
-		public void onModification(CtxChangeEvent event) {
-
-			LOG.info(event.getId() + ": *** MODIFIED event ***");
-		}
-
-		/* (non-Javadoc)
-		 * @see org.societies.api.context.event.CtxChangeEventListener#onRemoval(org.societies.api.context.event.CtxChangeEvent)
-		 */
-		@Override
-		public void onRemoval(CtxChangeEvent event) {
-
-			LOG.info(event.getId() + ": *** REMOVED event ***");
-		}
-
-		/* (non-Javadoc)
-		 * @see org.societies.api.context.event.CtxChangeEventListener#onUpdate(org.societies.api.context.event.CtxChangeEvent)
-		 */
-		@Override
-		public void onUpdate(CtxChangeEvent event) {
-
-			LOG.info(event.getId() + ": *** UPDATED event ***");
-			LOG.info(event.getId().getOwnerId()+": *** UPDATED event ***");
-			
-
-		}
-	}
-
 	@Override
-	public HashMap<String, HashMap<String, String[]>> retrieveLookupMembersCtxAttributes(Object communityId){
+	public HashMap<String, HashMap<String, String[]>> retrieveLookupMembersCtxAttributes(Object communityId) throws InvalidFormatException{
 
 		//Cast IIdentity for the societies platform
-		IIdentity cisID = (IIdentity)communityId;
+		IIdentity cisID = idMgr.fromJid(communityId.toString());
+		LOG.info("cisID retrieved: "+ cisID);
 		CtxEntityIdentifier ctxCommunityEntityIdentifier;
 		//Hashmap with format: person, context attributes
 		HashMap<String, HashMap<String, String[]>> persons = new HashMap<String, HashMap<String, String[]>>();
 		
 		try {
 			ctxCommunityEntityIdentifier = this.ctxBroker.retrieveCommunityEntityId(requestorService, cisID).get();
+			if (ctxCommunityEntityIdentifier == null)
+				throw new IllegalArgumentException("Community not created, ctxCommunityEntityIdentifier is null"); 
 			LOG.info("communityEntityIdentifier retrieved: " +ctxCommunityEntityIdentifier.toString()+ " based on cisID: "+ cisID);
 			
 			CommunityCtxEntity communityEntity = (CommunityCtxEntity) this.ctxBroker.retrieve(requestorService, ctxCommunityEntityIdentifier).get();
 
-			//Hashmap representing the context attributes
-			HashMap<String, String[]> othersCtx = new HashMap<String, String[]>();
 			Set<CtxEntityIdentifier> ctxMembersIDs = communityEntity.getMembers();
-
+			LOG.info("communityEntity.getMembers().size()" + communityEntity.getMembers().size());
 			 
 			for(CtxEntityIdentifier member : ctxMembersIDs){
+				//Hashmap representing the context attributes
+				HashMap<String, String[]> othersCtx = new HashMap<String, String[]>();
+				
 				CtxEntity retrievedCtxEntity = (CtxEntity) this.ctxBroker.retrieve(requestorService, member).get();
-				LOG.info("retrievedCtxEntity: "+retrievedCtxEntity.getId());
+				LOG.info("Retrieved member entity: "+retrievedCtxEntity.getId());
 
 				//Job Position
 				Set<CtxAttribute> attribute = retrievedCtxEntity.getAttributes(CtxAttributeTypes.ABOUT);
@@ -264,6 +232,10 @@ public class ContextAware3pService implements IContextAware3pService  {
 				attribute = retrievedCtxEntity.getAttributes(CtxAttributeTypes.LOCATION_SYMBOLIC);
 				for(CtxAttribute location : attribute)
 					othersCtx.put("location", new String[]{location.getStringValue()});
+				//Status
+				attribute = retrievedCtxEntity.getAttributes(CtxAttributeTypes.STATUS);
+				for(CtxAttribute status : attribute)
+					othersCtx.put("status", new String[]{status.getStringValue()});
 				
 				//Interests
 				attribute = retrievedCtxEntity.getAttributes(CtxAttributeTypes.INTERESTS);
@@ -295,6 +267,16 @@ public class ContextAware3pService implements IContextAware3pService  {
 		}
 		return persons;
 
-	}	
+	}
+
+	/* (non-Javadoc)
+	 * @see org.societies.context.externalBrokerConnector.IContextAware3pService#setListener(org.societies.api.context.event.CtxChangeEventListener)
+	 */
+	@Override
+	public void setListener(CtxChangeEventListener myCtxChangeEventListener) {
+		// TODO Auto-generated method stub
+		this.myCtxChangeEventListener = myCtxChangeEventListener;
+		
+	}
 
 }
