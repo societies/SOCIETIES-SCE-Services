@@ -11,7 +11,7 @@
        keeping these definitions separate is to facilitate integration
        testing of the bundle outside of an OSGi container -->
     
-    <osgi:service ref="externalCtxBrokerExample" interface="org.societies.context.example.externalBroker.ExternalCtxBrokerExample" />   
+    <osgi:service ref="externalCtxBrokerMock" interface="org.societies.context.mock.externalBroker.ExternalCtxBrokerMock" />   
     
 	<osgi:reference id="externalCtxBroker" interface="org.societies.api.context.broker.ICtxBroker" cardinality="1..1" />
 	<osgi:reference id="commMgr" interface="org.societies.api.comm.xmpp.interfaces.ICommManager" cardinality="1..1" />
