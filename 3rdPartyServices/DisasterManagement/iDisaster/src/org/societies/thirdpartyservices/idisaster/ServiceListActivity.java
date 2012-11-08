@@ -64,13 +64,16 @@ import android.widget.AdapterView.OnItemClickListener;
 public class ServiceListActivity extends ListActivity {
 
 	ContentResolver resolver;
-	Cursor recommendedServiceCursor;	// used for services that are recommended to the team members
 	int recommendedServices;			// keep track of number of recommended services
 	Cursor sharedServiceCursor;		// used for services that are shared by team members
 	int sharedServices;					// keep track of number of shared services
 	Cursor myServiceCursor;			// used for services that are used in the team by the user
 	int myServices;						// keep track of number of services used by the user
-		
+
+	// Static classes that can be accessed by other activities e.g. ServiceRecommendActivity
+	static Cursor recommendedServiceCursor;	// used for services that are recommended to the team members
+
+	
 	ArrayAdapter<String> serviceAdapter;
 	ListView listView;
 
@@ -161,14 +164,13 @@ public class ServiceListActivity extends ListActivity {
         if (! iDisasterApplication.testDataUsed) {
         	if (serviceAdapter!= null) serviceAdapter.clear();
         	
-        	// TODO: Replaced by the type "Recommended"
-			if (getServices ("Full access")						// Retrieve services from the selected team
+			if (getServices (iDisasterApplication.getInstance().SERVICE_RECOMMENDED)	// Retrieve services recommended in the team
 					.equals(iDisasterApplication.getInstance().QUERY_EXCEPTION)) {
 				showQueryExceptionDialog ();	// Exception: Display dialog and terminates activity
 			}
 
         	// TODO: Replaced by the type "Shared"
-			if (getServices ("Monitor")						// Retrieve services from the selected team
+			if (getServices (iDisasterApplication.getInstance().SERVICE_SHARED)			// Retrieve services shared in the selected team
 					.equals(iDisasterApplication.getInstance().QUERY_EXCEPTION)) {
 				showQueryExceptionDialog ();	// Exception: Display dialog and terminates activity
 			}
@@ -222,7 +224,7 @@ public class ServiceListActivity extends ListActivity {
 	}
 
 /**
- * getServices retrieves the list of services recommended of shared in the selected team
+ * getServices retrieves the list of services related to the selected team
  * from Social Provider.
  * Parameter:			Type: "Recommended" or "Shared"
  * Return value:		Query status code
@@ -233,13 +235,13 @@ public class ServiceListActivity extends ListActivity {
 		boolean recommendedFlag;
 		
 		// Check serviceType
-		if (serviceType.equals("Full access")){				// TODO: Replaced by the type "Recommended"
+		if (serviceType.equals(iDisasterApplication.getInstance().SERVICE_SHARED)){
 			recommendedFlag = false;
 			if (sharedServiceCursor != null) {
 				sharedServiceCursor.close();		// "close" releases data but does not set to null
 				sharedServiceCursor = null;
 			}
-		} else if (serviceType.equals("Monitor")) {			// TODO: Replaced by the type "Shared"
+		} else if (serviceType.equals(iDisasterApplication.getInstance().SERVICE_RECOMMENDED)) {
 			recommendedFlag = true;
 			if (recommendedServiceCursor != null) {
 				recommendedServiceCursor.close();		// "close" releases data but does not set to null
@@ -250,7 +252,7 @@ public class ServiceListActivity extends ListActivity {
 		}
 
 
-		// Step 1: get GLOBAL_ID_SERVICES for recommended services in the selected CIS
+		// Step 1: get GLOBAL_ID_SERVICES for shared or recommended services in the selected CIS
 			Uri sharingUri = SocialContract.Sharing.CONTENT_URI;
 						
 			String[] sharingProjection = new String[] {
@@ -273,7 +275,7 @@ public class ServiceListActivity extends ListActivity {
 
 			}
 
-			// Step 2: retrieve the services with the GLOBAL_ID_SERVICEs retrieved above
+			// Step 2: retrieve the services with the GLOBAL_ID_SERVICE retrieved above
 //TODO: We assume that a service can only be recommended once in a CIS...
 			if (sharingCursor == null) {			// No cursor was set - should not happen?
 				iDisasterApplication.getInstance().debug (2, "sharingCursor was not set to any value");
@@ -486,14 +488,24 @@ public class ServiceListActivity extends ListActivity {
 
 		switch (item.getItemId()) {
 
-			case R.id.disasterMenuAddService:
+			case R.id.disasterMenuRecommendService:
 
 ////TODO: Remove code for testing the correct setting of preferences 
 //				Toast.makeText(getApplicationContext(),
 //						"Menu item chosen: Add service", Toast.LENGTH_LONG)
 //						.show();			
 
-				startActivity(new Intent(ServiceListActivity.this, ServiceAddActivity.class));
+				startActivity(new Intent(ServiceListActivity.this, ServiceRecommendActivity.class));
+			break; 
+
+			case R.id.disasterMenuAddService:
+
+			////TODO: Remove code for testing the correct setting of preferences 
+				Toast.makeText(getApplicationContext(),
+						"Not implemented yet. To add a service, select a recommended service first. ", Toast.LENGTH_LONG)
+									.show();			
+//	The ServiceListActivity crashes...
+//				startActivity(new Intent(ServiceListActivity.this, ServiceAddActivity.class));
 			break;
 		
 			default:

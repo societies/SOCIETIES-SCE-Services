@@ -63,7 +63,7 @@ public class MemberListActivity extends ListActivity {
 	ContentResolver resolver;
 	int members;						// keep track of number of members
 	
-	// Static classes that can be accessed by othe activities e.g. MemberAddActivity
+	// Static classes that can be accessed by other activities e.g. MemberAddActivity
 	static Cursor memberCursor;			// used for the members in the selected team
 	
 	ArrayAdapter<String> memberAdapter;

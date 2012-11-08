@@ -39,6 +39,9 @@ import android.content.DialogInterface;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
@@ -48,65 +51,61 @@ import android.view.View;
 import android.view.View.OnClickListener;
 
 /**
- * Activity for adding members to the selected disaster team (community).
+ * Activity for recommending services in the selected disaster team (community).
+ * 
+ * NB: Currently a service is only recommended once - see method serviceInTeam
  * 
  * @author Jacqueline.Floch@sintef.no
  *
  */
-public class MemberAddActivity extends ListActivity implements OnClickListener {
+public class ServiceRecommendActivity extends ListActivity implements OnClickListener {
 //implements OnMultiChoiceClickListener {
 
 	ContentResolver resolver;
-	Cursor peopleCursor;			// used for the persons in the registry
-	int people;						// keep track of number of persons
+	Cursor serviceCursor;			// used for the services in the global registry
+	int service;					// keep track of number of services
 	
-	ArrayAdapter<String> peopleAdapter;
+	ArrayAdapter<String> serviceAdapter;
 	ListView listView;
 	
-	ArrayList <Integer> peopleMap = new ArrayList <Integer> ();		// Maps person position in list on UI with person cursor position
-																	// (Persons already members are not displayed)
+	ArrayList <Integer> serviceMap = new ArrayList <Integer> ();	// Maps service position in list on UI with service cursor position
+																	// (Services already recommended are not displayed)
 
-	Button memberAddButton;
+	Button serviceRecommendButton;
 	
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
 		super.onCreate(savedInstanceState);
 		
-    	setContentView (R.layout.member_add_layout);
+    	setContentView (R.layout.service_recommend_layout);
     	listView = getListView();
     	resolver = getContentResolver();
+    	
+//    	listView.set
 
-//    	listView.setOnItemClickListener(new OnItemClickListener() {
-//    		public void onItemClick (AdapterView<?> parent, View view,
-//    			int position, long id) {
-//    			
-//    			if ((position) < people) {			// Retrieve information from members in the team
-//    				peopleCursor.moveToPosition(position);
-//    				String memberGlobalId = peopleCursor.getString(peopleCursor
-//    						.getColumnIndex(SocialContract.People.GLOBAL_ID));
-//     				String memberName =  peopleCursor.getString(peopleCursor
-//    						.getColumnIndex(SocialContract.People.NAME));
-//    
-//// The activity is kept on stack (check also that "noHistory" is not set in Manifest)
-//// Should it be removed?
-////       				finish();
-//    					
-//    					// Test code
-//            			Toast.makeText(getApplicationContext(),
-//                				"Selected: " + memberName + " " + memberGlobalId, Toast.LENGTH_LONG)
-//                				.show();    				
-//
-//    				} else {
+    	listView.setOnItemLongClickListener (new OnItemLongClickListener() {
+    		public boolean onItemLongClick (AdapterView<?> parent, View view,
+    			int position, long id) {
+    			
+    			if ((position) < service) {			// Retrieve information from members in the team
+    				serviceCursor.moveToPosition(serviceMap.get(position));
+    				String description = serviceCursor.getString(serviceCursor.getColumnIndex(SocialContract.Services.DESCRIPTION));
+
+    				Toast.makeText (getApplicationContext(), description, Toast.LENGTH_LONG).show();
+    			} else {
 //    					// Should never happen..
-//    				}
-//    			}
-//
-//    	});
+    			}
+    			
+    			return true;
+
+    		}
+
+    	});
 
 	    // Add click listener to button
-    	memberAddButton = (Button) findViewById(R.id.memberButton);
-    	memberAddButton.setOnClickListener(this);
+    	serviceRecommendButton = (Button) findViewById(R.id.serviceRecommendButton);
+    	serviceRecommendButton.setOnClickListener(this);
 
     	
     	//TODO:  Add listener for long click
@@ -132,8 +131,8 @@ public class MemberAddActivity extends ListActivity implements OnClickListener {
     protected void onResume() {
     	super.onResume();
     	
-        if (peopleAdapter!= null) peopleAdapter.clear();
-    	if (getPeople()						// Retrieve people from the registry
+        if (serviceAdapter!= null) serviceAdapter.clear();
+    	if (getServices ()					// Retrieve services from the global registry
     				.equals(iDisasterApplication.getInstance().QUERY_EXCEPTION)) {
     		showQueryExceptionDialog ();	// Exception: Display dialog and terminates activity
    		}
@@ -157,7 +156,7 @@ public class MemberAddActivity extends ListActivity implements OnClickListener {
         // underlying resources (logcat will warn you about it.)
         //
 
-//    	memberCursor.close();
+//    	serviceCursor.close();
     }
 
 /**
@@ -167,15 +166,15 @@ public class MemberAddActivity extends ListActivity implements OnClickListener {
 
 	public void onClick(View view) {
 
-    	if(view == memberAddButton){
-    		// check if any member selected
+    	if(view == serviceRecommendButton){
+    		// check if any service is selected
     		
-			if (addNewMembers()						// Insert members for the selected team
+			if (recommendNewServices()						// Insert services for the selected team
 				.equals(iDisasterApplication.getInstance().INSERT_EXCEPTION)) {
 				showQueryExceptionDialog ();	// Exception: Display dialog (and terminates activity)
 				// Go back to the previous activity
 			} else {
-				// The members will be added to the adapter (and adapter to view) on resume of MemberListActivity 
+				// The services will be added to the adapter (and adapter to view) on resume of MemberListActivity 
 				finish ();
 			}
  		
@@ -188,26 +187,33 @@ public class MemberAddActivity extends ListActivity implements OnClickListener {
 
 
 /**
- * getPeople retrieves the list of people in the people directory.
+ * getServices retrieves the list of services in the global registry.
  */
-    private String getPeople () {
+    private String getServices () {
     	
-		if (peopleCursor != null) {
-			peopleCursor.close();		// "close" releases data but does not set to null
-			peopleCursor = null;
+		if (serviceCursor != null) {
+			serviceCursor.close();		// "close" releases data but does not set to null
+			serviceCursor = null;
 		}
     		
-    	Uri peopleUri = SocialContract.People.CONTENT_URI;
+    	Uri serviceUri = SocialContract.Services.CONTENT_URI;
     					
-    	String[] peopleProjection = new String[] {
-    				SocialContract.People.GLOBAL_ID,
-    				SocialContract.People.NAME};
-    	
+    	String[] serviceProjection = new String[] {
+    				SocialContract.Services.GLOBAL_ID,
+    				SocialContract.Services.NAME,
+    				SocialContract.Services.DESCRIPTION};		// Description is used later on when the user selects services 
+
+		String serviceSelection = SocialContract.Services.OWNER_ID + "= ?"+
+				"AND " + SocialContract.Services.AVAILABLE + "<> ?";
+		
+		String[] serviceSelectionArgs = new String[] {"",		// Retrieve services in the GLOBAL registry i.e. no service owner
+					iDisasterApplication.getInstance().SERVICE_TYPE_CLIENT };	// Ignore services of type CLIENT
+				
     	try {
-    		peopleCursor= resolver.query(peopleUri, peopleProjection,
-    					null /* selection */, null /* selectionArgs */, null /* sortOrder*/);			
+    		serviceCursor = resolver.query(serviceUri, serviceProjection,
+    				serviceSelection, serviceSelectionArgs, null /* sortOrder*/);			
     		} catch (Exception e) {
-    			iDisasterApplication.getInstance().debug (2, "Query to "+ peopleUri + "causes an exception");
+    			iDisasterApplication.getInstance().debug (2, "Query to "+ serviceUri + "causes an exception");
     			return iDisasterApplication.getInstance().QUERY_EXCEPTION;
     		}
     	
@@ -220,42 +226,42 @@ public class MemberAddActivity extends ListActivity implements OnClickListener {
      */
     	private void assignAdapter () {
     				
-    		people= 0;
-    		if (peopleMap != null) {
-    			peopleMap.clear();	// Reset mapping between UI list and poeple list
+    		service = 0;
+    		if (serviceMap != null) {
+    			serviceMap.clear();	// Reset mapping between UI list and poeple list
     			
     		} else {				// Should never happen...
-    			peopleMap = new ArrayList <Integer> ();
+    			serviceMap = new ArrayList <Integer> ();
     		}
     				
-    		ArrayList<String> peopleList = new ArrayList<String> ();
+    		ArrayList<String> serviceList = new ArrayList<String> ();
 
 //    			An empty List will be assigned to Adapter
-//    			if (peopleCursor == null) {
+//    			if (serviceCursor == null) {
 
 //    			An empty List will be assigned to Adapter
-//    				if (peopleCursor == null) {
-//    					if (peopleCursor.getCount() == 0) {
+//    				if (serviceCursor == null) {
+//    					if (serviceCursor.getCount() == 0) {
     				
-    		if (peopleCursor != null) {
-    			if (peopleCursor.getCount() != 0) {
-    				while (peopleCursor.moveToNext()) {
-    					// Only display people that are not members in the selected team	
-    					if (! memberInTeam (peopleCursor.getString(peopleCursor
-    							.getColumnIndex(SocialContract.People.GLOBAL_ID)))) {
+    		if (serviceCursor != null) {
+    			if (serviceCursor.getCount() != 0) {
+    				while (serviceCursor.moveToNext()) {
+    					// Only display services that are not recommended in the selected team	
+    					if (! serviceInTeam (serviceCursor.getString(serviceCursor
+    							.getColumnIndex(SocialContract.Services.GLOBAL_ID)))) {
 	    						
-    						String displayName = peopleCursor.getString(peopleCursor
-    								.getColumnIndex(SocialContract.People.NAME));
-    						peopleList.add (displayName);
-    						people++;
-    						peopleMap.add (peopleCursor.getPosition()); // Maps person in UI list and cursor position 	
+    						String displayName = serviceCursor.getString(serviceCursor
+    								.getColumnIndex(SocialContract.Services.NAME));
+    						serviceList.add (displayName);
+    						service++;
+    						serviceMap.add (serviceCursor.getPosition()); // Maps person in UI list and cursor position 	
     					}
     				}
     			}
     		}
 
     	    listView.setAdapter(new ArrayAdapter<String>(this,
-    	            R.layout.disaster_list_item_multiple_choice, peopleList));
+    	            R.layout.disaster_list_item_multiple_choice, serviceList));
     	    
     	    listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
 
@@ -264,26 +270,26 @@ public class MemberAddActivity extends ListActivity implements OnClickListener {
     	
     	
 /**
- * check whether or not a person is already member in a team.
+ * check whether or not a service is already recommended in a team.
  */
-    private boolean memberInTeam (String m) {
+    private boolean serviceInTeam (String m) {
     	
-    	if (MemberListActivity.memberCursor == null) {
+    	if (ServiceListActivity.recommendedServiceCursor == null) {
     		return false;    		
     	}
-    	if (MemberListActivity.memberCursor.getCount() ==0) {
+    	if (ServiceListActivity.recommendedServiceCursor.getCount() ==0) {
     		return false;
     	}
     	
-    	MemberListActivity.memberCursor.moveToFirst();
-    	if (m.equals(MemberListActivity.memberCursor.getString(
-    			MemberListActivity.memberCursor.getColumnIndex(SocialContract.People.GLOBAL_ID)))) {
+    	ServiceListActivity.recommendedServiceCursor.moveToFirst();
+    	if (m.equals(ServiceListActivity.recommendedServiceCursor.getString(
+    			ServiceListActivity.recommendedServiceCursor.getColumnIndex(SocialContract.Services.GLOBAL_ID)))) {
     			return true;
     	}
     	
-    	while (MemberListActivity.memberCursor.moveToNext()) {
-    		if (m.equals(MemberListActivity.memberCursor.getString(
-    				MemberListActivity.memberCursor.getColumnIndex(SocialContract.People.GLOBAL_ID)))) {
+    	while (ServiceListActivity.recommendedServiceCursor.moveToNext()) {
+    		if (m.equals(ServiceListActivity.recommendedServiceCursor.getString(
+    				ServiceListActivity.recommendedServiceCursor.getColumnIndex(SocialContract.People.GLOBAL_ID)))) {
     			return true;
     		}
     	}
@@ -293,44 +299,50 @@ public class MemberAddActivity extends ListActivity implements OnClickListener {
 
 
 /**
- * add selected members to SocialProvider
+ * add selected services for recommendation to SocialProvider
  */
-	private String addNewMembers () {
+	private String recommendNewServices () {
     
 		SparseBooleanArray checkedRows = listView.getCheckedItemPositions();
 		
 		String selected = "";
 
-		for (int i=0; i<people; ++i) {
+		for (int i=0; i<service; ++i) {
 			if (checkedRows.get(i)) {
-				peopleCursor.moveToPosition(peopleMap.get(i));
-				selected = selected + " " + peopleCursor.getString(peopleCursor.getColumnIndex(SocialContract.People.NAME));
-				
+				serviceCursor.moveToPosition(serviceMap.get(i));
+				selected = selected + " " + serviceCursor.getString(serviceCursor.getColumnIndex(SocialContract.Services.NAME));
+
+				Toast.makeText(this, "selected:" + selected, Toast.LENGTH_SHORT).show();
+
 				// Set the values related to the activity to store in Social Provider
-				ContentValues membershipValues = new ContentValues ();
+				ContentValues sharingValues = new ContentValues ();
 				
-		//TODO: Remove the following once Social Provider has been corrected (Social Provider should insert the GLOBAL_ID)
+//TODO: Remove the following once Social Provider has been corrected (Social Provider should insert the GLOBAL_ID)
 				SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss");
 				String currentDateandTime = sdf.format(new Date());
-				membershipValues.put(SocialContract.Membership.GLOBAL_ID, currentDateandTime);
-		// End remove		
+				sharingValues.put(SocialContract.Sharing.GLOBAL_ID, currentDateandTime);
+// End remove		
 
-				membershipValues.put(SocialContract.Membership.GLOBAL_ID_MEMBER,		// Id of the member to be added
-						peopleCursor.getString(peopleCursor.getColumnIndex(SocialContract.People.GLOBAL_ID)));
-				membershipValues.put(SocialContract.Membership.GLOBAL_ID_COMMUNITY,		// Add member to the selected team
+				sharingValues.put(SocialContract.Sharing.GLOBAL_ID_SERVICE,		// Id of the service to be recommended
+						serviceCursor.getString(serviceCursor.getColumnIndex(SocialContract.Services.GLOBAL_ID)));
+				sharingValues.put(SocialContract.Sharing.GLOBAL_ID_COMMUNITY,	// Recommend service in the selected team
 									iDisasterApplication.getInstance().selectedTeam.globalId);
-				membershipValues.put(SocialContract.Membership.TYPE, "member");			// Activity intent
-				membershipValues.put(SocialContract.Membership.ORIGIN, "SOCIETIES");	// Social platform iDisaster is plugged into		
-				 
+				sharingValues.put(SocialContract.Sharing.GLOBAL_ID_OWNER,			// Member recommending the service
+									iDisasterApplication.getInstance().me.globalId);		
+				sharingValues.put(SocialContract.Sharing.TYPE, iDisasterApplication.getInstance().SERVICE_RECOMMENDED);
+				sharingValues.put(SocialContract.Sharing.ORIGIN, "SOCIETIES");	// Social platform iDisaster is plugged into		
+
+
+				
 				try {
 // The Uri value returned is not used.
 //					Uri activityNewUri = getContentResolver().insert( SocialContract.CommunityActivity.CONTENT_URI,
-//												activityValues);
-					getContentResolver().insert( SocialContract.Membership.CONTENT_URI, 
-							membershipValues);
+//							sharingValues);
+					getContentResolver().insert( SocialContract.Sharing.CONTENT_URI, 
+							sharingValues);
 				} catch (Exception e) {
 					iDisasterApplication.getInstance().debug (2, "Insert to "+ 
-										SocialContract.Membership.CONTENT_URI + "causes an exception");
+										SocialContract.Sharing.CONTENT_URI + "causes an exception");
 			    	return iDisasterApplication.getInstance().INSERT_EXCEPTION;
 				}
 			}
@@ -349,7 +361,7 @@ public class MemberAddActivity extends ListActivity implements OnClickListener {
         			
 	private void showQueryExceptionDialog () {
     	AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this);
-        alertBuilder.setMessage(getString(R.string.dialogPeopleQueryException))
+        alertBuilder.setMessage(getString(R.string.dialogServiceQueryException))
         			.setCancelable(false)
           			.setPositiveButton (getString(R.string.dialogOK), new DialogInterface.OnClickListener() {
           				public void onClick(DialogInterface dialog, int id) {

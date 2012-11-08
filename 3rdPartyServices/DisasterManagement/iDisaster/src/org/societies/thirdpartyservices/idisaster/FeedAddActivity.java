@@ -132,7 +132,7 @@ public class FeedAddActivity extends Activity implements OnClickListener {
 		activityValues.put(SocialContract.CommunityActivity.GLOBAL_ID_FEED_OWNER,	// Selected team
 							iDisasterApplication.getInstance().selectedTeam.globalId);
 		activityValues.put(SocialContract.CommunityActivity.GLOBAL_ID_VERB,			// Activity intent
-							iDisasterApplication.getInstance().DISPLAY);
+							iDisasterApplication.getInstance().FEED_DISPLAY);
 		activityValues.put(SocialContract.CommunityActivity.GLOBAL_ID_OBJECT, feedContent); // Text entered by the user
 //		No target - shared with all members in the community
 		activityValues.put(SocialContract.CommunityActivity.GLOBAL_ID_TARGET, "ALL"); // Activity target

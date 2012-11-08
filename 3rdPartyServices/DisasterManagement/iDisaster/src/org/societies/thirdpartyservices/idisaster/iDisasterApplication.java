@@ -24,11 +24,15 @@
  */
 package org.societies.thirdpartyservices.idisaster;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
 
 import android.app.AlertDialog;
 import android.app.Application;
+import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.database.Cursor;
@@ -91,7 +95,19 @@ public class iDisasterApplication extends Application {
 	public final String INSERT_SUCCESS = "INSERT_SUCCESS";
 	
 	// Constant keys used for activity feeds
-	public final String DISPLAY = "DISPLAY";
+	public final String FEED_DISPLAY = "DISPLAY";
+	
+	// Constant used for services 
+	public final String SERVICE_RECOMMENDED = "Recommended";
+	public final String SERVICE_SHARED = "Shared";
+
+	// Constant used for service types
+	public final String SERVICE_TYPE_PROVIDER = "Provider";
+	public final String SERVICE_TYPE_CLIENT = "Client";
+	public final String SERVICE_TYPE_APP = "App";
+
+// TODO: Remove this variable - only used while waiting update for Social Provider
+	private boolean servicesUpdated = false;
 
 // test data
 	ArrayList <String> disasterNameList;
@@ -149,6 +165,12 @@ public class iDisasterApplication extends Application {
 
 	    if (testDataUsed) {   
 	    	setTestData ();	    	
+	    }
+	    
+// TODO: Remove following code - only used while waiting update for Social Provider
+	    if (!servicesUpdated) {
+	    	servicesUpdated = true;
+	    	updateServices ();
 	    }
 			    
 	} //onCreate
@@ -235,7 +257,149 @@ public class iDisasterApplication extends Application {
 		return QUERY_EMPTY;
 	}
 
+
+/**
+ * updateServices is used temporarily. Will be removed after update of the code
+ * for Social Provider.
+ * It updates the Services table in order to use it as a global service registry 
+ * (in addition to a user service registry).
+ * - All OWNER_ID are set to ""
+ * - set service type (the field "available" is currently used as not filed "type" is defined  
+ */
+	private String updateServices () {
+		
+		Uri servicesUri = SocialContract.Services.CONTENT_URI;
+		
+		ContentValues values = new ContentValues ();
+		
+		// Step 1: get all services 
+					
+		String[] servicesProjection = new String[] {
+				SocialContract.Services._ID,
+				SocialContract.Services.GLOBAL_ID,
+				SocialContract.Services.NAME
+				};
+
+		Cursor servicesCursor;
+		try {
+			servicesCursor= getContentResolver().query(servicesUri, servicesProjection,
+					null /* selection */ , null /* selectionArgs */, null /* sortOrder*/);
+		} catch (Exception e) {
+			debug (2, "Query to "+ servicesUri + "causes an exception");
+			return QUERY_EXCEPTION;
+
+		}
+
+		// Step 2: remove owner ID
+		if (servicesCursor == null) {			// No cursor was set - should not happen?
+			iDisasterApplication.getInstance().debug (2, "servicesCursor was not set to any value");
+			return QUERY_EMPTY;
+		}
+		
+		if (servicesCursor.getCount() == 0) {	// No service is recommended in the team community
+			return QUERY_EMPTY;
+		}		
+		
+		while (servicesCursor.moveToNext()) {
+			Uri recordUri = servicesUri.withAppendedPath(servicesUri, "/" +
+					servicesCursor.getString(servicesCursor.getColumnIndex(SocialContract.Services._ID)));
+	        values = new ContentValues();
+	        values.put(SocialContract.Services.OWNER_ID, "");
+	        if (servicesCursor.getString(servicesCursor.getColumnIndex(SocialContract.Services.NAME)).equals("iJacket")) {
+		        values.put(SocialContract.Services.AVAILABLE, SERVICE_TYPE_PROVIDER);
+	        } else if (servicesCursor.getString(servicesCursor.getColumnIndex(SocialContract.Services.NAME)).equals("iJacketClient")) {
+	        	values.put(SocialContract.Services.AVAILABLE, SERVICE_TYPE_CLIENT);
+	        }
+	        getContentResolver().update(recordUri, values, null, null);		
+		}
 	
+		return QUERY_SUCCESS; 
+
+		
+		
+		
+//		Uri sharingUri = SocialContract.Sharing.CONTENT_URI;
+//		
+//		ContentValues values = new ContentValues ();
+//		
+////TODO: Remove the following once Social Provider has been corrected (Social Provider should insert the GLOBAL_ID)
+//		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss");
+//		String currentDateandTime = sdf.format(new Date());
+//		values.put(SocialContract.Sharing.GLOBAL_ID, currentDateandTime);
+//// End remove		
+//
+//		values.put(SocialContract.Sharing.GLOBAL_ID_SERVICE,		
+//				"s1xyz.societies.org");
+//		values.put(SocialContract.Sharing.GLOBAL_ID_COMMUNITY,
+//							"c1xyz.societies.org");
+//		values.put(SocialContract.Sharing.GLOBAL_ID_OWNER,		
+//				"knut@redcross.org");
+//		values.put(SocialContract.Sharing.TYPE, "Monitor");
+//		values.put(SocialContract.Sharing.ORIGIN, "Red Cross");		
+//		 
+//		try {
+////The Uri value returned is not used.
+////			Uri activityNewUri = getContentResolver().insert( SocialContract.CommunityActivity.CONTENT_URI,
+////										activityValues);
+//			getContentResolver().insert( sharingUri, values);
+//		} catch (Exception e) {
+//			iDisasterApplication.getInstance().debug (2, "Insert to "+ sharingUri + "causes an exception");
+//	    	return iDisasterApplication.getInstance().INSERT_EXCEPTION;
+//		}
+//
+//
+//		// Step 1a: get services of type "Monitor"
+//					
+//		String[] sharingProjection = new String[] {
+//				SocialContract.Sharing._ID,
+//				SocialContract.Sharing.GLOBAL_ID_SERVICE
+////				,
+////				SocialContract.Sharing.TYPE
+//				};
+//
+////		String sharingSelection = SocialContract.Sharing.TYPE + "= ?";
+////
+////		String[] sharingSelectionArgs = new String[] 
+////				{"Monitor"};		// Retrieve services of that type
+//
+//		String sharingSelection = null;
+//
+//		String[] sharingSelectionArgs = null;
+//
+//		Cursor sharingCursor;
+//		try {
+//			sharingCursor= getContentResolver().query(sharingUri, sharingProjection,
+//					sharingSelection, sharingSelectionArgs, null /* sortOrder*/);
+//		} catch (Exception e) {
+//			debug (2, "Query to "+ sharingUri + "causes an exception");
+//			return QUERY_EXCEPTION;
+//
+//		}
+//
+//		// Step 1b: replace the type to "Recommended"
+//		if (sharingCursor == null) {			// No cursor was set - should not happen?
+//			iDisasterApplication.getInstance().debug (2, "sharingCursor was not set to any value");
+//			return QUERY_EMPTY;
+//		}
+//		
+//		if (sharingCursor.getCount() == 0) {	// No service is recommended in the team community
+//			return QUERY_EMPTY;
+//		}		
+//		
+//		while (sharingCursor.moveToNext()) {
+//			Uri recordUri = sharingUri.withAppendedPath(sharingUri, "/" +
+//					sharingCursor.getString(sharingCursor.getColumnIndex(SocialContract.Sharing._ID)));
+//	        values = new ContentValues();
+//	        values.put(SocialContract.Sharing.TYPE, RECOMMENDED);
+//	        getContentResolver().update(recordUri, values, null, null);		
+//		}
+//	
+//		return QUERY_SUCCESS; 
+		
+	}
+		
+
+
 /**
 * showDialog is used under testing
 * parameters: activity context, message to be displayed, button text
