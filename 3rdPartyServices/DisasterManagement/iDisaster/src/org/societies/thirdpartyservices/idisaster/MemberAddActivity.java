@@ -39,10 +39,12 @@ import android.content.DialogInterface;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Toast;
+import android.widget.AdapterView.OnItemLongClickListener;
 import android.util.SparseBooleanArray;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -77,43 +79,31 @@ public class MemberAddActivity extends ListActivity implements OnClickListener {
     	listView = getListView();
     	resolver = getContentResolver();
 
-//    	listView.setOnItemClickListener(new OnItemClickListener() {
-//    		public void onItemClick (AdapterView<?> parent, View view,
-//    			int position, long id) {
-//    			
-//    			if ((position) < people) {			// Retrieve information from members in the team
-//    				peopleCursor.moveToPosition(position);
-//    				String memberGlobalId = peopleCursor.getString(peopleCursor
-//    						.getColumnIndex(SocialContract.People.GLOBAL_ID));
-//     				String memberName =  peopleCursor.getString(peopleCursor
-//    						.getColumnIndex(SocialContract.People.NAME));
-//    
-//// The activity is kept on stack (check also that "noHistory" is not set in Manifest)
-//// Should it be removed?
-////       				finish();
-//    					
-//    					// Test code
-//            			Toast.makeText(getApplicationContext(),
-//                				"Selected: " + memberName + " " + memberGlobalId, Toast.LENGTH_LONG)
-//                				.show();    				
-//
-//    				} else {
+    	// Add listener for long click on an item in the list
+    	listView.setOnItemLongClickListener (new OnItemLongClickListener() {
+    		public boolean onItemLongClick (AdapterView<?> parent, View view,
+    			int position, long id) {
+    			
+    			if ((position) < people) {			// Retrieve information for selected person
+    				peopleCursor.moveToPosition(peopleMap.get(position));
+    				String personName = peopleCursor.getString(peopleCursor.getColumnIndex(SocialContract.People.NAME));
+        			Toast.makeText(getApplicationContext(),
+            				"No more member information for " + personName, Toast.LENGTH_LONG)
+            				.show();    				
+    			} else {
 //    					// Should never happen..
-//    				}
-//    			}
-//
-//    	});
+    			}
+    			
+    			return true;
+
+    		}
+
+    	});
+
 
 	    // Add click listener to button
     	memberAddButton = (Button) findViewById(R.id.memberButton);
     	memberAddButton.setOnClickListener(this);
-
-    	
-    	//TODO:  Add listener for long click
-    	// listView.setOnItemLongClickListener(new DrawPopup());
-		// TODO: Start the MemberDetails Activity
-		// TODO: Add parameters to Intent
-		// startActivity (new Intent(MemberListActivity.this, MemberDetailsActivity.class));
 
     }
 

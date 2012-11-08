@@ -81,14 +81,13 @@ public class ServiceRecommendActivity extends ListActivity implements OnClickLis
     	setContentView (R.layout.service_recommend_layout);
     	listView = getListView();
     	resolver = getContentResolver();
-    	
-//    	listView.set
 
+    	// Add listener for long click on an item in the list
     	listView.setOnItemLongClickListener (new OnItemLongClickListener() {
     		public boolean onItemLongClick (AdapterView<?> parent, View view,
     			int position, long id) {
     			
-    			if ((position) < service) {			// Retrieve information from members in the team
+    			if ((position) < service) {			// Retrieve information from selected service
     				serviceCursor.moveToPosition(serviceMap.get(position));
     				String description = serviceCursor.getString(serviceCursor.getColumnIndex(SocialContract.Services.DESCRIPTION));
 

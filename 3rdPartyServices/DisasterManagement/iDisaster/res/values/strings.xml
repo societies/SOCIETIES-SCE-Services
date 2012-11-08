@@ -65,12 +65,6 @@
 	<string name="memberAddButton">Add member(s)</string>
     <string name="memberAddHeading">Select new members</string>
 	<string name="memberAddNoPeople">No people to add</string>
-	<string name="memberDetailsHeading">Member profile</string>
-	<string name="memberDescriptionHint">Enter keywords</string>
-    <string name="memberDescriptionLabel">Description:</string>
-    <string name="memberNameHint">New nember name</string>
-    <string name="memberNameLabel">Name:</string>
-    <string name="memberAddDialog">Please re-enter the member name and description.</string>
 
 	<string name="serviceAddButton">Add service(s)</string>
     <string name="serviceAddHeading">Select new services</string>

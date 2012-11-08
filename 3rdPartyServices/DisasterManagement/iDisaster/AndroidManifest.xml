@@ -86,12 +86,6 @@
 		</activity>
 		
         <activity
-            android:name=".MemberDetailsActivity"
-            android:theme="@android:style/Theme.NoTitleBar"
-            android:noHistory="true" > 
-        </activity>       
-		
-        <activity
             android:name=".ServiceDetailsActivity"
             android:theme="@android:style/Theme.NoTitleBar"
             >

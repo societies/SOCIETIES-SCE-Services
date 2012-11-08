@@ -100,27 +100,24 @@ public class MemberListActivity extends ListActivity {
     			if (iDisasterApplication.testDataUsed) {			// Test data
     				// TODO: Remove code for testing the correct setting of preferences 
         			Toast.makeText(getApplicationContext(),
-        				"Click ListItem Number   " + (position+1) + "   " + iDisasterApplication.getInstance().memberNameList.get (position), Toast.LENGTH_LONG)
+        				"No more member information for " + iDisasterApplication.getInstance().memberNameList.get (position),
+        				Toast.LENGTH_LONG)
         				.show();    				
     			} else {
     				if ((position) < members) {			// Retrieve information from members in the team
     					memberCursor.moveToPosition(position);
-     					String memberGlobalId = memberCursor.getString(memberCursor
-    							.getColumnIndex(SocialContract.People.GLOBAL_ID));
+//     					String memberGlobalId = memberCursor.getString(memberCursor
+//    							.getColumnIndex(SocialContract.People.GLOBAL_ID));
        					String memberName =  memberCursor.getString(memberCursor
     							.getColumnIndex(SocialContract.People.NAME));
-        				// TODO: Start the MemberDetails Activity
-    					// TODO: Add parameters to Intent
-        				// startActivity (new Intent(MemberListActivity.this, MemberDetailsActivity.class));
+            			Toast.makeText(getApplicationContext(),
+                				"No more member information for " + memberName, Toast.LENGTH_LONG)
+                				.show();    				
 
 // The activity is kept on stack (check also that "noHistory" is not set in Manifest)
 // Should it be removed?
 //       				finish();
     					
-    					// Test code
-            			Toast.makeText(getApplicationContext(),
-                				"Selected: " + memberName + " " + memberGlobalId, Toast.LENGTH_LONG)
-                				.show();    				
 
     				} else {
     					// Should never happen..
