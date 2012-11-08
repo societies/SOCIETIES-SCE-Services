@@ -99,7 +99,7 @@ namespace HWUPortal
         private const int WM_CLOSE = 0x10;
         private const int WS_CHILD = 0x40000000;
 
-
+        Process p = null;
 
         /// <summary>
         /// Creeate control when visibility changes
@@ -119,7 +119,7 @@ namespace HWUPortal
                 appWin = IntPtr.Zero;
 
                 // Start the remote application
-                Process p = null;
+               
                 try
                 {
                     // Start the process
@@ -163,7 +163,7 @@ namespace HWUPortal
         }
         private void p_Exited(object sender, EventArgs args)
         {
-
+            Console.WriteLine("Received exit event");
             ApplicationControlArgs cArgs = new ApplicationControlArgs(this.exeName, true);
             appExit(this, cArgs);
         }
@@ -173,16 +173,49 @@ namespace HWUPortal
             // Stop the application
             if (appWin != IntPtr.Zero)
             {
+                if (p != null && !p.HasExited)
+                {
+                    try
+                    {
+                        Console.WriteLine("Closing main window"+p.ProcessName);
 
+                        p.CloseMainWindow();
+
+                        
+                        if (!p.HasExited)
+                        {
+                            if (!p.WaitForExit(5000))
+                            {
+                                Console.WriteLine("Closing down process");
+                                p.Close();
+
+                                if (!p.HasExited)
+                                {
+                                    Console.WriteLine("process has not exited yet");
+                                    if (!p.WaitForExit(5000))
+                                    {
+                                        Console.WriteLine("killing process");
+                                        p.Kill();
+                                        Console.WriteLine("killed process");
+                                    }
+                                }
+                            }
+                        }
+                        Console.WriteLine("Closed");
+                    }
+                    catch (Exception exc)
+                    {
+                        Console.WriteLine(exc.Message);
+                    }
+                }
                 // Post a close message
-                PostMessage(appWin, WM_CLOSE, 0, 0);
+                //PostMessage(appWin, WM_CLOSE, 0, 0);
                
                 // Delay for it to get the message
-                System.Threading.Thread.Sleep(1000);
+                //System.Threading.Thread.Sleep(1000);
 
                 // Clear internal handle
                 appWin = IntPtr.Zero;
-
                 this.created = false;
                 Console.WriteLine("Destroyed exe" + this.exeName);
             }

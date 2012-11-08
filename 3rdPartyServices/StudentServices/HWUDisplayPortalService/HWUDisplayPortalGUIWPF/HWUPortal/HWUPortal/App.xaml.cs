@@ -47,5 +47,10 @@ namespace HWUPortal
                 return Assembly.Load(block);
             }
         }
+
+        private void Application_Exit(object sender, ExitEventArgs e)
+        {
+            Console.WriteLine("Portal exiting");
+        }
     }
 }

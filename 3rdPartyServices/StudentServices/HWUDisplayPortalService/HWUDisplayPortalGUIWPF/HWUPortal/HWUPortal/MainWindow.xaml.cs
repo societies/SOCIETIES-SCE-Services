@@ -18,6 +18,7 @@ using Microsoft.Kinect.Interop;
 using Coding4Fun.Kinect.Wpf;
 using Coding4Fun.Kinect;
 using Coding4Fun.Kinect.Wpf.Controls;
+using System.IO;
 
 namespace HWUPortal
 {
@@ -51,7 +52,9 @@ namespace HWUPortal
         
 
         System.Windows.Forms.FlowLayoutPanel flpPanel;
-      
+        StreamWriter writer;
+        FileStream ostrm;
+        TextWriter oldOut = Console.Out;
         StandaloneAppControl standaloneAppControl;
 
         #region Kinectvariables
@@ -73,7 +76,13 @@ namespace HWUPortal
         public MainWindow()
         {
             Thread.CurrentThread.Name = "MainWindowThread";
-            
+
+            String userProfile = System.Environment.GetEnvironmentVariable("USERPROFILE");
+            String directory = userProfile + @"\societies\portalLog.txt";
+            ostrm = new FileStream(directory, FileMode.Create, FileAccess.Write);
+            writer = new StreamWriter(ostrm);
+            writer.AutoFlush = true;
+            Console.SetOut(writer);
             InitializeComponent();
             this.webBrowser.Visibility = System.Windows.Visibility.Hidden;
             RightHand.BringIntoView();
@@ -106,7 +115,8 @@ namespace HWUPortal
 
 
             standaloneAppControl = new StandaloneAppControl();
-            
+            standaloneAppControl.appExit += new StandaloneAppControl.ApplicationExitedHandler(onExeDestroyed);
+
             //appControl = new ApplicationControl.ApplicationControl();
             //appControl.appExit += new ApplicationControl.ApplicationControl.ApplicationExitedHandler(onExeDestroyed);
 
@@ -464,44 +474,50 @@ namespace HWUPortal
         }
 
 
+        public delegate void setButtonContextDelegate(HoverButton button, String content);
+
+        public void setButtonContext(HoverButton button, String content)
+        {
+           
+            if (button.Dispatcher.CheckAccess())
+            {
+                Console.WriteLine("I have access to change the content of the button. Current content: "+button.Content+"| new content: "+content);
+                button.Content = content;
+            }
+            else
+            {
+                Console.WriteLine("I don't have access to the button. Using delegate method");
+                button.Dispatcher.Invoke(new setButtonContextDelegate(setButtonContext), button, content);
+            }
+
+        }
+
+
         public delegate void enableThisButtonDelegate(HoverButton button, Boolean enabled);
 
         public void enableThisButton(HoverButton button, Boolean enabled)
         {
+           
             if (button.Dispatcher.CheckAccess())
             {
                 button.IsEnabled = enabled;
                 if (enabled)
                 {
+                    Console.WriteLine("enabling button" + button.Name);
                     button.Visibility = System.Windows.Visibility.Visible;
                 }
                 else
                 {
+                    Console.WriteLine("disabling button" + button.Name);
                     button.Visibility = System.Windows.Visibility.Hidden;
                 }
             }
             else
             {
+                Console.WriteLine("using dispatcher to enable/disable button");
                 button.Dispatcher.Invoke(new enableThisButtonDelegate(enableThisButton), button, enabled);
             }
-            //if (button.InvokeRequired)
-            //{
-            //    button.Invoke(new enableThisButtonDelegate(this.enableThisButton), button, enabled);
-            //}
-            //else
-            //{
-            //button.IsEnabled = enabled;
-            //if (enabled)
-            //{
-            //    button.Visibility = System.Windows.Visibility.Visible;
-            //}
-            //else
-            //{
-            //    button.Visibility = System.Windows.Visibility.Hidden;
-            //}
-            //button.Enabled = enabled;
-            //button.Visible = enabled;
-            //}
+            
         }
 
         public delegate void enableViewingPanelDelegate(Panel panel, Boolean enabled);
@@ -582,6 +598,7 @@ namespace HWUPortal
 
         private void WindowClosing(object sender, System.ComponentModel.CancelEventArgs e)
         {
+            Console.WriteLine("Window is closing");
             kinectSensorChooser1.KinectSensorChanged -= kinectSensorChooser1_KinectSensorChanged;
             this.StopKinect(this.kinect);
             if (socketServer != null)
@@ -614,7 +631,14 @@ namespace HWUPortal
 
         private void WindowClosed(object sender, EventArgs e)
         {
+            if (writer != null)
+            {
+                Console.SetOut(oldOut);
+                writer.Close();
+                ostrm.Close();
+            }
             Console.WriteLine("window closed");
+
         }
 
         public void onExeDestroyed(object sender, ApplicationControlArgs args)
@@ -623,26 +647,59 @@ namespace HWUPortal
             {
                 Console.WriteLine("Service did not exit gracefully");
             }
-            if (!this.runningService.serviceName.Equals(string.Empty))
+            else
             {
-                //raise close service event;
-                this.closeShowingServiceBtn.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+                Console.WriteLine("Service exited gracefully");
             }
+
+            if (this.runningService != null)
+            {
+                Console.WriteLine("Closing running service");
+                //if (!this.runningService.serviceName.Equals(string.Empty))
+                //{
+                    //raise close service event;
+                  //  this.closeShowingServiceBtn.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+                //}
+
+                ServiceInformationSocketClient socket = new ServiceInformationSocketClient();
+                socket.sendServiceInformationEvent(this.userSession.getIPAddress(), userSession.getPort(), runningService.serviceName, ServiceInformationSocketClient.ServiceRuntimeInformation.STOPPED_SERVICE);
+                Console.WriteLine("sent service information");
+                this.runningService = new ServiceInfo();
+                Console.WriteLine("running service re-initialised");
+                try
+                {
+                    
+                    //this.closeShowingServiceBtn.Content = "";
+                    setButtonContext(this.closeShowingServiceBtn, "");
+                    //this.closeShowingServiceBtn.Text = "";
+                    this.enableThisButton(this.closeShowingServiceBtn, false);
+                    KinectSensor.KinectSensors.StatusChanged += KinectSensors_StatusChanged;
+                    this.DiscoverKinectSensor();
+                }
+                catch (Exception exc)
+                {
+                    Console.WriteLine(exc.Message);
+                }
+            }
+
 
 
         }
 
         private void closeShowingServiceBtn_Click(object sender, RoutedEventArgs e)
         {
+            Console.WriteLine("Close showing service button clicked");
             if (!this.runningService.serviceName.Equals(string.Empty))
             {
                 this.stopService(e, this.runningService);
                 ServiceInformationSocketClient socket = new ServiceInformationSocketClient();
                 socket.sendServiceInformationEvent(this.userSession.getIPAddress(), userSession.getPort(), runningService.serviceName, ServiceInformationSocketClient.ServiceRuntimeInformation.STOPPED_SERVICE);
                 this.runningService = new ServiceInfo();
-                this.closeShowingServiceBtn.Content = "";
+
+                setButtonContext(this.closeShowingServiceBtn, "");
                 //this.closeShowingServiceBtn.Text = "";
                 this.enableThisButton(this.closeShowingServiceBtn, false);
+                Console.WriteLine("Disabled button: " + this.closeShowingServiceBtn.Name);
                
             }
         }

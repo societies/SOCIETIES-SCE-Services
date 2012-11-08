@@ -44,21 +44,27 @@ namespace HWUPortal
             try
             {
                 server.Connect(ip);
+                Console.WriteLine("Sending :  " + sInformation.ToString() + ":" + serviceName);
+                server.Send(Encoding.ASCII.GetBytes(sInformation.ToString() + ":" + serviceName));
+                Console.WriteLine("message sent");
+                server.Close();
+
+                Console.WriteLine("socket closed");
+                
             }
             catch (SocketException e)
             {
-                Console.WriteLine("Unable to connect to server:"+remoteIPAddress.ToString()+":"+port);
-                return;
+                Console.WriteLine("Exception while trying to send service information message over socket. \n"+e.Message);
             }
             //string input = Console.ReadLine();
             //if (input == "exit")
             //    break;
-            server.Send(Encoding.ASCII.GetBytes(sInformation.ToString() + ":" + serviceName));
+
             //byte[] data = new byte[1024];
             //int receivedDataLength = server.Receive(data);
             //string stringData = Encoding.ASCII.GetString(data, 0, receivedDataLength);
 
-            server.Close();
+            
 
         }
         public static void main()
