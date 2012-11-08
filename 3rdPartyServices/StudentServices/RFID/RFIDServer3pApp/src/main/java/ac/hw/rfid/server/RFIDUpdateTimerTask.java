@@ -49,6 +49,7 @@ public class RFIDUpdateTimerTask extends TimerTask{
 		this.tagNumber = tagNumber;
 		this.symLoc = symLoc;
 		this.userJid = userID;
+		this.timeStamp = new Date();
 	}
 	
 	@Override
