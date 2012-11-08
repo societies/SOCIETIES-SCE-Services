@@ -244,7 +244,7 @@ public class Person extends Observable
         return onlyFriend( rankedFriends );
     }
 
-    public Iterable<ContextUpdates> getStatus()
+    public Iterable<ShortTermContextUpdates> getStatus()
     {
         Relationship firstStatus = underlyingNode.getSingleRelationship(
                 STATUS, Direction.OUTGOING );
@@ -261,18 +261,18 @@ public class Person extends Observable
         // END SNIPPET: getStatusTraversal
 
 
-        return new IterableWrapper<ContextUpdates, Path>(
+        return new IterableWrapper<ShortTermContextUpdates, Path>(
                 traversal.traverse( firstStatus.getEndNode() ) )
         {
             @Override
-            protected ContextUpdates underlyingObjectToObject( Path path )
+            protected ShortTermContextUpdates underlyingObjectToObject( Path path )
             {
-                return new ContextUpdates( path.endNode() );
+                return new ShortTermContextUpdates( path.endNode() );
             }
         };
     }
     
-    public ContextUpdates getLastStatus()
+    public ShortTermContextUpdates getLastStatus()
     {
     	Relationship firstStatus = underlyingNode.getSingleRelationship(
     			STATUS, Direction.OUTGOING );
@@ -282,12 +282,12 @@ public class Person extends Observable
     		//TODO:FIX THIS!!
     		return null;
     	}
-    	return new ContextUpdates(firstStatus.getEndNode());
+    	return new ShortTermContextUpdates(firstStatus.getEndNode());
     }
     
-    public ArrayList<ContextUpdates> friendLastStatuses()
+    public ArrayList<ShortTermContextUpdates> friendLastStatuses()
     {
-    	ArrayList<ContextUpdates> status = new ArrayList<ContextUpdates>();
+    	ArrayList<ShortTermContextUpdates> status = new ArrayList<ShortTermContextUpdates>();
     	for ( Person friend : this.getFriends() )
         {
     		status.add(friend.getLastStatus());
@@ -295,7 +295,7 @@ public class Person extends Observable
         return status;
     }
 
-    public Iterator<ContextUpdates> friendStatuses()
+    public Iterator<ShortTermContextUpdates> friendStatuses()
     {
         return new CheckAllCtxActivityStreamIterator( this );
     }
@@ -305,7 +305,7 @@ public class Person extends Observable
         Transaction tx = graphDb().beginTx();
         try
         {
-            ContextUpdates oldStatus;
+            ShortTermContextUpdates oldStatus;
             if ( getStatus().iterator().hasNext() )
             {
                 oldStatus = getStatus().iterator().next();
@@ -342,8 +342,8 @@ public class Person extends Observable
         Node newCtx = graphDb().createNode();
         newCtx.setProperty( ShortTermCtxTypes.STATUS, text );
         newCtx.setProperty( ShortTermCtxTypes.LOCATION, location );
-        SimpleDateFormat formatter = new SimpleDateFormat(ContextUpdates.DATE_FORMAT);
-        newCtx.setProperty( ContextUpdates.DATE, formatter.format(new Date().getTime()));
+        SimpleDateFormat formatter = new SimpleDateFormat(ShortTermContextUpdates.DATE_FORMAT);
+        newCtx.setProperty( ShortTermContextUpdates.DATE, formatter.format(new Date().getTime()));
         //Check location changes
         if (contextHasChanged(ShortTermCtxTypes.LOCATION, location)){
             //TODO:Broadcast Observer
@@ -360,7 +360,7 @@ public class Person extends Observable
 	 * @return
 	 */
     private boolean contextHasChanged(final String context, String location) {
-    	ContextUpdates ctxStatus= getLastStatus();
+    	ShortTermContextUpdates ctxStatus= getLastStatus();
     	//Check old location with new location
     	if (context.equals(ShortTermCtxTypes.LOCATION))
     		if (ctxStatus != null && !location.equals(ctxStatus.getShortTermCtx(ShortTermCtxTypes.LOCATION))){

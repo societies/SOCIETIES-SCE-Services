@@ -59,7 +59,7 @@ public class CtxMonitor extends Thread{
 		try {
 			while (true) {
 
-				System.out.println("Checking if people context match");
+				logger.info("Checking if people context match");
 
 
 				//First rule: location
@@ -71,7 +71,7 @@ public class CtxMonitor extends Thread{
 					while(iterator.hasMoreElements()) {
 						//Session name = actual location
 						String sessionName = iterator.nextElement();
-						System.out.println("First rule: Location "+personsSameLocation.toString());
+						logger.info("First rule: Location "+personsSameLocation.toString());
 						
 //						//Second rule: Company
 //						//Check company
@@ -81,7 +81,7 @@ public class CtxMonitor extends Thread{
 //						//Third rule: Interest
 //						//Check similar interest
 						Hashtable<String, HashSet<Person>> personsWithSameInterests = conditions.getPersonsByWeight(sessionName, personsSameLocation.get(sessionName));
-						System.out.println("Third rule: Interests "+personsWithSameInterests.toString());
+						logger.info("Third rule: Interests "+personsWithSameInterests.toString());
 //						
 //						//Fourth rule: Status
 //						//Check status of the user e.g busy, on phone, driving...
@@ -90,8 +90,8 @@ public class CtxMonitor extends Thread{
 						
 
 						if (!sessionRepository.containSession(sessionName) && !personsWithSameInterests.isEmpty()) {
-							System.out.println("Starting a new session..");
-							System.out.println("Inviting people..");
+							logger.info("Starting a new session..");
+							logger.info("Inviting people..");
 							sessionRepository.inviteMembers(sessionName, personsWithSameInterests.get(sessionName));
 						} //Check conflict if actual users in the session
 						else if (sessionRepository.differenceBetweenSessionMembers(personsWithSameInterests.get(sessionName), sessionName)){
@@ -104,7 +104,6 @@ public class CtxMonitor extends Thread{
 						}
 					}
 				}
-				System.out.println(sessionRepository.sessionsTable.toString()+"\n");
 				//Sleep in seconds
 				Thread.sleep(SECONDS);
 

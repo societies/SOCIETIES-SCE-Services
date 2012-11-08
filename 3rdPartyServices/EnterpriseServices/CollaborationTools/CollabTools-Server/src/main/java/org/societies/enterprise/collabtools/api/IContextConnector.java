@@ -32,8 +32,10 @@ import java.util.HashMap;
  * @author cviana
  *
  */
-public interface IContextConector {
+public interface IContextConnector {
 	
-	public HashMap<String, HashMap<String, String[]>> getInitialContext(String cisID);
+	public HashMap<String, HashMap<String, String[]>> getInitialContext(Object parameter);
+	
+	public void shortTermCtxUpdates(Object parameter);
 
 }

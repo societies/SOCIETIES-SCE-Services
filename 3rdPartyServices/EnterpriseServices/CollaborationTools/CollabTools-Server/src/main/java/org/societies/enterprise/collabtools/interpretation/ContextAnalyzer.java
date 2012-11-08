@@ -27,6 +27,7 @@ package org.societies.enterprise.collabtools.interpretation;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -57,7 +58,9 @@ public class ContextAnalyzer implements IContextReasoning {
 		this.personRepository = personRepository;
 	}
 
+	//Concept enriched by Alchemy API
 	private final String[] ctxEnrichedByConcept(String[] interests) throws XPathExpressionException, IOException, SAXException, ParserConfigurationException{
+		//TODO: api key hardcoded....
 		final String APIKEY = "ca193cc1d3101c225266787a3d5fc1f810b52f02";
 		// Create an AlchemyAPI object.
 		//AlchemyAPI api key, enable to 1000 queries a day
@@ -105,6 +108,7 @@ public class ContextAnalyzer implements IContextReasoning {
 			throw new IllegalArgumentException("There is no similarity between this individuals");
 	}
 	
+	//Based on automatic thresholding for images
 	static public float automaticThresholding(ArrayList<Float> elements ) {
 		float initialThreshold = 0;
 		for (float value : elements)
@@ -115,7 +119,7 @@ public class ContextAnalyzer implements IContextReasoning {
 		float finalThreshold = 0;
 		boolean done = false;
 		while (!done) {
-			float avgG1 = 0,  avgG2 = 0; 
+			float avgG1 = 0,  avgG2 = 0;
 			int nG1 = 0, nG2 = 0;
 			for (int i = 0; i < elements.size(); i++) {
 				if (elements.get(i) > initialThreshold) {
@@ -137,6 +141,16 @@ public class ContextAnalyzer implements IContextReasoning {
 				initialThreshold = finalThreshold;
 		}
 		return finalThreshold;
+	}
+	
+	public void setupWeightBetweenPeople(Person person)
+	{
+		Map<Person, Integer> persons = this.personRepository.getPersonWithSimilarInterests(person);
+		for (Map.Entry<Person, Integer> entry : persons.entrySet()) {
+			//Similarity Formula is: similar interests/ min(personA, personB)
+			float weight = ContextAnalyzer.personInterestsSimilarity(entry.getValue(), entry.getKey(), person);
+			person.addFriend(entry.getKey(),weight);  
+		}
 	}
 
 }

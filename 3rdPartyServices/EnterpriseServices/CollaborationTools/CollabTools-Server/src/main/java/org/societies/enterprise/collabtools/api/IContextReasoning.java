@@ -24,6 +24,14 @@
  */
 package org.societies.enterprise.collabtools.api;
 
+import java.io.IOException;
+
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.xpath.XPathExpressionException;
+
+import org.xml.sax.SAXException;
+
+
 /**
  * Describe your class here...
  *
@@ -31,5 +39,7 @@ package org.societies.enterprise.collabtools.api;
  *
  */
 public interface IContextReasoning {
+	
+	public void incrementInterests() throws XPathExpressionException, IOException, SAXException, ParserConfigurationException;
 
 }

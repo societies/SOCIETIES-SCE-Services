@@ -29,17 +29,17 @@ import java.util.NoSuchElementException;
 
 import org.neo4j.helpers.collection.PositionedIterator;
 
-class CheckAllCtxActivityStreamIterator implements Iterator<ContextUpdates> {
-    private ArrayList<PositionedIterator<ContextUpdates>> ctxUpdates = new ArrayList<PositionedIterator<ContextUpdates>>();
+class CheckAllCtxActivityStreamIterator implements Iterator<ShortTermContextUpdates> {
+    private ArrayList<PositionedIterator<ShortTermContextUpdates>> ctxUpdates = new ArrayList<PositionedIterator<ShortTermContextUpdates>>();
     private StatusUpdateComparator comparator = new StatusUpdateComparator();
 
     public CheckAllCtxActivityStreamIterator( Person person )
     {
         for ( Person friend : person.getFriends() )
         {
-            Iterator<ContextUpdates> iterator = friend.getStatus().iterator();
+            Iterator<ShortTermContextUpdates> iterator = friend.getStatus().iterator();
             if (iterator.hasNext()) {
-                ctxUpdates.add(new PositionedIterator<ContextUpdates>(iterator));
+                ctxUpdates.add(new PositionedIterator<ShortTermContextUpdates>(iterator));
             }
         }
 
@@ -51,15 +51,15 @@ class CheckAllCtxActivityStreamIterator implements Iterator<ContextUpdates> {
         return ctxUpdates.size() > 0;
     }
 
-    public ContextUpdates next()
+    public ShortTermContextUpdates next()
     {
         if ( ctxUpdates.size() == 0 )
         {
             throw new NoSuchElementException();
         }
         // START SNIPPET: getActivityStream
-        PositionedIterator<ContextUpdates> first = ctxUpdates.get(0);
-        ContextUpdates returnVal = first.current();
+        PositionedIterator<ShortTermContextUpdates> first = ctxUpdates.get(0);
+        ShortTermContextUpdates returnVal = first.current();
 
         if ( !first.hasNext() )
         {
@@ -85,8 +85,8 @@ class CheckAllCtxActivityStreamIterator implements Iterator<ContextUpdates> {
         throw new UnsupportedOperationException( "Not supported yet..." );
     }
 
-    private class StatusUpdateComparator implements Comparator<PositionedIterator<ContextUpdates>> {
-        public int compare(PositionedIterator<ContextUpdates> a, PositionedIterator<ContextUpdates> b) {
+    private class StatusUpdateComparator implements Comparator<PositionedIterator<ShortTermContextUpdates>> {
+        public int compare(PositionedIterator<ShortTermContextUpdates> a, PositionedIterator<ShortTermContextUpdates> b) {
             return a.current().getDate().compareTo(b.current().getDate());
         }
     }

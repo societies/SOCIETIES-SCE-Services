@@ -41,7 +41,7 @@ import org.societies.enterprise.collabtools.acquisition.Person;
 import org.societies.enterprise.collabtools.acquisition.PersonRepository;
 import org.societies.enterprise.collabtools.acquisition.RelTypes;
 import org.societies.enterprise.collabtools.acquisition.ShortTermCtxTypes;
-import org.societies.enterprise.collabtools.acquisition.ContextUpdates;
+import org.societies.enterprise.collabtools.acquisition.ShortTermContextUpdates;
 import org.societies.enterprise.collabtools.runtime.ContextActivity;
 import org.societies.enterprise.collabtools.runtime.SessionRepository;
 
@@ -80,11 +80,11 @@ public class Rules {
 	public synchronized Hashtable<String, HashSet<Person>> getPersonsWithMatchingShortTermCtx(final String ctxAtributte, HashSet<Person> personHashSet) {
 		//Compare symbolic location
 		this.hashCtxList.clear();
-		HashSet<ContextUpdates> lastUpdates = new HashSet<ContextUpdates>();
+		HashSet<ShortTermContextUpdates> lastUpdates = new HashSet<ShortTermContextUpdates>();
 		Iterator<Person> it = personHashSet.iterator();
 		while(it.hasNext())
 			lastUpdates.add(it.next().getLastStatus());
-		ContextUpdates[] statusUpdateArray = new ContextUpdates[lastUpdates.size()];
+		ShortTermContextUpdates[] statusUpdateArray = new ShortTermContextUpdates[lastUpdates.size()];
 		lastUpdates.toArray(statusUpdateArray);
 		return  getUniqueElements(statusUpdateArray, ctxAtributte);	
 	}
@@ -172,8 +172,8 @@ public class Rules {
 	 * @param statusList
 	 * @return
 	 */
-	private Hashtable<String, HashSet<Person>>  getUniqueElements(ContextUpdates[] statusArray, final String ctxAttribute) {
-		ContextUpdates[] temp = new ContextUpdates[statusArray.length]; // null elements
+	private Hashtable<String, HashSet<Person>>  getUniqueElements(ShortTermContextUpdates[] statusArray, final String ctxAttribute) {
+		ShortTermContextUpdates[] temp = new ShortTermContextUpdates[statusArray.length]; // null elements
 		log.info("Number of persons: "+temp.length+" with context "+ctxAttribute);
 		int count = 0;
 		for(int j = 0; j < statusArray.length; j++) {
@@ -189,7 +189,7 @@ public class Rules {
 		//		return uniqueStrs;
 	}
 
-	private boolean hasSameShortTermCtx(ContextUpdates ctx, ContextUpdates[] temp, final String ctxAttribute) {
+	private boolean hasSameShortTermCtx(ShortTermContextUpdates ctx, ShortTermContextUpdates[] temp, final String ctxAttribute) {
 		HashSet<Person> hashsetTemp;
 		hashsetTemp = hashCtxList.get(ctx.getShortTermCtx(ctxAttribute));
 		for(int j = 0; j < temp.length; j++) {
@@ -293,7 +293,7 @@ public class Rules {
 		return true;
 	}
 
-	public static boolean checkDuplicate(List<ContextUpdates> list) {
+	public static boolean checkDuplicate(List<ShortTermContextUpdates> list) {
 		HashSet<String> set = new HashSet<String>();
 		for (int i = 0; i < list.size(); i++) {
 			boolean val = set.add(list.get(i).getShortTermCtx(ShortTermCtxTypes.STATUS));

@@ -129,6 +129,14 @@ public class PersonRepository
         return new Person( personNode );
     }
     
+    public boolean hasPerson(String name)
+    {
+        Node personNode = index.get( Person.NAME, name ).getSingle();
+        if (personNode == null)
+        	return false;
+        return true;
+    }
+    
     public Map<Person, Integer> getPersonWithSimilarInterests(Person self)
     {
     	Map<Person,Integer> persons = new HashMap<Person, Integer>();
@@ -185,7 +193,7 @@ public class PersonRepository
             }
             personNode.getSingleRelationship( A_PERSON, Direction.INCOMING ).delete();
 
-            for ( ContextUpdates status : person.getStatus() )
+            for ( ShortTermContextUpdates status : person.getStatus() )
             {
                 Node statusNode = status.getUnderlyingNode();
                 for ( Relationship r : statusNode.getRelationships() )

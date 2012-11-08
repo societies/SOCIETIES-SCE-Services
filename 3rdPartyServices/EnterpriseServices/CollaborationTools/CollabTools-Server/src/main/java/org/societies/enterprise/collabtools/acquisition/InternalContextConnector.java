@@ -25,13 +25,14 @@
 package org.societies.enterprise.collabtools.acquisition;
 
 import java.util.HashMap;
-import java.util.Observable;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.societies.context.externalBrokerConnector.ExternalCtxBrokerConnector;
-import org.societies.enterprise.collabtools.api.IContextConector;
+import org.societies.enterprise.collabtools.api.IContextConnector;
 
 /**
  * Describe your class here...
@@ -39,33 +40,37 @@ import org.societies.enterprise.collabtools.api.IContextConector;
  * @author cviana
  *
  */
-public class ContextConector extends Observable implements IContextConector {
+public class InternalContextConnector implements IContextConnector {
 
+//	private Logger logger = LoggerFactory.getLogger(this.getClass());
+	
 	BundleContext bundleContext = FrameworkUtil.getBundle(this.getClass()).getBundleContext();
 	ServiceReference connectorServiceReference= bundleContext.getServiceReference(ExternalCtxBrokerConnector.class.getName());
 	ExternalCtxBrokerConnector connector =(ExternalCtxBrokerConnector)bundleContext.getService(connectorServiceReference);
 	private ContextSubscriber contextSubscriber;
 	
+	
 	/**
 	 * @param contextSubscriber
 	 */
-	public ContextConector(ContextSubscriber contextSubscriber) {
+	public InternalContextConnector(ContextSubscriber contextSubscriber) {
 		this.contextSubscriber = contextSubscriber;
+		this.connector.addObserver(this.contextSubscriber);
+//		this.connector.testEvent();
 	}
 
 	/**
 	 * @return persons and context attributes
 	 */
-	public HashMap<String, HashMap<String, String[]>> getInitialContext(String cisID) {
-		
-		HashMap<String, HashMap<String, String[]>> persons = connector.ca3pService.retrieveLookupMembersCtxAttributes((Object)cisID);
-		connector.ca3pService.registerForContextChanges((Object)cisID);
+	public HashMap<String, HashMap<String, String[]>> getInitialContext(Object cisID) {
+		HashMap<String, HashMap<String, String[]>> persons = connector.retrieveLookupMembersCtxAttributes(cisID);
+		if (persons.isEmpty())
+			throw new IllegalArgumentException("HashMap pf persons cannot be null! ");
 		return persons;
-		
 	}
 	
-	public void ctxChanged() {
-		
+	public void shortTermCtxUpdates(Object parameter) {
+		connector.registerForContextChanges(parameter);
 	}
 
 	

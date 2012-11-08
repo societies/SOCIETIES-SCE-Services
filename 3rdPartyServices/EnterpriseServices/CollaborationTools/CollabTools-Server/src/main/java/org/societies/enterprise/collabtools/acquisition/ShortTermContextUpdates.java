@@ -41,13 +41,13 @@ import org.neo4j.graphdb.traversal.Traverser;
 import org.neo4j.helpers.collection.IteratorUtil;
 import org.neo4j.kernel.Traversal;
 
-public class ContextUpdates extends Observable
+public class ShortTermContextUpdates extends Observable
 {
     private final Node underlyingNode;
     static final String DATE = "date";
 	static final String DATE_FORMAT = "HH:mm:ss dd-MM-yyyy";
 
-    public ContextUpdates( Node underlyingNode )
+    public ShortTermContextUpdates( Node underlyingNode )
     {
 
         this.underlyingNode = underlyingNode;

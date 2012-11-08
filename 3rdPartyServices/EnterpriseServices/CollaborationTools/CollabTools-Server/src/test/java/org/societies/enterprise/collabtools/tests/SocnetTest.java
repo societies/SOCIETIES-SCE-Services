@@ -39,7 +39,7 @@ import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 import org.neo4j.graphdb.index.Index;
 import org.neo4j.helpers.collection.IteratorUtil;
-import org.societies.enterprise.collabtools.acquisition.ContextUpdates;
+import org.societies.enterprise.collabtools.acquisition.ShortTermContextUpdates;
 import org.societies.enterprise.collabtools.acquisition.LongTermCtxTypes;
 import org.societies.enterprise.collabtools.acquisition.Person;
 import org.societies.enterprise.collabtools.acquisition.PersonRepository;
@@ -87,7 +87,7 @@ public class SocnetTest
 			Person person = getRandomPerson();
 			person.addContextStatus("Testing!", "School", null);
 
-			ContextUpdates update = person.getStatus().iterator().next();
+			ShortTermContextUpdates update = person.getStatus().iterator().next();
 			assertThat(update, CoreMatchers.<Object> notNullValue());
 			assertThat(update.getShortTermCtx(ShortTermCtxTypes.STATUS), equalTo("Testing!"));
 			assertThat(update.getPerson(), equalTo(person));
@@ -122,7 +122,7 @@ public class SocnetTest
         }
 
         int i = statuses.size();
-        for ( ContextUpdates update : person.getStatus() )
+        for ( ShortTermContextUpdates update : person.getStatus() )
         {
             i--;
             assertThat( update.getShortTermCtx(ShortTermCtxTypes.STATUS), equalTo( statuses.get( i ) ) );
@@ -158,7 +158,7 @@ public class SocnetTest
             friend.addContextStatus( "Dum-deli-dum...", "location", null );
         }
 
-        ArrayList<ContextUpdates> updates = fromIterableToArrayList( person.friendStatuses() );
+        ArrayList<ShortTermContextUpdates> updates = fromIterableToArrayList( person.friendStatuses() );
         assertThat( updates.size(), equalTo( numberOfStatuses ) );
         assertUpdatesAreSortedByDate( updates );
     }
@@ -186,7 +186,7 @@ public class SocnetTest
         person.addContextStatus( "Bar", null, null );
         person.addContextStatus( "Baz", null, null );
 
-        for(ContextUpdates status : person.getStatus())
+        for(ShortTermContextUpdates status : person.getStatus())
         {
             assertThat(status.getPerson(), equalTo( person ));
             System.out.println("Person: "+status.getPerson()+" Status: "+status.getShortTermCtx(ShortTermCtxTypes.STATUS));
@@ -203,7 +203,7 @@ public class SocnetTest
         for ( Node node : indexStatus.query( ShortTermCtxTypes.STATUS, "*o*" ) )
         {
             // This will return
-        	ContextUpdates s = new ContextUpdates(node);
+        	ShortTermContextUpdates s = new ShortTermContextUpdates(node);
         	System.out.println(s.getShortTermCtx(ShortTermCtxTypes.STATUS));
         }
     }
@@ -414,10 +414,10 @@ public class SocnetTest
     }
 
     private void assertUpdatesAreSortedByDate(
-            ArrayList<ContextUpdates> statusUpdates )
+            ArrayList<ShortTermContextUpdates> statusUpdates )
     {
         Date date = new Date( 0 );
-        for ( ContextUpdates update : statusUpdates )
+        for ( ShortTermContextUpdates update : statusUpdates )
         {
             org.junit.Assert.assertTrue( date.getTime() < update.getDate().getTime() );
             // TODO: Should be assertThat(date, lessThan(update.getDate));

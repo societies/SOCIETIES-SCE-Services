@@ -18,7 +18,9 @@ import org.osgi.framework.ServiceRegistration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.societies.enterprise.collabtools.acquisition.ContextSubscriber;
+import org.societies.enterprise.collabtools.acquisition.Person;
 import org.societies.enterprise.collabtools.acquisition.PersonRepository;
+import org.societies.enterprise.collabtools.interpretation.ContextAnalyzer;
 import org.societies.enterprise.collabtools.runtime.CtxMonitor;
 import org.societies.enterprise.collabtools.runtime.SessionRepository;
 
@@ -60,7 +62,7 @@ public class Activator implements BundleActivator
         
         ContextSubscriber ctxSub = new ContextSubscriber(personRepository, sessionRepository);
  
-        //the OSGi registration
+        //OSGi registration
         serviceRegistration = context.registerService(GraphDatabaseService.class.getName(), graphDb, new Hashtable<String,String>() );
         logger.info("registered " + serviceRegistration.getReference() );
         
@@ -68,17 +70,33 @@ public class Activator implements BundleActivator
         
         ctxSubServiceRegistration =context.registerService(ContextSubscriber.class.getName(), ctxSub, null);
         
-
+        Object cisID = "cis-ad1536de-7d89-43f7-a14a-74e278ed36aa.societies.local";
+		//Setting up initial context for GraphDB
+        ctxSub.initialCtx(cisID);
+        
+        //Enrichment of ctx
+        logger.info("Starting enrichment of context..." );
+        ContextAnalyzer ctxRsn = new ContextAnalyzer(personRepository);
+		ctxRsn.incrementInterests();
+		
+		//Applying weight between edges
+		logger.info("Setup weight among participants..." );
+        for (Person person : personRepository.getAllPersons()) {
+    		ctxRsn.setupWeightBetweenPeople(person);
+        }
         
         //Setting up GraphDB
 //        TestUtils test = new TestUtils(personRepository, sessionRepository);
 //        test.createPersons(5);
 //        test.setupFriendsBetweenPeople();
         
-//        //Starting Context Monitor
-//        logger.info("Starting Context Monitor..." );
-//        CtxMonitor thread = new CtxMonitor(personRepository, sessionRepository);
-//		thread.start();
+        //Registering for ctx changes
+        ctxSub.registerForContextChanges(cisID);
+        
+        //Starting Context Monitor
+        logger.info("Starting Context Monitor..." );
+        CtxMonitor thread = new CtxMonitor(personRepository, sessionRepository);
+		thread.start();
      
  
     }
