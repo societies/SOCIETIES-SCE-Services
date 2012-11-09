@@ -178,6 +178,11 @@ public class DisplayPortalClient extends EventListener implements IDisplayDriver
 	}
 
 	public void updateUserLocation(String location){
+		this.LOG.debug("location of user: "+location);
+		this.LOG.debug("Location of screens: ");
+		for (int i=0; i<screenLocations.size(); i++){
+			this.LOG.debug("Screen location: "+i+": "+screenLocations.get(i));
+		}
 		//if near a screen
 		if (this.screenLocations.contains(location)){
 			this.LOG.debug("Requesting access");
