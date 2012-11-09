@@ -177,6 +177,16 @@ public class DisplayPortalClient extends EventListener implements IDisplayDriver
 
 	}
 
+	private boolean matchesLocation(String location){
+		for (String scrLoc : this.screenLocations){
+			if (scrLoc.equalsIgnoreCase(location)){
+				return true;
+			}
+		
+		}
+		
+		return false;
+	}
 	public void updateUserLocation(String location){
 		this.LOG.debug("location of user: "+location);
 		this.LOG.debug("Location of screens: ");
@@ -184,7 +194,7 @@ public class DisplayPortalClient extends EventListener implements IDisplayDriver
 			this.LOG.debug("Screen location: "+i+": "+screenLocations.get(i));
 		}
 		//if near a screen
-		if (this.screenLocations.contains(location)){
+		if (this.matchesLocation(location)){
 			this.LOG.debug("Requesting access");
 			//request access
 			String reply = this.portalServerRemote.requestAccess(serverIdentity, userIdentity.getJid(), location);
