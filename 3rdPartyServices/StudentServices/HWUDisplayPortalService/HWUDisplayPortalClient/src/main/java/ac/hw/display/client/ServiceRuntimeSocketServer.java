@@ -148,7 +148,7 @@ public class ServiceRuntimeSocketServer extends Thread{
 
 	@Override
 	protected void finalize(){
-		this.listening = false;
+	
 		//Clean up 
 		try{
 			in.close();

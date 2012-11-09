@@ -203,25 +203,27 @@ public class SocketClient {
 		SocketClient c = new SocketClient("137.195.24.6");
 		
 		UserSession userSession = new UserSession("emma@societies.local.macs.hw.ac.uk", 10001);
-		ServiceInfo sInfo = new ServiceInfo(null, "Social Learning", "http://www.macs.hw.ac.uk/~ceeep1/societies/services/SocialLearningGame.exe", 0 , true);
+		
+		c.sendText("Eliza's service", userSession, "<strong>Hello Emma!!! </strong>");
+		/*ServiceInfo sInfo = new ServiceInfo(null, "Social Learning", "http://www.macs.hw.ac.uk/~ceeep1/societies/services/SocialLearningGame.exe", 0 , true);
 		
 		ServiceInfo sInfo2 = new ServiceInfo (null, "PolicyEditor", "http://www.macs.hw.ac.uk/~ceeep1/societies/services/POLICY~1.JAR", 0, false);
-		ServiceInfo sInfo3 = new ServiceInfo(null, "Youtube", "http://www.youtube.com/watch?v=3OnnDqH6Wj8", 0, false);
-		ServiceInfo sInfo4 = new ServiceInfo(null, "MyTV", "http://www.macs.hw.ac.uk/~ceesmm1/societies/mytv/MyTvUI.exe", 0, true);
+		ServiceInfo sInfo3 = new ServiceInfo(null, "Youtube", "http://www.youtube.com/watch?v=3OnnDqH6Wj8", 0, false);*/
+/*		ServiceInfo sInfo4 = new ServiceInfo(null, "MyTV", "http://www.macs.hw.ac.uk/~ceesmm1/societies/mytv/MyTvUI.exe", 0, true);*/
 		//userSession.addService(sInfo2);
 		//userSession.addService(sInfo);
-		userSession.addService(sInfo4);
+	//	userSession.addService(sInfo4);
 		//userSession.addService(sInfo2);
 		//userSession.addService(sInfo2);
 		//userSession.addService(sInfo3);
-		c.startSession(userSession);
+/*		c.startSession(userSession);
 		try {
 			Thread.sleep(5000);
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+		*/
 		
 		//c.startService(userSession, sInfo2.getServiceName());
 		/*
