@@ -89,7 +89,7 @@ public class SocketServer extends Thread{
 			server = new ServerSocket(port);
 		} catch (IOException e) {
 			LOG.debug("ServerSocket creation failed: "+port);
-			LOG.debug(e.getStackTrace().toString());
+			e.printStackTrace();
 			return;
 		}
 		
@@ -98,7 +98,7 @@ public class SocketServer extends Thread{
 			client = server.accept();
 		} catch (IOException e) {
 			LOG.debug("Accept failed: "+port);
-			LOG.debug(e.getStackTrace().toString());
+			e.printStackTrace();
 			return;
 		}
 
@@ -109,7 +109,7 @@ public class SocketServer extends Thread{
 			in = new BufferedReader(new InputStreamReader(client.getInputStream()));
 		} catch (IOException e) {
 			LOG.debug("Accept failed: "+port);
-			LOG.debug(e.getStackTrace().toString());
+			e.printStackTrace();
 			return;
 		}
 
