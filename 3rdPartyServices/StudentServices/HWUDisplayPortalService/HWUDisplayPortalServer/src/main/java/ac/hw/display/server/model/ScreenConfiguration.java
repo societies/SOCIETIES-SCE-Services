@@ -46,7 +46,7 @@ public class ScreenConfiguration {
 	}
 	public Screen getScreenBasedOnLocation(String location){
 		for (Screen screen: screens){
-			if (screen.getLocation().equalsIgnoreCase(location)){
+			if (screen.getLocation().equalsIgnoreCase(location.trim())){
 				return screen;
 			}
 		}

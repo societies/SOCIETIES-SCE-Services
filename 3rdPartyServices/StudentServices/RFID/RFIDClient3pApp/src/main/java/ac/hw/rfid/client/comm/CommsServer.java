@@ -109,7 +109,7 @@ private static final List<String> PACKAGES = Collections.unmodifiableList(
 				this.rfidClient.acknowledgeRegistration(clientBean.getRStatus());
 			}else if(clientBean.getMethod().equals(RfidClientMethodType.SEND_UPDATE)){
 				this.LOG.debug("Received rfid update: "+clientBean.getSymLoc()+" for my tag number: "+clientBean.getTagNumber());
-				this.rfidClient.sendUpdate(clientBean.getSymLoc(), clientBean.getTagNumber());
+				this.rfidClient.sendUpdate(clientBean.getSymLoc().trim(), clientBean.getTagNumber().trim());
 			}else{
 				this.LOG.debug("Payload object not of type: "+RfidClientBean.class.getName()+". Ignoring message from: "+stanza.getFrom().getJid());
 			}

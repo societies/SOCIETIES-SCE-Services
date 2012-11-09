@@ -147,6 +147,7 @@ public class CommsServer implements IFeatureServer{
 				String identity = ((DisplayPortalServerBean) payload).getIdentity();
 				String location = ((DisplayPortalServerBean) payload).getLocation();
 				String ipAddress =  this.displayPortalServer.requestAccess(identity, location);
+				this.LOG.debug("Got access response :"+ipAddress+" for: "+identity+" and location: "+location);
 				DisplayPortalServerIPAddressResultBean resultBean = new DisplayPortalServerIPAddressResultBean();
 				resultBean.setIpAddress(ipAddress);
 				this.LOG.debug("Returning result of access request: "+ipAddress);

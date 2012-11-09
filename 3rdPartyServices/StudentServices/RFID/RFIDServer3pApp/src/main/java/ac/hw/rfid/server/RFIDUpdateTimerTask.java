@@ -63,7 +63,7 @@ public class RFIDUpdateTimerTask extends TimerTask{
 		}
 		
 		
-			this.rfidClient.sendUpdate(this.userJid, this.symLoc, this.tagNumber);	
+			this.rfidClient.sendUpdate(this.userJid, this.symLoc.trim(), this.tagNumber);	
 			this.logging.debug("Sent remote Symbolic Location update message [value:"+this.symLoc+"]");
 	
 		

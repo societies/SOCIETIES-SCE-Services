@@ -307,7 +307,7 @@ public class RfidServer extends EventListener implements IRfidServer, ServiceTra
 
 	@Override
 	public void registerRFIDTag(String tagNumber, String dpiAsString, String serviceID, String password) {
-		logging.debug("Received request to register RFID tag: "+tagNumber+" from dpi: "+dpiAsString+" and serviceID: "+serviceID);
+		logging.debug("Received request to register RFID tag: "+tagNumber+" from identity: "+dpiAsString+" and serviceID: "+serviceID);
 			if (this.tagToPasswordTable.containsKey(tagNumber)){
 				String myPass = this.tagToPasswordTable.get(tagNumber);
 				logging.debug("Tag exists");

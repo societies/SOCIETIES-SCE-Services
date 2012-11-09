@@ -119,7 +119,7 @@ public class ContextEventListener implements CtxChangeEventListener{
 			try {
 				CtxAttribute ctxAttribute = (CtxAttribute) futureAttribute.get();
 				this.LOG.debug("Received context event for "+ctxAttribute.getType()+" with value: "+ctxAttribute.getStringValue());
-				this.client.updateUserLocation(ctxAttribute.getStringValue());
+				this.client.updateUserLocation(ctxAttribute.getStringValue().trim());
 				
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
