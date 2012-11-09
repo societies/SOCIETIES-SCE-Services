@@ -202,7 +202,7 @@ public class SocketClient {
 		
 		SocketClient c = new SocketClient("137.195.24.6");
 		
-		UserSession userSession = new UserSession("eliza@societies.local", 10001);
+		UserSession userSession = new UserSession("emma@societies.local.macs.hw.ac.uk", 10001);
 		ServiceInfo sInfo = new ServiceInfo(null, "Social Learning", "http://www.macs.hw.ac.uk/~ceeep1/societies/services/SocialLearningGame.exe", 0 , true);
 		
 		ServiceInfo sInfo2 = new ServiceInfo (null, "PolicyEditor", "http://www.macs.hw.ac.uk/~ceeep1/societies/services/POLICY~1.JAR", 0, false);

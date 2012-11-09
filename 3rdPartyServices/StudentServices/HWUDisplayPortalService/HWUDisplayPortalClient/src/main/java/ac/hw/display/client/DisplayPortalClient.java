@@ -89,7 +89,10 @@ public class DisplayPortalClient extends EventListener implements IDisplayDriver
 	public DisplayPortalClient(){
 		this.screenLocations = new ArrayList<String>();
 		this.servRuntimeSocketThread = new ServiceRuntimeSocketServer(this);
+		this.serviceRuntimeSocketPort = this.servRuntimeSocketThread.setListenPort();
 		this.servRuntimeSocketThread.start();
+		
+		
 	}
 
 
@@ -454,35 +457,5 @@ public class DisplayPortalClient extends EventListener implements IDisplayDriver
 
 	}
 
-
-	/*	private void requestServerIdentityFromUser(){
-
-	if (this.idMgr.getThisNetworkNode().getJid().endsWith("macs.hw.ac.uk")){
-		try {
-			this.serverIdentity = this.idMgr.fromJid("university.societies.local.macs.hw.ac.uk");
-		} catch (InvalidFormatException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
-	if (this.serverIdentity==null){
-		String serverIdentityStr = JOptionPane.showInputDialog("Please enter the JID of the CSS hosting the server application", "xcmanager.societies.local");
-
-		try {
-			this.serverIdentity = this.idMgr.fromJid(serverIdentityStr);
-
-
-		} catch (InvalidFormatException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
-}*/
-
-
-	public void setServiceRuntimeSocketPort(int port){
-		this.serviceRuntimeSocketPort = port;
-		
-	}
 
 }
