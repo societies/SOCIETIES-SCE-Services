@@ -166,6 +166,7 @@ public class DisplayPortalClient extends EventListener implements IDisplayDriver
 				this.LOG.debug("Retrieved screen locations from my server");
 				for (int i=0; i<locs.length; i++){
 					this.screenLocations.add(locs[i]);
+					this.LOG.debug("Screen location: "+i+": "+locs[i]);
 				}
 			}
 			userSession = new UserSession(this.userIdentity.getJid(), this.serviceRuntimeSocketPort);
