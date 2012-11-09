@@ -52,17 +52,23 @@ public class ServiceRuntimeSocketServer extends Thread{
 	public static final String stopped_Service = "STOPPED_SERVICE";
 	private static final String logged_Out = "LOGGED_OUT";
 	private  Logger logging = LoggerFactory.getLogger(this.getClass());
+	private boolean listening = true;
 	//private int[] ports = new int[]{2121,2122,2123,2124,2125,2126,2127,2128,2129,2130,2131,2132,2133,2134,2135,2136,2137,2138,2139,2140,2141,2142, 2143,2144,2145,2146,2147,2148,2149,2150,2151};
 
 	public ServiceRuntimeSocketServer(DisplayPortalClient displayService){
 		this.displayService = displayService;
+		listening = true;
 
 	}
 
 	@Override
 	public void run(){
-		this.listenSocket();
+		while (listening){
+			this.listenSocket();
+		}
 	}
+	
+	
 	public void listenSocket(){
 
 		int serverPort = 0;
@@ -110,6 +116,7 @@ public class ServiceRuntimeSocketServer extends Thread{
 					}else if (line.contains(logged_Out)){
 						this.displayService.notifyLogOutEvent();
 						this.server.close();
+						
 					}
 				}
 				//Send data back to client
@@ -122,16 +129,18 @@ public class ServiceRuntimeSocketServer extends Thread{
 		}
 	}
 
+	
 
 	@Override
 	protected void finalize(){
+		this.listening = false;
 		//Clean up 
 		try{
 			in.close();
 			out.close();
 			server.close();
 		} catch (IOException e) {
-			System.out.println("Could not close.");
+			this.logging.debug("Could not close.");
 		}
 	}
 }

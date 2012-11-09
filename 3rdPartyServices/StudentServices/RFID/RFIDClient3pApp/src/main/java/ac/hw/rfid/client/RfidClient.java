@@ -24,6 +24,8 @@
  */
 package ac.hw.rfid.client;
 
+import java.util.Date;
+import java.util.Timer;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
@@ -36,6 +38,7 @@ import org.societies.api.context.broker.ICtxBroker;
 import org.societies.api.context.model.CtxAttributeTypes;
 import org.societies.api.context.source.CtxSourceNames;
 import org.societies.api.context.source.ICtxSourceMgr;
+import org.societies.api.css.devicemgmt.rfid.RFIDUpdateEvent;
 import org.societies.api.identity.IIdentity;
 import org.societies.api.identity.IIdentityManager;
 import org.societies.api.identity.RequestorService;
@@ -88,8 +91,8 @@ public class RfidClient extends EventListener implements IRfidClient {
 	private IEventMgr evMgr;
 	private IServices services;
 	private RequestorService requestor;
-
-
+	private RFIDNoInputUpdater timerTask;
+	private Timer timer;
 
 	public RfidClient() {
 		
@@ -135,6 +138,7 @@ public class RfidClient extends EventListener implements IRfidClient {
 			Future<String> fID = this.ctxSourceMgr.register(CtxSourceNames.RFID, CtxAttributeTypes.LOCATION_SYMBOLIC);
 			myCtxSourceId = fID.get();
 			this.logging.debug("Successfully registered to ctxSourceMgr. Got my source ID: "+myCtxSourceId);
+			timerTask = new RFIDNoInputUpdater(this.ctxSourceMgr, this.myCtxSourceId);
 			return true;
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
@@ -149,7 +153,9 @@ public class RfidClient extends EventListener implements IRfidClient {
 
 	@Override
 	public void sendUpdate(String symLoc, String tagNumber) {
-		
+		if (this.timer!=null){
+			this.timer.cancel();
+		}
 		this.clientGUI.sendSymLocUpdate(tagNumber, symLoc);
 		this.logging.debug("updated gui");
 		this.clientGUI.tfTagNumber.setText(tagNumber);
@@ -171,7 +177,16 @@ public class RfidClient extends EventListener implements IRfidClient {
 			this.ctxSourceMgr.sendUpdate(myCtxSourceId, symLoc, null, false, 1.0, 1d/5);
 			this.logging.debug("Sent new RFID information");
 		}
-
+		
+		
+		timer = new Timer();
+		
+		Date futureDate = new Date(new Date().getTime()+10000);
+		
+		timer.schedule(timerTask, futureDate);
+		
+		
+		
 	}
 
 	@Override

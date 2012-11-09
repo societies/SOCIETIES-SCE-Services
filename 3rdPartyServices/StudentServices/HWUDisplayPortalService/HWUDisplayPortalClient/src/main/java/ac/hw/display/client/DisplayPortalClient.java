@@ -84,7 +84,7 @@ public class DisplayPortalClient extends EventListener implements IDisplayDriver
 
 	private UserSession userSession;
 	private ContextEventListener ctxEvListener;
-	private int serviceRuntimeSocketPort;
+	private Integer serviceRuntimeSocketPort;
 
 	public DisplayPortalClient(){
 		this.screenLocations = new ArrayList<String>();
@@ -195,6 +195,11 @@ public class DisplayPortalClient extends EventListener implements IDisplayDriver
 					//release currently used screen
 					this.portalServerRemote.releaseResource(serverIdentity, userIdentity.getJid(), currentUsedScreenIP);
 				}
+				if (this.servRuntimeSocketThread!=null){
+					
+				}
+
+				
 				//now setup new screen
 				SocketClient socketClient = new SocketClient(reply);
 
@@ -228,7 +233,8 @@ public class DisplayPortalClient extends EventListener implements IDisplayDriver
 				socketClient.endSession(this.userSession.getUserIdentity());
 				this.currentUsedScreenIP = "";
 				this.currentUsedScreenLocation = "";
-
+				
+				this.servRuntimeSocketThread.finalize();
 				DisplayEvent dEvent = new DisplayEvent(this.currentUsedScreenIP, DisplayEventConstants.DEVICE_UNAVAILABLE);
 				InternalEvent iEvent = new InternalEvent(EventTypes.DISPLAY_EVENT, "displayUpdate", "org/societies/css/device", dEvent);
 				try {
@@ -415,7 +421,6 @@ public class DisplayPortalClient extends EventListener implements IDisplayDriver
 
 			this.currentUsedScreenIP = "";
 			this.currentUsedScreenLocation = "";
-
 			InternalEvent iEvent = new InternalEvent(EventTypes.DISPLAY_EVENT, "displayUpdate", "org/societies/css/device", dEvent);
 			try {
 				this.evMgr.publishInternalEvent(iEvent);
