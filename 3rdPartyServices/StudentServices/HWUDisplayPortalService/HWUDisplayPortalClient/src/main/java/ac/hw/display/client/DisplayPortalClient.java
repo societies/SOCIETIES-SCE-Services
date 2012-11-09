@@ -183,7 +183,7 @@ public class DisplayPortalClient extends EventListener implements IDisplayDriver
 		for (int i=0; i<screenLocations.size(); i++){
 			String scrLoc = screenLocations.get(i);
 			this.LOG.debug("Screen location length: "+scrLoc.length());	
-			if (scrLoc.toString().equalsIgnoreCase(location.toString())){
+			if (scrLoc.trim().equalsIgnoreCase(location.trim())){
 				this.LOG.debug(scrLoc+" matches "+location+". Returning true");
 				return true;
 			}
