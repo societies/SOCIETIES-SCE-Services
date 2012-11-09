@@ -119,6 +119,7 @@ namespace MyTvUI
                         {
                             Console.WriteLine("SOCKET_SERVER: "+USER_SESSION_ENDED + "message received");
                             stream.Write(okBytes, 0, okBytes.Length);
+                            //close down
                         }
                         else
                         {

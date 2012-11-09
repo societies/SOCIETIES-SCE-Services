@@ -90,8 +90,11 @@ namespace MyTvUI
             //redirect console output
             try
             {
-                ostrm = new FileStream("logs.txt", FileMode.Create, FileAccess.Write);
+                String userProfile = System.Environment.GetEnvironmentVariable("USERPROFILE");
+                String directory = userProfile + @"\societies\myTvLogs.txt";
+                ostrm = new FileStream(directory, FileMode.Create, FileAccess.Write);
                 writer = new StreamWriter(ostrm);
+                writer.AutoFlush = true;
                 Console.SetOut(writer);
             }
             catch (Exception e)
@@ -171,18 +174,24 @@ namespace MyTvUI
         //close window
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
+            Console.WriteLine("Window closing called");
+
+            Console.WriteLine("Stopping kinect");
+            closing = true;
+            StopKinect(kinectSensorChooser1.Kinect);
+
+            Console.WriteLine("Stopping sockets");
             //stop sockets
             socketClient.disconnect();
             socketServer.stopSocketServer();
 
+            Console.WriteLine("Flushing logs");
             if (writer != null)
             {
                 Console.SetOut(oldOut);
                 writer.Close();
                 ostrm.Close();
             }
-            closing = true;
-            StopKinect(kinectSensorChooser1.Kinect);
         }
         #endregion window
 
@@ -790,33 +799,7 @@ namespace MyTvUI
 
         void exitHoverRegion_Click(object sender, RoutedEventArgs e)
         {
-            if (writer != null)
-            {
-                Console.SetOut(oldOut);
-                writer.Close();
-                ostrm.Close();
-            }
             mytvWindow.Close();
-            
-            //try
-            //{
-            //    //if the application was opened by another window close the current window not the other application
-            //    if (Application.Current.Windows.Count > 1)
-            //    {
-            //        for (int i = 0; i < Application.Current.Windows.Count; i++)
-            //        {
-            //            if (Application.Current.Windows[i].GetType().ToString().Equals("MyTvUI.MainWindow"))
-            //                Application.Current.Windows[i].Close();
-            //        }
-            //    }
-            //    //otherwise close the main window
-            //    else
-                    //Application.Current.MainWindow.Close();
-            //}
-            //catch (InvalidOperationException e2)
-            //{
-            //    System.IO.File.AppendAllText(@".\logs.txt", "Exception: " + e2);
-            //}
         }
 
         static internal ImageSource getImageSourceFromResource(string psAssemblyName, string psResourceName)
@@ -880,6 +863,11 @@ namespace MyTvUI
                 }
             }
             return localIP;
+        }
+
+        private void mytvWindow_Closed(object sender, EventArgs e)
+        {
+            Console.WriteLine("Window closed called");
         }
     }
 
