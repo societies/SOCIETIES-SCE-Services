@@ -145,8 +145,16 @@ public class RfidServer extends EventListener implements IRfidServer, ServiceTra
 			this.wUnitToSymlocTable = new Hashtable<String, String>();
 			
 		}
+		this.registerRFIDReaders();
+		
+		frame = new ServerGUIFrame(this);
+	}
+	
+	
+	private void registerRFIDReaders(){
 		String[] options = new String[]{"0.localhost","1.University addresses"};
-		String str = (String) JOptionPane.showInputDialog(null, "Select Configuration", "Configuration", JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
+		//String str = (String) JOptionPane.showInputDialog(null, "Select Configuration", "Configuration", JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
+		String str = options[1];
 		if (str.equalsIgnoreCase(options[0])){
 			
 			if (null != iDevice) {
@@ -186,9 +194,8 @@ public class RfidServer extends EventListener implements IRfidServer, ServiceTra
 			//this.rfidDriver.connect("137.195.27.197");
 			//this.rfidDriver.connect("137.195.27.198");
 		}
-		frame = new ServerGUIFrame(this);
+		
 	}
-	
 	public RfidServer(){
 		UIManager.put("ClassLoader", ClassLoader.getSystemClassLoader());
 		try {
@@ -242,13 +249,14 @@ public class RfidServer extends EventListener implements IRfidServer, ServiceTra
 	 * Method called when an RFID_UPDATE_EVENT is received
 	 */
 	public void sendUpdate(String wUnit, String rfidTagNumber) {
-	
+		
 		if (this.wUnitToSymlocTable.containsKey(wUnit)){
 			this.logging.debug("wUnit: "+wUnit+" matches symloc: "+wUnitToSymlocTable.get(wUnit));
 			if (this.tagToTimerTable.containsKey(rfidTagNumber)){
 				
 				this.tagToTimerTable.get(rfidTagNumber).setSymLoc(this.wUnitToSymlocTable.get(wUnit));
 				this.logging.debug("setting symloc: "+this.wUnitToSymlocTable.get(wUnit)+" to: "+rfidTagNumber);
+				this.frame.addRow(this.tagtoIdentityTable.get(rfidTagNumber), rfidTagNumber, wUnit, this.wUnitToSymlocTable.get(wUnit));
 			}else{
 				if (this.tagtoIdentityTable.containsKey(rfidTagNumber)){
 					this.logging.debug("tag "+rfidTagNumber+" registered to identity "+tagtoIdentityTable.get(rfidTagNumber));
@@ -257,11 +265,13 @@ public class RfidServer extends EventListener implements IRfidServer, ServiceTra
 					Timer timer = new Timer();
 					timer.schedule(task, new Date(), 5000);
 					this.logging.debug("Created timer");
+					this.frame.addRow(this.tagtoIdentityTable.get(rfidTagNumber), rfidTagNumber, wUnit, this.wUnitToSymlocTable.get(wUnit));
 				}
 			}
 			
 		}else{
 			this.logging.debug("wUnit :"+wUnit+" doesn't match any symLoc");
+			this.frame.addRow("Unregistered", rfidTagNumber, wUnit, "Unknown");
 		}
 		
 		
