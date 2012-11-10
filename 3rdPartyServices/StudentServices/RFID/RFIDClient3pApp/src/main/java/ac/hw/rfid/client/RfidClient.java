@@ -179,7 +179,7 @@ public class RfidClient extends EventListener implements IRfidClient {
 		}
 		
 		
-		timer = new Timer();
+		this.timer = new Timer();
 		
 		Date futureDate = new Date(new Date().getTime()+10000);
 		

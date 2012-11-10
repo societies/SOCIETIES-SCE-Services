@@ -26,6 +26,8 @@ package ac.hw.rfid.client;
 
 import java.util.TimerTask;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.societies.api.context.source.ICtxSourceMgr;
 
 /**
@@ -34,8 +36,10 @@ import org.societies.api.context.source.ICtxSourceMgr;
  */
 public class RFIDNoInputUpdater extends TimerTask{
 
-	String ctxSourceId;
-	ICtxSourceMgr ctxSourceMgr;
+	private String ctxSourceId;
+	private ICtxSourceMgr ctxSourceMgr;
+	private Logger logging = LoggerFactory.getLogger(this.getClass());
+	
 	
 	public RFIDNoInputUpdater(ICtxSourceMgr ctxSourceMgr, String ctxSourceId){
 		this.ctxSourceId = ctxSourceId;
@@ -43,6 +47,9 @@ public class RFIDNoInputUpdater extends TimerTask{
 	}
 
 	public void run(){
+		this.logging.debug("No update from RFID in the last 10 seconds. Now sending a null symbolic location");
 		this.ctxSourceMgr.sendUpdate(ctxSourceId, null);
+		this.logging.debug("Sent null symbolic location");
+		
 	}
 }
