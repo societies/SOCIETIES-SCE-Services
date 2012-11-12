@@ -1,6 +1,7 @@
 package ac.hw.rfid.test;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.societies.api.comm.xmpp.interfaces.ICommManager;
@@ -23,6 +24,7 @@ public class TestSendUpdate {
 		
 	}
 	
+	@Ignore
 	@Test
 	public void testSendUpdate(){
 		
