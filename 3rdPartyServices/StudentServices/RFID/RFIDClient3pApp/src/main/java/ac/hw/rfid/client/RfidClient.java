@@ -183,7 +183,8 @@ public class RfidClient extends EventListener implements IRfidClient {
 			//this.ctxSourceMgr.sendUpdate(this.myCtxSourceId, symLoc);		
 			this.logging.debug("Updating context database with: "+symLoc);
 			
-			this.ctxSourceMgr.sendUpdate(myCtxSourceId, symLoc, null, false, 1.0, 1d/5);
+			//this.ctxSourceMgr.sendUpdate(myCtxSourceId, symLoc, null, false, 1.0, 1d/5);
+			this.updateContextDirectly(symLoc);
 			this.logging.debug("Sent new RFID information");
 		}
 		
