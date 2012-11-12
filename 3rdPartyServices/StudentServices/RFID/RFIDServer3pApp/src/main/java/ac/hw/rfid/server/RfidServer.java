@@ -327,23 +327,25 @@ public class RfidServer extends EventListener implements IRfidServer, ServiceTra
 					
 					this.tagtoIdentityTable.put(tagNumber, dpiAsString);
 					//this.dpiToServiceID.put(dpiAsString, serviceID);
-					//this.sendAcknowledgeMessage(dpiAsString, serviceID, 0);
+					this.rfidClientRemote.acknowledgeRegistration(dpiAsString, 0);
 					this.frame.setNewDPIRegistered(tagNumber, dpiAsString);
 					logging.debug("Registration successfull. Sent Acknowledgement 0");
 
 				}else{
-					//this.sendAcknowledgeMessage(dpiAsString, serviceID, 1);
+					this.rfidClientRemote.acknowledgeRegistration(dpiAsString, 1);
 					logging.debug("Registration unsuccessfull. Sent Ack 1");
 				}
 			}else{
 				
-				//this.sendAcknowledgeMessage(dpiAsString, serviceID, 2);
+				this.rfidClientRemote.acknowledgeRegistration(dpiAsString, 2);
 				logging.debug("Registration unsuccessfull. Sent Ack 2");
 			}
 		
 
 		
 	}
+
+	
 
 	private void removeOldRegistration( String dpiAsString){
 		if (this.tagtoIdentityTable.contains(dpiAsString)){

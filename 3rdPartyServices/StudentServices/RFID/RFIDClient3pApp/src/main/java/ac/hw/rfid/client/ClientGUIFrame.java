@@ -349,16 +349,21 @@ public class ClientGUIFrame extends JFrame
 			} catch (CtxException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
-				JOptionPane.showMessageDialog(this, "Error updating "+attr.getType()+" attribute ");	
+				this.logging.debug("Error updating "+attr.getType()+" attribute ");	
 			}
 			this.tfTagNumber.setText(rfidTagNumber);
 			JOptionPane.showMessageDialog(this, "Successfully registered tag: "+this.rfidTagNumber);
 			break;
 		case 1 :
-			JOptionPane.showMessageDialog(this, "Error registering tag. Password incorrect");
+			//JOptionPane.showMessageDialog(this, "Error registering tag. Password incorrect");
+			String newPasswd = (String) JOptionPane.showInputDialog(this, "The password for registering your RFID tag number was incorrect. Please enter your password again.","RFID Tag Registration unsuccessful", JOptionPane.ERROR_MESSAGE, null, null, new String());
+			this.sendRegisterMessage(newPasswd);
 			break;
 		case 2 :
 			JOptionPane.showMessageDialog(this, "Error registering tag. Tag number not recognised");
+			this.rfidTagNumber = (String) JOptionPane.showInputDialog(this, "The rfid tag number was not recognised. Please enter a valid rfid tag number below. ", "RFID Tag Registration unsuccessful", JOptionPane.ERROR_MESSAGE, null, null, new String());
+			String password = (String) JOptionPane.showInputDialog(this, "Please enter the password", "RFID Tag registration password needed", JOptionPane.ERROR_MESSAGE, null, null, new String());
+			this.sendRegisterMessage(password);
 			break;
 		default: JOptionPane.showMessageDialog(this, "Error registering tag. Unknown error!");
 			break;
