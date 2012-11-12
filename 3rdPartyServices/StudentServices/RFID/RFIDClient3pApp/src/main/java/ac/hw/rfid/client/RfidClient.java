@@ -25,6 +25,7 @@
 package ac.hw.rfid.client;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Timer;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -34,8 +35,15 @@ import javax.swing.UIManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.societies.api.comm.xmpp.interfaces.ICommManager;
-import org.societies.api.context.broker.ICtxBroker;
+import org.societies.api.internal.context.broker.ICtxBroker;
+import org.societies.api.context.CtxException;
+import org.societies.api.context.model.CtxAttribute;
+import org.societies.api.context.model.CtxAttributeIdentifier;
 import org.societies.api.context.model.CtxAttributeTypes;
+import org.societies.api.context.model.CtxEntity;
+import org.societies.api.context.model.CtxIdentifier;
+import org.societies.api.context.model.CtxModelType;
+import org.societies.api.context.model.IndividualCtxEntity;
 import org.societies.api.context.source.CtxSourceNames;
 import org.societies.api.context.source.ICtxSourceMgr;
 import org.societies.api.css.devicemgmt.rfid.RFIDUpdateEvent;
@@ -165,7 +173,8 @@ public class RfidClient extends EventListener implements IRfidClient {
 			boolean registered = this.register();
 			if (registered){
 				this.logging.debug("RFID is registered with ctx source mgr. Updating context db with: "+symLoc);
-				this.ctxSourceMgr.sendUpdate(this.myCtxSourceId, symLoc);
+				//this.ctxSourceMgr.sendUpdate(this.myCtxSourceId, symLoc);
+				this.updateContextDirectly(symLoc);
 				this.logging.debug("Sent new RFID information");
 			}else{
 				this.logging.error("Received symloc update: "+symLoc+" but unable to register as a context source with the ICtxSourceMgr.");
@@ -189,6 +198,37 @@ public class RfidClient extends EventListener implements IRfidClient {
 		
 	}
 
+	private void updateContextDirectly(String value){
+		try {
+			Future<IndividualCtxEntity> retrieveIndividualEntity = this.ctxBroker.retrieveIndividualEntity(userIdentity);
+			CtxEntity person = retrieveIndividualEntity.get();
+			if (person!=null){
+				Future<List<CtxIdentifier>> lookup = this.ctxBroker.lookup(person.getId(), CtxModelType.ATTRIBUTE, CtxAttributeTypes.LOCATION_SYMBOLIC);
+				List<CtxIdentifier> attributes = lookup.get();
+				
+				if (attributes.size()==0){
+					this.logging.debug("no symbolic location attributes found");
+				}else{
+					for (int i=0; i<attributes.size(); i++){
+						this.ctxBroker.updateAttribute((CtxAttributeIdentifier) attributes.get(i), value);
+						this.logging.debug("Updating attribute: "+attributes.get(i).toUriString()+" with value: "+value);
+					}
+				}
+			}else{
+				this.logging.debug("Entity Person is null");
+			}
+			
+		} catch (CtxException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ExecutionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 	@Override
 	public void acknowledgeRegistration(Integer rStatus) {
 		this.clientGUI.acknowledgeRegistration(rStatus);

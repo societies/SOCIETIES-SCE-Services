@@ -32,7 +32,7 @@
 
 		<osgi:reference id="commManager" interface="org.societies.api.comm.xmpp.interfaces.ICommManager"></osgi:reference>
 		<osgi:reference id="ctxSourceMgr" interface="org.societies.api.context.source.ICtxSourceMgr"></osgi:reference>
-		<osgi:reference id="ctxBroker" interface="org.societies.api.context.broker.ICtxBroker"></osgi:reference>
+		<osgi:reference id="ctxBroker" interface="org.societies.api.internal.context.broker.ICtxBroker"></osgi:reference>
 		<osgi:reference id="eventMgmtRef" interface="org.societies.api.osgi.event.IEventMgr"></osgi:reference>
 		<osgi:reference id="IServices" interface="org.societies.api.services.IServices"></osgi:reference>
 				

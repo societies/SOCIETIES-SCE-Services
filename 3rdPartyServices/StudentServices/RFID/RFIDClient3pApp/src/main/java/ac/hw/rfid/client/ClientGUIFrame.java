@@ -362,6 +362,7 @@ public class ClientGUIFrame extends JFrame
 		case 2 :
 			JOptionPane.showMessageDialog(this, "Error registering tag. Tag number not recognised");
 			this.rfidTagNumber = (String) JOptionPane.showInputDialog(this, "The rfid tag number was not recognised. Please enter a valid rfid tag number below. ", "RFID Tag Registration unsuccessful", JOptionPane.ERROR_MESSAGE, null, null, new String());
+			
 			String password = (String) JOptionPane.showInputDialog(this, "Please enter the password", "RFID Tag registration password needed", JOptionPane.ERROR_MESSAGE, null, null, new String());
 			this.sendRegisterMessage(password);
 			break;
