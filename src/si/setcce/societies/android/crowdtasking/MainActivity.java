@@ -7,6 +7,8 @@ import java.util.Calendar;
 import org.apache.http.client.methods.HttpGet;
 
 import si.setcce.societies.android.rest.RestTask;
+import android.accounts.Account;
+import android.accounts.AccountManager;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
@@ -16,6 +18,7 @@ import android.content.IntentFilter;
 import android.os.Bundle;
 import android.provider.CalendarContract;
 import android.provider.CalendarContract.Events;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.Window;
@@ -24,6 +27,7 @@ import android.webkit.CookieSyncManager;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.webkit.WebBackForwardList;
 import android.widget.Toast;
 
 import com.google.zxing.integration.android.IntentIntegrator;
@@ -38,7 +42,16 @@ public class MainActivity extends Activity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-		
+
+        AccountManager am = AccountManager.get(this);
+        Account[] accounts = am.getAccounts();
+        for(Account ac: accounts)
+        {
+	        String acname=ac.name;
+	        String actype = ac.type;
+	        Log.d("accountInfo", acname + ":" + actype);
+        }
+        
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_main);
 		webView = (WebView) findViewById(R.id.webView1);
@@ -55,6 +68,7 @@ public class MainActivity extends Activity {
         //webView.loadData("<h1>Application is loading...</h1>", "text/html", "utf-8");
         webView.loadUrl("file:///android_asset/start.html");
         //webView.loadUrl("file:///android_asset/test2.html");
+
         
         try {
 			HttpGet searchRequest = new HttpGet(new URI("http://crowdtasking.appspot.com"));
@@ -86,10 +100,18 @@ public class MainActivity extends Activity {
     @Override
     public void onBackPressed()
     {
-        if(webView.canGoBack())
-            webView.goBack();
-        else
+        if(webView.canGoBack()) {
+        	WebBackForwardList webBackForwardList = webView.copyBackForwardList();
+        	int i = webBackForwardList.getCurrentIndex();
+        	String historyUrl = webBackForwardList.getItemAtIndex(webBackForwardList.getCurrentIndex()-1).getUrl();
+        	if (historyUrl.contains("start.html")) {
+        		super.onBackPressed();
+        	}
+        	webView.goBack();
+        }
+        else {
             super.onBackPressed();
+        }
     }    
 
     @TargetApi(14)
@@ -214,7 +236,6 @@ public class MainActivity extends Activity {
         }
         
         public void onPageFinished(WebView view, String url) {
-        	webView.loadUrl("javascript:window.location.alert('bu!')");
         	if (url.contains("enter") || url.contains("leave")) {
         		webView.goBack();
         	}
