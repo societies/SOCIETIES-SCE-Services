@@ -63,33 +63,34 @@ public class ServiceRuntimeSocketServer extends Thread{
 		listening = true;
 
 	}
-	
+
 	public int setListenPort(){
-		  try {
-		   ServerSocket portLocator = new ServerSocket(0);
-		   serverPort = portLocator.getLocalPort();
-		   portLocator.close();
-		   this.logging.debug("Found available port: "+serverPort);
-		   return serverPort;
-		  } catch (IOException e) {
-		   e.printStackTrace();
-		  }
-		  return -1;
-		 }
-	
+		try {
+			ServerSocket portLocator = new ServerSocket(0);
+			serverPort = portLocator.getLocalPort();
+			portLocator.close();
+			this.logging.debug("Found available port: "+serverPort);
+			return serverPort;
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return -1;
+	}
+
 	@Override
 	public void run(){
 		while (listening){
+			this.logging.debug("Starting a new serverSocket on: "+this.serverPort);
 			this.listenSocket();
 		}
 	}
-	
-	
+
+
 	public void listenSocket(){
 		try{
 
 			server = new ServerSocket(serverPort); 
-			
+
 		} catch (IOException e) {
 			System.out.println("Could not listen on port "+serverPort);
 
@@ -111,49 +112,63 @@ public class ServiceRuntimeSocketServer extends Thread{
 			this.notifyAll();
 		}
 
+
 		
-			try{
-				String line = in.readLine();
+		try{
+			String line = in.readLine();
+			while (line!=null){
+
+
 				this.logging.debug("Received from portal: "+line);
-					if (line!=null){
-						if (line.contains(started_Service)){
-							String serviceName = line.substring(started_Service.length()+1);
-							this.displayService.notifyServiceStarted(serviceName.trim());
-							this.logging.debug("Called serviceStarted method on"+serviceName);
-						}else if (line.contains(stopped_Service)){
-							String serviceName = line.substring(stopped_Service.length()+1);
-							this.displayService.notifyServiceStopped(serviceName.trim());
-							this.logging.debug("Called serviceStopped method on"+serviceName);
-						}else if (line.contains(logged_Out)){
-							this.displayService.notifyLogOutEvent();
-							
-							
-						}
-						
-						this.finalize();
+				if (line!=null){
+					if (line.contains(started_Service)){
+						String serviceName = line.substring(started_Service.length()+1);
+						this.displayService.notifyServiceStarted(serviceName.trim());
+						this.logging.debug("Called serviceStarted method on"+serviceName);
+					}else if (line.contains(stopped_Service)){
+						String serviceName = line.substring(stopped_Service.length()+1);
+						this.displayService.notifyServiceStopped(serviceName.trim());
+						this.logging.debug("Called serviceStopped method on"+serviceName);
+					}else if (line.contains(logged_Out)){
+						this.displayService.notifyLogOutEvent();
+
+						this.logging.debug("Called notifyLogOutEvent");
 					}
-				
+
+
+				}
+				line = in.readLine();
+
 				//Send data back to client
 				//out.println(line);
-			} catch (IOException e) {
-				this.logging.debug(e.getMessage());
-				e.printStackTrace();
-				finalize();
-				return;
-			}
+			} 
+			this.finalize();
+		}catch (IOException e) {
+			this.logging.debug(e.getMessage());
+			e.printStackTrace();
+			finalize();
+			return;
 		}
-	
 
-	
+	}
+
+
+
+
+
+
+
 
 	@Override
 	protected void finalize(){
-	
+
+		this.logging.debug("finalise");
 		//Clean up 
 		try{
 			in.close();
 			out.close();
 			server.close();
+			this.logging.debug("SocketServer closed.");
 		} catch (IOException e) {
 			this.logging.debug("Could not close.");
 		}

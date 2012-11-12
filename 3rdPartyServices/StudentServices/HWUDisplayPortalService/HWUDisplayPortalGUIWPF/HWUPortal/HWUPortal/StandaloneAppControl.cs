@@ -166,6 +166,9 @@ namespace HWUPortal
             Console.WriteLine("Received exit event");
             ApplicationControlArgs cArgs = new ApplicationControlArgs(this.exeName, true);
             appExit(this, cArgs);
+
+            this.created = false;
+            appWin = IntPtr.Zero;
         }
         public void DestroyExe(EventArgs e)
         {
