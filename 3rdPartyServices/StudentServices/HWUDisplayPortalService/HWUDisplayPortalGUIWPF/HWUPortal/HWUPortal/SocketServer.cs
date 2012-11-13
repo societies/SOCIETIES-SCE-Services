@@ -215,13 +215,13 @@ namespace HWUPortal
         {
             String[] lines = (input.Split('\n'));
             String text = string.Empty;
-            if (lines.Length > 1)
+            if (lines.Length > 0)
             {
                 if (lines[0].IndexOf("LOGOUT") > -1)
                 {
                     if (lines[1].Trim().IndexOf(this.userSession.getUserIdentity()) > -1)
                     {
-
+                        Console.WriteLine("Logout method called on gui");
                         this.gui.logOut();
                         this.stream.Write(okBytes, 0, okBytes.Length);
                         //this is now set in the GUI

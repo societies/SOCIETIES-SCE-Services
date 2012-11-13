@@ -344,13 +344,25 @@ namespace HWUPortal
         internal delegate void logOutDelegate();
         internal void logOut()
         {
-            if (logoutButton.Dispatcher.CheckAccess())
+            Console.WriteLine("Logout called");
+            try
             {
-                logoutButton.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+                this.logoutMethod(logoutButton, new RoutedEventArgs());
+                //if (logoutButton.Dispatcher.CheckAccess())
+                //{
+                //    Console.WriteLine("Directly invoking button click on logout");
+                //    logoutButton.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+                //}
+                //else
+                //{
+                //    Console.WriteLine("Logout delegate method called");
+                //    logoutButton.Dispatcher.Invoke(new logOutDelegate(logOut));
+                //}
+
             }
-            else
+            catch (Exception e)
             {
-                logoutButton.Dispatcher.Invoke(new logOutDelegate(logOut));
+                Console.WriteLine(e.Message);
             }
 
 
@@ -706,55 +718,89 @@ namespace HWUPortal
 
         private void logoutButton_Click(object sender, RoutedEventArgs e)
         {
-            if (this.loggedIn)
+            if (this.logoutMethod(sender, e))
             {
-
-                String user = this.userSession.getUserIdentity();
-                Console.WriteLine("logging out user");
-
-                Console.WriteLine("Stopping service");
-
-                if (!this.runningService.serviceName.Equals(string.Empty))
-                {
-                    this.stopService(e, this.runningService);
-                    this.runningService = new ServiceInfo();
-                }
-                ServiceInformationSocketClient client = new ServiceInformationSocketClient();
-                client.sendLogoutEvent(userSession.getIPAddress(), userSession.getPort());
-
-                this.userSession = new UserSession();
-                foreach (HoverButton button in myButtons)
-                {
-                    this.enableThisButton(button, false);
-                }
-
-                this.enableThisButton(this.closeShowingServiceBtn, false);
-                this.enableThisButton(this.logoutButton, false);
-
-                Console.WriteLine("User: " + user + " is logged out");
-                //this.notifyIcon1.ShowBalloonTip(5000, "SOCIETIES Display Portal", "User: " + user + " has logged out", ToolTipIcon.Info);
-                if (iViewer != null)
-                {
-                    if (!iViewer.IsDisposed)
-                    {
-                        iViewer.Dispose();
-
-
-                    }
-                }
-
-                this.loggedIn = false;
-
                 this.socketServer.helperLogoutMethod();
-                this.setApplicationVisible(false);
+
+            }
+        }
+
+        private delegate bool logoutMethodDelegate(object sender, RoutedEventArgs e);
+
+        private bool logoutMethod(object sender, RoutedEventArgs e)
+        {
+            if (this.Dispatcher.CheckAccess())
+            {
+                Console.WriteLine("logoutButton_Clicked from sender: " + sender.ToString());
+                if (this.loggedIn)
+                {
+
+                    String user = this.userSession.getUserIdentity();
+                    Console.WriteLine("logging out user");
+
+                    Console.WriteLine("Stopping service");
+
+                    if (!this.runningService.serviceName.Equals(string.Empty))
+                    {
+                        this.stopService(e, this.runningService);
+                        this.runningService = new ServiceInfo();
+                    }
+                    ServiceInformationSocketClient client = new ServiceInformationSocketClient();
+                    client.sendLogoutEvent(userSession.getIPAddress(), userSession.getPort());
+
+                    this.userSession = new UserSession();
+                    foreach (HoverButton button in myButtons)
+                    {
+                        this.enableThisButton(button, false);
+                    }
+
+                    this.enableThisButton(this.closeShowingServiceBtn, false);
+                    this.enableThisButton(this.logoutButton, false);
+
+                    Console.WriteLine("User: " + user + " is logged out");
+                    //this.notifyIcon1.ShowBalloonTip(5000, "SOCIETIES Display Portal", "User: " + user + " has logged out", ToolTipIcon.Info);
+                    if (iViewer != null)
+                    {
+                        if (!iViewer.IsDisposed)
+                        {
+                            disposeComponent(iViewer);
+
+
+                        }
+                    }
+
+                    this.loggedIn = false;
+
+                    this.setApplicationVisible(false);
+                    return true;
+                }
+                else
+                {
+                    Console.WriteLine("no user is logged in");
+                    return false;
+                }
             }
             else
             {
-                Console.WriteLine("user already logged out");
+                return (bool) this.Dispatcher.Invoke(new logoutMethodDelegate(logoutMethod), sender, e);
             }
+           
            
         }
 
+        private delegate void disposeComponentDelegate(ImageViewer objtoDispose);
+
+        private void disposeComponent(ImageViewer objtoDispose)
+        {
+            if (objtoDispose.InvokeRequired)
+            {
+                objtoDispose.Invoke(new disposeComponentDelegate(disposeComponent), objtoDispose);
+            }
+            else
+            {
+                objtoDispose.Dispose();
+            }
+        }
         public void onExeServiceStopped(ServiceInfo sInfo)
         {
             KinectSensor.KinectSensors.StatusChanged += KinectSensors_StatusChanged;

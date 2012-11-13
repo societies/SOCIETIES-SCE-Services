@@ -101,9 +101,10 @@ public class RfidClient extends EventListener implements IRfidClient {
 	private RequestorService requestor;
 	private RFIDNoInputUpdater timerTask;
 	private Timer timer;
+	private String currentSymLoc = "";
 
 	public RfidClient() {
-		
+
 	}
 
 
@@ -161,42 +162,48 @@ public class RfidClient extends EventListener implements IRfidClient {
 
 	@Override
 	public void sendUpdate(String symLoc, String tagNumber) {
+
+
 		if (this.timer!=null){
 			this.timer.cancel();
 		}
 		this.clientGUI.sendSymLocUpdate(tagNumber, symLoc);
 		this.logging.debug("updated gui");
-		this.clientGUI.tfTagNumber.setText(tagNumber);
-		
-		if (this.myCtxSourceId==null){
-			
-			boolean registered = this.register();
-			if (registered){
-				this.logging.debug("RFID is registered with ctx source mgr. Updating context db with: "+symLoc);
-				//this.ctxSourceMgr.sendUpdate(this.myCtxSourceId, symLoc);
+		if (!this.currentSymLoc.equalsIgnoreCase(symLoc)){
+			this.logging.debug("New value for symbolic location received: "+symLoc);
+			this.clientGUI.tfTagNumber.setText(tagNumber);
+
+			if (this.myCtxSourceId==null){
+
+				boolean registered = this.register();
+				if (registered){
+					this.logging.debug("RFID is registered with ctx source mgr. Updating context db with: "+symLoc);
+					//this.ctxSourceMgr.sendUpdate(this.myCtxSourceId, symLoc);
+					this.updateContextDirectly(symLoc);
+					this.logging.debug("Sent new RFID information");
+				}else{
+					this.logging.error("Received symloc update: "+symLoc+" but unable to register as a context source with the ICtxSourceMgr.");
+				}
+			}else{
+				//this.ctxSourceMgr.sendUpdate(this.myCtxSourceId, symLoc);		
+				this.logging.debug("Updating context database with: "+symLoc);
+
+				//this.ctxSourceMgr.sendUpdate(myCtxSourceId, symLoc, null, false, 1.0, 1d/5);
 				this.updateContextDirectly(symLoc);
 				this.logging.debug("Sent new RFID information");
-			}else{
-				this.logging.error("Received symloc update: "+symLoc+" but unable to register as a context source with the ICtxSourceMgr.");
 			}
 		}else{
-			//this.ctxSourceMgr.sendUpdate(this.myCtxSourceId, symLoc);		
-			this.logging.debug("Updating context database with: "+symLoc);
-			
-			//this.ctxSourceMgr.sendUpdate(myCtxSourceId, symLoc, null, false, 1.0, 1d/5);
-			this.updateContextDirectly(symLoc);
-			this.logging.debug("Sent new RFID information");
+			this.logging.debug("Same symloc received. "+symLoc+"Not updating context.");
 		}
-		
-		
+		this.currentSymLoc = symLoc;
 		this.timer = new Timer();
-		
+
 		Date futureDate = new Date(new Date().getTime()+10000);
-		
+
 		timer.schedule(timerTask, futureDate);
-		
-		
-		
+
+
+
 	}
 
 	private void updateContextDirectly(String value){
@@ -206,7 +213,7 @@ public class RfidClient extends EventListener implements IRfidClient {
 			if (person!=null){
 				Future<List<CtxIdentifier>> lookup = this.ctxBroker.lookup(person.getId(), CtxModelType.ATTRIBUTE, CtxAttributeTypes.LOCATION_SYMBOLIC);
 				List<CtxIdentifier> attributes = lookup.get();
-				
+
 				if (attributes.size()==0){
 					this.logging.debug("no symbolic location attributes found");
 				}else{
@@ -218,7 +225,7 @@ public class RfidClient extends EventListener implements IRfidClient {
 			}else{
 				this.logging.debug("Entity Person is null");
 			}
-			
+
 		} catch (CtxException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -346,7 +353,7 @@ public class RfidClient extends EventListener implements IRfidClient {
 				}
 
 				this.unRegisterFromSLMEvents();
-				
+
 			}
 		}else{
 			this.logging.debug("Received SLM event but it wasn't related to my bundle");
