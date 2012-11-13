@@ -239,6 +239,15 @@ public class RfidClient extends EventListener implements IRfidClient {
 	}
 	@Override
 	public void acknowledgeRegistration(Integer rStatus) {
+		
+		while (this.clientGUI==null){
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 		this.clientGUI.acknowledgeRegistration(rStatus);
 		this.logging.debug("Received acknowledgement for registration");
 

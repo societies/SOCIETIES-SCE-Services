@@ -216,7 +216,7 @@ public class ClientGUIFrame extends JFrame
 		gbPanel0.setConstraints( pnPanel1, gbcPanel0 );
 		pnPanel0.add( pnPanel1 );
 
-		setDefaultCloseOperation( EXIT_ON_CLOSE );
+		setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 
 		setContentPane( pnPanel0 );
 		pack();
@@ -325,7 +325,7 @@ public class ClientGUIFrame extends JFrame
 		if (this.rfidServer==null){
 			JOptionPane.showMessageDialog(this, "rfidServer is null");
 		}
-		this.rfidServer.registerRFIDTag(serverIdentity.getJid(), rfidTagNumber, this.userIdentity.getJid(), "replaceThis", password);
+		this.rfidServer.registerRFIDTag(serverIdentity.getJid(), rfidTagNumber, this.userIdentity.getJid(), "", password);
 
 
 	}

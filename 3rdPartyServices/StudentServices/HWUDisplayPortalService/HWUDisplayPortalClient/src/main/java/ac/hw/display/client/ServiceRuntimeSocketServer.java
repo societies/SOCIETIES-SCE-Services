@@ -109,7 +109,7 @@ public class ServiceRuntimeSocketServer extends Thread{
 			out = new PrintWriter(client.getOutputStream(), true);
 		} catch (IOException e) {
 			System.out.println("Accept failed: "+serverPort);
-			this.notifyAll();
+			
 		}
 
 
