@@ -49,8 +49,10 @@ public class SocketServer extends Thread{
 	private static final String GUI_STARTED = "GUI_STARTED";
 	private static final String GUI_STOPPED = "GUI_STOPPED";
 	private static final String USER_ACTION = "USER_ACTION";
-	private static final String CHANNEL_REQUEST = "CHANNEL_REQUEST";
-	private static final String MUTED_REQUEST = "MUTED_REQUEST";
+	private static final String CHANNEL_PREFERENCE_REQUEST = "CHANNEL_PREFERENCE_REQUEST";
+	private static final String MUTED_PREFERENCE_REQUEST = "MUTED_PREFERENCE_REQUEST";
+	private static final String CHANNEL_INTENT_REQUEST = "CHANNEL_INTENT_REQUEST";
+	private static final String MUTED_INTENT_REQUEST = "MUTED_INTENT_REQUEST";
 	private static final String RECEIVED = "RECEIVED";
 	private static final String FAILED = "FAILED";
 	private static final String START_MSG = "START_MSG";
@@ -155,15 +157,27 @@ public class SocketServer extends Thread{
 					String value = splitData[2];
 					commandHandler.processUserAction(parameterName, value);
 					
-				}else if(command.equalsIgnoreCase(CHANNEL_REQUEST)){
-					LOG.debug(CHANNEL_REQUEST+" message received");
+				}else if(command.equalsIgnoreCase(CHANNEL_PREFERENCE_REQUEST)){
+					LOG.debug(CHANNEL_PREFERENCE_REQUEST+" message received");
 					String response = commandHandler.getChannelPreference();
 					out.println(response);
 					finalize();
 
-				}else if(command.equalsIgnoreCase(MUTED_REQUEST)){
-					LOG.debug(MUTED_REQUEST+" message received");
+				}else if(command.equalsIgnoreCase(MUTED_PREFERENCE_REQUEST)){
+					LOG.debug(MUTED_PREFERENCE_REQUEST+" message received");
 					String response = commandHandler.getMutedPreference();
+					out.println(response);
+					finalize();
+					
+				}else if(command.equalsIgnoreCase(CHANNEL_INTENT_REQUEST)){
+					LOG.debug(CHANNEL_INTENT_REQUEST+" message received");
+					String response = commandHandler.getChannelIntent();
+					out.println(response);
+					finalize();
+					
+				}else if(command.equalsIgnoreCase(MUTED_INTENT_REQUEST)){
+					LOG.debug(MUTED_INTENT_REQUEST+" message received");
+					String response = commandHandler.getMutedIntent();
 					out.println(response);
 					finalize();
 

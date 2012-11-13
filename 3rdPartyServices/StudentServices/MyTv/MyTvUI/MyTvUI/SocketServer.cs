@@ -117,9 +117,11 @@ namespace MyTvUI
                         }
                         else if (command.Equals(USER_SESSION_ENDED))
                         {
+                            //not used
                             Console.WriteLine("SOCKET_SERVER: "+USER_SESSION_ENDED + "message received");
                             stream.Write(okBytes, 0, okBytes.Length);
                             //close down
+                            //window.Close();
                         }
                         else
                         {

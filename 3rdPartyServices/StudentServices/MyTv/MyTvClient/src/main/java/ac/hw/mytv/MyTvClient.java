@@ -371,7 +371,7 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 			try {
 				RequestorService requestor = new RequestorService(userID, myServiceID);
 				LOG.debug("Created RequestorService type for: "+userID.toString()+" with serviceID: "+myServiceID.toString());
-				Future<IAction> futureOutcome = persoMgr.getPreference(requestor, userID, myServiceType, myServiceID, "channel");
+				Future<IAction> futureOutcome = persoMgr.getPreference(requestor, userID, myServiceType, myServiceID, "muted");
 				LOG.debug("Requested preference from personalisationManager");
 				IAction outcome = futureOutcome.get();
 				LOG.debug("Called .get()");
@@ -385,6 +385,52 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 				LOG.debug("Error retrieving mute preference");
 			} 
 			LOG.debug("Preference request result = "+result);
+			return result;
+		}
+		
+		public String getChannelIntent(){
+			LOG.debug("Getting channel intent from Personalisation manager");
+			String result = "INTENT-ERROR";
+			try {
+				RequestorService requestor = new RequestorService(userID, myServiceID);
+				LOG.debug("Created RequestorService type for: "+userID.toString()+" with serviceID: "+myServiceID.toString());
+				Future<IAction> futureOutcome = persoMgr.getIntentAction(requestor, userID, myServiceID, "channel");
+				LOG.debug("Requested intent from personalisationManager");
+				IAction outcome = futureOutcome.get();
+				LOG.debug("Called .get()");
+				if(outcome!=null){
+					LOG.debug("Successfully retrieved channel intent outcome: "+outcome.getvalue());
+					result = outcome.getvalue();
+				}else{
+					LOG.debug("No channel intent was found");
+				}
+			} catch (Exception e){
+				LOG.debug("Error retrieving intent");
+			}
+			LOG.debug("Intent request result = "+result);
+			return result;
+		}
+		
+		public String getMutedIntent(){
+			LOG.debug("Getting muted intent from personalisation manager");
+			String result = "INTENT_ERROR";
+			try {
+				RequestorService requestor = new RequestorService(userID, myServiceID);
+				LOG.debug("Created RequestorService type for: "+userID.toString()+" with serviceID: "+myServiceID.toString());
+				Future<IAction> futureOutcome = persoMgr.getIntentAction(requestor, userID, myServiceID, "muted");
+				LOG.debug("Requested intent from personalisationManager");
+				IAction outcome = futureOutcome.get();
+				LOG.debug("Called .get()");
+				if(outcome!=null){
+					LOG.debug("Successfully retrieved muted intent outcome: "+outcome.getvalue());
+					result = outcome.getvalue();
+				}else{
+					LOG.debug("No muted intent was found");
+				}
+			} catch (Exception e){
+				LOG.debug("Error retrieving intent");
+			}
+			LOG.debug("Intent request result = "+result);
 			return result;
 		}
 	}

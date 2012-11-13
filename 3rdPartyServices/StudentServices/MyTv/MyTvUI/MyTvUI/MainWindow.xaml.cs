@@ -148,9 +148,17 @@ namespace MyTvUI
                     Console.WriteLine("Initialising personalisable parameters");
                     this.userID = socketClient.getUserID();
                     //if EMMA -> getPreferences
-                    //if JOHN -> getUserIntent
-                    Console.WriteLine("Getting preferences for user: "+userID);
-                    initialisePreferences();
+                    //if ARTHUR -> getUserIntent
+                    if(this.userID.Equals("emma.societies.local.macs.hw.ac.uk")
+                    {
+                        Console.WriteLine("Getting preferences for user: "+userID);
+                        initialisePreferences();
+                    }else if(this.userID.Equals("arthur.societies.local.macs.hw.ac.uk")
+                    {
+                        Console.WriteLine("Getting intent for user: "+userID);
+                        initialiseIntent();
+                    }
+                    
                 }
 
                 //initialise activity feeds
@@ -175,6 +183,19 @@ namespace MyTvUI
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             Console.WriteLine("Window closing called");
+
+            if (commsInitialised)
+            {
+                Console.WriteLine("Send GUI closing message to service client");
+                String response = socketClient.sendMessage(
+                           "START_MSG\n" +
+                           "GUI_STOPPED\n" +
+                           "END_MSG\n");
+                if (response.Contains("RECEIVED"))
+                {
+                    Console.WriteLine("Service client received shutdown message");
+                }
+            }
 
             Console.WriteLine("Stopping kinect");
             closing = true;
@@ -401,29 +422,34 @@ namespace MyTvUI
             //set channel
             Console.WriteLine("Requesting channel preference");
             String prefRequest = "START_MSG\n" +
-                    "CHANNEL_REQUEST\n" +
+                    "CHANNEL_PREFERENCE_REQUEST\n" +
                     "END_MSG\n";
 
-            String channelPref = socketClient.sendMessage(prefRequest);
-            Console.WriteLine("Got channel preference: " + channelPref);
+            String channelPref = socketClient.sendMessage(prefRequest).Trim();
+            Console.WriteLine("Got channel preference: [" + channelPref +"]");
             if (channelPref.Equals("1"))
             {
+                Console.WriteLine("Personalising to channel 1");
                 setChannel1();
             }
             else if (channelPref.Equals("2"))
             {
+                Console.WriteLine("Personalising to channel 2");
                 setChannel2();
             }
             else if (channelPref.Equals("3"))
             {
+                Console.WriteLine("Personalising to channel 3");
                 setChannel3();
             }
             else if (channelPref.Equals("4"))
             {
+                Console.WriteLine("Personalising to channel 4");
                 setChannel4();
             }
             else  //default channel is 0
             {
+                Console.WriteLine("Personalising to default channel 0");
                 setChannel0();
             }
             //MessageBox.Show("Got channel preference");
@@ -431,12 +457,66 @@ namespace MyTvUI
             //set muted
             Console.WriteLine("Requesting mute preference");
             String muteRequest = "START_MSG\n" +
-                    "MUTED_REQUEST\n" +
+                    "MUTED_PREFERENCE_REQUEST\n" +
                     "END_MSG\n";
 
-            String mutedPref = socketClient.sendMessage(muteRequest);
-            Console.WriteLine("Got mute preference: " + mutedPref);
+            String mutedPref = socketClient.sendMessage(muteRequest).Trim();
+            Console.WriteLine("Got mute preference: [" + mutedPref+"]");
             if (mutedPref.Equals("false"))
+            {
+                //unmute tv
+                Console.WriteLine("Personalising volume to unmuted");
+                setUnMute();
+            }
+            else  //default state is muted
+            {
+                //mute tv
+                Console.WriteLine("Personalising volume to muted");
+                setMute();
+            }
+            //MessageBox.Show("Got muted preference");
+        }
+
+        private void initialiseIntent()
+        {
+            //set channel
+            Console.WriteLine("Requesting channel intent");
+            String intentRequest = "START_MSG\n" +
+                    "CHANNEL_INTENT_REQUEST\n" +
+                    "END_MSG\n";
+
+            String channelIntent = socketClient.sendMessage(intentRequest);
+            Console.WriteLine("Got channel intent :"+channelIntent);
+            if (channelIntent.Equals("1"))
+            {
+                setChannel1();
+            }
+            else if (channelIntent.Equals("2"))
+            {
+                setChannel2();
+            }
+            else if (channelIntent.Equals("3"))
+            {
+                setChannel3();
+            }
+            else if (channelIntent.Equals("4"))
+            {
+                setChannel4();
+            }
+            else  //default channel is 0
+            {
+                setChannel0();
+            }
+
+            //set muted
+            Console.WriteLine("Requesting mute preference");
+            String muteRequest = "START_MSG\n" +
+                    "MUTED_INTENT_REQUEST\n" +
+                    "END_MSG\n";
+
+            String mutedIntent = socketClient.sendMessage(muteRequest);
+            Console.WriteLine("Got muted intent: " + mutedIntent);
+            if (mutedIntent.Equals("false"))
             {
                 //unmute tv
                 setUnMute();
@@ -446,8 +526,8 @@ namespace MyTvUI
                 //mute tv
                 setMute();
             }
-            //MessageBox.Show("Got muted preference");
         }
+
         #endregion serviceactions
 
         /*
