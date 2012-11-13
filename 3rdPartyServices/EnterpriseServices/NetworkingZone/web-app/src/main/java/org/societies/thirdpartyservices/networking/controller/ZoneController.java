@@ -66,6 +66,21 @@ public class ZoneController {
 		return new ModelAndView("zone", model) ;
 	}
 	
+	@RequestMapping(value="/m_zone.html",method=RequestMethod.GET)
+	public ModelAndView m_zonePage() {
+		
+		log.info("ZoneController : GET start");
+		Map<String, Object> model = new HashMap<String, Object>();
+	
+		// Get members
+		List<UserDetails> memberList = getNetworkClient().getCurrentZoneMemberList();
+		
+		model.put("memberlist", memberList);
+			
+		
+		return new ModelAndView("m_zone", model) ;
+	}
+	
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value="/zone.html",method=RequestMethod.POST)
 	public ModelAndView showfriendprofile(@Valid ZoneForm zoneform, BindingResult result, Map model, HttpSession session) {
@@ -118,6 +133,60 @@ public class ZoneController {
 		
 		return new ModelAndView("friendprofile", model);
 	}
+	
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value="/m_zone.html",method=RequestMethod.POST)
+	public ModelAndView m_showfriendprofile(@Valid ZoneForm zoneform, BindingResult result, Map model, HttpSession session) {
+		log.info("showfriendprofile : GET start");
+		
+		currentFriendid = new String(zoneform.getFriendid());
+		ProfileForm profileForm = new ProfileForm();
+		UserDetails userDets = getNetworkClient().getFriendDetails(zoneform.getFriendid());
+		
+		profileForm.setName(userDets.getDisplayName());
+		profileForm.setEmail(userDets.getEmail());
+		profileForm.setHomelocation(userDets.getHomelocation());
+		
+		profileForm.setDepartment(userDets.getDept());
+		profileForm.setCompany(userDets.getCompany());
+		profileForm.setPosition(userDets.getPosition());
+		profileForm.setAbout(userDets.getAbout());
+		profileForm.setEducationHistory(userDets.getEducationhistory());
+		profileForm.setEmploymentHistory(userDets.getEmploymenthistory());
+		
+		
+		profileForm.setAboutvisible(0);
+		profileForm.setPersonalvisible(0);
+		profileForm.setEmployvisible(0);
+		profileForm.setEmphistvisible(0);
+		profileForm.setEduhistvisible(0);
+		
+		ShareInfo info = getNetworkClient().getFriendShareInfo(zoneform.getFriendid());
+		
+		if ((info.getShareHash() & SHARE_ABOUT) == SHARE_ABOUT) 
+			profileForm.setAboutvisible(1);
+		
+		if ((info.getShareHash() & SHARE_PERSONAL) == SHARE_PERSONAL) 
+			profileForm.setPersonalvisible(1);
+		
+		if ((info.getShareHash() & SHARE_EMPLOYMENT)  == SHARE_EMPLOYMENT) 
+			profileForm.setEmployvisible(1);
+		
+		
+		if ((info.getShareHash() & SHARE_EMPLOY_HISTORY)  == SHARE_EMPLOY_HISTORY) 
+			profileForm.setEmphistvisible(1);
+		
+		if ((info.getShareHash() & SHARE_EDU_HISTORY)  == SHARE_EDU_HISTORY) 
+			profileForm.setEduhistvisible(1);
+		
+		model.put("profileForm", profileForm);
+		
+		List<String> notes = getNetworkClient().getnotes(currentFriendid);
+		model.put("notes", notes);		
+		
+		return new ModelAndView("friendprofile", model);
+	}
+	
 	
 	@RequestMapping(value="/addnote.html",method=RequestMethod.POST)
 	public @ResponseBody JsonResponse addnote(@RequestBody String note){

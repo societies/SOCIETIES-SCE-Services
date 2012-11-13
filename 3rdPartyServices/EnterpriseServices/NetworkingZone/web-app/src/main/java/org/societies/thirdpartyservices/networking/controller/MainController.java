@@ -53,6 +53,25 @@ public class MainController {
 		return  new ModelAndView("main", model);
 		
 	}
+	
+	@RequestMapping(value="/m_main.html",method=RequestMethod.GET)
+	public ModelAndView m_main() {
+		
+		Map<String, Object> model = new HashMap<String, Object>();
+		// Check if the user has created an profile for Networking Zone
+		//If not, direct them to the Profile Page
+		
+		getMyNetClient().InitService();
+		boolean bProfileExists = getMyNetClient().bProfileExists();
+		model.put("bProfileExists", bProfileExists);
+		
+		zoneDets = getMyNetClient().getZoneDetails();
+		
+		model.put("zonedets", zoneDets);
+		
+		return  new ModelAndView("m_main", model);
+		
+	}
 
 	public NetworkClient getMyNetClient() {
 		return myNetClient;
@@ -90,4 +109,31 @@ public class MainController {
 		return  new ModelAndView("zone", model);
 	}
 
+	@RequestMapping(value="/{zonenumber}/m_gotozone.html",method=RequestMethod.GET)
+	public ModelAndView m_gotozone(@PathVariable(value="zonenumber") String zonenumber, HttpSession session) 
+	{
+		zoneIndex = Integer.parseInt(zonenumber) - 1;
+		if ((zoneIndex < 0) || (zoneIndex >= zoneDets.size()))
+				zoneIndex = 0;
+		
+		Map<String, Object> model = new HashMap<String, Object>();
+				
+		getMyNetClient().joinZoneCis(zoneDets.get(zoneIndex).getZonename());
+		model.put("cisname", zoneDets.get(zoneIndex).getZonename());
+		model.put("zonelocation", zoneDets.get(zoneIndex).getZonelocationdisplay());
+		model.put("topics", zoneDets.get(zoneIndex).getZonetopics());
+		// Get members
+		List<UserDetails> memberList = getMyNetClient().getCurrentZoneMemberList();
+		model.put("memberlist", memberList);
+		
+		List<ZoneEvent> zoneeventList = getMyNetClient().getCurrentZoneEvents();
+		model.put("zoneeventlist", zoneeventList);
+		
+		for ( int i = 0; i < memberList.size(); i++)
+		{
+			log.info(zoneDets.get(zoneIndex).getZonename() + " : member " + memberList.get(i));
+		}
+		return  new ModelAndView("m_zone", model);
+	}
+	
 }
