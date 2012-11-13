@@ -164,14 +164,14 @@ public class RfidClient extends EventListener implements IRfidClient {
 	public void sendUpdate(String symLoc, String tagNumber) {
 
 
-		if (this.timer!=null){
+/*		if (this.timer!=null){
 			try{
 			this.timer.cancel();
 			}catch(Exception e){
 				this.logging.debug("Error canceling timer. Timer already cancelled.");
 				e.printStackTrace();
 			}
-		}
+		}*/
 		this.clientGUI.sendSymLocUpdate(tagNumber, symLoc);
 		this.logging.debug("updated gui");
 		if (!this.currentSymLoc.equalsIgnoreCase(symLoc)){
@@ -201,11 +201,11 @@ public class RfidClient extends EventListener implements IRfidClient {
 			this.logging.debug("Same symloc received. "+symLoc+"Not updating context.");
 		}
 		this.currentSymLoc = symLoc;
-		this.timer = new Timer();
+		//this.timer = new Timer();
 
-		Date futureDate = new Date(new Date().getTime()+10000);
+		//Date futureDate = new Date(new Date().getTime()+10000);
 
-		timer.schedule(timerTask, futureDate);
+		//timer.schedule(timerTask, futureDate);
 
 
 
