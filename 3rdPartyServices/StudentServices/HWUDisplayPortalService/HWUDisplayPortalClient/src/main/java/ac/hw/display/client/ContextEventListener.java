@@ -138,6 +138,8 @@ public class ContextEventListener implements CtxChangeEventListener{
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
+				
+				LOG.debug("thread of handleInternalEvent method finished executing");
 			}
 		}.start();
 
