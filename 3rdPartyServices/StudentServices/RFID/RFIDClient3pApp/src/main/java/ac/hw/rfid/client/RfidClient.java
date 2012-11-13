@@ -165,7 +165,12 @@ public class RfidClient extends EventListener implements IRfidClient {
 
 
 		if (this.timer!=null){
+			try{
 			this.timer.cancel();
+			}catch(Exception e){
+				this.logging.debug("Error canceling timer. Timer already cancelled.");
+				e.printStackTrace();
+			}
 		}
 		this.clientGUI.sendSymLocUpdate(tagNumber, symLoc);
 		this.logging.debug("updated gui");
