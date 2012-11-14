@@ -534,54 +534,54 @@ namespace MyTvUI
          * Perhaps won't be used if dynamic personalisation not applied
          */
         #region preference updates
-        public int setChannelParameter(int channel)
-        {
-            int result;
-            switch (channel)
-            {
-                case 0: 
-                    tvBrowser.Navigate(channel0);
-                    result = 0;
-                    break;
-                case 1: 
-                    tvBrowser.Navigate(channel1);
-                    result = 1;
-                    break;
-                case 2: 
-                    tvBrowser.Navigate(channel2);
-                    result = 2;
-                    break;
-                case 3: 
-                    tvBrowser.Navigate(channel3);
-                    result = 3;
-                    break;
-                case 4: 
-                    tvBrowser.Navigate(channel4);
-                    result = 4;
-                    break;
-                default:
-                    tvBrowser.Navigate(channel0);
-                    result = 0;
-                    break;
-            }
-            return result;
-        }
+        //public int setChannelParameter(int channel)
+        //{
+        //    int result;
+        //    switch (channel)
+        //    {
+        //        case 0: 
+        //            tvBrowser.Navigate(channel0);
+        //            result = 0;
+        //            break;
+        //        case 1: 
+        //            tvBrowser.Navigate(channel1);
+        //            result = 1;
+        //            break;
+        //        case 2: 
+        //            tvBrowser.Navigate(channel2);
+        //            result = 2;
+        //            break;
+        //        case 3: 
+        //            tvBrowser.Navigate(channel3);
+        //            result = 3;
+        //            break;
+        //        case 4: 
+        //            tvBrowser.Navigate(channel4);
+        //            result = 4;
+        //            break;
+        //        default:
+        //            tvBrowser.Navigate(channel0);
+        //            result = 0;
+        //            break;
+        //    }
+        //    return result;
+        //}
 
-        public Boolean setMutedParameter(Boolean muted)
-        {
-            Boolean result;
-            if (muted)
-            {
-                //mute volume
-                result = true;
-            }
-            else
-            {
-                //unmute volume
-                result = false;
-            }
-            return result;
-        }
+        //public Boolean setMutedParameter(Boolean muted)
+        //{
+        //    Boolean result;
+        //    if (muted)
+        //    {
+        //        //mute volume
+        //        result = true;
+        //    }
+        //    else
+        //    {
+        //        //unmute volume
+        //        result = false;
+        //    }
+        //    return result;
+        //}
         #endregion preference updates
 
         #region sockets
@@ -893,7 +893,7 @@ namespace MyTvUI
         #region additional
         private void tvBrowser_WindowLoaded(object sender, RoutedEventArgs e)
         {
-            tvBrowser.Navigate("http://www.macs.hw.ac.uk/~ceesmm1/societies/mytv/channels/splashScreen.html");
+            //tvBrowser.Navigate("http://www.macs.hw.ac.uk/~ceesmm1/societies/mytv/channels/splashScreen.html");
         }
 
         void tvBrowser_Navigated(object sender, NavigationEventArgs e)
