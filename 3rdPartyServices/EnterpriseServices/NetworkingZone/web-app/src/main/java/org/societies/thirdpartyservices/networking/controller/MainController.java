@@ -95,9 +95,14 @@ public class MainController {
 		model.put("cisname", zoneDets.get(zoneIndex).getZonename());
 		model.put("zonelocation", zoneDets.get(zoneIndex).getZonelocationdisplay());
 		model.put("topics", zoneDets.get(zoneIndex).getZonetopics());
+
 		// Get members
-		List<UserDetails> memberList = getMyNetClient().getCurrentZoneMemberList();
-		model.put("memberlist", memberList);
+				List<UserDetails> memberList = getMyNetClient().getCurrentZoneMemberList();
+				List<UserDetails> suggestList = getMyNetClient().getSuggestedFriends();
+				
+				model.put("memberlist", memberList);
+				model.put("suggestList", suggestList);
+				
 		
 		List<ZoneEvent> zoneeventList = getMyNetClient().getCurrentZoneEvents();
 		model.put("zoneeventlist", zoneeventList);
@@ -124,7 +129,10 @@ public class MainController {
 		model.put("topics", zoneDets.get(zoneIndex).getZonetopics());
 		// Get members
 		List<UserDetails> memberList = getMyNetClient().getCurrentZoneMemberList();
+		List<UserDetails> suggestList = getMyNetClient().getSuggestedFriends();
+		
 		model.put("memberlist", memberList);
+		model.put("suggestList", suggestList);
 		
 		List<ZoneEvent> zoneeventList = getMyNetClient().getCurrentZoneEvents();
 		model.put("zoneeventlist", zoneeventList);

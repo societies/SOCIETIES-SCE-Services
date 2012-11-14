@@ -96,7 +96,36 @@
 <div class="clear"></div>
 <p class="error">Please, enter ...</p>
 </li>
+<li class="clearfix">
+<label for="">Employment History</label>
+<input type="text" id="shortsmalltext" name="newempwhere" />
+<input type="text" id="shortsmalltext" name="newempwhat" />
+<ul>
+<xc:forEach var="empDet" items="${profileForm.employmentHistory}">
+<li>${empDet.what} , ${empDet.where}</li>
+</xc:forEach>
+</ul>
+</li> 
+<li class="clearfix">
+<label for="">Education History</label><br>
+<smalllabel for="">College</smalllabel> 
+<input type="text" name="neweduwhere" id="shortsmalltext" />
+<smalllabel for="">Course</smalllabel> 
+<input type="text" name="neweduwhat" id="shortsmalltext" />
+<br/>
+<a href="#" onclick="doAjaxAddEducationHistory();"><img src="images/add.png" width =20 height=20></a>  
+<div id="edudetailslist">
+<ul>
+<xc:forEach var="eduDet" items="${profileForm.educationHistory}">
+<li>${eduDet.what} , ${eduDet.where}, ${eduDet.level}</li>
+</xc:forEach>
+</ul>
 
+<div id="publicinfo_error_edudetails" class="error"></div>
+<div id="publicinfo_info_edudetails" class="success"></div>
+				
+</div>
+</li>
 <li class="clearfix">
 <p class="success">Thank you! Success Message here.</p>
 <p class="error">Sorry, an error has occured. Please try again later.</p>	

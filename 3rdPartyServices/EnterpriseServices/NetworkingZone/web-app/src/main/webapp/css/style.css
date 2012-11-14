@@ -4,7 +4,7 @@ background-color:#fafafa;
 }
 
 html, body, div, span, object, iframe,
-h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+h1, h2, h3, h4, h5, h6, h7, p, blockquote, pre,
 abbr, cite,
 del, em, img, q,
 small, strong, b, i,
@@ -173,7 +173,8 @@ h2,
 h3,
 h4,
 h5,
-h6 {
+h6,
+h7 {
 	font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
@@ -185,6 +186,8 @@ h2 {font-size: 36px;}
 h3 {font-size: 30px;}
 
 h4 {font-size: 24px;}
+
+h7 {font-size: 24px;}
 
 h5 {font-size: 21px;}
 
@@ -230,7 +233,8 @@ h2,
 h3,
 h4,
 h5,
-h6 {
+h6,
+h7 {
 	margin-bottom: 10px;
 }
 
@@ -603,6 +607,15 @@ h5.box_title {
     font-weight: normal;
     margin-bottom: 20px;
     padding-left: 220px;
+    padding-top: 20px;
+}
+
+h7.box_title {
+    color: #B7B3B3;
+    font-size: 22px;
+    font-weight: normal;
+    margin-bottom: 20px;
+    padding-left: 20px;
     padding-top: 20px;
 }
 

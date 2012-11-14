@@ -52,8 +52,10 @@
 <section class="homebox_entries grid_12">
 <!-- FIRST ROW -->
 <header>
-  <h4 class="box_title">NETWORKING ZONE </h4>
-  <h4 class="box_title">Location : <strong>${zonelocation}</strong>  Topic : <strong>${topics}</strong></h4>
+  <h7 class="box_title">NETWORKING ZONE </h7><br/>
+  <h7 class="box_title">Location : <strong>${zonelocation}</strong>  
+  <br/>
+  Topic : <strong>${topics}</strong></h7>
 </header>
 <div class="hr grid_12 clearfix">&nbsp;</div>
 <article>
@@ -79,7 +81,7 @@
 <article>
 <p><strong>Suggested Connections in Current Location</strong></p>
 <ul>
-<xc:forEach var="memberlistentry" items="${memberlist}">
+<xc:forEach var="memberlistentry" items="${suggestlist}">
 <li>
 <a href="#" onclick="submitform('${memberlistentry.userid}')">
 ${memberlistentry.displayName},${memberlistentry.company}
