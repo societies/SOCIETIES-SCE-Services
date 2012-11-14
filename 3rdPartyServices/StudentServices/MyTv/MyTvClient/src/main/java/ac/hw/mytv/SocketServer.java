@@ -187,6 +187,12 @@ public class SocketServer extends Thread{
 					finalize();
 					commandHandler.disconnectFromGUI();
 				}
+				
+				else{
+					LOG.debug("Unknown command received from MyTvUI: "+command);
+					out.println(FAILED);
+					finalize();
+				}
 			}
 		} catch (IOException e) {
 			LOG.debug("Read failed");
