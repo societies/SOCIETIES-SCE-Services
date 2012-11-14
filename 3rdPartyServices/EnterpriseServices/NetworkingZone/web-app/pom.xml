@@ -300,6 +300,7 @@
 							org.societies.api.ext3p.networking;resolution:=optional,
 							org.springframework.osgi.context;resolution:=optional,
 							org.societies.activity;resolution:=optional,
+							org.societies.api.schema.css.directory;resolution:=optional,
 							<!-- Form validation -->
 							javax.validation,*;resolution:=optional
 						</Import-Package>
