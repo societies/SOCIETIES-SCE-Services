@@ -161,7 +161,7 @@ public class SocketClient {
 	}
 	
 	public void startService(UserSession userSession, String serviceName){
-		String message = "START SERVICE\n"+
+		String message = "START_SERVICE\n"+
 				userSession.getUserIdentity()+"\n"+
 				serviceName+"\n";
 		this.sendMessage(message);
@@ -189,6 +189,11 @@ public class SocketClient {
 		String message = "LOGOUT\n"+userSession.getUserIdentity()+"\n";
 		this.sendMessage(message);
 		this.logging.debug("Sent LOGOUT message");
+	}
+	
+	public void startService(ServiceInfo sInfo){
+		String message = "START_SERVICE\n "+sInfo.getServiceName()+"\n";
+		this.sendMessage(message);
 	}
 	private static int countLines(String str){
 		   String[] lines = str.split("\r\n|\r|\n");
@@ -226,11 +231,16 @@ public class SocketClient {
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		}	
+		c.startService(userSession, policyEditor.getServiceName());
+		try {
+			Thread.sleep(5000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 		
-		String message = "LOGOUT\n" +
-				"emma.societies.local.macs.hw.ac.uk\n";
-		c.sendMessage(message);
+		c.logOut(userSession);
 		
 		//userSession.addService(sInfo2);
 		//userSession.addService(sInfo);
