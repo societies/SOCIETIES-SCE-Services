@@ -161,7 +161,7 @@ public class SocketClient {
 	}
 	
 	public void startService(UserSession userSession, String serviceName){
-		String message = "START SERVICE\n"+
+		String message = "START_SERVICE\n"+
 				userSession.getUserIdentity()+"\n"+
 				serviceName+"\n";
 		this.sendMessage(message);
@@ -190,6 +190,11 @@ public class SocketClient {
 		this.sendMessage(message);
 		this.logging.debug("Sent LOGOUT message");
 	}
+	
+	public void startService(ServiceInfo sInfo){
+		String message = "START_SERVICE\n "+sInfo.getServiceName()+"\n";
+		this.sendMessage(message);
+	}
 	private static int countLines(String str){
 		   String[] lines = str.split("\r\n|\r|\n");
 		   return  lines.length;
@@ -216,7 +221,7 @@ public class SocketClient {
 		ServiceInfo sInfo2 = new ServiceInfo (null, "PolicyEditor", "http://www.macs.hw.ac.uk/~ceeep1/societies/services/POLICY~1.JAR", 0, false);
 		ServiceInfo sInfo3 = new ServiceInfo(null, "Youtube", "http://www.youtube.com/watch?v=3OnnDqH6Wj8", 0, false);*/
 /*		ServiceInfo sInfo4 = new ServiceInfo(null, "MyTV", "http://www.macs.hw.ac.uk/~ceesmm1/societies/mytv/MyTvUI.exe", 0, true);*/
-		ServiceInfo policyEditor = new ServiceInfo (null, "PolicyEditor", "http://www.macs.hw.ac.uk/~ceeep1/societies/services/POLICY~1.JAR", 0, false);
+		ServiceInfo policyEditor = new ServiceInfo (null, "MyTV", "http://www.macs.hw.ac.uk/~ceesmm1/societies/mytv/MyTvUI.exe", 4984, true);
 		
 		userSession.addService(policyEditor);
 		
@@ -226,11 +231,16 @@ public class SocketClient {
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		}	
+		c.startService(userSession, policyEditor.getServiceName());
+		try {
+			Thread.sleep(5000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 		
-		String message = "LOGOUT\n" +
-				"emma.societies.local.macs.hw.ac.uk\n";
-		c.sendMessage(message);
+		c.logOut(userSession);
 		
 		//userSession.addService(sInfo2);
 		//userSession.addService(sInfo);

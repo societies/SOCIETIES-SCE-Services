@@ -234,11 +234,11 @@ namespace HWUPortal
                     }
 
                 }
-                else if (lines[0].IndexOf("START SERVICE") > -1)
+                else if (lines[0].IndexOf("START_SERVICE") > -1)
                 {
                     String userId = lines[1];
                     String serviceName = lines[2];
-
+                    Console.WriteLine("Starting service: " + serviceName);
                     this.gui.startService(serviceName);
                     this.stream.Write(okBytes, 0, okBytes.Length);
                 }

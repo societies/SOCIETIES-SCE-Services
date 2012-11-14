@@ -39,7 +39,7 @@
 <li><a href="myprofile.html">Privacy Settings</a></li>
 </ul>
 </li>
-<li><a href="m_main.html"><br />Home</a></li>
+<li><a href="main.html"><br />Home</a></li>
 </ul> 
 </nav><!-- #end webmenu -->
 <div class="clear"></div>

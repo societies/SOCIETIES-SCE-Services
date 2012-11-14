@@ -226,7 +226,8 @@ namespace HWUPortal
 
         public void startService(string serviceName)
         {
-            ServiceInfo sInfo = this.userSession.getService(serviceName);
+            ServiceInfo sInfo = this.userSession.getService(serviceName.Trim());
+            
             if (sInfo != null)
             {
                 Console.WriteLine(serviceName + " starting now");
@@ -682,7 +683,7 @@ namespace HWUPortal
                 {
                     
                     //this.closeShowingServiceBtn.Content = "";
-                    setButtonContext(this.closeShowingServiceBtn, "");
+                    setButtonContext(this.closeShowingServiceBtn, " ");
                     //this.closeShowingServiceBtn.Text = "";
                     this.enableThisButton(this.closeShowingServiceBtn, false);
                     KinectSensor.KinectSensors.StatusChanged += KinectSensors_StatusChanged;
@@ -815,6 +816,7 @@ namespace HWUPortal
         {
             if (sInfo.serviceType == ServiceType.EXE || sInfo.serviceType == ServiceType.JAR)
             {
+                Console.Write("Stopping Service (executable).");
                 //appWindow.Close();
                 standaloneAppControl.DestroyExe(e);
                 //appControl.DestroyExe(e);
@@ -824,6 +826,7 @@ namespace HWUPortal
             }
             else if (sInfo.serviceType == ServiceType.WEB)
             {
+                Console.WriteLine("Stopping Service (Web).");
                 this.webBrowser.Navigate("about:blank");
                 this.webBrowser.Visibility = System.Windows.Visibility.Hidden;
             }

@@ -107,7 +107,7 @@
 <article>
 <p><strong>Suggested Connections in Current Location</strong></p>
 <ul>
-<xc:forEach var="memberlistentry" items="${memberlist}">
+<xc:forEach var="memberlistentry" items="${suggestlist}">
 <li>${memberlistentry.displayName},${memberlistentry.company} <br/> <input type="button" value="Connect" onclick="submitform('${memberlistentry.userid}')" > </li>
 </xc:forEach>
 </ul>

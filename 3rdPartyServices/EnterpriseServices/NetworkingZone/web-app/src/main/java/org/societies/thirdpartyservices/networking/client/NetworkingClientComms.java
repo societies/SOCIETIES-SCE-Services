@@ -886,4 +886,12 @@ public class NetworkingClientComms implements ICommCallback {
 								
 	}
 
+	public String getNetServerID() {
+		return netServerID;
+	}
+
+	public void setNetServerID(String netServerID) {
+		this.netServerID = netServerID;
+	}
+
 }

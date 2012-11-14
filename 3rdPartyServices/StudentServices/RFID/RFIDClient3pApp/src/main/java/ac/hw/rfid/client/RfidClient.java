@@ -35,7 +35,6 @@ import javax.swing.UIManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.societies.api.comm.xmpp.interfaces.ICommManager;
-import org.societies.api.internal.context.broker.ICtxBroker;
 import org.societies.api.context.CtxException;
 import org.societies.api.context.model.CtxAttribute;
 import org.societies.api.context.model.CtxAttributeIdentifier;
@@ -46,10 +45,10 @@ import org.societies.api.context.model.CtxModelType;
 import org.societies.api.context.model.IndividualCtxEntity;
 import org.societies.api.context.source.CtxSourceNames;
 import org.societies.api.context.source.ICtxSourceMgr;
-import org.societies.api.css.devicemgmt.rfid.RFIDUpdateEvent;
 import org.societies.api.identity.IIdentity;
 import org.societies.api.identity.IIdentityManager;
 import org.societies.api.identity.RequestorService;
+import org.societies.api.internal.context.broker.ICtxBroker;
 import org.societies.api.osgi.event.CSSEvent;
 import org.societies.api.osgi.event.CSSEventConstants;
 import org.societies.api.osgi.event.EventListener;
@@ -103,6 +102,9 @@ public class RfidClient extends EventListener implements IRfidClient {
 	private Timer timer;
 	private String currentSymLoc = "";
 
+	private UpdateOtherTimerTask updateOtherTimerTask;
+	private Timer updateOtherTimer;
+
 	public RfidClient() {
 
 	}
@@ -144,8 +146,8 @@ public class RfidClient extends EventListener implements IRfidClient {
 
 	private boolean register(){
 		try {
-			Future<String> fID = this.ctxSourceMgr.register(CtxSourceNames.RFID, CtxAttributeTypes.LOCATION_SYMBOLIC);
-			myCtxSourceId = fID.get();
+			myCtxSourceId = this.ctxSourceMgr.register(CtxSourceNames.RFID, CtxAttributeTypes.LOCATION_SYMBOLIC).get();
+			 
 			this.logging.debug("Successfully registered to ctxSourceMgr. Got my source ID: "+myCtxSourceId);
 			timerTask = new RFIDNoInputUpdater(this.ctxSourceMgr, this.myCtxSourceId);
 			return true;
@@ -163,17 +165,28 @@ public class RfidClient extends EventListener implements IRfidClient {
 	@Override
 	public void sendUpdate(String symLoc, String tagNumber) {
 
-
-/*		if (this.timer!=null){
-			try{
-			this.timer.cancel();
-			}catch(Exception e){
-				this.logging.debug("Error canceling timer. Timer already cancelled.");
-				e.printStackTrace();
+/*		if (this.timerTask!=null){
+			if (this.timer!=null){
+				try{
+					
+					this.timer.cancel();
+				}catch(Exception e){
+					this.logging.debug("Error canceling timer. Timer already cancelled.");
+					e.printStackTrace();
+				}
+				try{
+					
+					this.timerTask.cancel();
+				}catch(Exception e){
+					this.logging.debug("Error canceling timerTask. TimerTask already cancelled.");
+					e.printStackTrace();
+				}
 			}
 		}*/
 		this.clientGUI.sendSymLocUpdate(tagNumber, symLoc);
 		this.logging.debug("updated gui");
+
+
 		if (!this.currentSymLoc.equalsIgnoreCase(symLoc)){
 			this.logging.debug("New value for symbolic location received: "+symLoc);
 			this.clientGUI.tfTagNumber.setText(tagNumber);
@@ -212,6 +225,7 @@ public class RfidClient extends EventListener implements IRfidClient {
 	}
 
 	private void updateContextDirectly(String value){
+		
 		try {
 			Future<IndividualCtxEntity> retrieveIndividualEntity = this.ctxBroker.retrieveIndividualEntity(userIdentity);
 			CtxEntity person = retrieveIndividualEntity.get();
@@ -223,8 +237,8 @@ public class RfidClient extends EventListener implements IRfidClient {
 					this.logging.debug("no symbolic location attributes found");
 				}else{
 					for (int i=0; i<attributes.size(); i++){
-						this.ctxBroker.updateAttribute((CtxAttributeIdentifier) attributes.get(i), value);
-						this.logging.debug("Updating attribute: "+attributes.get(i).toUriString()+" with value: "+value);
+						CtxAttribute attr = this.ctxBroker.updateAttribute((CtxAttributeIdentifier) attributes.get(i), value).get();
+						this.logging.debug("Updating attribute: "+attr.getId().toUriString()+" with value: "+attr.getStringValue());
 					}
 				}
 			}else{
@@ -240,11 +254,14 @@ public class RfidClient extends EventListener implements IRfidClient {
 		} catch (ExecutionException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		} catch (Exception e){
+			e.printStackTrace();
+			this.logging.error(e.getMessage());
 		}
 	}
 	@Override
 	public void acknowledgeRegistration(Integer rStatus) {
-		
+
 		while (this.clientGUI==null){
 			try {
 				Thread.sleep(1000);
@@ -346,7 +363,7 @@ public class RfidClient extends EventListener implements IRfidClient {
 
 			if (slmEvent.getEventType().equals(ServiceMgmtEventType.NEW_SERVICE)){
 				ServiceResourceIdentifier myClientServiceID = slmEvent.getServiceId();
-				this.serverIdentity = getServices().getServer(myClientServiceID);
+				this.serverIdentity = this.services.getServer(myClientServiceID);
 				this.logging.debug("Retrieved my server's identity: "+this.serverIdentity.getJid());
 				//this.requestServerIdentityFromUser();
 				//ServiceResourceIdentifier serviceId = this.portalServerRemote.getServerServiceId(serverIdentity);
@@ -354,7 +371,7 @@ public class RfidClient extends EventListener implements IRfidClient {
 				//UIManager.put("ClassLoader", ClassLoader.getSystemClassLoader());
 
 				ServiceResourceIdentifier serviceId = this.getServices().getServerServiceIdentifier(myClientServiceID);
-				this.logging.debug("Retrieved my server's serviceID: "+serviceId.getIdentifier().toASCIIString());
+				this.logging.debug("Retrieved my server's serviceID: "+serviceId.getIdentifier());
 				this.requestor = new RequestorService(serverIdentity, serviceId);
 
 				boolean registered = this.register();
@@ -414,6 +431,14 @@ public class RfidClient extends EventListener implements IRfidClient {
 
 
 
+	public static void main(String[] args){
+
+		
+		
+		
+		
+
+	}
 
 
 
