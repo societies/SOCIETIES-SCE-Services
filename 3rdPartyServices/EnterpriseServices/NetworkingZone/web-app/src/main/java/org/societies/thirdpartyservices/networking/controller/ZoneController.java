@@ -62,7 +62,7 @@ public class ZoneController {
 		List<UserDetails> suggestList = getNetworkClient().getSuggestedFriends();
 		
 		model.put("memberlist", memberList);
-		model.put("suggestList", suggestList);
+		model.put("suggestlist", suggestList);
 		return new ModelAndView("zone", model) ;
 	}
 	
@@ -76,8 +76,12 @@ public class ZoneController {
 				List<UserDetails> memberList = getNetworkClient().getCurrentZoneMemberList();
 				List<UserDetails> suggestList = getNetworkClient().getSuggestedFriends();
 				
+				
+				log.info("got suggested friends. size = " + suggestList.size());
+				
+				
 				model.put("memberlist", memberList);
-				model.put("suggestList", suggestList);
+				model.put("suggestlist", suggestList);
 			
 		
 		return new ModelAndView("m_zone", model) ;
@@ -222,7 +226,7 @@ public class ZoneController {
 				List<UserDetails> suggestList = getNetworkClient().getSuggestedFriends();
 				
 				model.put("memberlist", memberList);
-				model.put("suggestList", suggestList);
+				model.put("suggestlist", suggestList);
 			
 		
 		return new ModelAndView("zone", model) ;
@@ -244,7 +248,7 @@ public class ZoneController {
 				List<UserDetails> suggestList = getNetworkClient().getSuggestedFriends();
 				
 				model.put("memberlist", memberList);
-				model.put("suggestList", suggestList);
+				model.put("suggestlist", suggestList);
 			
 		
 		return new ModelAndView("m_zone", model) ;
