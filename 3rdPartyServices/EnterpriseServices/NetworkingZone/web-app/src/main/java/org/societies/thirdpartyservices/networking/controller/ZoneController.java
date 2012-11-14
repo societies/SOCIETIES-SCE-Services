@@ -59,10 +59,10 @@ public class ZoneController {
 	
 		// Get members
 		List<UserDetails> memberList = getNetworkClient().getCurrentZoneMemberList();
+		List<UserDetails> suggestList = getNetworkClient().getSuggestedFriends();
 		
 		model.put("memberlist", memberList);
-			
-		
+		model.put("suggestList", suggestList);
 		return new ModelAndView("zone", model) ;
 	}
 	
@@ -73,9 +73,11 @@ public class ZoneController {
 		Map<String, Object> model = new HashMap<String, Object>();
 	
 		// Get members
-		List<UserDetails> memberList = getNetworkClient().getCurrentZoneMemberList();
-		
-		model.put("memberlist", memberList);
+				List<UserDetails> memberList = getNetworkClient().getCurrentZoneMemberList();
+				List<UserDetails> suggestList = getNetworkClient().getSuggestedFriends();
+				
+				model.put("memberlist", memberList);
+				model.put("suggestList", suggestList);
 			
 		
 		return new ModelAndView("m_zone", model) ;
@@ -216,9 +218,11 @@ public class ZoneController {
 		Map<String, Object> model = new HashMap<String, Object>();
 	
 		// Get members
-		List<UserDetails> memberList = getNetworkClient().getCurrentZoneMemberList();
-		
-		model.put("memberlist", memberList);
+				List<UserDetails> memberList = getNetworkClient().getCurrentZoneMemberList();
+				List<UserDetails> suggestList = getNetworkClient().getSuggestedFriends();
+				
+				model.put("memberlist", memberList);
+				model.put("suggestList", suggestList);
 			
 		
 		return new ModelAndView("zone", model) ;
@@ -236,9 +240,11 @@ public class ZoneController {
 		Map<String, Object> model = new HashMap<String, Object>();
 	
 		// Get members
-		List<UserDetails> memberList = getNetworkClient().getCurrentZoneMemberList();
-		
-		model.put("memberlist", memberList);
+				List<UserDetails> memberList = getNetworkClient().getCurrentZoneMemberList();
+				List<UserDetails> suggestList = getNetworkClient().getSuggestedFriends();
+				
+				model.put("memberlist", memberList);
+				model.put("suggestList", suggestList);
 			
 		
 		return new ModelAndView("m_zone", model) ;

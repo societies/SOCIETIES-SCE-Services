@@ -65,6 +65,7 @@ import org.societies.api.schema.cis.community.Criteria;
 import org.societies.api.schema.cis.community.MembershipCrit;
 import org.societies.api.schema.cis.community.Participant;
 import org.societies.api.schema.cis.directory.CisAdvertisementRecord;
+import org.societies.api.schema.css.directory.CssAdvertisementRecord;
 
 import org.societies.activity.PersistedActivityFeed;
 
@@ -772,7 +773,9 @@ public class NetworkClient {
 				for (Participant part :  memberList)
 				{
 					log.info("getMembers : Zone " + currentZoneCis.getName() + " Member  [" +part.getJid()  + " ]");
-					zoneMembers.add(part.getJid());
+					// ignore me and the server
+					if (!(part.getJid().contains(getCommManager().getIdManager().getThisNetworkNode().getJid())))
+						zoneMembers.add(part.getJid());
 				}
 			}
 			
@@ -876,5 +879,51 @@ public class NetworkClient {
 		
 		
 	}
+	
+	public List<UserDetails> getSuggestedFriends() {
+
+		Future<List<CssAdvertisementRecord>> asynchSuggestedFriends = getCssManager().suggestedFriends();
+		List<CssAdvertisementRecord> suggestFriendAdvert = null;
+		List<UserDetails> suggestions = new ArrayList<UserDetails>();
+		List<String> suggestedFriendsIDs = new ArrayList<String>();
+		try {
+			suggestFriendAdvert = asynchSuggestedFriends.get();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ExecutionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		if ((suggestFriendAdvert != null) && (suggestFriendAdvert.size() > 0) && zoneMembers != null)
+		{
+			for ( int index = 0; index < suggestFriendAdvert.size(); index++ )
+	
+			{
+				// check they are member of room
+				boolean bfound = false;
+				for ( int j = 0; j < zoneMembers.size() && bfound == false; j++)
+				{
+					if (zoneMembers.get(j).contains(suggestFriendAdvert.get(index).getId()))
+					{
+						bfound = true;
+						suggestedFriendsIDs.add(suggestFriendAdvert.get(index).getId());
+					}
+				}
+			}
+		}
+		
+		if (suggestedFriendsIDs.size() > 0)
+		{
+			
+			suggestions = getCommsClient().getUserDetailsList(suggestedFriendsIDs);
+		}
+
+		return suggestions;
+
+	}
+	
+				
 	
 }

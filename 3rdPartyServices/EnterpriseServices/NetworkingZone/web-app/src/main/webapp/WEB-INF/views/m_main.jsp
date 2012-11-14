@@ -57,7 +57,7 @@
 <section class="homebox_entries grid_12">
 <!-- FIRST ROW -->
 <header>
-  <h4 class="box_title">NETWORKING ZONES </h4></header>
+  <h7 class="box_title">NETWORKING ZONES </h7></header>
 <div class="hr grid_12 clearfix">&nbsp;</div>
 <table style="float:center" border="1">
 <xc:forEach var="zoneentry" items="${zonedets}" varStatus="status" begin="0" step="1">
