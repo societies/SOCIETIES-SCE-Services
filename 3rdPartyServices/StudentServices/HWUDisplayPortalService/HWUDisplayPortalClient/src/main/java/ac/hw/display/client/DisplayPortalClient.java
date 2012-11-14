@@ -204,17 +204,19 @@ public class DisplayPortalClient extends EventListener implements IDisplayDriver
 		}
 		//if near a screen
 		if (this.matchesLocation(location)){
-			
+			//check if the user is already using another screen
 			if (this.hasSession){
-				this.LOG.debug("Releasing previous screen session");
+				this.LOG.debug("Releasing previous screen session from: "+currentUsedScreenIP);
 				//release currently used screen
 				SocketClient sClient = new SocketClient(currentUsedScreenIP);
 				sClient.logOut(userSession);
+				this.LOG.debug("Sent logout msg to: "+currentUsedScreenIP);
 				this.portalServerRemote.releaseResource(serverIdentity, userIdentity.getJid(), currentUsedScreenIP);
+				this.LOG.debug("Released screen: "+currentUsedScreenIP);
 				
 			}
 			
-			this.LOG.debug("Requesting access");
+			this.LOG.debug("Requesting access to screen in location: "+location);
 			//request access
 			String reply = this.portalServerRemote.requestAccess(serverIdentity, userIdentity.getJid(), location);
 			//if access refused do nothing
@@ -224,12 +226,7 @@ public class DisplayPortalClient extends EventListener implements IDisplayDriver
 			else //if access is granted 
 			{
 				this.LOG.debug("Access to screen granted. IP Address is: "+reply);
-				//check if the user is already using another screen
-
-				if (this.servRuntimeSocketThread!=null){
-					
-				}
-
+				
 				
 				//now setup new screen
 				SocketClient socketClient = new SocketClient(reply);
