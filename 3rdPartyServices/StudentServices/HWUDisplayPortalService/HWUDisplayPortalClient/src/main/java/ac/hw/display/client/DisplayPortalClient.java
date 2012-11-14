@@ -91,8 +91,8 @@ public class DisplayPortalClient extends EventListener implements IDisplayDriver
 		this.servRuntimeSocketThread = new ServiceRuntimeSocketServer(this);
 		this.serviceRuntimeSocketPort = this.servRuntimeSocketThread.setListenPort();
 		this.servRuntimeSocketThread.start();
-		
-		
+
+
 	}
 
 
@@ -107,10 +107,10 @@ public class DisplayPortalClient extends EventListener implements IDisplayDriver
 	}
 
 	private void registerForSLMEvents() {
-		  String eventFilter = "(&" + 
-				    "(" + CSSEventConstants.EVENT_NAME + "="+ServiceMgmtEventType.NEW_SERVICE+")" +
-				    "(" + CSSEventConstants.EVENT_SOURCE + "=org/societies/servicelifecycle)" +
-				    ")";
+		String eventFilter = "(&" + 
+				"(" + CSSEventConstants.EVENT_NAME + "="+ServiceMgmtEventType.NEW_SERVICE+")" +
+				"(" + CSSEventConstants.EVENT_SOURCE + "=org/societies/servicelifecycle)" +
+				")";
 		this.evMgr.subscribeInternalEvent(this, new String[]{EventTypes.SERVICE_LIFECYCLE_EVENT}, eventFilter);
 		this.LOG.debug("Subscribed to "+EventTypes.SERVICE_LIFECYCLE_EVENT+" events");
 
@@ -119,7 +119,7 @@ public class DisplayPortalClient extends EventListener implements IDisplayDriver
 	private void unRegisterFromSLMEvents()
 	{
 		String eventFilter = "(&" + 
-				 "(" + CSSEventConstants.EVENT_NAME + "="+ServiceMgmtEventType.NEW_SERVICE+")" +
+				"(" + CSSEventConstants.EVENT_NAME + "="+ServiceMgmtEventType.NEW_SERVICE+")" +
 				"(" + CSSEventConstants.EVENT_SOURCE + "=org/societies/servicelifecycle)" +
 				")";
 
@@ -158,7 +158,7 @@ public class DisplayPortalClient extends EventListener implements IDisplayDriver
 				this.LOG.debug("Retrieved my server's identity: "+this.serverIdentity.getJid());
 				//this.requestServerIdentityFromUser();
 				//ServiceResourceIdentifier serviceId = this.portalServerRemote.getServerServiceId(serverIdentity);
-				
+
 				//UIManager.put("ClassLoader", ClassLoader.getSystemClassLoader());
 
 				ServiceResourceIdentifier serviceId = this.services.getServerServiceIdentifier(myClientServiceID);
@@ -182,7 +182,7 @@ public class DisplayPortalClient extends EventListener implements IDisplayDriver
 
 	private boolean matchesLocation(String location){
 		this.LOG.debug("User location length: "+location.length());
-		
+
 		for (int i=0; i<screenLocations.size(); i++){
 			String scrLoc = screenLocations.get(i);
 			this.LOG.debug("Screen location length: "+scrLoc.length());	
@@ -191,90 +191,96 @@ public class DisplayPortalClient extends EventListener implements IDisplayDriver
 				return true;
 			}
 			this.LOG.debug(scrLoc+" doesn't match "+location);
-		
+
 		}
 		this.LOG.debug("return false");
 		return false;
 	}
 	public void updateUserLocation(String location){
+
 		this.LOG.debug("location of user: "+location);
 		this.LOG.debug("Location of screens: ");
 		for (int i=0; i<screenLocations.size(); i++){
 			this.LOG.debug("Screen location: "+i+": "+screenLocations.get(i));
 		}
-		//if near a screen
-		if (this.matchesLocation(location)){
-			//check if the user is already using another screen
-			if (this.hasSession){
-				this.LOG.debug("Releasing previous screen session from: "+currentUsedScreenIP);
-				//release currently used screen
-				SocketClient sClient = new SocketClient(currentUsedScreenIP);
-				sClient.logOut(userSession);
-				this.LOG.debug("Sent logout msg to: "+currentUsedScreenIP);
-				this.portalServerRemote.releaseResource(serverIdentity, userIdentity.getJid(), currentUsedScreenIP);
-				this.LOG.debug("Released screen: "+currentUsedScreenIP);
-				
-			}
-			
-			this.LOG.debug("Requesting access to screen in location: "+location);
-			//request access
-			String reply = this.portalServerRemote.requestAccess(serverIdentity, userIdentity.getJid(), location);
-			//if access refused do nothing
-			if (reply=="REFUSED"){
-				this.LOG.debug("Refused access to screen.");
-			}
-			else //if access is granted 
-			{
-				this.LOG.debug("Access to screen granted. IP Address is: "+reply);
-				
-				
-				//now setup new screen
-				SocketClient socketClient = new SocketClient(reply);
 
-				socketClient.startSession(userSession);
-				//TODO: send services TO DISPLAY
-				this.currentUsedScreenIP = reply;
-				this.currentUsedScreenLocation = location;
-				this.hasSession = true;
-				DisplayEvent dEvent = new DisplayEvent(this.currentUsedScreenIP, DisplayEventConstants.DEVICE_AVAILABLE);
-				InternalEvent iEvent = new InternalEvent(EventTypes.DISPLAY_EVENT, "displayUpdate", "org/societies/css/device", dEvent);
-				try {
-					this.evMgr.publishInternalEvent(iEvent);
-				} catch (EMSException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+		if (!location.trim().equalsIgnoreCase(currentUsedScreenLocation.trim())){
+			//if near a screen
+			if (this.matchesLocation(location)){
+				//check if the user is already using another screen
+				if (this.hasSession){
+					this.LOG.debug("Releasing previous screen session from: "+currentUsedScreenIP);
+					//release currently used screen
+					SocketClient sClient = new SocketClient(currentUsedScreenIP);
+					sClient.logOut(userSession);
+					this.LOG.debug("Sent logout msg to: "+currentUsedScreenIP);
+					this.portalServerRemote.releaseResource(serverIdentity, userIdentity.getJid(), currentUsedScreenIP);
+					this.LOG.debug("Released screen: "+currentUsedScreenIP);
+
 				}
 
-			}
-		}//user is not near a screen
-		else{
-			this.LOG.debug("User not near screen");
-			//if he's using a screen
-			if (this.hasSession){
-				this.LOG.debug("User in session with portal GUI. Attempting to logout");
-				//release resource
-				this.portalServerRemote.releaseResource(serverIdentity, userIdentity.getJid(), currentUsedScreenLocation);
-
-				this.hasSession = false;
-
-
-				SocketClient socketClient = new SocketClient(this.currentUsedScreenIP);
-				socketClient.endSession(this.userSession.getUserIdentity());
-				this.currentUsedScreenIP = "";
-				this.currentUsedScreenLocation = "";
-				
-				this.servRuntimeSocketThread.finalize();
-				DisplayEvent dEvent = new DisplayEvent(this.currentUsedScreenIP, DisplayEventConstants.DEVICE_UNAVAILABLE);
-				InternalEvent iEvent = new InternalEvent(EventTypes.DISPLAY_EVENT, "displayUpdate", "org/societies/css/device", dEvent);
-				try {
-					this.evMgr.publishInternalEvent(iEvent);
-				} catch (EMSException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+				this.LOG.debug("Requesting access to screen in location: "+location);
+				//request access
+				String reply = this.portalServerRemote.requestAccess(serverIdentity, userIdentity.getJid(), location);
+				//if access refused do nothing
+				if (reply=="REFUSED"){
+					this.LOG.debug("Refused access to screen.");
 				}
-			}else{
-				this.LOG.debug("User not in a session with the screen. Nothing to do.");
+				else //if access is granted 
+				{
+					this.LOG.debug("Access to screen granted. IP Address is: "+reply);
+
+
+					//now setup new screen
+					SocketClient socketClient = new SocketClient(reply);
+
+					socketClient.startSession(userSession);
+					//TODO: send services TO DISPLAY
+					this.currentUsedScreenIP = reply;
+					this.currentUsedScreenLocation = location;
+					this.hasSession = true;
+					DisplayEvent dEvent = new DisplayEvent(this.currentUsedScreenIP, DisplayEventConstants.DEVICE_AVAILABLE);
+					InternalEvent iEvent = new InternalEvent(EventTypes.DISPLAY_EVENT, "displayUpdate", "org/societies/css/device", dEvent);
+					try {
+						this.evMgr.publishInternalEvent(iEvent);
+					} catch (EMSException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+
+				}
+			}//user is not near a screen
+			else{
+				this.LOG.debug("User not near screen");
+				//if he's using a screen
+				if (this.hasSession){
+					this.LOG.debug("User in session with portal GUI. Attempting to logout");
+					//release resource
+					this.portalServerRemote.releaseResource(serverIdentity, userIdentity.getJid(), currentUsedScreenLocation);
+
+					this.hasSession = false;
+
+
+					SocketClient socketClient = new SocketClient(this.currentUsedScreenIP);
+					socketClient.endSession(this.userSession.getUserIdentity());
+					this.currentUsedScreenIP = "";
+					this.currentUsedScreenLocation = "";
+
+					this.servRuntimeSocketThread.finalize();
+					DisplayEvent dEvent = new DisplayEvent(this.currentUsedScreenIP, DisplayEventConstants.DEVICE_UNAVAILABLE);
+					InternalEvent iEvent = new InternalEvent(EventTypes.DISPLAY_EVENT, "displayUpdate", "org/societies/css/device", dEvent);
+					try {
+						this.evMgr.publishInternalEvent(iEvent);
+					} catch (EMSException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}else{
+					this.LOG.debug("User not in a session with the screen. Nothing to do.");
+				}
 			}
+		}else{
+			this.LOG.debug("Ignoring same value for symloc> new: "+location+" - current: "+this.currentUsedScreenLocation);
 		}
 	}
 
@@ -436,7 +442,7 @@ public class DisplayPortalClient extends EventListener implements IDisplayDriver
 				}
 			}
 		}
-		
+
 		this.LOG.debug("Could not find service: "+serviceName);
 
 	}
