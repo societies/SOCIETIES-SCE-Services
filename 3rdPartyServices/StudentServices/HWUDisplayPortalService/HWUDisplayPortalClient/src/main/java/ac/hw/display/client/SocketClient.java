@@ -187,6 +187,7 @@ public class SocketClient {
 	
 	public void logOut(UserSession userSession){
 		String message = "LOGOUT\n"+userSession.getUserIdentity()+"\n";
+		this.sendMessage(message);
 	}
 	private static int countLines(String str){
 		   String[] lines = str.split("\r\n|\r|\n");
