@@ -204,6 +204,16 @@ public class DisplayPortalClient extends EventListener implements IDisplayDriver
 		}
 		//if near a screen
 		if (this.matchesLocation(location)){
+			
+			if (this.hasSession){
+				this.LOG.debug("Releasing previous screen session");
+				//release currently used screen
+				SocketClient sClient = new SocketClient(currentUsedScreenIP);
+				sClient.logOut(userSession);
+				this.portalServerRemote.releaseResource(serverIdentity, userIdentity.getJid(), currentUsedScreenIP);
+				
+			}
+			
 			this.LOG.debug("Requesting access");
 			//request access
 			String reply = this.portalServerRemote.requestAccess(serverIdentity, userIdentity.getJid(), location);
@@ -215,11 +225,7 @@ public class DisplayPortalClient extends EventListener implements IDisplayDriver
 			{
 				this.LOG.debug("Access to screen granted. IP Address is: "+reply);
 				//check if the user is already using another screen
-				if (this.hasSession){
-					this.LOG.debug("Releasing previous screen session");
-					//release currently used screen
-					this.portalServerRemote.releaseResource(serverIdentity, userIdentity.getJid(), currentUsedScreenIP);
-				}
+
 				if (this.servRuntimeSocketThread!=null){
 					
 				}
@@ -248,6 +254,7 @@ public class DisplayPortalClient extends EventListener implements IDisplayDriver
 			this.LOG.debug("User not near screen");
 			//if he's using a screen
 			if (this.hasSession){
+				this.LOG.debug("User in session with portal GUI. Attempting to logout");
 				//release resource
 				this.portalServerRemote.releaseResource(serverIdentity, userIdentity.getJid(), currentUsedScreenLocation);
 
@@ -268,6 +275,8 @@ public class DisplayPortalClient extends EventListener implements IDisplayDriver
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
+			}else{
+				this.LOG.debug("User not in a session with the screen. Nothing to do.");
 			}
 		}
 	}

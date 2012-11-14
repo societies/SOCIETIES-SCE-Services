@@ -184,6 +184,10 @@ public class SocketClient {
 		this.sendMessage(message);	
 		
 	}
+	
+	public void logOut(UserSession userSession){
+		String message = "LOGOUT\n"+userSession.getUserIdentity()+"\n";
+	}
 	private static int countLines(String str){
 		   String[] lines = str.split("\r\n|\r|\n");
 		   return  lines.length;
@@ -200,16 +204,32 @@ public class SocketClient {
 		}
 		
 		
-		SocketClient c = new SocketClient("137.195.24.6");
+		SocketClient c = new SocketClient("127.0.0.1");
 		
-		UserSession userSession = new UserSession("emma@societies.local.macs.hw.ac.uk", 10001);
+		UserSession userSession = new UserSession("emma.societies.local.macs.hw.ac.uk", 10001);
 		
-		c.sendText("Eliza's service", userSession, "<strong>Hello Emma!!! </strong>");
+		//c.sendText("Eliza's service", userSession, "<strong>Hello Emma!!! </strong>");
 		/*ServiceInfo sInfo = new ServiceInfo(null, "Social Learning", "http://www.macs.hw.ac.uk/~ceeep1/societies/services/SocialLearningGame.exe", 0 , true);
 		
 		ServiceInfo sInfo2 = new ServiceInfo (null, "PolicyEditor", "http://www.macs.hw.ac.uk/~ceeep1/societies/services/POLICY~1.JAR", 0, false);
 		ServiceInfo sInfo3 = new ServiceInfo(null, "Youtube", "http://www.youtube.com/watch?v=3OnnDqH6Wj8", 0, false);*/
 /*		ServiceInfo sInfo4 = new ServiceInfo(null, "MyTV", "http://www.macs.hw.ac.uk/~ceesmm1/societies/mytv/MyTvUI.exe", 0, true);*/
+		ServiceInfo policyEditor = new ServiceInfo (null, "PolicyEditor", "http://www.macs.hw.ac.uk/~ceeep1/societies/services/POLICY~1.JAR", 0, false);
+		
+		userSession.addService(policyEditor);
+		
+		c.startSession(userSession);
+		try {
+			Thread.sleep(5000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		String message = "LOGOUT\n" +
+				"emma.societies.local.macs.hw.ac.uk\n";
+		c.sendMessage(message);
+		
 		//userSession.addService(sInfo2);
 		//userSession.addService(sInfo);
 	//	userSession.addService(sInfo4);
