@@ -87,6 +87,53 @@ public class MyProfileController {
 		return  new ModelAndView("myprofile", model);
 	}
 	
+	@RequestMapping(value="/m_myprofile.html",method=RequestMethod.GET)
+	public ModelAndView m_myprofile() {
+		Map<String, Object> model = new HashMap<String, Object>();
+		ProfileForm profileForm = new ProfileForm();
+		UserDetails userDets = getMyNetClient().getMyDetails();
+		
+		profileForm.setName(userDets.getDisplayName());
+		profileForm.setEmail(userDets.getEmail());
+		profileForm.setHomelocation(userDets.getHomelocation());
+		
+		profileForm.setDepartment(userDets.getDept());
+		profileForm.setCompany(userDets.getCompany());
+		profileForm.setPosition(userDets.getPosition());
+		profileForm.setAbout(userDets.getAbout());
+		profileForm.setEducationHistory(userDets.getEducationhistory());
+		profileForm.setEmploymentHistory(userDets.getEmploymenthistory());
+		
+		
+		profileForm.setAboutvisible(0);
+		profileForm.setPersonalvisible(0);
+		profileForm.setEmployvisible(0);
+		profileForm.setEmphistvisible(0);
+		profileForm.setEduhistvisible(0);
+		
+		ShareInfo info = getMyNetClient().getDefaultShareInfo();
+		
+		if ((info.getShareHash() & SHARE_ABOUT) == SHARE_ABOUT) 
+			profileForm.setAboutvisible(1);
+		
+		if ((info.getShareHash() & SHARE_PERSONAL) == SHARE_PERSONAL) 
+			profileForm.setPersonalvisible(1);
+		
+		if ((info.getShareHash() & SHARE_EMPLOYMENT)  == SHARE_EMPLOYMENT) 
+			profileForm.setEmployvisible(1);
+		
+		
+		if ((info.getShareHash() & SHARE_EMPLOY_HISTORY)  == SHARE_EMPLOY_HISTORY) 
+			profileForm.setEmphistvisible(1);
+		
+		if ((info.getShareHash() & SHARE_EDU_HISTORY)  == SHARE_EDU_HISTORY) 
+			profileForm.setEduhistvisible(1);
+		
+		model.put("profileForm", profileForm);
+		
+		return  new ModelAndView("m_myprofile", model);
+	}
+	
 	@RequestMapping(value="/editprofile.html",method=RequestMethod.GET)
 	public ModelAndView editprofile() {
 		Map<String, Object> model = new HashMap<String, Object>();
@@ -110,9 +157,61 @@ public class MyProfileController {
 		return new ModelAndView("editprofile", model);
 	}
 	
+	@RequestMapping(value="/m_editprofile.html",method=RequestMethod.GET)
+	public ModelAndView m_editprofile() {
+		Map<String, Object> model = new HashMap<String, Object>();
+		
+		ProfileForm profileForm = new ProfileForm();
+				
+		UserDetails userDets = getMyNetClient().getMyDetails();
+		profileForm.setName(userDets.getDisplayName());
+		profileForm.setEmail(userDets.getEmail());
+		profileForm.setHomelocation(userDets.getHomelocation());
+		profileForm.setDepartment(userDets.getDept());
+		profileForm.setCompany(userDets.getCompany());
+		profileForm.setPosition(userDets.getPosition());
+		profileForm.setAbout(userDets.getAbout());
+			
+		profileForm.setEducationHistory(userDets.getEducationhistory());
+		profileForm.setEmploymentHistory(userDets.getEmploymenthistory());
+		
+		model.put("profileForm", profileForm);
+		
+		return new ModelAndView("m_editprofile", model);
+	}
+	
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value="/editprofile.html",method=RequestMethod.POST)
 	public ModelAndView saveprofile(@Valid ProfileForm profileForm, BindingResult result, Map model, HttpSession session) {
+		
+		log.info("profileForm.getName() : " + profileForm.getName());
+		log.info("profileForm.getName() : " + profileForm.getCompany());
+		log.info("profileForm.getDepartment() : " + profileForm.getDepartment());
+		log.info("profileForm.getDepartment() : " + profileForm.getPosition());
+		log.info("profileForm.getAbout() : " + profileForm.getAbout());
+		
+		UserDetails userDets = getMyNetClient().getMyDetails();
+		
+		userDets.setDisplayName(profileForm.getName());
+		userDets.setEmail(profileForm.getEmail());
+		userDets.setHomelocation(profileForm.getHomelocation());
+		
+		
+		userDets.setDept(profileForm.getDepartment());
+		userDets.setCompany(profileForm.getCompany());
+		userDets.setPosition(profileForm.getPosition());
+		userDets.setAbout(profileForm.getAbout());
+		userDets.setEducationhistory(profileForm.getEducationHistory());
+		userDets.setEmploymenthistory(profileForm.getEmploymentHistory());
+		getMyNetClient().setMyDetails(userDets);
+		
+		model.put("profileForm", profileForm);
+		return new ModelAndView("myprofile", model);
+	}
+	
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value="/m_editprofile.html",method=RequestMethod.POST)
+	public ModelAndView m_saveprofile(@Valid ProfileForm profileForm, BindingResult result, Map model, HttpSession session) {
 		
 		log.info("profileForm.getName() : " + profileForm.getName());
 		log.info("profileForm.getName() : " + profileForm.getCompany());

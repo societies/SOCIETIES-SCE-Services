@@ -67,7 +67,7 @@
 <td width=25%>
 <figure class="gravatar">
 <img alt="" src="images/webprofile_pic_sample1.jpg" height="48" width="48" />
-<a class="furtherinfo-link" href="editprofile.html">EDIT PROFILE</a>
+<a class="furtherinfo-link" href="m_editprofile.html">EDIT PROFILE</a>
 </figure>
 </td>
 <td width=50%>

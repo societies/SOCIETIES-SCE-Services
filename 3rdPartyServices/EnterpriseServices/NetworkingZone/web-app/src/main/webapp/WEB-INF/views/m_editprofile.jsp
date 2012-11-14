@@ -50,7 +50,7 @@
 <div class="breadcrumbs"><a href="">Home</a> / <a href="">Page</a></div>
 <!-- Form -->
 <section id="form_style_main">
-<form:form method="POST" action="editprofile.html" name="profileform" id="" commandName="profileForm">	
+<form:form method="POST" action="m_editprofile.html" name="profileform" id="" commandName="profileForm">	
 <h4 class="form_title">Edit Profile </h4>
 <div class="hr dotted clearfix">&nbsp;</div>
 <ul>						

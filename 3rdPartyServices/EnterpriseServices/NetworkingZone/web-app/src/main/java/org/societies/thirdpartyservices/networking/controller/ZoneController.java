@@ -184,7 +184,7 @@ public class ZoneController {
 		List<String> notes = getNetworkClient().getnotes(currentFriendid);
 		model.put("notes", notes);		
 		
-		return new ModelAndView("friendprofile", model);
+		return new ModelAndView("m_friendprofile", model);
 	}
 	
 	
@@ -224,4 +224,23 @@ public class ZoneController {
 		return new ModelAndView("zone", model) ;
 	}
 	
+	@RequestMapping(value="/m_makeconnection.html",method=RequestMethod.GET)
+	public ModelAndView  m_makeconection(){
+	//public @ResponseBody JsonResponse updatePersonalDetails(@RequestBody UserPersonDetails details){
+
+
+		
+		getNetworkClient().addfriend(currentFriendid);
+		
+		log.info("ZoneController : makeconection");
+		Map<String, Object> model = new HashMap<String, Object>();
+	
+		// Get members
+		List<UserDetails> memberList = getNetworkClient().getCurrentZoneMemberList();
+		
+		model.put("memberlist", memberList);
+			
+		
+		return new ModelAndView("m_zone", model) ;
+	}
 }
