@@ -101,7 +101,7 @@ public class MainController {
 				List<UserDetails> suggestList = getMyNetClient().getSuggestedFriends();
 				
 				model.put("memberlist", memberList);
-				model.put("suggestList", suggestList);
+				model.put("suggestlist", suggestList);
 				
 		
 		List<ZoneEvent> zoneeventList = getMyNetClient().getCurrentZoneEvents();
@@ -131,8 +131,9 @@ public class MainController {
 		List<UserDetails> memberList = getMyNetClient().getCurrentZoneMemberList();
 		List<UserDetails> suggestList = getMyNetClient().getSuggestedFriends();
 		
+		log.info("got suggested friends. size = " + suggestList.size());
 		model.put("memberlist", memberList);
-		model.put("suggestList", suggestList);
+		model.put("suggestlist", suggestList);
 		
 		List<ZoneEvent> zoneeventList = getMyNetClient().getCurrentZoneEvents();
 		model.put("zoneeventlist", zoneeventList);

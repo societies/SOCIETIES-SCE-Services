@@ -20,6 +20,7 @@
           <entry key="TargetPlatform" value="SOCIETIES" />
           <entry key="ServiceProvider" value="ICT-SOCIETIES" />
           <entry key="ServiceMetaModel" value-ref="serMetamodel" />
+          <entry key="ServiceClient" value="http://societies.local:8080/3p-service/networkingApp.jar" /> <!-- this is dummy value, doesn't exist on server -->
       </osgi:service-properties>
   	</osgi:service>
   	
@@ -27,7 +28,7 @@
      	<property name="authorSignature" value="mmannion" />
      	<property name="serviceDescription" value="Networking Zone" />
      	<property name="serviceName" value="NetworkingZone" />
-     	<property name="serviceType" value="THIRD_PARTY_CLIENT" />
+     	<property name="serviceType" value="THIRD_PARTY_SERVER" />
      	<property name="serviceCategory" value="media" />
      	<property name="privacyPolicy" value="privacy-policy.xml" />
  	</bean>

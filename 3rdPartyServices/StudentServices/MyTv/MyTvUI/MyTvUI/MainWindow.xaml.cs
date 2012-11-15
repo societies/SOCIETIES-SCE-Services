@@ -203,8 +203,11 @@ namespace MyTvUI
 
             Console.WriteLine("Stopping sockets");
             //stop sockets
-            socketClient.disconnect();
-            socketServer.stopSocketServer();
+            if (commsInitialised)
+            {
+                socketClient.disconnect();
+                socketServer.stopSocketServer();
+            }
 
             Console.WriteLine("Flushing logs");
             if (writer != null)
@@ -357,6 +360,31 @@ namespace MyTvUI
             return true;
         }
 
+        private Boolean setDefaultChannel()
+        {
+            Console.WriteLine("Setting channel to default - 0");
+            tvBrowser.Navigate(channel0);
+            channel1Button.Fill = channelBg_deselected;
+            channel2Button.Fill = channelBg_deselected;
+            channel3Button.Fill = channelBg_deselected;
+            channel4Button.Fill = channelBg_deselected;
+            offButton.Fill = offBg_selected;
+            currentChannel = 0;
+            return true;
+        }
+
+        private Boolean setDefaultVolume()
+        {
+            Console.WriteLine("Setting muted to default - true");
+            MMDeviceEnumerator devEnum = new MMDeviceEnumerator();
+            MMDevice defaultDevice = devEnum.GetDefaultAudioEndpoint(EDataFlow.eRender, ERole.eMultimedia);
+            defaultDevice.AudioEndpointVolume.Mute = true;
+            volumeDown.Fill = muteBg_selected;
+            volumeUp.Fill = unmuteBg_deselected;
+            currentlyMuted = true;
+            return true;
+        }
+
         private Boolean setMute()
         {
             Console.WriteLine("Setting muted");
@@ -447,10 +475,14 @@ namespace MyTvUI
                 Console.WriteLine("Personalising to channel 4");
                 setChannel4();
             }
+            else if (channelPref.Equals("0"))
+            {
+                Console.WriteLine("Personalising to channel 0");
+                setChannel0();
+            }
             else  //default channel is 0
             {
-                Console.WriteLine("Personalising to default channel 0");
-                setChannel0();
+                setDefaultChannel();
             }
             //MessageBox.Show("Got channel preference");
 
@@ -468,11 +500,14 @@ namespace MyTvUI
                 Console.WriteLine("Personalising volume to unmuted");
                 setUnMute();
             }
-            else  //default state is muted
+            else if (mutedPref.Equals("true"))
             {
-                //mute tv
                 Console.WriteLine("Personalising volume to muted");
                 setMute();
+            }
+            else  //default state is muted
+            {
+                setDefaultVolume();
             }
             //MessageBox.Show("Got muted preference");
         }

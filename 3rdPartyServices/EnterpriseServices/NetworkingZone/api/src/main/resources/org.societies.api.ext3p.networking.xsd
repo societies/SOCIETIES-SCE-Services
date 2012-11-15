@@ -44,6 +44,7 @@
 				<xs:element name="userid" type="xs:string" minOccurs="0" />
 				<xs:element name="username" type="xs:string" minOccurs="0" />
 				<xs:element name="useraction" type="xs:string" minOccurs="0" />
+				<xs:element name="published" type="xs:string" minOccurs="0" />
 			</xs:sequence>
 		</xs:complexType>
 		

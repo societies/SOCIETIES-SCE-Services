@@ -502,6 +502,7 @@ public class NetworkBackEnd {
 		
 		cisActivities = null;
 		ICis cisToQuery = null;
+		List<ZoneEvent> fulleventList = new ArrayList<ZoneEvent>();
 		List<ZoneEvent> eventList = new ArrayList<ZoneEvent>();
 		
 		for ( int iCisCount = 0; iCisCount < netZoneCis.size(); iCisCount++)
@@ -547,7 +548,43 @@ public class NetworkBackEnd {
 				zoneEvent.setUserid(element.getActor());
 				zoneEvent.setUseraction(element.getVerb());
 				zoneEvent.setUsername(networkingDirectory.getUserName(element.getActor()));
-				eventList.add(zoneEvent);
+				
+				
+				fulleventList.add(zoneEvent);
+				
+			}
+			
+			// now clean it up
+			if (fulleventList.size() > 0)
+			{
+				for ( int i = fulleventList.size() - 1; i > -1; i--)
+				{
+					if ((fulleventList.get(i).getUseraction().contains("left")) || fulleventList.get(i).getUseraction().contains("joined"))
+					{
+						// check if this is a duplicate
+						boolean bIsDup = false;
+						for (int j = 0; j < eventList.size() && bIsDup == false; j++)
+						{
+							if (eventList.get(j).getUserid().contains(fulleventList.get(i).getUserid()))
+							{
+								if ((eventList.get(j).getUseraction().contains("left")) || eventList.get(j).getUseraction().contains("joined")) 
+								{
+									bIsDup = true;
+								}
+							}
+						}
+						
+						if (!bIsDup)
+						{
+							eventList.add(fulleventList.get(i));
+						}
+					}
+					else
+					{
+						// otherwise add it
+						eventList.add(fulleventList.get(i));
+					}
+				}
 			}
 		}
 		else

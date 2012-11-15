@@ -916,8 +916,13 @@ public class NetworkClient {
 		
 		if (suggestedFriendsIDs.size() > 0)
 		{
-			
+			log.info("got suggested friends");
 			suggestions = getCommsClient().getUserDetailsList(suggestedFriendsIDs);
+			
+			if (suggestions!=  null)
+			{
+				log.info("got suggested friends. size = " + suggestions.size());
+			}
 		}
 
 		return suggestions;

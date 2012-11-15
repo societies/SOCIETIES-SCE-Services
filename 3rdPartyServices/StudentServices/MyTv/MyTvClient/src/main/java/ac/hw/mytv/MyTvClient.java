@@ -360,6 +360,7 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 				}
 			} catch (Exception e){
 				LOG.debug("Error retrieving preference");
+				e.printStackTrace();
 			}
 			LOG.debug("Preference request result = "+result);
 			return result;
@@ -383,6 +384,7 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 				}
 			} catch (Exception e) {
 				LOG.debug("Error retrieving mute preference");
+				e.printStackTrace();
 			} 
 			LOG.debug("Preference request result = "+result);
 			return result;
