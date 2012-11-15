@@ -120,6 +120,7 @@ public class ContextEventListener implements CtxChangeEventListener{
 				CtxIdentifier ctxIdentifier = event.getId();
 				Future<CtxModelObject> futureAttribute;
 				try {
+					Thread.sleep(10);
 					futureAttribute = ctxBroker.retrieve(requestor,ctxIdentifier);
 
 					try {
@@ -135,6 +136,9 @@ public class ContextEventListener implements CtxChangeEventListener{
 						e.printStackTrace();
 					}
 				} catch (CtxException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
