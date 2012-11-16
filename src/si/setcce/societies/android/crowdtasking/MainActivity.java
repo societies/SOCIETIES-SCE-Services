@@ -16,18 +16,16 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
-import android.provider.CalendarContract;
-import android.provider.CalendarContract.Events;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.Window;
 import android.webkit.CookieManager;
 import android.webkit.CookieSyncManager;
+import android.webkit.WebBackForwardList;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.webkit.WebBackForwardList;
 import android.widget.Toast;
 
 import com.google.zxing.integration.android.IntentIntegrator;
@@ -54,7 +52,7 @@ public class MainActivity extends Activity {
         
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_main);
-		webView = (WebView) findViewById(R.id.webView1);
+		webView = (WebView) findViewById(R.id.webView);
         webView.setInitialScale(1);
         webView.getSettings().setJavaScriptEnabled(true);
         webView.getSettings().setLoadWithOverviewMode(true);
@@ -72,7 +70,7 @@ public class MainActivity extends Activity {
         
         try {
 			HttpGet searchRequest = new HttpGet(new URI("http://crowdtasking.appspot.com"));
-			RestTask task = new RestTask(this,SEARCH_ACTION);
+			RestTask task = new RestTask(this,SEARCH_ACTION,"");
 			task.execute(searchRequest);
 		} catch (URISyntaxException e) {
 			e.printStackTrace();
@@ -130,7 +128,7 @@ public class MainActivity extends Activity {
 				beginTime.set(2012, 9, 24, 12, 30);
 				Calendar endTime = Calendar.getInstance();
 				endTime.set(2012, 9, 24, 13, 30);
-				Intent intent = new Intent(Intent.ACTION_INSERT)
+				/*Intent intent = new Intent(Intent.ACTION_INSERT)
 						.setData(Events.CONTENT_URI)
 						.putExtra(CalendarContract.EXTRA_EVENT_BEGIN_TIME,
 								beginTime.getTimeInMillis())
@@ -142,11 +140,14 @@ public class MainActivity extends Activity {
 						.putExtra(Events.AVAILABILITY, Events.AVAILABILITY_BUSY)
 						.putExtra(Intent.EXTRA_EMAIL,
 								"helena.halas@setcce.si, jan.porekar@setcce.si, simon.juresa@setcce.si");
-				startActivity(intent);
+				startActivity(intent);*/
             	return true;
             
             case R.id.profile:
-            	webView.loadUrl("http://crowdtasking.appspot.com/profile");
+            	//webView.loadUrl("http://crowdtasking.appspot.com/profile");
+            	//Intent startIntent=new Intent(this.getApplicationContext(),ProfileActivity.class);
+            	Intent startIntent=new Intent(this.getApplicationContext(),SettingsActivity.class);
+            	startActivity(startIntent);
                 return true;
 
             case R.id.logout:
