@@ -166,16 +166,6 @@ public class MemberListActivity extends ListActivity {
 	protected void onPause() {
 			
 		super.onPause ();
-			
-// TODO: check the following:
-	// When using managedQuery(), the activity keeps a reference to the cursor and close it
-    // whenever needed (in onDestroy() for instance.) 
-    // When using a contentResolver's query(), the developer has to manage the cursor as a sensitive
-    // resource. If you forget, for instance, to close() it in onDestroy(), you will leak 
-    // underlying resources (logcat will warn you about it.)
-    //
-
-//		memberCursor.close();
 	}
 
 
@@ -302,9 +292,9 @@ public class MemberListActivity extends ListActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu){
 
-//The FIXED menu is set by the TabActivity.
+// The FIXED menu is set by the TabActivity (i.e. DisasterActivity).
 // I am uncertain why the call to the super class leads to the creation
-// of the fixed menu set by the TabActivity (DisasterActivity)
+// of the fixed menu set by the TabActivity.
 
     	super.onCreateOptionsMenu(menu);
     	
@@ -318,20 +308,15 @@ public class MemberListActivity extends ListActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
-// The TabActivity handles items in the FIXED menu.
+// The TabActivity (i.e. DisasterActivity) handles items in the FIXED menu.
 // I am uncertain why the call to the super class leads to handling
-// of a command in the fixed menu by the TabActivity (DisasterActivity)
+// of a command in the fixed menu by the TabActivity
 
     	super.onOptionsItemSelected(item);
 
     	switch (item.getItemId()) {
 
-    		case R.id.disasterMenuAddMember:
-////TODO: Remove code for testing the correct setting of preferences 
-//    			Toast.makeText(getApplicationContext(),
-//    				"Menu item chosen: Add member", Toast.LENGTH_LONG)
-//    				.show();
-    			
+    		case R.id.disasterMenuAddMember:    			
     			startActivity(new Intent(MemberListActivity.this, MemberAddActivity.class));
     		break;
     		

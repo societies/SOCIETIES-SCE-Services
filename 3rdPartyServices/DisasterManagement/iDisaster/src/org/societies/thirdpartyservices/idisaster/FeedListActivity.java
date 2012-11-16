@@ -93,14 +93,14 @@ public class FeedListActivity extends ListActivity implements OnClickListener{
     		public void onItemClick (AdapterView<?> parent, View view,
     			int position, long id) {
     			if (iDisasterApplication.testDataUsed) {
-// TODO: Remove code for testing the correct setting of preferences 
-    			Toast.makeText(getApplicationContext(),
-    				"Click ListItem Number   " + (position+1) + "   " + iDisasterApplication.getInstance().feedContentList.get (position), Toast.LENGTH_LONG)
-    				.show();
-    			} else {
+    				Toast.makeText(getApplicationContext(),
+    						"Click ListItem Number   " + (position+1) + "   " + iDisasterApplication.getInstance().feedContentList.get (position), Toast.LENGTH_LONG)
+    						.show();
+    				} 
+    			else {
 // TODO: Eventually start new activity if something more to show about the feed.
     				
-				}
+					}
 // The activity is kept on stack (check also that "noHistory" is not set in Manifest)
 // Should it be removed?
 //    			finish();
@@ -149,15 +149,6 @@ public class FeedListActivity extends ListActivity implements OnClickListener{
 		
 		super.onPause ();
 		
-// TODO: check the following:
-	// When using managedQuery(), the activity keeps a reference to the cursor and close it
-    // whenever needed (in onDestroy() for instance.) 
-    // When using a contentResolver's query(), the developer has to manage the cursor as a sensitive
-    // resource. If you forget, for instance, to close() it in onDestroy(), you will leak 
-    // underlying resources (logcat will warn you about it.)
-    //
-
-//		feedCursor.close();
 	}
 
 /**
@@ -189,8 +180,6 @@ public class FeedListActivity extends ListActivity implements OnClickListener{
 //		, SocialContract.CommunityActivity.+++
 		};		
 
-
-//TODO: Add a check on selected community? 
 		String communityActivitySelection = SocialContract.CommunityActivity.GLOBAL_ID_FEED_OWNER + "= ?";
 		String[] communityActivitySelectionArgs = new String[] {iDisasterApplication.getInstance().
 														selectedTeam.globalId};		// The feed belongs to the CIS
@@ -252,9 +241,9 @@ public class FeedListActivity extends ListActivity implements OnClickListener{
     @Override
     public boolean onCreateOptionsMenu(Menu menu){
 
-    	//The FIXED menu is set by the TabActivity.
+// The FIXED menu is set by the TabActivity (i.e. DisasterActivity).
 // I am uncertain why the call to the super class leads to the creation
-// of the fixed menu set by the TabActivity (DisasterActivity)
+// of the fixed menu set by the TabActivity.
     	super.onCreateOptionsMenu(menu);
     	
     	menu.setGroupVisible(R.id.disasterMenuFeed, true);
@@ -267,18 +256,14 @@ public class FeedListActivity extends ListActivity implements OnClickListener{
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
-		// The TabActivity handles items in the FIXED menu.
+// The TabActivity (i.e. DisasterActivity) handles items in the FIXED menu.
 // I am uncertain why the call to the super class leads to handling
-// of a command in the fixed menu by the TabActivity (DisasterActivity)
+// of a command in the fixed menu by the TabActivity.
     	super.onOptionsItemSelected(item);
     	
     	switch (item.getItemId()) {
 
     		case R.id.disasterMenuAddFeed:    			
-//TODO: Remove code for testing the correct setting of preferences 
-//    			Toast.makeText(getApplicationContext(),
-//    				"Menu item chosen: Add feed", Toast.LENGTH_LONG)
-//    				.show();
     			startActivity(new Intent(FeedListActivity.this, FeedAddActivity.class));
     		break;
     		

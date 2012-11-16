@@ -52,7 +52,10 @@ import android.widget.AdapterView.OnItemClickListener;
 
 /**
  * This activity allows the user to list the services
- * recommended, shared or installed in the disaster team.
+ * recommended in the disaster team or installed by the user.
+ * 
+ * NB! shared services in the CIS are no longer shown by the Activity.
+ * They can be accessed through the member list.
  * 
  * @author Jacqueline.Floch@sintef.no
  *
@@ -64,19 +67,19 @@ import android.widget.AdapterView.OnItemClickListener;
 public class ServiceListActivity extends ListActivity {
 
 	ContentResolver resolver;
+	
 	int recommendedServices;			// keep track of number of recommended services
-	Cursor sharedServiceCursor;		// used for services that are shared by team members
-	int sharedServices;					// keep track of number of shared services
-	Cursor myServiceCursor;			// used for services that are used in the team by the user
 	int myServices;						// keep track of number of services used by the user
+	// Static classes that can be accessed by other activities e.g. ServiceRecommendActivity, ServiceAddActivity
+	static Cursor recommendedServiceCursor;		// used for services that are recommended to the team members
+	static Cursor myServiceCursor;				// used for services that are used in the team by the user
 
-	// Static classes that can be accessed by other activities e.g. ServiceRecommendActivity
-	static Cursor recommendedServiceCursor;	// used for services that are recommended to the team members
-
+	// No longer set by this activity 
+	Cursor sharedServiceCursor = null;		// used for services that are shared by team members
+	int sharedServices = 0;			// keep track of number of shared services
 	
 	ArrayAdapter<String> serviceAdapter;
 	ListView listView;
-
 
 	
 	
@@ -102,13 +105,12 @@ public class ServiceListActivity extends ListActivity {
     	listView.setOnItemClickListener(new OnItemClickListener() {
     		public void onItemClick (AdapterView<?> parent, View view,
     				int position, long id) {
- //TODO: revise test data
-    			Intent intent = new Intent(ServiceListActivity.this, ServiceDetailsActivity.class);
-				intent.putExtra("CONTEXT", "RELATED_TO_CIS");			// The service is already related to CIS
-
+    			
+     			Intent intent = new Intent(ServiceListActivity.this, ServiceDetailsActivity.class);
 
     			if (iDisasterApplication.testDataUsed) {					// Test data    				
-        				intent.putExtra("ACTION", "RECOMMENDED");					// For test: The service is recommended in the CIS
+        				intent.putExtra("TYPE", 							// For test: The service is recommended in the CIS
+        						iDisasterApplication.getInstance().SERVICE_RECOMMENDED); 
         				intent.putExtra("SERVICE_ID", Integer.toString(position));  // For test: service identity
 				
         			} else {
@@ -117,17 +119,17 @@ public class ServiceListActivity extends ListActivity {
     						recommendedServiceCursor.moveToPosition(position);
         					serviceGlobalId =  recommendedServiceCursor.getString(recommendedServiceCursor
     							.getColumnIndex(SocialContract.Services.GLOBAL_ID));
-               				intent.putExtra("ACTION", "RECOMMENDED");       					
+               				intent.putExtra("TYPE", iDisasterApplication.getInstance().SERVICE_RECOMMENDED);       					
         				} else if ((position-recommendedServices) < sharedServices) {	// Retrieve information from list of shared services in the team
         					sharedServiceCursor.moveToPosition(position-recommendedServices);
         					serviceGlobalId =  sharedServiceCursor.getString(sharedServiceCursor
     							.getColumnIndex(SocialContract.Services.GLOBAL_ID));
-               				intent.putExtra("ACTION", "SHARED");       					
+               				intent.putExtra("TYPE", iDisasterApplication.getInstance().SERVICE_SHARED);       					
         				} else if ((position-recommendedServices-sharedServices) < myServices) {
         					myServiceCursor.moveToPosition(position-recommendedServices - sharedServices);
         					serviceGlobalId =  sharedServiceCursor.getString(sharedServiceCursor
     							.getColumnIndex(SocialContract.Services.GLOBAL_ID));
-               				intent.putExtra("ACTION", "OWN");       					
+               				intent.putExtra("TYPE", iDisasterApplication.getInstance().SERVICE_INSTALLED);       					
         				} else {	// should never happen
         					iDisasterApplication.getInstance().debug (2, "No service id can be retrieved from position in onClickListener");
         					return;
@@ -139,11 +141,7 @@ public class ServiceListActivity extends ListActivity {
 // The activity is kept on stack (check also that "noHistory" is not set in Manifest
 //        		finish();
     		}
-    	});
-    	
-//TODO:  Add listener for long click
-    	// listView.setOnItemLongClickListener(new DrawPopup());
-       	
+    	});       	
     } // onCreate
     				
     
@@ -166,40 +164,24 @@ public class ServiceListActivity extends ListActivity {
         	
 			if (getServices (iDisasterApplication.getInstance().SERVICE_RECOMMENDED)	// Retrieve services recommended in the team
 					.equals(iDisasterApplication.getInstance().QUERY_EXCEPTION)) {
-				showQueryExceptionDialog ();	// Exception: Display dialog and terminates activity
+				showQueryExceptionDialog ();	// Exception: Display dialog
 			}
 
-        	// TODO: Replaced by the type "Shared"
-			if (getServices (iDisasterApplication.getInstance().SERVICE_SHARED)			// Retrieve services shared in the selected team
-					.equals(iDisasterApplication.getInstance().QUERY_EXCEPTION)) {
-				showQueryExceptionDialog ();	// Exception: Display dialog and terminates activity
-			}
+// NB! Shared services in the CIS are no longer shown by the Activity.
+//     They can be accessed through the member list.
+//			if (getServices (iDisasterApplication.getInstance().SERVICE_SHARED)			// Retrieve services shared in the selected team
+//					.equals(iDisasterApplication.getInstance().QUERY_EXCEPTION)) {
+//				showQueryExceptionDialog ();	// Exception: Display dialog
+//			}
 
 			if (getMyServices ()						// Retrieve services from the selected team
 					.equals(iDisasterApplication.getInstance().QUERY_EXCEPTION)) {
 				showQueryExceptionDialog ();	// Exception: Display dialog
 			}
 
-        	assignAdapter ();
-        	
-//        	Toast.makeText(getApplicationContext(),
-//				"Bug when getting data from Social Provider: the implementation of this activity is not complete", Toast.LENGTH_LONG /*Toast.LENGTH_SHORT*/ )
-//				.show();
+        	assignAdapter ();        	
         }
 
-//    		// Create dialog if no member in disaster team						
-//      	AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this);
-//      	alertBuilder.setMessage(getString(R.string.memberListDialog))
-//      		.setCancelable(false)
-//      		.setPositiveButton (getString(R.string.dialogOK), new DialogInterface.OnClickListener() {
-//      			public void onClick(DialogInterface dialog, int id) {
-//      				// add code
-//      				return;
-//      			}
-//      		});
-//    	    AlertDialog alert = alertBuilder.create();
-//    	    alert.show();
-//    	    return;
 	}
 
 /**
@@ -210,17 +192,6 @@ public class ServiceListActivity extends ListActivity {
 	protected void onPause() {
 			
 		super.onPause ();
-			
-// TODO: check the following:
-	// When using managedQuery(), the activity keeps a reference to the cursor and close it
-    // whenever needed (in onDestroy() for instance.) 
-    // When using a contentResolver's query(), the developer has to manage the cursor as a sensitive
-    // resource. If you forget, for instance, to close() it in onDestroy(), you will leak 
-    // underlying resources (logcat will warn you about it.)
-
-//		recommendedServiceCursor.close();
-//		sharedServiceCursor.close();
-//		myServiceCursor.close();
 	}
 
 /**
@@ -229,6 +200,8 @@ public class ServiceListActivity extends ListActivity {
  * Parameter:			Type: "Recommended" or "Shared"
  * Return value:		Query status code
  */
+
+//TODO: We assume that a service can only be recommended once in a CIS...
 
 	private String getServices (String serviceType) {
 		
@@ -276,7 +249,6 @@ public class ServiceListActivity extends ListActivity {
 			}
 
 			// Step 2: retrieve the services with the GLOBAL_ID_SERVICE retrieved above
-//TODO: We assume that a service can only be recommended once in a CIS...
 			if (sharingCursor == null) {			// No cursor was set - should not happen?
 				iDisasterApplication.getInstance().debug (2, "sharingCursor was not set to any value");
 				return iDisasterApplication.getInstance().QUERY_EMPTY;
@@ -287,7 +259,7 @@ public class ServiceListActivity extends ListActivity {
 			}			
 			
 			// Get GLOBAL_ID and NAME for recommended services
-				// 
+				 
 			Uri servicesUri = SocialContract.Services.CONTENT_URI;
 					
 			String[] servicesProjection = new String[] {
@@ -329,21 +301,9 @@ public class ServiceListActivity extends ListActivity {
 			
 			return iDisasterApplication.getInstance().QUERY_SUCCESS;
 			
-			
-		//
-		// When using managedQuery(), the activity keeps a reference to the cursor and close it
-		// whenever needed (in onDestroy() for instance.) 
-		// When using a contentResolver's query(), the developer has to manage the cursor as a sensitive
-		// resource. If you forget, for instance, to close() it in onDestroy(), you will leak 
-		// underlying resources (logcat will warn you about it.)
-		//
 	}
 
 	
-// TODO: Discussed design of SOcial Provider here
-//	A user may have installed a service but not using it it a CIS. 
-//	(e.g. extension of UI is used for some, nut not all, CISs)
-
 /**
  * getMyServices retrieves the list of services recommended of shared in the selected team
  * from Social Provider.
@@ -384,17 +344,12 @@ public class ServiceListActivity extends ListActivity {
 				return iDisasterApplication.getInstance().QUERY_EMPTY;
 			}
 				
-			if (myServiceCursor.getCount() == 0) {	// No service is recommended or shared in the team community
+			if (myServiceCursor.getCount() == 0) {	// No service installed by the user
 				return iDisasterApplication.getInstance().QUERY_EMPTY;
 			}			
 			
 			return iDisasterApplication.getInstance().QUERY_SUCCESS;
 								
-		// When using managedQuery(), the activity keeps a reference to the cursor and close it
-		// whenever needed (in onDestroy() for instance.) 
-		// When using a contentResolver's query(), the developer has to manage the cursor as a sensitive
-		// resource. If you forget, for instance, to close() it in onDestroy(), you will leak 
-		// underlying resources (logcat will warn you about it.)
 	}
 	
 
@@ -429,6 +384,7 @@ public class ServiceListActivity extends ListActivity {
 					}
 				}
 			}
+			
 			if (sharedServiceCursor != null) {
 				if (sharedServiceCursor.getCount() != 0) {
 					while (sharedServiceCursor.moveToNext()) {
@@ -465,9 +421,9 @@ public class ServiceListActivity extends ListActivity {
 @Override
 	public boolean onCreateOptionsMenu(Menu menu){
 
-		//The FIXED menu is set by the TabActivity.
+// The FIXED menu is set by the TabActivity (i.e. DisasterActivity).
 // I am uncertain why the call to the super class leads to the creation
-// of the fixed menu set by the TabActivity (DisasterActivity)
+// of the fixed menu set by the TabActivity.
 		super.onCreateOptionsMenu(menu);
 		
 		menu.setGroupVisible(R.id.disasterMenuService, true);
@@ -481,20 +437,14 @@ public class ServiceListActivity extends ListActivity {
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 
-		// The TabActivity handles items in the FIXED menu.
+// The TabActivity (i.e. DisasterActivity) handles items in the FIXED menu.
 // I am uncertain why the call to the super class leads to handling
-// of a command in the fixed menu by the TabActivity (DisasterActivity)
+// of a command in the fixed menu by the TabActivity
 		super.onOptionsItemSelected(item);
 
 		switch (item.getItemId()) {
 
 			case R.id.disasterMenuRecommendService:
-
-////TODO: Remove code for testing the correct setting of preferences 
-//				Toast.makeText(getApplicationContext(),
-//						"Menu item chosen: Add service", Toast.LENGTH_LONG)
-//						.show();			
-
 				startActivity(new Intent(ServiceListActivity.this, ServiceRecommendActivity.class));
 			break; 
 

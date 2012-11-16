@@ -98,13 +98,20 @@ public class iDisasterApplication extends Application {
 	public final String FEED_DISPLAY = "DISPLAY";
 	
 	// Constant used for services 
-	public final String SERVICE_RECOMMENDED = "Recommended";
-	public final String SERVICE_SHARED = "Shared";
+	public final String SERVICE_RECOMMENDED = "RECOMMENDED";
+	public final String SERVICE_SHARED = "SHARED";
+	public final String SERVICE_INSTALLED = "INSTALLED";
 
 	// Constant used for service types
 	public final String SERVICE_TYPE_PROVIDER = "Provider";
 	public final String SERVICE_TYPE_CLIENT = "Client";
 	public final String SERVICE_TYPE_APP = "App";
+
+	// Constant used for operations on services
+	public final String SERVICE_RECOMMEND = "Recommend";
+	public final String SERVICE_INSTALL = "Install";
+	public final String SERVICE_LAUNCH = "Launch";
+	public final String SERVICE_SHARE = "Share";	
 
 // TODO: Remove this variable - only used while waiting update for Social Provider
 	private boolean servicesUpdated = false;
@@ -163,9 +170,9 @@ public class iDisasterApplication extends Application {
 //	    editor.putString ("pref.dummy", "");
 //	    editor.commit ();
 
-	    if (testDataUsed) {   
+//	    if (testDataUsed) {   
 	    	setTestData ();	    	
-	    }
+//	    }
 	    
 // TODO: Remove following code - only used while waiting update for Social Provider
 	    if (!servicesUpdated) {
@@ -265,6 +272,7 @@ public class iDisasterApplication extends Application {
  * (in addition to a user service registry).
  * - All OWNER_ID are set to ""
  * - set service type (the field "available" is currently used as not filed "type" is defined  
+ * - set service CONFIG to a correct package name
  */
 	private String updateServices () {
 		
@@ -278,6 +286,16 @@ public class iDisasterApplication extends Application {
 				SocialContract.Services._ID,
 				SocialContract.Services.GLOBAL_ID,
 				SocialContract.Services.NAME
+//TODO: remove - Used temporarily - to check data
+				,
+				SocialContract.Services.DESCRIPTION,
+				SocialContract.Services.TYPE,
+				SocialContract.Services.APP_TYPE,
+				SocialContract.Services.AVAILABLE,
+				SocialContract.Services.DEPENDENCY,
+				SocialContract.Services.CONFIG,
+				SocialContract.Services.URL
+
 				};
 
 		Cursor servicesCursor;
@@ -301,14 +319,46 @@ public class iDisasterApplication extends Application {
 		}		
 		
 		while (servicesCursor.moveToNext()) {
+			
+			
+//TODO: Remove - Used temporarily			
+			String serviceName = servicesCursor.getString(servicesCursor
+					.getColumnIndex(SocialContract.Services.NAME));
+			String serviceDescription = servicesCursor.getString(servicesCursor
+					.getColumnIndex(SocialContract.Services.DESCRIPTION));
+			String serviceType = servicesCursor.getString(servicesCursor
+				.getColumnIndex(SocialContract.Services.TYPE));
+			String serviceAppType=servicesCursor.getString(servicesCursor
+				.getColumnIndex(SocialContract.Services.APP_TYPE));
+			String serviceAvailable = servicesCursor.getString(servicesCursor
+			.getColumnIndex(SocialContract.Services.AVAILABLE));
+			String serviceDependency = servicesCursor.getString(servicesCursor
+			.getColumnIndex(SocialContract.Services.DEPENDENCY));
+			String serviceConfig = servicesCursor.getString(servicesCursor
+			.getColumnIndex(SocialContract.Services.CONFIG));
+			String serviceURL = servicesCursor.getString(servicesCursor
+			.getColumnIndex(SocialContract.Services.APP_TYPE));
+	
+
+			
+			
+			
+			
+			
+			
+			
+			
+			
 			Uri recordUri = servicesUri.withAppendedPath(servicesUri, "/" +
 					servicesCursor.getString(servicesCursor.getColumnIndex(SocialContract.Services._ID)));
 	        values = new ContentValues();
 	        values.put(SocialContract.Services.OWNER_ID, "");
 	        if (servicesCursor.getString(servicesCursor.getColumnIndex(SocialContract.Services.NAME)).equals("iJacket")) {
 		        values.put(SocialContract.Services.AVAILABLE, SERVICE_TYPE_PROVIDER);
+		        values.put(SocialContract.Services.CONFIG, "org.ubicompforall.cityexplorer");
 	        } else if (servicesCursor.getString(servicesCursor.getColumnIndex(SocialContract.Services.NAME)).equals("iJacketClient")) {
 	        	values.put(SocialContract.Services.AVAILABLE, SERVICE_TYPE_CLIENT);
+		        values.put(SocialContract.Services.CONFIG, "org.ubicompforall.cityexplorer");
 	        }
 	        getContentResolver().update(recordUri, values, null, null);		
 		}

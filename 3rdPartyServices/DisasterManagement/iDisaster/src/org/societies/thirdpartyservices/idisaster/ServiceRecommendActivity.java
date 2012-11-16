@@ -309,9 +309,6 @@ public class ServiceRecommendActivity extends ListActivity implements OnClickLis
 		for (int i=0; i<service; ++i) {
 			if (checkedRows.get(i)) {
 				serviceCursor.moveToPosition(serviceMap.get(i));
-				selected = selected + " " + serviceCursor.getString(serviceCursor.getColumnIndex(SocialContract.Services.NAME));
-
-				Toast.makeText(this, "selected:" + selected, Toast.LENGTH_SHORT).show();
 
 				// Set the values related to the activity to store in Social Provider
 				ContentValues sharingValues = new ContentValues ();
@@ -347,7 +344,6 @@ public class ServiceRecommendActivity extends ListActivity implements OnClickLis
 			}
 		}
 				
-		Toast.makeText(this, "selected:" + selected, Toast.LENGTH_SHORT).show();
 		return iDisasterApplication.getInstance().INSERT_SUCCESS;
 
 	}

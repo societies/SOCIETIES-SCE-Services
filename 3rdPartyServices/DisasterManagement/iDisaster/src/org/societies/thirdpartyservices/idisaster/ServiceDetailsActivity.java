@@ -24,14 +24,19 @@
  */
 package org.societies.thirdpartyservices.idisaster;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.societies.android.api.cis.SocialContract;
 import org.societies.thirdpartyservices.idisaster.R;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.ContentResolver;
+import android.content.ContentValues;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
@@ -63,15 +68,26 @@ public class ServiceDetailsActivity extends Activity implements OnClickListener 
 	private TextView serviceDescriptionView;
 	
 	private ContentResolver resolver;
-	
-	private String serviceGlobalId;
+
+	Cursor serviceCursor;
+	private String serviceID;
 	private String serviceName;
 	private String serviceDescription;
+// Used temporarily - waiting for extension of Social Provider
+	private String serviceType;
+	private String serviceAppType;
+	private String serviceAvailable;
+	private String serviceDependency;
+	private String serviceConfig;
+	private String serviceURL;
+	
+	private String requestType;
+
 	
 	//TODO: will be fetched from SocialProvider when available...
 	private String servicePackage ="org.ubicompforall.cityexplorer";  // can be found
 	private String serviceIntent =".gui.CalendarActivity";	// can be found
-//	privat String serviceIntent ="org.ubicompforall.cityexplorer.gui.PlanPoiTab";  // can be found
+//	private String serviceIntent ="org.ubicompforall.cityexplorer.gui.PlanPoiTab";  // can be found
 	
 	// Constant keys for servicAction
 	public static final String SERVICE_INSTALL = "Install";
@@ -89,52 +105,63 @@ public class ServiceDetailsActivity extends Activity implements OnClickListener 
 
 
 
-		Intent intent= getIntent(); 						// Get the intent that created activity
-		String actionContext = intent.getStringExtra("CONTEXT"); 	// Retrieve first parameter (service related to a CIS?)
-		
-		String action = intent.getStringExtra("ACTION"); 			// Retrieve second parameter (what kind of relation?)
-		
-// Needed? This is a global resource that is retrieved from iDisaster App
-//		String cisID = intent.getStringExtra("CIS_ID");
-		String serviceID = intent.getStringExtra("SERVICE_ID"); // Retrieve third parameter: service ID
-		
-		
+		Intent intent= getIntent(); 						// Get the intent that created activity		
+		requestType = intent.getStringExtra("TYPE"); 	 	// Retrieve first parameter (type of service in the CIS)
+		serviceID = intent.getStringExtra("SERVICE_ID"); 	// Retrieve second parameter: service ID
 		
 		if (iDisasterApplication.testDataUsed) {
 			int position = Integer.parseInt(serviceID);
-			if (actionContext.equals("ADD_TO_CIS")){
-				serviceName = iDisasterApplication.getInstance().serviceNameList.get (position);
-				serviceDescription = iDisasterApplication.getInstance().serviceDescriptionList.get (position);
-				} else if (actionContext.equals("RELATED_TO_CIS")) {
-				serviceName = iDisasterApplication.getInstance().CISserviceNameList.get (position);
-				serviceDescription = iDisasterApplication.getInstance().CISserviceDescriptionList.get (position);
-			} // else: should not happened. Feil action code was used
+			serviceName = iDisasterApplication.getInstance().CISserviceNameList.get (position);
+			serviceDescription = iDisasterApplication.getInstance().CISserviceDescriptionList.get (position);
+			serviceAction = iDisasterApplication.getInstance().SERVICE_RECOMMEND;
 		} else {
-			getServiceInformation (serviceID);
+			if (getServiceInformation () 		// Retrieve service information from SocialProvider
+					.equals(iDisasterApplication.getInstance().QUERY_EXCEPTION)) {
+				showQueryExceptionDialog ();	// Exception: Display dialog and terminates activity
+			}
+
 			// TODO: Add a check that some info was retrieved
 		}
 		
 		// Get text fields
-		serviceNameView = (TextView) findViewById(R.id.showServiceDetailsName);
+		serviceNameView = (TextView) findViewById(R.id.serviceDetailsName);
 		serviceNameView.setText(serviceName);
 
-		//TODO: get parameters from intent
-		//TODO: get service information from content provider
-
 		// Set name and description
-		serviceDescriptionView = (TextView) findViewById(R.id.showServiceDetailsDescription);
+		serviceDescriptionView = (TextView) findViewById(R.id.serviceDetailsDescription);
 		serviceDescriptionView.setText(serviceDescription);
 		
-		// Add button: 3 options (install, launch, share depending of settings)
-		// Define what action can be performed on the service
+				
+		final Button button = (Button) findViewById(R.id.serviceDetailsButton);
+
+// TODO: Check the return code of checkServiceInstallStatus in the following
 		
-		
-		final Button button = (Button) findViewById(R.id.showServiceDetailsButton);
-		
-		if ((serviceAction != SERVICE_INSTALL) && (serviceAction != SERVICE_LAUNCH) && 
-				(serviceAction != SERVICE_SHARE)) {
-			updateServiceAction ();							// This should normally not happen!
+		if (requestType.equals (iDisasterApplication.getInstance().SERVICE_RECOMMENDED)) {	// The service is recommended in the CIS
+			
+			if (serviceInstalled(serviceCursor.getString(serviceCursor				// If the service is installed on the device
+					.getColumnIndex(SocialContract.Services.CONFIG)))) {
+				serviceAction = iDisasterApplication.getInstance().SERVICE_LAUNCH;	// Action available to user is Launch			
+				checkServiceInstallStatus (true);									// Check consistency with data in SocialProvider				
+			} else {																// If the service is NOT installed on the device
+				serviceAction = iDisasterApplication.getInstance().SERVICE_INSTALL; // Action available to user is Install
+				checkServiceInstallStatus (false);											// Check consistency with data in SocialProvider
+			}
+			
+		} else if (requestType.equals (iDisasterApplication.getInstance().SERVICE_INSTALLED)) {	// The service is marked installed by the user
+			if (serviceInstalled(serviceCursor.getString(serviceCursor				// If the service is installed on the device
+					.getColumnIndex(SocialContract.Services.CONFIG)))) {
+				serviceAction = iDisasterApplication.getInstance().SERVICE_SHARE;	// Action available to user is Share
+				checkServiceInstallStatus (true);										// Check consistency with data in SocialProvider
+			} else {																// If the service is NOT installed on the device
+				serviceAction = iDisasterApplication.getInstance().SERVICE_INSTALL;	// Action available to user is Install
+				updateServiceInstallStatus (false);											// Update information in database
+			}
+			
+		} else if (requestType.equals (iDisasterApplication.getInstance().SERVICE_SHARED)) {
+// TODO: implement unshare
+			serviceAction ="Back";
 		}
+		
 		button.setText(serviceAction);
 		button.setOnClickListener(this);
     }
@@ -147,9 +174,9 @@ public class ServiceDetailsActivity extends Activity implements OnClickListener 
 	public void onClick(View arg0) {
 
 		// TODO: Remove code for testing the correct setting of preferences
-		if (serviceAction == SERVICE_INSTALL) {
-			// check that the service is not yet installed
-		    Intent intent1 = new Intent(serviceIntent);      
+//		if (serviceAction == SERVICE_INSTALL) {
+//			// check that the service is not yet installed
+//		    Intent intent1 = new Intent(serviceIntent);      
 		      
 //		    if (isCallable(intent1)== true){
 //    			Toast.makeText(getApplicationContext(),  serviceIntent + " found" , Toast.LENGTH_LONG).show();		    	
@@ -157,25 +184,25 @@ public class ServiceDetailsActivity extends Activity implements OnClickListener 
 //    			Toast.makeText(getApplicationContext(),  serviceIntent + " NOT found" , Toast.LENGTH_LONG).show();		    	
 //		    	
 //		    }
-			
-		    if (isInstalled (servicePackage) == true){
-    			Toast.makeText(getApplicationContext(),  servicePackage + " found" , Toast.LENGTH_LONG).show();		    	
-		    } else {
-    			Toast.makeText(getApplicationContext(),  servicePackage + " NOT found" , Toast.LENGTH_LONG).show();		    	
-		    	
-		    }
-
-			
-		} else if (serviceAction == SERVICE_LAUNCH) {
-			
-		} else if (serviceAction == SERVICE_SHARE) {
-			
-		} else {
-			// This should never happened!
-			// TODO: Update data in Content provider and proceeds as for install
-		}
-
-		
+//			
+//		    if (serviceInstalled (servicePackage) == true){
+//    			Toast.makeText(getApplicationContext(),  servicePackage + " found" , Toast.LENGTH_LONG).show();		    	
+//		    } else {
+//    			Toast.makeText(getApplicationContext(),  servicePackage + " NOT found" , Toast.LENGTH_LONG).show();
+//		    	
+//		    }
+//
+//			
+//		} else if (serviceAction == SERVICE_LAUNCH) {
+//			
+//		} else if (serviceAction == SERVICE_SHARE) {
+//			
+//		} else {
+//			// This should never happened!
+//			// TODO: Update data in Content provider and proceeds as for install
+//		}
+//
+//		
 		
 		Toast.makeText(getApplicationContext(),
 			"Not implemented yet!", Toast.LENGTH_LONG).show();
@@ -189,41 +216,197 @@ public class ServiceDetailsActivity extends Activity implements OnClickListener 
  * from Social Provider.
  */
 
-	private void getServiceInformation (String id) {
-
-		serviceGlobalId ="";
-		serviceName ="";
-		serviceDescription ="";
-
+	private String getServiceInformation () {
+		
 		Uri serviceUri = SocialContract.Services.CONTENT_URI;
 						
 		String[] serviceProjection = new String[] {
-							SocialContract.Services.GLOBAL_ID,
 							SocialContract.Services.NAME,
-							SocialContract.Services.DESCRIPTION};
+							SocialContract.Services.DESCRIPTION
+// TODO: remove - Used temporarily - waiting for extension of Social Provider							
+							,
+							SocialContract.Services.TYPE,
+							SocialContract.Services.APP_TYPE,
+							SocialContract.Services.AVAILABLE,
+							SocialContract.Services.DEPENDENCY,
+							SocialContract.Services.CONFIG,
+							SocialContract.Services.URL
+							};
 		String serviceSelection = SocialContract.Services.GLOBAL_ID + "= ?";
-		String [] serviceSelectionArgs = new String [] {id} ;
+		String [] serviceSelectionArgs = new String [] {serviceID} ;
 		
-		Cursor serviceCursor = resolver.query (serviceUri, serviceProjection, serviceSelection,
-									   serviceSelectionArgs,
-									   null /* sortOrder*/);
-		if (serviceCursor != null) {
-			if (serviceCursor.moveToFirst()){		// Should not be several matches; anyway only select the first
-				serviceGlobalId = serviceCursor.getString(serviceCursor		// should be the same as "id"
-						.getColumnIndex(SocialContract.Services.GLOBAL_ID));
-				serviceName = serviceCursor.getString(serviceCursor
+		try {
+			serviceCursor = resolver.query (serviceUri, serviceProjection, serviceSelection,
+					   serviceSelectionArgs,
+					   null /* sortOrder*/);
+		} catch (Exception e) {
+			iDisasterApplication.getInstance().debug (2, "Query to "+ serviceUri + "causes an exception");
+			return iDisasterApplication.getInstance().QUERY_EXCEPTION;
+		}
+		
+		if (serviceCursor == null) {
+			return iDisasterApplication.getInstance().QUERY_EXCEPTION;
+		}
+		
+		if (serviceCursor.getCount() == 0) {
+			return iDisasterApplication.getInstance().QUERY_EMPTY;
+		}
+		
+		serviceCursor.moveToFirst();		// Should not be several matches; anyway only select the first
+		serviceName = serviceCursor.getString(serviceCursor
 						.getColumnIndex(SocialContract.Services.NAME));
-				serviceDescription = serviceCursor.getString(serviceCursor
-						.getColumnIndex(SocialContract.Services.DESCRIPTION));				
+		serviceDescription = serviceCursor.getString(serviceCursor
+						.getColumnIndex(SocialContract.Services.DESCRIPTION));
+		
+//TODO: Remove - Used temporarily - waiting for extension of Social Provider
+
+		serviceType = serviceCursor.getString(serviceCursor
+					.getColumnIndex(SocialContract.Services.TYPE));
+		serviceAppType=serviceCursor.getString(serviceCursor
+					.getColumnIndex(SocialContract.Services.APP_TYPE));
+		serviceAvailable = serviceCursor.getString(serviceCursor
+				.getColumnIndex(SocialContract.Services.AVAILABLE));
+		serviceDependency = serviceCursor.getString(serviceCursor
+				.getColumnIndex(SocialContract.Services.DEPENDENCY));
+		serviceConfig = serviceCursor.getString(serviceCursor
+				.getColumnIndex(SocialContract.Services.CONFIG));
+		serviceURL = serviceCursor.getString(serviceCursor
+				.getColumnIndex(SocialContract.Services.APP_TYPE));
+		
+
+		return iDisasterApplication.getInstance().QUERY_SUCCESS;
+	}
+
+
+/**
+ * checkServiceInstallStatus checks that the service status (installed) setting in
+ * in Social provider.
+ */
+
+	public String checkServiceInstallStatus (boolean installStatus) {
+		
+		Cursor installedServiceCursor;
+		Uri serviceUri = SocialContract.Services.CONTENT_URI;
+
+		String[] serviceProjection = new String[] {
+						SocialContract.Services.AVAILABLE
+						};
+		String serviceSelection = SocialContract.Services.GLOBAL_ID + "= ?" +
+						"AND " + SocialContract.Services.OWNER_ID + "= ?";
+		
+		String [] serviceSelectionArgs = new String [] 
+								{serviceID,
+								iDisasterApplication.getInstance().me.globalId	} ;
+
+		try {
+			installedServiceCursor = resolver.query (serviceUri, serviceProjection, serviceSelection,
+					serviceSelectionArgs, null /* sortOrder*/);
+		} catch (Exception e) {
+			iDisasterApplication.getInstance().debug (2, "Query to "+ serviceUri + "causes an exception");
+			return iDisasterApplication.getInstance().QUERY_EXCEPTION;
+		}
+
+		if (installedServiceCursor == null) {		// Should never happen
+			return iDisasterApplication.getInstance().QUERY_EXCEPTION;
+		}
+
+		if (installedServiceCursor.getCount() == 0) {
+			if (installStatus) {	// The service is installed on the device and should be added to Social Provider
+				
+				// Add the service in table. It should be there!
+
+				// Set the values related to the activity to store in Social Provider
+				ContentValues serviceValues = new ContentValues ();
+				
+//TODO: Remove the following once Social Provider has been corrected (Social Provider should insert the GLOBAL_ID)
+//				SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss");
+//				String currentDateandTime = sdf.format(new Date());
+				serviceValues.put(SocialContract.Services.GLOBAL_ID, serviceID);	//TODO: problem ID is duplicated!
+// End remove		
+//				serviceValues.put(SocialContract.Services.TYPE, "Disaster");
+//				serviceValues.put(SocialContract.Services.NAME, serviceName);
+//				serviceValues.put(SocialContract.Services.OWNER_ID,
+//						iDisasterApplication.getInstance().me.globalId);
+//				serviceValues.put(SocialContract.Services.ORIGIN, "Red Cross");
+//				serviceValues.put(SocialContract.Services.ORIGIN, "Red Cross");
+//				serviceValues.put(SocialContract.Services.ORIGIN, "Red Cross");
+//				serviceValues.put(SocialContract.Services.ORIGIN, "Red Cross");
+//				serviceValues.put(SocialContract.Services.DESCRIPTION, serviceDescription);
+//				serviceValues.put(SocialContract.Services.AVAILABLE, 
+//						iDisasterApplication.getInstance().SERVICE_INSTALLED);
+//TODO: set to right value!
+//				serviceValues.put(SocialContract.Services.DEPENDENCY, "");
+//				serviceValues.put(SocialContract.Services.CONFIG, "");
+//				serviceValues.put(SocialContract.Services.URL, "");
+							
+				
+//			    GLOBAL_ID (needed temporally until we have a working sync adapter)
+//			    NAME
+//			    OWNER_ID
+//			    TYPE
+//			    DESCRIPTION (optional, set to "NA" if not provided)
+//			    APP_TYPE
+//			    ORIGIN
+//			    AVAILABLE
+//			    DEPENDENCY (Optional, set to "NA" if not provided)
+//			    CONFIG (Optional, set to "NA" if not provided)
+//			    URL (Optional, set to "NA" if not provided) 
+
+				
+				
+				try {
+// The Uri value returned is not used.
+//					Uri activityNewUri = getContentResolver().insert( SocialContract.CommunityActivity.CONTENT_URI,
+//							sharingValues);
+					getContentResolver().insert( SocialContract.Services.CONTENT_URI, 
+							serviceValues);
+				} catch (Exception e) {
+					iDisasterApplication.getInstance().debug (2, "Insert to "+ 
+										SocialContract.Services.CONTENT_URI + "causes an exception");
+			    	return iDisasterApplication.getInstance().INSERT_EXCEPTION;
+				}
+				
+				
+				return iDisasterApplication.getInstance().QUERY_SUCCESS;
+				
+				
+			}
+			else {					// This is normal. The service is not installed on the device
+				return iDisasterApplication.getInstance().QUERY_EMPTY;
 			}
 		}
+		
+		installedServiceCursor.moveToFirst();		// Should not be several matches; anyway only select the first
+//TODO: check AVAILABLE: it should be set to 
+		String available = installedServiceCursor.getString(installedServiceCursor
+				.getColumnIndex(SocialContract.Services.AVAILABLE));	
+		
+		if (installStatus) {	// The service is installed on the device and should marked available in Social Provider
+			if (available.equals(iDisasterApplication.getInstance().SERVICE_INSTALLED)) {
+				return iDisasterApplication.getInstance().QUERY_SUCCESS;				
+			} else {
+				// Set the filed AVAILABLE to the right value 
+				return iDisasterApplication.getInstance().QUERY_SUCCESS;				
+			}
+		} else {				// The service is NOT installed on the device and not be stored in Social Provider
+			if (available.equals(iDisasterApplication.getInstance().SERVICE_INSTALLED)) {
+				// TODO: Remove from Social Provider. The service should not be there
+				return iDisasterApplication.getInstance().QUERY_SUCCESS;				
+			} else {
+				// Set the filed AVAILABLE to the right value 
+				return iDisasterApplication.getInstance().QUERY_SUCCESS;				
+			}
+		}
+				
+// TODO: Remove any other entries. There should only be a service registration per user!
+			
 	}
 
 /**
- * Update service data in Content provider.
+ * updateServiceInstallStatus ...
  */
 
-	public void updateServiceAction () {
+	public void updateServiceInstallStatus (boolean status) {
 		// TODO: Update data in Content provider
 		// Check that the service (App) is installed
 	}
@@ -245,8 +428,11 @@ public class ServiceDetailsActivity extends Activity implements OnClickListener 
  * Check if any installed App has the package name given as a parameter.
  */
 
-    private boolean isInstalled (String appName) {
+    private boolean serviceInstalled (String appPackageName) {
     	
+    	if (appPackageName == null) {
+    		return (false);
+    	}
     	// Get package names of all installed applications
     	PackageManager pm = getPackageManager();
     	List <PackageInfo> list = pm.getInstalledPackages(0);
@@ -255,12 +441,9 @@ public class ServiceDetailsActivity extends Activity implements OnClickListener 
     	   ApplicationInfo ai;
     	   try {
     		   ai = pm.getApplicationInfo(pi.packageName, 0);
-//    		   System.out.println(">>>>>>packages is<<<<<<<<" + ai.publicSourceDir);   		   
-    		   if (!((ai.flags & ApplicationInfo.FLAG_SYSTEM) != 0)) {			// Only consider 3rd party Apps
-    			   																// Ignore Apps installed in the device's system image. 
-//    			   Log.d(getClass().getSimpleName(), ">>>>>>packages is NOT system package " + pi.packageName);
-//    			   System.out.println(">>>>>>packages is<<<<<<<<" + ai.publicSourceDir);
-    			   if (appName.equals(pi.packageName)) {
+    		   if (!((ai.flags & ApplicationInfo.FLAG_SYSTEM) != 0)) {		// Only consider 3rd party Apps
+    			   															// Ignore Apps installed in the device's system image. 
+    			   if (appPackageName.equals(pi.packageName)) {
     				   return (true);
     			   }    	        	 
     		   }
@@ -277,5 +460,25 @@ public class ServiceDetailsActivity extends Activity implements OnClickListener 
 //	mainIntent.addCategory(Intent.CATEGORY_LAUNCHER);
 //	final List pkgAppsList = context.getPackageManager().queryIntentActivities( mainIntent, 0);
 
+
+/**
+ * showQueryExceptionDialog displays a dialog to the user.
+ * In this case, the activity does not terminate since the other
+ * activities in the TAB may still work.
+ */
+    	        			
+    private void showQueryExceptionDialog () {
+        AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this);
+        alertBuilder.setMessage(getString(R.string.dialogServiceDetailsQueryException))
+            		.setCancelable(false)
+              		.setPositiveButton (getString(R.string.dialogOK), new DialogInterface.OnClickListener() {
+              			public void onClick(DialogInterface dialog, int id) {
+              				finish ();
+              				return;
+              			}
+    	          	});
+    	 AlertDialog alert = alertBuilder.create();
+    	 alert.show();	
+    }
     
 }
