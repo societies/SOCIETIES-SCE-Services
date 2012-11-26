@@ -22,9 +22,9 @@
  * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.disaster.idisaster;
+package org.societies.thirdpartyservices.idisaster;
 
-import com.disaster.idisaster.R;
+import org.societies.thirdpartyservices.idisaster.R;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -44,7 +44,8 @@ import android.content.Intent;
 
 import android.view.inputmethod.InputMethodManager;
 
-import com.disaster.idisaster.SocialContract;
+import org.societies.android.api.cis.SocialContract;
+//import org.societies.thirdpartyservices.idisaster.SocialContract;
 import android.net.Uri;
 
 import android.content.ContentValues;
@@ -132,7 +133,6 @@ public class LoginActivity extends Activity implements OnClickListener {
     		userName = getString (R.string.loginUserNameHint);
     	} else {
     		userName = userNameView.getText().toString();
-
     	}
 
     	if (userEmailView.getText().length() == 0) {		// check input for password
@@ -195,8 +195,9 @@ public class LoginActivity extends Activity implements OnClickListener {
 //    			Toast.LENGTH_LONG).show();
 
         // Add user to Social Provider
-        insertMe ();
-        
+		if (!iDisasterApplication.testDataUsed) {			// Test data
+			insertMe ();
+		}        
 
         // Hide the soft keyboard:
 		// - the soft keyboard will not appear on next activity window!
@@ -210,7 +211,7 @@ public class LoginActivity extends Activity implements OnClickListener {
 	}
 
 	/**
-	 * insertMe is to add the user information in SocialProvider
+	 * insertMe is used to add the user information in SocialProvider
 	 */
 
 	private void insertMe () {
@@ -220,7 +221,7 @@ public class LoginActivity extends Activity implements OnClickListener {
 		
 		//What to get:
 		String[] projection = new String [] {
-				SocialContract.Me.GLOBAL_ID,
+				SocialContract.Me._ID,
 				SocialContract.Me.NAME,
 				SocialContract.Me.DISPLAY_NAME
 			};
@@ -244,7 +245,7 @@ public class LoginActivity extends Activity implements OnClickListener {
 			while (cursor.moveToNext()) {
 
 				String displayName = cursor.getString(cursor
-						.getColumnIndex(SocialContract.Community.DISPLAY_NAME));
+						.getColumnIndex(SocialContract.Me.DISPLAY_NAME));
 				
 				iDisasterApplication.getInstance().showDialog (this, "name: " + displayName , getString(R.string.dialogOK));
 				

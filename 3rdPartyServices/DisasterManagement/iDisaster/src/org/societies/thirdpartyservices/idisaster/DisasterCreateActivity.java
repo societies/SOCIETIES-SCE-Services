@@ -22,9 +22,9 @@
  * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.disaster.idisaster;
+package org.societies.thirdpartyservices.idisaster;
 
-import com.disaster.idisaster.R;
+import org.societies.thirdpartyservices.idisaster.R;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -39,32 +39,35 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 
 /**
- * Activity for adding a new service to the selected disaster team (community).
+ * Activity for creating a new disaster team (community).
  * 
  * @author Jacqueline.Floch@sintef.no
  *
  */
-public class ServiceAddActivity extends Activity implements OnClickListener {
+public class DisasterCreateActivity extends Activity implements OnClickListener {
 
-	private EditText serviceNameView;
-	private EditText serviceDescriptionView;
-	private String serviceName;
-	private String serviceDescription;
+	private EditText disasterNameView;
+	private EditText disasterDescriptionView;
+	private String disasterName;
+	private String disasterDescription;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.service_add_layout);
+		setContentView(R.layout.disaster_create_layout);
 
 		// Get editable fields
-		serviceNameView = (EditText) findViewById(R.id.editServiceAddName);
-		serviceDescriptionView = (EditText) findViewById(R.id.editServiceAddDescription);
+		disasterNameView = (EditText) findViewById(R.id.editDisasterCreateName);
+		disasterDescriptionView = (EditText) findViewById(R.id.editDisasterCreateDescription);
 
     	// Add click listener to button
-    	final Button button = (Button) findViewById(R.id.serviceAddButton);
+    	final Button button = (Button) findViewById(R.id.disasterCreateButton);
     	button.setOnClickListener(this);
+
+//	    Test dialog
+//    	iDisasterApplication.getInstance().showDialog (this, getString(R.string.DisasterCreateTestDialog), getString(R.string.dialogOK));
 
     }
 
@@ -76,52 +79,67 @@ public class ServiceAddActivity extends Activity implements OnClickListener {
 
 	public void onClick(View view) {
 
-    	if (serviceNameView.getText().length() == 0) {					// check input for service name
+    	if (disasterNameView.getText().length() == 0) {					// check input for disaster name
 
     		// Hide the soft keyboard otherwise the toast message does appear more clearly.
     	    InputMethodManager mgr = (InputMethodManager) getSystemService(this.INPUT_METHOD_SERVICE);
-    	    mgr.hideSoftInputFromWindow(serviceNameView.getWindowToken(), 0);
+    	    mgr.hideSoftInputFromWindow(disasterNameView.getWindowToken(), 0);
 	    
-    		Toast.makeText(this, getString(R.string.toastServiceName), 
+    		Toast.makeText(this, getString(R.string.toastDisasterName), 
     				Toast.LENGTH_LONG).show();
     		return;
 
-    	} else if (serviceDescriptionView.getText().length() == 0) {	// check input for description (or any obligatory field)
+    	} else if (disasterDescriptionView.getText().length() == 0) {	// check input for description (or any obligatory field)
 
     		// Hide the soft keyboard otherwise the toast message does appear more clearly.
     	    InputMethodManager mgr = (InputMethodManager) getSystemService(this.INPUT_METHOD_SERVICE);
-    	    mgr.hideSoftInputFromWindow(serviceDescriptionView.getWindowToken(), 0);
+    	    mgr.hideSoftInputFromWindow(disasterDescriptionView.getWindowToken(), 0);
 
-    	    Toast.makeText(this, getString(R.string.toastServiceDescription), 
+    	    Toast.makeText(this, getString(R.string.toastDisasterDescription), 
 	    			Toast.LENGTH_LONG).show();
 	    	return;
 
-    	} else {														// add to registry
+    	} else {														// add disaster to directory
 
-    		serviceName = serviceNameView.getText().toString();
-    		serviceDescription = serviceDescriptionView.getText().toString();
-
-    		//TODO: Add call to the Social Provider 
-
-	    		
-//TODO: Refresh list of services? - so it is displayed in the previous activity
+    		disasterName = disasterNameView.getText().toString();
+    		disasterDescription = disasterDescriptionView.getText().toString();
     		
-//TODO: remove test code
-    	    iDisasterApplication.getInstance().serviceNameList.add(serviceName);
-    	    
-    	    // report data change to adapter
-// TODO: Add to adapter
-//    	    iDisasterApplication.getInstance().serviceAdapter.notifyDataSetChanged();
-
+//TODO: Add call to the Social Provider
     		
+    		boolean disasterCreationCode = false;	// TODO: replace by code returned by Societes API
+    			    		
+    		// Create dialog for error
+    		if (disasterCreationCode) { 							
+    			AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this);
+    			alertBuilder.setMessage(getString(R.string.disasterCreateDialog))
+    				.setCancelable(false)
+    				.setPositiveButton (getString(R.string.dialogOK), new DialogInterface.OnClickListener() {
+    					public void onClick(DialogInterface dialog, int id) {
+    						disasterNameView.setText(getString(R.string.emptyText));
+    						disasterNameView.setHint(getString(R.string.loginUserNameHint));
+	    		           return;
+    					}
+    				});
+	    		AlertDialog alert = alertBuilder.create();
+	    		alert.show();
+	    		return;
+	   		}
+	
+    		// Test case: Refresh list of disasters for display in the DisasterListActivity
+    		if (iDisasterApplication.testDataUsed) {
+    	   	    iDisasterApplication.getInstance().disasterNameList.add(disasterName);
+        	    // report data change to adapter
+        	    iDisasterApplication.getInstance().disasterAdapter.notifyDataSetChanged();
+   			}
+     		
 // TODO: Remove code for testing the correct setting of preferences 
-    	    Toast.makeText(this, "Debug: "  + serviceName + " " + serviceDescription, 
+    	    Toast.makeText(this, "Debug: "  + disasterName + " " + disasterDescription, 
     			Toast.LENGTH_LONG).show();
 
     	    // Hide the soft keyboard:
 			// - the soft keyboard will not appear on next activity window!
     	    InputMethodManager mgr = (InputMethodManager) getSystemService(this.INPUT_METHOD_SERVICE);
-    	    mgr.hideSoftInputFromWindow(serviceNameView.getWindowToken(), 0);
+    	    mgr.hideSoftInputFromWindow(disasterNameView.getWindowToken(), 0);
 
 	    	finish();
     	    // Go back to the previous activity
