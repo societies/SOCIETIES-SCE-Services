@@ -211,7 +211,6 @@ public class iDisasterApplication extends Application {
 			SocialContract.Me.DISPLAY_NAME
 		};
 			
-
 		String selection = SocialContract.Me._ID + " = 1"; // Use the first user identity for Societies
 		String[] selectionArgs = null;
 
