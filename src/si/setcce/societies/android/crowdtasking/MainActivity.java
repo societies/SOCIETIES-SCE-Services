@@ -112,7 +112,7 @@ public class MainActivity extends Activity {
         }
     }    
 
-    @TargetApi(14)
+    //@TargetApi(14)
 	@Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle item selection
@@ -125,9 +125,9 @@ public class MainActivity extends Activity {
             case R.id.home:
             	//webView.loadUrl("http://crowdtasking.appspot.com/");
 				Calendar beginTime = Calendar.getInstance();
-				beginTime.set(2012, 9, 24, 12, 30);
+				beginTime.set(2012, 11, 29, 17, 00);
 				Calendar endTime = Calendar.getInstance();
-				endTime.set(2012, 9, 24, 13, 30);
+				endTime.set(2012, 11, 29, 17, 15);
 				/*Intent intent = new Intent(Intent.ACTION_INSERT)
 						.setData(Events.CONTENT_URI)
 						.putExtra(CalendarContract.EXTRA_EVENT_BEGIN_TIME,
@@ -141,6 +141,19 @@ public class MainActivity extends Activity {
 						.putExtra(Intent.EXTRA_EMAIL,
 								"helena.halas@setcce.si, jan.porekar@setcce.si, simon.juresa@setcce.si");
 				startActivity(intent);*/
+				Intent intent = new Intent(Intent.ACTION_EDIT);
+				intent.setType("vnd.android.cursor.item/event");
+				/*intent.putExtra("beginTime", beginTime);
+				intent.putExtra("allDay", true);
+				intent.putExtra("rrule", "FREQ=YEARLY");
+				intent.putExtra("endTime", endTime);*/
+				intent.putExtra("title", "ICS test");
+				intent.putExtra(Intent.EXTRA_EMAIL,
+						"sjuresa@gmail.com");
+//						"simon.juresa@setcce.si, helena.halas@setcce.si, jan.porekar@setcce.si");
+				startActivity(intent);
+				//startActivityForResult(intent, RESULT_OK );
+				
             	return true;
             
             case R.id.profile:
