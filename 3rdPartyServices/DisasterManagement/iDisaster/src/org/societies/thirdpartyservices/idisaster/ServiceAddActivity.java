@@ -53,7 +53,6 @@ import android.widget.AdapterView.OnItemClickListener;
  */
 
 // TODO: At the moment a list of services is provided. Some search functionality should be added
-// TODO: Removed the services already in CIS from the list...
 
 public class ServiceAddActivity extends ListActivity {
     @Override

@@ -129,7 +129,7 @@ public class ServiceListActivity extends ListActivity {
         					myServiceCursor.moveToPosition(position-recommendedServices - sharedServices);
         					serviceGlobalId =  sharedServiceCursor.getString(sharedServiceCursor
     							.getColumnIndex(SocialContract.Services.GLOBAL_ID));
-               				intent.putExtra("TYPE", iDisasterApplication.getInstance().SERVICE_INSTALLED);       					
+               				intent.putExtra("TYPE", iDisasterApplication.getInstance().SERVICE_INSTALLED);
         				} else {	// should never happen
         					iDisasterApplication.getInstance().debug (2, "No service id can be retrieved from position in onClickListener");
         					return;
@@ -325,10 +325,10 @@ public class ServiceListActivity extends ListActivity {
 					SocialContract.Services.GLOBAL_ID,
 					SocialContract.Services.NAME};
 
-			String serviceSelection = SocialContract.Services.OWNER_ID + "= ?";
+			String serviceSelection = SocialContract.Services.AVAILABLE + "= ?";
 
 			String[] serviceSelectionArgs = new String[] 
-					{iDisasterApplication.getInstance().me.globalId}; // Services installed by the user
+					{iDisasterApplication.getInstance().SERVICE_INSTALLED}; // Services installed by the user
 		
 			try {
 				myServiceCursor = resolver.query(serviceUri, sharingProjection,

@@ -97,10 +97,13 @@ public class iDisasterApplication extends Application {
 	// Constant keys used for activity feeds
 	public final String FEED_DISPLAY = "DISPLAY";
 	
-	// Constant used for services 
+	// Constant used for services in a community
 	public final String SERVICE_RECOMMENDED = "RECOMMENDED";
 	public final String SERVICE_SHARED = "SHARED";
+	
+	// Constant used for services on a device
 	public final String SERVICE_INSTALLED = "INSTALLED";
+	public final String SERVICE_NOT_INSTALLED = "NOT_INSTALLED";
 
 	// Constant used for service types
 	public final String SERVICE_TYPE_PROVIDER = "Provider";
@@ -270,9 +273,11 @@ public class iDisasterApplication extends Application {
  * for Social Provider.
  * It updates the Services table in order to use it as a global service registry 
  * (in addition to a user service registry).
- * - All OWNER_ID are set to ""
- * - set service type (the field "available" is currently used as not filed "type" is defined  
- * - set service CONFIG to a correct package name
+ * - GLOBAL_ID is set to the package name for the service (Android App)
+ * - OWNER_ID is set to "Contact@SW_company_X.org" to avoid confusion with any user (in People)
+ * - TYPE is set to the service type (SERVICE_TYPE_* - see above)
+ * - CONFIG is set to the name of the intent for launching the Android App
+ * - DEPENDENCY: remove for client
  */
 	private String updateServices () {
 		
@@ -322,43 +327,43 @@ public class iDisasterApplication extends Application {
 			
 			
 //TODO: Remove - Used temporarily			
-			String serviceName = servicesCursor.getString(servicesCursor
-					.getColumnIndex(SocialContract.Services.NAME));
-			String serviceDescription = servicesCursor.getString(servicesCursor
-					.getColumnIndex(SocialContract.Services.DESCRIPTION));
-			String serviceType = servicesCursor.getString(servicesCursor
-				.getColumnIndex(SocialContract.Services.TYPE));
-			String serviceAppType=servicesCursor.getString(servicesCursor
-				.getColumnIndex(SocialContract.Services.APP_TYPE));
-			String serviceAvailable = servicesCursor.getString(servicesCursor
-			.getColumnIndex(SocialContract.Services.AVAILABLE));
-			String serviceDependency = servicesCursor.getString(servicesCursor
-			.getColumnIndex(SocialContract.Services.DEPENDENCY));
-			String serviceConfig = servicesCursor.getString(servicesCursor
-			.getColumnIndex(SocialContract.Services.CONFIG));
-			String serviceURL = servicesCursor.getString(servicesCursor
-			.getColumnIndex(SocialContract.Services.APP_TYPE));
+//			String serviceName = servicesCursor.getString(servicesCursor
+//					.getColumnIndex(SocialContract.Services.NAME));
+//			String serviceDescription = servicesCursor.getString(servicesCursor
+//					.getColumnIndex(SocialContract.Services.DESCRIPTION));
+//			String serviceType = servicesCursor.getString(servicesCursor
+//				.getColumnIndex(SocialContract.Services.TYPE));
+//			String serviceAppType=servicesCursor.getString(servicesCursor
+//				.getColumnIndex(SocialContract.Services.APP_TYPE));
+//			String serviceAvailable = servicesCursor.getString(servicesCursor
+//			.getColumnIndex(SocialContract.Services.AVAILABLE));
+//			String serviceDependency = servicesCursor.getString(servicesCursor
+//			.getColumnIndex(SocialContract.Services.DEPENDENCY));
+//			String serviceConfig = servicesCursor.getString(servicesCursor
+//			.getColumnIndex(SocialContract.Services.CONFIG));
+//			String serviceURL = servicesCursor.getString(servicesCursor
+//			.getColumnIndex(SocialContract.Services.APP_TYPE));
 	
-
-			
-			
-			
-			
-			
-			
-			
-			
 			
 			Uri recordUri = servicesUri.withAppendedPath(servicesUri, "/" +
 					servicesCursor.getString(servicesCursor.getColumnIndex(SocialContract.Services._ID)));
 	        values = new ContentValues();
-	        values.put(SocialContract.Services.OWNER_ID, "");
+	        values.put(SocialContract.Services.OWNER_ID, "Contact@SW_company_X.org");
 	        if (servicesCursor.getString(servicesCursor.getColumnIndex(SocialContract.Services.NAME)).equals("iJacket")) {
-		        values.put(SocialContract.Services.AVAILABLE, SERVICE_TYPE_PROVIDER);
-		        values.put(SocialContract.Services.CONFIG, "org.ubicompforall.cityexplorer");
+	        	// City Explorer used for test... 
+		        values.put(SocialContract.Services.GLOBAL_ID, "org.ubicompforall.cityexplorer");
+		        values.put(SocialContract.Services.TYPE, SERVICE_TYPE_PROVIDER);
+		        values.put(SocialContract.Services.AVAILABLE, SERVICE_NOT_INSTALLED);
+		     // City Explorer used for test... 
+		        values.put(SocialContract.Services.CONFIG, "org.ubicompforall.cityexplorer.gui.StartActivity");
 	        } else if (servicesCursor.getString(servicesCursor.getColumnIndex(SocialContract.Services.NAME)).equals("iJacketClient")) {
-	        	values.put(SocialContract.Services.AVAILABLE, SERVICE_TYPE_CLIENT);
-		        values.put(SocialContract.Services.CONFIG, "org.ubicompforall.cityexplorer");
+	        	// City Explorer used for test... 
+		        values.put(SocialContract.Services.GLOBAL_ID, "org.ubicompforall.cityexplorer");
+	        	values.put(SocialContract.Services.TYPE, SERVICE_TYPE_CLIENT);
+		        values.put(SocialContract.Services.AVAILABLE, SERVICE_NOT_INSTALLED);
+		        values.put(SocialContract.Services.DEPENDENCY, "");
+	        	// City Explorer used for test... 
+		        values.put(SocialContract.Services.CONFIG, "org.ubicompforall.cityexplorer.gui.StartActivity");
 	        }
 	        getContentResolver().update(recordUri, values, null, null);		
 		}
