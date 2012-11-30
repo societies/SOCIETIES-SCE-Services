@@ -64,6 +64,25 @@
 				    android:paddingLeft="2dip" android:paddingRight="2dip"
 				    android:paddingTop="10dip" android:paddingBottom="10dip" />
 			</TableRow>
+
+			<TableRow>
+				<TextView
+				    android:id="@+id/serviceDetailsStatusLabel"
+				    android:text="@string/serviceStatusLabel" android:textColor= "@color/black" 
+					android:textStyle="bold" android:width="100dp" 
+					android:layout_width="wrap_content" android:layout_height="wrap_content"
+					android:paddingLeft="2dip" android:paddingRight="2dip"
+					android:paddingTop="2dip" android:paddingBottom="2dip" 
+					/>
+				<!-- Not sure if android:text is needed below -->
+				<TextView
+				    android:id="@+id/serviceDetailsStatus"
+				    android:textColor="@color/black"
+				    android:layout_width="wrap_content" android:layout_height="wrap_content"
+				    android:paddingLeft="2dip" android:paddingRight="2dip"
+				    android:paddingTop="10dip" android:paddingBottom="10dip" />
+			</TableRow>
+
 		</TableLayout> 
 		
 	</RelativeLayout>

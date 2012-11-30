@@ -93,6 +93,9 @@ public class iDisasterApplication extends Application {
 	// Constant keys used for insert
 	public final String INSERT_EXCEPTION = "INSERT_EXCEPTION";
 	public final String INSERT_SUCCESS = "INSERT_SUCCESS";
+	// Constant keys used for update
+	public final String UPDATE_EXCEPTION = "UPDATE_EXCEPTION";
+	public final String UPDATE_SUCCESS = "UPDATE_SUCCESS";
 	
 	// Constant keys used for activity feeds
 	public final String FEED_DISPLAY = "DISPLAY";
@@ -115,6 +118,7 @@ public class iDisasterApplication extends Application {
 	public final String SERVICE_INSTALL = "Install";
 	public final String SERVICE_LAUNCH = "Launch";
 	public final String SERVICE_SHARE = "Share";	
+	public final String SERVICE_UNSHARE = "Unshare";	
 
 // TODO: Remove this variable - only used while waiting update for Social Provider
 	private boolean servicesUpdated = false;
@@ -358,7 +362,7 @@ public class iDisasterApplication extends Application {
 		        values.put(SocialContract.Services.CONFIG, "org.ubicompforall.cityexplorer.gui.StartActivity");
 	        } else if (servicesCursor.getString(servicesCursor.getColumnIndex(SocialContract.Services.NAME)).equals("iJacketClient")) {
 	        	// City Explorer used for test... 
-		        values.put(SocialContract.Services.GLOBAL_ID, "org.ubicompforall.cityexplorer");
+		        values.put(SocialContract.Services.GLOBAL_ID, "org.baretull");
 	        	values.put(SocialContract.Services.TYPE, SERVICE_TYPE_CLIENT);
 		        values.put(SocialContract.Services.AVAILABLE, SERVICE_NOT_INSTALLED);
 		        values.put(SocialContract.Services.DEPENDENCY, "");

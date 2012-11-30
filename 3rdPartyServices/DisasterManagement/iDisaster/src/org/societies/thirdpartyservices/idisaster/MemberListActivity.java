@@ -111,7 +111,7 @@ public class MemberListActivity extends ListActivity {
        					String memberName =  memberCursor.getString(memberCursor
     							.getColumnIndex(SocialContract.People.NAME));
             			Toast.makeText(getApplicationContext(),
-                				"No more member information for " + memberName, Toast.LENGTH_LONG)
+                				"No detailed member information available for " + memberName, Toast.LENGTH_LONG)
                 				.show();    				
 
 // The activity is kept on stack (check also that "noHistory" is not set in Manifest)

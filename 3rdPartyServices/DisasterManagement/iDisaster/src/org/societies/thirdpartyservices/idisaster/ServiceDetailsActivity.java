@@ -66,23 +66,39 @@ public class ServiceDetailsActivity extends Activity implements OnClickListener 
 
 	private TextView serviceNameView;
 	private TextView serviceDescriptionView;
+	private TextView serviceStatusView;
 	
 	private ContentResolver resolver;
 
+	Uri serviceUri = SocialContract.Services.CONTENT_URI;
 	Cursor serviceCursor;
 	private String serviceID;
 	private String serviceName;
 	private String serviceDescription;
+	private String serviceAvailable;
+	
 // Used temporarily - waiting for extension of Social Provider
 	private String serviceType;
 	private String serviceAppType;
-	private String serviceAvailable;
 	private String serviceDependency;
 	private String serviceConfig;
 	private String serviceURL;
 	
-	private String requestType;
+	private String requestContext;
 
+// Status information for the user. Not stored in SocialProvider 
+	private String serviceStatus;
+	private String SERVICE_STATUS_RECOMMENDED = "This service is recommended in the team.";
+	private String SERVICE_STATUS_INSTALLED = "This service is installed on your device. You can share it with the team members.";
+	private String SERVICE_STATUS_REMOVED = "This service was not properly or is no longer installed on your device.";
+	private String SERVICE_STATUS_SHARED_BY_ME = "You have shared this service with the team members.";
+	private String SERVICE_STATUS_SHARED_IN_CIS = "This service is shared by other team members.";
+
+	private String SERVICE_STATUS_UNKNOWN = "No more information available.";
+	
+	
+
+	
 	
 	//TODO: will be fetched from SocialProvider when available...
 	private String servicePackage ="org.ubicompforall.cityexplorer";  // can be found
@@ -105,60 +121,88 @@ public class ServiceDetailsActivity extends Activity implements OnClickListener 
 
 
 
-		Intent intent= getIntent(); 						// Get the intent that created activity		
-		requestType = intent.getStringExtra("TYPE"); 	 	// Retrieve first parameter (type of service in the CIS)
-		serviceID = intent.getStringExtra("SERVICE_ID"); 	// Retrieve second parameter: service ID
+		Intent intent= getIntent(); 							// Get the intent that created activity		
+		requestContext = intent.getStringExtra("REQUEST_CONTEXT");	// Retrieve first parameter (context for request of details)
+		serviceID = intent.getStringExtra("SERVICE_ID"); 		// Retrieve second parameter: service ID
 		
 		if (iDisasterApplication.testDataUsed) {
 			int position = Integer.parseInt(serviceID);
 			serviceName = iDisasterApplication.getInstance().CISserviceNameList.get (position);
 			serviceDescription = iDisasterApplication.getInstance().CISserviceDescriptionList.get (position);
+			serviceAvailable = iDisasterApplication.getInstance().SERVICE_NOT_INSTALLED;
 			serviceAction = iDisasterApplication.getInstance().SERVICE_RECOMMEND;
 		} else {
-			if (getServiceInformation () 		// Retrieve service information from SocialProvider
-					.equals(iDisasterApplication.getInstance().QUERY_EXCEPTION)) {
+			// Retrieve service information from SocialProvider
+			if (!(getServiceInformation ()
+					.equals(iDisasterApplication.getInstance().QUERY_SUCCESS))) {
 				showQueryExceptionDialog ();	// Exception: Display dialog and terminates activity
 			}
-
-			// TODO: Add a check that some info was retrieved
+			
+			// Check that availability status in SocialProvider is consistent with 
+			// service availability	on the device		
+			if (!(checkServiceInstallStatus ()
+					.equals (iDisasterApplication.getInstance().UPDATE_SUCCESS))) {
+				showQueryExceptionDialog ();	// Exception: Display dialog and terminates activity			
+			}	
 		}
 		
 		// Get text fields
 		serviceNameView = (TextView) findViewById(R.id.serviceDetailsName);
-		serviceNameView.setText(serviceName);
+		serviceDescriptionView = (TextView) findViewById(R.id.serviceDetailsDescription);
+		serviceStatusView = (TextView) findViewById(R.id.serviceDetailsStatus);
 
 		// Set name and description
-		serviceDescriptionView = (TextView) findViewById(R.id.serviceDetailsDescription);
+		serviceNameView.setText(serviceName);
 		serviceDescriptionView.setText(serviceDescription);
 		
+		// Set status (on UI) to temporary value
+		serviceStatusView.setText(SERVICE_STATUS_UNKNOWN);
+
 				
 		final Button button = (Button) findViewById(R.id.serviceDetailsButton);
 
-// TODO: Check the return code of checkServiceInstallStatus in the following
-		
-		if (requestType.equals (iDisasterApplication.getInstance().SERVICE_RECOMMENDED)) {	// The service is recommended in the CIS
+		if (requestContext.equals 
+				(iDisasterApplication.getInstance().SERVICE_RECOMMENDED)) {			// Details request for a service recommended in the CIS
 			
-			if (serviceInstalled(serviceCursor.getString(serviceCursor				// If the service is installed on the device
-					.getColumnIndex(SocialContract.Services.CONFIG)))) {
-				serviceAction = iDisasterApplication.getInstance().SERVICE_LAUNCH;	// Action available to user is Launch			
-				checkServiceInstallStatus (true);									// Check consistency with data in SocialProvider				
-			} else {																// If the service is NOT installed on the device
+			// Set status (on UI)
+			serviceStatusView.setText(SERVICE_STATUS_RECOMMENDED);
+			
+			if (serviceAvailable															// If the service is installed on the device
+					.equals(iDisasterApplication.getInstance().SERVICE_INSTALLED)) {
+				serviceAction = iDisasterApplication.getInstance().SERVICE_LAUNCH;	// Action available to user is Launch
+				
+			} else {																		// If the service is NOT installed on the device
 				serviceAction = iDisasterApplication.getInstance().SERVICE_INSTALL; // Action available to user is Install
-				checkServiceInstallStatus (false);											// Check consistency with data in SocialProvider
 			}
 			
-		} else if (requestType.equals (iDisasterApplication.getInstance().SERVICE_INSTALLED)) {	// The service is marked installed by the user
-			if (serviceInstalled(serviceCursor.getString(serviceCursor				// If the service is installed on the device
-					.getColumnIndex(SocialContract.Services.CONFIG)))) {
+		} else if (requestContext.equals 
+				(iDisasterApplication.getInstance().SERVICE_INSTALLED)) {			// Details request for a service ins the list of installed services
+			
+			if (serviceAvailable															// If the service is really installed on the device
+					.equals(iDisasterApplication.getInstance().SERVICE_INSTALLED)) {
+			
+				// Set status (on UI)
+				serviceStatusView.setText(SERVICE_STATUS_INSTALLED);
+// TODO: check if the service is already shared...				
+//				serviceStatusView.setText(SERVICE_STATUS_SHARED_BY_ME);
+				
 				serviceAction = iDisasterApplication.getInstance().SERVICE_SHARE;	// Action available to user is Share
-				checkServiceInstallStatus (true);										// Check consistency with data in SocialProvider
-			} else {																// If the service is NOT installed on the device
+// TODO: check if the service is already shared...				
+//				serviceAction = iDisasterApplication.getInstance().SERVICE_UNSHARE;	// Action available to user is Unshare
+
+			} else {																		// If the service is NOT installed on the device
+
+				// Set status (on UI)
+				serviceStatusView.setText(SERVICE_STATUS_REMOVED);				
+				
 				serviceAction = iDisasterApplication.getInstance().SERVICE_INSTALL;	// Action available to user is Install
-				updateServiceInstallStatus (false);											// Update information in database
+				
 			}
 			
-		} else if (requestType.equals (iDisasterApplication.getInstance().SERVICE_SHARED)) {
-// TODO: implement unshare
+		} else if (requestContext.equals (iDisasterApplication.getInstance().SERVICE_SHARED)) {
+// TODO: Check it the client is installed. If not ACtion is "Install client" - otherwise "Access"
+			// Set status (on UI)
+			serviceStatusView.setText(SERVICE_STATUS_SHARED_IN_CIS);
 			serviceAction ="Back";
 		}
 		
@@ -217,17 +261,17 @@ public class ServiceDetailsActivity extends Activity implements OnClickListener 
  */
 
 	private String getServiceInformation () {
-		
-		Uri serviceUri = SocialContract.Services.CONTENT_URI;
-						
+								
 		String[] serviceProjection = new String[] {
+							SocialContract.Services._ID,
+							SocialContract.Services.GLOBAL_ID,
 							SocialContract.Services.NAME,
-							SocialContract.Services.DESCRIPTION
+							SocialContract.Services.DESCRIPTION,
+							SocialContract.Services.AVAILABLE							
 // TODO: remove - Used temporarily - waiting for extension of Social Provider							
 							,
 							SocialContract.Services.TYPE,
 							SocialContract.Services.APP_TYPE,
-							SocialContract.Services.AVAILABLE,
 							SocialContract.Services.DEPENDENCY,
 							SocialContract.Services.CONFIG,
 							SocialContract.Services.URL
@@ -253,162 +297,106 @@ public class ServiceDetailsActivity extends Activity implements OnClickListener 
 		}
 		
 		serviceCursor.moveToFirst();		// Should not be several matches; anyway only select the first
+		
 		serviceName = serviceCursor.getString(serviceCursor
 						.getColumnIndex(SocialContract.Services.NAME));
 		serviceDescription = serviceCursor.getString(serviceCursor
 						.getColumnIndex(SocialContract.Services.DESCRIPTION));
-		
-//TODO: Remove - Used temporarily - waiting for extension of Social Provider
-
-		serviceType = serviceCursor.getString(serviceCursor
-					.getColumnIndex(SocialContract.Services.TYPE));
-		serviceAppType=serviceCursor.getString(serviceCursor
-					.getColumnIndex(SocialContract.Services.APP_TYPE));
 		serviceAvailable = serviceCursor.getString(serviceCursor
 				.getColumnIndex(SocialContract.Services.AVAILABLE));
-		serviceDependency = serviceCursor.getString(serviceCursor
-				.getColumnIndex(SocialContract.Services.DEPENDENCY));
-		serviceConfig = serviceCursor.getString(serviceCursor
-				.getColumnIndex(SocialContract.Services.CONFIG));
-		serviceURL = serviceCursor.getString(serviceCursor
-				.getColumnIndex(SocialContract.Services.APP_TYPE));
-		
 
+// TODO: If there are several matches for the service, the duplications should be removed
+		
+//TODO: Remove - Used temporarily - waiting for extension of Social Provider
+//		serviceType = serviceCursor.getString(serviceCursor
+//					.getColumnIndex(SocialContract.Services.TYPE));
+//		serviceAppType=serviceCursor.getString(serviceCursor
+//					.getColumnIndex(SocialContract.Services.APP_TYPE));
+//		serviceDependency = serviceCursor.getString(serviceCursor
+//				.getColumnIndex(SocialContract.Services.DEPENDENCY));
+//		serviceConfig = serviceCursor.getString(serviceCursor
+//				.getColumnIndex(SocialContract.Services.CONFIG));
+//		serviceURL = serviceCursor.getString(serviceCursor
+//				.getColumnIndex(SocialContract.Services.APP_TYPE));
+		
 		return iDisasterApplication.getInstance().QUERY_SUCCESS;
 	}
 
 
 /**
- * checkServiceInstallStatus checks that the service status (installed) setting in
- * in Social provider.
+ * checkServiceInstallStatus
+ * - checks the consistency between the availability status of the service in SocialProvider
+ *   and the availability on device.
+ * - triggers status update in SocialProvider, if not consistent.
  */
 
-	public String checkServiceInstallStatus (boolean installStatus) {
-		
-		Cursor installedServiceCursor;
-		Uri serviceUri = SocialContract.Services.CONTENT_URI;
+	private String checkServiceInstallStatus () {
 
-		String[] serviceProjection = new String[] {
-						SocialContract.Services.AVAILABLE
-						};
-		String serviceSelection = SocialContract.Services.GLOBAL_ID + "= ?" +
-						"AND " + SocialContract.Services.OWNER_ID + "= ?";
+		// Assume that information about the service has already been 
+		// retrieved by getServiceInformation
 		
-		String [] serviceSelectionArgs = new String [] 
-								{serviceID,
-								iDisasterApplication.getInstance().me.globalId	} ;
-
-		try {
-			installedServiceCursor = resolver.query (serviceUri, serviceProjection, serviceSelection,
-					serviceSelectionArgs, null /* sortOrder*/);
-		} catch (Exception e) {
-			iDisasterApplication.getInstance().debug (2, "Query to "+ serviceUri + "causes an exception");
+		if (serviceCursor == null) {
 			return iDisasterApplication.getInstance().QUERY_EXCEPTION;
 		}
-
-		if (installedServiceCursor == null) {		// Should never happen
-			return iDisasterApplication.getInstance().QUERY_EXCEPTION;
-		}
-
-		if (installedServiceCursor.getCount() == 0) {
-			if (installStatus) {	// The service is installed on the device and should be added to Social Provider
-				
-				// Add the service in table. It should be there!
-
-				// Set the values related to the activity to store in Social Provider
-				ContentValues serviceValues = new ContentValues ();
-				
-//TODO: Remove the following once Social Provider has been corrected (Social Provider should insert the GLOBAL_ID)
-//				SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss");
-//				String currentDateandTime = sdf.format(new Date());
-				serviceValues.put(SocialContract.Services.GLOBAL_ID, serviceID);	//TODO: problem ID is duplicated!
-// End remove		
-//				serviceValues.put(SocialContract.Services.TYPE, "Disaster");
-//				serviceValues.put(SocialContract.Services.NAME, serviceName);
-//				serviceValues.put(SocialContract.Services.OWNER_ID,
-//						iDisasterApplication.getInstance().me.globalId);
-//				serviceValues.put(SocialContract.Services.ORIGIN, "Red Cross");
-//				serviceValues.put(SocialContract.Services.ORIGIN, "Red Cross");
-//				serviceValues.put(SocialContract.Services.ORIGIN, "Red Cross");
-//				serviceValues.put(SocialContract.Services.ORIGIN, "Red Cross");
-//				serviceValues.put(SocialContract.Services.DESCRIPTION, serviceDescription);
-//				serviceValues.put(SocialContract.Services.AVAILABLE, 
-//						iDisasterApplication.getInstance().SERVICE_INSTALLED);
-//TODO: set to right value!
-//				serviceValues.put(SocialContract.Services.DEPENDENCY, "");
-//				serviceValues.put(SocialContract.Services.CONFIG, "");
-//				serviceValues.put(SocialContract.Services.URL, "");
-							
-				
-//			    GLOBAL_ID (needed temporally until we have a working sync adapter)
-//			    NAME
-//			    OWNER_ID
-//			    TYPE
-//			    DESCRIPTION (optional, set to "NA" if not provided)
-//			    APP_TYPE
-//			    ORIGIN
-//			    AVAILABLE
-//			    DEPENDENCY (Optional, set to "NA" if not provided)
-//			    CONFIG (Optional, set to "NA" if not provided)
-//			    URL (Optional, set to "NA" if not provided) 
-
-				
-				
-				try {
-// The Uri value returned is not used.
-//					Uri activityNewUri = getContentResolver().insert( SocialContract.CommunityActivity.CONTENT_URI,
-//							sharingValues);
-					getContentResolver().insert( SocialContract.Services.CONTENT_URI, 
-							serviceValues);
-				} catch (Exception e) {
-					iDisasterApplication.getInstance().debug (2, "Insert to "+ 
-										SocialContract.Services.CONTENT_URI + "causes an exception");
-			    	return iDisasterApplication.getInstance().INSERT_EXCEPTION;
-				}
-				
-				
-				return iDisasterApplication.getInstance().QUERY_SUCCESS;
-				
-				
-			}
-			else {					// This is normal. The service is not installed on the device
-				return iDisasterApplication.getInstance().QUERY_EMPTY;
-			}
+		
+		if (serviceCursor.getCount() == 0) {
+			return iDisasterApplication.getInstance().QUERY_EMPTY;
 		}
 		
-		installedServiceCursor.moveToFirst();		// Should not be several matches; anyway only select the first
-//TODO: check AVAILABLE: it should be set to 
-		String available = installedServiceCursor.getString(installedServiceCursor
-				.getColumnIndex(SocialContract.Services.AVAILABLE));	
+		serviceCursor.moveToFirst();		// Should not be several matches; anyway only select the first
 		
-		if (installStatus) {	// The service is installed on the device and should marked available in Social Provider
-			if (available.equals(iDisasterApplication.getInstance().SERVICE_INSTALLED)) {
-				return iDisasterApplication.getInstance().QUERY_SUCCESS;				
-			} else {
-				// Set the filed AVAILABLE to the right value 
-				return iDisasterApplication.getInstance().QUERY_SUCCESS;				
-			}
-		} else {				// The service is NOT installed on the device and not be stored in Social Provider
-			if (available.equals(iDisasterApplication.getInstance().SERVICE_INSTALLED)) {
-				// TODO: Remove from Social Provider. The service should not be there
-				return iDisasterApplication.getInstance().QUERY_SUCCESS;				
-			} else {
-				// Set the filed AVAILABLE to the right value 
-				return iDisasterApplication.getInstance().QUERY_SUCCESS;				
-			}
-		}
-				
-// TODO: Remove any other entries. There should only be a service registration per user!
+		if (serviceInstalled(serviceCursor.getString(serviceCursor	// If the service is installed on the device
+				.getColumnIndex(SocialContract.Services.GLOBAL_ID)))) {
 			
+			if (serviceAvailable.equals (iDisasterApplication.getInstance().SERVICE_NOT_INSTALLED)){
+				return (updateServiceInstallStatus (iDisasterApplication.getInstance().SERVICE_INSTALLED));
+			}
+		
+		} else {													// If the service is NOT installed on the device
+		
+			if (serviceAvailable.equals (iDisasterApplication.getInstance().SERVICE_INSTALLED)){
+				return (updateServiceInstallStatus (iDisasterApplication.getInstance().SERVICE_NOT_INSTALLED));
+			}
+		}		
+
+		return iDisasterApplication.getInstance().UPDATE_SUCCESS;
 	}
 
+		
 /**
- * updateServiceInstallStatus ...
+ * updateServiceInstallStatus updates availability status in SocialProvider.
  */
 
-	public void updateServiceInstallStatus (boolean status) {
-		// TODO: Update data in Content provider
-		// Check that the service (App) is installed
+	private String updateServiceInstallStatus (String status) {
+		
+		// Assume that information about the service has already been 
+		// retrieved by getServiceInformation
+		
+		if (serviceCursor == null) {
+			return iDisasterApplication.getInstance().QUERY_EXCEPTION;
+		}
+		
+		if (serviceCursor.getCount() == 0) {
+			return iDisasterApplication.getInstance().QUERY_EMPTY;
+		}
+		
+		serviceCursor.moveToFirst();		// Should not be several matches; anyway only select the first	
+		
+		Uri recordUri = serviceUri.withAppendedPath(serviceUri, "/" +
+				serviceCursor.getString(serviceCursor.getColumnIndex(SocialContract.Services._ID)));
+		ContentValues values = new ContentValues();
+        values.put(SocialContract.Services.AVAILABLE, status);
+
+        try {
+        	getContentResolver().update(recordUri, values, null, null);		
+		} catch (Exception e) {
+			iDisasterApplication.getInstance().debug (2, "Update to "+ 
+										SocialContract.Services.CONTENT_URI + "causes an exception");
+			return iDisasterApplication.getInstance().UPDATE_EXCEPTION;
+		}
+
+        serviceAvailable = status;
+        return iDisasterApplication.getInstance().UPDATE_SUCCESS;
 	}
 
 /**

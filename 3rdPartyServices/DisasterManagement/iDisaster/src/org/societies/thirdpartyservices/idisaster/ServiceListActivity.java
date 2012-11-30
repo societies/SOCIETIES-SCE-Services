@@ -109,7 +109,7 @@ public class ServiceListActivity extends ListActivity {
      			Intent intent = new Intent(ServiceListActivity.this, ServiceDetailsActivity.class);
 
     			if (iDisasterApplication.testDataUsed) {					// Test data    				
-        				intent.putExtra("TYPE", 							// For test: The service is recommended in the CIS
+        				intent.putExtra("REQUEST_CONTEXT", 							// For test: The service is recommended in the CIS
         						iDisasterApplication.getInstance().SERVICE_RECOMMENDED); 
         				intent.putExtra("SERVICE_ID", Integer.toString(position));  // For test: service identity
 				
@@ -119,17 +119,17 @@ public class ServiceListActivity extends ListActivity {
     						recommendedServiceCursor.moveToPosition(position);
         					serviceGlobalId =  recommendedServiceCursor.getString(recommendedServiceCursor
     							.getColumnIndex(SocialContract.Services.GLOBAL_ID));
-               				intent.putExtra("TYPE", iDisasterApplication.getInstance().SERVICE_RECOMMENDED);       					
+               				intent.putExtra("REQUEST_CONTEXT", iDisasterApplication.getInstance().SERVICE_RECOMMENDED);       					
         				} else if ((position-recommendedServices) < sharedServices) {	// Retrieve information from list of shared services in the team
         					sharedServiceCursor.moveToPosition(position-recommendedServices);
         					serviceGlobalId =  sharedServiceCursor.getString(sharedServiceCursor
     							.getColumnIndex(SocialContract.Services.GLOBAL_ID));
-               				intent.putExtra("TYPE", iDisasterApplication.getInstance().SERVICE_SHARED);       					
+               				intent.putExtra("REQUEST_CONTEXT", iDisasterApplication.getInstance().SERVICE_SHARED);       					
         				} else if ((position-recommendedServices-sharedServices) < myServices) {
         					myServiceCursor.moveToPosition(position-recommendedServices - sharedServices);
         					serviceGlobalId =  sharedServiceCursor.getString(sharedServiceCursor
     							.getColumnIndex(SocialContract.Services.GLOBAL_ID));
-               				intent.putExtra("TYPE", iDisasterApplication.getInstance().SERVICE_INSTALLED);
+               				intent.putExtra("REQUEST_CONTEXT", iDisasterApplication.getInstance().SERVICE_INSTALLED);
         				} else {	// should never happen
         					iDisasterApplication.getInstance().debug (2, "No service id can be retrieved from position in onClickListener");
         					return;

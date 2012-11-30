@@ -80,7 +80,8 @@
 	<string name="serviceRecommendButton">Recommend service(s)</string>
     <string name="serviceRecommendHeading">Select new services</string>
 	<string name="serviceRecommendNoService">No service to recommend</string>
-    
+    <string name="serviceStatusLabel">Status:</string>
+	
     <string name="startButton">Start</string>
     <string name="start_menu_logoff">Log off</string>
     <string name="startTestDialog">The application is in Start Activity.</string>

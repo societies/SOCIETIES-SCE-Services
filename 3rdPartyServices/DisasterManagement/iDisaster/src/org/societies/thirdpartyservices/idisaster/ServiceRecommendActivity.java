@@ -187,6 +187,7 @@ public class ServiceRecommendActivity extends ListActivity implements OnClickLis
 
 /**
  * getServices retrieves the list of services in the global registry.
+ * - services of type "client" are omitted (since they make no sense without a "provider")
  */
     private String getServices () {
     	
@@ -202,10 +203,9 @@ public class ServiceRecommendActivity extends ListActivity implements OnClickLis
     				SocialContract.Services.NAME,
     				SocialContract.Services.DESCRIPTION};		// Description is used later on when the user selects services 
 
-		String serviceSelection = SocialContract.Services.OWNER_ID + "= ?"+
-				"AND " + SocialContract.Services.AVAILABLE + "<> ?";
+		String serviceSelection = SocialContract.Services.TYPE + "<> ?";
 		
-		String[] serviceSelectionArgs = new String[] {"",		// Retrieve services in the GLOBAL registry i.e. no service owner
+		String[] serviceSelectionArgs = new String[] {
 					iDisasterApplication.getInstance().SERVICE_TYPE_CLIENT };	// Ignore services of type CLIENT
 				
     	try {
@@ -253,7 +253,7 @@ public class ServiceRecommendActivity extends ListActivity implements OnClickLis
     								.getColumnIndex(SocialContract.Services.NAME));
     						serviceList.add (displayName);
     						service++;
-    						serviceMap.add (serviceCursor.getPosition()); // Maps person in UI list and cursor position 	
+    						serviceMap.add (serviceCursor.getPosition()); // Maps service in UI list and cursor position 	
     					}
     				}
     			}
