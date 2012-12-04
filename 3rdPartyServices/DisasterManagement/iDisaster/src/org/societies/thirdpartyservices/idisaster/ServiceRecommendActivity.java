@@ -349,9 +349,8 @@ public class ServiceRecommendActivity extends ListActivity implements OnClickLis
 	}
 
 /**
- * showQueryExceptionDialog displays a dialog to the user.
- * In this case, the activity does not terminate since the other
- * activities in the TAB may still work.
+ * showQueryExceptionDialog displays a dialog to the user and
+ * terminates the activity.
  */
         			
 	private void showQueryExceptionDialog () {

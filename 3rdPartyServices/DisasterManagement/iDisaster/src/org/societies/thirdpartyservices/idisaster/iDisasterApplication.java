@@ -118,7 +118,12 @@ public class iDisasterApplication extends Application {
 	public final String SERVICE_INSTALL = "Install";
 	public final String SERVICE_LAUNCH = "Launch";
 	public final String SERVICE_SHARE = "Share";	
-	public final String SERVICE_UNSHARE = "Unshare";	
+	public final String SERVICE_UNSHARE = "Unshare";
+	
+	// Constant keys used for service download (and install)
+	public final String DOWNLOAD_EXCEPTION = "DOWNLOAD_EXCEPTION";
+	public final String DOWNLOAD_SUCCESS = "DOWNLOAD_SUCCESS";
+
 
 // TODO: Remove this variable - only used while waiting update for Social Provider
 	private boolean servicesUpdated = false;
@@ -354,18 +359,21 @@ public class iDisasterApplication extends Application {
 	        values = new ContentValues();
 	        values.put(SocialContract.Services.OWNER_ID, "Contact@SW_company_X.org");
 	        if (servicesCursor.getString(servicesCursor.getColumnIndex(SocialContract.Services.NAME)).equals("iJacket")) {
-	        	// City Explorer used for test... 
-		        values.put(SocialContract.Services.GLOBAL_ID, "org.ubicompforall.cityexplorer");
+		        values.put(SocialContract.Services.GLOBAL_ID, "no.ntnu.osnap.generic");
 		        values.put(SocialContract.Services.TYPE, SERVICE_TYPE_PROVIDER);
 		        values.put(SocialContract.Services.AVAILABLE, SERVICE_NOT_INSTALLED);
-		     // City Explorer used for test... 
+		        values.put(SocialContract.Services.URL, "http://folk.ntnu.no/svarvaa/utils/pro2www/apk/Tshirt.apk");
 		        values.put(SocialContract.Services.CONFIG, "org.ubicompforall.cityexplorer.gui.StartActivity");
+		        
 	        } else if (servicesCursor.getString(servicesCursor.getColumnIndex(SocialContract.Services.NAME)).equals("iJacketClient")) {
 	        	// City Explorer used for test... 
-		        values.put(SocialContract.Services.GLOBAL_ID, "org.baretull");
-	        	values.put(SocialContract.Services.TYPE, SERVICE_TYPE_CLIENT);
+		        values.put(SocialContract.Services.GLOBAL_ID, "org.ubicompforall.cityexplorer");
+//	        	values.put(SocialContract.Services.TYPE, SERVICE_TYPE_CLIENT);
+		        values.put(SocialContract.Services.TYPE, SERVICE_TYPE_PROVIDER);
 		        values.put(SocialContract.Services.AVAILABLE, SERVICE_NOT_INSTALLED);
 		        values.put(SocialContract.Services.DEPENDENCY, "");
+		        values.put(SocialContract.Services.URL, "https://play.google.com/store/apps");
+
 	        	// City Explorer used for test... 
 		        values.put(SocialContract.Services.CONFIG, "org.ubicompforall.cityexplorer.gui.StartActivity");
 	        }

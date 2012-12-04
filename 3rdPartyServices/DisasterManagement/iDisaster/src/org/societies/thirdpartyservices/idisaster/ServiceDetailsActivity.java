@@ -24,6 +24,16 @@
  */
 package org.societies.thirdpartyservices.idisaster;
 
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -46,7 +56,9 @@ import android.content.pm.ResolveInfo;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -76,13 +88,13 @@ public class ServiceDetailsActivity extends Activity implements OnClickListener 
 	private String serviceName;
 	private String serviceDescription;
 	private String serviceAvailable;
+	private String serviceURL;
 	
 // Used temporarily - waiting for extension of Social Provider
 	private String serviceType;
 	private String serviceAppType;
 	private String serviceDependency;
 	private String serviceConfig;
-	private String serviceURL;
 	
 	private String requestContext;
 
@@ -130,7 +142,7 @@ public class ServiceDetailsActivity extends Activity implements OnClickListener 
 			serviceName = iDisasterApplication.getInstance().CISserviceNameList.get (position);
 			serviceDescription = iDisasterApplication.getInstance().CISserviceDescriptionList.get (position);
 			serviceAvailable = iDisasterApplication.getInstance().SERVICE_NOT_INSTALLED;
-			serviceAction = iDisasterApplication.getInstance().SERVICE_RECOMMEND;
+			serviceAction = iDisasterApplication.getInstance().SERVICE_INSTALL;
 		} else {
 			// Retrieve service information from SocialProvider
 			if (!(getServiceInformation ()
@@ -200,7 +212,7 @@ public class ServiceDetailsActivity extends Activity implements OnClickListener 
 			}
 			
 		} else if (requestContext.equals (iDisasterApplication.getInstance().SERVICE_SHARED)) {
-// TODO: Check it the client is installed. If not ACtion is "Install client" - otherwise "Access"
+// TODO: Check it the client is installed. If not Action is "Install client" - otherwise "Access"
 			// Set status (on UI)
 			serviceStatusView.setText(SERVICE_STATUS_SHARED_IN_CIS);
 			serviceAction ="Back";
@@ -217,39 +229,36 @@ public class ServiceDetailsActivity extends Activity implements OnClickListener 
 	@Override
 	public void onClick(View arg0) {
 
-		// TODO: Remove code for testing the correct setting of preferences
-//		if (serviceAction == SERVICE_INSTALL) {
-//			// check that the service is not yet installed
-//		    Intent intent1 = new Intent(serviceIntent);      
-		      
-//		    if (isCallable(intent1)== true){
-//    			Toast.makeText(getApplicationContext(),  serviceIntent + " found" , Toast.LENGTH_LONG).show();		    	
-//		    } else {
-//    			Toast.makeText(getApplicationContext(),  serviceIntent + " NOT found" , Toast.LENGTH_LONG).show();		    	
-//		    	
-//		    }
-//			
-//		    if (serviceInstalled (servicePackage) == true){
-//    			Toast.makeText(getApplicationContext(),  servicePackage + " found" , Toast.LENGTH_LONG).show();		    	
-//		    } else {
-//    			Toast.makeText(getApplicationContext(),  servicePackage + " NOT found" , Toast.LENGTH_LONG).show();
-//		    	
-//		    }
-//
-//			
-//		} else if (serviceAction == SERVICE_LAUNCH) {
-//			
-//		} else if (serviceAction == SERVICE_SHARE) {
-//			
-//		} else {
-//			// This should never happened!
-//			// TODO: Update data in Content provider and proceeds as for install
-//		}
-//
-//		
-		
-		Toast.makeText(getApplicationContext(),
-			"Not implemented yet!", Toast.LENGTH_LONG).show();
+		if (serviceAction.equals (iDisasterApplication.getInstance().SERVICE_INSTALL)) {
+			if (installService ().equals (iDisasterApplication.getInstance().DOWNLOAD_EXCEPTION)) {
+				showDownloadExceptionDialog ();		// Exception; No termination (the user may have to switch on network access)
+				return;	
+			} else {
+				if (!(updateServiceInstallStatus (iDisasterApplication.getInstance().SERVICE_INSTALLED)
+						.equals (iDisasterApplication.getInstance().UPDATE_SUCCESS))) {
+					showQueryExceptionDialog ();	// Exception: Display dialog and terminates activity			
+				} else {
+					finish ();
+				}
+				return;
+			}
+
+		} else if (serviceAction.equals (iDisasterApplication.getInstance().SERVICE_LAUNCH)) {
+			
+			
+			Toast.makeText(getApplicationContext(), "Not implemented yet!", Toast.LENGTH_LONG).show();
+			
+		} else if (serviceAction.equals (iDisasterApplication.getInstance().SERVICE_SHARE)) {
+			Toast.makeText(getApplicationContext(), "Not implemented yet!", Toast.LENGTH_LONG).show();
+
+		} else if (serviceAction.equals (iDisasterApplication.getInstance().SERVICE_UNSHARE)) {
+			Toast.makeText(getApplicationContext(), "Not implemented yet!", Toast.LENGTH_LONG).show();
+			
+		} else if (serviceAction.equals ("Back")) {
+			finish ();	
+		} else {					// This should never happened!
+			return;
+		}
 		
 	}
 
@@ -267,14 +276,14 @@ public class ServiceDetailsActivity extends Activity implements OnClickListener 
 							SocialContract.Services.GLOBAL_ID,
 							SocialContract.Services.NAME,
 							SocialContract.Services.DESCRIPTION,
-							SocialContract.Services.AVAILABLE							
+							SocialContract.Services.AVAILABLE,
+							SocialContract.Services.URL
 // TODO: remove - Used temporarily - waiting for extension of Social Provider							
 							,
 							SocialContract.Services.TYPE,
 							SocialContract.Services.APP_TYPE,
 							SocialContract.Services.DEPENDENCY,
-							SocialContract.Services.CONFIG,
-							SocialContract.Services.URL
+							SocialContract.Services.CONFIG
 							};
 		String serviceSelection = SocialContract.Services.GLOBAL_ID + "= ?";
 		String [] serviceSelectionArgs = new String [] {serviceID} ;
@@ -304,6 +313,8 @@ public class ServiceDetailsActivity extends Activity implements OnClickListener 
 						.getColumnIndex(SocialContract.Services.DESCRIPTION));
 		serviceAvailable = serviceCursor.getString(serviceCursor
 				.getColumnIndex(SocialContract.Services.AVAILABLE));
+		serviceURL = serviceCursor.getString(serviceCursor
+				.getColumnIndex(SocialContract.Services.URL));
 
 // TODO: If there are several matches for the service, the duplications should be removed
 		
@@ -400,10 +411,10 @@ public class ServiceDetailsActivity extends Activity implements OnClickListener 
 	}
 
 /**
- * Check if any installed App can answer the Intent given as a parameter.
+ * isCallable checks if any installed App can answer the Intent given as a parameter.
  */
 	
-    private boolean isCallable (Intent intent1) {    
+    private boolean isCallable (Intent intent1) { 
         List<ResolveInfo> list = getPackageManager().queryIntentActivities(intent1, PackageManager.MATCH_DEFAULT_ONLY);    
         if(list.size() > 0)  
         	return true ;    
@@ -413,7 +424,7 @@ public class ServiceDetailsActivity extends Activity implements OnClickListener 
     }  
 
 /**
- * Check if any installed App has the package name given as a parameter.
+ * serviceInstalled checks if any installed App has the package name given as a parameter.
  */
 
     private boolean serviceInstalled (String appPackageName) {
@@ -443,16 +454,81 @@ public class ServiceDetailsActivity extends Activity implements OnClickListener 
     	return (false);
 	}
     
-    
-//	final Intent mainIntent = new Intent(Intent.ACTION_MAIN, null);
-//	mainIntent.addCategory(Intent.CATEGORY_LAUNCHER);
-//	final List pkgAppsList = context.getPackageManager().queryIntentActivities( mainIntent, 0);
+/**
+ * installService triggers the installation of the service either from 
+ * - using Google Play (download vie Google Play)
+ * - downloading from a web site
+ */
+    private String installService () {
+
+// Alternative: NOT USED
+//    	Open Web page from which Apps can be downloaded
+//		Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://folk.ntnu.no/svarvaa/utils/pro2www/"));
+//		startActivity(browserIntent);
+
+    	if (serviceURL.equals ("https://play.google.com/store/apps")) {			// Download from Google Play
+    		try {
+        		Intent goToMarket = new Intent(Intent.ACTION_VIEW)
+					.setData(Uri.parse("market://details?id=" + serviceID));
+        		startActivity(goToMarket);
+    		} catch (Exception e) {
+				iDisasterApplication.getInstance().debug (2, "Download APK causes an exception");
+    			return iDisasterApplication.getInstance().DOWNLOAD_EXCEPTION;
+	        }
+			return iDisasterApplication.getInstance().DOWNLOAD_SUCCESS;	
+ 
+    	} else {																// Download and install Android
+		    try {
+// TODO: remove test code
+// Work on old Samsung Tab - Android 2.1 with 3G - and HTC Android 4.1 - but not on LG Android 2.1
+//	            URL url = new URL("http://folk.ntnu.no/svarvaa/utils/pro2www/apk/Tshirt.apk");
+
+// Work on old Samsung Tab - Android 2.1 with 3G - but not on HTC Android 4.1
+//	            URL url = new URL ("http://www.sintef.no/project/UbiCompForAll/city_explorer/CityExplorer.apk");
+		    	
+	            URL url = new URL(serviceURL);				// Download file URL
+				String fileName = serviceName + ".apk";		// File for storing download
+				
+	            HttpURLConnection c = (HttpURLConnection) url.openConnection();
+	            c.setRequestMethod("GET");
+	            c.setDoOutput(true);
+	            c.connect();
+
+	            String PATH = Environment.getExternalStorageDirectory() + "/download/";
+	            File file = new File(PATH);
+	            file.mkdirs();
+	            File outputFile = new File(file, fileName);
+	            FileOutputStream fos = new FileOutputStream(outputFile);
+
+	            InputStream is = c.getInputStream();
+
+	            byte[] buffer = new byte[1024];
+	            int count = 0;
+	            int fileSize = c.getContentLength();
+
+	            while ((count = is.read(buffer)) != -1) {
+	                fos.write(buffer, 0, count);
+	            }
+	            fos.close();
+	            is.close();
+
+	            Intent intent = new Intent(Intent.ACTION_VIEW);
+	            intent.setDataAndType(Uri.fromFile(new File(Environment.getExternalStorageDirectory() + "/download/" + fileName)), "application/vnd.android.package-archive");
+	            intent.setPackage("com.android.packageinstaller");
+	            startActivity(intent);
+
+	        } catch (Exception e) {
+				iDisasterApplication.getInstance().debug (2, "Download APK causes an exception");
+    			return iDisasterApplication.getInstance().DOWNLOAD_EXCEPTION;
+	        }
+			return iDisasterApplication.getInstance().DOWNLOAD_SUCCESS;	    		
+    	}
+    }
 
 
 /**
- * showQueryExceptionDialog displays a dialog to the user.
- * In this case, the activity does not terminate since the other
- * activities in the TAB may still work.
+ * showQueryExceptionDialog displays a dialog to the user and 
+ * terminates since the activity.
  */
     	        			
     private void showQueryExceptionDialog () {
@@ -468,5 +544,25 @@ public class ServiceDetailsActivity extends Activity implements OnClickListener 
     	 AlertDialog alert = alertBuilder.create();
     	 alert.show();	
     }
+
     
+/**
+ * showDownloadExceptionDialog displays a dialog to the user.
+ * In this case, the activity does not terminate since the user
+ * may check Internet and try a second time.
+ */
+        	        			
+	private void showDownloadExceptionDialog () {
+		AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this);
+        alertBuilder.setMessage(getString(R.string.dialogServiceDownloadException))
+        		.setCancelable(false)
+                .setPositiveButton (getString(R.string.dialogOK), new DialogInterface.OnClickListener() {
+                	public void onClick(DialogInterface dialog, int id) {
+                  		return;
+                  	}
+                });
+        AlertDialog alert = alertBuilder.create();
+        alert.show();	
+	}
+
 }
