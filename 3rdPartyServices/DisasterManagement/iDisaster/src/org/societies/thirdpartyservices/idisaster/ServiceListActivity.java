@@ -109,10 +109,10 @@ public class ServiceListActivity extends ListActivity {
      			Intent intent = new Intent(ServiceListActivity.this, ServiceDetailsActivity.class);
 
     			if (iDisasterApplication.testDataUsed) {					// Test data    				
-        				intent.putExtra("REQUEST_CONTEXT", 							// For test: The service is recommended in the CIS
-        						iDisasterApplication.getInstance().SERVICE_RECOMMENDED); 
-        				intent.putExtra("SERVICE_ID", Integer.toString(position));  // For test: service identity
-				
+        				intent.putExtra("REQUEST_CONTEXT", 									// For test: The service is recommended in the CIS
+        						iDisasterApplication.getInstance().SERVICE_RECOMMENDED);
+        				intent.putExtra("SERVICE_GLOBAL_ID", Integer.toString(position));	// For test: service identity
+        				
         			} else {
         				String serviceGlobalId;
         				if (position < recommendedServices) {							// Retrieve information from list of recommended services in the team
@@ -127,14 +127,14 @@ public class ServiceListActivity extends ListActivity {
                				intent.putExtra("REQUEST_CONTEXT", iDisasterApplication.getInstance().SERVICE_SHARED);       					
         				} else if ((position-recommendedServices-sharedServices) < myServices) {
         					myServiceCursor.moveToPosition(position-recommendedServices - sharedServices);
-        					serviceGlobalId =  sharedServiceCursor.getString(sharedServiceCursor
+        					serviceGlobalId =  myServiceCursor.getString(myServiceCursor
     							.getColumnIndex(SocialContract.Services.GLOBAL_ID));
                				intent.putExtra("REQUEST_CONTEXT", iDisasterApplication.getInstance().SERVICE_INSTALLED);
         				} else {	// should never happen
         					iDisasterApplication.getInstance().debug (2, "No service id can be retrieved from position in onClickListener");
         					return;
         				}
-        				intent.putExtra("SERVICE_ID", serviceGlobalId);    				    				
+        				intent.putExtra("SERVICE_GLOBAL_ID", serviceGlobalId);		    				
         			}
     			// Start the ServiceDetails activity
         		startActivity(intent);
@@ -196,7 +196,7 @@ public class ServiceListActivity extends ListActivity {
 
 /**
  * getServices retrieves the list of services related to the selected team
- * from Social Provider.
+ * from SocialProvider.
  * Parameter:			Type: "Recommended" or "Shared"
  * Return value:		Query status code
  */
@@ -306,7 +306,7 @@ public class ServiceListActivity extends ListActivity {
 	
 /**
  * getMyServices retrieves the list of services recommended of shared in the selected team
- * from Social Provider.
+ * from SocialProvider.
  * Parameter:			Type: "Recommended" or "Shared"
  * Return value:		Query status code
  */

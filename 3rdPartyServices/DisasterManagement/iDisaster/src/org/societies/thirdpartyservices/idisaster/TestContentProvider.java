@@ -36,7 +36,7 @@ import android.provider.ContactsContract;
 import android.widget.TextView;
 
 /**
- * This is an activity to test Content Provider code.
+ * This is an activity to test SocialProvider code.
  * 
  * @author Jacqueline.Floch@sintef.no
  * 

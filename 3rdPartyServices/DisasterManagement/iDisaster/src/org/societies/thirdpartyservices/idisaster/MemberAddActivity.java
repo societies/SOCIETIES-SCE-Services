@@ -296,10 +296,10 @@ public class MemberAddActivity extends ListActivity implements OnClickListener {
 				peopleCursor.moveToPosition(peopleMap.get(i));
 				selected = selected + " " + peopleCursor.getString(peopleCursor.getColumnIndex(SocialContract.People.NAME));
 				
-				// Set the values related to the activity to store in Social Provider
+				// Set the values related to the activity to store in SocialProvider
 				ContentValues membershipValues = new ContentValues ();
 				
-		//TODO: Remove the following once Social Provider has been corrected (Social Provider should insert the GLOBAL_ID)
+		//TODO: Remove the following once SocialProvider has been corrected (SocialProvider should insert the GLOBAL_ID)
 				SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss");
 				String currentDateandTime = sdf.format(new Date());
 				membershipValues.put(SocialContract.Membership.GLOBAL_ID, currentDateandTime);

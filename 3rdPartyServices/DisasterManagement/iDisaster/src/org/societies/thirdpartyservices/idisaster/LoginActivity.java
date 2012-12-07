@@ -176,7 +176,7 @@ public class LoginActivity extends Activity implements OnClickListener {
 	    	return;
 	   	}
     	
-// TODO: store log information in the Social Provider - not in preferences.
+// TODO: store log information in the SocialProvider - not in preferences.
 // Temporary solution as long CSS Manager Light is not available
     	
     	// Store user name and password in preferences
@@ -194,7 +194,7 @@ public class LoginActivity extends Activity implements OnClickListener {
 //    	    Toast.makeText(this, "Debug: "  + testName + " " + testEmail + " " + testPassword, 
 //    			Toast.LENGTH_LONG).show();
 
-        // Add user to Social Provider
+        // Add user to SocialProvider
 		if (!iDisasterApplication.testDataUsed) {			// Test data
 			insertMe ();
 		}        
@@ -238,7 +238,7 @@ public class LoginActivity extends Activity implements OnClickListener {
 		
 		
 		if (cursor == null) {
-			iDisasterApplication.getInstance().showDialog (this, "No content provider found", getString(R.string.dialogOK));
+			iDisasterApplication.getInstance().showDialog (this, "SocialProvider not found", getString(R.string.dialogOK));
 			
 		} else {
 

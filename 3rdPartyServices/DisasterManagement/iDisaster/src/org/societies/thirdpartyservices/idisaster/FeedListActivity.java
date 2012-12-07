@@ -163,7 +163,7 @@ public class FeedListActivity extends ListActivity implements OnClickListener{
 
 /**
  * getFeed retrieves the list of activity feeds for the selected disaster team
- * from Social Provider.
+ * from SocialProvider.
  */
 	private String getFeeds () {
 		

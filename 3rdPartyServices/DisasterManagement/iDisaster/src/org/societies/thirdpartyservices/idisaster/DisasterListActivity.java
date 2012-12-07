@@ -184,7 +184,7 @@ public class DisasterListActivity extends ListActivity {
 
 /**
  * getOwnDisasterTeams retrieves the list of disaster teams owned by the user
- * from Social Provider.
+ * from SocialProvider.
  */
 	
 	private String getOwnDisasterTeams () {
@@ -236,7 +236,7 @@ public class DisasterListActivity extends ListActivity {
 	
 /**
  * getMemberDisasterTeams retrieves the list of disaster teams the user is
- * member of from Social Provider.
+ * member of from SocialProvider.
  */
 
 	private String getMemberDisasterTeams () {

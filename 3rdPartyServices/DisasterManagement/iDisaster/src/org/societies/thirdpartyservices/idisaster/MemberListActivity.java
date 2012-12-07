@@ -171,7 +171,7 @@ public class MemberListActivity extends ListActivity {
 
 /**
  * getFeed retrieves the list of activity feeds for the selected disaster team
- * from Social Provider.
+ * from SocialProvider.
  */
 	private String getMembers () {
 		

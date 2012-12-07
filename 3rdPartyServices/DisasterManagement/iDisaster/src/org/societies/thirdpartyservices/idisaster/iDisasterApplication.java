@@ -72,7 +72,7 @@ public class iDisasterApplication extends Application {
 
 	private static iDisasterApplication singleton; // Reference to the single instance of the Application
 
-// All information is fetched from the Social Provider. Preferences are no longer used.
+// All information is fetched from the SocialProvider. Preferences are no longer used.
 //
 //	static final String PREFS_NAME = "iDisasterPreferences"; 	// File for storing preferences
 //	SharedPreferences preferences;								// Preferences shared with all activities
@@ -80,8 +80,8 @@ public class iDisasterApplication extends Application {
 
 	static final Boolean testDataUsed = false;		// When set to true do not used SocialProvider
 
-	Me me = new Me();										// Store user identity - not persistent data (can be retrieved from Social Provider)
-	SelectedTeam selectedTeam = new SelectedTeam ();		// Store team selected by the user - not persistent data (can be retrieved from Social Provider)
+	Me me = new Me();										// Store user identity - not persistent data (can be retrieved from SocialProvider)
+	SelectedTeam selectedTeam = new SelectedTeam ();		// Store team selected by the user - not persistent data (can be retrieved from SocialProvider)
 	
 	// Constant keys used for user Logging
 	public final String USER_NOT_IDENTFIED = "USER_NOT_IDENTFIED";
@@ -119,13 +119,19 @@ public class iDisasterApplication extends Application {
 	public final String SERVICE_LAUNCH = "Launch";
 	public final String SERVICE_SHARE = "Share";	
 	public final String SERVICE_UNSHARE = "Unshare";
+	public final String SERVICE_NO_ACTION = " ";
+
 	
 	// Constant keys used for service download (and install)
 	public final String DOWNLOAD_EXCEPTION = "DOWNLOAD_EXCEPTION";
 	public final String DOWNLOAD_SUCCESS = "DOWNLOAD_SUCCESS";
 
+	// Constant keys used for service launch
+	public final String LAUNCH_EXCEPTION = "LAUNCH_EXCEPTION";
+	public final String LAUNCH_SUCCESS = "LAUNCH_SUCCESS";
 
-// TODO: Remove this variable - only used while waiting update for Social Provider
+
+// TODO: Remove this variable - only used while waiting update for SocialProvider
 	private boolean servicesUpdated = false;
 
 // test data
@@ -173,7 +179,7 @@ public class iDisasterApplication extends Application {
 		super.onCreate ();
 		singleton = this;
 
-// All information is fetched from the Social Provider. Preferences are no longer used.
+// All information is fetched from the SocialProvider. Preferences are no longer used.
 //
 // Restore preferences from preferences file.
 // If the preferences file does not exist, it is created when changes are committed.
@@ -186,7 +192,7 @@ public class iDisasterApplication extends Application {
 	    	setTestData ();	    	
 //	    }
 	    
-// TODO: Remove following code - only used while waiting update for Social Provider
+// TODO: Remove following code - only used while waiting update for SocialProvider
 	    if (!servicesUpdated) {
 	    	servicesUpdated = true;
 	    	updateServices ();
@@ -279,7 +285,7 @@ public class iDisasterApplication extends Application {
 
 /**
  * updateServices is used temporarily. Will be removed after update of the code
- * for Social Provider.
+ * for SocialProvider.
  * It updates the Services table in order to use it as a global service registry 
  * (in addition to a user service registry).
  * - GLOBAL_ID is set to the package name for the service (Android App)
@@ -359,8 +365,8 @@ public class iDisasterApplication extends Application {
 	        values = new ContentValues();
 	        values.put(SocialContract.Services.OWNER_ID, "Contact@SW_company_X.org");
 	        if (servicesCursor.getString(servicesCursor.getColumnIndex(SocialContract.Services.NAME)).equals("iJacket")) {
-		        values.put(SocialContract.Services.GLOBAL_ID, "no.ntnu.osnap.generic");
-		        values.put(SocialContract.Services.TYPE, SERVICE_TYPE_PROVIDER);
+		        values.put(SocialContract.Services.GLOBAL_ID, "no.ntnu.osnap.tshirt");
+		        values.put(SocialContract.Services.APP_TYPE, SERVICE_TYPE_PROVIDER);
 		        values.put(SocialContract.Services.AVAILABLE, SERVICE_NOT_INSTALLED);
 		        values.put(SocialContract.Services.URL, "http://folk.ntnu.no/svarvaa/utils/pro2www/apk/Tshirt.apk");
 		        values.put(SocialContract.Services.CONFIG, "org.ubicompforall.cityexplorer.gui.StartActivity");
@@ -368,9 +374,10 @@ public class iDisasterApplication extends Application {
 	        } else if (servicesCursor.getString(servicesCursor.getColumnIndex(SocialContract.Services.NAME)).equals("iJacketClient")) {
 	        	// City Explorer used for test... 
 		        values.put(SocialContract.Services.GLOBAL_ID, "org.ubicompforall.cityexplorer");
-//	        	values.put(SocialContract.Services.TYPE, SERVICE_TYPE_CLIENT);
-		        values.put(SocialContract.Services.TYPE, SERVICE_TYPE_PROVIDER);
+//	        	values.put(SocialContract.Services.APP_TYPE, SERVICE_TYPE_CLIENT);
+		        values.put(SocialContract.Services.APP_TYPE, SERVICE_TYPE_PROVIDER);
 		        values.put(SocialContract.Services.AVAILABLE, SERVICE_NOT_INSTALLED);
+		        values.put(SocialContract.Services.CONFIG, "android.intent.action.MAIN"); // TODO: ???
 		        values.put(SocialContract.Services.DEPENDENCY, "");
 		        values.put(SocialContract.Services.URL, "https://play.google.com/store/apps");
 
@@ -389,7 +396,7 @@ public class iDisasterApplication extends Application {
 //		
 //		ContentValues values = new ContentValues ();
 //		
-////TODO: Remove the following once Social Provider has been corrected (Social Provider should insert the GLOBAL_ID)
+////TODO: Remove the following once SocialProvider has been corrected (SocialProvider should insert the GLOBAL_ID)
 //		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss");
 //		String currentDateandTime = sdf.format(new Date());
 //		values.put(SocialContract.Sharing.GLOBAL_ID, currentDateandTime);
@@ -560,7 +567,7 @@ public class iDisasterApplication extends Application {
 	} // end setTestData
 
 
-// All information is fetched from the Social Provider. Preferences are no longer used.
+// All information is fetched from the SocialProvider. Preferences are no longer used.
 //
 //		public String getDisasterTeamName () {
 //			return preferences.getString ("pref.disasterteamname", getString(R.string.noPreference));

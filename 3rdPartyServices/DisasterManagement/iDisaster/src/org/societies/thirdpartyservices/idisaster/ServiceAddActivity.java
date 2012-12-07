@@ -60,7 +60,7 @@ public class ServiceAddActivity extends ListActivity {
 
     super.onCreate(savedInstanceState);
 
-    //TODO: query Content Provider for service repository
+    //TODO: query SocialProvider for service repository
 	
   	boolean noService = false;
   	
@@ -94,7 +94,7 @@ public class ServiceAddActivity extends ListActivity {
     	// listView.setTextFilterEnabled(true);  
     	
     	
-// TODO: Get the list from the Societies Content Provider
+// TODO: Get the list from the Societies SocialProvider
 
 
     	// The Adapter provides access to the data items.
@@ -273,7 +273,7 @@ public class ServiceAddActivity extends ListActivity {
 //    		serviceName = serviceNameView.getText().toString();
 //    		serviceDescription = serviceDescriptionView.getText().toString();
 //
-//    		//TODO: Add call to the Social Provider 
+//    		//TODO: Add call to the SocialProvider 
 //
 //	    		
 ////TODO: Refresh list of services? - so it is displayed in the previous activity

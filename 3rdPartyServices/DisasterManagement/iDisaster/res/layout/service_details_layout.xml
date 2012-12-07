@@ -14,17 +14,26 @@
 			android:paddingTop="2dip" android:paddingBottom="2dip" />
 
  		<Button
-			android:id="@+id/serviceDetailsButton"
+			android:id="@+id/serviceDetailsButton1"
 		 	android:layout_below="@id/serviceDetailsLabel"
 			android:layout_width="wrap_content" android:layout_height="wrap_content"
 			android:text="@string/emptyText"
 			android:textColor="@color/black" 
 		/>
- 						
+
+ 		<Button
+			android:id="@+id/serviceDetailsButton2"
+		 	android:layout_below="@id/serviceDetailsLabel"
+		 	android:layout_toRightOf="@id/serviceDetailsButton1"
+			android:layout_width="wrap_content" android:layout_height="wrap_content"
+			android:text="@string/emptyText"
+			android:textColor="@color/black" 
+		/>
+ 								
 		<TableLayout android:id="@+id/serviceDetailsTable"
 			android:layout_width="fill_parent" android:layout_height="fill_parent"
 			xmlns:android="http://schemas.android.com/apk/res/android"
-			android:layout_below="@id/serviceDetailsButton"
+			android:layout_below="@id/serviceDetailsButton1"
 			android:background="@color/white"
 			android:shrinkColumns="1"
 			>

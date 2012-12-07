@@ -24,12 +24,19 @@
  */
 package org.societies.thirdpartyservices.idisaster;
 
+import java.util.List;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -55,7 +62,9 @@ import org.societies.thirdpartyservices.idisaster.R;
 
 public class StartActivity extends Activity implements OnClickListener {
 
-	Boolean loggedIn;		// when true the user is logged
+	Boolean loggedIn;							// when true the user is logged
+	Boolean socialProviderInstalled = true;		// when true the SocialProvider is installed
+												// initial value is true allowing using test data
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -83,6 +92,7 @@ public class StartActivity extends Activity implements OnClickListener {
     
     	loggedIn = false;	// Always reset when starting activity since the user may have logged out in
     						// this App or another App
+    	
     									
     	// check is the user is logged in
     	// if logged in display the user name
@@ -92,17 +102,26 @@ public class StartActivity extends Activity implements OnClickListener {
 		if (iDisasterApplication.testDataUsed) {							// Use test data (no SocialProvider)
 			startView.setText(getString(R.string.startInfoNotLogged));			
 		} else {															// Fetch data from SocialProvider
-			String userQueryCode = iDisasterApplication.getInstance().checkUserIdentity(this);
-			if (userQueryCode.equals(iDisasterApplication.getInstance().QUERY_SUCCESS)) {	// User is identified
-				startView.setText(getString(R.string.startInfoLogged) 
-						+ " " 													// Not sure end space in the predefined string is ignored
-						+ iDisasterApplication.getInstance().me.displayName);
-				loggedIn = true;
-			} else if (userQueryCode.equals(iDisasterApplication.getInstance().QUERY_EMPTY)) {	// No data returned by Social provider
-				startView.setText(getString(R.string.startInfoNotLogged));
-			} else {
-				showQueryExceptionDialog ();	// Exception: Display dialog and terminates activity
-	        }
+			
+			socialProviderInstalled = appInstalled ("org.societies.android.platform");
+			if (!socialProviderInstalled) {			// Check whether or nor SocialProvider is installed
+				showQueryExceptionDialog 										// Show exception
+					(getString(R.string.dialogSocialProviderException));
+// TODO: Add code to download and start SocialProvider		
+			} else {			
+				String userQueryCode = iDisasterApplication.getInstance().checkUserIdentity(this);
+				if (userQueryCode.equals(iDisasterApplication.getInstance().QUERY_SUCCESS)) {	// User is identified
+					startView.setText(getString(R.string.startInfoLogged) 
+							+ " " 													// Not sure end space in the predefined string is ignored
+							+ iDisasterApplication.getInstance().me.displayName);
+					loggedIn = true;
+				} else if (userQueryCode.equals(iDisasterApplication.getInstance().QUERY_EMPTY)) {	// No data returned by SocialProvider
+					startView.setText(getString(R.string.startInfoNotLogged));
+				} else {
+					showQueryExceptionDialog (getString(R.string.dialogQueryException));	// Exception: Display dialog
+		        }
+				
+			}
 		}
 	}
 
@@ -111,11 +130,17 @@ public class StartActivity extends Activity implements OnClickListener {
  * the OnClickListener is assigned to the button
  */
 	 public void onClick (View view) {
+		 
+		if  (!socialProviderInstalled) {			// Wait for installing SocialProvider
+													// Currently further queries to SocialProvider will fail...
+													// Reason? : permissions are granted at install (as described in Manifest)
+			return;
+		}
 		
 		if (!loggedIn) {													// User was not identified
 			//TODO: Replace this logging by a call to CSS Management?
 			// I am not sure how this should be handled as handling logging
-			// should be under the responsibility of Social Provider
+			// should be under the responsibility of SocialProvider
 
     		startActivity(new Intent(StartActivity.this, LoginActivity.class));
     		return;			
@@ -154,7 +179,7 @@ public class StartActivity extends Activity implements OnClickListener {
     		
 //TODO: Call CSS Management?
 // I am not sure how this should be handled as many Apps may be "logged in".
-// Handling logging should be under the responsibility of Social Provider
+// Handling logging should be under the responsibility of SocialProvider
 
     		break;
     		
@@ -168,14 +193,14 @@ public class StartActivity extends Activity implements OnClickListener {
  * showQueryExceptionDialog displays a dialog to the user and terminates activity.
  */
 		
-	private void showQueryExceptionDialog () {
+	private void showQueryExceptionDialog (String message) {
 		AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this);
-		alertBuilder.setMessage(getString(R.string.dialogQueryException))
+		alertBuilder.setMessage(message)
   				.setCancelable(false)
   				.setPositiveButton (getString(R.string.dialogOK), new DialogInterface.OnClickListener() {
   					public void onClick(DialogInterface dialog, int id) {
   						// add termination code code eventually
-  						finish ();
+  							finish ();			// No more needed as App is killed...
   						return;
   					}
   				});
@@ -184,11 +209,42 @@ public class StartActivity extends Activity implements OnClickListener {
 	}
 
 
+/**
+ * appInstalled checks if any installed App has the package name given as a parameter.
+ */
+
+    private boolean appInstalled (String appPackageName) {
+	    	
+    	if (appPackageName == null) {
+	    	return (false);
+	    }
+    	// Get package names of all installed applications
+    	PackageManager pm = getPackageManager();
+    	List <PackageInfo> list = pm.getInstalledPackages(0);
+    
+    	for (PackageInfo pi : list) {
+    	   ApplicationInfo ai;
+    	   try {
+    		   ai = pm.getApplicationInfo(pi.packageName, 0);
+    		   if (!((ai.flags & ApplicationInfo.FLAG_SYSTEM) != 0)) {		// Only consider 3rd party Apps
+    			   															// Ignore Apps installed in the device's system image. 
+    			   if (appPackageName.equals(pi.packageName)) {
+    				   return (true);
+    			   }    	        	 
+    		   }
+    	      
+    	   } catch (NameNotFoundException e) {
+    		   Log.d(getClass().getSimpleName(), "Name not found", e);
+    	   }
+    	}
+    	return (false);
+	}
+
 
 /**
  * getPreferences retrieves the preferences stored in the preferences file.
  */
-// All information is fetched from the Social Provider. Preferences are no longer used.
+// All information is fetched from the SocialProvider. Preferences are no longer used.
 //
 //    private void getPreferences () {
 //

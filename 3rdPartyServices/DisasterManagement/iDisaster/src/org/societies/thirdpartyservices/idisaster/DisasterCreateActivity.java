@@ -104,7 +104,7 @@ public class DisasterCreateActivity extends Activity implements OnClickListener 
     		disasterName = disasterNameView.getText().toString();
     		disasterDescription = disasterDescriptionView.getText().toString();
     		
-//TODO: Add call to the Social Provider
+//TODO: Add call to the SocialProvider
     		
     		boolean disasterCreationCode = false;	// TODO: replace by code returned by Societes API
     			    		
