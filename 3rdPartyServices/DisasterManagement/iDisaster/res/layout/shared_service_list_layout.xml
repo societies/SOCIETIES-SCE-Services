@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/sharedServiceListLayout"
+	android:layout_width="wrap_content" android:layout_height="fill_parent"
+	>
+	<!-- android:orientation="vertical"  -->
+
+	<TextView android:id="@+id/sharedServiceLabel" android:layout_width="fill_parent"
+     	android:text="@string/emptyText" 
+     	android:textSize="20dip" android:textStyle="bold"
+     	android:textColor="@color/white" android:background="@color/orange"
+		android:layout_height="wrap_content" 
+		android:paddingLeft="5dip"
+		android:paddingTop="2dip" android:paddingBottom="2dip" />
+	
+	<ListView android:id="@android:id/list"
+	    android:layout_width="fill_parent" android:layout_height="fill_parent"
+		android:background="@color/white" 
+		android:cacheColorHint="@color/white"
+		android:layout_below="@id/sharedServiceLabel"/>
+	
+	<TextView android:id="@id/android:empty" android:layout_width="fill_parent"
+		android:layout_height="fill_parent" android:background="@color/white"
+		android:text="@string/add_item_menu"
+		android:textStyle="bold" android:textSize="20dip"
+		android:paddingLeft="5dip"
+		android:layout_below="@id/sharedServiceLabel"/>
+</RelativeLayout>

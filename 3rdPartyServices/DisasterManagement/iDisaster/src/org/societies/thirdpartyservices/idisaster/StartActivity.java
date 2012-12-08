@@ -45,6 +45,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import org.societies.thirdpartyservices.idisaster.R;
+import org.societies.thirdpartyservices.idisaster.data.ThirdPartyService;
 
 
 /**
@@ -102,11 +103,14 @@ public class StartActivity extends Activity implements OnClickListener {
 		if (iDisasterApplication.testDataUsed) {							// Use test data (no SocialProvider)
 			startView.setText(getString(R.string.startInfoNotLogged));			
 		} else {															// Fetch data from SocialProvider
-			
-			socialProviderInstalled = appInstalled ("org.societies.android.platform");
+
+			socialProviderInstalled = new ThirdPartyService ("")
+						.serviceInstalled (this,"org.societies.android.platform");
+//			socialProviderInstalled = appInstalled ("org.societies.android.platform");
 			if (!socialProviderInstalled) {			// Check whether or nor SocialProvider is installed
-				showQueryExceptionDialog 										// Show exception
-					(getString(R.string.dialogSocialProviderException));
+				showQueryExceptionDialog (										// Show exception and terminate
+						getString(R.string.dialogSocialProviderException));
+				
 // TODO: Add code to download and start SocialProvider		
 			} else {			
 				String userQueryCode = iDisasterApplication.getInstance().checkUserIdentity(this);
@@ -118,7 +122,7 @@ public class StartActivity extends Activity implements OnClickListener {
 				} else if (userQueryCode.equals(iDisasterApplication.getInstance().QUERY_EMPTY)) {	// No data returned by SocialProvider
 					startView.setText(getString(R.string.startInfoNotLogged));
 				} else {
-					showQueryExceptionDialog (getString(R.string.dialogQueryException));	// Exception: Display dialog
+					showQueryExceptionDialog (getString(R.string.dialogQueryException));
 		        }
 				
 			}
@@ -200,46 +204,13 @@ public class StartActivity extends Activity implements OnClickListener {
   				.setPositiveButton (getString(R.string.dialogOK), new DialogInterface.OnClickListener() {
   					public void onClick(DialogInterface dialog, int id) {
   						// add termination code code eventually
-  							finish ();			// No more needed as App is killed...
+  							finish ();
   						return;
   					}
   				});
 		AlertDialog alert = alertBuilder.create();
 	    alert.show();	
 	}
-
-
-/**
- * appInstalled checks if any installed App has the package name given as a parameter.
- */
-
-    private boolean appInstalled (String appPackageName) {
-	    	
-    	if (appPackageName == null) {
-	    	return (false);
-	    }
-    	// Get package names of all installed applications
-    	PackageManager pm = getPackageManager();
-    	List <PackageInfo> list = pm.getInstalledPackages(0);
-    
-    	for (PackageInfo pi : list) {
-    	   ApplicationInfo ai;
-    	   try {
-    		   ai = pm.getApplicationInfo(pi.packageName, 0);
-    		   if (!((ai.flags & ApplicationInfo.FLAG_SYSTEM) != 0)) {		// Only consider 3rd party Apps
-    			   															// Ignore Apps installed in the device's system image. 
-    			   if (appPackageName.equals(pi.packageName)) {
-    				   return (true);
-    			   }    	        	 
-    		   }
-    	      
-    	   } catch (NameNotFoundException e) {
-    		   Log.d(getClass().getSimpleName(), "Name not found", e);
-    	   }
-    	}
-    	return (false);
-	}
-
 
 /**
  * getPreferences retrieves the preferences stored in the preferences file.

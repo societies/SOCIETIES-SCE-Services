@@ -6,16 +6,16 @@
     <string name="app_name">iDisaster</string>
 
     <string name="dialogOK">OK</string>
-    <string name="dialogFeedInsertException">EXCEPTION: Cannot store the new activity in SocialProvider.</string>
-    <string name="dialogFeedQueryException">EXCEPTION: Cannot retrieve activities from SocialProvider.</string>
-    <string name="dialogMemberQueryException">EXCEPTION: Cannot retrieve members from SocialProvider.</string>
-    <string name="dialogPeopleQueryException">EXCEPTION: Cannot retrieve information in people registry from SocialProvider.</string>
-    <string name="dialogQueryException">EXCEPTION: Cannot retrieve information from SocialProvider.</string>
-	<string name="dialogServiceDetailsQueryException">EXCEPTION: Cannot retrieve service information from SocialProvider.</string>
-	<string name="dialogServiceDownloadException">EXCEPTION: Cannot downlad the service. Check your internet connection. </string>
-	<string name="dialogServiceLaunchException">EXCEPTION: Cannot launch the service. Try a manual launch. </string>
-	<string name="dialogServiceQueryException">EXCEPTION: Cannot retrieve services from SocialProvider </string>
-    <string name="dialogSocialProviderException">EXCEPTION: SocialProvider is not installed. You should install SocialProvider and then re-install iDisaster </string>
+    <string name="dialogFeedInsertException">EXCEPTION:\nCannot store the new activity in SocialProvider.</string>
+    <string name="dialogFeedQueryException">EXCEPTION:\nCannot retrieve activities from SocialProvider.</string>
+    <string name="dialogMemberQueryException">EXCEPTION:\nCannot retrieve members from SocialProvider.</string>
+    <string name="dialogPeopleQueryException">EXCEPTION:\nCannot retrieve information in people registry from SocialProvider.</string>
+    <string name="dialogQueryException">EXCEPTION:\nCannot retrieve information from SocialProvider.</string>
+	<string name="dialogServiceDetailsQueryException">EXCEPTION:\nCannot retrieve service information from SocialProvider.</string>
+	<string name="dialogServiceDownloadException">EXCEPTION:\nCannot downlad the service. Check your internet connection. </string>
+	<string name="dialogServiceLaunchException">EXCEPTION:\nCannot launch the service. Try a manual launch. </string>
+	<string name="dialogServiceQueryException">EXCEPTION:\nCannot retrieve services from SocialProvider </string>
+    <string name="dialogSocialProviderException">EXCEPTION:\nSocialProvider is not installed.You should install SocialProvider and then re-install iDisaster.</string>
 	
     <string name="disaster_list_menu_createCommunity">Create disaster team</string>
 	<string name="disasterListDialogCIS">No teams yet. Select menu to add teams.</string>
