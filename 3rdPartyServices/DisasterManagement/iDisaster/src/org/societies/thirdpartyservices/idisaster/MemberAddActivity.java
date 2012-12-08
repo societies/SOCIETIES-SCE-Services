@@ -288,13 +288,14 @@ public class MemberAddActivity extends ListActivity implements OnClickListener {
 	private String addNewMembers () {
     
 		SparseBooleanArray checkedRows = listView.getCheckedItemPositions();
-		
-		String selected = "";
+
+// Used for debug		
+//		String selected = "";
 
 		for (int i=0; i<people; ++i) {
 			if (checkedRows.get(i)) {
 				peopleCursor.moveToPosition(peopleMap.get(i));
-				selected = selected + " " + peopleCursor.getString(peopleCursor.getColumnIndex(SocialContract.People.NAME));
+//				selected = selected + " " + peopleCursor.getString(peopleCursor.getColumnIndex(SocialContract.People.NAME));
 				
 				// Set the values related to the activity to store in SocialProvider
 				ContentValues membershipValues = new ContentValues ();
@@ -326,7 +327,7 @@ public class MemberAddActivity extends ListActivity implements OnClickListener {
 			}
 		}
 				
-		Toast.makeText(this, "selected:" + selected, Toast.LENGTH_SHORT).show();
+//		Toast.makeText(this, "selected:" + selected, Toast.LENGTH_SHORT).show();
 		return iDisasterApplication.getInstance().INSERT_SUCCESS;
 
 	}

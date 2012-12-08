@@ -65,6 +65,7 @@ import android.widget.Toast;
 
 import android.widget.Button;
 import android.util.Log;
+import android.util.SparseBooleanArray;
 import android.view.View;
 import android.view.View.OnClickListener;
 
@@ -88,6 +89,9 @@ public class ServiceDetailsActivity extends Activity implements OnClickListener 
 	Uri serviceUri = SocialContract.Services.CONTENT_URI;
 	Cursor serviceCursor;
 
+	Uri sharingUri = SocialContract.Sharing.CONTENT_URI;
+	Cursor sharingCursor;
+
 	private String serviceId;	
 	private String serviceGlobalId;
 	private String serviceName;
@@ -97,7 +101,7 @@ public class ServiceDetailsActivity extends Activity implements OnClickListener 
 	private String serviceAppType;
 	private String serviceConfig;
 	
-// Used temporarily - waiting for extension of SocialProvider
+// Used temporarily - waiting for extension of Social Provider
 //	private String serviceType;
 //	private String serviceDependency;
 	
@@ -224,14 +228,24 @@ public class ServiceDetailsActivity extends Activity implements OnClickListener 
 		button2 = (Button) findViewById(R.id.serviceDetailsButton2);
 		if (serviceAction1.equals((iDisasterApplication.getInstance().SERVICE_LAUNCH))) {
 			
-// TODO: check if the service is already shared...				
-//			serviceStatusView.setText(SERVICE_STATUS_SHARED_BY_ME);
-// TODO: check if the service is already shared...				
-//			serviceAction = iDisasterApplication.getInstance().SERVICE_UNSHARE;	// Action available to user is Unshare
+			String sharingStatus = checkServiceShareStatus() ;
+			if (sharingStatus.equals (iDisasterApplication.getInstance().QUERY_EXCEPTION)) {
+				showQueryExceptionDialog ();	// SocialProvider exception: Display dialog and terminates activity
+				
+			} else {
+				if (sharingStatus.equals (iDisasterApplication.getInstance().QUERY_SUCCESS)) {
+					serviceAction2 = iDisasterApplication.getInstance().SERVICE_UNSHARE;	// Alternative action to user is Unshare
+					
+				} else {
+					serviceAction2 = iDisasterApplication.getInstance().SERVICE_SHARE;		// Alternative action to user is Share
+					serviceStatusView.setText (SERVICE_STATUS_SHARED_BY_ME);
 
-			serviceAction2 = iDisasterApplication.getInstance().SERVICE_SHARE;	// Alternative action to user is Share
+				}
+			}
+
 			button2.setText(serviceAction2);
 			button2.setOnClickListener(this);
+			
 		} else {
 			button2.setVisibility(android.view.View.GONE);		// Hide button2			
 		}
@@ -280,14 +294,22 @@ public class ServiceDetailsActivity extends Activity implements OnClickListener 
     		
     	} else if (button2.getId() == ((Button) v).getId()) {
     
-    		if (serviceAction2.equals (iDisasterApplication.getInstance().SERVICE_SHARE)) {					// Request to sahre a service
+    		if (serviceAction2.equals (iDisasterApplication.getInstance().SERVICE_SHARE)) {					// Request to share a service
     			
-    			Toast.makeText(getApplicationContext(), "Share: not implemented yet!", Toast.LENGTH_LONG).show();
-
+    			if (shareService ().equals (iDisasterApplication.getInstance().INSERT_EXCEPTION)) {			// Update information in SocialProvider 
+    				showQueryExceptionDialog (); 			/// SocialProvider exception: Display dialog and terminates activity
+    			} else {
+    				finish ();
+    			}
+    			
     		} else if (serviceAction2.equals (iDisasterApplication.getInstance().SERVICE_UNSHARE)) {
     			
-    			Toast.makeText(getApplicationContext(), "Unshare: not implemented yet!", Toast.LENGTH_LONG).show();
-
+    			if (unshareService ().equals (iDisasterApplication.getInstance().UPDATE_SUCCESS)) {			// Update information in SocialProvider 
+    				finish ();
+    			} else {
+    				showQueryExceptionDialog (); 			/// SocialProvider exception: Display dialog and terminates activity
+    			}
+ 
     		} else {				// should never happen
     			return;
     		}
@@ -298,7 +320,7 @@ public class ServiceDetailsActivity extends Activity implements OnClickListener 
 
 /**
  * getServiceInformation retrieves the information about the service 
- * from SocialProvider.
+ * from Social Provider.
  */
 
 	private String getServiceInformation () {
@@ -312,7 +334,7 @@ public class ServiceDetailsActivity extends Activity implements OnClickListener 
 							SocialContract.Services.URL,
 							SocialContract.Services.APP_TYPE,
 							SocialContract.Services.CONFIG
-// TODO: remove - Used temporarily - waiting for extension of SocialProvider
+// TODO: remove - Used temporarily - waiting for extension of Social Provider
 							,
 							SocialContract.Services.TYPE,
 							SocialContract.Services.DEPENDENCY
@@ -356,7 +378,7 @@ public class ServiceDetailsActivity extends Activity implements OnClickListener 
 
 // TODO: If there are several matches for the service, the duplications should be removed
 		
-//TODO: Remove - Used temporarily - waiting for extension of SocialProvider
+//TODO: Remove - Used temporarily - waiting for extension of Social Provider
 //		serviceType = serviceCursor.getString(serviceCursor
 //					.getColumnIndex(SocialContract.Services.TYPE));
 //		serviceDependency = serviceCursor.getString(serviceCursor
@@ -607,44 +629,138 @@ public class ServiceDetailsActivity extends Activity implements OnClickListener 
 //    }
 
 /**
- * checkServiceShareStatus gets the share status of the service in SocialProvider
- * for the selected CIS.
+ * checkServiceShareStatus gets the share status of the service in SocialProvider for the selected CIS.
  */
 
 	private String checkServiceShareStatus () {
-
-		// Assume that information about the service has already been 
-		// retrieved by getServiceInformation
 		
-		if (serviceCursor == null) {
-			return iDisasterApplication.getInstance().QUERY_EXCEPTION;
+		if (sharingCursor != null) {
+			sharingCursor.close();		// "close" releases data but does not set to null
+			sharingCursor = null;
 		}
+	
+	// Step 1: get GLOBAL_ID_SERVICES for shared or recommended services in the selected CIS
+					
+		String[] sharingProjection = new String[] {
+				SocialContract.Sharing._ID};							// Retrieve the _ID of the shared service entry (if any)
+	
+		String sharingSelection = 
+				SocialContract.Sharing.GLOBAL_ID_SERVICE + "= ?" +				// Service selected for the Details activity	
+				"AND " + SocialContract.Sharing.GLOBAL_ID_COMMUNITY + "= ?" +	// Selected community
+				"AND " + SocialContract.Sharing.GLOBAL_ID_OWNER + "= ?" +		// shared by ME
+				"AND " + SocialContract.Sharing.TYPE + "= ?";			// Type should be set to "shared" 
+	
+		String[] sharingSelectionArgs = new String[]
+	//TO DO: Replace GlobalID by Id (next version) 
+				{serviceGlobalId,												// For selected service
+				iDisasterApplication.getInstance().selectedTeam.globalId, 		// For the selected CIS
+				iDisasterApplication.getInstance().me.globalId, 				// For me
+				iDisasterApplication.getInstance().SERVICE_SHARED};				// Retrieve shared services
 		
-		if (serviceCursor.getCount() == 0) {
+		try {
+			sharingCursor= resolver.query(sharingUri, sharingProjection,
+					sharingSelection, sharingSelectionArgs, null /* sortOrder*/);
+		} catch (Exception e) {
+			iDisasterApplication.getInstance().debug (2, "Query to "+ sharingUri + "causes an exception");
+			return iDisasterApplication.getInstance().QUERY_EXCEPTION;
+	
+		}
+	
+		if (sharingCursor == null) {			// No cursor was set - should not happen?
+			iDisasterApplication.getInstance().debug (2, "sharingCursor was not set to any value");
 			return iDisasterApplication.getInstance().QUERY_EMPTY;
 		}
-		
-		serviceCursor.moveToFirst();		// Should not be several matches; anyway only select the first
-		
-		if (serviceInstalled(serviceCursor.getString(serviceCursor	// If the service is installed on the device
-				.getColumnIndex(SocialContract.Services.GLOBAL_ID)))) {
-			
-			if (serviceAvailable.equals (iDisasterApplication.getInstance().SERVICE_NOT_INSTALLED)){
-				return (updateServiceInstallStatus (iDisasterApplication.getInstance().SERVICE_INSTALLED));
-			}
-		
-		} else {													// If the service is NOT installed on the device
-		
-			if (serviceAvailable.equals (iDisasterApplication.getInstance().SERVICE_INSTALLED)){
-				return (updateServiceInstallStatus (iDisasterApplication.getInstance().SERVICE_NOT_INSTALLED));
-			}
-		}		
+	
+		if (sharingCursor.getCount() == 0) {	// No service is shared in the team community
+			return iDisasterApplication.getInstance().QUERY_EMPTY;
+		}			
+	
+		if (sharingCursor.getCount() >1) {		// Multiple entries for that service - should not happen
+			Toast.makeText(getApplicationContext(), 
+					"SocialProvider database is corrupted: multiple entries for that shared service",
+					Toast.LENGTH_LONG).show();
+	//TODO: clean the database
+		}
 
+		return iDisasterApplication.getInstance().QUERY_SUCCESS;
+	}
+
+/**
+ * shareService add a new entry in SocialProvider Sharing table
+ */
+	private String shareService () {
+    
+		// Set the values related to the activity to store in SocialProvider
+		ContentValues sharingValues = new ContentValues ();
+		
+//TODO: Remove the following once SocialProvider has been corrected (SocialProvider should insert the GLOBAL_ID)
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss");
+		String currentDateandTime = sdf.format(new Date());
+		sharingValues.put(SocialContract.Sharing.GLOBAL_ID, currentDateandTime);
+// End remove		
+
+		// TODO: replace Global ID with ID
+		sharingValues.put(SocialContract.Sharing.GLOBAL_ID_SERVICE,	serviceGlobalId);	// Id of the service to be shared
+		sharingValues.put(SocialContract.Sharing.GLOBAL_ID_COMMUNITY,					// Recommend service in the selected team
+							iDisasterApplication.getInstance().selectedTeam.globalId);
+		sharingValues.put(SocialContract.Sharing.GLOBAL_ID_OWNER,						// Member recommending the service
+							iDisasterApplication.getInstance().me.globalId);		
+		sharingValues.put(SocialContract.Sharing.TYPE, iDisasterApplication.getInstance().SERVICE_SHARED);
+		sharingValues.put(SocialContract.Sharing.ORIGIN, "SOCIETIES");	// Social platform iDisaster is plugged into
+		
+		try {
+// The Uri value returned is not used.
+//						Uri activityNewUri = getContentResolver().insert( SocialContract.CommunityActivity.CONTENT_URI,
+//								sharingValues);
+			getContentResolver().insert( SocialContract.Sharing.CONTENT_URI, 
+					sharingValues);
+		} catch (Exception e) {
+			iDisasterApplication.getInstance().debug (2, "Insert to "+ 
+								SocialContract.Sharing.CONTENT_URI + "causes an exception");
+	    	return iDisasterApplication.getInstance().INSERT_EXCEPTION;
+		}
+		
+		return iDisasterApplication.getInstance().INSERT_SUCCESS;
+	}
+    
+/**
+ * unshareService removes entry from SocialProvider Sharing table
+ */
+	private String unshareService () {
+
+		
+// CRASH on 	private String serviceId;	
+		
+		if (sharingCursor == null) {			// No cursor previously when checking the shared status (in checkServiceShareStatus) 
+												// - should not happen as "unshare" action is not available in that case
+			iDisasterApplication.getInstance().debug (2, "sharingCursor was not set to any value");
+			return iDisasterApplication.getInstance().QUERY_EMPTY;
+		}
+	
+		if (sharingCursor.getCount() == 0) {	// No service is shared in the team community
+			return iDisasterApplication.getInstance().QUERY_EMPTY;
+		}					
+		
+		sharingCursor.moveToFirst();
+		
+		String s = sharingCursor.getString(sharingCursor.getColumnIndex(SocialContract.Sharing._ID));
+		Uri recordUri = sharingUri.withAppendedPath(sharingUri, "/" + 
+				sharingCursor.getString(sharingCursor.getColumnIndex(SocialContract.Sharing._ID)));
+		
+		try {
+// The number of rows deleted is not used.
+//							Int i activityNewUri = getContentResolver().delete (SocialContract.Sharing.CONTENT_URI, null, null);
+			getContentResolver().delete(recordUri, null, null);
+			
+		} catch (Exception e) {
+			iDisasterApplication.getInstance().debug (2, "Delete of "+ recordUri + "causes an exception");
+	    	return iDisasterApplication.getInstance().UPDATE_EXCEPTION;
+		}
+		
 		return iDisasterApplication.getInstance().UPDATE_SUCCESS;
 	}
 
-    
-    
+	
 /**
  * showQueryExceptionDialog displays a dialog to the user and 
  * terminates since the activity.

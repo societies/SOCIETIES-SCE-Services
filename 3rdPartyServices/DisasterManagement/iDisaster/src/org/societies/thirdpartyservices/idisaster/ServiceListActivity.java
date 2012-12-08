@@ -452,7 +452,7 @@ public class ServiceListActivity extends ListActivity {
 
 			////TODO: Remove code for testing the correct setting of preferences 
 				Toast.makeText(getApplicationContext(),
-						"Not implemented yet. To add a service, select a recommended service first. ", Toast.LENGTH_LONG)
+						"Not implemented yet. To add a service, select a recommended service (eventually recommend a service first).", Toast.LENGTH_LONG)
 									.show();			
 //	The ServiceListActivity crashes...
 //				startActivity(new Intent(ServiceListActivity.this, ServiceAddActivity.class));

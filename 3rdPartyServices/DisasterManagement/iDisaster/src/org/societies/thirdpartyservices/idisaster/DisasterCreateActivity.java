@@ -24,15 +24,22 @@
  */
 package org.societies.thirdpartyservices.idisaster;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+import org.societies.android.api.cis.SocialContract;
 import org.societies.thirdpartyservices.idisaster.R;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.widget.EditText;
 import android.widget.Toast;
+import android.util.SparseBooleanArray;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.inputmethod.InputMethodManager;
@@ -79,11 +86,13 @@ public class DisasterCreateActivity extends Activity implements OnClickListener 
 
 	public void onClick(View view) {
 
-    	if (disasterNameView.getText().length() == 0) {					// check input for disaster name
+	    // Hide the soft keyboard:
+		// - the soft keyboard does not hide the toast message
+		// - the soft keyboard will not appear on next activity window!
+	    InputMethodManager mgr = (InputMethodManager) getSystemService(this.INPUT_METHOD_SERVICE);
+	    mgr.hideSoftInputFromWindow(disasterNameView.getWindowToken(), 0);
 
-    		// Hide the soft keyboard otherwise the toast message does appear more clearly.
-    	    InputMethodManager mgr = (InputMethodManager) getSystemService(this.INPUT_METHOD_SERVICE);
-    	    mgr.hideSoftInputFromWindow(disasterNameView.getWindowToken(), 0);
+    	if (disasterNameView.getText().length() == 0) {					// check input for disaster name
 	    
     		Toast.makeText(this, getString(R.string.toastDisasterName), 
     				Toast.LENGTH_LONG).show();
@@ -91,59 +100,90 @@ public class DisasterCreateActivity extends Activity implements OnClickListener 
 
     	} else if (disasterDescriptionView.getText().length() == 0) {	// check input for description (or any obligatory field)
 
-    		// Hide the soft keyboard otherwise the toast message does appear more clearly.
-    	    InputMethodManager mgr = (InputMethodManager) getSystemService(this.INPUT_METHOD_SERVICE);
-    	    mgr.hideSoftInputFromWindow(disasterDescriptionView.getWindowToken(), 0);
-
     	    Toast.makeText(this, getString(R.string.toastDisasterDescription), 
 	    			Toast.LENGTH_LONG).show();
 	    	return;
 
-    	} else {														// add disaster to directory
-
-    		disasterName = disasterNameView.getText().toString();
-    		disasterDescription = disasterDescriptionView.getText().toString();
-    		
-//TODO: Add call to the SocialProvider
-    		
-    		boolean disasterCreationCode = false;	// TODO: replace by code returned by Societes API
-    			    		
-    		// Create dialog for error
-    		if (disasterCreationCode) { 							
-    			AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this);
-    			alertBuilder.setMessage(getString(R.string.disasterCreateDialog))
-    				.setCancelable(false)
-    				.setPositiveButton (getString(R.string.dialogOK), new DialogInterface.OnClickListener() {
-    					public void onClick(DialogInterface dialog, int id) {
-    						disasterNameView.setText(getString(R.string.emptyText));
-    						disasterNameView.setHint(getString(R.string.loginUserNameHint));
-	    		           return;
-    					}
-    				});
-	    		AlertDialog alert = alertBuilder.create();
-	    		alert.show();
-	    		return;
-	   		}
-	
-    		// Test case: Refresh list of disasters for display in the DisasterListActivity
-    		if (iDisasterApplication.testDataUsed) {
-    	   	    iDisasterApplication.getInstance().disasterNameList.add(disasterName);
-        	    // report data change to adapter
-        	    iDisasterApplication.getInstance().disasterAdapter.notifyDataSetChanged();
-   			}
-     		
-// TODO: Remove code for testing the correct setting of preferences 
-    	    Toast.makeText(this, "Debug: "  + disasterName + " " + disasterDescription, 
-    			Toast.LENGTH_LONG).show();
-
-    	    // Hide the soft keyboard:
-			// - the soft keyboard will not appear on next activity window!
-    	    InputMethodManager mgr = (InputMethodManager) getSystemService(this.INPUT_METHOD_SERVICE);
-    	    mgr.hideSoftInputFromWindow(disasterNameView.getWindowToken(), 0);
+    	} 
+    	
+		disasterName = disasterNameView.getText().toString();
+		disasterDescription = disasterDescriptionView.getText().toString();
+		
+		if (iDisasterApplication.testDataUsed) {				// Test case: Refresh list of disasters for display in the DisasterListActivity
+	   	    iDisasterApplication.getInstance().disasterNameList.add(disasterName);
+    	    // report data change to adapter
+    	    iDisasterApplication.getInstance().disasterAdapter.notifyDataSetChanged();
 
 	    	finish();
     	    // Go back to the previous activity
-	    }
+	    
+		} else {
+			if (addNewTeam()						// add disaster to SocialProvider
+					.equals(iDisasterApplication.getInstance().INSERT_EXCEPTION)) {
+				showQueryExceptionDialog ();	// Exception: Display dialog (and terminates activity)
+    			// Go back to the previous activity
+    		} else {
+    			// The team was added to SocialProvider; The adapter (and adapter to view) is updated on resume of MemberListActivity 
+    			finish ();
+    		}
+    	}
     }
+	
+/**
+ * add team to SocialProvider
+ */
+	private String addNewTeam () {
+    
+//    	Uri teamUri = SocialContract.Communities.CONTENT_URI;
+
+		// Set the values related to the activity to store in SocialProvider
+		ContentValues teamValues = new ContentValues ();
+		
+//TODO: Remove the following once SocialProvider has been corrected (SocialProvider should insert the GLOBAL_ID)
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss");
+		String currentDateandTime = sdf.format(new Date());
+		teamValues.put(SocialContract.Communities.GLOBAL_ID, currentDateandTime);
+// End remove		
+
+		teamValues.put(SocialContract.Communities.TYPE, "disaster");
+		teamValues.put(SocialContract.Communities.NAME, disasterName);
+		teamValues.put(SocialContract.Communities.DESCRIPTION, disasterDescription);
+		teamValues.put(SocialContract.Communities.OWNER_ID,iDisasterApplication.getInstance().me.globalId);
+		teamValues.put(SocialContract.Communities.ORIGIN, "SOCIETIES");
+
+		try {
+// The Uri value returned is not used.
+//						Uri activityNewUri = getContentResolver().insert( SocialContract.CommunityActivity.CONTENT_URI,
+//													activityValues);
+			getContentResolver().insert( SocialContract.Communities.CONTENT_URI, 
+					teamValues);
+		} catch (Exception e) {
+			iDisasterApplication.getInstance().debug (2, "Insert to "+ 
+								SocialContract.Communities.CONTENT_URI + "causes an exception");
+	    	return iDisasterApplication.getInstance().INSERT_EXCEPTION;
+		}
+				
+		return iDisasterApplication.getInstance().INSERT_SUCCESS;
+	}
+	
+/**
+ * showQueryExceptionDialog displays a dialog to the user.
+ * In this case, the activity does not terminate since the other
+ * activities in the TAB may still work.
+ */
+        			
+	private void showQueryExceptionDialog () {
+    	AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this);
+        alertBuilder.setMessage(getString(R.string.dialogPeopleQueryException))
+        			.setCancelable(false)
+          			.setPositiveButton (getString(R.string.dialogOK), new DialogInterface.OnClickListener() {
+          				public void onClick(DialogInterface dialog, int id) {
+          					finish ();
+          					return;
+          				}
+          			});
+        AlertDialog alert = alertBuilder.create();
+        alert.show();	
+	}
 
 }
