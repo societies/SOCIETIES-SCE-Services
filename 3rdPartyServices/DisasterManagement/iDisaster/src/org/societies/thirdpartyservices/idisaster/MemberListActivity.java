@@ -106,18 +106,20 @@ public class MemberListActivity extends ListActivity {
     			} else {
     				if ((position) < members) {			// Retrieve information from members in the team
     					memberCursor.moveToPosition(position);
-//     					String memberGlobalId = memberCursor.getString(memberCursor
-//    							.getColumnIndex(SocialContract.People.GLOBAL_ID));
+    					
+    	     			Intent intent = new Intent(MemberListActivity.this, SharedServiceListActivity.class);
+     					String memberGlobalId = memberCursor.getString(memberCursor
+    							.getColumnIndex(SocialContract.People.GLOBAL_ID));
+           				intent.putExtra("MEMBER_ID", memberGlobalId);       					
        					String memberName =  memberCursor.getString(memberCursor
     							.getColumnIndex(SocialContract.People.NAME));
-            			Toast.makeText(getApplicationContext(),
-                				"No detailed member information available for " + memberName, Toast.LENGTH_LONG)
-                				.show();    				
-
+           				intent.putExtra("MEMBER_NAME", memberName);       					
+            			// Start the SharedServiceList activity
+                		startActivity(intent);
+           				
 // The activity is kept on stack (check also that "noHistory" is not set in Manifest)
 // Should it be removed?
-//       				finish();
-    					
+//       				finish();	
 
     				} else {
     					// Should never happen..

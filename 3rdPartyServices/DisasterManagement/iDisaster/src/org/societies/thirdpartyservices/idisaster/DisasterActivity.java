@@ -52,8 +52,6 @@ public class DisasterActivity extends TabActivity {
         setContentView (R.layout.disaster_layout);
 
 		TextView title = (TextView)findViewById(R.id.disasterLabel);
-
-		String t= iDisasterApplication.getInstance().selectedTeam.name;
 		title.setText (iDisasterApplication.getInstance().selectedTeam.name);
         
         Resources res = getResources();		// Resource object to get Drawables

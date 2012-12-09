@@ -370,16 +370,17 @@ public class iDisasterApplication extends Application {
 		        values.put(SocialContract.Services.AVAILABLE, SERVICE_NOT_INSTALLED);
 		        values.put(SocialContract.Services.URL, "http://folk.ntnu.no/svarvaa/utils/pro2www/apk/Tshirt.apk");
 		        values.put(SocialContract.Services.CONFIG, "org.ubicompforall.cityexplorer.gui.StartActivity");
+				values.put(SocialContract.Services.DEPENDENCY, "org.ubicompforall.cityexplorer");
 		        
 	        } else if (servicesCursor.getString(servicesCursor.getColumnIndex(SocialContract.Services.NAME)).equals("iJacketClient")) {
 	        	// City Explorer used for test... 
 		        values.put(SocialContract.Services.GLOBAL_ID, "org.ubicompforall.cityexplorer");
-//	        	values.put(SocialContract.Services.APP_TYPE, SERVICE_TYPE_CLIENT);
-		        values.put(SocialContract.Services.APP_TYPE, SERVICE_TYPE_PROVIDER);
+	        	values.put(SocialContract.Services.APP_TYPE, SERVICE_TYPE_CLIENT);
 		        values.put(SocialContract.Services.AVAILABLE, SERVICE_NOT_INSTALLED);
+		        values.put(SocialContract.Services.URL, "http://folk.ntnu.no/svarvaa/utils/pro2www/apk/OsnapApp.apk");
+//		        values.put(SocialContract.Services.URL, "https://play.google.com/store/apps");
 		        values.put(SocialContract.Services.CONFIG, "android.intent.action.MAIN"); // TODO: ???
 		        values.put(SocialContract.Services.DEPENDENCY, "");
-		        values.put(SocialContract.Services.URL, "https://play.google.com/store/apps");
 
 	        	// City Explorer used for test... 
 		        values.put(SocialContract.Services.CONFIG, "org.ubicompforall.cityexplorer.gui.StartActivity");

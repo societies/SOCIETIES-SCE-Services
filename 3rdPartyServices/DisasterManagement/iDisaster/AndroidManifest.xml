@@ -76,8 +76,13 @@
         <activity
             android:name=".MemberListActivity"
             android:theme="@android:style/Theme.NoTitleBar" > 
+        </activity>
+        
+        <activity
+            android:name=".SharedServiceListActivity"
+            android:theme="@android:style/Theme.NoTitleBar" > 
         </activity>       
-		
+        		
         <activity
             android:name=".ServiceListActivity"
             android:theme="@android:style/Theme.NoTitleBar" >

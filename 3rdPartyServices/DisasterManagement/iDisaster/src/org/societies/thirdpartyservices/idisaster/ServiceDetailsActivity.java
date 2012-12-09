@@ -76,7 +76,7 @@ public class ServiceDetailsActivity extends Activity implements OnClickListener 
 		setContentView(R.layout.service_details_layout);
 //		resolver = getContentResolver ();
 
-		Intent intent= getIntent(); 							// Get the intent that created activity		
+		Intent intent= getIntent(); 					// Get the intent that created activity		
 		requestContext = intent.getStringExtra("REQUEST_CONTEXT");	// Retrieve first parameter (context for request of details)
 		
 		thirdPartyService = new ThirdPartyService
@@ -99,7 +99,7 @@ public class ServiceDetailsActivity extends Activity implements OnClickListener 
 			}
 			
 			// Check that availability status in SocialProvider is consistent with 
-			// service availability	on the device		
+			// service availability	on the device
 			if (!(thirdPartyService.checkServiceInstallStatus (this)
 					.equals (iDisasterApplication.getInstance().UPDATE_SUCCESS))) {
 				showQueryExceptionDialog ();	// Exception: Display dialog and terminates activity			
@@ -157,7 +157,17 @@ public class ServiceDetailsActivity extends Activity implements OnClickListener 
 // TODO: Check it the client is installed. If not Action is "Install client" - otherwise "Access"
 			// Set status (on UI)
 			serviceStatusView.setText(SERVICE_STATUS_SHARED_IN_CIS);
-			serviceAction1 ="Back";
+
+			// NB: The service should normally not be installed. If so it was already launched 
+			if (thirdPartyService.serviceAvailable													// If the service is installed on the device
+					.equals(iDisasterApplication.getInstance().SERVICE_INSTALLED)) {
+				// Set status (on UI)
+				serviceAction1 = iDisasterApplication.getInstance().SERVICE_LAUNCH;			// Action available to user is Launch
+				
+			} else {																	// If the service is NOT installed on the device
+				// Set status (on UI)
+				serviceAction1 = iDisasterApplication.getInstance().SERVICE_INSTALL; 		// Action available to user is Install
+			}
 		}
 		
 		button1 = (Button) findViewById(R.id.serviceDetailsButton1);
@@ -167,25 +177,30 @@ public class ServiceDetailsActivity extends Activity implements OnClickListener 
 		button2 = (Button) findViewById(R.id.serviceDetailsButton2);
 		if (serviceAction1.equals((iDisasterApplication.getInstance().SERVICE_LAUNCH))) {
 			
-			String sharingStatus = thirdPartyService.checkServiceShareStatus(this,
-					iDisasterApplication.getInstance().me.globalId,
-					iDisasterApplication.getInstance().selectedTeam.globalId) ;
-			if (sharingStatus.equals (iDisasterApplication.getInstance().QUERY_EXCEPTION)) {
-				showQueryExceptionDialog ();	// SocialProvider exception: Display dialog and terminates activity
-				
-			} else {
-				if (sharingStatus.equals (iDisasterApplication.getInstance().QUERY_SUCCESS)) {
-					serviceAction2 = iDisasterApplication.getInstance().SERVICE_UNSHARE;	// Alternative action to user is Unshare
+			if (!requestContext.equals (iDisasterApplication.getInstance().SERVICE_SHARED)) {		// Only the request is not about a shared service
+				String sharingStatus = thirdPartyService.checkServiceShareStatus(this,
+						iDisasterApplication.getInstance().me.globalId,
+						iDisasterApplication.getInstance().selectedTeam.globalId) ;
+				if (sharingStatus.equals (iDisasterApplication.getInstance().QUERY_EXCEPTION)) {
+					showQueryExceptionDialog ();	// SocialProvider exception: Display dialog and terminates activity
 					
 				} else {
-					serviceAction2 = iDisasterApplication.getInstance().SERVICE_SHARE;		// Alternative action to user is Share
-					serviceStatusView.setText (SERVICE_STATUS_SHARED_BY_ME);
+					if (sharingStatus.equals (iDisasterApplication.getInstance().QUERY_SUCCESS)) {
+						serviceAction2 = iDisasterApplication.getInstance().SERVICE_UNSHARE;	// Alternative action to user is Unshare
+						
+					} else {
+						serviceAction2 = iDisasterApplication.getInstance().SERVICE_SHARE;		// Alternative action to user is Share
+						serviceStatusView.setText (SERVICE_STATUS_SHARED_BY_ME);
 
+					}
 				}
-			}
 
-			button2.setText(serviceAction2);
-			button2.setOnClickListener(this);
+				button2.setText(serviceAction2);
+				button2.setOnClickListener(this);
+				
+			} else {
+				button2.setVisibility(android.view.View.GONE);		// Hide button2							
+			}
 			
 		} else {
 			button2.setVisibility(android.view.View.GONE);		// Hide button2			

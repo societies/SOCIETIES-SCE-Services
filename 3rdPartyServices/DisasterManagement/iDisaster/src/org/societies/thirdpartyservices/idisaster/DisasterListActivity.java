@@ -169,14 +169,6 @@ public class DisasterListActivity extends ListActivity {
     protected void onPause() {
     	super.onPause ();
     	
-// TODO: check the following:
-    	// When using managedQuery(), the activity keeps a reference to the cursor and close it
-    	// whenever needed (in onDestroy() for instance.) 
-    	// When using a contentResolver's query(), the developer has to manage the cursor as a sensitive
-    	// resource. If you forget, for instance, to close() it in onDestroy(), you will leak 
-    	// underlying resources (logcat will warn you about it.)
-    	//
-    	
 //    	ownTeamCursor.close();
 //    	memberTeamCursor.close();    	
 

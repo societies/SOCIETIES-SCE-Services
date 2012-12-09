@@ -4,11 +4,14 @@
     <string name="add_item_menu">\n\n\nActivate menu to add item</string>
     
     <string name="app_name">iDisaster</string>
-
+    
+	<string name="dialogCancel">Cancel</string>
     <string name="dialogOK">OK</string>
     <string name="dialogFeedInsertException">EXCEPTION:\nCannot store the new activity in SocialProvider.</string>
     <string name="dialogFeedQueryException">EXCEPTION:\nCannot retrieve activities from SocialProvider.</string>
+    <string name="dialogInstall">Install</string>
     <string name="dialogMemberQueryException">EXCEPTION:\nCannot retrieve members from SocialProvider.</string>
+    <string name="dialogNotInstalled">client is not installed on this device.</string>
     <string name="dialogPeopleQueryException">EXCEPTION:\nCannot retrieve information in people registry from SocialProvider.</string>
     <string name="dialogQueryException">EXCEPTION:\nCannot retrieve information from SocialProvider.</string>
 	<string name="dialogServiceDetailsQueryException">EXCEPTION:\nCannot retrieve service information from SocialProvider.</string>
@@ -86,6 +89,7 @@
     <string name="serviceStatusLabel">Status:</string>
 
     <string name="sharedServiceLabel">Service shared by: ... in ...</string>
+    <string name="sharedServiceNone">\n\n\nNo service shared by this member</string>
     	
     <string name="startButton">Start</string>
     <string name="start_menu_logoff">Log off</string>
