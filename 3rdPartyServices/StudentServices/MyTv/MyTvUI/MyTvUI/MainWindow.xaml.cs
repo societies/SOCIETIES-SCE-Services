@@ -149,15 +149,15 @@ namespace MyTvUI
                     this.userID = socketClient.getUserID();
                     //if EMMA -> getPreferences
                     //if ARTHUR -> getUserIntent
-                    if(this.userID.Equals("emma.societies.local.macs.hw.ac.uk"))
-                    {
+                    //if(this.userID.Equals("emma.societies.local.macs.hw.ac.uk"))
+                    //{
                         Console.WriteLine("Getting preferences for user: "+userID);
                         initialisePreferences();
-                    }else if(this.userID.Equals("arthur.societies.local.macs.hw.ac.uk"))
-                    {
-                        Console.WriteLine("Getting intent for user: "+userID);
-                        initialiseIntent();
-                    }
+                    //}else if(this.userID.Equals("arthur.societies.local.macs.hw.ac.uk"))
+                    //{
+                      //  Console.WriteLine("Getting intent for user: "+userID);
+                      //  initialiseIntent();
+                    //}
                     
                 }
 
