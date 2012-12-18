@@ -22,79 +22,16 @@
  * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.disaster.idisaster;
+package org.societies.thirdpartyservices.idisaster;
 
 import android.app.Activity;
-import android.content.Intent;
-import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.widget.TextView;
-import android.widget.Toast;
 
 /**
- * This activity allows the user to look up members
- * in a directory, more to be added.
+ * Allows user to view and update account data.
  * 
- * @author Jacqueline.Floch@sintef.no
+ * @author Babak.Farshchian@sintef.no
  *
  */
-public class MemberListActivity extends Activity {
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-	// TODO Auto-generated method stub
-	super.onCreate(savedInstanceState);
-
-	TextView textview = new TextView(this);
-        textview.setText("No Members yet. Select menu to add members.");
-        setContentView(textview);
-    }
-
-/**
- * onCreateOptionsMenu expands the activity menu for this activity tab.
- */
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu){
-
-		//The FIXED menu is set by the TabActivity.
-// I am uncertain why the call to the super class leads to the creation
-// of the fixed menu set by the TabActivity (DisasterActivity)
-
-    	super.onCreateOptionsMenu(menu);
-    	
-    	menu.setGroupVisible(R.id.disasterMenuMember, true);
-    	return true;
-    }
-
-    /**
-    * onOptionsItemSelected handles the selection of an item in the activity menu.
-    */
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-
-		// The TabActivity handles items in the FIXED menu.
-// I am uncertain why the call to the super class leads to handling
-// of a command in the fixed menu by the TabActivity (DisasterActivity)
-
-    	super.onOptionsItemSelected(item);
-
-    	switch (item.getItemId()) {
-
-    		case R.id.disasterMenuAddMember:
-////TODO: Remove code for testing the correct setting of preferences 
-//    			Toast.makeText(getApplicationContext(),
-//    				"Menu item chosen: Add member", Toast.LENGTH_LONG)
-//    				.show();
-    			
-    			startActivity(new Intent(MemberListActivity.this, MemberAddActivity.class));
-    		break;
-    		
-    		default:
-    		break;
-    	}
-    	return true;
-    }
+public class AccountManagerActivity extends Activity {
 
 }

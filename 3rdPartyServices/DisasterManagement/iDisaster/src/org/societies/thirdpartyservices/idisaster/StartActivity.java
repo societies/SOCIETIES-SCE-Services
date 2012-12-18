@@ -22,15 +22,13 @@
  * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.disaster.idisaster;
-
-import com.disaster.idisaster.R;
+package org.societies.thirdpartyservices.idisaster;
 
 import android.app.Activity;
-import android.content.ContentResolver;
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
-import android.database.Cursor;
-import android.net.Uri;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -39,11 +37,7 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.TextView;
 
-import com.disaster.idisaster.SocialContract;
-import android.net.Uri;
-import android.content.ContentValues;
-import android.content.ContentResolver;
-import android.database.Cursor;
+import org.societies.thirdpartyservices.idisaster.R;
 
 
 /**
@@ -61,7 +55,7 @@ import android.database.Cursor;
 
 public class StartActivity extends Activity implements OnClickListener {
 
-	Boolean loggedIn = false;
+	Boolean loggedIn;		// when true the user is logged
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -86,31 +80,29 @@ public class StartActivity extends Activity implements OnClickListener {
     public void onResume () {
     	
     	super.onResume();
-    	
     
-    	loggedIn = false;
-    		
+    	loggedIn = false;	// Always reset when starting activity since the user may have logged out in
+    						// this App or another App
+    									
     	// check is the user is logged in
     	// if logged in display the user name
     	// if not tell the user he is not logged in.
 		TextView startView = (TextView) findViewById(R.id.startInfo);
 
-		
-		if (iDisasterApplication.testDataUsed) {			// Test data
+		if (iDisasterApplication.testDataUsed) {							// Use test data (no SocialProvider)
 			startView.setText(getString(R.string.startInfoNotLogged));			
-		} else {														// Fetch data from SocialProvider
-			String userName = getUserIdentity();
-			if (userName == null) {											// No data returned by Social provider
-				iDisasterApplication.getInstance().showDialog (this,
-						"Unable to retrieve user information from SocialProvider",
-						 getString(R.string.dialogOK));
-			} else if (userName == "Your Name") {							// User is not identified
-				startView.setText(getString(R.string.startInfoNotLogged));
-			
-			} else {														// User is identified
-				startView.setText(getString(R.string.startInfoLogged) + userName);
+		} else {															// Fetch data from SocialProvider
+			String userQueryCode = iDisasterApplication.getInstance().checkUserIdentity(this);
+			if (userQueryCode.equals(iDisasterApplication.getInstance().QUERY_SUCCESS)) {	// User is identified
+				startView.setText(getString(R.string.startInfoLogged) 
+						+ " " 													// Not sure end space in the predefined string is ignored
+						+ iDisasterApplication.getInstance().me.displayName);
 				loggedIn = true;
-			}
+			} else if (userQueryCode.equals(iDisasterApplication.getInstance().QUERY_EMPTY)) {	// No data returned by Social provider
+				startView.setText(getString(R.string.startInfoNotLogged));
+			} else {
+				showQueryExceptionDialog ();	// Exception: Display dialog and terminates activity
+	        }
 		}
 	}
 
@@ -120,55 +112,79 @@ public class StartActivity extends Activity implements OnClickListener {
  */
 	 public void onClick (View view) {
 		
-		if (!loggedIn) {		// no user name
+		if (!loggedIn) {													// User was not identified
+			//TODO: Replace this logging by a call to CSS Management?
+			// I am not sure how this should be handled as handling logging
+			// should be under the responsibility of Social Provider
+
     		startActivity(new Intent(StartActivity.this, LoginActivity.class));
     		return;			
 		} else {
-	    	startActivity(new Intent(StartActivity.this, DisasterActivity.class));
+	    	startActivity(new Intent(StartActivity.this, DisasterListActivity.class));
 	    	return;
 		}
    	}
 
 
 /**
- * getUserIdentity is to add the user information in SocialProvider
+ * onCreateOptionsMenu creates the activity menu.
  */
+ 
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu){
+		menu.clear();
+		getMenuInflater().inflate(R.menu.start_menu, menu);
 
-	private String getUserIdentity () {
-		String displayName = null;
-		
-		Uri uri = SocialContract.Me.CONTENT_URI;
+//		It is possible to set up a variable menu		
+//			menu.findItem (R.id....).setVisible(true);
 
-		//What to get:
-		String[] projection = new String [] {
-				SocialContract.Me.GLOBAL_ID,
-				SocialContract.Me.NAME,
-				SocialContract.Me.DISPLAY_NAME
-			};
-		
-//		String selection = "";
-		String selection = SocialContract.Me._ID + " = 1";
-
-		String[] selectionArgs = null;
-		String sortOrder = null;
-		
-		Cursor cursor = getContentResolver().query(uri, projection, selection, selectionArgs, sortOrder);
-		
-		if (cursor == null) {
-			iDisasterApplication.getInstance().showDialog (this,
-					"Unable to retrieve user information from SocialProvider",
-					 getString(R.string.dialogOK));
-		} else {
-// TODO: Add a check? : Should it be a single user (stored in Me).
-//			int i= cursor.getCount(); was used for debug
-			if (cursor.moveToFirst()){
-				displayName = cursor.getString(cursor
-						.getColumnIndex(SocialContract.Me.DISPLAY_NAME));			}
-		}
-		return displayName;
+		return true;
 	}
 
-	
+
+/**
+  * onOptionsItemSelected handles the selection of an item in the activity menu.
+  */
+
+	@Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+		
+    	case R.id.startMenuLogoff:
+    		
+//TODO: Call CSS Management?
+// I am not sure how this should be handled as many Apps may be "logged in".
+// Handling logging should be under the responsibility of Social Provider
+
+    		break;
+    		
+    	default:
+    		break;
+    	}
+    	return true;
+    }
+
+/**
+ * showQueryExceptionDialog displays a dialog to the user and terminates activity.
+ */
+		
+	private void showQueryExceptionDialog () {
+		AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this);
+		alertBuilder.setMessage(getString(R.string.dialogQueryException))
+  				.setCancelable(false)
+  				.setPositiveButton (getString(R.string.dialogOK), new DialogInterface.OnClickListener() {
+  					public void onClick(DialogInterface dialog, int id) {
+  						// add termination code code eventually
+  						finish ();
+  						return;
+  					}
+  				});
+		AlertDialog alert = alertBuilder.create();
+	    alert.show();	
+	}
+
+
+
 /**
  * getPreferences retrieves the preferences stored in the preferences file.
  */
@@ -200,44 +216,5 @@ public class StartActivity extends Activity implements OnClickListener {
 //    		return;
 //    	}
 //    }
-
-
-/**
- * onCreateOptionsMenu creates the activity menu.
- */
- 
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu){
-		menu.clear();
-		getMenuInflater().inflate(R.menu.start_menu, menu);
-
-//		It is possible to set up a variable menu		
-//			menu.findItem (R.id....).setVisible(true);
-
-		return true;
-	}
-
-
-/**
-  * onOptionsItemSelected handles the selection of an item in the activity menu.
-  */
-
-	@Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-		switch (item.getItemId()) {
-		
-    	case R.id.startMenuLogoff:
-//TODO: Call the Social Provider
-// reset user preferences - not used anymore
-//    		iDisasterApplication.getInstance().setDisasterTeamName // reset user preferences
-//    		(getString(R.string.noPreference));					
-
-    		break;
-    		
-    	default:
-    		break;
-    	}
-    	return true;
-    }
 
 }

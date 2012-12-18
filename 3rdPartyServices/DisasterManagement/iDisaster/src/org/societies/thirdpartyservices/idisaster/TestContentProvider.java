@@ -22,45 +22,87 @@
  * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.disaster.idisaster;
+package org.societies.thirdpartyservices.idisaster;
 
-import com.disaster.idisaster.R;
+import org.societies.thirdpartyservices.idisaster.R;
+
 
 import android.app.Activity;
+import android.content.ContentResolver;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.widget.TextView;
 
 /**
- * Activity for showing service details.
+ * This is an activity to test Content Provider code.
  * 
  * @author Jacqueline.Floch@sintef.no
+ * 
  *
  */
-public class ServiceDetailsActivity extends Activity {
+public class TestContentProvider extends Activity {
 
-	private TextView serviceNameView;
-	private TextView serviceDescriptionView;
-	private String serviceName = "serviceTestName";
-	private String serviceDescription = "serviceTestDescription";
-
-
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-
+	ContentResolver resolver;
+	Cursor cursor;
+	
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.service_details_layout);
+		setContentView(R.layout.test_content_provider_layout);
+		TextView contactView = (TextView) findViewById(R.id.contactview);
 
+		Cursor cursor = getContacts();
 
-		// Get text fields
-		serviceNameView = (TextView) findViewById(R.id.showServiceDetailsName);
-		serviceDescriptionView = (TextView) findViewById(R.id.showServiceDetailsDescription);
+		while (cursor.moveToNext()) {
+
+			String displayName = cursor.getString(cursor
+					.getColumnIndex(ContactsContract.Data.DISPLAY_NAME));
+			contactView.append("Name: ");
+			contactView.append(displayName);
+			contactView.append("\n");
+		}
+
+	}
+
+	private Cursor getContacts() {
+		// Run query
+
+		Uri uri = ContactsContract.Contacts.CONTENT_URI;
+		String[] projection = new String[] { ContactsContract.Contacts._ID,
+				ContactsContract.Contacts.DISPLAY_NAME };
+		String selection = ContactsContract.Contacts.IN_VISIBLE_GROUP + " = '"
+				+ ("1") + "'";
+		String[] selectionArgs = null;
+		String sortOrder = ContactsContract.Contacts.DISPLAY_NAME
+				+ " COLLATE LOCALIZED ASC";
+
+		resolver  = getContentResolver();
+		cursor = resolver.query(uri, projection, selection, selectionArgs,sortOrder);
+
+		return cursor;
+
+// Code from Lars Vogel example (vogella.com). 
+// managedQuery is deprecated.
+//
+// When using managedQuery(), the activity keeps a reference to the cursor and close it
+// whenever needed (in onDestroy() for instance.) 
+// When using a contentResolver's query(), the developer has to manage the cursor as a sensitive
+// resource. If you forget, for instance, to close() it in onDestroy(), you will leak 
+// underlying resources (logcat will warn you about it.)
+//
+//		return managedQuery(uri, projection, selection, selectionArgs,
+//				sortOrder);
+	}
+
+	@Override
+	public void onDestroy () {
+		super.onDestroy();
 		
-		//TODO: set name and description
-
-//	    Test dialog
-//    	iDisasterApplication.getInstance().showDialog (this, getString(R.string.newDisasterTestDialog), getString(R.string.dialogOK));
-
-    }
-
+		if (cursor != null) {
+			cursor.close();
+		}
+		
+	}
 }

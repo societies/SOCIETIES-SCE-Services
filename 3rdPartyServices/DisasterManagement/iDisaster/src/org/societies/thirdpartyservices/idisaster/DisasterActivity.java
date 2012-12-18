@@ -1,17 +1,30 @@
-package com.disaster.idisaster;
+package org.societies.thirdpartyservices.idisaster;
 
 //import org.societies.api.css.management.ICssRecord;
 //import org.societies.api.css.management.ISocietiesApp;
 // import org.societies.cis.android.client.SocietiesApp;
 
-import com.disaster.idisaster.R;
+import java.util.ArrayList;
 
+import org.societies.android.api.cis.SocialContract;
+import org.societies.thirdpartyservices.idisaster.R;
+import org.societies.thirdpartyservices.idisaster.data.Me;
+import org.societies.thirdpartyservices.idisaster.data.SelectedTeam;
+
+import android.app.AlertDialog;
+import android.app.Application;
 import android.app.TabActivity;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Resources;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ArrayAdapter;
 import android.widget.TabHost;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -40,7 +53,8 @@ public class DisasterActivity extends TabActivity {
 
 		TextView title = (TextView)findViewById(R.id.disasterLabel);
 
-		title.setText (iDisasterApplication.getInstance().disasterTeamName);
+		String t= iDisasterApplication.getInstance().selectedTeam.name;
+		title.setText (iDisasterApplication.getInstance().selectedTeam.name);
         
         Resources res = getResources();		// Resource object to get Drawables
         TabHost tabHost = getTabHost();		// The activity TabHost
