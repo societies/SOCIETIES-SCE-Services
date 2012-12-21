@@ -1,4 +1,4 @@
-package org.societies.thirdpartyservices;
+package org.societies.thirdpartyservices.ijacketclient;
 
 import java.util.Random;
 
