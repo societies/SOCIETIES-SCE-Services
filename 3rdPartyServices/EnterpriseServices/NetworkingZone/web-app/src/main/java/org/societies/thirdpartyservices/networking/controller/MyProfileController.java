@@ -42,6 +42,9 @@ public class MyProfileController {
 	
 	@RequestMapping(value="/myprofile.html",method=RequestMethod.GET)
 	public ModelAndView myprofile() {
+		
+		getMyNetClient().recordActionShowProfile();
+		
 		Map<String, Object> model = new HashMap<String, Object>();
 		ProfileForm profileForm = new ProfileForm();
 		UserDetails userDets = getMyNetClient().getMyDetails();

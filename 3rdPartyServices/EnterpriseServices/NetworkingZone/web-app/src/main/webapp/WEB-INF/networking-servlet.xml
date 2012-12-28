@@ -42,7 +42,7 @@
 
 	<!-- Configures the annotation-driven Spring MVC Controller programming model -->
 	<mvc:annotation-driven />	
-	<ctx:property-placeholder properties-ref="networkclientConfig"/> 
+	
 	
 
 		
@@ -70,22 +70,9 @@
   		</property>
 	</bean>
 			
-	<bean id="networkClient" 
-		class="org.societies.thirdpartyservices.networking.client.NetworkClient">
-		<property name="cisManager" ref="cisManager" />
-		<property name="cisDirectoryClient" ref="cisDirectoryClient" />
-		<property name="commsClient" ref="commsClient" /> 
-		<property name="ctxBroker" ref="ctxBroker" />
-		<property name="commManager" ref="commManager" />
-		<property name="cssManager" ref="cssManager" />
-	</bean>		
 	
-	<bean id="commsClient" 
-		class="org.societies.thirdpartyservices.networking.client.NetworkingClientComms"
-		 init-method="InitService">
- 		<constructor-arg value="${networkingserver}"/> 
-		<property name="commManager" ref="commManager" />
-	</bean>
+	
+	
 	
 	<!-- Scans the classpath for annotated components that will be auto-registered as Spring beans. -->
 	<ctx:component-scan base-package="org.societies.thirdpartyservices.networking.controller" />

@@ -46,8 +46,9 @@ import org.societies.api.ext3p.networking.ShareInfo;
 import org.societies.api.ext3p.networking.UserDetails;
 import org.societies.api.ext3p.networking.ZoneDetails;
 import org.societies.api.ext3p.networking.ZoneEvent;
-import org.societies.api.schema.activity.Activity;
-import org.societies.api.schema.activityfeed.Activityfeed;
+import org.societies.api.schema.activity.MarshaledActivity;
+import org.societies.api.schema.activityfeed.MarshaledActivityFeed;
+
 import org.societies.thirdpartyservices.networking.directory.NetworkingDirectory;
 
 
@@ -73,7 +74,7 @@ public class NetworkBackEnd {
 	
 	//private ICis netCis;
 	private List<ICis> netZoneCis;
-	private List<Activity> cisActivities;
+	private List<MarshaledActivity> cisActivities;
 	private List<ZoneDetails> netZoneDetails;
 	
 
@@ -264,7 +265,7 @@ public class NetworkBackEnd {
 	}
 	
 	
-	public List<Activity> getCisActivity(ICis cisNet)
+	public List<MarshaledActivity> getCisActivity(ICis cisNet)
 	{
 		NetZoneActivitiesCallback actCallBack = new NetZoneActivitiesCallback(cisNet.getCisId());
 		cisActivities = null;
@@ -285,10 +286,10 @@ public class NetworkBackEnd {
 		
 		if (cisActivities != null)
 		{
-			Iterator<Activity> it = cisActivities.iterator();
+			Iterator<MarshaledActivity> it = cisActivities.iterator();
 			
 			while(it.hasNext()){
-				Activity element = it.next();
+				MarshaledActivity element = it.next();
 				log.info(cisNet.getName() + " activities . element.getActor : " + element.getActor());
 				log.info(cisNet.getName() + " activities . element.getObject : " + element.getObject());
 				log.info(cisNet.getName() + " activities . element.getPublished : " + element.getPublished());
@@ -315,11 +316,11 @@ public class NetworkBackEnd {
 			this.parentJid = parentJid;
 		}
 		
-		public void receiveResult(Activityfeed activityFeedObject){
+		public void receiveResult(MarshaledActivityFeed activityFeedObject){
 
 			//int[] check = {0,0};
 			
-			cisActivities = activityFeedObject.getGetActivitiesResponse().getActivity();
+			cisActivities = activityFeedObject.getGetActivitiesResponse().getMarshaledActivity();
 			
 			/*
 			Iterator<Activity> it = l.iterator();
@@ -534,10 +535,10 @@ public class NetworkBackEnd {
 		
 		if (cisActivities != null)
 		{
-			Iterator<Activity> it = cisActivities.iterator();
+			Iterator<MarshaledActivity> it = cisActivities.iterator();
 			ZoneEvent zoneEvent = null;
 			while(it.hasNext()){
-				Activity element = it.next();
+				MarshaledActivity element = it.next();
 				log.info(cisToQuery.getName() + " activities . element.getActor : " + element.getActor());
 				log.info(cisToQuery.getName() + " activities . element.getObject : " + element.getObject());
 				log.info(cisToQuery.getName() + " activities . element.getPublished : " + element.getPublished());
@@ -611,7 +612,7 @@ public class NetworkBackEnd {
 		
 		for ( int i = 0; i < zoneDets.size(); i++)
 		{
-			try {
+		//	try {
 				zoneDets.get(i).setZonemembercount(0);
 	
 				for ( int j = 0; j < netZoneCis.size(); j++)
@@ -625,25 +626,26 @@ public class NetworkBackEnd {
 						ICisOwned tempcis = getCisManager().getOwnedCis(netZoneCis.get(j).getCisId());
 						if (tempcis !=null)
 						{
-							Future<Set<ICisParticipant>> tempmemberlistfut = tempcis.getMemberList();
-							if (tempmemberlistfut != null) {
-								Set<ICisParticipant> tempmemberlist = tempmemberlistfut.get();
+							//Future<Set<ICisParticipant>> tempmemberlistfut = tempcis.getMemberList();
+							Set<ICisParticipant> tempmemberlist = tempcis.getMemberList();
+							//if (tempmemberlistfut != null) {
+							//	Set<ICisParticipant> tempmemberlist = tempmemberlistfut.get();
 								if (tempmemberlist != null) {
 									zoneDets.get(i).setZonemembercount(tempmemberlist.size());
 										log.info("NetworkBackEnd getZoneDetails . member count for " + zoneDets.get(i).getZonename() + " is " + tempmemberlist.size());
 								}
-							}
+							//}
 						}
 						j = netZoneCis.size();
 					}
 				}
-			} catch (InterruptedException e) {
+		//	} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (ExecutionException e) {
+		//		e.printStackTrace();
+		//	} catch (ExecutionException e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+		//		e.printStackTrace();
+		//	}
 			
 		}
 		
