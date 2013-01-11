@@ -10,43 +10,13 @@ http://www.springframework.org/schema/osgi-compendium
 http://www.springframework.org/schema/osgi-compendium/spring-osgi-compendium-1.2.xsd"
 	xmlns:context="http://www.springframework.org/schema/context">
 
-	<!-- definitions using elements of the osgi namespace can be included in 
-		this file. There is no requirement to keep these definitions in a separate 
-		file if you do not want to. The rationale for keeping these definitions separate 
-		is to facilitate integration testing of the bundle outside of an OSGi container -->
-		
-		<!-- Using the <osgi:service tag you define the interface(s) that your component exposes -->
-		<!-- Here you also declare the SERVICE TYPE in order for your service to be published on a Viego node -->
-	<bean id="sharedCalendarUtil"
-		class="org.societies.rdPartyService.enterprise.sharedCalendar.SharedCalendarUtil">
-		<constructor-arg value="${clientId}" />
-		<constructor-arg value="${clientSecret}" />
-		<constructor-arg value="${accessToken}" />
-		<constructor-arg value="${refreshToken}" />
-	</bean>
-
-	<context:property-placeholder
-		properties-ref="backEndProperties" />
-
-	<osgi-compendium:cm-properties id="backEndProperties"
-		persistent-id="bk" />
-
-	<!-- Required References -->
-	<osgi:reference id="CommManagerBundle"
-		interface="org.societies.api.comm.xmpp.interfaces.ICommManager" />
-	<osgi:reference id="dataSource" interface="javax.sql.DataSource" />
-	<osgi:reference id="eventManager"
-		interface="org.societies.api.osgi.event.IEventMgr" />
-	<osgi:reference id="serviceMgmt"
+	<!-- Service References -->
+	<osgi:reference id="serviceUtil"
 		interface="org.societies.api.services.IServices" />
-	<osgi:reference id="CisManagementBundle"
-		interface="org.societies.api.cis.management.ICisManager" />
-	<osgi:reference id="activityFeed"
-		interface="org.societies.api.activity.IActivityFeed" cardinality="0..1" />
 
 	<!-- Provided Services -->
-	<osgi:service ref="sharedCalendar"
-		interface="org.societies.rdPartyService.enterprise.sharedCalendar.ISharedCalendar">
+	<osgi:service ref="myService"
+		interface="org.societies.myexample.service.IMyService">
 		<osgi:service-properties>
 			<entry key="TargetPlatform" value="SOCIETIES" />
 			<entry key="ServiceProvider" value="ICT-SOCIETIES" />
@@ -56,18 +26,11 @@ http://www.springframework.org/schema/osgi-compendium/spring-osgi-compendium-1.2
 	</osgi:service>
 
 	<bean id="serMetamodel" class="org.societies.api.schema.servicelifecycle.model.Service">
-		<property name="authorSignature" value="Soluta.Net" />
-		<property name="serviceDescription" value="Shared Calendar Server Component" />
-		<property name="serviceName" value="Shared Calendar Server" />
+		<property name="authorSignature" value="Your Name" />
+		<property name="serviceDescription" value="Some description" />
+		<property name="serviceName" value="My Exmaple Service" />
 		<property name="serviceType" value="THIRD_PARTY_SERVER" />
-		<property name="privacyPolicy" value="http://societies.local/local_file" />
+		<property name="serviceCategory" value="example" />
+		<property name="privacyPolicy" value="privacy-policy.xml" />
 	</bean>
-
-	<osgi:set id="availableDevicesSet" interface="org.societies.api.css.devicemgmt.IDevice"
-		cardinality="0..N">
-		<osgi:listener bind-method="onBind" unbind-method="onUnbind">
-			<bean
-				class="org.societies.rdPartyService.enterprise.sharedCalendar.DeviceListener" />
-		</osgi:listener>
-	</osgi:set>
 </beans>
