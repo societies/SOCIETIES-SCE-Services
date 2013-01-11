@@ -34,7 +34,7 @@
 
 	<dependencies>
 	
-		<!-- add your dependencies here e.g. for using the societies-api use the following-->
+		<!-- add your dependencies here e.g. for using the societies-api use the following
 		
 		<dependency>
 			<groupId>org.societies.api.external</groupId>
@@ -42,7 +42,7 @@
 			<version>0.5</version>
 			<scope>provided</scope>
 		</dependency>
-
+-->
 	</dependencies>
 
 	<build>
