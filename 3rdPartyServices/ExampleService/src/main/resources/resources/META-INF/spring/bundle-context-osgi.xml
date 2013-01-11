@@ -1,25 +1,73 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:osgi="http://www.springframework.org/schema/osgi"
+	xmlns:osgi-compendium="http://www.springframework.org/schema/osgi-compendium"
 	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
-http://www.springframework.org/schema/osgi http://www.springframework.org/schema/osgi/spring-osgi.xsd">
+http://www.springframework.org/schema/osgi http://www.springframework.org/schema/osgi/spring-osgi.xsd
+http://www.springframework.org/schema/context
+http://www.springframework.org/schema/context/spring-context-2.5.xsd
+http://www.springframework.org/schema/osgi-compendium
+http://www.springframework.org/schema/osgi-compendium/spring-osgi-compendium-1.2.xsd"
+	xmlns:context="http://www.springframework.org/schema/context">
 
 	<!-- definitions using elements of the osgi namespace can be included in 
 		this file. There is no requirement to keep these definitions in a separate 
 		file if you do not want to. The rationale for keeping these definitions separate 
 		is to facilitate integration testing of the bundle outside of an OSGi container -->
+		
+		<!-- Using the <osgi:service tag you define the interface(s) that your component exposes -->
+		<!-- Here you also declare the SERVICE TYPE in order for your service to be published on a Viego node -->
+	<bean id="sharedCalendarUtil"
+		class="org.societies.rdPartyService.enterprise.sharedCalendar.SharedCalendarUtil">
+		<constructor-arg value="${clientId}" />
+		<constructor-arg value="${clientSecret}" />
+		<constructor-arg value="${accessToken}" />
+		<constructor-arg value="${refreshToken}" />
+	</bean>
 
-	<osgi:service ref="externalCtxBrokerMock"
-		interface="org.societies.context.mock.externalBroker.ExternalCtxBrokerMock" />
+	<context:property-placeholder
+		properties-ref="backEndProperties" />
 
-	<osgi:reference id="externalCtxBroker"
-		interface="org.societies.api.context.broker.ICtxBroker" cardinality="1..1" />
-	<osgi:reference id="commMgr"
-		interface="org.societies.api.comm.xmpp.interfaces.ICommManager"
-		cardinality="1..1" />
-	<osgi:reference id="cisManager"
-		interface="org.societies.api.cis.management.ICisManager" cardinality="1..1" />
-	<osgi:reference id="internalCtxBroker"
-		interface="org.societies.api.internal.context.broker.ICtxBroker"
-		cardinality="1..1" />
+	<osgi-compendium:cm-properties id="backEndProperties"
+		persistent-id="bk" />
+
+	<!-- Required References -->
+	<osgi:reference id="CommManagerBundle"
+		interface="org.societies.api.comm.xmpp.interfaces.ICommManager" />
+	<osgi:reference id="dataSource" interface="javax.sql.DataSource" />
+	<osgi:reference id="eventManager"
+		interface="org.societies.api.osgi.event.IEventMgr" />
+	<osgi:reference id="serviceMgmt"
+		interface="org.societies.api.services.IServices" />
+	<osgi:reference id="CisManagementBundle"
+		interface="org.societies.api.cis.management.ICisManager" />
+	<osgi:reference id="activityFeed"
+		interface="org.societies.api.activity.IActivityFeed" cardinality="0..1" />
+
+	<!-- Provided Services -->
+	<osgi:service ref="sharedCalendar"
+		interface="org.societies.rdPartyService.enterprise.sharedCalendar.ISharedCalendar">
+		<osgi:service-properties>
+			<entry key="TargetPlatform" value="SOCIETIES" />
+			<entry key="ServiceProvider" value="ICT-SOCIETIES" />
+			<entry key="ServiceMetaModel" value-ref="serMetamodel" />
+			<entry key="ServiceClient" value="http://societies.local/client.jar" />
+		</osgi:service-properties>
+	</osgi:service>
+
+	<bean id="serMetamodel" class="org.societies.api.schema.servicelifecycle.model.Service">
+		<property name="authorSignature" value="Soluta.Net" />
+		<property name="serviceDescription" value="Shared Calendar Server Component" />
+		<property name="serviceName" value="Shared Calendar Server" />
+		<property name="serviceType" value="THIRD_PARTY_SERVER" />
+		<property name="privacyPolicy" value="http://societies.local/local_file" />
+	</bean>
+
+	<osgi:set id="availableDevicesSet" interface="org.societies.api.css.devicemgmt.IDevice"
+		cardinality="0..N">
+		<osgi:listener bind-method="onBind" unbind-method="onUnbind">
+			<bean
+				class="org.societies.rdPartyService.enterprise.sharedCalendar.DeviceListener" />
+		</osgi:listener>
+	</osgi:set>
 </beans>
