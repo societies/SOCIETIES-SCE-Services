@@ -9,7 +9,6 @@ import org.apache.http.client.methods.HttpGet;
 import si.setcce.societies.android.rest.RestTask;
 import android.accounts.Account;
 import android.accounts.AccountManager;
-import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -33,7 +32,12 @@ import com.google.zxing.integration.android.IntentResult;
 //import android.annotation.SuppressLint;
 
 public class MainActivity extends Activity {
-	private static final String SEARCH_ACTION = "si.setcce.societies.android.rest.TEST";
+	private static final String TEST_ACTION = "si.setcce.societies.android.rest.TEST";
+	private static final String GET_MEETING_ACTION = "si.setcce.societies.android.rest.meeting";
+	private static final String APPLICATION_URL = "http://crowdtasking.appspot.com";
+	private static final String MEETING_URL = "http://crowdtasking.appspot.com/android/meeting/";
+	private static final String MEETING_REST_API_URL = "http://crowdtasking.appspot.com/rest/meeting";
+	private static final String SCAN_QR_URL = "http://crowdtasking.appspot.com/android/scanQR";
 	private WebView webView;
 	
 	//@SuppressLint("SetJavaScriptEnabled")
@@ -60,7 +64,7 @@ public class MainActivity extends Activity {
         webView.getSettings().setBuiltInZoomControls(true);
         webView.setScrollBarStyle(WebView.SCROLLBARS_OUTSIDE_OVERLAY);
         webView.setScrollbarFadingEnabled(false);
-        webView.setWebViewClient(new MyWebViewClient());
+        webView.setWebViewClient(new MyWebViewClient(this));
         webView.getSettings().setDefaultZoom(WebSettings.ZoomDensity.FAR);
         webView.addJavascriptInterface(new JSInterface(webView), "android");
         //webView.loadData("<h1>Application is loading...</h1>", "text/html", "utf-8");
@@ -69,8 +73,8 @@ public class MainActivity extends Activity {
 
         
         try {
-			HttpGet searchRequest = new HttpGet(new URI("http://crowdtasking.appspot.com"));
-			RestTask task = new RestTask(this,SEARCH_ACTION,"");
+			HttpGet searchRequest = new HttpGet(new URI(APPLICATION_URL));
+			RestTask task = new RestTask(this,TEST_ACTION,"");
 			task.execute(searchRequest);
 		} catch (URISyntaxException e) {
 			e.printStackTrace();
@@ -80,7 +84,8 @@ public class MainActivity extends Activity {
     @Override
     public void onResume() {
         super.onResume();
-    	registerReceiver(receiver, new IntentFilter(SEARCH_ACTION));	
+        registerReceiver(receiver, new IntentFilter(TEST_ACTION));
+        registerReceiver(receiver, new IntentFilter(GET_MEETING_ACTION));
     }
     
     @Override
@@ -100,7 +105,7 @@ public class MainActivity extends Activity {
     {
         if(webView.canGoBack()) {
         	WebBackForwardList webBackForwardList = webView.copyBackForwardList();
-        	int i = webBackForwardList.getCurrentIndex();
+        	//int i = webBackForwardList.getCurrentIndex();
         	String historyUrl = webBackForwardList.getItemAtIndex(webBackForwardList.getCurrentIndex()-1).getUrl();
         	if (historyUrl.contains("start.html")) {
         		super.onBackPressed();
@@ -112,7 +117,6 @@ public class MainActivity extends Activity {
         }
     }    
 
-    //@TargetApi(14)
 	@Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle item selection
@@ -123,7 +127,6 @@ public class MainActivity extends Activity {
                 return true;
 
             case R.id.home:
-            	//webView.loadUrl("http://crowdtasking.appspot.com/");
 				Calendar beginTime = Calendar.getInstance();
 				beginTime.set(2012, 11, 29, 17, 00);
 				Calendar endTime = Calendar.getInstance();
@@ -157,7 +160,6 @@ public class MainActivity extends Activity {
             	return true;
             
             case R.id.profile:
-            	//webView.loadUrl("http://crowdtasking.appspot.com/profile");
             	//Intent startIntent=new Intent(this.getApplicationContext(),ProfileActivity.class);
             	Intent startIntent=new Intent(this.getApplicationContext(),SettingsActivity.class);
             	startActivity(startIntent);
@@ -167,7 +169,7 @@ public class MainActivity extends Activity {
             	CookieSyncManager.createInstance(this);
             	CookieManager cookieManager = CookieManager.getInstance();
             	cookieManager.removeAllCookie();
-            	webView.loadUrl("http://crowdtasking.appspot.com/");
+            	webView.loadUrl(APPLICATION_URL);
                 return true;
 
             default:
@@ -202,8 +204,13 @@ public class MainActivity extends Activity {
     private BroadcastReceiver receiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-        	webView.loadUrl("javascript:window.location.replace('http://crowdtasking.appspot.com/menu')");
-        	//webView.loadUrl("http://crowdtasking.appspot.com/menu");
+        	if (intent.getAction().equalsIgnoreCase(TEST_ACTION)) {
+            	webView.loadUrl("javascript:window.location.replace('"+APPLICATION_URL+"/menu')");
+        	}
+        	if (intent.getAction().equalsIgnoreCase(GET_MEETING_ACTION)) {
+        		String response = intent.getStringExtra(RestTask.HTTP_RESPONSE);
+        		System.out.println(response);
+        	}
         }
     };
 
@@ -221,6 +228,8 @@ public class MainActivity extends Activity {
     
     
     private class MyWebViewClient extends WebViewClient {
+    	Activity parentActivity;
+    	
 		@SuppressWarnings("unused")
 		public void onRequestFocus(WebView view) {
 			synchronized (this) {
@@ -228,11 +237,33 @@ public class MainActivity extends Activity {
 			}
 		}
 
+		public MyWebViewClient(Activity activity) {
+			parentActivity = activity;
+		}
+				
+		private void addMeetingToCalendar(String url) {
+    		String meetingID = url.substring(MEETING_URL.length());
+    		System.out.println(meetingID);
+    		try
+            {
+    			HttpGet searchRequest = new HttpGet(new URI(MEETING_REST_API_URL+"?id="+meetingID));
+    			RestTask task = new RestTask(parentActivity,GET_MEETING_ACTION,"");
+    			task.execute(searchRequest);
+    		} catch (URISyntaxException e) {
+    			e.printStackTrace();
+    		}
+
+		}
+		
     	@Override
         public boolean shouldOverrideUrlLoading(WebView view, String url) {
-        	if (url.equalsIgnoreCase("http://crowdtasking.appspot.com/AndroidMenu")) {
+        	if (url.equalsIgnoreCase(SCAN_QR_URL)) {
                 IntentIntegrator integrator = new IntentIntegrator(MainActivity.this);
                 integrator.initiateScan(IntentIntegrator.QR_CODE_TYPES);
+        		return true;
+        	}
+        	if (url.startsWith(MEETING_URL)) {
+        		addMeetingToCalendar(url);
         		return true;
         	}
         	/*System.out.println(String.format("Url: %s",url));
@@ -252,14 +283,14 @@ public class MainActivity extends Activity {
         public void onPageFinished(WebView view, String url) {
         	if (url.contains("enter") || url.contains("leave")) {
         		webView.goBack();
-        	}
+        	}/*
         	if (url.contains("/menu")) {
         		//webView.loadUrl("javascript:$('#androidMenu').show()");
         		webView.loadUrl("javascript:window.document.getElementById(androidMenu).style.display = 'block';");
             	webView.loadUrl("javascript:window.location.alert('bu!')");
-        	}
+        	}*/
             //view.setInitialScale((int)(25*view.getScale()));
-    		webView.loadUrl("javascript:bu()");
+    		//webView.loadUrl("javascript:bu()");
        }
     }
 }

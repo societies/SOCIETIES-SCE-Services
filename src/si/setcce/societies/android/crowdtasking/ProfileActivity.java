@@ -98,7 +98,6 @@ public class ProfileActivity extends Activity {
 				JSONObject user = (new JSONObject(response));
 				result.setText(user.getString("firstName")+" "+user.getString("lastName"));
 			} catch (JSONException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			// Process the response data (here we just display it)
