@@ -2,20 +2,25 @@ package si.setcce.societies.android.crowdtasking;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
 
 import org.apache.http.client.methods.HttpGet;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import si.setcce.societies.android.rest.RestTask;
-import android.accounts.Account;
-import android.accounts.AccountManager;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
-import android.util.Log;
+import android.provider.CalendarContract.Events;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.Window;
@@ -38,20 +43,27 @@ public class MainActivity extends Activity {
 	private static final String MEETING_URL = "http://crowdtasking.appspot.com/android/meeting/";
 	private static final String MEETING_REST_API_URL = "http://crowdtasking.appspot.com/rest/meeting";
 	private static final String SCAN_QR_URL = "http://crowdtasking.appspot.com/android/scanQR";
+	private String startUrl;
 	private WebView webView;
 	
 	//@SuppressLint("SetJavaScriptEnabled")
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        AccountManager am = AccountManager.get(this);
+        startUrl = APPLICATION_URL+"/menu";
+        /*AccountManager am = AccountManager.get(this);
         Account[] accounts = am.getAccounts();
         for(Account ac: accounts)
         {
 	        String acname=ac.name;
 	        String actype = ac.type;
 	        Log.d("accountInfo", acname + ":" + actype);
+        }*/
+        
+        final Intent intent = getIntent();
+        final String action = intent.getAction();
+        if (Intent.ACTION_VIEW.equals(action)) {
+        	startUrl = intent.getData().toString();
         }
         
         requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -127,36 +139,7 @@ public class MainActivity extends Activity {
                 return true;
 
             case R.id.home:
-				Calendar beginTime = Calendar.getInstance();
-				beginTime.set(2012, 11, 29, 17, 00);
-				Calendar endTime = Calendar.getInstance();
-				endTime.set(2012, 11, 29, 17, 15);
-				/*Intent intent = new Intent(Intent.ACTION_INSERT)
-						.setData(Events.CONTENT_URI)
-						.putExtra(CalendarContract.EXTRA_EVENT_BEGIN_TIME,
-								beginTime.getTimeInMillis())
-						.putExtra(CalendarContract.EXTRA_EVENT_END_TIME,
-								endTime.getTimeInMillis())
-						.putExtra(Events.TITLE, "SOCIETIES Crowd Tasking - evaluation - final steps")
-						.putExtra(Events.DESCRIPTION, "Kako popraviti navodila + evaluacijo, ...")
-						.putExtra(Events.EVENT_LOCATION, "Laboratorij za Am I in wisdom of the crowds")
-						.putExtra(Events.AVAILABILITY, Events.AVAILABILITY_BUSY)
-						.putExtra(Intent.EXTRA_EMAIL,
-								"helena.halas@setcce.si, jan.porekar@setcce.si, simon.juresa@setcce.si");
-				startActivity(intent);*/
-				Intent intent = new Intent(Intent.ACTION_EDIT);
-				intent.setType("vnd.android.cursor.item/event");
-				/*intent.putExtra("beginTime", beginTime);
-				intent.putExtra("allDay", true);
-				intent.putExtra("rrule", "FREQ=YEARLY");
-				intent.putExtra("endTime", endTime);*/
-				intent.putExtra("title", "ICS test");
-				intent.putExtra(Intent.EXTRA_EMAIL,
-						"sjuresa@gmail.com");
-//						"simon.juresa@setcce.si, helena.halas@setcce.si, jan.porekar@setcce.si");
-				startActivity(intent);
-				//startActivityForResult(intent, RESULT_OK );
-				
+            	webView.loadUrl(APPLICATION_URL);
             	return true;
             
             case R.id.profile:
@@ -205,16 +188,86 @@ public class MainActivity extends Activity {
         @Override
         public void onReceive(Context context, Intent intent) {
         	if (intent.getAction().equalsIgnoreCase(TEST_ACTION)) {
-            	webView.loadUrl("javascript:window.location.replace('"+APPLICATION_URL+"/menu')");
+            	webView.loadUrl("javascript:window.location.replace('"+startUrl+"')");
         	}
         	if (intent.getAction().equalsIgnoreCase(GET_MEETING_ACTION)) {
         		String response = intent.getStringExtra(RestTask.HTTP_RESPONSE);
-        		System.out.println(response);
+        		sendMeetingEvent(response);
+                
         	}
         }
     };
 
-	private class JSInterface {
+    private void sendMeetingEvent(String meetingJSON) {
+        //String JSON_STRING = "{ \"id\":212001,\"subject\":\"nujen sestanek\",\"description\":\"Urgent!!!\",\"cs\":{\"id\":179001,\"name\":\"test\",\"urlMapping\":\"test\"},\"startTime\":\"Jan 31, 2013 12:00:02 PM\",\"endTime\":\"Jan 31, 2013 2:00:03 PM\",\"organizer\":\"Setcce Research\"}";
+    	JSONObject meeting;
+    	String space;
+    	try {
+			meeting = new JSONObject(meetingJSON);
+			space = meeting.getJSONObject("cs").optString("name");
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return;
+		}
+		//String description = meeting.optString("description");
+    	
+        
+        Calendar beginTime = Calendar.getInstance();
+        beginTime.setTime(parseDateString(meeting.optString("startTime").toString()));
+		//beginTime.set(2013, 1, 15, 17, 00);
+		Calendar endTime = Calendar.getInstance();
+		endTime.setTime(parseDateString(meeting.optString("endTime").toString()));
+		//endTime.set(2013, 1, 15, 17, 15);
+		Intent intent = new Intent(Intent.ACTION_EDIT);
+		intent.setType("vnd.android.cursor.item/event");
+		intent.putExtra("title", meeting.optString("subject"));
+		intent.putExtra("description", meeting.optString("description"));
+		intent.putExtra(Events.EVENT_LOCATION, space);
+		//intent.putExtra(Events.DESCRIPTION, meeting.optString("description"));
+		//intent.putExtra(Events.DTSTART, beginTime.getTimeInMillis());
+		//intent.putExtra(Events.DTEND, endTime.getTimeInMillis());
+		intent.putExtra("beginTime", beginTime.getTimeInMillis());
+		intent.putExtra("endTime", endTime.getTimeInMillis());
+		//intent.putExtra("allDay", true);
+		//intent.putExtra("rrule", "FREQ=YEARLY");
+		
+		/*intent.putExtra(Intent.EXTRA_EMAIL,
+				"sjuresa@gmail.com");*/
+//				"simon.juresa@setcce.si, helena.halas@setcce.si, jan.porekar@setcce.si");
+		startActivity(intent);
+
+		//startActivityForResult(intent, RESULT_OK );
+
+
+		/*Intent intent = new Intent(Intent.ACTION_INSERT)
+		.setData(Events.CONTENT_URI)
+		.putExtra(CalendarContract.EXTRA_EVENT_BEGIN_TIME,
+				beginTime.getTimeInMillis())
+		.putExtra(CalendarContract.EXTRA_EVENT_END_TIME,
+				endTime.getTimeInMillis())
+		.putExtra(Events.TITLE, "SOCIETIES Crowd Tasking - evaluation - final steps")
+		.putExtra(Events.DESCRIPTION, "Kako popraviti navodila + evaluacijo, ...")
+		.putExtra(Events.EVENT_LOCATION, "Laboratorij za Am I in wisdom of the crowds")
+		.putExtra(Events.AVAILABILITY, Events.AVAILABILITY_BUSY)
+		.putExtra(Intent.EXTRA_EMAIL,
+				"helena.halas@setcce.si, jan.porekar@setcce.si, simon.juresa@setcce.si");
+		startActivity(intent);*/
+    }
+
+	private Date parseDateString(String dateString) {
+		DateFormat formatter = new SimpleDateFormat("MMM d, yyyy HH:mm:ss a");
+		Date datum;
+		try {
+			datum = formatter.parse(dateString);
+		} catch (ParseException e) {
+			e.printStackTrace();
+			datum = new Date();
+		}
+		return datum;
+	}
+    
+    private class JSInterface {
 		private WebView mAppView;
 		public JSInterface(WebView appView) {
 			this.mAppView = appView;
