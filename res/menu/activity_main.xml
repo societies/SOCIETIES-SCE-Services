@@ -3,8 +3,8 @@
         android:title="@string/scanQRcode"
         android:orderInCategory="10"
         android:showAsAction="ifRoom" />
-    <item android:id="@+id/profile"
-        android:title="@string/profile"
+    <item android:id="@+id/remote"
+        android:title="@string/remote"
         android:orderInCategory="100"
         android:showAsAction="ifRoom" />
     <item android:id="@+id/home"

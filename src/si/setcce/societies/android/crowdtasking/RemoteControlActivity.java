@@ -47,9 +47,9 @@ import android.widget.TextView;
  * @author Simon Jureša
  * 
  */
-public class ProfileActivity extends Activity {
-	private static final String PROFILE_ACTION = "si.setcce.societies.android.crowdtasking.PROFILE";
-	private static final String PROFILE_URI = "http://crowdtasking.appspot.com/rest/user";
+public class RemoteControlActivity extends Activity {
+	private static final String REMOTE_CONTROL_ACTION = "si.setcce.societies.android.crowdtasking.REMOTE";
+	private static final String PROFILE_URI = "http://crowdtasking.appspot.com/rest/remote";
 	private TextView result;
 	private ProgressDialog progress;
 
@@ -62,13 +62,13 @@ public class ProfileActivity extends Activity {
 
 		// Create profile request
 		try {
-			String url = String.format(PROFILE_URI, "RestDemo", "Android");
+			/*String url = String.format(PROFILE_URI, "RestDemo", "Android");
 			HttpGet profileRequest = new HttpGet(new URI(url));
-			RestTask task = new RestTask(this, PROFILE_ACTION, CookieManager.getInstance().getCookie("crowdtasking.appspot.com"));
+			RestTask task = new RestTask(this, REMOTE_CONTROL_ACTION, CookieManager.getInstance().getCookie("crowdtasking.appspot.com"));
 			task.execute(profileRequest);
 			// Display progress to the user
 			progress = ProgressDialog.show(this, "Connecting",
-					"Waiting For Results...", true);
+					"Waiting For Results...", true);*/
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -77,7 +77,7 @@ public class ProfileActivity extends Activity {
 	@Override
 	public void onResume() {
 		super.onResume();
-		registerReceiver(receiver, new IntentFilter(PROFILE_ACTION));
+		registerReceiver(receiver, new IntentFilter(REMOTE_CONTROL_ACTION));
 	}
 
 	@Override
@@ -100,7 +100,7 @@ public class ProfileActivity extends Activity {
 			} catch (JSONException e) {
 				e.printStackTrace();
 			}
-			// Process the response data (here we just display it)
+			// Process the response data
 		}
 	};
 }

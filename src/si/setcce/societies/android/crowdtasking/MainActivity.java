@@ -142,9 +142,8 @@ public class MainActivity extends Activity {
             	webView.loadUrl(APPLICATION_URL);
             	return true;
             
-            case R.id.profile:
-            	//Intent startIntent=new Intent(this.getApplicationContext(),ProfileActivity.class);
-            	Intent startIntent=new Intent(this.getApplicationContext(),SettingsActivity.class);
+            case R.id.remote:
+            	Intent startIntent=new Intent(this.getApplicationContext(),RemoteControlActivity.class);
             	startActivity(startIntent);
                 return true;
 
@@ -300,7 +299,7 @@ public class MainActivity extends Activity {
     		try
             {
     			HttpGet searchRequest = new HttpGet(new URI(MEETING_REST_API_URL+"?id="+meetingID));
-    			RestTask task = new RestTask(parentActivity,GET_MEETING_ACTION,"");
+    			RestTask task = new RestTask(parentActivity, GET_MEETING_ACTION, CookieManager.getInstance().getCookie("crowdtasking.appspot.com"));
     			task.execute(searchRequest);
     		} catch (URISyntaxException e) {
     			e.printStackTrace();

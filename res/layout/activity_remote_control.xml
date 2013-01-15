@@ -8,6 +8,6 @@
 		android:id="@+id/new_activity_text_view"
 		android:layout_width="fill_parent"
 		android:layout_height="wrap_content"
-		android:text="@string/title_activity_profile"
+		android:text="@string/title_activity_remote_control"
 	/>
 </LinearLayout>
