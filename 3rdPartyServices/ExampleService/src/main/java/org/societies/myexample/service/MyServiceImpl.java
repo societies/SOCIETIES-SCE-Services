@@ -24,16 +24,15 @@
  */
 package org.societies.myexample.service;
 
-import org.societies.api.services.IServices;
+import org.societies.api.context.broker.ICtxBroker;
 
 public class MyServiceImpl implements IMyService {
 
-	IServices serviceUtil;
+	ICtxBroker cxtBrokerService;
 	
 	@Override
 	public void doSomething() {
 		// TODO Auto-generated method stub
-
 	}
 
 }

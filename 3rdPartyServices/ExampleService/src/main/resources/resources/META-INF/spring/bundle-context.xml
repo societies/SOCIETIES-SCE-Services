@@ -15,7 +15,7 @@ http://www.springframework.org/schema/tx http://www.springframework.org/schema/t
 
 	<bean id="myService"
 		class="org.societies.myexample.service.MyServiceimpl">
-		<property name="serviceUtil" ref="serviceUtil"/>
+		<property name="cxtBrokerService" ref="cxtBrokerRef"/>
 	</bean>
 
 </beans>

@@ -24,7 +24,7 @@
 		<dependency>
 			<groupId>org.societies.api.external</groupId>
 			<artifactId>societies-api</artifactId>
-			<version>0.4.1</version>
+			<version>0.5</version>
 			<scope>provided</scope>
 		</dependency>
 	</dependencies>

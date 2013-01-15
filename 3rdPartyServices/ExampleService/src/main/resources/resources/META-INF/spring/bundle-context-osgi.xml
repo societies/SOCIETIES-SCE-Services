@@ -11,8 +11,8 @@ http://www.springframework.org/schema/osgi-compendium/spring-osgi-compendium-1.2
 	xmlns:context="http://www.springframework.org/schema/context">
 
 	<!-- Service References -->
-	<osgi:reference id="serviceUtil"
-		interface="org.societies.api.services.IServices" />
+	<osgi:reference id="cxtBrokerRef"
+		interface="org.societies.api.context.broker.ICtxBroker" />
 
 	<!-- Provided Services -->
 	<osgi:service ref="myService"
