@@ -7,14 +7,15 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
 
 import org.apache.http.client.methods.HttpGet;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import si.setcce.societies.android.rest.RestTask;
+import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -26,7 +27,6 @@ import android.view.MenuItem;
 import android.view.Window;
 import android.webkit.CookieManager;
 import android.webkit.CookieSyncManager;
-import android.webkit.WebBackForwardList;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -36,17 +36,22 @@ import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 //import android.annotation.SuppressLint;
 
+@SuppressLint("SimpleDateFormat")
 public class MainActivity extends Activity {
 	private static final String TEST_ACTION = "si.setcce.societies.android.rest.TEST";
+	private static final String CHECK_IN_OUT = "si.setcce.societies.android.rest.CHECK_IN_OUT";
 	private static final String GET_MEETING_ACTION = "si.setcce.societies.android.rest.meeting";
 	private static final String APPLICATION_URL = "http://crowdtasking.appspot.com";
 	private static final String MEETING_URL = "http://crowdtasking.appspot.com/android/meeting/";
 	private static final String MEETING_REST_API_URL = "http://crowdtasking.appspot.com/rest/meeting";
 	private static final String SCAN_QR_URL = "http://crowdtasking.appspot.com/android/scanQR";
 	private String startUrl;
+	public String nfcUrl=null;
 	private WebView webView;
+	private ProgressDialog progress;
 	
 	//@SuppressLint("SetJavaScriptEnabled")
+	@SuppressLint("SetJavaScriptEnabled")
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -60,14 +65,18 @@ public class MainActivity extends Activity {
 	        Log.d("accountInfo", acname + ":" + actype);
         }*/
         
-        final Intent intent = getIntent();
-        final String action = intent.getAction();
-        if (Intent.ACTION_VIEW.equals(action)) {
-        	startUrl = intent.getData().toString();
-        }
-        
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_main);
+        /*
+        webView.setWebChromeClient(new WebChromeClient() {
+			public boolean onConsoleMessage(ConsoleMessage cm) {
+				Log.d("Crowd TAsking", cm.message() + 
+						" -- From line " + cm.lineNumber() 
+						+ " of " + cm.sourceId());
+				return true;
+			}
+    	});*/
+        
 		webView = (WebView) findViewById(R.id.webView);
         webView.setInitialScale(1);
         webView.getSettings().setJavaScriptEnabled(true);
@@ -80,9 +89,30 @@ public class MainActivity extends Activity {
         webView.getSettings().setDefaultZoom(WebSettings.ZoomDensity.FAR);
         webView.addJavascriptInterface(new JSInterface(webView), "android");
         //webView.loadData("<h1>Application is loading...</h1>", "text/html", "utf-8");
-        webView.loadUrl("file:///android_asset/start.html");
+        //webView.loadUrl("file:///android_asset/start.html");
         //webView.loadUrl("file:///android_asset/test2.html");
+     }
 
+    @Override
+	protected void onNewIntent(Intent intent) {
+        String action = intent.getAction();
+        if (Intent.ACTION_VIEW.equals(action)) {
+        	startUrl = intent.getData().toString();
+        }
+        if ("android.nfc.action.NDEF_DISCOVERED".equals(action)) {
+        	nfcUrl = intent.getData().toString();
+        }
+	}
+
+	@Override
+    public void onResume() {
+        super.onResume();
+        registerReceiver(receiver, new IntentFilter(TEST_ACTION));
+        registerReceiver(receiver, new IntentFilter(GET_MEETING_ACTION));
+        registerReceiver(receiver, new IntentFilter(CHECK_IN_OUT));
+        //registerReceiver(receiver, new IntentFilter("android.nfc.action.NDEF_DISCOVERED"));
+
+        progress = ProgressDialog.show(this, "Connecting", "Waiting For GAE...", true);
         
         try {
 			HttpGet searchRequest = new HttpGet(new URI(APPLICATION_URL));
@@ -91,14 +121,7 @@ public class MainActivity extends Activity {
 		} catch (URISyntaxException e) {
 			e.printStackTrace();
 		}
-     }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        registerReceiver(receiver, new IntentFilter(TEST_ACTION));
-        registerReceiver(receiver, new IntentFilter(GET_MEETING_ACTION));
-    }
+}
     
     @Override
     public void onPause() {
@@ -116,12 +139,12 @@ public class MainActivity extends Activity {
     public void onBackPressed()
     {
         if(webView.canGoBack()) {
-        	WebBackForwardList webBackForwardList = webView.copyBackForwardList();
+        	//WebBackForwardList webBackForwardList = webView.copyBackForwardList();
         	//int i = webBackForwardList.getCurrentIndex();
-        	String historyUrl = webBackForwardList.getItemAtIndex(webBackForwardList.getCurrentIndex()-1).getUrl();
+        	/*String historyUrl = webBackForwardList.getItemAtIndex(webBackForwardList.getCurrentIndex()-1).getUrl();
         	if (historyUrl.contains("start.html")) {
         		super.onBackPressed();
-        	}
+        	}*/
         	webView.goBack();
         }
         else {
@@ -158,6 +181,30 @@ public class MainActivity extends Activity {
                 return super.onOptionsItemSelected(item);
         }
     }
+	
+	private void checkInOut(String url) {
+    	/*if (resultQR.startsWith("http")) {
+        	webView.loadUrl(resultQR);
+    	}
+    	if (resultQR.startsWith("cs:")) {
+    		webView.loadUrl(resultQR.replaceFirst("cs", "http"));
+    	}*/
+		if (url.startsWith("cs:")) {
+			url = url.replaceFirst("cs", "http");
+		}
+		
+		HttpGet searchRequest;
+		try {
+			searchRequest = new HttpGet(new URI(url));
+			RestTask task = new RestTask(getApplicationContext(), CHECK_IN_OUT, CookieManager.getInstance().getCookie("crowdtasking.appspot.com"));
+			task.execute(searchRequest);
+		} catch (URISyntaxException e) {
+			e.printStackTrace();
+			Toast toast = Toast.makeText(getApplicationContext(), "Error: "+e.getMessage(), Toast.LENGTH_LONG);
+			toast.show();
+		}
+
+	}
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent intent) {
@@ -167,13 +214,7 @@ public class MainActivity extends Activity {
         if (contents != null) {
         	//Toast toast = Toast.makeText(getApplicationContext(), R.string.result_succeeded, Toast.LENGTH_SHORT);
         	//toast.show();
-        	String resultQR = result.getContents();
-        	if (resultQR.startsWith("http")) {
-            	webView.loadUrl(resultQR);
-        	}
-        	if (resultQR.startsWith("cs:")) {
-        		webView.loadUrl(resultQR.replaceFirst("cs", "http"));
-        	}
+        	checkInOut(result.getContents());
         } else {
         	Toast toast = Toast.makeText(getApplicationContext(), R.string.result_failed, Toast.LENGTH_SHORT);
         	toast.show();
@@ -186,13 +227,28 @@ public class MainActivity extends Activity {
     private BroadcastReceiver receiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+			if (progress != null) {
+				progress.dismiss();
+			}
         	if (intent.getAction().equalsIgnoreCase(TEST_ACTION)) {
-            	webView.loadUrl("javascript:window.location.replace('"+startUrl+"')");
+            	//webView.loadUrl("javascript:window.location.replace('"+startUrl+"')");
+        		if(!webView.canGoBack()) {
+           			webView.loadUrl(APPLICATION_URL+"/menu");
+        		}
+            	if (nfcUrl != null) {
+            		checkInOut(nfcUrl);
+					nfcUrl = null;
+            	}
         	}
         	if (intent.getAction().equalsIgnoreCase(GET_MEETING_ACTION)) {
         		String response = intent.getStringExtra(RestTask.HTTP_RESPONSE);
         		sendMeetingEvent(response);
-                
+        	}
+        	if (intent.getAction().equalsIgnoreCase(CHECK_IN_OUT)) {
+        		String response = intent.getStringExtra(RestTask.HTTP_RESPONSE);
+        		System.out.println(response);
+				Toast toast = Toast.makeText(getApplicationContext(), response, Toast.LENGTH_SHORT);
+				toast.show();
         	}
         }
     };
@@ -271,17 +327,22 @@ public class MainActivity extends Activity {
 		public JSInterface(WebView appView) {
 			this.mAppView = appView;
 		}
+		/*
 		public void doEchoTest(String echo) {
 			Toast toast = Toast.makeText(mAppView.getContext(), echo,
 					Toast.LENGTH_SHORT);
 			toast.show();
-		}
+		}*/
 	}
     
     
     private class MyWebViewClient extends WebViewClient {
     	Activity parentActivity;
     	
+		public MyWebViewClient(Activity activity) {
+			parentActivity = activity;
+		}
+				
 		@SuppressWarnings("unused")
 		public void onRequestFocus(WebView view) {
 			synchronized (this) {
@@ -289,10 +350,6 @@ public class MainActivity extends Activity {
 			}
 		}
 
-		public MyWebViewClient(Activity activity) {
-			parentActivity = activity;
-		}
-				
 		private void addMeetingToCalendar(String url) {
     		String meetingID = url.substring(MEETING_URL.length());
     		System.out.println(meetingID);
@@ -335,7 +392,12 @@ public class MainActivity extends Activity {
         public void onPageFinished(WebView view, String url) {
         	if (url.contains("enter") || url.contains("leave")) {
         		webView.goBack();
-        	}/*
+        	}
+    		if (!startUrl.equalsIgnoreCase(APPLICATION_URL+"/menu")) {
+            	webView.loadUrl(startUrl);
+            	startUrl = APPLICATION_URL+"/menu";
+    		}
+        	/*
         	if (url.contains("/menu")) {
         		//webView.loadUrl("javascript:$('#androidMenu').show()");
         		webView.loadUrl("javascript:window.document.getElementById(androidMenu).style.display = 'block';");

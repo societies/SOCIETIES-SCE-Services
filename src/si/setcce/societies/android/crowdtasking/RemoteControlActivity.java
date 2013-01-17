@@ -24,9 +24,6 @@
  */
 package si.setcce.societies.android.crowdtasking;
 
-import java.net.URI;
-
-import org.apache.http.client.methods.HttpGet;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -38,7 +35,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
-import android.webkit.CookieManager;
 import android.widget.TextView;
 
 /**
@@ -49,7 +45,7 @@ import android.widget.TextView;
  */
 public class RemoteControlActivity extends Activity {
 	private static final String REMOTE_CONTROL_ACTION = "si.setcce.societies.android.crowdtasking.REMOTE";
-	private static final String PROFILE_URI = "http://crowdtasking.appspot.com/rest/remote";
+	//private static final String REMOTE_URI = "http://crowdtasking.appspot.com/rest/remote";
 	private TextView result;
 	private ProgressDialog progress;
 

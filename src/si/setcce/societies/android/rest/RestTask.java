@@ -39,6 +39,7 @@ import org.apache.http.protocol.HttpContext;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
+import android.util.Log;
 
 /**
  * Describe your class here...
@@ -89,7 +90,9 @@ public class RestTask extends AsyncTask<HttpUriRequest, Void, String> {
 			return response;
 		} catch (Exception e) {
 			e.printStackTrace();
-			return null;
+			String msg = e.getMessage();
+			Log.e("SCT", msg);
+			return msg;
 		}
 	}
 
