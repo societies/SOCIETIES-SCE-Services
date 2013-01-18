@@ -23,89 +23,79 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.societies.thirdPartyServices.disasterManagement.analyzeThis;
+package org.societies.thirdPartyServices.disasterManagement.wantToHelp.xmlrpc;
 
+import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Vector;
+import java.net.UnknownHostException;
 
 import org.apache.xmlrpc.XmlRpcException;
 import org.apache.xmlrpc.client.XmlRpcClient;
 import org.apache.xmlrpc.client.XmlRpcClientConfigImpl;
-import org.societies.thirdPartyServices.disasterManagement.analyzeThis.data.TicketData;
+import org.societies.thirdPartyServices.disasterManagement.wantToHelp.data.UserData;
 
-public class XMLRPCClient_AT {
+public class XMLRPCClient_IWTH {
 	private XmlRpcClient client;
-
-	public XMLRPCClient_AT() {
+//	private static final String CSDM_IP = "213.133.100.232";
+	private static final String CSDM_IP = "localhost";
+	private static String SOCIETIES_XMLRPC_IP;
+	
+	public XMLRPCClient_IWTH () {
 		try {
+			SOCIETIES_XMLRPC_IP = InetAddress.getLocalHost().getHostAddress();
+			SOCIETIES_XMLRPC_IP = "localhost";
+			
 			XmlRpcClientConfigImpl config = new XmlRpcClientConfigImpl();
-			config.setServerURL(new URL(
-					"http://213.133.100.232/societies/server.php"));
+			config.setServerURL(new URL("http://"+CSDM_IP+"/societies/server.php"));
 			client = new XmlRpcClient();
 			client.setConfig(config);
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
+		} catch (UnknownHostException e) {
+			e.printStackTrace();
 		}
 	}
-
+	
 	/**
-	 * Add new request/ticket for assistance to CSDM platform.
-	 * 
-	 * @return ticket status
+	 * Sign in user to 'crowd support for disaster management' (CSDM) platform. If the user is not subscribed, a new user is created on CSDM site.
+	 * @return user status 
 	 */
-	public String addTicket(String shortDescription, String longDescription) {
+	public String signInUser(String email, String password, String lastname, String firstname, String institute, String societies_xmlrpc_url){
 		String returnString = null;
 		try {
-			Object[] params = new Object[] { shortDescription, longDescription,
-					"" };
-			returnString = (String) client.execute("societies.addRequest",
-					params);
+			Object[] params = new Object[] { email, password, lastname, firstname, institute, societies_xmlrpc_url };
+			returnString = (String) client.execute("societies.addUser", params);
 		} catch (XmlRpcException e) {
 			e.printStackTrace();
 		}
 		return returnString;
 	}
-
+	
 	/**
-	 * Request all tickets since input starting date.
-	 * 
-	 * @param startingDate
-	 * @return Vector of tickets
+	 * Retrieve user data from CSDM.
+	 * @param email user ID
+	 * @return UserData
 	 */
-	public Vector<TicketData> getTickets(String startingDate) {
-		String response = null;
+	public UserData getUserData(String email) {
+		String returnString = null;
 		try {
-			Object[] getRequestsParams= new Object[] {startingDate};
-			response = (String) client.execute("societies.getRequests", getRequestsParams);
+			Object[] getUserDataParams = new Object[] {email};
+			returnString = (String) client.execute("societies.getUserData", getUserDataParams);
+//			System.out.println(returnString+"//////////");
 		} catch (XmlRpcException e) {
 			e.printStackTrace();
 		}
-
-		Vector<TicketData> tickets = new Vector<TicketData>();
-		if (!response.equalsIgnoreCase("")) {
-			String[] responseLines = response.split("\n");
-//			System.out.println("responseLine: "+responseLines[0]);
-			
-			for (String line : responseLines) {
-//				System.out.println("line: "+line);
-				String[] ticket = line.split("---");
-//				System.out.println("ticket: "+ticket[0]);
-				tickets.add(new TicketData(new Integer(ticket[0]), ticket[1]));
-			}
-		}
-		return tickets;
+		return new UserData(returnString);
 	}
-
+	
 	/**
 	 * main method for testing
 	 */
 	public static void main(String[] args) {
-		System.out
-				.println("Starting JavaXMLRPCClient in AnalyzeThis service ...");
-		XMLRPCClient_AT xmlrpcClient = new XMLRPCClient_AT();
-		// System.out.println("addRequest: " +
-		// xmlrpcClient.addRequest("short Description", "long Description"));
-		 System.out.println("getRequests> "+xmlrpcClient.getTickets("2012-04-24"));
+		System.out.println("Starting JavaXMLRPCClient in IWantToHelp service ...");
+		XMLRPCClient_IWTH xmlrpcClient = new XMLRPCClient_IWTH();
+		System.out.println("addUser>     " +xmlrpcClient.signInUser("john@doe.ar", "asdf", "johnny", "doom", "death star", SOCIETIES_XMLRPC_IP+":54321" ));
+		System.out.println("getUserData> "+xmlrpcClient.getUserData("john@doe.ar"));
 	}
 }

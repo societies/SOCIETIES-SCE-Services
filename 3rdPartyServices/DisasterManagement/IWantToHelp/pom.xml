@@ -84,13 +84,13 @@
 			<version>4.2</version>
 		</dependency>
 		
-		<!-- SOCIETIES PLATFORM -->
+		<!-- SOCIETIES PLATFORM 
 		<dependency>
 			<groupId>org.societies.api.external</groupId>
 			<artifactId>societies-api</artifactId>
 			<version>${release.version}</version>
 			<scope>provided</scope>
-		</dependency>
+		</dependency>-->
 	</dependencies>
 	<build>
 		<plugins>

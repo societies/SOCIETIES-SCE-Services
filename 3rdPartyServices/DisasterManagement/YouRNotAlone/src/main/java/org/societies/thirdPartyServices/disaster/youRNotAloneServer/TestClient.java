@@ -65,7 +65,7 @@ public class TestClient {
 			System.out.println(r.toString());
 		}
 
-		System.out.println("/nStarting get test ......");
+		System.out.println("\nStarting get test ......");
 		//GET Test
 		// Get JSON for application
 		String volunteersXML = getVolunteers(service,MediaType.APPLICATION_XML);
@@ -81,7 +81,7 @@ public class TestClient {
 		System.out.println(volunteerJSON);
 		// Get translators
 		String translator = getTranslator(service,MediaType.APPLICATION_JSON);
-		System.out.println(volunteerJSON);
+		System.out.println("translator      "+translator+"\n");
 		// Get group with expertise
 		// expertise skills are seperated by "&"
 		String groupJSON = getVolunteersByExpertise(service,MediaType.APPLICATION_JSON, "english&Japanese&"); 
@@ -89,11 +89,21 @@ public class TestClient {
 		
 		
 
-		//DELETE Test
-		System.out.println("Starting delete test ......");
-		// get Volunteer with id 1
-		String res = deleteVolunteer(service,"1");
-		System.out.println(res);
+//		//DELETE Test
+//		System.out.println("Starting delete test ......");
+//		// get Volunteer with id 1
+//		String res1 = deleteVolunteer(service,"1");
+//		System.out.println(res1);
+//		String res2 = deleteVolunteer(service,"2");
+//		System.out.println(res2);
+//		String res3 = deleteVolunteer(service,"3");
+//		System.out.println(res3);
+//		String res4 = deleteVolunteer(service,"4");
+//		System.out.println(res4);
+//		String res5 = deleteVolunteer(service,"5");
+//		System.out.println(res5);
+//		String res6 = deleteVolunteer(service,"6");
+//		System.out.println(res6);
 
 	}
 
@@ -129,6 +139,7 @@ public class TestClient {
 		return service.path("rest").path(ID).delete(ClientResponse.class).toString();
 
 	}
+	
 	
 	private static String getTranslator(WebResource service,String type){
 		return service.path("rest").path("/translator")

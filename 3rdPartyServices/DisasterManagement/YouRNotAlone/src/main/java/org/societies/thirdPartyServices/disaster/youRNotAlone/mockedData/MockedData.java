@@ -38,7 +38,7 @@ public class MockedData{
 		v3.addSkill("php");
 		
 		Volunteer v4 = new Volunteer("4","Zhiyong","Yu","Telecom SudParis",
-				"france","zhiyong@gmail.com");
+				"france","Zhiyong.Yu@it-sudparis.eu");
 		v4.addSpokenLanguage("english");
 		v4.addSpokenLanguage("japanese");
 		v4.addSkill("java");
@@ -63,6 +63,14 @@ public class MockedData{
 		v6.addSkill("C++");
 		v6.addSkill("python");
 		
+		Volunteer v7 = new Volunteer("7","Michael","Lichtenstern","DLR",
+				"german","m.lichtenstern@dlr.de");
+		v7.addSpokenLanguage("english");
+		v7.addSpokenLanguage("german");
+		v7.addSkill("java");
+		v7.addSkill("C++");
+		v7.addSkill("python");
+		
 		volunteers = new ArrayList<Volunteer>();
 		volunteers.add(v1);
 		volunteers.add(v2);
@@ -70,6 +78,7 @@ public class MockedData{
 		volunteers.add(v4);
 		volunteers.add(v5);
 		volunteers.add(v6);
+		volunteers.add(v7);
 		
 	}
 	
