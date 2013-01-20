@@ -91,17 +91,22 @@ public class MainActivity extends Activity {
         //webView.loadData("<h1>Application is loading...</h1>", "text/html", "utf-8");
         //webView.loadUrl("file:///android_asset/start.html");
         //webView.loadUrl("file:///android_asset/test2.html");
-     }
+        checkIntent(getIntent());
+    }
 
-    @Override
-	protected void onNewIntent(Intent intent) {
+	private void checkIntent(Intent intent) {
         String action = intent.getAction();
         if (Intent.ACTION_VIEW.equals(action)) {
         	startUrl = intent.getData().toString();
         }
         if ("android.nfc.action.NDEF_DISCOVERED".equals(action)) {
         	nfcUrl = intent.getData().toString();
-        }
+        }		
+	}
+	
+    @Override
+	protected void onNewIntent(Intent intent) {
+    	checkIntent(intent);
 	}
 
 	@Override
@@ -110,7 +115,7 @@ public class MainActivity extends Activity {
         registerReceiver(receiver, new IntentFilter(TEST_ACTION));
         registerReceiver(receiver, new IntentFilter(GET_MEETING_ACTION));
         registerReceiver(receiver, new IntentFilter(CHECK_IN_OUT));
-        //registerReceiver(receiver, new IntentFilter("android.nfc.action.NDEF_DISCOVERED"));
+        registerReceiver(receiver, new IntentFilter("android.nfc.action.NDEF_DISCOVERED"));
 
         progress = ProgressDialog.show(this, "Connecting", "Waiting For GAE...", true);
         
@@ -188,10 +193,10 @@ public class MainActivity extends Activity {
     	}
     	if (resultQR.startsWith("cs:")) {
     		webView.loadUrl(resultQR.replaceFirst("cs", "http"));
-    	}*/
+    	}
 		if (url.startsWith("cs:")) {
 			url = url.replaceFirst("cs", "http");
-		}
+		}*/
 		
 		HttpGet searchRequest;
 		try {
@@ -212,9 +217,14 @@ public class MainActivity extends Activity {
       if (result != null) {
         String contents = result.getContents();
         if (contents != null) {
+        	if (contents.startsWith("http")) {
+        		webView.loadUrl(contents);
+	    	}
+	    	if (contents.startsWith("cs:")) {
+	    		checkInOut(contents.replaceFirst("cs", "http"));
+	    	}
         	//Toast toast = Toast.makeText(getApplicationContext(), R.string.result_succeeded, Toast.LENGTH_SHORT);
         	//toast.show();
-        	checkInOut(result.getContents());
         } else {
         	Toast toast = Toast.makeText(getApplicationContext(), R.string.result_failed, Toast.LENGTH_SHORT);
         	toast.show();
@@ -236,7 +246,7 @@ public class MainActivity extends Activity {
            			webView.loadUrl(APPLICATION_URL+"/menu");
         		}
             	if (nfcUrl != null) {
-            		checkInOut(nfcUrl);
+            		checkInOut(nfcUrl.replaceFirst("cs", "http"));
 					nfcUrl = null;
             	}
         	}

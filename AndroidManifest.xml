@@ -10,7 +10,7 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <!--uses-permission android:name="android.permission.GET_ACCOUNTS" /-->
-    <!--uses-permission android:name="android.permission.NFC" /-->
+    <uses-permission android:name="android.permission.NFC" />
 
     <application
         android:name="si.setcce.societies.android.crowdtasking.CrowdTasking"
@@ -38,8 +38,8 @@
 	            <action android:name="android.nfc.action.NDEF_DISCOVERED" />
 	            <category android:name="android.intent.category.DEFAULT" />
 	            <category android:name="android.intent.category.BROWSABLE" />
-	                <data android:scheme="cs"/>
-	                  <!--android:host="crowdtasking.appspot.com" -->
+	                <data android:scheme="cs"
+	                  android:host="crowdtasking.appspot.com"/>
 	        </intent-filter>
 	        </activity>
         <activity
