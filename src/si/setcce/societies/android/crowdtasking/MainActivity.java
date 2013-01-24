@@ -20,6 +20,10 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.provider.CalendarContract.Events;
 import android.view.Menu;
@@ -37,7 +41,7 @@ import com.google.zxing.integration.android.IntentResult;
 //import android.annotation.SuppressLint;
 
 @SuppressLint("SimpleDateFormat")
-public class MainActivity extends Activity {
+public class MainActivity extends Activity implements SensorEventListener {
 	private static final String TEST_ACTION = "si.setcce.societies.android.rest.TEST";
 	private static final String CHECK_IN_OUT = "si.setcce.societies.android.rest.CHECK_IN_OUT";
 	private static final String GET_MEETING_ACTION = "si.setcce.societies.android.rest.meeting";
@@ -49,13 +53,28 @@ public class MainActivity extends Activity {
 	public String nfcUrl=null;
 	private WebView webView;
 	private ProgressDialog progress;
+	private SensorManager sensorManager;
+	private Sensor accelerometer;
+	private float mAccel; // acceleration apart from gravity
+	private float mAccelCurrent; // current acceleration including gravity
+	private float mAccelLast; // last acceleration including gravity
 	
+	public MainActivity() {
+	}
+
 	//@SuppressLint("SetJavaScriptEnabled")
 	@SuppressLint("SetJavaScriptEnabled")
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        startUrl = APPLICATION_URL+"/menu";
+		
+        sensorManager = (SensorManager)getSystemService(SENSOR_SERVICE);
+		accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+	    mAccel = 0.00f;
+	    mAccelCurrent = SensorManager.GRAVITY_EARTH;
+	    mAccelLast = SensorManager.GRAVITY_EARTH;
+
+	    startUrl = APPLICATION_URL+"/menu";
         /*AccountManager am = AccountManager.get(this);
         Account[] accounts = am.getAccounts();
         for(Account ac: accounts)
@@ -116,6 +135,7 @@ public class MainActivity extends Activity {
         registerReceiver(receiver, new IntentFilter(GET_MEETING_ACTION));
         registerReceiver(receiver, new IntentFilter(CHECK_IN_OUT));
         registerReceiver(receiver, new IntentFilter("android.nfc.action.NDEF_DISCOVERED"));
+        sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
 
         progress = ProgressDialog.show(this, "Connecting", "Waiting For GAE...", true);
         
@@ -132,6 +152,7 @@ public class MainActivity extends Activity {
     public void onPause() {
         super.onPause();
     	unregisterReceiver(receiver);
+    	sensorManager.unregisterListener(this);
     }
   	
     @Override
@@ -171,8 +192,9 @@ public class MainActivity extends Activity {
             	return true;
             
             case R.id.remote:
-            	Intent startIntent=new Intent(this.getApplicationContext(),RemoteControlActivity.class);
-            	startActivity(startIntent);
+            	refreshData();
+            	//Intent startIntent=new Intent(this.getApplicationContext(),RemoteControlActivity.class);
+            	//startActivity(startIntent);
                 return true;
 
             case R.id.logout:
@@ -332,21 +354,43 @@ public class MainActivity extends Activity {
 		return datum;
 	}
     
-    private class JSInterface {
+    public class JSInterface {
 		private WebView mAppView;
 		public JSInterface(WebView appView) {
 			this.mAppView = appView;
 		}
-		/*
-		public void doEchoTest(String echo) {
+		
+		public void toast(String echo) {
 			Toast toast = Toast.makeText(mAppView.getContext(), echo,
 					Toast.LENGTH_SHORT);
 			toast.show();
-		}*/
+		}
 	}
-    
-    
-    private class MyWebViewClient extends WebViewClient {
+
+    @Override
+	public void onAccuracyChanged(Sensor sensor, int accuracy) {
+	}
+
+	@Override
+	public void onSensorChanged(SensorEvent sensor) {
+        float x = sensor.values[0];
+        float y = sensor.values[1];
+        float z = sensor.values[2];
+        mAccelLast = mAccelCurrent;
+        mAccelCurrent = (float) Math.sqrt((double) (x*x + y*y + z*z));
+        float delta = mAccelCurrent - mAccelLast;
+        mAccel = mAccel * 0.9f + delta; // perform low-cut filter
+        if (mAccel > 10) {
+        	mAccel = 0;
+        	refreshData();
+        }
+	}
+
+	private void refreshData() {
+		webView.loadUrl("javascript:refreshOnShake()");
+	}
+
+	private class MyWebViewClient extends WebViewClient {
     	Activity parentActivity;
     	
 		public MyWebViewClient(Activity activity) {
