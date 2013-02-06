@@ -53,7 +53,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
- * Describe your class here...
+ * Connector for using Context Broker in SOCIETIES Platform
  *
  * @author NikosK and cviana
  *
@@ -277,6 +277,15 @@ public class ContextAware3pService implements IContextAware3pService  {
 		// TODO Auto-generated method stub
 		this.myCtxChangeEventListener = myCtxChangeEventListener;
 		
+	}
+
+
+	/* (non-Javadoc)
+	 * @see org.societies.context.externalBrokerConnector.IContextAware3pService#getRequestor()
+	 */
+	@Override
+	public RequestorService getRequestor() {
+		return this.requestorService;
 	}
 
 }

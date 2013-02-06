@@ -29,6 +29,7 @@ import java.util.HashMap;
 
 import org.societies.api.context.event.CtxChangeEventListener;
 import org.societies.api.identity.InvalidFormatException;
+import org.societies.api.identity.RequestorService;
 
 /**
  * This is a 3p service Ifc that needs to access context through the societies platform ...
@@ -42,8 +43,10 @@ public interface IContextAware3pService {
 	
 	public HashMap<String, HashMap<String, String[]>> retrieveLookupMembersCtxAttributes(Object communityId) throws InvalidFormatException;
 
+	public abstract RequestorService getRequestor();
+	
 	/**
 	 * @param myCtxChangeEventListener
 	 */
-	public void setListener(CtxChangeEventListener myCtxChangeEventListener);
+	public abstract void setListener(CtxChangeEventListener myCtxChangeEventListener);
 }
