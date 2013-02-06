@@ -24,24 +24,27 @@
  */
 package org.societies.enterprise.collabtools;
 
-import java.util.ArrayList;
+import java.io.File;
+import java.util.HashMap;
 
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
-import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 import org.neo4j.graphdb.index.Index;
 import org.neo4j.index.impl.lucene.LuceneIndex;
+import org.neo4j.kernel.impl.util.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.societies.enterprise.collabtools.acquisition.Person;
+import org.societies.enterprise.collabtools.acquisition.LongTermCtxTypes;
 import org.societies.enterprise.collabtools.acquisition.PersonRepository;
-import org.societies.enterprise.collabtools.acquisition.RelTypes;
-import org.societies.enterprise.collabtools.interpretation.ContextAnalyzer;
+import org.societies.enterprise.collabtools.runtime.CollabApps;
 import org.societies.enterprise.collabtools.runtime.CtxMonitor;
 import org.societies.enterprise.collabtools.runtime.SessionRepository;
 
 /**
+ * 
+ * Main class to test without OSGi bundle
+ * 
  * @author cviana
  *
  */
@@ -49,11 +52,11 @@ public class MainTest {
 
 	private static final Logger logger  = LoggerFactory.getLogger(MainTest.class);
 
-	private static GraphDatabaseService graphDb;
+	private static GraphDatabaseService personGraphDb;
+	private static GraphDatabaseService sessionGraphDb;
 	private static PersonRepository personRepository;
-	private static SessionRepository sessionRepository = new SessionRepository(); 
-	private static Index<Node> indexPerson;
-	private static Index<Node> indexShortTermCtx;
+	private static SessionRepository sessionRepository; 
+	private static Index<Node> indexPerson, indexSession, indexShortTermCtx;
 
 	/**
 	 * @param args
@@ -61,14 +64,24 @@ public class MainTest {
 	 */
 	public static void main(String[] args) throws Exception {
 
+	    FileUtils.deleteRecursively(new File("target/PersonsGraphDb"));
+	    FileUtils.deleteRecursively(new File("target/SessionsGraphDb"));
 		
 		//Database setup
 		logger.info("Database setup");
 		GraphDatabaseFactory gdbf = new GraphDatabaseFactory();
-		graphDb = gdbf.newEmbeddedDatabase( "target/PersonsGraphDb" );
-		indexPerson = graphDb.index().forNodes( "PersonNodes" );
-		indexShortTermCtx = graphDb.index().forNodes( "CtxNodes" );
-		personRepository = new PersonRepository( graphDb, indexPerson);
+	    personGraphDb = gdbf.newEmbeddedDatabase("target/PersonsGraphDb");
+	    sessionGraphDb = gdbf.newEmbeddedDatabase("target/SessionsGraphDb");
+	    indexPerson = personGraphDb.index().forNodes("PersonNodes");
+	    indexSession = sessionGraphDb.index().forNodes("SessionNodes");
+	    indexShortTermCtx = personGraphDb.index().forNodes("CtxNodes");
+	    
+	    HashMap<String, String> collabAppsConfig = new HashMap<String, String>();
+	    collabAppsConfig.put("chat", "societies.local");
+	    CollabApps collabApps = new CollabApps(collabAppsConfig);
+
+	    personRepository = new PersonRepository(personGraphDb, indexPerson);
+	    sessionRepository = new SessionRepository(sessionGraphDb, indexSession, collabApps);
 		registerShutdownHook();
 
 		//Caching last recently used for Location
@@ -85,7 +98,7 @@ public class MainTest {
 		test.createMockLongTermCtx();
 		test.createMockShortTermCtx();
 		test.enrichedCtx();
-		test.setupFriendsBetweenPeople();
+		test.setupFriendsBetweenPeople(LongTermCtxTypes.INTERESTS);
 
 		
 //		YouMightKnow ymn = new YouMightKnow(personRepository.getPersonByName("person#"+3), new String[] {"project planning"}, 5);
@@ -99,9 +112,10 @@ public class MainTest {
 		CtxMonitor thread = new CtxMonitor(personRepository, sessionRepository);
 		thread.start();
 
-//		//Creating more updates
+		//Creating more updates
 		while (true) {
-			Thread.sleep(3 * 1000);
+			// 15 sec
+			Thread.sleep(15 * 1000);
 			test.createMockShortTermCtx();
 		}
 
@@ -120,7 +134,8 @@ public class MainTest {
 			@Override
 			public void run()
 			{
-				graphDb.shutdown();
+				personGraphDb.shutdown();
+				sessionGraphDb.shutdown();
 			}
 		} );
 	}

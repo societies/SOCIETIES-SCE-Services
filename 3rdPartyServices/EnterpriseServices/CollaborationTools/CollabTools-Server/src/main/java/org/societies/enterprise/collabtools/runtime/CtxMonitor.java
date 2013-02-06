@@ -36,7 +36,7 @@ import org.societies.enterprise.collabtools.interpretation.Rules;
 
 
 /**
- * Describe your class here...
+ * Context monitor analyze the users information to check if the rules matches
  *
  * @author cviana
  *
@@ -86,20 +86,15 @@ public class CtxMonitor extends Thread{
 //						Hashtable<String, HashSet<Person>> personsWithSameStatus = conditions.getPersonsWithMatchingShortTermCtx(ShortTermCtxTypes.STATUS, personsWithSameInterests.get(sessionName));
 //						logger.info("Fourth rule: Status "+personsWithSameStatus.toString());
 						
-
-						if (!sessionRepository.containSession(sessionName) && !personsWithSameInterests.isEmpty()) {
-							logger.info("Starting a new session..");
-							logger.info("Inviting people..");
-							sessionRepository.inviteMembers(sessionName, personsWithSameInterests.get(sessionName));
-						} //Check conflict if actual users in the session
-						else if (sessionRepository.differenceBetweenSessionMembers(personsWithSameInterests.get(sessionName), sessionName)){
-							if (!personsWithSameInterests.get(sessionName).isEmpty()) {
-								//Compare persons in same context with members in this session
-								sessionRepository.inviteMembers(sessionName, personsWithSameInterests.get(sessionName));
-								logger.info("Checking if users are in a session..");
-							}
-
-						}
+						//Check conflict if actual users in the session
+			            if (!(personsWithSameInterests.get(sessionName)).isEmpty()) {
+			                if (!this.sessionRepository.containSession(sessionName)) {
+			                  logger.info("Starting a new session..");
+			                  logger.info("Inviting people..");
+			                  this.sessionRepository.createSession(sessionName);
+			                }
+			                this.sessionRepository.addMembers(sessionName, personsWithSameInterests.get(sessionName));
+			              }
 					}
 				}
 				//Sleep in seconds

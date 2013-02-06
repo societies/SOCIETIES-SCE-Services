@@ -1,8 +1,7 @@
 Manifest-Version: 1.0
 Export-Package: org.societies.enterprise.collabtools.acquisition;uses:
- ="javax.xml.xpath,javax.xml.parsers,org.slf4j,org.xml.sax,org.osgi.fr
- amework,org.societies.context.externalBrokerConnector";version="0.1.0
- "
+ ="org.slf4j,org.osgi.framework,org.societies.context.externalBrokerCo
+ nnector";version="0.1.0"
 Ignore-Package: ch.qos.logback.classic,ch.qos.logback.core,ch.qos.logb
  ack.core.joran.spi,ch.qos.logback.classic.joran
 Bundle-ClassPath: .,neo4j-kernel-1.8.M04.jar,classes,neo4j-graph-algo-
@@ -19,7 +18,7 @@ Import-Bundle: org.societies.context-management.context-3pbroker-conne
 Build-Jdk: 1.7.0_03
 Bundle-Version: 0.1.0
 Embed-Transitive: true
-Bnd-LastModified: 1352391617528
+Bnd-LastModified: 1360165371267
 Bundle-ManifestVersion: 2
 Bundle-Activator: org.societies.enterprise.collabtools.Activator
 Bundle-SymbolicName: org.societies.enterprise.CollabTools
@@ -41,14 +40,13 @@ Import-Package: com.sun.source.tree;resolution:=optional,com.sun.sourc
  ional,org.societies.api.context.broker;resolution:=optional,org.socie
  ties.api.context.event;resolution:=optional,org.societies.api.context
  .model;resolution:=optional,org.societies.api.identity;resolution:=op
- tional,org.societies.api.internal.context.broker;resolution:=optional
- ,org.societies.api.schema.servicelifecycle.model;resolution:=optional
- ,org.societies.context.externalBrokerConnector;resolution:=optional;v
- ersion="[0.1,1)",org.springframework.beans.factory.annotation;resolut
- ion:=optional,org.springframework.stereotype;resolution:=optional,org
- .w3c.dom;resolution:=optional,org.xml.sax;resolution:=optional,org.xm
- l.sax.ext;resolution:=optional,org.xml.sax.helpers;resolution:=option
- al,sun.misc;resolution:=optional
+ tional,org.societies.api.schema.servicelifecycle.model;resolution:=op
+ tional,org.societies.context.externalBrokerConnector;resolution:=opti
+ onal;version="[0.1,1)",org.springframework.beans.factory.annotation;r
+ esolution:=optional,org.springframework.stereotype;resolution:=option
+ al,org.w3c.dom;resolution:=optional,org.xml.sax;resolution:=optional,
+ org.xml.sax.ext;resolution:=optional,org.xml.sax.helpers;resolution:=
+ optional,sun.misc;resolution:=optional
 Embed-Dependency: *;scope=compile|runtime
 Originally-Created-By: Apache Maven Bundle Plugin
 

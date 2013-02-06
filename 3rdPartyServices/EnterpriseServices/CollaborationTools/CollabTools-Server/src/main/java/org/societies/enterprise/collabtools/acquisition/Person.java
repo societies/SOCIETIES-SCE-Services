@@ -24,7 +24,7 @@
  */
 package org.societies.enterprise.collabtools.acquisition;
 
-import static org.societies.enterprise.collabtools.acquisition.RelTypes.KNOWS;
+import static org.societies.enterprise.collabtools.acquisition.RelTypes.SIMILARITY;
 import static org.societies.enterprise.collabtools.acquisition.RelTypes.NEXT;
 import static org.societies.enterprise.collabtools.acquisition.RelTypes.STATUS;
 
@@ -35,6 +35,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Observable;
 
 import org.neo4j.graphalgo.GraphAlgoFactory;
@@ -57,13 +58,14 @@ import org.societies.enterprise.collabtools.runtime.SessionRepository;
 
 public class Person extends Observable
 {
-    public static final String NAME = "name";
-    public static final String ID = "id";
+	  public static final String NAME = "name";
+	  public static final String ID = "id";
+	  public static final String COLLAB_APPS = "collab_apps";
 
     // START SNIPPET: the-node
     private final Node underlyingNode;
 
-    Person( Node personNode )
+    public Person(Node personNode)
     {
         this.underlyingNode = personNode;
     }
@@ -78,18 +80,19 @@ public class Person extends Observable
     // START SNIPPET: delegate-to-the-node
     public String getName()
     {
-        return (String)underlyingNode.getProperty( NAME );
+        return (String)underlyingNode.getProperty(NAME);
     }
 
     // END SNIPPET: delegate-to-the-node
     
 	public String getLongTermCtx(String property){
-		return (String) underlyingNode.getProperty( property, "" );
+		return (String) underlyingNode.getProperty(property, "");
 	}
 	
-	//Array of interests
-	public String[] getInterests(){
-		return (String[]) underlyingNode.getProperty( LongTermCtxTypes.INTERESTS );
+	//Array of ctx
+	public String[] getArrayLongTermCtx(String property)
+	{
+	  return (String[])this.underlyingNode.getProperty(property);
 	}
 	
 	public void setLongTermCtx(final String property, String value){
@@ -113,8 +116,8 @@ public class Person extends Observable
 		Transaction tx = underlyingNode.getGraphDatabase().beginTx();
 		try
 		{
-			underlyingNode.setProperty( LongTermCtxTypes.INTERESTS, values );
-			index.add( underlyingNode, LongTermCtxTypes.INTERESTS, values );
+			underlyingNode.setProperty(property, values );
+			index.add(underlyingNode, property, values );
 //			Example:
 //			index.add( myNode, "Education", new String[] {"Stanford University, Grad School", "Harvard University, MS"} );
 //			index.add( myNode, "Work", new String[] {"Nokia Siemens Networks", "Motorola"} );
@@ -151,7 +154,7 @@ public class Person extends Observable
 
     // END SNIPPET: override
 
-    public void addFriend( Person otherPerson, float weight )
+    public void addFriend(Person otherPerson, float weight)
     {
         Transaction tx = underlyingNode.getGraphDatabase().beginTx();
         try
@@ -161,7 +164,7 @@ public class Person extends Observable
                 Relationship friendRel = getFriendRelationshipTo( otherPerson );
                 if ( friendRel == null )
                 {
-                    underlyingNode.createRelationshipTo( otherPerson.getUnderlyingNode(), KNOWS ).setProperty("weight", weight);
+                    underlyingNode.createRelationshipTo(otherPerson.getUnderlyingNode(), SIMILARITY ).setProperty("weight", weight);
                 }
                 tx.success();
             }
@@ -182,7 +185,7 @@ public class Person extends Observable
         return getFriendsByDepth( 1 );
     }
 
-    public void removeFriend( Person otherPerson )
+    public void removeFriend(Person otherPerson)
     {
         Transaction tx = underlyingNode.getGraphDatabase().beginTx();
         try
@@ -213,15 +216,15 @@ public class Person extends Observable
     {
         // use graph algo to calculate a shortest path
         PathFinder<Path> finder = GraphAlgoFactory.shortestPath(
-                Traversal.expanderForTypes( KNOWS, Direction.BOTH ), maxDepth );
+                Traversal.expanderForTypes(SIMILARITY, Direction.BOTH), maxDepth );
 
         Path path = finder.findSinglePath( underlyingNode,
                 otherPerson.getUnderlyingNode() );
-        return createPersonsFromNodes( path );
+        return createPersonsFromNodes(path);
     }
 
     public Iterable<Person> getFriendRecommendation(
-            int numberOfFriendsToReturn )
+            int numberOfFriendsToReturn)
     {
         HashSet<Person> friends = new HashSet<Person>();
         IteratorUtil.addToCollection( getFriends(), friends );
@@ -248,7 +251,7 @@ public class Person extends Observable
     {
         Relationship firstStatus = underlyingNode.getSingleRelationship(
                 STATUS, Direction.OUTGOING );
-        if ( firstStatus == null )
+        if (firstStatus == null)
         {
             return Collections.emptyList();
         }
@@ -256,13 +259,13 @@ public class Person extends Observable
         // START SNIPPET: getStatusTraversal
         TraversalDescription traversal = Traversal.description().
                 depthFirst().
-                relationships( NEXT ).
+                relationships(NEXT).
                 evaluator(Evaluators.all());
         // END SNIPPET: getStatusTraversal
 
 
         return new IterableWrapper<ShortTermContextUpdates, Path>(
-                traversal.traverse( firstStatus.getEndNode() ) )
+                traversal.traverse(firstStatus.getEndNode()) )
         {
             @Override
             protected ShortTermContextUpdates underlyingObjectToObject( Path path )
@@ -275,7 +278,7 @@ public class Person extends Observable
     public ShortTermContextUpdates getLastStatus()
     {
     	Relationship firstStatus = underlyingNode.getSingleRelationship(
-    			STATUS, Direction.OUTGOING );
+    			STATUS, Direction.OUTGOING);
     	//Check status is empty
     	if ( firstStatus == null )
     	{
@@ -288,7 +291,7 @@ public class Person extends Observable
     public ArrayList<ShortTermContextUpdates> friendLastStatuses()
     {
     	ArrayList<ShortTermContextUpdates> status = new ArrayList<ShortTermContextUpdates>();
-    	for ( Person friend : this.getFriends() )
+    	for (Person friend : this.getFriends())
         {
     		status.add(friend.getLastStatus());
         }
@@ -297,10 +300,10 @@ public class Person extends Observable
 
     public Iterator<ShortTermContextUpdates> friendStatuses()
     {
-        return new CheckAllCtxActivityStreamIterator( this );
+        return new CheckAllCtxActivityStreamIterator(this);
     }
 
-    public void addContextStatus( String status, String location, SessionRepository sessionRep )
+    public void addContextStatus( Map<String, String> shortTermCtx, SessionRepository sessionRep )
     {
         Transaction tx = graphDb().beginTx();
         try
@@ -315,15 +318,15 @@ public class Person extends Observable
                 oldStatus = null;
             }
             
-            Node newStatus = createNewCtxNode( status, location, sessionRep );
+            Node newStatus = createNewCtxNode(shortTermCtx, sessionRep);
 
-            if ( oldStatus != null )
+            if (oldStatus != null)
             {
-                underlyingNode.getSingleRelationship( RelTypes.STATUS, Direction.OUTGOING ).delete();
-                newStatus.createRelationshipTo( oldStatus.getUnderlyingNode(), RelTypes.NEXT );
+                underlyingNode.getSingleRelationship(RelTypes.STATUS, Direction.OUTGOING).delete();
+                newStatus.createRelationshipTo(oldStatus.getUnderlyingNode(), RelTypes.NEXT);
             }
 
-            underlyingNode.createRelationshipTo( newStatus, RelTypes.STATUS );  
+            underlyingNode.createRelationshipTo(newStatus, RelTypes.STATUS);  
             tx.success();
         }
         finally
@@ -337,16 +340,17 @@ public class Person extends Observable
         return underlyingNode.getGraphDatabase();
     }
 
-    private Node createNewCtxNode( String text, String location, SessionRepository sessionRep )
+    private Node createNewCtxNode(Map<String, String> shortTermCtx, SessionRepository sessionRep)
     {
         Node newCtx = graphDb().createNode();
-        newCtx.setProperty( ShortTermCtxTypes.STATUS, text );
-        newCtx.setProperty( ShortTermCtxTypes.LOCATION, location );
+        for (Map.Entry entry : shortTermCtx.entrySet()) {
+            newCtx.setProperty((String)entry.getKey(), entry.getValue());
+          }
         SimpleDateFormat formatter = new SimpleDateFormat(ShortTermContextUpdates.DATE_FORMAT);
         newCtx.setProperty( ShortTermContextUpdates.DATE, formatter.format(new Date().getTime()));
-        //Check location changes
-        if (contextHasChanged(ShortTermCtxTypes.LOCATION, location)){
-            //TODO:Broadcast Observer
+        //Check location changes; First status, second location
+        if (contextHasChanged(ShortTermCtxTypes.LOCATION, shortTermCtx.get(ShortTermCtxTypes.LOCATION))){
+            //TODO:Fix the context changes
             this.addObserver(sessionRep);
             setChanged();
             notifyObservers(this);
@@ -359,15 +363,15 @@ public class Person extends Observable
      * @param location
 	 * @return
 	 */
-    private boolean contextHasChanged(final String context, String location) {
+    private boolean contextHasChanged(final String contextType, String context) {
     	ShortTermContextUpdates ctxStatus= getLastStatus();
-    	//Check old location with new location
-    	if (context.equals(ShortTermCtxTypes.LOCATION))
-    		if (ctxStatus != null && !location.equals(ctxStatus.getShortTermCtx(ShortTermCtxTypes.LOCATION))){
-    	        System.out.println(ctxStatus.getPerson()+" had location: "+ctxStatus.getShortTermCtx(ShortTermCtxTypes.LOCATION)+" and now has location: "+location);
-    			return true;
-    		}
-    	return false;
+    	
+    	//Check old context with new context
+        if ((ctxStatus != null) && (!context.equals(ctxStatus.getShortTermCtx(contextType)))) {
+            System.out.println(ctxStatus.getPerson() + " had context: " + ctxStatus.getShortTermCtx(contextType) + " and now has context: " + context);
+            return true;
+          }
+          return false;
     }
 
 	private final class RankedPerson
@@ -425,9 +429,9 @@ public class Person extends Observable
     public Relationship getFriendRelationshipTo( Person otherPerson )
     {
         Node otherNode = otherPerson.getUnderlyingNode();
-        for ( Relationship rel : underlyingNode.getRelationships( KNOWS ) )
+        for ( Relationship rel : underlyingNode.getRelationships(SIMILARITY) )
         {
-            if ( rel.getOtherNode( underlyingNode ).equals( otherNode ) )
+            if ( rel.getOtherNode(underlyingNode).equals(otherNode) )
             {
                 return rel;
             }
@@ -440,12 +444,12 @@ public class Person extends Observable
         // return all my friends and their friends using new traversal API
         TraversalDescription travDesc = Traversal.description()
                 .breadthFirst()
-                .relationships( KNOWS )
+                .relationships(SIMILARITY)
                 .uniqueness( Uniqueness.NODE_GLOBAL )
                 .evaluator( Evaluators.toDepth(depth))
                 .evaluator( Evaluators.excludeStartPosition() );
 
-        return createPersonsFromPath( travDesc.traverse( underlyingNode ) );
+        return createPersonsFromPath(travDesc.traverse(underlyingNode) );
     }
 
     private IterableWrapper<Person, Path> createPersonsFromPath(
@@ -463,7 +467,7 @@ public class Person extends Observable
 
     private int getNumberOfPathsToPerson( Person otherPerson )
     {
-        PathFinder<Path> finder = GraphAlgoFactory.allPaths( Traversal.expanderForTypes( KNOWS, Direction.BOTH ), 2 );
+        PathFinder<Path> finder = GraphAlgoFactory.allPaths( Traversal.expanderForTypes(SIMILARITY, Direction.BOTH), 2 );
         Iterable<Path> paths = finder.findAllPaths( getUnderlyingNode(), otherPerson.getUnderlyingNode() );
         return IteratorUtil.count( paths );
     }
@@ -478,6 +482,38 @@ public class Person extends Observable
                 return new Person( node );
             }
         };
+    }
+    
+    public void setCollabApps(String[] collabApps)
+    {
+      Index<Node> index = this.underlyingNode.getGraphDatabase().index().forNodes("PersonNodes");
+      Transaction tx = this.underlyingNode.getGraphDatabase().beginTx();
+      try
+      {
+        this.underlyingNode.setProperty("collab_apps", collabApps);
+        index.add(this.underlyingNode, "collab_apps", collabApps);
+        tx.success();
+      }
+      finally
+      {
+        tx.finish();
+      }
+    }
+
+    public String[] getCollabApps()
+    {
+      return (String[])this.underlyingNode.getProperty(COLLAB_APPS);
+    }
+
+    public void addSession(String sessionName)
+    {
+      if (!getUnderlyingNode().hasProperty("has_sessions")) {
+        setLongTermCtx("has_sessions", new String[] { sessionName });
+      }
+      else
+      {
+        setLongTermCtx("has_sessions", new String[] { sessionName });
+      }
     }
 
 }

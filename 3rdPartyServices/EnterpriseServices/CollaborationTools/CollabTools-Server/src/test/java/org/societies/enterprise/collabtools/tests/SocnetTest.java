@@ -25,8 +25,10 @@ import static org.junit.Assert.assertThat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 import org.hamcrest.CoreMatchers;
@@ -83,9 +85,14 @@ public class SocnetTest
     @Test
     public void addStatusAndRetrieveIt() throws Exception
     {
+		Map<String, String> shortTermCtx = new HashMap<String, String>();
         for (int i = 0; i < 20; i++) {
 			Person person = getRandomPerson();
-			person.addContextStatus("Testing!", "School", null);
+			shortTermCtx.put(ShortTermCtxTypes.STATUS, "Testing");
+		    shortTermCtx.put(ShortTermCtxTypes.LOCATION, "School");
+			
+			person.addContextStatus(shortTermCtx, null);
+		    shortTermCtx.clear();
 
 			ShortTermContextUpdates update = person.getStatus().iterator().next();
 			assertThat(update, CoreMatchers.<Object> notNullValue());
@@ -116,9 +123,13 @@ public class SocnetTest
         statuses.add( "Test3" );
 
         Person person = getRandomPerson();
+		Map<String, String> shortTermCtx = new HashMap<String, String>();
         for ( String status : statuses )
         {
-            person.addContextStatus( status, "location", null );
+			shortTermCtx.put(ShortTermCtxTypes.STATUS, status);
+		    shortTermCtx.put(ShortTermCtxTypes.LOCATION, "location");
+            person.addContextStatus(shortTermCtx, null );
+    	    shortTermCtx.clear();
         }
 
         int i = statuses.size();
@@ -152,10 +163,15 @@ public class SocnetTest
         Person person = getRandomPersonWithFriends();
         int numberOfStatuses = 20;
 
+		Map<String, String> shortTermCtx = new HashMap<String, String>();
+
         for ( int i = 0; i < numberOfStatuses; i++ )
         {
-            Person friend = getRandomFriendOf( person );
-            friend.addContextStatus( "Dum-deli-dum...", "location", null );
+            Person friend = getRandomFriendOf(person);
+    		shortTermCtx.put(ShortTermCtxTypes.STATUS, "Dum-deli-dum...");
+    	    shortTermCtx.put(ShortTermCtxTypes.LOCATION, "location");
+            friend.addContextStatus(shortTermCtx , null );
+            shortTermCtx.clear();
         }
 
         ArrayList<ShortTermContextUpdates> updates = fromIterableToArrayList( person.friendStatuses() );
@@ -182,9 +198,19 @@ public class SocnetTest
     public void shouldReturnTheCorrectPersonFromAnyStatusUpdate() throws Exception
     {
         Person person = getRandomPerson();
-        person.addContextStatus( "Foo", null, null );
-        person.addContextStatus( "Bar", null, null );
-        person.addContextStatus( "Baz", null, null );
+		Map<String, String> shortTermCtx = new HashMap<String, String>();
+	    shortTermCtx.put(ShortTermCtxTypes.LOCATION, null);
+	    
+		shortTermCtx.put(ShortTermCtxTypes.STATUS, "Foo");
+        person.addContextStatus(shortTermCtx, null );
+	    shortTermCtx.clear();
+	    
+		shortTermCtx.put(ShortTermCtxTypes.STATUS, "Bar");
+        person.addContextStatus(shortTermCtx, null );
+	    shortTermCtx.clear();
+        
+		shortTermCtx.put(ShortTermCtxTypes.STATUS, "Baz");
+        person.addContextStatus(shortTermCtx, null );
 
         for(ShortTermContextUpdates status : person.getStatus())
         {

@@ -232,7 +232,7 @@ public class Rules {
 			hashsetPersons.toArray(person);
 			ArrayList<Float> elements = new ArrayList<Float>(); 
 			for (Person p : person) {
-				Iterable<Relationship> knows = p.getUnderlyingNode().getRelationships(RelTypes.KNOWS);
+				Iterable<Relationship> knows = p.getUnderlyingNode().getRelationships(RelTypes.SIMILARITY);
 				while (knows.iterator().hasNext()) {
 					Relationship rel = knows.iterator().next();
 					elements.add((Float) rel.getProperty("weight"));

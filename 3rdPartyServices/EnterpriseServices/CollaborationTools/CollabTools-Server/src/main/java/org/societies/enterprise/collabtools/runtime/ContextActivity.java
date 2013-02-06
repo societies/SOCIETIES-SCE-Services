@@ -29,21 +29,24 @@ import java.util.Hashtable;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.societies.enterprise.collabtools.acquisition.LongTermCtxTypes;
 import org.societies.enterprise.collabtools.acquisition.ShortTermContextUpdates;
 import org.societies.enterprise.collabtools.acquisition.Person;
 import org.societies.enterprise.collabtools.acquisition.PersonRepository;
 
 /**
- * Describe your class here...
+ * Provide context information
  *
  * @author cviana
  *
  */
+@Deprecated
 public final class ContextActivity {
 	
 	private static final Logger logger  = LoggerFactory.getLogger(ContextActivity.class);
 	
 	//Get context changes often
+	@Deprecated
 	public static HashSet<ShortTermContextUpdates> getLastContextUpdates(PersonRepository personRepository) {
 		HashSet<ShortTermContextUpdates> ctxHashSet = new HashSet<ShortTermContextUpdates>();
 		for (Person person : personRepository.getAllPersons() ) {
@@ -53,10 +56,11 @@ public final class ContextActivity {
 	}
 	
 	//Get context which change a few times
+	@Deprecated
 	public Hashtable<String, String[]> getPersonPropertiesContext(PersonRepository personRepository, final String ctxAttribute) {
 		Hashtable<String, String[]> hashTable = new Hashtable<String, String[]>();
 		for (Person person : personRepository.getAllPersons() ) {
-			String[] interests = person.getInterests();
+			String[] interests = person.getArrayLongTermCtx(LongTermCtxTypes.INTERESTS);
 			String personName = person.getName();
 			hashTable.put(personName, interests);
 		}

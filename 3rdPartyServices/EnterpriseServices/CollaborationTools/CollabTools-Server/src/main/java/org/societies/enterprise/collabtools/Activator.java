@@ -25,7 +25,9 @@
 package org.societies.enterprise.collabtools;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.Random;
 
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
@@ -42,9 +44,11 @@ import org.osgi.framework.ServiceRegistration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.societies.enterprise.collabtools.acquisition.ContextSubscriber;
+import org.societies.enterprise.collabtools.acquisition.LongTermCtxTypes;
 import org.societies.enterprise.collabtools.acquisition.Person;
 import org.societies.enterprise.collabtools.acquisition.PersonRepository;
 import org.societies.enterprise.collabtools.interpretation.ContextAnalyzer;
+import org.societies.enterprise.collabtools.runtime.CollabApps;
 import org.societies.enterprise.collabtools.runtime.CtxMonitor;
 import org.societies.enterprise.collabtools.runtime.SessionRepository;
 
@@ -56,9 +60,10 @@ public class Activator implements BundleActivator
  
     private static GraphDatabaseService graphDb;
     private static Index<Node> indexPerson;
+    private static Index<Node> indexSession;
     private ServiceRegistration serviceRegistration, indexServiceRegistration, ctxSubServiceRegistration;
     
-    private SessionRepository sessionRepository = new SessionRepository();
+    private SessionRepository sessionRepository;
     private PersonRepository personRepository;
  
     @Override
@@ -80,11 +85,20 @@ public class Activator implements BundleActivator
         GraphDatabaseFactory gdbf = new GraphDatabaseFactory();
         gdbf.setIndexProviders( providers );
         gdbf.setCacheProviders( cacheList );
-        graphDb = gdbf.newEmbeddedDatabase( "databases/PersonsGraphDb" );
-        indexPerson = graphDb.index().forNodes( "PersonNodes" );
-        personRepository = new PersonRepository( graphDb, indexPerson);
+        graphDb = gdbf.newEmbeddedDatabase("databases/PersonsGraphDb" + new Random().nextInt(100));
+//        graphDb = gdbf.newEmbeddedDatabase("databases/PersonsGraphDb");
+        indexPerson = graphDb.index().forNodes("PersonNodes");
+        indexSession = graphDb.index().forNodes("SessionNodes");
         
-        ContextSubscriber ctxSub = new ContextSubscriber(personRepository, sessionRepository);
+
+        HashMap collabAppsConfig = new HashMap();
+        collabAppsConfig.put("chat", "societies.local");
+        CollabApps collabApps = new CollabApps(collabAppsConfig);
+
+        this.personRepository = new PersonRepository(graphDb, indexPerson);
+        this.sessionRepository = new SessionRepository(graphDb, indexSession, collabApps);
+
+        ContextSubscriber ctxSub = new ContextSubscriber(this.personRepository, this.sessionRepository);
  
         //OSGi registration
         serviceRegistration = context.registerService(GraphDatabaseService.class.getName(), graphDb, new Hashtable<String,String>() );
@@ -95,18 +109,19 @@ public class Activator implements BundleActivator
         ctxSubServiceRegistration =context.registerService(ContextSubscriber.class.getName(), ctxSub, null);
         
         Object cisID = "cis-ad1536de-7d89-43f7-a14a-74e278ed36aa.societies.local";
+        
 		//Setting up initial context for GraphDB
         ctxSub.initialCtx(cisID);
         
         //Enrichment of ctx
         logger.info("Starting enrichment of context..." );
-        ContextAnalyzer ctxRsn = new ContextAnalyzer(personRepository);
-		ctxRsn.incrementInterests();
+        ContextAnalyzer ctxRsn = new ContextAnalyzer(this.personRepository);
+        ctxRsn.incrementInterests();
 		
 		//Applying weight between edges
 		logger.info("Setup weight among participants..." );
         for (Person person : personRepository.getAllPersons()) {
-    		ctxRsn.setupWeightBetweenPeople(person);
+            ctxRsn.setupWeightBetweenPeople(person, LongTermCtxTypes.INTERESTS);
         }
         
         //Setting up GraphDB

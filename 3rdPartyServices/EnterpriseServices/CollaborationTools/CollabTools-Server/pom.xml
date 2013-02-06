@@ -4,7 +4,8 @@
 	<parent>
 		<artifactId>spring-osgi-parent</artifactId>
 		<groupId>org.societies</groupId>
-		<version>0.1</version>
+		<version>RELEASE</version>
+		<relativePath>../../parent/spring-osgi.xml</relativePath>
 	</parent>
 	<groupId>org.societies.enterprise</groupId>
 	<artifactId>CollabTools</artifactId>

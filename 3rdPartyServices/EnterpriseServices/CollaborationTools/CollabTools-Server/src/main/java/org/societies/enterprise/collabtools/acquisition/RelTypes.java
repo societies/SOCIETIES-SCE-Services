@@ -28,10 +28,16 @@ import org.neo4j.graphdb.RelationshipType;
 
 public enum RelTypes implements RelationshipType
 {
-    REF_PERSONS,
-    A_PERSON,
-    STATUS,
-    NEXT,
-    KNOWS
+	  REF_PERSONS, 
+
+	  A_PERSON, 
+	  STATUS, 
+	  NEXT, 
+	  SIMILARITY, 
+
+	  REF_SESSIONS, 
+
+	  A_SESSION, 
+	  PARTICIPATE;
 }
-//Included weight in KNOWS property
+//Included weight in SIMILARITY property

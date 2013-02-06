@@ -36,6 +36,7 @@ import javax.xml.xpath.XPathExpressionException;
 import org.societies.enterprise.collabtools.acquisition.LongTermCtxTypes;
 import org.societies.enterprise.collabtools.acquisition.Person;
 import org.societies.enterprise.collabtools.acquisition.PersonRepository;
+import org.societies.enterprise.collabtools.acquisition.ShortTermCtxTypes;
 import org.societies.enterprise.collabtools.api.IContextReasoning;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
@@ -92,16 +93,16 @@ public class ContextAnalyzer implements IContextReasoning {
 	 */
 	public void incrementInterests() throws XPathExpressionException, IOException, SAXException, ParserConfigurationException {
     	for (Person friend :personRepository.getAllPersons()) {
-    		String[] newInterests = ctxEnrichedByConcept(friend.getInterests());
+    		String[] newInterests = ctxEnrichedByConcept(friend.getArrayLongTermCtx(LongTermCtxTypes.INTERESTS));
     		friend.setLongTermCtx(LongTermCtxTypes.INTERESTS, newInterests);
     	}		
 	}
 	
-	static public float personInterestsSimilarity (int similarCtx, Person personA, Person personB) {
+	static public float personCtxSimilarity (int similarCtx, String ctxType, Person personA, Person personB) {
 		//Similarity Formula is: similar interests/ min(personA, personB)
 		//Check if there is no similarity between both
 		if (similarCtx != 0) {
-			float weight = similarCtx/ Math.min((float)personA.getInterests().length,personB.getInterests().length );
+			float weight = similarCtx/ Math.min((float)personA.getArrayLongTermCtx(ctxType).length,personB.getArrayLongTermCtx(ctxType).length );
 			return weight;
 		}
 		else
@@ -143,13 +144,13 @@ public class ContextAnalyzer implements IContextReasoning {
 		return finalThreshold;
 	}
 	
-	public void setupWeightBetweenPeople(Person person)
+	public void setupWeightBetweenPeople(Person person, String property)
 	{
-		Map<Person, Integer> persons = this.personRepository.getPersonWithSimilarInterests(person);
-		for (Map.Entry<Person, Integer> entry : persons.entrySet()) {
+		Map<Person, Integer> persons = this.personRepository.getPersonWithSimilarCtx(person, property);
+		for (Map.Entry<Person, Integer> individual : persons.entrySet()) {
 			//Similarity Formula is: similar interests/ min(personA, personB)
-			float weight = ContextAnalyzer.personInterestsSimilarity(entry.getValue(), entry.getKey(), person);
-			person.addFriend(entry.getKey(),weight);  
+			float weight = ContextAnalyzer.personCtxSimilarity(individual.getValue(), property, individual.getKey(), person);
+			person.addFriend(individual.getKey(),weight);  
 		}
 	}
 

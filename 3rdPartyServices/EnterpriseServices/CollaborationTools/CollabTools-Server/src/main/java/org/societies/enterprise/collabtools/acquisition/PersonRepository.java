@@ -143,15 +143,15 @@ public class PersonRepository
         return true;
     }
     
-    public Map<Person, Integer> getPersonWithSimilarInterests(Person self)
+    public Map<Person, Integer> getPersonWithSimilarCtx(Person self, String property)
     {
     	Map<Person,Integer> persons = new HashMap<Person, Integer>();
     	for ( Person person : getAllPersons() )
     	{
         	int counter = 0;
     		if (!self.equals(person)) {
-    			List<String> personInterest = Arrays.asList(person.getInterests());
-    			for (String match : self.getInterests()) {    			
+    			List<String> personInterest = Arrays.asList(person.getArrayLongTermCtx(property));
+    			for (String match : self.getArrayLongTermCtx(property)) {    			
     				if (personInterest.contains(match)) {
     					counter++;
     					persons.put(person, counter);
@@ -197,7 +197,7 @@ public class PersonRepository
             {
                 person.removeFriend( friend );
             }
-            personNode.getSingleRelationship( A_PERSON, Direction.INCOMING ).delete();
+            personNode.getSingleRelationship(A_PERSON, Direction.INCOMING).delete();
 
             for ( ShortTermContextUpdates status : person.getStatus() )
             {
@@ -221,10 +221,10 @@ public class PersonRepository
     public Iterable<Person> getAllPersons()
     {
         return new IterableWrapper<Person, Relationship>(
-                personRefNode.getRelationships( A_PERSON ) )
+                personRefNode.getRelationships(A_PERSON) )
         {
             @Override
-            protected Person underlyingObjectToObject( Relationship personRel )
+            protected Person underlyingObjectToObject(Relationship personRel)
             {
                 return new Person( personRel.getEndNode() );
             }

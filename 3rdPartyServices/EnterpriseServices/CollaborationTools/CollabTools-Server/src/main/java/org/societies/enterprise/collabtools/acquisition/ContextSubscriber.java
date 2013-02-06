@@ -25,22 +25,16 @@
 
 package org.societies.enterprise.collabtools.acquisition;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
 
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.xpath.XPathExpressionException;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.societies.enterprise.collabtools.api.IContextSubscriber;
-import org.societies.enterprise.collabtools.interpretation.ContextAnalyzer;
 import org.societies.enterprise.collabtools.runtime.SessionRepository;
-import org.xml.sax.SAXException;
 
 public class ContextSubscriber implements IContextSubscriber, Observer
 {
@@ -91,53 +85,47 @@ public class ContextSubscriber implements IContextSubscriber, Observer
 		logger.info("******************************* update event  ***************** " + msg[0]);
 		logger.info("******************************* update event  ***************** " + msg[1]);
 		logger.info("******************************* update event  ***************** " + msg[2]);
-		Person individual = this.personRepository.getPersonByName(msg[2]);
-		String context = msg[1];
-		String type = msg[0];
-		if (type == "locationSymbolic")
-			individual.addContextStatus( individual.getLastStatus().getShortTermCtx(ShortTermCtxTypes.STATUS), context, sessionRepository );
-		else if (type == "status")
-			individual.addContextStatus( context, individual.getLastStatus().getShortTermCtx(ShortTermCtxTypes.LOCATION), sessionRepository );
+	    Map<String, String> shortTermCtx = new HashMap<String, String>();
+	    Person individual = this.personRepository.getPersonByName(msg[2]);
+	    String context = msg[1];
+	    String type = msg[0];
+	    if (type == "locationSymbolic") {
+	      shortTermCtx.put(individual.getLastStatus().getShortTermCtx(ShortTermCtxTypes.STATUS), context);
+	      individual.addContextStatus(shortTermCtx, this.sessionRepository);
+	    }
+	    else if (type == "status") {
+	      shortTermCtx.put(context, individual.getLastStatus().getShortTermCtx(ShortTermCtxTypes.LOCATION));
+	      individual.addContextStatus(shortTermCtx, this.sessionRepository);
+	    }
 	}
 
 	private void setContext(String type, String[] context, String person) throws Exception {
 		logger.info("******************************* Adding Context for: " + person + ", " + type + ", " + context[0].toString());
 		if (this.personRepository.hasPerson(person)) {
 			Person individual = this.personRepository.getPersonByName(person);
-			if (type == "interests")
-				individual.setLongTermCtx("interests", context);
-			else if (type == "work")
-				individual.setLongTermCtx("work", context[0]);
-			else if (type == "company")
-				individual.setLongTermCtx("company", context[0]);
-			else if (type == "location")
-				individual.addContextStatus( (individual.getLastStatus() == null ? "" : individual.getLastStatus().getShortTermCtx(ShortTermCtxTypes.STATUS)), context[0], sessionRepository );
-			else if (type == "status")
-				individual.addContextStatus( context[0], (individual.getLastStatus() == null ? "" : individual.getLastStatus().getShortTermCtx(ShortTermCtxTypes.LOCATION)), sessionRepository );
+		      Map<String, String> shortTermCtx = new HashMap<String, String>();
+		      if (type == LongTermCtxTypes.INTERESTS) {
+		        individual.setLongTermCtx(LongTermCtxTypes.INTERESTS, context);
+		      } else if (type == LongTermCtxTypes.WORK) {
+		        individual.setLongTermCtx(LongTermCtxTypes.WORK, context[0]);
+		      } else if (type == LongTermCtxTypes.COMPANY) {
+		        individual.setLongTermCtx(LongTermCtxTypes.COMPANY, context[0]);
+		      } else if (type == ShortTermCtxTypes.LOCATION) {
+		        shortTermCtx.put(individual.getLastStatus() == null ? "" : individual.getLastStatus().getShortTermCtx(ShortTermCtxTypes.STATUS), context[0]);
+		        individual.addContextStatus(shortTermCtx, this.sessionRepository);
+		      }
+		      else if (type == ShortTermCtxTypes.STATUS) {
+		        shortTermCtx.put(context[0], individual.getLastStatus() == null ? "" : individual.getLastStatus().getShortTermCtx(ShortTermCtxTypes.LOCATION));
+		        individual.addContextStatus(shortTermCtx, this.sessionRepository);
+		      }
 		}
 		else {
 			//Otherwise will be the first element, name : if (type == "name")
 			Person individual = this.personRepository.createPerson(person);
-			individual.setLongTermCtx("name", context);
+			individual.setLongTermCtx(Person.NAME, context);
 		}
 	}
 
-
-	private void enrichedCtx() throws XPathExpressionException, IOException, SAXException, ParserConfigurationException
-	{
-		ContextAnalyzer ctxRsn = new ContextAnalyzer(this.personRepository);
-		ctxRsn.incrementInterests();
-	}
-
-	private void setupWeightBetweenPeople(Person person)
-	{
-		Map<Person, Integer> persons = this.personRepository.getPersonWithSimilarInterests(person);
-		for (Map.Entry<Person, Integer> entry : persons.entrySet()) {
-			//Similarity Formula is: similar interests/ min(personA, personB)
-			float weight = ContextAnalyzer.personInterestsSimilarity(entry.getValue(), entry.getKey(), person);
-			person.addFriend(entry.getKey(),weight);  
-		}
-	}
 }
 
 

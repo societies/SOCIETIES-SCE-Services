@@ -29,7 +29,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Scanner;
@@ -45,11 +44,10 @@ import org.neo4j.kernel.impl.util.FileUtils;
 import org.societies.enterprise.collabtools.acquisition.LongTermCtxTypes;
 import org.societies.enterprise.collabtools.acquisition.Person;
 import org.societies.enterprise.collabtools.acquisition.PersonRepository;
+import org.societies.enterprise.collabtools.acquisition.ShortTermCtxTypes;
 import org.societies.enterprise.collabtools.interpretation.ContextAnalyzer;
 import org.societies.enterprise.collabtools.runtime.SessionRepository;
 import org.xml.sax.SAXException;
-
-import scala.actors.threadpool.Arrays;
 
 
 public class TestUtils {
@@ -57,22 +55,23 @@ public class TestUtils {
     private static final Random r = new Random( System.currentTimeMillis() );
 	private static int nrOfPersons;
     private PersonRepository personRepository;
-    private SessionRepository sessionRep;
+    private SessionRepository sessionRepository;
     
-    public TestUtils(PersonRepository personRepository,  SessionRepository sessionRep) {
+    public TestUtils(PersonRepository personRepository,  SessionRepository sessionRepository) {
     	this.personRepository = personRepository;
-        this.sessionRep = sessionRep;
+        this.sessionRepository = sessionRepository;
 	}
     
 	public void createPersons(int nrOfPersons) throws Exception
     {
-		this.nrOfPersons = nrOfPersons;
+		TestUtils.nrOfPersons = nrOfPersons;
         for ( int i = 0; i < nrOfPersons; i++ )
         {    	
             Person person = personRepository.createPerson( "person#" + i);
             //Set long term context
             person.setLongTermCtx(Person.NAME, "person#" + i);
-            System.out.println("person#" +i+" created" );
+            person.setLongTermCtx(Person.COLLAB_APPS, new String[] { "chat" });
+            System.out.println("Person#" +i+" created" );
         }
     }
 	
@@ -85,15 +84,15 @@ public class TestUtils {
         }
     }
 
-	public void setupFriendsBetweenPeople()
+	public void setupFriendsBetweenPeople(String ctxType)
     {
         for ( Person person : personRepository.getAllPersons() )
         {
 //                person.addFriend( getRandomPerson() );
-        	Map<Person, Integer> persons = personRepository.getPersonWithSimilarInterests(person);
+        	Map<Person, Integer> persons = personRepository.getPersonWithSimilarCtx(person, ctxType);
 			for (Map.Entry<Person, Integer> entry : persons.entrySet()) {
 				//Similarity Formula is: similar interests/ min(personA, personB)
-				float weight = ContextAnalyzer.personInterestsSimilarity(entry.getValue(), entry.getKey(), person);
+				float weight = ContextAnalyzer.personCtxSimilarity(entry.getValue(), ctxType, entry.getKey(), person);
         		person.addFriend(entry.getKey(),weight);  
 			}
         }
@@ -102,11 +101,15 @@ public class TestUtils {
 	/**
 	 * 
 	 */
-    public void createMockShortTermCtx() {
-    	for (Person friend :personRepository.getAllPersons()) {
-    		friend.addContextStatus( getRandomStatus(), getRandomLocation(), sessionRep );
-    	}
-    }
+	  public void createMockShortTermCtx()
+	  {
+	    Map<String, String> shortTermCtx = new HashMap<String, String>();
+	    for (Person friend : this.personRepository.getAllPersons()) {
+	      shortTermCtx.put(ShortTermCtxTypes.STATUS, getRandomStatus());
+	      shortTermCtx.put(ShortTermCtxTypes.LOCATION, getRandomLocation());
+	      friend.addContextStatus(shortTermCtx, this.sessionRepository);
+	    }
+	  }
 
 	/**
 	 * 
@@ -123,7 +126,7 @@ public class TestUtils {
     private Person getRandomPerson()
     {
         return personRepository.getPersonByName( "person#"
-                + r.nextInt( nrOfPersons ) );
+                + r.nextInt(TestUtils.nrOfPersons) );
     }
 
 
@@ -241,7 +244,7 @@ public class TestUtils {
 				createMockShortTermCtx();
 				break;
 			case 2:
-				setupFriendsBetweenPeople();
+				setupFriendsBetweenPeople(LongTermCtxTypes.INTERESTS);
 				break;
 			case 3:
 				enrichedCtx();
@@ -274,7 +277,7 @@ public class TestUtils {
 		ctxRsn.incrementInterests();
 	}
 	
-	private static void clearDirectory( File path )
+	private static void clearDirectory(File path)
     {
         try
         {
