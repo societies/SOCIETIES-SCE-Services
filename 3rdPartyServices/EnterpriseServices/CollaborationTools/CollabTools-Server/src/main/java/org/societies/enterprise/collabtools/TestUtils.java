@@ -24,9 +24,7 @@
  */
 package org.societies.enterprise.collabtools;
 
-import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -37,10 +35,6 @@ import java.util.Set;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathExpressionException;
 
-import org.neo4j.graphdb.factory.GraphDatabaseSetting;
-import org.neo4j.helpers.collection.IteratorUtil;
-import org.neo4j.kernel.EmbeddedGraphDatabase;
-import org.neo4j.kernel.impl.util.FileUtils;
 import org.societies.enterprise.collabtools.acquisition.LongTermCtxTypes;
 import org.societies.enterprise.collabtools.acquisition.Person;
 import org.societies.enterprise.collabtools.acquisition.PersonRepository;
@@ -182,28 +176,28 @@ public class TestUtils {
 	}	
 	
 
-	/**
-	 * @param person
-	 * @return
-	 */
-	private Person getRandomFriendOf(Person person) {
-        ArrayList<Person> friends = new ArrayList<Person>();
-        IteratorUtil.addToCollection( person.getFriends().iterator(), friends );
-        return friends.get( r.nextInt( friends.size() ) );
-	}
-
-	/**
-	 * @return
-	 */
-	private Person getRandomPersonWithFriends() {
-		Person p;
-        do
-        {
-            p = getRandomPerson();
-        }
-        while ( p.getNrOfFriends() == 0 );
-        return p;
-	}
+//	/**
+//	 * @param person
+//	 * @return
+//	 */
+//	private Person getRandomFriendOf(Person person) {
+//        ArrayList<Person> friends = new ArrayList<Person>();
+//        IteratorUtil.addToCollection( person.getFriends().iterator(), friends );
+//        return friends.get( r.nextInt( friends.size() ) );
+//	}
+//
+//	/**
+//	 * @return
+//	 */
+//	private Person getRandomPersonWithFriends() {
+//		Person p;
+//        do
+//        {
+//            p = getRandomPerson();
+//        }
+//        while ( p.getNrOfFriends() == 0 );
+//        return p;
+//	}
 	
 	public void changeLocation(){
 		this.createMockShortTermCtx();
@@ -277,26 +271,26 @@ public class TestUtils {
 		ctxRsn.incrementInterests();
 	}
 	
-	private static void clearDirectory(File path)
-    {
-        try
-        {
-            FileUtils.deleteRecursively( path );
-        }
-        catch ( IOException e )
-        {
-            if ( GraphDatabaseSetting.osIsWindows() )
-            {
-                System.err.println( "Couldn't clear directory, and that's ok because this is Windows. Next " +
-                		EmbeddedGraphDatabase.class.getSimpleName() + " will get a new directory" );
-                e.printStackTrace();
-            }
-            else
-            {
-                throw new RuntimeException( "Couldn't not clear directory" );
-            }
-        }
-    }
+//	private static void clearDirectory(File path)
+//    {
+//        try
+//        {
+//            FileUtils.deleteRecursively( path );
+//        }
+//        catch ( IOException e )
+//        {
+//            if ( GraphDatabaseSetting.osIsWindows() )
+//            {
+//                System.err.println( "Couldn't clear directory, and that's ok because this is Windows. Next " +
+//                		EmbeddedGraphDatabase.class.getSimpleName() + " will get a new directory" );
+//                e.printStackTrace();
+//            }
+//            else
+//            {
+//                throw new RuntimeException( "Couldn't not clear directory" );
+//            }
+//        }
+//    }
 
 	
 }

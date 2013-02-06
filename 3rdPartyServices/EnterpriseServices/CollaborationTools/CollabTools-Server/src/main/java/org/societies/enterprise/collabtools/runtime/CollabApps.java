@@ -41,21 +41,27 @@ public class CollabApps implements ICollabApps
 {
 	private static HashMap<String, String> collabAppsConfig;
 
+	//Application type and server application
 	public CollabApps(HashMap<String, String> collabAppsConfig)
 	{
 		CollabApps.collabAppsConfig = collabAppsConfig;
 	}
 
+	//member and applications available from this user
 	public void sendInvite(String member, String[] collabApps)
 	{
 //		System.out.println("collabAppsConfig.isEmpty(): "+collabAppsConfig.isEmpty());
 		Iterator<?> it = collabAppsConfig.entrySet().iterator();
 		while (it.hasNext()) {
 			Map.Entry pairs = (Map.Entry)it.next();
+			System.out.println(pairs.getKey());
 			if (Arrays.asList(collabApps).contains(pairs.getKey()))
 			{
 				//TODO:Start invitation
-				System.out.println("Send invitation to member: " + member);
+				System.out.println("Send invitation to member: " + member + " using app" + pairs.getKey());
+			}
+			else {				
+				throw new IllegalArgumentException(pairs.getKey()+" application not available");
 			}
 		}
 	}

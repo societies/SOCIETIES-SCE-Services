@@ -25,11 +25,17 @@
 package org.societies.enterprise.collabtools.api;
 
 /**
- * Describe your class here...
+ * Setup the collaborative application
  *
  * @author cviana
  *
  */
-public interface ISessionApp {
+public interface ICollabAppIntegrator {
+	
+	public void setup();
+	
+	public void join(String user);
+	
+	public void kick(String user);
 
 }

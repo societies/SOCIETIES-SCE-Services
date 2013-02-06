@@ -36,7 +36,6 @@ import javax.xml.xpath.XPathExpressionException;
 import org.societies.enterprise.collabtools.acquisition.LongTermCtxTypes;
 import org.societies.enterprise.collabtools.acquisition.Person;
 import org.societies.enterprise.collabtools.acquisition.PersonRepository;
-import org.societies.enterprise.collabtools.acquisition.ShortTermCtxTypes;
 import org.societies.enterprise.collabtools.api.IContextReasoning;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
