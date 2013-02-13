@@ -224,7 +224,7 @@ public class WantToHelp implements IWantToHelp, ActionListener {
 				e1.printStackTrace();
 			}
 			String testADDRESS = ""; //TODO
-			feedbackTextArea.append("xmlrpc on 'login' > "+xmlRpcClient_IWTH.signInUser(testUserEmail, testUserPassword, testUserLastname, testUserFirstname, testUserInstitute, testADDRESS)+"\n");
+			feedbackTextArea.append("xmlrpc on 'login' > "+xmlRpcClient_IWTH.signInUser(testUserEmail, testUserPassword, testUserLastname, testUserFirstname, testUserInstitute, testADDRESS, "skills,myOnes")+"\n");
 			
 			pullThread.setCheckData(true);
 			subscribe.setVisible(false);

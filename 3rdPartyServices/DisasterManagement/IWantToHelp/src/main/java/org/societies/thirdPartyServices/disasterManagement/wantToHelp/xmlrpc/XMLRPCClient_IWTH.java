@@ -61,10 +61,10 @@ public class XMLRPCClient_IWTH {
 	 * Sign in user to 'crowd support for disaster management' (CSDM) platform. If the user is not subscribed, a new user is created on CSDM site.
 	 * @return user status 
 	 */
-	public String signInUser(String email, String password, String lastname, String firstname, String institute, String societies_xmlrpc_url){
+	public String signInUser(String email, String password, String lastname, String firstname, String institute, String societies_xmlrpc_url, String commaSeparatedSkills){
 		String returnString = null;
 		try {
-			Object[] params = new Object[] { email, password, lastname, firstname, institute, societies_xmlrpc_url };
+			Object[] params = new Object[] { email, password, lastname, firstname, institute, societies_xmlrpc_url, commaSeparatedSkills };
 			returnString = (String) client.execute("societies.addUser", params);
 		} catch (XmlRpcException e) {
 			e.printStackTrace();
@@ -95,7 +95,7 @@ public class XMLRPCClient_IWTH {
 	public static void main(String[] args) {
 		System.out.println("Starting JavaXMLRPCClient in IWantToHelp service ...");
 		XMLRPCClient_IWTH xmlrpcClient = new XMLRPCClient_IWTH();
-		System.out.println("addUser>     " +xmlrpcClient.signInUser("john@doe.ar", "asdf", "johnny", "doom", "death star", SOCIETIES_XMLRPC_IP+":54321" ));
+		System.out.println("addUser>     " +xmlrpcClient.signInUser("john@doe.ar", "asdf", "johnny", "doom", "death star", SOCIETIES_XMLRPC_IP+":54321", "French, Nasenbohren" ));
 		System.out.println("getUserData> "+xmlrpcClient.getUserData("john@doe.ar"));
 	}
 }
