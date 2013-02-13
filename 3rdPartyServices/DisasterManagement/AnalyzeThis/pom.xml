@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>org.societies</groupId>
 		<artifactId>spring-osgi-parent</artifactId>
-		<version>0.1</version>
+		<version>RELEASE</version>
 	</parent>
 	<groupId>org.societies.thirdPartyServices.disasterManagement</groupId>
 	<artifactId>AnalyzeThis</artifactId>
@@ -18,7 +18,7 @@
 	</properties>
 	<dependencies>
 	
-		<!-- OSGI, Spring, JUnit and Logger-->
+		<!-- OSGI, Spring, JUnit and Logger
 		<dependency>
 			<groupId>org.osgi</groupId>
 			<artifactId>org.osgi.compendium</artifactId>
@@ -40,7 +40,6 @@
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>3.8.1</version><!--$NO-MVN-MAN-VER$-->
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -48,7 +47,7 @@
 			<artifactId>slf4j-simple</artifactId>
 			<version>${slf4j.version}</version>
 			<scope>provided</scope>
-		</dependency>
+		</dependency>-->
 
 		<!-- RESTful -->
 		<dependency>
@@ -96,13 +95,24 @@
 			<version>4.2</version>
 		</dependency>
 		
-		<!-- SOCIETIES PLATFORM
+		<!-- SOCIETIES PLATFORM -->
 		<dependency>
 			<groupId>org.societies.api.external</groupId>
 			<artifactId>societies-api</artifactId>
 			<version>${release.version}</version>
 			<scope>provided</scope>
-		</dependency> -->
+		</dependency>
+		<dependency>
+			<groupId>org.societies</groupId>
+			<artifactId>common-ext-libs</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.societies.thirdPartyServices.disasterManagement</groupId>
+			<artifactId>youRNotAlone</artifactId>
+			<version>0.1</version>
+			<scope>provided</scope>
+		</dependency>
 	</dependencies>
 	<build>
 		<plugins>
@@ -120,10 +130,7 @@
 						<Bundle-Name>${project.name}</Bundle-Name>
 						<Bundle-Version>${project.version}</Bundle-Version>                        
 						<Embed-Dependency>*;scope=compile|runtime;inline=false</Embed-Dependency>
-                        <Embed-Transitive>true</Embed-Transitive>
-                        <Import-Package>
-	!com.sun.jdmk.comm, !org.apache.avalon.framework.logger,
-	!org.apache.log, *</Import-Package>
+                        <Embed-Transitive>false</Embed-Transitive>
 					</instructions>
 				</configuration>
 			</plugin>

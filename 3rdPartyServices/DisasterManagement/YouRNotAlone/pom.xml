@@ -4,16 +4,16 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<name>You R Not Alone</name>
-	<groupId>org.societies.3rdPartyServices.disaster</groupId>
+	<groupId>org.societies.thirdPartyServices.disasterManagement</groupId>
 	<artifactId>youRNotAlone</artifactId>
 	<version>0.1</version>
-	<packaging>jar</packaging>
+	<packaging>bundle</packaging>
 	<url>http://www.springframework.org/osgi</url>
 
 	<parent>
 		<groupId>org.societies</groupId>
 		<artifactId>spring-osgi-parent</artifactId>
-		<version>0.1</version>
+		<version>RELEASE</version>
 	</parent>
 
 	<dependencies>
