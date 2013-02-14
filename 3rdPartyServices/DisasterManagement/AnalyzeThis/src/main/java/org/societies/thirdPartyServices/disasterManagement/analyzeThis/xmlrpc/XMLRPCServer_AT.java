@@ -16,13 +16,21 @@ import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
 
 public class XMLRPCServer_AT {
-    public static final int port = 54321;
+    public static final int DEFAULT_PORT = 54321;
     
     public XMLRPCServer_AT() throws Exception {
+    	this(DEFAULT_PORT);
+    }
+
+    /**
+	 * @param port2
+	 */
+	public XMLRPCServer_AT(int port) throws Exception {
     	// testing for sending data to YRNA 
     	// must be moved to AnalyzeThis.java
     	
     	// read data from societies database
+    	/*
     	Volunteer hulk_hogan = new Volunteer("100","Hulk","Hogan","WWF", "USA","hulk@hogan.com");
 		hulk_hogan.addSpokenLanguage("english");
 		hulk_hogan.addSpokenLanguage("brutal");
@@ -33,6 +41,7 @@ public class XMLRPCServer_AT {
 		
 		WebResource service = Client.create(new DefaultClientConfig()).resource(UriBuilder.fromUri("http://157.159.160.188:8080/YouRNotAloneServer").build());
 		System.out.println("yrna add: "+service.path("rest").path("/").path(hulk_hogan.getID()).accept(MediaType.APPLICATION_XML).put(ClientResponse.class, hulk_hogan));
+    	*/
     	
     	WebServer webServer = new WebServer(port);
         
@@ -48,9 +57,9 @@ public class XMLRPCServer_AT {
 
         webServer.start();
         System.out.println("web server for XML RPC started ...");
-    }
+	}
 
-    public static void main(String[] args) throws Exception {
+	public static void main(String[] args) throws Exception {
     	BasicConfigurator.configure();
         new XMLRPCServer_AT();
     }

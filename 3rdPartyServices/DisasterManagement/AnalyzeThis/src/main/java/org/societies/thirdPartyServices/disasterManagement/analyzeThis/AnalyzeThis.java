@@ -47,17 +47,16 @@ import javax.swing.text.DefaultCaret;
 
 import net.miginfocom.swing.MigLayout;
 
+import org.apache.log4j.BasicConfigurator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.societies.api.comm.xmpp.interfaces.ICommManager;
-import org.societies.api.context.broker.ICtxBroker;
-import org.societies.api.context.model.CtxAttributeTypes;
-import org.societies.api.context.model.CtxEntity;
-import org.societies.api.context.model.CtxEntityIdentifier;
-import org.societies.api.identity.IIdentity;
-import org.societies.api.identity.Requestor;
+import org.societies.api.privacytrust.trust.ITrustBroker;
+import org.societies.api.privacytrust.trust.evidence.ITrustEvidenceCollector;
 import org.societies.thirdPartyServices.disasterManagement.analyzeThis.data.TicketData;
 import org.societies.thirdPartyServices.disasterManagement.analyzeThis.xmlrpc.XMLRPCClient_AT;
+import org.societies.thirdPartyServices.disasterManagement.analyzeThis.xmlrpc.XMLRPCServer_AT;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -65,7 +64,8 @@ public class AnalyzeThis implements IAnalyzeThis, ActionListener {
 	
 	/** The logging facility. */
 	private static final Logger LOG = LoggerFactory.getLogger(AnalyzeThis.class);
-	
+
+	private XMLRPCServer_AT xmlRpcServer;
 	private XMLRPCClient_AT xmlRpcClient_AT;
 	private PullThread pullThread;
 	
@@ -86,18 +86,34 @@ public class AnalyzeThis implements IAnalyzeThis, ActionListener {
 	public static final String FEEDBACK_LAYOUT_CONSTRAINTS = "hidemode 3, gap 0 0, novisualpadding, ins 0, wrap 1"; //, debug 2000";
 	public static final String FEEDBACK_COLUMN_CONTSTRAINTS = "[fill, grow]";
 	public static final String FEEDBACK_ROW_CONSTRAINTS = "[fill, grow]";
+
+	private static final int BASIS_PORT = 54300;
 	
 	
-	
-	//@Autowired(required=true)	
-	private ICtxBroker externalCtxBroker;
-	//@Autowired(required=true)
+	@Autowired(required=true)
 	private ICommManager commMgr;
+	@Autowired(required=true)
+	private ITrustEvidenceCollector trustEvidenceCollector;
+	@Autowired(required=true)
+	private ITrustBroker trustBroker;
+
 
 	public AnalyzeThis() {
 		LOG.info("*** " + this.getClass() + " instantiated");
 		
 		xmlRpcClient_AT = new XMLRPCClient_AT();
+
+		String xmppDomain = commMgr.getIdManager().getThisNetworkNode().getDomain();
+		int userNumber = Integer.parseInt(xmppDomain.substring(4, xmppDomain.indexOf('.'))); // subdomain always to start with "user" - i.e. 4 digits
+		int port = BASIS_PORT + userNumber;
+		
+    	BasicConfigurator.configure();
+        try {
+			xmlRpcServer = new XMLRPCServer_AT(port);
+		} catch (Exception e) {
+			LOG.error(e.getMessage());
+		}
+		
 		
 		// otherwise it does not startup in VIRGO
 		UIManager.put("ClassLoader", ClassLoader.getSystemClassLoader());
@@ -156,21 +172,6 @@ public class AnalyzeThis implements IAnalyzeThis, ActionListener {
 		pullThread.setRun(false);
 		
 		frame.dispose();
-	}
-
-	@SuppressWarnings("unused")
-	public void retrieveData () throws Exception{
-//		feedbackTextArea.append("retrieveData from CSS ... ");
-		IIdentity cssOwnerId = commMgr.getIdManager().fromJid(commMgr.getIdManager().getThisNetworkNode().getBareJid());
-		Requestor requestor = new Requestor(cssOwnerId);
-		
-		CtxEntityIdentifier ownerEntityIdentifier = externalCtxBroker.retrieveIndividualEntityId(requestor, cssOwnerId).get();
-		CtxEntity ownerEntity = (CtxEntity) externalCtxBroker.retrieve(requestor, ownerEntityIdentifier).get();
-		
-		String testUserLastname = ownerEntity.getAttributes(CtxAttributeTypes.NAME_LAST).iterator().next().getStringValue();
-		String testUserFirstname = ownerEntity.getAttributes(CtxAttributeTypes.NAME_FIRST).iterator().next().getStringValue();
-		String testUserEmail = "korbinian.frank@dlr.de";
-
 	}
 
 	@Override
@@ -252,12 +253,31 @@ public class AnalyzeThis implements IAnalyzeThis, ActionListener {
 		this.commMgr = commMgr;
 	}
 
-	public ICtxBroker getExternalCtxBroker() {
-		return externalCtxBroker;
+	/**
+	 * @return the trustEvidenceCollector
+	 */
+	public ITrustEvidenceCollector getTrustEvidenceCollector() {
+		return trustEvidenceCollector;
 	}
 
-	public void setExternalCtxBroker(ICtxBroker externalCtxBroker) {
-		//textArea.append("got externalCtxBroker: " + externalCtxBroker+" \n");
-		this.externalCtxBroker = externalCtxBroker;
+	/**
+	 * @param trustEvidenceCollector the trustEvidenceCollector to set
+	 */
+	public void setTrustEvidenceCollector(ITrustEvidenceCollector trustEvidenceCollector) {
+		this.trustEvidenceCollector = trustEvidenceCollector;
+	}
+
+	/**
+	 * @return the trustBroker
+	 */
+	public ITrustBroker getTrustBroker() {
+		return trustBroker;
+	}
+
+	/**
+	 * @param trustBroker the trustBroker to set
+	 */
+	public void setTrustBroker(ITrustBroker trustBroker) {
+		this.trustBroker = trustBroker;
 	}
 }

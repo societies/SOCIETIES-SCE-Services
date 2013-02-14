@@ -37,8 +37,8 @@ import org.societies.thirdPartyServices.disasterManagement.wantToHelp.data.UserD
 
 public class XMLRPCClient_IWTH {
 	private XmlRpcClient client;
-//	private static final String CSDM_IP = "213.133.100.232";
-	private static final String CSDM_IP = "localhost";
+	private static final String CSDM_IP = "213.133.100.232";
+//	private static final String CSDM_IP = "localhost";
 	private static String SOCIETIES_XMLRPC_IP;
 	
 	public XMLRPCClient_IWTH () {

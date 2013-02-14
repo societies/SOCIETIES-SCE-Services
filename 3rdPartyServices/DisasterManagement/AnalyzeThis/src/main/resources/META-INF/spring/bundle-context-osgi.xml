@@ -21,8 +21,9 @@
 	-->
 	
 	<!-- <bean id="AnalyzeThisServiceBean" class="org.societies.thirdPartyServices.disasterManagement.analyzeThis.AnalyzeThis" /> -->
-<!--   
-	<osgi:reference id="externalCtxBroker" interface="org.societies.api.context.broker.ICtxBroker" cardinality="1..1" />
+   
+	<osgi:reference id="trustEvidenceCollector" interface="org.societies.api.privacytrust.trust.evidence.ITrustEvidenceCollector" cardinality="1..1" />
+	<osgi:reference id="trustBroker" interface="org.societies.api.privacytrust.trust.ITrustBroker" cardinality="1..1" />
 	<osgi:reference id="commMgr" interface="org.societies.api.comm.xmpp.interfaces.ICommManager" cardinality="1..1" />
--->	
+	
 </beans>

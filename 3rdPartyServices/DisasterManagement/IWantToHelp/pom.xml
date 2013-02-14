@@ -84,6 +84,21 @@
 			<version>4.2</version>
 		</dependency>
 		
+		
+
+		<!-- <dependency>
+			<groupId>com.sun.jersey</groupId>
+			<artifactId>jersey-server</artifactId>
+			<version>1.12</version>
+		</dependency>-->
+		<dependency>
+			<groupId>com.sun.jersey</groupId>
+			<artifactId>jersey-client</artifactId>
+			<version>1.12</version>
+		</dependency>
+		
+		
+		
 		<!-- SOCIETIES PLATFORM -->
 		<dependency>
 			<groupId>org.societies.api.external</groupId>
