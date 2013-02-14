@@ -24,6 +24,13 @@
 		
 		<!-- Virgo -->
 		<dependency>
+			<groupId>jivesoftware</groupId>
+			<artifactId>smackx</artifactId>
+			<version>3.1.0</version>
+		</dependency>
+		
+		<!-- Virgo -->
+		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-simple</artifactId>
 			<version>${slf4j.version}</version>
@@ -62,6 +69,7 @@
 			<version>4.3.0</version>
 			<scope>provided</scope>
 		</dependency>
+		<!-- SOCIETIES -->
 		<dependency>
 			<groupId>org.societies.context-management</groupId>
 			<artifactId>context-3pbroker-connector</artifactId>

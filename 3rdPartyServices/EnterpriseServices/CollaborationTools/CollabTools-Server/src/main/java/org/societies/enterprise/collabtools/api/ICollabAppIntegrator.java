@@ -24,6 +24,8 @@
  */
 package org.societies.enterprise.collabtools.api;
 
+import org.jivesoftware.smack.XMPPException;
+
 /**
  * Setup the collaborative application
  *
@@ -34,8 +36,18 @@ public interface ICollabAppIntegrator {
 	
 	public void setup();
 	
-	public void join(String user);
+	/**
+	 * @param user
+	 * @param room
+	 * @throws XMPPException 
+	 */
+	void join(String user, String room) throws XMPPException;
 	
-	public void kick(String user);
+	/**
+	 * @param user
+	 * @param room
+	 * @throws XMPPException 
+	 */
+	void kick(String user, String room) throws XMPPException;
 
 }
