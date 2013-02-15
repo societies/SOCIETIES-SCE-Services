@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+		http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc-3.0.xsd
+		http://www.springframework.org/schema/osgi-compendium http://www.springframework.org/schema/osgi-compendium/spring-osgi-compendium.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:jdbc="http://www.springframework.org/schema/jdbc" xmlns:osgix="http://www.springframework.org/schema/osgi-compendium"
+	xmlns:tx="http://www.springframework.org/schema/tx">
+
+	<context:annotation-config />
+
+	
+	<context:property-placeholder properties-ref="networkclientConfig"/> 
+	
+	<bean id="NZoneClientComms" 
+		class="org.societies.ext3p.nzone.client.NZoneClientComms" 
+		init-method="InitService">
+		<constructor-arg value="${networkingserver}"/> 
+		<property name="commManager" ref="commManager" />
+	</bean>
+	
+	<bean id="NZoneClient" 
+		class="org.societies.ext3p.nzone.client.NZoneClient" 
+		init-method="initialize"
+		 destroy-method="cleanUp">
+		<constructor-arg value="${networkingserver}"/> 
+		<property name="commManager" ref="commManager" />
+		<property name="ctxBroker" ref="ctxBroker" />
+		<property name="nzoneClientComms" ref="NZoneClientComms" />
+		<property name="cisManager" ref="cisManager" />
+		<property name="cisDirectoryClient" ref="cisDirectoryClient" />
+		<property name="serviceMgmt" ref="serviceMgmt" />
+		<property name="uam" ref="uam" />
+		<property name="persoMgr" ref="persoMgr" />
+	</bean>
+	
+	
+</beans>
