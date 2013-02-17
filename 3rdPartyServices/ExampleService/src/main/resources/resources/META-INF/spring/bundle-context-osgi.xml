@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:osgi="http://www.springframework.org/schema/osgi"
+	xmlns:osgi-compendium="http://www.springframework.org/schema/osgi-compendium"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+http://www.springframework.org/schema/osgi http://www.springframework.org/schema/osgi/spring-osgi.xsd
+http://www.springframework.org/schema/context
+http://www.springframework.org/schema/context/spring-context-2.5.xsd
+http://www.springframework.org/schema/osgi-compendium
+http://www.springframework.org/schema/osgi-compendium/spring-osgi-compendium-1.2.xsd"
+	xmlns:context="http://www.springframework.org/schema/context">
+
+	<!-- Service References -->
+	<osgi:reference id="cxtBrokerRef"
+		interface="org.societies.api.context.broker.ICtxBroker" />
+
+	<!-- Provided Services -->
+	<osgi:service ref="myService"
+		interface="org.societies.myexample.service.IMyService">
+		<osgi:service-properties>
+			<entry key="TargetPlatform" value="SOCIETIES" />
+			<entry key="ServiceProvider" value="ICT-SOCIETIES" />
+			<entry key="ServiceMetaModel" value-ref="serMetamodel" />
+			<entry key="ServiceClient" value="http://societies.local/client.jar" />
+		</osgi:service-properties>
+	</osgi:service>
+
+	<bean id="serMetamodel" class="org.societies.api.schema.servicelifecycle.model.Service">
+		<property name="authorSignature" value="Your Name" />
+		<property name="serviceDescription" value="Some description" />
+		<property name="serviceName" value="My Exmaple Service" />
+		<property name="serviceType" value="THIRD_PARTY_SERVER" />
+		<property name="serviceCategory" value="example" />
+		<property name="privacyPolicy" value="privacy-policy.xml" />
+	</bean>
+</beans>

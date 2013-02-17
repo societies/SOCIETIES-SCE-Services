@@ -1,0 +1,254 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<title>Societies Platform - How to CreateUse a ContentProvider -	Societies Redmine</title>
+
+</head>
+<body class="theme-Red-andy controller-wiki action-show">
+	<div id="wrapper">
+		<div id="wrapper2">
+
+
+			<div class="" id="main">
+
+				<div id="content">
+					<div class="wiki">
+						<a name="How-to-Use-an-Android-Content-Provider"></a>
+						<h1>
+							How to Use an Android Content Provider<a
+								href="#How-to-Use-an-Android-Content-Provider"
+								class="wiki-anchor">&para;</a>
+						</h1>
+
+						<ul>
+							<li>Content providers manage access to a structured set of
+								data.</li>
+							<li>They encapsulate the data, and provide mechanisms for
+								defining data security.</li>
+							<li>Content providers are the standard interface that
+								connects data in one process with code running in another
+								process</li>
+						</ul>
+
+						<a name="How"></a>
+						<h3>
+							How<a href="#How" class="wiki-anchor">&para;</a>
+						</h3>
+
+						<p>
+							You use the ContentResolver object in your application's Context
+							to communicate with the provider as a client. <br />The
+							ContentResolver object communicates with the provider object, an
+							instance of a class that implements ContentProvider. <br />The
+							provider object receives data requests from clients, performs the
+							requested action, and returns the results.<br />The
+							ContentResolver methods provide the basic "CRUD" (create,
+							retrieve, update, and delete) functions of persistent storage.
+						</p>
+
+
+						<p>
+							For example to get a list of the words and their locales from the
+							User Dictionary Provider, you call ContentResolver.query(). <br />The
+							query() method calls the ContentProvider.query() method defined
+							by the User Dictionary Provider.
+						</p>
+
+
+						<p>The following lines of code show a ContentResolver.query()
+							call:</p>
+
+
+						<p>
+							<img
+								src="../../../img/ContentResolver.png"
+								alt="" />
+						</p>
+
+
+						<p>
+							A Content URIs is a URI that identifies data in a provider. <br />Content
+							URIs include the symbolic name of the entire provider (its
+							authority) and a name that points to a table (a path). <br />When
+							you call a client method to access a table in a provider, the
+							content URI for the table is one of the arguments.
+						</p>
+
+
+						<a name="When"></a>
+						<h3>
+							When<a href="#When" class="wiki-anchor">&para;</a>
+						</h3>
+
+
+						<p>
+							You don't need to develop your own provider if you don't intend
+							to share your data with other applications. <br />However, you
+							do need your own provider to provide custom search suggestions in
+							your own application.<br />You also need your own provider if
+							you want to copy and paste complex data or files from your
+							application to other applications.
+						</p>
+
+
+						<a name="Android-Societies-Content-Provider-beta"></a>
+						<h2>
+							Android Societies Content Provider (beta)<a
+								href="#Android-Societies-Content-Provider-beta"
+								class="wiki-anchor">&para;</a>
+						</h2>
+
+
+						<p>This content provider is the beta version to store common
+							data like credential, service, etc.</p>
+
+
+						<p>
+							The Authority for Societies content provider is defined in <a
+								href="https://github.com/societies/SOCIETIES-Platform/blob/development/platform-infrastructure/client-frwk/CoreInterfaces/src/main/java/org/societies/android/platform/interfaces/IContentProvider.java"
+								class="external">GITHUB</a>
+						</p>
+
+
+						<p>
+							and it is <strong>org.societies.android.platform.contentprovider</strong>
+						</p>
+
+
+						<p>
+							All the information of this content provider are stored into a
+							MySQL DB into different TABLES.<br />Each tables is defined as
+							structure and URIs inside ICoreInterface under <strong>org.societies.api.android.internal.tables</strong>
+							package. There are currently those tables:
+						</p>
+
+
+						<ul>
+							<li>CredentialTable</li>
+							<li>CssNodeTable</li>
+							<li>CssNodesTable</li>
+							<li>CssProfileTable</li>
+							<li>ServiceTable</li>
+						</ul>
+
+
+						<p>The tables are created during the onCreate method</p>
+
+
+						<p>and here is the code:</p>
+
+
+						<p>
+							[[<a class="external"
+								href="https://redmine.ict-societies.eu/attachments/131/Schermata_04-2456023_alle_10.19.27.png">https://redmine.ict-societies.eu/attachments/131/Schermata_04-2456023_alle_10.19.27.png</a>]]
+						</p>
+
+
+						<p>
+							The reference to the Table definition is in GitHUB at this level<br />
+							[[<a class="external"
+								href="https://github.com/societies/SOCIETIES-Platform/blob/development/platform-infrastructure/client-frwk/CoreInterfaces/src/main/java/org/societies/api/android/internal/tables">https://github.com/societies/SOCIETIES-Platform/blob/development/platform-infrastructure/client-frwk/CoreInterfaces/src/main/java/org/societies/api/android/internal/tables</a>]]
+						</p>
+
+
+						<a name="Insert-Example"></a>
+						<h3>
+							Insert Example<a href="#Insert-Example" class="wiki-anchor">&para;</a>
+						</h3>
+
+
+						<p>To add some data inside the Content Provider and so into
+							the Table of the Societied DB you need</p>
+
+
+						<ol>
+							<li>the URI composed by the AUTHORITY of the Content
+								Provider + Table Name</li>
+							<li>ContentValue object that is a map with the data to be
+								stored into the table</li>
+						</ol>
+
+
+						<p>
+							here a simple example on how to add a Credential MAP into the CP.<br />
+							<img
+								src="../../../img/CredentialMap.png"
+								alt="" />
+						</p>
+
+
+						<a name="Query-Example"></a>
+						<h3>
+							Query Example<a href="#Query-Example" class="wiki-anchor">&para;</a>
+						</h3>
+
+
+						As described into the first example to Query some data into the
+						Content Provider the following data are required:
+						<ol>
+							<li>Projection: a view of the table to query</li>
+							<li>URI of the content provider + Table to query</li>
+							<li>Where clause + Args</li>
+						</ol>
+
+
+						<p>
+							here another example available also in the code:<br />
+							<img
+								src="../../../img/QueryExample.png"
+								alt="" />
+						</p>
+
+
+						<a name="Delete-Example"></a>
+						<h3>
+							Delete Example<a href="#Delete-Example" class="wiki-anchor">&para;</a>
+						</h3>
+
+
+						<p>To delete something in the Content Provider and so in the
+							DB you need</p>
+
+
+						<ol>
+							<li>Content URI to access the right Content Provider
+								(Authority) and Table ( + "/TABLEBAME")</li>
+							<li>A string that contains the where condition to select the
+								dataset to delete. This should contains ? char to add variables</li>
+							<li>An array that contains the variables, in the order to be
+								put inside the WHERE string</li>
+						</ol>
+
+
+						<p>
+							here an example to better understand...<br />
+							<img
+								src="../../../img/DeleteExample.png"
+								alt="" />
+						</p>
+
+
+						<a name="Useful-links"></a>
+						<h2>
+							Useful links<a href="#Useful-links" class="wiki-anchor">&para;</a>
+						</h2>
+
+
+						<ol>
+							<li><a
+								href="http://developer.android.com/guide/topics/providers/content-providers.html"
+								class="external">Android Content Provder</a></li>
+							<li><a
+								href="http://developer.android.com/guide/topics/providers/content-provider-creating.html"
+								class="external">Create a Content Provider</a></li>
+						</ol>
+					</div>
+					
+					<div style="clear: both;"></div>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+</html>

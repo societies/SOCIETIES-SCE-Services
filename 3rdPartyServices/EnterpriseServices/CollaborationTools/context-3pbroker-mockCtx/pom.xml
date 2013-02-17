@@ -14,7 +14,7 @@
 	<!-- groupId is set in parent pom -->
 	<groupId>org.societies.context-management</groupId>
 	<artifactId>context-3pbroker-mockCtx</artifactId>
-	<version>${version.cm}</version>
+	<version>0.1</version>
 	<packaging>bundle</packaging>
 
 	<developers>
@@ -58,6 +58,7 @@
 			<groupId>org.osgi</groupId>
 			<artifactId>org.osgi.core</artifactId>
 			<version>4.3.0</version>
+			<scope>provided</scope>
 		</dependency>
 				
 		

@@ -1,0 +1,651 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<title>Societies Platform - How to Create a PhoneGap Plugin - Societies Redmine</title>
+</head>
+<body class="theme-Red-andy controller-wiki action-show">
+	<div id="wrapper"/>
+		<div id="wrapper2"/>
+
+			<div id="header">
+
+
+			</div>
+
+			<div class="" id="main">
+
+				<div id="content">
+
+					<div class="wiki">
+						<a name="How-to-Create-a-PhoneGap-Plugin"></a>
+						<h1>
+							How to Create a PhoneGap Plugin<a
+								href="#How-to-Create-a-PhoneGap-Plugin" class="wiki-anchor">&para;</a>
+						</h1>
+
+						<a name="Plugin-system"></a>
+						<h2>
+							Plugin system<a href="#Plugin-system" class="wiki-anchor">&para;</a>
+						</h2>
+
+						<a name="Overall-Architecture"></a>
+						<h3>
+							Overall Architecture<a href="#Overall-Architecture"
+								class="wiki-anchor">&para;</a>
+						</h3>
+
+						<p>To enlarge web application possibilities, it may be useful
+							to use native calls through Javascript. For example, to use a
+							piece of complex Android code (Java code) easily in Javascript.
+							This is possible using the PhoneGap plugin system.</p>
+
+						<p>The overall architecture is the following:</p>
+
+						<ul>
+							<li>a <strong>native component</strong> making the job, for
+								example a Java Android file
+							</li>
+							<li>a <strong>HTML / CSS / Javascript GUI</strong> using
+								this native component through Javascript calls
+							</li>
+							<li>a <strong>bridge between Javascript and the
+									native code</strong> to create the link. This bridge is composed of:
+								<ul>
+									<li>one native file (i.e. one Java file),</li>
+									<li>one Javascript file exposing this native component,</li>
+									<li>and generally one quick configuration file specific to
+										the platform.</li>
+								</ul></li>
+						</ul>
+
+						<p>The following illustration shows this overall architecture.
+							Notice that PhoneGap is already providing plugins (PhoneGap
+							Javascript Engine / PhoneGap Native Engine).</p>
+
+						<p>
+							<img src="../../../img/PhoneGap-Plugin-Architecture-Overview.png" />
+						</p>
+
+
+						<a name="More-About-the-Bridge-between-Javascript-Native-Code"></a>
+						<h3>
+							More About the Bridge between Javascript / Native Code<a
+								href="#More-About-the-Bridge-between-Javascript-Native-Code"
+								class="wiki-anchor">&para;</a>
+						</h3>
+
+						<p>Let's take a simple example:</p>
+
+						<ul>
+							<li>In Java you have a method "String sayHello(String name)"
+								which return "Hello &lt;name&gt;!"</li>
+							<li>In Javascript, you want to call the method
+								"sayHello(name, successCallback, failureCallback)" to use this
+								Java method (if you are just the user of this Javascript method,
+								you don't have to know that).</li>
+						</ul>
+
+						<p>But PhoneGap is providing us:</p>
+
+						<ul>
+							<li>In the Java side: a method "PluginResult execute(String
+								methodName, JSONArray arguments, String callbackId)"</li>
+							<li>In the Javascript side: a method
+								"PhoneGap.exec(successCallback, failureCallback, 'plugin name',
+								'method name', [parameters])"</li>
+						</ul>
+
+						<p>The goal of the bridge is to use these methods provided by
+							PhoneGap to hide the complexity and provide simple methods to the
+							user. We will show how to learn that later in section "Quick
+							Overview: How to Create a Plugin". Let's continue with principles
+							around this bridge.</p>
+
+						<p>
+							The main idea behind this bridge is to transform a Java method
+							call into a formatted string. More precisely a JSON formatted
+							string. JSON is a string format used very often in Web
+							technologies and particularly with Javascript because it is so
+							easy to manipulate this format in this language (it has been
+							created for that). About JSON, see <a
+								href="/projects/sp/wiki/Tips_to_Manage_the_JSON_Format"
+								class="wiki-page">Tips to Manage the JSON Format</a> (using
+							Javascript, Java and Android). We are using the same idea in the
+							Societies communication framework (using XML schemas) or to share
+							services between Android Societies applications (using formatted
+							string). Therefore:
+						</p>
+
+						<ul>
+							<li>PhoneGap is managing the method call and the link
+								between Java / Javascript with “execute” (Java side) and
+								“PhoneGap.exec” (Javascript side)</li>
+							<li>In our bridge, we only have to transform:
+								<ul>
+									<li>Java side: our Java parameters into a JSON string, our
+										return value(s) into a JSON string (or a normal string if we
+										only have one simple value)</li>
+									<li>Javascript side: almost nothing. Sometimes we will
+										have to transform our parameters into a JSON array (which is
+										more than easy) for convenience but that is all. The user of
+										the method will manage normal parameters or JSON formatted
+										parameters, and receive a JSON formatted value(s). This is the
+										common way to work in Javascript.</li>
+								</ul>
+							</li>
+						</ul>
+
+						<a name="Android-PhoneGap-Plugins"></a>
+						<h2>
+							Android PhoneGap Plugins<a href="#Android-PhoneGap-Plugins"
+								class="wiki-anchor">&para;</a>
+						</h2>
+
+						<a name="Quick-Overview-How-to-Create-a-Plugin"></a>
+						<h3>
+							Quick Overview: How to Create a Plugin<a
+								href="#Quick-Overview-How-to-Create-a-Plugin"
+								class="wiki-anchor">&para;</a>
+						</h3>
+
+						<p>To build a PhoneGap plugin, we have to create the bridge
+							between Javascript and Java in order to provide usable methods
+							for the user.</p>
+
+						<p>
+							<strong>One Java file
+								(org.packagename.MyJavaPhoneGapPlugin.java)</strong>
+						</p>
+
+						<pre>
+							<code class="Java syntaxhl">
+<span class="CodeRay"><span class="no"> 1</span> <span
+									class="di">public</span> <span class="ty">class</span> <span
+									class="cl">MyJavaPhoneGapPlugin</span> <span class="di">extends</span> Plugin {
+<span class="no"> 2</span>      <span class="at">@Override</span>
+<span class="no"> 3</span>      <span class="di">public</span> PluginResult execute(<span
+									class="pt">String</span> methodName, JSONArray params, <span
+									class="pt">String</span> callbackID) {
+<span class="no"> 4</span>          PluginResult result = <span
+									class="pc">null</span>;
+<span class="no"> 5</span>          <span class="c">// –- Manage the relevant methode name</span>
+<span class="no"> 6</span>          <span class="kw">if</span> (methodName.equals(<span
+									class="er">“</span>myMethodName<span class="er">”</span>)) {
+<span class="no"> 7</span>              <span class="c">// Retrieve parameters from the JSON array</span>
+<span class="no"> 8</span>              <span class="c">// Call the Java method and save the return value</span>
+<span class="no"> 9</span>              <span class="c">// Refactor the return value as a String or a JSON object</span>
+<span class="no"><strong>10</strong></span>              result = <span
+									class="kw">new</span> PluginResult(Status.OK, &lt;Java call result&gt;);
+<span class="no">11</span>          }
+<span class="no">12</span>          <span class="c">// -- Error: unknown methode name</span>
+<span class="no">13</span>          <span class="kw">else</span> {
+<span class="no">14</span>              result = <span class="kw">new</span> PluginResult(Status.INVALID_ACTION);
+<span class="no">15</span>          }
+<span class="no">16</span>          <span class="kw">return</span> result;
+<span class="no">17</span>      }
+<span class="no">18</span> }</span>
+							</code>
+							<br />
+						</pre>
+
+						<p>
+							<strong>One Javascript file
+								(js/plugins/MyJSPhoneGapPlugin.js)</strong>
+						</p>
+
+
+						<pre>
+							<code class="Javascript syntaxhl">
+<span class="CodeRay"><span class="no"> 1</span> <span
+									class="c">// -- Create the class</span>
+<span class="no"> 2</span> <span class="kw">var</span> MyJSPhoneGapPlugin = {
+<span class="no"> 3</span>    <span class="c">// -- Create methods</span>
+<span class="no"> 4</span>    <span class="fu">myMethodName</span>: <span
+									class="kw">function</span>(parameter, successCallback, failureCallback) {
+<span class="no"> 5</span>       <span class="kw">return</span> PhoneGap.exec(
+<span class="no"> 6</span>          successCallback,      <span
+									class="c">//Success callback</span>
+<span class="no"> 7</span>          failureCallback,      <span
+									class="c">//Failure callback</span>
+<span class="no"> 8</span>          <span class="s"><span
+										class="dl">'</span><span class="k">PluginName</span><span
+										class="dl">'</span></span>,         <span class="c">//Plugin name (defined in PhoneGap configuration)</span>
+<span class="no"> 9</span>          <span class="s"><span
+										class="dl">'</span><span class="k">myMethodName</span><span
+										class="dl">'</span></span>,       <span class="c">//Method to call in this plugin</span>
+<span class="no"><strong>10</strong></span>          [parameter]);         <span
+									class="c">//List of arguments of the call</span>
+<span class="no">11</span>    },
+<span class="no">12</span>    <span class="fu">myOtherMethodName</span>: <span
+									class="kw">function</span>(parameter, successCallback, failureCallback) {
+<span class="no">13</span>       <span class="kw">return</span> PhoneGap.exec(
+<span class="no">14</span>          successCallback,
+<span class="no">15</span>          failureCallback,
+<span class="no">16</span>          <span class="s"><span
+										class="dl">'</span><span class="k">PluginName</span><span
+										class="dl">'</span></span>,
+<span class="no">17</span>          <span class="s"><span
+										class="dl">'</span><span class="k">myOtherMethodName</span><span
+										class="dl">'</span></span>,
+<span class="no">18</span>          [parameter]);
+<span class="no">19</span>    }
+<span class="no"><strong>20</strong></span>    <span class="c">// ...</span>
+<span class="no">21</span> };
+<span class="no">22</span> 
+<span class="no">23</span>  <span class="c">// –- Add this plugin to PhoneGap plugin system</span>
+<span class="no">24</span>  PhoneGap.addConstructor(<span class="kw">function</span>() {
+<span class="no">25</span>      PhoneGap.addPlugin(<span class="s"><span
+										class="dl">&quot;</span><span class="k">MyPluginName</span><span
+										class="dl">&quot;</span></span>, MyJSPhoneGapPlugin);
+<span class="no">26</span>  });
+</span>
+							</code>
+						</pre>
+
+						<p>
+							<strong>One configuration file (xml/plugins.xml)</strong>
+						</p>
+
+						<pre>
+							<code class="Java syntaxhl">
+<span class="CodeRay"><span class="no">1</span> &lt;plugin name=<span
+									class="s"><span class="dl">&quot;</span><span class="k">PluginName</span><span
+										class="dl">&quot;</span></span> value=<span class="s"><span
+										class="dl">&quot;</span><span class="k">org.packagename.MyJavaPhoneGapPlugin</span><span
+										class="dl">&quot;</span></span> /&gt;
+</span>
+							</code>
+						</pre>
+
+						<p>	<strong>How to use this plugin in Javascript (e.g. index.html)</strong>	</p>
+
+						<p>This is finished! Let's use it! We are in a HTML file of	the GUI.</p>
+
+						<pre>
+							<code class="Javascript syntaxhl">
+<span class="CodeRay"><span class="no"> 1</span>  <span
+									class="ta">&lt;script</span> <span class="an">src</span>=<span
+									class="s"><span class="dl">&quot;</span><span class="k">js/plugin/MyJSPhoneGapPlugin.js</span><span
+										class="dl">&quot;</span></span><span class="ta">&gt;</span><span
+									class="ta">&lt;/script&gt;</span>
+<span class="no"> 2</span>  <span class="ta">&lt;script&gt;</span>
+<span class="no"> 3</span>  document.addEventListener('deviceready', function() {
+<span class="no"> 4</span>      window.plugins.MyPluginName.myMethodName(“my parameter”, onSuccess, onFailure);
+<span class="no"> 5</span>  });    
+<span class="no"> 6</span> 
+<span class="no"> 7</span>  function onSuccess(data) {
+<span class="no"> 8</span>      console.log(data);
+<span class="no"> 9</span>  }
+<span class="no"><strong>10</strong></span>  function onFailure(e) {
+<span class="no">11</span>      console.log(e);
+<span class="no">12</span>  }
+<span class="no">13</span>  <span class="ta">&lt;/script&gt;</span></span>
+							</code>
+							<br />
+						</pre>
+
+						<a name="Create-a-Simple-PhoneGap-Plugin"></a>
+						<h3>
+							Create a Simple PhoneGap Plugin<a
+								href="#Create-a-Simple-PhoneGap-Plugin" class="wiki-anchor">&para;</a>
+						</h3>
+
+
+						<p>Simple PhoneGap plugin means: synchronous Java calls using
+							simple parameters (int, string, list, …).</p>
+
+
+						<p>
+							A “HelloWorld” plugin example is available on Github: <a
+								href="https://github.com/societies/SOCIETIES-Platform/tree/Olivier_ClientFrmk_PhoneGap/platform-infrastructure/client-frwk/PhonegapPluginExemple"
+								class="external">platform-infrastructure/client-frwk/PhonegapPluginExemple</a>
+						</p>
+
+
+						<p>
+							See the <a
+								href="http://wiki.phonegap.com/w/page/36753494/How%20to%20Create%20a%20PhoneGap%20Plugin%20for%20Android"
+								class="external">Android PhoneGap Plugins Creation /
+								Installation</a> official tutorial to learn more about creation of a
+							PhoneGap plugin.
+						</p>
+
+
+						<a name="Create-a-PhoneGap-Plugin-Using-Complex-Parameters"></a>
+						<h3>
+							Create a PhoneGap Plugin Using Complex Parameters<a
+								href="#Create-a-PhoneGap-Plugin-Using-Complex-Parameters"
+								class="wiki-anchor">&para;</a>
+						</h3>
+
+
+						<p>PhoneGap plugin using complex parameters means: synchronous
+							Java calls using simple parameters (int, string, list, …) or Java
+							object parameters.</p>
+
+
+						<p>Java objects have to be transformed into JSON strings by
+							the bridge in order to be passed to the Javascript method. This
+							mean that this Java object is relatively simple, without any
+							logic in it. Like a bean. Anyway, this logic will not appear in
+							the JSON string. The more this Java object is simple, the more
+							this step can be done automatically. Very complex Java object may
+							need manual actions to create the bridge.</p>
+
+
+						<p>
+							A <a
+								href="https://github.com/societies/SOCIETIES-Platform/tree/development/platform-infrastructure/client-frwk/devicestatusgui"
+								class="external">DeviceStatus</a> plugin is available on Github	to show the usage of complex parameters. Show especially the <a
+								href="https://github.com/societies/SOCIETIES-Platform/blob/development/platform-infrastructure/client-frwk/devicestatusgui/src/org/societies/android/platform/gui/plugin/DeviceStatusSimpleJavaCallPlugin.java"
+								class="external">Android Plugin
+								DeviceStatusSimpleJavaCallPlugin</a>
+						</p>
+
+
+						<a
+							name="Create-a-PhoneGap-Plugin-Using-Asynchronous-Call-on-Java-Side"></a>
+						<h3>
+							Create a PhoneGap Plugin Using Asynchronous Call on Java Side<a
+								href="#Create-a-PhoneGap-Plugin-Using-Asynchronous-Call-on-Java-Side"
+								class="wiki-anchor">&para;</a>
+						</h3>
+
+
+						<p>In our previous examples, on Javascript side, calls are
+							asynchronous. This is a common practice in Javascript and a good
+							one in this case because we are going to use Android native
+							methods for relatively heavy computation.</p>
+
+
+						<p>In Java side, we will manage both approach: synchronous and
+							asynchronous calls. Synchronous are already manage by previous
+							paragraphs. Let's see how to manage asynchronous calls.</p>
+
+
+						<ol>
+							<li>In your execute() method of your plugin save the
+								callbackID.</li>
+							<li>Return a NO_RESULT plugin result and set keep callback
+								id to true.</li>
+						</ol>
+
+
+						<pre>
+ PluginResult pluginResult = new PluginResult(Status.NO_RESULT); 
+ pluginResult.setKeepCallback(true); 
+ return pluginResult;
+</pre>
+
+						<ol>
+							<li>When your asynchronous Java method finishes return
+								another plugin result like this:</li>
+						</ol>
+
+
+						<pre>
+ PluginResult result = new PluginResult(Status.OK, data);
+ result.setKeepCallback(false);
+ this.success(result, this.savedCallbackID); 
+ // OR this.error(errorResult, this.savedCallbackID);
+</pre>
+
+						<p>
+							A <a
+								href="https://github.com/societies/SOCIETIES-Platform/tree/development/platform-infrastructure/client-frwk/devicestatusgui"
+								class="external">DeviceStatus</a> plugin is available on Github
+							to show the usage of asynchronous Java calls.
+						</p>
+
+
+						<a
+							name="Create-a-PhoneGap-Plugin-Using-Android-Service-on-the-Java-Side"></a>
+						<h3>
+							Create a PhoneGap Plugin Using Android Service on the Java Side<a
+								href="#Create-a-PhoneGap-Plugin-Using-Android-Service-on-the-Java-Side"
+								class="wiki-anchor">&para;</a>
+						</h3>
+
+
+						<p>
+							It is also possible to use Android services (bound service or
+							started service) on PhoneGap plugins. A <a
+								href="https://github.com/societies/SOCIETIES-Platform/tree/development/platform-infrastructure/client-frwk/devicestatusgui"
+								class="external">DeviceStatus</a> plugin is available on Github
+							to show the usage such services.<br />This is similar to a
+							simple Java call, but the connection with the service has to be
+							done before the execution of the "execute" method. Therefore, to
+							use an Android Service, you will have to use the method
+							"onResume", which is always called before the execution in the
+							Android environment. Unfortunately, the "Plugin" class seems to
+							have a bug with the "onResume" method. So, to summarize, in
+							future versions of PhoneGap, we may launch our service in the
+							"onResume" method like bellow:
+						</p>
+
+
+						<pre>
+							<code class="Java syntaxhl">
+<span class="CodeRay"><span class="no"> 1</span> <span
+									class="at">@Override</span>
+<span class="no"> 2</span> <span class="di">public</span> <span
+									class="ty">void</span> onResume(<span class="ty">boolean</span> arg) {
+<span class="no"> 3</span>     Log.d(<span class="s"><span
+										class="dl">&quot;</span><span class="k">MyPlugin</span><span
+										class="dl">&quot;</span></span>, <span class="s"><span
+										class="dl">&quot;</span><span class="k">Plugin resumed</span><span
+										class="dl">&quot;</span></span>);
+<span class="no"> 4</span>     <span class="c">// Link to the Android service</span>
+<span class="no"> 5</span>     <span class="kw">if</span> (!serviceConnected) {
+<span class="no"> 6</span>         Intent serviceIntent = <span
+									class="kw">new</span> Intent(<span class="lv">this</span>.ctx, AndroidServiceClass.class);
+<span class="no"> 7</span>         <span class="lv">this</span>.ctx.bindService(serviceIntent , <span
+									class="kw">new</span> ServiceConnection() { ... }, <span
+									class="pt">Context</span>.BIND_AUTO_CREATE);
+<span class="no"> 8</span>     }
+<span class="no"> 9</span> }</span>
+							</code>
+							<br />
+						</pre>
+
+						<p>But, at the moment, we have to launch the service in the
+							"execute" method, and to launch our real computation when the
+							Android service is launched. See the example bellow:</p>
+
+
+						<pre>
+							<code class="Java syntaxhl">
+								<span class="CodeRay"><span class="no"> 1</span> <span
+									class="at">@Override</span>
+<span class="no"> 2</span> <span class="di">public</span> PluginResult execute(<span
+									class="pt">String</span> methodName, JSONArray params, <span
+									class="pt">String</span> callbackID) {    
+<span class="no"> 3</span>     <span class="c">// Inform the JS side: async mode</span>
+<span class="no"> 4</span>     PluginResult result = <span class="kw">new</span> PluginResult(Status.NO_RESULT);
+<span class="no"> 5</span>     result.setKeepCallback(<span class="pc">true</span>);
+<span class="no"> 6</span>     <span class="lv">this</span>.methodName = methodName;
+<span class="no"> 7</span>     <span class="lv">this</span>.arguments = arguments;
+<span class="no"> 8</span>     <span class="lv">this</span>.callbackID = callbackID;
+<span class="no"> 9</span>     <span class="c">// Launch the Android service</span>
+<span class="no"><strong>10</strong></span>     Intent deviceStatusIntent = <span
+									class="kw">new</span> Intent(<span class="lv">this</span>.ctx, DeviceStatusServiceDifferentProcess.class);
+<span class="no">11</span>     <span class="lv">this</span>.ctx.bindService(deviceStatusIntent, deviceStatusServiceConnection, <span
+									class="pt">Context</span>.BIND_AUTO_CREATE);
+<span class="no">12</span>     <span class="kw">return</span> result;
+<span class="no">13</span> }
+<span class="no">14</span> 
+<span class="no">15</span> <span class="di">private</span> ServiceConnection deviceStatusServiceConnection = <span
+									class="kw">new</span> ServiceConnection()
+<span class="no">16</span> {
+<span class="no">17</span>     <span class="di">public</span> <span
+									class="ty">void</span> onServiceDisconnected(ComponentName name)
+<span class="no">18</span>     {
+<span class="no">19</span>         deviceStatusServiceConnected = <span
+									class="pc">false</span>;
+<span class="no"><strong>20</strong></span>     }
+<span class="no">21</span>     <span class="di">public</span> <span
+									class="ty">void</span> onServiceConnected(ComponentName name, IBinder service)
+<span class="no">22</span>     {
+<span class="no">23</span>         deviceStatusService = <span
+									class="kw">new</span> Messenger(service);
+<span class="no">24</span>         deviceStatusServiceConnected = <span
+									class="pc">true</span>;
+<span class="no">25</span>         onPluginReady(methodName, arguments, callbackID);
+<span class="no">26</span>     }
+<span class="no">27</span> };
+<span class="no">28</span> 
+<span class="no">29</span> <span class="di">public</span> PluginResult onPluginReady(<span
+									class="pt">String</span> methodName, JSONArray arguments, <span
+									class="pt">String</span> callbackID)
+<span class="no"><strong>30</strong></span> {
+<span class="no">31</span>     Log.d(<span class="lv">this</span>.getClass().getSimpleName(), <span
+									class="s"><span class="dl">&quot;</span><span class="k">Plugin Called</span><span
+										class="dl">&quot;</span></span>);
+<span class="no">32</span>     <span class="c">// Real computation ...</span>
+<span class="no">33</span> }</span>
+							</code>
+							<br />
+						</pre>
+
+						<a name="How-to-Share-the-Javascript-API"></a>
+						<h2>
+							How to Share the Javascript API<a
+								href="#How-to-Share-the-Javascript-API" class="wiki-anchor">&para;</a>
+						</h2>
+
+
+						The creator and the user of the PhoneGap plugin may not be the
+						same person. Furthermore, Javascript doesn't have something like
+						"Interface". Therefore, a process is needed to share the
+						Javascript API in order to help the user of the plugin (the GUI
+						developer for example), to use it.<br />Two quick steps are
+						needed:
+						<ol>
+							<li><strong>The developer of the plugin have to
+									comment his Javascript plugin file using the Javadoc / Doxygen
+									/ <a href="http://code.google.com/p/jsdoc-toolkit/w/list"
+									class="external">JSDoc</a> syntax.
+							</strong> For the documentation of the return values, please provide: one
+								example of JSON result, and the <a
+								href="http://json-schema.org/" class="external">JSON schema</a>
+								of this result. The first one is only an example easy to
+								understand, and the second one give the exact information.<br />The
+								JSDoc syntax has some features (like @class, @constructor), for
+								more information, please read: The <a
+								href="http://code.google.com/p/jsdoc-toolkit/w/list"
+								class="external">JSDoc Wiki page</a>, the <a
+								href="http://wiki.servoy.com/display/public/DOCS/Annotating+JavaScript+using+JSDoc;jsessionid=E64B51C72965963CE8DC5D2A50709E6A"
+								class="external">JSDoc programming guider</a>. <br />Example
+								with the <a
+								href="https://github.com/societies/SOCIETIES-Platform/tree/development/platform-infrastructure/client-frwk/devicestatusgui"
+								class="external">DeviceStatus plugin</a>:<br />
+							<pre>
+/**
+ * @author Olivier Maridat (Trialog)
+ * @version 1.0
+ * @class
+ * @constructor
+ */
+var DeviceStatus = {
+    /**
+     * To retrieve the connectivity provider status
+     * 
+     * @param {Object} successCallback The callback which will be called when result is successful.
+     * Example of JSON result:
+     * &lt;pre&gt;
+     * {"isInternetEnabled":true, "providerList":[{"name":"WiFi", "enabled":true}, {"name":"mobile mms", "enabled":false}]}
+     * &lt;/pre&gt;
+     * Schema of the JSON result:
+     * &lt;pre&gt;
+     * {
+     *      "name":"ConnectivityProviderStatus",
+     *      "properties":{
+     *          "isInternetEnabled":{
+     *              "required":true,
+     *              "type":"boolean",
+     *              "description":"To know if Internet is available or not" 
+     *          },
+     *          "providerList":{
+     *              "required":false,
+     *              "type":"array",
+     *              "description":"List of connectivity providers",
+     *              "items":{
+     *                  "name":{
+     *                      "required":true,
+     *                      "type":"string",
+     *                      "description":"Name of the connectivity provider" 
+     *                  },
+     *                  "enabled":{
+     *                      "required":true,
+     *                      "type":"boolean",
+     *                      "description":"To know if this provider is available or not" 
+     *                  }
+     *              }
+     *          }
+     *      }
+     * }
+     * &lt;/pre&gt;
+     * @param {Object} failureCallback The callback which will be called when result encounters an error. (String result)
+     */
+    getConnectivityStatus: function(successCallback, failureCallback){
+        var parameters = null;
+        return PhoneGap.exec(
+                successCallback,
+                failureCallback,
+                'DeviceStatus',
+                'getConnectivityStatus',
+                [parameters]);
+    }
+    // ...
+};
+</pre></li>
+							<li><strong>The developer of the plugin have to
+									generate the Javascript documentation of his plugin using "mvn
+									site".</strong> The documentation will be available on the target/doc
+								folder.<br />To do that, the POM of the project had to be
+								configured using the JSDoc Maven plugin:<br />
+							<pre>
+&lt;pluginRepositories&gt;
+    &lt;pluginRepository&gt;
+        &lt;id&gt;jsdoctk2&lt;/id&gt;
+        &lt;url&gt;http://jsdoctk-plugin.googlecode.com/svn/repo&lt;/url&gt;
+    &lt;/pluginRepository&gt;
+&lt;/pluginRepositories&gt;
+&lt;build&gt;
+    &lt;plugins&gt;
+        &lt;!-- ... --&gt;
+        &lt;plugin&gt;
+            &lt;groupId&gt;nl.windgazer&lt;/groupId&gt;
+            &lt;artifactId&gt;jsdoctk-plugin&lt;/artifactId&gt;
+            &lt;version&gt;2.3.2&lt;/version&gt;
+            &lt;executions&gt;
+                &lt;execution&gt;
+                    &lt;phase&gt;site&lt;/phase&gt;
+                    &lt;goals&gt;
+                        &lt;goal&gt;jsdoc&lt;/goal&gt;
+                    &lt;/goals&gt;
+                &lt;/execution&gt;
+            &lt;/executions&gt;
+            &lt;configuration&gt;
+                &lt;!-- The generated documentation will be put on this directory --&gt;
+                &lt;directory&gt;${project.build.directory}/doc&lt;/directory&gt;
+                &lt;!-- JS file(s) of this directory will be used to generate the documentation --&gt;
+                &lt;srcDir&gt;${basedir}/assets/www/js/plugin&lt;/srcDir&gt;
+            &lt;/configuration&gt;
+        &lt;/plugin&gt;
+    &lt;/plugins&gt;
+&lt;/build&gt;
+</pre><br />The generated documentation will look like:<br />
+							<img
+								src="../../../img/jsdoc-documentation.png"
+								alt="" />
+								</li>
+						</ol>
+
+			</div>
+		</div>
+	</div>
+
+</body>
+</html>

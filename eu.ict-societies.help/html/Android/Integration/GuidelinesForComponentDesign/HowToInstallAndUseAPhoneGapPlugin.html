@@ -1,0 +1,172 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<title>Societies Platform - How to InstallUse a PhoneGap Plugin	- Societies Redmine</title>
+<meta name="description" content="Redmine" />
+<meta name="keywords" content="issue,bug,tracker" />
+<meta name="csrf-param" content="authenticity_token" />
+<meta name="csrf-token"
+	content="JMAfmcSzh9nqByMBkqpzD7RzT3uWZzg7qmINPKbMSTE=" />
+<link rel='shortcut icon' href='/favicon.ico?1310384844' />
+<link href="/themes/red-andy/stylesheets/application.css?1304377159"
+	media="all" rel="stylesheet" type="text/css" />
+
+<script src="/javascripts/prototype.js?1310384844"
+	type="text/javascript"></script>
+<script src="/javascripts/effects.js?1310384844" type="text/javascript"></script>
+<script src="/javascripts/dragdrop.js?1310384844" type="text/javascript"></script>
+<script src="/javascripts/controls.js?1310384844" type="text/javascript"></script>
+<script src="/javascripts/application.js?1310384844"
+	type="text/javascript"></script>
+<script type="text/javascript">
+	//         
+	Event
+			.observe(
+					window,
+					'load',
+					function() {
+						new WarnLeavingUnsaved(
+								'The current page contains unsaved text that will be lost if you leave this page.');
+					});
+	//
+</script>
+
+<!--[if IE 6]>
+    <style type="text/css">
+      * html body{ width: expression( document.documentElement.clientWidth < 900 ? '900px' : '100%' ); }
+      body {behavior: url(/stylesheets/csshover.htc?1310384844);}
+    </style>
+<![endif]-->
+<link rel="stylesheet"
+	href="/plugin_assets/redmine_backlogs/javascripts/jquery/jquery.jqplot/jquery.jqplot.min.css"
+	type="text/css" />
+
+<script
+	src="/plugin_assets/redmine_backlogs/javascripts/jquery/jquery-1.4.2.min.js?1318533980"
+	type="text/javascript"></script>
+<script
+	src="/plugin_assets/redmine_backlogs/javascripts/jquery/jquery-ui-1.8rc3.custom.min.js?1318533980"
+	type="text/javascript"></script>
+<script
+	src="/plugin_assets/redmine_backlogs/javascripts/jquery/jquery.jeditable.mini.js?1318533980"
+	type="text/javascript"></script>
+<script
+	src="/plugin_assets/redmine_backlogs/javascripts/jquery/jquery.cookie.js?1318533980"
+	type="text/javascript"></script>
+<!--[if IE]><script src="/plugin_assets/redmine_backlogs/javascripts/jquery/jquery.jqplot/excanvas.js?1318533980" type="text/javascript"></script><![endif] -->
+<script
+	src="/plugin_assets/redmine_backlogs/javascripts/jquery/jquery.jqplot/jquery.jqplot.js?1318533980"
+	type="text/javascript"></script>
+<script
+	src="/plugin_assets/redmine_backlogs/javascripts/jquery/jquery.jqplot/plugins/jqplot.highlighter.js?1318533980"
+	type="text/javascript"></script>
+<script
+	src="/plugin_assets/redmine_backlogs/javascripts/jquery/jquery.jqplot/plugins/jqplot.canvasTextRenderer.min.js?1318533980"
+	type="text/javascript"></script>
+<script
+	src="/plugin_assets/redmine_backlogs/javascripts/jquery/jquery.jqplot/plugins/jqplot.canvasAxisTickRenderer.min.js?1318533980"
+	type="text/javascript"></script>
+<script
+	src="/plugin_assets/redmine_backlogs/javascripts/jquery/jquery.jqplot/plugins/jqplot.enhancedLegendRenderer.min.js?1318533980"
+	type="text/javascript"></script>
+
+<script
+	src="/plugin_assets/redmine_backlogs/javascripts/common.js?1318533980"
+	type="text/javascript"></script>
+<script
+	src="/plugin_assets/redmine_backlogs/javascripts/burndown.js?1318533980"
+	type="text/javascript"></script>
+
+
+<!-- page specific tags -->
+
+<link href="/stylesheets/scm.css?1310384844" media="screen"
+	rel="stylesheet" type="text/css" />
+</head>
+<body class="theme-Red-andy controller-wiki action-show">
+	<div id="wrapper">
+		<div id="wrapper2">
+
+
+			<div id="header">
+
+			
+			</div>
+
+			<div class="" id="main">
+
+
+				<div id="content">
+
+					
+					<div class="wiki">
+						<a name="How-to-InstallUse-a-PhoneGap-Plugin"></a>
+						<h1>
+							How to Install/Use a PhoneGap Plugin<a
+								href="#How-to-InstallUse-a-PhoneGap-Plugin" class="wiki-anchor">&para;</a>
+						</h1>
+
+
+						<p>
+							This article is a summarize, more focus on Societies needs, of
+							the PhoneGap Wiki page: <a
+								href="http://wiki.phonegap.com/w/page/36752779/PhoneGap%20Plugins#HowtoInstallPluginsforAllPlatforms"
+								class="external">How to Install a PhoneGap Plugins for all platforms</a>.
+						</p>
+
+
+						<a name="How-to-Install-PhoneGap-Plugins-for-Android"></a>
+						<h2>
+							How to Install PhoneGap Plugins for Android<a
+								href="#How-to-Install-PhoneGap-Plugins-for-Android"
+								class="wiki-anchor">&para;</a>
+						</h2>
+
+
+						<ul>
+							<li>Copy/paste the JS file of the plugin somewhere in:
+								assets/www/. A good practice is to paste it in the folder: <strong>assets/www/js/plugin</strong>
+							</li>
+							<li>Ensure that your project can access the Java file of the
+								plugin (e.g. through Maven dependency)</li>
+							<li>Edit (or create) the file res/xml/plugins.xml and add a
+								<code>&lt;plugin&gt;</code> tag:<br /> <pre>
+									<code class="xml syntaxhl">
+<span class="CodeRay">
+<span class="no">1</span> <span class="ta">&lt;plugins&gt;</span>
+<span class="no">2</span> ...
+<span class="no">3</span> <span class="ta">&lt;plugin</span> <span class="an">name</span>=<span class="s"> <span class="dl">&quot;</span><span class="k">YourPluginName</span><span class="dl">&quot;</span></span><span class="an">value</span>=<span class="s"><span class="dl">&quot;</span><span class="k">package.YourJavaPlugin</span><span class="dl">&quot;</span></span><span class="ta">/&gt;</span>
+<span class="no">4</span> ...
+<span class="no">5</span> <span class="ta">&lt;/plugins&gt;</span></span>
+									</code>
+								</pre>
+							</li>
+							<li>If needed run "mvn site" on the project of the plugin to
+								easily show the Javascript API of this plugin</li>
+						</ul>
+					</div>
+
+
+
+
+
+
+
+
+
+
+
+					<div style="clear: both;"></div>
+				</div>
+			</div>
+
+			<div id="ajax-indicator" style="display: none;">
+				<span>Loading...</span>
+			</div>
+
+		</div>
+	</div>
+
+</body>
+</html>
