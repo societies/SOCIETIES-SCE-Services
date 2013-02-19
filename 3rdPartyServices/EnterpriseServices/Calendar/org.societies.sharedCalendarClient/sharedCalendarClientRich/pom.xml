@@ -26,10 +26,9 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.societies.api.ext3p</groupId>
-			<artifactId>societies-api-ext3p</artifactId>
+			<groupId>org.societies.rdpartyService.enterprise</groupId>
+			<artifactId>calendar-api</artifactId>
 			<version>${release.version}</version>
-			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.osgi</groupId>

@@ -24,6 +24,7 @@
  */
 package org.societies.rdpartyService.enterprise;
 
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -56,6 +57,7 @@ import org.societies.api.osgi.event.EventListener;
 import org.societies.api.osgi.event.EventTypes;
 import org.societies.api.osgi.event.IEventMgr;
 import org.societies.api.osgi.event.InternalEvent;
+import org.societies.api.services.IServices;
 import org.societies.rdpartyService.enterprise.interfaces.IReturnedResultCallback;
 import org.societies.rdpartyService.enterprise.interfaces.ISharedCalendarClientRich;
 
@@ -76,6 +78,7 @@ public class SharedCalendarClientRich extends EventListener implements ICommCall
 	private ICommManager commManager;
 	private IIdentityManager idMgr;
 	private IEventMgr evtMgr;
+	private IServices serviceMgmt;
 	//70n1 variables used for the integration with screen device.
 	private IDisplayDriver displayDriverService;
 	private String myServiceName;
@@ -118,6 +121,14 @@ public class SharedCalendarClientRich extends EventListener implements ICommCall
 		this.commManager = commManager;
 	}
 	
+	public IServices getServiceMngmt() {
+		return serviceMgmt;
+	}
+
+	public void setServiceMngmt(IServices serviceMgmt) {
+		this.serviceMgmt = serviceMgmt;
+	}
+	
 	/**
 	 * This method is used to retrieve the jid of the Server where the 3rd party
 	 * service is deployed. In a future version this property is loaded
@@ -126,11 +137,8 @@ public class SharedCalendarClientRich extends EventListener implements ICommCall
 	 * @return the jid of the server where the service is deployed
 	 */
 	public String getServiceServer() {
-		return this.serviceServer;
-	}
-
-	public void setServiceServer(String serviceServer) {
-		this.serviceServer = serviceServer;
+		
+		return getServiceMngmt().getServer(getServiceMngmt().getMyServiceId(SharedCalendarClientRich.class)).getJid();
 	}
 
 	public IIdentityManager getIdMgr() {
@@ -154,7 +162,12 @@ public class SharedCalendarClientRich extends EventListener implements ICommCall
 			// register for display events
 			this.registerForDisplayEvents();
 //			try {
-				//this.myServiceExeURL = new URL("http://www.macs.hw.ac.uk/~ceeep1/societies/services/MockWindowsExecutable.exe");
+				try {
+					this.myServiceExeURL = new URL("http://www.macs.hw.ac.uk/~ceeep1/societies/services/MockWindowsExecutable.exe");
+				} catch (MalformedURLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 				this.myServiceName = "Shared Calendar Client";
 				this.displayDriverService.registerDisplayableService(null, myServiceName, myServiceExeURL, false);
 //			} catch (MalformedURLException e) {
@@ -270,16 +283,13 @@ public class SharedCalendarClientRich extends EventListener implements ICommCall
 	
 	private IIdentity retrieveTargetIdentity(){
 		IIdentity result = null;
-		try {
-			if (idMgr != null){
-				result = idMgr.fromJid(getServiceServer());
-			}else{
+
+		if (idMgr != null){
+			result = getServiceMngmt().getServer(getServiceMngmt().getMyServiceId(SharedCalendarClientRich.class));
+		}else{
 				log.error("Identity Manager is NOT available.");
-			}
-		} catch (InvalidFormatException e1) {
-			
-			e1.printStackTrace();
-		} 
+		}
+
 		return result;
 	}
 
@@ -695,7 +705,7 @@ public class SharedCalendarClientRich extends EventListener implements ICommCall
 	 */
 	@Override
 	public void handleExternalEvent(CSSEvent event) {
-		// TODO Auto-generated method stub
+		if(log.isDebugEnabled()) log.debug("handleExternalEvent: " + event.geteventName());
 		
 	}
 
@@ -717,13 +727,13 @@ public class SharedCalendarClientRich extends EventListener implements ICommCall
 
 	@Override
 	public void serviceStarted(String arg0) {
-		// TODO Auto-generated method stub
+		if(log.isDebugEnabled()) log.debug("serviceStarted: " + arg0);
 		
 	}
 
 	@Override
 	public void serviceStopped(String arg0) {
-		// TODO Auto-generated method stub
+		if(log.isDebugEnabled()) log.debug("serviceStopped: " + arg0);
 		
 	}
 	

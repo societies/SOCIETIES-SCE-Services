@@ -74,7 +74,7 @@ public class SharedCalendarUtil {
 	private static Logger log=LoggerFactory.getLogger(SharedCalendarUtil.class);
 
 	
-	
+	/*
 	// Test main
 	public static void main(String[] argj) throws Exception {
 		SharedCalendarUtil testCalendar = new SharedCalendarUtil();
@@ -92,7 +92,7 @@ public class SharedCalendarUtil {
 			log.error("Unable to create calendar", e);
 		}		
 	}
-	
+	*/
 	/**
 	 * Constructor that initialize the class field
 	 */
@@ -107,7 +107,7 @@ public class SharedCalendarUtil {
 	 * @param accessToken
 	 * @param refreshToken
 	 */
-	public SharedCalendarUtil(String clientId, String clientSecret,
+/*	public SharedCalendarUtil(String clientId, String clientSecret,
 			String accessToken, String refreshToken) {
 		super();
 		this.clientId = clientId;
@@ -116,7 +116,7 @@ public class SharedCalendarUtil {
 		this.refreshToken = refreshToken;
 		this.setUp();
 	}
-
+*/
 	/**
 	 * Utility methods
 	 */
@@ -426,7 +426,7 @@ public class SharedCalendarUtil {
 	 */
 	private void readAndSetProperties(){
 		props = new Properties();
-		URL url = ClassLoader.getSystemResource("META-INF/conf/backEnd.properties");
+		URL url = ClassLoader.getSystemResource("META-INF/backEnd.properties");
 		InputStream inputStream = null;
 		try {
 			inputStream = url.openStream();

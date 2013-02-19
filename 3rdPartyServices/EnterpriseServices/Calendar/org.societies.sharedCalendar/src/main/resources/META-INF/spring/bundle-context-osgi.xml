@@ -17,16 +17,15 @@
 	
 	<bean id="sharedCalendarUtil"
 		class="org.societies.rdPartyService.enterprise.sharedCalendar.SharedCalendarUtil">
-		<constructor-arg value="${clientId}" />
+		<!--  <constructor-arg value="${clientId}" />
 		<constructor-arg value="${clientSecret}" />
 		<constructor-arg value="${accessToken}" />
-		<constructor-arg value="${refreshToken}" />
+		<constructor-arg value="${refreshToken}" />-->
 	</bean>
-	
+	<!--  
 	<context:property-placeholder properties-ref="backEndProperties" />
-
 	<osgi-compendium:cm-properties id="backEndProperties" persistent-id="bk" />
-	
+	-->
 	<!-- Required References -->
 	<osgi:reference id="CommManagerBundle" interface="org.societies.api.comm.xmpp.interfaces.ICommManager" />
 	<osgi:reference id="dataSource" interface="javax.sql.DataSource" />
@@ -41,7 +40,7 @@
 			<entry key="TargetPlatform" value="SOCIETIES" />
 			<entry key="ServiceProvider" value="ICT-SOCIETIES" />
 			<entry key="ServiceMetaModel" value-ref="serMetamodel" />
-			<entry key="ServiceClient" value="http://societies.local/client.jar" />
+			<!-- <entry key="ServiceClient" value="http://societies.local/client.jar" />  -->
 		</osgi:service-properties>
 	</osgi:service>
 
@@ -50,7 +49,6 @@
 		<property name="serviceDescription" value="Shared Calendar Server Component" />
 		<property name="serviceName" value="Shared Calendar Server" />
 		<property name="serviceType" value="THIRD_PARTY_SERVER" />
-		<property name="privacyPolicy" value="http://societies.local/local_file" />
 	</bean>
 
 	<osgi:set id="availableDevicesSet" interface="org.societies.api.css.devicemgmt.IDevice" cardinality="0..N">

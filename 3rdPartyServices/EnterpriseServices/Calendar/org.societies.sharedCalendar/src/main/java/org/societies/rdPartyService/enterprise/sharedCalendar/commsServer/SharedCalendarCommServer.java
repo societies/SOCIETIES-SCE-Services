@@ -171,7 +171,8 @@ public class SharedCalendarCommServer implements IFeatureServer{
 				}
 				break;
 			case CREATE_CIS_CALENDAR:
-				resultBean.setLastOperationSuccessful(this.sharedCalendarService.createCISCalendar(bean.getCalendarSummary(), bean.getCISId()));
+				//resultBean.setLastOperationSuccessful(this.sharedCalendarService.createCISCalendar(bean.getCalendarSummary(), bean.getCISId()));
+				resultBean.setCalendarId(this.sharedCalendarService.createCISCalendar(bean.getCalendarSummary(), bean.getCISId()));
 				break;
 			case CREATE_EVENT_ON_CIS_CALENDAR:
 				resultBean.setEventId((this.sharedCalendarService.createEventOnCISCalendar(bean.getNewEvent(), bean.getCalendarId())));

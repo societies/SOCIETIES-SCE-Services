@@ -56,9 +56,9 @@ public interface ISharedCalendar {
 	 * This method create a private calendar for a CIS
 	 * @param CISId
 	 * @param calendarSummary
-	 * @return
+	 * @return the id of the calendar
 	 */
-	public boolean createCISCalendar(String calendarSummary, String CISId);
+	public String createCISCalendar(String calendarSummary, String CISId);
 	
 	/**
 	 * This method deletes the CIS calendar with the provided CalendarId

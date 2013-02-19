@@ -66,7 +66,9 @@ public class TestSharedCalendar extends AbstractTransactionalJUnit4SpringContext
 		boolean result=false;
 		if (!isCisCalendarAvailable){
 			log.info(cisCalendars.size()+" Calendars retrieved");
-			result = sharedCalendar.createCISCalendar(_testCisSummary,_testCisId);
+			String calendarId = sharedCalendar.createCISCalendar(_testCisSummary,_testCisId);
+			if(calendarId!=null)
+				result=true;
 		}else{			
 //			for (Calendar calendar : cisCalendars) {
 //				if(calendar.getSummary().equalsIgnoreCase(_testCisSummary)){

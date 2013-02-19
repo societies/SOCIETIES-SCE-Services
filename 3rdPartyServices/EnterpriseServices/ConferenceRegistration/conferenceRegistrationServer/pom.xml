@@ -6,7 +6,8 @@
 	<artifactId>confreg-server</artifactId>
 	<packaging>bundle</packaging>
 	<name>Conference Registration Server Bundle</name>
-	<version>0.1</version>
+	<version>${release.version}</version>
+	
 	<url>http://www.springframework.org/osgi</url>
 	<developers>
 	    <developer>
@@ -22,7 +23,7 @@
 	<parent>
 		<groupId>org.societies</groupId>
 		<artifactId>spring-osgi-parent</artifactId>
-		<version>0.1</version>
+		<version>RELEASE</version>
 	</parent>
 	
 	<dependencies>
@@ -30,15 +31,29 @@
 		<dependency>
 			<groupId>org.societies.thirdparty.confreg</groupId>
 			<artifactId>confreg-api</artifactId>
-			<version>0.1</version>	
+			<version>${release.version}</version>
 			<scope>compile</scope>			
 		</dependency>
 		<dependency>
 			<groupId>org.societies.api.external</groupId>
 			<artifactId>societies-api</artifactId>
-			<version>${release.version}</version>
 			<scope>provided</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.societies</groupId>
+			<artifactId>common-ext-libs</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.societies.rdpartyService.enterprise</groupId>
+			<artifactId>sharedCalendarClientRich</artifactId>
+			<version>0.1.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.societies</groupId>
+			<artifactId>hibernate_classes</artifactId>
+			<scope>provided</scope>
+		</dependency>		
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>org.springframework.spring-library</artifactId>

@@ -53,7 +53,7 @@ import org.societies.api.css.devicemgmt.IDevice;
 import org.societies.api.ext3p.schema.sharedcalendar.Calendar;
 import org.societies.api.ext3p.schema.sharedcalendar.Event;
 import org.societies.api.osgi.event.IEventMgr;
-import org.societies.api.schema.activityfeed.Activityfeed;
+import org.societies.api.schema.activityfeed.MarshaledActivityFeed;
 import org.societies.api.services.IServices;
 import org.societies.rdPartyService.enterprise.sharedCalendar.persistence.DAO.CISCalendarDAO;
 import org.societies.rdPartyService.enterprise.sharedCalendar.persistence.DAO.CSSCalendarDAO;
@@ -133,7 +133,7 @@ public class SharedCalendar implements ISharedCalendar, IPrivateCalendarUtil {
 							new IActivityFeedCallback() {
 								@Override
 								public void receiveResult(
-										Activityfeed activityFeedObject) {
+										MarshaledActivityFeed activityFeedObject) {
 									log.debug("Added a 'Create CIS Calendar' activity to the Activity Feed.");
 								}
 							}
@@ -149,7 +149,7 @@ public class SharedCalendar implements ISharedCalendar, IPrivateCalendarUtil {
 	 * @see org.societies.rdPartyService.enterprise.sharedCalendar.ISharedCalendar#createCISCalendar(java.lang.String, java.lang.String)
 	 */
 	@Override
-	public boolean createCISCalendar(String calendarSummary, String CISId) {
+	public String createCISCalendar(String calendarSummary, String CISId) {
 		
 		//Test purpose only
 		log.info("SERVICE INSTANCE IDENTIFIER: "+serviceMetadataUtil.getMyServiceId(this.getClass()).getServiceInstanceIdentifier());
@@ -192,7 +192,11 @@ public class SharedCalendar implements ISharedCalendar, IPrivateCalendarUtil {
 			}
 
 		}
-		return result;
+		
+		if(result)
+			return storedCalendarId;
+		else
+			return null;
 	}
 	
 	private void notifyCisCalendarDeletion(String calendarId, String CISId){
@@ -209,7 +213,7 @@ public class SharedCalendar implements ISharedCalendar, IPrivateCalendarUtil {
 							new IActivityFeedCallback() {
 								@Override
 								public void receiveResult(
-										Activityfeed activityFeedObject) {
+										MarshaledActivityFeed activityFeedObject) {
 									log.debug("Added a 'Delete CIS Calendar' activity to the Activity Feed.");
 								}
 							}
@@ -323,7 +327,7 @@ public class SharedCalendar implements ISharedCalendar, IPrivateCalendarUtil {
 							new IActivityFeedCallback() {
 								@Override
 								public void receiveResult(
-										Activityfeed activityFeedObject) {
+										MarshaledActivityFeed activityFeedObject) {
 									log.debug("Added a 'Create CIS Event' activity to the Activity Feed.");
 								}
 							}
@@ -449,7 +453,7 @@ public class SharedCalendar implements ISharedCalendar, IPrivateCalendarUtil {
 							new IActivityFeedCallback() {
 								@Override
 								public void receiveResult(
-										Activityfeed activityFeedObject) {
+										MarshaledActivityFeed activityFeedObject) {
 									log.debug("Added a 'Delete CIS Event' activity to the Activity Feed.");
 								}
 							}
@@ -539,7 +543,7 @@ public class SharedCalendar implements ISharedCalendar, IPrivateCalendarUtil {
 							new IActivityFeedCallback() {
 								@Override
 								public void receiveResult(
-										Activityfeed activityFeedObject) {
+										MarshaledActivityFeed activityFeedObject) {
 									log.debug("Added a 'Subscription to Calendar Event' activity to the Activity Feed.");
 								}
 							}
@@ -618,7 +622,7 @@ public class SharedCalendar implements ISharedCalendar, IPrivateCalendarUtil {
 							new IActivityFeedCallback() {
 								@Override
 								public void receiveResult(
-										Activityfeed activityFeedObject) {
+										MarshaledActivityFeed activityFeedObject) {
 									log.debug("Added a 'Unsubscription from Calendar Event' activity to the Activity Feed.");
 								}
 							}

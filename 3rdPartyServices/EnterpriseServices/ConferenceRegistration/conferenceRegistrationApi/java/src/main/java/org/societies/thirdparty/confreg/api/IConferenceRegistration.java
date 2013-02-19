@@ -1,10 +1,11 @@
 package org.societies.thirdparty.confreg.api;
 
+import java.util.Date;
 import java.util.List;
 
 import org.societies.api.identity.IIdentity;
 import org.societies.thirdparty.conferenceregistration.schema.Conference;
-import org.societies.thirdparty.conferenceregistration.schema.Session;
+import org.societies.thirdparty.conferenceregistration.schema.ConferenceSession;
 
 public interface IConferenceRegistration {
 	
@@ -22,6 +23,14 @@ public interface IConferenceRegistration {
 	 * @return
 	 */
 	public List<Conference> getConferenceList();
+	
+	/**
+	 * This method is used to get a full list of conferences available created by IIdentity
+	 * 
+	 * @param creator 
+	 * @return
+	 */
+	public List<Conference> getConferenceList(IIdentity creator);
 	
 	/**
 	 * This method may be used to create a new Conference
@@ -56,7 +65,7 @@ public interface IConferenceRegistration {
 	 * @param conferenceId
 	 * @param memberId
 	 */
-	public void joinConference(String conferenceId, String memberId);
+	public void joinConference(String conferenceId, IIdentity memberId);
 	
 	/**
 	 * This method is used to remove a user from a conference
@@ -64,7 +73,7 @@ public interface IConferenceRegistration {
 	 * @param conferenceId
 	 * @param memberId
 	 */
-	public void leaveConference(String conferenceId, String memberId);
+	public void leaveConference(String conferenceId, IIdentity memberId);
 	
 	/**
 	 * This method is used to add a Session to a Conference
@@ -77,7 +86,7 @@ public interface IConferenceRegistration {
 	 * @param location
 	 * @return
 	 */
-	public Session addSession (String conferenceId, String name, String description, String startDate, String endDate, String location);
+	public ConferenceSession addSession (String conferenceId, String name, String description, Date startDate, Date endDate, String location);
 
 	/**
 	 * This method is used to remove a Session from a Conference
@@ -91,7 +100,7 @@ public interface IConferenceRegistration {
 	 * 
 	 * @param session
 	 */
-	public void updateSession(Session session);
+	public void updateSession(ConferenceSession session);
 	
 	/**
 	 * This method is used to retrieve a session from a Conference
@@ -100,7 +109,7 @@ public interface IConferenceRegistration {
  	 * @param conferenceId
 	 * @return
 	 */
-	public Session getSession(String sessionId, String conferenceId);
+	public ConferenceSession getSession(String sessionId, String conferenceId);
 	
 	/**
 	 * This method is used to get a list of sessions in a conference
@@ -108,7 +117,7 @@ public interface IConferenceRegistration {
 	 * @param conferenceId
 	 * @return
 	 */
-	public List<Session> getConferenceSessions(String conferenceId);
+	public List<ConferenceSession> getConferenceSessions(String conferenceId);
 	
 	/**
 	 * This method is used to join a Session

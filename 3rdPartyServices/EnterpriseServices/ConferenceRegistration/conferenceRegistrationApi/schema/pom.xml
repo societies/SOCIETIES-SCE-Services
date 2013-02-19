@@ -3,8 +3,15 @@
 	<groupId>org.societies.thirdparty.confreg</groupId>
 	<artifactId>confreg-schema</artifactId>
 	<name>ConferenceRegistration Schema API</name>
-	<version>0.1</version>
+	<version>${release.version}</version>
 	<packaging>jar</packaging>
+	
+	<parent>
+		<groupId>org.societies</groupId>
+		<artifactId>spring-osgi-parent</artifactId>
+		<version>RELEASE</version>
+	</parent>
+	
 	<dependencies>
 		<dependency>
 			<groupId>com.sun.xml.bind</groupId>

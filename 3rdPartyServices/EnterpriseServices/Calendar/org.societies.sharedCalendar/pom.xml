@@ -36,10 +36,10 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.societies.api.ext3p</groupId>
-			<artifactId>societies-api-ext3p</artifactId>
+			<groupId>org.societies.rdpartyService.enterprise</groupId>
+			<artifactId>calendar-api</artifactId>
 			<version>${release.version}</version>
-			<scope>provided</scope>
+			<scope>compile</scope>
 		</dependency>
 		<!-- Common external libraries -->
         <dependency>
@@ -137,9 +137,10 @@
 							google-api-client;groupId=com.google.api-client;version=1.7.0-beta,
 							google-http-client;groupId=com.google.http-client;version=1.7.0-beta,
 							google-oauth-client;groupId=com.google.oauth-client;version=1.7.0-beta,
-							jackson-core-asl;groupId=org.codehaus.jackson;version=1.9.4
+							jackson-core-asl;groupId=org.codehaus.jackson;version=1.9.4,
+							calendar-api;groupId=org.societies.rdpartyService.enterprise;scope=compile|runtime
 						</Embed-Dependency>
-<!-- 						<Export-Package>org.societies.rdPartyService.enterprise.sharedCalendar.*</Export-Package> -->
+ 						<Export-Package>org.societies.api.ext3p.schema.*</Export-Package>
 						<!-- See http://www.bradchen.com/node/10 for reasons of importing hibernate packages -->
 						<Import-Package>
 <!-- 							org.societies.api.ext3p.schema.sharedcalendar;version="[0.1,1)", -->
