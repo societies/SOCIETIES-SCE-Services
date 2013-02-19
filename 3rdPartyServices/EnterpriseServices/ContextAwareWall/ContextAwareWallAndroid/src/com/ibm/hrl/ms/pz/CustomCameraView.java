@@ -1,17 +1,23 @@
 package com.ibm.hrl.ms.pz;
 
 import android.content.Context;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.hardware.Camera;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.widget.ImageView;
 
 public class CustomCameraView  extends SurfaceView{
 	private SurfaceHolder previewHolder;
 	
 	private Camera camera= null;
 	private boolean surfaceCreated = false;
+	private ImageView imageView; 
+	
 	SurfaceHolder.Callback surfaceHolderListener = new SurfaceHolder.Callback() {
 	     
 
@@ -38,13 +44,42 @@ public class CustomCameraView  extends SurfaceView{
 	   }
 	   
 	 };
+	 /*
+	 @Override
+	 public void onDraw(Canvas canvas) {
+
+	             Paint paint = new Paint();
+	             paint.setStyle(Paint.Style.FILL_AND_STROKE);
+	             paint.setStrokeWidth(3);
+	             paint.setAntiAlias(true);
+	             paint.setColor(Color.BLUE);
+	             canvas.drawRect(0, 0, this.getWidth(), this.getHeight(), paint);
+
+	             
+	     if (hasData) {
+
+	         resetColor();
+	         try {
+
+	             canvas.drawColor(getResources().getColor(R.color.graphbg_color));
+
+	             graphDraw(canvas);
+	         } catch (ValicException ex) {
+
+	         }
+
+	     }
+	 }*/
 	 
 	 
 	 private void init(){
 		 try{
 			 previewHolder = this.getHolder();
 			 previewHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
-			 previewHolder.addCallback(surfaceHolderListener); 
+			 previewHolder.addCallback(surfaceHolderListener);
+			 
+			 
+			 
 		 }catch (Exception e) {
 			 Log.e("error", e.getMessage()+ " ; cause: "+e.getCause(), e);
 		}

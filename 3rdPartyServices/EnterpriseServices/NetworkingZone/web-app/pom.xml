@@ -218,7 +218,7 @@
 					<instructions>
 						<Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
 						<!-- TODO: Fix up again when comms bug #1561 is fixed -->
-						<Export-Package>!*</Export-Package>
+						<Export-Package>org.societies.thirdpartyservices.networking.**</Export-Package>
 						<Import-Package>
 							javax.servlet.jsp.jstl.core;version="[1.2.0,2.0.0)",
 							javax.servlet;version="[3.0.0, 4.0.0)",
@@ -301,6 +301,9 @@
 							org.springframework.osgi.context;resolution:=optional,
 							org.societies.activity;resolution:=optional,
 							org.societies.api.schema.css.directory;resolution:=optional,
+							org.societies.api.useragent.monitoring;resolution:=optional,
+							org.societies.api.personalisation.mgmt;resolution:=optional,
+							org.societies.api.personalisation.model;resolution:=optional,
 							<!-- Form validation -->
 							javax.validation,*;resolution:=optional
 						</Import-Package>

@@ -35,6 +35,8 @@
 		http://www.springframework.org/schema/osgi http://www.springframework.org/schema/osgi/spring-osgi.xsd
 		http://www.springframework.org/schema/osgi-compendium http://www.springframework.org/schema/osgi-compendium/spring-osgi-compendium-1.2.xsd">
 	
+	<context:property-placeholder properties-ref="networkclientConfig"/> 
+	
 	<osgi:reference id="commManager" interface="org.societies.api.comm.xmpp.interfaces.ICommManager"/> 
 	<osgi:reference id="ctxBroker" interface="org.societies.api.context.broker.ICtxBroker" />
 	
@@ -43,11 +45,45 @@
 	
 	<osgi:reference id="cssManager" interface="org.societies.api.internal.css.management.ICSSLocalManager" cardinality="0..1"/>
 	
+	<osgi:reference id="uam" interface="org.societies.api.useragent.monitoring.IUserActionMonitor">
+	</osgi:reference>
+	
+	<osgi:reference id="persoMgr" interface="org.societies.api.personalisation.mgmt.IPersonalisationManager">
+	</osgi:reference>
+	
+	<osgi:reference id="serviceMgmt" interface="org.societies.api.services.IServices">
+	</osgi:reference>
+	
+	<bean id="commsClient" 
+		class="org.societies.thirdpartyservices.networking.client.NetworkingClientComms"
+		 init-method="InitService">
+ 		<constructor-arg value="${networkingserver}"/> 
+		<property name="commManager" ref="commManager" />
+	</bean>
+	
+	<bean id="networkClient" 
+		class="org.societies.thirdpartyservices.networking.client.NetworkClient">
+		<property name="cisManager" ref="cisManager" />
+		<property name="cisDirectoryClient" ref="cisDirectoryClient" />
+		<property name="commsClient" ref="commsClient" /> 
+		<property name="ctxBroker" ref="ctxBroker" />
+		<property name="commManager" ref="commManager" />
+		<property name="cssManager" ref="cssManager" />
+		<property name="uam" ref="uam" />
+		<property name="persoMgr" ref="persoMgr" />
+		<property name="serviceMgmt" ref="serviceMgmt" />
+		
+	</bean>		
 	
 	
 	
  
-	<osgi:service ref="NetworkingServiceData" interface="org.societies.api.services.PlaceholderService">
+	<osgi:service ref="networkClient">
+	 <osgi:interfaces>
+	        <value>org.societies.thirdpartyservices.networking.client.NetworkClient</value>
+	        <value>org.societies.api.personalisation.model.IActionConsumer</value>
+	    </osgi:interfaces>
+
       <osgi:service-properties>
           <entry key="TargetPlatform" value="SOCIETIES" />
           <entry key="ServiceProvider" value="ICT-SOCIETIES" />
@@ -63,8 +99,7 @@
  	
 
  
-	<bean id="NetworkingServiceData" class="org.societies.api.services.PlaceholderService">
-  	</bean>
+	
   	
   	
 	<bean id="serMetamodel" class="org.societies.api.schema.servicelifecycle.model.Service">

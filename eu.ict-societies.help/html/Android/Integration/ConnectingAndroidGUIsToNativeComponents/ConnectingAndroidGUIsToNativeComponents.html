@@ -1,0 +1,734 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<title>Societies Platform - Android GUI Development - Societies
+	Redmine</title>
+<meta name="description" content="Redmine" />
+<meta name="keywords" content="issue,bug,tracker" />
+<meta name="csrf-param" content="authenticity_token" />
+<meta name="csrf-token"
+	content="JMAfmcSzh9nqByMBkqpzD7RzT3uWZzg7qmINPKbMSTE=" />
+<link rel='shortcut icon' href='/favicon.ico?1310384844' />
+<link href="/themes/red-andy/stylesheets/application.css?1304377159"
+	media="all" rel="stylesheet" type="text/css" />
+
+<script src="/javascripts/prototype.js?1310384844"
+	type="text/javascript"></script>
+<script src="/javascripts/effects.js?1310384844" type="text/javascript"></script>
+<script src="/javascripts/dragdrop.js?1310384844" type="text/javascript"></script>
+<script src="/javascripts/controls.js?1310384844" type="text/javascript"></script>
+<script src="/javascripts/application.js?1310384844"
+	type="text/javascript"></script>
+<script type="text/javascript">
+	//         
+	Event
+			.observe(
+					window,
+					'load',
+					function() {
+						new WarnLeavingUnsaved(
+								'The current page contains unsaved text that will be lost if you leave this page.');
+					});
+	//
+</script>
+
+<!--[if IE 6]>
+    <style type="text/css">
+      * html body{ width: expression( document.documentElement.clientWidth < 900 ? '900px' : '100%' ); }
+      body {behavior: url(/stylesheets/csshover.htc?1310384844);}
+    </style>
+<![endif]-->
+<link rel="stylesheet"
+	href="/plugin_assets/redmine_backlogs/javascripts/jquery/jquery.jqplot/jquery.jqplot.min.css"
+	type="text/css" />
+
+<script
+	src="/plugin_assets/redmine_backlogs/javascripts/jquery/jquery-1.4.2.min.js?1318533980"
+	type="text/javascript"></script>
+<script
+	src="/plugin_assets/redmine_backlogs/javascripts/jquery/jquery-ui-1.8rc3.custom.min.js?1318533980"
+	type="text/javascript"></script>
+<script
+	src="/plugin_assets/redmine_backlogs/javascripts/jquery/jquery.jeditable.mini.js?1318533980"
+	type="text/javascript"></script>
+<script
+	src="/plugin_assets/redmine_backlogs/javascripts/jquery/jquery.cookie.js?1318533980"
+	type="text/javascript"></script>
+<!--[if IE]><script src="/plugin_assets/redmine_backlogs/javascripts/jquery/jquery.jqplot/excanvas.js?1318533980" type="text/javascript"></script><![endif]-->
+<script
+	src="/plugin_assets/redmine_backlogs/javascripts/jquery/jquery.jqplot/jquery.jqplot.js?1318533980"
+	type="text/javascript"></script>
+<script
+	src="/plugin_assets/redmine_backlogs/javascripts/jquery/jquery.jqplot/plugins/jqplot.highlighter.js?1318533980"
+	type="text/javascript"></script>
+<script
+	src="/plugin_assets/redmine_backlogs/javascripts/jquery/jquery.jqplot/plugins/jqplot.canvasTextRenderer.min.js?1318533980"
+	type="text/javascript"></script>
+<script
+	src="/plugin_assets/redmine_backlogs/javascripts/jquery/jquery.jqplot/plugins/jqplot.canvasAxisTickRenderer.min.js?1318533980"
+	type="text/javascript"></script>
+<script
+	src="/plugin_assets/redmine_backlogs/javascripts/jquery/jquery.jqplot/plugins/jqplot.enhancedLegendRenderer.min.js?1318533980"
+	type="text/javascript"></script>
+
+<script
+	src="/plugin_assets/redmine_backlogs/javascripts/common.js?1318533980"
+	type="text/javascript"></script>
+<script
+	src="/plugin_assets/redmine_backlogs/javascripts/burndown.js?1318533980"
+	type="text/javascript"></script>
+
+
+<!-- page specific tags -->
+
+<link href="/stylesheets/scm.css?1310384844" media="screen"
+	rel="stylesheet" type="text/css" />
+</head>
+<body class="theme-Red-andy controller-wiki action-show">
+	<div id="wrapper">
+		<div id="wrapper2">
+
+			<div class="" id="main">
+
+
+				<div id="content">
+
+
+					<div class="wiki">
+						<a name="Android-GUI-to-Native-Component-Guide"></a>
+						<h1>
+							Android GUI to Native Component Guide<a
+								href="#Android-GUI-to-Native-Component-Guide"
+								class="wiki-anchor">&para;</a>
+						</h1>
+
+
+						<p>One of the main tasks in Societies Android development is
+							to link the visual aspect of an Android native component such as
+							an Android Service to its GUI. In normal Android development that
+							would entail creating one or more Android Activities utilising
+							native widgets that would interact with the other non-visual
+							Android components.</p>
+
+
+						<p>Societies decided to develop using HTML+CSS+JS utilising
+							PhoneGap instead and the link between the visual aspect of the
+							native component and the component itself is a bit more
+							complicated.</p>
+
+
+						<p>
+							<strong>Note</strong><br />In order to fully understand the
+							article it is assumed that the reader has a basic understanding
+							of HTML, JavaScript, JQuery/JQueryMobile and JSON.
+						</p>
+
+
+						<p>
+							<strong>Resources</strong>
+						</p>
+
+
+						<p>
+							Good introductory site for HTML with experimental areas: <a
+								class="external"
+								href="http://www.w3schools.com/html/default.asp">http://www.w3schools.com/html/default.asp</a><br />JavaScript
+							version: <a class="external"
+								href="http://www.w3schools.com/js/default.asp">http://www.w3schools.com/js/default.asp</a><br />Critique
+							and guide to avoiding problems in JavaScript: <a class="external"
+								href="http://shop.oreilly.com/product/9780596517748.do">http://shop.oreilly.com/product/9780596517748.do</a><br />JQuery
+							site: <a class="external" href="http://jquery.com/">http://jquery.com/</a><br />jQueryMobile
+							site: <a class="external" href="http://jquerymobile.com/">http://jquerymobile.com/</a><br />Free
+							online JQuery book although it may lag the current version: <a
+								class="external" href="http://jqfundamentals.com/">http://jqfundamentals.com/</a><br />JSON
+							site: <a class="external" href="http://www.json.org/">http://www.json.org/</a>
+						</p>
+
+
+						<a name="Main-Developer-Components"></a>
+						<h2>
+							Main Developer Components<a href="#Main-Developer-Components"
+								class="wiki-anchor">&para;</a>
+						</h2>
+
+
+						<a name="GUI-HTMLCSS-implemented-as-a-WebView"></a>
+						<h3>
+							GUI (HTML+CSS) implemented as a WebView<a
+								href="#GUI-HTMLCSS-implemented-as-a-WebView" class="wiki-anchor">&para;</a>
+						</h3>
+
+
+						<p>Essentially the GUI component is a fragment of HTML with
+							some custom JQueryMobile HTML element attributes. JQueryMobile
+							provides the base CSS and a lot of the styling can be customised
+							using their ThemeRoller and/or customising any aspect of the CSS.
+							JQuery/JQueryMobile also provide navigation, eventing, animation
+							and simplified access to the DOM as well as protecting the
+							developer from different browser quirks.</p>
+
+
+						<p>Example of a HTML page:</p>
+
+
+						<pre>
+&lt;div data-role="page" id="xmppDomainReg"&gt;
+
+    &lt;div data-role="header" data-theme="a" data-position="fixed"&gt;
+        &lt;p&gt;&lt;img src="societies-images/societies_xsmall.png" alt="Societies" align="top" /&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;Domain Registration&lt;/p&gt;
+    &lt;/div&gt;&lt;!-- /header --&gt;
+
+    &lt;div data-role="content" data-theme="a"&gt;    
+           &lt;div id= "xmppRegDialog"&gt;
+            &lt;div data-role="fieldcontain" &gt;
+                &lt;label for="regUsername"&gt;Username: &lt;/label&gt;
+                &lt;input type="text" name="regUserLogin" id="regUsername" value=""  /&gt;
+            &lt;/div&gt;
+
+            &lt;div data-role="fieldcontain" &gt;
+                &lt;label for="regUserpass"&gt;Password: &lt;/label&gt;
+                &lt;input type="password" name="regUserPass" id="regUserpass" value="" /&gt;
+            &lt;/div&gt;
+
+            &lt;div data-role="fieldcontain" &gt;
+                &lt;label for="repeatRegUserpass"&gt;Repeat Password: &lt;/label&gt;
+                &lt;input type="password" name="repeatRegUserPass" id="repeatRegUserpass" value="" /&gt;
+            &lt;/div&gt;
+
+            &lt;div&gt;
+                &lt;label for="domainServers"&gt;Societies Domain Servers&lt;/label&gt;
+
+                &lt;select name="domainServersList" id="domainServers"&gt;
+                      &lt;option value="societies.local" selected="selected"&gt;societies.local&lt;/option&gt;
+                      &lt;option value="societies.alternative"&gt;societies.alternative&lt;/option&gt;
+                &lt;/select&gt; 
+            &lt;/div&gt;
+
+            &lt;div data-role="collapsible"&gt;
+                &lt;h3&gt;SOCIETIES Terms&lt;/h3&gt;
+
+                &lt;label for="societiesTCs"&gt;SOCIETIES Terms of Use:&lt;/label&gt;
+                &lt;textarea name="textareaSocietiesTCs" id="societiesTCs"&gt;
+                Societies Terms &#38; Conditions. 1. You must be mad 2. Paranoid helps 3. Infinite time
+                &lt;/textarea&gt;
+            &lt;/div&gt;
+            &lt;div&gt;
+                &lt;label for="regSocietiesTerms"&gt;I agree with the Terms of Use for SOCIETIES software&lt;/label&gt;
+                &lt;input type="checkbox" name="regSocietiesTerms" id="regSocietiesTerms" class="custom" value="true"/&gt;
+            &lt;/div&gt;
+
+            &lt;div data-role="collapsible"&gt;
+                &lt;h3&gt;Identity Terms&lt;/h3&gt;
+                &lt;label for="domainTCs"&gt;Identity Domain Terms of Use:&lt;/label&gt;
+                &lt;textarea name="textareaDomainTCs" id="domainTCs"&gt;
+                Domain Server Terms &#38; Conditions 1. Exists 2. Free 3. Never goes missing
+                &lt;/textarea&gt;
+            &lt;/div&gt;
+
+            &lt;div&gt;
+                &lt;label for="regDomainTerms"&gt;I agree with the Terms of Use for the Identity Domain:&lt;/label&gt;
+                &lt;input type="checkbox" name="regDomainTerms" id="regDomainTerms" class="custom" /&gt;
+            &lt;/div&gt;
+
+            &lt;input id="registerXMPP" type="button" value="Register" data-icon="gear" data-inline="true" /&gt; 
+
+        &lt;/div&gt;
+    &lt;/div&gt;&lt;!-- /content --&gt;
+
+    &lt;div data-role="footer" data-theme="a" &gt;
+        &lt;a href="#main" data-role="button" data-icon="home" data-inline="true"&gt;home&lt;/a&gt;
+    &lt;/div&gt;&lt;!-- /footer --&gt;
+&lt;/div&gt;&lt;!-- /page --&gt;
+
+</pre>
+
+						<a name="PhoneGap-Plugin"></a>
+						<h3>
+							PhoneGap Plugin<a href="#PhoneGap-Plugin" class="wiki-anchor">&para;</a>
+						</h3>
+
+
+						<p>PhoneGap comes with a lot of functionality that allows a
+							device's resources to be accessed from JavaScript. It also has a
+							plugin extensibility model that allows custom plugins to be added
+							to its default API. The plugins are Plain Old Java Objects (POJO)
+							which extend the PhoneGap Plugin class. PhoneGap abstracts the
+							native Android JavaScript/Java bridge and uses JSON objects to
+							convey information from and to JavasScript. Invocations from
+							JavasScript to Java can be synchronous or asynchronous and the
+							latter mode is preferred to preserve GUI responsiveness.</p>
+
+
+						<p>These custom plugins must be registered with PhoneGap via
+							an XML configuration file and some boilerplate JavasScript code
+							before they can be used.</p>
+
+
+						<a name="Android-Native-Component"></a>
+						<h3>
+							Android Native Component<a href="#Android-Native-Component"
+								class="wiki-anchor">&para;</a>
+						</h3>
+
+
+						<p>The native components are normal Android Services,
+							Broadcast Receivers and Content Providers and are invoked using
+							normal Android procedures from the relevant PhoneGap plugin.
+							Results from the native components are conveyed either directly
+							or via intents back to the plugin and the plugin then uses the
+							PhoneGap JavaScript/Java bridge to convey results back to the
+							HTML page.</p>
+
+
+						<a name="Android-Communication-Components"></a>
+						<h2>
+							Android Communication Components<a
+								href="#Android-Communication-Components" class="wiki-anchor">&para;</a>
+						</h2>
+
+
+						<p>In the event that a native component wishes to invoke a
+							remote method, i.e. on another CSS node, or publish/receive
+							Pubsub events then the Android Communication components
+							(currently two discrete Android applications) must be used.</p>
+
+
+						<a name="Android-Agent"></a>
+						<h3>
+							Android Agent<a href="#Android-Agent" class="wiki-anchor">&para;</a>
+						</h3>
+
+
+						<p>This component handles the XMPP communication from and to
+							an Android node. In order to utilise this component the
+							AndroidAgentAPI jar must be linked into the target Android app.
+							The main interfaces provided by this component are similar to the
+							Virgo mode of operation.</p>
+
+
+						<a name="Android-PubSub"></a>
+						<h3>
+							Android PubSub<a href="#Android-PubSub" class="wiki-anchor">&para;</a>
+						</h3>
+
+
+						<p>This component leverages the Android Agent app and supplies
+							the inter-node eventing capability based on XMPP Pubsub.Again,
+							it's interfaces are similar to the Virgo implementation.</p>
+
+
+						<a name="Deployment-Details"></a>
+						<h3>
+							Deployment Details<a href="#Deployment-Details"
+								class="wiki-anchor">&para;</a>
+						</h3>
+
+
+						<p>
+							<strong>Note</strong>
+						</p>
+
+
+						<p>These Android apps must be deployed to the target
+							AVD/device prior to attempting to use the Android Societies App
+							or any other app that required inter-node communication and
+							Pubsub notification</p>
+
+
+						<p>$ mvn android:deploy</p>
+
+
+						<p>These apps are not run directly by a user but is in essence
+							are Android Services that wait for another app to bind to them.</p>
+
+
+						<a name="Android-Societies-App-Components"></a>
+						<h2>
+							Android Societies App Components<a
+								href="#Android-Societies-App-Components" class="wiki-anchor">&para;</a>
+						</h2>
+
+
+						<p>
+							Located in SOCIETIES-Platform/platform-infrastructure/client-frwk<br />h3.
+							Android Communication Components
+						</p>
+
+
+						<a name="Android-Agent"></a>
+						<h4>
+							Android Agent<a href="#Android-Agent" class="wiki-anchor">&para;</a>
+						</h4>
+
+
+						<p>
+							<strong>AndroidAgent:</strong> Main AndroidAgent app project (APK
+							artefact)
+						</p>
+
+
+						<p>
+							<strong>AndroidAgentApi:</strong> AndroidAgent API which needs to
+							included into Android apps that require inter-node communication
+							(JAR artefact)<br />
+							<strong>AndroidIPC:</strong> Handles the Android InterProcess
+							Communication (IPC) between the client app and the AndroidAgent
+							app (JAR artefact)
+						</p>
+
+
+						<p>
+							<strong>AndroidAgentTester:</strong> AndroidAgent app tester (APK
+							artefact)
+						</p>
+
+
+						<p>
+							<strong>AndroidPubsub:</strong> Main AndroidPubsub app project
+							(APK artefact)<br />
+							<strong>AndroidPubsubApi</strong>:AndroidPubsub API which needs
+							to included into Android apps that require inter-node
+							communication (JAR artefact)
+						</p>
+
+
+						<p>
+							<strong>AndroidPubsubTester:</strong> AndroidAgent app tester
+							(APK artefact)
+						</p>
+
+
+						<a name="Android-Societies-App-project"></a>
+						<h3>
+							Android Societies App project<a
+								href="#Android-Societies-App-project" class="wiki-anchor">&para;</a>
+						</h3>
+
+
+						<p>
+							<strong>MasterGUI:</strong> Main Android Societies app project
+							(APK artefact)
+						</p>
+
+
+						<a name="Android-Societies-App-APKLIBs"></a>
+						<h3>
+							Android Societies App APKLIBs<a
+								href="#Android-Societies-App-APKLIBs" class="wiki-anchor">&para;</a>
+						</h3>
+
+
+						<p>
+							<strong>SocietiesContentProvider:</strong> Android Societies app
+							cache (APKLIB artefact) <br />
+							<strong>SocietiesCSSManager:</strong> Android Societies app
+							CSSManager service (APKLIB artefact)<br />
+							<strong>SocietiesDeviceStatus:</strong> Android Societies Device
+							Status service (APKLIB artefact)<br />
+							<strong>SocietiesServiceMonitor:</strong> Android Societies app
+							Service Monitor service (APKLIB artefact)
+						</p>
+
+
+						<a name="Android-Configuration"></a>
+						<h3>
+							Android Configuration<a href="#Android-Configuration"
+								class="wiki-anchor">&para;</a>
+						</h3>
+
+
+						<p>
+							<strong>AndroidConfiguration:</strong> Android configuration
+							scripts and files
+						</p>
+
+
+						<a name="Example-APKLIB-main-and-test-project"></a>
+						<h3>
+							Example APKLIB main and test project<a
+								href="#Example-APKLIB-main-and-test-project" class="wiki-anchor">&para;</a>
+						</h3>
+
+
+						<p>
+							<strong>APKLIBContainer:</strong> Main APKLIB Android project
+							(APK artefact)<br />
+							<strong>TestAPKLIBContainer:</strong> APKLIB test project (APK
+							artefact)
+						</p>
+
+
+						<a name="Internal-38-External-APIs"></a>
+						<h3>
+							Internal &#38; External APIs<a href="#Internal-38-External-APIs"
+								class="wiki-anchor">&para;</a>
+						</h3>
+
+
+						<p>Located in SOCIETIES-Platform/api/android</p>
+
+
+						<p>
+							<strong>internal</strong>: Internal Android APIs (JAR artefact) <br />
+							<strong>external</strong>: External Android APIs (JAR artefact)
+						</p>
+
+
+						<a name="GUI-to-PhoneGap-Integration"></a>
+						<h2>
+							GUI to PhoneGap Integration<a href="#GUI-to-PhoneGap-Integration"
+								class="wiki-anchor">&para;</a>
+						</h2>
+
+
+						<p>
+							<a href="/projects/sp/wiki/Android_GUI_PhoneGap_Integration"
+								class="wiki-page">GUI to PhoneGap Integration</a>
+						</p>
+
+
+						<a
+							name="GUI-to-Native-Component-Integration-No-Inter-node-Communication"></a>
+						<h2>
+							GUI to Native Component Integration (No Inter-node Communication)<a
+								href="#GUI-to-Native-Component-Integration-No-Inter-node-Communication"
+								class="wiki-anchor">&para;</a>
+						</h2>
+
+
+						<p>
+							<a href="/projects/sp/wiki/GUI_to_Local_Native_Integration"
+								class="wiki-page">GUI to Native Component Integration (No
+								Inter-node Communication)</a>
+						</p>
+
+
+						<a
+							name="GUI-to-Native-Component-Integration-Inter-node-Communication"></a>
+						<h2>
+							GUI to Native Component Integration (Inter-node Communication)<a
+								href="#GUI-to-Native-Component-Integration-Inter-node-Communication"
+								class="wiki-anchor">&para;</a>
+						</h2>
+
+
+						<p>
+							<a href="/projects/sp/wiki/GUI_to_Remote_Native_Integration"
+								class="wiki-page">GUI to Native Component Integration
+								(Inter-node Communication)</a>
+						</p>
+
+
+						<a name="JavaScript-Anatomy"></a>
+						<h2>
+							JavaScript Anatomy<a href="#JavaScript-Anatomy"
+								class="wiki-anchor">&para;</a>
+						</h2>
+
+
+						<p>In the early years JavaScript was mingled in with HTML code
+							especially for inserting event code snippets. This is probably
+							the way that most people that have used JavaScript remember
+							working with it and the probably left with the impression that it
+							was a toy language for adding dynamic elements to HTML. The
+							Document Object Model (DOM) is acknowledged as being difficult to
+							work with although this was outside the scope of JavaScript. The
+							other main problem was cross-browser compatibility, i.e. how much
+							of the JavaScript syntax and behaviour was supported. JavaScript
+							frameworks such as JQuery were attempts to overcome these
+							obstacles and although plain HTML and JavaScript can be used
+							developers are generally more productive using the frameworks.</p>
+
+
+						<p>As a result, modern web development separates HTML from
+							JavaScript to reduce code pollution and allow specialisation
+							within the web technologies. The Societies app web development
+							follows this model and no JavaScript should appear in any of the
+							HTML.</p>
+
+
+						<p>
+							<strong>Note</strong><br />There may be changes in the future
+							but the main organisation principles will remain the same)
+						</p>
+
+
+						<p>There are currently two files within the MasterGUI project
+							listed under
+							/platform-infrastructure/client-frwk/MasterGUI/assets/www</p>
+
+
+						<ol>
+							<li>index.html (HTML code)</li>
+							<li>reference.js (JavaScript code)</li>
+						</ol>
+
+
+						<a name="Javascript-Organisation"></a>
+						<h3>
+							Javascript Organisation<a href="#Javascript-Organisation"
+								class="wiki-anchor">&para;</a>
+						</h3>
+
+
+						<p>There are three main areas within the reference.js file:</p>
+
+
+						<ol>
+							<li>PhoneGap plugin(s) registration</li>
+							<li>utility functions</li>
+							<li>JQuery code to attach utility functions to HTML element
+								events</li>
+						</ol>
+
+
+						<a name="JQuery-Event-Integration"></a>
+						<h4>
+							JQuery Event Integration<a href="#JQuery-Event-Integration"
+								class="wiki-anchor">&para;</a>
+						</h4>
+
+
+						<p>
+							As the JavaScript is not directly code with the corresponding
+							HTML elements, JQuery has the provision to attach relevant
+							JavaScript to its corresponding HTML element. This occurs even
+							before the normal <strong>onload</strong> event and any event
+							listeners should also be inserted here. The HTML element's <strong>id</strong>
+							attribute is normally used so it important that HTML id
+							attributes are unique.
+						</p>
+
+
+						<pre>
+jQuery(function() {
+    console.log("jQuery calls");
+
+    document.addEventListener("deviceready", onDeviceReady, false);
+
+    $('#toggleAcceleromter').click(function() {
+        toggleAccel();
+    });
+}
+</pre>
+
+						<a name="PhoneGap-Plugins"></a>
+						<h4>
+							PhoneGap Plugins<a href="#PhoneGap-Plugins" class="wiki-anchor">&para;</a>
+						</h4>
+
+
+						<p>
+							Apart from the declaration of the custom plugins to PhoneGap via
+							the plugins.xml file (/res/xml), some boilerplate JavaScript is
+							also required. This usually done when PhoneGap issues the <strong>deviceready</strong>
+							event:
+						</p>
+
+
+						<pre>
+        onDeviceReady: function() {
+            console.log("PhoneGap Loaded, Device Ready");
+
+            //Register any PhoneGap plugins here. Example shown for illustration
+
+            cordova.addConstructor(function() {
+                //Register the javascript plugin with PhoneGap
+                console.log("Register CoreServiceMonitorService plugin ");
+                cordova.addPlugin('CoreServiceMonitorService', Societies.CoreServiceMonitorService);
+
+                console.log("Register LocalCSSManagerService plugin ");
+                cordova.addPlugin('LocalCSSManagerService', Societies.LocalCSSManagerService);
+
+                console.log("Register DeviceStatus Service plugin ");
+                cordova.addPlugin("DeviceStatus", Societies.DeviceStatus);
+
+                console.log("Register Preferences plugin ");
+                cordova.addPlugin("AppPreferences", Societies.AppPreferences);
+
+            });
+
+            //handle the Android Back button 
+            //PhoneGap/ HTML views break semantics of Back button unless
+            //app intercepts button and simulates back button behaviour
+            document.addEventListener("backbutton", SocietiesGUI.backButtonHandler, false);
+
+            SocietiesGUI.displayConnectionInfo();
+
+        },
+</pre>
+
+						<a name="Utility-Functions"></a>
+						<h4>
+							Utility Functions<a href="#Utility-Functions" class="wiki-anchor">&para;</a>
+						</h4>
+
+
+						<p>These are normal JavaScript functions that carry out
+							various tasks and will form the bulk of the JavaScript code. For
+							example:</p>
+
+
+						<pre>
+        getCSSIdentity: function () {
+            function success(data) {
+                console.log("getCSSIdentity - successful: " + data.value);
+                jQuery("#username").val(data.value);
+            }
+
+            function failure(data) {
+                alert("getCSSIdentity - failure: " + data);
+            }
+
+            window.plugins.AppPreferences.getStringPrefValue(success, failure, "cssIdentity");
+
+        }
+</pre>
+
+						<a name="Namespaces"></a>
+						<h3>
+							Namespaces<a href="#Namespaces" class="wiki-anchor">&para;</a>
+						</h3>
+
+
+						<p>All variables not part of a function and functions are
+							added into a global variable/namespace in Javascript (in a
+							browser the global variable is window). This can cause major
+							problems especially as the JS code base grows as all sections of
+							code have access to global variables and can change any global
+							variable value. The function namespace becomes a problem when
+							other JS libraries are pulled in and function name collisions can
+							take place.</p>
+
+
+						<p>There are many strategies to counter this major weakness in
+							JS and a simple one being used in MasterGUI is to assign global
+							variables Societies and SocietiesGUI and using object literal
+							notation (OLN) define all variables and functions as part of
+							these global variables. For example, the function
+							disconnectFromLocalCSSManager is referred to as
+							SocietiesGUI.disconnectFromLocalCSSManager.</p>
+
+
+						<p>
+							Using some form of namespacing strategy is essential as it will
+							minimise global variable usage, make function calls easier to
+							navigate when reading code and make your code more portable. Read
+							here for some more namespace strategies - <a class="external"
+								href="http://javascriptweblog.wordpress.com/2010/12/07/namespacing-in-javascript/">http://javascriptweblog.wordpress.com/2010/12/07/namespacing-in-javascript/</a>
+						</p>
+					</div>
+				<div style="clear: both;"></div>
+				</div>
+			</div>
+
+			<div id="ajax-indicator" style="display: none;">
+				<span>Loading...</span>
+			</div>
+
+		</div>
+	</div>
+
+</body>
+</html>

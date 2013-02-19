@@ -3,8 +3,10 @@
 <RelativeLayout 
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
-	android:layout_height="fill_parent">
-
+	android:layout_height="fill_parent" >
+<!-- The button appears on a black bakground. To set a white background: 
+	android:background="@color/white" >
+ -->    
  		<TextView android:id="@+id/memberAddLabel" android:layout_width="fill_parent"
      		android:text="@string/memberAddHeading" 
      		android:textSize="20dip" android:textStyle="bold"
@@ -12,91 +14,25 @@
 			android:layout_height="wrap_content" 
 			android:paddingLeft="5dip"
 			android:paddingTop="2dip" android:paddingBottom="2dip" />
- 				
-	 	<TableLayout android:id="@+id/memberAddTable"
-			android:layout_width="fill_parent" android:layout_height="fill_parent"
-			xmlns:android="http://schemas.android.com/apk/res/android"
+ 		
+ 		<Button android:id="@+id/memberButton"
 			android:layout_below="@id/memberAddLabel"
-			android:background="@color/white"
-			>
-			
-			<TableRow>
-				<TextView android:id="@+id/editMemberAddNameLabel"
-					android:text="@string/memberNameLabel" android:textColor="@color/black"
-					android:textStyle="bold" android:width="100dp" 
-					android:layout_width="wrap_content" android:layout_height="wrap_content"
-					android:paddingLeft="2dip" android:paddingRight="2dip"
-					android:paddingTop="2dip" android:paddingBottom="2dip" 
-					/>
+			android:layout_width="wrap_content" android:layout_height="wrap_content"
+			android:text="@string/memberAddButton"
+			android:textColor="@color/black"
+		/>
+ 		
+ 		<ListView android:id="@android:id/list"
+	    	android:layout_below="@id/memberButton"
+	    	android:layout_width="fill_parent" android:layout_height="fill_parent"
+			android:background="@color/white" 
+			android:cacheColorHint="@color/white"/>
+	
+		<TextView android:id="@id/android:empty"
+ 	    	android:layout_below="@id/memberButton"
+	    	android:layout_width="fill_parent" android:layout_height="fill_parent" 
+	    	android:background="@color/white"
+			android:text="@string/memberAddNoPeople"/>
 
-				<!-- Not sure if android:text is needed below -->
-
-			<EditText
-				    android:id="@+id/editMemberAddName"
-				    android:text="@string/emptyText"
-				    android:hint="@string/memberNameHint" android:textColor="@color/black"
-				    android:background="@android:drawable/editbox_background"
-				    android:width="200dp" android:maxWidth="200dp"
-				    android:layout_width="fill_parent" android:layout_height="wrap_content"
-				    android:paddingRight="2dip"
-				    android:paddingTop="10dip" android:paddingBottom="10dip" 
-				    />
-				
-<!--			    android:layout_toRightOf="@id/editMemberNameLabel"  -->
-				
-			</TableRow>
-
-			<TableRow>
-
-				<TextView
-				    android:id="@+id/editMemberAddDescriptionLabel"
-				    android:text="@string/memberDescriptionLabel" android:textColor= "@color/black" 
-					android:textStyle="bold" android:width="100dp" 
-					android:layout_width="wrap_content" android:layout_height="wrap_content"
-					android:paddingLeft="2dip" android:paddingRight="2dip"
-					android:paddingTop="2dip" android:paddingBottom="2dip" 
-					/>
-<!-- 				android:layout_below="@id/editMemberNameLabel"  -->
-
-<!-- Not sure if android:text is needed below -->
-				<EditText
-				    android:id="@+id/editMemberAddDescription"
-				    android:text="@string/emptyText"
-				    android:hint= "@string/memberDescriptionHint" android:textColor="@color/black"
-				    android:background="@android:drawable/editbox_background"
-				    android:width="200dp"
-				    android:layout_width="fill_parent" android:layout_height="wrap_content"
-				    android:paddingRight="2dip"
-				    android:paddingTop="10dip" android:paddingBottom="10dip" />
-<!-- 
-android:maxWidth="140dp"
- -->
-<!-- 				    android:layout_toRightOf="@id/editPasswordLabel" -->				
-			</TableRow>
-
-			<TableRow>
-
-			    <TextView
-				    android:id="@+id/memberAddDummy1"
-				    android:text="@string/emptyText" android:textColor= "@color/black"
-					android:textStyle="bold" android:width="100dp" 
-					android:layout_width="wrap_content" android:layout_height="wrap_content"
-					android:paddingLeft="2dip" android:paddingRight="2dip"
-					android:paddingTop="2dip" android:paddingBottom="2dip" />					
-<!-- 				android:layout_below="@id/editPasswordLabel" -->
-
-				<Button
-				    android:id="@+id/memberAddButton" 
-				    android:layout_width="wrap_content" android:layout_height="wrap_content"
-				    android:text="@string/memberAddButton"
-				    android:textColor="@color/black" 
-				/>
-<!-- 				android:layout_toRightOf="@id/loginDummy1" -->
-
-<!-- The button style of the start page is not kept yet - see lgin_layout -->
-
-			</TableRow>
- 						
-		</TableLayout> 
  
-	</RelativeLayout>
+</RelativeLayout>

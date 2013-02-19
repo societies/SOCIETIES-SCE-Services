@@ -12,55 +12,59 @@
 			android:layout_height="wrap_content" 
 			android:paddingLeft="5dip"
 			android:paddingTop="2dip" android:paddingBottom="2dip" />
- 				
-	 	<TableLayout android:id="@+id/serviceDetailsTable"
+
+ 		<Button
+			android:id="@+id/serviceDetailsButton"
+		 	android:layout_below="@id/serviceDetailsLabel"
+			android:layout_width="wrap_content" android:layout_height="wrap_content"
+			android:text="@string/emptyText"
+			android:textColor="@color/black" 
+		/>
+ 						
+		<TableLayout android:id="@+id/serviceDetailsTable"
 			android:layout_width="fill_parent" android:layout_height="fill_parent"
 			xmlns:android="http://schemas.android.com/apk/res/android"
-			android:layout_below="@id/serviceDetailsLabel"
+			android:layout_below="@id/serviceDetailsButton"
 			android:background="@color/white"
+			android:shrinkColumns="1"
 			>
 			
 			<TableRow>
-				<TextView android:id="@+id/showServiceDetailsNameLabel"
+				<TextView android:id="@+id/serviceDetailsNameLabel"
 					android:text="@string/serviceNameLabel" android:textColor="@color/black"
 					android:textStyle="bold" android:width="100dp" 
 					android:layout_width="wrap_content" android:layout_height="wrap_content"
 					android:paddingLeft="2dip" android:paddingRight="2dip"
 					android:paddingTop="2dip" android:paddingBottom="2dip" 
 					/>
-
 				<!-- Not sure if android:text is needed below -->
 				<TextView
-				    android:id="@+id/showServiceDetailsName"
-				    android:text="@string/emptyText" android:textColor="@color/black"
+				    android:id="@+id/serviceDetailsName"
+				    android:textColor="@color/black"
 				    android:layout_width="wrap_content" android:layout_height="wrap_content"
 				    android:paddingLeft="2dip" android:paddingRight="2dip"
 				    android:paddingTop="10dip" android:paddingBottom="10dip" 
-				    />
-				
+				    />				
 			</TableRow>
 
 			<TableRow>
-
 				<TextView
-				    android:id="@+id/showServiceDetailsDescriptionLabel"
+				    android:id="@+id/serviceDetailsDescriptionLabel"
 				    android:text="@string/serviceDescriptionLabel" android:textColor= "@color/black" 
 					android:textStyle="bold" android:width="100dp" 
 					android:layout_width="wrap_content" android:layout_height="wrap_content"
 					android:paddingLeft="2dip" android:paddingRight="2dip"
 					android:paddingTop="2dip" android:paddingBottom="2dip" 
 					/>
-
 				<!-- Not sure if android:text is needed below -->
 				<TextView
-				    android:id="@+id/showServiceDetailsDescription"
-				    android:text="@string/emptyText" android:textColor="@color/black"
+				    android:id="@+id/serviceDetailsDescription"
+				    android:textColor="@color/black"
 				    android:layout_width="wrap_content" android:layout_height="wrap_content"
 				    android:paddingLeft="2dip" android:paddingRight="2dip"
 				    android:paddingTop="10dip" android:paddingBottom="10dip" />
 			</TableRow>
- 						
 		</TableLayout> 
- 
+		
 	</RelativeLayout>
  

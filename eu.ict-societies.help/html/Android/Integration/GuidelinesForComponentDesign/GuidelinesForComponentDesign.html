@@ -1,0 +1,306 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<title>Societies Platform - Guidelines for Component Design -
+	Societies Redmine</title>
+<meta name="description" content="Redmine" />
+<meta name="keywords" content="issue,bug,tracker" />
+<meta name="csrf-param" content="authenticity_token" />
+<meta name="csrf-token"
+	content="JMAfmcSzh9nqByMBkqpzD7RzT3uWZzg7qmINPKbMSTE=" />
+<link rel='shortcut icon' href='/favicon.ico?1310384844' />
+<link href="/themes/red-andy/stylesheets/application.css?1304377159"
+	media="all" rel="stylesheet" type="text/css" />
+
+<script src="/javascripts/prototype.js?1310384844"
+	type="text/javascript"></script>
+<script src="/javascripts/effects.js?1310384844" type="text/javascript"></script>
+<script src="/javascripts/dragdrop.js?1310384844" type="text/javascript"></script>
+<script src="/javascripts/controls.js?1310384844" type="text/javascript"></script>
+<script src="/javascripts/application.js?1310384844"
+	type="text/javascript"></script>
+<script type="text/javascript">
+	//         
+	Event
+			.observe(
+					window,
+					'load',
+					function() {
+						new WarnLeavingUnsaved(
+								'The current page contains unsaved text that will be lost if you leave this page.');
+					});
+	//
+</script>
+
+<!--[if IE 6]>
+    <style type="text/css">
+      * html body{ width: expression( document.documentElement.clientWidth < 900 ? '900px' : '100%' ); }
+      body {behavior: url(/stylesheets/csshover.htc?1310384844);}
+    </style>
+<![endif]-->
+<link rel="stylesheet"
+	href="/plugin_assets/redmine_backlogs/javascripts/jquery/jquery.jqplot/jquery.jqplot.min.css"
+	type="text/css" />
+
+<script
+	src="/plugin_assets/redmine_backlogs/javascripts/jquery/jquery-1.4.2.min.js?1318533980"
+	type="text/javascript"></script>
+<script
+	src="/plugin_assets/redmine_backlogs/javascripts/jquery/jquery-ui-1.8rc3.custom.min.js?1318533980"
+	type="text/javascript"></script>
+<script
+	src="/plugin_assets/redmine_backlogs/javascripts/jquery/jquery.jeditable.mini.js?1318533980"
+	type="text/javascript"></script>
+<script
+	src="/plugin_assets/redmine_backlogs/javascripts/jquery/jquery.cookie.js?1318533980"
+	type="text/javascript"></script>
+<!--[if IE]><script src="/plugin_assets/redmine_backlogs/javascripts/jquery/jquery.jqplot/excanvas.js?1318533980" type="text/javascript"></script><![endif]-->
+<script
+	src="/plugin_assets/redmine_backlogs/javascripts/jquery/jquery.jqplot/jquery.jqplot.js?1318533980"
+	type="text/javascript"></script>
+<script
+	src="/plugin_assets/redmine_backlogs/javascripts/jquery/jquery.jqplot/plugins/jqplot.highlighter.js?1318533980"
+	type="text/javascript"></script>
+<script
+	src="/plugin_assets/redmine_backlogs/javascripts/jquery/jquery.jqplot/plugins/jqplot.canvasTextRenderer.min.js?1318533980"
+	type="text/javascript"></script>
+<script
+	src="/plugin_assets/redmine_backlogs/javascripts/jquery/jquery.jqplot/plugins/jqplot.canvasAxisTickRenderer.min.js?1318533980"
+	type="text/javascript"></script>
+<script
+	src="/plugin_assets/redmine_backlogs/javascripts/jquery/jquery.jqplot/plugins/jqplot.enhancedLegendRenderer.min.js?1318533980"
+	type="text/javascript"></script>
+
+<script
+	src="/plugin_assets/redmine_backlogs/javascripts/common.js?1318533980"
+	type="text/javascript"></script>
+<script
+	src="/plugin_assets/redmine_backlogs/javascripts/burndown.js?1318533980"
+	type="text/javascript"></script>
+
+
+<!-- page specific tags -->
+
+<link href="/stylesheets/scm.css?1310384844" media="screen"
+	rel="stylesheet" type="text/css" />
+</head>
+<body class="theme-Red-andy controller-wiki action-show">
+	<div id="wrapper">
+		<div id="wrapper2">
+
+
+			<div id="header">
+
+
+			</div>
+
+			<div class="" id="main">
+
+
+				<div id="content">
+
+
+					<div class="wiki">
+						<a name="Design-Decisions"></a>
+						<h1>
+							Design Decisions<a href="#Design-Decisions" class="wiki-anchor">&para;</a>
+						</h1>
+
+
+						<p>The various Android Societies components will require some
+							GUI/user interaction. For example, CSS registration, activity
+							feeds, User interaction Monitor etc. Rather than having each
+							component create its own GUI activity(s), it is proposed that a
+							single GUI will be created to cover all aspects of user
+							interaction with the Societies Core Services (WP4) and the
+							various WP5 functionalities layered on top. This design decision
+							will allow the the following:</p>
+
+
+						<ul>
+							<li>A single integrated GUI to control and allow user
+								interaction with the Societies Android client</li>
+							<li>Encourage a consistent user experience</li>
+							<li>Allow steamlined user interaction flows to be developed</li>
+							<li>Encourage consistent user notifications and dialogs</li>
+						</ul>
+
+
+						<p>The decision has also been made to use Web-based activities
+							rather than native-based activities in conjunction with PhoneGap
+							and JQueryMobile. This will mean that the screens will be
+							composed of HTML5+CSS with JQueryMobile attributes and the use of
+							Javascript to add and control dynamic content. Some benefits that
+							flow from this set of tools are:</p>
+
+
+						<ul>
+							<li>Allow for the porting of the Societies Light Client to
+								other potential mobile operating systems and a future date
+								leveraging PhoneGap</li>
+							<li>JQueryMobile will provide a lot of the page navigation,
+								AJAX and user events functionality along with page animation
+								effects, theming and cross browser consistency</li>
+							<li>PhoneGap provides an existing Javascript API to access
+								device resources such as addresss books, sensors and
+								connectivity with an extensible plugin architecture</li>
+							<li>Non-programming web designer personnel can work on the
+								HTML+CSS aspects of the client</li>
+							<li>Developers can concentrate on the Javascript and
+								Javacsript-Native PhoneGap plugins (Java classes) to extend the
+								PhoneGap API and provide additional Societies functionality</li>
+							<li>The HTML+CSS+Javascript code base can be used for
+								non-Android browser-based development with minimal changes</li>
+						</ul>
+
+
+						<a name="Guidelines-for-Component-Design"></a>
+						<h1>
+							Guidelines for Component Design<a
+								href="#Guidelines-for-Component-Design" class="wiki-anchor">&para;</a>
+						</h1>
+
+
+						<a name="Running-the-GUI-application"></a>
+						<h2>
+							Running the GUI application<a href="#Running-the-GUI-application"
+								class="wiki-anchor">&para;</a>
+						</h2>
+
+
+						There are three ways of getting a Android GUI application working:
+						<ul>
+							<li><strong>Browser</strong>: As the content is HTML based,
+								point any browser at your local Git repository using a localised
+								version of the following URI: "file:///&lt;local
+								path&gt;/SOCIETIES-Platform/platform-infrastructure/client-frwk/MasterGUI/assets/www/index.html".
+								The main page of the application should appear.</li>
+							<li><strong>Android Emulator</strong>: This option will
+								require the installation of the Android SDK, the creation of an
+								Android Virtual Device of the name "Test22Device" and supporting
+								Android 2.2. Compile the MasterGui project using Maven or even
+								easier, Eclipse, start the relevant AVD, deploy the application
+								and run the app. The running of the application can be slow and
+								HTML pages look longer than expected.</li>
+							<li><strong>Android Device</strong>: This option is similar
+								to the above option except that the application is deployed and
+								run on an actual Android device that is at least Android 2.2.
+								This option is the best for reviewing the final build in terms
+								of speed, layout and whether there are any phone specific
+								browser problems.</li>
+						</ul>
+
+
+						<a name="What-is-PhoneGap"></a>
+						<h2>
+							What is PhoneGap?<a href="#What-is-PhoneGap" class="wiki-anchor">&para;</a>
+						</h2>
+
+
+						<p>PhoneGap is a platform for building mobile application
+							using Web technologies: HTML, CSS and Javascript. Mobile
+							platforms like Android, iPhone or Blackberry are not ready yet to
+							manage such application, that is why PhoneGap is filling in the
+							gap by providing a plugin system to use native call through
+							Javascript.</p>
+
+
+						<p>To resume, PhoneGap is providing:</p>
+
+
+						<ul>
+							<li>a <strong>PhoneGap Builder</strong>: a way to embed an
+								HTML, CSS, Javascript web application into a mobile application
+								(Android, iPhone, Blackberry and others)
+							</li>
+							<li>a <strong>PhoneGap API</strong>: native PhoneGap plugins
+								(see next point) to access:
+								<ul>
+									<li>Javascript standard APIs not yet available on mobile
+										platform (e.g. HTML5 WebSocket , ...)</li>
+									<li>well-known controls and actions on mobile device not
+										(totally) yet defined as standards (e.g. access the contact
+										list, make a call, ...)</li>
+								</ul>
+							</li>
+							<li>a <strong>PhoneGap Plugin system</strong> to enlarge
+								Javascript possibilities by using native call
+								<ul>
+									<li>a set of PhoneGap plugin is already available: <a
+										href="https://github.com/phonegap/phonegap-plugins"
+										class="external">PhoneGap plugins list</a></li>
+								</ul></li>
+						</ul>
+
+
+						<p>PhoneGap is an open source project recently lead by Adobe
+							and incubated by the Apache Cordova project . “PhoneGap” may be
+							renamed “Cordova” in a near future.</p>
+
+
+						<a name="Resources"></a>
+						<h3>
+							Resources<a href="#Resources" class="wiki-anchor">&para;</a>
+						</h3>
+
+
+						<ul>
+							<li>PhoneGap Get Started Guide: <a class="external"
+								href="http://phonegap.com/start/">http://phonegap.com/start/</a></li>
+							<li>PhoneGap Wiki: <a class="external"
+								href="http://wiki.phonegap.com/w/page/16494772/FrontPage">http://wiki.phonegap.com/w/page/16494772/FrontPage</a>
+								<ul>
+									<li>PhoneGap Plugins Creation / Installation: <a
+										class="external"
+										href="http://wiki.phonegap.com/w/page/36752779/PhoneGap%20Plugins">http://wiki.phonegap.com/w/page/36752779/PhoneGap%20Plugins</a></li>
+									<li>Android PhoneGap Plugins Creation / Installation: <a
+										class="external"
+										href="http://wiki.phonegap.com/w/page/36753494/How%20to%20Create%20a%20PhoneGap%20Plugin%20for%20Android">http://wiki.phonegap.com/w/page/36753494/How%20to%20Create%20a%20PhoneGap%20Plugin%20for%20Android</a></li>
+								</ul>
+							</li>
+							<li>Custom PhoneGap Plugin List: <a class="external"
+								href="https://github.com/phonegap/phonegap-plugins">https://github.com/phonegap/phonegap-plugins</a></li>
+							<li>PhoneGap Google Group (very active): <a class="external"
+								href="https://groups.google.com/forum/?fromgroups#!forum/phonegap">https://groups.google.com/forum/?fromgroups#!forum/phonegap</a>
+							</li>
+							<li>Some PhoneGap Tutorials: <a class="external"
+								href="http://www.mobiledevelopersolutions.com/home/start/twominutetutorials">http://www.mobiledevelopersolutions.com/home/start/twominutetutorials</a></li>
+						</ul>
+
+
+						<a name="Tutorials"></a>
+						<h2>
+							Tutorials<a href="#Tutorials" class="wiki-anchor">&para;</a>
+						</h2>
+
+
+						<ul>
+							<li><a
+								href="/projects/sp/wiki/How_to_Create_a_PhoneGap_Plugin"
+								class="wiki-page">How to Create a PhoneGap Plugin</a></li>
+							<li><a
+								href="/projects/sp/wiki/Tips_to_Manage_the_JSON_Format"
+								class="wiki-page">Tips to Manage the JSON Format</a> (using
+								Javascript, Java and Android)</li>
+						</ul>
+					</div>
+
+
+
+
+
+					<div style="clear: both;"></div>
+				</div>
+			</div>
+
+			<div id="ajax-indicator" style="display: none;">
+				<span>Loading...</span>
+			</div>
+
+
+		</div>
+	</div>
+
+</body>
+</html>

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:osgi="http://www.springframework.org/schema/osgi"
+  xmlns:osgix="http://www.springframework.org/schema/osgi-compendium"
+  xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+                      http://www.springframework.org/schema/osgi http://www.springframework.org/schema/osgi/spring-osgi.xsd
+                      	http://www.springframework.org/schema/osgi-compendium http://www.springframework.org/schema/osgi-compendium/spring-osgi-compendium-1.2.xsd">
+	
+
+  <!-- definitions using elements of the osgi namespace can be included
+       in this file. There is no requirement to keep these definitions
+       in a separate file if you do not want to. The rationale for 
+       keeping these definitions separate is to facilitate integration
+       testing of the bundle outside of an OSGi container -->
+	
+	<osgi:reference id="commManager" interface="org.societies.api.comm.xmpp.interfaces.ICommManager"/> 
+	<osgi:reference id="ctxBroker" interface="org.societies.api.context.broker.ICtxBroker" />
+	<osgi:reference id="cisManager" interface="org.societies.api.cis.management.ICisManager" />
+	<osgi:reference id="cisDirectoryClient" interface="org.societies.api.cis.directory.ICisDirectoryRemote" />
+	<osgi:reference id="uam" interface="org.societies.api.useragent.monitoring.IUserActionMonitor"/>
+	<osgi:reference id="persoMgr" interface="org.societies.api.personalisation.mgmt.IPersonalisationManager"/>
+	<osgi:reference id="serviceMgmt" interface="org.societies.api.services.IServices"/>
+	
+	 
+	  <osgix:cm-properties id="networkclientConfig" persistent-id="networkclient"> 
+       	<prop key="networkingserver">netzone.societies.local</prop>
+    </osgix:cm-properties>
+    
+	<osgi:service ref="NZoneClient">
+		<osgi:interfaces>
+	        <value>org.societies.api.ext3p.nzone.client.INZoneClient</value>
+	        <value>org.societies.api.personalisation.model.IActionConsumer</value>
+	    </osgi:interfaces>
+	    
+       <osgi:service-properties>
+          <entry key="TargetPlatform" value="SOCIETIES" />
+          <entry key="ServiceProvider" value="ICT-SOCIETIES" />
+          <entry key="ServiceMetaModel" value-ref="serMetamodel" />
+      </osgi:service-properties>
+ 	</osgi:service>
+  	
+	<bean id="serMetamodel" class="org.societies.api.schema.servicelifecycle.model.Service">
+     	<property name="authorSignature" value="mmannion" />
+     	<property name="serviceDescription" value="Networking Zone - Client" />
+     	<property name="serviceName" value="NZoneClient" />
+     	<property name="serviceType" value="THIRD_PARTY_CLIENT" />
+     	<property name="serviceCategory" value="media" />
+     	<property name="privacyPolicy" value="privacy-policy.xml" />
+ 	</bean>
+ 	
+</beans>

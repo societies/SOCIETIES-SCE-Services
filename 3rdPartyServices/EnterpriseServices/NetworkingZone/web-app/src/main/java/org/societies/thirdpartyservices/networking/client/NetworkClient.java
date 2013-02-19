@@ -57,6 +57,7 @@ import org.societies.api.ext3p.networking.UserDetails;
 import org.societies.api.ext3p.networking.ZoneDetails;
 import org.societies.api.ext3p.networking.ZoneEvent;
 
+import org.societies.api.identity.IIdentity;
 import org.societies.api.identity.Requestor;
 import org.societies.api.internal.css.management.ICSSLocalManager;
 import org.societies.api.schema.cis.community.Community;
@@ -70,13 +71,24 @@ import org.societies.api.schema.css.directory.CssAdvertisementRecord;
 import org.societies.activity.PersistedActivityFeed;
 
 
+import org.societies.api.personalisation.mgmt.IPersonalisationManager;
+import org.societies.api.personalisation.model.Action;
+import org.societies.api.personalisation.model.IAction;
+import org.societies.api.personalisation.model.IActionConsumer;
+import org.societies.api.schema.servicelifecycle.model.ServiceResourceIdentifier;
+import org.societies.api.services.IServices;
+import org.societies.api.services.ServiceMgmtEvent;
+import org.societies.api.services.ServiceMgmtEventType;
+import org.societies.api.useragent.monitoring.IUserActionMonitor;
 
+public class NetworkClient implements IActionConsumer
 
-public class NetworkClient {
+{
 
 	private static Logger log = LoggerFactory.getLogger(NetworkClient.class);
 
 	String userID;
+	IIdentity userIdentity;
 	UserDetails myUserDetails;
 	private ICis netCis;
 	private ICis currentZoneCis;
@@ -110,11 +122,32 @@ public class NetworkClient {
 	public ICisManager cisManager;
 	private ICSSLocalManager cssManager;
 	public ICisDirectoryRemote cisDirectoryClient;
+	private IUserActionMonitor uam; 
+	public IPersonalisationManager getPersoMgr() {
+		return persoMgr;
+	}
+
+
+	IPersonalisationManager persoMgr;
+	IServices serviceMgmt;
+	
+	public IServices getServiceMgmt() {
+		return serviceMgmt;
+	}
+
+
 	public boolean bInitialise = false;
+	
+	ServiceResourceIdentifier myServiceID;
+	String myServiceName;
+	String myServiceType;
 
 	
 	public NetworkClient()  {
 		log.info("NetworkClient bundle instantiated.");
+		
+		myServiceName = "networkClient";
+		myServiceType = "webapp";
 		
 	}
 		
@@ -123,6 +156,8 @@ public class NetworkClient {
 	{
 		if (requestor == null)
 			requestor = new Requestor(getCommManager().getIdManager().getThisNetworkNode());
+		
+		userIdentity = getCommManager().getIdManager().getThisNetworkNode();
 		
 		getContextAtributeNetUser();
 		getContextCssRecordEntries();
@@ -265,6 +300,7 @@ public class NetworkClient {
 	
 	public UserDetails getMyDetails(){
 		
+	//	recordActionShowProfile();
 		if (myUserDetails == null)
 		{
 			myUserDetails = getCommsClient().getMyDetails();
@@ -929,6 +965,90 @@ public class NetworkClient {
 
 	}
 	
+	/**
+	 * @return the uam
+	 */
+	public IUserActionMonitor getUam() {
+		return uam;
+	}
+	/**
+	 * @param uam the uam to set
+	 */
+	public void setUam(IUserActionMonitor uam) {
+		this.uam = uam;
+	}
+	
+	
+	public void setPersoMgr(IPersonalisationManager persoMgr){
+		this.persoMgr = persoMgr;
+	}
+
+	public void setServiceMgmt(IServices serviceMgmt){
+		this.serviceMgmt = serviceMgmt;
+	}
+	
+	
+	/*
+	 * These methods are called by PersonalisationManager and User Agent
+	 * (non-Javadoc)
+	 * @see org.societies.api.personalisation.model.IActionConsumer#getServiceIdentifier()
+	 */
+	@Override
+	public ServiceResourceIdentifier getServiceIdentifier() {
+		return myServiceID;
+	}
+
+	@Override
+	public String getServiceType() {
+		return myServiceType;
+	}
+
+
+	@Override
+	public List<String> getServiceTypes() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
+	@Override
+	public boolean setIAction(IIdentity arg0, IAction arg1) {
+		log.info("setIAction called ");
+		// TODO Auto-generated method stub
+		return false;
+	}
 				
+	
+	public void recordActionShowProfile()
+	{
+		String parameterName = new String("nzuseraction");
+		String value = new String("showprofile");
+		
+		if (myServiceID == null )
+			myServiceID = serviceMgmt.getMyServiceId(this.getClass());
+		
+
+		//create action object and send to uam
+		IAction action = new Action(myServiceID, myServiceType, parameterName, value);
+		log.info("recordActionShowProfile : Sending action to UAM my serviceID class: "+ myServiceID.getClass());
+		log.info("recordActionShowProfile : Sending action to UAM my serviceID getServiceInstanceIdentifier: "+ myServiceID.getServiceInstanceIdentifier());
+		
+		log.info("recordActionShowProfile : Sending action to UAM: "+action.toString());
+		uam.monitor(userIdentity, action);
+	}
+	
+	public void recordActionEnterZone()
+	{
+		String parameterName = new String("nzuseraction");
+		String value = new String("enterzone");
+		
+		if (myServiceID == null )
+			myServiceID = serviceMgmt.getMyServiceId(this.getClass());
+		//create action object and send to uam
+		IAction action = new Action(myServiceID, myServiceType, parameterName, value);
+		log.info("recordActionEnterZone : Sending action to UAM my serviceID: "+ myServiceID);
+		log.info("recordActionEnterZone : Sending action to UAM: "+action.toString());
+		uam.monitor(userIdentity, action);
+	}
 	
 }

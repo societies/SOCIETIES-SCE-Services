@@ -26,6 +26,8 @@ package org.societies.context.mock.externalBroker;
 
 import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
@@ -33,16 +35,15 @@ import java.util.concurrent.ExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.societies.api.cis.attributes.MembershipCriteria;
+import org.societies.api.cis.management.ICis;
 import org.societies.api.cis.management.ICisManager;
 import org.societies.api.cis.management.ICisOwned;
 import org.societies.api.comm.xmpp.exceptions.CommunicationException;
 import org.societies.api.comm.xmpp.interfaces.ICommManager;
 import org.societies.api.context.CtxException;
-import org.societies.api.context.broker.ICtxBroker;
 import org.societies.api.context.model.CommunityCtxEntity;
 import org.societies.api.context.model.CtxAttribute;
 import org.societies.api.context.model.CtxAttributeTypes;
-import org.societies.api.context.model.CtxEntity;
 import org.societies.api.context.model.CtxEntityTypes;
 import org.societies.api.context.model.IndividualCtxEntity;
 import org.societies.api.identity.IIdentity;
@@ -66,7 +67,6 @@ public class ExternalCtxBrokerMock 	{
 
 
 	/** The 3P Context Broker service reference. */
-	private ICtxBroker externalCtxBroker;
 	private ICommManager commMgrService;
 	private org.societies.api.internal.context.broker.ICtxBroker internalCtxBroker;
 	private IIdentity cssOwnerId;
@@ -82,11 +82,10 @@ public class ExternalCtxBrokerMock 	{
 
 
 	@Autowired(required=true)
-	public ExternalCtxBrokerMock(ICtxBroker externalCtxBroker,org.societies.api.internal.context.broker.ICtxBroker internalCtxBroker , ICommManager commMgr,ICisManager cisManager) throws Exception {
+	public ExternalCtxBrokerMock(org.societies.api.internal.context.broker.ICtxBroker internalCtxBroker , ICommManager commMgr,ICisManager cisManager) throws Exception {
 
 		LOG.info("*** " + this.getClass() + " instantiated");
 
-		this.externalCtxBroker = externalCtxBroker;
 		this.internalCtxBroker = internalCtxBroker;
 		this.commMgrService = commMgr;
 
@@ -101,17 +100,30 @@ public class ExternalCtxBrokerMock 	{
 		LOG.info("*** requestor = " + this.requestor);
 
 		Hashtable<String,MembershipCriteria> cisCriteria = new Hashtable<String,MembershipCriteria>();
-		try {
-			cisOwned = cisManager.createCis("testCIS-CollabTools", "cisType", cisCriteria, "CSCW CIS").get();
-			LOG.info("*** Cis created = testCIS-CollabTools ");
-
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ExecutionException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		
+//		try {
+//			//Deleting CIS-CollabTools if already exist 
+//			List<ICis> listCIS = cisManager.searchCisByName("CIS-CollabTools");
+////			LOG.info("*** listCIS: "+listCIS.size());
+//			Iterator<ICis> itr = listCIS.iterator();
+//			while (itr.hasNext()) {
+//				String cisToRemove = itr.next().getCisId();
+//				LOG.info("*** Deleting CIS-CollabTools = " + cisToRemove);
+//				cisManager.deleteCis(cisToRemove);
+//			}
+//			
+//			
+			//Creating CIS-CollabTools
+			cisOwned = cisManager.createCis("CIS-CollabTools"+new Random().nextInt(100), "Test", cisCriteria, "CSCW CIS").get();
+			LOG.info("*** Cis created = CIS-CollabTools ");
+//
+//		} catch (InterruptedException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		} catch (ExecutionException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
 		
 		LOG.info("*** cisOwned " +cisOwned);
 		LOG.info("*** cisOwned.getCisId() " +cisOwned.getCisId());
@@ -130,12 +142,7 @@ public class ExternalCtxBrokerMock 	{
 		} catch (CommunicationException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
-//		
-//		this.ca3pService.registerForContextChanges(cisID);
-//
-//		this.ca3pService.retrieveLookupCommunityEntAttributes(cisID);
-		
+		}		
 	
 		new Thread()
 		{
@@ -258,22 +265,8 @@ public class ExternalCtxBrokerMock 	{
 		CtxAttribute locationAttr = this.internalCtxBroker.createAttribute(indiEnt.getId(), CtxAttributeTypes.LOCATION_SYMBOLIC).get();
 		locationAttr.setStringValue(getRandomLocation());
 		this.internalCtxBroker.update(locationAttr);
-//		try {
-//			this.ca3pService.getCtxSub().setContext("location", locationAttr.getStringValue(), "person#"+numberPerson+"@societies.local");
-//		} catch (Exception e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
 	
 		LOG.info("*** Change location for person#"+numberPerson+": "+locationAttr.getStringValue());
-		
-//		CtxEntity retrievedCtxEntity = (CtxEntity) this.internalCtxBroker.retrieve(requestor, member).get();
-//		Set<CtxAttribute> location = retrievedCtxEntity.getAttributes(CtxAttributeTypes.LOCATION_SYMBOLIC);
-//		CtxAttribute ctxAttr = (CtxAttribute) this.ctxBroker.retrieve(requestorService, location.iterator().next().getId()).get();
-//
-//		ctxAttr.setStringValue("newDeviceLocation");
-//		ctxAttr = (CtxAttribute) this.ctxBroker.update(requestorService, ctxAttr).get();
-
 	}
 
 	/**
@@ -282,62 +275,5 @@ public class ExternalCtxBrokerMock 	{
 	private static String getRandomLocation() {
 		final String[] location={"Work","Home","Gym"};
 		return location[r.nextInt(3)];
-	}
-	
-
-
-//	public void createCtx() {
-//		
-//		Set<CtxEntityIdentifier> ctxMembersIDs = communityEntity.getMembers();
-//		Iterator<CtxEntityIdentifier> members = ctxMembersIDs.iterator();
-//		
-//		while(members.hasNext()){
-//			CtxEntityIdentifier member = members.next();
-//			// 1b. Register listener by specifying the context attribute scope and type
-//			CtxEntity retrievedCtxEntity = (CtxEntity) this.externalCtxBroker.retrieve(requestor, member).get();
-//			Set<CtxAttribute> ctxAtrb = retrievedCtxEntity.getAttributes(CtxAttributeTypes.LOCATION_SYMBOLIC);
-//			locationAttr = (CtxAttribute) this.externalCtxBroker.retrieve(requestor, ctxAtrb.iterator().next().getId()).get();
-//			
-//			retrievedCtxEntity = (CtxEntity) this.externalCtxBroker.retrieve(requestor, member).get();
-//			ctxAtrb = retrievedCtxEntity.getAttributes(CtxAttributeTypes.INTERESTS);
-//			interestsAttr1 = (CtxAttribute) this.externalCtxBroker.retrieve(requestor, ctxAtrb.iterator().next().getId()).get();
-//			
-//			retrievedCtxEntity = (CtxEntity) this.externalCtxBroker.retrieve(requestor, member).get();
-//			ctxAtrb = retrievedCtxEntity.getAttributes(CtxAttributeTypes.INTERESTS);
-//			interestsAttr2 = (CtxAttribute) this.externalCtxBroker.retrieve(requestor, ctxAtrb.iterator().next().getId()).get();
-//			
-//			retrievedCtxEntity = (CtxEntity) this.externalCtxBroker.retrieve(requestor, member).get();
-//			ctxAtrb = retrievedCtxEntity.getAttributes(CtxAttributeTypes.INTERESTS);
-//			interestsAttr3 = (CtxAttribute) this.externalCtxBroker.retrieve(requestor, ctxAtrb.iterator().next().getId()).get();
-//			
-//			retrievedCtxEntity = (CtxEntity) this.externalCtxBroker.retrieve(requestor, member).get();
-//			ctxAtrb = retrievedCtxEntity.getAttributes(CtxAttributeTypes.NAME);
-//			locationAttr = (CtxAttribute) this.externalCtxBroker.retrieve(requestor, ctxAtrb.iterator().next().getId()).get();
-//			
-//			retrievedCtxEntity = (CtxEntity) this.externalCtxBroker.retrieve(requestor, member).get();
-//			ctxAtrb = retrievedCtxEntity.getAttributes(CtxAttributeTypes.ABOUT);
-//			aboutMeAttr = (CtxAttribute) this.externalCtxBroker.retrieve(requestor, ctxAtrb.iterator().next().getId()).get();
-//			
-//			retrievedCtxEntity = (CtxEntity) this.externalCtxBroker.retrieve(requestor, member).get();
-//			ctxAtrb = retrievedCtxEntity.getAttributes(CtxAttributeTypes.STATUS);
-//			statusAttr = (CtxAttribute) this.externalCtxBroker.retrieve(requestor, ctxAtrb.iterator().next().getId()).get();
-//			
-//
-//			locationAttr = (CtxAttribute) this.externalCtxBroker.update(requestor, locationAttr).get();
-//
-//			interestsAttr1 = (CtxAttribute) this.externalCtxBroker.update(requestor, interestsAttr1).get();
-//
-//			interestsAttr2 = (CtxAttribute) this.externalCtxBroker.update(requestor, interestsAttr2).get();
-//			
-//			interestsAttr3 = (CtxAttribute) this.externalCtxBroker.update(requestor, interestsAttr3).get();
-//
-//			aboutMeAttr = (CtxAttribute) this.externalCtxBroker.update(requestor, aboutMeAttr).get();
-//			
-//			statusAttr = (CtxAttribute) this.externalCtxBroker.update(requestor, statusAttr).get();
-//		}
-//		
-//	}
-
-	
-	
+	}	
 }
