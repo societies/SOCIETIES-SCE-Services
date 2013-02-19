@@ -125,6 +125,8 @@ public class WantToHelp implements IWantToHelp, ActionListener {
 
 		// otherwise it does not startup in VIRGO
 		UIManager.put("ClassLoader", ClassLoader.getSystemClassLoader());
+
+		LOG.info("*** commMgr="+commMgr);
 		
 		frame = new JFrame("IWantToHelp");
 		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -155,10 +157,13 @@ public class WantToHelp implements IWantToHelp, ActionListener {
 		panel.add(subscribe);
 		panel.add(unsubscribe);
 	    panel.add(feedbackPanel);
+
+		LOG.info("*** contextBroker="+externalCtxBroker);
 	}
 	
 	@PostConstruct
 	public void activate() throws Exception {
+		LOG.info("*** " + this.getClass() + " activated");
 		feedbackTextArea.append("on activate -> WantToHelp service started\n");
 
 		pullThread = new PullThread();

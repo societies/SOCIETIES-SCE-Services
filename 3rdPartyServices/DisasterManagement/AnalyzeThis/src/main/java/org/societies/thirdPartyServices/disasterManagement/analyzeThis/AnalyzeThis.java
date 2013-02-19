@@ -103,16 +103,8 @@ public class AnalyzeThis implements IAnalyzeThis, ActionListener {
 		
 		xmlRpcClient_AT = new XMLRPCClient_AT();
 
-		String xmppDomain = commMgr.getIdManager().getThisNetworkNode().getDomain();
-		int userNumber = Integer.parseInt(xmppDomain.substring(4, xmppDomain.indexOf('.'))); // subdomain always to start with "user" - i.e. 4 digits
-		int port = BASIS_PORT + userNumber;
+		LOG.info("*** commMgr="+commMgr);
 		
-    	BasicConfigurator.configure();
-        try {
-			xmlRpcServer = new XMLRPCServer_AT(port);
-		} catch (Exception e) {
-			LOG.error(e.getMessage());
-		}
 		
 		
 		// otherwise it does not startup in VIRGO
@@ -157,6 +149,17 @@ public class AnalyzeThis implements IAnalyzeThis, ActionListener {
 	public void activate() throws Exception {
 		feedbackTextArea.append("on activate -> AnalyzeThis service started\n");
 
+		String xmppDomain = commMgr.getIdManager().getThisNetworkNode().getDomain();
+		int userNumber = Integer.parseInt(xmppDomain.substring(4, xmppDomain.indexOf('.'))); // subdomain always to start with "user" - i.e. 4 digits
+		int port = BASIS_PORT + userNumber;
+		
+    	BasicConfigurator.configure();
+        try {
+			xmlRpcServer = new XMLRPCServer_AT(port);
+		} catch (Exception e) {
+			LOG.error(e.getMessage());
+		}
+        
 		pullThread = new PullThread();
 		pullThread.start();
 		pullThread.setCheckData(false);

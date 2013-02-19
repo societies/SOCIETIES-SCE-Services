@@ -17,37 +17,6 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 	<dependencies>
-	
-		<!-- OSGI, Spring, JUnit and Logger
-		<dependency>
-			<groupId>org.osgi</groupId>
-			<artifactId>org.osgi.compendium</artifactId>
-			<version>4.1.0</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.osgi</groupId>
-			<artifactId>org.osgi.core</artifactId>
-			<version>4.1.0</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.osgi</groupId>
-			<artifactId>org.springframework.osgi.core</artifactId>
-			<version>1.2.1</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-simple</artifactId>
-			<version>${slf4j.version}</version>
-			<scope>provided</scope>
-		</dependency>-->
 
 		<!-- RESTful -->
 		<dependency>
@@ -130,8 +99,13 @@
 						<Bundle-Name>${project.name}</Bundle-Name>
 						<Bundle-Version>${project.version}</Bundle-Version>                        
 						<Embed-Dependency>*;scope=compile|runtime;inline=false</Embed-Dependency>
-                        <Embed-Transitive>false</Embed-Transitive>
-						<Import-Package>*;resolution:=optional</Import-Package>
+                        <Embed-Transitive>true</Embed-Transitive>
+						<Import-Package>!com.sun.jdmk.comm,!org.apache.avalon.framework.logger,!org.apache.log,!org.eclipse.jetty.continuation,
+                        !org.jaxen.saxpath,!org.eclipse.jetty.server,!org.eclipse.jetty.server.ssl,!org.eclipse.jetty.server.nio,!org.eclipse.jetty.server.handler,
+                        !org.jaxen.pattern,!org.jaxen.dom4j,!org.relaxng.datatype,!org.eclipse.jetty.io.nio,!com.sun.msv.datatype.xsd,!org.gjt.xpp,!org.jaxen,
+                        !org.eclipse.jetty.io,!org.eclipse.jetty.http,!com.sun.msv.datatype,!org.eclipse.jetty.http.security,
+                        !org.eclipse.jetty.server.session,!com.sun.net.httpserver,!org.apache.tools.ant,
+                        !com.apple.eawt,*</Import-Package>
 					</instructions>
 				</configuration>
 			</plugin>
