@@ -111,15 +111,21 @@ public class WantToHelp implements IWantToHelp, ActionListener {
 	private String languages;
 	
 	
-	@Autowired(required=true)	
+//	@Autowired(required=true)	
 	private ICtxBroker externalCtxBroker;
-	@Autowired(required=true)
+//	@Autowired(required=true)
 	private ICommManager commMgr;
 
+	private boolean NO_USER;
 
-	
-	public WantToHelp() {
+
+
+	@Autowired(required=true)
+	public WantToHelp(ICtxBroker externalCtxBroker, ICommManager commMgr) {
 		LOG.info("*** " + this.getClass() + " instantiated");
+		
+		this.externalCtxBroker = externalCtxBroker;
+		this.commMgr = commMgr;
 		
 		xmlRpcClient_IWTH = new XMLRPCClient_IWTH();
 
@@ -159,9 +165,20 @@ public class WantToHelp implements IWantToHelp, ActionListener {
 	    panel.add(feedbackPanel);
 
 		LOG.info("*** contextBroker="+externalCtxBroker);
+		
+
+		LOG.info("*** " + this.getClass() + " activated");
+		feedbackTextArea.append("on activate -> WantToHelp service started\n");
+
+		pullThread = new PullThread();
+		pullThread.start();
+		pullThread.setCheckData(false);
+		
+		frame.pack();
+		frame.setVisible(true);
 	}
 	
-	@PostConstruct
+//	@PostConstruct
 	public void activate() throws Exception {
 		LOG.info("*** " + this.getClass() + " activated");
 		feedbackTextArea.append("on activate -> WantToHelp service started\n");
@@ -175,7 +192,7 @@ public class WantToHelp implements IWantToHelp, ActionListener {
 		
 	}
 
-	@PreDestroy
+//	@PreDestroy
 	public void deactivate() throws Exception {
 		feedbackTextArea.append("on deactivate -> WantToHelp service stopped\n");
 
@@ -184,14 +201,24 @@ public class WantToHelp implements IWantToHelp, ActionListener {
 		frame.dispose();
 	}
 	
+	/*
+	 * commMgr.getIdManager().getThisNetworkNode().getDomain() = societies.local
+	 * commMgr.getIdManager().getThisNetworkNode().getNodeIdentifier() = rich
+	 * commMgr.getIdManager().getThisNetworkNode().getIdentifier() = xcmanager | userX
+	 */
 	public void getUserDataFromCSS() throws Exception{
-		String xmppDomain = commMgr.getIdManager().getThisNetworkNode().getDomain();
-		int userNumber = Integer.parseInt(xmppDomain.substring(4, xmppDomain.indexOf('.'))); // subdomain always to start with "user" - i.e. 4 digits
+		String userName = commMgr.getIdManager().getThisNetworkNode().getIdentifier();
+		
+		int userNumber = -1;
+		if (userName.startsWith("user"))
+			 userNumber = Integer.parseInt(userName.substring(4)); // starts with "user" - i.e. 4 digits
+		else NO_USER=true;
 		if (userNumber <10) USER_ID = "0"+userNumber;
 		else USER_ID = ""+userNumber;
 		
+		
 		feedbackTextArea.append("retrieve user data from CSS ... \n");
-		IIdentity cssOwnerId = commMgr.getIdManager().fromJid(commMgr.getIdManager().getThisNetworkNode().getBareJid());
+		IIdentity cssOwnerId = commMgr.getIdManager().fromJid(commMgr.getIdManager().getThisNetworkNode().getBareJid());  // e.g. resolves to "xcmanager.societies.local"
 		Requestor requestor = new Requestor(cssOwnerId);
 
 		CtxEntityIdentifier ownerEntityIdentifier = externalCtxBroker.retrieveIndividualEntityId(requestor, cssOwnerId).get();
@@ -205,10 +232,12 @@ public class WantToHelp implements IWantToHelp, ActionListener {
 		if (foundAttrsIt.hasNext())
 			name = foundAttrsIt.next().getStringValue();
 		if (name == null || name.equals("")){
-			foundAttrsIt = ownerEntity.getAttributes(CtxAttributeTypes.ID).iterator();
-			if (foundAttrsIt.hasNext())
-				name = foundAttrsIt.next().getStringValue();
+//			foundAttrsIt = ownerEntity.getAttributes(CtxAttributeTypes.ID).iterator();
+//			if (foundAttrsIt.hasNext())
+//				name = foundAttrsIt.next().getStringValue();
+			name = userName;
 		}
+		LOG.debug("Name="+name);
 		
 		//For CSDM, every user needs first and last name;
 		if (name !=null && !name.equals("")){
@@ -227,7 +256,8 @@ public class WantToHelp implements IWantToHelp, ActionListener {
 		if (foundAttrsIt.hasNext())
 			userFirstname = foundAttrsIt.next().getStringValue();
 //		feedbackTextArea.append(testUserFirstname+"\n");	
-		
+
+		LOG.debug("FirstName LastName:"+userFirstname + " "+ userLastname);
 		
 		if ((userLastname==null || userLastname.equals("")) && (userFirstname==null || userFirstname.equals("")))
 		{
@@ -267,7 +297,7 @@ public class WantToHelp implements IWantToHelp, ActionListener {
 		if (foundAttrsIt.hasNext())
 			interests = foundAttrsIt.next().getStringValue();
 		
-		if (interests!=null || !interests.equals("")){
+		if (interests!=null && !interests.equals("")){
 			if (skills==null || skills.equals(""))
 				skills = interests;
 			else if (skills.endsWith(","))
@@ -335,6 +365,7 @@ public class WantToHelp implements IWantToHelp, ActionListener {
 
 		
 		// Communicate with CSDM
+		if (NO_USER) USER_ID = "00";  //TODO remove
 		String XMLRPC_SERVER_ADDRESS = SOCIETIES_XMLRPC_IP+":543"+USER_ID; //TODO
 		print("xmlrpc on 'login' > "+xmlRpcClient_IWTH.signInUser(userEmail, testUserPassword, userLastname, userFirstname, userInstitute, XMLRPC_SERVER_ADDRESS, skills )+"\n");
 		
@@ -342,8 +373,10 @@ public class WantToHelp implements IWantToHelp, ActionListener {
 		
 		// Communicate with YRNA
 		Volunteer volunteer = new Volunteer(userEmail, userFirstname, userLastname, userInstitute, userCountry, userEmail);
-		String[] languagesArray = languages.split(",");
-		String[] skillsArray = skills.split(",");
+		String[] languagesArray = {};
+		if (languages!= null) languages.split(",");
+		String[] skillsArray = {};
+		if (skills!=null) skills.split(",");
 		for (String skill: skillsArray)
 			volunteer.addSkill(skill.trim());
 		for (String language: languagesArray)
@@ -399,7 +432,7 @@ public class WantToHelp implements IWantToHelp, ActionListener {
 	 * main method for testing
 	 */
 	public static void main(String[] args) throws Exception {
-		WantToHelp iWantToHelp = new WantToHelp();
+		WantToHelp iWantToHelp = new WantToHelp(null, null);
 		iWantToHelp.activate();
 	}
 	
