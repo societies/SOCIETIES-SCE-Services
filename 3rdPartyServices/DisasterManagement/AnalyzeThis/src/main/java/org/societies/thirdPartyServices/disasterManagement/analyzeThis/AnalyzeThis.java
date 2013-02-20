@@ -92,13 +92,11 @@ public class AnalyzeThis implements IAnalyzeThis, ActionListener {
 	
 	@Autowired(required=true)
 	private ICommManager commMgr;
-	@Autowired(required=true)
-	private ITrustEvidenceCollector trustEvidenceCollector;
-	@Autowired(required=true)
-	private ITrustBroker trustBroker;
 
 
-	public AnalyzeThis() {
+	@Autowired(required=true)
+	public AnalyzeThis(ICommManager commMgr) {
+		this.commMgr = commMgr;
 		LOG.info("*** " + this.getClass() + " instantiated");
 		
 		xmlRpcClient_AT = new XMLRPCClient_AT();
@@ -143,14 +141,21 @@ public class AnalyzeThis implements IAnalyzeThis, ActionListener {
 	    panel.add(subscribe);
 	    panel.add(unsubscribe);
 	    panel.add(feedbackPanel);
-	}
-	
-	@PostConstruct
-	public void activate() throws Exception {
+//	}
+//	
+//	@PostConstruct
+//	public void activate() throws Exception {
 		feedbackTextArea.append("on activate -> AnalyzeThis service started\n");
+		
 
-		String xmppDomain = commMgr.getIdManager().getThisNetworkNode().getDomain();
-		int userNumber = Integer.parseInt(xmppDomain.substring(4, xmppDomain.indexOf('.'))); // subdomain always to start with "user" - i.e. 4 digits
+		String userName = commMgr.getIdManager().getThisNetworkNode().getIdentifier();
+		int userNumber = -1;
+		boolean NO_USER = false;
+		if (userName.startsWith("user"))
+			 userNumber = Integer.parseInt(userName.substring(4)); // starts with "user" - i.e. 4 digits
+		else NO_USER=true;
+		
+		if (NO_USER) userNumber = 0; //TODO remove. was only for local testing
 		int port = BASIS_PORT + userNumber;
 		
     	BasicConfigurator.configure();
@@ -168,7 +173,7 @@ public class AnalyzeThis implements IAnalyzeThis, ActionListener {
 		frame.setVisible(true);	
 	}
 
-	@PreDestroy
+//	@PreDestroy
 	public void deactivate() throws Exception {
 		feedbackTextArea.append("on deactivate ->AnalyzeThis service stopped ... \n");
 
@@ -234,8 +239,8 @@ public class AnalyzeThis implements IAnalyzeThis, ActionListener {
 	 * main method for testing
 	 */
 	public static void main(String[] args) throws Exception {
-		AnalyzeThis analyzeThis = new AnalyzeThis();
-		analyzeThis.activate();
+		AnalyzeThis analyzeThis = new AnalyzeThis(null);
+//		analyzeThis.activate();
 	}
 	
 	private class WindowEventHandler extends WindowAdapter {
@@ -256,31 +261,4 @@ public class AnalyzeThis implements IAnalyzeThis, ActionListener {
 		this.commMgr = commMgr;
 	}
 
-	/**
-	 * @return the trustEvidenceCollector
-	 */
-	public ITrustEvidenceCollector getTrustEvidenceCollector() {
-		return trustEvidenceCollector;
-	}
-
-	/**
-	 * @param trustEvidenceCollector the trustEvidenceCollector to set
-	 */
-	public void setTrustEvidenceCollector(ITrustEvidenceCollector trustEvidenceCollector) {
-		this.trustEvidenceCollector = trustEvidenceCollector;
-	}
-
-	/**
-	 * @return the trustBroker
-	 */
-	public ITrustBroker getTrustBroker() {
-		return trustBroker;
-	}
-
-	/**
-	 * @param trustBroker the trustBroker to set
-	 */
-	public void setTrustBroker(ITrustBroker trustBroker) {
-		this.trustBroker = trustBroker;
-	}
 }
