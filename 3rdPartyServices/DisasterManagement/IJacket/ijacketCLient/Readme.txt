@@ -2,11 +2,19 @@
 -- Description
 ------------------------------------------------------
 
+The Ijacket client presents a gui where the user can choose a CIS and send a message to it.
+The CISs available for choosing are the ones in which the application has been shared to
+or in other words, the ones that match: Application.GlobalID = org.societies.thirdpartyservices.ijacketlib.IJacketDefines.AccountData.IJACKET_CLIENT_SERVICE_NAME
 
+If the application has been started with an intent, it will look for the extra IjacketIntentExtras.CIS_ID in order to retrieve the id of the default community
+  
+For publishing into the feed, the user just write his text in the text box and press send.
 
-
-
-
+That will trigger the publishing of the activity with the following parameters:
+ACTOR: username (retrieved from me table)
+VERB: posted
+OBJECT: text written in the text box
+TARGET: AccountData.IJACKET_SERVICE_NAME
 
 
 

@@ -8,16 +8,12 @@
     <packaging>apk</packaging>
     <name>ijacket</name>
 
-   <parent>
-        <groupId>org.societies</groupId>
-        <artifactId>android-parent</artifactId>
-        <version>RELEASE</version>
-   </parent>
    
     <dependencies>
-        <dependency>
+         <dependency>
             <groupId>com.google.android</groupId>
             <artifactId>android</artifactId>
+            <version>4.1.1.4</version>
             <exclusions>
 				<!-- Provided by Android -->
 				<exclusion>
@@ -25,15 +21,8 @@
 					<groupId>xpp3</groupId>
 				</exclusion>
 			</exclusions>
-			<version>4.1.1.4</version>
             <scope>provided</scope>
         </dependency>
-		<dependency>
-			<groupId>com.google.android</groupId>
-			<artifactId>android-test</artifactId>
-			<version>4.1.1.4</version>
-			<scope>provided</scope>
-		</dependency>
         
         
     <dependency>
@@ -45,8 +34,8 @@
     <dependency>
         <groupId>org.societies.thirdpartyservices</groupId>
         <artifactId>ijacketLib</artifactId>
-	    <version>${release.version}</version>
-	    <type>apklib</type>
+	    <version>1.1</version>
+	    <type>jar</type>
 	</dependency>
         
     </dependencies>

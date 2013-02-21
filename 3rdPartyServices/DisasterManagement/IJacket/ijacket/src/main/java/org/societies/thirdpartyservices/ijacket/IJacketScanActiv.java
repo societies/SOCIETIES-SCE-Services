@@ -56,6 +56,7 @@ public class IJacketScanActiv extends Activity{// implements OnItemSelectedListe
     private static final int IJACK_SCAN_ACTV_CONTENT_VIEW_ID = 10101010;
     private TableLayout layout;
     private Button scanButton;
+    private Button testButton;
     
     
     private Button preferredJackButton;
@@ -74,15 +75,20 @@ public class IJacketScanActiv extends Activity{// implements OnItemSelectedListe
         
         
         Intent intent = getIntent();
-        String cisJid = intent.getStringExtra(org.societies.thirdpartyservices.ijacketlib.IJacketDefines.IjacketIntentExtras.CIS_ID);// TODO: set the intent extra
-        if(null != cisJid && false !=cisJid.isEmpty()){
+        long cisId = intent.getLongExtra(org.societies.thirdpartyservices.ijacketlib.IJacketDefines.IjacketIntentExtras.CIS_ID,-1);// TODO: set the intent extra
+        if(-1 != cisId){
             SharedPreferences mypref = getSharedPreferences(IJacketApp.PREF_FILE_NAME, Context.MODE_PRIVATE);
             SharedPreferences.Editor e = mypref.edit();
-    		e.putString(IJacketApp.CIS_JID_PREFERENCE_TAG, cisJid);
+    		e.putLong(IJacketApp.CIS_JID_PREFERENCE_TAG, cisId);
     		e.commit();
 
+        }else{
+        	Log.d(LOG_TAG, "IJacketScanActiv has not received intent argument on startup");
         } 
 
+        getAppInfoFromProvider();
+        Log.d(LOG_TAG, "got app info from provider");
+        
 	        layout = new TableLayout(this);
 	        layout.setId(IJACK_SCAN_ACTV_CONTENT_VIEW_ID);
 	        layout.setLayoutParams( new TableLayout.LayoutParams(TableLayout.LayoutParams.MATCH_PARENT, TableLayout.LayoutParams.MATCH_PARENT) );
@@ -99,8 +105,8 @@ public class IJacketScanActiv extends Activity{// implements OnItemSelectedListe
 	            	try{
 	            		
 	            		SharedPreferences mypref = getSharedPreferences(IJacketApp.PREF_FILE_NAME, MODE_PRIVATE);
-	        			String jid = mypref.getString(IJacketApp.CIS_JID_PREFERENCE_TAG, "");
-	        			if(jid.isEmpty()){
+	        			long comId = mypref.getLong(IJacketApp.CIS_JID_PREFERENCE_TAG, -1);
+	        			if(-1 == comId){
 	        				quickToastMessage("Please first select a community");
 	        				Log.d("LOG_TAG", "no community selected" );
 	        				return;
@@ -111,6 +117,33 @@ public class IJacketScanActiv extends Activity{// implements OnItemSelectedListe
 		                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
 		                intent.putExtra("SCAN_MODE", "QR_CODE_MODE");
 		                startActivityForResult(intent, CUSTOM_REQUEST_QR_SCANNER);
+	            	}
+	            	catch(ActivityNotFoundException ex) {
+	            		quickToastMessage("You need to install zxing Barcode scanner!");
+	            	}
+	            }
+	        } );
+	        
+	      //Initialize test button
+	        testButton = new Button(this);
+	        testButton.setText("Jacketless test");
+	        testButton.setOnClickListener( new View.OnClickListener() {
+	            public void onClick(View view) {
+	            	try{
+	            		
+	            		SharedPreferences mypref = getSharedPreferences(IJacketApp.PREF_FILE_NAME, MODE_PRIVATE);
+	        			long comId = mypref.getLong(IJacketApp.CIS_JID_PREFERENCE_TAG, -1);
+	        			if(-1 == comId){
+	        				quickToastMessage("Please first select a community");
+	        				Log.d("LOG_TAG", "no community selected" );
+	        				return;
+	        			}
+	        			IJacketApp appState = (IJacketApp) (getApplication());
+	        			appState.setTestMode(true);
+	        			// now we trigger the Menu Activity
+	    				Intent i = new Intent(IJacketScanActiv.this, JacketMenuActivity.class);
+	    				startActivity(i);
+	            		
 	            	}
 	            	catch(ActivityNotFoundException ex) {
 	            		quickToastMessage("You need to install zxing Barcode scanner!");
@@ -131,7 +164,9 @@ public class IJacketScanActiv extends Activity{// implements OnItemSelectedListe
     private void addItemsOnCISSpinner(){
     	//if (savedInstanceState == null) {
     	Log.d(LOG_TAG, "start of add items to spinner");
-    	Fragment newFragment = new MainActivityCursorLoader();
+		IJacketApp appState = (IJacketApp) (getApplication());
+		long tempServId =	appState.getiJacketSevId();
+    	Fragment newFragment = new MainActivityCursorLoader(tempServId);
     	FragmentTransaction ft = getFragmentManager().beginTransaction();
     	ft.add(IJACK_SCAN_ACTV_CONTENT_VIEW_ID, newFragment).commit();
     	Log.d(LOG_TAG, "end of add items to spinner");
@@ -199,7 +234,8 @@ public class IJacketScanActiv extends Activity{// implements OnItemSelectedListe
             	 
             	 layout.addView(scanButton);
             	 
-
+            	 layout.addView(testButton);
+            	 
             	 
             	 //ImageView image = new ImageView(IJacketScanActiv.this);
             	 //image.setImageResource(R.drawable.scan);
@@ -284,9 +320,40 @@ public class IJacketScanActiv extends Activity{// implements OnItemSelectedListe
 
 
     private void getAppInfoFromProvider(){
+
+    	Log.d(LOG_TAG, "going to retrieve our service ID");
+    	Uri uri = Uri.parse(SocialContract.AUTHORITY_STRING + SocialContract.UriPathIndex.SERVICES);
+        try{
+        	//String[] mProjection ={SocialContract.Me.GLOBAL_ID};
+        	String mSelectionClause = SocialContract.Services.GLOBAL_ID + " = ?";
+        	String[] mSelectionArgs = {org.societies.thirdpartyservices.ijacketlib.IJacketDefines.AccountData.IJACKET_SERVICE_NAME};
+        	ContentResolver cr = this.getApplication().getContentResolver();
+	       	 Cursor cursor = cr.query(uri,null,mSelectionClause,mSelectionArgs,null);
+	       	if (null == cursor || cursor.getCount() < 1){
+	       		Log.d(LOG_TAG, "could not find the service id");
+	       		return;
+	       	}
+	       	else{
+       			int i  = cursor.getColumnIndex(SocialContract.Services._ID);
+       			cursor.moveToNext();
+       			long ServiceID = cursor.getLong(i);
+       			IJacketApp appState = (IJacketApp) (getApplication());
+       			appState.setiJacketSevId(ServiceID);
+   		    	Log.d(LOG_TAG, "serviceID is " + ServiceID);
+	       	}
+    	}catch (Exception e) {
+	   		// TODO Auto-generated catch block
+	   		Log.d(LOG_TAG, "exception in the serviceID");
+	   		e.printStackTrace();
+	   		return ;
+	   	}
+        return ;
+
+
+
     	
     	// get my credential
-	   	 String mSelectionClause = SocialContract.Me.ACCOUNT_TYPE +  " = ?";
+	   /*	 String mSelectionClause = SocialContract.Me.ACCOUNT_TYPE +  " = ?";
 	   	 String[] mSelectionArgs = {"BOX"};
 	   	 ContentResolver cr = getContentResolver();
 	   	 Uri otherUri =  Uri.parse(SocialContract.AUTHORITY_STRING + SocialContract.UriPathIndex.ME);
@@ -294,7 +361,7 @@ public class IJacketScanActiv extends Activity{// implements OnItemSelectedListe
 			if (cursor != null && cursor.getCount() >0) {
 				// ADD CODE
 			}
-
+		*/
     	
     }
 
