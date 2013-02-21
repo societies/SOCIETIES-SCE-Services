@@ -30,11 +30,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.net.InetAddress;
 import java.util.Iterator;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -42,8 +39,8 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.UIManager;
 import javax.swing.text.DefaultCaret;
-import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.UriBuilder;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -70,6 +67,7 @@ import com.sun.jersey.api.client.config.ClientConfig;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
 
 
+@SuppressWarnings("unused")
 @Service
 public class WantToHelp implements IWantToHelp, ActionListener {
 
@@ -77,15 +75,16 @@ public class WantToHelp implements IWantToHelp, ActionListener {
 	private static final Logger LOG = LoggerFactory.getLogger(WantToHelp.class);
 	
 	private XMLRPCClient_IWTH xmlRpcClient_IWTH;
-	private PullThread pullThread;
 
 	public static final String subscribeCommand = "subscribe";
 	public static final String unsubscribeCommand = "unsubscribe";
-	
 	private JFrame frame;
 	private JTextArea feedbackTextArea; 
 	private JButton subscribe;
 	private JButton unsubscribe;
+	
+//	private PullThread pullThread;
+	
 	
 	public static final String PANEL_LAYOUT_CONSTRAINTS = "hidemode 3, gap 0 10, novisualpadding, ins 4, wrap 1"; //, debug 2000";
 	public static final String PANEL_COLUMN_CONTSTRAINTS = "[fill, grow]";
@@ -122,83 +121,104 @@ public class WantToHelp implements IWantToHelp, ActionListener {
 
 	@Autowired(required=true)
 	public WantToHelp(ICtxBroker externalCtxBroker, ICommManager commMgr) {
-		LOG.info("*** " + this.getClass() + " instantiated");
+		printAndLog("********** " + this.getClass() + " instantiated");
 		
 		this.externalCtxBroker = externalCtxBroker;
 		this.commMgr = commMgr;
 		
 		xmlRpcClient_IWTH = new XMLRPCClient_IWTH();
 
+		printAndLog("********** commMgr="+commMgr);
+		printAndLog("********** contextBroker="+externalCtxBroker);
+		
+		// ++++++++++++   GUI start   ++++++++++++
+		
 		// otherwise it does not startup in VIRGO
-		UIManager.put("ClassLoader", ClassLoader.getSystemClassLoader());
+//		UIManager.put("ClassLoader", ClassLoader.getSystemClassLoader());
+//		frame = new JFrame("IWantToHelp");
+//		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+//		frame.addWindowListener(new WindowEventHandler());
+//
+//		JPanel panel = new JPanel();
+//		panel.setLayout(new MigLayout(PANEL_LAYOUT_CONSTRAINTS, PANEL_COLUMN_CONTSTRAINTS, PANEL_ROW_CONSTRAINTS));
+//		Dimension panelDimension = new Dimension(1200, 768); 
+//		panel.setPreferredSize(panelDimension);
+//		frame.getContentPane().add(panel);
+//		
+//		feedbackTextArea = new JTextArea("");
+//		feedbackTextArea.setEditable(false);
+//		DefaultCaret caret = (DefaultCaret)feedbackTextArea.getCaret();
+//		caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
+//	    JScrollPane scrollPane = new JScrollPane(feedbackTextArea);
+//	    JPanel feedbackPanel = new JPanel(new MigLayout(FEEDBACK_LAYOUT_CONSTRAINTS, FEEDBACK_COLUMN_CONTSTRAINTS, FEEDBACK_ROW_CONSTRAINTS));
+//	    feedbackPanel.add(scrollPane);
+//		
+//		subscribe = new JButton("I want to help: subscribe to CSDM platform");
+//		subscribe.setActionCommand(subscribeCommand);
+//		subscribe.addActionListener(this);
+//		unsubscribe = new JButton("I am done");
+//		unsubscribe.setActionCommand(unsubscribeCommand);
+//		unsubscribe.addActionListener(this);
+//		unsubscribe.setVisible(false);
+//
+//		panel.add(subscribe);
+//		panel.add(unsubscribe);
+//	    panel.add(feedbackPanel);
+//	    
+//	    frame.pack();
+//		frame.setVisible(true);
+	    
+		// ------------   GUI end   ------------
 
-		LOG.info("*** commMgr="+commMgr);
 		
-		frame = new JFrame("IWantToHelp");
-		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		frame.addWindowListener(new WindowEventHandler());
-
-		JPanel panel = new JPanel();
-		panel.setLayout(new MigLayout(PANEL_LAYOUT_CONSTRAINTS, PANEL_COLUMN_CONTSTRAINTS, PANEL_ROW_CONSTRAINTS));
-		Dimension panelDimension = new Dimension(1200, 768); 
-		panel.setPreferredSize(panelDimension);
-		frame.getContentPane().add(panel);
+		// ++++++++++++   pull thread start   ++++++++++++		
 		
-		feedbackTextArea = new JTextArea("");
-		feedbackTextArea.setEditable(false);
-		DefaultCaret caret = (DefaultCaret)feedbackTextArea.getCaret();
-		caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
-	    JScrollPane scrollPane = new JScrollPane(feedbackTextArea);
-	    JPanel feedbackPanel = new JPanel(new MigLayout(FEEDBACK_LAYOUT_CONSTRAINTS, FEEDBACK_COLUMN_CONTSTRAINTS, FEEDBACK_ROW_CONSTRAINTS));
-	    feedbackPanel.add(scrollPane);
+//		pullThread = new PullThread();
+//		pullThread.start();
+//		pullThread.setCheckData(false);
 		
-		subscribe = new JButton("I want to help: subscribe to CSDM platform");
-		subscribe.setActionCommand(subscribeCommand);
-		subscribe.addActionListener(this);
-		unsubscribe = new JButton("I am done");
-		unsubscribe.setActionCommand(unsubscribeCommand);
-		unsubscribe.addActionListener(this);
-		unsubscribe.setVisible(false);
-
-		panel.add(subscribe);
-		panel.add(unsubscribe);
-	    panel.add(feedbackPanel);
-
-		LOG.info("*** contextBroker="+externalCtxBroker);
+		// ------------   pull thread end   ------------
 		
-
-		LOG.info("*** " + this.getClass() + " activated");
-		feedbackTextArea.append("on activate -> WantToHelp service started\n");
-
-		pullThread = new PullThread();
-		pullThread.start();
-		pullThread.setCheckData(false);
 		
-		frame.pack();
-		frame.setVisible(true);
+		sendDataToCSDMandYRNA();
 	}
 	
 //	@PostConstruct
 	public void activate() throws Exception {
-		LOG.info("*** " + this.getClass() + " activated");
-		feedbackTextArea.append("on activate -> WantToHelp service started\n");
+		printAndLog("********** on activate -> WantToHelp service started");
 
-		pullThread = new PullThread();
-		pullThread.start();
-		pullThread.setCheckData(false);
+		// ++++++++++++   GUI start   ++++++++++++
 		
-		frame.pack();
-		frame.setVisible(true);
+//		frame.pack();
+//		frame.setVisible(true);
+
+		// ------------   GUI end   ------------
+		
+		// ++++++++++++   pull thread start   ++++++++++++	
+		
+//		pullThread = new PullThread();
+//		pullThread.start();
+//		pullThread.setCheckData(false);
+		
+		// ------------   pull thread end   ------------
 		
 	}
 
 //	@PreDestroy
 	public void deactivate() throws Exception {
-		feedbackTextArea.append("on deactivate -> WantToHelp service stopped\n");
-
-		pullThread.setRun(false);
+		printAndLog("********** on deactivate -> WantToHelp service stopped");
+		
+		// ++++++++++++   GUI start   ++++++++++++
 		
 		frame.dispose();
+		
+		// ------------   GUI end   ------------
+		
+		// ++++++++++++   pull thread start   ++++++++++++	
+		
+//		pullThread.setRun(false);
+
+		// ------------   pull thread end   ------------
 	}
 	
 	/*
@@ -207,6 +227,9 @@ public class WantToHelp implements IWantToHelp, ActionListener {
 	 * commMgr.getIdManager().getThisNetworkNode().getIdentifier() = xcmanager | userX
 	 */
 	public void getUserDataFromCSS() throws Exception{
+		
+		printAndLog("********** retrieve user data from CSS ... ");
+		
 		String userName = commMgr.getIdManager().getThisNetworkNode().getIdentifier();
 		
 		int userNumber = -1;
@@ -216,8 +239,6 @@ public class WantToHelp implements IWantToHelp, ActionListener {
 		if (userNumber <10) USER_ID = "0"+userNumber;
 		else USER_ID = ""+userNumber;
 		
-		
-		feedbackTextArea.append("retrieve user data from CSS ... \n");
 		IIdentity cssOwnerId = commMgr.getIdManager().fromJid(commMgr.getIdManager().getThisNetworkNode().getBareJid());  // e.g. resolves to "xcmanager.societies.local"
 		Requestor requestor = new Requestor(cssOwnerId);
 
@@ -226,7 +247,6 @@ public class WantToHelp implements IWantToHelp, ActionListener {
 		String name = null;
 		
 		CtxEntity ownerEntity = (CtxEntity) externalCtxBroker.retrieve(requestor, ownerEntityIdentifier).get();
-//		feedbackTextArea.append("retrieve completed\n");
 
 		Iterator<CtxAttribute> foundAttrsIt = ownerEntity.getAttributes(CtxAttributeTypes.NAME).iterator();
 		if (foundAttrsIt.hasNext())
@@ -237,7 +257,7 @@ public class WantToHelp implements IWantToHelp, ActionListener {
 //				name = foundAttrsIt.next().getStringValue();
 			name = userName;
 		}
-		LOG.debug("Name="+name);
+		printAndLog("********** Name="+name);
 		
 		//For CSDM, every user needs first and last name;
 		if (name !=null && !name.equals("")){
@@ -250,14 +270,12 @@ public class WantToHelp implements IWantToHelp, ActionListener {
 		foundAttrsIt = ownerEntity.getAttributes(CtxAttributeTypes.NAME_LAST).iterator();
 		if (foundAttrsIt.hasNext())
 			userLastname = foundAttrsIt.next().getStringValue();
-//		feedbackTextArea.append(testUserLastname+"\n");
 		
 		foundAttrsIt = ownerEntity.getAttributes(CtxAttributeTypes.NAME_FIRST).iterator();
 		if (foundAttrsIt.hasNext())
 			userFirstname = foundAttrsIt.next().getStringValue();
-//		feedbackTextArea.append(testUserFirstname+"\n");	
 
-		LOG.debug("FirstName LastName:"+userFirstname + " "+ userLastname);
+		printAndLog("********** FirstName LastName:"+userFirstname + " "+ userLastname);
 		
 		if ((userLastname==null || userLastname.equals("")) && (userFirstname==null || userFirstname.equals("")))
 		{
@@ -268,7 +286,6 @@ public class WantToHelp implements IWantToHelp, ActionListener {
 				CtxAttribute nameFirst = externalCtxBroker.createAttribute(requestor, ownerEntityIdentifier, CtxAttributeTypes.NAME_FIRST).get();
 				nameFirst.setStringValue("First");
 				nameFirst = (CtxAttribute) externalCtxBroker.update(requestor, nameFirst).get();
-//				feedbackTextArea.append("nameFirst="+nameFirst.getStringValue()+"\n");	
 		}
 
 		userEmail = cssOwnerId + "@" + SOCIETIES_IDENTIFIER;
@@ -276,10 +293,10 @@ public class WantToHelp implements IWantToHelp, ActionListener {
 		if (foundAttrsIt.hasNext())
 			userEmail = foundAttrsIt.next().getStringValue();
 		//testUserEmail = testUserFirstname+"."+testUserLastname+"@ict-societies.eu";
-		feedbackTextArea.append("email: "+userEmail+"\n");
+		printAndLog("********** email: "+userEmail);
 
 		testUserPassword = userFirstname.toLowerCase()+userLastname.toLowerCase();
-		feedbackTextArea.append("password: "+testUserPassword+"\n");
+		printAndLog("********** password: "+testUserPassword);
 		
 		foundAttrsIt = ownerEntity.getAttributes(CtxAttributeTypes.AFFILIATION).iterator();
 		if (foundAttrsIt.hasNext())
@@ -317,7 +334,7 @@ public class WantToHelp implements IWantToHelp, ActionListener {
 
 	@Override
 	public void provideHelp() {
-		LOG.info("provide help");
+		printAndLog("********** provide help");
 	}
 	
 	@Override
@@ -326,13 +343,13 @@ public class WantToHelp implements IWantToHelp, ActionListener {
 		if (command.equalsIgnoreCase(subscribeCommand)) {
 
 			//dummyTest();
-			communicateWithThreePlatforms();
+			sendDataToCSDMandYRNA();
 			
-			pullThread.setCheckData(true);
+//			pullThread.setCheckData(true);
 			subscribe.setVisible(false);
 			unsubscribe.setVisible(true);
 		} else if (command.equalsIgnoreCase(unsubscribeCommand)) {
-			pullThread.setCheckData(false);
+//			pullThread.setCheckData(false);
 			subscribe.setVisible(true);
 			unsubscribe.setVisible(false);
 		}  
@@ -351,13 +368,11 @@ public class WantToHelp implements IWantToHelp, ActionListener {
 			System.out.println("yrna add: "+service.path("rest").path("/").path(hulk_hogan.getID()).accept(MediaType.APPLICATION_XML).put(ClientResponse.class, hulk_hogan));
 	}
 	
-	private void communicateWithThreePlatforms(){
-		
+	private void sendDataToCSDMandYRNA(){
+		printAndLog("********** sendDataToCSDMandYRNA trying to get user data");
 		// Communicate with SOCIETIES to get context
 		try {
-			//feedbackTextArea.append("before\n");
 			getUserDataFromCSS();
-			//feedbackTextArea.append("after\n\n\n\n\n\n\n\n\n\n\n");
 		} catch (Exception e1) {
 			e1.printStackTrace();
 		}
@@ -367,7 +382,7 @@ public class WantToHelp implements IWantToHelp, ActionListener {
 		// Communicate with CSDM
 		if (NO_USER) USER_ID = "00";  //TODO remove
 		String XMLRPC_SERVER_ADDRESS = SOCIETIES_XMLRPC_IP+":543"+USER_ID; //TODO
-		print("xmlrpc on 'login' > "+xmlRpcClient_IWTH.signInUser(userEmail, testUserPassword, userLastname, userFirstname, userInstitute, XMLRPC_SERVER_ADDRESS, skills )+"\n");
+		printAndLog("********** CSDM xmlrpc signInUser > "+xmlRpcClient_IWTH.signInUser(userEmail, testUserPassword, userLastname, userFirstname, userInstitute, XMLRPC_SERVER_ADDRESS, skills ));
 		
 
 		
@@ -389,10 +404,18 @@ public class WantToHelp implements IWantToHelp, ActionListener {
 		ClientResponse r = service.path("rest").path("/")
 				.path(volunteer.getID()).accept(MediaType.APPLICATION_XML)
 				.put(ClientResponse.class, volunteer);
-		print("Communication with YRNA platform"+r+"\n");
+		printAndLog("********** send data to YRNA platform: "+r);
 
 	}
+	
 
+	private void printAndLog(String string) {
+		if (feedbackTextArea!=null)
+			feedbackTextArea.append(string+"\n");
+		
+		LOG.info(string);
+		
+	}
 
 	private class PullThread extends Thread {
 		
@@ -406,12 +429,12 @@ public class WantToHelp implements IWantToHelp, ActionListener {
 			while(run){
 				if (checkData) {
 					userData = xmlRpcClient_IWTH.getUserData(userEmail);
-					feedbackTextArea.append(userEmail + " settings from webDLRPHP> "+ userData + "\n");
+					printAndLog(userEmail + " settings from CSDM> "+ userData + "");
 					if (userData != null)
 						updateUserDataInCSS();
 				}
 				try {
-					sleep(pullIntervalInSeconds*1000);
+					sleep(pullIntervalInSeconds*10000);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
@@ -459,19 +482,7 @@ public class WantToHelp implements IWantToHelp, ActionListener {
 	}
 
 	public void setExternalCtxBroker(ICtxBroker externalCtxBroker) {
-		//textArea.append("got externalCtxBroker: " + externalCtxBroker+" \n");
 		this.externalCtxBroker = externalCtxBroker;
 	}
-	
-	
-	/**
-	 * @param string
-	 */
-	private void print(String string) {
-		if (feedbackTextArea!=null)
-			feedbackTextArea.append(string);
-		else
-			LOG.info(string);
-		
-	}
+
 }

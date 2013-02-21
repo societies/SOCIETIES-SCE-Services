@@ -25,10 +25,8 @@
 
 package org.societies.thirdPartyServices.disasterManagement.wantToHelp.xmlrpc;
 
-import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.UnknownHostException;
 
 import org.apache.xmlrpc.XmlRpcException;
 import org.apache.xmlrpc.client.XmlRpcClient;
@@ -39,20 +37,14 @@ public class XMLRPCClient_IWTH {
 	private XmlRpcClient client;
 	private static final String CSDM_IP = "213.133.100.232";
 //	private static final String CSDM_IP = "localhost";
-	private static String SOCIETIES_XMLRPC_IP;
 	
 	public XMLRPCClient_IWTH () {
 		try {
-			SOCIETIES_XMLRPC_IP = InetAddress.getLocalHost().getHostAddress();
-			SOCIETIES_XMLRPC_IP = "localhost";
-			
 			XmlRpcClientConfigImpl config = new XmlRpcClientConfigImpl();
 			config.setServerURL(new URL("http://"+CSDM_IP+"/societies/server.php"));
 			client = new XmlRpcClient();
 			client.setConfig(config);
 		} catch (MalformedURLException e) {
-			e.printStackTrace();
-		} catch (UnknownHostException e) {
 			e.printStackTrace();
 		}
 	}
@@ -95,7 +87,7 @@ public class XMLRPCClient_IWTH {
 	public static void main(String[] args) {
 		System.out.println("Starting JavaXMLRPCClient in IWantToHelp service ...");
 		XMLRPCClient_IWTH xmlrpcClient = new XMLRPCClient_IWTH();
-		System.out.println("addUser>     " +xmlrpcClient.signInUser("john@doe.ar", "asdf", "johnny", "doom", "death star", SOCIETIES_XMLRPC_IP+":54321", "French, Nasenbohren" ));
+		System.out.println("addUser>     " +xmlrpcClient.signInUser("john@doe.ar", "asdf", "johnny", "doom", "death star", CSDM_IP+":54321", "French, Java" ));
 		System.out.println("getUserData> "+xmlrpcClient.getUserData("john@doe.ar"));
 	}
 }
