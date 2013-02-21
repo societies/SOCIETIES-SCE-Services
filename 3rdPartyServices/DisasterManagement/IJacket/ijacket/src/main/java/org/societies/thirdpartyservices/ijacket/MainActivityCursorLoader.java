@@ -25,7 +25,7 @@ public class MainActivityCursorLoader extends ListFragment implements
 	private static final String LOG_TAG = MainActivityCursorLoader.class.getName();
     // This is the Adapter being used to display the list's data.
     SimpleCursorAdapter mAdapter;
-    Uri COMUNITIES_URI = Uri.parse(SocialContract.AUTHORITY_STRING + SocialContract.UriPathIndex.COMMINITIES);
+    Uri COMUNITIES_URI = Uri.parse(SocialContract.AUTHORITY_STRING + SocialContract.UriPathIndex.COMMUNITIES);
 
     
     @Override public void onActivityCreated(Bundle savedInstanceState) {

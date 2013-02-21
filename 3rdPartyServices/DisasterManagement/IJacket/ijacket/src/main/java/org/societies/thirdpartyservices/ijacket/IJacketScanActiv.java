@@ -48,7 +48,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 
-
 public class IJacketScanActiv extends Activity{// implements OnItemSelectedListener {
 
     private static final int CUSTOM_REQUEST_QR_SCANNER = 0;
@@ -75,7 +74,7 @@ public class IJacketScanActiv extends Activity{// implements OnItemSelectedListe
         
         
         Intent intent = getIntent();
-        String cisJid = intent.getStringExtra("");// TODO: set the intent extra
+        String cisJid = intent.getStringExtra(org.societies.thirdpartyservices.ijacketlib.IJacketDefines.IjacketIntentExtras.CIS_ID);// TODO: set the intent extra
         if(null != cisJid && false !=cisJid.isEmpty()){
             SharedPreferences mypref = getSharedPreferences(IJacketApp.PREF_FILE_NAME, Context.MODE_PRIVATE);
             SharedPreferences.Editor e = mypref.edit();
@@ -284,6 +283,20 @@ public class IJacketScanActiv extends Activity{// implements OnItemSelectedListe
     }
 
 
+    private void getAppInfoFromProvider(){
+    	
+    	// get my credential
+	   	 String mSelectionClause = SocialContract.Me.ACCOUNT_TYPE +  " = ?";
+	   	 String[] mSelectionArgs = {"BOX"};
+	   	 ContentResolver cr = getContentResolver();
+	   	 Uri otherUri =  Uri.parse(SocialContract.AUTHORITY_STRING + SocialContract.UriPathIndex.ME);
+	   	 Cursor cursor = cr.query(otherUri,null,mSelectionClause,mSelectionArgs,null);
+			if (cursor != null && cursor.getCount() >0) {
+				// ADD CODE
+			}
+
+    	
+    }
 
 
 	

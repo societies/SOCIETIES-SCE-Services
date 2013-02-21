@@ -387,9 +387,9 @@ public class JacketMenuActivity extends Activity {
 		    	 Cursor cursor = cr.query(otherUri,null,mSelectionClause,mSelectionArgs,null);
 				if (cursor != null && cursor.getCount() >0) {
 				    while (cursor.moveToNext()) {
-				    	String actor = cursor.getString(cursor.getColumnIndex(SocialContract.CommunityActivity.GLOBAL_ID_ACTOR));
-				    	String verb  = cursor.getString(cursor.getColumnIndex(SocialContract.CommunityActivity.GLOBAL_ID_VERB));
-				    	String obj = cursor.getString(cursor.getColumnIndex(SocialContract.CommunityActivity.GLOBAL_ID_OBJECT));
+				    	String actor = cursor.getString(cursor.getColumnIndex(SocialContract.CommunityActivity.ACTOR));
+				    	String verb  = cursor.getString(cursor.getColumnIndex(SocialContract.CommunityActivity.VERB));
+				    	String obj = cursor.getString(cursor.getColumnIndex(SocialContract.CommunityActivity.OBJECT));
 				        Log.d("LOG_TAG", "found activity " + actor);
 				        con.print(actor + " " + verb + " " +obj, false);
 				    }

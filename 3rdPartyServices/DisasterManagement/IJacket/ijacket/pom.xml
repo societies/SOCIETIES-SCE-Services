@@ -37,9 +37,16 @@
         
         
     <dependency>
-	    <groupId>org.societies.android.api.external</groupId>
-	    <artifactId>societies-android-api</artifactId>
+		    <groupId>no.sintef.ubicollab</groupId>
+		    <artifactId>sdk</artifactId>
+		    <version>0.4.1</version>
+	</dependency>
+	
+    <dependency>
+        <groupId>org.societies.thirdpartyservices</groupId>
+        <artifactId>ijacketLib</artifactId>
 	    <version>${release.version}</version>
+	    <type>apklib</type>
 	</dependency>
         
     </dependencies>
@@ -51,7 +58,7 @@
             <plugin>
                 <groupId>com.jayway.maven.plugins.android.generation2</groupId>
                 <artifactId>android-maven-plugin</artifactId>
-                <version>3.1.1</version>
+                <version>3.4.0</version>
                 <configuration>
                     <androidManifestFile>${project.basedir}/AndroidManifest.xml</androidManifestFile>
                     <assetsDirectory>${project.basedir}/assets</assetsDirectory>
