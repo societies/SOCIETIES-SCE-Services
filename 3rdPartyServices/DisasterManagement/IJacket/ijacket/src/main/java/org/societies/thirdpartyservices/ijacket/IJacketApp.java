@@ -18,7 +18,9 @@ public class IJacketApp extends Application {
 	
 	String selectCommunityJid = "";*/
 	
-
+	long iJacketSevId = -1;
+	
+	boolean testMode = false; // if true means that there is no jacket
 	
 	public static final String CIS_JID_PREFERENCE_TAG = "CisJID";
 	public static final String MAC_PREFERENCE_TAG = "MacAddress";
@@ -28,6 +30,8 @@ public class IJacketApp extends Application {
 	
 	
 
+	
+	
 /*
 	public String getSelectedCommunityLocalId() {
 		return selectedCommunityLocalId;
@@ -44,6 +48,22 @@ public class IJacketApp extends Application {
 	public void setSelectCommunityJid(String selectCommunityJid) {
 		this.selectCommunityJid = selectCommunityJid;
 	}*/
+
+	public long getiJacketSevId() {
+		return iJacketSevId;
+	}
+
+	public void setiJacketSevId(long iJacketSevId) {
+		this.iJacketSevId = iJacketSevId;
+	}
+
+	public boolean isTestMode() {
+		return testMode;
+	}
+
+	public void setTestMode(boolean testMode) {
+		this.testMode = testMode;
+	}
 
 	public BluetoothConnection getCon() {
 		return con;
