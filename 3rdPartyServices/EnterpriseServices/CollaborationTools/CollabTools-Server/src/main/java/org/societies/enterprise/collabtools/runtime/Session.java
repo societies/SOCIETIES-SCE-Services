@@ -144,7 +144,7 @@ public class Session implements Observer {
 				//Finally add to the status node
 //				getLastSessionHistoryStatus().createRelationshipTo(tempNode, RelTypes.PARTICIPATE).setProperty(Session.ROLE, role);
 				
-				inviteMember(member);
+				this.inviteMember(member);
 
 				tx.success();
 			}
@@ -204,6 +204,8 @@ public class Session implements Observer {
 //
 //				System.out.println("Person " + member.getName() + " removed from session " + this.getSessionName());
 
+				this.kickMember(member);
+				
 				tx.success();
 			}
 			finally
@@ -230,7 +232,13 @@ public class Session implements Observer {
 		private void inviteMember(Person member)
 		{
 			String[] collabAppsAvailables = member.getArrayLongTermCtx(Person.COLLAB_APPS);
-			this.collabApps.sendInvite(member.getName(), collabAppsAvailables);
+			this.collabApps.sendInvite(member.getName(), collabAppsAvailables, getSessionName());
+		}
+		
+		private void kickMember(Person member)
+		{
+			String[] collabAppsAvailables = member.getArrayLongTermCtx(Person.COLLAB_APPS);
+			this.collabApps.sendKick(member.getName(), collabAppsAvailables, getSessionName());
 		}
 
 		public boolean equals(Object o)

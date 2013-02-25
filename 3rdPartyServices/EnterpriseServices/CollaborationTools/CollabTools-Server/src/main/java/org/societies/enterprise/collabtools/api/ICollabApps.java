@@ -25,13 +25,15 @@
 package org.societies.enterprise.collabtools.api;
 
 /**
- * Describe your class here...
+ * Interface to the Collaborative applications
  *
  * @author Christopher Viana Lima
  *
  */
 public interface ICollabApps {
 
-	  public abstract void sendInvite(String paramString, String[] paramArrayOfString);
+	  public abstract void sendInvite(String member, String[] collabApps, String sessionName);
+	  
+	  public abstract void sendKick(String member, String[] collabApps, String sessionName);
 	  
 }

@@ -85,7 +85,7 @@ public class TestUtils {
 //                person.addFriend( getRandomPerson() );
         	Map<Person, Integer> persons = personRepository.getPersonWithSimilarCtx(person, ctxType);
 			for (Map.Entry<Person, Integer> entry : persons.entrySet()) {
-				//Similarity Formula is: similar interests/ min(personA, personB)
+				//Similarity Formula is: (similar ctx/ personA + similar ctx/personB) / 2
 				float weight = ContextAnalyzer.personCtxSimilarity(entry.getValue(), ctxType, entry.getKey(), person);
         		person.addFriend(entry.getKey(),weight);  
 			}

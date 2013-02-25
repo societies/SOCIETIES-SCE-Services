@@ -164,6 +164,7 @@ public class Person extends Observable
                 Relationship friendRel = getFriendRelationshipTo( otherPerson );
                 if ( friendRel == null )
                 {
+                	System.out.println("weight: "+weight);
                     underlyingNode.createRelationshipTo(otherPerson.getUnderlyingNode(), SIMILARITY ).setProperty("weight", weight);
                 }
                 tx.success();

@@ -98,11 +98,12 @@ public class ContextAnalyzer implements IContextReasoning {
 	}
 	
 	static public float personCtxSimilarity (int similarCtx, String ctxType, Person personA, Person personB) {
-		//Similarity Formula is: similar interests/ min(personA, personB)
+		//Similarity Formula is: (similar ctx/ personA + similar ctx/personB) / 2
 		//Check if there is no similarity between both
 		if (similarCtx != 0) {
-			float weight = similarCtx/ Math.min((float)personA.getArrayLongTermCtx(ctxType).length,personB.getArrayLongTermCtx(ctxType).length );
-			return weight;
+			float PersonAweight = (float)similarCtx/personA.getArrayLongTermCtx(ctxType).length;
+			float PersonBweight = (float)similarCtx/personB.getArrayLongTermCtx(ctxType).length ;
+			return (PersonAweight + PersonBweight) / 2;
 		}
 		else
 			throw new IllegalArgumentException("There is no similarity between this individuals");

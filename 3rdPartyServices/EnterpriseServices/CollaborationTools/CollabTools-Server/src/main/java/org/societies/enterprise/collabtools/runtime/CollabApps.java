@@ -29,6 +29,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.jivesoftware.smack.XMPPException;
 import org.societies.enterprise.collabtools.api.ICollabApps;
 
 /**
@@ -40,6 +41,8 @@ import org.societies.enterprise.collabtools.api.ICollabApps;
 public class CollabApps implements ICollabApps
 {
 	private static HashMap<String, String> collabAppsConfig;
+	//Instanciate the collab app
+	ChatAppIntegrator chat = new ChatAppIntegrator();
 
 	//Application type and server application
 	public CollabApps(HashMap<String, String> collabAppsConfig)
@@ -48,21 +51,43 @@ public class CollabApps implements ICollabApps
 	}
 
 	//member and applications available from this user
-	public void sendInvite(String member, String[] collabApps)
+	@Override
+	public void sendInvite(String member, String[] collabApps, String sessionName)
 	{
 //		System.out.println("collabAppsConfig.isEmpty(): "+collabAppsConfig.isEmpty());
 		Iterator<?> it = collabAppsConfig.entrySet().iterator();
 		while (it.hasNext()) {
 			Map.Entry pairs = (Map.Entry)it.next();
-			System.out.println(pairs.getKey());
 			if (Arrays.asList(collabApps).contains(pairs.getKey()))
 			{
 				//TODO:Start invitation
-				System.out.println("Send invitation to member: " + member + " using app" + pairs.getKey());
+				System.out.println("Send invitation to member: " + member + " using app " + pairs.getKey());
+				try {
+					chat.join(member, sessionName);
+				} catch (XMPPException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 			else {				
 				throw new IllegalArgumentException(pairs.getKey()+" application not available");
 			}
 		}
 	}
+
+	/* (non-Javadoc)
+	 * @see org.societies.enterprise.collabtools.api.ICollabApps#sendKick(java.lang.String, java.lang.String[], java.lang.String)
+	 */
+	@Override
+	public void sendKick(String member, String[] collabApps, String sessionName) {
+		try {
+			System.out.println("Kicking member: " + member);
+			chat.kick(member, sessionName);
+		} catch (XMPPException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+	}
+
 }

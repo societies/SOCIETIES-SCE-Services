@@ -195,7 +195,7 @@ public class SessionRepository implements Observer {
 		Iterator<Person> personIterator = members.iterator();
 		while (personIterator.hasNext()) {
 			Person person = (Person)personIterator.next();
-			//Verify if person is in already in session
+			//Verify if person is already in session
 			if (!isInSession(person, sessionName)) {
 				person.addSession(sessionName);  
 				membersPersonList.add(person);

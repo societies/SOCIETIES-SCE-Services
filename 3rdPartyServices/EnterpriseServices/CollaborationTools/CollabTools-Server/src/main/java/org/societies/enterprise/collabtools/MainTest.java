@@ -92,7 +92,7 @@ public class MainTest {
 		test.deleteSocialGraph();
 		
 //		test.menu();
-		test.createPersons(5); //5 people by default
+		test.createPersons(4); //5 people by default
 		
 //		Creating some updates
 		test.createMockLongTermCtx();
@@ -114,8 +114,8 @@ public class MainTest {
 
 		//Creating more updates
 		while (true) {
-			// 15 sec
-			Thread.sleep(15 * 1000);
+			// 5 sec
+			Thread.sleep(5 * 1000);
 			test.createMockShortTermCtx();
 		}
 
