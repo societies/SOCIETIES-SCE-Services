@@ -8,6 +8,8 @@ public final class IJacketDefines {
 		
 		// local id representing the community to be used
 		public static final String CIS_ID = "CIS_ID";
+		// local id representing the owner of the service
+		public static final String CSS_ID = "CSS_ID";
 	}
 
 	
@@ -21,9 +23,10 @@ public final class IJacketDefines {
 	
 	public static final class Verbs{
 		
-		public static final String DISPLAY = "JACKET_DISPLAY";
-		public static final String VIBRATE = "JACKET_VIBRATE";
-		public static final String RING = "JACKET_RING";
+		public static final String DISPLAY = "DISPLAY";
+		public static final String VIBRATE = "VIBRATE";
+		public static final String RING = "RING";
+
 	}
 
 }

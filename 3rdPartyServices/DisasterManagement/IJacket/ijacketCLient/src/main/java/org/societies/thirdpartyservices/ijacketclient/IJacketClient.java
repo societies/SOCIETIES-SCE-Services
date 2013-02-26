@@ -1,5 +1,6 @@
 package org.societies.thirdpartyservices.ijacketclient;
 
+import java.util.ArrayList;
 import java.util.Random;
 
 import org.societies.android.api.cis.SocialContract;
@@ -17,6 +18,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.SimpleCursorAdapter;
 import android.widget.Spinner;
@@ -64,7 +66,7 @@ public class IJacketClient extends Activity implements OnItemSelectedListener {
 		setContentView(R.layout.main);
 		Log.d(LOG_TAG, "items added on Spinnet");
 		addItemsOnCISSpinner();
-		
+		populateVerbSpinner();
 		
 		
 		 
@@ -92,9 +94,12 @@ public class IJacketClient extends Activity implements OnItemSelectedListener {
         	 * method are "column name" and "value"
         	 */
         	//mNewValues.put(SocialContract.CommunityActivity.GLOBAL_ID, randomStr());
+        	
+        	Spinner spinnerVerbs = (Spinner) findViewById( R.id.spinner2 );
+        	String verb = spinnerVerbs.getSelectedItem().toString();
         	mNewValues.put(SocialContract.CommunityActivity.ACTOR, user_name);
         	mNewValues.put(SocialContract.CommunityActivity.OBJECT, editText.getText().toString());
-        	mNewValues.put(SocialContract.CommunityActivity.VERB, "posted");
+        	mNewValues.put(SocialContract.CommunityActivity.VERB, verb);
         	mNewValues.put(SocialContract.CommunityActivity.TARGET, org.societies.thirdpartyservices.ijacketlib.IJacketDefines.AccountData.IJACKET_SERVICE_NAME);
         	mNewValues.put(SocialContract.CommunityActivity._ID_FEED_OWNER, communityLocalID);
         	Log.d(LOG_TAG, "going to inseet: " + cssID + " posted " + editText.getText().toString() + " at " +communityJid);
@@ -190,6 +195,20 @@ public class IJacketClient extends Activity implements OnItemSelectedListener {
                 return (i+1);  
         }
         return 0;
+    }
+    
+    
+    private void populateVerbSpinner(){
+    	Spinner spinnerVerbs = (Spinner) findViewById( R.id.spinner2 );
+    	if(null == spinnerVerbs) Log.d(LOG_TAG, "verb spinner is null...");
+    	ArrayList<String> spinnerArray = new ArrayList<String>();
+    	spinnerArray.add( org.societies.thirdpartyservices.ijacketlib.IJacketDefines.Verbs.DISPLAY);
+    	spinnerArray.add(org.societies.thirdpartyservices.ijacketlib.IJacketDefines.Verbs.RING);
+    	spinnerArray.add(org.societies.thirdpartyservices.ijacketlib.IJacketDefines.Verbs.VIBRATE);
+    	// Create an ArrayAdapter using the string array and a default spinner layout
+    	ArrayAdapter<String> adapter = new ArrayAdapter<String> (this,android.R.layout.simple_spinner_dropdown_item, spinnerArray);
+    	spinnerVerbs.setAdapter(adapter);
+    	return;
     }
     
         
