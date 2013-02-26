@@ -33,7 +33,8 @@ package org.societies.thirdpartyservices.idisaster.data;
  *
  */
 public class Me {
-		public String globalId;		// CSS ID
+		public String peopleId;			// The key that connects the user account to a row in the People table
+		public String globalId;			// CSS ID
 		public String displayName;		// nickname - if not available "name" is used for display
 		public String name;
 }

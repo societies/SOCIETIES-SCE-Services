@@ -124,8 +124,10 @@ public class StartActivity extends Activity implements OnClickListener {
 							+ " " 													// Not sure end space in the predefined string is ignored
 							+ iDisasterApplication.getInstance().me.displayName);
 					loggedIn = true;
-				} else if (userQueryCode.equals(iDisasterApplication.getInstance().QUERY_EMPTY)) {	// No data returned by SocialProvider
-					startView.setText(getString(R.string.startInfoNotLogged));
+				} else if (userQueryCode.equals(iDisasterApplication.getInstance().QUERY_EMPTY)) {	// No account data returned by SocialProvider
+					startView.setText(getString(R.string.startInfoNoAccount));
+				} else if (userQueryCode.equals(iDisasterApplication.getInstance().NO_ENTRY)) {		// No people data for the user account
+					startView.setText(getString(R.string.startInfoUserNotRegistered));
 				} else {
 					showQueryExceptionDialog (getString(R.string.dialogQueryException));
 		        }

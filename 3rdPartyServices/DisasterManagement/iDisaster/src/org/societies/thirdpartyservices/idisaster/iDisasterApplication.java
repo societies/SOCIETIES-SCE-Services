@@ -96,6 +96,8 @@ public class iDisasterApplication extends Application {
 	// Constant keys used for update
 	public final String UPDATE_EXCEPTION = "UPDATE_EXCEPTION";
 	public final String UPDATE_SUCCESS = "UPDATE_SUCCESS";
+	// Constant keys for table inconsistency
+	public final String NO_ENTRY = "NO_ENTRY";
 	
 	// Constant keys used for activity feeds
 	public final String FEED_DISPLAY = "DISPLAY";
@@ -225,6 +227,8 @@ public class iDisasterApplication extends Application {
 
 		//What to get:
 		String[] projection = new String [] {
+			SocialContract.Me._ID,
+			SocialContract.Me._ID_PEOPLE,
 			SocialContract.Me.GLOBAL_ID,
 			SocialContract.Me.NAME,
 			SocialContract.Me.DISPLAY_NAME
@@ -263,36 +267,112 @@ public class iDisasterApplication extends Application {
 		}
 
 // Debug code
-//		String id;		
+//		String idPeople;		
+//		String globalId;		
 //		String name;
 //		String dislayName;
 //		String AccountType;
 //		
 //		int i =0;
 //		while (cursor.moveToNext()) {
-//				id = cursor.getString(cursor.getColumnIndex(SocialContract.Me.GLOBAL_ID));
+//				idPeople = cursor.getString(cursor.getColumnIndex(SocialContract.Me._ID_PEOPLE));
+//				globalId = cursor.getString(cursor.getColumnIndex(SocialContract.Me.GLOBAL_ID));
 //				name = cursor.getString(cursor.getColumnIndex(SocialContract.Me.NAME));
 //				dislayName = cursor.getString(cursor.getColumnIndex(SocialContract.Me.DISPLAY_NAME));
 //				i++;				
 //		}
 		
 		if (cursor.moveToFirst()){
-			me.globalId = cursor.getString(cursor		// TODO: check that GLOBAL_ID is correct?
-							.getColumnIndex(SocialContract.Me.GLOBAL_ID));
-			me.name = cursor.getString(cursor
-							.getColumnIndex(SocialContract.Me.NAME));
-			me.displayName = cursor.getString(cursor
-					.getColumnIndex(SocialContract.Me.DISPLAY_NAME));
-			if (me.displayName.equals(SocialContract.VALUE_NOT_DEFINED)) {
-				me.displayName = me.name;		// use name as display name
-			}
-			return QUERY_SUCCESS;		// The only case where true is returned
+			
+			me.peopleId = cursor.getString(cursor
+					.getColumnIndex(SocialContract.Me._ID_PEOPLE));
+
+					// Check that the user can be found in People
+			if (checkPeople (cursor).equals(QUERY_SUCCESS)) {
+				me.globalId = cursor.getString(cursor
+								.getColumnIndex(SocialContract.Me.GLOBAL_ID));
+				me.name = cursor.getString(cursor
+								.getColumnIndex(SocialContract.Me.NAME));
+				me.displayName = cursor.getString(cursor
+						.getColumnIndex(SocialContract.Me.DISPLAY_NAME));
+				if (me.displayName.equals(SocialContract.VALUE_NOT_DEFINED)) {
+					me.displayName = me.name;		// use name as display name
+				}
+				return QUERY_SUCCESS;		// The only case where true is returned				
+			} else
+				return NO_ENTRY;			// No entry matching entry in People
 		}
 		// should not happen
 		return QUERY_EMPTY;
 	}
 
+/**
+ * 	checkPeople checks that the key that connects the user account to a row in
+ * 	the People table is correct. If not it tries to set it.
+ * 
+ * 	Returns a query code:
+ * 			QUERY_SUCCESS if the user account is registered in Me
+ * 			QUERY_EMPTY if the user is not registered
+ * 			QUERY_EXECPTION if the query fails
+ * 
+ *  This method is defined by iDisaster such as a check can be made in any
+ *  activity. 
+ */
+	public String checkPeople (Cursor meCursor) {
+		
+		Cursor peopleCursor = null;
+		Uri uri = SocialContract.People.CONTENT_URI;
 
+		
+		// Creates query to People
+		String[] projection = new String [] {
+				SocialContract.People._ID,
+//				SocialContract.People.NAME,
+				SocialContract.People.EMAIL
+			};
+		String selection = SocialContract.People.EMAIL + "= ?"; // Match users on email address
+		String[] selectionArgs = new String[] {meCursor.getString(meCursor.getColumnIndex(SocialContract.Me.NAME))};
+		String sortOrder = null;	
+        try{
+        	peopleCursor = getContentResolver().query(uri, projection, selection, selectionArgs, sortOrder);
+        } catch (Exception e) {
+			debug (2, "Query to "+ uri + "causes an exception");
+        	return QUERY_EXCEPTION;
+        }			
+		if (peopleCursor == null) { 			// should not happen
+			return QUERY_EMPTY;
+		}		
+		if (peopleCursor.getCount() == 0) {		// No match in People - Inconsistent tables
+			return QUERY_EMPTY;
+		}
+
+		if (peopleCursor.moveToFirst()) {
+			String s = peopleCursor.getString(peopleCursor
+					.getColumnIndex(SocialContract.People._ID));
+
+			if (me.peopleId.equals(s)) {		// Me and People are consistent
+				return QUERY_SUCCESS;
+			} else {							// Update the table Me
+				me.peopleId = "-1";
+				Uri meUri = SocialContract.Me.CONTENT_URI;
+				Uri recordUri = meUri.withAppendedPath(meUri, "/" +
+						meCursor.getString(meCursor.getColumnIndex(SocialContract.Me._ID)));
+				ContentValues values = new ContentValues();
+				values.put(SocialContract.Me._ID_PEOPLE, s);
+				try {
+					getContentResolver().update(recordUri, values, null, null);
+				} catch (Exception e) {
+					debug (2, "Query to "+ uri + "causes an exception");
+		        	return UPDATE_EXCEPTION;
+		        }
+				me.peopleId = s;
+				return QUERY_SUCCESS;
+			}
+		}		
+		return QUERY_EMPTY;
+	}
+	
+	
 /**
  * updateServices is used temporarily. Will be removed after update of the code
  * for SocialProvider.

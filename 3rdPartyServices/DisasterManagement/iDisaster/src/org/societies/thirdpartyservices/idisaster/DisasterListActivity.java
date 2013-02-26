@@ -146,7 +146,7 @@ public class DisasterListActivity extends ListActivity {
 		// Test data are set in onCreate - see explanation above
 
 		if (! iDisasterApplication.testDataUsed) {
-			if (disasterAdapter!= null) disasterAdapter.clear();		
+			if (disasterAdapter!= null) disasterAdapter.clear();	
 			if (getOwnDisasterTeams()			// Retrieve disaster teams I am owner of
 					.equals(iDisasterApplication.getInstance().QUERY_EXCEPTION)) {
 				showQueryExceptionDialog ();	 // Exception: Display dialog and terminates activity
