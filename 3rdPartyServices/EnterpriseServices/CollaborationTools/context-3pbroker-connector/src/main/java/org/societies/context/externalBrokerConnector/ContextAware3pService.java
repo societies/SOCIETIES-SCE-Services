@@ -140,7 +140,7 @@ public class ContextAware3pService implements IContextAware3pService  {
 				CtxEntityIdentifier member = members.next();
 				LOG.info("*** member.toString "+member.toString());
 				// 1b. Register listener by specifying the context attribute scope and type
-				CtxEntity retrievedCtxEntity = (CtxEntity) this.ctxBroker.retrieve(requestorService, member).get();
+//				CtxEntity retrievedCtxEntity = (CtxEntity) this.ctxBroker.retrieve(requestorService, member).get();
 //				Set<CtxAttribute> location = retrievedCtxEntity.getAttributes(CtxAttributeTypes.LOCATION_SYMBOLIC);
 				this.ctxBroker.registerForChanges(requestorService, this.myCtxChangeEventListener, member, CtxAttributeTypes.LOCATION_SYMBOLIC);
 				this.ctxBroker.registerForChanges(requestorService, this.myCtxChangeEventListener, member, CtxAttributeTypes.STATUS);
@@ -221,9 +221,9 @@ public class ContextAware3pService implements IContextAware3pService  {
 				LOG.info("Retrieved member entity: "+retrievedCtxEntity.getId());
 
 				//Job Position
-				Set<CtxAttribute> attribute = retrievedCtxEntity.getAttributes(CtxAttributeTypes.ABOUT);
-				for(CtxAttribute aboutMe : attribute)
-					othersCtx.put("work", new String[]{aboutMe.getStringValue()});
+				Set<CtxAttribute> attribute = retrievedCtxEntity.getAttributes(CtxAttributeTypes.OCCUPATION);
+				for(CtxAttribute occupation : attribute)
+					othersCtx.put("work", new String[]{occupation.getStringValue()});
 				//Company
 				attribute = retrievedCtxEntity.getAttributes(CtxAttributeTypes.ADDRESS_WORK_CITY);
 				for(CtxAttribute company : attribute)
