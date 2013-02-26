@@ -176,7 +176,9 @@ public class FeedListActivity extends ListActivity implements OnClickListener{
 		
 		String[] communityActivityprojection = new String[] {
 // TODO: Find out what information is relevant and should be retrieved
-			SocialContract.CommunityActivity.GLOBAL_ID_OBJECT
+				
+//	old API: SocialContract.CommunityActivity.GLOBAL_ID_OBJECT
+			SocialContract.CommunityActivity.OBJECT
 //		, SocialContract.CommunityActivity.+++
 		};		
 
@@ -220,8 +222,12 @@ public class FeedListActivity extends ListActivity implements OnClickListener{
 			if (feedCursor.getCount() != 0) {
 				while (feedCursor.moveToNext()) {
 					feeds++;
+					
+// old API					String displayName = feedCursor.getString(feedCursor
+//							.getColumnIndex(SocialContract.CommunityActivity.GLOBAL_ID_OBJECT));
+
 					String displayName = feedCursor.getString(feedCursor
-							.getColumnIndex(SocialContract.CommunityActivity.GLOBAL_ID_OBJECT));
+							.getColumnIndex(SocialContract.CommunityActivity.OBJECT));
 					feedList.add (displayName);
 				}
 			}

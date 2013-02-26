@@ -43,6 +43,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.societies.thirdpartyservices.idisaster.R;
 import org.societies.thirdpartyservices.idisaster.data.ThirdPartyService;
@@ -104,16 +105,20 @@ public class StartActivity extends Activity implements OnClickListener {
 			startView.setText(getString(R.string.startInfoNotLogged));			
 		} else {															// Fetch data from SocialProvider
 
+			// Check whether or nor SocialProvider is installed
 			socialProviderInstalled = new ThirdPartyService ("")
 						.serviceInstalled (this,"org.societies.android.platform");
-//			socialProviderInstalled = appInstalled ("org.societies.android.platform");
-			if (!socialProviderInstalled) {			// Check whether or nor SocialProvider is installed
+			if (!socialProviderInstalled) {
 				showQueryExceptionDialog (										// Show exception and terminate
 						getString(R.string.dialogSocialProviderException));
 				
-// TODO: Add code to download and start SocialProvider		
-			} else {			
+// TODO: Add code to download and start SocialProvider
+				
+			} else {		// SocialProvider is installed
+
+				// Get the identity for the user
 				String userQueryCode = iDisasterApplication.getInstance().checkUserIdentity(this);
+				
 				if (userQueryCode.equals(iDisasterApplication.getInstance().QUERY_SUCCESS)) {	// User is identified
 					startView.setText(getString(R.string.startInfoLogged) 
 							+ " " 													// Not sure end space in the predefined string is ignored
@@ -124,9 +129,9 @@ public class StartActivity extends Activity implements OnClickListener {
 				} else {
 					showQueryExceptionDialog (getString(R.string.dialogQueryException));
 		        }
-				
 			}
 		}
+
 	}
 
 /**
@@ -142,12 +147,16 @@ public class StartActivity extends Activity implements OnClickListener {
 		}
 		
 		if (!loggedIn) {													// User was not identified
-			//TODO: Replace this logging by a call to CSS Management?
-			// I am not sure how this should be handled as handling logging
-			// should be under the responsibility of SocialProvider
 
-    		startActivity(new Intent(StartActivity.this, LoginActivity.class));
-    		return;			
+//TODO: Replace this logging by a call to CSS Management
+
+// The user should create an account on box.com
+//    		startActivity(new Intent(StartActivity.this, LoginActivity.class));
+
+			Toast.makeText(this, getString(R.string.startInfoNotLogged), 
+			Toast.LENGTH_LONG).show();
+    		return;
+    		
 		} else {
 	    	startActivity(new Intent(StartActivity.this, DisasterListActivity.class));
 	    	return;

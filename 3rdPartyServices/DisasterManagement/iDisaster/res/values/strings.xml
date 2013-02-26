@@ -94,7 +94,7 @@
     <string name="startButton">Start</string>
     <string name="start_menu_logoff">Log off</string>
     <string name="startTestDialog">The application is in Start Activity.</string>
-    <string name="startInfoNotLogged">You are not logged in.</string>
+    <string name="startInfoNotLogged">You cannot be logged in:\nCreate an account for box.com.</string>
     <string name="startInfoLogged">You are logged as </string>
     
 

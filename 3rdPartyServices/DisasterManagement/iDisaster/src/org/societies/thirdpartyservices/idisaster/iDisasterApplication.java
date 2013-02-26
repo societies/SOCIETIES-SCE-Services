@@ -188,15 +188,16 @@ public class iDisasterApplication extends Application {
 //	    editor.putString ("pref.dummy", "");
 //	    editor.commit ();
 
-//	    if (testDataUsed) {   
+// Test code - to be used only for test when SocialProvider is not avaibale
+	    if (testDataUsed) {   
 	    	setTestData ();	    	
-//	    }
-	    
-// TODO: Remove following code - only used while waiting update for SocialProvider
-	    if (!servicesUpdated) {
-	    	servicesUpdated = true;
-	    	updateServices ();
 	    }
+	    
+// The following code was used for testing purpose while waiting update for SocialProvider
+//	    if (!servicesUpdated) {
+//	    	servicesUpdated = true;
+//	    	updateServices ();
+//	    }
 			    
 	} //onCreate
 
@@ -228,14 +229,14 @@ public class iDisasterApplication extends Application {
 			SocialContract.Me.NAME,
 			SocialContract.Me.DISPLAY_NAME
 		};
-			
-		String selection = SocialContract.Me._ID + " = 1"; // Use the first user identity for Societies
-		String[] selectionArgs = null;
 
-//  Alternative query:
-//		String selection = SocialContract.Me._ID + "= ?"; // Use the first user identity for Societies
-//		String[] selectionArgs = new String[] {"1"};
-			
+		String selection = SocialContract.Me.ACCOUNT_TYPE + "= ?"; // Use the first user identity with Account in box.com
+		String[] selectionArgs = new String[] {"com.box"};
+
+//  Alternative query - does not work with new version of SocialProvider
+//		String selection = SocialContract.Me.ACCOUNT_TYPE + " = com.box"; // Use the first user identity with Account in box.com
+//		String[] selectionArgs = null;
+
 		String sortOrder = null;
 	
         try{
@@ -246,35 +247,44 @@ public class iDisasterApplication extends Application {
         }
 			
 		if (cursor == null) {
-			showDialog (ctx, "Unable to retrieve user information from SocialProvider", getString(R.string.dialogOK));
+// Test code
+//			showDialog (ctx, "Unable to retrieve user information from SocialProvider", getString(R.string.dialogOK));
 			me.displayName = USER_NOT_IDENTFIED;
 			debug (2, "No instance of Me");
 			return QUERY_EMPTY;
 		}
 			
 		if (cursor.getCount() == 0) {
-			showDialog (ctx, "Unable to retrieve user information from SocialProvider", getString(R.string.dialogOK));
+// Test code
+//			showDialog (ctx, "Unable to retrieve user information from SocialProvider", getString(R.string.dialogOK));
 			me.displayName = USER_NOT_IDENTFIED;
 			debug (2, "No instance of Me");
 			return QUERY_EMPTY;
 		}
 
-// TODO: There may be different logging info for user (stored in ContentProvider in Me).
-//	 		The first row is always Societies, other rows may be used for Facebook, etc...
-//			To get the number of entries, use:
-//				int i= cursor.getCount(); 
+// Debug code
+//		String id;		
+//		String name;
+//		String dislayName;
+//		String AccountType;
+//		
+//		int i =0;
+//		while (cursor.moveToNext()) {
+//				id = cursor.getString(cursor.getColumnIndex(SocialContract.Me.GLOBAL_ID));
+//				name = cursor.getString(cursor.getColumnIndex(SocialContract.Me.NAME));
+//				dislayName = cursor.getString(cursor.getColumnIndex(SocialContract.Me.DISPLAY_NAME));
+//				i++;				
+//		}
+		
 		if (cursor.moveToFirst()){
 			me.globalId = cursor.getString(cursor		// TODO: check that GLOBAL_ID is correct?
 							.getColumnIndex(SocialContract.Me.GLOBAL_ID));
 			me.name = cursor.getString(cursor
 							.getColumnIndex(SocialContract.Me.NAME));
-				
-			if (cursor.getString(cursor					//TODO: check with Babak: what is returned if no name?
-					.getColumnIndex(SocialContract.Me.DISPLAY_NAME)) == null) {
-				me.displayName = me.name;		// use name as display name
-			} else {
-				me.displayName = cursor.getString(cursor
+			me.displayName = cursor.getString(cursor
 					.getColumnIndex(SocialContract.Me.DISPLAY_NAME));
+			if (me.displayName.equals(SocialContract.VALUE_NOT_DEFINED)) {
+				me.displayName = me.name;		// use name as display name
 			}
 			return QUERY_SUCCESS;		// The only case where true is returned
 		}
@@ -294,54 +304,54 @@ public class iDisasterApplication extends Application {
  * - CONFIG is set to the name of the intent for launching the Android App
  * - DEPENDENCY: remove for client
  */
-	private String updateServices () {
-		
-		Uri servicesUri = SocialContract.Services.CONTENT_URI;
-		
-		ContentValues values = new ContentValues ();
-		
-		// Step 1: get all services 
-					
-		String[] servicesProjection = new String[] {
-				SocialContract.Services._ID,
-				SocialContract.Services.GLOBAL_ID,
-				SocialContract.Services.NAME
-//TODO: remove - Used temporarily - to check data
-				,
-				SocialContract.Services.DESCRIPTION,
-				SocialContract.Services.TYPE,
-				SocialContract.Services.APP_TYPE,
-				SocialContract.Services.AVAILABLE,
-				SocialContract.Services.DEPENDENCY,
-				SocialContract.Services.CONFIG,
-				SocialContract.Services.URL
-
-				};
-
-		Cursor servicesCursor;
-		try {
-			servicesCursor= getContentResolver().query(servicesUri, servicesProjection,
-					null /* selection */ , null /* selectionArgs */, null /* sortOrder*/);
-		} catch (Exception e) {
-			debug (2, "Query to "+ servicesUri + "causes an exception");
-			return QUERY_EXCEPTION;
-
-		}
-
-		// Step 2: remove owner ID
-		if (servicesCursor == null) {			// No cursor was set - should not happen?
-			iDisasterApplication.getInstance().debug (2, "servicesCursor was not set to any value");
-			return QUERY_EMPTY;
-		}
-		
-		if (servicesCursor.getCount() == 0) {	// No service is recommended in the team community
-			return QUERY_EMPTY;
-		}		
-		
-		while (servicesCursor.moveToNext()) {
+//	private String updateServices () {
+//		
+//		Uri servicesUri = SocialContract.Services.CONTENT_URI;
+//		
+//		ContentValues values = new ContentValues ();
+//		
+//		// Step 1: get all services 
+//					
+//		String[] servicesProjection = new String[] {
+//				SocialContract.Services._ID,
+//				SocialContract.Services.GLOBAL_ID,
+//				SocialContract.Services.NAME
+////TODO: remove - Used temporarily - to check data
+//				,
+//				SocialContract.Services.DESCRIPTION,
+//				SocialContract.Services.TYPE,
+//				SocialContract.Services.APP_TYPE,
+//				SocialContract.Services.AVAILABLE,
+//				SocialContract.Services.DEPENDENCY,
+//				SocialContract.Services.CONFIG,
+//				SocialContract.Services.URL
+//
+//				};
+//
+//		Cursor servicesCursor;
+//		try {
+//			servicesCursor= getContentResolver().query(servicesUri, servicesProjection,
+//					null /* selection */ , null /* selectionArgs */, null /* sortOrder*/);
+//		} catch (Exception e) {
+//			debug (2, "Query to "+ servicesUri + "causes an exception");
+//			return QUERY_EXCEPTION;
+//
+//		}
+//
+//		// Step 2: remove owner ID
+//		if (servicesCursor == null) {			// No cursor was set - should not happen?
+//			iDisasterApplication.getInstance().debug (2, "servicesCursor was not set to any value");
+//			return QUERY_EMPTY;
+//		}
+//		
+//		if (servicesCursor.getCount() == 0) {	// No service is recommended in the team community
+//			return QUERY_EMPTY;
+//		}		
+//		
+//		while (servicesCursor.moveToNext()) {
 			
 			
-//TODO: Remove - Used temporarily			
+// Used temporarily	for debugging - checking query results	
 //			String serviceName = servicesCursor.getString(servicesCursor
 //					.getColumnIndex(SocialContract.Services.NAME));
 //			String serviceDescription = servicesCursor.getString(servicesCursor
@@ -360,35 +370,43 @@ public class iDisasterApplication extends Application {
 //			.getColumnIndex(SocialContract.Services.APP_TYPE));
 	
 			
-			Uri recordUri = servicesUri.withAppendedPath(servicesUri, "/" +
-					servicesCursor.getString(servicesCursor.getColumnIndex(SocialContract.Services._ID)));
-	        values = new ContentValues();
-	        values.put(SocialContract.Services.OWNER_ID, "Contact@SW_company_X.org");
-	        if (servicesCursor.getString(servicesCursor.getColumnIndex(SocialContract.Services.NAME)).equals("iJacket")) {
-		        values.put(SocialContract.Services.GLOBAL_ID, "no.ntnu.osnap.tshirt");
-		        values.put(SocialContract.Services.APP_TYPE, SERVICE_TYPE_PROVIDER);
-		        values.put(SocialContract.Services.AVAILABLE, SERVICE_NOT_INSTALLED);
-		        values.put(SocialContract.Services.URL, "http://folk.ntnu.no/svarvaa/utils/pro2www/apk/Tshirt.apk");
-		        values.put(SocialContract.Services.CONFIG, "org.ubicompforall.cityexplorer.gui.StartActivity");
-				values.put(SocialContract.Services.DEPENDENCY, "org.ubicompforall.cityexplorer");
-		        
-	        } else if (servicesCursor.getString(servicesCursor.getColumnIndex(SocialContract.Services.NAME)).equals("iJacketClient")) {
-	        	// City Explorer used for test... 
-		        values.put(SocialContract.Services.GLOBAL_ID, "org.ubicompforall.cityexplorer");
-	        	values.put(SocialContract.Services.APP_TYPE, SERVICE_TYPE_CLIENT);
-		        values.put(SocialContract.Services.AVAILABLE, SERVICE_NOT_INSTALLED);
-		        values.put(SocialContract.Services.URL, "http://folk.ntnu.no/svarvaa/utils/pro2www/apk/OsnapApp.apk");
-//		        values.put(SocialContract.Services.URL, "https://play.google.com/store/apps");
-		        values.put(SocialContract.Services.CONFIG, "android.intent.action.MAIN"); // TODO: ???
-		        values.put(SocialContract.Services.DEPENDENCY, "");
-
-	        	// City Explorer used for test... 
-		        values.put(SocialContract.Services.CONFIG, "org.ubicompforall.cityexplorer.gui.StartActivity");
-	        }
-	        getContentResolver().update(recordUri, values, null, null);		
-		}
-	
-		return QUERY_SUCCESS; 
+//			Uri recordUri = servicesUri.withAppendedPath(servicesUri, "/" +
+//					servicesCursor.getString(servicesCursor.getColumnIndex(SocialContract.Services._ID)));
+//	        values = new ContentValues();
+//	        values.put(SocialContract.Services.OWNER_ID, "Contact@SW_company_X.org");
+//	        if (servicesCursor.getString(servicesCursor.getColumnIndex(SocialContract.Services.NAME)).equals("iJacket")) {
+//
+////	        	values.put(SocialContract.Services.GLOBAL_ID, "org.societies.thirdpartyservices.ijacket");
+//	        	values.put(SocialContract.Services.GLOBAL_ID, "no.ntnu.osnap.tshirt");
+//		        values.put(SocialContract.Services.APP_TYPE, SERVICE_TYPE_PROVIDER);
+//		        values.put(SocialContract.Services.AVAILABLE, SERVICE_NOT_INSTALLED);
+////		        values.put(SocialContract.Services.URL, "http://folk.ntnu.no/svarvaa/utils/pro2www/apk/iJacket.apk");		        
+//		        values.put(SocialContract.Services.URL, "http://folk.ntnu.no/svarvaa/utils/pro2www/apk/Tshirt.apk");
+//// TODO: Not needed?
+//		        values.put(SocialContract.Services.CONFIG, "org.ubicompforall.cityexplorer.gui.StartActivity");
+////				values.put(SocialContract.Services.DEPENDENCY, "org.societies.thirdpartyservices.ijacketclient");
+//				values.put(SocialContract.Services.DEPENDENCY, "org.ubicompforall.cityexplorer");
+//		        
+//	        } else if (servicesCursor.getString(servicesCursor.getColumnIndex(SocialContract.Services.NAME)).equals("iJacketClient")) {
+//	        	// City Explorer used for test... 
+////	        	values.put(SocialContract.Services.GLOBAL_ID, "org.societies.thirdpartyservices.ijacketclient");
+//	        	values.put(SocialContract.Services.GLOBAL_ID, "org.ubicompforall.cityexplorer");
+//	        	values.put(SocialContract.Services.APP_TYPE, SERVICE_TYPE_CLIENT);
+//		        values.put(SocialContract.Services.AVAILABLE, SERVICE_NOT_INSTALLED);
+////		        values.put(SocialContract.Services.URL, "http://folk.ntnu.no/svarvaa/utils/pro2www/apk/iJacketClient.apk");
+//		        values.put(SocialContract.Services.URL, "http://folk.ntnu.no/svarvaa/utils/pro2www/apk/OsnapApp.apk");
+////		        values.put(SocialContract.Services.URL, "https://play.google.com/store/apps")
+//// Todo: not needed		        
+//		        values.put(SocialContract.Services.CONFIG, "android.intent.action.MAIN"); // TODO: ???
+//		        values.put(SocialContract.Services.DEPENDENCY, "");
+//
+//	        	// City Explorer used for test... 
+//		        values.put(SocialContract.Services.CONFIG, "org.ubicompforall.cityexplorer.gui.StartActivity");
+//	        }
+//	        getContentResolver().update(recordUri, values, null, null);		
+//		}
+//	
+//		return QUERY_SUCCESS; 
 
 		
 		
@@ -471,7 +489,7 @@ public class iDisasterApplication extends Application {
 //	
 //		return QUERY_SUCCESS; 
 		
-	}
+//	}
 		
 
 

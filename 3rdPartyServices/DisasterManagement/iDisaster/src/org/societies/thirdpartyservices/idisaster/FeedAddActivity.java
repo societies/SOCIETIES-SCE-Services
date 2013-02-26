@@ -127,15 +127,23 @@ public class FeedAddActivity extends Activity implements OnClickListener {
 // End remove		
 
 		activityValues.put(SocialContract.CommunityActivity.ORIGIN, "SOCIETIES");	// Social platform iDisaster is plugged into		
-		activityValues.put(SocialContract.CommunityActivity.GLOBAL_ID_ACTOR,		// Me
-							iDisasterApplication.getInstance().me.globalId);
+// old API		
+//		activityValues.put(SocialContract.CommunityActivity.GLOBAL_ID_ACTOR,		// Me
+//		iDisasterApplication.getInstance().me.globalId);
+		activityValues.put(SocialContract.CommunityActivity.ACTOR,					// Me
+				iDisasterApplication.getInstance().me.globalId);
 		activityValues.put(SocialContract.CommunityActivity.GLOBAL_ID_FEED_OWNER,	// Selected team
 							iDisasterApplication.getInstance().selectedTeam.globalId);
-		activityValues.put(SocialContract.CommunityActivity.GLOBAL_ID_VERB,			// Activity intent
-							iDisasterApplication.getInstance().FEED_DISPLAY);
-		activityValues.put(SocialContract.CommunityActivity.GLOBAL_ID_OBJECT, feedContent); // Text entered by the user
-//		No target - shared with all members in the community
-		activityValues.put(SocialContract.CommunityActivity.GLOBAL_ID_TARGET, "ALL"); // Activity target
+// old API		activityValues.put(SocialContract.CommunityActivity.GLOBAL_ID_VERB,			// Activity intent
+//		iDisasterApplication.getInstance().FEED_DISPLAY);
+		activityValues.put(SocialContract.CommunityActivity.VERB,					// Activity intent
+				iDisasterApplication.getInstance().FEED_DISPLAY);
+// old API		activityValues.put(SocialContract.CommunityActivity.GLOBAL_ID_OBJECT, feedContent); // Text entered by the user
+		activityValues.put(SocialContract.CommunityActivity.OBJECT, feedContent); 	// Text entered by the user
+
+		//		No target - shared with all members in the community
+// old API		activityValues.put(SocialContract.CommunityActivity.GLOBAL_ID_TARGET, "ALL"); // Activity target
+		activityValues.put(SocialContract.CommunityActivity.TARGET, "ALL"); 		// Activity target
 		 
 		try {
 // The Uri value returned is not used.

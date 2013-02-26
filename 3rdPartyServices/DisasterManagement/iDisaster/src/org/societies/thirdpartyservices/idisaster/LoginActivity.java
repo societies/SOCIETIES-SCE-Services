@@ -63,8 +63,8 @@ import android.database.Cursor;
  */
 
 
-// TODO: This ACtivity will be removed
-// Login should be handled by CSS Management Light
+// TODO: This Activity is no longer used.
+// Login should be handled by CSS Management
 
 public class LoginActivity extends Activity implements OnClickListener {
 
