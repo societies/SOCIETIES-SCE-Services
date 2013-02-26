@@ -7,6 +7,20 @@
 		<version>RELEASE</version>
 		<relativePath>../../parent/spring-osgi.xml</relativePath>
 	</parent>
+	
+	<developers>
+	    <developer>
+			<id>ChristopherLima</id>
+			<name>Christopher Viana Lima</name>
+			<email></email>
+			<organization>PTIN</organization>
+			<organizationUrl>http://www.ptinovacao.pt/</organizationUrl>
+			<roles>
+				<role>developer</role>
+			</roles>
+		</developer>
+	</developers>
+			    	
 	<groupId>org.societies.enterprise</groupId>
 	<artifactId>CollabTools</artifactId>
 	<packaging>bundle</packaging>
@@ -140,7 +154,7 @@
 							<version>0.1.0</version>
 							<type>jar</type>
 							<overWrite>true</overWrite>
-							<outputDirectory>${env.VIRGO_HOME}/repository/usr</outputDirectory>
+							<outputDirectory>${spring.osgi.deploy.dir}</outputDirectory>
 						</artifactItem>
 					</artifactItems>
 				</configuration>

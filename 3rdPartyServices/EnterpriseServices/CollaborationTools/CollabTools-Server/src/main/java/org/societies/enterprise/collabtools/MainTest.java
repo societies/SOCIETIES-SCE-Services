@@ -85,7 +85,7 @@ public class MainTest {
 		registerShutdownHook();
 
 		//Caching last recently used for Location
-		( (LuceneIndex<Node>) indexShortTermCtx ).setCacheCapacity( "name", 3000 );
+		((LuceneIndex<Node>) indexShortTermCtx).setCacheCapacity("name", 3000);
 
 		TestUtils test = new TestUtils(personRepository, sessionRepository);
 		//Clean graph DB

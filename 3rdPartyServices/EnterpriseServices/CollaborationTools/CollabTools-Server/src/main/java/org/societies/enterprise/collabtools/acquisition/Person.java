@@ -143,7 +143,7 @@ public class Person extends Observable
     public boolean equals( Object o )
     {
         return o instanceof Person &&
-                underlyingNode.equals( ( (Person)o ).getUnderlyingNode() );
+                underlyingNode.equals( ((Person)o).getUnderlyingNode() );
     }
 
     @Override
@@ -178,12 +178,12 @@ public class Person extends Observable
 
     public int getNrOfFriends()
     {
-        return IteratorUtil.count( getFriends() );
+        return IteratorUtil.count(getFriends());
     }
 
     public Iterable<Person> getFriends()
     {
-        return getFriendsByDepth( 1 );
+        return getFriendsByDepth(1);
     }
 
     public void removeFriend(Person otherPerson)
@@ -191,9 +191,9 @@ public class Person extends Observable
         Transaction tx = underlyingNode.getGraphDatabase().beginTx();
         try
         {
-            if ( !this.equals( otherPerson ) )
+            if ( !this.equals(otherPerson))
             {
-                Relationship friendRel = getFriendRelationshipTo( otherPerson );
+                Relationship friendRel = getFriendRelationshipTo(otherPerson);
                 if ( friendRel != null )
                 {
                     friendRel.delete();
@@ -212,8 +212,8 @@ public class Person extends Observable
         return getFriendsByDepth( 2 );
     }
 
-    public Iterable<Person> getShortestPathTo( Person otherPerson,
-                                               int maxDepth )
+    public Iterable<Person> getShortestPathTo(Person otherPerson,
+                                               int maxDepth)
     {
         // use graph algo to calculate a shortest path
         PathFinder<Path> finder = GraphAlgoFactory.shortestPath(
@@ -228,21 +228,21 @@ public class Person extends Observable
             int numberOfFriendsToReturn)
     {
         HashSet<Person> friends = new HashSet<Person>();
-        IteratorUtil.addToCollection( getFriends(), friends );
+        IteratorUtil.addToCollection(getFriends(), friends);
 
         HashSet<Person> friendsOfFriends = new HashSet<Person>();
         IteratorUtil.addToCollection( getFriendsOfFriends(), friendsOfFriends );
 
-        friendsOfFriends.removeAll( friends );
+        friendsOfFriends.removeAll(friends);
 
         ArrayList<RankedPerson> rankedFriends = new ArrayList<RankedPerson>();
         for ( Person friend : friendsOfFriends )
         {
-            int rank = getNumberOfPathsToPerson( friend );
+            int rank = getNumberOfPathsToPerson(friend);
             rankedFriends.add( new RankedPerson( friend, rank ) );
         }
 
-        Collections.sort( rankedFriends, new RankedComparer() );
+        Collections.sort(rankedFriends, new RankedComparer());
         trimTo( rankedFriends, numberOfFriendsToReturn );
 
         return onlyFriend( rankedFriends );
