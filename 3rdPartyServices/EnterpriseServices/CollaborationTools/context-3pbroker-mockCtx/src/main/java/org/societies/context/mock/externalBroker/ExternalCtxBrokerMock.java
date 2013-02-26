@@ -27,7 +27,6 @@ package org.societies.context.mock.externalBroker;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
@@ -36,23 +35,20 @@ import java.util.concurrent.ExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.societies.api.cis.attributes.MembershipCriteria;
-import org.societies.api.cis.management.ICis;
 import org.societies.api.cis.management.ICisManager;
 import org.societies.api.cis.management.ICisOwned;
-import org.societies.api.comm.xmpp.exceptions.CommunicationException;
 import org.societies.api.comm.xmpp.interfaces.ICommManager;
 import org.societies.api.context.CtxException;
 import org.societies.api.context.broker.ICtxBroker;
 import org.societies.api.context.model.CommunityCtxEntity;
 import org.societies.api.context.model.CtxAssociation;
+import org.societies.api.context.model.CtxAssociationIdentifier;
 import org.societies.api.context.model.CtxAttribute;
 import org.societies.api.context.model.CtxAttributeIdentifier;
 import org.societies.api.context.model.CtxAttributeTypes;
 import org.societies.api.context.model.CtxEntity;
 import org.societies.api.context.model.CtxEntityIdentifier;
-import org.societies.api.context.model.CtxEntityTypes;
 import org.societies.api.context.model.CtxIdentifier;
-import org.societies.api.context.model.IndividualCtxEntity;
 import org.societies.api.identity.IIdentity;
 import org.societies.api.identity.INetworkNode;
 import org.societies.api.identity.InvalidFormatException;
@@ -76,7 +72,6 @@ public class ExternalCtxBrokerMock 	{
 	/** The 3P Context Broker service reference. */
     private ICommManager commMgrService;
     private ICtxBroker ctxBroker;
-    private IIdentity cssOwnerId;
     private INetworkNode cssNodeId;
     private ICisOwned cisOwned = null;
     private IIdentity cisID;
@@ -102,10 +97,10 @@ public class ExternalCtxBrokerMock 	{
 		LOG.info("*** cssNodeId = " + this.cssNodeId);
 
 		final String cssOwnerStr = this.cssNodeId.getBareJid();
-		this.cssOwnerId = commMgr.getIdManager().fromJid(cssOwnerStr);
-		LOG.info("*** cssOwnerId = " + this.cssOwnerId);
+		this.cssID = this.commMgrService.getIdManager().fromJid(cssOwnerStr);
+		LOG.info("*** cssID = " + this.cssID);
 
-		this.requestor = new Requestor(this.cssOwnerId);
+		this.requestor = getRequestor(this.cssID);
 		LOG.info("*** requestor = " + this.requestor);
 
 		Hashtable<String,MembershipCriteria> cisCriteria = new Hashtable<String,MembershipCriteria>();
@@ -123,8 +118,9 @@ public class ExternalCtxBrokerMock 	{
 //			
 //			
 			//Creating CIS-CollabTools
-			cisOwned = cisManager.createCis("CIS-CollabTools"+new Random().nextInt(100), "Test", cisCriteria, "CSCW CIS").get();
-			LOG.info("*** Cis created = CIS-CollabTools ");
+			this.cisOwned = cisManager.createCis("CIS-CollabTools"+new Random().nextInt(100), "Test", cisCriteria, "CSCW CIS").get();
+			this.cisID = this.commMgrService.getIdManager().fromJid(cisOwned.getCisId());
+			LOG.info("*** created CIS = CIS-CollabTools ");
 //
 //		} catch (InterruptedException e) {
 //			// TODO Auto-generated catch block
@@ -136,7 +132,7 @@ public class ExternalCtxBrokerMock 	{
 		
 		LOG.info("*** cisOwned " +cisOwned);
 		LOG.info("*** cisOwned.getCisId() " +cisOwned.getCisId());
-		String cisIDString  = cisOwned.getCisId();
+//		String cisIDString  = cisOwned.getCisId();
 
 	    LOG.info("*** Starting community context samples...");
 
@@ -171,16 +167,13 @@ public class ExternalCtxBrokerMock 	{
 	
 	  private Requestor getRequestor(IIdentity cssOwnerId)
 	  {
-	    return this.requestor = new Requestor(this.cssOwnerId);
+	    return this.requestor = new Requestor(this.cssID);
 	  }
 
 
 	
 	public void createPersons(String namePerson) throws Exception
 	    {
-	
-		LOG.info("*****cssID: " + this.cssID.toString());
-
 	    this.personIndiEnt = ((CtxEntity)this.ctxBroker.createEntity(this.requestor, this.cssID, "person").get());
 	    CtxAttribute interestsAttr1 = (CtxAttribute)this.ctxBroker.createAttribute(this.requestor, this.personIndiEnt.getId(), "interests").get();
 	    String[] interests = getRandomInterests();
@@ -195,8 +188,8 @@ public class ExternalCtxBrokerMock 	{
 				CtxAttribute nameAttr = this.ctxBroker.createAttribute(requestor, personIndiEnt.getId() , CtxAttributeTypes.NAME).get();
 				nameAttr.setStringValue(namePerson);
 				
-				CtxAttribute aboutMeAttr = this.ctxBroker.createAttribute(requestor, personIndiEnt.getId() , CtxAttributeTypes.ABOUT).get();
-				aboutMeAttr.setStringValue(getRandomWork());
+				CtxAttribute occupationAttr = this.ctxBroker.createAttribute(requestor, personIndiEnt.getId() , CtxAttributeTypes.OCCUPATION).get();
+				occupationAttr.setStringValue(getRandomOccupation());
 				
 				CtxAttribute locationAttr = this.ctxBroker.createAttribute(requestor, personIndiEnt.getId(), CtxAttributeTypes.LOCATION_SYMBOLIC).get();
 			    this.ctxAttrLocationIdentifier = locationAttr.getId();
@@ -209,7 +202,7 @@ public class ExternalCtxBrokerMock 	{
 			    this.ctxBroker.update(this.requestor, interestsAttr2);
 			    this.ctxBroker.update(this.requestor, interestsAttr3);
 			    this.ctxBroker.update(this.requestor, nameAttr);
-			    this.ctxBroker.update(this.requestor, aboutMeAttr);
+			    this.ctxBroker.update(this.requestor, occupationAttr);
 			    this.ctxBroker.update(this.requestor, locationAttr);
 			    this.ctxBroker.update(this.requestor, statusAttr);
 
@@ -217,19 +210,17 @@ public class ExternalCtxBrokerMock 	{
 				 
 				LOG.info("Creating person name: "+nameAttr.getStringValue());
 				LOG.info("*** with Interests: "+interestsAttr1.getStringValue()+", "+interestsAttr2.getStringValue()+", "+interestsAttr3.getStringValue());
-				LOG.info("*** with Job Position: "+aboutMeAttr.getStringValue());
+				LOG.info("*** with Job Position: "+occupationAttr.getStringValue());
 				LOG.info("*** with Location: "+locationAttr.getStringValue());
 				LOG.info("*** with Status: "+statusAttr.getStringValue());
 				
 			    LOG.info("*** getting  Associations");
-			    String cisIDString = this.cisOwned.getCisId();
-			    this.cisID = this.commMgrService.getIdManager().fromJid(cisIDString);
 			    CtxEntityIdentifier ctxCommunityEntityIdentifier = (CtxEntityIdentifier)this.ctxBroker.retrieveCommunityEntityId(this.requestor, this.cisID).get();
 			    LOG.info("communityEntityIdentifier retrieved: " + ctxCommunityEntityIdentifier.toString() + " based on cisID: " + this.cisID);
 			    CommunityCtxEntity communityEntity = (CommunityCtxEntity)this.ctxBroker.retrieve(this.requestor, ctxCommunityEntityIdentifier).get();
-			    Set assocIDSet = communityEntity.getAssociations("hasMembers");
+			    Set<CtxAssociationIdentifier> assocIDSet = communityEntity.getAssociations("hasMembers");
 			    if (assocIDSet.size() > 0) {
-			      List assocIdList = new ArrayList(assocIDSet);
+			      List<CtxAssociationIdentifier> assocIdList = new ArrayList<CtxAssociationIdentifier>(assocIDSet);
 			      this.assocHasMembers = ((CtxAssociation)this.ctxBroker.retrieve(this.requestor, (CtxIdentifier)assocIdList.get(0)).get());
 			    }
 
@@ -267,9 +258,9 @@ public class ExternalCtxBrokerMock 	{
 		return status[r.nextInt(3)];
 	}
 	
-	private String getRandomWork() {
-		final String[] work={"Manager","Developer","Beta Tester"};
-		return work[r.nextInt(3)];
+	private String getRandomOccupation() {
+		final String[] occupation={"Manager","Developer","Beta Tester"};
+		return occupation[r.nextInt(3)];
 	}
 	
 	/**
