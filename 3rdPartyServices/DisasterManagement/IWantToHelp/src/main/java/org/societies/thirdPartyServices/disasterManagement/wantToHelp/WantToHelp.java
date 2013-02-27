@@ -1,5 +1,5 @@
 /**
-  * Copyright (c) 2011, SOCIETIES Consortium (WATERFORD INSTITUTE OF TECHNOLOGY (TSSG), HERIOT-WATT UNIVERSITY (HWU), SOLUTA.NET 
+ * Copyright (c) 2011, SOCIETIES Consortium (WATERFORD INSTITUTE OF TECHNOLOGY (TSSG), HERIOT-WATT UNIVERSITY (HWU), SOLUTA.NET 
  * (SN), GERMAN AEROSPACE CENTRE (Deutsches Zentrum fuer Luft- und Raumfahrt e.V.) (DLR), Zavod za varnostne tehnologije
  * informacijske družbe in elektronsko poslovanje (SETCCE), INSTITUTE OF COMMUNICATION AND COMPUTER SYSTEMS (ICCS), LAKE
  * COMMUNICATIONS (LAKE), INTEL PERFORMANCE LEARNING SOLUTIONS LTD (INTEL), PORTUGAL TELECOM INOVAÇÃO, SA (PTIN), IBM Corp., 
@@ -104,9 +104,9 @@ public class WantToHelp implements IWantToHelp, ActionListener {
 	private String testUserPassword = "password";	
 	private String userFirstname = "firstname";
 	private String userLastname = "lastname";
-	private String userInstitute = "institute";
-	private String skills = "skills,myOnes";
-	private String userCountry = "DLR";
+	private String userInstitute = "DLR";
+	private String skills = "";
+	private String userCountry = "Germany";
 	private String languages;
 	
 	
@@ -116,8 +116,6 @@ public class WantToHelp implements IWantToHelp, ActionListener {
 	private ICommManager commMgr;
 
 	private boolean NO_USER;
-
-
 
 	@Autowired(required=true)
 	public WantToHelp(ICtxBroker externalCtxBroker, ICommManager commMgr) {
@@ -130,6 +128,10 @@ public class WantToHelp implements IWantToHelp, ActionListener {
 
 		printAndLog("********** commMgr="+commMgr);
 		printAndLog("********** contextBroker="+externalCtxBroker);
+		
+		
+		sendDataToCSDMandYRNA();
+		
 		
 		// ++++++++++++   GUI start   ++++++++++++
 		
@@ -178,9 +180,6 @@ public class WantToHelp implements IWantToHelp, ActionListener {
 //		pullThread.setCheckData(false);
 		
 		// ------------   pull thread end   ------------
-		
-		
-		sendDataToCSDMandYRNA();
 	}
 	
 //	@PostConstruct

@@ -1,3 +1,28 @@
+/**
+ * Copyright (c) 2011, SOCIETIES Consortium (WATERFORD INSTITUTE OF TECHNOLOGY (TSSG), HERIOT-WATT UNIVERSITY (HWU), SOLUTA.NET 
+ * (SN), GERMAN AEROSPACE CENTRE (Deutsches Zentrum fuer Luft- und Raumfahrt e.V.) (DLR), Zavod za varnostne tehnologije
+ * informacijske družbe in elektronsko poslovanje (SETCCE), INSTITUTE OF COMMUNICATION AND COMPUTER SYSTEMS (ICCS), LAKE
+ * COMMUNICATIONS (LAKE), INTEL PERFORMANCE LEARNING SOLUTIONS LTD (INTEL), PORTUGAL TELECOM INOVAÇÃO, SA (PTIN), IBM Corp., 
+ * INSTITUT TELECOM (ITSUD), AMITEC DIACHYTI EFYIA PLIROFORIKI KAI EPIKINONIES ETERIA PERIORISMENIS EFTHINIS (AMITEC), TELECOM 
+ * ITALIA S.p.a.(TI),  TRIALOG (TRIALOG), Stiftelsen SINTEF (SINTEF), NEC EUROPE LTD (NEC))
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following
+ * conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+ *
+ * 2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following
+ *    disclaimer in the documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING,
+ * BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT 
+ * SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+ * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
 package org.societies.thirdPartyServices.disasterManagement.analyzeThis.xmlrpc;
 
 import java.util.Date;
@@ -5,141 +30,86 @@ import java.util.concurrent.ExecutionException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.societies.api.comm.xmpp.interfaces.ICommManager;
 import org.societies.api.identity.InvalidFormatException;
-import org.societies.api.privacytrust.trust.ITrustBroker;
 import org.societies.api.privacytrust.trust.TrustException;
-import org.societies.api.privacytrust.trust.evidence.ITrustEvidenceCollector;
 import org.societies.api.privacytrust.trust.evidence.TrustEvidenceType;
 import org.societies.api.privacytrust.trust.model.MalformedTrustedEntityIdException;
 import org.societies.api.privacytrust.trust.model.TrustedEntityId;
 import org.societies.api.privacytrust.trust.model.TrustedEntityType;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.societies.thirdPartyServices.disasterManagement.analyzeThis.AnalyzeThis;
 
+@SuppressWarnings("unused")
 public class TrustHandler {
 	private static final String SOCIETIES_DOMAIN = ".societies.local";
-	Logger logger = LoggerFactory.getLogger(TrustHandler.class);
-	@Autowired(required = true)
-	private ITrustEvidenceCollector trustEvidenceCollector;
-	@Autowired(required = true)
-	private ITrustBroker trustBroker;
-	@Autowired(required = true)
-	private ICommManager commMgr;
-	private TrustedEntityId trustorId;
+	private static final Logger LOG = LoggerFactory.getLogger(TrustHandler.class);
 
-	public String recalculateTrust(String reporting_user_id,
-			String recalculate_user_id, int value) {
-		logger.debug("user_id " + reporting_user_id
-				+ " reported: recalculate trust for user_id "
-				+ recalculate_user_id + " --- value = " + value);
-
-		TrustedEntityId trustedCssId1 = null;
-		try {
-			if (trustorId == null)
-				this.trustorId = new TrustedEntityId(TrustedEntityType.CSS,
-						commMgr.getIdManager()
-								.fromJid(
-								// "trustorCss@societies.local");
-										commMgr.getIdManager()
-												.getThisNetworkNode()
-												.getBareJid()).toString());
-
-			trustedCssId1 = new TrustedEntityId(
-					TrustedEntityType.CSS, commMgr
-							.getIdManager()
-							.fromJid(
-									recalculate_user_id.substring(0,
-											recalculate_user_id.indexOf('@'))
-											+ SOCIETIES_DOMAIN).toString());
-
-		} catch (MalformedTrustedEntityIdException e) {
-			logger.error(e.getMessage());
-		} catch (InvalidFormatException e) {
-			logger.error(e.getMessage());
-		}
+	public String recalculateTrust(String reporting_user_id, String required_user_id, int value) {
+//		LOG.debug("user_id " + reporting_user_id + " reported: recalculate trust for user_id " + recalculate_user_id + " --- value = " + value);
 		
-		if (trustEvidenceCollector != null)
+		String feedback = "<br>";
+		
+		TrustedEntityId questionerUserTEID = null;
+		TrustedEntityId requiredUserTEID = null;
+		try {
+//			feedback += "CommMgr "+AnalyzeThis.getInstance().getCommMgr().toString()+ " <br>";
+			questionerUserTEID = new TrustedEntityId(TrustedEntityType.CSS, AnalyzeThis.getInstance().getCommMgr().getIdManager() .fromJid(
+					AnalyzeThis.getInstance().getCommMgr().getIdManager().getThisNetworkNode().getBareJid()).toString());
+			requiredUserTEID = new TrustedEntityId(TrustedEntityType.CSS, required_user_id.substring(0,required_user_id.indexOf('@')) + SOCIETIES_DOMAIN);
+		} catch (MalformedTrustedEntityIdException e1) {
+			LOG.error(e1.getMessage());
+		} catch (InvalidFormatException e1) {
+			LOG.error(e1.getMessage());
+		}
+		feedback += "questioner_user trustId "+questionerUserTEID.getEntityId()+ " <br>";
+		feedback += "required_user trustId "+requiredUserTEID.getEntityId()+ " <br>";
+		
+		feedback += "TrustEvidenceCollector "+AnalyzeThis.getInstance().getTrustEvidenceCollector()+" <br>";
+		if (AnalyzeThis.getInstance().getTrustEvidenceCollector() != null)
 			try {
-				trustEvidenceCollector.addDirectEvidence(trustorId, trustedCssId1,
-						TrustEvidenceType.RATED, new Date(), new Double(value/100));
+				AnalyzeThis.getInstance().getTrustEvidenceCollector().addDirectEvidence(questionerUserTEID, requiredUserTEID, TrustEvidenceType.RATED, new Date(), new Double(value/100));
 			} catch (TrustException e) {
-				logger.error(e.getMessage());
+				LOG.error(e.getMessage());
 			}
 		else
-			logger.error("No connection to TrustEvidenceCollector");
+			LOG.error("No connection to TrustEvidenceCollector");
 
-		return getTrust(reporting_user_id, recalculate_user_id);
+//		return feedback;
+		return getTrust(reporting_user_id, required_user_id);
 	}
 
 	public String getTrust(String questioner_user_id, String required_user_id) {
-		logger.debug("questioner_user_id " + questioner_user_id
-				+ " | required_user_id " + required_user_id);
+//		LOG.debug("questioner_user_id " + questioner_user_id + " | required_user_id " + required_user_id);
+		String feedback = "<br>";
+		TrustedEntityId questionerUserTEID = null;
+		TrustedEntityId requiredUserTEID = null;
+		try {
+//			feedback += "CommMgr "+AnalyzeThis.getInstance().getCommMgr().toString()+ " <br>";
+			questionerUserTEID = new TrustedEntityId(TrustedEntityType.CSS, AnalyzeThis.getInstance().getCommMgr().getIdManager() .fromJid(
+					AnalyzeThis.getInstance().getCommMgr().getIdManager().getThisNetworkNode().getBareJid()).toString());
+			requiredUserTEID = new TrustedEntityId(TrustedEntityType.CSS, required_user_id.substring(0,required_user_id.indexOf('@')) + SOCIETIES_DOMAIN);
+		} catch (MalformedTrustedEntityIdException e1) {
+			LOG.error(e1.getMessage());
+		} catch (InvalidFormatException e1) {
+			LOG.error(e1.getMessage());
+		}
+		feedback += "questioner_user trustId "+questionerUserTEID.getEntityId()+ " <br>";
+		feedback += "required_user trustId "+requiredUserTEID.getEntityId()+ " <br>";
+		
+		Double trustResult = 0.0;
+//		feedback += "TrustBroker "+AnalyzeThis.getInstance().getTrustBroker().toString()+ " <br>";
 
-		if (trustorId == null)
-			try {
-				this.trustorId = new TrustedEntityId(TrustedEntityType.CSS,
-						commMgr.getIdManager()
-								.fromJid(
-								// "trustorCss@societies.local");
-										commMgr.getIdManager()
-												.getThisNetworkNode()
-												.getBareJid()).toString());
-			} catch (MalformedTrustedEntityIdException e1) {
-				logger.error(e1.getMessage());
-			} catch (InvalidFormatException e1) {
-				logger.error(e1.getMessage());
-			}
+		try {
+			trustResult = AnalyzeThis.getInstance().getTrustBroker().retrieveTrust(questionerUserTEID, requiredUserTEID).get();
+			feedback += " ........ TRUST RESULT "+trustResult+"<br>";
+		} catch (InterruptedException e) {
+			LOG.error(e.getMessage());
+		} catch (ExecutionException e) {
+			LOG.error(e.getMessage());
+		} catch (TrustException e) {
+			LOG.error(e.getMessage());
+		}
 
-		Double trustResult = Math.random();
-		if (trustBroker != null)
-			try {
-				trustResult = trustBroker.retrieveTrust(
-						this.trustorId,
-						new TrustedEntityId(TrustedEntityType.CSS,
-								required_user_id.substring(0,
-										required_user_id.indexOf('.'))
-										+ SOCIETIES_DOMAIN)).get();
-			} catch (InterruptedException e) {
-				logger.error(e.getMessage());
-			} catch (ExecutionException e) {
-				logger.error(e.getMessage());
-			} catch (TrustException e) {
-				logger.error(e.getMessage());
-			}
-		else
-			logger.error("No connection to TrustBroker");
-
+//		return feedback;
 		return trustResult * 100 + "";
-	}
-
-	/**
-	 * @return the trustEvidenceCollector
-	 */
-	public ITrustEvidenceCollector getTrustEvidenceCollector() {
-		return trustEvidenceCollector;
-	}
-
-	/**
-	 * @param trustEvidenceCollector
-	 *            the trustEvidenceCollector to set
-	 */
-	public void setTrustEvidenceCollector(
-			ITrustEvidenceCollector trustEvidenceCollector) {
-		this.trustEvidenceCollector = trustEvidenceCollector;
-	}
-
-	/**
-	 * @return the trustBroker
-	 */
-	public ITrustBroker getTrustBroker() {
-		return trustBroker;
-	}
-
-	/**
-	 * @param trustBroker
-	 *            the trustBroker to set
-	 */
-	public void setTrustBroker(ITrustBroker trustBroker) {
-		this.trustBroker = trustBroker;
 	}
 }

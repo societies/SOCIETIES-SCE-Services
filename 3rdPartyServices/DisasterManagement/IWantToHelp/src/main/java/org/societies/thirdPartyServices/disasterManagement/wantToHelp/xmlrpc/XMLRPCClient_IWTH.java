@@ -74,7 +74,6 @@ public class XMLRPCClient_IWTH {
 		try {
 			Object[] getUserDataParams = new Object[] {email};
 			returnString = (String) client.execute("societies.getUserData", getUserDataParams);
-//			System.out.println(returnString+"//////////");
 		} catch (XmlRpcException e) {
 			e.printStackTrace();
 		}

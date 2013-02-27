@@ -8,7 +8,7 @@
 	</parent>
 	<groupId>org.societies.thirdPartyServices.disasterManagement</groupId>
 	<artifactId>AnalyzeThis</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.2</version>
 	<packaging>bundle</packaging>
 	<name>AnalyzeThis</name>
 	<url>http://www.ict-societies.eu/</url>

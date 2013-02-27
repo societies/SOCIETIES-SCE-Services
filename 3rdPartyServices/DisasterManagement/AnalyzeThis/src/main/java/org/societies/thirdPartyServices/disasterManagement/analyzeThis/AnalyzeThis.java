@@ -59,6 +59,7 @@ import org.societies.thirdPartyServices.disasterManagement.analyzeThis.xmlrpc.XM
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+@SuppressWarnings("unused")
 @Service
 public class AnalyzeThis implements IAnalyzeThis, ActionListener {
 	
@@ -89,65 +90,25 @@ public class AnalyzeThis implements IAnalyzeThis, ActionListener {
 
 	private static final int BASIS_PORT = 54300;
 	
+	private static AnalyzeThis selfReference;
+	
 	
 	@Autowired(required=true)
 	private ICommManager commMgr;
-
+	@Autowired(required = true)
+	private ITrustEvidenceCollector trustEvidenceCollector;
+	@Autowired(required = true)
+	private ITrustBroker trustBroker;
 
 	@Autowired(required=true)
 	public AnalyzeThis(ICommManager commMgr) {
 		this.commMgr = commMgr;
-		LOG.info("*** " + this.getClass() + " instantiated");
+		printAndLog("^^^^^^^^^ " + this.getClass() + " instantiated");
 		
 		xmlRpcClient_AT = new XMLRPCClient_AT();
 
-		LOG.info("*** commMgr="+commMgr);
+		printAndLog("^^^^^^^^^ commMgr="+commMgr);
 		
-		
-		
-		// otherwise it does not startup in VIRGO
-		UIManager.put("ClassLoader", ClassLoader.getSystemClassLoader());
-		
-		frame = new JFrame("AnalyzeThis");
-		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		frame.addWindowListener(new WindowEventHandler());
-		
-		JPanel panel = new JPanel();
-		panel.setLayout(new MigLayout(PANEL_LAYOUT_CONSTRAINTS, PANEL_COLUMN_CONTSTRAINTS, PANEL_ROW_CONSTRAINTS));
-		Dimension panelDimension = new Dimension(1200, 768); 
-		panel.setPreferredSize(panelDimension);
-		frame.getContentPane().add(panel);
-		
-		subscribe = new JButton("subscribe to recent CSDM requests");
-		subscribe.setActionCommand(subscribeCommand);
-		subscribe.addActionListener(this);
-		unsubscribe = new JButton("I am done");
-		unsubscribe.setActionCommand(unsubscribeCommand);
-		unsubscribe.addActionListener(this);
-		unsubscribe.setVisible(false);
-		
-		addticket = new JButton("add ticket");
-		addticket.setActionCommand(addticketCommand);
-		addticket.addActionListener(this);
-
-		feedbackTextArea = new JTextArea("");
-		feedbackTextArea.setEditable(false);
-		DefaultCaret caret = (DefaultCaret)feedbackTextArea.getCaret();
-		caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
-	    JScrollPane scrollPane = new JScrollPane(feedbackTextArea);
-	    JPanel feedbackPanel = new JPanel(new MigLayout(FEEDBACK_LAYOUT_CONSTRAINTS, FEEDBACK_COLUMN_CONTSTRAINTS, FEEDBACK_ROW_CONSTRAINTS));
-	    feedbackPanel.add(scrollPane);
-
-	    panel.add(subscribe);
-	    panel.add(unsubscribe);
-	    panel.add(feedbackPanel);
-//	}
-//	
-//	@PostConstruct
-//	public void activate() throws Exception {
-		feedbackTextArea.append("on activate -> AnalyzeThis service started\n");
-		
-
 		String userName = commMgr.getIdManager().getThisNetworkNode().getIdentifier();
 		int userNumber = -1;
 		boolean NO_USER = false;
@@ -165,19 +126,72 @@ public class AnalyzeThis implements IAnalyzeThis, ActionListener {
 			LOG.error(e.getMessage());
 		}
         
-		pullThread = new PullThread();
-		pullThread.start();
-		pullThread.setCheckData(false);
+        selfReference = this;
 		
-		frame.pack();
-		frame.setVisible(true);	
+		// ++++++++++++   GUI start   ++++++++++++
+		
+		// otherwise it does not startup in VIRGO
+//		UIManager.put("ClassLoader", ClassLoader.getSystemClassLoader());
+//		
+//		frame = new JFrame("AnalyzeThis");
+//		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+//		frame.addWindowListener(new WindowEventHandler());
+//		
+//		JPanel panel = new JPanel();
+//		panel.setLayout(new MigLayout(PANEL_LAYOUT_CONSTRAINTS, PANEL_COLUMN_CONTSTRAINTS, PANEL_ROW_CONSTRAINTS));
+//		Dimension panelDimension = new Dimension(1200, 768); 
+//		panel.setPreferredSize(panelDimension);
+//		frame.getContentPane().add(panel);
+//		
+//		subscribe = new JButton("subscribe to recent CSDM requests");
+//		subscribe.setActionCommand(subscribeCommand);
+//		subscribe.addActionListener(this);
+//		unsubscribe = new JButton("I am done");
+//		unsubscribe.setActionCommand(unsubscribeCommand);
+//		unsubscribe.addActionListener(this);
+//		unsubscribe.setVisible(false);
+//		
+//		addticket = new JButton("add ticket");
+//		addticket.setActionCommand(addticketCommand);
+//		addticket.addActionListener(this);
+//
+//		feedbackTextArea = new JTextArea("");
+//		feedbackTextArea.setEditable(false);
+//		DefaultCaret caret = (DefaultCaret)feedbackTextArea.getCaret();
+//		caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
+//	    JScrollPane scrollPane = new JScrollPane(feedbackTextArea);
+//	    JPanel feedbackPanel = new JPanel(new MigLayout(FEEDBACK_LAYOUT_CONSTRAINTS, FEEDBACK_COLUMN_CONTSTRAINTS, FEEDBACK_ROW_CONSTRAINTS));
+//	    feedbackPanel.add(scrollPane);
+//
+//	    panel.add(subscribe);
+//	    panel.add(unsubscribe);
+//	    panel.add(feedbackPanel);
+//
+//		printAndLog("^^^^^^^^^ on activate -> AnalyzeThis service started");
+//		frame.pack();
+//		frame.setVisible(true);
+
+		// ------------   GUI end   ------------
+
+		
+		// ++++++++++++   pull thread start   ++++++++++++
+        
+//		pullThread = new PullThread();
+//		pullThread.start();
+//		pullThread.setCheckData(false);
+		
+		// ------------   pull thread end   ------------
+	}
+	
+	public static AnalyzeThis getInstance(){
+		return selfReference;
 	}
 
 //	@PreDestroy
 	public void deactivate() throws Exception {
-		feedbackTextArea.append("on deactivate ->AnalyzeThis service stopped ... \n");
+		printAndLog("^^^^^^^^^ on deactivate ->AnalyzeThis service stopped ... ");
 
-		pullThread.setRun(false);
+//		pullThread.setRun(false);
 		
 		frame.dispose();
 	}
@@ -186,14 +200,21 @@ public class AnalyzeThis implements IAnalyzeThis, ActionListener {
 	public void actionPerformed(ActionEvent e) {
 		String command = e.getActionCommand();
 		if (command.equalsIgnoreCase(subscribeCommand)) {
-			pullThread.setCheckData(true);
+//			pullThread.setCheckData(true);
 			subscribe.setVisible(false);
 			unsubscribe.setVisible(true);
 		} else if (command.equalsIgnoreCase(unsubscribeCommand)) {
-			pullThread.setCheckData(false);
+//			pullThread.setCheckData(false);
 			subscribe.setVisible(true);
 			unsubscribe.setVisible(false);
 		} else if (command.equalsIgnoreCase(addticketCommand)) {}
+	}
+	
+	private void printAndLog(String string) {
+		if (feedbackTextArea!=null)
+			feedbackTextArea.append(string+"");
+		
+		LOG.info(string);	
 	}
 	
 	private class PullThread extends Thread {
@@ -214,7 +235,7 @@ public class AnalyzeThis implements IAnalyzeThis, ActionListener {
 					
 					for (TicketData ticketData : xmlRpcClient_AT.getTickets(mysqlFormat.format(cal.getTime()))) 
 						if (!ticketDataMap.containsKey(ticketData.getID())) {
-							feedbackTextArea.append("new request> "+ ticketData + "\n");
+							printAndLog("^^^^^^^^^ new request> "+ ticketData + "");
 							ticketDataMap.put(ticketData.getID(), ticketData);
 						}
 				}
@@ -261,4 +282,34 @@ public class AnalyzeThis implements IAnalyzeThis, ActionListener {
 		this.commMgr = commMgr;
 	}
 
+	/**
+	 * @return the trustEvidenceCollector
+	 */
+	public ITrustEvidenceCollector getTrustEvidenceCollector() {
+		return trustEvidenceCollector;
+	}
+
+	/**
+	 * @param trustEvidenceCollector
+	 *            the trustEvidenceCollector to set
+	 */
+	public void setTrustEvidenceCollector(
+			ITrustEvidenceCollector trustEvidenceCollector) {
+		this.trustEvidenceCollector = trustEvidenceCollector;
+	}
+
+	/**
+	 * @return the trustBroker
+	 */
+	public ITrustBroker getTrustBroker() {
+		return trustBroker;
+	}
+
+	/**
+	 * @param trustBroker
+	 *            the trustBroker to set
+	 */
+	public void setTrustBroker(ITrustBroker trustBroker) {
+		this.trustBroker = trustBroker;
+	}
 }

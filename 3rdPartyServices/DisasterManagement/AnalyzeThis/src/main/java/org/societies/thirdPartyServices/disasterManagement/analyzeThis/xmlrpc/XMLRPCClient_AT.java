@@ -85,12 +85,9 @@ public class XMLRPCClient_AT {
 		Vector<TicketData> tickets = new Vector<TicketData>();
 		if (!response.equalsIgnoreCase("")) {
 			String[] responseLines = response.split("\n");
-//			System.out.println("responseLine: "+responseLines[0]);
 			
 			for (String line : responseLines) {
-//				System.out.println("line: "+line);
 				String[] ticket = line.split("---");
-//				System.out.println("ticket: "+ticket[0]);
 				tickets.add(new TicketData(new Integer(ticket[0]), ticket[1]));
 			}
 		}
