@@ -11,6 +11,7 @@ import org.societies.thirdpartyservices.ijacket.com.ComLibException;
 import org.societies.thirdpartyservices.ijacket.com.ConnectionListener;
 import org.societies.thirdpartyservices.ijacket.com.ConnectionMetadata;
 import org.societies.thirdpartyservices.ijacket.com.ConnectionMetadata.DefaultServices;
+import org.societies.thirdpartyservices.ijacketlib.IJacketDefines;
 
 
 
@@ -404,7 +405,22 @@ public class JacketMenuActivity extends Activity {
 				        	
 				        	
 				        }else{
-				        	con.print(actor + " " + verb + " " +obj, false);
+				        	if (verb.equals(IJacketDefines.Verbs.DISPLAY))
+				        		con.print(obj, false);
+				        	if (verb.equals(IJacketDefines.Verbs.RING))
+				        		con.data(new byte[]{100, 75, 52, 15}, false);
+				        	if (verb.equals(IJacketDefines.Verbs.VIBRATE)){
+			             		//Vibrate mobile
+			             		Vibrator vib = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+			             		vib.vibrate(2000);
+			             		
+			             		
+			             		//Vibrate remote module
+								con.write(vibrationButton.pin, true, false);
+			                 	Thread.sleep(2000);
+			                 	con.write(vibrationButton.pin, false, false);
+				        	}
+				        		
 				        }
 				    }
 				} else {
