@@ -33,7 +33,9 @@ package org.societies.thirdpartyservices.idisaster.data;
  *
  */
 public class Me {
-		@Deprecated public String globalId;			// CSS Global ID
+		@Deprecated public String globalId;	// People.GLOBAL_ID - Not sure it is the same as Me.GLOBAL_ID
+
+		public String peopleGlobalId;	// People.GLOBAL_ID - Not the same as Me.GLOBAL_ID (that is set to PENDING)
 		public String peopleId;			// The key that connects the user account to a row in the People table
 										// _ID_PEOPLE in Me
 										// _ID in People

@@ -119,17 +119,26 @@ public class FeedAddActivity extends Activity implements OnClickListener {
 
 		// Set the values related to the activity to store in SocialProvider
 		ContentValues activityValues = new ContentValues ();
-	
+
+// TODO: what should be set here? local or global id?
 		activityValues.put(SocialContract.CommunityActivity._ID_FEED_OWNER,
 				iDisasterApplication.getInstance().selectedTeam.id);
+
+// TODO: what should be set here? global or local id? - local id seems to not work		
 		activityValues.put(SocialContract.CommunityActivity.ACTOR,					// Me
-				iDisasterApplication.getInstance().me.peopleId);
+				iDisasterApplication.getInstance().me.peopleGlobalId);
+
 		activityValues.put(SocialContract.CommunityActivity.VERB,					// Activity intent: Simple text
 				iDisasterApplication.getInstance().VERB_TEXT);
 		activityValues.put(SocialContract.CommunityActivity.OBJECT, feedContent); 	// Text entered by the user			
 		activityValues.put(SocialContract.CommunityActivity.TARGET,					// Recipient for Activity 
 				iDisasterApplication.getInstance().TARGET_ALL);
-				 
+
+		// Fields for synchronization with box.com
+		activityValues.put(SocialContract.CommunityActivity.ACCOUNT_NAME, iDisasterApplication.getInstance().me.userName);
+		activityValues.put(SocialContract.CommunityActivity.ACCOUNT_TYPE, "com.box");
+		activityValues.put(SocialContract.CommunityActivity.DIRTY, 1);
+
 		try {
 // The Uri value returned is not used.
 //			Uri activityNewUri = getContentResolver().insert( SocialContract.CommunityActivity.CONTENT_URI,

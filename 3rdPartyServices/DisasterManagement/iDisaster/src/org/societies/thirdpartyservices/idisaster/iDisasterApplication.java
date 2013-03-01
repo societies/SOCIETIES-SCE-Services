@@ -233,7 +233,7 @@ public class iDisasterApplication extends Application {
 		String[] projection = new String [] {
 			SocialContract.Me._ID,
 			SocialContract.Me._ID_PEOPLE,
-//			SocialContract.Me.GLOBAL_ID,
+			SocialContract.Me.GLOBAL_ID,
 			SocialContract.Me.NAME,
 			SocialContract.Me.DISPLAY_NAME,
 			SocialContract.Me.USER_NAME			
@@ -297,6 +297,10 @@ public class iDisasterApplication extends Application {
 			
 			me.peopleId = cursor.getString(cursor
 					.getColumnIndex(SocialContract.Me._ID_PEOPLE));
+// Cannot be set here - Me.GLOBAL_ID is set to PENDING
+// Should be set in checkPeople
+//			me.peopleGlobalId = cursor.getString(cursor
+//					.getColumnIndex(SocialContract.Me.GLOBAL_ID));
 
 					// Check that the user can be found in People
 			if (checkPeople (cursor).equals(QUERY_SUCCESS)) {
@@ -341,6 +345,7 @@ public class iDisasterApplication extends Application {
 		// Creates query to People
 		String[] projection = new String [] {
 				SocialContract.People._ID,
+				SocialContract.People.GLOBAL_ID,
 //				SocialContract.People.NAME,
 				SocialContract.People.EMAIL
 			};
@@ -365,6 +370,8 @@ public class iDisasterApplication extends Application {
 					.getColumnIndex(SocialContract.People._ID));
 
 			if (me.peopleId.equals(s)) {		// Me and People are consistent
+				me.peopleGlobalId =  peopleCursor.getString(peopleCursor
+						.getColumnIndex(SocialContract.People.GLOBAL_ID));
 				return QUERY_SUCCESS;
 			} else {							// Update the table Me
 				me.peopleId = "-1";
@@ -380,6 +387,8 @@ public class iDisasterApplication extends Application {
 		        	return UPDATE_EXCEPTION;
 		        }
 				me.peopleId = s;
+				me.peopleGlobalId =  peopleCursor.getString(peopleCursor
+						.getColumnIndex(SocialContract.People.GLOBAL_ID));
 				return QUERY_SUCCESS;
 			}
 		}		

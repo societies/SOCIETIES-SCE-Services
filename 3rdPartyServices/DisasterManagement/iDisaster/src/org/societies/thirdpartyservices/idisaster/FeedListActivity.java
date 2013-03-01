@@ -28,6 +28,7 @@ import java.util.ArrayList;
 
 import org.societies.android.api.cis.SocialContract;
 import org.societies.thirdpartyservices.idisaster.R;
+import org.societies.thirdpartyservices.idisaster.data.SocialEntity;
 
 import android.app.AlertDialog;
 import android.app.ListActivity;
@@ -199,46 +200,6 @@ public class FeedListActivity extends ListActivity implements OnClickListener{
 		
 		return iDisasterApplication.getInstance().QUERY_SUCCESS;
 	}
-
-/**
- * getEntityName retrieves the name of an entity. Either person, service of community.
- * Currently only service is implemented!
- */
-	private String getEntityName  (String id) {
-			
-		Uri peopleUri = SocialContract.People.CONTENT_URI;
-			
-		String[] peopleProjection = new String[] {
-			SocialContract.People.NAME
-		};		
-
-		String peopleSelection = SocialContract.People._ID + "= ?";
-		String[] peopleSelectionArgs = new String[] {id};			// The id of the entity
-
-
-		Cursor c;
-		try {
-			c = resolver.query(peopleUri, peopleProjection,
-						peopleSelection, peopleSelectionArgs,
-						null /* no order */);			
-			} catch (Exception e) {
-				iDisasterApplication.getInstance().debug (2, "Query to "+ peopleUri + "causes an exception");
-	    		return "";
-			}
-			
-		if (c==null) {
-			return "";
-		}
-			
-		if (c.getCount()==0) {
-			return "";
-		}
-
-		if (c.moveToFirst()) {
-			return (c.getString(c.getColumnIndex(SocialContract.People.NAME)));
-		}
-		return "";
-	}
 	
 	
 /**
@@ -262,8 +223,10 @@ public class FeedListActivity extends ListActivity implements OnClickListener{
 				while (feedCursor.moveToNext()) {
 					feeds++;
 					
-					String displayName = getEntityName (feedCursor.getString(feedCursor
-												.getColumnIndex(SocialContract.CommunityActivity.ACTOR)));
+					SocialEntity actor = new SocialEntity (feedCursor.getString(
+							(feedCursor.getColumnIndex(SocialContract.CommunityActivity.ACTOR))));
+					
+					String displayName = actor.getEntityName (getContentResolver ());
 
 					String v = feedCursor.getString(feedCursor
 							.getColumnIndex(SocialContract.CommunityActivity.VERB));
@@ -274,18 +237,20 @@ public class FeedListActivity extends ListActivity implements OnClickListener{
 						String t = feedCursor.getString(feedCursor
 								.getColumnIndex(SocialContract.CommunityActivity.TARGET));
 						if (!(t.equals (iDisasterApplication.getInstance().TARGET_ALL))) { // only add Target if not ALL
-							displayName = getEntityName  (t);
+							SocialEntity target = new SocialEntity (t);
+							displayName = displayName + " => " + target.getEntityName  (getContentResolver ());
 						}
 						
-					} else {													// service command
-						
+					} else {													// service command						
 						displayName = displayName + " " + v + " " +
-								feedCursor.getString(feedCursor.getColumnIndex(SocialContract.CommunityActivity.OBJECT))
-								+ " " + 
-								feedCursor.getString(feedCursor
-									.getColumnIndex(SocialContract.CommunityActivity.TARGET));
+								feedCursor.getString(feedCursor.getColumnIndex(SocialContract.CommunityActivity.OBJECT));
+						String t = feedCursor.getString(feedCursor
+								.getColumnIndex(SocialContract.CommunityActivity.TARGET));
+						if (!(t.equals (iDisasterApplication.getInstance().TARGET_ALL))) { // only add Target if not ALL
+							SocialEntity target = new SocialEntity (t);
+							displayName = displayName + " => " + target.getEntityName  (getContentResolver ());
+						}						
 					}
-						
 					
 					feedList.add (displayName);
 				}

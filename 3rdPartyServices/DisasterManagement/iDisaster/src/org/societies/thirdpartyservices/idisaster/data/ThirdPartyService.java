@@ -98,9 +98,7 @@ public class ThirdPartyService {
  * from Social Provider.
  */
 
-	public String getServiceInformation (Context cxt, ContentResolver c) {
-
-		resolver = c;
+	public String getServiceInformation (Context cxt, ContentResolver resolver) {
 		
 		String[] serviceProjection = new String[] {
 							SocialContract.Services._ID,
