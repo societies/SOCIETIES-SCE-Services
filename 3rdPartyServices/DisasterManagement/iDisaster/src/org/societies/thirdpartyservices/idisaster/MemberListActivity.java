@@ -109,7 +109,7 @@ public class MemberListActivity extends ListActivity {
     					
     	     			Intent intent = new Intent(MemberListActivity.this, SharedServiceListActivity.class);
      					String memberGlobalId = memberCursor.getString(memberCursor
-    							.getColumnIndex(SocialContract.People.GLOBAL_ID));
+    							.getColumnIndex(SocialContract.People._ID));
            				intent.putExtra("MEMBER_ID", memberGlobalId);       					
        					String memberName =  memberCursor.getString(memberCursor
     							.getColumnIndex(SocialContract.People.NAME));
@@ -186,10 +186,10 @@ public class MemberListActivity extends ListActivity {
 		Uri membershipUri = SocialContract.Membership.CONTENT_URI;
 					
 		String[] membershipProjection = new String[] {
-				SocialContract.Membership.GLOBAL_ID_MEMBER};
+				SocialContract.Membership._ID_MEMBER};
 
-		String membershipSelection = SocialContract.Membership.GLOBAL_ID_COMMUNITY + "= ?";
-		String[] membershipSelectionArgs = new String[] {iDisasterApplication.getInstance().selectedTeam.globalId};	// For the selected CIS
+		String membershipSelection = SocialContract.Membership._ID_COMMUNITY + "= ?";
+		String[] membershipSelectionArgs = new String[] {iDisasterApplication.getInstance().selectedTeam.id};	// For the selected CIS
 	
 		Cursor membershipCursor;
 		try {
@@ -216,7 +216,7 @@ public class MemberListActivity extends ListActivity {
 		Uri peopleUri = SocialContract.People.CONTENT_URI;
 				
 		String[] membersProjection = new String[] {
-					SocialContract.People.GLOBAL_ID,
+					SocialContract.People._ID,
 					SocialContract.People.NAME};
 			
 		// Build selection string and selectionArgs string
@@ -227,15 +227,15 @@ public class MemberListActivity extends ListActivity {
 		while (membershipCursor.moveToNext()) {
 			if (first) {
 				first = false;
-				membersSelection = SocialContract.People.GLOBAL_ID + "= ?";
+				membersSelection = SocialContract.People._ID + "= ?";
 				membersSelectionArgs.add (membershipCursor.getString(
-								(membershipCursor.getColumnIndex(SocialContract.Membership.GLOBAL_ID_MEMBER))));
+								(membershipCursor.getColumnIndex(SocialContract.Membership._ID_MEMBER))));
 			} 
 			else {
 				membersSelection = membersSelection + " OR " +
-											   SocialContract.People.GLOBAL_ID + "= ?";
+											   SocialContract.People._ID + "= ?";
 				membersSelectionArgs.add (membershipCursor.getString(
-						(membershipCursor.getColumnIndex(SocialContract.Membership.GLOBAL_ID_MEMBER))));
+						(membershipCursor.getColumnIndex(SocialContract.Membership._ID_MEMBER))));
 			}
 		}
 		

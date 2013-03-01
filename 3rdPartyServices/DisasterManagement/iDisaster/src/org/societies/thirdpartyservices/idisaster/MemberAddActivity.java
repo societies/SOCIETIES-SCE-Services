@@ -190,7 +190,7 @@ public class MemberAddActivity extends ListActivity implements OnClickListener {
     	Uri peopleUri = SocialContract.People.CONTENT_URI;
     					
     	String[] peopleProjection = new String[] {
-    				SocialContract.People.GLOBAL_ID,
+    				SocialContract.People._ID,
     				SocialContract.People.NAME};
     	
     	try {
@@ -232,7 +232,7 @@ public class MemberAddActivity extends ListActivity implements OnClickListener {
     				while (peopleCursor.moveToNext()) {
     					// Only display people that are not members in the selected team	
     					if (! memberInTeam (peopleCursor.getString(peopleCursor
-    							.getColumnIndex(SocialContract.People.GLOBAL_ID)))) {
+    							.getColumnIndex(SocialContract.People._ID)))) {
 	    						
     						String displayName = peopleCursor.getString(peopleCursor
     								.getColumnIndex(SocialContract.People.NAME));
@@ -267,13 +267,13 @@ public class MemberAddActivity extends ListActivity implements OnClickListener {
     	
     	MemberListActivity.memberCursor.moveToFirst();
     	if (m.equals(MemberListActivity.memberCursor.getString(
-    			MemberListActivity.memberCursor.getColumnIndex(SocialContract.People.GLOBAL_ID)))) {
+    			MemberListActivity.memberCursor.getColumnIndex(SocialContract.People._ID)))) {
     			return true;
     	}
     	
     	while (MemberListActivity.memberCursor.moveToNext()) {
     		if (m.equals(MemberListActivity.memberCursor.getString(
-    				MemberListActivity.memberCursor.getColumnIndex(SocialContract.People.GLOBAL_ID)))) {
+    				MemberListActivity.memberCursor.getColumnIndex(SocialContract.People._ID)))) {
     			return true;
     		}
     	}
@@ -300,19 +300,18 @@ public class MemberAddActivity extends ListActivity implements OnClickListener {
 				// Set the values related to the activity to store in SocialProvider
 				ContentValues membershipValues = new ContentValues ();
 				
-		//TODO: Remove the following once SocialProvider has been corrected (SocialProvider should insert the GLOBAL_ID)
-				SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss");
-				String currentDateandTime = sdf.format(new Date());
-				membershipValues.put(SocialContract.Membership.GLOBAL_ID, currentDateandTime);
-		// End remove		
+				membershipValues.put(SocialContract.Membership._ID_COMMUNITY,	// Add member to the selected team
+						iDisasterApplication.getInstance().selectedTeam.id);				
+				membershipValues.put(SocialContract.Membership._ID_MEMBER,		// Id of the member to be added
+						peopleCursor.getString(peopleCursor.getColumnIndex(SocialContract.People._ID)));
+				membershipValues.put(SocialContract.Membership.DESCRIPTION,	"");// Application-provided description: none
+				membershipValues.put(SocialContract.Membership.TYPE, "member");	// Application-provided
 
-				membershipValues.put(SocialContract.Membership.GLOBAL_ID_MEMBER,		// Id of the member to be added
-						peopleCursor.getString(peopleCursor.getColumnIndex(SocialContract.People.GLOBAL_ID)));
-				membershipValues.put(SocialContract.Membership.GLOBAL_ID_COMMUNITY,		// Add member to the selected team
-									iDisasterApplication.getInstance().selectedTeam.globalId);
-				membershipValues.put(SocialContract.Membership.TYPE, "member");			// Activity intent
-				membershipValues.put(SocialContract.Membership.ORIGIN, "SOCIETIES");	// Social platform iDisaster is plugged into		
-				 
+				// Fields for synchronization with box.com
+				membershipValues.put(SocialContract.CommunityActivity.ACCOUNT_NAME, iDisasterApplication.getInstance().me.userName);
+				membershipValues.put(SocialContract.CommunityActivity.ACCOUNT_TYPE, "com.box");
+				membershipValues.put(SocialContract.CommunityActivity.DIRTY, 1);
+
 				try {
 // The Uri value returned is not used.
 //					Uri activityNewUri = getContentResolver().insert( SocialContract.CommunityActivity.CONTENT_URI,

@@ -60,7 +60,7 @@ import org.societies.thirdpartyservices.idisaster.data.ThirdPartyService;
 
 public class SharedServiceListActivity extends ListActivity {
 
-	private String memberGlobalId;
+	private String memberId;
 	private String memberName;
 	
 	private ContentResolver resolver;
@@ -81,7 +81,7 @@ public class SharedServiceListActivity extends ListActivity {
     	super.onCreate(savedInstanceState);
     	
 		Intent intent= getIntent(); 					// Get the intent that created activity		
-		memberGlobalId = intent.getStringExtra("MEMBER_ID");	// Retrieve first parameter (id of member sharing services)
+		memberId = intent.getStringExtra("MEMBER_ID");	// Retrieve first parameter (id of member sharing services)
 		memberName = intent.getStringExtra("MEMBER_NAME");		// Retrieve second parameter (name of member sharing services)
     	
     	setContentView (R.layout.shared_service_list_layout);    	
@@ -188,16 +188,16 @@ public class SharedServiceListActivity extends ListActivity {
 			Uri sharingUri = SocialContract.Sharing.CONTENT_URI;
 						
 			String[] sharingProjection = new String[] {
-					SocialContract.Sharing.GLOBAL_ID_SERVICE};
+					SocialContract.Sharing._ID_SERVICE};
 
-			String sharingSelection = SocialContract.Sharing.GLOBAL_ID_COMMUNITY + "= ?" +									
-									"AND " + SocialContract.Sharing.GLOBAL_ID_OWNER + "= ?" +
+			String sharingSelection = SocialContract.Sharing._ID_COMMUNITY + "= ?" +									
+									"AND " + SocialContract.Sharing._ID_OWNER + "= ?" +
 									"AND " + SocialContract.Sharing.TYPE + "= ?";
 
 			String[] sharingSelectionArgs = new String[] 
-					{iDisasterApplication.getInstance().selectedTeam.globalId,	// For the selected CIS
-					memberGlobalId,												// For the member
-					iDisasterApplication.getInstance().SERVICE_SHARED};			// Retrieve shared services
+					{iDisasterApplication.getInstance().selectedTeam.id,	// For the selected CIS
+					memberId,												// For the member
+					iDisasterApplication.getInstance().SERVICE_SHARED};		// Retrieve shared services
 	
 			Cursor sharingCursor;
 			try {
@@ -236,12 +236,12 @@ public class SharedServiceListActivity extends ListActivity {
 					first = false;
 					servicesSelection = SocialContract.Services.GLOBAL_ID + "= ?";
 					servicesSelectionArgs.add (sharingCursor.getString(
-									(sharingCursor.getColumnIndex(SocialContract.Sharing.GLOBAL_ID_SERVICE))));
+									(sharingCursor.getColumnIndex(SocialContract.Sharing._ID_SERVICE))));
 				} else {
 					servicesSelection = servicesSelection + 
 										" OR " +  SocialContract.Services.GLOBAL_ID + "= ?";
 					servicesSelectionArgs.add (sharingCursor.getString(
-							(sharingCursor.getColumnIndex(SocialContract.Sharing.GLOBAL_ID_SERVICE))));
+							(sharingCursor.getColumnIndex(SocialContract.Sharing._ID_SERVICE))));
 				}
 			}
 						
@@ -299,8 +299,9 @@ public class SharedServiceListActivity extends ListActivity {
 	private void launchClientService (int position) {
 		
 		sharedServiceCursor.moveToPosition(position);
+// TODO: check this!		
 		selectedServiceGlobalId =  sharedServiceCursor.getString(sharedServiceCursor
-				.getColumnIndex(SocialContract.Services.GLOBAL_ID));
+				.getColumnIndex(SocialContract.Services._ID));
 		selectedServiceName =  sharedServiceCursor.getString(sharedServiceCursor
 				.getColumnIndex(SocialContract.Services.NAME));
 		
@@ -356,7 +357,8 @@ public class SharedServiceListActivity extends ListActivity {
   						// Start ServiceDetails activity
   		     			Intent intent = new Intent(SharedServiceListActivity.this, ServiceDetailsActivity.class);
            				intent.putExtra("REQUEST_CONTEXT", iDisasterApplication.getInstance().SERVICE_SHARED);
-        				intent.putExtra("SERVICE_GLOBAL_ID", clientServiceGlobalId);
+//TODO: check this!
+        				intent.putExtra("SERVICE_ID", clientServiceGlobalId);
                 		startActivity(intent);
   						return;
   					}
