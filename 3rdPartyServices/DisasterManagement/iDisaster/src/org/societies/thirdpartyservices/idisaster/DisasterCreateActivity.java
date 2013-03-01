@@ -134,23 +134,21 @@ public class DisasterCreateActivity extends Activity implements OnClickListener 
  */
 	private String addNewTeam () {
     
-//    	Uri teamUri = SocialContract.Communities.CONTENT_URI;
-
 		// Set the values related to the activity to store in SocialProvider
 		ContentValues teamValues = new ContentValues ();
 		
-//TODO: Remove the following once SocialProvider has been corrected (SocialProvider should insert the GLOBAL_ID)
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss");
-		String currentDateandTime = sdf.format(new Date());
-		teamValues.put(SocialContract.Communities.GLOBAL_ID, currentDateandTime);
-// End remove		
-
-		teamValues.put(SocialContract.Communities.TYPE, "disaster");
 		teamValues.put(SocialContract.Communities.NAME, disasterName);
 		teamValues.put(SocialContract.Communities.DESCRIPTION, disasterDescription);
-		teamValues.put(SocialContract.Communities.OWNER_ID,iDisasterApplication.getInstance().me.globalId);
-		teamValues.put(SocialContract.Communities.ORIGIN, "SOCIETIES");
+// TODO: Remove debug code
+//		String s = iDisasterApplication.getInstance().me.peopleId;
+		teamValues.put(SocialContract.Communities._ID_OWNER,iDisasterApplication.getInstance().me.peopleId);
+		teamValues.put(SocialContract.Communities.TYPE, iDisasterApplication.getInstance().COMMUNITY_TYPE);
 
+		// Fields for synchronization with box.com
+		teamValues.put(SocialContract.Communities.ACCOUNT_NAME, iDisasterApplication.getInstance().me.userName);
+		teamValues.put(SocialContract.Communities.ACCOUNT_TYPE, "com.box");
+		teamValues.put(SocialContract.Communities.DIRTY, 1);
+		
 		try {
 // The Uri value returned is not used.
 //						Uri activityNewUri = getContentResolver().insert( SocialContract.CommunityActivity.CONTENT_URI,

@@ -47,6 +47,7 @@
     <string name="disasterHeading">Selected team</string>
 
     <string name="feedAddButton">Add activity</string>
+    <string name="feedAddCommunityPending">Team info not yet synchronised. Wait before adding an activity.</string>
     <string name="feedAddHeading">Edit Activity</string>
 	<string name="feedCancelButton">Cancel</string>
 	<string name="feedContentHint">Enter a short status</string>

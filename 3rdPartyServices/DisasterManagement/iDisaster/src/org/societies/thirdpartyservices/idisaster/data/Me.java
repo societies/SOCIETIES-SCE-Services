@@ -33,8 +33,13 @@ package org.societies.thirdpartyservices.idisaster.data;
  *
  */
 public class Me {
+		@Deprecated public String globalId;			// CSS Global ID
 		public String peopleId;			// The key that connects the user account to a row in the People table
-		public String globalId;			// CSS ID
+										// _ID_PEOPLE in Me
+										// _ID in People
+		// Fields extracted from Me
+		public String name;				// name of the user
 		public String displayName;		// nickname - if not available "name" is used for display
-		public String name;
+		public String userName;		// login user name
+
 }

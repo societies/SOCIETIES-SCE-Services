@@ -32,7 +32,8 @@ package org.societies.thirdpartyservices.idisaster.data;
  *
  */
 public class SelectedTeam {
-	public String globalId;		// CIS ID
+	public String globalId;		// CIS global ID
+	public String id;			// CIS local ID
 	public String name;			// name of the team
 	public boolean ownFlag;		// True if the user has selected the community as owner
 }

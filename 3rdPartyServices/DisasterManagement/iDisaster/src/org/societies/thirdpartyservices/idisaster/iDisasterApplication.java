@@ -98,9 +98,13 @@ public class iDisasterApplication extends Application {
 	public final String UPDATE_SUCCESS = "UPDATE_SUCCESS";
 	// Constant keys for table inconsistency
 	public final String NO_ENTRY = "NO_ENTRY";
-	
+
+	// Constant keys used for communities
+	public final String COMMUNITY_TYPE = "SOCIETIES_DM";
+
 	// Constant keys used for activity feeds
-	public final String FEED_DISPLAY = "DISPLAY";
+	public final String VERB_TEXT = "VERB_TEXT";
+	public final String TARGET_ALL = "TARGET_ALL";
 	
 	// Constant used for services in a community
 	public final String SERVICE_RECOMMENDED = "RECOMMENDED";
@@ -229,9 +233,10 @@ public class iDisasterApplication extends Application {
 		String[] projection = new String [] {
 			SocialContract.Me._ID,
 			SocialContract.Me._ID_PEOPLE,
-			SocialContract.Me.GLOBAL_ID,
+//			SocialContract.Me.GLOBAL_ID,
 			SocialContract.Me.NAME,
-			SocialContract.Me.DISPLAY_NAME
+			SocialContract.Me.DISPLAY_NAME,
+			SocialContract.Me.USER_NAME			
 		};
 
 		String selection = SocialContract.Me.ACCOUNT_TYPE + "= ?"; // Use the first user identity with Account in box.com
@@ -267,18 +272,24 @@ public class iDisasterApplication extends Application {
 		}
 
 // Debug code
+//		String id;		
 //		String idPeople;		
-//		String globalId;		
+////		String globalId;		
 //		String name;
 //		String dislayName;
+//		String userName;
 //		String AccountType;
+//		
 //		
 //		int i =0;
 //		while (cursor.moveToNext()) {
+//				id = cursor.getString(cursor.getColumnIndex(SocialContract.Me._ID));
 //				idPeople = cursor.getString(cursor.getColumnIndex(SocialContract.Me._ID_PEOPLE));
-//				globalId = cursor.getString(cursor.getColumnIndex(SocialContract.Me.GLOBAL_ID));
+////				globalId = cursor.getString(cursor.getColumnIndex(SocialContract.Me.GLOBAL_ID));
 //				name = cursor.getString(cursor.getColumnIndex(SocialContract.Me.NAME));
 //				dislayName = cursor.getString(cursor.getColumnIndex(SocialContract.Me.DISPLAY_NAME));
+//				userName = cursor.getString(cursor.getColumnIndex(SocialContract.Me.USER_NAME));
+//				
 //				i++;				
 //		}
 		
@@ -289,8 +300,8 @@ public class iDisasterApplication extends Application {
 
 					// Check that the user can be found in People
 			if (checkPeople (cursor).equals(QUERY_SUCCESS)) {
-				me.globalId = cursor.getString(cursor
-								.getColumnIndex(SocialContract.Me.GLOBAL_ID));
+//				me.globalId = cursor.getString(cursor
+//								.getColumnIndex(SocialContract.Me.GLOBAL_ID));
 				me.name = cursor.getString(cursor
 								.getColumnIndex(SocialContract.Me.NAME));
 				me.displayName = cursor.getString(cursor
@@ -298,6 +309,9 @@ public class iDisasterApplication extends Application {
 				if (me.displayName.equals(SocialContract.VALUE_NOT_DEFINED)) {
 					me.displayName = me.name;		// use name as display name
 				}
+				me.userName = cursor.getString(cursor
+						.getColumnIndex(SocialContract.Me.USER_NAME));
+
 				return QUERY_SUCCESS;		// The only case where true is returned				
 			} else
 				return NO_ENTRY;			// No entry matching entry in People
@@ -331,7 +345,7 @@ public class iDisasterApplication extends Application {
 				SocialContract.People.EMAIL
 			};
 		String selection = SocialContract.People.EMAIL + "= ?"; // Match users on email address
-		String[] selectionArgs = new String[] {meCursor.getString(meCursor.getColumnIndex(SocialContract.Me.NAME))};
+		String[] selectionArgs = new String[] {meCursor.getString(meCursor.getColumnIndex(SocialContract.Me.USER_NAME))};
 		String sortOrder = null;	
         try{
         	peopleCursor = getContentResolver().query(uri, projection, selection, selectionArgs, sortOrder);
@@ -346,7 +360,7 @@ public class iDisasterApplication extends Application {
 			return QUERY_EMPTY;
 		}
 
-		if (peopleCursor.moveToFirst()) {
+		if (peopleCursor.moveToFirst()) {			
 			String s = peopleCursor.getString(peopleCursor
 					.getColumnIndex(SocialContract.People._ID));
 

@@ -92,7 +92,7 @@ public class DisasterListActivity extends ListActivity {
 
     			if (iDisasterApplication.testDataUsed) {			// Test data
     				iDisasterApplication.getInstance().selectedTeam.name = iDisasterApplication.getInstance().disasterNameList.get(position);
-    				iDisasterApplication.getInstance().selectedTeam.globalId = Integer.toString(position);
+    				iDisasterApplication.getInstance().selectedTeam.id = Integer.toString(position);
 // Store the selected disaster in application preferences
 //    				iDisasterApplication.getInstance().setDisasterTeamName (name);
     				
@@ -101,6 +101,8 @@ public class DisasterListActivity extends ListActivity {
     					ownTeamCursor.moveToPosition(position);
     					iDisasterApplication.getInstance().selectedTeam.name =  ownTeamCursor.getString(ownTeamCursor
     							.getColumnIndex(SocialContract.Communities.NAME));
+    					iDisasterApplication.getInstance().selectedTeam.id = ownTeamCursor.getString(ownTeamCursor
+    							.getColumnIndex(SocialContract.Communities._ID));
     					iDisasterApplication.getInstance().selectedTeam.globalId = ownTeamCursor.getString(ownTeamCursor
     							.getColumnIndex(SocialContract.Communities.GLOBAL_ID));
         				iDisasterApplication.getInstance().selectedTeam.ownFlag = true;
@@ -108,7 +110,9 @@ public class DisasterListActivity extends ListActivity {
     					memberTeamCursor.moveToPosition(position-ownTeams);
     					iDisasterApplication.getInstance().selectedTeam.name =  memberTeamCursor.getString(memberTeamCursor
     							.getColumnIndex(SocialContract.Communities.NAME));
-    					iDisasterApplication.getInstance().selectedTeam.globalId = memberTeamCursor.getString(memberTeamCursor
+    					iDisasterApplication.getInstance().selectedTeam.id = memberTeamCursor.getString(memberTeamCursor
+    							.getColumnIndex(SocialContract.Communities._ID));
+    					iDisasterApplication.getInstance().selectedTeam.globalId = ownTeamCursor.getString(ownTeamCursor
     							.getColumnIndex(SocialContract.Communities.GLOBAL_ID));
         				iDisasterApplication.getInstance().selectedTeam.ownFlag = false;
     				}
@@ -188,29 +192,26 @@ public class DisasterListActivity extends ListActivity {
 
 		Uri uri = SocialContract.Communities.CONTENT_URI;
 		
+//		String[] projection = new String[] {
+//				SocialContract.Communities._ID,			// Retrieve CIS local ID - GOLBAL_ID not used anymore
+//				SocialContract.Communities.NAME};		// Retrieve CIS name (will be displayed to the user)
+
 		String[] projection = new String[] {
-				SocialContract.Communities.GLOBAL_ID,	// Retrieve CIS global ID
+				SocialContract.Communities.GLOBAL_ID,	// CIS Global ID (used for activity feeds)
+				SocialContract.Communities._ID,			// CIS local ID
+				SocialContract.Communities._ID_OWNER,	// Owner of the community
 				SocialContract.Communities.NAME};		// Retrieve CIS name (will be displayed to the user)
 
-//		All communities
-//		String selection = null;
-//		String[] selectionArgs = null;
-
-//		TEST CODE: communities of type disaster
-//		String selection = SocialContract.Communities.TYPE + " = disaster";
-//		String[] selectionArgs = null;
-
-//		TEST CODE: communities I am owning
-//		String selection = SocialContract.Communities.OWNER_ID + "= ?"; 
-//		String[] selectionArgs = new String[] {iDisasterApplication.getInstance().me.globalId};
-
-// TODO: Add a check on user identity?
-
+		
 		String selection = SocialContract.Communities.TYPE + "= ? AND " 
-					     + SocialContract.Communities.OWNER_ID + "= ?";
-		String[] selectionArgs = new String[] {"disaster",											// The CIS type is "disaster"
-												iDisasterApplication.getInstance().me.globalId};	// The user is owner
+					     + SocialContract.Communities._ID_OWNER + "= ?";
+		String[] selectionArgs = new String[] {iDisasterApplication.getInstance().COMMUNITY_TYPE,   // The CIS type
+												iDisasterApplication.getInstance().me.peopleId};	// The user is owner
 
+//		String selection = SocialContract.Communities.TYPE + "= ?";
+//		String[] selectionArgs = new String[] {iDisasterApplication.getInstance().COMMUNITY_TYPE};
+
+		
 		String sortOrder = SocialContract.Communities.NAME
 				+ " COLLATE LOCALIZED ASC";					// Alphabetic order (to reverse order, use "DESC" instead of "ASC"
 		
@@ -242,10 +243,10 @@ public class DisasterListActivity extends ListActivity {
 		Uri membershipUri = SocialContract.Membership.CONTENT_URI;		
 		
 		String[] membershipProjection = new String[] {
-				SocialContract.Membership.GLOBAL_ID_COMMUNITY};
+				SocialContract.Membership._ID_COMMUNITY};
 
-		String membershipSelection = SocialContract.Membership.GLOBAL_ID_MEMBER + "= ?";
-		String[] membershipSelectionArgs = new String[] {iDisasterApplication.getInstance().me.globalId};	// The user is owner
+		String membershipSelection = SocialContract.Membership._ID_MEMBER + "= ?";
+		String[] membershipSelectionArgs = new String[] {iDisasterApplication.getInstance().me.peopleId};	// The user is owner
 		
 		Cursor membershipCursor;
 		try {
@@ -272,8 +273,9 @@ public class DisasterListActivity extends ListActivity {
 		Uri communitiesUri = SocialContract.Communities.CONTENT_URI;
 				
 		String[] communitiesProjection = new String[] {
-					SocialContract.Communities.GLOBAL_ID,
-					SocialContract.Communities.NAME};
+					SocialContract.Communities.GLOBAL_ID,	// CIS Global ID (used for activity feeds)
+					SocialContract.Communities._ID,			// CIS local ID
+					SocialContract.Communities.NAME};		// Retrieve CIS name (will be displayed to the user)
 			
 		// Build selection string and selectionArgs string
 		boolean first = true;
@@ -282,14 +284,14 @@ public class DisasterListActivity extends ListActivity {
 		while (membershipCursor.moveToNext()) {
 			if (first) {
 				first = false;
-				communitiesSelection = SocialContract.Communities.GLOBAL_ID + "= ?";
+				communitiesSelection = SocialContract.Communities._ID + "= ?";
 				communitiesSelectionArgs.add (membershipCursor.getString(
-								(membershipCursor.getColumnIndex(SocialContract.Membership.GLOBAL_ID_COMMUNITY))));
+								(membershipCursor.getColumnIndex(SocialContract.Membership._ID_COMMUNITY))));
 			} else {
 				communitiesSelection = communitiesSelection +
-									   " AND " +  SocialContract.Communities.GLOBAL_ID + "= ?";
+									   " AND " +  SocialContract.Communities._ID + "= ?";
 				communitiesSelectionArgs.add (membershipCursor.getString(
-								(membershipCursor.getColumnIndex(SocialContract.Membership.GLOBAL_ID_COMMUNITY))));
+								(membershipCursor.getColumnIndex(SocialContract.Membership._ID_COMMUNITY))));
 			}
 		}
 		membershipCursor.close();		// "close" releases no more needed data
@@ -335,7 +337,9 @@ public class DisasterListActivity extends ListActivity {
 		if (ownTeamCursor != null) {
 			if (ownTeamCursor.getCount() != 0) {
 				while (ownTeamCursor.moveToNext()) {
-					ownTeams++;
+					ownTeams++;					
+					String owner = ownTeamCursor.getString(ownTeamCursor
+							.getColumnIndex(SocialContract.Communities._ID_OWNER));					
 					String displayName = "owned: " + ownTeamCursor.getString(ownTeamCursor
 							.getColumnIndex(SocialContract.Communities.NAME));
 					disasterList.add (displayName);

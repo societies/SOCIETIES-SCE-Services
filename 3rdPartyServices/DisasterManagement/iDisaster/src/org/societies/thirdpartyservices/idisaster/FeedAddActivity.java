@@ -119,32 +119,17 @@ public class FeedAddActivity extends Activity implements OnClickListener {
 
 		// Set the values related to the activity to store in SocialProvider
 		ContentValues activityValues = new ContentValues ();
-		
-//TODO: Remove the following once SocialProvider has been corrected (SocialProvider should insert the GLOBAL_ID)
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss");
-		String currentDateandTime = sdf.format(new Date());
-		activityValues.put(SocialContract.CommunityActivity.GLOBAL_ID, currentDateandTime);
-// End remove		
-
-		activityValues.put(SocialContract.CommunityActivity.ORIGIN, "SOCIETIES");	// Social platform iDisaster is plugged into		
-// old API		
-//		activityValues.put(SocialContract.CommunityActivity.GLOBAL_ID_ACTOR,		// Me
-//		iDisasterApplication.getInstance().me.globalId);
+	
+		activityValues.put(SocialContract.CommunityActivity._ID_FEED_OWNER,
+				iDisasterApplication.getInstance().selectedTeam.id);
 		activityValues.put(SocialContract.CommunityActivity.ACTOR,					// Me
-				iDisasterApplication.getInstance().me.globalId);
-		activityValues.put(SocialContract.CommunityActivity.GLOBAL_ID_FEED_OWNER,	// Selected team
-							iDisasterApplication.getInstance().selectedTeam.globalId);
-// old API		activityValues.put(SocialContract.CommunityActivity.GLOBAL_ID_VERB,			// Activity intent
-//		iDisasterApplication.getInstance().FEED_DISPLAY);
-		activityValues.put(SocialContract.CommunityActivity.VERB,					// Activity intent
-				iDisasterApplication.getInstance().FEED_DISPLAY);
-// old API		activityValues.put(SocialContract.CommunityActivity.GLOBAL_ID_OBJECT, feedContent); // Text entered by the user
-		activityValues.put(SocialContract.CommunityActivity.OBJECT, feedContent); 	// Text entered by the user
-
-		//		No target - shared with all members in the community
-// old API		activityValues.put(SocialContract.CommunityActivity.GLOBAL_ID_TARGET, "ALL"); // Activity target
-		activityValues.put(SocialContract.CommunityActivity.TARGET, "ALL"); 		// Activity target
-		 
+				iDisasterApplication.getInstance().me.peopleId);
+		activityValues.put(SocialContract.CommunityActivity.VERB,					// Activity intent: Simple text
+				iDisasterApplication.getInstance().VERB_TEXT);
+		activityValues.put(SocialContract.CommunityActivity.OBJECT, feedContent); 	// Text entered by the user			
+		activityValues.put(SocialContract.CommunityActivity.TARGET,					// Recipient for Activity 
+				iDisasterApplication.getInstance().TARGET_ALL);
+				 
 		try {
 // The Uri value returned is not used.
 //			Uri activityNewUri = getContentResolver().insert( SocialContract.CommunityActivity.CONTENT_URI,

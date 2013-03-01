@@ -174,23 +174,22 @@ public class FeedListActivity extends ListActivity implements OnClickListener{
 
 		Uri communityActivityUri = SocialContract.CommunityActivity.CONTENT_URI;
 		
-		String[] communityActivityprojection = new String[] {
-// TODO: Find out what information is relevant and should be retrieved
-				
-//	old API: SocialContract.CommunityActivity.GLOBAL_ID_OBJECT
-			SocialContract.CommunityActivity.OBJECT
-//		, SocialContract.CommunityActivity.+++
+		String[] communityActivityProjection = new String[] {
+			SocialContract.CommunityActivity.ACTOR,
+			SocialContract.CommunityActivity.VERB,
+			SocialContract.CommunityActivity.OBJECT,	
+			SocialContract.CommunityActivity.TARGET
 		};		
 
-		String communityActivitySelection = SocialContract.CommunityActivity.GLOBAL_ID_FEED_OWNER + "= ?";
+		String communityActivitySelection = SocialContract.CommunityActivity._ID_FEED_OWNER + "= ?";
 		String[] communityActivitySelectionArgs = new String[] {iDisasterApplication.getInstance().
-														selectedTeam.globalId};		// The feed belongs to the CIS
+														selectedTeam.id};			// The feed belongs to the CIS
 
 //TODO: Classify according to date
 		String communityActivitysortOrder = null;
 
 		try {
-			feedCursor = resolver.query(communityActivityUri, communityActivityprojection,
+			feedCursor = resolver.query(communityActivityUri, communityActivityProjection,
 					communityActivitySelection, communityActivitySelectionArgs,
 					communityActivitysortOrder);			
 		} catch (Exception e) {
@@ -201,7 +200,47 @@ public class FeedListActivity extends ListActivity implements OnClickListener{
 		return iDisasterApplication.getInstance().QUERY_SUCCESS;
 	}
 
+/**
+ * getEntityName retrieves the name of an entity. Either person, service of community.
+ * Currently only service is implemented!
+ */
+	private String getEntityName  (String id) {
+			
+		Uri peopleUri = SocialContract.People.CONTENT_URI;
+			
+		String[] peopleProjection = new String[] {
+			SocialContract.People.NAME
+		};		
 
+		String peopleSelection = SocialContract.People._ID + "= ?";
+		String[] peopleSelectionArgs = new String[] {id};			// The id of the entity
+
+
+		Cursor c;
+		try {
+			c = resolver.query(peopleUri, peopleProjection,
+						peopleSelection, peopleSelectionArgs,
+						null /* no order */);			
+			} catch (Exception e) {
+				iDisasterApplication.getInstance().debug (2, "Query to "+ peopleUri + "causes an exception");
+	    		return "";
+			}
+			
+		if (c==null) {
+			return "";
+		}
+			
+		if (c.getCount()==0) {
+			return "";
+		}
+
+		if (c.moveToFirst()) {
+			return (c.getString(c.getColumnIndex(SocialContract.People.NAME)));
+		}
+		return "";
+	}
+	
+	
 /**
  * assignAdapter assigns data to display to adapter and adapter to view.
  */
@@ -223,11 +262,31 @@ public class FeedListActivity extends ListActivity implements OnClickListener{
 				while (feedCursor.moveToNext()) {
 					feeds++;
 					
-// old API					String displayName = feedCursor.getString(feedCursor
-//							.getColumnIndex(SocialContract.CommunityActivity.GLOBAL_ID_OBJECT));
+					String displayName = getEntityName (feedCursor.getString(feedCursor
+												.getColumnIndex(SocialContract.CommunityActivity.ACTOR)));
 
-					String displayName = feedCursor.getString(feedCursor
-							.getColumnIndex(SocialContract.CommunityActivity.OBJECT));
+					String v = feedCursor.getString(feedCursor
+							.getColumnIndex(SocialContract.CommunityActivity.VERB));
+ 
+					if (v.equals(iDisasterApplication.getInstance().VERB_TEXT)) { // simple text
+						displayName = displayName + ": " +
+							feedCursor.getString(feedCursor.getColumnIndex(SocialContract.CommunityActivity.OBJECT));
+						String t = feedCursor.getString(feedCursor
+								.getColumnIndex(SocialContract.CommunityActivity.TARGET));
+						if (!(t.equals (iDisasterApplication.getInstance().TARGET_ALL))) { // only add Target if not ALL
+							displayName = getEntityName  (t);
+						}
+						
+					} else {													// service command
+						
+						displayName = displayName + " " + v + " " +
+								feedCursor.getString(feedCursor.getColumnIndex(SocialContract.CommunityActivity.OBJECT))
+								+ " " + 
+								feedCursor.getString(feedCursor
+									.getColumnIndex(SocialContract.CommunityActivity.TARGET));
+					}
+						
+					
 					feedList.add (displayName);
 				}
 			}
@@ -269,8 +328,14 @@ public class FeedListActivity extends ListActivity implements OnClickListener{
     	
     	switch (item.getItemId()) {
 
-    		case R.id.disasterMenuAddFeed:    			
-    			startActivity(new Intent(FeedListActivity.this, FeedAddActivity.class));
+    		case R.id.disasterMenuAddFeed:    
+    			if (iDisasterApplication.getInstance().selectedTeam.globalId.equals ("GLOBAL_ID_PENDING")) {
+    	    		Toast.makeText(this, getString(R.string.feedAddCommunityPending), 
+    	    				Toast.LENGTH_LONG).show();
+    			} else {
+        			startActivity(new Intent(FeedListActivity.this, FeedAddActivity.class));	
+    			}
+    			
     		break;
     		
     		default:
