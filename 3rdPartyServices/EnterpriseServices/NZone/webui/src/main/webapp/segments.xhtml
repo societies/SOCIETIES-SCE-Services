@@ -1,0 +1,32 @@
+<f:view xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:pm="http://primefaces.org/mobile" contentType="text/html">
+
+	<pm:page
+		title="hasCode.com PrimeFaces Mobile Tutorial - Mobile Components">
+		<pm:view id="segments">
+			<pm:header title="The header">
+				<f:facet name="left">
+					<p:button value="Back" icon="back" href="#segments" />
+				</f:facet>
+				<f:facet name="right">
+					<p:button value="Config" icon="gear" href="#config" />
+				</f:facet>
+			</pm:header>
+			<pm:content>
+				<h:outputText value="This is our content.." />
+				<p:calendar mode="inline" />
+			</pm:content>
+			<pm:footer>
+				<pm:buttonGroup orientation="horizontal">
+					<p:button value="Like" href="#segments" />
+					<p:button value="Share" href="#segments" />
+				</pm:buttonGroup>
+			</pm:footer>
+		</pm:view>
+	</pm:page>
+
+</f:view>

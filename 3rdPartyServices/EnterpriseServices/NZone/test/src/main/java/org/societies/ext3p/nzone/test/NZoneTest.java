@@ -73,7 +73,7 @@ public class NZoneTest {
 			}
 			
 			log.info("Getting suggestions for this zone");
-			List<UserPreview> list = getNzoneClient().getSuggestedList();
+			List<UserPreview> list = getNzoneClient().getSuggestedList(false);
 			
 			for ( int j = 0; j < list.size(); j++)
 			{

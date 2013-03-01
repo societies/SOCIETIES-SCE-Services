@@ -41,6 +41,7 @@ import org.societies.api.schema.cis.community.CommunityMethods;
 import org.societies.api.schema.cis.community.Criteria;
 import org.societies.api.schema.cis.community.MembershipCrit;
 import org.societies.api.schema.cis.community.Participant;
+import org.societies.api.schema.cis.community.ParticipantRole;
 import org.societies.api.schema.cis.directory.CisAdvertisementRecord;
 import org.societies.api.schema.servicelifecycle.model.ServiceResourceIdentifier;
 import org.societies.api.services.IServices;
@@ -394,7 +395,7 @@ public class NZoneClient implements INZoneClient,IActionConsumer {
 		
 	} 
 	@Override
-	public List<UserPreview> getSuggestedList()
+	public List<UserPreview> getSuggestedList(boolean bMainZone)
 	{
 		// Return a list of suggest contacts from the current zone,
 		//if no current zone, return a list from main zone
@@ -402,7 +403,7 @@ public class NZoneClient implements INZoneClient,IActionConsumer {
 		
 		
 		//TODO start: This need to change when css mnager suggest friends working
-		if (currentZoneCis != null)
+		if ((bMainZone == false) && (currentZoneCis != null))
 		{
 			memberList = null;
 			currentZoneCis.getListOfMembers(requestor,iCisManagerCallback);
@@ -439,39 +440,43 @@ public class NZoneClient implements INZoneClient,IActionConsumer {
 			// Now populate UserPreview
 			for ( int i = 0; i < memberList.size(); i++)
 			{
-				UserPreview userPre = new UserPreview();
-				userPre.setUserid(memberList.get(i).getJid());
-				log.debug("userPre.getUserid[" + i + "] id is : " +userPre.getUserid());
-				if (userDets != null)
-				{	
-					for ( int j = 0; j < userDets.size(); j++)
-					{
-						log.debug("checking userDets.getUserid[" + j + "] : " + userDets.get(j).getUserid());
-					
-						if ((userDets.get(j) != null) && (userDets.get(j).getUserid() != null))
+				if ((memberList.get(i).getRole() != ParticipantRole.OWNER)
+						&& !memberList.get(i).getJid().contains(myIdentity.getBareJid()))
+				{
+					UserPreview userPre = new UserPreview();
+					userPre.setUserid(memberList.get(i).getJid());
+					log.debug("userPre.getUserid[" + i + "] id is : " +userPre.getUserid());
+					if (userDets != null)
+					{	
+						for ( int j = 0; j < userDets.size(); j++)
 						{
-							if (userPre.getUserid().contentEquals(userDets.get(j).getUserid()))
+							log.debug("checking userDets.getUserid[" + j + "] : " + userDets.get(j).getUserid());
+					
+							if ((userDets.get(j) != null) && (userDets.get(j).getUserid() != null))
 							{
-								userPre.setCompany(userDets.get(j).getCompany());
-								userPre.setDisplayName(userDets.get(j).getDisplayName());
-								if (userDets.get(j).getCompany() != "")
+								if (userPre.getUserid().contentEquals(userDets.get(j).getUserid()))
 								{
-									// Check is we have 'tagged' this company
-									//get UserPrefences
-									if 	(preferences != null)
+									userPre.setCompany(userDets.get(j).getCompany());
+									userPre.setDisplayName(userDets.get(j).getDisplayName());
+									if (userDets.get(j).getCompany() != "")
 									{
-										if (preferences.isPreferred("company", userDets.get(j).getCompany()))
+										// Check is we have 'tagged' this company
+										//	get UserPrefences
+										if 	(preferences != null)
 										{
-											log.debug("Tagging user as preferred");
-											userPre.setTags(tags);
+											if (preferences.isPreferred("company", userDets.get(j).getCompany()))
+											{
+												log.debug("Tagging user as preferred");
+												userPre.setTags(tags);
+											}
 										}
 									}
 								}
 							}
 						}
 					}
+					list.add(userPre);
 				}
-				list.add(userPre);
 			}
 		} else 
 		{
@@ -500,7 +505,7 @@ public class NZoneClient implements INZoneClient,IActionConsumer {
 			
 			for ( int i = 0; i < memberList.size(); i++)
 			{
-				suggestionsIDs.add(memberList.get(i).getJid());
+					suggestionsIDs.add(memberList.get(i).getJid());
 			}
 			
 			List<UserDetails> userDets = this.getNzoneClientComms().getUserDetailsList(suggestionsIDs);
@@ -510,6 +515,9 @@ public class NZoneClient implements INZoneClient,IActionConsumer {
 			// Now populate UserPreview
 			for ( int i = 0; i < memberList.size(); i++)
 			{
+				if ((memberList.get(i).getRole() != ParticipantRole.OWNER)
+						&& !memberList.get(i).getJid().contains(myIdentity.getBareJid()))
+				{
 				UserPreview userPre = new UserPreview();
 				userPre.setUserid(memberList.get(i).getJid());
 				
@@ -545,20 +553,19 @@ public class NZoneClient implements INZoneClient,IActionConsumer {
 					}
 				}
 				list.add(userPre);
+				}
 			}
 		}
 		return list;
 	} 
 	
 	
-	@Override
-	public void getUserProfile(){} ;
+
 	@Override
 	public void saveShareInfo(){} ;
+	
 	@Override
-	public void getMyProfile(){} ;
-	@Override
-	public void getActivityFeed(){} ;
+	public void getActivityFeed(boolean bMainZone){} ;
 	@Override
 	public void sendSocFR(){} ;
 	@Override
@@ -593,6 +600,21 @@ public class NZoneClient implements INZoneClient,IActionConsumer {
 		// TODO : tempo Save to database
 		
 	}
+	
+	@Override
+	public boolean isPreferred(String type, String value)
+	{
+		
+		// get UserPrefences
+		if 	(preferences == null)
+		{
+			return false;
+		}
+		
+		return preferences.isPreferred(type, value);
+		
+	}
+	
 	
 	@Override
 	public void removeAsPreferred(String type, String value)
@@ -951,6 +973,77 @@ public class NZoneClient implements INZoneClient,IActionConsumer {
 			log.info("recordActionEnterZone : Sending action to UAM: "+action.toString());
 			getUam().monitor(myIdentity, action);
 		}
+	
+	
+	@Override
+	public UserDetails getMyProfile()
+	{
+		// check if we have a profile saved, if not create a new profile with info from css record in context
+		
+		UserDetails myDets = getNzoneClientComms().getMyDetails();
+		
+		if (myDets == null) 
+			myDets = new UserDetails();	
+				
+		if (myDets.getDisplayName() == null || (myDets.getDisplayName().length() == 0))
+		{
+			// profile not populated from context yet
+			myDets.setDisplayName(getContextAtribute(CtxAttributeTypes.NAME.toString()));
+			myDets.setCompany(getContextAtribute(CtxAttributeTypes.WORK_POSITION.toString()));
+			myDets.setPosition(getContextAtribute(CtxAttributeTypes.OCCUPATION.toString()));
+			myDets.setEmail(getContextAtribute(CtxAttributeTypes.EMAIL.toString()));
+			
+			getNzoneClientComms().updateMyDetails(myDets);
+		}
+		
+		return myDets;
+		
+		//getContextAtribute(CtxAttributeTypes.NAME.toString());
+		//getContextAtribute(CtxAttributeTypes.EMAIL.toString());
+		
+		
+	};
+	
+	
+	@Override
+	public int getCurrentZone()
+	{
+		// check if we have a profile saved, if not create a new profile with info from css record in context
+		List<ZoneDetails> fullList = getNzoneClientComms().getZoneDetails();
+		
+		if (currentZoneCis != null && fullList != null)
+		{
+			for ( int i = 0 ; i < fullList.size(); i++)
+			{
+				// Find our one
+				if (fullList.get(i).getCisid().contains(currentZoneCis.getCisId()))
+					return (i);
+			}
+		}
+		
+		return 0;
+		
+	};
+	
+	@Override
+	public UserDetails getUserProfile(String userID)
+	{
+		return getNzoneClientComms().getUserDetails(userID);
+	}
+
+	@Override
+	public boolean isProfileSetup() {
+		// check if we have a profile saved, if not create a new profile with info from css record in context
+		
+		UserDetails userDets = getNzoneClientComms().getMyDetails();
+		if ((userDets != null) && (userDets.getDisplayName() != null))
+		{
+			if (userDets.getDisplayName().length() > 0)
+				return true;
+		}		
+		return false;
+	} ;
+	
 	
 }
 

@@ -79,13 +79,15 @@ public class NZoneDirectory {
 	@SuppressWarnings("unchecked")
 	public List<ZoneDetails> getZoneDetails() {
 		
-		Session session = sessionFactory.openSession();
+		Session session = null;
 		ZoneDetails zoneRec = null;
-		List<ZoneDetails> zoneList = new ArrayList<ZoneDetails>();
+		List<ZoneDetails> zoneList = null;
 		
 		log.info("NZoneDirectory getZoneDetails called.");
 		
 		try {
+			session = sessionFactory.openSession();
+			zoneList = new ArrayList<ZoneDetails>();
 			
 			
 			List<NZZones> tmpList = session.createCriteria(NZZones.class).list();
@@ -120,12 +122,15 @@ public class NZoneDirectory {
 	@SuppressWarnings("unchecked")
 	public UserDetails getUserRecord(String userid) {
 		
-		Session session = sessionFactory.openSession();
-		UserDetails userRec = new UserDetails();
+		Session session = null;
+		UserDetails userRec = null;
 		
 		log.info("NZoneDirectory getUserRecord called.");
 		
 		try {
+			session = sessionFactory.openSession();
+			userRec = new UserDetails();
+			
 			
 			
 			List<NZUser> tmpRegistryEntryList = session.createCriteria(NZUser.class)
@@ -159,15 +164,18 @@ public class NZoneDirectory {
 		return userRec;
 	}
 	
-	public UserDetails updateUserRecord(UserDetails userRec) {
+	public boolean updateUserRecord(UserDetails userRec) {
 		
-		Session session = sessionFactory.openSession();
-		Transaction t = session.beginTransaction();
+		Session session = null;
+		Transaction t = null;
+		boolean result = false;
 		
 		log.info("NZoneDirectory updateUserRecord called.");
 		
 		
 		try {
+			session = sessionFactory.openSession();
+			t = session.beginTransaction();
 			
 			NZUser userDb = new NZUser();
 			
@@ -204,6 +212,7 @@ public class NZoneDirectory {
 			
 			session.saveOrUpdate(userDb);
 			t.commit();
+			result = true;
 			
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -215,7 +224,7 @@ public class NZoneDirectory {
 		}
 		
 		
-		return userRec;
+		return result;
 	}
 	
 	

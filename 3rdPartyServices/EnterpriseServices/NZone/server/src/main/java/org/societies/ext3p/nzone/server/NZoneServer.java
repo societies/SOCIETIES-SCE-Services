@@ -362,6 +362,11 @@ public class NZoneServer implements INZoneServer{
 		 }
 		 return userDetList;
 	}
+	
+	public UserDetails getProfileDetails(String myuserid) {
+		 return getNzoneDirectory().getUserRecord(myuserid);
+	}
+	
 
 	public List<ZoneDetails> getNetZoneDetails() {
 		return netZoneDetails;
@@ -376,6 +381,11 @@ public class NZoneServer implements INZoneServer{
 	public boolean savePreferences(String userid, String pref)
 	{
 		return getNzoneDirectory().savePreferences(userid, pref);
+	}
+
+	public boolean updateMyDetails(UserDetails details) {
+		return getNzoneDirectory().updateUserRecord(details);
+		
 	}
 	
 	

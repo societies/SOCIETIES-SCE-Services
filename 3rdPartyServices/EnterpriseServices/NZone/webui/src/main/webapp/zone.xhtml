@@ -1,0 +1,59 @@
+<f:view xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:pm="http://primefaces.org/mobile" contentType="text/html">
+
+	<pm:page title="Networking Zone">
+		<pm:view id="viewZone">
+			<pm:header title="Zone" />
+			<pm:content>
+				<p:accordionPanel>
+					This is your current zone
+					
+					<p:tab title="Who">
+						List of suggested people
+						
+						<h:form id="form">
+							<h:panelGrid columns="2" style="margin-bottom:10px"
+								cellpadding="5">
+								<p:selectOneRadio id="zoneMembers"
+									value="#{friendBean.friendid}">
+									<f:selectItems value="#{peopleBean.suggestions}" var="person"
+										itemLabel="#{person.displayName} - #{person.company} - #{person.tags} - #{person.userid}"
+										itemValue="#{person.userid}" />
+									<f:ajax event="click" render="friendsid" />
+								</p:selectOneRadio>
+							</h:panelGrid>
+
+							<h:outputText value="Current friend selected is :" />
+							<h:outputText value="#{friendBean.friendid}" id="friendsid"
+								style="font-weight:bold" />
+
+							<p:commandButton icon="back" value="View Friends Profile"
+								action="gotofriend" />
+
+
+						</h:form>
+
+					</p:tab>
+
+					<p:tab title="What">
+						Activity Feed will go here" 
+				</p:tab>
+
+
+				</p:accordionPanel>
+
+				<h:form id="form3">
+					<p:commandButton icon="back" value="Back to Main Zone"
+						action="gotomain" />
+				</h:form>
+			</pm:content>
+		</pm:view>
+
+	</pm:page>
+</f:view>
+
+

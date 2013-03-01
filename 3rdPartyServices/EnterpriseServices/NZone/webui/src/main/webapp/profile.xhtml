@@ -1,0 +1,44 @@
+<f:view xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:pm="http://primefaces.org/mobile" contentType="text/html">
+
+	<pm:page title="Networking Zone">
+		<pm:view id="viewProfile">
+			<f:event listener="#{profileBean.loadprofile}" type="preRenderView" />
+		
+			<pm:header title="Your Profile" />
+			<pm:content>
+			
+				<h:form id="profileform">
+						
+				This is your profile
+				<h:outputLabel for="name" value="Name:" style="font-weight:bold" />
+					<h:outputText id="name" value="#{profileBean.name}" />
+					<p:tooltip for="name" value="This is loaded from your Css Profile"
+						showEffect="slide" hideEffect="slide" />
+
+					<h:outputLabel for="email" value="Email:" style="font-weight:bold" />
+					<h:outputText id="email" value="#{profileBean.email}" />
+					<p:tooltip for="email" value="This is loaded from your Css Profile"
+						showEffect="slide" hideEffect="slide" />
+
+					<h:outputLabel for="company" value="Company:"
+						style="font-weight:bold" />
+					<h:outputText id="company" value="#{profileBean.company}" />
+					<p:tooltip for="company"
+						value="This is loaded from your Css Profile" showEffect="slide"
+						hideEffect="slide" />
+
+					<p:commandButton icon="back" value="Back to Main Zone"
+						action="gototmain" />
+				</h:form>
+				
+			</pm:content>
+		</pm:view>
+	</pm:page>
+</f:view>
+
+

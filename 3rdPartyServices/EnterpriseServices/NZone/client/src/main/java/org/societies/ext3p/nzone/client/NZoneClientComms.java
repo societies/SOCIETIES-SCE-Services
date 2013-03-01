@@ -327,6 +327,53 @@ public class NZoneClientComms implements ICommCallback {
 		return null;
 	}
 	
+	
+	public UserDetails getUserDetails(String userID)
+	{
+		
+		// We want to sent all messages for Netowrking Client to the metworking server
+		// hardcode for now TODO : Read from properties
+		IIdentity toIdentity = null;
+		commsResult = null;
+				
+		try {
+			toIdentity = getCommManager().getIdManager().fromJid(netServerID);
+		} catch (InvalidFormatException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		Stanza stanza = new Stanza(toIdentity);
+		List<String> userLst = new ArrayList<String>();
+		userLst.add(userID);
+		// CREATE MESSAGE BEAN
+		NzoneBean netBean = new NzoneBean();
+		netBean.setMethod(Method.GET_USER_DETAILS);
+		netBean.setData(userLst);
+		startSignal = new CountDownLatch(1);
+				
+		try {
+			getCommManager().sendIQGet(stanza, netBean, this);
+						
+		} catch (CommunicationException e) {
+			LOG.warn(e.getMessage());
+		};
+
+		try {
+			startSignal.await();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+						
+		
+		if ((commsResult != null) && (this.commsResult.getUserdata() != null))
+			return this.commsResult.getUserdata().get(0);
+		
+		return null;
+		
+	}
+	
+	
 	public List<UserDetails> getUserDetailsList(List<String> userIDs)
 	{
 		
@@ -470,4 +517,83 @@ public class NZoneClientComms implements ICommCallback {
 		this.netServerID = netServerID;
 	}
 
+	public UserDetails getMyDetails() {
+		IIdentity toIdentity = null;
+		commsResult = null;
+		try {
+			toIdentity = getCommManager().getIdManager().fromJid(netServerID);
+		} catch (InvalidFormatException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		Stanza stanza = new Stanza(toIdentity);
+						
+		// CREATE MESSAGE BEAN
+		NzoneBean netBean = new NzoneBean();
+		netBean.setMethod(Method.GET_MY_DETAILS);
+			
+		startSignal = new CountDownLatch(1);
+						
+		try {
+			getCommManager().sendIQGet(stanza, netBean, this);
+							
+		} catch (CommunicationException e) {
+			LOG.warn(e.getMessage());
+		};
+
+		try {
+			startSignal.await();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+								
+				
+		if ((commsResult != null) && (this.commsResult.getUserdata() != null))
+			return this.commsResult.getUserdata().get(0);
+				
+		return null;
+	}
+
+	
+	public boolean updateMyDetails(UserDetails dets) {
+		IIdentity toIdentity = null;
+		commsResult = null;
+		try {
+			toIdentity = getCommManager().getIdManager().fromJid(netServerID);
+		} catch (InvalidFormatException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		Stanza stanza = new Stanza(toIdentity);
+						
+		// CREATE MESSAGE BEAN
+		NzoneBean netBean = new NzoneBean();
+		netBean.setMethod(Method.UPDATE_MY_DETAILS);
+		netBean.setDetails(dets);
+			
+		startSignal = new CountDownLatch(1);
+						
+		try {
+			getCommManager().sendIQGet(stanza, netBean, this);
+							
+		} catch (CommunicationException e) {
+			LOG.warn(e.getMessage());
+		};
+
+		try {
+			startSignal.await();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+								
+				
+		if (commsResult != null) 
+			return this.commsResult.isResult();
+				
+		return false;
+	}
+
+	
 }
