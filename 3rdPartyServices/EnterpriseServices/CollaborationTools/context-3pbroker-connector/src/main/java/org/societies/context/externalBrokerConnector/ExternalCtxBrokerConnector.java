@@ -149,7 +149,7 @@ public class ExternalCtxBrokerConnector extends Observable {
 				for(CtxAttribute name : ctxEntity) {
 					person = name.getStringValue();
 				}
-				LOG.info("name.getStringValue() "+person);
+
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

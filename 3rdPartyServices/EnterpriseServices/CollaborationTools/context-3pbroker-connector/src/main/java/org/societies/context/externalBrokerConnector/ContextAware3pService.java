@@ -139,19 +139,13 @@ public class ContextAware3pService implements IContextAware3pService  {
 			while(members.hasNext()){
 				CtxEntityIdentifier member = members.next();
 				LOG.info("*** member.toString "+member.toString());
-				// 1b. Register listener by specifying the context attribute scope and type
+				//Register listener by specifying the context attribute scope and type
 //				CtxEntity retrievedCtxEntity = (CtxEntity) this.ctxBroker.retrieve(requestorService, member).get();
 //				Set<CtxAttribute> location = retrievedCtxEntity.getAttributes(CtxAttributeTypes.LOCATION_SYMBOLIC);
+				//TODO: Include here other ctx updates if necessary
 				this.ctxBroker.registerForChanges(requestorService, this.myCtxChangeEventListener, member, CtxAttributeTypes.LOCATION_SYMBOLIC);
 				this.ctxBroker.registerForChanges(requestorService, this.myCtxChangeEventListener, member, CtxAttributeTypes.STATUS);
 
-
-//				Thread.sleep(3000);
-				// 2. Update attribute to see some event action
-//				CtxAttribute ctxAttr = (CtxAttribute) this.ctxBroker.retrieve(requestorService, location.iterator().next().getId()).get();
-//	
-//				ctxAttr.setStringValue("newDeviceLocation");
-//				ctxAttr = (CtxAttribute) this.ctxBroker.update(requestorService, ctxAttr).get();
 			}
 		} catch (InterruptedException e1) {
 			// TODO Auto-generated catch block
