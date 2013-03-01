@@ -50,6 +50,8 @@ import org.xml.sax.SAXException;
 public class ContextAnalyzer implements IContextReasoning {
 
 	private PersonRepository personRepository;
+	//TODO: api key hardcoded....
+	final String APIKEY = "ca193cc1d3101c225266787a3d5fc1f810b52f02";
 
 	/**
 	 * @param personRepository
@@ -58,10 +60,8 @@ public class ContextAnalyzer implements IContextReasoning {
 		this.personRepository = personRepository;
 	}
 
-	//Concept enriched by Alchemy API
+	//Concepts enriched by Alchemy API
 	private final String[] ctxEnrichedByConcept(String[] interests) throws XPathExpressionException, IOException, SAXException, ParserConfigurationException{
-		//TODO: api key hardcoded....
-		final String APIKEY = "ca193cc1d3101c225266787a3d5fc1f810b52f02";
 		// Create an AlchemyAPI object.
 		//AlchemyAPI api key, enable to 1000 queries a day
 		AlchemyAPISimple alchemyObj = AlchemyAPISimple.GetInstanceFromString(APIKEY);
@@ -83,6 +83,29 @@ public class ContextAnalyzer implements IContextReasoning {
 		return setInterests.toArray(new String[setInterests.size()]);
 	}
 	
+	//Categorization enriched by Alchemy API
+	private final String[] ctxEnrichedByCategorization(String[] interests) throws XPathExpressionException, IOException, SAXException, ParserConfigurationException{
+		// Create an AlchemyAPI object.
+		//AlchemyAPI api key, enable to 1000 queries a day
+		AlchemyAPISimple alchemyObj = AlchemyAPISimple.GetInstanceFromString(APIKEY);
+
+		Set<String> setInterests = new HashSet<String>(); 
+		// Extract concept tags for a text string.
+		for (String interest : interests) {
+			setInterests.add(interest);
+			//Check if interest is null
+			System.out.println("Interest: "+interest);
+			Document doc = alchemyObj.TextGetCategory(interest);
+			if (doc != null) {
+				NodeList result = doc.getElementsByTagName("text");
+				for (int i = 0; i < result.getLength(); i++) {
+					setInterests.add(result.item(i).getTextContent().toLowerCase());
+				}
+			}
+		}
+		return setInterests.toArray(new String[setInterests.size()]);
+	}
+	
 	/**
 	 * @throws ParserConfigurationException 
 	 * @throws SAXException 
@@ -90,9 +113,16 @@ public class ContextAnalyzer implements IContextReasoning {
 	 * @throws XPathExpressionException 
 	 * 
 	 */
-	public void incrementInterests() throws XPathExpressionException, IOException, SAXException, ParserConfigurationException {
+	public void incrementInterestsByConcept() throws XPathExpressionException, IOException, SAXException, ParserConfigurationException {
     	for (Person friend :personRepository.getAllPersons()) {
     		String[] newInterests = ctxEnrichedByConcept(friend.getArrayLongTermCtx(LongTermCtxTypes.INTERESTS));
+    		friend.setLongTermCtx(LongTermCtxTypes.INTERESTS, newInterests);
+    	}		
+	}
+	
+	public void incrementInterestsByCategory() throws XPathExpressionException, IOException, SAXException, ParserConfigurationException {
+    	for (Person friend :personRepository.getAllPersons()) {
+    		String[] newInterests = ctxEnrichedByCategorization(friend.getArrayLongTermCtx(LongTermCtxTypes.INTERESTS));
     		friend.setLongTermCtx(LongTermCtxTypes.INTERESTS, newInterests);
     	}		
 	}
@@ -110,7 +140,7 @@ public class ContextAnalyzer implements IContextReasoning {
 	}
 	
 	//Based on automatic thresholding for images
-	static public float automaticThresholding(ArrayList<Float> elements ) {
+	static public float automaticThresholding(ArrayList<Float> elements) {
 		float initialThreshold = 0;
 		for (float value : elements)
 	    {
@@ -148,7 +178,7 @@ public class ContextAnalyzer implements IContextReasoning {
 	{
 		Map<Person, Integer> persons = this.personRepository.getPersonWithSimilarCtx(person, property);
 		for (Map.Entry<Person, Integer> individual : persons.entrySet()) {
-			//Similarity Formula is: similar interests/ min(personA, personB)
+			//Similarity Formula is: W = (matched/personA) + (matched/personB) / 2
 			float weight = ContextAnalyzer.personCtxSimilarity(individual.getValue(), property, individual.getKey(), person);
 			person.addFriend(individual.getKey(),weight);  
 		}

@@ -28,7 +28,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Hashtable;
-import java.util.Random;
 
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
@@ -63,25 +62,26 @@ public class Activator implements BundleActivator
  
 	private static GraphDatabaseService personGraphDb;
 	private static GraphDatabaseService sessionGraphDb;
+    private SessionRepository sessionRepository;
+    private PersonRepository personRepository;
+    
 	private static Index<Node> indexPerson, indexSession, indexShortTermCtx;
     private ServiceRegistration serviceRegistration, indexServiceRegistration, ctxSubServiceRegistration;
     
-    private SessionRepository sessionRepository;
-    private PersonRepository personRepository;
  
     @Override
     public void start( BundleContext context ) throws Exception
     {
         //cache providers
         ArrayList<CacheProvider> cacheList = new ArrayList<CacheProvider>();
-        cacheList.add( new SoftCacheProvider() );
+        cacheList.add(new SoftCacheProvider());
  
         //index providers
         IndexProvider lucene = new LuceneIndexProvider();
         ArrayList<IndexProvider> provs = new ArrayList<IndexProvider>();
-        provs.add( lucene );
+        provs.add(lucene);
         ListIndexIterable providers = new ListIndexIterable();
-        providers.setIndexProviders( provs );
+        providers.setIndexProviders(provs);
  
         //comment this for persistence
 	    FileUtils.deleteRecursively(new File("target/PersonsGraphDb"));
@@ -90,8 +90,8 @@ public class Activator implements BundleActivator
         //database setup
         logger.info("Database setup");
         GraphDatabaseFactory gdbf = new GraphDatabaseFactory();
-        gdbf.setIndexProviders( providers );
-        gdbf.setCacheProviders( cacheList );
+        gdbf.setIndexProviders(providers);
+        gdbf.setCacheProviders(cacheList);
 //        personGraphDb = gdbf.newEmbeddedDatabase("databases/PersonsGraphDb" + new Random().nextInt(100));
 	    personGraphDb = gdbf.newEmbeddedDatabase("databases/PersonsGraphDb");
 	    sessionGraphDb = gdbf.newEmbeddedDatabase("databases/SessionsGraphDb");
@@ -120,7 +120,7 @@ public class Activator implements BundleActivator
         
         ctxSubServiceRegistration =context.registerService(ContextSubscriber.class.getName(), ctxSub, null);
         
-        Object cisID = "cis-ad1536de-7d89-43f7-a14a-74e278ed36aa.societies.local";
+        Object cisID = "cis-d4957aca-5ecc-4aac-92a4-b1ef6fa124b3.societies.local";
         
 		//Setting up initial context for GraphDB
         ctxSub.initialCtx(cisID);
@@ -128,7 +128,7 @@ public class Activator implements BundleActivator
         //Enrichment of ctx
         logger.info("Starting enrichment of context..." );
         ContextAnalyzer ctxRsn = new ContextAnalyzer(this.personRepository);
-        ctxRsn.incrementInterests();
+        ctxRsn.incrementInterestsByConcept();
 		
 		//Applying weight between edges
 		logger.info("Setup weight among participants..." );

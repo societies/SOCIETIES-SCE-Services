@@ -19,7 +19,7 @@ Import-Bundle: org.societies.context-management.context-3pbroker-conne
 Build-Jdk: 1.7.0_03
 Bundle-Version: 0.1.0
 Embed-Transitive: true
-Bnd-LastModified: 1361909786285
+Bnd-LastModified: 1362152308602
 Bundle-ManifestVersion: 2
 Bundle-Activator: org.societies.enterprise.collabtools.Activator
 Bundle-SymbolicName: org.societies.enterprise.CollabTools

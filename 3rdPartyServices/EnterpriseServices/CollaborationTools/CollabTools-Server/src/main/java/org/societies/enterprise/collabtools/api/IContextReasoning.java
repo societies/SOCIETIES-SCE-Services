@@ -40,6 +40,6 @@ import org.xml.sax.SAXException;
  */
 public interface IContextReasoning {
 	
-	public void incrementInterests() throws XPathExpressionException, IOException, SAXException, ParserConfigurationException;
+	public void incrementInterestsByConcept() throws XPathExpressionException, IOException, SAXException, ParserConfigurationException;
 
 }

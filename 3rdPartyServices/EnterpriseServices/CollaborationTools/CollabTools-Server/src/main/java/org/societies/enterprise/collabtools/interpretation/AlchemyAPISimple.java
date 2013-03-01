@@ -65,12 +65,24 @@ public class AlchemyAPISimple {
 
 	}
 
-	private Document TextGetRankedConcepts(String text,
-			AlchemyAPIConceptParams params) throws IOException, SAXException,
+	private Document TextGetRankedConcepts(String text,	AlchemyAPIConceptParams params) throws IOException, SAXException,
 			ParserConfigurationException, XPathExpressionException {		
 		CheckText(text);		
 		params.setText(text);		
 		return POST("TextGetRankedConcepts", "text", params);
+	}
+
+	public Document TextGetCategory(String text) throws IOException, SAXException, ParserConfigurationException, XPathExpressionException
+	{
+		return TextGetCategory(text, new AlchemyAPICategoryParams());
+	}
+
+	private Document TextGetCategory(String text, AlchemyAPICategoryParams params) throws IOException, SAXException,
+	ParserConfigurationException, XPathExpressionException
+	{
+		CheckText(text);
+		params.setText(text);
+		return POST("TextGetCategory", "text", params);
 	}
 
 	private Document POST(String callName, String callPrefix, AlchemyAPIParams params)

@@ -65,7 +65,7 @@ public class TestUtils {
             //Set long term context
             person.setLongTermCtx(Person.NAME, "person#" + i);
             person.setLongTermCtx(Person.COLLAB_APPS, new String[] { "chat" });
-            System.out.println("Person#" +i+" created" );
+            System.out.println("Person#" +i+" created");
         }
     }
 	
@@ -74,7 +74,7 @@ public class TestUtils {
 //    	clearDirectory( new File("target/PersonsGraphDb"));
         for ( Person person : personRepository.getAllPersons() )
         {
-            personRepository.deletePerson( person );
+            personRepository.deletePerson(person);
         }
     }
 
@@ -268,7 +268,8 @@ public class TestUtils {
 	public void enrichedCtx() throws XPathExpressionException, IOException,
 			SAXException, ParserConfigurationException {
 		ContextAnalyzer ctxRsn = new ContextAnalyzer(personRepository);
-		ctxRsn.incrementInterests();
+		ctxRsn.incrementInterestsByConcept();
+		ctxRsn.incrementInterestsByCategory();
 	}
 	
 //	private static void clearDirectory(File path)
