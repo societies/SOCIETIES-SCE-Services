@@ -30,6 +30,7 @@ import java.util.Date;
 
 import org.societies.android.api.cis.SocialContract;
 import org.societies.thirdpartyservices.idisaster.R;
+import org.societies.thirdpartyservices.idisaster.data.SocialActivity;
 
 import android.app.AlertDialog;
 import android.app.ListActivity;
@@ -95,20 +96,13 @@ public class MemberAddActivity extends ListActivity implements OnClickListener {
     			}
     			
     			return true;
-
     		}
-
     	});
-
 
 	    // Add click listener to button
     	memberAddButton = (Button) findViewById(R.id.memberButton);
     	memberAddButton.setOnClickListener(this);
-
-    }
-
-    
-    
+    } 
     
 /**
  * onResume is called at start of the active lifetime.
@@ -289,13 +283,13 @@ public class MemberAddActivity extends ListActivity implements OnClickListener {
     
 		SparseBooleanArray checkedRows = listView.getCheckedItemPositions();
 
-// Used for debug		
-//		String selected = "";
+// Used for Activity Feed		
+		String selected = "Welcome to new members:";
 
 		for (int i=0; i<people; ++i) {
 			if (checkedRows.get(i)) {
 				peopleCursor.moveToPosition(peopleMap.get(i));
-//				selected = selected + " " + peopleCursor.getString(peopleCursor.getColumnIndex(SocialContract.People.NAME));
+				selected = selected + " " + peopleCursor.getString(peopleCursor.getColumnIndex(SocialContract.People.NAME));
 				
 				// Set the values related to the activity to store in SocialProvider
 				ContentValues membershipValues = new ContentValues ();
@@ -327,6 +321,22 @@ public class MemberAddActivity extends ListActivity implements OnClickListener {
 		}
 				
 //		Toast.makeText(this, "selected:" + selected, Toast.LENGTH_SHORT).show();
+		
+// Add an activity to the feed		
+		SocialActivity socialActivity = 
+				new SocialActivity (iDisasterApplication.getInstance().me.userName); // account for synchronization
+		ContentResolver activityResolver = getContentResolver();
+		
+// The return code from addActivity is not exploited here		
+		socialActivity.addActivity (activityResolver,			// Insert activity to the activity feed
+// TODO: what should be set here? local or global id?
+				iDisasterApplication.getInstance().selectedTeam.id,		// Feed of the the selected team
+//TODO: what should be set here? global or local id? - local id seems to not work		
+				iDisasterApplication.getInstance().me.peopleGlobalId,	// Me
+				iDisasterApplication.getInstance().VERB_TEXT,			// Activity intent: Simple text
+				selected,												// List of new members
+				iDisasterApplication.getInstance().TARGET_ALL);			// Recipient for Activity
+
 		return iDisasterApplication.getInstance().INSERT_SUCCESS;
 
 	}

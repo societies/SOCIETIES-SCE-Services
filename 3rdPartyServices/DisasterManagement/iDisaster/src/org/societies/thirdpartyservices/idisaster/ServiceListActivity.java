@@ -111,30 +111,30 @@ public class ServiceListActivity extends ListActivity {
     			if (iDisasterApplication.testDataUsed) {					// Test data    				
         				intent.putExtra("REQUEST_CONTEXT", 									// For test: The service is recommended in the CIS
         						iDisasterApplication.getInstance().SERVICE_RECOMMENDED);
-        				intent.putExtra("SERVICE_GLOBAL_ID", Integer.toString(position));	// For test: service identity
+        				intent.putExtra("SERVICE_ID", Integer.toString(position));			// For test: service identity
         				
         			} else {
-        				String serviceGlobalId;
+        				String serviceId;
         				if (position < recommendedServices) {							// Retrieve information from list of recommended services in the team
     						recommendedServiceCursor.moveToPosition(position);
-        					serviceGlobalId =  recommendedServiceCursor.getString(recommendedServiceCursor
-    							.getColumnIndex(SocialContract.Services.GLOBAL_ID));
+        					serviceId =  recommendedServiceCursor.getString(recommendedServiceCursor
+    							.getColumnIndex(SocialContract.Services._ID));
                				intent.putExtra("REQUEST_CONTEXT", iDisasterApplication.getInstance().SERVICE_RECOMMENDED);       					
         				} else if ((position-recommendedServices) < sharedServices) {	// Retrieve information from list of shared services in the team
         					sharedServiceCursor.moveToPosition(position-recommendedServices);
-        					serviceGlobalId =  sharedServiceCursor.getString(sharedServiceCursor
-    							.getColumnIndex(SocialContract.Services.GLOBAL_ID));
+        					serviceId =  sharedServiceCursor.getString(sharedServiceCursor
+    							.getColumnIndex(SocialContract.Services._ID));
                				intent.putExtra("REQUEST_CONTEXT", iDisasterApplication.getInstance().SERVICE_SHARED);       					
         				} else if ((position-recommendedServices-sharedServices) < myServices) {
         					myServiceCursor.moveToPosition(position-recommendedServices - sharedServices);
-        					serviceGlobalId =  myServiceCursor.getString(myServiceCursor
-    							.getColumnIndex(SocialContract.Services.GLOBAL_ID));
+        					serviceId =  myServiceCursor.getString(myServiceCursor
+    							.getColumnIndex(SocialContract.Services._ID));
                				intent.putExtra("REQUEST_CONTEXT", iDisasterApplication.getInstance().SERVICE_INSTALLED);
         				} else {	// should never happen
         					iDisasterApplication.getInstance().debug (2, "No service id can be retrieved from position in onClickListener");
         					return;
         				}
-        				intent.putExtra("SERVICE_GLOBAL_ID", serviceGlobalId);		    				
+        				intent.putExtra("SERVICEL_ID", serviceId);		    				
         			}
     			// Start the ServiceDetails activity
         		startActivity(intent);
@@ -174,7 +174,7 @@ public class ServiceListActivity extends ListActivity {
 //				showQueryExceptionDialog ();	// Exception: Display dialog
 //			}
 
-			if (getMyServices ()						// Retrieve services from the selected team
+			if (getMyServices ()														// Retrieve services installed by the user
 					.equals(iDisasterApplication.getInstance().QUERY_EXCEPTION)) {
 				showQueryExceptionDialog ();	// Exception: Display dialog
 			}
@@ -225,17 +225,17 @@ public class ServiceListActivity extends ListActivity {
 		}
 
 
-		// Step 1: get GLOBAL_ID_SERVICES for shared or recommended services in the selected CIS
+		// Step 1: get _ID_SERVICES for shared or recommended services in the selected CIS
 			Uri sharingUri = SocialContract.Sharing.CONTENT_URI;
-						
-			String[] sharingProjection = new String[] {
-					SocialContract.Sharing.GLOBAL_ID_SERVICE};
 
-			String sharingSelection = SocialContract.Sharing.GLOBAL_ID_COMMUNITY + "= ?" +
+			String[] sharingProjection = new String[] {
+					SocialContract.Sharing._ID_SERVICE};
+
+			String sharingSelection = SocialContract.Sharing._ID_COMMUNITY + "= ?" +
 									"AND " + SocialContract.Sharing.TYPE + "= ?";
 
 			String[] sharingSelectionArgs = new String[] 
-					{iDisasterApplication.getInstance().selectedTeam.globalId, // For the selected CIS
+					{iDisasterApplication.getInstance().selectedTeam.id, 		// For the selected CIS
 					serviceType};											   // Retrieve services of that type
 	
 			Cursor sharingCursor;
@@ -248,7 +248,7 @@ public class ServiceListActivity extends ListActivity {
 
 			}
 
-			// Step 2: retrieve the services with the GLOBAL_ID_SERVICE retrieved above
+			// Step 2: retrieve the services with the _ID_SERVICE retrieved above
 			if (sharingCursor == null) {			// No cursor was set - should not happen?
 				iDisasterApplication.getInstance().debug (2, "sharingCursor was not set to any value");
 				return iDisasterApplication.getInstance().QUERY_EMPTY;
@@ -261,9 +261,9 @@ public class ServiceListActivity extends ListActivity {
 			// Get GLOBAL_ID and NAME for recommended services
 				 
 			Uri servicesUri = SocialContract.Services.CONTENT_URI;
-					
+			
 			String[] servicesProjection = new String[] {
-						SocialContract.Services.GLOBAL_ID,
+						SocialContract.Services._ID,
 						SocialContract.Services.NAME};
 				
 			boolean first = true;
@@ -272,14 +272,14 @@ public class ServiceListActivity extends ListActivity {
 			while (sharingCursor.moveToNext()) {
 				if (first) {
 					first = false;
-					servicesSelection = SocialContract.Services.GLOBAL_ID + "= ?";
+					servicesSelection = SocialContract.Services._ID + "= ?";
 					servicesSelectionArgs.add (sharingCursor.getString(
-									(sharingCursor.getColumnIndex(SocialContract.Sharing.GLOBAL_ID_SERVICE))));
+									(sharingCursor.getColumnIndex(SocialContract.Sharing._ID_SERVICE))));
 				} else {
 					servicesSelection = servicesSelection + 
-										" OR " +  SocialContract.Services.GLOBAL_ID + "= ?";
+										" OR " +  SocialContract.Services._ID + "= ?";
 					servicesSelectionArgs.add (sharingCursor.getString(
-							(sharingCursor.getColumnIndex(SocialContract.Sharing.GLOBAL_ID_SERVICE))));
+							(sharingCursor.getColumnIndex(SocialContract.Sharing._ID_SERVICE))));
 				}
 			}
 			
@@ -305,9 +305,7 @@ public class ServiceListActivity extends ListActivity {
 
 	
 /**
- * getMyServices retrieves the list of services recommended of shared in the selected team
- * from SocialProvider.
- * Parameter:			Type: "Recommended" or "Shared"
+ * getMyServices retrieves the list of services installed by the user.
  * Return value:		Query status code
  */
 
@@ -318,13 +316,16 @@ public class ServiceListActivity extends ListActivity {
 			myServiceCursor = null;
 		}
 
-		// Step 1: get GLOBAL_IDs for services installed by the user
 			Uri serviceUri = SocialContract.Services.CONTENT_URI;
 							
 			String[] sharingProjection = new String[] {
-					SocialContract.Services.GLOBAL_ID,
+					SocialContract.Services._ID,
 					SocialContract.Services.NAME};
 
+// Note this table is not synchronized. It only contains
+// - the list of services available from the marketplace
+// - the list of services installed by the user
+			
 			String serviceSelection = SocialContract.Services.AVAILABLE + "= ?";
 
 			String[] serviceSelectionArgs = new String[] 

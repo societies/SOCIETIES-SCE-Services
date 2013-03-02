@@ -29,6 +29,7 @@ import java.util.Date;
 
 import org.societies.android.api.cis.SocialContract;
 import org.societies.thirdpartyservices.idisaster.R;
+import org.societies.thirdpartyservices.idisaster.data.SocialActivity;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -90,17 +91,26 @@ public class FeedAddActivity extends Activity implements OnClickListener {
 
     	} else {														// add activity to feed
 
-
     		feedContent = feedContentView.getText().toString();
-    		
     		
     		if (iDisasterApplication.testDataUsed) {			// Test data
         	    iDisasterApplication.getInstance().feedContentList.add(feedContent);
         	    iDisasterApplication.getInstance().feedAdapter.notifyDataSetChanged(); // Notify data change to adapter
         	    finish ();							// Terminates and go back to previous activity
     		} else {
-    			if (addFeed()						// Insert activity to the activity feed for the selected team
-					.equals(iDisasterApplication.getInstance().INSERT_EXCEPTION)) {
+    			SocialActivity socialActivity = 
+    					new SocialActivity (iDisasterApplication.getInstance().me.userName); // account for synchronization
+    			ContentResolver activityResolver = getContentResolver();
+    			
+    			if ((socialActivity.addActivity (activityResolver,				// Insert activity to the activity feed
+ // TODO: what should be set here? local or global id?
+    					iDisasterApplication.getInstance().selectedTeam.id,		// Feed of the the selected team
+// TODO: what should be set here? global or local id? - local id seems to not work		
+    					iDisasterApplication.getInstance().me.peopleGlobalId,	// Me
+    					iDisasterApplication.getInstance().VERB_TEXT,			// Activity intent: Simple text
+    					feedContent,											// Text entered by the user
+    					iDisasterApplication.getInstance().TARGET_ALL)			// Recipient for Activity
+				.equals(iDisasterApplication.getInstance().INSERT_EXCEPTION))) {
     				showQueryExceptionDialog ();	// Exception: Display dialog (and terminates activity)
     				// Go back to the previous activity
     			} else {
@@ -115,44 +125,44 @@ public class FeedAddActivity extends Activity implements OnClickListener {
  * addFeed inserts a new activity to the activity feed for the selected disaster team
  * in SocialProvider.
  */
-	private String addFeed () {
-
-		// Set the values related to the activity to store in SocialProvider
-		ContentValues activityValues = new ContentValues ();
-
-// TODO: what should be set here? local or global id?
-		activityValues.put(SocialContract.CommunityActivity._ID_FEED_OWNER,
-				iDisasterApplication.getInstance().selectedTeam.id);
-
-// TODO: what should be set here? global or local id? - local id seems to not work		
-		activityValues.put(SocialContract.CommunityActivity.ACTOR,					// Me
-				iDisasterApplication.getInstance().me.peopleGlobalId);
-
-		activityValues.put(SocialContract.CommunityActivity.VERB,					// Activity intent: Simple text
-				iDisasterApplication.getInstance().VERB_TEXT);
-		activityValues.put(SocialContract.CommunityActivity.OBJECT, feedContent); 	// Text entered by the user			
-		activityValues.put(SocialContract.CommunityActivity.TARGET,					// Recipient for Activity 
-				iDisasterApplication.getInstance().TARGET_ALL);
-
-		// Fields for synchronization with box.com
-		activityValues.put(SocialContract.CommunityActivity.ACCOUNT_NAME, iDisasterApplication.getInstance().me.userName);
-		activityValues.put(SocialContract.CommunityActivity.ACCOUNT_TYPE, "com.box");
-		activityValues.put(SocialContract.CommunityActivity.DIRTY, 1);
-
-		try {
-// The Uri value returned is not used.
-//			Uri activityNewUri = getContentResolver().insert( SocialContract.CommunityActivity.CONTENT_URI,
+//	private String addFeed () {
+//
+//		// Set the values related to the activity to store in SocialProvider
+//		ContentValues activityValues = new ContentValues ();
+//
+//// TODO: what should be set here? local or global id?
+//		activityValues.put(SocialContract.CommunityActivity._ID_FEED_OWNER,
+//				iDisasterApplication.getInstance().selectedTeam.id);
+//
+//// TODO: what should be set here? global or local id? - local id seems to not work		
+//		activityValues.put(SocialContract.CommunityActivity.ACTOR,					// Me
+//				iDisasterApplication.getInstance().me.peopleGlobalId);
+//
+//		activityValues.put(SocialContract.CommunityActivity.VERB,					// Activity intent: Simple text
+//				iDisasterApplication.getInstance().VERB_TEXT);
+//		activityValues.put(SocialContract.CommunityActivity.OBJECT, feedContent); 	// Text entered by the user			
+//		activityValues.put(SocialContract.CommunityActivity.TARGET,					// Recipient for Activity 
+//				iDisasterApplication.getInstance().TARGET_ALL);
+//
+//		// Fields for synchronization with box.com
+//		activityValues.put(SocialContract.CommunityActivity.ACCOUNT_NAME, iDisasterApplication.getInstance().me.userName);
+//		activityValues.put(SocialContract.CommunityActivity.ACCOUNT_TYPE, "com.box");
+//		activityValues.put(SocialContract.CommunityActivity.DIRTY, 1);
+//
+//		try {
+//// The Uri value returned is not used.
+////			Uri activityNewUri = getContentResolver().insert( SocialContract.CommunityActivity.CONTENT_URI,
+////										activityValues);
+//			getContentResolver().insert( SocialContract.CommunityActivity.CONTENT_URI, 
 //										activityValues);
-			getContentResolver().insert( SocialContract.CommunityActivity.CONTENT_URI, 
-										activityValues);
-		} catch (Exception e) {
-			iDisasterApplication.getInstance().debug (2, "Insert to "+ 
-								SocialContract.CommunityActivity.CONTENT_URI + "causes an exception");
-	    	return iDisasterApplication.getInstance().INSERT_EXCEPTION;
-		}
-		
-		return iDisasterApplication.getInstance().INSERT_SUCCESS;
-	}
+//		} catch (Exception e) {
+//			iDisasterApplication.getInstance().debug (2, "Insert to "+ 
+//								SocialContract.CommunityActivity.CONTENT_URI + "causes an exception");
+//	    	return iDisasterApplication.getInstance().INSERT_EXCEPTION;
+//		}
+//		
+//		return iDisasterApplication.getInstance().INSERT_SUCCESS;
+//	}
 
 /**
  * showQueryExceptionDialog displays a dialog to the user.

@@ -52,10 +52,10 @@ import android.util.Log;
 import android.widget.Toast;
 
 /**
- *  Service is used for storing information about one service. 
+ *  ThirdPartyService is used for storing information about one service. 
  *  It provides all operations needed for services (launch, share, ...).
  *
- * @author jacquelinefloch
+ * @author Jacqueline.Floch@sintef.no
  *
  */
 

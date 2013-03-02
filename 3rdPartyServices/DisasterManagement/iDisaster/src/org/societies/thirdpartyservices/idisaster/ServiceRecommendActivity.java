@@ -199,11 +199,17 @@ public class ServiceRecommendActivity extends ListActivity implements OnClickLis
     	Uri serviceUri = SocialContract.Services.CONTENT_URI;
     					
     	String[] serviceProjection = new String[] {
+// TODO: GLOBAL_ID used temporarily
     				SocialContract.Services.GLOBAL_ID,
+    				SocialContract.Services._ID,
     				SocialContract.Services.NAME,
+//    				SocialContract.Services.APP_TYPE,
+    				SocialContract.Services.TYPE,
     				SocialContract.Services.DESCRIPTION};		// Description is used later on when the user selects services 
 
-		String serviceSelection = SocialContract.Services.APP_TYPE + "<> ?";
+// TODO: use APP_TYPE after correction of Populate
+//		String serviceSelection = SocialContract.Services.APP_TYPE + "<> ?";
+		String serviceSelection = SocialContract.Services.TYPE + "<> ?";
 		
 		String[] serviceSelectionArgs = new String[] {
 					iDisasterApplication.getInstance().SERVICE_TYPE_CLIENT };	// Ignore services of type CLIENT
@@ -227,7 +233,7 @@ public class ServiceRecommendActivity extends ListActivity implements OnClickLis
     				
     		service = 0;
     		if (serviceMap != null) {
-    			serviceMap.clear();	// Reset mapping between UI list and poeple list
+    			serviceMap.clear();	// Reset mapping between UI list and people list
     			
     		} else {				// Should never happen...
     			serviceMap = new ArrayList <Integer> ();
@@ -247,7 +253,7 @@ public class ServiceRecommendActivity extends ListActivity implements OnClickLis
     				while (serviceCursor.moveToNext()) {
     					// Only display services that are not recommended in the selected team	
     					if (! serviceInTeam (serviceCursor.getString(serviceCursor
-    							.getColumnIndex(SocialContract.Services.GLOBAL_ID)))) {
+    							.getColumnIndex(SocialContract.Services._ID)))) {
 	    						
     						String displayName = serviceCursor.getString(serviceCursor
     								.getColumnIndex(SocialContract.Services.NAME));
@@ -282,13 +288,13 @@ public class ServiceRecommendActivity extends ListActivity implements OnClickLis
     	
     	ServiceListActivity.recommendedServiceCursor.moveToFirst();
     	if (m.equals(ServiceListActivity.recommendedServiceCursor.getString(
-    			ServiceListActivity.recommendedServiceCursor.getColumnIndex(SocialContract.Services.GLOBAL_ID)))) {
+    			ServiceListActivity.recommendedServiceCursor.getColumnIndex(SocialContract.Services._ID)))) {
     			return true;
     	}
     	
     	while (ServiceListActivity.recommendedServiceCursor.moveToNext()) {
     		if (m.equals(ServiceListActivity.recommendedServiceCursor.getString(
-    				ServiceListActivity.recommendedServiceCursor.getColumnIndex(SocialContract.People.GLOBAL_ID)))) {
+    				ServiceListActivity.recommendedServiceCursor.getColumnIndex(SocialContract.Services._ID)))) {
     			return true;
     		}
     	}
@@ -312,23 +318,23 @@ public class ServiceRecommendActivity extends ListActivity implements OnClickLis
 
 				// Set the values related to the activity to store in SocialProvider
 				ContentValues sharingValues = new ContentValues ();
-				
-//TODO: Remove the following once SocialProvider has been corrected (SocialProvider should insert the GLOBAL_ID)
-				SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss");
-				String currentDateandTime = sdf.format(new Date());
-				sharingValues.put(SocialContract.Sharing.GLOBAL_ID, currentDateandTime);
-// End remove		
 
-				sharingValues.put(SocialContract.Sharing.GLOBAL_ID_SERVICE,		// Id of the service to be recommended
-						serviceCursor.getString(serviceCursor.getColumnIndex(SocialContract.Services.GLOBAL_ID)));
-				sharingValues.put(SocialContract.Sharing.GLOBAL_ID_COMMUNITY,	// Recommend service in the selected team
-									iDisasterApplication.getInstance().selectedTeam.globalId);
-				sharingValues.put(SocialContract.Sharing.GLOBAL_ID_OWNER,			// Member recommending the service
-									iDisasterApplication.getInstance().me.globalId);		
+				sharingValues.put(SocialContract.Sharing._ID_SERVICE,		// Id of the service to be recommended
+						serviceCursor.getString(serviceCursor.getColumnIndex(SocialContract.Services._ID)));
+				sharingValues.put(SocialContract.Sharing._ID_OWNER,			// Member recommending the service
+						iDisasterApplication.getInstance().me.peopleId);		
+				sharingValues.put(SocialContract.Sharing._ID_COMMUNITY,	// Recommend service in the selected team
+									iDisasterApplication.getInstance().selectedTeam.id);
 				sharingValues.put(SocialContract.Sharing.TYPE, iDisasterApplication.getInstance().SERVICE_RECOMMENDED);
-				sharingValues.put(SocialContract.Sharing.ORIGIN, "SOCIETIES");	// Social platform iDisaster is plugged into		
+				sharingValues.put(SocialContract.Sharing.DESCRIPTION, "");
 
-
+// Filed needed temporarily
+				sharingValues.put(SocialContract.Sharing.GLOBAL_ID,		// Global id of the service to be recommended
+						serviceCursor.getString(serviceCursor.getColumnIndex(SocialContract.Services.GLOBAL_ID)));				
+// Fields for synchronization with box.com
+				sharingValues.put(SocialContract.CommunityActivity.ACCOUNT_NAME, iDisasterApplication.getInstance().me.userName);
+				sharingValues.put(SocialContract.CommunityActivity.ACCOUNT_TYPE, "com.box");
+				sharingValues.put(SocialContract.CommunityActivity.DIRTY, 1);
 				
 				try {
 // The Uri value returned is not used.

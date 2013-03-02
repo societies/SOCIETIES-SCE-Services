@@ -100,32 +100,32 @@ public class iDisasterApplication extends Application {
 	public final String NO_ENTRY = "NO_ENTRY";
 
 	// Constant keys used for communities
-	public final String COMMUNITY_TYPE = "SOCIETIES_DM";
+	public final String COMMUNITY_TYPE = "DISASTER";
 
 	// Constant keys used for activity feeds
 	public final String VERB_TEXT = "VERB_TEXT";
 	public final String TARGET_ALL = "TARGET_ALL";
 	
 	// Constant used for services in a community
-	public final String SERVICE_RECOMMENDED = "RECOMMENDED";
-	public final String SERVICE_SHARED = "SHARED";
+	public final String SERVICE_RECOMMENDED = "SERVICE_RECOMMENDED";
+	public final String SERVICE_SHARED = "SERVICE_SHARED";
 	
 	// Constant used for services on a device
-	public final String SERVICE_INSTALLED = "INSTALLED";
-	public final String SERVICE_NOT_INSTALLED = "NOT_INSTALLED";
+	public final String SERVICE_INSTALLED = "SERVICE_INSTALLED";
+	public final String SERVICE_NOT_INSTALLED = "SERVICE_NOT_INSTALLED";
 
 	// Constant used for service types
-	public final String SERVICE_TYPE_PROVIDER = "Provider";
-	public final String SERVICE_TYPE_CLIENT = "Client";
-	public final String SERVICE_TYPE_APP = "App";
+	public final String SERVICE_TYPE_PROVIDER = "SERVICE_TYPE_PROVIDER";
+	public final String SERVICE_TYPE_CLIENT = "SERVICE_TYPE_CLIENT";
+	public final String SERVICE_TYPE_APP = "SERVICE_TYPE_APP";
 
 	// Constant used for operations on services
-	public final String SERVICE_RECOMMEND = "Recommend";
-	public final String SERVICE_INSTALL = "Install";
-	public final String SERVICE_LAUNCH = "Launch";
-	public final String SERVICE_SHARE = "Share";	
-	public final String SERVICE_UNSHARE = "Unshare";
-	public final String SERVICE_NO_ACTION = " ";
+	public final String SERVICE_RECOMMEND = "SERVICE_RECOMMEND";
+	public final String SERVICE_INSTALL = "SERVICE_INSTALL";
+	public final String SERVICE_LAUNCH = "SERVICE_LAUNCH";
+	public final String SERVICE_SHARE = "SERVICE_SHARE";	
+	public final String SERVICE_UNSHARE = "SERVICE_UNSHARE";
+	public final String SERVICE_NO_ACTION = "SERVICE_NO_ACTION";
 
 	
 	// Constant keys used for service download (and install)

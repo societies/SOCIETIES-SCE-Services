@@ -28,7 +28,7 @@ package org.societies.thirdpartyservices.idisaster.data;
  *  Common resource used by iDisaster application components.
  *  Used to store the team (community) selected by the user.
  *
- * @author jacquelinefloch
+ * @author Jacqueline.Floch@sintef.no
  *
  */
 public class SelectedTeam {
