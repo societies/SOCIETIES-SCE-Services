@@ -7,29 +7,43 @@
 
 	<pm:page title="Networking Zone">
 		<pm:view id="viewZone">
-			<pm:header title="Zone" />
+			<pm:header title="#{mainBean.zoneName}" />
 			<pm:content>
 				<p:accordionPanel>
-					This is your current zone
-					
-					<p:tab title="Who">
-						List of suggested people
-						
-						<h:form id="form">
-							<h:panelGrid columns="2" style="margin-bottom:10px"
-								cellpadding="5">
-								<p:selectOneRadio id="zoneMembers"
-									value="#{friendBean.friendid}">
-									<f:selectItems value="#{peopleBean.suggestions}" var="person"
-										itemLabel="#{person.displayName} - #{person.company} - #{person.tags} - #{person.userid}"
-										itemValue="#{person.userid}" />
-									<f:ajax event="click" render="friendsid" />
-								</p:selectOneRadio>
-							</h:panelGrid>
 
-							<h:outputText value="Current friend selected is :" />
+					<p:tab title="Suggested Contacts">
+
+						<h:form id="form">
+
+							<p:dataTable id="zoneMembers" value="#{peopleBean.suggestions}"
+								var="person">
+
+
+								<p:column headerText="Name" style="width:24%">
+									<h:outputText value="#{person.displayName}" />
+								</p:column>
+
+								<p:column headerText="Company" style="width:24%">
+									<h:outputText value="#{person.company}" />
+								</p:column>
+
+								<p:column headerText=" " style="width:24%">
+									<h:outputText value="#{person.tags}" rendered="#{peopleBean.istagged(person)}"/>
+								</p:column>
+
+								<p:column style="width:4%">
+									<p:commandButton id="selectButton" 
+										action="gotofriend" icon="ui-icon-search" title="View">
+										<f:setPropertyActionListener value="#{person.userid}"
+											target="#{friendBean.friendid}" />
+									</p:commandButton>
+								</p:column>
+
+							</p:dataTable>
+
+
 							<h:outputText value="#{friendBean.friendid}" id="friendsid"
-								style="font-weight:bold" />
+								style="font-weight:bold" rendered="false" />
 
 							<p:commandButton icon="back" value="View Friends Profile"
 								action="gotofriend" />
@@ -39,9 +53,21 @@
 
 					</p:tab>
 
-					<p:tab title="What">
-						Activity Feed will go here" 
-				</p:tab>
+					<p:tab title="Activity">
+						
+						<h:form id="formact">
+							<br/>
+								<h:outputText  value="John joined  community " />
+								<br/>	<br/>
+								<h:outputText  value="Ted joned  community " />
+								<br/>	<br/>
+								<h:outputText  value="Networking Admin shared service NZone Client" />
+								<br/>	<br/>
+								<h:outputText  value="Networking community created " />
+								<br/>	<br/>
+						</h:form>
+					</p:tab>
+				
 
 
 				</p:accordionPanel>

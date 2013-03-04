@@ -81,18 +81,18 @@ public class LocationBean implements Serializable {
 		{
 			dets = getNzoneClient().getZoneDetails();
 			// we don;t want the main zone in this so remove
-		//	if ((dets != null) && (dets.size() > 0))
-		//	{
-		//		for ( int i = 0; i < dets.size(); i++)
-		//		{
-		//			if (dets.get(i).getMainzone() == 1)
-		//			{
-		//				dets.remove(i);
-		//				i = dets.size(); 
-		//			}
+			/*if ((dets != null) && (dets.size() > 0))
+			{
+				for ( int i = 0; i < dets.size(); i++)
+				{
+					if (dets.get(i).getMainzone() == 1)
+					{
+						dets.remove(i);
+						i = dets.size(); 
+					}
 					
-		//		}
-		//	}		
+				}
+			}	*/	
 		}		
 		
 		return dets;

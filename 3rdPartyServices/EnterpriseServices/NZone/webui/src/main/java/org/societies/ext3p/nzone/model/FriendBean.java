@@ -27,11 +27,13 @@ public class FriendBean implements Serializable, ValueChangeListener {
 	private String name;   
     private String company;
     private String preferredcompany;
+    private boolean pref;
        
     
     FriendBean()
     {
     	preferredcompany = new String("0");
+    	pref = false;
     }
     
     public String getFriendid() {
@@ -91,7 +93,7 @@ public class FriendBean implements Serializable, ValueChangeListener {
 	public void setAsPreferred()
 	{
 		log.info("Called  setAsPreferred");
-		
+		pref = true;
 		getNzoneClient().setAsPreferred("company", this.getCompany());
 	}
 
@@ -101,16 +103,32 @@ public class FriendBean implements Serializable, ValueChangeListener {
 	}
 
 	public void setPreferredcompany(String preferredcompany) {
+		
 		log.info("Called  setPreferredcompany with [" + preferredcompany + "]");
 		
 		this.preferredcompany = preferredcompany;
 		if (preferredcompany.contentEquals("1"))
+		{
+			pref = true;
+		
 			getNzoneClient().setAsPreferred("company", this.getCompany());
+		}
 		else
+		{
 			getNzoneClient().removeAsPreferred("company", this.getCompany());
+			pref = false;
+		}
 	}
 	
-	 public void valueChanged(ValueChangeEvent vce){
+	 public boolean isPref() {
+		return pref;
+	}
+
+	public void setPref(boolean pref) {
+		this.pref = pref;
+	}
+
+	public void valueChanged(ValueChangeEvent vce){
 		 
 		 log.info("Called  valueChanged with [" + vce.toString() + "]");
 	   }

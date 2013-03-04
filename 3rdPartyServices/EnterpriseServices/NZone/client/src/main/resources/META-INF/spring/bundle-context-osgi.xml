@@ -22,7 +22,8 @@
 	<osgi:reference id="persoMgr" interface="org.societies.api.personalisation.mgmt.IPersonalisationManager"/>
 	<osgi:reference id="serviceMgmt" interface="org.societies.api.services.IServices"/>
 	
-	 
+	<osgi:reference id="actFeedMgr" interface="org.societies.api.activity.IActivityFeedManager"/>
+    
 	  <osgix:cm-properties id="networkclientConfig" persistent-id="networkclient"> 
        	<prop key="networkingserver">netzone.societies.local</prop>
     </osgix:cm-properties>

@@ -10,6 +10,9 @@ import java.util.concurrent.Future;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.societies.api.activity.IActivity;
+import org.societies.api.activity.IActivityFeed;
+import org.societies.api.activity.IActivityFeedManager;
 import org.societies.api.cis.directory.ICisDirectoryCallback;
 import org.societies.api.cis.directory.ICisDirectoryRemote;
 import org.societies.api.cis.management.ICis;
@@ -62,6 +65,9 @@ public class NZoneClient implements INZoneClient,IActionConsumer {
 	private IUserActionMonitor uam; 
 	private IPersonalisationManager persoMgr;
 	IServices serviceMgmt;
+	private IActivityFeedManager actFeedMgr;
+	private IActivityFeed actFeed;
+	private List<IActivity> tempActList;
 	
 	
 	private ServiceResourceIdentifier myServiceID;
@@ -180,6 +186,20 @@ public class NZoneClient implements INZoneClient,IActionConsumer {
 		this.serviceMgmt = serviceMgmt;
 	}
 
+	/**
+	 * @return the actFeedMgr
+	 */
+	public IActivityFeedManager getActFeedMgr() {
+		return actFeedMgr;
+	}
+
+	/**
+	 * @param actFeedMgr the actFeedMgr to set
+	 */
+	public void setActFeedMgr(IActivityFeedManager actFeedMgr) {
+		this.actFeedMgr = actFeedMgr;
+	}
+
 	public NZoneClient(String networkingserver)	
 	{
 		this.nzoneServerCssID = new String(networkingserver);
@@ -209,6 +229,7 @@ public class NZoneClient implements INZoneClient,IActionConsumer {
 		log.info("NZoneClient bundle myIdentity is." + myIdentity.getJid());
 		if (requestor == null)
 			requestor = new Requestor(myIdentity);
+		
 		
 		myServiceID = getServiceMgmt().getMyServiceId(this.getClass());
 		
@@ -250,6 +271,9 @@ public class NZoneClient implements INZoneClient,IActionConsumer {
 		zoneDetails = getZoneDetails();
 		
 		
+		actFeed = getActFeedMgr().getOrCreateFeed(myIdentity.getBareJid(), "netzoneactfeed");
+		tempActList = new ArrayList<IActivity>();
+		
 		
 		
 	};
@@ -276,8 +300,10 @@ public class NZoneClient implements INZoneClient,IActionConsumer {
 		joinedCis = getCisManager().getCis(cisJid);
 	
 		if (joinedCis != null)
+		{
+			log.info("joinCis already a member");
 			return joinedCis;	
-	
+		}
 
 		CisAdvertisementRecord adRec = getCisAdvert(cisJid);
 			
@@ -310,10 +336,11 @@ public class NZoneClient implements INZoneClient,IActionConsumer {
 		if (bJoinResponseReceived)
 			joinedCis = getCisManager().getCis(cisJid);
 				
+		log.info("joinZoneCis finsihed");
 		if (joinedCis != null)
 			return joinedCis;	
 		
-		log.info("joinZoneCis End");
+		log.info("joinZoneCis problem");
 		return null; // problem joining
 	}
 
@@ -399,6 +426,7 @@ public class NZoneClient implements INZoneClient,IActionConsumer {
 	{
 		// Return a list of suggest contacts from the current zone,
 		//if no current zone, return a list from main zone
+		List<UserPreview> sortedlist = new ArrayList<UserPreview>();
 		List<UserPreview> list = new ArrayList<UserPreview>();
 		
 		
@@ -556,7 +584,25 @@ public class NZoneClient implements INZoneClient,IActionConsumer {
 				}
 			}
 		}
-		return list;
+		
+		
+		for ( int i = 0; i < list.size(); i++)
+		{
+			if (list.get(i).getTags().size() > 0)
+			{
+				sortedlist.add(list.get(i));
+			}
+		}
+		
+		for (int i = 0; i < list.size(); i++)
+		{
+			if (list.get(i).getTags().size() == 0)
+			{
+				sortedlist.add(list.get(i));
+			}
+		}
+		
+		return sortedlist;
 	} 
 	
 	
@@ -580,6 +626,15 @@ public class NZoneClient implements INZoneClient,IActionConsumer {
 	@Override
 	public void setAsPreferred(String type, String value)
 	{
+		
+		IActivity act = actFeed.getEmptyIActivity();
+		act.setActor("User");
+		act.setVerb("added");
+		act.setObject(value + " as a preferred" + type);
+		//actFeed.addActivity(act, null);
+		// Temporary activty list until activty fed usable
+		tempActList.add(act);
+		
 		
 		// get UserPrefences
 		if 	(preferences == null)
@@ -619,6 +674,15 @@ public class NZoneClient implements INZoneClient,IActionConsumer {
 	@Override
 	public void removeAsPreferred(String type, String value)
 	{
+		IActivity act = actFeed.getEmptyIActivity();
+		act.setActor("User");
+		act.setVerb("removed");
+		act.setObject(value + " removed as a preferred" + type);
+		//actFeed.addActivity(act, null);
+		
+		// Temporary activty list until activty fed usable
+		tempActList.add(act);
+		
 		// get UserPrefences
 		if 	(preferences == null)
 		{

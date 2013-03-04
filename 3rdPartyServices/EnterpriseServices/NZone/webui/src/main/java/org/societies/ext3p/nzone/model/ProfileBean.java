@@ -38,6 +38,12 @@ public class ProfileBean implements Serializable {
 		this.nzoneClient = nzoneClient;
 	}
 	
+	public void intialiseprofilebean(ComponentSystemEvent ev)
+	{
+		setProfilemissing(!getNzoneClient().isProfileSetup());
+		
+	}
+	
 	public boolean isProfilemissing()
 	{
 		log.info("isProfilemissing called value at start is " + this.profilemissing);
@@ -66,6 +72,8 @@ public class ProfileBean implements Serializable {
 		}
 		log.info("loadProfileDetails called end");
 	}
+	
+	
 	/**
 	 * @return the name
 	 */

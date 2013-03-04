@@ -64,5 +64,31 @@ public class PeopleBean {
 	public void setCurrentMainView(boolean currentMainView) {
 		this.currentMainView = currentMainView;
 	}
+	
+	public boolean istagged(UserPreview currentdet)
+	{
+		if (currentdet == null)
+			return false;
+		
+		if (currentdet.getTags() == null)
+			return false;
+		
+		
+		if (currentdet.getTags().size() == 0)
+			return false;
+		
+		if (currentdet.getTags().get(0) == null)
+			return false;
+		
+		
+		 
+		if (currentdet.getTags().get(0).length() > 0)
+		{
+			return true;
+		}
+		return false;
+		
+		
+	}
 }
                     

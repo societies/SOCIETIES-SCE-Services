@@ -36,6 +36,7 @@
 		<property name="serviceMgmt" ref="serviceMgmt" />
 		<property name="uam" ref="uam" />
 		<property name="persoMgr" ref="persoMgr" />
+		<property name="actFeedMgr" ref="actFeedMgr" />
 	</bean>
 	
 	
