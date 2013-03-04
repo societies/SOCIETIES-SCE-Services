@@ -31,9 +31,12 @@ public class UserData {
 	private String institute = "";
 	private String email = "";
 	private String societies_xmlrpc_url = "";
+	private String[] skills = null; 
+	private String separator = ":.:"; 
+	private String skillseparator = ",";
 	
-	public UserData(String commaSeperated){
-		String[] tokens = commaSeperated.split(",");
+	public UserData(String seperated){
+		String[] tokens = seperated.split(separator);
 		if (tokens.length > 3) {
 			setFirstName(tokens[0]);
 			setLastName(tokens[1]);
@@ -42,6 +45,8 @@ public class UserData {
 		}
 		if (tokens.length > 4)
 			setSocieties_xmlrpc_url(tokens[4]);
+		if (tokens.length > 5)
+			setSkills(tokens[5].split(skillseparator));
 	}
 
 	public String getFirstName() {
@@ -84,7 +89,21 @@ public class UserData {
 		this.societies_xmlrpc_url = societies_xmlrpc_url;
 	}
 
+	public String[] getSkills() {
+		return skills;
+	}
+
+	public void setSkills(String[] skills) {
+		this.skills = skills;
+	}
+
 	public String toString(){
-		return getFirstName() + " - " + getLastName() + " - " + getInstitute() + " - " + getEmail() + " - " + getSocieties_xmlrpc_url();
+		String returnString = getFirstName() + " "+separator+" " + getLastName() + " "+separator+" " + getInstitute() + " "+separator+" " + getEmail() 
+				+ " "+separator+" " + getSocieties_xmlrpc_url()+ " "+separator+" " ;
+		if (getSkills() != null)
+			for (String skill : getSkills()) 
+				returnString += skill+skillseparator;
+		
+		return returnString;
 	}
 }

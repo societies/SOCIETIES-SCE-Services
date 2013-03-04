@@ -83,7 +83,7 @@ public class WantToHelp implements IWantToHelp, ActionListener {
 	private JButton subscribe;
 	private JButton unsubscribe;
 	
-//	private PullThread pullThread;
+	private PullThread pullThread;
 	
 	
 	public static final String PANEL_LAYOUT_CONSTRAINTS = "hidemode 3, gap 0 10, novisualpadding, ins 4, wrap 1"; //, debug 2000";
@@ -100,12 +100,12 @@ public class WantToHelp implements IWantToHelp, ActionListener {
 
 	private String USER_ID;
 	
-	private String userEmail = "korbinian.frank@dlr.de";
+	private String userEmail = "john@doe.ar";
 	private String testUserPassword = "password";	
 	private String userFirstname = "firstname";
 	private String userLastname = "lastname";
 	private String userInstitute = "DLR";
-	private String skills = "";
+	private String skills = "A,B";
 	private String userCountry = "Germany";
 	private String languages;
 	
@@ -175,9 +175,9 @@ public class WantToHelp implements IWantToHelp, ActionListener {
 		
 		// ++++++++++++   pull thread start   ++++++++++++		
 		
-//		pullThread = new PullThread();
-//		pullThread.start();
-//		pullThread.setCheckData(false);
+		pullThread = new PullThread();
+		pullThread.start();
+		pullThread.setCheckData(true);
 		
 		// ------------   pull thread end   ------------
 	}
@@ -413,6 +413,7 @@ public class WantToHelp implements IWantToHelp, ActionListener {
 			feedbackTextArea.append(string+"\n");
 		
 		LOG.info(string);
+//		System.out.println(string);
 		
 	}
 
@@ -433,7 +434,7 @@ public class WantToHelp implements IWantToHelp, ActionListener {
 						updateUserDataInCSS();
 				}
 				try {
-					sleep(pullIntervalInSeconds*10000);
+					sleep(pullIntervalInSeconds*1000);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
@@ -455,7 +456,6 @@ public class WantToHelp implements IWantToHelp, ActionListener {
 	 */
 	public static void main(String[] args) throws Exception {
 		WantToHelp iWantToHelp = new WantToHelp(null, null);
-		iWantToHelp.activate();
 	}
 	
 	private class WindowEventHandler extends WindowAdapter {
