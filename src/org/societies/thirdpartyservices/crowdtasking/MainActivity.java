@@ -59,11 +59,13 @@ public class MainActivity extends Activity implements SensorEventListener {
 	private static final String LOG_EVENT = "si.setcce.societies.android.rest.LOG_EVENT";
 	private static final String GET_MEETING_ACTION = "si.setcce.societies.android.rest.meeting";
 	private static final String APPLICATION_URL = "http://crowdtasking.appspot.com";
+	//private static final String APPLICATION_URL = "http://192.168.1.102:8888";
 	private static final String MEETING_URL = APPLICATION_URL + "/android/meeting/";
 	private static final String MEETING_REST_API_URL = APPLICATION_URL + "/rest/meeting";
 	private static final String SCAN_QR_URL = APPLICATION_URL + "/android/scanQR";
 	private static final String PICK_TASK_URL = APPLICATION_URL + "/task/view?id=";
 	private static final String EVENT_API_URL = APPLICATION_URL + "/rest/event";
+	private static final String SHARE_CS_URL = APPLICATION_URL + "/android/shareCsUrl";
 	private String startUrl;
 	public String nfcUrl=null;
 	private WebView webView;
@@ -413,6 +415,34 @@ public class MainActivity extends Activity implements SensorEventListener {
 					Toast.LENGTH_SHORT);
 			toast.show();
 		}
+		
+		public void share(String spejs, String action) {
+			if (spejs == null || "".equalsIgnoreCase(spejs)) {
+				Toast toast = Toast.makeText(mAppView.getContext(), "Enter URL mapping",
+						Toast.LENGTH_SHORT);
+				toast.show();
+				return;
+			}
+			if (action == null || "".equalsIgnoreCase(action) && !("PD".equalsIgnoreCase(action) || "CI".equalsIgnoreCase(action) || "CO".equalsIgnoreCase(action))) {
+				return;
+			}
+			String schema="cs:";
+			if ("PD".equalsIgnoreCase(action)) {
+				schema="http:";
+			}
+			String text = schema+"//crowdtasking.appspot.com/cs/"+spejs;
+			if ("CI".equalsIgnoreCase(action)) {
+				text+="/enter";
+			}
+			if ("CO".equalsIgnoreCase(action)) {
+				text+="/leave";
+			}
+			Intent sendIntent = new Intent();
+			sendIntent.setAction(Intent.ACTION_SEND);
+			sendIntent.putExtra(Intent.EXTRA_TEXT, text);
+			sendIntent.setType("text/plain");
+			startActivity(sendIntent);
+		}
 	}
 
     @Override
@@ -469,6 +499,11 @@ public class MainActivity extends Activity implements SensorEventListener {
     	@Override
         public boolean shouldOverrideUrlLoading(WebView view, String url) {
         	if (url.equalsIgnoreCase(SCAN_QR_URL)) {
+                IntentIntegrator integrator = new IntentIntegrator(MainActivity.this);
+                integrator.initiateScan(IntentIntegrator.QR_CODE_TYPES);
+        		return true;
+        	}
+        	if (url.equalsIgnoreCase(SHARE_CS_URL)) {
                 IntentIntegrator integrator = new IntentIntegrator(MainActivity.this);
                 integrator.initiateScan(IntentIntegrator.QR_CODE_TYPES);
         		return true;
