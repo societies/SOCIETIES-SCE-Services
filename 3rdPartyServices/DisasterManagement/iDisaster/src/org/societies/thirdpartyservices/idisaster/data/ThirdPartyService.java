@@ -30,6 +30,7 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -62,14 +63,16 @@ import android.widget.Toast;
 
 public class ThirdPartyService {
 	
-//	private String serviceId;	
+	public String serviceId;
 	public String serviceGlobalId;
 	public String serviceName;
 	public String serviceDescription;
-	public String serviceAvailable;
 	private String serviceURL;
-	private String serviceAppType;
+	private String serviceType;
 	private String serviceConfig;
+	private String serviceDependency;
+	
+	public String serviceInstallStatus = iDisasterApplication.getInstance().SERVICE_NOT_INSTALLED;
 
 	Uri serviceUri = SocialContract.Services.CONTENT_URI;
 	Cursor serviceCursor;
@@ -87,13 +90,13 @@ public class ThirdPartyService {
 
 /**
  * Constructor.
+ * 
  */
-
-	public ThirdPartyService (String id) {
-		serviceGlobalId =id;
+	public ThirdPartyService (String globalId) {
+		serviceGlobalId = globalId;
 	}
 	
-/**
+/**	
  * getServiceInformation retrieves the information about the service 
  * from Social Provider.
  */
@@ -102,17 +105,21 @@ public class ThirdPartyService {
 		
 		String[] serviceProjection = new String[] {
 							SocialContract.Services._ID,
-							SocialContract.Services.GLOBAL_ID,
+//							SocialContract.Services.GLOBAL_ID,			// already set on class instantiation
 							SocialContract.Services.NAME,
 							SocialContract.Services.DESCRIPTION,
-							SocialContract.Services.AVAILABLE,
-							SocialContract.Services.URL,
-							SocialContract.Services.APP_TYPE,
-							SocialContract.Services.CONFIG
-							
+							SocialContract.Services.URL,				// URL to code to be downloaded
+							SocialContract.Services.TYPE,				//	
+							SocialContract.Services.CONFIG,				// intent to launch the service
+							SocialContract.Services.DEPENDENCY			// dependency on another service
+
+// Not used
+//							SocialContract.Services._ID_OWNER,
+//							SocialContract.Services.APP_TYPE,
+//							SocialContract.Services.AVAILABLE
+
 // TODO: remove - Used temporarily - waiting for extension of Social Provider
 //							,
-//							SocialContract.Services.TYPE,
 //							SocialContract.Services.DEPENDENCY
 							};
 		
@@ -137,21 +144,29 @@ public class ThirdPartyService {
 		}
 		
 		serviceCursor.moveToFirst();		// Should not be several matches; anyway only select the first
+
+//  serviceGlobalId is set on class instantiation 
+//		serviceGlobalId = serviceCursor.getString(serviceCursor
+//				.getColumnIndex(SocialContract.Services.GLOBAL_ID));
+
+		serviceId = serviceCursor.getString(serviceCursor
+				.getColumnIndex(SocialContract.Services._ID));
 		
-//		serviceId = serviceCursor.getString(serviceCursor
-//				.getColumnIndex(SocialContract.Services._ID));
 		serviceName = serviceCursor.getString(serviceCursor
 						.getColumnIndex(SocialContract.Services.NAME));
 		serviceDescription = serviceCursor.getString(serviceCursor
 						.getColumnIndex(SocialContract.Services.DESCRIPTION));
-		serviceAvailable = serviceCursor.getString(serviceCursor
-				.getColumnIndex(SocialContract.Services.AVAILABLE));
+// No longer used
+//		serviceAvailable = serviceCursor.getString(serviceCursor
+//				.getColumnIndex(SocialContract.Services.AVAILABLE));
 		serviceURL = serviceCursor.getString(serviceCursor
 				.getColumnIndex(SocialContract.Services.URL));
-		serviceAppType=serviceCursor.getString(serviceCursor
-				.getColumnIndex(SocialContract.Services.APP_TYPE));
+		serviceType=serviceCursor.getString(serviceCursor
+				.getColumnIndex(SocialContract.Services.TYPE));
 		serviceConfig = serviceCursor.getString(serviceCursor
 				.getColumnIndex(SocialContract.Services.CONFIG));
+		serviceDependency = serviceCursor.getString(serviceCursor
+				.getColumnIndex(SocialContract.Services.DEPENDENCY));
 
 //TODO: If there are several matches for the service, the duplications should be removed
 		
@@ -170,9 +185,12 @@ public class ThirdPartyService {
  * - checks the consistency between the availability status of the service in SocialProvider
  *   and the availability on device.
  * - triggers status update in SocialProvider, if not consistent.
+ * 
+ * return UPDATE_SUCCESS if checking success;
+ *
  */
 
-	public String checkServiceInstallStatus (Context cxt) {
+	public String checkServiceInstallStatus (Context cxt, ContentResolver resolver) {
 
 		// Assume that information about the service has already been 
 		// retrieved by getServiceInformation
@@ -187,60 +205,160 @@ public class ThirdPartyService {
 		
 		serviceCursor.moveToFirst();		// Should not be several matches; anyway only select the first
 		
-		if (serviceInstalled (cxt, serviceCursor.getString(serviceCursor	// If the service is installed on the device
-				.getColumnIndex(SocialContract.Services.GLOBAL_ID)))) {
+		if (serviceInstalled (cxt, serviceGlobalId)) {	//Service installed on the device
 			
-			if (serviceAvailable.equals (iDisasterApplication.getInstance().SERVICE_NOT_INSTALLED)){
-				return (updateServiceInstallStatus (cxt, iDisasterApplication.getInstance().SERVICE_INSTALLED));
-			}
-		
+			// check info stored in SocialProvider
+			return updateServiceInstallStatus (cxt, resolver, iDisasterApplication.getInstance().SERVICE_INSTALLED);
+					
 		} else {													// If the service is NOT installed on the device
-		
-			if (serviceAvailable.equals (iDisasterApplication.getInstance().SERVICE_INSTALLED)){
-				return (updateServiceInstallStatus (cxt, iDisasterApplication.getInstance().SERVICE_NOT_INSTALLED));
-			}
+			
+			// check info stored in SocialProvider
+			return updateServiceInstallStatus (cxt, resolver, iDisasterApplication.getInstance().SERVICE_NOT_INSTALLED);			
 		}		
-
-		return iDisasterApplication.getInstance().UPDATE_SUCCESS;
 	}
 
 		
 /**
  * updateServiceInstallStatus updates availability status in SocialProvider.
  * 
+ * sets the attribute serviceAvailable
+ * 
+ * return UPDATE_SUCCESS if update success;
+ *
+ * 
  */
 
-	public String updateServiceInstallStatus (Context cxt, String status) {
+	public String updateServiceInstallStatus (Context cxt, ContentResolver resolver, String status) {
 		
 		// Assume that information about the service has already been 
 		// retrieved by getServiceInformation
 		
-		if (serviceCursor == null) {
+		// Reset variable first - Then set it if the service is installed and the table properly updated
+		serviceInstallStatus = iDisasterApplication.getInstance().SERVICE_NOT_INSTALLED;
+				
+		Uri sharingUri = SocialContract.Sharing.CONTENT_URI;
+
+		String[] sharingProjection = new String[] {
+				SocialContract.Sharing._ID,
+				SocialContract.Sharing._ID_SERVICE,
+//				SocialContract.Sharing._ID_COMMUNITY,
+				SocialContract.Sharing.TYPE};
+
+		String sharingSelection = SocialContract.Sharing._ID_COMMUNITY + "= ?" +
+								"AND " + SocialContract.Sharing._ID_SERVICE + "= ?";
+
+		String[] sharingSelectionArgs = new String[] 
+				{"0", 									// "0" if own services
+				serviceId};								// Retrieve services of that type
+
+		Cursor sharingCursor;
+		try {
+			sharingCursor= resolver.query(sharingUri, sharingProjection,
+					sharingSelection, sharingSelectionArgs, null /* sortOrder*/);
+		} catch (Exception e) {
+			iDisasterApplication.getInstance().debug (2, "Query to "+ sharingUri + "causes an exception");
+			return iDisasterApplication.getInstance().QUERY_EXCEPTION;
+		}				
+		
+		if (sharingCursor == null) {
 			return iDisasterApplication.getInstance().QUERY_EXCEPTION;
 		}
 		
-		if (serviceCursor.getCount() == 0) {
-			return iDisasterApplication.getInstance().QUERY_EMPTY;
-		}
+		if (sharingCursor.getCount() == 0) {			// No service found
+
+			if (status.equals(iDisasterApplication.getInstance().SERVICE_INSTALLED)) {	// Service is installed and table should be updated
+
+				ContentValues sharingValues = new ContentValues ();
+
+				sharingValues.put(SocialContract.Sharing._ID_SERVICE, serviceId);	// Id of the installed service
+				sharingValues.put(SocialContract.Sharing._ID_OWNER, "0");			// "0" if own services
+				sharingValues.put(SocialContract.Sharing._ID_COMMUNITY,	"0"); 		// "0" if own services
+				sharingValues.put(SocialContract.Sharing.TYPE, iDisasterApplication.getInstance().SERVICE_INSTALLED);
+				sharingValues.put(SocialContract.Sharing.DESCRIPTION, "");
+
+// Field needed temporarily
+				sharingValues.put(SocialContract.Sharing.GLOBAL_ID,	serviceGlobalId);	// Global id of the service to be recommended
+// No sync needed
+				
+				try {
+// The Uri value returned is not used.
+//					Uri activityNewUri = getContentResolver().insert( SocialContract.CommunityActivity.CONTENT_URI,
+//							sharingValues);
+					resolver.insert( SocialContract.Sharing.CONTENT_URI, sharingValues);
+				} catch (Exception e) {
+					iDisasterApplication.getInstance().debug (2, "Insert to "+ 
+										SocialContract.Sharing.CONTENT_URI + "causes an exception");
+			    	return iDisasterApplication.getInstance().INSERT_EXCEPTION;
+				}
+				
+				serviceInstallStatus = iDisasterApplication.getInstance().SERVICE_INSTALLED;
+			}
+			
+			return iDisasterApplication.getInstance().UPDATE_SUCCESS;	
+			
+		}	// getCount == 0
+
 		
-		serviceCursor.moveToFirst();		// Should not be several matches; anyway only select the first	
-		
-		Uri recordUri = serviceUri.withAppendedPath(serviceUri, "/" +
-				serviceCursor.getString(serviceCursor.getColumnIndex(SocialContract.Services._ID)));
-		ContentValues values = new ContentValues();
-        values.put(SocialContract.Services.AVAILABLE, status);
+		// A (at least one) service is found in the sharing table
+		sharingCursor.moveToFirst();
 
-        try {
-        	resolver.update(recordUri, values, null, null);		
+		boolean first = true;
+		while (sharingCursor.moveToNext()) {
+			
+			
+//			String s_id = sharingCursor.getString(sharingCursor.getColumnIndex(SocialContract.Sharing._ID));
+//			String s_id_service = sharingCursor.getString(sharingCursor.getColumnIndex(SocialContract.Sharing._ID_SERVICE));
+//			String s_type = sharingCursor.getString(sharingCursor.getColumnIndex(SocialContract.Sharing.TYPE));
+//			String s_com = sharingCursor.getString(sharingCursor.getColumnIndex(SocialContract.Sharing._ID_COMMUNITY));
 
-		} catch (Exception e) {
-			iDisasterApplication.getInstance().debug (2, "Update to "+ 
-										SocialContract.Services.CONTENT_URI + "causes an exception");
-			return iDisasterApplication.getInstance().UPDATE_EXCEPTION;
+						
+
+			Uri recordUri = sharingUri.withAppendedPath(serviceUri, "/" +
+					serviceCursor.getString(serviceCursor.getColumnIndex(SocialContract.Services._ID)));
+			
+			if (first) {																			// check that TYPE is properly set
+				first = false;
+				if (status.equals(iDisasterApplication.getInstance().SERVICE_INSTALLED)) {
+
+					if (!(sharingCursor.getString(sharingCursor
+							.getColumnIndex(SocialContract.Sharing.TYPE)).equals(status))) {		// update info in Sharing table set TYPE to SERVICE_INSTALLED
+						ContentValues values = new ContentValues();
+				        values.put(SocialContract.Services.TYPE, status);		
+				        try {
+				        	resolver.update(recordUri, values, null, null);		
+						} catch (Exception e) {
+							iDisasterApplication.getInstance().debug (2, "Update to "+ 
+														SocialContract.Services.CONTENT_URI + "causes an exception");
+							return iDisasterApplication.getInstance().UPDATE_EXCEPTION;
+						}
+					}
+					serviceInstallStatus = iDisasterApplication.getInstance().SERVICE_INSTALLED;
+
+					// otherwise the TYPE is correctly set
+					
+				} else {				// SERVICE_NOT_INSTALLED. It should be reomved from the table
+			        try {
+			        	resolver.delete (recordUri, null, null);		
+					} catch (Exception e) {
+						iDisasterApplication.getInstance().debug (2, "Update to "+ 
+													SocialContract.Services.CONTENT_URI + "causes an exception");
+						return iDisasterApplication.getInstance().UPDATE_EXCEPTION;
+					}
+				} 
+					
+			} else {					// A service installed by the user should be only registered once in the table 
+		        try {
+		        	resolver.delete (recordUri, null, null);		
+				} catch (Exception e) {
+					iDisasterApplication.getInstance().debug (2, "Update to "+ 
+												SocialContract.Services.CONTENT_URI + "causes an exception");
+					return iDisasterApplication.getInstance().UPDATE_EXCEPTION;
+				}	
+			}
 		}
-
-        serviceAvailable = status;
-        return iDisasterApplication.getInstance().UPDATE_SUCCESS;
+	
+		return iDisasterApplication.getInstance().UPDATE_SUCCESS;
+				
 	}
 
 /**
@@ -319,7 +437,9 @@ public class ThirdPartyService {
 // Work on old Samsung Tab - Android 2.1 with 3G - but not on HTC Android 4.1
 //		            URL url = new URL ("http://www.sintef.no/project/UbiCompForAll/city_explorer/CityExplorer.apk");
 		    	
-	            URL url = new URL(serviceURL);				// Download file URL
+//	            URL url = new URL(serviceURL);				// Download file URL
+		    	URL url = new URL ("http://folk.ntnu.no/svarvaa/utils/pro2www/apk/Tshirt.apk");
+	            
 				String fileName = serviceName + ".apk";		// File for storing download
 				
 	            HttpURLConnection c = (HttpURLConnection) url.openConnection();
@@ -422,17 +542,18 @@ public class ThirdPartyService {
 				SocialContract.Sharing._ID};							// Retrieve the _ID of the shared service entry (if any)
 	
 		String sharingSelection = 
-				SocialContract.Sharing.GLOBAL_ID_SERVICE + "= ?" +				// Service selected for the Details activity	
-				"AND " + SocialContract.Sharing.GLOBAL_ID_COMMUNITY + "= ?" +	// Selected community
-				"AND " + SocialContract.Sharing.GLOBAL_ID_OWNER + "= ?" +		// shared by ME
-				"AND " + SocialContract.Sharing.TYPE + "= ?";			// Type should be set to "shared" 
+				SocialContract.Sharing._ID_SERVICE + "= ?" +					// Service selected for the Details activity	
+				"AND " + SocialContract.Sharing._ID_COMMUNITY + "= ?" +			// Selected community
+				"AND " + SocialContract.Sharing._ID_OWNER + "= ?" +				// shared by ME
+				"AND " + SocialContract.Sharing.TYPE + "= ?" +					// Type should be set to "shared"
+				"AND " + SocialContract.Sharing.DELETED + "<> ?";				// Delete flag.
 	
 		String[] sharingSelectionArgs = new String[]
-//TODO: Replace GlobalID by Id (next version) 
-				{serviceGlobalId,												// For selected service
+				{serviceId,														// For selected service
 				teamId,	 														// For the selected CIS
 				meId, 															// For me
-				iDisasterApplication.getInstance().SERVICE_SHARED};				// Retrieve shared services
+				iDisasterApplication.getInstance().SERVICE_SHARED,				// Retrieve shared services
+				"1"};
 		
 		try {
 			sharingCursor= resolver.query(sharingUri, sharingProjection,
@@ -463,23 +584,24 @@ public class ThirdPartyService {
 /**
  * shareService add a new entry in SocialProvider Sharing table
  */
-	public String shareService (Context cxt, String meId, String teamId) {
-    
+	public String shareService (Context cxt, String meId, String meUserName, String teamId) {
+		
 		// Set the values related to the activity to store in SocialProvider
 		ContentValues sharingValues = new ContentValues ();
 		
-//TODO: Remove the following once SocialProvider has been corrected (SocialProvider should insert the GLOBAL_ID)
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss");
-		String currentDateandTime = sdf.format(new Date());
-		sharingValues.put(SocialContract.Sharing.GLOBAL_ID, currentDateandTime);
-// End remove		
-
-		// TODO: replace Global ID with ID
-		sharingValues.put(SocialContract.Sharing.GLOBAL_ID_SERVICE,	serviceGlobalId);	// Id of the service to be shared
-		sharingValues.put(SocialContract.Sharing.GLOBAL_ID_COMMUNITY, teamId);			// Recommend service in the selected team
-		sharingValues.put(SocialContract.Sharing.GLOBAL_ID_OWNER, meId);				// Member recommending the service
+		sharingValues.put(SocialContract.Sharing._ID_SERVICE, serviceId);	// Id of the service to be shared
+		sharingValues.put(SocialContract.Sharing._ID_OWNER, meId);			// Member recommending the service
+		sharingValues.put(SocialContract.Sharing._ID_COMMUNITY, teamId);	// Recommend service in the selected team
 		sharingValues.put(SocialContract.Sharing.TYPE, iDisasterApplication.getInstance().SERVICE_SHARED);
-		sharingValues.put(SocialContract.Sharing.ORIGIN, "SOCIETIES");	// Social platform iDisaster is plugged into
+		sharingValues.put(SocialContract.Sharing.DESCRIPTION, "");
+
+//Field needed temporarily
+		sharingValues.put(SocialContract.Sharing.GLOBAL_ID,	serviceGlobalId);	// Global id of the service to be recommended
+//Fields for synchronization with box.com
+		sharingValues.put(SocialContract.CommunityActivity.ACCOUNT_NAME, meUserName);
+		sharingValues.put(SocialContract.CommunityActivity.ACCOUNT_TYPE, "com.box");
+		sharingValues.put(SocialContract.CommunityActivity.DIRTY, 1);
+
 		
 		try {
 // The Uri value returned is not used.
@@ -517,11 +639,14 @@ public class ThirdPartyService {
 		Uri recordUri = sharingUri.withAppendedPath(sharingUri, "/" + 
 				sharingCursor.getString(sharingCursor.getColumnIndex(SocialContract.Sharing._ID)));
 		
+		ContentValues values = new ContentValues();
+        values.put(SocialContract.Sharing.DELETED, "1");
+		
 		try {
 // The number of rows deleted is not used.
 //								Int i activityNewUri = getContentResolver().delete (SocialContract.Sharing.CONTENT_URI, null, null);
 //			getContentResolver().delete(recordUri, null, null);
-			resolver.delete(recordUri, null, null);
+			resolver.update(recordUri, values, null, null);
 			
 		} catch (Exception e) {
 			iDisasterApplication.getInstance().debug (2, "Delete of "+ recordUri + "causes an exception");

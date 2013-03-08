@@ -56,11 +56,15 @@ public class ServiceDetailsActivity extends Activity implements OnClickListener 
 	private String requestContext;
 	private ThirdPartyService thirdPartyService;
 
+	static final String INTENT_SERVICE_DETAILS_REQUEST_CONTEXT ="REQUEST_CONTEXT";
+	static final String INTENT_SERVICE_DETAILS_GLOBAL_ID_SERVICE ="GLOBAL_ID_SERVICE";
+
+	
 // Status information for the user. Not stored in SocialProvider 
 	private String SERVICE_STATUS_RECOMMENDED = "This service is recommended in the team.";
 	private String SERVICE_STATUS_RECOMMENDED_INSTALLED = "This recommended service is already installed on your device. You can share it with the team members.";	
 	private String SERVICE_STATUS_INSTALLED = "This service is installed on your device. You can share it with the team members.";
-	private String SERVICE_STATUS_REMOVED = "This service was not properly or is no longer installed on your device.";
+	private String SERVICE_STATUS_REMOVED = "This service was not properly installed or is no longer installed on your device.";
 	private String SERVICE_STATUS_SHARED_BY_ME = "You have shared this service with the team members.";
 	private String SERVICE_STATUS_SHARED_IN_CIS = "This service is shared by other team members.";
 
@@ -76,11 +80,14 @@ public class ServiceDetailsActivity extends Activity implements OnClickListener 
 		setContentView(R.layout.service_details_layout);
 //		resolver = getContentResolver ();
 
-		Intent intent= getIntent(); 					// Get the intent that created activity		
-		requestContext = intent.getStringExtra("REQUEST_CONTEXT");	// Retrieve first parameter (context for request of details)
+		// Get the intent that created activity	
+		Intent intent= getIntent();	
 		
+		// Retrieve first parameter (context for request of details)
+		requestContext = intent.getStringExtra(INTENT_SERVICE_DETAILS_REQUEST_CONTEXT);	
+		// Retrieve second parameter: service ID
 		thirdPartyService = new ThirdPartyService
-				(intent.getStringExtra("SERVICE_GLOBAL_ID")); 		// Retrieve second parameter: service ID
+				(intent.getStringExtra(INTENT_SERVICE_DETAILS_GLOBAL_ID_SERVICE));
 		
 		serviceAction2 = iDisasterApplication.getInstance().SERVICE_NO_ACTION;	// In most cases, only one action is available for a service
 		
@@ -88,7 +95,7 @@ public class ServiceDetailsActivity extends Activity implements OnClickListener 
 			int position = Integer.parseInt(thirdPartyService.serviceGlobalId);
 			thirdPartyService.serviceName = iDisasterApplication.getInstance().CISserviceNameList.get (position);
 			thirdPartyService.serviceDescription = iDisasterApplication.getInstance().CISserviceDescriptionList.get (position);
-			thirdPartyService.serviceAvailable = iDisasterApplication.getInstance().SERVICE_NOT_INSTALLED;
+			thirdPartyService.serviceInstallStatus = iDisasterApplication.getInstance().SERVICE_NOT_INSTALLED;
 			serviceAction1 = iDisasterApplication.getInstance().SERVICE_INSTALL;
 			
 		} else {
@@ -100,7 +107,7 @@ public class ServiceDetailsActivity extends Activity implements OnClickListener 
 			
 			// Check that availability status in SocialProvider is consistent with 
 			// service availability	on the device
-			if (!(thirdPartyService.checkServiceInstallStatus (this)
+			if (!(thirdPartyService.checkServiceInstallStatus (this, getContentResolver())
 					.equals (iDisasterApplication.getInstance().UPDATE_SUCCESS))) {
 				showQueryExceptionDialog ();	// Exception: Display dialog and terminates activity			
 			}	
@@ -122,7 +129,7 @@ public class ServiceDetailsActivity extends Activity implements OnClickListener 
 				(iDisasterApplication.getInstance().SERVICE_RECOMMENDED)) {			// Details request for a service recommended in the CIS
 			
 			
-			if (thirdPartyService.serviceAvailable														// If the service is installed on the device
+			if (thirdPartyService.serviceInstallStatus														// If the service is installed on the device
 					.equals(iDisasterApplication.getInstance().SERVICE_INSTALLED)) {
 				// Set status (on UI)
 				serviceStatusView.setText(SERVICE_STATUS_RECOMMENDED);
@@ -138,7 +145,7 @@ public class ServiceDetailsActivity extends Activity implements OnClickListener 
 		} else if (requestContext.equals 
 				(iDisasterApplication.getInstance().SERVICE_INSTALLED)) {			// Details request for a service in the list of installed services
 			
-			if (thirdPartyService.serviceAvailable															// If the service is really installed on the device
+			if (thirdPartyService.serviceInstallStatus															// If the service is really installed on the device
 					.equals(iDisasterApplication.getInstance().SERVICE_INSTALLED)) {
 			
 				// Set status (on UI)
@@ -159,7 +166,7 @@ public class ServiceDetailsActivity extends Activity implements OnClickListener 
 			serviceStatusView.setText(SERVICE_STATUS_SHARED_IN_CIS);
 
 			// NB: The service should normally not be installed. If so it was already launched 
-			if (thirdPartyService.serviceAvailable													// If the service is installed on the device
+			if (thirdPartyService.serviceInstallStatus													// If the service is installed on the device
 					.equals(iDisasterApplication.getInstance().SERVICE_INSTALLED)) {
 				// Set status (on UI)
 				serviceAction1 = iDisasterApplication.getInstance().SERVICE_LAUNCH;			// Action available to user is Launch
@@ -179,8 +186,8 @@ public class ServiceDetailsActivity extends Activity implements OnClickListener 
 			
 			if (!requestContext.equals (iDisasterApplication.getInstance().SERVICE_SHARED)) {		// Only the request is not about a shared service
 				String sharingStatus = thirdPartyService.checkServiceShareStatus(this,
-						iDisasterApplication.getInstance().me.globalId,
-						iDisasterApplication.getInstance().selectedTeam.globalId) ;
+						iDisasterApplication.getInstance().me.peopleId,
+						iDisasterApplication.getInstance().selectedTeam.id) ;
 				if (sharingStatus.equals (iDisasterApplication.getInstance().QUERY_EXCEPTION)) {
 					showQueryExceptionDialog ();	// SocialProvider exception: Display dialog and terminates activity
 					
@@ -226,7 +233,8 @@ public class ServiceDetailsActivity extends Activity implements OnClickListener 
     					(getString(R.string.dialogServiceDownloadException));		
     				return;	
     			} else {								// Service was correctly installed - Update data in SocialProvider
-    				if (!(thirdPartyService.updateServiceInstallStatus (this, iDisasterApplication.getInstance().SERVICE_INSTALLED)
+    				if (!(thirdPartyService.updateServiceInstallStatus (this, getContentResolver(), 
+    															iDisasterApplication.getInstance().SERVICE_INSTALLED)
     						.equals (iDisasterApplication.getInstance().UPDATE_SUCCESS))) {					// Update of SocialProvider has failed
     					showQueryExceptionDialog ();	// Exception: Display dialog and terminates activity			
     				} else {
@@ -253,7 +261,8 @@ public class ServiceDetailsActivity extends Activity implements OnClickListener 
     
     		if (serviceAction2.equals (iDisasterApplication.getInstance().SERVICE_SHARE)) {					// Request to share a service
     			
-    			if (thirdPartyService.shareService (this, iDisasterApplication.getInstance().me.globalId,
+    			if (thirdPartyService.shareService (this, iDisasterApplication.getInstance().me.peopleId,
+    												iDisasterApplication.getInstance().me.userName,
     												iDisasterApplication.getInstance().selectedTeam.globalId)
     					.equals (iDisasterApplication.getInstance().INSERT_EXCEPTION)) {			// Update information in SocialProvider 
     				showQueryExceptionDialog (); 			/// SocialProvider exception: Display dialog and terminates activity

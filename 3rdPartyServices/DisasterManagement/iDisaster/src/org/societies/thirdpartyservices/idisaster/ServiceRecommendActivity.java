@@ -30,6 +30,7 @@ import java.util.Date;
 
 import org.societies.android.api.cis.SocialContract;
 import org.societies.thirdpartyservices.idisaster.R;
+import org.societies.thirdpartyservices.idisaster.data.SocialActivity;
 
 import android.app.AlertDialog;
 import android.app.ListActivity;
@@ -199,7 +200,6 @@ public class ServiceRecommendActivity extends ListActivity implements OnClickLis
     	Uri serviceUri = SocialContract.Services.CONTENT_URI;
     					
     	String[] serviceProjection = new String[] {
-// TODO: GLOBAL_ID used temporarily
     				SocialContract.Services.GLOBAL_ID,
     				SocialContract.Services._ID,
     				SocialContract.Services.NAME,
@@ -257,6 +257,8 @@ public class ServiceRecommendActivity extends ListActivity implements OnClickLis
 	    						
     						String displayName = serviceCursor.getString(serviceCursor
     								.getColumnIndex(SocialContract.Services.NAME));
+    						String type = serviceCursor.getString(serviceCursor
+    								.getColumnIndex(SocialContract.Services.TYPE));
     						serviceList.add (displayName);
     						service++;
     						serviceMap.add (serviceCursor.getPosition()); // Maps service in UI list and cursor position 	
@@ -277,7 +279,7 @@ public class ServiceRecommendActivity extends ListActivity implements OnClickLis
 /**
  * check whether or not a service is already recommended in a team.
  */
-    private boolean serviceInTeam (String m) {
+    private boolean serviceInTeam (String serviceId) {
     	
     	if (ServiceListActivity.recommendedServiceCursor == null) {
     		return false;    		
@@ -287,13 +289,13 @@ public class ServiceRecommendActivity extends ListActivity implements OnClickLis
     	}
     	
     	ServiceListActivity.recommendedServiceCursor.moveToFirst();
-    	if (m.equals(ServiceListActivity.recommendedServiceCursor.getString(
+    	if (serviceId.equals(ServiceListActivity.recommendedServiceCursor.getString(
     			ServiceListActivity.recommendedServiceCursor.getColumnIndex(SocialContract.Services._ID)))) {
     			return true;
     	}
     	
     	while (ServiceListActivity.recommendedServiceCursor.moveToNext()) {
-    		if (m.equals(ServiceListActivity.recommendedServiceCursor.getString(
+    		if (serviceId.equals(ServiceListActivity.recommendedServiceCursor.getString(
     				ServiceListActivity.recommendedServiceCursor.getColumnIndex(SocialContract.Services._ID)))) {
     			return true;
     		}
@@ -310,11 +312,15 @@ public class ServiceRecommendActivity extends ListActivity implements OnClickLis
     
 		SparseBooleanArray checkedRows = listView.getCheckedItemPositions();
 		
-		String selected = "";
+		String recommendedServices = "New recommended services: ";
+		Boolean recommendedFlag = false;
 
 		for (int i=0; i<service; ++i) {
 			if (checkedRows.get(i)) {
+				recommendedFlag = true;
 				serviceCursor.moveToPosition(serviceMap.get(i));
+				recommendedServices = recommendedServices + " " + serviceCursor.
+						getString(serviceCursor.getColumnIndex(SocialContract.Services.NAME));
 
 				// Set the values related to the activity to store in SocialProvider
 				ContentValues sharingValues = new ContentValues ();
@@ -325,10 +331,11 @@ public class ServiceRecommendActivity extends ListActivity implements OnClickLis
 						iDisasterApplication.getInstance().me.peopleId);		
 				sharingValues.put(SocialContract.Sharing._ID_COMMUNITY,	// Recommend service in the selected team
 									iDisasterApplication.getInstance().selectedTeam.id);
+				String s = iDisasterApplication.getInstance().selectedTeam.id;
 				sharingValues.put(SocialContract.Sharing.TYPE, iDisasterApplication.getInstance().SERVICE_RECOMMENDED);
 				sharingValues.put(SocialContract.Sharing.DESCRIPTION, "");
 
-// Filed needed temporarily
+// Field needed temporarily?
 				sharingValues.put(SocialContract.Sharing.GLOBAL_ID,		// Global id of the service to be recommended
 						serviceCursor.getString(serviceCursor.getColumnIndex(SocialContract.Services.GLOBAL_ID)));				
 // Fields for synchronization with box.com
@@ -349,7 +356,28 @@ public class ServiceRecommendActivity extends ListActivity implements OnClickLis
 				}
 			}
 		}
-				
+		
+		
+		if (recommendedFlag) {			// New recommended services: add an activity to the feed
+			
+			SocialActivity socialActivity = 
+					new SocialActivity (iDisasterApplication.getInstance().me.userName); // account for synchronization
+			ContentResolver activityResolver = getContentResolver();
+			
+// The return code from addActivity is not exploited here		
+			socialActivity.addActivity (activityResolver,			// Insert activity to the activity feed
+// TODO: what should be set here? local or global id?
+					iDisasterApplication.getInstance().selectedTeam.id,		// Feed of the the selected team
+//TODO: what should be set here? global or local id? - local id seems to not work		
+					iDisasterApplication.getInstance().me.peopleGlobalId,	// Me
+					iDisasterApplication.getInstance().VERB_TEXT,			// Activity intent: Simple text
+					recommendedServices,												// List of new members
+					iDisasterApplication.getInstance().TARGET_ALL);			// Recipient for Activity
+		}
+
+
+		
+		
 		return iDisasterApplication.getInstance().INSERT_SUCCESS;
 
 	}

@@ -64,9 +64,11 @@ public class SharedServiceListActivity extends ListActivity {
 	private String memberName;
 	
 	private ContentResolver resolver;
+
 	private Cursor sharedServiceCursor;			// used for the shared services
 	private int sharedServices;					// keep track of number of own teams
-	private String selectedServiceGlobalId;
+
+	private String selectedServiceId;
 	private String selectedServiceName;
 	private String clientServiceGlobalId;
 	
@@ -80,8 +82,8 @@ public class SharedServiceListActivity extends ListActivity {
 
     	super.onCreate(savedInstanceState);
     	
-		Intent intent= getIntent(); 					// Get the intent that created activity		
-		memberId = intent.getStringExtra("MEMBER_ID");	// Retrieve first parameter (id of member sharing services)
+		Intent intent= getIntent(); 							// Get the intent that created activity		
+		memberId = intent.getStringExtra("MEMBER_ID");			// Retrieve first parameter (id of member sharing services)
 		memberName = intent.getStringExtra("MEMBER_NAME");		// Retrieve second parameter (name of member sharing services)
     	
     	setContentView (R.layout.shared_service_list_layout);    	
@@ -224,7 +226,7 @@ public class SharedServiceListActivity extends ListActivity {
 			Uri servicesUri = SocialContract.Services.CONTENT_URI;
 					
 			String[] servicesProjection = new String[] {
-						SocialContract.Services.GLOBAL_ID,
+						SocialContract.Services._ID,
 						SocialContract.Services.NAME,
 						SocialContract.Services.DEPENDENCY};		// Client ID
 				
@@ -234,12 +236,12 @@ public class SharedServiceListActivity extends ListActivity {
 			while (sharingCursor.moveToNext()) {
 				if (first) {
 					first = false;
-					servicesSelection = SocialContract.Services.GLOBAL_ID + "= ?";
+					servicesSelection = SocialContract.Services._ID + "= ?";
 					servicesSelectionArgs.add (sharingCursor.getString(
 									(sharingCursor.getColumnIndex(SocialContract.Sharing._ID_SERVICE))));
 				} else {
 					servicesSelection = servicesSelection + 
-										" OR " +  SocialContract.Services.GLOBAL_ID + "= ?";
+										" OR " +  SocialContract.Services._ID + "= ?";
 					servicesSelectionArgs.add (sharingCursor.getString(
 							(sharingCursor.getColumnIndex(SocialContract.Sharing._ID_SERVICE))));
 				}
@@ -299,13 +301,10 @@ public class SharedServiceListActivity extends ListActivity {
 	private void launchClientService (int position) {
 		
 		sharedServiceCursor.moveToPosition(position);
-// TODO: check this!		
-		selectedServiceGlobalId =  sharedServiceCursor.getString(sharedServiceCursor
+		
+		selectedServiceId =  sharedServiceCursor.getString(sharedServiceCursor
 				.getColumnIndex(SocialContract.Services._ID));
 		selectedServiceName =  sharedServiceCursor.getString(sharedServiceCursor
-				.getColumnIndex(SocialContract.Services.NAME));
-		
-		String selectedServiceName =  sharedServiceCursor.getString(sharedServiceCursor
 				.getColumnIndex(SocialContract.Services.NAME));
 		
 		clientServiceGlobalId = sharedServiceCursor.getString(sharedServiceCursor
@@ -320,13 +319,13 @@ public class SharedServiceListActivity extends ListActivity {
 			return;
 		}
 		
-		if (!(clientService.checkServiceInstallStatus (this)
+		if (!(clientService.checkServiceInstallStatus (this, getContentResolver())
 				.equals (iDisasterApplication.getInstance().UPDATE_SUCCESS))) {
 			showQueryExceptionDialog ();	// Exception: Display dialog and terminates activity
 			return;
 		}
 		
-		if (!(clientService.serviceAvailable										// If the service is NOT installed on the device
+		if (!(clientService.serviceInstallStatus									// If the service is NOT installed on the device
 				.equals(iDisasterApplication.getInstance().SERVICE_INSTALLED))) {
 			showInstallDialog (selectedServiceName);
 
@@ -356,9 +355,8 @@ public class SharedServiceListActivity extends ListActivity {
   					public void onClick(DialogInterface dialog, int id) {
   						// Start ServiceDetails activity
   		     			Intent intent = new Intent(SharedServiceListActivity.this, ServiceDetailsActivity.class);
-           				intent.putExtra("REQUEST_CONTEXT", iDisasterApplication.getInstance().SERVICE_SHARED);
-//TODO: check this!
-        				intent.putExtra("SERVICE_ID", clientServiceGlobalId);
+           				intent.putExtra(ServiceDetailsActivity.INTENT_SERVICE_DETAILS_REQUEST_CONTEXT, iDisasterApplication.getInstance().SERVICE_SHARED);
+        				intent.putExtra(ServiceDetailsActivity.INTENT_SERVICE_DETAILS_GLOBAL_ID_SERVICE, clientServiceGlobalId);
                 		startActivity(intent);
   						return;
   					}

@@ -112,17 +112,12 @@ public class DisasterListActivity extends ListActivity {
     							.getColumnIndex(SocialContract.Communities.NAME));
     					iDisasterApplication.getInstance().selectedTeam.id = memberTeamCursor.getString(memberTeamCursor
     							.getColumnIndex(SocialContract.Communities._ID));
-    					iDisasterApplication.getInstance().selectedTeam.globalId = ownTeamCursor.getString(ownTeamCursor
+    					iDisasterApplication.getInstance().selectedTeam.globalId = memberTeamCursor.getString(memberTeamCursor
     							.getColumnIndex(SocialContract.Communities.GLOBAL_ID));
         				iDisasterApplication.getInstance().selectedTeam.ownFlag = false;
     				}
-    			}
-// TODO: Remove test code    			
-//    			Toast.makeText(getApplicationContext(),
-//        				"Click ListItem Number   " + (position+1) + "   " + iDisasterApplication.getInstance().selectedTeam.name,
-//        				Toast.LENGTH_LONG).show();
-
-    			// Start the Disaster Activity
+    			}    					
+    			
     			startActivity (new Intent(DisasterListActivity.this, DisasterActivity.class));
 
 // The activity is kept on stack (check also that "noHistory" is not set in Manifest

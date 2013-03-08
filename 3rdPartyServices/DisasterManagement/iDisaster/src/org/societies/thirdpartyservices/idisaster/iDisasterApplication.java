@@ -116,7 +116,7 @@ public class iDisasterApplication extends Application {
 
 	// Constant used for service types
 	public final String SERVICE_TYPE_PROVIDER = "SERVICE_TYPE_PROVIDER";
-	public final String SERVICE_TYPE_CLIENT = "SERVICE_TYPE_CLIENT";
+	public final String SERVICE_TYPE_CLIENT = "SocialContract.ServiceConstants.SERVICE_TYPE_CLIENT";
 	public final String SERVICE_TYPE_APP = "SERVICE_TYPE_APP";
 
 	// Constant used for operations on services
@@ -135,7 +135,7 @@ public class iDisasterApplication extends Application {
 	// Constant keys used for service launch
 	public final String LAUNCH_EXCEPTION = "LAUNCH_EXCEPTION";
 	public final String LAUNCH_SUCCESS = "LAUNCH_SUCCESS";
-
+	
 
 // TODO: Remove this variable - only used while waiting update for SocialProvider
 	private boolean servicesUpdated = false;
@@ -233,7 +233,7 @@ public class iDisasterApplication extends Application {
 		String[] projection = new String [] {
 			SocialContract.Me._ID,
 			SocialContract.Me._ID_PEOPLE,
-			SocialContract.Me.GLOBAL_ID,
+//			SocialContract.Me.GLOBAL_ID,		Not needed is set to PENDING
 			SocialContract.Me.NAME,
 			SocialContract.Me.DISPLAY_NAME,
 			SocialContract.Me.USER_NAME			
@@ -302,7 +302,11 @@ public class iDisasterApplication extends Application {
 //			me.peopleGlobalId = cursor.getString(cursor
 //					.getColumnIndex(SocialContract.Me.GLOBAL_ID));
 
-					// Check that the user can be found in People
+			// Check that the user can be found in People
+			
+			// IMPORTANT: if this check is removed, make sure that 
+			// me.peopleGlobalId and me.peopleId are set properly
+			
 			if (checkPeople (cursor).equals(QUERY_SUCCESS)) {
 //				me.globalId = cursor.getString(cursor
 //								.getColumnIndex(SocialContract.Me.GLOBAL_ID));
@@ -366,10 +370,10 @@ public class iDisasterApplication extends Application {
 		}
 
 		if (peopleCursor.moveToFirst()) {			
-			String s = peopleCursor.getString(peopleCursor
+			String peopleId = peopleCursor.getString(peopleCursor
 					.getColumnIndex(SocialContract.People._ID));
 
-			if (me.peopleId.equals(s)) {		// Me and People are consistent
+			if (me.peopleId.equals(peopleId)) {		// Me and People are consistent
 				me.peopleGlobalId =  peopleCursor.getString(peopleCursor
 						.getColumnIndex(SocialContract.People.GLOBAL_ID));
 				return QUERY_SUCCESS;
@@ -379,14 +383,14 @@ public class iDisasterApplication extends Application {
 				Uri recordUri = meUri.withAppendedPath(meUri, "/" +
 						meCursor.getString(meCursor.getColumnIndex(SocialContract.Me._ID)));
 				ContentValues values = new ContentValues();
-				values.put(SocialContract.Me._ID_PEOPLE, s);
+				values.put(SocialContract.Me._ID_PEOPLE, peopleId);
 				try {
 					getContentResolver().update(recordUri, values, null, null);
 				} catch (Exception e) {
 					debug (2, "Query to "+ uri + "causes an exception");
 		        	return UPDATE_EXCEPTION;
 		        }
-				me.peopleId = s;
+				me.peopleId = peopleId;
 				me.peopleGlobalId =  peopleCursor.getString(peopleCursor
 						.getColumnIndex(SocialContract.People.GLOBAL_ID));
 				return QUERY_SUCCESS;
@@ -518,11 +522,6 @@ public class iDisasterApplication extends Application {
 //		
 //		ContentValues values = new ContentValues ();
 //		
-////TODO: Remove the following once SocialProvider has been corrected (SocialProvider should insert the GLOBAL_ID)
-//		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss");
-//		String currentDateandTime = sdf.format(new Date());
-//		values.put(SocialContract.Sharing.GLOBAL_ID, currentDateandTime);
-//// End remove		
 //
 //		values.put(SocialContract.Sharing.GLOBAL_ID_SERVICE,		
 //				"s1xyz.societies.org");

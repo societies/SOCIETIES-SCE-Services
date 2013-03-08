@@ -283,13 +283,16 @@ public class MemberAddActivity extends ListActivity implements OnClickListener {
     
 		SparseBooleanArray checkedRows = listView.getCheckedItemPositions();
 
-// Used for Activity Feed		
-		String selected = "Welcome to new members:";
+// Used for Activity Feed
+			String selectedMembers = "Welcome to new members:";
+			Boolean selectedFlag = false;
 
 		for (int i=0; i<people; ++i) {
 			if (checkedRows.get(i)) {
+				selectedFlag = true;
 				peopleCursor.moveToPosition(peopleMap.get(i));
-				selected = selected + " " + peopleCursor.getString(peopleCursor.getColumnIndex(SocialContract.People.NAME));
+				selectedMembers = selectedMembers + " " + peopleCursor.
+						getString(peopleCursor.getColumnIndex(SocialContract.People.NAME));
 				
 				// Set the values related to the activity to store in SocialProvider
 				ContentValues membershipValues = new ContentValues ();
@@ -321,21 +324,23 @@ public class MemberAddActivity extends ListActivity implements OnClickListener {
 		}
 				
 //		Toast.makeText(this, "selected:" + selected, Toast.LENGTH_SHORT).show();
-		
-// Add an activity to the feed		
-		SocialActivity socialActivity = 
-				new SocialActivity (iDisasterApplication.getInstance().me.userName); // account for synchronization
-		ContentResolver activityResolver = getContentResolver();
-		
+				
+		if (selectedFlag) {			// New selecte member: sdd an activity to the feed
+					
+			SocialActivity socialActivity = 
+					new SocialActivity (iDisasterApplication.getInstance().me.userName); // account for synchronization
+			ContentResolver activityResolver = getContentResolver();
+			
 // The return code from addActivity is not exploited here		
-		socialActivity.addActivity (activityResolver,			// Insert activity to the activity feed
+			socialActivity.addActivity (activityResolver,			// Insert activity to the activity feed
 // TODO: what should be set here? local or global id?
-				iDisasterApplication.getInstance().selectedTeam.id,		// Feed of the the selected team
+					iDisasterApplication.getInstance().selectedTeam.id,		// Feed of the the selected team
 //TODO: what should be set here? global or local id? - local id seems to not work		
-				iDisasterApplication.getInstance().me.peopleGlobalId,	// Me
-				iDisasterApplication.getInstance().VERB_TEXT,			// Activity intent: Simple text
-				selected,												// List of new members
-				iDisasterApplication.getInstance().TARGET_ALL);			// Recipient for Activity
+					iDisasterApplication.getInstance().me.peopleGlobalId,	// Me
+					iDisasterApplication.getInstance().VERB_TEXT,			// Activity intent: Simple text
+					selectedMembers,												// List of new members
+					iDisasterApplication.getInstance().TARGET_ALL);			// Recipient for Activity
+		}
 
 		return iDisasterApplication.getInstance().INSERT_SUCCESS;
 

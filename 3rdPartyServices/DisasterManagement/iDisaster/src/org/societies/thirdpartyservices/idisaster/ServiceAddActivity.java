@@ -128,17 +128,17 @@ public class ServiceAddActivity extends ListActivity {
  //    			startActivity (new Intent(ServiceAddActivity.this, ServiceDetailsActivity.class));
     			    			
     			Intent intent = new Intent(ServiceAddActivity.this, ServiceDetailsActivity.class);
-				intent.putExtra("CONTEXT", "ADD_TO_CIS");			// The service is not yet related to CIS
+				intent.putExtra(ServiceDetailsActivity.INTENT_SERVICE_DETAILS_REQUEST_CONTEXT, "ADD_TO_CIS");			// The service is not yet related to CIS
    				intent.putExtra("ACTION", "FOUND");       					
     			if (iDisasterApplication.testDataUsed) {
 // Needed? This is a global resource that is retrieved from iDisaster App
 //    				intent.putExtra("CIS_ID", iDisasterApplication.getInstance().selectedTeam.globalId);
-    				intent.putExtra("SERVICE_ID", Integer.toString(position));    				
+    				intent.putExtra(ServiceDetailsActivity.INTENT_SERVICE_DETAILS_GLOBAL_ID_SERVICE, Integer.toString(position));    				
     			} else {
     			// TODO: use service information returned by SocialProvider	
 // Needed? This is a global resource that is retrieved from iDisaster App
 //    				intent.putExtra("CIS_ID", iDisasterApplication.getInstance().selectedTeam.globalId);
-    				intent.putExtra("SERVICE_ID", Integer.toString(position));    				    				
+    				intent.putExtra(ServiceDetailsActivity.INTENT_SERVICE_DETAILS_GLOBAL_ID_SERVICE, Integer.toString(position));    				    				
     			}
     			startActivity(intent);
 
