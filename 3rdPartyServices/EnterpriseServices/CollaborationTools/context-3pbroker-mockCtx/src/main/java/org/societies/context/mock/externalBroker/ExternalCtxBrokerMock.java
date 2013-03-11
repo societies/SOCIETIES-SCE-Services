@@ -25,6 +25,7 @@
 package org.societies.context.mock.externalBroker;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
@@ -35,6 +36,8 @@ import java.util.concurrent.ExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.societies.api.cis.attributes.MembershipCriteria;
+import org.societies.api.cis.attributes.Rule;
+import org.societies.api.cis.management.ICis;
 import org.societies.api.cis.management.ICisManager;
 import org.societies.api.cis.management.ICisOwned;
 import org.societies.api.comm.xmpp.interfaces.ICommManager;
@@ -49,6 +52,7 @@ import org.societies.api.context.model.CtxAttributeTypes;
 import org.societies.api.context.model.CtxEntity;
 import org.societies.api.context.model.CtxEntityIdentifier;
 import org.societies.api.context.model.CtxIdentifier;
+import org.societies.api.context.model.IndividualCtxEntity;
 import org.societies.api.identity.IIdentity;
 import org.societies.api.identity.INetworkNode;
 import org.societies.api.identity.InvalidFormatException;
@@ -64,34 +68,35 @@ public class ExternalCtxBrokerMock 	{
 
 	/** The logging facility. */
 	private static final Logger LOG = LoggerFactory.getLogger(ExternalCtxBrokerMock.class);
-	
+
 	/** Random reference */
-    private static final Random r = new Random(System.currentTimeMillis());
+	private static final Random r = new Random(System.currentTimeMillis());
 
 
 	/** The 3P Context Broker service reference. */
-    private ICommManager commMgrService;
-    private ICtxBroker ctxBroker;
-    private INetworkNode cssNodeId;
-    private ICisOwned cisOwned = null;
-    private IIdentity cisID;
-    private IIdentity cssID;
-    private CtxAssociation assocHasMembers;
-    private Requestor requestor = null;
+	private ICommManager commMgrService;
+	private ICtxBroker ctxBroker;
+	private INetworkNode cssNodeId;
+	private ICisOwned cisOwned = null;
+	private IIdentity cisID;
+	private IIdentity cssID;
+	private CtxAssociation assocHasMembers;
+	private Requestor requestor = null;
 
-    private CtxEntity personIndiEnt;
-    private CtxAttributeIdentifier ctxAttrLocationIdentifier;
-    
-    private final static String NAMEPERSON = "person#0@societies.local";
+	private CtxEntityIdentifier personIndiEnt;
+	private CtxAttributeIdentifier ctxAttrLocationIdentifier;
+
+	//    private final static String NAMEPERSON = "admin@societies.local";
+	private final static String NAMEPERSON = "Chris Lima";
 
 
 	@Autowired(required=true)
 	public ExternalCtxBrokerMock(ICtxBroker externalCtxBroker, ICommManager commMgr, ICisManager cisManager) throws Exception {
 
-	    LOG.info("*** " + getClass() + " instantiated");
+		LOG.info("*** " + getClass() + " instantiated");
 
-	    this.ctxBroker = externalCtxBroker;
-	    this.commMgrService = commMgr;
+		this.ctxBroker = externalCtxBroker;
+		this.commMgrService = commMgr;
 
 		this.cssNodeId = commMgr.getIdManager().getThisNetworkNode();
 		LOG.info("*** cssNodeId = " + this.cssNodeId);
@@ -104,47 +109,81 @@ public class ExternalCtxBrokerMock 	{
 		LOG.info("*** requestor = " + this.requestor);
 
 		Hashtable<String,MembershipCriteria> cisCriteria = new Hashtable<String,MembershipCriteria>();
-		
-//		try {
-//			//Deleting CIS-CollabTools if already exist 
-//			List<ICis> listCIS = cisManager.searchCisByName("CIS-CollabTools");
-////			LOG.info("*** listCIS: "+listCIS.size());
-//			Iterator<ICis> itr = listCIS.iterator();
-//			while (itr.hasNext()) {
-//				String cisToRemove = itr.next().getCisId();
-//				LOG.info("*** Deleting CIS-CollabTools = " + cisToRemove);
-//				cisManager.deleteCis(cisToRemove);
-//			}
-//			
-//			
+
+
+		//		MembershipCriteria m = new MembershipCriteria();
+		//		
+		//	
+		//			Rule r = new Rule("equals",new ArrayList<String>(Arrays.asList("married")));
+		//			m.setRule(r);
+		//			cisCriteria.put(CtxAttributeTypes.STATUS, m);
+		//			r = new Rule("equals",new ArrayList<String>(Arrays.asList("Brazil")));
+		//			m.setRule(r);
+		//			cisCriteria.put(CtxAttributeTypes.ADDRESS_HOME_COUNTRY, m);
+		//		
+
+		//		try {
+		//			//Deleting CIS-CollabTools if already exist 
+		//			List<ICis> listCIS = cisManager.searchCisByName("CIS-CollabTools");
+		////			LOG.info("*** listCIS: "+listCIS.size());
+		//			Iterator<ICis> itr = listCIS.iterator();
+		//			while (itr.hasNext()) {
+		//				String cisToRemove = itr.next().getCisId();
+		//				LOG.info("*** Deleting CIS-CollabTools = " + cisToRemove);
+		//				cisManager.deleteCis(cisToRemove);
+		//			}
+		//			
+		//		
+		//create ciss
+		//		cisManager.createCis("CIS-CollabTools"+new Random().nextInt(100), "Test", cisCriteria, "CSCW CIS").get();
+		//		cisManager.createCis("CIS-CollabTools"+new Random().nextInt(100), "Test", cisCriteria, "CSCW CIS").get();
+		//		cisManager.createCis("CIS-CollabTools"+new Random().nextInt(100), "Test", cisCriteria, "CSCW CIS").get();
+		//		cisManager.createCis("CIS-CollabTools"+new Random().nextInt(100), "Test", cisCriteria, "CSCW CIS").get();
+
+		List<ICis> cisList = new ArrayList<ICis>();
+		cisList = cisManager.getCisList();
+		if (cisList.size() > 0){
+			int size = cisList.size();
+			LOG.info("there are "+size+" CIS - last one is : "+(cisList.get(size-1)).getName() + " \t id " + (cisList.get(size-1)).getCisId());
+			this.cisID = commMgr.getIdManager().fromJid(cisList.get(size-1).getCisId());
+		}
+		else{
 			//Creating CIS-CollabTools
 			this.cisOwned = cisManager.createCis("CIS-CollabTools"+new Random().nextInt(100), "Test", cisCriteria, "CSCW CIS").get();
 			this.cisID = this.commMgrService.getIdManager().fromJid(cisOwned.getCisId());
 			LOG.info("*** created CIS = CIS-CollabTools ");
-//
-//		} catch (InterruptedException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		} catch (ExecutionException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-		
-		LOG.info("*** cisOwned " +cisOwned);
-		LOG.info("*** cisOwned.getCisId() " +cisOwned.getCisId());
-//		String cisIDString  = cisOwned.getCisId();
+		}
 
-	    LOG.info("*** Starting community context samples...");
+		this.cisOwned = cisManager.createCis("CIS-CollabTools", "Test", cisCriteria, "CSCW CIS").get();
+		cisOwned.setCisType("RICH");
+		//		List<ICis> listCIS = cisManager.searchCisByName("CIS-CollabTools");
+		//		listCIS.get(0).getCisId();
+		cisOwned.addMember("admin.societies.local", "participant");
+		this.cisID = this.commMgrService.getIdManager().fromJid(cisOwned.getCisId());
+		LOG.info("*** created CIS = CIS-CollabTools ");
 
-	    createPersons(NAMEPERSON);	
-	
+		//
+		//		} catch (InterruptedException e) {
+		//			// TODO Auto-generated catch block
+		//			e.printStackTrace();
+		//		} catch (ExecutionException e) {
+		//			// TODO Auto-generated catch block
+		//			e.printStackTrace();
+		//		}
+
+		//		String cisIDString  = cisOwned.getCisId();
+
+		LOG.info("*** Starting community context samples...");
+
+		createPersons(NAMEPERSON);
+
 		new Thread()
 		{
 			public void run() {
 				while (true) {
 					try {
 						//30 seg
-						Thread.sleep(30000);
+						Thread.sleep(10000);
 						changeLocation();
 					} catch (InterruptedException e) {
 						// TODO Auto-generated catch block
@@ -164,79 +203,104 @@ public class ExternalCtxBrokerMock 	{
 		}.start();
 
 	}
-	
-	  private Requestor getRequestor(IIdentity cssOwnerId)
-	  {
-	    return this.requestor = new Requestor(this.cssID);
-	  }
+
+	private Requestor getRequestor(IIdentity cssOwnerId)
+	{
+		return this.requestor = new Requestor(this.cssID);
+	}
 
 
-	
+
 	public void createPersons(String namePerson) throws Exception
-	    {
-	    this.personIndiEnt = ((CtxEntity)this.ctxBroker.createEntity(this.requestor, this.cssID, "person").get());
-	    CtxAttribute interestsAttr1 = (CtxAttribute)this.ctxBroker.createAttribute(this.requestor, this.personIndiEnt.getId(), "interests").get();
-	    String[] interests = getRandomInterests();
-	    interestsAttr1.setStringValue(interests[0]);
-				
-				CtxAttribute interestsAttr2 = this.ctxBroker.createAttribute(requestor, personIndiEnt.getId() , CtxAttributeTypes.INTERESTS).get();
-				interestsAttr2.setStringValue(interests[1]);
-				
-				CtxAttribute interestsAttr3 = this.ctxBroker.createAttribute(requestor, personIndiEnt.getId() , CtxAttributeTypes.INTERESTS).get();
-				interestsAttr3.setStringValue(interests[2]);
-				
-				CtxAttribute nameAttr = this.ctxBroker.createAttribute(requestor, personIndiEnt.getId() , CtxAttributeTypes.NAME).get();
-				nameAttr.setStringValue(namePerson);
-				
-				CtxAttribute occupationAttr = this.ctxBroker.createAttribute(requestor, personIndiEnt.getId() , CtxAttributeTypes.OCCUPATION).get();
-				occupationAttr.setStringValue(getRandomOccupation());
-				
-				CtxAttribute locationAttr = this.ctxBroker.createAttribute(requestor, personIndiEnt.getId(), CtxAttributeTypes.LOCATION_SYMBOLIC).get();
-			    this.ctxAttrLocationIdentifier = locationAttr.getId();
-				locationAttr.setStringValue(getRandomLocation());
-				
-				CtxAttribute statusAttr = this.ctxBroker.createAttribute(requestor, personIndiEnt.getId(), CtxAttributeTypes.STATUS).get();
-				statusAttr.setStringValue(getRandomStatus());
-	
-				this.ctxBroker.update(requestor, interestsAttr1);
-			    this.ctxBroker.update(this.requestor, interestsAttr2);
-			    this.ctxBroker.update(this.requestor, interestsAttr3);
-			    this.ctxBroker.update(this.requestor, nameAttr);
-			    this.ctxBroker.update(this.requestor, occupationAttr);
-			    this.ctxBroker.update(this.requestor, locationAttr);
-			    this.ctxBroker.update(this.requestor, statusAttr);
+	{
+		//	    this.personIndiEnt = ((CtxEntity)this.ctxBroker.createEntity(this.requestor, this.cssID, "person").get());
 
-				
-				 
-				LOG.info("Creating person name: "+nameAttr.getStringValue());
-				LOG.info("*** with Interests: "+interestsAttr1.getStringValue()+", "+interestsAttr2.getStringValue()+", "+interestsAttr3.getStringValue());
-				LOG.info("*** with Job Position: "+occupationAttr.getStringValue());
-				LOG.info("*** with Location: "+locationAttr.getStringValue());
-				LOG.info("*** with Status: "+statusAttr.getStringValue());
-				
-			    LOG.info("*** getting  Associations");
-			    CtxEntityIdentifier ctxCommunityEntityIdentifier = (CtxEntityIdentifier)this.ctxBroker.retrieveCommunityEntityId(this.requestor, this.cisID).get();
-			    LOG.info("communityEntityIdentifier retrieved: " + ctxCommunityEntityIdentifier.toString() + " based on cisID: " + this.cisID);
-			    CommunityCtxEntity communityEntity = (CommunityCtxEntity)this.ctxBroker.retrieve(this.requestor, ctxCommunityEntityIdentifier).get();
-			    Set<CtxAssociationIdentifier> assocIDSet = communityEntity.getAssociations("hasMembers");
-			    if (assocIDSet.size() > 0) {
-			      List<CtxAssociationIdentifier> assocIdList = new ArrayList<CtxAssociationIdentifier>(assocIDSet);
-			      this.assocHasMembers = ((CtxAssociation)this.ctxBroker.retrieve(this.requestor, (CtxIdentifier)assocIdList.get(0)).get());
-			    }
+		this.personIndiEnt = this.ctxBroker.retrieveIndividualEntityId(this.requestor, this.cssID).get();
+		final IndividualCtxEntity operatorCtxEnt = (IndividualCtxEntity) this.ctxBroker.retrieve(this.requestor,personIndiEnt).get();
+		
+		CtxAttribute interestsAttr1 = (CtxAttribute)this.ctxBroker.createAttribute(this.requestor, this.personIndiEnt, "interests").get();
+		String[] interests = getRandomInterests();
+		interestsAttr1.setStringValue(interests[0]);
 
-			    LOG.info("community members (after adding new members) " + this.assocHasMembers.getChildEntities());
+		CtxAttribute interestsAttr2 = this.ctxBroker.createAttribute(requestor, personIndiEnt , CtxAttributeTypes.INTERESTS).get();
+		interestsAttr2.setStringValue(interests[1]);
 
-			    this.assocHasMembers.addChildEntity(this.personIndiEnt.getId());
+		CtxAttribute interestsAttr3 = this.ctxBroker.createAttribute(requestor, personIndiEnt , CtxAttributeTypes.INTERESTS).get();
+		interestsAttr3.setStringValue(interests[2]);
+		
+		CtxAttribute nameAttr = addAttribute(namePerson, operatorCtxEnt, CtxAttributeTypes.NAME);
+		
+		CtxAttribute occupationAttr = addAttribute(getRandomOccupation(), operatorCtxEnt, CtxAttributeTypes.OCCUPATION);
+		
+		CtxAttribute locationAttr = addAttribute(getRandomLocation(), operatorCtxEnt, CtxAttributeTypes.LOCATION_SYMBOLIC);
+		
+		CtxAttribute statusAttr = addAttribute(getRandomStatus(), operatorCtxEnt, CtxAttributeTypes.STATUS);
 
-			    this.assocHasMembers = ((CtxAssociation)this.ctxBroker.update(this.requestor, this.assocHasMembers).get());
+		this.ctxBroker.update(requestor, interestsAttr1);
+		this.ctxBroker.update(this.requestor, interestsAttr2);
+		this.ctxBroker.update(this.requestor, interestsAttr3);
+		this.ctxBroker.update(this.requestor, nameAttr);
+		this.ctxBroker.update(this.requestor, occupationAttr);
+		this.ctxBroker.update(this.requestor, locationAttr);
+		this.ctxBroker.update(this.requestor, statusAttr);
 
-			    LOG.info("community members (after adding new members) " + this.assocHasMembers.getChildEntities());
 
-			    LOG.info(" BEFORE UPDATE communityEnt.getID():  " + communityEntity.getId());
-			    LOG.info(" BEFORE UPDATE communityEnt.getMembers():  " + communityEntity.getMembers());
 
-			    this.ctxBroker.update(this.requestor, communityEntity);
-	    }
+		LOG.info("Creating person name: "+nameAttr.getStringValue());
+		LOG.info("*** with Interests: "+interestsAttr1.getStringValue()+", "+interestsAttr2.getStringValue()+", "+interestsAttr3.getStringValue());
+		LOG.info("*** with Job Position: "+occupationAttr.getStringValue());
+		LOG.info("*** with Location: "+locationAttr.getStringValue());
+		LOG.info("*** with Status: "+statusAttr.getStringValue());
+
+		LOG.info("*** getting  Associations");
+		CtxEntityIdentifier ctxCommunityEntityIdentifier = (CtxEntityIdentifier)this.ctxBroker.retrieveCommunityEntityId(this.requestor, this.cisID).get();
+		LOG.info("communityEntityIdentifier retrieved: " + ctxCommunityEntityIdentifier.toString() + " based on cisID: " + this.cisID);
+		CommunityCtxEntity communityEntity = (CommunityCtxEntity)this.ctxBroker.retrieve(this.requestor, ctxCommunityEntityIdentifier).get();
+		Set<CtxAssociationIdentifier> assocIDSet = communityEntity.getAssociations("hasMembers");
+		if (assocIDSet.size() > 0) {
+			List<CtxAssociationIdentifier> assocIdList = new ArrayList<CtxAssociationIdentifier>(assocIDSet);
+			this.assocHasMembers = ((CtxAssociation)this.ctxBroker.retrieve(this.requestor, (CtxIdentifier)assocIdList.get(0)).get());
+		}
+
+		LOG.info("community members (before adding new members) " + this.assocHasMembers.getChildEntities());
+
+		this.assocHasMembers.addChildEntity(this.personIndiEnt);
+
+		this.assocHasMembers = ((CtxAssociation)this.ctxBroker.update(this.requestor, this.assocHasMembers).get());
+
+		LOG.info("community members (after adding new members) " + this.assocHasMembers.getChildEntities());
+
+		LOG.info(" BEFORE UPDATE communityEnt.getID():  " + communityEntity.getId());
+		LOG.info(" BEFORE UPDATE communityEnt.getMembers():  " + communityEntity.getMembers());
+
+		//			    this.ctxBroker.update(this.requestor, communityEntity);
+	}
+
+	/**
+	 * @param attributeValue
+	 * @param operatorCtxEnt
+	 * @param name 
+	 * @return
+	 * @throws InterruptedException
+	 * @throws ExecutionException
+	 * @throws CtxException
+	 */
+	//Verify if the attribute exist in the ctx broker
+	private CtxAttribute addAttribute(String attributeValue, final IndividualCtxEntity operatorCtxEnt, String ctxType)	throws InterruptedException, ExecutionException, CtxException {
+		Set<CtxAttribute> attributes = operatorCtxEnt.getAttributes(ctxType);
+		CtxAttribute attribute = null;
+		if(attributes.size()>0){
+			for(CtxAttribute ctxAttr : attributes){
+				LOG.info("Old value"+ctxAttr.getStringValue() ) ;
+			}
+		}
+		else {
+			attribute = this.ctxBroker.createAttribute(this.requestor, this.personIndiEnt, ctxType).get();
+			attribute.setStringValue(attributeValue);
+		}
+		attribute.setStringValue(attributeValue);
+		return attribute;
+	}
 
 	private String[] getRandomInterests() {
 		final String[] interests={"bioinformatics", "web development", "semantic web", "requiremens analysis", "system modeling", 
@@ -257,12 +321,12 @@ public class ExternalCtxBrokerMock 	{
 		final String[] status={"Online","Busy","Away"};
 		return status[r.nextInt(3)];
 	}
-	
+
 	private String getRandomOccupation() {
 		final String[] occupation={"Manager","Developer","Beta Tester"};
 		return occupation[r.nextInt(3)];
 	}
-	
+
 	/**
 	 * @return
 	 */
@@ -273,10 +337,10 @@ public class ExternalCtxBrokerMock 	{
 
 	//Randomly change location for users
 	private  void changeLocation() throws InvalidFormatException, InterruptedException, ExecutionException, CtxException {
-	    CtxAttribute locationAttr = (CtxAttribute)this.ctxBroker.retrieve(this.requestor, this.ctxAttrLocationIdentifier).get();
-	    locationAttr.setStringValue(getRandomLocation());
-	    this.ctxBroker.update(this.requestor, locationAttr);
+		CtxAttribute locationAttr = (CtxAttribute)this.ctxBroker.retrieve(this.requestor, this.ctxAttrLocationIdentifier).get();
+		locationAttr.setStringValue(getRandomLocation());
+		this.ctxBroker.update(this.requestor, locationAttr);
 
-	    LOG.info("*** Change location for person: " + NAMEPERSON + ": " + locationAttr.getStringValue());
+		LOG.info("*** Change location for person: " + NAMEPERSON + ": " + locationAttr.getStringValue());
 	}	
 }
