@@ -38,15 +38,9 @@ import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.index.Index;
-import org.neo4j.graphdb.index.IndexHits;
-import org.neo4j.graphdb.index.IndexManager;
 import org.neo4j.helpers.collection.IterableWrapper;
-import org.neo4j.helpers.collection.MapUtil;
-import org.neo4j.index.lucene.QueryContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.societies.enterprise.collabtools.Activator;
-import org.societies.enterprise.collabtools.runtime.SessionRepository;
 
 import scala.actors.threadpool.Arrays;
 
@@ -55,7 +49,6 @@ public class PersonRepository
     private final GraphDatabaseService graphDb;
     private final Index<Node> index;
     private final Node personRefNode;
-	private SessionRepository sessionRep;
 	
 	private static final Logger logger  = LoggerFactory.getLogger(PersonRepository.class);
 
@@ -101,7 +94,7 @@ public class PersonRepository
         try
         {
             Node newPersonNode = graphDb.createNode();
-            personRefNode.createRelationshipTo( newPersonNode, A_PERSON );
+            personRefNode.createRelationshipTo(newPersonNode, A_PERSON);
             // lock now taken, we can check if  already exist in index
             Node alreadyExist = index.get( Person.NAME, name ).getSingle();
             if ( alreadyExist != null )
@@ -109,10 +102,10 @@ public class PersonRepository
                 tx.failure();
                 throw new Exception( "Person with this name already exists " );
             }
-            newPersonNode.setProperty( Person.NAME, name );
-            index.add( newPersonNode, Person.NAME, name );
+            newPersonNode.setProperty(Person.NAME, name);
+            index.add(newPersonNode, Person.NAME, name);
             tx.success();
-            Person person = new Person( newPersonNode );
+            Person person = new Person(newPersonNode);
             //TODO:VERIFIY OBSERVER
             logger.info("Person added: "+name);
             return person;
@@ -124,20 +117,20 @@ public class PersonRepository
 
     }
 
-    public Person getPersonByName( String name )
+    public Person getPersonByName(String name)
     {
-        Node personNode = index.get( Person.NAME, name ).getSingle();
+        Node personNode = index.get(Person.NAME, name).getSingle();
         if ( personNode == null )
         {
             throw new IllegalArgumentException( "Person[" + name
                     + "] not found" );
         }
-        return new Person( personNode );
+        return new Person(personNode);
     }
     
     public boolean hasPerson(String name)
     {
-        Node personNode = index.get( Person.NAME, name ).getSingle();
+        Node personNode = index.get(Person.NAME, name).getSingle();
         if (personNode == null)
         	return false;
         return true;

@@ -24,10 +24,10 @@
  */
 package org.societies.enterprise.collabtools;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.Random;
 
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
@@ -39,19 +39,14 @@ import org.neo4j.index.lucene.LuceneIndexProvider;
 import org.neo4j.kernel.ListIndexIterable;
 import org.neo4j.kernel.impl.cache.CacheProvider;
 import org.neo4j.kernel.impl.cache.SoftCacheProvider;
-import org.neo4j.kernel.impl.util.FileUtils;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.societies.enterprise.collabtools.acquisition.ContextSubscriber;
-import org.societies.enterprise.collabtools.acquisition.LongTermCtxTypes;
-import org.societies.enterprise.collabtools.acquisition.Person;
 import org.societies.enterprise.collabtools.acquisition.PersonRepository;
-import org.societies.enterprise.collabtools.interpretation.ContextAnalyzer;
 import org.societies.enterprise.collabtools.runtime.CollabApps;
-import org.societies.enterprise.collabtools.runtime.CtxMonitor;
 import org.societies.enterprise.collabtools.runtime.SessionRepository;
 
 
@@ -68,9 +63,11 @@ public class Activator implements BundleActivator
 	private static Index<Node> indexPerson, indexSession, indexShortTermCtx;
     private ServiceRegistration serviceRegistration, indexServiceRegistration, ctxSubServiceRegistration;
     
+    ContextSubscriber ctxSub;
+    
  
     @Override
-    public void start( BundleContext context ) throws Exception
+    public void start(BundleContext context) throws Exception
     {
         //cache providers
         ArrayList<CacheProvider> cacheList = new ArrayList<CacheProvider>();
@@ -84,77 +81,57 @@ public class Activator implements BundleActivator
         providers.setIndexProviders(provs);
  
         //comment this for persistence
-	    FileUtils.deleteRecursively(new File("target/PersonsGraphDb"));
-	    FileUtils.deleteRecursively(new File("target/SessionsGraphDb"));
+//	    FileUtils.deleteRecursively(new File("databases/PersonsGraphDb"));
+//	    FileUtils.deleteRecursively(new File("databases/SessionsGraphDb"));
         
         //database setup
         logger.info("Database setup");
         GraphDatabaseFactory gdbf = new GraphDatabaseFactory();
         gdbf.setIndexProviders(providers);
         gdbf.setCacheProviders(cacheList);
-//        personGraphDb = gdbf.newEmbeddedDatabase("databases/PersonsGraphDb" + new Random().nextInt(100));
-	    personGraphDb = gdbf.newEmbeddedDatabase("databases/PersonsGraphDb");
-	    sessionGraphDb = gdbf.newEmbeddedDatabase("databases/SessionsGraphDb");
+      int random = new Random().nextInt(100);
+	    personGraphDb = gdbf.newEmbeddedDatabase("databases/PersonsGraphDb" + random );
+	    sessionGraphDb = gdbf.newEmbeddedDatabase("databases/SessionsGraphDb" + random);
 	    indexPerson = personGraphDb.index().forNodes("PersonNodes");
 	    indexSession = sessionGraphDb.index().forNodes("SessionNodes");
 	    indexShortTermCtx = personGraphDb.index().forNodes("CtxNodes");
         
 
 	    HashMap<String, String> collabAppsConfig = new HashMap<String, String>();
+	    //App and server
 	    collabAppsConfig.put("chat", "societies.local");
 	    CollabApps collabApps = new CollabApps(collabAppsConfig);
 
         personRepository = new PersonRepository(personGraphDb, indexPerson);
-        sessionRepository = new SessionRepository(personGraphDb, indexSession, collabApps);
+        sessionRepository = new SessionRepository(sessionGraphDb, indexSession, collabApps);
 
 		//Caching last recently used for Location
 		((LuceneIndex<Node>) indexShortTermCtx).setCacheCapacity("name", 3000);
 
-        ContextSubscriber ctxSub = new ContextSubscriber(personRepository, sessionRepository);
- 
+        this.ctxSub = new ContextSubscriber(personRepository, sessionRepository);
+
         //OSGi registration
         serviceRegistration = context.registerService(GraphDatabaseService.class.getName(), personGraphDb, new Hashtable<String,String>() );
-        logger.info("registered " + serviceRegistration.getReference() );
+        logger.info("registered " + serviceRegistration.getReference());
+        
+//        sessionGraphDbRegistration = context.registerService(GraphDatabaseService.class.getName(), sessionGraphDb, new Hashtable<String,String>() );
+//        logger.info("registered " + sessionGraphDbRegistration.getReference());
         
         indexServiceRegistration = context.registerService(Index.class.getName(), indexPerson, new Hashtable<String,String>() );
         
         ctxSubServiceRegistration =context.registerService(ContextSubscriber.class.getName(), ctxSub, null);
         
-        Object cisID = "cis-d4957aca-5ecc-4aac-92a4-b1ef6fa124b3.societies.local";
-        
-		//Setting up initial context for GraphDB
-        ctxSub.initialCtx(cisID);
-        
-        //Enrichment of ctx
-        logger.info("Starting enrichment of context..." );
-        ContextAnalyzer ctxRsn = new ContextAnalyzer(this.personRepository);
-        ctxRsn.incrementInterestsByConcept();
-		
-		//Applying weight between edges
-		logger.info("Setup weight among participants..." );
-        for (Person person : personRepository.getAllPersons()) {
-            ctxRsn.setupWeightBetweenPeople(person, LongTermCtxTypes.INTERESTS);
-        }
-       
-        
-        //Registering for ctx changes
-        ctxSub.registerForContextChanges(cisID);
-        
-        //Starting Context Monitor
-        logger.info("Starting Context Monitor..." );
-        CtxMonitor thread = new CtxMonitor(personRepository, sessionRepository);
-		thread.start();    
- 
     }
  
     @Override
-    public void stop( BundleContext context ) throws Exception
+    public void stop(BundleContext context) throws Exception
     {
     	ctxSubServiceRegistration.unregister();
-        serviceRegistration.unregister();
+    	serviceRegistration.unregister();
+//    	sessionGraphDbRegistration.unregister();
         indexServiceRegistration.unregister();
         personGraphDb.shutdown();
 		sessionGraphDb.shutdown(); 
-    }
+    }  
  
 }

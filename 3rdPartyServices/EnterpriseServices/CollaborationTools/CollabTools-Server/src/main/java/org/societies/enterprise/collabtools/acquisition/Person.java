@@ -30,11 +30,13 @@ import static org.societies.enterprise.collabtools.acquisition.RelTypes.STATUS;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Observable;
 
@@ -100,8 +102,8 @@ public class Person extends Observable
 		Transaction tx = underlyingNode.getGraphDatabase().beginTx();
 		try
 		{
-			underlyingNode.setProperty( property, value );
-			index.add( underlyingNode, property, value );
+			underlyingNode.setProperty(property, value);
+			index.add(underlyingNode, property, value);
             tx.success();
         }
         finally
@@ -114,10 +116,22 @@ public class Person extends Observable
 	public void setLongTermCtx(final String property, String[] values){
 		Index<Node> index = underlyingNode.getGraphDatabase().index().forNodes("PersonNodes");
 		Transaction tx = underlyingNode.getGraphDatabase().beginTx();
+		System.out.println(Arrays.toString(values));
+
+		//Cleaning array from null and blank words 
+		List<String> list = new ArrayList<String>();
+	    for(String s : values) {
+	       if(s != null && s.length() > 0) {
+	          list.add(s);
+	       }
+	    }
+	    values = list.toArray(new String[list.size()]);
+		System.out.println(Arrays.toString(values));
+
 		try
 		{
-			underlyingNode.setProperty(property, values );
-			index.add(underlyingNode, property, values );
+			underlyingNode.setProperty(property, values);
+			index.add(underlyingNode, property, values);
 //			Example:
 //			index.add( myNode, "Education", new String[] {"Stanford University, Grad School", "Harvard University, MS"} );
 //			index.add( myNode, "Work", new String[] {"Nokia Siemens Networks", "Motorola"} );
@@ -140,10 +154,10 @@ public class Person extends Observable
     }
 
     @Override
-    public boolean equals( Object o )
+    public boolean equals(Object o)
     {
         return o instanceof Person &&
-                underlyingNode.equals( ((Person)o).getUnderlyingNode() );
+                underlyingNode.equals(((Person)o).getUnderlyingNode());
     }
 
     @Override
@@ -159,13 +173,13 @@ public class Person extends Observable
         Transaction tx = underlyingNode.getGraphDatabase().beginTx();
         try
         {
-            if ( !this.equals( otherPerson ) )
+            if (!this.equals(otherPerson))
             {
-                Relationship friendRel = getFriendRelationshipTo( otherPerson );
-                if ( friendRel == null )
+                Relationship friendRel = getFriendRelationshipTo(otherPerson);
+                if (friendRel == null)
                 {
                 	System.out.println("weight: "+weight);
-                    underlyingNode.createRelationshipTo(otherPerson.getUnderlyingNode(), SIMILARITY ).setProperty("weight", weight);
+                    underlyingNode.createRelationshipTo(otherPerson.getUnderlyingNode(), SIMILARITY).setProperty("weight", weight);
                 }
                 tx.success();
             }
@@ -280,8 +294,8 @@ public class Person extends Observable
     {
     	Relationship firstStatus = underlyingNode.getSingleRelationship(
     			STATUS, Direction.OUTGOING);
-    	//Check status is empty
-    	if ( firstStatus == null )
+    	//Check if status is empty
+    	if (firstStatus == null)
     	{
     		//TODO:FIX THIS!!
     		return null;
@@ -304,12 +318,12 @@ public class Person extends Observable
         return new CheckAllCtxActivityStreamIterator(this);
     }
 
-    public void addContextStatus( Map<String, String> shortTermCtx, SessionRepository sessionRep )
+    public void addContextStatus(Map<String, String> shortTermCtx, SessionRepository sessionRep)
     {
         Transaction tx = graphDb().beginTx();
         try
-        {
-            ShortTermContextUpdates oldStatus;
+        {       
+        	ShortTermContextUpdates oldStatus;
             if ( getStatus().iterator().hasNext() )
             {
                 oldStatus = getStatus().iterator().next();
@@ -329,6 +343,19 @@ public class Person extends Observable
 
             underlyingNode.createRelationshipTo(newStatus, RelTypes.STATUS);  
             tx.success();
+//            Node newStatus = createNewCtxNode(shortTermCtx, sessionRep);
+//            //Verify if oldstatus exist
+//            if (getStatus().iterator().hasNext())
+//            {
+//            	ShortTermContextUpdates oldStatus = getStatus().iterator().next();
+//                underlyingNode.getSingleRelationship(RelTypes.STATUS, Direction.OUTGOING).delete();
+//                newStatus.createRelationshipTo(oldStatus.getUnderlyingNode(), RelTypes.NEXT);
+//            } 
+//            else
+//            {
+//                underlyingNode.createRelationshipTo(newStatus, RelTypes.STATUS);  
+//            }
+//            tx.success();
         }
         finally
         {
@@ -343,20 +370,35 @@ public class Person extends Observable
 
     private Node createNewCtxNode(Map<String, String> shortTermCtx, SessionRepository sessionRep)
     {
-        Node newCtx = graphDb().createNode();
-        for (Map.Entry entry : shortTermCtx.entrySet()) {
-            newCtx.setProperty((String)entry.getKey(), entry.getValue());
-          }
-        SimpleDateFormat formatter = new SimpleDateFormat(ShortTermContextUpdates.DATE_FORMAT);
-        newCtx.setProperty( ShortTermContextUpdates.DATE, formatter.format(new Date().getTime()));
-        //Check location changes; First status, second location
-        if (contextHasChanged(ShortTermCtxTypes.LOCATION, shortTermCtx.get(ShortTermCtxTypes.LOCATION))){
-            //TODO:Fix the context changes
-            this.addObserver(sessionRep);
-            setChanged();
-            notifyObservers(this);
-        }
-        return newCtx;
+    	Node newCtx = graphDb().createNode();
+    	ShortTermContextUpdates oldStatus = getLastStatus();
+    	boolean contextChanged = false;
+    	if (oldStatus != null) {
+    		Node lastNodeStatus = oldStatus.getUnderlyingNode();
+    		for (String propertyKey : getLastStatus().getUnderlyingNode().getPropertyKeys()) {
+    			if (!propertyKey.equals(ShortTermContextUpdates.DATE)) {
+    				newCtx.setProperty(propertyKey, lastNodeStatus.getProperty(propertyKey) );
+    			}
+    		}
+    	} 
+    	for (Map.Entry entry : shortTermCtx.entrySet()) {
+    		String key = (String)entry.getKey();
+    		if (key.equals(ShortTermCtxTypes.LOCATION)){
+    			contextChanged = contextHasChanged((String)entry.getKey(), entry.getValue().toString());
+    		} 
+    		newCtx.setProperty((String)entry.getKey(), entry.getValue().toString());
+    	}
+    	//Including date stamp
+    	SimpleDateFormat formatter = new SimpleDateFormat(ShortTermContextUpdates.DATE_FORMAT);
+    	newCtx.setProperty(ShortTermContextUpdates.DATE, formatter.format(new Date().getTime()));
+    	//Check location changes; First status, second location
+    	if (contextChanged){
+    		//TODO:Fix the context changes
+    		this.addObserver(sessionRep);
+    		setChanged();
+    		notifyObservers(this);
+    	}
+    	return newCtx;
     }
 
     /**
@@ -366,13 +408,20 @@ public class Person extends Observable
 	 */
     private boolean contextHasChanged(final String contextType, String context) {
     	ShortTermContextUpdates ctxStatus= getLastStatus();
-    	
-    	//Check old context with new context
-        if ((ctxStatus != null) && (!context.equals(ctxStatus.getShortTermCtx(contextType)))) {
-            System.out.println(ctxStatus.getPerson() + " had context: " + ctxStatus.getShortTermCtx(contextType) + " and now has context: " + context);
-            return true;
-          }
-          return false;
+    	String propValue= ctxStatus.getShortTermCtx(contextType);
+//    	if (ctxStatus == null){
+//    		return false;
+//    		//			throw new IllegalArgumentException("ctxStatus cannot be null!");
+//    	}
+    	//Verify if old context is not empty
+    	if (!ctxStatus.getShortTermCtx(contextType).isEmpty()) {
+    		//Check old context with new context
+    		if (!context.equals(ctxStatus.getShortTermCtx(contextType))) {
+    			System.out.println(ctxStatus.getPerson() + " had context: " + ctxStatus.getShortTermCtx(contextType) + " and now has context: " + context);
+    			return true;
+    		}
+    	}
+    	return false;
     }
 
 	private final class RankedPerson

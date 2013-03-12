@@ -100,9 +100,14 @@ public class TestUtils {
 	    Map<String, String> shortTermCtx = new HashMap<String, String>();
 	    for (Person friend : this.personRepository.getAllPersons()) {
 	      shortTermCtx.put(ShortTermCtxTypes.STATUS, getRandomStatus());
-	      shortTermCtx.put(ShortTermCtxTypes.LOCATION, getRandomLocation());
+//	      shortTermCtx.put(ShortTermCtxTypes.LOCATION, getRandomLocation());
 	      friend.addContextStatus(shortTermCtx, this.sessionRepository);
 	    }
+	    Map<String, String> shortTermCtx1 = new HashMap<String, String>();
+	    for (Person friend : this.personRepository.getAllPersons()) {
+		      shortTermCtx1.put(ShortTermCtxTypes.LOCATION, getRandomLocation());
+		      friend.addContextStatus(shortTermCtx1, this.sessionRepository);
+		    }
 	  }
 
 	/**
@@ -137,7 +142,7 @@ public class TestUtils {
 	 * @return
 	 */
 	private static String[] getRandomInterests() {
-		final String[] interests={"bioinformatics", "web development", "semantic web", "requiremens analysis", "system modeling", 
+		final String[] interests={"bioinformatics", "web development", "semantic web", "requirements analysis", "system modeling", 
 				"project planning", "project management", "software engineering", "software development", "technical writing"};
 		Set<String> finalInterests = new HashSet<String>();
 		for(int i=0; i<3; i++){
@@ -269,7 +274,7 @@ public class TestUtils {
 			SAXException, ParserConfigurationException {
 		ContextAnalyzer ctxRsn = new ContextAnalyzer(personRepository);
 		ctxRsn.incrementInterestsByConcept();
-		ctxRsn.incrementInterestsByCategory();
+//		ctxRsn.incrementInterestsByCategory();
 	}
 	
 //	private static void clearDirectory(File path)
