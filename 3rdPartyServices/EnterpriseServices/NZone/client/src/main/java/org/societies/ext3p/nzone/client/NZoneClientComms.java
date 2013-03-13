@@ -63,10 +63,7 @@ public class NZoneClientComms implements ICommCallback {
 			.unmodifiableList(Arrays
 					.asList("org.societies.api.ext3p.schema.nzone"));
 
-	//TODO : Temporary while testing
-	private int TEST_TIME_MULTIPLER = 10;
-	private int WAIT_TIME_SECS = 100;
-	
+
 	// PRIVATE VARIABLES
 	private ICommManager commManager;
 	private static Logger LOG = LoggerFactory.getLogger(NZoneClientComms.class);

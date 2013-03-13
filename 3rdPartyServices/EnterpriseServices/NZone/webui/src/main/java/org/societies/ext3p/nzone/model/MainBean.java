@@ -85,6 +85,8 @@ public class MainBean implements Serializable {
 
 		if (dets == null)
 			dets = getNzoneClient().getZoneDetails();
+		
+		getNzoneClient().getSnsData();
 		return dets;
 	}
 

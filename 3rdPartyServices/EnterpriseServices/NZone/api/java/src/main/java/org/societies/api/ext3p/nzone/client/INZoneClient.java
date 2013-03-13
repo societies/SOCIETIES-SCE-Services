@@ -38,5 +38,7 @@ public interface INZoneClient {
 	
 	public boolean isProfileSetup();
 	
+	public void getSnsData() ;
+	
 }
 
