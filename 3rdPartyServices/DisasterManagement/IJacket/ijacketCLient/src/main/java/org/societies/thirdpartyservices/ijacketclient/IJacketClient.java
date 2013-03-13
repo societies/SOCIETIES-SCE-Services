@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Random;
 
 import org.societies.android.api.cis.SocialContract;
+import org.societies.android.api.cis.SupportedAccountTypes;
 
 import android.app.Activity;
 import android.content.ContentResolver;
@@ -28,8 +29,8 @@ import android.widget.AdapterView.OnItemSelectedListener;
 public class IJacketClient extends Activity implements OnItemSelectedListener {
 
     private static String LOG_TAG = "ijacketCLient";
-    ContentResolver cr;
-    String communityJid = "";
+    //ContentResolver cr = this.getApplication().getContentResolver();
+    String communityName = "";
     long communityLocalID = 0;
     String user_name = "defaultUser";
     
@@ -37,6 +38,9 @@ public class IJacketClient extends Activity implements OnItemSelectedListener {
     long defaultCISID = 0;
     long my_cssID = 0; 
     long CSS_sharing_jacket = 0;
+    
+    String accountNameSync = "";
+    String accountTypeSync = SupportedAccountTypes.COM_BOX;
     
     /**
      * Called when the activity is first created.
@@ -65,7 +69,7 @@ public class IJacketClient extends Activity implements OnItemSelectedListener {
         	CSS_sharing_jacket = cssJid;
 
         } 
-
+        fillUpAccNameAndType();
         
 
     	Log.d(LOG_TAG, "going to retrieve service and CSS id");
@@ -87,9 +91,40 @@ public class IJacketClient extends Activity implements OnItemSelectedListener {
        
     }
         
+    
+    public void fillUpAccNameAndType(){
+    	ContentResolver cr = this.getApplication().getContentResolver();
+		String	mSelectionClause = SocialContract.Me.ACCOUNT_TYPE + " = ?";
+		
+	    
+		Log.d(LOG_TAG, "accountType sync is " + accountTypeSync);
+	    
+		String[]  mSelectionArgs = {accountTypeSync};
+		
+    	Cursor c = cr.query(SocialContract.Me.CONTENT_URI,null,mSelectionClause,mSelectionArgs, null);
+       	if (null == c || c.getCount() < 1){
+       		Log.d(LOG_TAG, "could not my account");
+       		
+       	}
+       	else{
+       		if (c.getCount() > 1){ 
+       			Log.d(LOG_TAG, "too many box accounts");
+       		}else{
+       			int i  = c.getColumnIndex(SocialContract.Me.USER_NAME);
+   		    	c.moveToNext();
+   		    	String user = c.getString(i);
+   		    	Log.d(LOG_TAG, "user is " + user);
+   			    accountNameSync = user;
+       		}
+       	}
+
+    	
+    }
+    
+    
     /** Called when the user touches the button */
     public void sendMessage(View view) {
-		cr = this.getApplication().getContentResolver();
+    	ContentResolver cr = this.getApplication().getContentResolver();
 		
 		Log.d(LOG_TAG, "send button pressed");
 		
@@ -107,11 +142,14 @@ public class IJacketClient extends Activity implements OnItemSelectedListener {
         	Spinner spinnerVerbs = (Spinner) findViewById( R.id.spinner2 );
         	String verb = spinnerVerbs.getSelectedItem().toString();
         	mNewValues.put(SocialContract.CommunityActivity.ACTOR, user_name);
+        	mNewValues.put(SocialContract.CommunityActivity.ACCOUNT_TYPE, accountTypeSync);
+        	mNewValues.put(SocialContract.CommunityActivity.ACCOUNT_NAME, accountNameSync);
         	mNewValues.put(SocialContract.CommunityActivity.OBJECT, editText.getText().toString());
         	mNewValues.put(SocialContract.CommunityActivity.VERB, verb);
+        	mNewValues.put(SocialContract.CommunityActivity.DIRTY, 1);
         	mNewValues.put(SocialContract.CommunityActivity.TARGET, org.societies.thirdpartyservices.ijacketlib.IJacketDefines.AccountData.IJACKET_SERVICE_NAME);
         	mNewValues.put(SocialContract.CommunityActivity._ID_FEED_OWNER, communityLocalID);
-        	Log.d(LOG_TAG, "going to inseet: " + user_name + " posted " + editText.getText().toString() + " at " +communityJid);
+        	Log.d(LOG_TAG, "going to inseet: " + user_name + " posted " + editText.getText().toString() + " at " +communityName);
         
         	Uri mNewUri = cr.insert(FEED_URI,mNewValues);
         	
@@ -132,12 +170,13 @@ public class IJacketClient extends Activity implements OnItemSelectedListener {
     }
         
     private void retrieveCSSID(){
+    	ContentResolver cr = this.getApplication().getContentResolver();
     	Log.d(LOG_TAG, "going to retrieve CSSID");
     	Uri CSS_URI = Uri.parse(SocialContract.AUTHORITY_STRING + SocialContract.UriPathIndex.ME);
         try{
         	//String[] mProjection ={SocialContract.Me.GLOBAL_ID};
         	String mSelectionClause = SocialContract.Me.ACCOUNT_TYPE + " = ?";
-        	String[] mSelectionArgs = {org.societies.thirdpartyservices.ijacketlib.IJacketDefines.AccountData.ACCOUNT_TYPE};
+        	String[] mSelectionArgs = {SupportedAccountTypes.COM_BOX};
         	cr = this.getApplication().getContentResolver();
 	       	 Cursor cursor = cr.query(CSS_URI,null,mSelectionClause,mSelectionArgs,null);
 	       	if (null == cursor || cursor.getCount() < 1){
@@ -166,6 +205,7 @@ public class IJacketClient extends Activity implements OnItemSelectedListener {
     }    
 
     private void retrieveIJacketServiceID(){
+    	ContentResolver cr = this.getApplication().getContentResolver();
     	Log.d(LOG_TAG, "going to retrieve Ijacket service ID");
     	Uri CSS_URI = Uri.parse(SocialContract.AUTHORITY_STRING + SocialContract.UriPathIndex.SERVICES);
         try{
@@ -223,6 +263,7 @@ public class IJacketClient extends Activity implements OnItemSelectedListener {
     
         
     private void addItemsOnCISSpinner(){
+    	ContentResolver cr = this.getApplication().getContentResolver();
         	Spinner spinnerCIS = (Spinner) findViewById( R.id.spinner1 );
         	if(null == spinnerCIS) Log.d(LOG_TAG, "spinner is null...");
     		
@@ -236,15 +277,17 @@ public class IJacketClient extends Activity implements OnItemSelectedListener {
     	        
     	        // get communities where I Ijacket is shared and by the user which came in the intent
     	        if(0 != CSS_sharing_jacket){
-    	        	mSelectionArgs = new String[2];
+    	        	mSelectionArgs = new String[3];
     	        	mSelectionArgs[0] = this.iJacketServiceId + "";
+    	        	mSelectionArgs[1] = SocialContract.ServiceConstants.SERVICE_SHARED;
     	        	// in case the id of the user who is sharing came in the intent
-    	        	mSelectionClause = SocialContract.Sharing._ID_SERVICE + " = ? AND " + SocialContract.Sharing._ID_OWNER + " = ?";
-    	        	mSelectionArgs[1] = this.CSS_sharing_jacket + "";
+    	        	mSelectionClause = SocialContract.Sharing._ID_SERVICE + " = ? AND " + SocialContract.Sharing.TYPE + " = ? AND " + SocialContract.Sharing._ID_OWNER + " = ?";
+    	        	mSelectionArgs[2] = this.CSS_sharing_jacket + "";
     	        }else{
     	        	mSelectionArgs = new String[1];
     	        	mSelectionArgs[0] = this.iJacketServiceId + "";
-    	        	mSelectionClause = SocialContract.Sharing._ID_SERVICE + " = ?";
+    	        	mSelectionArgs[1] = SocialContract.ServiceConstants.SERVICE_SHARED;
+    	        	mSelectionClause = SocialContract.Sharing._ID_SERVICE + " = ? AND " + SocialContract.Sharing.TYPE + " = ?";
     	        }
     	        Log.d(LOG_TAG, "query is " + mSelectionClause + " and arg 0 is " + mSelectionArgs[0]);
     	        if(mSelectionArgs.length>1) Log.d(LOG_TAG, " and arg1 is " + mSelectionArgs[1]);
@@ -361,11 +404,11 @@ public class IJacketClient extends Activity implements OnItemSelectedListener {
     			long id) {
     		
     		Cursor cursor = (Cursor) parent.getItemAtPosition(pos);
-    		int i = cursor.getColumnIndex(SocialContract.Communities.GLOBAL_ID); 
-    		communityJid = cursor.getString(i);
+    		int i = cursor.getColumnIndex(SocialContract.Communities.NAME); 
+    		communityName = cursor.getString(i);
     		i = cursor.getColumnIndex(SocialContract.Communities._ID); 
     		communityLocalID = cursor.getLong(i);
-    	    Log.d(LOG_TAG, "found community with JID " + communityJid + " and id " + communityLocalID);
+    	    Log.d(LOG_TAG, "found community with name " + communityName + " and id " + communityLocalID);
     	    
     		
     	}

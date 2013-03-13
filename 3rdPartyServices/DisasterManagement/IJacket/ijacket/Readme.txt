@@ -2,7 +2,7 @@
 -- Description
 ------------------------------------------------------
 
-The Ijacket client presents a first gui where the user can choose a CIS and connect its Jacket to it.
+The Ijacket  presents a first gui where the user can choose a CIS and connect its Jacket to it.
 The CISs available for choosing are the ones in which the application has been shared to
 or in other words, the ones that match: Application.GlobalID = org.societies.thirdpartyservices.ijacketlib.IJacketDefines.AccountData.IJACKET_SERVICE_NAME
 

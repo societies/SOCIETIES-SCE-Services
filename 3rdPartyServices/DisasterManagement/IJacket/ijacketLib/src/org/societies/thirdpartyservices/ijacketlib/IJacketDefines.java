@@ -16,7 +16,7 @@ public final class IJacketDefines {
 	public static final class AccountData{
 		
 		// local id representing the community to be used
-		public static final String ACCOUNT_TYPE = "com.box";
+		//public static final String ACCOUNT_TYPE = "com.box";
 		public static final String IJACKET_CLIENT_SERVICE_NAME = "org.societies.thirdpartyservices.ijacketclient";
 		public static final String IJACKET_SERVICE_NAME = "org.societies.thirdpartyservices.ijacket";
 	}
