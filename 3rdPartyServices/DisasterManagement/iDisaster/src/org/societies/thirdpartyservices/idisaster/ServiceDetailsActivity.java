@@ -25,6 +25,7 @@
 package org.societies.thirdpartyservices.idisaster;
 
 
+import org.societies.android.api.cis.SocialContract;
 import org.societies.thirdpartyservices.idisaster.R;
 import org.societies.thirdpartyservices.idisaster.data.ThirdPartyService;
 
@@ -38,6 +39,7 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.TextView;
 //import android.widget.Toast;
+import android.widget.Toast;
 
 /**
  * Activity for showing service details.
@@ -55,18 +57,22 @@ public class ServiceDetailsActivity extends Activity implements OnClickListener 
 	
 	private String requestContext;
 	private ThirdPartyService thirdPartyService;
-
+	private long memberId = 0;
+	
 	static final String INTENT_SERVICE_DETAILS_REQUEST_CONTEXT ="REQUEST_CONTEXT";
 	static final String INTENT_SERVICE_DETAILS_GLOBAL_ID_SERVICE ="GLOBAL_ID_SERVICE";
+	static final String INTENT_SERVICE_DETAILS_MEMBER_ID ="MEMBER_ID";			// Only valid if request to launching a service client
 
 	
 // Status information for the user. Not stored in SocialProvider 
 	private String SERVICE_STATUS_RECOMMENDED = "This service is recommended in the team.";
-	private String SERVICE_STATUS_RECOMMENDED_INSTALLED = "This recommended service is already installed on your device. You can share it with the team members.";	
+	private String SERVICE_STATUS_RECOMMENDED_INSTALLED = "This recommended service is already installed on your device. You can share it with the team members.";
+	
 	private String SERVICE_STATUS_INSTALLED = "This service is installed on your device. You can share it with the team members.";
+	private String SERVICE_STATUS_SHARED_BY_ME = "This service is installed on your device and shared with the team members.";
 	private String SERVICE_STATUS_REMOVED = "This service was not properly installed or is no longer installed on your device.";
-	private String SERVICE_STATUS_SHARED_BY_ME = "You have shared this service with the team members.";
-	private String SERVICE_STATUS_SHARED_IN_CIS = "This service is shared by other team members.";
+
+	private String SERVICE_STATUS_SHARED_IN_CIS = "This service client allows you to access a service shared by other team members.";
 
 	private String SERVICE_STATUS_UNKNOWN = "No more information available.";
 	
@@ -88,6 +94,9 @@ public class ServiceDetailsActivity extends Activity implements OnClickListener 
 		// Retrieve second parameter: service ID
 		thirdPartyService = new ThirdPartyService
 				(intent.getStringExtra(INTENT_SERVICE_DETAILS_GLOBAL_ID_SERVICE));
+		if (requestContext.equals (SocialContract.ServiceConstants.SERVICE_SHARED)) {
+			memberId = intent.getLongExtra(INTENT_SERVICE_DETAILS_MEMBER_ID, 0);			
+		}
 		
 		serviceAction2 = iDisasterApplication.getInstance().SERVICE_NO_ACTION;	// In most cases, only one action is available for a service
 		
@@ -95,22 +104,17 @@ public class ServiceDetailsActivity extends Activity implements OnClickListener 
 			int position = Integer.parseInt(thirdPartyService.serviceGlobalId);
 			thirdPartyService.serviceName = iDisasterApplication.getInstance().CISserviceNameList.get (position);
 			thirdPartyService.serviceDescription = iDisasterApplication.getInstance().CISserviceDescriptionList.get (position);
-			thirdPartyService.serviceInstallStatus = iDisasterApplication.getInstance().SERVICE_NOT_INSTALLED;
+			thirdPartyService.serviceInstallStatus = SocialContract.ServiceConstants.SERVICE_NOT_INSTALLED;
 			serviceAction1 = iDisasterApplication.getInstance().SERVICE_INSTALL;
 			
 		} else {
 			// Retrieve service information from SocialProvider
-			if (!(thirdPartyService.getServiceInformation (this, getContentResolver ())
+			if (!(thirdPartyService.getServiceInformation (this, getContentResolver (), 
+							iDisasterApplication.getInstance().me.peopleId,
+							iDisasterApplication.getInstance().selectedTeam.id)
 					.equals(iDisasterApplication.getInstance().QUERY_SUCCESS))) {
 				showQueryExceptionDialog ();	// Exception: Display dialog and terminates activity
-			}
-			
-			// Check that availability status in SocialProvider is consistent with 
-			// service availability	on the device
-			if (!(thirdPartyService.checkServiceInstallStatus (this, getContentResolver())
-					.equals (iDisasterApplication.getInstance().UPDATE_SUCCESS))) {
-				showQueryExceptionDialog ();	// Exception: Display dialog and terminates activity			
-			}	
+			}			
 		}
 		
 		// Get text fields
@@ -126,27 +130,27 @@ public class ServiceDetailsActivity extends Activity implements OnClickListener 
 		serviceStatusView.setText(SERVICE_STATUS_UNKNOWN);
 		
 		if (requestContext.equals 
-				(iDisasterApplication.getInstance().SERVICE_RECOMMENDED)) {			// Details request for a service recommended in the CIS
+				(SocialContract.ServiceConstants.SERVICE_RECOMMENDED)) {			// Details request for a service recommended in the CIS
 			
 			
-			if (thirdPartyService.serviceInstallStatus														// If the service is installed on the device
-					.equals(iDisasterApplication.getInstance().SERVICE_INSTALLED)) {
+			if (thirdPartyService.serviceInstallStatus										// If the service is installed on the device
+					.equals(SocialContract.ServiceConstants.SERVICE_INSTALLED)) {
 				// Set status (on UI)
-				serviceStatusView.setText(SERVICE_STATUS_RECOMMENDED);
+				serviceStatusView.setText(SERVICE_STATUS_RECOMMENDED_INSTALLED);
 				serviceAction1 = iDisasterApplication.getInstance().SERVICE_LAUNCH;			// Action available to user is Launch
 				
 			} else {																	// If the service is NOT installed on the device
 				// Set status (on UI)
-				serviceStatusView.setText(SERVICE_STATUS_RECOMMENDED_INSTALLED);
+				serviceStatusView.setText(SERVICE_STATUS_RECOMMENDED);
 				serviceAction1 = iDisasterApplication.getInstance().SERVICE_INSTALL; 		// Action available to user is Install
 
 			}
 			
 		} else if (requestContext.equals 
-				(iDisasterApplication.getInstance().SERVICE_INSTALLED)) {			// Details request for a service in the list of installed services
+				(SocialContract.ServiceConstants.SERVICE_INSTALLED)) {			// Details request for a service in the list of installed services
 			
 			if (thirdPartyService.serviceInstallStatus															// If the service is really installed on the device
-					.equals(iDisasterApplication.getInstance().SERVICE_INSTALLED)) {
+					.equals(SocialContract.ServiceConstants.SERVICE_INSTALLED)) {
 			
 				// Set status (on UI)
 				serviceStatusView.setText(SERVICE_STATUS_INSTALLED);
@@ -159,21 +163,21 @@ public class ServiceDetailsActivity extends Activity implements OnClickListener 
 				serviceAction1 = iDisasterApplication.getInstance().SERVICE_INSTALL;		// Action available to user is Install
 
 			}
-			
-		} else if (requestContext.equals (iDisasterApplication.getInstance().SERVICE_SHARED)) { 	// Details request for a service in the list of shared services
-// TODO: Check it the client is installed. If not Action is "Install client" - otherwise "Access"
+
+		} else if (requestContext.equals (SocialContract.ServiceConstants.SERVICE_SHARED)) { 	// Details request for a service client for a shared service
+
 			// Set status (on UI)
 			serviceStatusView.setText(SERVICE_STATUS_SHARED_IN_CIS);
 
-			// NB: The service should normally not be installed. If so it was already launched 
-			if (thirdPartyService.serviceInstallStatus													// If the service is installed on the device
-					.equals(iDisasterApplication.getInstance().SERVICE_INSTALLED)) {
+			// NB: The service client is normally not installed.
+			if (thirdPartyService.serviceInstallStatus												// If the service client is installed on the device
+					.equals(SocialContract.ServiceConstants.SERVICE_INSTALLED)) {				// Should normally not happen - Launch from SharedServiceListActivity 
 				// Set status (on UI)
-				serviceAction1 = iDisasterApplication.getInstance().SERVICE_LAUNCH;			// Action available to user is Launch
+				serviceAction1 = iDisasterApplication.getInstance().SERVICE_LAUNCH;					// Action available to user is Launch
 				
 			} else {																	// If the service is NOT installed on the device
 				// Set status (on UI)
-				serviceAction1 = iDisasterApplication.getInstance().SERVICE_INSTALL; 		// Action available to user is Install
+				serviceAction1 = iDisasterApplication.getInstance().SERVICE_INSTALL; 				// Action available to user is Install
 			}
 		}
 		
@@ -184,22 +188,14 @@ public class ServiceDetailsActivity extends Activity implements OnClickListener 
 		button2 = (Button) findViewById(R.id.serviceDetailsButton2);
 		if (serviceAction1.equals((iDisasterApplication.getInstance().SERVICE_LAUNCH))) {
 			
-			if (!requestContext.equals (iDisasterApplication.getInstance().SERVICE_SHARED)) {		// Only the request is not about a shared service
-				String sharingStatus = thirdPartyService.checkServiceShareStatus(this,
-						iDisasterApplication.getInstance().me.peopleId,
-						iDisasterApplication.getInstance().selectedTeam.id) ;
-				if (sharingStatus.equals (iDisasterApplication.getInstance().QUERY_EXCEPTION)) {
-					showQueryExceptionDialog ();	// SocialProvider exception: Display dialog and terminates activity
+			if (!requestContext.equals (SocialContract.ServiceConstants.SERVICE_SHARED)) {		// Only the request is NOT about a shared service
+				
+				if (thirdPartyService.serviceShareStatus.equals (SocialContract.ServiceConstants.SERVICE_SHARED)) {
+					serviceAction2 = iDisasterApplication.getInstance().SERVICE_UNSHARE;	// Alternative action to user is Unshare
+					serviceStatusView.setText (SERVICE_STATUS_SHARED_BY_ME);
 					
 				} else {
-					if (sharingStatus.equals (iDisasterApplication.getInstance().QUERY_SUCCESS)) {
-						serviceAction2 = iDisasterApplication.getInstance().SERVICE_UNSHARE;	// Alternative action to user is Unshare
-						
-					} else {
-						serviceAction2 = iDisasterApplication.getInstance().SERVICE_SHARE;		// Alternative action to user is Share
-						serviceStatusView.setText (SERVICE_STATUS_SHARED_BY_ME);
-
-					}
+					serviceAction2 = iDisasterApplication.getInstance().SERVICE_SHARE;		// Alternative action to user is Share
 				}
 
 				button2.setText(serviceAction2);
@@ -227,15 +223,19 @@ public class ServiceDetailsActivity extends Activity implements OnClickListener 
     	if (button1.getId() == ((Button) v).getId()) {									// First button is clicked
     		
     		if (serviceAction1.equals (iDisasterApplication.getInstance().SERVICE_INSTALL)) {				// Request to install
+
+// Toast is not shown before the service installation activity appears (i.e. service is downloaded)
+//	            Toast.makeText(this.getApplicationContext(), getString(R.string.toastServiceDetailsDownload)
+//	            		, Toast.LENGTH_LONG).show();
+    			
     			if (thirdPartyService.installService (this)
     					.equals (iDisasterApplication.getInstance().DOWNLOAD_EXCEPTION)) {
     				showServiceExceptionDialog 			// Install exception; No termination (the user may have to switch on network access)
     					(getString(R.string.dialogServiceDownloadException));		
     				return;	
     			} else {								// Service was correctly installed - Update data in SocialProvider
-    				if (!(thirdPartyService.updateServiceInstallStatus (this, getContentResolver(), 
-    															iDisasterApplication.getInstance().SERVICE_INSTALLED)
-    						.equals (iDisasterApplication.getInstance().UPDATE_SUCCESS))) {					// Update of SocialProvider has failed
+    				if (!(thirdPartyService.setServiceInstallStatus (this, getContentResolver())
+    						.equals (iDisasterApplication.getInstance().QUERY_SUCCESS))) {					// Update of SocialProvider has failed
     					showQueryExceptionDialog ();	// Exception: Display dialog and terminates activity			
     				} else {
     					finish ();
@@ -244,7 +244,18 @@ public class ServiceDetailsActivity extends Activity implements OnClickListener 
     			}
 
     		} else if (serviceAction1.equals (iDisasterApplication.getInstance().SERVICE_LAUNCH)) {			// Request to launch
-    			if (thirdPartyService.launchApplication (this)
+    			
+    			long launchTeam = iDisasterApplication.getInstance().selectedTeam.id;
+    			long launchPeople;
+
+    			// ADD code her!!
+    			if (!requestContext.equals (SocialContract.ServiceConstants.SERVICE_SHARED)) {	// The request is NOT about a shared service
+    				launchPeople = iDisasterApplication.getInstance().me.peopleId;
+    			} else {
+    				launchPeople = memberId;			// retrieved from intent when launching the current activity	
+    			}
+    			
+    			if (thirdPartyService.launchApplication (this, launchTeam, launchPeople)
     					.equals (iDisasterApplication.getInstance().LAUNCH_EXCEPTION)) {					// Launch has failed
     				showServiceExceptionDialog			// Launch exception: display dialog
     					(getString(R.string.dialogServiceLaunchException));
@@ -261,9 +272,9 @@ public class ServiceDetailsActivity extends Activity implements OnClickListener 
     
     		if (serviceAction2.equals (iDisasterApplication.getInstance().SERVICE_SHARE)) {					// Request to share a service
     			
-    			if (thirdPartyService.shareService (this, iDisasterApplication.getInstance().me.peopleId,
+    			if (thirdPartyService.shareService (this, getContentResolver(), iDisasterApplication.getInstance().me.peopleId,
     												iDisasterApplication.getInstance().me.userName,
-    												iDisasterApplication.getInstance().selectedTeam.globalId)
+    												iDisasterApplication.getInstance().selectedTeam.id)
     					.equals (iDisasterApplication.getInstance().INSERT_EXCEPTION)) {			// Update information in SocialProvider 
     				showQueryExceptionDialog (); 			/// SocialProvider exception: Display dialog and terminates activity
     			} else {
@@ -272,13 +283,15 @@ public class ServiceDetailsActivity extends Activity implements OnClickListener 
     			
     		} else if (serviceAction2.equals (iDisasterApplication.getInstance().SERVICE_UNSHARE)) {
     			
-    			if (thirdPartyService.unshareService (this)
+    			if (thirdPartyService.unshareService (this, getContentResolver(),
+    												iDisasterApplication.getInstance().me.peopleId,
+    												iDisasterApplication.getInstance().selectedTeam.id)
     					.equals (iDisasterApplication.getInstance().UPDATE_SUCCESS)) {			// Update information in SocialProvider 
     				finish ();
     			} else {
     				showQueryExceptionDialog (); 			/// SocialProvider exception: Display dialog and terminates activity
     			}
- 
+    			
     		} else {				// should never happen
     			return;
     		}

@@ -92,7 +92,7 @@ public class DisasterListActivity extends ListActivity {
 
     			if (iDisasterApplication.testDataUsed) {			// Test data
     				iDisasterApplication.getInstance().selectedTeam.name = iDisasterApplication.getInstance().disasterNameList.get(position);
-    				iDisasterApplication.getInstance().selectedTeam.id = Integer.toString(position);
+    				iDisasterApplication.getInstance().selectedTeam.id = position;
 // Store the selected disaster in application preferences
 //    				iDisasterApplication.getInstance().setDisasterTeamName (name);
     				
@@ -101,7 +101,7 @@ public class DisasterListActivity extends ListActivity {
     					ownTeamCursor.moveToPosition(position);
     					iDisasterApplication.getInstance().selectedTeam.name =  ownTeamCursor.getString(ownTeamCursor
     							.getColumnIndex(SocialContract.Communities.NAME));
-    					iDisasterApplication.getInstance().selectedTeam.id = ownTeamCursor.getString(ownTeamCursor
+    					iDisasterApplication.getInstance().selectedTeam.id = ownTeamCursor.getLong(ownTeamCursor
     							.getColumnIndex(SocialContract.Communities._ID));
     					iDisasterApplication.getInstance().selectedTeam.globalId = ownTeamCursor.getString(ownTeamCursor
     							.getColumnIndex(SocialContract.Communities.GLOBAL_ID));
@@ -110,7 +110,7 @@ public class DisasterListActivity extends ListActivity {
     					memberTeamCursor.moveToPosition(position-ownTeams);
     					iDisasterApplication.getInstance().selectedTeam.name =  memberTeamCursor.getString(memberTeamCursor
     							.getColumnIndex(SocialContract.Communities.NAME));
-    					iDisasterApplication.getInstance().selectedTeam.id = memberTeamCursor.getString(memberTeamCursor
+    					iDisasterApplication.getInstance().selectedTeam.id = memberTeamCursor.getLong(memberTeamCursor
     							.getColumnIndex(SocialContract.Communities._ID));
     					iDisasterApplication.getInstance().selectedTeam.globalId = memberTeamCursor.getString(memberTeamCursor
     							.getColumnIndex(SocialContract.Communities.GLOBAL_ID));
@@ -201,7 +201,7 @@ public class DisasterListActivity extends ListActivity {
 		String selection = SocialContract.Communities.TYPE + "= ? AND " 
 					     + SocialContract.Communities._ID_OWNER + "= ?";
 		String[] selectionArgs = new String[] {iDisasterApplication.getInstance().COMMUNITY_TYPE,   // The CIS type
-												iDisasterApplication.getInstance().me.peopleId};	// The user is owner
+								String.valueOf (iDisasterApplication.getInstance().me.peopleId)};	// The user is owner
 
 //		String selection = SocialContract.Communities.TYPE + "= ?";
 //		String[] selectionArgs = new String[] {iDisasterApplication.getInstance().COMMUNITY_TYPE};
@@ -239,9 +239,10 @@ public class DisasterListActivity extends ListActivity {
 		
 		String[] membershipProjection = new String[] {
 				SocialContract.Membership._ID_COMMUNITY};
-
+		
 		String membershipSelection = SocialContract.Membership._ID_MEMBER + "= ?";
-		String[] membershipSelectionArgs = new String[] {iDisasterApplication.getInstance().me.peopleId};	// The user is owner
+		String[] membershipSelectionArgs = new String[] 
+						{String.valueOf (iDisasterApplication.getInstance().me.peopleId)};	// The user is owner
 		
 		Cursor membershipCursor;
 		try {
@@ -280,13 +281,13 @@ public class DisasterListActivity extends ListActivity {
 			if (first) {
 				first = false;
 				communitiesSelection = SocialContract.Communities._ID + "= ?";
-				communitiesSelectionArgs.add (membershipCursor.getString(
-								(membershipCursor.getColumnIndex(SocialContract.Membership._ID_COMMUNITY))));
+				communitiesSelectionArgs.add (String.valueOf (membershipCursor.getLong(
+								(membershipCursor.getColumnIndex(SocialContract.Membership._ID_COMMUNITY)))));
 			} else {
 				communitiesSelection = communitiesSelection +
-									   " AND " +  SocialContract.Communities._ID + "= ?";
-				communitiesSelectionArgs.add (membershipCursor.getString(
-								(membershipCursor.getColumnIndex(SocialContract.Membership._ID_COMMUNITY))));
+									   " OR " +  SocialContract.Communities._ID + "= ?";
+				communitiesSelectionArgs.add (String.valueOf (membershipCursor.getString(
+								(membershipCursor.getColumnIndex(SocialContract.Membership._ID_COMMUNITY)))));
 			}
 		}
 		membershipCursor.close();		// "close" releases no more needed data
@@ -333,7 +334,7 @@ public class DisasterListActivity extends ListActivity {
 			if (ownTeamCursor.getCount() != 0) {
 				while (ownTeamCursor.moveToNext()) {
 					ownTeams++;					
-					String owner = ownTeamCursor.getString(ownTeamCursor
+					long owner = ownTeamCursor.getLong(ownTeamCursor
 							.getColumnIndex(SocialContract.Communities._ID_OWNER));					
 					String displayName = "owned: " + ownTeamCursor.getString(ownTeamCursor
 							.getColumnIndex(SocialContract.Communities.NAME));

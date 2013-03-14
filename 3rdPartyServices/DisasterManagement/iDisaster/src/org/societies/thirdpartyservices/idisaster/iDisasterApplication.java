@@ -41,6 +41,7 @@ import android.util.Log;
 import android.widget.ArrayAdapter;
 
 import org.societies.android.api.cis.SocialContract;
+import org.societies.android.api.cis.SupportedAccountTypes;
 import org.societies.thirdpartyservices.idisaster.data.Me;
 import org.societies.thirdpartyservices.idisaster.data.SelectedTeam;
 
@@ -107,17 +108,8 @@ public class iDisasterApplication extends Application {
 	public final String TARGET_ALL = "TARGET_ALL";
 	
 	// Constant used for services in a community
-	public final String SERVICE_RECOMMENDED = "SERVICE_RECOMMENDED";
-	public final String SERVICE_SHARED = "SERVICE_SHARED";
+	public final String SERVICE_NOT_SHARED = "SERVICE_NOT_SHARED";
 	
-	// Constant used for services on a device
-	public final String SERVICE_INSTALLED = "SERVICE_INSTALLED";
-	public final String SERVICE_NOT_INSTALLED = "SERVICE_NOT_INSTALLED";
-
-	// Constant used for service types
-	public final String SERVICE_TYPE_PROVIDER = "SERVICE_TYPE_PROVIDER";
-	public final String SERVICE_TYPE_CLIENT = "SocialContract.ServiceConstants.SERVICE_TYPE_CLIENT";
-	public final String SERVICE_TYPE_APP = "SERVICE_TYPE_APP";
 
 	// Constant used for operations on services
 	public final String SERVICE_RECOMMEND = "SERVICE_RECOMMEND";
@@ -240,10 +232,10 @@ public class iDisasterApplication extends Application {
 		};
 
 		String selection = SocialContract.Me.ACCOUNT_TYPE + "= ?"; // Use the first user identity with Account in box.com
-		String[] selectionArgs = new String[] {"com.box"};
+		String[] selectionArgs = new String[] {SupportedAccountTypes.COM_BOX};
 
 //  Alternative query - does not work with new version of SocialProvider
-//		String selection = SocialContract.Me.ACCOUNT_TYPE + " = com.box"; // Use the first user identity with Account in box.com
+//		String selection = SocialContract.Me.ACCOUNT_TYPE + " = " + SupportedAccountTypes.COM_BOX; // Use the first user identity with Account in box.com
 //		String[] selectionArgs = null;
 
 		String sortOrder = null;
@@ -284,7 +276,7 @@ public class iDisasterApplication extends Application {
 //		int i =0;
 //		while (cursor.moveToNext()) {
 //				id = cursor.getString(cursor.getColumnIndex(SocialContract.Me._ID));
-//				idPeople = cursor.getString(cursor.getColumnIndex(SocialContract.Me._ID_PEOPLE));
+//				idPeople = cursor.getLong(cursor.getColumnIndex(SocialContract.Me._ID_PEOPLE));
 ////				globalId = cursor.getString(cursor.getColumnIndex(SocialContract.Me.GLOBAL_ID));
 //				name = cursor.getString(cursor.getColumnIndex(SocialContract.Me.NAME));
 //				dislayName = cursor.getString(cursor.getColumnIndex(SocialContract.Me.DISPLAY_NAME));
@@ -295,8 +287,7 @@ public class iDisasterApplication extends Application {
 		
 		if (cursor.moveToFirst()){
 			
-			me.peopleId = cursor.getString(cursor
-					.getColumnIndex(SocialContract.Me._ID_PEOPLE));
+			me.peopleId = cursor.getLong (cursor.getColumnIndex(SocialContract.Me._ID_PEOPLE));
 // Cannot be set here - Me.GLOBAL_ID is set to PENDING
 // Should be set in checkPeople
 //			me.peopleGlobalId = cursor.getString(cursor
@@ -370,15 +361,15 @@ public class iDisasterApplication extends Application {
 		}
 
 		if (peopleCursor.moveToFirst()) {			
-			String peopleId = peopleCursor.getString(peopleCursor
+			long peopleId = peopleCursor.getLong (peopleCursor
 					.getColumnIndex(SocialContract.People._ID));
 
-			if (me.peopleId.equals(peopleId)) {		// Me and People are consistent
+			if (me.peopleId == peopleId) {		// Me and People are consistent
 				me.peopleGlobalId =  peopleCursor.getString(peopleCursor
 						.getColumnIndex(SocialContract.People.GLOBAL_ID));
 				return QUERY_SUCCESS;
 			} else {							// Update the table Me
-				me.peopleId = "-1";
+				me.peopleId = -1;
 				Uri meUri = SocialContract.Me.CONTENT_URI;
 				Uri recordUri = meUri.withAppendedPath(meUri, "/" +
 						meCursor.getString(meCursor.getColumnIndex(SocialContract.Me._ID)));
@@ -399,201 +390,6 @@ public class iDisasterApplication extends Application {
 		return QUERY_EMPTY;
 	}
 	
-	
-/**
- * updateServices is used temporarily. Will be removed after update of the code
- * for SocialProvider.
- * It updates the Services table in order to use it as a global service registry 
- * (in addition to a user service registry).
- * - GLOBAL_ID is set to the package name for the service (Android App)
- * - OWNER_ID is set to "Contact@SW_company_X.org" to avoid confusion with any user (in People)
- * - TYPE is set to the service type (SERVICE_TYPE_* - see above)
- * - CONFIG is set to the name of the intent for launching the Android App
- * - DEPENDENCY: remove for client
- */
-//	private String updateServices () {
-//		
-//		Uri servicesUri = SocialContract.Services.CONTENT_URI;
-//		
-//		ContentValues values = new ContentValues ();
-//		
-//		// Step 1: get all services 
-//					
-//		String[] servicesProjection = new String[] {
-//				SocialContract.Services._ID,
-//				SocialContract.Services.GLOBAL_ID,
-//				SocialContract.Services.NAME
-////TODO: remove - Used temporarily - to check data
-//				,
-//				SocialContract.Services.DESCRIPTION,
-//				SocialContract.Services.TYPE,
-//				SocialContract.Services.APP_TYPE,
-//				SocialContract.Services.AVAILABLE,
-//				SocialContract.Services.DEPENDENCY,
-//				SocialContract.Services.CONFIG,
-//				SocialContract.Services.URL
-//
-//				};
-//
-//		Cursor servicesCursor;
-//		try {
-//			servicesCursor= getContentResolver().query(servicesUri, servicesProjection,
-//					null /* selection */ , null /* selectionArgs */, null /* sortOrder*/);
-//		} catch (Exception e) {
-//			debug (2, "Query to "+ servicesUri + "causes an exception");
-//			return QUERY_EXCEPTION;
-//
-//		}
-//
-//		// Step 2: remove owner ID
-//		if (servicesCursor == null) {			// No cursor was set - should not happen?
-//			iDisasterApplication.getInstance().debug (2, "servicesCursor was not set to any value");
-//			return QUERY_EMPTY;
-//		}
-//		
-//		if (servicesCursor.getCount() == 0) {	// No service is recommended in the team community
-//			return QUERY_EMPTY;
-//		}		
-//		
-//		while (servicesCursor.moveToNext()) {
-			
-			
-// Used temporarily	for debugging - checking query results	
-//			String serviceName = servicesCursor.getString(servicesCursor
-//					.getColumnIndex(SocialContract.Services.NAME));
-//			String serviceDescription = servicesCursor.getString(servicesCursor
-//					.getColumnIndex(SocialContract.Services.DESCRIPTION));
-//			String serviceType = servicesCursor.getString(servicesCursor
-//				.getColumnIndex(SocialContract.Services.TYPE));
-//			String serviceAppType=servicesCursor.getString(servicesCursor
-//				.getColumnIndex(SocialContract.Services.APP_TYPE));
-//			String serviceAvailable = servicesCursor.getString(servicesCursor
-//			.getColumnIndex(SocialContract.Services.AVAILABLE));
-//			String serviceDependency = servicesCursor.getString(servicesCursor
-//			.getColumnIndex(SocialContract.Services.DEPENDENCY));
-//			String serviceConfig = servicesCursor.getString(servicesCursor
-//			.getColumnIndex(SocialContract.Services.CONFIG));
-//			String serviceURL = servicesCursor.getString(servicesCursor
-//			.getColumnIndex(SocialContract.Services.APP_TYPE));
-	
-			
-//			Uri recordUri = servicesUri.withAppendedPath(servicesUri, "/" +
-//					servicesCursor.getString(servicesCursor.getColumnIndex(SocialContract.Services._ID)));
-//	        values = new ContentValues();
-//	        values.put(SocialContract.Services.OWNER_ID, "Contact@SW_company_X.org");
-//	        if (servicesCursor.getString(servicesCursor.getColumnIndex(SocialContract.Services.NAME)).equals("iJacket")) {
-//
-////	        	values.put(SocialContract.Services.GLOBAL_ID, "org.societies.thirdpartyservices.ijacket");
-//	        	values.put(SocialContract.Services.GLOBAL_ID, "no.ntnu.osnap.tshirt");
-//		        values.put(SocialContract.Services.APP_TYPE, SERVICE_TYPE_PROVIDER);
-//		        values.put(SocialContract.Services.AVAILABLE, SERVICE_NOT_INSTALLED);
-////		        values.put(SocialContract.Services.URL, "http://folk.ntnu.no/svarvaa/utils/pro2www/apk/iJacket.apk");		        
-//		        values.put(SocialContract.Services.URL, "http://folk.ntnu.no/svarvaa/utils/pro2www/apk/Tshirt.apk");
-//// TODO: Not needed?
-//		        values.put(SocialContract.Services.CONFIG, "org.ubicompforall.cityexplorer.gui.StartActivity");
-////				values.put(SocialContract.Services.DEPENDENCY, "org.societies.thirdpartyservices.ijacketclient");
-//				values.put(SocialContract.Services.DEPENDENCY, "org.ubicompforall.cityexplorer");
-//		        
-//	        } else if (servicesCursor.getString(servicesCursor.getColumnIndex(SocialContract.Services.NAME)).equals("iJacketClient")) {
-//	        	// City Explorer used for test... 
-////	        	values.put(SocialContract.Services.GLOBAL_ID, "org.societies.thirdpartyservices.ijacketclient");
-//	        	values.put(SocialContract.Services.GLOBAL_ID, "org.ubicompforall.cityexplorer");
-//	        	values.put(SocialContract.Services.APP_TYPE, SERVICE_TYPE_CLIENT);
-//		        values.put(SocialContract.Services.AVAILABLE, SERVICE_NOT_INSTALLED);
-////		        values.put(SocialContract.Services.URL, "http://folk.ntnu.no/svarvaa/utils/pro2www/apk/iJacketClient.apk");
-//		        values.put(SocialContract.Services.URL, "http://folk.ntnu.no/svarvaa/utils/pro2www/apk/OsnapApp.apk");
-////		        values.put(SocialContract.Services.URL, "https://play.google.com/store/apps")
-//// Todo: not needed		        
-//		        values.put(SocialContract.Services.CONFIG, "android.intent.action.MAIN"); // TODO: ???
-//		        values.put(SocialContract.Services.DEPENDENCY, "");
-//
-//	        	// City Explorer used for test... 
-//		        values.put(SocialContract.Services.CONFIG, "org.ubicompforall.cityexplorer.gui.StartActivity");
-//	        }
-//	        getContentResolver().update(recordUri, values, null, null);		
-//		}
-//	
-//		return QUERY_SUCCESS; 
-
-		
-		
-		
-//		Uri sharingUri = SocialContract.Sharing.CONTENT_URI;
-//		
-//		ContentValues values = new ContentValues ();
-//		
-//
-//		values.put(SocialContract.Sharing.GLOBAL_ID_SERVICE,		
-//				"s1xyz.societies.org");
-//		values.put(SocialContract.Sharing.GLOBAL_ID_COMMUNITY,
-//							"c1xyz.societies.org");
-//		values.put(SocialContract.Sharing.GLOBAL_ID_OWNER,		
-//				"knut@redcross.org");
-//		values.put(SocialContract.Sharing.TYPE, "Monitor");
-//		values.put(SocialContract.Sharing.ORIGIN, "Red Cross");		
-//		 
-//		try {
-////The Uri value returned is not used.
-////			Uri activityNewUri = getContentResolver().insert( SocialContract.CommunityActivity.CONTENT_URI,
-////										activityValues);
-//			getContentResolver().insert( sharingUri, values);
-//		} catch (Exception e) {
-//			iDisasterApplication.getInstance().debug (2, "Insert to "+ sharingUri + "causes an exception");
-//	    	return iDisasterApplication.getInstance().INSERT_EXCEPTION;
-//		}
-//
-//
-//		// Step 1a: get services of type "Monitor"
-//					
-//		String[] sharingProjection = new String[] {
-//				SocialContract.Sharing._ID,
-//				SocialContract.Sharing.GLOBAL_ID_SERVICE
-////				,
-////				SocialContract.Sharing.TYPE
-//				};
-//
-////		String sharingSelection = SocialContract.Sharing.TYPE + "= ?";
-////
-////		String[] sharingSelectionArgs = new String[] 
-////				{"Monitor"};		// Retrieve services of that type
-//
-//		String sharingSelection = null;
-//
-//		String[] sharingSelectionArgs = null;
-//
-//		Cursor sharingCursor;
-//		try {
-//			sharingCursor= getContentResolver().query(sharingUri, sharingProjection,
-//					sharingSelection, sharingSelectionArgs, null /* sortOrder*/);
-//		} catch (Exception e) {
-//			debug (2, "Query to "+ sharingUri + "causes an exception");
-//			return QUERY_EXCEPTION;
-//
-//		}
-//
-//		// Step 1b: replace the type to "Recommended"
-//		if (sharingCursor == null) {			// No cursor was set - should not happen?
-//			iDisasterApplication.getInstance().debug (2, "sharingCursor was not set to any value");
-//			return QUERY_EMPTY;
-//		}
-//		
-//		if (sharingCursor.getCount() == 0) {	// No service is recommended in the team community
-//			return QUERY_EMPTY;
-//		}		
-//		
-//		while (sharingCursor.moveToNext()) {
-//			Uri recordUri = sharingUri.withAppendedPath(sharingUri, "/" +
-//					sharingCursor.getString(sharingCursor.getColumnIndex(SocialContract.Sharing._ID)));
-//	        values = new ContentValues();
-//	        values.put(SocialContract.Sharing.TYPE, RECOMMENDED);
-//	        getContentResolver().update(recordUri, values, null, null);		
-//		}
-//	
-//		return QUERY_SUCCESS; 
-		
-//	}
-		
-
 
 /**
 * showDialog is used under testing

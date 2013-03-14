@@ -33,15 +33,14 @@ package org.societies.thirdpartyservices.idisaster.data;
  *
  */
 public class Me {
-		@Deprecated public String globalId;	// People.GLOBAL_ID - Not sure it is the same as Me.GLOBAL_ID
 
 		public String peopleGlobalId;	// People.GLOBAL_ID - Not the same as Me.GLOBAL_ID (that is set to PENDING)
-		public String peopleId;			// The key that connects the user account to a row in the People table
+		public long peopleId;			// The key that connects the user account to a row in the People table
 										// _ID_PEOPLE in Me
 										// _ID in People
 		// Fields extracted from Me
 		public String name;				// name of the user
 		public String displayName;		// nickname - if not available "name" is used for display
-		public String userName;		// login user name
+		public String userName;			// login user name
 
 }

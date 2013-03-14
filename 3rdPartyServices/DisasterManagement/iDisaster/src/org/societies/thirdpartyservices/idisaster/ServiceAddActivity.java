@@ -52,7 +52,7 @@ import android.widget.AdapterView.OnItemClickListener;
  *
  */
 
-// TODO: At the moment a list of services is provided. Some search functionality should be added
+// TODO: This activity should be revised and tested!
 
 public class ServiceAddActivity extends ListActivity {
     @Override

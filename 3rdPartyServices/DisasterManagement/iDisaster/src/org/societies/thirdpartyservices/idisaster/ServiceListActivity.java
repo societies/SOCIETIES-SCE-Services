@@ -32,6 +32,7 @@ import org.societies.thirdpartyservices.idisaster.R;
 import android.app.AlertDialog;
 import android.app.ListActivity;
 import android.content.ContentResolver;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
@@ -76,7 +77,7 @@ public class ServiceListActivity extends ListActivity {
 
 	// No longer set by this activity 
 	Cursor sharedServiceCursor = null;		// used for services that are shared by team members
-	int sharedServices = 0;			// keep track of number of shared services
+	int sharedServices = 0;					// keep track of number of shared services
 	
 	ArrayAdapter<String> serviceAdapter;
 	ListView listView;
@@ -109,7 +110,7 @@ public class ServiceListActivity extends ListActivity {
     			if (iDisasterApplication.testDataUsed) {					// Test data    				
     					// For test: The service is recommended in the CIS
         				intent.putExtra(ServiceDetailsActivity.INTENT_SERVICE_DETAILS_REQUEST_CONTEXT, 									
-        						iDisasterApplication.getInstance().SERVICE_RECOMMENDED);
+        						SocialContract.ServiceConstants.SERVICE_RECOMMENDED);
         				// For test: service identity
         				intent.putExtra(ServiceDetailsActivity.INTENT_SERVICE_DETAILS_GLOBAL_ID_SERVICE, Integer.toString(position));        				
         			} else {
@@ -119,19 +120,24 @@ public class ServiceListActivity extends ListActivity {
     						serviceGlobalId =  recommendedServiceCursor.getString(recommendedServiceCursor
     							.getColumnIndex(SocialContract.Services.GLOBAL_ID));
                				intent.putExtra(ServiceDetailsActivity.INTENT_SERVICE_DETAILS_REQUEST_CONTEXT, 
-               						iDisasterApplication.getInstance().SERVICE_RECOMMENDED);       					
-        				} else if ((position-recommendedServices) < sharedServices) {	// Retrieve information from list of shared services in the team
-        					sharedServiceCursor.moveToPosition(position-recommendedServices);
-        					serviceGlobalId =  sharedServiceCursor.getString(sharedServiceCursor
-    							.getColumnIndex(SocialContract.Services.GLOBAL_ID));
-               				intent.putExtra(ServiceDetailsActivity.INTENT_SERVICE_DETAILS_REQUEST_CONTEXT,
-               						iDisasterApplication.getInstance().SERVICE_SHARED);       					
+               						SocialContract.ServiceConstants.SERVICE_RECOMMENDED);
+               				
+// NB! Shared services in the CIS are no longer shown by the Activity.
+// 	If code is restored, the code in this activity and in ServiceDetailsActivituy should be revised.
+//  Since there is no information about who is sharing the service, the Launch that requires the ID of the member
+//  sharing the service is not straightforward to implement.
+//        				} else if ((position-recommendedServices) < sharedServices) {	// Retrieve information from list of shared services in the team
+//        					sharedServiceCursor.moveToPosition(position-recommendedServices);
+//        					serviceGlobalId =  sharedServiceCursor.getString(sharedServiceCursor
+//    							.getColumnIndex(SocialContract.Services.GLOBAL_ID));
+//               				intent.putExtra(ServiceDetailsActivity.INTENT_SERVICE_DETAILS_REQUEST_CONTEXT,
+//               						SocialContract.ServiceConstants.SERVICE_SHARED);       					
         				} else if ((position-recommendedServices-sharedServices) < myServices) {
         					myServiceCursor.moveToPosition(position-recommendedServices - sharedServices);
         					serviceGlobalId =  myServiceCursor.getString(myServiceCursor
     							.getColumnIndex(SocialContract.Services.GLOBAL_ID));
                				intent.putExtra(ServiceDetailsActivity.INTENT_SERVICE_DETAILS_REQUEST_CONTEXT, 
-               						iDisasterApplication.getInstance().SERVICE_INSTALLED);
+               						SocialContract.ServiceConstants.SERVICE_INSTALLED);
         				} else {	// should never happen
         					iDisasterApplication.getInstance().debug (2, "No service id can be retrieved from position in onClickListener");
         					return;
@@ -160,11 +166,13 @@ public class ServiceListActivity extends ListActivity {
 		super.onResume();
     	
 		// Test data are set in onCreate - see explanation above
+		
+//		testSharing(this, getContentResolver ());
     		
         if (! iDisasterApplication.testDataUsed) {
         	if (serviceAdapter!= null) serviceAdapter.clear();
         	
-			if (getServices (iDisasterApplication.getInstance().SERVICE_RECOMMENDED)	// Retrieve services recommended in the team
+			if (getServices (SocialContract.ServiceConstants.SERVICE_RECOMMENDED)	// Retrieve services recommended in the team
 					.equals(iDisasterApplication.getInstance().QUERY_EXCEPTION)) {
 				showQueryExceptionDialog ();	// Exception: Display dialog
 			}
@@ -177,7 +185,8 @@ public class ServiceListActivity extends ListActivity {
 //			}
 
 //			if (getMyServices ()														// Retrieve services installed by the user
-			if (getServices (iDisasterApplication.getInstance().SERVICE_INSTALLED)	// Retrieve services installed by the user
+
+			if (getServices (SocialContract.ServiceConstants.SERVICE_INSTALLED)	// Retrieve services installed by the user
 					.equals(iDisasterApplication.getInstance().QUERY_EXCEPTION)) {
 				showQueryExceptionDialog ();	// Exception: Display dialog
 			}
@@ -211,24 +220,26 @@ public class ServiceListActivity extends ListActivity {
 		
 		int flagType = 0;
 		
-		// Will be set to "0" when querying own services
-		String selectedTeamId = iDisasterApplication.getInstance().selectedTeam.id;
+		// Will be set to 0 when querying own services
+		long selectedTeamId = iDisasterApplication.getInstance().selectedTeam.id;
 		
 		// Check serviceType
-		if (serviceType.equals(iDisasterApplication.getInstance().SERVICE_INSTALLED)){
+		if (serviceType.equals(SocialContract.ServiceConstants.SERVICE_INSTALLED)){
 			flagType = 1;
-			selectedTeamId = "0";				// Own services
+
+			selectedTeamId = 0;					// Own services
+
 			if (myServiceCursor != null) {
 				myServiceCursor.close();		// "close" releases data but does not set to null
 				myServiceCursor = null;
 			}
-		} else if (serviceType.equals(iDisasterApplication.getInstance().SERVICE_RECOMMENDED)) {
+		} else if (serviceType.equals(SocialContract.ServiceConstants.SERVICE_RECOMMENDED)) {
 			flagType = 2;
 			if (recommendedServiceCursor != null) {
 				recommendedServiceCursor.close();		// "close" releases data but does not set to null
 				recommendedServiceCursor = null;
 			}
-		} else if (serviceType.equals(iDisasterApplication.getInstance().SERVICE_SHARED)) {
+		} else if (serviceType.equals(SocialContract.ServiceConstants.SERVICE_SHARED)) {
 			flagType = 3;
 			if (sharedServiceCursor != null) {
 				sharedServiceCursor.close();		// "close" releases data but does not set to null
@@ -245,11 +256,11 @@ public class ServiceListActivity extends ListActivity {
 			String[] sharingProjection = new String[] {
 					SocialContract.Sharing._ID_SERVICE};
 
-			String sharingSelection = SocialContract.Sharing._ID_COMMUNITY + "= ?" +
-									"AND " + SocialContract.Sharing.TYPE + "= ?";
+			String sharingSelection = SocialContract.Sharing._ID_COMMUNITY + " = ?" +
+									" AND " + SocialContract.Sharing.TYPE + " = ?";
 
 			String[] sharingSelectionArgs = new String[] 
-					{selectedTeamId, 						// For the selected CIS ("0" if own services)
+					{String.valueOf (selectedTeamId),		// For the selected CIS (0 if own services)
 					serviceType};							// Retrieve services of that type
 	
 			Cursor sharingCursor;
@@ -287,16 +298,14 @@ public class ServiceListActivity extends ListActivity {
 			while (sharingCursor.moveToNext()) {
 				if (first) {
 					first = false;
-					servicesSelection = SocialContract.Services._ID + "= ?";
-//TODO: upgrade to new API when available. _ID_SERVICE should be replace by GLOBAL_ID for service
-					servicesSelectionArgs.add (sharingCursor.getString(
-									(sharingCursor.getColumnIndex(SocialContract.Sharing._ID_SERVICE))));
+					servicesSelection = SocialContract.Services._ID + " = ?";
+					servicesSelectionArgs.add (String.valueOf (sharingCursor.getLong(
+									(sharingCursor.getColumnIndex(SocialContract.Sharing._ID_SERVICE)))));
 				} else {
 					servicesSelection = servicesSelection + 
-										" OR " +  SocialContract.Services._ID + "= ?";
-//TODO: upgrade to new API when available. _ID_SERVICE should be replace by GLOBAL_ID for service
-					servicesSelectionArgs.add (sharingCursor.getString(
-							(sharingCursor.getColumnIndex(SocialContract.Sharing._ID_SERVICE))));
+										" OR " +  SocialContract.Services._ID + " = ?";
+					servicesSelectionArgs.add (String.valueOf (sharingCursor.getLong(
+							(sharingCursor.getColumnIndex(SocialContract.Sharing._ID_SERVICE)))));
 				}
 			}
 			
@@ -506,5 +515,89 @@ public class ServiceListActivity extends ListActivity {
 	        AlertDialog alert = alertBuilder.create();
 	        alert.show();	
 		}
+
+/**
+ * testSharing gets all services in the sharing table
+ */
+	public void testSharing (Context cxt, ContentResolver resolver) {
+		Uri sharingUri = SocialContract.Sharing.CONTENT_URI;			
+		Cursor testCursor; 
+	
+		String[] sharingProjection = new String[] {			// Retrieve all entries in table
+				SocialContract.Sharing._ID,
+				SocialContract.Sharing.GLOBAL_ID,
+				SocialContract.Sharing._ID_COMMUNITY,
+				SocialContract.Sharing._ID_OWNER,
+				SocialContract.Sharing._ID_SERVICE,
+//				SocialContract.Sharing.DESCRIPTION,
+				SocialContract.Sharing.TYPE,
+//				SocialContract.Sharing.ACCOUNT_NAME,
+//				SocialContract.Sharing.ACCOUNT_TYPE,
+//				SocialContract.Sharing.CREATION_DATE,				
+//				SocialContract.Sharing.DELETED,
+//				SocialContract.Sharing.DIRTY,
+//				SocialContract.Sharing.LAST_MODIFIED_DATE
+				};
+	
+		String sharingSelection = null;
+	
+		String[] sharingSelectionArgs = null;									// Onøy care about fields which are not deleted
+				
+		try {
+			testCursor= resolver.query(sharingUri, sharingProjection, null, null, null);
+		} catch (Exception e) {
+			return;
+		}
+			
+		if (testCursor == null) {
+			return;
+		}
+
+		int myCount = testCursor.getCount();
+		
+		if (testCursor.getCount() == 0) {
+			return;
+		}		
+		
+		int i =0;
+		
+		while (testCursor.moveToNext()) {
+			
+			long s01Id = testCursor.getLong(testCursor
+					.getColumnIndex(SocialContract.Sharing._ID));
+			String s02GlobalId = testCursor.getString(testCursor
+					.getColumnIndex(SocialContract.Sharing.GLOBAL_ID));
+			long s03IdCommunity = testCursor.getLong(testCursor
+					.getColumnIndex(SocialContract.Sharing._ID_COMMUNITY));
+			long s04IdOwner = testCursor.getLong(testCursor
+					.getColumnIndex(SocialContract.Sharing._ID_OWNER));
+			long s05IdService = testCursor.getLong(testCursor
+					.getColumnIndex(SocialContract.Sharing._ID_SERVICE));
+//			String s06Desc = testCursor.getString(testCursor
+//					.getColumnIndex(SocialContract.Sharing.DESCRIPTION));
+			String s07TYPE = testCursor.getString(testCursor
+					.getColumnIndex(SocialContract.Sharing.TYPE));
+//			String s08AccountName = testCursor.getString(testCursor
+//					.getColumnIndex(SocialContract.Sharing.ACCOUNT_NAME));
+//			String s09AccountType = testCursor.getString(testCursor
+//					.getColumnIndex(SocialContract.Sharing.ACCOUNT_TYPE));
+//			String s10CreationDate = testCursor.getString(testCursor
+//					.getColumnIndex(SocialContract.Sharing.CREATION_DATE));
+//			String s11Deleted = testCursor.getString(testCursor
+//					.getColumnIndex(SocialContract.Sharing.DELETED));
+//			String s12Dirty = testCursor.getString(testCursor
+//					.getColumnIndex(SocialContract.Sharing.DIRTY));
+//			String s13Last = testCursor.getString(testCursor
+//					.getColumnIndex(SocialContract.Sharing.LAST_MODIFIED_DATE));
+
+			String s14Service = "ID: " + s01Id + " GLOBAL_ID " + s02GlobalId + " CIS_ID: " + s03IdCommunity + " OWNNER_ID: " + s04IdOwner
+								+ " SERVICE_ID: " + s05IdService + " TYPE: " + s07TYPE + " ";
+			
+			i ++;
+			
+		}
+		
+		return;
+	}
 
 }

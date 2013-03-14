@@ -183,11 +183,13 @@ public class FeedListActivity extends ListActivity implements OnClickListener{
 		};		
 
 		String communityActivitySelection = SocialContract.CommunityActivity._ID_FEED_OWNER + "= ?";
-		String[] communityActivitySelectionArgs = new String[] {iDisasterApplication.getInstance().
-														selectedTeam.id};			// The feed belongs to the CIS
+		String[] communityActivitySelectionArgs = new String[] {String.valueOf (iDisasterApplication.getInstance().
+														selectedTeam.id)};			// The feed belongs to the CIS
 
 //TODO: Classify according to date
-		String communityActivitysortOrder = null;
+//		String communityActivitysortOrder = null;
+		String communityActivitysortOrder = SocialContract.CommunityActivity.LAST_MODIFIED_DATE 
+				+ " DESC";	
 
 		try {
 			feedCursor = resolver.query(communityActivityUri, communityActivityProjection,
@@ -223,7 +225,7 @@ public class FeedListActivity extends ListActivity implements OnClickListener{
 				while (feedCursor.moveToNext()) {
 					feeds++;
 					
-					SocialEntity actor = new SocialEntity (feedCursor.getString(
+					SocialEntity actor = new SocialEntity (feedCursor.getString (
 							(feedCursor.getColumnIndex(SocialContract.CommunityActivity.ACTOR))));
 					
 					String displayName = actor.getEntityName (getContentResolver ());
@@ -244,12 +246,15 @@ public class FeedListActivity extends ListActivity implements OnClickListener{
 					} else {													// service command						
 						displayName = displayName + " " + v + " " +
 								feedCursor.getString(feedCursor.getColumnIndex(SocialContract.CommunityActivity.OBJECT));
-						String t = feedCursor.getString(feedCursor
-								.getColumnIndex(SocialContract.CommunityActivity.TARGET));
-						if (!(t.equals (iDisasterApplication.getInstance().TARGET_ALL))) { // only add Target if not ALL
-							SocialEntity target = new SocialEntity (t);
-							displayName = displayName + " => " + target.getEntityName  (getContentResolver ());
-						}						
+//TODO: consider other services than the Jacket
+						displayName = displayName + " iJacket";
+						
+//						String t = feedCursor.getString(feedCursor
+//								.getColumnIndex(SocialContract.CommunityActivity.TARGET));
+//						if (!(t.equals (iDisasterApplication.getInstance().TARGET_ALL))) { // only add Target if not ALL
+//							SocialEntity target = new SocialEntity (t);
+//							displayName = displayName + " => " + target.getEntityName  (getContentResolver ());
+//						}						
 					}
 					
 					feedList.add (displayName);

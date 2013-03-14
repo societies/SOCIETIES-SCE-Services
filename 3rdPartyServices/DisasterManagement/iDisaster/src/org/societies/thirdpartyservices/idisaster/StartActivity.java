@@ -45,6 +45,7 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.societies.android.api.cis.SocialContract;
 import org.societies.thirdpartyservices.idisaster.R;
 import org.societies.thirdpartyservices.idisaster.data.ThirdPartyService;
 
@@ -107,7 +108,7 @@ public class StartActivity extends Activity implements OnClickListener {
 
 			// Check whether or nor SocialProvider is installed
 			socialProviderInstalled = new ThirdPartyService ("")
-						.serviceInstalled (this,"org.societies.android.platform");
+						.serviceInstalled (this,"org.societies.android.platform").equals( SocialContract.ServiceConstants.SERVICE_INSTALLED);
 			if (!socialProviderInstalled) {
 				showQueryExceptionDialog (										// Show exception and terminate
 						getString(R.string.dialogSocialProviderException));
@@ -117,7 +118,7 @@ public class StartActivity extends Activity implements OnClickListener {
 			} else {		// SocialProvider is installed
 
 				// Get the identity for the user
-				String userQueryCode = iDisasterApplication.getInstance().checkUserIdentity(this);
+				String userQueryCode = iDisasterApplication.getInstance().checkUserIdentity (this);
 				
 				if (userQueryCode.equals(iDisasterApplication.getInstance().QUERY_SUCCESS)) {	// User is identified
 					startView.setText(getString(R.string.startInfoLogged) 

@@ -28,6 +28,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import org.societies.android.api.cis.SocialContract;
+import org.societies.android.api.cis.SupportedAccountTypes;
 import org.societies.thirdpartyservices.idisaster.R;
 
 import android.app.Activity;
@@ -146,7 +147,7 @@ public class DisasterCreateActivity extends Activity implements OnClickListener 
 
 		// Fields for synchronization with box.com
 		teamValues.put(SocialContract.Communities.ACCOUNT_NAME, iDisasterApplication.getInstance().me.userName);
-		teamValues.put(SocialContract.Communities.ACCOUNT_TYPE, "com.box");
+		teamValues.put(SocialContract.Communities.ACCOUNT_TYPE, SupportedAccountTypes.COM_BOX);
 		teamValues.put(SocialContract.Communities.DIRTY, 1);
 		
 		try {

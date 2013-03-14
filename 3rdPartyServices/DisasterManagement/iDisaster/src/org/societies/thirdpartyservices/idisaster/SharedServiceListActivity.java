@@ -60,7 +60,7 @@ import org.societies.thirdpartyservices.idisaster.data.ThirdPartyService;
 
 public class SharedServiceListActivity extends ListActivity {
 
-	private String memberId;
+	private long memberId;
 	private String memberName;
 	
 	private ContentResolver resolver;
@@ -83,7 +83,7 @@ public class SharedServiceListActivity extends ListActivity {
     	super.onCreate(savedInstanceState);
     	
 		Intent intent= getIntent(); 							// Get the intent that created activity		
-		memberId = intent.getStringExtra("MEMBER_ID");			// Retrieve first parameter (id of member sharing services)
+		memberId = intent.getLongExtra("MEMBER_ID", 0);			// Retrieve first parameter (id of member sharing services)
 		memberName = intent.getStringExtra("MEMBER_NAME");		// Retrieve second parameter (name of member sharing services)
     	
     	setContentView (R.layout.shared_service_list_layout);    	
@@ -194,12 +194,15 @@ public class SharedServiceListActivity extends ListActivity {
 
 			String sharingSelection = SocialContract.Sharing._ID_COMMUNITY + "= ?" +									
 									"AND " + SocialContract.Sharing._ID_OWNER + "= ?" +
-									"AND " + SocialContract.Sharing.TYPE + "= ?";
+									"AND " + SocialContract.Sharing.TYPE + "= ?" +
+									"AND " + SocialContract.Sharing.DELETED + "<> ?";
 
 			String[] sharingSelectionArgs = new String[] 
-					{iDisasterApplication.getInstance().selectedTeam.id,	// For the selected CIS
-					memberId,												// For the member
-					iDisasterApplication.getInstance().SERVICE_SHARED};		// Retrieve shared services
+					{String.valueOf (iDisasterApplication.getInstance().selectedTeam.id),	// For the selected CIS
+					String.valueOf (memberId),												// For the member who is sharing
+					SocialContract.ServiceConstants.SERVICE_SHARED,							// Retrieve shared services
+					"1"																		// Delete pending
+					};
 	
 			Cursor sharingCursor;
 			try {
@@ -211,7 +214,7 @@ public class SharedServiceListActivity extends ListActivity {
 
 			}
 
-			// Step 2: retrieve the services with the GLOBAL_ID_SERVICE retrieved above
+			// Step 2: retrieve the services with the _ID_SERVICE retrieved above
 			if (sharingCursor == null) {			// No cursor was set - should not happen?
 				iDisasterApplication.getInstance().debug (2, "sharingCursor was not set to any value");
 				return iDisasterApplication.getInstance().QUERY_EMPTY;
@@ -237,13 +240,13 @@ public class SharedServiceListActivity extends ListActivity {
 				if (first) {
 					first = false;
 					servicesSelection = SocialContract.Services._ID + "= ?";
-					servicesSelectionArgs.add (sharingCursor.getString(
-									(sharingCursor.getColumnIndex(SocialContract.Sharing._ID_SERVICE))));
+					servicesSelectionArgs.add (String.valueOf (sharingCursor.getLong(
+									(sharingCursor.getColumnIndex(SocialContract.Sharing._ID_SERVICE)))));
 				} else {
 					servicesSelection = servicesSelection + 
 										" OR " +  SocialContract.Services._ID + "= ?";
-					servicesSelectionArgs.add (sharingCursor.getString(
-							(sharingCursor.getColumnIndex(SocialContract.Sharing._ID_SERVICE))));
+					servicesSelectionArgs.add (String.valueOf (sharingCursor.getLong(
+							(sharingCursor.getColumnIndex(SocialContract.Sharing._ID_SERVICE)))));
 				}
 			}
 						
@@ -313,26 +316,22 @@ public class SharedServiceListActivity extends ListActivity {
 				(clientServiceGlobalId);
 		
 		// Retrieve client service information from SocialProvider
-		if (!(clientService.getServiceInformation (this, getContentResolver ())
+		if (!(clientService.getServiceInformation (this, getContentResolver (), 
+						iDisasterApplication.getInstance().me.peopleId,
+						iDisasterApplication.getInstance().selectedTeam.id)
 				.equals(iDisasterApplication.getInstance().QUERY_SUCCESS))) {
 			showQueryExceptionDialog ();	// Exception: Display dialog and terminates activity
 			return;
 		}
 		
-		if (!(clientService.checkServiceInstallStatus (this, getContentResolver())
-				.equals (iDisasterApplication.getInstance().UPDATE_SUCCESS))) {
-			showQueryExceptionDialog ();	// Exception: Display dialog and terminates activity
-			return;
-		}
-		
-		if (!(clientService.serviceInstallStatus									// If the service is NOT installed on the device
-				.equals(iDisasterApplication.getInstance().SERVICE_INSTALLED))) {
+		if (!clientService.serviceInstallStatus										// If the service is NOT installed on the device
+				.equals(SocialContract.ServiceConstants.SERVICE_INSTALLED)) {
 			showInstallDialog (selectedServiceName);
-
 			
 		} else {																	// If the service is installed on the device
-// TODO: Add intent parameters
-			if (clientService.launchApplication (this)									// Launch service
+			if (clientService.launchApplication (this , 								// Launch service
+								iDisasterApplication.getInstance().selectedTeam.id,		// team where service is shared
+								memberId)												// member sharing the service
 					.equals (iDisasterApplication.getInstance().LAUNCH_EXCEPTION)) {				// Launch has failed
 				showServiceExceptionDialog			// Launch exception: display dialog
 					(getString(R.string.dialogServiceLaunchException));
@@ -355,8 +354,9 @@ public class SharedServiceListActivity extends ListActivity {
   					public void onClick(DialogInterface dialog, int id) {
   						// Start ServiceDetails activity
   		     			Intent intent = new Intent(SharedServiceListActivity.this, ServiceDetailsActivity.class);
-           				intent.putExtra(ServiceDetailsActivity.INTENT_SERVICE_DETAILS_REQUEST_CONTEXT, iDisasterApplication.getInstance().SERVICE_SHARED);
+           				intent.putExtra(ServiceDetailsActivity.INTENT_SERVICE_DETAILS_REQUEST_CONTEXT, SocialContract.ServiceConstants.SERVICE_SHARED);
         				intent.putExtra(ServiceDetailsActivity.INTENT_SERVICE_DETAILS_GLOBAL_ID_SERVICE, clientServiceGlobalId);
+        				intent.putExtra(ServiceDetailsActivity.INTENT_SERVICE_DETAILS_MEMBER_ID, memberId);
                 		startActivity(intent);
   						return;
   					}

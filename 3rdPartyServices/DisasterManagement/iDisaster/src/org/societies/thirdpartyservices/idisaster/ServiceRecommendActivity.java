@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Date;
 
 import org.societies.android.api.cis.SocialContract;
+import org.societies.android.api.cis.SupportedAccountTypes;
 import org.societies.thirdpartyservices.idisaster.R;
 import org.societies.thirdpartyservices.idisaster.data.SocialActivity;
 
@@ -196,7 +197,9 @@ public class ServiceRecommendActivity extends ListActivity implements OnClickLis
 			serviceCursor.close();		// "close" releases data but does not set to null
 			serviceCursor = null;
 		}
-    		
+		
+//		testServices();
+		
     	Uri serviceUri = SocialContract.Services.CONTENT_URI;
     					
     	String[] serviceProjection = new String[] {
@@ -207,13 +210,17 @@ public class ServiceRecommendActivity extends ListActivity implements OnClickLis
     				SocialContract.Services.TYPE,
     				SocialContract.Services.DESCRIPTION};		// Description is used later on when the user selects services 
 
-// TODO: use APP_TYPE after correction of Populate
 //		String serviceSelection = SocialContract.Services.APP_TYPE + "<> ?";
-		String serviceSelection = SocialContract.Services.TYPE + "<> ?";
+    	
+//		String serviceSelection = SocialContract.Services.TYPE + "<> ?";
+//		
+//		String[] serviceSelectionArgs = new String[] {
+//					SocialContract.ServiceConstants.SERVICE_TYPE_CLIENT };	// Ignore services of type CLIENT
+
+		String serviceSelection = null;
 		
-		String[] serviceSelectionArgs = new String[] {
-					iDisasterApplication.getInstance().SERVICE_TYPE_CLIENT };	// Ignore services of type CLIENT
-				
+		String[] serviceSelectionArgs = null;	
+
     	try {
     		serviceCursor = resolver.query(serviceUri, serviceProjection,
     				serviceSelection, serviceSelectionArgs, null /* sortOrder*/);			
@@ -326,22 +333,18 @@ public class ServiceRecommendActivity extends ListActivity implements OnClickLis
 				ContentValues sharingValues = new ContentValues ();
 
 				sharingValues.put(SocialContract.Sharing._ID_SERVICE,		// Id of the service to be recommended
-						serviceCursor.getString(serviceCursor.getColumnIndex(SocialContract.Services._ID)));
+						serviceCursor.getLong(serviceCursor.getColumnIndex(SocialContract.Services._ID)));
 				sharingValues.put(SocialContract.Sharing._ID_OWNER,			// Member recommending the service
 						iDisasterApplication.getInstance().me.peopleId);		
 				sharingValues.put(SocialContract.Sharing._ID_COMMUNITY,	// Recommend service in the selected team
 									iDisasterApplication.getInstance().selectedTeam.id);
-				String s = iDisasterApplication.getInstance().selectedTeam.id;
-				sharingValues.put(SocialContract.Sharing.TYPE, iDisasterApplication.getInstance().SERVICE_RECOMMENDED);
+				sharingValues.put(SocialContract.Sharing.TYPE, SocialContract.ServiceConstants.SERVICE_RECOMMENDED);
 				sharingValues.put(SocialContract.Sharing.DESCRIPTION, "");
 
-// Field needed temporarily?
-				sharingValues.put(SocialContract.Sharing.GLOBAL_ID,		// Global id of the service to be recommended
-						serviceCursor.getString(serviceCursor.getColumnIndex(SocialContract.Services.GLOBAL_ID)));				
 // Fields for synchronization with box.com
-				sharingValues.put(SocialContract.CommunityActivity.ACCOUNT_NAME, iDisasterApplication.getInstance().me.userName);
-				sharingValues.put(SocialContract.CommunityActivity.ACCOUNT_TYPE, "com.box");
-				sharingValues.put(SocialContract.CommunityActivity.DIRTY, 1);
+				sharingValues.put(SocialContract.Sharing.ACCOUNT_NAME, iDisasterApplication.getInstance().me.userName);
+				sharingValues.put(SocialContract.Sharing.ACCOUNT_TYPE, SupportedAccountTypes.COM_BOX);
+				sharingValues.put(SocialContract.Sharing.DIRTY, 1);
 				
 				try {
 // The Uri value returned is not used.
@@ -369,7 +372,7 @@ public class ServiceRecommendActivity extends ListActivity implements OnClickLis
 // TODO: what should be set here? local or global id?
 					iDisasterApplication.getInstance().selectedTeam.id,		// Feed of the the selected team
 //TODO: what should be set here? global or local id? - local id seems to not work		
-					iDisasterApplication.getInstance().me.peopleGlobalId,	// Me
+					iDisasterApplication.getInstance().me.userName,			// Me
 					iDisasterApplication.getInstance().VERB_TEXT,			// Activity intent: Simple text
 					recommendedServices,												// List of new members
 					iDisasterApplication.getInstance().TARGET_ALL);			// Recipient for Activity
@@ -401,4 +404,91 @@ public class ServiceRecommendActivity extends ListActivity implements OnClickLis
         alert.show();	
 	}
 
+/**
+ * testServices retrieves the list of services in the global registry.
+ */
+    private void testServices () {
+    	
+		Cursor testCursor; 
+    		
+    	Uri serviceUri = SocialContract.Services.CONTENT_URI;
+    					
+    	String[] serviceProjection = new String[] {
+    				SocialContract.Services._ID,
+    				SocialContract.Services.GLOBAL_ID,
+					SocialContract.Services._ID_OWNER,
+	    			SocialContract.Services.APP_TYPE,
+	    			SocialContract.Services.AVAILABLE,
+	    			SocialContract.Services.CONFIG,
+	    			SocialContract.Services.DEPENDENCY,
+    				SocialContract.Services.DESCRIPTION,
+    			    SocialContract.Services.NAME,
+    				SocialContract.Services.TYPE,
+	    			SocialContract.Services.URL,
+    				SocialContract.Services.ACCOUNT_NAME,
+    				SocialContract.Services.ACCOUNT_TYPE,
+    				SocialContract.Services.CREATION_DATE,				
+    				SocialContract.Services.DELETED,
+    				SocialContract.Services.DIRTY,
+    				SocialContract.Services.LAST_MODIFIED_DATE
+    	
+    	};		// Description is used later on when the user selects services 
+
+				
+    	try {
+    		testCursor = resolver.query(serviceUri, serviceProjection, null, null, null /* sortOrder*/);			
+    		} catch (Exception e) {
+    			return ;
+    		}
+
+		int myCount = testCursor.getCount();
+		
+		if (testCursor.getCount() == 0) {
+			return;
+		}		
+		
+		int i =0;
+		
+		while (testCursor.moveToNext()) {
+			
+			long s01Id = testCursor.getLong(testCursor
+					.getColumnIndex(SocialContract.Services._ID));
+			String s02GlobalId = testCursor.getString(testCursor
+					.getColumnIndex(SocialContract.Services.GLOBAL_ID));
+			long s03IdOwner = testCursor.getLong(testCursor
+					.getColumnIndex(SocialContract.Services._ID_OWNER));
+			String s04IdAppType = testCursor.getString(testCursor
+					.getColumnIndex(SocialContract.Services.APP_TYPE));
+			String s05IdAvailable = testCursor.getString(testCursor
+					.getColumnIndex(SocialContract.Services.AVAILABLE));
+			String s06IdConfig = testCursor.getString(testCursor
+					.getColumnIndex(SocialContract.Services.CONFIG));
+			String s07IdDeependencyAvailable = testCursor.getString(testCursor
+					.getColumnIndex(SocialContract.Services.DEPENDENCY));
+			String s08Desc = testCursor.getString(testCursor
+					.getColumnIndex(SocialContract.Services.DESCRIPTION));
+			String s09NAme = testCursor.getString(testCursor
+					.getColumnIndex(SocialContract.Services.NAME));
+			
+			String s10Type = testCursor.getString(testCursor
+					.getColumnIndex(SocialContract.Services.TYPE));
+			String s11URL = testCursor.getString(testCursor
+					.getColumnIndex(SocialContract.Services.URL));			
+			String s12AccountName = testCursor.getString(testCursor
+					.getColumnIndex(SocialContract.Services.ACCOUNT_NAME));
+			String s13AccountType = testCursor.getString(testCursor
+					.getColumnIndex(SocialContract.Services.ACCOUNT_TYPE));
+			String s14CreationDate = testCursor.getString(testCursor
+					.getColumnIndex(SocialContract.Services.CREATION_DATE));
+			String s15Deleted = testCursor.getString(testCursor
+					.getColumnIndex(SocialContract.Services.DELETED));
+			String s16Dirty = testCursor.getString(testCursor
+					.getColumnIndex(SocialContract.Services.DIRTY));
+			String s17Last = testCursor.getString(testCursor
+					.getColumnIndex(SocialContract.Services.LAST_MODIFIED_DATE));
+		
+			i ++;			
+		}
+		return;
+    	}
 }

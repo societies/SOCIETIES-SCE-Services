@@ -108,9 +108,9 @@ public class MemberListActivity extends ListActivity {
     					memberCursor.moveToPosition(position);
     					
     	     			Intent intent = new Intent(MemberListActivity.this, SharedServiceListActivity.class);
-     					String memberGlobalId = memberCursor.getString(memberCursor
+     					long memberId = memberCursor.getLong (memberCursor
     							.getColumnIndex(SocialContract.People._ID));
-           				intent.putExtra("MEMBER_ID", memberGlobalId);       					
+           				intent.putExtra("MEMBER_ID", memberId);       					
        					String memberName =  memberCursor.getString(memberCursor
     							.getColumnIndex(SocialContract.People.NAME));
            				intent.putExtra("MEMBER_NAME", memberName);       					
@@ -189,7 +189,8 @@ public class MemberListActivity extends ListActivity {
 				SocialContract.Membership._ID_MEMBER};
 
 		String membershipSelection = SocialContract.Membership._ID_COMMUNITY + "= ?";
-		String[] membershipSelectionArgs = new String[] {iDisasterApplication.getInstance().selectedTeam.id};	// For the selected CIS
+		String[] membershipSelectionArgs = new String[] 
+						{String.valueOf (iDisasterApplication.getInstance().selectedTeam.id)};	// For the selected CIS
 	
 		Cursor membershipCursor;
 		try {
@@ -228,14 +229,14 @@ public class MemberListActivity extends ListActivity {
 			if (first) {
 				first = false;
 				membersSelection = SocialContract.People._ID + "= ?";
-				membersSelectionArgs.add (membershipCursor.getString(
-								(membershipCursor.getColumnIndex(SocialContract.Membership._ID_MEMBER))));
+				membersSelectionArgs.add (String.valueOf( membershipCursor.getLong(
+								(membershipCursor.getColumnIndex(SocialContract.Membership._ID_MEMBER)))));
 			} 
 			else {
 				membersSelection = membersSelection + " OR " +
 											   SocialContract.People._ID + "= ?";
-				membersSelectionArgs.add (membershipCursor.getString(
-						(membershipCursor.getColumnIndex(SocialContract.Membership._ID_MEMBER))));
+				membersSelectionArgs.add (String.valueOf( membershipCursor.getLong(
+						(membershipCursor.getColumnIndex(SocialContract.Membership._ID_MEMBER)))));
 			}
 		}
 		

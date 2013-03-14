@@ -109,5 +109,7 @@
     <string name="toastMemberDescription">Please enter keywords.</string>
     <string name="toastServiceName">Please enter a service name.</string>
     <string name="toastServiceDescription">Please enter keywords.</string>
+    <string name="toastServiceDetailsDownload">Please wait while service is downloaded.</string>
+    
     
 </resources>
