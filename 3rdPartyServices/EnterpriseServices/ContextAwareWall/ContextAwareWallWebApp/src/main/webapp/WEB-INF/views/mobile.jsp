@@ -211,7 +211,7 @@ var cis = dojo.byId('cisBox').value;
 </script>
     </head>
  
- <body onload="initialUserDetails();" onunload="window.clearInterval(myInterval)">
+<body onload="initialUserDetails();" onunload="window.clearInterval(myInterval)">
  
   <!-- the view or "page"; select it as the "home" screen -->
 <div id="settings" dojoType="dojox.mobile.View" selected="true">
