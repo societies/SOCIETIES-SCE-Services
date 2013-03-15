@@ -62,9 +62,7 @@ public class ExternalCtxBrokerConnector extends Observable {
 	@Autowired(required=true)
 	public ExternalCtxBrokerConnector(ICtxBroker externalCtxBroker, ICisManager cisManager, IContextAware3pService ca3pService) throws Exception {
 
-		LOG.info("*** " + this.getClass() + " instantiated");
-
-		LOG.info("*** ca3pService : " + this.ca3pService + " instantiated");
+		LOG.info("*** ca3pService : " + ca3pService + " instantiated");
 
 		this.ctxBroker = externalCtxBroker;
 		this.ca3pService = ca3pService;
@@ -81,7 +79,6 @@ public class ExternalCtxBrokerConnector extends Observable {
 		try {
 			return this.ca3pService.retrieveLookupMembersCtxAttributes(cisID);
 		} catch (InvalidFormatException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		//TODO: FIX THIS!
@@ -151,13 +148,10 @@ public class ExternalCtxBrokerConnector extends Observable {
 				}
 
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (ExecutionException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (CtxException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			String [] response = new String [] {ctxAttr.getType(), ctxAttr.getStringValue(), person};
