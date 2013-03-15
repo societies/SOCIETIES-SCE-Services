@@ -72,11 +72,14 @@ public class ContextAnalyzer implements IContextReasoning {
 			setInterests.add(interest);
 			//Check if interest is null
 			System.out.println("Interest: "+interest);
-			Document doc = alchemyObj.TextGetRankedConcepts(interest);
-			if (doc != null) {
-				NodeList result = doc.getElementsByTagName("text");
-				for (int i = 0; i < result.getLength(); i++) {
-					setInterests.add(result.item(i).getTextContent().toLowerCase());
+			//Check if word has at least 5 letters
+			if (interest.length() > 5){
+				Document doc = alchemyObj.TextGetRankedConcepts(interest);
+				if (doc != null) {
+					NodeList result = doc.getElementsByTagName("text");
+					for (int i = 0; i < result.getLength(); i++) {
+						setInterests.add(result.item(i).getTextContent().toLowerCase());
+					}
 				}
 			}
 		}
@@ -95,11 +98,14 @@ public class ContextAnalyzer implements IContextReasoning {
 			setInterests.add(interest);
 			//Check if interest is null
 			System.out.println("Interest: "+interest);
-			Document doc = alchemyObj.TextGetCategory(interest);
-			if (doc != null) {
-				NodeList result = doc.getElementsByTagName("text");
-				for (int i = 0; i < result.getLength(); i++) {
-					setInterests.add(result.item(i).getTextContent().toLowerCase());
+			//Check if word has at least 5 letters
+			if (interest.length() > 5){
+				Document doc = alchemyObj.TextGetCategory(interest);
+				if (doc != null) {
+					NodeList result = doc.getElementsByTagName("text");
+					for (int i = 0; i < result.getLength(); i++) {
+						setInterests.add(result.item(i).getTextContent().toLowerCase());
+					}
 				}
 			}
 		}

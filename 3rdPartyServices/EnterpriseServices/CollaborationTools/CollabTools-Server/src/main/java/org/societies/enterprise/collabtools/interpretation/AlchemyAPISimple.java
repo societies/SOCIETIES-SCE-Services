@@ -66,8 +66,8 @@ public class AlchemyAPISimple {
 	}
 
 	private Document TextGetRankedConcepts(String text,	AlchemyAPIConceptParams params) throws IOException, SAXException,
-			ParserConfigurationException, XPathExpressionException {		
-		CheckText(text);		
+	ParserConfigurationException, XPathExpressionException {		
+		CheckText(text);
 		params.setText(text);		
 		return POST("TextGetRankedConcepts", "text", params);
 	}
@@ -106,7 +106,7 @@ public class AlchemyAPISimple {
 		ostream.close();
 
 		return doRequest(handle, params.getOutputMode());
-			}
+	}
 
 	private Document doRequest(HttpURLConnection handle, String outputMode)
 			throws IOException, SAXException,
@@ -126,7 +126,7 @@ public class AlchemyAPISimple {
 				String statusInfoStr = getNodeValue(factory, doc, "/results/statusInfo/text()");
 				if (null != statusInfoStr && statusInfoStr.length() > 0) {
 					return null;
-//					throw new IOException("Error making API call: " + statusInfoStr + '.');
+					//					throw new IOException("Error making API call: " + statusInfoStr + '.');
 				}
 
 				throw new IOException("Error making API call: " + statusStr + '.');
@@ -144,7 +144,7 @@ public class AlchemyAPISimple {
 		}
 
 		return doc;
-			}
+	}
 
 	private String getNodeValue(XPathFactory factory, Document doc, String xpathStr)
 			throws XPathExpressionException
@@ -162,8 +162,9 @@ public class AlchemyAPISimple {
 
 
 	private void CheckText(String text) {
-		if (null == text || text.length() < 5)
-			throw new IllegalArgumentException("Enter some text to analyze. The text must have at least 5 words");		
+		if (null == text || text.length() < 5) {
+			throw new IllegalArgumentException("Enter some text to analyze. The text must have at least 5 words");
+		}
 	}
 
 }

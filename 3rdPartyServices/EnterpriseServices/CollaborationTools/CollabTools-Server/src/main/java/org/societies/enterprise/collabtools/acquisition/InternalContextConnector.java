@@ -35,7 +35,7 @@ import org.societies.context.externalBrokerConnector.ExternalCtxBrokerConnector;
 import org.societies.enterprise.collabtools.api.IContextConnector;
 
 /**
- * Describe your class here...
+ * Connector for Context Broker
  *
  * @author cviana
  *
@@ -56,7 +56,6 @@ public class InternalContextConnector implements IContextConnector {
 	public InternalContextConnector(ContextSubscriber contextSubscriber) {
 		this.contextSubscriber = contextSubscriber;
 		this.connector.addObserver(this.contextSubscriber);
-//		this.connector.testEvent();
 	}
 
 	/**
@@ -65,7 +64,7 @@ public class InternalContextConnector implements IContextConnector {
 	public HashMap<String, HashMap<String, String[]>> getInitialContext(Object cisID) {
 		HashMap<String, HashMap<String, String[]>> persons = connector.retrieveLookupMembersCtxAttributes(cisID);
 		if (persons.isEmpty())
-			throw new IllegalArgumentException("HashMap pf persons cannot be null! ");
+			throw new NullPointerException("Community list persons cannot be null! ");
 		return persons;
 	}
 	

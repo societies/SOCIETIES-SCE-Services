@@ -274,7 +274,7 @@ public class TestUtils {
 			SAXException, ParserConfigurationException {
 		ContextAnalyzer ctxRsn = new ContextAnalyzer(personRepository);
 		ctxRsn.incrementInterestsByConcept();
-//		ctxRsn.incrementInterestsByCategory();
+		ctxRsn.incrementInterestsByCategory();
 	}
 	
 //	private static void clearDirectory(File path)

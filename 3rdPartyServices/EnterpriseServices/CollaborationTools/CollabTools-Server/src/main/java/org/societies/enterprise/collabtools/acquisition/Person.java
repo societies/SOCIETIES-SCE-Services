@@ -116,7 +116,6 @@ public class Person extends Observable
 	public void setLongTermCtx(final String property, String[] values){
 		Index<Node> index = underlyingNode.getGraphDatabase().index().forNodes("PersonNodes");
 		Transaction tx = underlyingNode.getGraphDatabase().beginTx();
-		System.out.println(Arrays.toString(values));
 
 		//Cleaning array from null and blank words 
 		List<String> list = new ArrayList<String>();
