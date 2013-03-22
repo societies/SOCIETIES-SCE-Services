@@ -47,7 +47,7 @@ import org.societies.enterprise.collabtools.acquisition.Person;
 import org.societies.enterprise.collabtools.acquisition.PersonRepository;
 import org.societies.enterprise.collabtools.acquisition.ShortTermCtxTypes;
 
-public class SocnetTest
+public class PersonTest
 {
     private static final Random r = new Random( System.currentTimeMillis() );
     private static GraphDatabaseService graphDb;

@@ -117,24 +117,21 @@ public class ContextSubscriber implements IContextSubscriber, Observer
 	{
 		//Arrays values: [0]model type, [1]string ctx value, [2]person
 		String[] msg = (String[])arg;
-		logger.info("******************************* update event  ***************** " + msg[0]);
-		logger.info("******************************* update event  ***************** " + msg[1]);
-		logger.info("******************************* update event  ***************** " + msg[2]);
+		logger.info("******************* update event  Ctx type*************** " + msg[0]);
+		logger.info("******************* update event  Ctx value************** " + msg[1]);
+		logger.info("******************* update event  Person***************** " + msg[2]);
 	    Map<String, String> shortTermCtx = new HashMap<String, String>();
 	    String type = msg[0];
 	    String context = msg[1];
-	    Person individual = this.personRepository.getPersonByName(msg[2]);
+		Person individual = this.personRepository.getPersonByName(msg[2]);
 	    
-	    shortTermCtx.put(type, context);
-//
-//	    if (type == "locationSymbolic") {
-//	      shortTermCtx.put(individual.getLastStatus().getShortTermCtx(ShortTermCtxTypes.STATUS), context);
-//	      individual.addContextStatus(shortTermCtx, this.sessionRepository);
-//	    }
-//	    else if (type == "status") {
-//	      shortTermCtx.put(context, individual.getLastStatus().getShortTermCtx(ShortTermCtxTypes.LOCATION));
-//	      individual.addContextStatus(shortTermCtx, this.sessionRepository);
-//	    }
+	    if (type == "locationSymbolic") {
+	      shortTermCtx.put(ShortTermCtxTypes.LOCATION, context);
+	    }
+	    else {
+		    shortTermCtx.put(type, context);
+	    }
+	    individual.addContextStatus(shortTermCtx, this.sessionRepository);
 	}
 
 	private void registerForContextChanges(Object cisID) {
