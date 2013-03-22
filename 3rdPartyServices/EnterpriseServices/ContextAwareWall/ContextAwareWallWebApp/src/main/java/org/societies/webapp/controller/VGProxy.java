@@ -61,7 +61,6 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.util.ByteArrayBuffer;
-import org.jfree.util.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -106,7 +105,8 @@ public class VGProxy {
 	private static final Logger LOG = LoggerFactory.getLogger(VGProxy.class);
 	
 	//String SERVER_URL = "http://ta-proj02:9082/VG4SWeb/vg/message";
-	String SERVER_URL = "http://societies.local.macs.hw.ac.uk:9080/VG4SWeb/vg/message";
+	//String SERVER_URL = "http://societies.local.macs.hw.ac.uk:9080/VG4SWeb/vg/message";
+	//String SERVER_URL ="";
 	String MOCK_ENTITY = "";
 	boolean MOCK_ENTITY_ACTIVE = false;
 	
@@ -243,11 +243,6 @@ public class VGProxy {
 		MultipartFile multipartFile = request.getFile("uploadedfile");
 		String cisParam = request.getParameter("cis");
 		
-		if (cisParam == null || cisParam.length() ==0){
-			LOG.error(LOG_PREFIX+ "  couldn't upload file; cis parameter is empty or null");
-			return "";
-		}
-		
 		String tempBackgroundImageName="";
 		try {
 		
@@ -258,7 +253,7 @@ public class VGProxy {
 			String currentImageName = "";
 			String warningMsg = "";
 			synchronized (VGProxy.class) {
-				if (mBackgroundFile != null && mBackgroundFile.length > 0 && mCisOfImage != null && mCisOfImage.length() > 0 &&
+				if (backgroundFile != null && backgroundFile.length > 0 && cisParam != null && cisParam.length() > 0 &&
 					mCurrentZone != null && mCurrentZone.length() > 0 && tempBackgroundImageName != null && tempBackgroundImageName.length() > 0){
 				
 						mBackgroundFile = backgroundFile ;
@@ -271,8 +266,8 @@ public class VGProxy {
 				}else{
 					
 						warningMsg+= "Couldn't upload file to WAS; Parametes: file name: "+tempBackgroundImageName+", cis "+
-									mCisOfImage+", zone "+mCurrentZone+ ", file size ";
-						warningMsg+= (mBackgroundFile != null)?mBackgroundFile.length: " null";
+								cisParam+", zone "+mCurrentZone+ ", file size ";
+						warningMsg+= (backgroundFile != null)?backgroundFile.length: " null";
 									 
 				}
 			}
@@ -412,7 +407,7 @@ public class VGProxy {
 		try{
 			cisList = cisManager.getCisList();
 			if (cisList.isEmpty()){
-				cisList = fillCisObjectforTesting();
+				//cisList = fillCisObjectforTesting();
 			}
 			
 			JSONArray jsonArray = new JSONArray();
@@ -804,7 +799,14 @@ public class VGProxy {
 			}
 			
 			if (imageName.length() == 0){
-				LOG.info(LOG_PREFIX+ "  in 'GetBackgroundImageTask' ; image name from VG server is empty");
+				
+				synchronized (VGProxy.class) {
+					mBackgroundFileName = "";
+					mBackgroundFile = null;
+					mImagesInZonePool.put(cis+"_"+zoneId,mBackgroundFileName);
+				}
+				
+				LOG.info(LOG_PREFIX+ "  in 'GetBackgroundImageTask' ; image name from VG server is empty; going to reset 'mBackgroundFileName'");
 				return;
 			}else if (backgroundImageName.equals(imageName) && currentImageObject != null && currentImageObject.length > 0){
 				LOG.info(LOG_PREFIX+ "  in 'GetBackgroundImageTask' ; Image name in local virgo server equals image name on WAS - no need to update");
@@ -907,11 +909,11 @@ public class VGProxy {
 	public void setICisManager(ICisManager cisManager){
 		this.cisManager = cisManager;
 	}
-	
+	/*
 	public void setServerURL(String serverURL) {
 		this.SERVER_URL = serverURL;
 		
-	}
+	}*/
 	
 	public void setCommManager(ICommManager commManager){
 		this.commManager = commManager;

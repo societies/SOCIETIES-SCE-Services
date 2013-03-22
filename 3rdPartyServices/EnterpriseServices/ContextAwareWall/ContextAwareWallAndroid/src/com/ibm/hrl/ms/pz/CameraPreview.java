@@ -202,6 +202,9 @@ public class CameraPreview extends Activity {
 		});
 		
 		getMessagesTask();
+		
+		Map<String,ImageDetails> filesOnSD = SDHelper.readFileNamesInVgGallery();
+		mBackgroundImagesNames.putAll(filesOnSD);
 		 
 	}catch (Exception e) {
 		 Log.e("error", e.getMessage()+ " ; cause: "+e.getCause(), e);
@@ -250,7 +253,7 @@ public class CameraPreview extends Activity {
 			mCurrentPhotoPath = file.getAbsolutePath();
 			setBackgroundImageName(tempGeneratedImgName);
 			takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(file));
-			mCustomCameraView.onPauseMySurfaceView();
+			//mCustomCameraView.onPauseMySurfaceView();
 		} catch (IOException e) {
 			Log.e("error", e.getMessage()+ " ; cause: "+e.getCause(), e);
 			file = null;
@@ -267,7 +270,7 @@ public class CameraPreview extends Activity {
 		case ACTION_TAKE_PHOTO_B: {
 			if (resultCode == RESULT_OK) {
 				if (mCurrentPhotoPath != null) {
-					mCustomCameraView.onResumeMySurfaceView();
+					//mCustomCameraView.onResumeMySurfaceView();
 					File image = displayBackgroundImage(getLocalBackgroundImgName(),mCurrentPhotoPath,true,false);
 					DownloadUploadHelper dh = new DownloadUploadHelper();
 					dh.uploadImage(image, getLocalBackgroundImgName(), this.mCisId,mServerUrl);
@@ -714,7 +717,7 @@ public class CameraPreview extends Activity {
 					}
 						
 					
-					if (shouldUpdateBackgroundImage(imageNameServer, getLocalBackgroundImgName())){
+					if (shouldUpdateBackgroundImage(imageNameServer,getLocalBackgroundImgName() )){
 						ImageDetails imageDetails = null;
 						synchronized (mBackgroundImagesNames) {
 							imageDetails = mBackgroundImagesNames.get(imageNameServer);
@@ -729,8 +732,9 @@ public class CameraPreview extends Activity {
 						}
 		            }
 					
-					if (shouldHideBackgroundImage(imageNameServer)){
-		            	mBackGroundImageView.setVisibility(View.GONE);
+					if (shouldHideBackgroundImage(imageNameServer,getLocalBackgroundImgName())){
+		            	mBackGroundImageView.setImageResource(R.drawable.black);
+						
 		            	mBackgroundImgName = "";
 		        		/*mCustomCameraView.onPauseMySurfaceView();
 		        		mCustomCameraView.onResumeMySurfaceView();
@@ -747,8 +751,10 @@ public class CameraPreview extends Activity {
 			
 			
 
-			private boolean shouldHideBackgroundImage(String imageNameServer) {
-				if ( imageNameServer.length() == 0 && System.currentTimeMillis() - mBackgroundImageTakenTS > (1000*15)){
+			private boolean shouldHideBackgroundImage(String imageNameServer,String localImageName) {
+				if ( imageNameServer.length() == 0 && System.currentTimeMillis() - mBackgroundImageTakenTS > (1000*10)){
+					return true;
+				}else if (imageNameServer.length() > 0 && !imageNameServer.equals(localImageName)){
 					return true;
 				}
 				return false;
@@ -949,15 +955,5 @@ public class CameraPreview extends Activity {
 		return mBackgroundImgName;
 	}
 	
-	private class ImageDetails{
-		public String imageName;
-		public String imagePath;
-		public boolean downloaded;
-		
-		public ImageDetails(String imageName, String imagePath,boolean downloaded){
-			this.imagePath = imagePath;
-			this.imageName = imageName;
-			this.downloaded = downloaded;
-		}
-	}
+	
 }
