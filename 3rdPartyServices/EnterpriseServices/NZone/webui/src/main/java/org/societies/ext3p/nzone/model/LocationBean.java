@@ -60,8 +60,7 @@ public class LocationBean implements Serializable {
 	 * @param zoneNo the zoneNo to set
 	 */
 	public void setZoneNo(int zoneNo) {
-		
-		getNzoneClient().bJoinZone(getDets().get(zoneNo).getCisid());
+		getNzoneClient().updateLocationManual(getDets().get(zoneNo).getZonelocation());
 		this.zoneNo = zoneNo;
 		this.setZoneName(getDets().get(zoneNo).getZonename());
 	}

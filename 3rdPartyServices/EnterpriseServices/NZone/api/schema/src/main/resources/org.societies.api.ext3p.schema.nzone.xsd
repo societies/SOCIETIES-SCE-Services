@@ -66,6 +66,8 @@
 				<xs:element name="facebookID" type="xs:string" minOccurs="0" />
 				<xs:element name="twitterID" type="xs:string" minOccurs="0" />
 				<xs:element name="linkedInID" type="xs:string" minOccurs="0" />
+				<xs:element name="googleplusID" type="xs:string" minOccurs="0" />
+				<xs:element name="foursqID" type="xs:string" minOccurs="0" />
 				<xs:element name="tags" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
 			</xs:sequence>
 		</xs:complexType>

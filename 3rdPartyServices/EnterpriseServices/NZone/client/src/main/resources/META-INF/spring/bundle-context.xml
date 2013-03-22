@@ -12,7 +12,6 @@
 	xmlns:tx="http://www.springframework.org/schema/tx">
 
 	<context:annotation-config />
-
 	
 	<context:property-placeholder properties-ref="networkclientConfig"/> 
 	
@@ -25,8 +24,7 @@
 	
 	<bean id="NZoneClient" 
 		class="org.societies.ext3p.nzone.client.NZoneClient" 
-		init-method="initialize"
-		 destroy-method="cleanUp">
+		init-method="initialize" destroy-method="cleanUp">
 		<constructor-arg value="${networkingserver}"/> 
 		<property name="commManager" ref="commManager" />
 		<property name="ctxBroker" ref="ctxBroker" />
@@ -38,6 +36,8 @@
 		<property name="persoMgr" ref="persoMgr" />
 		<property name="actFeedMgr" ref="actFeedMgr" />
 	</bean>
+	
+	<bean class="org.springframework.context.annotation.CommonAnnotationBeanPostProcessor"/>
 	
 	
 </beans>

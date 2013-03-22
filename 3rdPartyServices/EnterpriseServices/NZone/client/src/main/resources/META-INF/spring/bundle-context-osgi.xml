@@ -25,7 +25,7 @@
 	<osgi:reference id="actFeedMgr" interface="org.societies.api.activity.IActivityFeedManager"/>
     
 	  <osgix:cm-properties id="networkclientConfig" persistent-id="networkclient"> 
-       	<prop key="networkingserver">netzone.societies.local</prop>
+       	<prop key="networkingserver">user2.ict-societies.eu</prop>
     </osgix:cm-properties>
     
 	<osgi:service ref="NZoneClient">

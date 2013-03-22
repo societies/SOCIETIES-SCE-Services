@@ -17,6 +17,7 @@ import org.societies.api.comm.xmpp.interfaces.ICommManager;
 import org.societies.api.context.CtxException;
 import org.societies.api.context.broker.ICtxBroker;
 import org.societies.api.context.model.CtxAttribute;
+import org.societies.api.context.model.CtxAttributeTypes;
 import org.societies.api.context.model.CtxAttributeValueType;
 import org.societies.api.context.model.CtxEntityIdentifier;
 import org.societies.api.context.model.CtxIdentifier;
@@ -44,6 +45,7 @@ public class NZoneServer implements INZoneServer{
 	private static int SHARE_PERSONAL =   0x00001;
 	private static int SHARE_EMPLOYMENT = 0x00002;
 	private static int SHARE_ABOUT 		= 0x00004;
+	private static int SHARE_SOCIAL 	= 0x00008;
 	
 	private static Logger log = LoggerFactory.getLogger(NZoneServer.class);	
 
@@ -60,7 +62,7 @@ public class NZoneServer implements INZoneServer{
 	
 	//TODO : Probably move to somehwere
 	private static String nzoneMemberOfCxtAttr = "nzoneMemberOf";
-	private static String nzoneLocationCxtAttr = "ZONE_LOCATION_SYMBOLIC";
+	private static String nzoneLocationCxtAttr = CtxAttributeTypes.LOCATION_SYMBOLIC.toString();
 		
 	
 	public NZoneServer()	
@@ -357,6 +359,17 @@ public class NZoneServer implements INZoneServer{
 				 friendDets.setCompany("");
 				 friendDets.setPosition("");
 			 }
+			 
+			 if ((sharedInfo.getShareHash() & SHARE_SOCIAL)  != SHARE_SOCIAL)
+			 {
+				 friendDets.setAbout("");
+				 friendDets.setFacebookID("");
+				 friendDets.setTwitterID("");
+				 friendDets.setGoogleplusID("");
+				 friendDets.setLinkedInID("");
+				 friendDets.setFoursqID("");
+			 }
+		
 		
 			 userDetList.add(friendDets);
 		 }

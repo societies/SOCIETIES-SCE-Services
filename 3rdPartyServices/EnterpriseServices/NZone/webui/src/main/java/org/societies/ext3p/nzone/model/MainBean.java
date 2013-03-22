@@ -3,6 +3,7 @@ package org.societies.ext3p.nzone.model;
 import java.io.Serializable;
 import java.util.List;
 
+import javax.annotation.PostConstruct;
 import javax.faces.bean.ApplicationScoped;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ManagedProperty;
@@ -36,7 +37,12 @@ public class MainBean implements Serializable {
 
 	public MainBean() {
 		currentZone = 0;
-
+	}
+	
+	@PostConstruct
+	public void init()
+	{
+		this.getNzoneClient().delayedInit();
 	}
 
 	/**
@@ -86,7 +92,6 @@ public class MainBean implements Serializable {
 		if (dets == null)
 			dets = getNzoneClient().getZoneDetails();
 		
-		getNzoneClient().getSnsData();
 		return dets;
 	}
 

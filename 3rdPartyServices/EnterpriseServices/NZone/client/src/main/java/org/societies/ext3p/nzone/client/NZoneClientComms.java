@@ -567,6 +567,7 @@ public class NZoneClientComms implements ICommCallback {
 		// CREATE MESSAGE BEAN
 		NzoneBean netBean = new NzoneBean();
 		netBean.setMethod(Method.UPDATE_MY_DETAILS);
+		
 		netBean.setDetails(dets);
 			
 		startSignal = new CountDownLatch(1);

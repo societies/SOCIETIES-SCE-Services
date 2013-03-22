@@ -28,6 +28,11 @@ public class ProfileBean implements Serializable {
     private String name;
     private String email;
     private String company;
+    private String facebookid;
+    private String linkedinid;
+    private String twitterid;
+    private String foursqid;
+    private String googleplusid;
     private boolean profilemissing;
        
    
@@ -69,6 +74,11 @@ public class ProfileBean implements Serializable {
 			setName(myDets.getDisplayName());
 			setCompany(myDets.getCompany());
 			setEmail(myDets.getEmail());
+			this.setFacebookid(myDets.getFacebookID());
+			this.setLinkedinid(myDets.getLinkedInID());
+			this.setFoursqid(myDets.getFoursqID());
+			this.setGoogleplusid(myDets.getGoogleplusID());
+			this.setTwitterid(myDets.getTwitterID());
 		}
 		log.info("loadProfileDetails called end");
 	}
@@ -109,6 +119,36 @@ public class ProfileBean implements Serializable {
 	 */
 	public void setCompany(String company) {
 		this.company = company;
+	}
+	public String getFacebookid() {
+		return facebookid;
+	}
+	public void setFacebookid(String facebookid) {
+		this.facebookid = facebookid;
+	}
+	public String getLinkedinid() {
+		return linkedinid;
+	}
+	public void setLinkedinid(String linkedinid) {
+		this.linkedinid = linkedinid;
+	}
+	public String getTwitterid() {
+		return twitterid;
+	}
+	public void setTwitterid(String twitterid) {
+		this.twitterid = twitterid;
+	}
+	public String getFoursqid() {
+		return foursqid;
+	}
+	public void setFoursqid(String foursqid) {
+		this.foursqid = foursqid;
+	}
+	public String getGoogleplusid() {
+		return googleplusid;
+	}
+	public void setGoogleplusid(String googleplusid) {
+		this.googleplusid = googleplusid;
 	}
 	 
 

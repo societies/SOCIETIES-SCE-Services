@@ -3,22 +3,19 @@ package org.societies.ext3p.nzone.client;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
+import javax.annotation.PostConstruct;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import org.societies.api.activity.IActivity;
 import org.societies.api.activity.IActivityFeed;
 import org.societies.api.activity.IActivityFeedManager;
-import org.societies.api.cis.directory.ICisDirectoryCallback;
 import org.societies.api.cis.directory.ICisDirectoryRemote;
 import org.societies.api.cis.management.ICis;
 import org.societies.api.cis.management.ICisManager;
-import org.societies.api.cis.management.ICisManagerCallback;
-import org.societies.api.cis.management.ICisOwned;
 import org.societies.api.comm.xmpp.interfaces.ICommManager;
 import org.societies.api.context.CtxException;
 import org.societies.api.context.broker.ICtxBroker;
@@ -27,34 +24,30 @@ import org.societies.api.context.model.CtxAttributeTypes;
 import org.societies.api.context.model.CtxAttributeValueType;
 import org.societies.api.context.model.CtxEntity;
 import org.societies.api.context.model.CtxEntityIdentifier;
+import org.societies.api.context.model.CtxEntityTypes;
 import org.societies.api.context.model.CtxIdentifier;
 import org.societies.api.context.model.CtxModelObject;
 import org.societies.api.context.model.CtxModelType;
-import org.societies.api.context.model.CtxEntityTypes;
 import org.societies.api.ext3p.nzone.client.INZoneClient;
 import org.societies.api.ext3p.nzone.model.NZonePreferences;
 import org.societies.api.ext3p.nzone.model.UserPreview;
+import org.societies.api.ext3p.schema.nzone.UserDetails;
+import org.societies.api.ext3p.schema.nzone.ZoneDetails;
 import org.societies.api.identity.IIdentity;
-import org.societies.api.identity.INetworkNode;
-import org.societies.api.identity.Requestor;
 import org.societies.api.identity.RequestorService;
 import org.societies.api.personalisation.mgmt.IPersonalisationManager;
 import org.societies.api.personalisation.model.Action;
 import org.societies.api.personalisation.model.IAction;
 import org.societies.api.personalisation.model.IActionConsumer;
 import org.societies.api.personalisation.model.PersonalisablePreferenceIdentifier;
-import org.societies.api.schema.cis.community.Community;
-import org.societies.api.schema.cis.community.CommunityMethods;
 import org.societies.api.schema.cis.community.Criteria;
-import org.societies.api.schema.cis.community.MembershipCrit;
 import org.societies.api.schema.cis.community.Participant;
 import org.societies.api.schema.cis.community.ParticipantRole;
 import org.societies.api.schema.cis.directory.CisAdvertisementRecord;
 import org.societies.api.schema.servicelifecycle.model.ServiceResourceIdentifier;
 import org.societies.api.services.IServices;
 import org.societies.api.useragent.monitoring.IUserActionMonitor;
-import org.societies.api.ext3p.schema.nzone.UserDetails;
-import org.societies.api.ext3p.schema.nzone.ZoneDetails;
+import org.springframework.scheduling.annotation.Async;
 
 public class NZoneClient implements INZoneClient, IActionConsumer {
 
@@ -70,7 +63,6 @@ public class NZoneClient implements INZoneClient, IActionConsumer {
 	IServices serviceMgmt;
 	private IActivityFeedManager actFeedMgr;
 	private IActivityFeed actFeed;
-	private List<IActivity> tempActList;
 
 	private ServiceResourceIdentifier myServiceID;
 	private String myServiceName;
@@ -79,7 +71,7 @@ public class NZoneClient implements INZoneClient, IActionConsumer {
 
 	private String nzoneServerCssID;
 
-	private Requestor requestor;
+	// private Requestor requestor;
 	private RequestorService requestorService;
 	private List<CisAdvertisementRecord> localCisAds = new ArrayList<CisAdvertisementRecord>();
 	private boolean bJoinResponseReceived;
@@ -90,16 +82,21 @@ public class NZoneClient implements INZoneClient, IActionConsumer {
 
 	private ICis mainCis;
 	private ICis currentZoneCis;
+	
+	private boolean bInitialising = false;
+	private boolean bInitialised = false;
 
 	private static String nzoneMemberOfCxtAttr = "nzoneMemberOf";
-	private static String nzoneLocationCxtAttr = "ZONE_LOCATION_SYMBOLIC";
+	private static String nzoneLocationCxtAttr = CtxAttributeTypes.LOCATION_SYMBOLIC.toString();
 
 	private static String PREF_TAG = "taggedPreference";
-
 
 	private NZonePreferences preferences;
 
 	private List<CisAdvertisementRecord> cisDirCallbackResult;
+
+	private NZoneCxtChangeList cxtChangeList;
+	
 
 	public ICtxBroker getCtxBroker() {
 		return ctxBroker;
@@ -203,7 +200,7 @@ public class NZoneClient implements INZoneClient, IActionConsumer {
 	};
 
 	public NZoneClient() {
-		this.nzoneServerCssID = new String("admin.societies.local");
+		this.nzoneServerCssID = new String("user2.ict-societies.eu");
 
 		myServiceName = "nzoneClient";
 		myServiceType = "client";
@@ -211,16 +208,51 @@ public class NZoneClient implements INZoneClient, IActionConsumer {
 	};
 
 	public void initialize() {
-		log.debug("NZoneClient bundle initialized.");
+		
+		log.info("NZoneClient bundle initializing. start");
 
 		myIdentity = getCommManager().getIdManager().getThisNetworkNode();
 
-		log.debug("NZoneClient bundle myIdentity is." + myIdentity.getJid());
-		if (requestor == null)
-			requestor = new Requestor(myIdentity);
+		log.info("NZoneClient bundle myIdentity is." + myIdentity.getJid());
 
-		myServiceID = getServiceMgmt().getMyServiceId(this.getClass());
+		actFeed = getActFeedMgr().getOrCreateFeed(myIdentity.getBareJid(),
+				"netzoneactfeed", false);
+		
 
+		zoneDetails = getZoneDetails();
+
+		try {
+			cxtChangeList = new NZoneCxtChangeList();
+			cxtChangeList.client = this;
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		log.info("NZoneClient bundle initializing.end");
+		
+	}
+	
+	// We need to do this because we can't access our service id etc until we are started
+	@Override
+	@Async
+	public void delayedInit() {
+		
+		if (bInitialised)
+			return;
+		if (bInitialising)
+			return;
+		bInitialising = true;
+		
+		log.info("NZoneClient bundle delayedInit called.");
+		
+		
+		if (myServiceID == null)
+			myServiceID = getServiceMgmt().getMyServiceId(this.getClass());
+
+		if (requestorService == null)
+			requestorService = new RequestorService(myIdentity, myServiceID);
+		
 		// To join any nzone zone ( including main zone), we need to that the
 		// memberof
 		// attribute set
@@ -231,8 +263,7 @@ public class NZoneClient implements INZoneClient, IActionConsumer {
 
 		// The ICAUIPrediction prefiction bombs out if these are sets!??
 		// TODO : Check why they are needed
-		if (this.getContextAtribute(CtxAttributeTypes.LOCATION_SYMBOLIC
-				.toString()) == null)
+		if (this.getContextAtribute(CtxAttributeTypes.LOCATION_SYMBOLIC.toString()) == null)
 			updateContextAtribute(
 					CtxAttributeTypes.LOCATION_SYMBOLIC.toString(), "here");
 		if (this.getContextAtribute(CtxAttributeTypes.STATUS.toString()) == null)
@@ -253,14 +284,12 @@ public class NZoneClient implements INZoneClient, IActionConsumer {
 		}
 
 		mainCis = joinCis(mainCisId);
-
-		zoneDetails = getZoneDetails();
-
-		actFeed = getActFeedMgr().getOrCreateFeed(myIdentity.getBareJid(),
-				"netzoneactfeed");
-		tempActList = new ArrayList<IActivity>();
 		
-
+		
+		registerForContextChanges(new Object());
+		
+		bInitialised = true;
+		bInitialising= false;
 	};
 
 	public void cleanUp() {
@@ -274,6 +303,7 @@ public class NZoneClient implements INZoneClient, IActionConsumer {
 	};
 
 	private ICis joinCis(String cisJid) {
+		
 
 		ICis joinedCis;
 		log.debug("joinCis Start");
@@ -288,6 +318,13 @@ public class NZoneClient implements INZoneClient, IActionConsumer {
 		}
 
 		CisAdvertisementRecord adRec = getCisAdvert(cisJid);
+		
+		IActivity act = actFeed.getEmptyIActivity();
+		act.setActor("User");
+		act.setVerb("entered");
+		act.setObject(adRec.getName());
+		actFeed.addActivity(act);
+		
 
 		// First we need to frig out location so we can join
 		// Find necessary localtion
@@ -337,6 +374,13 @@ public class NZoneClient implements INZoneClient, IActionConsumer {
 		if (cisToLeave == null)
 			return;
 
+		IActivity act = actFeed.getEmptyIActivity();
+		act.setActor("User");
+		act.setVerb("left");
+		act.setObject(cisToLeave.getName());
+		actFeed.addActivity(act);
+		
+		
 		NZoneCisCallback cisCallback = new NZoneCisCallback();
 		getCisManager().leaveRemoteCIS(cisJid, cisCallback.iCisManagerCallback);
 		try {
@@ -358,6 +402,8 @@ public class NZoneClient implements INZoneClient, IActionConsumer {
 
 	@Override
 	public boolean bJoinZone(String zoneID) {
+
+
 		if (currentZoneCis != null) {
 			if (currentZoneCis.getCisId().contentEquals(zoneID) == true) {
 				// We are already a member of this zone, just return true
@@ -393,10 +439,17 @@ public class NZoneClient implements INZoneClient, IActionConsumer {
 
 	@Override
 	public List<UserPreview> getSuggestedList(boolean bMainZone) {
+
 		// Return a list of suggest contacts from the current zone,
 		// if no current zone, return a list from main zone
 		List<UserPreview> sortedlist = new ArrayList<UserPreview>();
 		List<UserPreview> list = new ArrayList<UserPreview>();
+
+		if (myServiceID == null)
+			myServiceID = getServiceMgmt().getMyServiceId(this.getClass());
+
+		if (requestorService == null)
+			requestorService = new RequestorService(myIdentity, myServiceID);
 
 		// TODO start: This need to change when css mnager suggest friends
 		// working
@@ -404,7 +457,7 @@ public class NZoneClient implements INZoneClient, IActionConsumer {
 			memberList = null;
 			NZoneCisCallback cisCallback = new NZoneCisCallback();
 
-			currentZoneCis.getListOfMembers(requestor,
+			currentZoneCis.getListOfMembers(requestorService,
 					cisCallback.iCisManagerCallback);
 
 			try {
@@ -480,7 +533,8 @@ public class NZoneClient implements INZoneClient, IActionConsumer {
 		} else {
 			memberList = null;
 			NZoneCisCallback cisCallback = new NZoneCisCallback();
-			mainCis.getListOfMembers(requestor, cisCallback.iCisManagerCallback);
+			mainCis.getListOfMembers(requestorService,
+					cisCallback.iCisManagerCallback);
 
 			try {
 				cisCallback.cisManagerCallbackSignal.await();
@@ -606,16 +660,14 @@ public class NZoneClient implements INZoneClient, IActionConsumer {
 		act.setActor("User");
 		act.setVerb("added");
 		act.setObject(value + " as a preferred" + type);
-		// actFeed.addActivity(act, null);
-		// Temporary activty list until activty fed usable
-		tempActList.add(act);
-
+		actFeed.addActivity(act);
+		
 		// get UserPrefences
 		if (preferences == null) {
-			 preferences = new NZonePreferences(getUserPreference(PREF_TAG));
+			preferences = new NZonePreferences(getUserPreference(PREF_TAG));
 			// TODO : TEmp, bypassing Personalisation Manager
-			//preferences = new NZonePreferences(getNzoneClientComms()
-			//		.getPreferences());
+			// preferences = new NZonePreferences(getNzoneClientComms()
+			// .getPreferences());
 			log.debug("Loaded prefererces are " + preferences.toString());
 		}
 		preferences.addPreferred(type, value);
@@ -645,18 +697,17 @@ public class NZoneClient implements INZoneClient, IActionConsumer {
 
 	@Override
 	public void removeAsPreferred(String type, String value) {
+
 		IActivity act = actFeed.getEmptyIActivity();
 		act.setActor("User");
 		act.setVerb("removed");
 		act.setObject(value + " removed as a preferred" + type);
-		// actFeed.addActivity(act, null);
+		actFeed.addActivity(act);
 
-		// Temporary activty list until activty fed usable
-		tempActList.add(act);
-
+	
 		// get UserPrefences
 		if (preferences == null) {
-			 preferences = new NZonePreferences(getUserPreference(PREF_TAG));
+			preferences = new NZonePreferences(getUserPreference(PREF_TAG));
 			// TODO : TEmp, bypassing Personalisation Manager
 			preferences = new NZonePreferences(getNzoneClientComms()
 					.getPreferences());
@@ -683,19 +734,25 @@ public class NZoneClient implements INZoneClient, IActionConsumer {
 	private void updateContextAtribute(String ctxAttribName, String value) {
 		log.debug("updateContextAtribute Start");
 
+		if (myServiceID == null)
+			myServiceID = getServiceMgmt().getMyServiceId(this.getClass());
+
+		if (requestorService == null)
+			requestorService = new RequestorService(myIdentity, myServiceID);
+
 		try {
 			// retrieve the CtxEntityIdentifier of the CSS owner context entity
 			CtxEntityIdentifier ownerEntityId = this
 					.getCtxBroker()
 					.retrieveIndividualEntityId(
-							requestor,
+							requestorService,
 							getCommManager().getIdManager()
 									.getThisNetworkNode()).get();
 			// create a context attribute under the CSS owner context entity
 
 			Future<List<CtxIdentifier>> ctxIdentLookupFut = this.getCtxBroker()
-					.lookup(requestor, ownerEntityId, CtxModelType.ATTRIBUTE,
-							ctxAttribName);
+					.lookup(requestorService, ownerEntityId,
+							CtxModelType.ATTRIBUTE, ctxAttribName);
 			// Thread.sleep(1000);
 			List<CtxIdentifier> ctxIdentLookup = ctxIdentLookupFut.get();
 			CtxIdentifier ctxIdent = null;
@@ -707,11 +764,11 @@ public class NZoneClient implements INZoneClient, IActionConsumer {
 			if (ctxIdent == null) {
 				ctxAttr = this
 						.getCtxBroker()
-						.createAttribute(requestor, ownerEntityId,
+						.createAttribute(requestorService, ownerEntityId,
 								ctxAttribName).get();
 			} else {
 				Future<CtxModelObject> netUserAttrFut = this.getCtxBroker()
-						.retrieve(requestor, ctxIdent);
+						.retrieve(requestorService, ctxIdent);
 				// Thread.sleep(1000);
 				ctxAttr = (CtxAttribute) netUserAttrFut.get();
 			}
@@ -721,7 +778,7 @@ public class NZoneClient implements INZoneClient, IActionConsumer {
 
 			// update the attribute in the Context DB
 			ctxAttr = (CtxAttribute) this.getCtxBroker()
-					.update(requestor, ctxAttr).get();
+					.update(requestorService, ctxAttr).get();
 
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
@@ -740,19 +797,25 @@ public class NZoneClient implements INZoneClient, IActionConsumer {
 		log.debug("getContextAtribute Start");
 		CtxAttribute ctxAttr = null;
 
+		if (requestorService == null) {
+			if (myServiceID == null)
+				myServiceID = getServiceMgmt().getMyServiceId(this.getClass());
+			requestorService = new RequestorService(myIdentity, myServiceID);
+		}
+
 		try {
 			// retrieve the CtxEntityIdentifier of the CSS owner context entity
 			CtxEntityIdentifier ownerEntityId = this
 					.getCtxBroker()
 					.retrieveIndividualEntityId(
-							requestor,
+							requestorService,
 							getCommManager().getIdManager()
 									.getThisNetworkNode()).get();
 			// create a context attribute under the CSS owner context entity
 
 			Future<List<CtxIdentifier>> ctxIdentLookupFut = this.getCtxBroker()
-					.lookup(requestor, ownerEntityId, CtxModelType.ATTRIBUTE,
-							ctxAttribName);
+					.lookup(requestorService, ownerEntityId,
+							CtxModelType.ATTRIBUTE, ctxAttribName);
 			// Thread.sleep(1000);
 			List<CtxIdentifier> ctxIdentLookup = ctxIdentLookupFut.get();
 			CtxIdentifier ctxIdent = null;
@@ -763,14 +826,16 @@ public class NZoneClient implements INZoneClient, IActionConsumer {
 			if (ctxIdent == null) {
 				ctxAttr = this
 						.getCtxBroker()
-						.createAttribute(requestor, ownerEntityId,
+						.createAttribute(requestorService, ownerEntityId,
 								ctxAttribName).get();
 			} else {
 				Future<CtxModelObject> ctxAttrFut = this.getCtxBroker()
-						.retrieve(requestor, ctxIdent);
+						.retrieve(requestorService, ctxIdent);
 				// Thread.sleep(1000);
 				ctxAttr = (CtxAttribute) ctxAttrFut.get();
+				
 			}
+		
 
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
@@ -794,19 +859,19 @@ public class NZoneClient implements INZoneClient, IActionConsumer {
 		cisDirCallbackResult = null;
 
 		NZoneCisDirCallback cisDirCb = new NZoneCisDirCallback();
-		
+
 		getCisDirectoryClient().searchByIDS(cisIdToRetrieve,
 				cisDirCb.iCisDirectoryCallback);
 
 		try {
 			cisDirCb.cisDirCallbackSignal.await();
 		} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
-		cisDirCallbackResult = 	cisDirCb.adList;
-			
+		cisDirCallbackResult = cisDirCb.adList;
+
 		if (cisDirCallbackResult != null) {
 			for (int index = 0; index < cisDirCallbackResult.size(); index++) {
 				// Todo : add check in here to see if should replace
@@ -841,6 +906,8 @@ public class NZoneClient implements INZoneClient, IActionConsumer {
 
 	@Override
 	public List<ZoneDetails> getZoneDetails() {
+
+
 		return getNzoneClientComms().getZoneDetails();
 
 		/*
@@ -863,6 +930,7 @@ public class NZoneClient implements INZoneClient, IActionConsumer {
 
 	@Override
 	public List<String> getServiceTypes() {
+
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -882,7 +950,7 @@ public class NZoneClient implements INZoneClient, IActionConsumer {
 
 		// create action object and send to uam
 		IAction action = new Action(myServiceID, myServiceType, parameterName,
-				value, true, false,true);
+				value, true, false, true);
 		if (getUam() != null) {
 			log.info("processUserPreference calling uam start ");
 			getUam().monitor(myIdentity, action);
@@ -897,7 +965,7 @@ public class NZoneClient implements INZoneClient, IActionConsumer {
 				myServiceID = getServiceMgmt().getMyServiceId(this.getClass());
 			log.info("getUserPreference : calling getPersoMgr().getPreference start");
 			Future<IAction> futureOutcome = getPersoMgr().getPreference(
-					requestor, myIdentity, myServiceType, myServiceID,
+					requestorService, myIdentity, myServiceType, myServiceID,
 					parameterName);
 			IAction outcome = futureOutcome.get();
 			log.info("getUserPreference : calling getPersoMgr().getPreference end");
@@ -919,6 +987,7 @@ public class NZoneClient implements INZoneClient, IActionConsumer {
 	// Put in to test implicit decision making
 	@Override
 	public void recordActionShowProfile() {
+
 		String parameterName = new String("nzuseraction");
 		String value = new String("showprofile");
 
@@ -927,7 +996,7 @@ public class NZoneClient implements INZoneClient, IActionConsumer {
 
 		// create action object and send to uam
 		IAction action = new Action(myServiceID, myServiceType, parameterName,
-				value,true,false,true);
+				value, true, false, true);
 
 		log.info("recordActionShowProfile : Sending action to UAM: "
 				+ action.toString());
@@ -938,6 +1007,7 @@ public class NZoneClient implements INZoneClient, IActionConsumer {
 
 	@Override
 	public void recordActionEnterZone() {
+
 		String parameterName = new String("nzuseraction");
 		String value = new String("enterzone");
 
@@ -945,7 +1015,7 @@ public class NZoneClient implements INZoneClient, IActionConsumer {
 			myServiceID = getServiceMgmt().getMyServiceId(this.getClass());
 		// create action object and send to uam
 		IAction action = new Action(myServiceID, myServiceType, parameterName,
-				value,true,false,true);
+				value, true, false, true);
 		log.info("recordActionEnterZone : Sending action to UAM: "
 				+ action.toString());
 		getUam().monitor(myIdentity, action);
@@ -955,6 +1025,7 @@ public class NZoneClient implements INZoneClient, IActionConsumer {
 
 	@Override
 	public UserDetails getMyProfile() {
+
 		// check if we have a profile saved, if not create a new profile with
 		// info from css record in context
 
@@ -966,14 +1037,16 @@ public class NZoneClient implements INZoneClient, IActionConsumer {
 		if (myDets.getDisplayName() == null
 				|| (myDets.getDisplayName().length() == 0)) {
 			// profile not populated from context yet
-			myDets.setDisplayName(getContextAtribute(CtxAttributeTypes.NAME
-					.toString()));
-			myDets.setCompany(getContextAtribute(CtxAttributeTypes.WORK_POSITION
-					.toString()));
-			myDets.setPosition(getContextAtribute(CtxAttributeTypes.OCCUPATION
-					.toString()));
-			myDets.setEmail(getContextAtribute(CtxAttributeTypes.EMAIL
-					.toString()));
+			myDets.setDisplayName(getContextAtribute(CtxAttributeTypes.NAME.toString()));
+			myDets.setCompany(getContextAtribute(CtxAttributeTypes.WORK_POSITION.toString()));
+			myDets.setPosition(getContextAtribute(CtxAttributeTypes.OCCUPATION.toString()));
+			myDets.setEmail(getContextAtribute(CtxAttributeTypes.EMAIL.toString()));
+
+			myDets.setFacebookID(getSnsData("facebook"));
+			myDets.setTwitterID(getSnsData("twitter"));
+			myDets.setLinkedInID(getSnsData("linkedin"));
+			myDets.setGoogleplusID(getSnsData("googleplus"));
+			myDets.setFoursqID(getSnsData("foursquare"));
 
 			getNzoneClientComms().updateMyDetails(myDets);
 		}
@@ -987,6 +1060,7 @@ public class NZoneClient implements INZoneClient, IActionConsumer {
 
 	@Override
 	public int getCurrentZone() {
+
 		// check if we have a profile saved, if not create a new profile with
 		// info from css record in context
 		List<ZoneDetails> fullList = getNzoneClientComms().getZoneDetails();
@@ -1021,50 +1095,53 @@ public class NZoneClient implements INZoneClient, IActionConsumer {
 		}
 		return false;
 	};
-	
-	@Override
-	public void getSnsData() {
-		
+
+	public String getSnsData(String whatSns) {
+
+		String snsId = new String();
+
 		log.debug("getSnsData Start");
 		CtxAttribute ctxAttr = null;
-		
-		if (requestorService == null)
-		{
+
+		if (requestorService == null) {
 			if (myServiceID == null)
 				myServiceID = getServiceMgmt().getMyServiceId(this.getClass());
 			requestorService = new RequestorService(myIdentity, myServiceID);
 		}
-		
+
 		try {
-			
-			
-			Future<List<CtxEntityIdentifier>> ctxIdentLookupFut = this.getCtxBroker().lookupEntities(this.requestorService, getCommManager().getIdManager().getThisNetworkNode(),
-					CtxEntityTypes.SOCIAL_NETWORK, CtxAttributeTypes.TYPE, "facebook", "facebook");
-			
-			
-			
+
+			Future<List<CtxEntityIdentifier>> ctxIdentLookupFut = this
+					.getCtxBroker().lookupEntities(
+							this.requestorService,
+							getCommManager().getIdManager()
+									.getThisNetworkNode(),
+							CtxEntityTypes.SOCIAL_NETWORK,
+							CtxAttributeTypes.TYPE, whatSns, whatSns);
+
 			// Thread.sleep(1000);
 			List<CtxEntityIdentifier> ctxIdentLookup = ctxIdentLookupFut.get();
 			CtxEntityIdentifier ctxIdent = null;
-			if ((ctxIdentLookup != null) && (ctxIdentLookup.size() > 0))
-				ctxIdent = ctxIdentLookup.get(0);
+			if ((ctxIdentLookup == null) || (ctxIdentLookup.size() == 0))
+				return snsId;
 
-			 // the retrieved identifier is used in order to retrieve the context model object (CtxEntity)
-			 CtxEntity retrievedCtxEntity = (CtxEntity) this.getCtxBroker().
-					 retrieve(requestorService, ctxIdent).get();
+			ctxIdent = ctxIdentLookup.get(0);
 
+			// the retrieved identifier is used in order to retrieve the context
+			// model object (CtxEntity)
+			CtxEntity retrievedCtxEntity = (CtxEntity) this.getCtxBroker()
+					.retrieve(requestorService, ctxIdent).get();
 
-			
-			 // Retrieve CtxAttributes assigned to retrievedCtxEntity 
-			 Set<CtxAttribute> ctxAttrSet = retrievedCtxEntity.getAttributes(CtxAttributeTypes.ID);
-			 
-			 CtxAttribute ctxAttr2;
-			 
-			 if( ctxAttrSet.size()>0 ){
-			         List<CtxAttribute>     ctxAttrList = new ArrayList<CtxAttribute>(ctxAttrSet);
-			         ctxAttr2 = ctxAttrList.get(0);
-			 }
-			 
+			// Retrieve CtxAttributes assigned to retrievedCtxEntity
+			Set<CtxAttribute> ctxAttrSet = retrievedCtxEntity
+					.getAttributes(CtxAttributeTypes.PROFILE_IMAGE_URL);
+
+			if (ctxAttrSet.size() > 0) {
+				List<CtxAttribute> ctxAttrList = new ArrayList<CtxAttribute>(
+						ctxAttrSet);
+				snsId = ctxAttrList.get(0).getStringValue();
+			}
+
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -1078,9 +1155,7 @@ public class NZoneClient implements INZoneClient, IActionConsumer {
 
 		log.debug("getSnsData End");
 
-		return ;
-
-		
+		return snsId;
 
 	}
 
@@ -1089,6 +1164,87 @@ public class NZoneClient implements INZoneClient, IActionConsumer {
 		log.info("..............setIAction called ................");
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public void registerForContextChanges(Object arg0) {
+	
+		log.info("registerForContextChanges start");
+		
+		if (requestorService == null) {
+			if (myServiceID == null)
+				myServiceID = getServiceMgmt().getMyServiceId(this.getClass());
+			requestorService = new RequestorService(myIdentity, myServiceID);
+		}
+
+		try {
+			// retrieve the CtxEntityIdentifier of the CSS owner context entity
+			CtxEntityIdentifier ownerEntityId = this
+					.getCtxBroker()
+					.retrieveIndividualEntityId(
+							requestorService,
+							getCommManager().getIdManager()
+									.getThisNetworkNode()).get();
+			// create a context attribute under the CSS owner context entity
+
+			Future<List<CtxIdentifier>> ctxIdentLookupFut = this.getCtxBroker()
+					.lookup(requestorService, ownerEntityId,CtxModelType.ATTRIBUTE, CtxAttributeTypes.LOCATION_SYMBOLIC);
+ 
+			List<CtxIdentifier> ctxIdentLookup = ctxIdentLookupFut.get();
+			CtxIdentifier ctxIdent = null;
+
+			if ((ctxIdentLookup != null) && (ctxIdentLookup.size() > 0))
+				ctxIdent = ctxIdentLookup.get(0);
+
+			if (ctxIdent != null) {
+				this.getCtxBroker().registerForChanges(requestorService, this.cxtChangeList, ctxIdent);
+			}
+		
+
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ExecutionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (CtxException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		log.info("registerForContextChanges End");
 	};
 
+	@Override
+	public void updateLocationManual(String zoneLoc)
+	{
+		log.info("updateLocationManual Start zoneLoc is " + zoneLoc);
+		updateContextAtribute(nzoneLocationCxtAttr,zoneLoc);
+		log.info("updateLocationManual End");
+	}
+
+	@Async
+	public void locationChanged() {
+		log.info("locationChanged Start ");
+		// TODO Auto-generated method stub
+		String newLoc = this.getContextAtribute(nzoneLocationCxtAttr);
+		log.info("locationChanged newLoc is " + newLoc);
+		
+		// find the 'zone' that matches this location and join it
+		
+		if ((zoneDetails != null) && (newLoc != null))
+		{
+			for ( int i = 0 ; i < zoneDetails.size(); i++)
+			{
+				if (zoneDetails.get(i).getZonelocation() != null)
+				{
+					log.info("zoneDetails.get(i).getZonelocation()  = " + zoneDetails.get(i).getZonelocation());
+					if (newLoc.contains(zoneDetails.get(i).getZonelocation()))
+					{
+						this.bJoinZone(zoneDetails.get(i).getCisid());
+					}
+				}
+			}
+		}
+	}
 }

@@ -6,7 +6,7 @@
 	<groupId>org.societies.ext3p.nzone</groupId>
 	<artifactId>nzone-web</artifactId>
 	<packaging>war</packaging>
-	<version>0.5</version>
+	<version>0.6</version>
 	<name>SOCIETIES 3p Networking Zone Web</name>
 	<url>http://maven.apache.org</url>
 
@@ -85,6 +85,7 @@
 							com.sun.faces.component;resolution:=optional,
 							javax.faces.model;resolution:=optional,
 							javax.faces.component.visit;resolution:=optional,
+						
 							
 							org.springframework.web.jsf.el,
 							
@@ -92,6 +93,8 @@
 							org.eclipse.virgo.web.dm,
 							org.springframework.web.context;resolution:=optional,
 							org.springframework.osgi.config;resolution:=optional,
+							
+							org.societies.api.ext3p.nzone.model;resolution:=optional,
 							
 							*;resolution:=optional
 							

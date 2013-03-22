@@ -1,5 +1,6 @@
 package org.societies.api.ext3p.nzone.client;
 
+import java.util.IllegalFormatException;
 import java.util.List;
 
 import org.societies.api.ext3p.nzone.model.UserPreview;
@@ -38,7 +39,11 @@ public interface INZoneClient {
 	
 	public boolean isProfileSetup();
 	
-	public void getSnsData() ;
+	public void delayedInit();
+	
+	public void registerForContextChanges(Object communityId);
+	
+	public void updateLocationManual(String zoneLoc);
 	
 }
 

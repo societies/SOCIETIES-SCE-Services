@@ -149,6 +149,8 @@ public class NZoneDirectory {
 				userRec.setFacebookID(tmpRegistryEntryList.get(0).getFacebookID());
 				userRec.setLinkedInID(tmpRegistryEntryList.get(0).getLinkedInID());
 				userRec.setTwitterID(tmpRegistryEntryList.get(0).getTwitterID());
+				userRec.setGoogleplusID(tmpRegistryEntryList.get(0).getGoogleplusID());
+				userRec.setFoursqID(tmpRegistryEntryList.get(0).getFoursqID());
 				userRec.setAbout(tmpRegistryEntryList.get(0).getAbout());
 			}
 			
@@ -206,6 +208,12 @@ public class NZoneDirectory {
 			
 			if (userRec.getTwitterID() != null)
 				userDb.setTwitterID(userRec.getTwitterID());
+			
+			if (userRec.getGoogleplusID() != null)
+				userDb.setGoogleplusID(userRec.getGoogleplusID());
+			
+			if (userRec.getFoursqID() != null)
+				userDb.setFoursqID(userRec.getFoursqID());
 			
 			if (userRec.getAbout() != null)
 				userDb.setAbout(userRec.getAbout());

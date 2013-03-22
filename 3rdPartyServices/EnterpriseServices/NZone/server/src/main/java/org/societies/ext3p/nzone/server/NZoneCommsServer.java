@@ -190,11 +190,10 @@ public class NZoneCommsServer implements IFeatureServer {
 					**/
 					case UPDATE_MY_DETAILS:
 					{
-						LOG.info("UPDATEMYDETAILS for user " + messageBean.getDetails().getUserid());
-						
+						LOG.info("UPDATEMYDETAILS for user " + stanza.getFrom().getBareJid());
+						messageBean.getDetails().setUserid(stanza.getFrom().getBareJid());
 						// We need to check that the user only is allowed update their own record 
-						if (stanza.getFrom().getBareJid().contains(messageBean.getDetails().getUserid()))
-							messageResult.setResult(getNzoneServer().updateMyDetails(messageBean.getDetails()));
+						messageResult.setResult(getNzoneServer().updateMyDetails(messageBean.getDetails()));
 						break;
 					}
 					/**
