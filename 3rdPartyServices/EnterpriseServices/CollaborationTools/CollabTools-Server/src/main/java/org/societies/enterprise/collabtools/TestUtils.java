@@ -115,7 +115,7 @@ public class TestUtils {
 	 */
 	public void createMockLongTermCtx() {
     	for (Person friend :personRepository.getAllPersons()) {
-        	friend.setLongTermCtx(LongTermCtxTypes.WORK, getRandomWork());
+        	friend.setLongTermCtx(LongTermCtxTypes.WORK, getRandomOccupation());
         	friend.setLongTermCtx(LongTermCtxTypes.INTERESTS, getRandomInterests());
         	friend.setLongTermCtx(LongTermCtxTypes.COMPANY, getRandomCompanies());
     	}	
@@ -175,7 +175,7 @@ public class TestUtils {
 	/**
 	 * @return
 	 */
-	private static String getRandomWork() {
+	private static String getRandomOccupation() {
 		final String[] work={"Manager","Developer","Beta Tester"};
 		return work[r.nextInt(3)];
 	}	

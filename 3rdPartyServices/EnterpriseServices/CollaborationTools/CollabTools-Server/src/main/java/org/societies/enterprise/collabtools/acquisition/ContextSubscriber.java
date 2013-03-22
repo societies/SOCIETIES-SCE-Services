@@ -125,7 +125,7 @@ public class ContextSubscriber implements IContextSubscriber, Observer
 	    String context = msg[1];
 		Person individual = this.personRepository.getPersonByName(msg[2]);
 	    
-	    if (type == "locationSymbolic") {
+	    if (type.equals("locationSymbolic")) {
 	      shortTermCtx.put(ShortTermCtxTypes.LOCATION, context);
 	    }
 	    else {
@@ -150,18 +150,18 @@ public class ContextSubscriber implements IContextSubscriber, Observer
 		Person individual = this.personRepository.getPersonByName(person);
 		//shortTermCtx format: context type, ctx value
 		Map<String, String> shortTermCtx = new HashMap<String, String>();
-		if (type == LongTermCtxTypes.INTERESTS) {
+		if (type.equals(LongTermCtxTypes.INTERESTS)) {
 			individual.setLongTermCtx(LongTermCtxTypes.INTERESTS, context);
-		} else if (type == LongTermCtxTypes.WORK) {
+		} else if (type.equals(LongTermCtxTypes.WORK)) {
 			individual.setLongTermCtx(LongTermCtxTypes.WORK, context[0]);
-		} else if (type == LongTermCtxTypes.COMPANY) {
+		} else if (type.equals(LongTermCtxTypes.COMPANY)) {
 			individual.setLongTermCtx(LongTermCtxTypes.COMPANY, context[0]);
-		} else if (type == ShortTermCtxTypes.LOCATION) {
+		} else if (type.equals(ShortTermCtxTypes.LOCATION)) {
 //			shortTermCtx.put(individual.getLastStatus() == null ? "" : individual.getLastStatus().getShortTermCtx(ShortTermCtxTypes.STATUS), context[0]);
 			shortTermCtx.put(ShortTermCtxTypes.LOCATION,context[0]);
 			individual.addContextStatus(shortTermCtx, this.sessionRepository);
 		}
-		else if (type == ShortTermCtxTypes.STATUS) {
+		else if (type.equals(ShortTermCtxTypes.STATUS)) {
 //			shortTermCtx.put(context[0], individual.getLastStatus() == null ? "" : individual.getLastStatus().getShortTermCtx(ShortTermCtxTypes.LOCATION));
 			shortTermCtx.put(ShortTermCtxTypes.STATUS,context[0]);
 			individual.addContextStatus(shortTermCtx, this.sessionRepository);

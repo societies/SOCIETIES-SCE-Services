@@ -401,8 +401,8 @@ public class Person extends Observable
     }
 
     /**
-	 * @param location 
-     * @param location
+	 * @param contextType 
+     * @param context
 	 * @return
 	 */
     private boolean contextHasChanged(final String contextType, String context) {
@@ -416,7 +416,7 @@ public class Person extends Observable
     	if (!ctxStatus.getShortTermCtx(contextType).isEmpty()) {
     		//Check old context with new context
     		if (!context.equals(ctxStatus.getShortTermCtx(contextType))) {
-    			System.out.println(ctxStatus.getPerson() + " had context: " + ctxStatus.getShortTermCtx(contextType) + " and now has context: " + context);
+    			System.out.println(ctxStatus.getPerson() + " had context: " + propValue + " and now has context: " + context);
     			return true;
     		}
     	}
@@ -429,7 +429,7 @@ public class Person extends Observable
 
         final int rank;
 
-        private RankedPerson( Person person, int rank )
+        private RankedPerson(Person person, int rank)
         {
 
             this.person = person;
@@ -449,38 +449,38 @@ public class Person extends Observable
 
     private class RankedComparer implements Comparator<RankedPerson>
     {
-        public int compare( RankedPerson a, RankedPerson b )
+        public int compare(RankedPerson a, RankedPerson b)
         {
             return b.getRank() - a.getRank();
         }
 
     }
 
-    private void trimTo( ArrayList<RankedPerson> rankedFriends,
-                         int numberOfFriendsToReturn )
+    private void trimTo(ArrayList<RankedPerson> rankedFriends,
+                         int numberOfFriendsToReturn)
     {
-        while ( rankedFriends.size() > numberOfFriendsToReturn )
+        while (rankedFriends.size() > numberOfFriendsToReturn)
         {
-            rankedFriends.remove( rankedFriends.size() - 1 );
+            rankedFriends.remove(rankedFriends.size() - 1);
         }
     }
 
-    private Iterable<Person> onlyFriend( Iterable<RankedPerson> rankedFriends )
+    private Iterable<Person> onlyFriend(Iterable<RankedPerson> rankedFriends)
     {
         ArrayList<Person> retVal = new ArrayList<Person>();
-        for ( RankedPerson person : rankedFriends )
+        for (RankedPerson person : rankedFriends)
         {
-            retVal.add( person.getPerson() );
+            retVal.add(person.getPerson());
         }
         return retVal;
     }
 
-    public Relationship getFriendRelationshipTo( Person otherPerson )
+    public Relationship getFriendRelationshipTo(Person otherPerson)
     {
         Node otherNode = otherPerson.getUnderlyingNode();
-        for ( Relationship rel : underlyingNode.getRelationships(SIMILARITY) )
+        for (Relationship rel : underlyingNode.getRelationships(SIMILARITY))
         {
-            if ( rel.getOtherNode(underlyingNode).equals(otherNode) )
+            if (rel.getOtherNode(underlyingNode).equals(otherNode))
             {
                 return rel;
             }

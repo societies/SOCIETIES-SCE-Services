@@ -96,11 +96,11 @@ public class PersonRepository
             Node newPersonNode = graphDb.createNode();
             personRefNode.createRelationshipTo(newPersonNode, A_PERSON);
             // lock now taken, we can check if  already exist in index
-            Node alreadyExist = index.get( Person.NAME, name ).getSingle();
-            if ( alreadyExist != null )
+            Node alreadyExist = index.get(Person.NAME, name).getSingle();
+            if (alreadyExist != null)
             {
                 tx.failure();
-                throw new Exception( "Person with this name already exists " );
+                throw new Exception("Person with this name already exists ");
             }
             newPersonNode.setProperty(Person.NAME, name);
             index.add(newPersonNode, Person.NAME, name);
