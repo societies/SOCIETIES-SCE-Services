@@ -27,7 +27,7 @@ package org.societies.enterprise.collabtools.api;
 import org.jivesoftware.smack.XMPPException;
 
 /**
- * Setup the collaborative application
+ * Setup collaborative application. 1..1
  *
  * @author cviana
  *

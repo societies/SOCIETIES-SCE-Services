@@ -24,13 +24,18 @@
  */
 package org.societies.enterprise.collabtools.api;
 
+import java.util.Observable;
+
 /**
- * Describe your class here...
+ * Interface for subscribe for context information
  *
  * @author cviana
  *
  */
 public interface IContextSubscriber {
 	//Societies integration.... miner
+	public void initialCtx(Object cisID);
+	
+	public void update(Observable o, Object arg);	
 
 }
