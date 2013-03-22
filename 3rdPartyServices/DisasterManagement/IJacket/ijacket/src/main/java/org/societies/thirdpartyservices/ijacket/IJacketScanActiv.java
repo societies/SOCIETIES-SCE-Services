@@ -107,7 +107,7 @@ public class IJacketScanActiv extends Activity{// implements OnItemSelectedListe
 	            		SharedPreferences mypref = getSharedPreferences(IJacketApp.PREF_FILE_NAME, MODE_PRIVATE);
 	        			long comId = mypref.getLong(IJacketApp.CIS_JID_PREFERENCE_TAG, -1);
 	        			if(-1 == comId){
-	        				quickToastMessage("Please first select a community");
+	        				quickToastMessage("Please first select a team");
 	        				Log.d("LOG_TAG", "no community selected" );
 	        				return;
 	        			}
@@ -134,7 +134,7 @@ public class IJacketScanActiv extends Activity{// implements OnItemSelectedListe
 	            		SharedPreferences mypref = getSharedPreferences(IJacketApp.PREF_FILE_NAME, MODE_PRIVATE);
 	        			long comId = mypref.getLong(IJacketApp.CIS_JID_PREFERENCE_TAG, -1);
 	        			if(-1 == comId){
-	        				quickToastMessage("Please first select a community");
+	        				quickToastMessage("Please first select a team");
 	        				Log.d("LOG_TAG", "no community selected" );
 	        				return;
 	        			}
@@ -151,11 +151,11 @@ public class IJacketScanActiv extends Activity{// implements OnItemSelectedListe
 	            }
 	        } );
 	        
-	        resetUI();
+	       // resetUI();
 	        
 	        
 	        
-	        super.setContentView(layout);
+	        //super.setContentView(layout);
 
     }
     
@@ -217,6 +217,13 @@ public class IJacketScanActiv extends Activity{// implements OnItemSelectedListe
         });
     }
     
+   protected void onResume(){
+	   super.onResume();
+	   //clearUI();
+    	resetUI();
+    	super.setContentView(layout);
+    }
+    
     private void resetUI() {
         runOnUiThread(new Runnable() {
              public void run() {
@@ -262,7 +269,7 @@ public class IJacketScanActiv extends Activity{// implements OnItemSelectedListe
 		 		 }
             	 
             	 TextView text0 = new TextView(IJacketScanActiv.this);
-            	 text0.setText("Please choose the Community to share your jacket updates.");
+            	 text0.setText("Please configure the team to connect your jacket to.");
             	 text0.setTextSize(24);
             	 layout.addView(text0);
             	 

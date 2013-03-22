@@ -7,9 +7,9 @@
    		<welcome-file>/views/default.jsp</welcome-file>
 	</welcome-file-list>
 	
-	<display-name>societies web-app</display-name>
+	<display-name>ContextAwareWall</display-name>
 
-	<description>Societies Platforn webapplication using Spring MVC </description>
+	<description>ContextAwareWall</description>
 
 <!-- OSGI aware web application context declaration -->
 	<context-param>

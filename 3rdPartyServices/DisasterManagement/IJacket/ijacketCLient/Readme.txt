@@ -19,7 +19,7 @@ TARGET: AccountData.IJACKET_SERVICE_NAME
 
 
 ------------------------------------------------------
--- Building
+--- Building
 ------------------------------------------------------
 
 
@@ -39,8 +39,7 @@ But you have to maveninze it so it matches the following import:
 
 
 Mavenizing the jar is not so difficult, you mainly have to run the following command:
-mvn install:install-file -Dfile=<path-to-file> -DgroupId=<group-id> \
-    -DartifactId=<artifact-id> -Dversion=<version> -Dpackaging=<packaging>
+mvn install:install-file -Dfile=ubicollabsdk.jar -DgroupId=no.sintef.ubicollab -DartifactId=sdk -Dversion=0.4.2 -Dpackaging=jar
 
 You also need to have built the ijacketLib aplklib which is located in this github repository.
 

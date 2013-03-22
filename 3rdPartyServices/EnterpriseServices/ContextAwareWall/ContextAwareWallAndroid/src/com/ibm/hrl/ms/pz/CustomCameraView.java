@@ -1,22 +1,18 @@
 package com.ibm.hrl.ms.pz;
 
 import android.content.Context;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
 import android.hardware.Camera;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
-import android.widget.ImageView;
 
 public class CustomCameraView  extends SurfaceView{
 	private SurfaceHolder previewHolder;
 	
 	private Camera camera= null;
 	private boolean surfaceCreated = false;
-	private ImageView imageView; 
+	private boolean cameraReleased = true;
 	
 	SurfaceHolder.Callback surfaceHolderListener = new SurfaceHolder.Callback() {
 	     
@@ -97,7 +93,7 @@ public class CustomCameraView  extends SurfaceView{
          super(context, attrs, defStyle);
          init();
      }
-		
+	
 	 public void onResumeMySurfaceView(){
 		 openCamera();
 	 }
@@ -108,13 +104,17 @@ public class CustomCameraView  extends SurfaceView{
 	
 	 private void releaseCamera(){
 		 try{
-			 if (camera!= null){
+			 if (camera!= null && !cameraReleased){
 				 camera.stopPreview();
+				 camera.setPreviewCallback(null);
 				 camera.release();
-				 Log.d("debug","Stopping camaera on pause");
+				 camera = null;
+				 Log.i("vg","Stopping camaera on pause");
 			 }
 		 }catch (Exception e) {
 			   Log.e("error", e.getMessage()+ " ; cause: "+e.getCause(), e);
+		 }finally{
+			 cameraReleased = true;
 		 }
 	 }
 	 
@@ -123,13 +123,19 @@ public class CustomCameraView  extends SurfaceView{
 			 if (surfaceCreated == false){
 				 return;
 			 }
-			 camera=Camera.open();
-			 camera.setPreviewDisplay(previewHolder);
-			 camera.startPreview();
-			 camera.setDisplayOrientation(90);
-			 Log.d("debug","starting camera on resume");
+			 if (camera == null){
+				 camera=Camera.open();
+				 camera.setPreviewDisplay(previewHolder);
+				 camera.startPreview();
+				 camera.setDisplayOrientation(90);
+				 cameraReleased = false;
+			 }
+			 
+			 
+			 Log.i("vg","starting camera on resume");
 		 }catch (Exception e) {
 			   Log.e("error", e.getMessage()+ " ; cause: "+e.getCause(), e);
+			   releaseCamera();
 		 }
 	 }
 	 

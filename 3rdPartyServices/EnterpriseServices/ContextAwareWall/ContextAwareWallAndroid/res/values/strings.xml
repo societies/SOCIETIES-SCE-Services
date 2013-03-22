@@ -8,4 +8,5 @@
     <string name="entity">entity</string>
     <string name="cis">CIS</string>
     <string name="Set">Set</string>
+    <color name="black">#000000</color>
 </resources>
