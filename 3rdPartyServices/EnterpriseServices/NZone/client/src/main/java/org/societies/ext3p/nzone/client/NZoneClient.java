@@ -215,8 +215,8 @@ public class NZoneClient implements INZoneClient, IActionConsumer {
 
 		log.info("NZoneClient bundle myIdentity is." + myIdentity.getJid());
 
-		actFeed = getActFeedMgr().getOrCreateFeed(myIdentity.getBareJid(),
-				"netzoneactfeed", false);
+	//	actFeed = getActFeedMgr().getOrCreateFeed(myIdentity.getBareJid(),
+	//			"netzoneactfeed", false);
 		
 
 		zoneDetails = getZoneDetails();
@@ -319,11 +319,11 @@ public class NZoneClient implements INZoneClient, IActionConsumer {
 
 		CisAdvertisementRecord adRec = getCisAdvert(cisJid);
 		
-		IActivity act = actFeed.getEmptyIActivity();
-		act.setActor("User");
-		act.setVerb("entered");
-		act.setObject(adRec.getName());
-		actFeed.addActivity(act);
+	//	IActivity act = actFeed.getEmptyIActivity();
+	//	act.setActor("User");
+	//	act.setVerb("entered");
+	//	act.setObject(adRec.getName());
+	//	actFeed.addActivity(act);
 		
 
 		// First we need to frig out location so we can join
@@ -374,11 +374,11 @@ public class NZoneClient implements INZoneClient, IActionConsumer {
 		if (cisToLeave == null)
 			return;
 
-		IActivity act = actFeed.getEmptyIActivity();
-		act.setActor("User");
-		act.setVerb("left");
-		act.setObject(cisToLeave.getName());
-		actFeed.addActivity(act);
+	//	IActivity act = actFeed.getEmptyIActivity();
+	//	act.setActor("User");
+	//	act.setVerb("left");
+	//	act.setObject(cisToLeave.getName());
+	//	actFeed.addActivity(act);
 		
 		
 		NZoneCisCallback cisCallback = new NZoneCisCallback();
@@ -656,11 +656,11 @@ public class NZoneClient implements INZoneClient, IActionConsumer {
 	@Override
 	public void setAsPreferred(String type, String value) {
 
-		IActivity act = actFeed.getEmptyIActivity();
-		act.setActor("User");
-		act.setVerb("added");
-		act.setObject(value + " as a preferred" + type);
-		actFeed.addActivity(act);
+	//	IActivity act = actFeed.getEmptyIActivity();
+	//	act.setActor("User");
+	//	act.setVerb("added");
+	//	act.setObject(value + " as a preferred" + type);
+	//	actFeed.addActivity(act);
 		
 		// get UserPrefences
 		if (preferences == null) {
@@ -698,11 +698,11 @@ public class NZoneClient implements INZoneClient, IActionConsumer {
 	@Override
 	public void removeAsPreferred(String type, String value) {
 
-		IActivity act = actFeed.getEmptyIActivity();
-		act.setActor("User");
-		act.setVerb("removed");
-		act.setObject(value + " removed as a preferred" + type);
-		actFeed.addActivity(act);
+	//	IActivity act = actFeed.getEmptyIActivity();
+	//	act.setActor("User");
+	//	act.setVerb("removed");
+	//	act.setObject(value + " removed as a preferred" + type);
+	//	actFeed.addActivity(act);
 
 	
 		// get UserPrefences
