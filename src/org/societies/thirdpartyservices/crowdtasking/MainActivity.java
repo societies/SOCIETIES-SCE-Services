@@ -1,8 +1,12 @@
 package org.societies.thirdpartyservices.crowdtasking;
 
+import java.io.BufferedInputStream;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
+import java.net.URLConnection;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -16,22 +20,28 @@ import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.util.ByteArrayBuffer;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.societies.android.api.contentproviders.CSSContentProvider;
 
 import si.setcce.societies.android.crowdtasking.RemoteControlActivity;
 import si.setcce.societies.android.rest.RestTask;
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.database.Cursor;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.provider.CalendarContract.Events;
 import android.util.Log;
@@ -50,7 +60,6 @@ import android.widget.Toast;
 
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
-//import android.annotation.SuppressLint;
 
 @SuppressLint("SimpleDateFormat")
 public class MainActivity extends Activity implements SensorEventListener {
@@ -114,7 +123,7 @@ public class MainActivity extends Activity implements SensorEventListener {
         webView.setScrollbarFadingEnabled(false);
         webView.setWebViewClient(new MyWebViewClient(this));
         webView.getSettings().setDefaultZoom(WebSettings.ZoomDensity.FAR);
-        webView.addJavascriptInterface(new JSInterface(webView), "android");
+        webView.addJavascriptInterface(new JSInterface(this, webView), "android");
         //webView.loadData("<h1>Application is loading...</h1>", "text/html", "utf-8");
         //webView.loadUrl("file:///android_asset/start.html");
         //webView.loadUrl("file:///android_asset/test2.html");
@@ -133,12 +142,81 @@ public class MainActivity extends Activity implements SensorEventListener {
 				toast.show();
 				return false;
 			}
-			
     	});
         
 
         checkIntent(getIntent());
-    }
+        webView.loadUrl(startUrl);
+    	if (nfcUrl != null) {
+    		checkInOut(nfcUrl.replaceFirst("cs", "http"));
+			nfcUrl = null;
+    	}
+	}
+
+    /* This Thread checks for Updates in the Background */
+    private Thread checkUpdate = new Thread() {
+        public void run() {
+            try {
+                URL updateURL = new URL("http://my.company.com/update");                
+                URLConnection conn = updateURL.openConnection(); 
+                InputStream is = conn.getInputStream();
+                BufferedInputStream bis = new BufferedInputStream(is);
+                ByteArrayBuffer baf = new ByteArrayBuffer(50);
+                
+                int current = 0;
+                while((current = bis.read()) != -1){
+                     baf.append((byte)current);
+                }
+
+                /* Convert the Bytes read to a String. */
+                final String s = new String(baf.toByteArray());         
+                
+                /* Get current Version Number */
+                int curVersion = getPackageManager().getPackageInfo("your.app.id", 0).versionCode;
+                int newVersion = Integer.valueOf(s);
+                
+                /* Is a higher version than the current already out? */
+                if (newVersion > curVersion) {
+                    /* Post a Handler for the UI to pick up and open the Dialog */
+                    //mHandler.post(showUpdate);
+                }                
+            } catch (Exception e) {
+            }
+        }
+    };
+
+    /* This Runnable creates a Dialog and asks the user to open the Market */ 
+    private Runnable showUpdate = new Runnable(){
+           public void run(){
+            new AlertDialog.Builder(MainActivity.this)
+            //.setIcon(R.drawable.icon)
+            .setTitle("Update Available")
+            .setMessage("An update for is available!\\n\\nOpen Android Market and see the details?")
+            .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                            /* User clicked OK so do some stuff */
+                            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("market://search?q=pname:your.app.id"));
+                            startActivity(intent);
+                    }
+            })
+            .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                            /* User clicked Cancel */
+                    }
+            })
+            .show();
+           }
+    };   
+    
+	private void toastIt(int number) {
+		toastIt(Integer.toString(number));
+	}
+	
+	private void toastIt(String text) {
+		System.out.println("Toast: "+text);
+		//Toast toast = Toast.makeText(getApplicationContext(), "Error: "+text, Toast.LENGTH_LONG);
+		//toast.show();
+	}
 
 	private void checkIntent(Intent intent) {
         String action = intent.getAction();
@@ -164,7 +242,7 @@ public class MainActivity extends Activity implements SensorEventListener {
         registerReceiver(receiver, new IntentFilter("android.nfc.action.NDEF_DISCOVERED"));
         sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
 
-        progress = ProgressDialog.show(this, "Connecting", "Waiting For GAE...", true);
+        /*progress = ProgressDialog.show(this, "Connecting", "Waiting For GAE...", true);
         
         try {
 			HttpGet searchRequest = new HttpGet(new URI(APPLICATION_URL));
@@ -172,7 +250,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 			task.execute(searchRequest);
 		} catch (URISyntaxException e) {
 			e.printStackTrace();
-		}
+		}*/
 }
     
     @Override
@@ -406,7 +484,9 @@ public class MainActivity extends Activity implements SensorEventListener {
     
     public class JSInterface {
 		private WebView mAppView;
-		public JSInterface(WebView appView) {
+		private Context context;
+		public JSInterface(Context context, WebView appView) {
+			this.context = context;
 			this.mAppView = appView;
 		}
 		
@@ -414,6 +494,47 @@ public class MainActivity extends Activity implements SensorEventListener {
 			Toast toast = Toast.makeText(mAppView.getContext(), echo,
 					Toast.LENGTH_SHORT);
 			toast.show();
+		}
+		
+		public void loginData() {
+			final String JS_SETELEMENT = "javascript:document.getElementById('%s').value='%s'";
+
+            String columns [] = {CSSContentProvider.CssRecord.CSS_RECORD_CSS_IDENTITY,
+                    CSSContentProvider.CssRecord.CSS_RECORD_EMAILID,
+                    CSSContentProvider.CssRecord.CSS_RECORD_FORENAME,
+                    CSSContentProvider.CssRecord.CSS_RECORD_NAME};
+    		//Cursor cursor = this.getContentResolver().query(CSSContentProvider.CssRecord.CONTENT_URI, columns, null, null, null);
+    		Cursor cursor = context.getContentResolver().query(CSSContentProvider.CssRecord.CONTENT_URI, null, null, null, null);
+        	try {
+    	    	/*String cName = cursor.getColumnName(1);
+    	    	toastIt(cursor.getColumnIndex(CSSContentProvider.CssRecord.CSS_RECORD_CSS_IDENTITY));
+    	    	toastIt(cursor.getString(cursor.getColumnIndex(cName)));
+    	    	toastIt(cursor.getString(cursor.getColumnIndex("cssIdentity")));*/
+    	    	//toastIt(cursor.getString(cursor.getColumnIndex(CSSContentProvider.CssRecord.CSS_RECORD_CSS_IDENTITY)));
+    	    	/*String text = cursor.getString(cursor.getColumnIndex("cssIdentity"));
+    			Toast toast = Toast.makeText(getApplicationContext(), "Error: "+text, Toast.LENGTH_LONG);
+    			toast.show();
+    			text = cursor.getString(cursor.getColumnIndex("domainServer"));
+    			toast = Toast.makeText(getApplicationContext(), "Error: "+text, Toast.LENGTH_LONG);
+    			toast.show();
+    			text = cursor.getString(cursor.getColumnIndex("name"));
+    			toast = Toast.makeText(getApplicationContext(), "Error: "+text, Toast.LENGTH_LONG);
+    			toast.show();*/
+    	    } catch (Exception e) {
+    	        e.printStackTrace();
+    	    }
+	
+	    	toastIt(cursor.getCount());
+	    	toastIt(cursor.getColumnCount());
+	    	cursor.moveToFirst();
+	    	for (int i=0; i<cursor.getColumnCount(); i++) {
+	    		System.out.println(cursor.getColumnName(i)+": "+cursor.getString(i));
+	    	}
+			
+			webView.loadUrl(String.format(JS_SETELEMENT, "userId", cursor.getString(cursor.getColumnIndex(CSSContentProvider.CssRecord.CSS_RECORD_CSS_IDENTITY))));
+			webView.loadUrl(String.format(JS_SETELEMENT, "name", cursor.getString(cursor.getColumnIndex(CSSContentProvider.CssRecord.CSS_RECORD_NAME))));
+			webView.loadUrl(String.format(JS_SETELEMENT, "foreName", cursor.getString(cursor.getColumnIndex(CSSContentProvider.CssRecord.CSS_RECORD_FORENAME))));
+			webView.loadUrl(String.format(JS_SETELEMENT, "email", cursor.getString(cursor.getColumnIndex(CSSContentProvider.CssRecord.CSS_RECORD_EMAILID))));
 		}
 		
 		public void share(String spejs, String action) {
