@@ -43,7 +43,7 @@ import org.societies.enterprise.collabtools.runtime.SessionRepository;
 
 /**
  * 
- * Main class to test without OSGi bundle
+ * Main class to test without OSGi bundle compliment
  * 
  * @author cviana
  *
@@ -92,7 +92,7 @@ public class MainTest {
 		test.deleteSocialGraph();
 		
 //		test.menu();
-		test.createPersons(4); //5 people by default
+		test.createPersons(2); //5 people by default
 		
 //		Creating some updates
 		test.createMockLongTermCtx();

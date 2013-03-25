@@ -32,6 +32,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.index.Index;
@@ -232,14 +233,14 @@ public class Rules {
 			hashsetPersons.toArray(person);
 			ArrayList<Float> elements = new ArrayList<Float>(); 
 			for (Person p : person) {
-				Iterable<Relationship> knows = p.getUnderlyingNode().getRelationships(RelTypes.SIMILARITY);
+				Iterable<Relationship> knows = p.getUnderlyingNode().getRelationships(RelTypes.SIMILARITY, Direction.OUTGOING);
 				while (knows.iterator().hasNext()) {
 					Relationship rel = knows.iterator().next();
-					elements.add((Float) rel.getProperty("weight"));
+					elements.add((Float) rel.getProperty("weight"));//Property of relationship similarity
 				}
 			}
-			float weight = ContextAnalyzer.automaticThresholding(elements);
-			log.info("automaticThresholding: "+ContextAnalyzer.automaticThresholding(elements));
+			float weight = ContextAnalyzer.getAutoThreshold(elements);
+			log.info("automaticThresholding: "+weight);
 			HashSet<Person> newHashsetPersons = new HashSet<Person>();
 			HashSet<Long> hashsetTemp = new HashSet<Long>();
 			for (Person individual : person) {

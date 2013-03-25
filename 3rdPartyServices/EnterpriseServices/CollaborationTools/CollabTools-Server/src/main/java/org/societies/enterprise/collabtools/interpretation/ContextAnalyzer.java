@@ -144,9 +144,9 @@ public class ContextAnalyzer implements IContextReasoning {
 		else
 			throw new IllegalArgumentException("There is no similarity between this individuals");
 	}
-	
-	//Based on automatic thresholding for images
-	static public float automaticThresholding(ArrayList<Float> elements) {
+
+	//Based on automatic thresholding. Formula: (avg < Mean/avg > Mean)/2
+	static public float getAutoThreshold(ArrayList<Float> elements) {
 		float initialThreshold = 0;
 		for (float value : elements)
 	    {
@@ -171,6 +171,10 @@ public class ContextAnalyzer implements IContextReasoning {
 			avgG1 = avgG1 / nG1;
 			avgG2 = avgG2 / nG2;
 			finalThreshold = (avgG1 + avgG2) / 2;
+			//Check division by zero. Not a Number
+			if (Float.isNaN(finalThreshold)){
+				return initialThreshold;
+			}
 			if (initialThreshold == finalThreshold) {
 				done = true;
 			}

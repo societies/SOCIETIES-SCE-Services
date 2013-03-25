@@ -25,7 +25,7 @@
 package org.societies.enterprise.collabtools.acquisition;
 
 /**
- * Describe your class here...
+ * Short term relationship types
  *
  * @author cviana
  *

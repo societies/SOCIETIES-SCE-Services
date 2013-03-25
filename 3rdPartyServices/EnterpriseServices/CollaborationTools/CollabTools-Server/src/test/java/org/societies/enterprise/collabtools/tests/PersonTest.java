@@ -48,6 +48,7 @@ import org.societies.enterprise.collabtools.acquisition.LongTermCtxTypes;
 import org.societies.enterprise.collabtools.acquisition.Person;
 import org.societies.enterprise.collabtools.acquisition.PersonRepository;
 import org.societies.enterprise.collabtools.acquisition.ShortTermCtxTypes;
+import org.societies.enterprise.collabtools.interpretation.ContextAnalyzer;
 import org.societies.enterprise.collabtools.runtime.CollabApps;
 import org.societies.enterprise.collabtools.runtime.SessionRepository;
 
@@ -359,6 +360,19 @@ public class PersonTest
 		//format: model type, string ctx value, person
 		String[] arg = {"locationSymbolic","Funfair","person#0"};
 		ctxSub.update(null, arg);
+	}
+	
+    //TODO:
+	@Test
+	public void autoThresholdingTest() throws Exception
+	{
+		ArrayList<Float> elements = new ArrayList<Float>();
+//		elements.add((float) 100);
+//		elements.add((float) 100);
+//		elements.add((float) 100);
+//		elements.add((float) 100);
+		float number = ContextAnalyzer.getAutoThreshold(elements);
+		System.out.println(number);
 	}
 
 	private static String name( final Node node )
