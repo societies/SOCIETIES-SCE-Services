@@ -1,0 +1,85 @@
+<f:view xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:pm="http://primefaces.org/mobile" contentType="text/html">
+
+	<pm:page title="Networking Zone">
+		<pm:view id="viewZone">
+			<pm:header title="#{mainBean.zoneName}" />
+			<pm:content>
+				<p:accordionPanel>
+
+					<p:tab title="Suggested Contacts">
+
+						<h:form id="form">
+
+							<p:dataTable id="zoneMembers" value="#{peopleBean.suggestions}"
+								var="person">
+
+
+								<p:column headerText="Name" style="width:24%">
+									<h:outputText value="#{person.displayName}" />
+								</p:column>
+
+								<p:column headerText="Company" style="width:24%">
+									<h:outputText value="#{person.company}" />
+								</p:column>
+
+								<p:column headerText=" " style="width:24%">
+									<h:outputText value="#{person.tags}" rendered="#{peopleBean.istagged(person)}"/>
+								</p:column>
+
+								<p:column style="width:4%">
+									<p:commandButton id="selectButton" 
+										action="gotofriend" icon="ui-icon-search" title="View">
+										<f:setPropertyActionListener value="#{person.userid}"
+											target="#{friendBean.friendid}" />
+									</p:commandButton>
+								</p:column>
+
+							</p:dataTable>
+
+
+							<h:outputText value="#{friendBean.friendid}" id="friendsid"
+								style="font-weight:bold" rendered="false" />
+
+							<p:commandButton icon="back" value="View Friends Profile"
+								action="gotofriend" />
+
+
+						</h:form>
+
+					</p:tab>
+
+					<p:tab title="Activity">
+						
+						<h:form id="formact">
+							<br/>
+								<h:outputText  value="John joined  community " />
+								<br/>	<br/>
+								<h:outputText  value="Ted joned  community " />
+								<br/>	<br/>
+								<h:outputText  value="Networking Admin shared service NZone Client" />
+								<br/>	<br/>
+								<h:outputText  value="Networking community created " />
+								<br/>	<br/>
+						</h:form>
+					</p:tab>
+				
+
+
+				</p:accordionPanel>
+
+				<h:form id="form3">
+					<p:commandButton icon="back" value="Back to Main Zone"
+						action="gotomain" />
+				</h:form>
+			</pm:content>
+		</pm:view>
+
+	</pm:page>
+</f:view>
+
+

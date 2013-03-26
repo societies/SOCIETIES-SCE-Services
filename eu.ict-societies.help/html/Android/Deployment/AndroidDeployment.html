@@ -1,0 +1,384 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<title>Societies Platform - Android Deployment - Societies
+	Redmine</title>
+<meta name="description" content="Redmine" />
+<meta name="keywords" content="issue,bug,tracker" />
+<meta name="csrf-param" content="authenticity_token" />
+<meta name="csrf-token"
+	content="JMAfmcSzh9nqByMBkqpzD7RzT3uWZzg7qmINPKbMSTE=" />
+<link rel='shortcut icon' href='/favicon.ico?1310384844' />
+<link href="/themes/red-andy/stylesheets/application.css?1304377159"
+	media="all" rel="stylesheet" type="text/css" />
+
+<script src="/javascripts/prototype.js?1310384844"
+	type="text/javascript" />
+<script src="/javascripts/effects.js?1310384844" type="text/javascript">
+	<script>
+</script>
+<script src="/javascripts/dragdrop.js?1310384844" type="text/javascript"></script>
+<script src="/javascripts/controls.js?1310384844" type="text/javascript"></script>
+<script src="/javascripts/application.js?1310384844"
+	type="text/javascript"></script>
+<script type="text/javascript">
+	//         
+	Event
+			.observe(
+					window,
+					'load',
+					function() {
+						new WarnLeavingUnsaved(
+								'The current page contains unsaved text that will be lost if you leave this page.');
+					});
+	//
+</script>
+
+<!--[if IE 6]>
+    <style type="text/css">
+      * html body{ width: expression( document.documentElement.clientWidth < 900 ? '900px' : '100%' ); }
+      body {behavior: url(/stylesheets/csshover.htc?1310384844);}
+    </style>
+<![endif]-->
+<link rel="stylesheet"
+	href="/plugin_assets/redmine_backlogs/javascripts/jquery/jquery.jqplot/jquery.jqplot.min.css"
+	type="text/css" />
+
+<script
+	src="/plugin_assets/redmine_backlogs/javascripts/jquery/jquery-1.4.2.min.js?1318533980"
+	type="text/javascript"></script>
+<script
+	src="/plugin_assets/redmine_backlogs/javascripts/jquery/jquery-ui-1.8rc3.custom.min.js?1318533980"
+	type="text/javascript"></script>
+<script
+	src="/plugin_assets/redmine_backlogs/javascripts/jquery/jquery.jeditable.mini.js?1318533980"
+	type="text/javascript"></script>
+<script
+	src="/plugin_assets/redmine_backlogs/javascripts/jquery/jquery.cookie.js?1318533980"
+	type="text/javascript"></script>
+<!--[if IE]><script src="/plugin_assets/redmine_backlogs/javascripts/jquery/jquery.jqplot/excanvas.js?1318533980" type="text/javascript"></script><![endif]-->
+<script
+	src="/plugin_assets/redmine_backlogs/javascripts/jquery/jquery.jqplot/jquery.jqplot.js?1318533980"
+	type="text/javascript"></script>
+<script
+	src="/plugin_assets/redmine_backlogs/javascripts/jquery/jquery.jqplot/plugins/jqplot.highlighter.js?1318533980"
+	type="text/javascript"></script>
+<script
+	src="/plugin_assets/redmine_backlogs/javascripts/jquery/jquery.jqplot/plugins/jqplot.canvasTextRenderer.min.js?1318533980"
+	type="text/javascript"></script>
+<script
+	src="/plugin_assets/redmine_backlogs/javascripts/jquery/jquery.jqplot/plugins/jqplot.canvasAxisTickRenderer.min.js?1318533980"
+	type="text/javascript"></script>
+<script
+	src="/plugin_assets/redmine_backlogs/javascripts/jquery/jquery.jqplot/plugins/jqplot.enhancedLegendRenderer.min.js?1318533980"
+	type="text/javascript"></script>
+
+<script
+	src="/plugin_assets/redmine_backlogs/javascripts/common.js?1318533980"
+	type="text/javascript"></script>
+<script
+	src="/plugin_assets/redmine_backlogs/javascripts/burndown.js?1318533980"
+	type="text/javascript"></script>
+
+
+<!-- page specific tags -->
+
+<link href="/stylesheets/scm.css?1310384844" media="screen"
+	rel="stylesheet" type="text/css" />
+</head>
+<body class="theme-Red-andy controller-wiki action-show">
+	<div id="wrapper">
+		<div id="wrapper2">
+
+
+
+			<div class="" id="main">
+				<!-- 				<div id="sidebar"> -->
+
+
+				<div class="wiki">
+					<a name="Android-Deployment"></a>
+					<h1>
+						Android Deployment<a href="#Android-Deployment"
+							class="wiki-anchor">&para;</a>
+					</h1>
+
+
+					<ul class="toc right">
+						<li><a href="#Android-Deployment">Android Deployment</a>
+							<ul>
+								<li><a href="#Configuration-and-App-Deployment">Configuration
+										and App Deployment</a></li>
+								<li><a href="#Connecting-to-an-Android-device">Connecting
+										to an Android device</a></li>
+								<li><a href="#Configuring-the-Device">Configuring the
+										Device</a></li>
+								<li><a href="#Alternative-App-Installation-Methods">Alternative
+										App Installation Methods</a></li>
+								<li><a href="#Societies-Android-App-Preferences">Societies
+										Android App Preferences</a></li>
+								<li><a href="#XMPP-Server-URI">XMPP Server URI</a></li>
+							</ul></li>
+					</ul>
+
+
+					<a name="Configuration-and-App-Deployment"></a>
+					<h2>
+						Configuration and App Deployment<a
+							href="#Configuration-and-App-Deployment" class="wiki-anchor">&para;</a>
+					</h2>
+
+
+					<p>There are three Linux Bash scripts for starting an AVD, and
+						configuring and deploying APKs to a target Android AVD/device.</p>
+
+
+					<ol>
+						<li>startTestAVD.sh: Start and AVD (<a class="external"
+							href="https://github.com/societies/SOCIETIES-Platform/blob/development/platform-infrastructure/client-frwk/AndroidConfiguration/startTestAVD.sh">https://github.com/societies/SOCIETIES-Platform/blob/development/platform-infrastructure/client-frwk/AndroidConfiguration/startTestAVD.sh</a>)
+						</li>
+						<li>initTestAVD.sh: Configure a device/AVD (<a
+							class="external"
+							href="https://github.com/societies/SOCIETIES-Platform/blob/development/platform-infrastructure/client-frwk/AndroidConfiguration/initTestAVD.sh">https://github.com/societies/SOCIETIES-Platform/blob/development/platform-infrastructure/client-frwk/AndroidConfiguration/initTestAVD.sh</a>)
+						</li>
+						<li>installSocieties.sh: Deploy the required Societies apps (<a
+							class="external"
+							href="https://github.com/societies/SOCIETIES-Platform/blob/Testing_Release_0.4/platform-infrastructure/client-frwk/AndroidConfiguration/installSocieties.sh">https://github.com/societies/SOCIETIES-Platform/blob/Testing_Release_0.4/platform-infrastructure/client-frwk/AndroidConfiguration/installSocieties.sh</a>)
+						</li>
+					</ol>
+
+
+					<p>The latter two scripts require that an AVD/device's serial
+						number is supplied a command line parameter in order to allow more
+						than AVD/device to be connected and select a particular target for
+						the scripts. In order to determine an AVD/device's serial use the
+						following command line:</p>
+
+
+					<pre>
+
+$ adb devices
+
+</pre>
+
+					<a name="Connecting-to-an-Android-device"></a>
+					<h2>
+						Connecting to an Android device<a
+							href="#Connecting-to-an-Android-device" class="wiki-anchor">&para;</a>
+					</h2>
+
+
+					<p>
+						In the case of a device being attached to a desktop/laptop the
+						easiest way is to use a USB cable. The only problem using USB is
+						that Windows users must install an Android USB driver. Linux and
+						Mac users
+						<ins>do not</ins>
+						require a driver.
+					</p>
+
+
+					<p>
+						It is possible to run <strong>adb</strong> over Wifi.
+					</p>
+
+
+					<p>
+						On the device via an installed terminal type app (<strong>requires
+							root access</strong>):
+					</p>
+
+
+					<pre>
+setprop service.adb.tcp.port 5555
+stop adbd
+start adbd
+</pre>
+
+					<p>You can disable it and return ADB to listening on USB with:</p>
+
+
+					<pre>
+setprop service.adb.tcp.port -1
+stop adbd
+start adbd
+</pre>
+
+					<p>Alternatively, if you have adb installed on your laptop:</p>
+
+
+					<pre>
+adb tcpip 5555
+adb connect 192.168.0.101:5555
+</pre>
+
+					<p>To tell the ADB daemon return to listening over USB:</p>
+
+
+					<pre>
+adb usb
+</pre>
+
+					<a name="Configuring-the-Device"></a>
+					<h2>
+						Configuring the Device<a href="#Configuring-the-Device"
+							class="wiki-anchor">&para;</a>
+					</h2>
+
+
+					<ul>
+						<li>Run the configuration script, initTestAVD.sh script. This
+							script is <strong>only</strong> required for AVDs and will have
+							no effect on a real device as they are not usually rooted and the
+							<strong>hosts</strong> file cannot be amended.
+						</li>
+					</ul>
+
+
+					<ul>
+						<li>Run the installSocieties.sh script. This action will
+							install the current two Societies apps, Communications and
+							Client, to the device or overwrite the existing installed
+							versions.</li>
+					</ul>
+
+
+					<a name="Alternative-App-Installation-Methods"></a>
+					<h2>
+						Alternative App Installation Methods<a
+							href="#Alternative-App-Installation-Methods" class="wiki-anchor">&para;</a>
+					</h2>
+
+
+					<p>In the case of a requirement to update the Societies
+						installed apps and the device cannot be tethered to a desktop,
+						there are other dissemination methods such as:</p>
+
+
+					<ol>
+						<li>E-mail: Assuming that a user's Android device has an
+							e-mail client, an email(s) can be sent to the user(s) with the
+							the updated apps(s) as attachments. In the case that an e-mail
+							client does not have the option to treat an e-mail as unicode,
+							there will be an error displayed about parsing the app but it
+							should allow the user to save the attachment to their SDcard. A
+							suitable Android File Manager/Explorer app will be required to
+							locate the saved app(s) and install them.</li>
+					</ol>
+
+
+					<ol>
+						<li>Dropbox: Sharing apps through this service is possible.</li>
+						<li>Web Server: Serve the apps from a web server via the
+							Android device's browser</li>
+					</ol>
+
+
+					<a name="Societies-Android-App-Preferences"></a>
+					<h2>
+						Societies Android App Preferences<a
+							href="#Societies-Android-App-Preferences" class="wiki-anchor">&para;</a>
+					</h2>
+
+
+					<ul>
+						<li>Domain Authority Server URI: The URI of the Domain
+							Authority server, i.e the XMPP server used to support the Domain
+							Authority and relevant CSSs. For example, "societies.local"</li>
+						<li>Domain Authority Name: The JID of the node which is
+							hosting the Domain Authority. The node can also support running a
+							CSS cloud node, i.e. Combined node. For example,
+							"combined.societies.local". <strong>Must be configured
+								prior to logging in</strong>
+						</li>
+						<li>CSS Identity: The user or CSS username to which the local
+							Android device wishes to login to. A typical value "userA". In
+							order for a login to occur successfully the user identity must
+							exist as a defined username on the chosen XMPP server defined by
+							the preference "Domain Authority Server URI". It is also required
+							that a CSS cloud node exists with the same username. For example,
+							a user "userA" logs into XMPP server defined as
+							"societies.local". The user, "userA", must be defined as a user
+							on the XMPP server "societies.local". A CSS cloud node must also
+							be registered as an external component with the name
+							"userA.societies.local". This can be achieved by either:</li>
+					</ul>
+
+
+					<blockquote>
+
+						<ol>
+							<li>define user via Openfire web administrative site</li>
+							<li>register user via browser-based relevant Webapp page</li>
+							<li>register user via the Android Societies Client app
+								registration page</li>
+						</ol>
+
+
+					</blockquote>
+
+					<ul>
+						<li>Identity Password: The XMPP username password used to
+							authenticate a user's login from a CSS node.</li>
+						<li>Android CSS Node JID Resource: The resource part of the
+							CSS node's Full JID. This identifier should be unique within a
+							CSS but no mechanism exists apart from a manual check to enforce
+							this. For example, a full JID could be "<a class="email"
+							href="mailto:userA@societies.local">userA@societies.local</a>/galaxy-nexus"
+							- "galaxy-nexus" is the resource. <strong>Must be
+								configured prior to logging in</strong>
+						</li>
+						<li>Domain Authority Server Port: The port number that
+							supports XMPP "Client to Server" communication. <strong>Must
+								be configured prior to logging in</strong>
+						</li>
+						<li>Node Type: Read-only preference that designates the
+							device as an Android client device.</li>
+					</ul>
+
+
+					<a name="XMPP-Server-URI"></a>
+					<h2>
+						XMPP Server URI<a href="#XMPP-Server-URI" class="wiki-anchor">&para;</a>
+					</h2>
+
+
+					<p>It appears that a plain IP address that defines an XMPP
+						server cannot be used when defining the Domain Authority Server
+						URI. There are two ways to avoid this problem:</p>
+
+
+					<ol>
+						<li>Define the server address as a well known DNS entry. This
+							can be done internally in a particular organisation or as an
+							internet wide defined DNS name.</li>
+						<li>Modify the <strong>hosts</strong> file on relevant CSS
+							nodes to manually define a name for the XMPP server, i.e. w<a
+							class="external" href="http://www.xxxx.yyyy.zzzz">www.xxxx.yyyy.zzzz</a>
+							societies.local would allow the societies.local name to be
+							translated to an IP address. This modification is possible on a
+							conventional OS based machine or an AVD. Actual Android devices
+							are predominantly not rooted and the hosts file is read-only. The
+							only solutions are either the previous suggestion or, if the
+							device owner is prepared to do so, root the device (cf. <a
+							href="/projects/sp/wiki/Rooting_Android_Phones" class="wiki-page">Rooting
+								Android Phones</a>).
+						</li>
+					</ol>
+				</div>
+
+				<div style="clear: both;"></div>
+			</div>
+		</div>
+
+		<div id="ajax-indicator" style="display: none;">
+			<span>Loading...</span>
+		</div>
+
+	</div>
+	<div></div>
+	<div></div>
+
+</body>
+</html>

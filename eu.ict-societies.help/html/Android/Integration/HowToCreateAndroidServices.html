@@ -1,0 +1,545 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<title>Societies Platform - Android Services - Societies Redmine</title>
+<meta name="description" content="Redmine" />
+<meta name="keywords" content="issue,bug,tracker" />
+<meta name="csrf-param" content="authenticity_token" />
+<meta name="csrf-token"
+	content="JMAfmcSzh9nqByMBkqpzD7RzT3uWZzg7qmINPKbMSTE=" />
+<link rel='shortcut icon' href='/favicon.ico?1310384844' />
+<link href="/themes/red-andy/stylesheets/application.css?1304377159"
+	media="all" rel="stylesheet" type="text/css" />
+
+<script src="/javascripts/prototype.js?1310384844"
+	type="text/javascript"></script>
+<script src="/javascripts/effects.js?1310384844" type="text/javascript"></script>
+<script src="/javascripts/dragdrop.js?1310384844" type="text/javascript"></script>
+<script src="/javascripts/controls.js?1310384844" type="text/javascript"></script>
+<script src="/javascripts/application.js?1310384844"
+	type="text/javascript"></script>
+<script type="text/javascript">
+	//         
+	
+	//
+</script>
+
+<!--[if IE 6]>
+    <style type="text/css">
+      * html body{ width: expression( document.documentElement.clientWidth < 900 ? '900px' : '100%' ); }
+      body {behavior: url(/stylesheets/csshover.htc?1310384844);}
+    </style>
+<![endif]-->
+<link rel="stylesheet"
+	href="/plugin_assets/redmine_backlogs/javascripts/jquery/jquery.jqplot/jquery.jqplot.min.css"
+	type="text/css" />
+
+<script
+	src="/plugin_assets/redmine_backlogs/javascripts/jquery/jquery-1.4.2.min.js?1318533980"
+	type="text/javascript"></script>
+<script
+	src="/plugin_assets/redmine_backlogs/javascripts/jquery/jquery-ui-1.8rc3.custom.min.js?1318533980"
+	type="text/javascript"></script>
+<script
+	src="/plugin_assets/redmine_backlogs/javascripts/jquery/jquery.jeditable.mini.js?1318533980"
+	type="text/javascript"></script>
+<script
+	src="/plugin_assets/redmine_backlogs/javascripts/jquery/jquery.cookie.js?1318533980"
+	type="text/javascript"></script>
+<!--[if IE]><script src="/plugin_assets/redmine_backlogs/javascripts/jquery/jquery.jqplot/excanvas.js?1318533980" type="text/javascript"></script><![endif]-->
+<script
+	src="/plugin_assets/redmine_backlogs/javascripts/jquery/jquery.jqplot/jquery.jqplot.js?1318533980"
+	type="text/javascript"></script>
+<script
+	src="/plugin_assets/redmine_backlogs/javascripts/jquery/jquery.jqplot/plugins/jqplot.highlighter.js?1318533980"
+	type="text/javascript"></script>
+<script
+	src="/plugin_assets/redmine_backlogs/javascripts/jquery/jquery.jqplot/plugins/jqplot.canvasTextRenderer.min.js?1318533980"
+	type="text/javascript"></script>
+<script
+	src="/plugin_assets/redmine_backlogs/javascripts/jquery/jquery.jqplot/plugins/jqplot.canvasAxisTickRenderer.min.js?1318533980"
+	type="text/javascript"></script>
+<script
+	src="/plugin_assets/redmine_backlogs/javascripts/jquery/jquery.jqplot/plugins/jqplot.enhancedLegendRenderer.min.js?1318533980"
+	type="text/javascript"></script>
+
+<script
+	src="/plugin_assets/redmine_backlogs/javascripts/common.js?1318533980"
+	type="text/javascript"></script>
+<script
+	src="/plugin_assets/redmine_backlogs/javascripts/burndown.js?1318533980"
+	type="text/javascript"></script>
+
+
+<!-- page specific tags -->
+
+<link href="/stylesheets/scm.css?1310384844" media="screen"
+	rel="stylesheet" type="text/css" />
+</head>
+<body class="theme-Red-andy controller-wiki action-show">
+	<div id="wrapper">
+		<div id="wrapper2">
+
+			<div class="" id="main">
+
+				<div id="content">
+
+
+					<div class="wiki">
+						<a name="Android-Services"></a>
+						<h1>
+							Android Services<a href="#Android-Services" class="wiki-anchor">&para;</a>
+						</h1>
+
+
+						<p>Android services fall into one of two categories - Bound
+							(allows local and remote components to "bind" to an API and
+							invoke methods) and Started (carries out a defined task(s)).
+							Services can also combine these two facets. This article
+							concentrates on the mechanics of creating these types of
+							services.</p>
+
+
+						<a name="Bound-Services"></a>
+						<h2>
+							Bound Services<a href="#Bound-Services" class="wiki-anchor">&para;</a>
+						</h2>
+
+
+						<p>
+							Review the article, <a class="external"
+								href="http://wiki.ict-societies.eu/index.php/AndroidServices">http://wiki.ict-societies.eu/index.php/AndroidServices</a>,
+							and its references for more information on the terminology. It is
+							important to decide if a service will be only used by components
+							within the same application or by internal and external
+							components.
+						</p>
+
+
+						<p>One important point to note is that no management of a
+							bound service is required - the service will automatically start
+							when the first binding takes place and will continue running
+							until the last binding is released. The implication of this is
+							that not unbinding from a service when your client component no
+							longer requires it keeps the service alive and consuming device
+							resources.</p>
+
+
+						<a name="Same-Process-Service"></a>
+						<h3>
+							Same Process Service<a href="#Same-Process-Service"
+								class="wiki-anchor">&para;</a>
+						</h3>
+
+
+						<p>The service just implements public methods according to
+							some interface(s), create a class that extends the Binder class:</p>
+
+
+						<pre>
+    public class LocalBinder extends Binder {
+        SameProcessService getService() {
+            return SameProcessService.this;
+        }
+    }
+
+</pre>
+
+						<p>and implement the Service method that must be implemented
+							by a bound service export its API:</p>
+
+
+						<pre>
+    public IBinder onBind(Intent intent) {
+        return this.binder;
+    }
+
+</pre>
+
+						<p>
+							A full example can be found at: <a class="external"
+								href="https://github.com/societies/SOCIETIES-Platform/blob/development/platform-infrastructure/client-frwk/IPCServiceExample/src/org/societies/android/platform/servicemonitor/SameProcessService.java">https://github.com/societies/SOCIETIES-Platform/blob/development/platform-infrastructure/client-frwk/IPCServiceExample/src/org/societies/android/platform/servicemonitor/SameProcessService.java</a>
+						</p>
+
+
+						<a name="Different-Process-Service"></a>
+						<h3>
+							Different Process Service<a href="#Different-Process-Service"
+								class="wiki-anchor">&para;</a>
+						</h3>
+
+
+						<p>
+							When a bound service has to support IPC remote invocations there
+							are two choices on how to proceed; Messenger or AIDL. Since AIDL
+							is required for a services that <strong>have</strong> to support
+							concurrent access and handle the issues of being thread-safe it
+							is currently not covered. Android IPC, whether it is Messenger or
+							AIDL based, is uni-directional meaning that if a remote method is
+							invoked and a return value is required, the client must implement
+							a suitable interface and all of the supporting boilerplate code
+							required to allow the remote component to convey the return value
+							back to the client component. This implies that if a component is
+							bound to more than one remote service, it will have to support
+							"return value" interfaces for these services and so on as the
+							number of bound remote services increases. This could very
+							quickly transform a client component into a complicated one and
+							that will require maintenance changes if one or more of the bound
+							services change their "return value" interfaces. In order to
+							prevent this complexity, the approach below is a hybrid one that
+							uses the Intent mechanism to convey return values if required and
+							implies a lot less code support on the part of the client
+							component.
+						</p>
+
+
+						<p>The Messenger mechanism is slightly fragile as it relies on
+							a client component specifying a remote method by a numeric index
+							and the receiving service interpreting this index as a method
+							call. In order to make the semantics of calling a remote service
+							through this mechanism more similar to conventional method
+							invocation there are two classes required:</p>
+
+
+						<p>
+							ServiceMethodTranslator: handles the parsing of remote service
+							interfaces. Requires that each interface declare an array of
+							method signatures (<a class="external"
+								href="https://github.com/societies/SOCIETIES-Platform/blob/development/platform-infrastructure/client-frwk/CoreInterfaces/src/main/java/org/societies/android/platform/utilities/ServiceMethodTranslator.java">https://github.com/societies/SOCIETIES-Platform/blob/development/platform-infrastructure/client-frwk/CoreInterfaces/src/main/java/org/societies/android/platform/utilities/ServiceMethodTranslator.java</a>)
+						</p>
+
+
+						<p>
+							RemoteServiceHandler: handles the Messenger mechanism's Messages
+							and uses reflection to extract the parameters from a message and
+							invoke the remote method (<a class="external"
+								href="https://github.com/societies/SOCIETIES-Platform/blob/development/platform-infrastructure/client-frwk/CoreInterfaces/src/main/java/org/societies/android/platform/utilities/RemoteServiceHandler.java">https://github.com/societies/SOCIETIES-Platform/blob/development/platform-infrastructure/client-frwk/CoreInterfaces/src/main/java/org/societies/android/platform/utilities/RemoteServiceHandler.java</a>)
+						</p>
+
+
+						<p>The above classes currently support primitives, String and
+							Parcelable objects. If support for arrays and collections is
+							required contact the WP4 Client Team.</p>
+
+
+						<p>To create remote bound service:</p>
+
+
+						<ul>
+							<li>Implement the service's API from one or more interfaces</li>
+						</ul>
+
+
+						<ul>
+							<li>Create the Messenger and associate the
+								RemoteServiceHandler with it</li>
+						</ul>
+
+
+						<pre>
+    @Override
+    public void onCreate () {
+        this.inMessenger = new Messenger(new RemoteServiceHandler(this.getClass(), this));
+        Log.i(LOG_TAG, "Service starting");
+    }
+
+</pre>
+
+						<ul>
+							<li>Implement the Service method that must be implemented by
+								a bound service to export its API:</li>
+						</ul>
+
+
+						<pre>
+    @Override
+    public IBinder onBind(Intent arg0) {
+        return inMessenger.getBinder();
+    }
+
+</pre>
+
+						<ul>
+							<li>Each public API method should be of the form:</li>
+						</ul>
+
+
+						<pre>
+public &lt;returnValue&gt; &lt;methodName&gt;(String client, &lt;other parameters&gt;) 
+    //Relevant code
+
+    /**
+        * Create intent to broadcast results to interested receivers
+    */
+    if (client != null) {
+       Intent intent = new Intent(GET_NODE_DETAILS);
+
+       intent.putExtra(INTENT_RETURN_KEY, node);
+       /**
+           * Intentionally restricting potential intent receiver to client 
+       */
+       intent.setPackage(client);
+       this.sendBroadcast(intent);
+    }
+
+    return node;
+
+</pre>
+
+						<p>The "client" parameter is required for two reasons:
+							signifies that the method call is a remote one and that the
+							return value should be returned via an intent; and allows the
+							intent to restrict the allowable receivers of the intent to the
+							client component that made the remote invocation in the first
+							place. Since the method could also be called as a local service,
+							it must return the return value through the normal mechanism.</p>
+
+
+						<p>
+							A full example can be found at <a class="external"
+								href="https://github.com/societies/SOCIETIES-Platform/blob/development/platform-infrastructure/client-frwk/IPCServiceExample/src/org/societies/android/platform/servicemonitor/CoreMonitor.java">https://github.com/societies/SOCIETIES-Platform/blob/development/platform-infrastructure/client-frwk/IPCServiceExample/src/org/societies/android/platform/servicemonitor/CoreMonitor.java</a>
+						</p>
+
+
+						<a name="Client-Components"></a>
+						<h2>
+							Client Components<a href="#Client-Components" class="wiki-anchor">&para;</a>
+						</h2>
+
+
+						<p>
+							In order to allow a component to bind to a service some
+							boilerplate code is required and there are some minor differences
+							depending on whether the bound service is local or remote. An
+							example client can be viewed at:<br />
+							<a class="external"
+								href="https://github.com/societies/SOCIETIES-Platform/blob/development/platform-infrastructure/client-frwk/IPCServiceExample/src/org/societies/android/platform/servicemonitor/ExampleServiceActivity.java">https://github.com/societies/SOCIETIES-Platform/blob/development/platform-infrastructure/client-frwk/IPCServiceExample/src/org/societies/android/platform/servicemonitor/ExampleServiceActivity.java</a>
+						</p>
+
+
+						<a name="Local-Bound-Service"></a>
+						<h3>
+							Local Bound Service<a href="#Local-Bound-Service"
+								class="wiki-anchor">&para;</a>
+						</h3>
+
+
+						<ul>
+							<li>Declare the local service:<br />
+							<pre>
+    private &lt;Interface of local bound service&gt; &lt;target service&gt;;
+</pre></li>
+						</ul>
+
+
+						<ul>
+							<li>Define an intent to specify the service to be bound to:<br />
+							<pre>
+        Intent intent = new Intent(this, &lt;name of service&gt;.class);
+</pre></li>
+						</ul>
+
+
+						<ul>
+							<li>Create a service connection class:</li>
+						</ul>
+
+
+						<pre>
+    private ServiceConnection &lt;name of service connection object&gt; = new ServiceConnection() {
+
+        public void onServiceDisconnected(ComponentName name) {
+            &lt;boolean variable&gt; = false;
+
+        }
+
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            LocalBinder binder = (LocalBinder) service;
+            &lt;target service&gt; = (&lt;Interface of local bound service&gt;) binder.getService();
+            &lt;boolean variable&gt; = true;
+
+        }
+    };
+</pre>
+
+						<ul>
+							<li>Use service as a normal component by invoking available
+								methods but ensure that each invocation uses the &lt;boolean
+								variable&gt; as indication of whether the service is still bound
+								to.</li>
+						</ul>
+
+
+						<a name="Remote-Bound-Service"></a>
+						<h3>
+							Remote Bound Service<a href="#Remote-Bound-Service"
+								class="wiki-anchor">&para;</a>
+						</h3>
+
+
+						<ul>
+							<li>Define a Messenger:</li>
+						</ul>
+
+
+						<pre>
+private Messenger &lt;messenger variable&gt;
+</pre>
+
+						<ul>
+							<li>Define an intent to specify the service to be bound to:</li>
+						</ul>
+
+
+						<pre>
+        Intent intent = new Intent(this, &lt;name of service.class);
+</pre>
+
+						<ul>
+							<li>Implement a ServiceConnection class:</li>
+						</ul>
+
+
+						<pre>
+    private ServiceConnection &lt;name of connection object&gt; = new ServiceConnection() {
+
+        public void onServiceDisconnected(ComponentName name) {
+            &lt;boolean variable&gt; = false;
+
+        }
+
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            &lt;boolean variable&gt; = true;
+            &lt;messenger variable&gt; = new Messenger(service);
+        }
+    };
+
+</pre>
+
+						<ul>
+							<li>Invoke the remote service's API but ensure that each
+								invocation uses the &lt;boolean variable&gt; as indication of
+								whether the service is still bound to. First select a method
+								signature from the target service's interface</li>
+						</ul>
+
+
+						<pre>
+            String targetMethod = &lt;target service's interface&gt;.methodsArray[8];
+</pre>
+
+						<ul>
+							<li>Define a Message and specify the interface's method's
+								index using the ServiceMethodTranslator:</li>
+						</ul>
+
+
+						<pre>
+            Message outMessage = Message.obtain(null, ServiceMethodTranslator.getMethodIndex(ICoreServiceMonitor.methodsArray, targetMethod), 0, 0);
+</pre>
+
+						<ul>
+							<li>Define a Bundle which forms the payload of the Message:</li>
+						</ul>
+
+
+						<pre>
+            Bundle outBundle = new Bundle();
+</pre>
+
+						<ul>
+							<li>Define the parameter values. It is important to note
+								that primitives, String and some other Android classes are
+								automatically Parcelable (<a class="external"
+								href="http://developer.android.com/reference/android/os/Parcelable.html">http://developer.android.com/reference/android/os/Parcelable.html</a>).
+								User-defined data types must implement the Parcelable interface
+								if they are to be passed through the IPC mechanism. <br />
+							<pre>
+            outBundle.putString(ServiceMethodTranslator.getMethodParameterName(targetMethod, 0), this.getPackageName());
+            outBundle.putParcelable(ServiceMethodTranslator.getMethodParameterName(targetMethod, 1), new AndroidParcelable());
+</pre>
+							</li>
+						</ul>
+
+
+						<ul>
+							<li>Assign the bundle to the message:</li>
+						</ul>
+
+
+						<pre>
+            outMessage.setData(outBundle);
+</pre>
+
+						<ul>
+							<li>Send the message<br />
+							<pre>
+            try {
+               &lt;messenger variable&gt;.send(outMessage);
+        } catch (RemoteException e) {
+                e.printStackTrace();
+        }
+</pre></li>
+						</ul>
+
+
+						<ul>
+							<li>In order to receive the return value of a previously
+								invoked remote method a Broadcast Receiver class must be
+								created:<br />
+							<pre>
+    private class &lt;name of receiver&gt; extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent.getAction().equals(&lt;name of intent that contains return value&gt;)) {
+                          //relevant code
+                        }
+        }
+</pre>
+							</li>
+						</ul>
+
+
+						<ul>
+							<li>Define an Intent Filter:</li>
+						</ul>
+
+
+						<pre>
+        IntentFilter intentFilter = new IntentFilter() ;
+        intentFilter.addAction(&lt;relevant intent&gt;);
+        this.registerReceiver(new &lt;name of receiver&gt;(), intentFilter);
+
+</pre>
+
+						<a name="Unbinding-a-Bound-Service"></a>
+						<h3>
+							Unbinding a Bound Service<a href="#Unbinding-a-Bound-Service"
+								class="wiki-anchor">&para;</a>
+						</h3>
+
+
+						<p>When a client component wishes to unbind from a service use
+							the following code :</p>
+
+
+						<pre>
+        if (&lt;boolean variable indicates bind status&gt;) {
+            unbindService(&lt;service connection object);
+        }
+
+</pre>
+					</div>
+
+
+					<div style="clear: both;"></div>
+				</div>
+			</div>
+
+		</div>
+	</div>
+
+</body>
+</html>

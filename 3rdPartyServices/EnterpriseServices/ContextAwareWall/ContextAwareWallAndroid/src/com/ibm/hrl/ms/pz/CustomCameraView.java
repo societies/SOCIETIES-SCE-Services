@@ -12,6 +12,8 @@ public class CustomCameraView  extends SurfaceView{
 	
 	private Camera camera= null;
 	private boolean surfaceCreated = false;
+	private boolean cameraReleased = true;
+	
 	SurfaceHolder.Callback surfaceHolderListener = new SurfaceHolder.Callback() {
 	     
 
@@ -38,13 +40,42 @@ public class CustomCameraView  extends SurfaceView{
 	   }
 	   
 	 };
+	 /*
+	 @Override
+	 public void onDraw(Canvas canvas) {
+
+	             Paint paint = new Paint();
+	             paint.setStyle(Paint.Style.FILL_AND_STROKE);
+	             paint.setStrokeWidth(3);
+	             paint.setAntiAlias(true);
+	             paint.setColor(Color.BLUE);
+	             canvas.drawRect(0, 0, this.getWidth(), this.getHeight(), paint);
+
+	             
+	     if (hasData) {
+
+	         resetColor();
+	         try {
+
+	             canvas.drawColor(getResources().getColor(R.color.graphbg_color));
+
+	             graphDraw(canvas);
+	         } catch (ValicException ex) {
+
+	         }
+
+	     }
+	 }*/
 	 
 	 
 	 private void init(){
 		 try{
 			 previewHolder = this.getHolder();
 			 previewHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
-			 previewHolder.addCallback(surfaceHolderListener); 
+			 previewHolder.addCallback(surfaceHolderListener);
+			 
+			 
+			 
 		 }catch (Exception e) {
 			 Log.e("error", e.getMessage()+ " ; cause: "+e.getCause(), e);
 		}
@@ -62,7 +93,7 @@ public class CustomCameraView  extends SurfaceView{
          super(context, attrs, defStyle);
          init();
      }
-		
+	
 	 public void onResumeMySurfaceView(){
 		 openCamera();
 	 }
@@ -73,13 +104,17 @@ public class CustomCameraView  extends SurfaceView{
 	
 	 private void releaseCamera(){
 		 try{
-			 if (camera!= null){
+			 if (camera!= null && !cameraReleased){
 				 camera.stopPreview();
+				 camera.setPreviewCallback(null);
 				 camera.release();
-				 Log.d("debug","Stopping camaera on pause");
+				 camera = null;
+				 Log.i("vg","Stopping camaera on pause");
 			 }
 		 }catch (Exception e) {
 			   Log.e("error", e.getMessage()+ " ; cause: "+e.getCause(), e);
+		 }finally{
+			 cameraReleased = true;
 		 }
 	 }
 	 
@@ -88,13 +123,19 @@ public class CustomCameraView  extends SurfaceView{
 			 if (surfaceCreated == false){
 				 return;
 			 }
-			 camera=Camera.open();
-			 camera.setPreviewDisplay(previewHolder);
-			 camera.startPreview();
-			 camera.setDisplayOrientation(90);
-			 Log.d("debug","starting camera on resume");
+			 if (camera == null){
+				 camera=Camera.open();
+				 camera.setPreviewDisplay(previewHolder);
+				 camera.startPreview();
+				 camera.setDisplayOrientation(90);
+				 cameraReleased = false;
+			 }
+			 
+			 
+			 Log.i("vg","starting camera on resume");
 		 }catch (Exception e) {
 			   Log.e("error", e.getMessage()+ " ; cause: "+e.getCause(), e);
+			   releaseCamera();
 		 }
 	 }
 	 

@@ -30,8 +30,14 @@ public class MessageForm {
 	private String cisBox;
 	private String style;
 	private String msg;
+	private String msgDest;
 	
-	
+	public String getMsgDest() {
+		return msgDest;
+	}
+	public void setMsgDest(String msgDest) {
+		this.msgDest = msgDest;
+	}
 	public String getUserId() {
 		return userId;
 	}

@@ -2,14 +2,28 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:orientation="vertical" >
-
+    android:orientation="vertical"
+    android:id="@+id/mainRelativeLayout"
+    android:background="@color/black"
+    >
+	
     
      <com.ibm.hrl.ms.pz.CustomCameraView
         android:id="@+id/surfaceView"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:orientation="vertical" />
+        android:orientation="vertical"
+      	 />
+     
+      <ImageView
+        android:id="@+id/imageBackground"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true" 
+        android:src="@drawable/black"
+        android:visibility="gone"/>
+     
    
     
      <LinearLayout
@@ -53,54 +67,95 @@
         android:textSize="30sp" 
         android:gravity="top" />
 	
-    
-    <LinearLayout
-    android:layout_width="fill_parent"
-    android:layout_height="wrap_content"
-    android:paddingLeft="1dp"
-    android:paddingRight="1dp"
-    android:orientation="horizontal" 
-    android:layout_alignParentBottom="true"
-    android:layout_alignParentLeft="true">
-    
+  
+		 
+<LinearLayout
+		    android:layout_width="fill_parent"
+		    android:layout_height="wrap_content"
+		    android:paddingLeft="1dp"
+		    android:paddingRight="1dp"
+		    android:orientation="vertical" 
+		    android:layout_alignParentLeft="true"
+		    android:layout_alignParentBottom="true">
+		    
+      
+           <LinearLayout
+		    android:layout_width="fill_parent"
+		    android:layout_height="wrap_content"
+		    android:paddingLeft="1dp"
+		    android:paddingRight="1dp"
+		    android:orientation="horizontal" 
+		   	>
         
-    <EditText
-        android:id="@+id/postMsgText"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentLeft="true" 
-       	android:layout_weight="1"
-        android:visibility="visible"
-        android:maxLength="50"
-         />
     
-      <!-- android:ems="6" -->
-     <ImageButton
-		android:id="@+id/sendNow"
-		android:src="@drawable/sendnow"
-		android:layout_height="wrap_content"
-		android:layout_width="wrap_content"
-		android:visibility="visible"	
-		/>
-     
-     <ImageButton
-		android:id="@+id/sprayFrame"
-		android:src="@drawable/socialchat"
-		android:layout_height="wrap_content"
-		android:layout_width="wrap_content"
-		/>
-		
-      <ImageButton
-		android:id="@+id/settings"
-		android:src="@drawable/settings"
-		android:layout_height="wrap_content"
-		android:layout_width="wrap_content"
-		/>
-    </LinearLayout>
+		    <EditText
+		        android:id="@+id/postMsgText"
+		        android:layout_width="0dp"
+		        android:layout_height="wrap_content"
+		       	android:hint="Type your message:"
+		       	android:layout_weight="1"
+		        android:visibility="visible"
+		        android:maxLength="50"
+		        android:textSize="16sp"
+		         />
+    
    
-	
+    		</LinearLayout>
+    
+	    <LinearLayout
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+	    android:paddingLeft="1dp"
+	    android:paddingRight="1dp"
+	    android:orientation="horizontal" 
+	    android:layout_alignParentBottom="true"
+	    android:layout_alignParentLeft="true">
+	    
+	    <EditText
+	        android:id="@+id/messageDest"
+	        android:layout_width="0dp"
+	        android:layout_height="wrap_content"
+	        android:hint="Msg To: (All CSS)"
+	       	android:layout_weight="1"
+	        android:visibility="visible"
+	        android:maxLength="50"
+	        android:textSize="16sp"
+	         />
+	    
+	      <!-- android:ems="6" -->
+	     <ImageButton
+			android:id="@+id/sendNow"
+			android:src="@drawable/sendnow"
+			android:layout_height="wrap_content"
+			android:layout_width="wrap_content"
+			android:visibility="visible"	
+			/>
+	     
+	     <ImageButton
+			android:id="@+id/sprayFrame"
+			android:src="@drawable/socialchat"
+			android:layout_height="wrap_content"
+			android:layout_width="wrap_content"
+			/>
+		
+	     <ImageButton
+			android:id="@+id/camera"
+			android:src="@drawable/camera"
+			android:layout_height="wrap_content"
+			android:layout_width="wrap_content"
+			/>
+	     
+	      <ImageButton
+			android:id="@+id/settings"
+			android:src="@drawable/settings"
+			android:layout_height="wrap_content"
+			android:layout_width="wrap_content"
+			/>
+	    </LinearLayout>
 
+</LinearLayout>
+
+      
 </RelativeLayout>    
     <!-- 
     

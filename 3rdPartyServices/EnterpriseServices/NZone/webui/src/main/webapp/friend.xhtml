@@ -1,0 +1,65 @@
+<f:view xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:pm="http://primefaces.org/mobile" contentType="text/html">
+
+	<pm:page title="Networking Zone">
+		<pm:view id="viewFriend">
+			<pm:header title="Friends Profile" />
+			<pm:content>
+				<p:accordionPanel id="friendInfoPanel">
+				This is your friends profile
+				<p:tab title="Details">
+						<h:form id="form">
+						<h:outputLabel for="friendname" value="Name " style="font-weight:bold" />
+						<h:outputText id="friendname" value="#{friendBean.name}" />
+						<br/>
+						<h:outputLabel for="friendcompanylabel" value="Company " style="font-weight:bold" />
+						<h:outputText id="friendcompanylabel" value="#{friendBean.company}" />
+						<h:outputText id="friendcompanypref" value=" *P*" rendered="#{friendBean.isPref()}"/>
+						
+						<br/>
+						
+        				<p:selectOneRadio value="#{friendBean.preferredcompany}">  
+           					<f:selectItem itemLabel="Preferred" itemValue="1" />  
+            				<f:selectItem itemLabel="Not Preferred" itemValue="0" />  
+            				<f:ajax event="click" render="friendcompanypref"/> 
+				        </p:selectOneRadio>
+				        	<p:commandButton icon="back" value="Back to Zone"
+								action="gotozone" />
+						</h:form> 
+						
+							<h:form id="profileform">
+							Choose what information to share with #{friendBean.name}
+							<br/>
+							Currently you are sharing your default profile
+						
+<br/><br/><br/>
+				<h:outputLabel for="name" value="Name:" style="font-weight:bold" />
+					<h:outputText id="name" value="#{profileBean.name}" />
+					<p:selectBooleanCheckbox value="false" rendered="false"/> 
+<br/><br/><br/>
+					<h:outputLabel for="email" value="Email:" style="font-weight:bold" />
+					<h:outputText id="email" value="#{profileBean.email}" />
+					<p:selectBooleanCheckbox value="false" /> 
+<br/><br/><br/>
+					<h:outputLabel for="company" value="Company:"
+						style="font-weight:bold" />
+					<h:outputText id="company" value="#{profileBean.company}" />
+					<p:selectBooleanCheckbox value="true" /> 
+					
+
+
+				</h:form>
+				 
+					</p:tab>
+				</p:accordionPanel>
+				
+			</pm:content>
+		</pm:view>
+	</pm:page>
+</f:view>
+
+

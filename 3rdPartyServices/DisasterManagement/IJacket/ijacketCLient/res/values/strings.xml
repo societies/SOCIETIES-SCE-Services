@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="hello">Choose the CIS and send a message to it!</string>
-    <string name="app_name">ijacketCLient</string>
+    <string name="app_name">iJacketClient</string>
     <string name="edit_message">message</string>
     <string name="button_send">send</string>
 </resources>

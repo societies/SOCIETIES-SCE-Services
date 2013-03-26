@@ -1,0 +1,305 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<title>Societies Platform - PhoneGapJQuery Mobile Patterns -
+	Societies Redmine</title>
+<meta name="description" content="Redmine" />
+<meta name="keywords" content="issue,bug,tracker" />
+<meta name="csrf-param" content="authenticity_token" />
+<meta name="csrf-token"
+	content="JMAfmcSzh9nqByMBkqpzD7RzT3uWZzg7qmINPKbMSTE=" />
+<link rel='shortcut icon' href='/favicon.ico?1310384844' />
+<link href="/themes/red-andy/stylesheets/application.css?1304377159"
+	media="all" rel="stylesheet" type="text/css" />
+
+<script src="/javascripts/prototype.js?1310384844"
+	type="text/javascript"></script>
+<script src="/javascripts/effects.js?1310384844" type="text/javascript"></script>
+<script src="/javascripts/dragdrop.js?1310384844" type="text/javascript"></script>
+<script src="/javascripts/controls.js?1310384844" type="text/javascript"></script>
+<script src="/javascripts/application.js?1310384844"
+	type="text/javascript"></script>
+<script type="text/javascript">
+	//         
+	Event
+			.observe(
+					window,
+					'load',
+					function() {
+						new WarnLeavingUnsaved(
+								'The current page contains unsaved text that will be lost if you leave this page.');
+					});
+	//
+</script>
+
+<!--[if IE 6]>
+    <style type="text/css">
+      * html body{ width: expression( document.documentElement.clientWidth < 900 ? '900px' : '100%' ); }
+      body {behavior: url(/stylesheets/csshover.htc?1310384844);}
+    </style>
+<![endif]-->
+<link rel="stylesheet"
+	href="/plugin_assets/redmine_backlogs/javascripts/jquery/jquery.jqplot/jquery.jqplot.min.css"
+	type="text/css" />
+
+<script
+	src="/plugin_assets/redmine_backlogs/javascripts/jquery/jquery-1.4.2.min.js?1318533980"
+	type="text/javascript"></script>
+<script
+	src="/plugin_assets/redmine_backlogs/javascripts/jquery/jquery-ui-1.8rc3.custom.min.js?1318533980"
+	type="text/javascript"></script>
+<script
+	src="/plugin_assets/redmine_backlogs/javascripts/jquery/jquery.jeditable.mini.js?1318533980"
+	type="text/javascript"></script>
+<script
+	src="/plugin_assets/redmine_backlogs/javascripts/jquery/jquery.cookie.js?1318533980"
+	type="text/javascript"></script>
+<!--[if IE]><script src="/plugin_assets/redmine_backlogs/javascripts/jquery/jquery.jqplot/excanvas.js?1318533980" type="text/javascript"></script><![endif]-->
+<script
+	src="/plugin_assets/redmine_backlogs/javascripts/jquery/jquery.jqplot/jquery.jqplot.js?1318533980"
+	type="text/javascript"></script>
+<script
+	src="/plugin_assets/redmine_backlogs/javascripts/jquery/jquery.jqplot/plugins/jqplot.highlighter.js?1318533980"
+	type="text/javascript"></script>
+<script
+	src="/plugin_assets/redmine_backlogs/javascripts/jquery/jquery.jqplot/plugins/jqplot.canvasTextRenderer.min.js?1318533980"
+	type="text/javascript"></script>
+<script
+	src="/plugin_assets/redmine_backlogs/javascripts/jquery/jquery.jqplot/plugins/jqplot.canvasAxisTickRenderer.min.js?1318533980"
+	type="text/javascript"></script>
+<script
+	src="/plugin_assets/redmine_backlogs/javascripts/jquery/jquery.jqplot/plugins/jqplot.enhancedLegendRenderer.min.js?1318533980"
+	type="text/javascript"></script>
+
+<script
+	src="/plugin_assets/redmine_backlogs/javascripts/common.js?1318533980"
+	type="text/javascript"></script>
+<script
+	src="/plugin_assets/redmine_backlogs/javascripts/burndown.js?1318533980"
+	type="text/javascript"></script>
+
+
+<!-- page specific tags -->
+
+<link href="/stylesheets/scm.css?1310384844" media="screen"
+	rel="stylesheet" type="text/css" />
+</head>
+<body class="theme-Red-andy controller-wiki action-show">
+	<div id="wrapper">
+
+		<div class="" id="main">
+
+			
+				<div class="wiki">
+					<a name="PhoneGap-JQuery-Mobile-Patterns"></a>
+					<h1>
+						PhoneGap - JQuery Mobile Patterns<a
+							href="#PhoneGap-JQuery-Mobile-Patterns" class="wiki-anchor">&para;</a>
+					</h1>
+
+
+					<p>
+						Although JQueryMobile is well documented (cf. <a class="external"
+							href="http://jquerymobile.com/demos/1.1.1/">http://jquerymobile.com/demos/1.1.1/</a>),
+						some aspects on how to implement it in the PhoneGap/Cordova
+						environment of the Societies Android App are not immediately
+						apparent. This article serves as "pattern" guide for developers
+						involved in developing for the Societies Android App to explain
+						certain aspects of the implementation.
+					</p>
+
+
+					<a name="Page-Model"></a>
+					<h2>
+						Page Model<a href="#Page-Model" class="wiki-anchor">&para;</a>
+					</h2>
+
+
+					<p>JQueryMobile has two templates for creating pages for a
+						PhoneGap app - single and multi page. Single page is where each
+						page is represented by a single HTML page whereas multi-page
+						involves only one HTML file and all of the app pages are
+						represented by div elements with correctly annotated attributes.
+						The Societies Android app is using the Single page model as it
+						allows each page to be worked on by a relevant developer. Specific
+						Javascript file(s) can also be developed to foster a module
+						approach to the app GUI.</p>
+
+
+					<p>In order to transition from one page to another two basic
+						mechanisms can be used:</p>
+
+
+					<ol>
+						<li>Use an HTML link on the "from" page &lt;a
+							href="myProfile.html"&gt; . Do not use rel="external" as this
+							disables the AJAX linking mechanism</li>
+					</ol>
+
+
+					<ol>
+						<li>Programatically change the page
+							$.mobile.changePage("html/landing.html");</li>
+					</ol>
+
+
+					<p>The second mechanism can use either a URL (as shown) or a
+						link to a page that already has been loaded into the DOM, i.e
+						$.mobile.changePage("#activeServices");</p>
+
+
+					<p>It is important to realise that whichever model is chosen,
+						the way that JQueryMobile works is the same - it manipulates the
+						the DOM to include all pages as virtual pages with the attribute
+						data-role="page". In the Multi-page model, the single HTML page is
+						loaded in to the DOM in one operation. The Single page model
+						retrieves all pages except the first one and inserts them into the
+						DOM as the pages are selected.</p>
+
+
+					<a name="Javascript-and-CSS-Inclusion"></a>
+					<h2>
+						Javascript and CSS Inclusion<a
+							href="#Javascript-and-CSS-Inclusion" class="wiki-anchor">&para;</a>
+					</h2>
+
+
+					<p>As a consequence of using the Single page model, the only
+						page on which to include Javascript and CSS is on the first HTML
+						page (index.html). The reason for this decision is that all other
+						pages which are linked with the above methods do not load new
+						pages (normal browser behaviour) but use an AJAX call to only
+						include the part of the new page delineated with a &lt;div
+						data-role="page"&gt; HTML element.</p>
+
+
+					<p>
+						Since each new page load will activate all Javascript code,
+						especially the <br />
+						<pre>
+$(document).bind('pageinit',function(){} 
+</pre>
+					</p>
+
+
+					<p>functions used to attach JS behaviour to selected HTML
+						elements multiple events will accumulate unless the following
+						convention is used to attach code:</p>
+
+
+					<pre>
+$('#connectXMPP').off('click').on('click', function(){
+</pre>
+
+					<p>Another consequence of the above is that unless a page has
+						been navigated to from the login page (initial page), no CSS will
+						be available to style subsequent pages and no JS will be available
+						to supply behaviour. This applies more so to testing HTML pages
+						with PhoneGapDesktop.</p>
+
+
+					<a name="Presenting-Pre-Populated-Pages"></a>
+					<h2>
+						Presenting Pre-Populated Pages<a
+							href="#Presenting-Pre-Populated-Pages" class="wiki-anchor">&para;</a>
+					</h2>
+
+
+					<p>A common task that occurs in web development is to present a
+						user with a page of multiple items, allow the selection of one
+						item and then present another page dedicated to displaying more
+						information on the chosen item, in effect a drill down mechanism.</p>
+
+
+					<p>The problem from the perspective of JQueryMobile is how to
+						populate data to a page that may not have been included into the
+						DOM yet. Manual DOM modifications and JQuery rely on the DOM
+						elements being present and cannot be made otherwise.</p>
+
+
+					<p>The solution is to load the subsidiary page into the DOM
+						when navigating to its parent page, i.e.</p>
+
+
+					<pre>
+   $.mobile.loadPage("html/active_services.html");
+   $.mobile.changePage("html/landing.html", { transition: "slideup"} );
+
+</pre>
+
+					<p>then to attach the population code to the event that will
+						trigger the child page. In this case, when a user clicks on a
+						button, the child page will be populated with the relevant
+						information. This can happen as the DOM has been already populated
+						with the child page.</p>
+
+
+					<pre>
+$(document).bind('pageinit',function(){
+
+    console.log("jQuery pageinit action(s) for activeservices");
+
+    $('#temp-active-services').off('click').on('click', function(){
+        SocietiesCoreServiceMonitorHelper.connectToCoreServiceMonitor(SocietiesActiveServices.getActiveServices);
+
+    });
+});
+
+</pre>
+
+					<p>
+						The retrieval of the data and the population of the data to the
+						relevant HTML elements are shown below. The function <strong>getActiveServices</strong>
+						retrieves the data and pass it to the function <strong>populateServicesHTML</strong>.
+						Having populated the data, the new page is changed
+						programmatically and the final step is ensure that the populated
+						new page is updated to include the modified HTML element(s).
+					</p>
+
+
+					<pre>
+    getActiveServices: function() {
+        console.log("Get Active Services");
+
+        function success(serviceData) {
+            SocietiesActiveServices.populateServicesHTML(serviceData);
+        }
+
+        function failure(data) {
+            alert("getActiveServices - failure: " + data);
+        }
+
+        window.plugins.SocietiesCoreServiceMonitor.activeServices(success, failure);
+    },
+
+    populateServicesHTML: function(data){
+        console.log("Populate Active Service page");
+
+        //Empty list
+        $('ul#activeServicesList li:last').remove();
+        //Populate services
+        for (i  = 0; i &lt; data.length; i++) {
+            var tableEntry = '&lt;li&gt;&lt;span&gt;' + data[i].className + '&lt;/span&gt;&lt;span&gt;' + SocietiesUtility.convertMilliseconds(data[i].activeSince)+ '&lt;/span&gt;&lt;/li&gt;';
+            jQuery('ul#activeServicesList').append(tableEntry);
+        }
+
+        $.mobile.changePage($("#activeServices"), {transition: "slideup"});
+        $('ul#activeServicesList').listview();
+
+    }
+</pre>
+
+					<p>Note that the link to the child page uses the linking
+						convention to move to a virtual page already in the DOM.</p>
+				</div>
+
+			</div>
+		</div>
+
+
+	</div>
+	</div>
+
+</body>
+</html>

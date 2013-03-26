@@ -78,11 +78,42 @@
 			<version>3.0.5.RELEASE</version>
 			<scope>provided</scope>
 		</dependency>
+		
+		<dependency>
+    		<groupId>org.springframework</groupId>
+    		<artifactId>org.springframework.web</artifactId>
+    		<version>3.0.5.RELEASE</version>
+    		<scope>provided</scope>
+		</dependency>
+		
 		<dependency>
 			<groupId>joda-time</groupId>
 			<artifactId>joda-time</artifactId>
 			<version>1.5.2</version>
 		</dependency>
+		
+		<!-- Apache Commons file upload  -->
+    	<dependency>
+        	<groupId>commons-fileupload</groupId>
+        	<artifactId>commons-fileupload</artifactId>
+        	<version>1.2.2</version>
+    	</dependency>
+    	<!-- Apache Commons IO -->
+    	<dependency>
+        	<groupId>org.apache.commons</groupId>
+        	<artifactId>commons-io</artifactId>
+        	<version>1.3.2</version>
+    	</dependency>
+    	
+    	<!-- 
+    	 <dependency>
+      		 <groupId>org.apache.httpcomponents</groupId>
+    		<artifactId>httpmime</artifactId>
+    		<version>4.2.3</version>
+    		<scope>compile</scope>
+    	</dependency>
+    	-->
+		
 		<!-- the following jars should be available in the repository/usr folder -->
 		<dependency>
 			<groupId>javax.validation</groupId>
@@ -159,23 +190,25 @@
 				<groupId>org.slf4j</groupId>
 				<artifactId>com.springsource.slf4j.org.apache.commons.logging</artifactId>
 			</dependency>
+		<!-- 
 		<dependency>
 			<groupId>org.jfree.chart</groupId>
 			<artifactId>org.jfree.chart-library</artifactId>
 			<type>libd</type>
 			<version>1.0.9</version>
-			<!--scope>provided</scope -->
 		</dependency>
 		<dependency>
 			<groupId>org.jfree.chart</groupId>
 			<artifactId>com.springsource.org.jfree.chart</artifactId>
 			<version>1.0.9</version>
 		</dependency>
+		-->
 		<dependency>
 			<groupId>org.jfree</groupId>
 			<artifactId>com.springsource.org.jfree</artifactId>
 			<version>1.0.12</version>
 		</dependency>
+		
 		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>com.springsource.javax.servlet</artifactId>
@@ -260,7 +293,9 @@
 							org.springframework.web.servlet.tags;version="[3.0.0,4.0.0)",
 							org.springframework.web.servlet.tags.form;version="[3.0.0,4.0.0)",
 							org.springframework.web.servlet.theme;version="[3.0.0,4.0.0)",
+							org.springframework.web.multipart.commons;version="[3.0.0,4.0.0)",
 							<!-- JSTL lib -->
+							
 							org.apache.taglibs.standard; version="[1.2.0,2)",
 							org.apache.taglibs.standard.extra.spath; version="[1.2.0,2)",
 							org.apache.taglibs.standard.functions; version="[1.2.0,2)",
@@ -294,6 +329,7 @@
 							org.jfree.chart.urls,
 							org.jfree.data.category,
 							org.jfree.data.general,
+							
 							<!-- Form validation -->
 							javax.validation,
 							org.societies.api.schema.servicelifecycle.model;resolution:=optional,

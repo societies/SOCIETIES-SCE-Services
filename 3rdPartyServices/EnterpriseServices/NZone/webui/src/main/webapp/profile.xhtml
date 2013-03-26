@@ -1,0 +1,63 @@
+<f:view xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:pm="http://primefaces.org/mobile" contentType="text/html">
+
+	<pm:page title="Networking Zone">
+		<pm:view id="viewProfile">
+			<f:event listener="#{profileBean.loadprofile}" type="preRenderView" />
+		
+			<pm:header title="Your Profile" />
+			<pm:content>
+			
+				<h:form id="profileform">
+						
+				<br/>
+				Choose what inforation is available by default to other members
+				<br/>
+				<br/>
+				<h:outputLabel for="name" value="Name:" style="font-weight:bold" />
+					<h:outputText id="name" value="#{profileBean.name}" />
+					<p:selectBooleanCheckbox value="false" rendered="false"/> 
+					<p:tooltip for="name" value="Your Public Name"
+						showEffect="slide" hideEffect="slide" />
+					<br/>	
+<br/><br/>
+					<h:outputLabel for="email" value="Email:" style="font-weight:bold" />
+					<h:outputText id="email" value="#{profileBean.email}" />
+					<p:selectBooleanCheckbox value="false" /> 
+					<p:tooltip for="email" value="Your email"
+						showEffect="slide" hideEffect="slide" />
+<br/><br/><br/>
+					<h:outputLabel for="company" value="Company:"
+						style="font-weight:bold" />
+					<h:outputText id="company" value="#{profileBean.company}" />
+					<p:selectBooleanCheckbox value="false" /> 
+					<p:tooltip for="company"
+						value="Your company" showEffect="slide"
+						hideEffect="slide" />
+<br/><br/><br/>
+					<p:graphicImage value="/images/facebook.png" />
+					<h:outputLabel for="facebooktrue" value="Facebook:"
+							style="font-weight:bold" rendered="#{profileBean.facebookid.isEmpty() == false}"/>
+					<h:outputText id="facebooktrue" value="#{profileBean.facebookid}"
+							rendered="#{profileBean.facebookid.isEmpty() == false}"/>
+					<h:outputLabel for="facebookfalse" value="Facebook:"
+							style="font-weight:bold" rendered="#{profileBean.facebookid.isEmpty()}"/>
+					<h:outputText id="facebookfalse" value="Not connected"
+							rendered="#{profileBean.facebookid.isEmpty()}"/>
+<br/><br/><br/>							
+       
+       
+					<p:commandButton icon="back" value="Back to Main Zone"
+						action="gotomain" />
+				</h:form>
+				
+			</pm:content>
+		</pm:view>
+	</pm:page>
+</f:view>
+
+

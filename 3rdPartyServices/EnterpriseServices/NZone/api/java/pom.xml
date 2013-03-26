@@ -1,0 +1,134 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>org.societies.ext3p.nzone</groupId>
+	<artifactId>nzone-api</artifactId>
+	<version>${release.version}</version>
+	<name>SOCIETIES 3p Networking Zone API</name>
+	<packaging>bundle</packaging>
+
+	<developers>
+		<developer>
+			<name>Maria Mannion </name>
+			<organization>Intel</organization>
+		</developer>
+	</developers>
+	
+	<parent>
+		<groupId>org.societies</groupId>
+		<artifactId>version-parent</artifactId>
+		<version>RELEASE</version>
+	</parent>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.societies.ext3p.nzone</groupId>
+			<artifactId>nzone-schema-api</artifactId>
+			 <version>${release.version}</version>
+		</dependency>
+			<dependency>
+			<groupId>org.simpleframework</groupId>
+			<artifactId>simple-xml</artifactId>
+			<version>2.6.9</version>
+			<scope>provided</scope>
+			<exclusions>
+			    <!-- StAX is not available on Android -->
+			    <exclusion>
+			        <artifactId>stax</artifactId>
+			        <groupId>stax</groupId>
+			    </exclusion>
+			    <exclusion>
+			        <artifactId>stax-api</artifactId>
+			        <groupId>stax</groupId>
+			    </exclusion>
+			    <!-- Provided by Android -->
+			    <exclusion>
+			        <artifactId>xpp3</artifactId>
+			        <groupId>xpp3</groupId>
+			    </exclusion>
+			</exclusions>
+		</dependency>
+	</dependencies>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<extensions>true</extensions>
+				<configuration>
+					<instructions>
+						<_exportcontents>*</_exportcontents>
+						<Import-Package>*;resolution:=optional</Import-Package>
+						<Embed-Dependency>*;scope=compile|runtime</Embed-Dependency>
+						<Embed-Transitive>false</Embed-Transitive>
+					</instructions>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<skipTests>true</skipTests>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<executions>
+						<!-- Used to copy the generated artifact to the container defined by 
+							VIRGO_HOME -->
+						<execution>
+							<id>copy</id>
+							<phase>install</phase>
+							<goals>
+								<goal>copy</goal>
+							</goals>
+							<configuration>
+								<stripVersion>false</stripVersion>
+							</configuration>
+						</execution>
+						<!-- Used to analyze the dependencies of the project. Will print warnings 
+							during verify phase,directly before install phase -->
+						<execution>
+							<id>analyze</id>
+							<phase>verify</phase>
+							<goals>
+								<goal>analyze-only</goal>
+							</goals>
+							<configuration>
+								<failOnWarning>false</failOnWarning>
+							</configuration>
+						</execution>
+					</executions>
+				<configuration>
+					<artifactItems>
+						<artifactItem>
+							<groupId>${project.groupId}</groupId>
+							<artifactId>${project.artifactId}</artifactId>
+							<version>${release.version}</version>
+							<type>bundle</type>
+							<overWrite>true</overWrite>
+							<outputDirectory>${spring.osgi.deploy.dir}</outputDirectory>
+						</artifactItem>
+					</artifactItems>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-site-plugin</artifactId>
+				<version>3.0</version>
+				<configuration>
+					<reportPlugins>
+						<plugin>
+							<groupId>org.apache.maven.plugins</groupId>
+							<artifactId>maven-javadoc-plugin</artifactId>
+							<version>2.8.1</version>
+						</plugin>
+					</reportPlugins>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+</project>
+

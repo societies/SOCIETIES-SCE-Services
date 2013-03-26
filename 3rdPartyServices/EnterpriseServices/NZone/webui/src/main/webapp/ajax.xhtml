@@ -1,0 +1,19 @@
+<f:view xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:pm="http://primefaces.org/mobile" contentType="text/html">
+
+	<pm:page title="hasCode.com PrimeFaces Mobile Tutorial - AJAX">
+		<pm:view id="main">
+			<pm:header title="AJAX Sample" />
+			<pm:content>
+				<h:form>
+					<p:commandButton value="Click" update="result"/> 
+					<h:outputText id="result" value="#{demoBean.output}" /> 
+				</h:form>
+			</pm:content>
+		</pm:view>
+	</pm:page>
+</f:view>

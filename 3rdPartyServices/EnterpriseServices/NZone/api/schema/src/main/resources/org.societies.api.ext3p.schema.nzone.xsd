@@ -1,0 +1,84 @@
+<xs:schema elementFormDefault="qualified" version="1.0"
+	xmlns="http://societies.org/api/ext3p/schema/nzone"
+	targetNamespace="http://societies.org/api/ext3p/schema/nzone"
+	xmlns:tns="http://societies.org/api/ext3p/schema/nzone"
+	xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+
+		<xs:element name="nzoneBean">
+			<xs:complexType>
+				<xs:sequence>
+					<xs:element name="method" type="tns:method" minOccurs="1" />
+					<xs:element name="data" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
+					<xs:element name="details" type="tns:userDetails" minOccurs="0"/>
+				</xs:sequence>
+			</xs:complexType>
+		</xs:element>
+
+		<xs:element name="nzoneBeanResult">
+			<xs:complexType>
+				<xs:sequence>
+					<xs:element name="result" type="xs:boolean" minOccurs="1" />
+					<xs:element name="data" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
+					<xs:element name="zonedata" type="tns:zoneDetails" minOccurs="0" maxOccurs="unbounded"/>
+					<xs:element name="userdata" type="tns:userDetails" minOccurs="0" maxOccurs="unbounded"/>
+				</xs:sequence>
+			</xs:complexType>
+		</xs:element>
+
+    
+		<xs:simpleType name="method">
+			<xs:restriction base="xs:string">
+				<xs:enumeration value="getZoneDetails"/>
+				<xs:enumeration value="getMainZone"/>
+				<xs:enumeration value="getZoneList"/>
+				<xs:enumeration value="getUserDetails"/>
+				<xs:enumeration value="getMyDetails"/>
+				<xs:enumeration value="updateMyDetails"/>
+				<xs:enumeration value="savePreferences"/>
+				<xs:enumeration value="getPreferences"/>
+			</xs:restriction>
+		</xs:simpleType>
+		
+		
+		<xs:complexType name="zoneDetails">
+			<xs:sequence>
+				<xs:element name="zonename" type="xs:string" minOccurs="0" />
+				<xs:element name="zonelocation" type="xs:string" minOccurs="0" />
+				<xs:element name="zonelocationdisplay" type="xs:string" minOccurs="0" />
+				<xs:element name="zonetopics" type="xs:string" minOccurs="0" />
+				<xs:element name="mainzone" type="xs:int" minOccurs="0" />
+				<xs:element name="zonemembercount" type="xs:int" minOccurs="0" />
+				<xs:element name="cisid" type="xs:string" minOccurs="0" />
+			</xs:sequence>
+		</xs:complexType>
+		
+		<xs:complexType name="userDetails">
+			<xs:sequence>
+				<xs:element name="userid" type="xs:string" minOccurs="0" />
+				<xs:element name="displayName" type="xs:string" minOccurs="0" />
+				<xs:element name="email" type="xs:string" minOccurs="0" />
+				<xs:element name="homelocation" type="xs:string" minOccurs="0" />
+				<xs:element name="sex" type="xs:string" minOccurs="0" />
+				<xs:element name="company" type="xs:string" minOccurs="0" />
+				<xs:element name="position" type="xs:string" minOccurs="0" />
+				<xs:element name="about" type="xs:string" minOccurs="0" />
+				<xs:element name="facebookID" type="xs:string" minOccurs="0" />
+				<xs:element name="twitterID" type="xs:string" minOccurs="0" />
+				<xs:element name="linkedInID" type="xs:string" minOccurs="0" />
+				<xs:element name="googleplusID" type="xs:string" minOccurs="0" />
+				<xs:element name="foursqID" type="xs:string" minOccurs="0" />
+				<xs:element name="tags" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
+			</xs:sequence>
+		</xs:complexType>
+		
+		<xs:complexType name="shareInfo">
+			<xs:sequence>
+				<xs:element name="userid" type="xs:string" minOccurs="0" />
+				<xs:element name="friendid" type="xs:string" minOccurs="0" />
+				<xs:element name="shareHash" type="xs:int" minOccurs="0" />
+			</xs:sequence>
+		</xs:complexType>
+		
+	</xs:schema>
+

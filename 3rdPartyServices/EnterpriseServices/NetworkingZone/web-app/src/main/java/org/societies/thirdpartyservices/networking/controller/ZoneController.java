@@ -54,6 +54,7 @@ public class ZoneController {
 	@RequestMapping(value="/zone.html",method=RequestMethod.GET)
 	public ModelAndView zonePage() {
 		
+		getNetworkClient().recordActionEnterZone();
 		log.info("ZoneController : GET start");
 		Map<String, Object> model = new HashMap<String, Object>();
 	
@@ -68,6 +69,7 @@ public class ZoneController {
 	
 	@RequestMapping(value="/m_zone.html",method=RequestMethod.GET)
 	public ModelAndView m_zonePage() {
+		getNetworkClient().recordActionEnterZone();
 		
 		log.info("ZoneController : GET start");
 		Map<String, Object> model = new HashMap<String, Object>();

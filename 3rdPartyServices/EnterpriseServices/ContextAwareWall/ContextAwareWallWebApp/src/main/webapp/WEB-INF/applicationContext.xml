@@ -42,14 +42,25 @@
 	
 	 <bean id="SocietiesRegistryBean" 
        		 class="org.societies.webapp.controller.SocietiesRegistryBean" >
+       		
+       		<!--  Intel's settings -->
+       		<property name="serverURL" value="http://srv-pz01.haifa.il.ibm.com:9080/VG4SWeb/"/>
+       		<property name="pzQueriesURL" value="http://srv-pz01.haifa.il.ibm.com:9080/QueriesGatewayREST/"/>
+       		
+       		<!--  Guy's Settings
+       		<property name="serverURL" value="http://GUYF2-TP.haifa.ibm.com:9080/VG4SWeb/"/>
+       		<property name="pzQueriesURL" value="http://ta-proj02.haifa.ibm.com:9082/QueriesGatewayREST/"/>
+       		-->
+       		
        		<!-- <property name="serverURL" value="http://ta-proj02:9082/VG4SWeb/vg/message"/> -->
-       		<!--  <property name="pzQueriesURL" value="http://ta-proj02.haifa.ibm.com:9082/QueriesGatewayREST/"/> -->
-       		<property name="serverURL" value="http://societies.local.macs.hw.ac.uk:9080/VG4SWeb/vg/message"/>
-       		<property name="pzQueriesURL" value="http://socieitesserver.societies.local:9080/QueriesGatewayREST/"/>
+       		<!-- <property name="pzQueriesURL" value="http://ta-proj02.haifa.ibm.com:9082/QueriesGatewayREST/"/> -->
+       		<!--  <property name="serverURL" value="http://societies.local.macs.hw.ac.uk:9080/VG4SWeb/vg/message"/> -->
+       		<!-- <property name="pzQueriesURL" value="http://socieitesserver.societies.local:9080/QueriesGatewayREST/"/> -->
        		<property name="mockEntity" value="registeredEntity_902_1"/>
        		<property name="mockEntityActive" value="false"/>
    </bean>
  
+	 
 	 <osgi:service ref="SocietiesRegistryBean" interface="org.societies.webapp.ISocietiesRegistryBean" >
       <osgi:service-properties>
           <entry key="TargetPlatform" value="SOCIETIES" />
@@ -60,13 +71,13 @@
   	</osgi:service>
   
   	<bean id="serMetamodel" class="org.societies.api.schema.servicelifecycle.model.Service">
-     <property name="authorSignature" value="guy feigenblat" />
+     <property name="authorSignature" value="gFeigenblat" />
      <property name="serviceDescription" value="Context Aware Wall" />
      <property name="serviceName" value="Context Aware Wall" />
      <property name="serviceType" value="THIRD_PARTY_WEB" />
-     <property name="privacyPolicy" value="http://societies.local/local_file" />
      <property name="serviceCategory" value="location" />
+     <property name="privacyPolicy" value="privacy-policy.xml" />
  	</bean>
- 
+
 	
 </beans>

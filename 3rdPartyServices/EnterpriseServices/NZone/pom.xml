@@ -1,0 +1,32 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>org.societies.ext3p.nzone</groupId>
+	<artifactId>builder</artifactId>
+	<version>${release.version}</version>
+	<name>NZone Builder</name>
+	<packaging>pom</packaging>
+
+	<developers>
+		<developer>
+			<name>Maria Mannion </name>
+			<organization>Intel</organization>
+		</developer>
+	</developers>
+	
+	<parent>
+		<groupId>org.societies</groupId>
+		<artifactId>version-parent</artifactId>
+		<version>RELEASE</version>
+	</parent>
+	
+	<modules>
+		<module>api/schema</module>
+		<module>api/java</module>
+		<module>server</module>
+		<module>client</module>
+		<module>test</module>
+		<module>webui</module>
+	</modules>
+</project>
+

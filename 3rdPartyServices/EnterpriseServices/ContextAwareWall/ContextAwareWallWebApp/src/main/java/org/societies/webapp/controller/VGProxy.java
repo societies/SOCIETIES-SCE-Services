@@ -24,21 +24,35 @@
  */
 package org.societies.webapp.controller;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import java.util.Timer;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
+import javax.annotation.PreDestroy;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
@@ -46,7 +60,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.protocol.HTTP;
-import org.jfree.util.Log;
+import org.apache.http.util.ByteArrayBuffer;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -67,7 +81,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.support.DefaultMultipartHttpServletRequest;
 import org.springframework.web.servlet.ModelAndView;
+//import org.apache.http.entity.mime.HttpMultipartMode;
+//import org.apache.http.entity.mime.MultipartEntity;
+//import org.apache.http.entity.mime.content.FileBody;
 
 
 /**
@@ -86,9 +105,18 @@ public class VGProxy {
 	private static final Logger LOG = LoggerFactory.getLogger(VGProxy.class);
 	
 	//String SERVER_URL = "http://ta-proj02:9082/VG4SWeb/vg/message";
-	String SERVER_URL = "http://societies.local.macs.hw.ac.uk:9080/VG4SWeb/vg/message";
+	//String SERVER_URL = "http://societies.local.macs.hw.ac.uk:9080/VG4SWeb/vg/message";
+	//String SERVER_URL ="";
 	String MOCK_ENTITY = "";
 	boolean MOCK_ENTITY_ACTIVE = false;
+	
+	static byte[] mBackgroundFile;
+	static String mBackgroundFileName=""; 
+	static String mCisOfImage="";
+	static boolean download = false;
+	static String mCurrentCis="";
+	static String mCurrentZone="";
+	static Map<String,String> mImagesInZonePool = new HashMap<String,String>();
 	
 	/*
 	 * {"userId" : "unknown7",  "cis": "111", "msg": "GuyGuyGuy", "style" : "", "zoneId":"1","messageId":"5","ts":null}
@@ -107,12 +135,17 @@ public class VGProxy {
 	@Autowired private ICommManager commManager;
 	@Autowired private SocietiesRegistryBean societiesRegistryBean;
 	
+	private Timer getImgTimerTask;
+    
 	public VGProxy(){
 		LOG.info(LOG_PREFIX + "Ctor");
+		
+		//getImgTimerTask = new Timer();
+        //getImgTimerTask.schedule(new GetImageNameTask(), 30*1000,10*1000);
 	}
 	
 	private List<ICis> fillCisObjectforTesting(){
-		LOG.debug("Start method 'fillCisObjectforTesting'");
+		LOG.debug(LOG_PREFIX+ " Start method 'fillCisObjectforTesting'");
 		
 		List<ICis> cisList = new ArrayList<ICis>();
 		try {
@@ -121,7 +154,7 @@ public class VGProxy {
 			CssRecord cssRecord = cssInterfaceResult2.getProfile();
 			
 			try{
-				LOG.debug("creating CIS for testing (in case no CIS if found):  CSS ID \t\t" + cssRecord.getCssIdentity());
+				LOG.debug(LOG_PREFIX+ " creating CIS for testing (in case no CIS if found):  CSS ID \t\t" + cssRecord.getCssIdentity());
 			}catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -145,9 +178,9 @@ public class VGProxy {
 			cisManager.createCis("Guy CIS_"+generateRand(),"",cisCriteria, "description: test guy2");
 			cisList = cisManager.getCisList();
 			if (cisList.size() > 0){
-				LOG.debug("there are "+cisList.size() +" CIS in the system - first one is : "+(cisList.get(0)).getName() + " \t id " + (cisList.get(0)).getCisId());
+				LOG.debug(LOG_PREFIX+ " there are "+cisList.size() +" CIS in the system - first one is : "+(cisList.get(0)).getName() + " \t id " + (cisList.get(0)).getCisId());
 			}else{
-				LOG.debug("Error! although just been created for testing, there are no CIS in the system");
+				LOG.debug(LOG_PREFIX+ "  Error! although just been created for testing, there are no CIS in the system");
 			}
 			
 			
@@ -168,6 +201,8 @@ public class VGProxy {
 		rand = Math.round(rand);
 		return (int)rand;
 	}
+	
+	
 	
 	
 	@RequestMapping(value="/test/createCIS.html",method = RequestMethod.GET)
@@ -200,6 +235,103 @@ public class VGProxy {
 	}
 	
 	
+	
+	@RequestMapping(value = "/upload.html", method = RequestMethod.POST)
+	public @ResponseBody String upload(HttpServletRequest request1) {
+		 
+		DefaultMultipartHttpServletRequest request = (DefaultMultipartHttpServletRequest)request1;
+		MultipartFile multipartFile = request.getFile("uploadedfile");
+		String cisParam = request.getParameter("cis");
+		
+		String tempBackgroundImageName="";
+		try {
+		
+			tempBackgroundImageName = multipartFile.getOriginalFilename();
+			byte[] backgroundFile = multipartFile.getBytes();
+			UploadTask uploadTask=null;
+			
+			String currentImageName = "";
+			String warningMsg = "";
+			synchronized (VGProxy.class) {
+				if (backgroundFile != null && backgroundFile.length > 0 && cisParam != null && cisParam.length() > 0 &&
+					mCurrentZone != null && mCurrentZone.length() > 0 && tempBackgroundImageName != null && tempBackgroundImageName.length() > 0){
+				
+						mBackgroundFile = backgroundFile ;
+						mCisOfImage = cisParam;
+						currentImageName = setBackgroundImageName(tempBackgroundImageName);
+						uploadTask = new UploadTask(mBackgroundFile, currentImageName, mCisOfImage, mCurrentZone,"");
+						
+						mImagesInZonePool.put(mCisOfImage+"_"+mCurrentZone, currentImageName);
+					
+				}else{
+					
+						warningMsg+= "Couldn't upload file to WAS; Parametes: file name: "+tempBackgroundImageName+", cis "+
+								cisParam+", zone "+mCurrentZone+ ", file size ";
+						warningMsg+= (backgroundFile != null)?backgroundFile.length: " null";
+									 
+				}
+			}
+			
+			if (warningMsg.length() == 0){
+				LOG.info(LOG_PREFIX+ "  file - "+currentImageName+" was sent to upload task;");	
+			}else{
+				LOG.warn(LOG_PREFIX+ " " + warningMsg);
+			}
+						
+			if (uploadTask != null){
+				uploadTask.start();
+			}
+			
+		} catch (Exception e) {
+			LOG.error(LOG_PREFIX+ "  Error writing file to byte[] stream. file name : "+tempBackgroundImageName,e);
+		}
+		
+		return "";
+	}
+	
+	
+	private String setBackgroundImageName(String originalName){
+		//first remove the file type (e.g. jpg) 
+		mBackgroundFileName = originalName.split("\\.")[0];
+		//then remove the unique android suffix (if exists)
+		mBackgroundFileName = mBackgroundFileName.split("\\-")[0];
+		return mBackgroundFileName;
+	}
+	
+	
+	@RequestMapping(value = "/download.html", method = RequestMethod.GET)
+	public void download(HttpServletRequest request, HttpServletResponse response) {
+		String fileName=null;
+		try {
+				fileName = request.getParameter("fileName");
+				// copy it to response's OutputStream
+				
+				synchronized (VGProxy.class) {
+					LOG.info(LOG_PREFIX+ "  request to download file "+ fileName + " sent to the server; file in server is '"+mBackgroundFileName+"'" );
+					if (mBackgroundFile != null && mBackgroundFile.length > 0 && mBackgroundFileName.equals(fileName)){
+						IOUtils.write(mBackgroundFile, response.getOutputStream());
+						LOG.info(LOG_PREFIX+ " '"+fileName +"' file was written to output stream; file size "+mBackgroundFile.length + " bytes" );
+					
+					}else if (mBackgroundFileName.equals(fileName) &&  (mBackgroundFile == null || mBackgroundFile.length == 0)){
+						LOG.warn(LOG_PREFIX+ " request to download image '"+fileName +"' accepted in server but image object is empty");
+					}else if (mBackgroundFileName.equals(fileName)){
+						LOG.info(LOG_PREFIX+ " request to download image '"+fileName +"' accepted in server but active image is '"+mBackgroundFileName+"'");
+					}
+				}
+				
+				LOG.info(LOG_PREFIX+ " begin file flush");
+				response.flushBuffer();
+				LOG.info(LOG_PREFIX+ "  end file flush");
+		    } catch (IOException ex) {
+		    	LOG.error(LOG_PREFIX+ " Error writing file to output stream. Filename was "+fileName,ex);
+		    	throw new RuntimeException("IOError writing file to output stream");
+		    } catch (Exception ex) {
+		    	LOG.error(LOG_PREFIX+ " Error writing file to output stream. Filename was "+fileName,ex);
+		    	throw new RuntimeException("Exception writing file to output stream");
+		    }
+	}
+	
+	
 	/**
 	 * Posting user message to the centralized context aware wall server
 	 * 
@@ -221,6 +353,7 @@ public class VGProxy {
 					jsonObject.put("cis", form.getCisBox());
 					jsonObject.put("userId", form.getUserId());
 					jsonObject.put("style", form.getStyle());
+					jsonObject.put("msgDest", form.getMsgDest());
 					
 					String postedMsg = form.getMsg();
 					postedMsg= postedMsg.replace("\n", " ");
@@ -248,19 +381,19 @@ public class VGProxy {
 	private boolean validateForm(MessageForm form){
 		boolean flag = true;
 		if (form.getCisBox() == null || form.getCisBox().length() == 0){
-			Log.warn("Selected CIs can't be null or Empty \t form.getCisBox()='"+form.getCisBox()+"'");
+			LOG.warn(LOG_PREFIX+ " Selected CIs can't be null or Empty \t form.getCisBox()='"+form.getCisBox()+"'");
 			flag = false;
 		}
 		if (form.getUserId() == null || form.getUserId().length() == 0){
-			Log.warn("UserId can't be null or Empty \t form.getUserId()='"+form.getUserId()+"'");
+			LOG.warn(LOG_PREFIX+ " UserId can't be null or Empty \t form.getUserId()='"+form.getUserId()+"'");
 			flag = false;
 		}
 		if (form.getMsg() == null || form.getMsg().trim().length() == 0){
-			Log.warn("UserId can't be null or Empty \t form.getMsg()='"+form.getMsg()+"'");
+			LOG.warn(LOG_PREFIX+" UserId can't be null or Empty \t form.getMsg()='"+form.getMsg()+"'");
 			flag = false;
 		}
 		if (form.getStyle() == null ||  form.getStyle().length() == 0){
-			Log.warn("UserId can't be null or Empty \t form.getStyle()='"+form.getStyle()+"'");
+			LOG.warn(LOG_PREFIX+ " UserId can't be null or Empty \t form.getStyle()='"+form.getStyle()+"'");
 			flag = false;
 		}
 		return flag;
@@ -274,7 +407,7 @@ public class VGProxy {
 		try{
 			cisList = cisManager.getCisList();
 			if (cisList.isEmpty()){
-				cisList = fillCisObjectforTesting();
+				//cisList = fillCisObjectforTesting();
 			}
 			
 			JSONArray jsonArray = new JSONArray();
@@ -338,7 +471,7 @@ public class VGProxy {
 		String responseString="";
 		int statusCode;
 		try {
-			HttpPost httpPostRequest = new HttpPost(societiesRegistryBean.getServerURL());
+			HttpPost httpPostRequest = new HttpPost(societiesRegistryBean.getServerURL()+"vg/message/");
 			
 			StringEntity entity = new StringEntity(jsonMsg, HTTP.UTF_8);
 			entity.setContentType("application/json");
@@ -374,9 +507,17 @@ public class VGProxy {
 	 * @param number - message id
 	 * @return
 	 */
+	
+	
+	
 	@RequestMapping(value="/getMsg.html",method = RequestMethod.GET)
 	public @ResponseBody String getMessages(@RequestParam String userID,@RequestParam String cis, @RequestParam String number){
-		return getMessagesInternal(userID,cis,number);
+		
+		String result = getMessagesInternal(userID,cis,number);
+		GetBackgroundImageTask imageTask = new GetBackgroundImageTask();
+		imageTask.start();
+		
+		return result;
 	}
 	
 	/**
@@ -386,26 +527,26 @@ public class VGProxy {
 	 */
 	@RequestMapping(value="/getZoneDetails.html",method = RequestMethod.GET)
 	public @ResponseBody String getZoneDetails(@RequestParam String zoneId){
-		Log.info("Start 'getZoneDetails'");
+		LOG.info(LOG_PREFIX+ "  Start 'getZoneDetails'");
 		if (zoneId == null || zoneId.trim().length() == 0){
-			Log.warn("in getZoneDetails method; zoneId is null or empty zoneId='"+zoneId+"'");
+			LOG.warn("in getZoneDetails method; zoneId is null or empty zoneId='"+zoneId+"'");
 			return "";
 		}
 		
 		String url =  societiesRegistryBean.getPzQueriesURL() + "/Admin/zone/"+zoneId;
-		Log.info("creating URL -->  "+url);
+		LOG.info(LOG_PREFIX+ " creating URL -->  "+url);
 	
 		String response  = perfromGetHttpRequest(url);
 		
 		if (response == null ||  response.length() == 0){
-			Log.warn("no response for '"+url+"' !!" );
+			LOG.warn(LOG_PREFIX+ "  no response for '"+url+"' !!" );
 		}else{
-			Log.info("response for '"+url+"' is : "+response);
+			LOG.info(LOG_PREFIX+ "  response for '"+url+"' is : "+response);
 		}
 		
 		
 		
-		Log.info("End 'getZoneDetails'");
+		LOG.info(LOG_PREFIX+ "  End 'getZoneDetails'");
 		return "";
 	}
 	
@@ -419,26 +560,320 @@ public class VGProxy {
 	 */
 	private String getMessagesInternal(String userId, String cis, String number){
  		LOG.debug(LOG_PREFIX + " enter getMessagesInternal");
-		String responseString="";
+		
+		
+		String retResponseString = "";
 		
 		String url = "";
 		try {
 			
-			url =  societiesRegistryBean.getServerURL() + "/";
+			url =  societiesRegistryBean.getServerURL() + "vg/message/";
 			String cisParam = URLEncoder.encode(cis, "UTF-8").replace("+", "%20");
 			String userIdParam = URLEncoder.encode(userId, "UTF-8").replace("+", "%20");
 			url = url + userIdParam+"/"+ cisParam+ "/"+number;
+			
+			String responseString="";
 			responseString = perfromGetHttpRequest(url);
 			
+			JSONObject jsonObject = new JSONObject();
+			jsonObject.put("data", responseString);
+			
+			String currentZoneId = extractZoneId(responseString);
+			
+			String logMsg = "";
+			synchronized (VGProxy.class) {
+				if ( !mCurrentCis.equals(cis) || !mCurrentZone.equals(currentZoneId) ){
+					mCisOfImage = mCurrentCis;
+					mBackgroundFile = null;
+					
+					String imageNameFromCache = mImagesInZonePool.get(cis+"_"+currentZoneId);
+					mBackgroundFileName = imageNameFromCache != null ? imageNameFromCache : "";
+					
+					LOG.info(LOG_PREFIX + " going to reset mBackgroundFileName");
+				}
+				mCurrentCis = cis;
+				mCurrentZone = currentZoneId;
+				
+				logMsg += "mBackgroundFileName = '"+mBackgroundFileName+"'\t mCurrentZone = '"+mCurrentZone +"'\t mCisOfImage = '"+mCisOfImage+"'"; 
+				
+				jsonObject.put("imgName",mBackgroundFileName);
+				jsonObject.put("zoneId",currentZoneId);
+				jsonObject.put("cis",cis);
+			}
+			LOG.info(LOG_PREFIX + " in 'getMessagesInternal' ; Members values: "+logMsg);
+			
+			retResponseString = jsonObject.toString();
+			
 	    }catch (Exception e) {
-	    	LOG.error(LOG_PREFIX + " exception in method 'getMessagesInternal' ; generated URL is "+url);
+	    	LOG.error(LOG_PREFIX + " exception in method 'getMessagesInternal' ; generated URL is "+url,e);
 		}
 		
-		LOG.debug(LOG_PREFIX + " finish postMessageInternal");
-	    return responseString;
+		LOG.debug(LOG_PREFIX + " finish 'getMessageInternal'; Return value: "+retResponseString);
+	    return retResponseString;
+	}
+	
+	private String extractZoneId(String json){
+		String zoneId = "";
+		try{
+			JSONArray jsonArray=null;
+			try{
+				if (json.length() > 3){
+					jsonArray = new JSONArray(json);
+				}
+			}catch(Exception e){
+				LOG.error(LOG_PREFIX + " exception in method 'extractZoneId' ; couldn't parse json String to json array ; Json = "+json);
+			}
+			
+			if (jsonArray != null && jsonArray.length() > 0){
+				JSONArray zones = ((JSONArray)  ((JSONObject)jsonArray.get(0)).get("zoneId"));
+				if (zones.length() > 0){
+					zoneId = zones.getString(0);
+				}
+			}
+		}catch(Exception e){
+			LOG.error(LOG_PREFIX + " exception in method 'extractZoneId' ; couldn't extract zone Id from msg. Setting zone id to ''",e);
+		}
+		return zoneId;
+	}
+
+	
+	private class UploadTask extends Thread{
+		byte[] data;
+		String fileName;
+		String cis;
+		String urlServer;
+		String zoneId;
+		
+		public UploadTask(byte[] data, String fileName,String cis, String zoneId, String urlServer){
+			this.data = data;
+			this.fileName = fileName;
+			this.cis = cis;
+			this.urlServer = urlServer;
+			this.zoneId = zoneId;
+			
+			LOG.info(LOG_PREFIX + " upload task was created with parameters; data length "+data.length + " ; file name = "+this.fileName+" ; cis = "+this.cis+" ; zoneId = "+zoneId);
+		}
+		
+		@Override
+		public void run() {
+			upload(data,fileName,cis, zoneId,urlServer);
+		}
+		
+	}
+
+	
+	private void upload(byte[] data, String fileName,String cis, String zone,String urlServer){
+    	HttpURLConnection connection = null;
+    	DataOutputStream outputStream = null;
+    	
+    	
+    	String lineEnd = "\r\n";
+    	String twoHyphens = "--";
+    	String boundary =  "*****";
+
+    	int bytesRead, bytesAvailable, bufferSize;
+    	byte[] buffer;
+    	int maxBufferSize = 1*1024*1024;
+    	FileOutputStream fos = null;
+    	
+    	if (fileName == null || fileName.length() == 0 || cis == null || cis.length() == 0 || zone == null || zone.length() == 0 ){
+    		LOG.error(LOG_PREFIX+ " ERROR Can't upload image; Error in input;  fileName="+fileName + " \t cis="+cis+" \t zone = "+zone );
+    		return;
+    	}
+    	
+    	long ts = System.currentTimeMillis();
+    	LOG.info(LOG_PREFIX + " START upload of '"+ fileName+"' to WAS; Cis '"+cis+"'  zone '"+zone+"'");
+    	try {
+	    	
+			File file = new File(fileName);
+			fos = new FileOutputStream(file);
+			fos.write(data);
+			fos.flush();
+	    	
+			FileInputStream fileInputStream = new FileInputStream(file);
+	    	
+	    	
+	    	try {
+				cis = URLEncoder.encode(cis, "UTF-8").replace("+", "%20");
+				zone = URLEncoder.encode(zone, "UTF-8").replace("+", "%20");
+			} catch (UnsupportedEncodingException e1) {
+				e1.printStackTrace();
+			}
+	    	
+	    	URL url = new URL(societiesRegistryBean.getServerURL()+"UploadServlet?cis="+cis+"&zoneId="+zone);
+	    	connection = (HttpURLConnection) url.openConnection();
+	    
+	    	// Allow Inputs & Outputs
+	    	connection.setDoInput(true);
+	    	connection.setDoOutput(true);
+	    	connection.setUseCaches(false);
+	
+	    	// Enable POST method
+	    	connection.setRequestMethod("POST");
+	
+	    	connection.setRequestProperty("Connection", "Keep-Alive");
+	    	connection.setRequestProperty("Content-Type", "multipart/form-data;boundary="+boundary);
+	    
+	    	outputStream = new DataOutputStream( connection.getOutputStream() );
+	    
+	    	outputStream.writeBytes(twoHyphens + boundary + lineEnd);
+	    
+	    	
+	    	outputStream.writeBytes("Content-Disposition: form-data; name=\"uploadedfile\";filename=\"" + fileName +"\"" + lineEnd);
+	    	outputStream.writeBytes(lineEnd);
+	    
+	    	bytesAvailable = fileInputStream.available();
+	    	bufferSize = Math.min(bytesAvailable, maxBufferSize);
+	    	buffer = new byte[bufferSize];
+	    
+	    	// Read file
+	    	bytesRead = fileInputStream.read(buffer, 0, bufferSize);
+	    	
+	    	while (bytesRead > 0)  	{
+		    	outputStream.write(buffer, 0, bufferSize);
+		    	bytesAvailable = fileInputStream.available();
+		    	bufferSize = Math.min(bytesAvailable, maxBufferSize);
+		    	bytesRead = fileInputStream.read(buffer, 0, bufferSize);
+	    	}
+	    
+	    	outputStream.writeBytes(lineEnd);
+	    	outputStream.writeBytes(twoHyphens + boundary + twoHyphens + lineEnd);
+	
+	    	// Responses from the server (code and message)
+	    	int serverResponseCode = connection.getResponseCode();
+	    	String serverResponseMessage = connection.getResponseMessage();
+	    	
+	    	LOG.info(LOG_PREFIX + " ServerResponseMessage  "+ serverResponseCode + "  " + serverResponseMessage);
+	    	
+	    	fileInputStream.close();
+	    	outputStream.flush();
+	    	outputStream.close();
+	    	fos.close();
+    	}catch (Exception ex) {
+    		LOG.error(LOG_PREFIX+ "  " + ex.getMessage(),ex);
+    		
+    	//Exception handling
+    	}
+    	LOG.info(LOG_PREFIX+ " END upload of '"+ fileName+"' to WAS; in "+ ((float)(System.currentTimeMillis()-ts)) /1000 + " seconds" );
 	}
 	
 	
+	private class GetBackgroundImageTask extends Thread{
+		@Override
+		public void run() {
+			String cis= null;
+			String zoneId = null;
+			String backgroundImageName;
+			byte[] currentImageObject;
+			synchronized (VGProxy.class) {
+				cis = mCurrentCis;
+				zoneId = mCurrentZone;
+				backgroundImageName = mBackgroundFileName;
+				currentImageObject = mBackgroundFile;
+			}
+			
+			if (cis == null || cis.length() ==0 || zoneId == null || zoneId.length() == 0 ){
+				LOG.warn(LOG_PREFIX+ "  in GetImageNameTask , mCurrentCis='"+mCurrentCis + "'  mCurrentZone='"+mCurrentZone +"--> can't pefrom task");
+				return;
+			}
+			
+			String result = "", cisEncoded="",zoneIdEncoded="";
+			
+			try {
+				cisEncoded = URLEncoder.encode(cis,"UTF-8").replace("+", "%20");
+				zoneIdEncoded = URLEncoder.encode(zoneId,"UTF-8").replace("+", "%20");
+				
+			} catch (UnsupportedEncodingException e1) {
+				e1.printStackTrace();
+			}
+			
+			
+			result = perfromGetHttpRequest(societiesRegistryBean.getServerURL()+"vg/message/cis/"+cisEncoded+"/zoneId/"+zoneIdEncoded);
+			
+			String imageName = "";
+			try{
+				JSONObject json = new JSONObject(result);
+				imageName = json.getString("imageName");
+			}catch(Exception e){
+				System.out.println(e);
+			}
+			
+			if (imageName.length() == 0){
+				
+				synchronized (VGProxy.class) {
+					mBackgroundFileName = "";
+					mBackgroundFile = null;
+					mImagesInZonePool.put(cis+"_"+zoneId,mBackgroundFileName);
+				}
+				
+				LOG.info(LOG_PREFIX+ "  in 'GetBackgroundImageTask' ; image name from VG server is empty; going to reset 'mBackgroundFileName'");
+				return;
+			}else if (backgroundImageName.equals(imageName) && currentImageObject != null && currentImageObject.length > 0){
+				LOG.info(LOG_PREFIX+ "  in 'GetBackgroundImageTask' ; Image name in local virgo server equals image name on WAS - no need to update");
+				
+				synchronized (VGProxy.class) {
+					mImagesInZonePool.put(cis+"_"+zoneId,backgroundImageName);
+				}
+				return;
+			}
+			
+			
+			byte[] imageBytesArray=null;
+			try{
+				String urlStr = societiesRegistryBean.getServerURL()+"upload/"+imageName;
+				 URL url = new URL(urlStr); //you can write here any link
+				 
+				 LOG.info(LOG_PREFIX+ "  going to download image: "+urlStr);
+				 
+				 
+	             /* Open a connection to that URL. */
+	             URLConnection ucon = url.openConnection();
+	
+	             /*
+	              * Define InputStreams to read from the URLConnection.
+	              */
+	             InputStream is = ucon.getInputStream();
+	             BufferedInputStream bis = new BufferedInputStream(is);
+	
+	             /*
+	              * Read bytes to the Buffer until there is nothing more to read(-1).
+	              */
+	             ByteArrayBuffer baf = new ByteArrayBuffer(5000);
+	             int current = 0;
+	             while ((current = bis.read()) != -1) {
+	                baf.append((byte) current);
+	             }
+	             
+	             imageBytesArray = baf.toByteArray();
+	             LOG.info(LOG_PREFIX+ "  finished download image , size: "+ imageBytesArray.length  +"bytes;  URL " + urlStr);
+			
+			}catch(Exception e){
+				LOG.error(LOG_PREFIX+ "  "+ e.getMessage(), e);
+			}
+             
+            String newMembersVal = "";
+			synchronized (VGProxy.class) {
+				mBackgroundFileName = imageName;
+				mBackgroundFile = imageBytesArray;
+				mCisOfImage = cis;
+				mImagesInZonePool.put(cis+"_"+zoneId,mBackgroundFileName);
+				
+				newMembersVal += "the image CIS "+mCisOfImage + "  fileName "+mBackgroundFileName;
+			}
+			
+			LOG.info(LOG_PREFIX+ " after download new Members: "+newMembersVal);
+		}
+	}
+	
+	@PreDestroy
+	public void cleanUp() throws Exception {
+	  System.out.println("Spring Container is destroy! Customer clean up");
+	  
+	  
+	  if(getImgTimerTask != null){
+		  getImgTimerTask.cancel();
+	  }
+	}
 	
 	/**
 	 * Internal Helper to perform HTTP request
@@ -449,7 +884,7 @@ public class VGProxy {
 		String responseString="";
 		int statusCode;
 		try{
-			LOG.debug("before executing HTTP get- url:\t "+ url);
+			LOG.debug(LOG_PREFIX+ " before executing HTTP get- url:\t "+ url);
 			HttpGet httpGetRequest = new HttpGet(url);
 			httpGetRequest.addHeader("accept", "application/json");
 	    	HttpClient httpclient = new DefaultHttpClient();
@@ -461,10 +896,11 @@ public class VGProxy {
 				while ((temp = bf.readLine()) != null) {
 					responseString+= temp;	
 				}
+				
 			}
 	    	LOG.info(LOG_PREFIX +"after executing rest call to: "+httpGetRequest.getURI()+ "\t status code- "+statusCode+"\t response: "+responseString);
 		}catch (Exception e) {
-			LOG.error(LOG_PREFIX + " exception in method 'perfromGetHttpRequest' ; generated URL is "+url);
+			LOG.error(LOG_PREFIX + " exception in method 'perfromGetHttpRequest' ; generated URL is "+url,e);
 		}
 		
 		return responseString;
@@ -473,11 +909,11 @@ public class VGProxy {
 	public void setICisManager(ICisManager cisManager){
 		this.cisManager = cisManager;
 	}
-	
+	/*
 	public void setServerURL(String serverURL) {
 		this.SERVER_URL = serverURL;
 		
-	}
+	}*/
 	
 	public void setCommManager(ICommManager commManager){
 		this.commManager = commManager;

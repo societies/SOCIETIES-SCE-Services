@@ -1,0 +1,66 @@
+<f:view xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:pm="http://primefaces.org/mobile" contentType="text/html">
+
+	<pm:page title="Networking Zone">
+		<pm:view id="viewMain">
+			<pm:header title="Conferencing Networking Zones" />
+			<pm:content>
+
+				<!-- This dialog will display if the user hasn't setup a profile
+			It directs them to the Profile Page -->
+				<p:confirmDialog id="confirmDialog"
+					message="Please set up a profie so that you can interact with other users"
+					header="Welcome To networking Zone" severity="alert"
+					rendered="#{profileBean.profilemissing}">
+					<p:commandButton id="confirm" value="OK" action="gotoprofile" />
+				</p:confirmDialog>
+
+				<p:accordionPanel>
+				<p:tab title="Where">
+					You are currently located in the #{mainBean.zoneName} zone.
+					<p:commandButton value="Location Details" action="gotozone" />
+					<p:graphicImage value="/images/#{mainBean.zoneImage}" />
+					<p:commandButton icon="back" value="Profile"
+						action="gotoprofile" />
+				</p:tab>
+				</p:accordionPanel>
+				<p:accordionPanel>
+					<p:tab title="Suggested Contacts">
+						<h:form id="form">
+							<p:dataList value="#{mainPeopleBean.suggestions}"
+								var="mainperson" itemType="square">
+								<p:column style="width:30%"> #{mainperson.displayName}, </p:column>
+								<p:column style="width:20%"> #{mainperson.company} </p:column>
+								<p:column style="width:30%"> #{mainperson.zone} </p:column>
+								<p:column style="width:20%"
+									rendered="#{mainPeopleBean.istagged(mainperson)}"> #{mainperson.tags} </p:column>
+							</p:dataList>
+						</h:form>
+					</p:tab>
+					<p:tab title="Activity">
+						<h:form id="formact">
+							<br/>
+								<h:outputText  value="John installed Server NZone" />
+								<br/>	<br/>
+								<h:outputText  value="John joined Community NZone" />
+								<br/>	<br/>
+									<h:outputText  value="John shared information with Community NZone" />
+								<br/>	<br/>
+									
+							
+						</h:form>
+					</p:tab>
+				</p:accordionPanel>
+
+				
+			</pm:content>
+		</pm:view>
+		
+	</pm:page>
+</f:view>
+
+

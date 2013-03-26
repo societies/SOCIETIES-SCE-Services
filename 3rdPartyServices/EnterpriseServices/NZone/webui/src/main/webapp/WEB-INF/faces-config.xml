@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<faces-config version="2.1" xmlns="http://java.sun.com/xml/ns/javaee"
+	xmlns:xi="http://www.w3.org/2001/XInclude" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-facesconfig_2_1.xsd">
+
+	<name>nzone-web</name>
+	<application>
+		<default-render-kit-id>PRIMEFACES_MOBILE</default-render-kit-id>
+		<el-resolver>org.springframework.web.jsf.el.SpringBeanFacesELResolver</el-resolver>
+	</application>	
+
+
+	<navigation-rule>
+   	<from-view-id>main.xhtml</from-view-id>
+   	<navigation-case>
+       <from-outcome>gotofriend</from-outcome>
+       <to-view-id>/friend.xhtml</to-view-id>
+   </navigation-case>
+   <navigation-case>
+       <from-outcome>gotozone</from-outcome>
+       <to-view-id>/zone.xhtml</to-view-id>
+   </navigation-case>
+    <navigation-case>
+       <from-outcome>gotoprofile</from-outcome>
+       <to-view-id>/profile.xhtml</to-view-id>
+   </navigation-case>
+</navigation-rule>
+<navigation-rule>
+   	<from-view-id>friend.xhtml</from-view-id>
+   	<navigation-case>
+       <from-outcome>gotomain</from-outcome>
+       <to-view-id>/main.xhtml</to-view-id>
+   </navigation-case>
+    <navigation-case>
+       <from-outcome>gotozone</from-outcome>
+       <to-view-id>/zone.xhtml</to-view-id>
+   </navigation-case>
+</navigation-rule>
+<navigation-rule>
+   	<from-view-id>zone.xhtml</from-view-id>
+   	<navigation-case>
+       <from-outcome>gotomain</from-outcome>
+       <to-view-id>/main.xhtml</to-view-id>
+   </navigation-case>
+   <navigation-case>
+       <from-outcome>gotofriend</from-outcome>
+       <to-view-id>/friend.xhtml</to-view-id>
+   </navigation-case>
+</navigation-rule>
+<navigation-rule>
+   	<from-view-id>profile.xhtml</from-view-id>
+   	<navigation-case>
+       <from-outcome>gotomain</from-outcome>
+       <to-view-id>/main.xhtml</to-view-id>
+   </navigation-case>
+</navigation-rule>
+
+
+</faces-config>
