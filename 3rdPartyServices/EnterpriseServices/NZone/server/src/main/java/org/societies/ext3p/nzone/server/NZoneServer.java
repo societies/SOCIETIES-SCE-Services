@@ -223,17 +223,21 @@ public class NZoneServer implements INZoneServer{
 	{
 		// TODO : do this with data from database
 		List<Action> actionsRo = new ArrayList<Action>();
-		actionsRo.add(new Action(ActionConstants.READ, true));
-		actionsRo.add(new Action(ActionConstants.CREATE, true));
+		actionsRo.add(new Action(ActionConstants.READ));
+		actionsRo.add(new Action(ActionConstants.WRITE, true));
 		
 		
 
 		List<Condition> conditionsMembersOnly = new ArrayList<Condition>();
-		conditionsMembersOnly.add(new Condition(ConditionConstants.SHARE_WITH_CIS_MEMBERS_ONLY, "1"));
+		
+		// ConditionConstants.SHARE_WITH_CIS_MEMBERS_ONLY, doesn't work for entrepirse trial, as of 26/3/2013 , known issue
+		//conditionsMembersOnly.add(new Condition(ConditionConstants.SHARE_WITH_CIS_MEMBERS_ONLY, "1"));
+		conditionsMembersOnly.add(new Condition(ConditionConstants.SHARE_WITH_3RD_PARTIES, "1"));
+		
 		
 		List<RequestItem> requests = new ArrayList<RequestItem>();
-		requests.add(new RequestItem(new Resource(DataIdentifierScheme.CONTEXT, nzoneMemberOfCxtAttr), actionsRo, conditionsMembersOnly));
-		requests.add(new RequestItem(new Resource(DataIdentifierScheme.CONTEXT, nzoneLocationCxtAttr), actionsRo, conditionsMembersOnly));
+	//	requests.add(new RequestItem(new Resource(DataIdentifierScheme.CONTEXT, nzoneMemberOfCxtAttr), actionsRo, conditionsMembersOnly));
+	//	requests.add(new RequestItem(new Resource(DataIdentifierScheme.CONTEXT, nzoneLocationCxtAttr), actionsRo, conditionsMembersOnly));
 		requests.add(new RequestItem(new Resource(DataIdentifierScheme.CIS, "cis-member-list"), actionsRo, conditionsMembersOnly));
 
 		RequestPolicy privacyPolicy = new RequestPolicy(requests);
@@ -400,8 +404,6 @@ public class NZoneServer implements INZoneServer{
 		return getNzoneDirectory().updateUserRecord(details);
 		
 	}
-	
-	
 	
 		
 }

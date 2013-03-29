@@ -7,7 +7,7 @@
 
 	<pm:page title="Networking Zone">
 		<pm:view id="viewMain">
-			<pm:header title="Conferencing Networking Zones" />
+			<pm:header title="Networking Zones" />
 			<pm:content>
 
 				<!-- This dialog will display if the user hasn't setup a profile
@@ -20,12 +20,12 @@
 				</p:confirmDialog>
 
 				<p:accordionPanel>
-				<p:tab title="Where">
+				<!--  seperate tab -->
+				<p:tab title="Zones">
 					You are currently located in the #{mainBean.zoneName} zone.
-					<p:commandButton value="Location Details" action="gotozone" />
+					<p:commandButton value="Zone Information" action="gotozone" />
 					<p:graphicImage value="/images/#{mainBean.zoneImage}" />
-					<p:commandButton icon="back" value="Profile"
-						action="gotoprofile" />
+				
 				</p:tab>
 				</p:accordionPanel>
 				<p:accordionPanel>
@@ -41,7 +41,7 @@
 							</p:dataList>
 						</h:form>
 					</p:tab>
-					<p:tab title="Activity">
+					<p:tab title="Your Activity">
 						<h:form id="formact">
 							<br/>
 								<h:outputText  value="John installed Server NZone" />
@@ -56,7 +56,7 @@
 					</p:tab>
 				</p:accordionPanel>
 
-				
+				<p:commandButton icon="back" value="Your Profile" action="gotoprofile" />
 			</pm:content>
 		</pm:view>
 		

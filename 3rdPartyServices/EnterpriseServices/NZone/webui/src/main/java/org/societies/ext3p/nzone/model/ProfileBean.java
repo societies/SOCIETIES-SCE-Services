@@ -2,7 +2,9 @@ package org.societies.ext3p.nzone.model;
   
 import java.io.Serializable;   
 
+import javax.faces.application.FacesMessage;
 import javax.faces.bean.ApplicationScoped;
+import javax.faces.context.FacesContext;
 import javax.faces.event.ActionEvent;
 import javax.faces.event.ComponentSystemEvent;
 
@@ -34,9 +36,17 @@ public class ProfileBean implements Serializable {
     private String foursqid;
     private String googleplusid;
     private boolean profilemissing;
+    
+    private boolean sharecompany;
        
    
-    public INZoneClient getNzoneClient() {
+    public boolean isSharecompany() {
+		return sharecompany;
+	}
+	public void setSharecompany(boolean sharecompany) {
+		this.sharecompany = sharecompany;
+	}
+	public INZoneClient getNzoneClient() {
 		return nzoneClient;
 	}
 	public void setNzoneClient(INZoneClient nzoneClient) {
@@ -79,6 +89,8 @@ public class ProfileBean implements Serializable {
 			this.setFoursqid(myDets.getFoursqID());
 			this.setGoogleplusid(myDets.getGoogleplusID());
 			this.setTwitterid(myDets.getTwitterID());
+			
+			this.setSharecompany(true);
 		}
 		log.info("loadProfileDetails called end");
 	}
@@ -150,6 +162,14 @@ public class ProfileBean implements Serializable {
 	public void setGoogleplusid(String googleplusid) {
 		this.googleplusid = googleplusid;
 	}
+	 
+	
+	 public void addMessage() {  
+		 	log.info("addMessage called");
+	        String summary = this.isSharecompany() ? "Checked" : "Unchecked";  
+	  
+	        FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(summary));  
+	    }  
 	 
 
 }  

@@ -23,8 +23,8 @@
 						<br/>
 						
         				<p:selectOneRadio value="#{friendBean.preferredcompany}">  
-           					<f:selectItem itemLabel="Preferred" itemValue="1" />  
-            				<f:selectItem itemLabel="Not Preferred" itemValue="0" />  
+           					<f:selectItem itemLabel="#{friendBean.company} is a Preferred Company" itemValue="1" />  
+            				<f:selectItem itemLabel="#{friendBean.company} is Not a Preferred Company" itemValue="0" />  
             				<f:ajax event="click" render="friendcompanypref"/> 
 				        </p:selectOneRadio>
 				        	<p:commandButton icon="back" value="Back to Zone"

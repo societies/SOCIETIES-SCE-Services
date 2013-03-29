@@ -27,11 +27,11 @@
 									<h:outputText value="#{person.company}" />
 								</p:column>
 
-								<p:column headerText=" " style="width:24%">
+								<p:column headerText="Rank" style="width:24%">
 									<h:outputText value="#{person.tags}" rendered="#{peopleBean.istagged(person)}"/>
 								</p:column>
 
-								<p:column style="width:4%">
+								<p:column headerText="View" style="width:4%">
 									<p:commandButton id="selectButton" 
 										action="gotofriend" icon="ui-icon-search" title="View">
 										<f:setPropertyActionListener value="#{person.userid}"

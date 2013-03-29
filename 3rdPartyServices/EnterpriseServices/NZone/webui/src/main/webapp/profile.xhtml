@@ -13,32 +13,40 @@
 			<pm:content>
 			
 				<h:form id="profileform">
+				
+				 <p:growl id="msg" /> 
 						
 				<br/>
 				Choose what inforation is available by default to other members
 				<br/>
 				<br/>
-				<h:outputLabel for="name" value="Name:" style="font-weight:bold" />
+				
+					<h:outputText value="Name: " style="font-weight:bold" />
 					<h:outputText id="name" value="#{profileBean.name}" />
-					<p:selectBooleanCheckbox value="false" rendered="false"/> 
+				
 					<p:tooltip for="name" value="Your Public Name"
-						showEffect="slide" hideEffect="slide" />
+						showEvent="focus" hideEvent="blur" />
 					<br/>	
+				
+					
 <br/><br/>
-					<h:outputLabel for="email" value="Email:" style="font-weight:bold" />
+
+				 
+        			<pm:switch value="#{profileBean.sharecompany}" onLabel="Share Personal Info" offLabel="Hide Personal Info"  style="width:100%" />  
+        			<br/>
+           
+					<h:outputText value="Email: " style="font-weight:bold" />
 					<h:outputText id="email" value="#{profileBean.email}" />
-					<p:selectBooleanCheckbox value="false" /> 
-					<p:tooltip for="email" value="Your email"
-						showEffect="slide" hideEffect="slide" />
-<br/><br/><br/>
-					<h:outputLabel for="company" value="Company:"
-						style="font-weight:bold" />
+					<br/>	
+					<br/>
+					<h:outputText value="Company:" style="font-weight:bold" />
 					<h:outputText id="company" value="#{profileBean.company}" />
-					<p:selectBooleanCheckbox value="false" /> 
-					<p:tooltip for="company"
-						value="Your company" showEffect="slide"
-						hideEffect="slide" />
-<br/><br/><br/>
+					 
+					
+					<br/><br/><br/>
+
+					<pm:switch value="#{profileBean.sharecompany}" onLabel="Share Social Info" offLabel="Hide Social Info"  style="width:100%" />    
+           			<br/>	
 					<p:graphicImage value="/images/facebook.png" />
 					<h:outputLabel for="facebooktrue" value="Facebook:"
 							style="font-weight:bold" rendered="#{profileBean.facebookid.isEmpty() == false}"/>

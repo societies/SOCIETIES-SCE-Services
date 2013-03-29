@@ -138,6 +138,7 @@
 							javax.faces.webapp;resolution:=optional,
 							com.sun.faces.component;resolution:=optional,
 							javax.faces.lifecycle;resolution:=optional,
+							javax.faces.model;resolution:=optional,
 							<!--  
 							org.springframework.binding.expression;resolution:=optional,
 							org.springframework.webflow.execution;resolution:=optional,
