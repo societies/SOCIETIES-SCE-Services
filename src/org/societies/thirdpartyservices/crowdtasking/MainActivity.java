@@ -25,7 +25,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.societies.android.api.contentproviders.CSSContentProvider;
 
-import si.setcce.societies.android.crowdtasking.RemoteControlActivity;
 import si.setcce.societies.android.rest.RestTask;
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -43,6 +42,7 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.provider.CalendarContract.Events;
 import android.util.Log;
 import android.view.Menu;
@@ -52,6 +52,7 @@ import android.webkit.ConsoleMessage;
 import android.webkit.CookieManager;
 import android.webkit.CookieSyncManager;
 import android.webkit.JsResult;
+import android.webkit.WebBackForwardList;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
@@ -84,6 +85,8 @@ public class MainActivity extends Activity implements SensorEventListener {
 	private float mAccel; // acceleration apart from gravity
 	private float mAccelCurrent; // current acceleration including gravity
 	private float mAccelLast; // last acceleration including gravity
+	private Handler mHandler=new Handler();
+	private CheckUpdate checkUpdate;
 	
 	public MainActivity() {
 	}
@@ -93,7 +96,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-		
+        
         sensorManager = (SensorManager)getSystemService(SENSOR_SERVICE);
 		accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
 	    mAccel = 0.00f;
@@ -151,13 +154,25 @@ public class MainActivity extends Activity implements SensorEventListener {
     		checkInOut(nfcUrl.replaceFirst("cs", "http"));
 			nfcUrl = null;
     	}
+    	checkUpdate = new CheckUpdate();
+        checkUpdate.start();
 	}
 
     /* This Thread checks for Updates in the Background */
-    private Thread checkUpdate = new Thread() {
-        public void run() {
+	class CheckUpdate extends Thread {
+		private boolean showIsUpToDate = false;
+
+		public CheckUpdate() {
+		}
+
+		public CheckUpdate(boolean showIsUpToDate) {
+			this.showIsUpToDate = showIsUpToDate;
+		}
+
+		public void run() {
             try {
-                URL updateURL = new URL("http://my.company.com/update");                
+            	Log.i("checkUpdate", "checkUpdate run");
+                URL updateURL = new URL("http://crowdtasking.appspot.com/apk/latest");                
                 URLConnection conn = updateURL.openConnection(); 
                 InputStream is = conn.getInputStream();
                 BufferedInputStream bis = new BufferedInputStream(is);
@@ -170,44 +185,68 @@ public class MainActivity extends Activity implements SensorEventListener {
 
                 /* Convert the Bytes read to a String. */
                 final String s = new String(baf.toByteArray());         
+            	Log.i("checkUpdate", "s: "+s);
                 
                 /* Get current Version Number */
-                int curVersion = getPackageManager().getPackageInfo("your.app.id", 0).versionCode;
+                int curVersion = getPackageManager().getPackageInfo(getPackageName(), 0).versionCode;
+            	Log.i("checkUpdate", "curVersion: "+curVersion);
                 int newVersion = Integer.valueOf(s);
+            	Log.i("checkUpdate", "newVersion: "+newVersion);
                 
                 /* Is a higher version than the current already out? */
                 if (newVersion > curVersion) {
                     /* Post a Handler for the UI to pick up and open the Dialog */
-                    //mHandler.post(showUpdate);
-                }                
+                	mHandler.post(showUpdate);
+                }
+                else {
+                	if (showIsUpToDate) {
+                		mHandler.post(showUpToDate);
+                	}
+                }
             } catch (Exception e) {
+            	Log.e("checkUpdate", "error in check update");
+            	Log.e("checkUpdate", e.getMessage());
             }
         }
     };
 
     /* This Runnable creates a Dialog and asks the user to open the Market */ 
     private Runnable showUpdate = new Runnable(){
-           public void run(){
-            new AlertDialog.Builder(MainActivity.this)
-            //.setIcon(R.drawable.icon)
-            .setTitle("Update Available")
-            .setMessage("An update for is available!\\n\\nOpen Android Market and see the details?")
-            .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int whichButton) {
-                            /* User clicked OK so do some stuff */
-                            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("market://search?q=pname:your.app.id"));
-                            startActivity(intent);
-                    }
-            })
-            .setNegativeButton("No", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int whichButton) {
-                            /* User clicked Cancel */
-                    }
-            })
-            .show();
-           }
-    };   
-    
+        public void run(){
+         new AlertDialog.Builder(MainActivity.this)
+         //.setIcon(R.drawable.icon)
+         .setTitle("Update Available")
+         .setMessage("An update for SCT Android is available! Do you want to download a new version?")
+         .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                 public void onClick(DialogInterface dialog, int whichButton) {
+                         /* User clicked OK so do some stuff */
+                         Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://crowdtasking.appspot.com/apk/index.html"));
+                         startActivity(intent);
+                 }
+         })
+         .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                 public void onClick(DialogInterface dialog, int whichButton) {
+                         /* User clicked Cancel */
+                 }
+         })
+         .show();
+        }
+ };   
+ 
+ private Runnable showUpToDate = new Runnable(){
+     public void run(){
+      new AlertDialog.Builder(MainActivity.this)
+      //.setIcon(R.drawable.icon)
+      .setTitle("No Update Available")
+      .setMessage("You have the latest version of SCT Android.")
+      .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+              public void onClick(DialogInterface dialog, int whichButton) {
+              }
+      })
+      .show();
+     }
+};   
+
 	private void toastIt(int number) {
 		toastIt(Integer.toString(number));
 	}
@@ -270,12 +309,13 @@ public class MainActivity extends Activity implements SensorEventListener {
     public void onBackPressed()
     {
         if(webView.canGoBack()) {
-        	//WebBackForwardList webBackForwardList = webView.copyBackForwardList();
+        	WebBackForwardList webBackForwardList = webView.copyBackForwardList();
         	//int i = webBackForwardList.getCurrentIndex();
-        	/*String historyUrl = webBackForwardList.getItemAtIndex(webBackForwardList.getCurrentIndex()-1).getUrl();
-        	if (historyUrl.contains("start.html")) {
+        	String historyUrl = webBackForwardList.getItemAtIndex(webBackForwardList.getCurrentIndex()).getUrl();
+        	if (historyUrl.equalsIgnoreCase(APPLICATION_URL+"/menu") ||
+        			historyUrl.startsWith(APPLICATION_URL+"/login")) {
         		super.onBackPressed();
-        	}*/
+        	}
         	webView.goBack();
         }
         else {
@@ -296,10 +336,15 @@ public class MainActivity extends Activity implements SensorEventListener {
             	webView.loadUrl(APPLICATION_URL);
             	return true;
             
-            case R.id.remote:
+            case R.id.checkUpdate:
             	//refreshData();
-            	Intent startIntent=new Intent(this.getApplicationContext(),RemoteControlActivity.class);
-            	startActivity(startIntent);
+            	/*Intent startIntent=new Intent(this.getApplicationContext(),RemoteControlActivity.class);
+            	startActivity(startIntent);*/
+            	if(checkUpdate.isAlive()){
+            		checkUpdate.interrupt(); 
+            	}
+            	checkUpdate = new CheckUpdate(true);
+            	checkUpdate.start();
                 return true;
 
             case R.id.logout:
@@ -496,51 +541,48 @@ public class MainActivity extends Activity implements SensorEventListener {
 			toast.show();
 		}
 		
-		public void loginData() {
+		public String loginData() {
 			final String JS_SETELEMENT = "javascript:document.getElementById('%s').value='%s'";
 
-            String columns [] = {CSSContentProvider.CssRecord.CSS_RECORD_CSS_IDENTITY,
+            /*String columns [] = {CSSContentProvider.CssRecord.CSS_RECORD_CSS_IDENTITY,
                     CSSContentProvider.CssRecord.CSS_RECORD_EMAILID,
                     CSSContentProvider.CssRecord.CSS_RECORD_FORENAME,
-                    CSSContentProvider.CssRecord.CSS_RECORD_NAME};
-    		//Cursor cursor = this.getContentResolver().query(CSSContentProvider.CssRecord.CONTENT_URI, columns, null, null, null);
-    		Cursor cursor = context.getContentResolver().query(CSSContentProvider.CssRecord.CONTENT_URI, null, null, null, null);
+                    CSSContentProvider.CssRecord.CSS_RECORD_NAME};*/
+    		JSONObject societiesUser = new JSONObject();
         	try {
-    	    	/*String cName = cursor.getColumnName(1);
-    	    	toastIt(cursor.getColumnIndex(CSSContentProvider.CssRecord.CSS_RECORD_CSS_IDENTITY));
-    	    	toastIt(cursor.getString(cursor.getColumnIndex(cName)));
-    	    	toastIt(cursor.getString(cursor.getColumnIndex("cssIdentity")));*/
-    	    	//toastIt(cursor.getString(cursor.getColumnIndex(CSSContentProvider.CssRecord.CSS_RECORD_CSS_IDENTITY)));
-    	    	/*String text = cursor.getString(cursor.getColumnIndex("cssIdentity"));
-    			Toast toast = Toast.makeText(getApplicationContext(), "Error: "+text, Toast.LENGTH_LONG);
-    			toast.show();
-    			text = cursor.getString(cursor.getColumnIndex("domainServer"));
-    			toast = Toast.makeText(getApplicationContext(), "Error: "+text, Toast.LENGTH_LONG);
-    			toast.show();
-    			text = cursor.getString(cursor.getColumnIndex("name"));
-    			toast = Toast.makeText(getApplicationContext(), "Error: "+text, Toast.LENGTH_LONG);
-    			toast.show();*/
+        		//Cursor cursor = context.getContentResolver().query(CSSContentProvider.CssRecord.CONTENT_URI, columns, null, null, null);
+        		Cursor cursor = context.getContentResolver().query(CSSContentProvider.CssRecord.CONTENT_URI, null, null, null, null);
+    	    	cursor.moveToFirst();
+
+    	    	/*toastIt(cursor.getCount());
+    	    	toastIt(cursor.getColumnCount());
+    	    	cursor.moveToFirst();
+    	    	for (int i=0; i<cursor.getColumnCount(); i++) {
+    	    		System.out.println(cursor.getColumnName(i)+": "+cursor.getString(i));
+    	    	}*/
+
+        		societiesUser.put("userId", cursor.getString(cursor.getColumnIndex(CSSContentProvider.CssRecord.CSS_RECORD_CSS_IDENTITY)));
+        		societiesUser.put("name", cursor.getString(cursor.getColumnIndex(CSSContentProvider.CssRecord.CSS_RECORD_NAME)));
+        		societiesUser.put("foreName", cursor.getString(cursor.getColumnIndex(CSSContentProvider.CssRecord.CSS_RECORD_FORENAME)));
+        		societiesUser.put("email", cursor.getString(cursor.getColumnIndex(CSSContentProvider.CssRecord.CSS_RECORD_EMAILID)));
+        		cursor.close();
+        		societiesUser.put("status", "ok");
+        		
+        		/*webView.loadUrl(String.format(JS_SETELEMENT, "userId", cursor.getString(cursor.getColumnIndex(CSSContentProvider.CssRecord.CSS_RECORD_CSS_IDENTITY))));
+    			webView.loadUrl(String.format(JS_SETELEMENT, "name", cursor.getString(cursor.getColumnIndex(CSSContentProvider.CssRecord.CSS_RECORD_NAME))));
+    			webView.loadUrl(String.format(JS_SETELEMENT, "foreName", cursor.getString(cursor.getColumnIndex(CSSContentProvider.CssRecord.CSS_RECORD_FORENAME))));
+    			webView.loadUrl(String.format(JS_SETELEMENT, "email", cursor.getString(cursor.getColumnIndex(CSSContentProvider.CssRecord.CSS_RECORD_EMAILID))));*/
     	    } catch (Exception e) {
     	        e.printStackTrace();
+    	        return "";
     	    }
-	
-	    	toastIt(cursor.getCount());
-	    	toastIt(cursor.getColumnCount());
-	    	cursor.moveToFirst();
-	    	for (int i=0; i<cursor.getColumnCount(); i++) {
-	    		System.out.println(cursor.getColumnName(i)+": "+cursor.getString(i));
-	    	}
-			
-			webView.loadUrl(String.format(JS_SETELEMENT, "userId", cursor.getString(cursor.getColumnIndex(CSSContentProvider.CssRecord.CSS_RECORD_CSS_IDENTITY))));
-			webView.loadUrl(String.format(JS_SETELEMENT, "name", cursor.getString(cursor.getColumnIndex(CSSContentProvider.CssRecord.CSS_RECORD_NAME))));
-			webView.loadUrl(String.format(JS_SETELEMENT, "foreName", cursor.getString(cursor.getColumnIndex(CSSContentProvider.CssRecord.CSS_RECORD_FORENAME))));
-			webView.loadUrl(String.format(JS_SETELEMENT, "email", cursor.getString(cursor.getColumnIndex(CSSContentProvider.CssRecord.CSS_RECORD_EMAILID))));
+        	System.out.println(societiesUser.toString());
+			return societiesUser.toString();
 		}
 		
 		public void share(String spejs, String action) {
 			if (spejs == null || "".equalsIgnoreCase(spejs)) {
-				Toast toast = Toast.makeText(mAppView.getContext(), "Enter URL mapping",
-						Toast.LENGTH_SHORT);
+				Toast toast = Toast.makeText(mAppView.getContext(), "Enter URL mapping", Toast.LENGTH_SHORT);
 				toast.show();
 				return;
 			}
