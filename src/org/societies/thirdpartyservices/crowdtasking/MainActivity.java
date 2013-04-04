@@ -148,12 +148,8 @@ public class MainActivity extends Activity implements SensorEventListener {
     	});
         
 
-        checkIntent(getIntent());
         webView.loadUrl(startUrl);
-    	if (nfcUrl != null) {
-    		checkInOut(nfcUrl.replaceFirst("cs", "http"));
-			nfcUrl = null;
-    	}
+        checkIntent(getIntent());
     	checkUpdate = new CheckUpdate();
         checkUpdate.start();
 	}
@@ -183,19 +179,12 @@ public class MainActivity extends Activity implements SensorEventListener {
                      baf.append((byte)current);
                 }
 
-                /* Convert the Bytes read to a String. */
-                final String s = new String(baf.toByteArray());         
-            	Log.i("checkUpdate", "s: "+s);
-                
-                /* Get current Version Number */
                 int curVersion = getPackageManager().getPackageInfo(getPackageName(), 0).versionCode;
             	Log.i("checkUpdate", "curVersion: "+curVersion);
-                int newVersion = Integer.valueOf(s);
+                int newVersion = Integer.valueOf(new String(baf.toByteArray()));
             	Log.i("checkUpdate", "newVersion: "+newVersion);
                 
-                /* Is a higher version than the current already out? */
                 if (newVersion > curVersion) {
-                    /* Post a Handler for the UI to pick up and open the Dialog */
                 	mHandler.post(showUpdate);
                 }
                 else {
@@ -210,23 +199,19 @@ public class MainActivity extends Activity implements SensorEventListener {
         }
     };
 
-    /* This Runnable creates a Dialog and asks the user to open the Market */ 
     private Runnable showUpdate = new Runnable(){
         public void run(){
          new AlertDialog.Builder(MainActivity.this)
-         //.setIcon(R.drawable.icon)
          .setTitle("Update Available")
          .setMessage("An update for SCT Android is available! Do you want to download a new version?")
          .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                  public void onClick(DialogInterface dialog, int whichButton) {
-                         /* User clicked OK so do some stuff */
                          Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://crowdtasking.appspot.com/apk/index.html"));
                          startActivity(intent);
                  }
          })
          .setNegativeButton("No", new DialogInterface.OnClickListener() {
                  public void onClick(DialogInterface dialog, int whichButton) {
-                         /* User clicked Cancel */
                  }
          })
          .show();
@@ -247,16 +232,6 @@ public class MainActivity extends Activity implements SensorEventListener {
      }
 };   
 
-	private void toastIt(int number) {
-		toastIt(Integer.toString(number));
-	}
-	
-	private void toastIt(String text) {
-		System.out.println("Toast: "+text);
-		//Toast toast = Toast.makeText(getApplicationContext(), "Error: "+text, Toast.LENGTH_LONG);
-		//toast.show();
-	}
-
 	private void checkIntent(Intent intent) {
         String action = intent.getAction();
         if (Intent.ACTION_VIEW.equals(action)) {
@@ -265,6 +240,10 @@ public class MainActivity extends Activity implements SensorEventListener {
         if ("android.nfc.action.NDEF_DISCOVERED".equals(action)) {
         	nfcUrl = intent.getData().toString();
         }		
+    	if (nfcUrl != null) {
+    		checkInOut(nfcUrl.replaceFirst("cs", "http"));
+			nfcUrl = null;
+    	}
 	}
 	
     @Override
@@ -290,12 +269,18 @@ public class MainActivity extends Activity implements SensorEventListener {
 		} catch (URISyntaxException e) {
 			e.printStackTrace();
 		}*/
+    	if (getIntent().getAction().equalsIgnoreCase(CHECK_IN_OUT)) {
+    		String response = getIntent().getStringExtra(RestTask.HTTP_RESPONSE);
+    		System.out.println(response);
+			Toast toast = Toast.makeText(getApplicationContext(), response, Toast.LENGTH_SHORT);
+			toast.show();
+    	}
 }
     
     @Override
     public void onPause() {
         super.onPause();
-    	unregisterReceiver(receiver);
+    	//unregisterReceiver(receiver);
     	sensorManager.unregisterListener(this);
     }
   	
