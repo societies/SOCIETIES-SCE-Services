@@ -207,6 +207,7 @@ public class MainActivity extends Activity implements SensorEventListener {
          .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                  public void onClick(DialogInterface dialog, int whichButton) {
                          Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://crowdtasking.appspot.com/apk/index.html"));
+                         intent.setClassName("com.android.browser", "com.android.browser.BrowserActivity");
                          startActivity(intent);
                  }
          })
@@ -430,6 +431,9 @@ public class MainActivity extends Activity implements SensorEventListener {
         	}
         	if (intent.getAction().equalsIgnoreCase(CHECK_IN_OUT)) {
         		String response = intent.getStringExtra(RestTask.HTTP_RESPONSE);
+        		if (!response.startsWith("Check")) {
+        			response = "Please sign in first.";
+        		}
         		System.out.println(response);
 				Toast toast = Toast.makeText(getApplicationContext(), response, Toast.LENGTH_SHORT);
 				toast.show();
