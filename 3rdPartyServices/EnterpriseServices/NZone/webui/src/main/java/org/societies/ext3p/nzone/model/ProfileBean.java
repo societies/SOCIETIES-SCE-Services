@@ -10,7 +10,9 @@ import javax.faces.event.ComponentSystemEvent;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.societies.api.ext3p.nzone.NZoneConsts;
 import org.societies.api.ext3p.nzone.client.INZoneClient;
+import org.societies.api.ext3p.schema.nzone.ShareInfo;
 import org.societies.api.ext3p.schema.nzone.UserDetails;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -29,7 +31,9 @@ public class ProfileBean implements Serializable {
 	
     private String name;
     private String email;
+    private String sex;
     private String company;
+    private String position;
     private String facebookid;
     private String linkedinid;
     private String twitterid;
@@ -38,13 +42,52 @@ public class ProfileBean implements Serializable {
     private boolean profilemissing;
     
     private boolean sharecompany;
-       
+    private boolean sharesns;
+    private boolean shareinterests;
+    private boolean sharepersonal;
+    
    
     public boolean isSharecompany() {
 		return sharecompany;
 	}
 	public void setSharecompany(boolean sharecompany) {
 		this.sharecompany = sharecompany;
+	}
+	/**
+	 * @return the sharesns
+	 */
+	public boolean isSharesns() {
+		return sharesns;
+	}
+	/**
+	 * @param sharesns the sharesns to set
+	 */
+	public void setSharesns(boolean sharesns) {
+		this.sharesns = sharesns;
+	}
+	/**
+	 * @return the shareinterests
+	 */
+	public boolean isShareinterests() {
+		return shareinterests;
+	}
+	/**
+	 * @param shareinterests the shareinterests to set
+	 */
+	public void setShareinterests(boolean shareinterests) {
+		this.shareinterests = shareinterests;
+	}
+	/**
+	 * @return the sharepersonal
+	 */
+	public boolean isSharepersonal() {
+		return sharepersonal;
+	}
+	/**
+	 * @param sharepersonal the sharepersonal to set
+	 */
+	public void setSharepersonal(boolean sharepersonal) {
+		this.sharepersonal = sharepersonal;
 	}
 	public INZoneClient getNzoneClient() {
 		return nzoneClient;
@@ -84,15 +127,66 @@ public class ProfileBean implements Serializable {
 			setName(myDets.getDisplayName());
 			setCompany(myDets.getCompany());
 			setEmail(myDets.getEmail());
-			this.setFacebookid(myDets.getFacebookID());
-			this.setLinkedinid(myDets.getLinkedInID());
-			this.setFoursqid(myDets.getFoursqID());
-			this.setGoogleplusid(myDets.getGoogleplusID());
-			this.setTwitterid(myDets.getTwitterID());
+			setPosition(myDets.getPosition());
+			setSex(myDets.getSex());
 			
-			this.setSharecompany(true);
+			if (myDets.getFacebookID() == null)
+				this.setFacebookid("");
+			else
+				this.setFacebookid(myDets.getFacebookID());
+			
+			if (myDets.getLinkedInID() == null)
+				this.setLinkedinid("");
+			else
+				this.setLinkedinid(myDets.getLinkedInID());
+			
+			if (myDets.getFoursqID() == null)
+				this.setFoursqid("");
+			else
+				this.setFoursqid(myDets.getFoursqID());
+			
+			if (myDets.getGoogleplusID() == null)
+				this.setGoogleplusid("");
+			else
+				this.setGoogleplusid(myDets.getGoogleplusID());
+			
+			if (myDets.getTwitterID() == null)
+				this.setTwitterid("");
+			else
+				this.setTwitterid(myDets.getTwitterID());
+			
 		}
+		
+		//Default to showing nothing until we read value
+		this.setSharepersonal(false);
+		this.setSharecompany(false);
+		this.setSharesns(false);
+		this.setShareinterests(false);
+		
+		ShareInfo info = getNzoneClient().getShareInfo("0");
+		if ((info != null) && (info.getShareHash() != null))
+		{
+			
+			 if ((info.getShareHash() & NZoneConsts.SHARE_PERSONAL) == NZoneConsts.SHARE_PERSONAL)
+				 this.setSharepersonal(true);
+			
+			 if ((info.getShareHash() & NZoneConsts.SHARE_EMPLOYMENT)  == NZoneConsts.SHARE_EMPLOYMENT)
+				 this.setSharecompany(true);
+			 
+			 if ((info.getShareHash() & NZoneConsts.SHARE_SOCIAL)  == NZoneConsts.SHARE_SOCIAL)
+				 this.setSharesns(true);
+			
+			 if ((info.getShareHash() & NZoneConsts.SHARE_INTERESTS)  == NZoneConsts.SHARE_INTERESTS)
+				 this.setShareinterests(true);
+			
+				 
+		}
+			
+		
+		
 		log.info("loadProfileDetails called end");
+	//	getNzoneClient().userViewingPreferredProfile();
+	//	getNzoneClient().userSharedWithViewPreferredProfile();
 	}
 	
 	
@@ -132,6 +226,30 @@ public class ProfileBean implements Serializable {
 	public void setCompany(String company) {
 		this.company = company;
 	}
+	/**
+	 * @return the position
+	 */
+	public String getPosition() {
+		return position;
+	}
+	/**
+	 * @param position the position to set
+	 */
+	public void setPosition(String position) {
+		this.position = position;
+	}
+	/**
+	 * @return the sex
+	 */
+	public String getSex() {
+		return sex;
+	}
+	/**
+	 * @param sex the sex to set
+	 */
+	public void setSex(String sex) {
+		this.sex = sex;
+	}
 	public String getFacebookid() {
 		return facebookid;
 	}
@@ -164,12 +282,34 @@ public class ProfileBean implements Serializable {
 	}
 	 
 	
-	 public void addMessage() {  
+	
+	public void addMessage() {  
 		 	log.info("addMessage called");
 	        String summary = this.isSharecompany() ? "Checked" : "Unchecked";  
 	  
 	        FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(summary));  
-	    }  
+	   }  
 	 
 
+	 public String saveShareInfo() {
+		 ShareInfo info = new ShareInfo();
+		 int shareflag = 0;
+		 
+		 if (this.isSharepersonal())
+			 shareflag += NZoneConsts.SHARE_PERSONAL;
+		 if (this.isSharecompany())
+			 shareflag += NZoneConsts.SHARE_EMPLOYMENT;
+		 if (this.isSharesns())
+			 shareflag += NZoneConsts.SHARE_SOCIAL;
+		 
+		 info.setFriendid("0");		
+		 info.setShareHash(shareflag);
+		 
+		 getNzoneClient().updateShareInfo(info);
+		 
+		return "gotomain";
+		 
+	 }
+	 
+	 
 }  

@@ -3,7 +3,6 @@ package org.societies.ext3p.nzone.server;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 import org.slf4j.Logger;
@@ -14,7 +13,6 @@ import org.societies.api.cis.management.ICis;
 import org.societies.api.cis.management.ICisManager;
 import org.societies.api.cis.management.ICisOwned;
 import org.societies.api.comm.xmpp.interfaces.ICommManager;
-import org.societies.api.context.CtxException;
 import org.societies.api.context.broker.ICtxBroker;
 import org.societies.api.context.model.CtxAttribute;
 import org.societies.api.context.model.CtxAttributeTypes;
@@ -23,6 +21,7 @@ import org.societies.api.context.model.CtxEntityIdentifier;
 import org.societies.api.context.model.CtxIdentifier;
 import org.societies.api.context.model.CtxModelObject;
 import org.societies.api.context.model.CtxModelType;
+import org.societies.api.ext3p.nzone.NZoneConsts;
 import org.societies.api.ext3p.nzone.server.INZoneServer;
 import org.societies.api.ext3p.schema.nzone.ShareInfo;
 import org.societies.api.ext3p.schema.nzone.UserDetails;
@@ -42,10 +41,6 @@ import org.societies.api.schema.identity.DataIdentifierScheme;
 
 public class NZoneServer implements INZoneServer{
 	
-	private static int SHARE_PERSONAL =   0x00001;
-	private static int SHARE_EMPLOYMENT = 0x00002;
-	private static int SHARE_ABOUT 		= 0x00004;
-	private static int SHARE_SOCIAL 	= 0x00008;
 	
 	private static Logger log = LoggerFactory.getLogger(NZoneServer.class);	
 
@@ -232,12 +227,14 @@ public class NZoneServer implements INZoneServer{
 		
 		// ConditionConstants.SHARE_WITH_CIS_MEMBERS_ONLY, doesn't work for entrepirse trial, as of 26/3/2013 , known issue
 		//conditionsMembersOnly.add(new Condition(ConditionConstants.SHARE_WITH_CIS_MEMBERS_ONLY, "1"));
-		conditionsMembersOnly.add(new Condition(ConditionConstants.SHARE_WITH_3RD_PARTIES, "1"));
+		//conditionsMembersOnly.add(new Condition(ConditionConstants.SHARE_WITH_3RD_PARTIES, "1"));
+		
+		conditionsMembersOnly.add(new Condition(ConditionConstants.SHARE_WITH_3RD_PARTIES, "Yes"));
 		
 		
 		List<RequestItem> requests = new ArrayList<RequestItem>();
-	//	requests.add(new RequestItem(new Resource(DataIdentifierScheme.CONTEXT, nzoneMemberOfCxtAttr), actionsRo, conditionsMembersOnly));
-	//	requests.add(new RequestItem(new Resource(DataIdentifierScheme.CONTEXT, nzoneLocationCxtAttr), actionsRo, conditionsMembersOnly));
+		requests.add(new RequestItem(new Resource(DataIdentifierScheme.CONTEXT, nzoneMemberOfCxtAttr), actionsRo, conditionsMembersOnly));
+		requests.add(new RequestItem(new Resource(DataIdentifierScheme.CONTEXT, nzoneLocationCxtAttr), actionsRo, conditionsMembersOnly));
 		requests.add(new RequestItem(new Resource(DataIdentifierScheme.CIS, "cis-member-list"), actionsRo, conditionsMembersOnly));
 
 		RequestPolicy privacyPolicy = new RequestPolicy(requests);
@@ -331,6 +328,16 @@ public class NZoneServer implements INZoneServer{
 		
 	}
 	
+	public ShareInfo getShareInfo(String myuserid, String frienduserid)
+	{
+		 return getNzoneDirectory().getShareInfo(myuserid, frienduserid);
+	}
+	
+	public boolean updateShareInfo(String myuserid, String frienduserid, int value)
+	{
+		 return getNzoneDirectory().updateShareInfo(myuserid, frienduserid, value);
+	}
+	
 	public List<UserDetails> getUserDetails(String myuserid, List<String> friendsid) {
 		
 		 List<UserDetails> userDetList = new ArrayList<UserDetails>();
@@ -345,26 +352,26 @@ public class NZoneServer implements INZoneServer{
 			 sharedInfo = getNzoneDirectory().getShareInfo(friendsid.get(userIndex), myuserid);
 		
 			 //Blank of the info they don't want to share with this user
-			 if ((sharedInfo.getShareHash() & SHARE_ABOUT) != SHARE_ABOUT) 
+			 if ((sharedInfo.getShareHash() & NZoneConsts.SHARE_ABOUT) != NZoneConsts.SHARE_ABOUT) 
 			 {
 				 friendDets.setAbout("");
 	
 			 }
 		
-			 if ((sharedInfo.getShareHash() & SHARE_PERSONAL) != SHARE_PERSONAL)
+			 if ((sharedInfo.getShareHash() & NZoneConsts.SHARE_PERSONAL) != NZoneConsts.SHARE_PERSONAL)
 			 {
 				 friendDets.setEmail("");
 				 friendDets.setHomelocation("");
 			 }
 			
 		
-			 if ((sharedInfo.getShareHash() & SHARE_EMPLOYMENT)  != SHARE_EMPLOYMENT)
+			 if ((sharedInfo.getShareHash() & NZoneConsts.SHARE_EMPLOYMENT)  != NZoneConsts.SHARE_EMPLOYMENT)
 			 {
 				 friendDets.setCompany("");
 				 friendDets.setPosition("");
 			 }
 			 
-			 if ((sharedInfo.getShareHash() & SHARE_SOCIAL)  != SHARE_SOCIAL)
+			 if ((sharedInfo.getShareHash() & NZoneConsts.SHARE_SOCIAL)  != NZoneConsts.SHARE_SOCIAL)
 			 {
 				 friendDets.setAbout("");
 				 friendDets.setFacebookID("");
@@ -373,7 +380,10 @@ public class NZoneServer implements INZoneServer{
 				 friendDets.setLinkedInID("");
 				 friendDets.setFoursqID("");
 			 }
-		
+			 
+			 if ((sharedInfo.getShareHash() & NZoneConsts.SHARE_INTERESTS)  != NZoneConsts.SHARE_INTERESTS)
+			 	 friendDets.getInterests().clear();
+			 
 		
 			 userDetList.add(friendDets);
 		 }
@@ -398,6 +408,16 @@ public class NZoneServer implements INZoneServer{
 	public boolean savePreferences(String userid, String pref)
 	{
 		return getNzoneDirectory().savePreferences(userid, pref);
+	}
+	
+	public String getSharePreferences(String userid)
+	{
+		return getNzoneDirectory().getSharePreferences(userid);
+	}
+	
+	public boolean saveSharePreferences(String userid, String pref)
+	{
+		return getNzoneDirectory().saveSharePreferences(userid, pref);
 	}
 
 	public boolean updateMyDetails(UserDetails details) {

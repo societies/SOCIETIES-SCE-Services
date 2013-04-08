@@ -89,6 +89,34 @@ public class PeopleBean {
 		return false;
 		
 		
+		
+	}
+	
+	public boolean isperftagged(UserPreview currentdet)
+	{
+		if (currentdet == null)
+			return false;
+		
+		if (currentdet.getTags() == null)
+			return false;
+		
+		
+		if (currentdet.getTags().size() == 0)
+			return false;
+		
+		if (currentdet.getTags().get(0) == null)
+			return false;
+		
+		
+		 
+		for ( int i = 0; i < currentdet.getTags().get(0).length() ; i++)
+		{
+			if (currentdet.getTags().get(i).contains("Learned"))
+					return true;
+		}
+		return false;
+		
+		
 	}
 }
                     

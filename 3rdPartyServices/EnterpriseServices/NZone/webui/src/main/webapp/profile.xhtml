@@ -7,6 +7,7 @@
 
 	<pm:page title="Networking Zone">
 		<pm:view id="viewProfile">
+			
 			<f:event listener="#{profileBean.loadprofile}" type="preRenderView" />
 		
 			<pm:header title="Your Profile" />
@@ -17,37 +18,46 @@
 				 <p:growl id="msg" /> 
 						
 				<br/>
-				Choose what inforation is available by default to other members
+				Choose what information is available by default to other members
 				<br/>
 				<br/>
-				
+					<p:graphicImage value="/images/profile_pic.jpg"  width="50" height="45" /> 
+								
 					<h:outputText value="Name: " style="font-weight:bold" />
 					<h:outputText id="name" value="#{profileBean.name}" />
 				
-					<p:tooltip for="name" value="Your Public Name"
-						showEvent="focus" hideEvent="blur" />
-					<br/>	
-				
-					
-<br/><br/>
-
-				 
-        			<pm:switch value="#{profileBean.sharecompany}" onLabel="Share Personal Info" offLabel="Hide Personal Info"  style="width:100%" />  
+				 	<p:separator style="color: black;"/>
+				 	<br/>
+        			<h:outputText value="Share my Personal Details: " style="font-weight:bold" /> <pm:switch value="#{profileBean.sharepersonal}" onLabel="Yes" offLabel="No"  style="width:100%" />  
         			<br/>
-           
+           			<br/>
 					<h:outputText value="Email: " style="font-weight:bold" />
 					<h:outputText id="email" value="#{profileBean.email}" />
 					<br/>	
 					<br/>
+					<h:outputText value="Sex" style="font-weight:bold" />
+					<h:outputText id="sex" value="#{profileBean.sex}" />
+					<br/><br/><br/>
+				
+				 	<p:separator style="color: black;"/>
+				 	<br/>
+        			<h:outputText value="Share my Company Details: " style="font-weight:bold" /> <pm:switch value="#{profileBean.sharecompany}" onLabel="Yes" offLabel="No"  style="width:100%" />  
+        			<br/>
+           			<br/>
 					<h:outputText value="Company:" style="font-weight:bold" />
 					<h:outputText id="company" value="#{profileBean.company}" />
+					<br/>	
+					<br/>
+					<h:outputText value="Position:" style="font-weight:bold" />
+					<h:outputText id="position" value="#{profileBean.position}" />
 					 
 					
 					<br/><br/><br/>
+					<p:separator style="color: black;"/>
 
-					<pm:switch value="#{profileBean.sharecompany}" onLabel="Share Social Info" offLabel="Hide Social Info"  style="width:100%" />    
-           			<br/>	
-					<p:graphicImage value="/images/facebook.png" />
+					<h:outputText value="Share my Social Network Data: " style="font-weight:bold" /> <pm:switch value="#{profileBean.sharesns}" onLabel="Yes" offLabel="No"  style="width:100%" />  
+        			<br/>
+					<p:graphicImage value="/images/facebook-col.png" width="30" height="25" />
 					<h:outputLabel for="facebooktrue" value="Facebook:"
 							style="font-weight:bold" rendered="#{profileBean.facebookid.isEmpty() == false}"/>
 					<h:outputText id="facebooktrue" value="#{profileBean.facebookid}"
@@ -56,11 +66,53 @@
 							style="font-weight:bold" rendered="#{profileBean.facebookid.isEmpty()}"/>
 					<h:outputText id="facebookfalse" value="Not connected"
 							rendered="#{profileBean.facebookid.isEmpty()}"/>
-<br/><br/><br/>							
-       
+					<br/>
+					<p:graphicImage value="/images/twitter-col.png" width="30" height="25" />
+					<h:outputLabel for="twittertrue" value="Twitter:"
+							style="font-weight:bold" rendered="#{profileBean.twitterid.isEmpty() == false}"/>
+					<h:outputText id="twittertrue" value="#{profileBean.twitterid}"
+							rendered="#{profileBean.twitterid.isEmpty() == false}"/>
+					<h:outputLabel for="twitterfalse" value="Twitter:"
+							style="font-weight:bold" rendered="#{profileBean.twitterid.isEmpty()}"/>
+					<h:outputText id="twitterfalse" value="Not connected"
+							rendered="#{profileBean.twitterid.isEmpty()}"/>
+					<br/>
+					<p:graphicImage value="/images/linkedin-col.png" width="30" height="25" />
+					<h:outputLabel for="linkedintrue" value="LinkedIn:"
+							style="font-weight:bold" rendered="#{profileBean.linkedinid.isEmpty() == false}"/>
+					<h:outputText id="linkedintrue" value="#{profileBean.linkedinid}"
+							rendered="#{profileBean.linkedinid.isEmpty() == false}"/>
+					<h:outputLabel for="linkedinfalse" value="LinkedIn:"
+							style="font-weight:bold" rendered="#{profileBean.linkedinid.isEmpty()}"/>
+					<h:outputText id="linkedinfalse" value="Not connected"
+							rendered="#{profileBean.linkedinid.isEmpty()}"/>
+					<br/>
+					<p:graphicImage value="/images/googleplus-col.png" width="30" height="25" />
+					<h:outputLabel for="goggleplustrue" value="Google+:"
+							style="font-weight:bold" rendered="#{profileBean.googleplusid.isEmpty() == false}"/>
+					<h:outputText id="goggleplustrue" value="#{profileBean.googleplusid}"
+							rendered="#{profileBean.googleplusid.isEmpty() == false}"/>
+					<h:outputLabel for="goggleplusfalse" value="Google+:"
+							style="font-weight:bold" rendered="#{profileBean.googleplusid.isEmpty()}"/>
+					<h:outputText id="goggleplusfalse" value="Not connected"
+							rendered="#{profileBean.googleplusid.isEmpty()}"/>
+					<br/>
+					<p:graphicImage value="/images/foursquare-col.png" width="30" height="25" />
+					<h:outputLabel for="foursqtrue" value="FourSq:"
+							style="font-weight:bold" rendered="#{profileBean.foursqid.isEmpty() == false}"/>
+					<h:outputText id="foursqtrue" value="#{profileBean.foursqid}"
+							rendered="#{profileBean.foursqid.isEmpty() == false}"/>
+					<h:outputLabel for="foursqfalse" value="FourSq:"
+							style="font-weight:bold" rendered="#{profileBean.foursqid.isEmpty()}"/>
+					<h:outputText id="foursqfalse" value="Not connected"
+							rendered="#{profileBean.foursqid.isEmpty()}"/>
+					<br/>
+
+					<br/><br/><br/>							
+       				<p:separator style="color: black;"/>
        
 					<p:commandButton icon="back" value="Back to Main Zone"
-						action="gotomain" />
+						action="#{profileBean.saveShareInfo}" />
 				</h:form>
 				
 			</pm:content>

@@ -30,7 +30,9 @@ import org.societies.api.context.model.CtxModelObject;
 import org.societies.api.context.model.CtxModelType;
 import org.societies.api.ext3p.nzone.client.INZoneClient;
 import org.societies.api.ext3p.nzone.model.NZonePreferences;
+import org.societies.api.ext3p.nzone.model.NZoneSharePreferences;
 import org.societies.api.ext3p.nzone.model.UserPreview;
+import org.societies.api.ext3p.schema.nzone.ShareInfo;
 import org.societies.api.ext3p.schema.nzone.UserDetails;
 import org.societies.api.ext3p.schema.nzone.ZoneDetails;
 import org.societies.api.identity.IIdentity;
@@ -94,6 +96,7 @@ public class NZoneClient implements INZoneClient, IActionConsumer {
 	private static String PREF_TAG = "taggedPreference";
 
 	private NZonePreferences preferences;
+	private NZoneSharePreferences sharepreferences;
 
 	private List<CisAdvertisementRecord> cisDirCallbackResult;
 
@@ -226,7 +229,10 @@ public class NZoneClient implements INZoneClient, IActionConsumer {
 			e.printStackTrace();
 		}
 		
-		tempGetAroundPrivacyPolicyErrorOnStartup();
+		sharepreferences = new NZoneSharePreferences(getNzoneClientComms().getSharePreferences());
+		preferences = new NZonePreferences(getNzoneClientComms().getPreferences());
+		
+	//	tempGetAroundPrivacyPolicyErrorOnStartup();
 		
 		log.info("NZoneClient bundle initializing.end");
 		
@@ -255,18 +261,11 @@ public class NZoneClient implements INZoneClient, IActionConsumer {
 		// To join any nzone zone ( including main zone), we need to that the
 		// memberof
 		// attribute set
-		if (this.getContextAtribute(nzoneMemberOfCxtAttr) == null)
-			updateContextAtribute(nzoneMemberOfCxtAttr, "true");
-		if (this.getContextAtribute(nzoneLocationCxtAttr) == null)
-			updateContextAtribute(nzoneLocationCxtAttr, "");
+		if (this.getContextAtributeAsPlatform(nzoneMemberOfCxtAttr) == null)
+			updateContextAtributeAsPlatform(nzoneMemberOfCxtAttr, "true");
+		if (this.getContextAtributeAsPlatform(nzoneLocationCxtAttr) == null)
+			updateContextAtributeAsPlatform(nzoneLocationCxtAttr, "");
 
-		// The ICAUIPrediction prefiction bombs out if these are sets!??
-		// TODO : Check why they are needed
-		if (this.getContextAtribute(CtxAttributeTypes.LOCATION_SYMBOLIC.toString()) == null)
-			updateContextAtribute(
-					CtxAttributeTypes.LOCATION_SYMBOLIC.toString(), "here");
-	//	if (this.getContextAtribute(CtxAttributeTypes.STATUS.toString()) == null)
-	//		updateContextAtribute(CtxAttributeTypes.STATUS.toString(), "online");
 
 		// TODO : Need to think about if we just retrieve the cis id's from the
 		// NzoneServer of the actualy cis objects
@@ -318,28 +317,6 @@ public class NZoneClient implements INZoneClient, IActionConsumer {
 
 		CisAdvertisementRecord adRec = getCisAdvert(cisJid);
 		
-	//	IActivity act = actFeed.getEmptyIActivity();
-	//	act.setActor("User");
-	//	act.setVerb("entered");
-	//	act.setObject(adRec.getName());
-	//	actFeed.addActivity(act);
-		
-
-		// First we need to frig out location so we can join
-		// Find necessary localtion
-
-		List<Criteria> crit = adRec.getMembershipCrit().getCriteria();
-		for (Criteria checkCrit : crit) {
-			if (checkCrit.getAttrib().contentEquals(nzoneLocationCxtAttr)) {
-				log.debug("joinZoneCis checkCrit.getValue1()"
-						+ checkCrit.getValue1());
-				updateContextAtribute(nzoneLocationCxtAttr,
-						checkCrit.getValue1());
-				break;
-			}
-		}
-		;
-
 		NZoneCisCallback cisCallback = new NZoneCisCallback();
 
 		getCisManager().joinRemoteCIS(adRec, cisCallback.iCisManagerCallback);
@@ -415,13 +392,13 @@ public class NZoneClient implements INZoneClient, IActionConsumer {
 		// ok, now we can go ahead a join the new zone
 		// Until we are connected up to the localtion management system, we
 		// need to set our location manually in context
-
+/*
 		for (int i = 0; i < getZoneDetails().size(); i++) {
 			if (getZoneDetails().get(i).getCisid().contentEquals(zoneID) == true)
 				updateContextAtribute(nzoneLocationCxtAttr, getZoneDetails().get(i)
 						.getZonelocation());
 		}
-
+*/
 		// Now we are ready to join
 		currentZoneCis = this.joinCis(zoneID);
 
@@ -633,9 +610,16 @@ public class NZoneClient implements INZoneClient, IActionConsumer {
 	};
 
 	@Override
-	public void getShareInfo() {
+	public ShareInfo getShareInfo(String friendid) {
+		return getNzoneClientComms().getShareInfo(friendid);
 	};
 
+	@Override
+	public void updateShareInfo(ShareInfo info)
+	{
+		getNzoneClientComms().updateShareInfo(info);
+	};
+	
 	@Override
 	public void saveMyProfile() {
 	};
@@ -721,7 +705,48 @@ public class NZoneClient implements INZoneClient, IActionConsumer {
 
 	}
 
-	
+	@Override
+	public void setAsSharePreferred(String type, String value, int sharevalue) {
+
+		
+		
+		// get UserPrefences
+		if (sharepreferences == null) {
+			sharepreferences = new NZoneSharePreferences(getNzoneClientComms().getSharePreferences());
+			log.info("Loaded prefererces are " + preferences.toString());
+		}
+		sharepreferences.addSharePreferred(type, value,sharevalue);
+		log.info("New share prefererces are " + sharepreferences.toString());
+		getNzoneClientComms().saveSharePreferences(sharepreferences.toString());
+	}
+
+	@Override
+	public int isSharePreferred(String type, String value) {
+
+		// get UserPrefences
+		if (sharepreferences == null) 
+			sharepreferences = new NZoneSharePreferences(getNzoneClientComms().getSharePreferences());
+
+
+		return sharepreferences.getSharePreferred(type, value);
+
+	}
+
+	@Override
+	public void removeAsSharePreferred(String type, String value) {
+
+		// get UserPrefences
+		if (sharepreferences == null) {
+			sharepreferences = new NZoneSharePreferences(getNzoneClientComms().getSharePreferences());
+			log.debug("Loaded prefererces are " + preferences.toString());
+		}
+		sharepreferences.removePreferred(type, value);
+		log.debug("New sharepreferences are " + sharepreferences.toString());
+
+		getNzoneClientComms().saveSharePreferences(sharepreferences.toString());
+
+	}
+
 	private void updateContextAtribute(String ctxAttribName, String value) {
 		log.debug("updateContextAtribute Start");
 
@@ -736,13 +761,13 @@ public class NZoneClient implements INZoneClient, IActionConsumer {
 			CtxEntityIdentifier ownerEntityId = this
 					.getCtxBroker()
 					.retrieveIndividualEntityId(
-							platformRequestor,
+							requestorService,
 							getCommManager().getIdManager()
 									.getThisNetworkNode()).get();
 			// create a context attribute under the CSS owner context entity
 
 			Future<List<CtxIdentifier>> ctxIdentLookupFut = this.getCtxBroker()
-					.lookup(platformRequestor, ownerEntityId,
+					.lookup(requestorService, ownerEntityId,
 							CtxModelType.ATTRIBUTE, ctxAttribName);
 			// Thread.sleep(1000);
 			List<CtxIdentifier> ctxIdentLookup = ctxIdentLookupFut.get();
@@ -755,11 +780,11 @@ public class NZoneClient implements INZoneClient, IActionConsumer {
 			if (ctxIdent == null) {
 				ctxAttr = this
 						.getCtxBroker()
-						.createAttribute(platformRequestor, ownerEntityId,
+						.createAttribute(requestorService, ownerEntityId,
 								ctxAttribName).get();
 			} else {
 				Future<CtxModelObject> netUserAttrFut = this.getCtxBroker()
-						.retrieve(platformRequestor, ctxIdent);
+						.retrieve(requestorService, ctxIdent);
 				// Thread.sleep(1000);
 				ctxAttr = (CtxAttribute) netUserAttrFut.get();
 			}
@@ -769,7 +794,7 @@ public class NZoneClient implements INZoneClient, IActionConsumer {
 
 			// update the attribute in the Context DB
 			ctxAttr = (CtxAttribute) this.getCtxBroker()
-					.update(platformRequestor, ctxAttr).get();
+					.update(requestorService, ctxAttr).get();
 
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
@@ -779,7 +804,8 @@ public class NZoneClient implements INZoneClient, IActionConsumer {
 			e.printStackTrace();
 		} catch (CtxException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			//e.printStackTrace();
+			log.info("Error updating " + ctxAttribName);
 		}
 
 	}
@@ -799,13 +825,13 @@ public class NZoneClient implements INZoneClient, IActionConsumer {
 			CtxEntityIdentifier ownerEntityId = this
 					.getCtxBroker()
 					.retrieveIndividualEntityId(
-							platformRequestor,
+							requestorService,
 							getCommManager().getIdManager()
 									.getThisNetworkNode()).get();
 			// create a context attribute under the CSS owner context entity
 
 			Future<List<CtxIdentifier>> ctxIdentLookupFut = this.getCtxBroker()
-					.lookup(platformRequestor, ownerEntityId,
+					.lookup(requestorService, ownerEntityId,
 							CtxModelType.ATTRIBUTE, ctxAttribName);
 			// Thread.sleep(1000);
 			List<CtxIdentifier> ctxIdentLookup = ctxIdentLookupFut.get();
@@ -817,11 +843,11 @@ public class NZoneClient implements INZoneClient, IActionConsumer {
 			if (ctxIdent == null) {
 				ctxAttr = this
 						.getCtxBroker()
-						.createAttribute(platformRequestor, ownerEntityId,
+						.createAttribute(requestorService, ownerEntityId,
 								ctxAttribName).get();
 			} else {
 				Future<CtxModelObject> ctxAttrFut = this.getCtxBroker()
-						.retrieve(platformRequestor, ctxIdent);
+						.retrieve(requestorService, ctxIdent);
 				// Thread.sleep(1000);
 				ctxAttr = (CtxAttribute) ctxAttrFut.get();
 				
@@ -835,12 +861,14 @@ public class NZoneClient implements INZoneClient, IActionConsumer {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (CtxException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.info("Error reading " + ctxAttribName + " from context broker");
 		}
 
 		log.debug("getContextAtribute End");
 
+		if (ctxAttr == null)
+			return null;
+		
 		return ctxAttr.getStringValue();
 
 	}
@@ -1025,17 +1053,28 @@ public class NZoneClient implements INZoneClient, IActionConsumer {
 		if (myDets.getDisplayName() == null
 				|| (myDets.getDisplayName().length() == 0)) {
 			// profile not populated from context yet
-			myDets.setDisplayName(getContextAtribute(CtxAttributeTypes.NAME.toString()));
-			myDets.setCompany(getContextAtribute(CtxAttributeTypes.ADDRESS_WORK_CITY.toString()));
-			myDets.setPosition(getContextAtribute(CtxAttributeTypes.WORK_POSITION.toString()));
-			myDets.setEmail(getContextAtribute(CtxAttributeTypes.EMAIL.toString()));
+			myDets.setDisplayName(getContextAtributeAsPlatform(CtxAttributeTypes.NAME.toString()));
+			myDets.setCompany(getContextAtributeAsPlatform(CtxAttributeTypes.ADDRESS_WORK_CITY.toString()));
+			myDets.setPosition(getContextAtributeAsPlatform(CtxAttributeTypes.WORK_POSITION.toString()));
+			myDets.setEmail(getContextAtributeAsPlatform(CtxAttributeTypes.EMAIL.toString()));
+			myDets.setSex(getContextAtributeAsPlatform(CtxAttributeTypes.SEX.toString()));
 
-			myDets.setFacebookID(getSnsData("facebook"));
-			myDets.setTwitterID(getSnsData("twitter"));
-			myDets.setLinkedInID(getSnsData("linkedin"));
-			myDets.setGoogleplusID(getSnsData("googleplus"));
-			myDets.setFoursqID(getSnsData("foursquare"));
-
+			NZoneSocialData data =	new NZoneSocialData();
+			data = getSnsData("facebook");
+			myDets.setFacebookID(data.getSnsid());
+			
+			data = getSnsData("twitter");
+			myDets.setTwitterID(data.getSnsid());
+			
+			data = getSnsData("linkedin");
+			myDets.setLinkedInID(data.getSnsid());
+			
+			data = getSnsData("googleplus");
+			myDets.setGoogleplusID(data.getSnsid());
+			
+			data = getSnsData("foursquare");
+			myDets.setFoursqID(data.getSnsid());
+			
 			getNzoneClientComms().updateMyDetails(myDets);
 		}
 
@@ -1081,12 +1120,13 @@ public class NZoneClient implements INZoneClient, IActionConsumer {
 		return false;
 	};
 
-	public String getSnsData(String whatSns) {
+		
+	public NZoneSocialData getSnsData(String whatSns) {
 
-		String snsId = new String();
+		NZoneSocialData data = new NZoneSocialData();
+		
 
 		log.debug("getSnsData Start");
-		CtxAttribute ctxAttr = null;
 
 		if (requestorService == null) {
 			if (myServiceID == null)
@@ -1108,7 +1148,7 @@ public class NZoneClient implements INZoneClient, IActionConsumer {
 			List<CtxEntityIdentifier> ctxIdentLookup = ctxIdentLookupFut.get();
 			CtxEntityIdentifier ctxIdent = null;
 			if ((ctxIdentLookup == null) || (ctxIdentLookup.size() == 0))
-				return snsId;
+				return data;
 
 			ctxIdent = ctxIdentLookup.get(0);
 
@@ -1124,8 +1164,17 @@ public class NZoneClient implements INZoneClient, IActionConsumer {
 			if (ctxAttrSet.size() > 0) {
 				List<CtxAttribute> ctxAttrList = new ArrayList<CtxAttribute>(
 						ctxAttrSet);
-				snsId = ctxAttrList.get(0).getStringValue();
+				data.setSnsid(ctxAttrList.get(0).getStringValue());
 			}
+			
+			ctxAttrSet = retrievedCtxEntity
+					.getAttributes(CtxAttributeTypes.INTERESTS);
+			if (ctxAttrSet.size() > 0) {
+				List<CtxAttribute> ctxAttrList = new ArrayList<CtxAttribute>(
+						ctxAttrSet);
+				data.setInterests(ctxAttrList.get(0).getStringValue());
+			}
+
 
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
@@ -1135,12 +1184,13 @@ public class NZoneClient implements INZoneClient, IActionConsumer {
 			e.printStackTrace();
 		} catch (CtxException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			//e.printStackTrace();
+			log.info("Unable to retrieve SNS data from context broker");
 		}
 
 		log.debug("getSnsData End");
 
-		return snsId;
+		return data;
 
 	}
 
@@ -1195,6 +1245,7 @@ public class NZoneClient implements INZoneClient, IActionConsumer {
 		} catch (CtxException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			log.error("Unable to register for context changes");
 		}
 
 		log.info("registerForContextChanges End");
@@ -1204,7 +1255,7 @@ public class NZoneClient implements INZoneClient, IActionConsumer {
 	public void updateLocationManual(String zoneLoc)
 	{
 		log.info("updateLocationManual Start zoneLoc is " + zoneLoc);
-		updateContextAtribute(nzoneLocationCxtAttr,zoneLoc);
+		updateContextAtributeAsPlatform(nzoneLocationCxtAttr,zoneLoc);
 		log.info("updateLocationManual End");
 	}
 
@@ -1212,7 +1263,7 @@ public class NZoneClient implements INZoneClient, IActionConsumer {
 	public void locationChanged() {
 		log.info("locationChanged Start ");
 		// TODO Auto-generated method stub
-		String newLoc = this.getContextAtribute(nzoneLocationCxtAttr);
+		String newLoc = this.getContextAtributeAsPlatform(nzoneLocationCxtAttr);
 		log.info("locationChanged newLoc is " + newLoc);
 		
 		if ((this.getZoneDetails() != null) && (newLoc != null))
@@ -1309,7 +1360,8 @@ public class NZoneClient implements INZoneClient, IActionConsumer {
 			e.printStackTrace();
 		} catch (CtxException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			// e.printStackTrace();
+			log.error("Unable to update context atribute " + ctxAttribName);
 		}
 
 	}
@@ -1365,13 +1417,64 @@ public class NZoneClient implements INZoneClient, IActionConsumer {
 			e.printStackTrace();
 		} catch (CtxException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			//e.printStackTrace();
+			log.error("Unable to read context atribute " + ctxAttribName);
+			
 		}
 
+		if (ctxAttr == null)
+			return null;
 		log.debug("getContextAtribute End");
 
 		return ctxAttr.getStringValue();
 
 	}
+	
+	@Async
+	public void userViewingPreferredProfile() {
+
+		String parameterName = new String("nzuseraction");
+		String value = new String("viewpreferredprofile");
+
+		if (myServiceID == null)
+			myServiceID = getServiceMgmt().getMyServiceId(this.getClass());
+
+		// create action object and send to uam
+		IAction action = new Action(myServiceID, myServiceType, parameterName,
+				value, true, true, true);
+
+		log.info("userViewingPreferredProfile : Sending action to UAM: "
+				+ action.toString());
+		getUam().monitor(myIdentity, action);
+	}
+	
+	@Override
+	@Async
+	public void userSharedWithViewPreferredProfile() {
+
+		try {
+			Thread.sleep(3000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} // temp to test
+		String parameterName = new String("nzuseraction");
+		String value = new String("sharedwithpreferredprofile");
+
+		if (myServiceID == null)
+			myServiceID = getServiceMgmt().getMyServiceId(this.getClass());
+
+		// create action object and send to uam
+		IAction action = new Action(myServiceID, myServiceType, parameterName,
+				value, true, true, true);
+
+		log.info("userSharedWithViewPreferredProfile : Sending action to UAM: "
+				+ action.toString());
+		getUam().monitor(myIdentity, action);
+	}
+	
+	
+	
+	
 	
 }

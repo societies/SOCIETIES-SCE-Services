@@ -38,6 +38,7 @@ import org.slf4j.LoggerFactory;
 import org.societies.api.ext3p.schema.nzone.UserDetails;
 import org.societies.api.ext3p.schema.nzone.ZoneDetails;
 import org.societies.ext3p.nzone.server.model.NZPreferences;
+import org.societies.ext3p.nzone.server.model.NZSharePreferences;
 import org.societies.ext3p.nzone.server.model.NZUser;
 import org.societies.ext3p.nzone.server.model.NZZones;
 import org.societies.api.ext3p.schema.nzone.ShareInfo;
@@ -152,6 +153,11 @@ public class NZoneDirectory {
 				userRec.setGoogleplusID(tmpRegistryEntryList.get(0).getGoogleplusID());
 				userRec.setFoursqID(tmpRegistryEntryList.get(0).getFoursqID());
 				userRec.setAbout(tmpRegistryEntryList.get(0).getAbout());
+				List<String> interestList = new ArrayList<String>();
+				String[] tokens = tmpRegistryEntryList.get(0).getInterests().split(",");
+				for (int i = 0; i < tokens.length; i++)
+					interestList.add(tokens[i]);
+				userRec.setInterests(interestList);
 			}
 			
 		} catch (Exception e) {
@@ -218,6 +224,23 @@ public class NZoneDirectory {
 			if (userRec.getAbout() != null)
 				userDb.setAbout(userRec.getAbout());
 			
+			if (userRec.getAbout() != null)
+				userDb.setAbout(userRec.getAbout());
+			
+			if (userRec.getInterests() != null)
+			{
+				String interestString = new String();
+				interestString = "";
+				for (int i = 0; i < userRec.getInterests().size(); i++)
+				{
+					interestString += userRec.getInterests().get(i);
+					if (i < userRec.getInterests().size()-1)
+							interestString += ",";
+				}
+				userDb.setInterests(interestString);
+
+			}
+			
 			session.saveOrUpdate(userDb);
 			t.commit();
 			result = true;
@@ -246,6 +269,7 @@ public class NZoneDirectory {
 		info.setUserid(userid);
 		info.setFriendid(friendid);
 		info.setShareHash(0);
+		info.setDefaultShareValue(true);
 		try {
 			
 			
@@ -257,6 +281,11 @@ public class NZoneDirectory {
 			if (tmpRegistryEntryList != null && tmpRegistryEntryList.size() > 0)
 			{
 				info.setShareHash(tmpRegistryEntryList.get(0).getSharehash());
+				
+				if (friendid.contentEquals("0"))
+					info.setDefaultShareValue(true);
+				else
+					info.setDefaultShareValue(false);
 			} else
 			{
 				// check for default
@@ -268,6 +297,9 @@ public class NZoneDirectory {
 				if (tmpRegistryEntryList != null && tmpRegistryEntryList.size() > 0)
 				{
 					info.setShareHash(tmpRegistryEntryList.get(0).getSharehash());
+					info.setDefaultShareValue(true);
+				
+					
 				}
 			}
 			
@@ -281,6 +313,52 @@ public class NZoneDirectory {
 		
 		
 		return info;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public boolean updateShareInfo(String userid, String friendid, int value) {
+		
+		Session session = null;
+		Transaction t = null;
+		boolean result = false;
+		
+		try {
+			
+			session = sessionFactory.openSession();
+			t = session.beginTransaction();
+			
+			List<NZShareInfo> tmpRegistryEntryList = session.createCriteria(NZShareInfo.class)
+					.add(Restrictions.eq("myuserid", userid).ignoreCase())
+					.add(Restrictions.eq("friendid", friendid).ignoreCase()).list();
+			
+			NZShareInfo info = null;
+			
+			if (tmpRegistryEntryList != null && tmpRegistryEntryList.size() > 0)
+			{
+				info = tmpRegistryEntryList.get(0);
+			} else
+			{	
+				info = new NZShareInfo();
+				info.setMyuserid(userid);
+				info.setFriendid(friendid);
+			}
+			
+			info.setSharehash(value);
+			
+			session.saveOrUpdate(info);
+			t.commit();
+			result = true;
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			if (session != null) {
+				session.close();
+			}
+		}
+		
+		
+		return result;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -354,6 +432,76 @@ public class NZoneDirectory {
 		return result;
 	}
 
-	
+	@SuppressWarnings("unchecked")
+	public String getSharePreferences(String userid) {
+		
+		Session session = null;
+		String prefString = null;
+		try {
+			session = sessionFactory.openSession();
+			
+			List<NZSharePreferences> tmpRegistryEntryList = session.createCriteria(NZSharePreferences.class)
+				.add(Restrictions.eq("myuserid", userid).ignoreCase()).list();
+			 
+			
+			if (tmpRegistryEntryList != null && tmpRegistryEntryList.size() > 0)
+			{
+				prefString = tmpRegistryEntryList.get(0).getPref();
+			}
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			if (session != null) {
+				session.close();
+			}
+		}
+		
+		
+		return prefString;
+	}
+
+	@SuppressWarnings("unchecked")
+	public boolean saveSharePreferences(String userid,String prefString) {
+		
+		Session session = null;
+		Transaction t = null;
+		boolean result = false;
+		try {
+			session = sessionFactory.openSession();
+			NZSharePreferences userPref = new NZSharePreferences();
+			List<NZSharePreferences> tmpRegistryEntryList = session.createCriteria(NZSharePreferences.class)
+				.add(Restrictions.eq("myuserid", userid).ignoreCase()).list();
+			 
+			
+			if (tmpRegistryEntryList != null && tmpRegistryEntryList.size() > 0)
+			{
+				userPref = tmpRegistryEntryList.get(0);
+			}
+			else
+			{
+				userPref.setMyuserid(userid);
+			}
+			
+			userPref.setPref(prefString);
+			t = session.beginTransaction();
+			session.saveOrUpdate(userPref);
+			t.commit();
+			result = true;
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+			if (t != null)
+				t.rollback();
+		} finally {
+			if (session != null) {
+				session.close();
+			}
+		}
+		
+		
+		return result;
+	}
+
 	
 }

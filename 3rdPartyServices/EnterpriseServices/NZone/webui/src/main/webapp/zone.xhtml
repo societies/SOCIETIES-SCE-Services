@@ -18,17 +18,20 @@
 							<p:dataTable id="zoneMembers" value="#{peopleBean.suggestions}"
 								var="person">
 
-
-								<p:column headerText="Name" style="width:24%">
+								<p:column style="width:10%">
+								<p:graphicImage value="/images/profile_pic.jpg"  width="50" height="45" /> 
+								</p:column>
+								
+								<p:column headerText="Name" style="width:32%">
 									<h:outputText value="#{person.displayName}" />
 								</p:column>
 
-								<p:column headerText="Company" style="width:24%">
+								<p:column headerText="Company" style="width:22%">
 									<h:outputText value="#{person.company}" />
 								</p:column>
 
-								<p:column headerText="Rank" style="width:24%">
-									<h:outputText value="#{person.tags}" rendered="#{peopleBean.istagged(person)}"/>
+								<p:column headerText="Rank" style="width:22%">
+									<p:graphicImage value="/images/learning.jpg"  width="40" height="36" rendered="#{peopleBean.isperftagged(person)}"/>		
 								</p:column>
 
 								<p:column headerText="View" style="width:4%">
@@ -44,10 +47,6 @@
 
 							<h:outputText value="#{friendBean.friendid}" id="friendsid"
 								style="font-weight:bold" rendered="false" />
-
-							<p:commandButton icon="back" value="View Friends Profile"
-								action="gotofriend" />
-
 
 						</h:form>
 

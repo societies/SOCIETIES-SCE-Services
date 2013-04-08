@@ -8,7 +8,9 @@ import javax.faces.event.ValueChangeListener;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.societies.api.ext3p.nzone.NZoneConsts;
 import org.societies.api.ext3p.nzone.client.INZoneClient;
+import org.societies.api.ext3p.schema.nzone.ShareInfo;
 import org.societies.api.ext3p.schema.nzone.UserDetails;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -28,12 +30,19 @@ public class FriendBean implements Serializable, ValueChangeListener {
     private String company;
     private String preferredcompany;
     private boolean pref;
+    private boolean sharecompany;
+    private boolean sharesns;
+    private boolean shareinterests;
+    private boolean sharepersonal;
+    
+    private String shareinfoMessage;
        
     
     FriendBean()
     {
     	preferredcompany = new String("0");
     	pref = false;
+    	setShareinfoMessage(new String(""));
     }
     
     public String getFriendid() {
@@ -53,7 +62,9 @@ public class FriendBean implements Serializable, ValueChangeListener {
 			this.setPreferredcompany("1");
 		else
 			this.setPreferredcompany("0");
-			
+		
+		this.loadShareInfo();
+		
 	}
 
 	public String getName() {   
@@ -83,6 +94,50 @@ public class FriendBean implements Serializable, ValueChangeListener {
 		this.company = company;
 	}
 
+	
+	  public boolean isSharecompany() {
+			return sharecompany;
+		}
+		public void setSharecompany(boolean sharecompany) {
+			this.sharecompany = sharecompany;
+		}
+		/**
+		 * @return the sharesns
+		 */
+		public boolean isSharesns() {
+			return sharesns;
+		}
+		/**
+		 * @param sharesns the sharesns to set
+		 */
+		public void setSharesns(boolean sharesns) {
+			this.sharesns = sharesns;
+		}
+		/**
+		 * @return the shareinterests
+		 */
+		public boolean isShareinterests() {
+			return shareinterests;
+		}
+		/**
+		 * @param shareinterests the shareinterests to set
+		 */
+		public void setShareinterests(boolean shareinterests) {
+			this.shareinterests = shareinterests;
+		}
+		/**
+		 * @return the sharepersonal
+		 */
+		public boolean isSharepersonal() {
+			return sharepersonal;
+		}
+		/**
+		 * @param sharepersonal the sharepersonal to set
+		 */
+		public void setSharepersonal(boolean sharepersonal) {
+			this.sharepersonal = sharepersonal;
+		}
+		
 	public INZoneClient getNzoneClient() {
 		return nzoneClient;
 	}
@@ -128,6 +183,20 @@ public class FriendBean implements Serializable, ValueChangeListener {
 		this.pref = pref;
 	}
 
+	/**
+	 * @return the shareinfoMessage
+	 */
+	public String getShareinfoMessage() {
+		return shareinfoMessage;
+	}
+
+	/**
+	 * @param shareinfoMessage the shareinfoMessage to set
+	 */
+	public void setShareinfoMessage(String shareinfoMessage) {
+		this.shareinfoMessage = shareinfoMessage;
+	}
+
 	public void valueChanged(ValueChangeEvent vce){
 		 
 		 log.info("Called  valueChanged with [" + vce.toString() + "]");
@@ -137,5 +206,114 @@ public class FriendBean implements Serializable, ValueChangeListener {
 		 log.info("Called  processValueChange with [" + ce.toString() + "]");
 	 }
 
+	 
+	 public void loadShareInfo() {
+		 log.info("Loading share info for this friend" + this.getFriendid());
+		 ShareInfo info = getNzoneClient().getShareInfo(this.getFriendid());
+		 this.setSharepersonal(false);
+		 this.setSharecompany(false);
+		 this.setSharesns(false);
+		 this.setShareinterests(false);
+		 
+		 
+		 
+		 if ((info != null) && (!info.isDefaultShareValue()))
+		 {
+				this.setShareinfoMessage("This is the information you have previous choosen to share with " + this.getName());
+		 
+			
+				if ((info.getShareHash() & NZoneConsts.SHARE_PERSONAL) == NZoneConsts.SHARE_PERSONAL)
+					this.setSharepersonal(true);
+					 	
+				if ((info.getShareHash() & NZoneConsts.SHARE_EMPLOYMENT)  == NZoneConsts.SHARE_EMPLOYMENT)
+					this.setSharecompany(true);
+					  
+				if ((info.getShareHash() & NZoneConsts.SHARE_SOCIAL)  == NZoneConsts.SHARE_SOCIAL)
+					this.setSharesns(true);
+					  
+				if ((info.getShareHash() & NZoneConsts.SHARE_INTERESTS)  == NZoneConsts.SHARE_INTERESTS)
+					this.setShareinterests(true);
+				
+				return;
+					 
+		 }
+		 
+		 if (this.isPref())
+		 {
+			 log.info("This is a preferred company, see if we have share info for this company");
+			 // check if we have 'learnt before what info to share
+			 int sharPref = getNzoneClient().isSharePreferred("company", this.getCompany());
+			 if (sharPref != -1)
+			 {
+				 log.info("This is a preferred company, found shared pref");	
+				 if ((sharPref & NZoneConsts.SHARE_PERSONAL) == NZoneConsts.SHARE_PERSONAL)
+					 this.setSharepersonal(true);
+				 	
+				 if ((sharPref & NZoneConsts.SHARE_EMPLOYMENT)  == NZoneConsts.SHARE_EMPLOYMENT)
+					 this.setSharecompany(true);
+				  
+				 if ((sharPref & NZoneConsts.SHARE_SOCIAL)  == NZoneConsts.SHARE_SOCIAL)
+					 this.setSharesns(true);
+				  
+				 if ((sharPref & NZoneConsts.SHARE_INTERESTS)  == NZoneConsts.SHARE_INTERESTS)
+					 this.setShareinterests(true);
+				 
+				 this.setShareinfoMessage("This is the information the system learned that you have previously shared with a person from preferred company "+ this.getCompany());
+				 
+				 return;
+			 }
+		 
+			 
+		 } 
+		 
+
+		
+		 
+		 if ((info != null) && (info.getShareHash() != null))
+		 {
+				
+			 if ((info.getShareHash() & NZoneConsts.SHARE_PERSONAL) == NZoneConsts.SHARE_PERSONAL)
+				 this.setSharepersonal(true);
+			 	
+			 if ((info.getShareHash() & NZoneConsts.SHARE_EMPLOYMENT)  == NZoneConsts.SHARE_EMPLOYMENT)
+				 this.setSharecompany(true);
+			  
+			 if ((info.getShareHash() & NZoneConsts.SHARE_SOCIAL)  == NZoneConsts.SHARE_SOCIAL)
+				 this.setSharesns(true);
+			  
+			 if ((info.getShareHash() & NZoneConsts.SHARE_INTERESTS)  == NZoneConsts.SHARE_INTERESTS)
+				 this.setShareinterests(true);
+		 }
+			
+		 this.setShareinfoMessage("Use the Dafault Share Proflie : No learnt preferences");
+
+	 }
+	 
+	 public String saveShareInfo() {
+		 ShareInfo info = new ShareInfo();
+		 int shareflag = 0;
+		 
+		 if (this.isSharepersonal())
+			 shareflag += NZoneConsts.SHARE_PERSONAL;
+		 if (this.isSharecompany())
+			 shareflag += NZoneConsts.SHARE_EMPLOYMENT;
+		 if (this.isSharesns())
+			 shareflag += NZoneConsts.SHARE_SOCIAL;
+		 
+		 info.setFriendid(friendid);		
+		 info.setShareHash(shareflag);
+		 
+		 getNzoneClient().updateShareInfo(info);
+		 
+		 if (this.isPref())
+		 {
+			 log.info("This is a preferred company, saving shared pref");	
+			 getNzoneClient().setAsSharePreferred("company", this.getCompany(), info.getShareHash());
+		 }
+		 
+		return "gotozone";
+		 
+	 }
+	 
 	   
 }  

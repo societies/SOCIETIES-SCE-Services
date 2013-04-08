@@ -8,27 +8,28 @@ import java.util.List;
 import java.util.Set;
 
 
-public class NZonePreferences {
+public class NZoneSharePreferences {
 
-	private HashMap<String, List<String>> list;
+	private HashMap<String, List<NZoneLearnShare>> list;
 	
 	String preferTypeDelim = ".";
 	String preferDelim = ",";
 	String shareDelim = ":";
 	
+	
 	//Define perferenceTypes
 	public static String company = "company"; 
 	public static String interest = "interest";
 	
-	public NZonePreferences(String preferences)	
+	public NZoneSharePreferences(String preferences)	
 	{
-		list = new HashMap<String, List<String>>();
+		list = new HashMap<String, List<NZoneLearnShare>>();
 		decode(preferences);
 	};
 	
-	public NZonePreferences()	
+	public NZoneSharePreferences()	
 	{
-		list = new HashMap<String, List<String>>();
+		list = new HashMap<String, List<NZoneLearnShare>>();
 	};
 	
 
@@ -37,50 +38,52 @@ public class NZonePreferences {
 		return encode();
 	}
 	
-	public boolean isPreferred(String parameterType, String parameterValue)
+	public int getSharePreferred(String parameterType, String parameterValue)
 	{
-		boolean result = false;
 		
 		if (parameterValue != null && parameterValue.length() > 0)
 		{
-			List<String> tempList = list.get(parameterType); 
+			List<NZoneLearnShare> tempList = list.get(parameterType); 
 			
 			if (tempList != null)
 			{
 				for ( int i = 0; i < tempList.size(); i++)
 				{
-					if (tempList.get(i).contentEquals(parameterValue.toLowerCase()))
-						return true;
+					if (tempList.get(i).value.contentEquals(parameterValue.toLowerCase()))
+						return tempList.get(i).share;
 				}
 			}
 		}
-		return result;
+		return -1;
 	}
 	
 
-	public void addPreferred(String parameterType, String parameterValue)
+	public void addSharePreferred(String parameterType, String parameterValue, int shareflag)
 	{
 				
-		List<String> tempList = list.get(parameterType); 
+		List<NZoneLearnShare> tempList = list.get(parameterType); 
+		NZoneLearnShare learnShar = new NZoneLearnShare(parameterValue.toLowerCase(), shareflag);
 		
 		if (tempList != null)
 		{
 			// check if it contains it already
 			for ( int i = 0; i < tempList.size(); i++)
 			{
-				if (tempList.get(i).contentEquals(parameterValue.toLowerCase()))
-					return;
+				if (tempList.get(i).value.contentEquals(parameterValue.toLowerCase()))
+				{
+					tempList.remove(i);
+					i = tempList.size();
+				}
 			}
-
-			list.remove(parameterType);
-			tempList.add(parameterValue.toLowerCase());
+			list.remove(parameterType);	
+			tempList.add(learnShar);
 			list.put(parameterType, tempList);
 		}
 		else
 		{
 			// new entry
-			tempList = new ArrayList<String>();
-			tempList.add(parameterValue);
+			tempList = new ArrayList<NZoneLearnShare>();
+			tempList.add(learnShar);
 			list.put(parameterType, tempList);
 		}	
 	}
@@ -88,14 +91,14 @@ public class NZonePreferences {
 	public void removePreferred(String parameterType, String parameterValue)
 	{
 				
-		List<String> tempList = list.get(parameterType); 
+		List<NZoneLearnShare> tempList = list.get(parameterType); 
 		
 		if (tempList != null)
 		{
 			// check if it contains it already
 			for ( int i = 0; i < tempList.size(); i++)
 			{
-				if (tempList.get(i).contentEquals(parameterValue.toLowerCase()))
+				if (tempList.get(i).value.contentEquals(parameterValue.toLowerCase()))
 				{
 					list.remove(parameterType);
 					tempList.remove(i);
@@ -125,15 +128,18 @@ public class NZonePreferences {
 				String[] preferTokens =  preferTypeTokens[i].split(preferDelim);
 			
 				// 	first token is perference name
-				// 	remaining tokens are preferences values
+				// second is preference value;
+				// thrid is sshare value
 				if (preferTokens.length > 1)
 				{
 					String key = preferTokens[0];
-					List<String> values = new ArrayList<String>();
+					List<NZoneLearnShare> values = new ArrayList<NZoneLearnShare>();
 				
 					for ( int j = 1; j < preferTokens.length; j++)
 					{
-						values.add(preferTokens[j]);
+						String[] preferShare =  preferTypeTokens[i].split(shareDelim);
+						NZoneLearnShare shareInfo = new NZoneLearnShare(preferShare[0],Integer.parseInt(preferShare[1]));
+						values.add(shareInfo);
 					}
 					list.put(key, values);
 				}
@@ -152,12 +158,14 @@ public class NZonePreferences {
 		{
 			String key = keysIter.next();
 			
-			encodedString = encodedString + key + preferDelim;
-			List<String> tempList = list.get(key);
+			encodedString += key + preferDelim;
+			List<NZoneLearnShare> tempList = list.get(key);
 			
 			for ( int i = 0; i < tempList.size(); i++)
 			{
-				encodedString = encodedString + tempList.get(i) + preferDelim;
+				encodedString += tempList.get(i).value + shareDelim;
+				encodedString += tempList.get(i).share;
+				encodedString += preferDelim;
 			}
 			
 			encodedString = encodedString +preferTypeDelim;
