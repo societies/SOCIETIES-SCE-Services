@@ -67,6 +67,8 @@ public class NZUser implements Serializable {
 	private String linkedInID;
 	private String foursqID;
 	private String googleplusID;
+	
+	private String interests;
 
 	/**
 	 * @return the userid
@@ -250,6 +252,21 @@ public class NZUser implements Serializable {
 	 */
 	public void setSex(String sex) {
 		this.sex = sex;
+	}
+
+	/**
+	 * @return the interests
+	 */
+	@Column(name = "interests")
+	public String getInterests() {
+		return interests;
+	}
+
+	/**
+	 * @param interests the interests to set
+	 */
+	public void setInterests(String interests) {
+		this.interests = interests;
 	}
 
 	public NZUser() {

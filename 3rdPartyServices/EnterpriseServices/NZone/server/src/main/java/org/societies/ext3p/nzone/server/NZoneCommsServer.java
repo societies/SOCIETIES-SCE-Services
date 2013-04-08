@@ -168,6 +168,19 @@ public class NZoneCommsServer implements IFeatureServer {
 						messageResult.setResult(getNzoneServer().savePreferences(stanza.getFrom().getBareJid(), messageBean.getData().get(0)));
 						break;
 					}
+					case GET_SHARE_PREFERENCES: 
+					{
+						List<String> returnData = new ArrayList<String>();
+						returnData.add(getNzoneServer().getSharePreferences(stanza.getFrom().getBareJid()));
+						messageResult.setData(returnData);
+						messageResult.setResult(true);
+						break;
+					}
+					case SAVE_SHARE_PREFERENCES: 
+					{
+						messageResult.setResult(getNzoneServer().saveSharePreferences(stanza.getFrom().getBareJid(), messageBean.getData().get(0)));
+						break;
+					}
 					case GET_MY_DETAILS:	
 					{
 						List<UserDetails> returnData = new ArrayList<UserDetails>();
@@ -196,34 +209,18 @@ public class NZoneCommsServer implements IFeatureServer {
 						messageResult.setResult(getNzoneServer().updateMyDetails(messageBean.getDetails()));
 						break;
 					}
-					/**
-					case GETSHAREINFO:	{
-						// We need to check that the user only is allowed update their own record 
-						if (stanza.getFrom().getBareJid().contains(messageBean.getMyuserid()))
-						{
-							messageResult.setSharedInfo(netServer.getShareInfo(messageBean.getMyuserid(), messageBean.getFrienduserid()));
-							messageResult.setResult(true);
-						}
+					
+					case GET_SHARE_INFO:	{
+						messageResult.setShareinfo(getNzoneServer().getShareInfo(stanza.getFrom().getBareJid(), messageBean.getFriendid()));
+						messageResult.setResult(true);
 						break;
 					}
-					case GETFRIENDSHAREINFO: {
+					case UPDATE_SHARE_INFO:	{
+						messageResult.setResult(getNzoneServer().updateShareInfo(stanza.getFrom().getBareJid(), messageBean.getFriendid(), messageBean.getSharevalue()));
 						
-						if (stanza.getFrom().getBareJid().contains(messageBean.getMyuserid()))
-						{
-							messageResult.setSharedInfo(netServer.getShareInfo(messageBean.getFrienduserid(), messageBean.getMyuserid()));
-							messageResult.setResult(true);
-						}
 						break;
 					}
-					case UPDATESHAREINFO:	{
-						// We need to check that the user only is allowed update their own record 
-						if (stanza.getFrom().getBareJid().contains(messageBean.getMyuserid()))
-						{
-							messageResult.setSharedInfo(netServer.updateShareInfo(messageBean.getSharedInfo()));
-							messageResult.setResult(true);
-						}
-						break;
-					}
+					/*
 					case GETZONEEVENTS:
 					{
 						messageResult.setZoneeventlist(netServer.getCisActivity(messageBean.getMycurrentzone()));

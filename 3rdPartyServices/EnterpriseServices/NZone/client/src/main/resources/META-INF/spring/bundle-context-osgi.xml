@@ -43,7 +43,7 @@
   	
 	<bean id="serMetamodel" class="org.societies.api.schema.servicelifecycle.model.Service">
      	<property name="authorSignature" value="mmannion" />
-     	<property name="serviceDescription" value="Networking Zone - Client" />
+     	<property name="serviceDescription" value="Networking Zone - Cloud Service" />
      	<property name="serviceName" value="NZoneClient" />
      	<property name="serviceType" value="THIRD_PARTY_CLIENT" />
      	<property name="serviceCategory" value="media" />

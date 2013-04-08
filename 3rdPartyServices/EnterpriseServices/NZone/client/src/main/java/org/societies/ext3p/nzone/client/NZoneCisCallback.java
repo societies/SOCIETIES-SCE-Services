@@ -40,25 +40,32 @@ public class NZoneCisCallback {
 			if (communityResultObject != null) {
 				if (communityResultObject.getJoinResponse() != null) {
 					log.info("Got response to join request ");
-					if (communityResultObject.getJoinResponse().isResult()) {
+			//		if (communityResultObject.getJoinResponse().isResult()) {
 						bResponseReceived = true;
 						cisManagerCallbackSignal.countDown();
-					}
-					;
+			//		}
+			//		;
 				}
 				if (communityResultObject.getLeaveResponse() != null) {
 					log.info("Got response to leave request ");
 					
-						if (communityResultObject.getLeaveResponse().isResult()) {
+			//			if (communityResultObject.getLeaveResponse().isResult()) {
 								bResponseReceived = true;
 								cisManagerCallbackSignal.countDown();
-						}
-					;
+			//			}
+			//		;
 				}
 						
 				if(communityResultObject.getWhoResponse() != null){
-					log.info("Got response to getmembers " + communityResultObject.getWhoResponse().getParticipant().size());
-					memberList = communityResultObject.getWhoResponse().getParticipant();
+					if (communityResultObject.getWhoResponse().getParticipant() != null)
+					{
+						log.info("Got response to getmembers " + communityResultObject.getWhoResponse().getParticipant().size());
+						memberList = communityResultObject.getWhoResponse().getParticipant();
+					}
+					else
+					{
+						log.info("Got response to getmembers : error");
+					}
 					cisManagerCallbackSignal.countDown();
 							
 				}
