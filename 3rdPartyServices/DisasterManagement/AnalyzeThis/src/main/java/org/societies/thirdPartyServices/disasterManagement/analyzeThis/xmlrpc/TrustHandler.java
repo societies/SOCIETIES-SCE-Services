@@ -30,10 +30,14 @@ import java.util.concurrent.ExecutionException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.societies.api.comm.xmpp.interfaces.ICommManager;
+import org.societies.api.identity.IIdentityManager;
 import org.societies.api.identity.InvalidFormatException;
+import org.societies.api.identity.Requestor;
 import org.societies.api.privacytrust.trust.TrustException;
 import org.societies.api.privacytrust.trust.evidence.TrustEvidenceType;
 import org.societies.api.privacytrust.trust.model.MalformedTrustedEntityIdException;
+//import org.societies.api.privacytrust.trust.model.TrustValueType;
 import org.societies.api.privacytrust.trust.model.TrustedEntityId;
 import org.societies.api.privacytrust.trust.model.TrustedEntityType;
 import org.societies.thirdPartyServices.disasterManagement.analyzeThis.AnalyzeThis;
@@ -79,27 +83,27 @@ public class TrustHandler {
 
 	public String getTrust(String questioner_user_id, String required_user_id) {
 //		LOG.debug("questioner_user_id " + questioner_user_id + " | required_user_id " + required_user_id);
-		String feedback = "<br>";
+		IIdentityManager idMgr = AnalyzeThis.getInstance().getCommMgr().getIdManager();
+		
 		TrustedEntityId questionerUserTEID = null;
 		TrustedEntityId requiredUserTEID = null;
+		Double trustResult = 0.0;
+		
+		String feedback = "<br>";
+		
 		try {
 //			feedback += "CommMgr "+AnalyzeThis.getInstance().getCommMgr().toString()+ " <br>";
-			questionerUserTEID = new TrustedEntityId(TrustedEntityType.CSS, AnalyzeThis.getInstance().getCommMgr().getIdManager() .fromJid(
-					AnalyzeThis.getInstance().getCommMgr().getIdManager().getThisNetworkNode().getBareJid()).toString());
+			questionerUserTEID = new TrustedEntityId(TrustedEntityType.CSS, idMgr.fromJid(idMgr.getThisNetworkNode().getBareJid()).toString());
 			requiredUserTEID = new TrustedEntityId(TrustedEntityType.CSS, required_user_id.substring(0,required_user_id.indexOf('@')) + SOCIETIES_DOMAIN);
-		} catch (MalformedTrustedEntityIdException e1) {
-			LOG.error(e1.getMessage());
-		} catch (InvalidFormatException e1) {
-			LOG.error(e1.getMessage());
-		}
-		feedback += "questioner_user trustId "+questionerUserTEID.getEntityId()+ " <br>";
-		feedback += "required_user trustId "+requiredUserTEID.getEntityId()+ " <br>";
-		
-		Double trustResult = 0.0;
-//		feedback += "TrustBroker "+AnalyzeThis.getInstance().getTrustBroker().toString()+ " <br>";
+			feedback += "questioner_user trustId "+questionerUserTEID.getEntityId()+ " <br>";
+			feedback += "required_user trustId "+requiredUserTEID.getEntityId()+ " <br>";
+			
+	//		feedback += "TrustBroker "+AnalyzeThis.getInstance().getTrustBroker().toString()+ " <br>";
 
-		try {
+			Requestor requestor = new Requestor(idMgr.fromJid(idMgr.getThisNetworkNode().getBareJid()));
+
 			trustResult = AnalyzeThis.getInstance().getTrustBroker().retrieveTrust(questionerUserTEID, requiredUserTEID).get();
+			//trustResult = AnalyzeThis.getInstance().getTrustBroker().retrieveTrustValue(requestor, questionerUserTEID, requiredUserTEID, TrustValueType.USER_PERCEIVED).get();
 			feedback += " ........ TRUST RESULT "+trustResult+"<br>";
 		} catch (InterruptedException e) {
 			LOG.error(e.getMessage());
@@ -107,6 +111,8 @@ public class TrustHandler {
 			LOG.error(e.getMessage());
 		} catch (TrustException e) {
 			LOG.error(e.getMessage());
+		} catch (InvalidFormatException e1) {
+			LOG.error(e1.getMessage());
 		}
 
 //		return feedback;
