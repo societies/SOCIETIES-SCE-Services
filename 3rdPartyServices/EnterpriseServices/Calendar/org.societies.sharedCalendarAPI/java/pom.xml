@@ -2,12 +2,12 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>org.societies.rdpartyService.enterprise</groupId>
+	<groupId>org.societies.thirdparty.sharedCalendar</groupId>
 	<!-- change the artifactid to your project artifactid -->
 	<artifactId>calendar-api</artifactId>
 	<name>SOCIETIES Calendar API</name>
 	<!-- the api version is the same as the release -->
-	<version>${release.version}</version>
+	<version>0.1</version>
 	<!-- the packaging tag enables the creation of the correct manifest using 
 		the maven-bundle-plugin -->
 	<packaging>bundle</packaging>
@@ -36,9 +36,9 @@
 	<dependencies>
 		<!-- add your dependencies here -->
 		<dependency>
-			<groupId>org.societies.rdpartyService.enterprise</groupId>
+			<groupId>org.societies.thirdparty.sharedCalendar</groupId>
 			<artifactId>calendar-api-schema</artifactId>
-			<version>${release.version}</version>
+			<version>${project.version}</version>
 		</dependency>
 		<!-- Needed for OSGI (Internal) Event -->
 		<dependency>
@@ -108,7 +108,7 @@
 						<artifactItem>
 							<groupId>${project.groupId}</groupId>
 							<artifactId>${project.artifactId}</artifactId>
-							<version>${release.version}</version>
+							<version>${project.version}</version>
 							<type>bundle</type>
 							<overWrite>true</overWrite>
 							<outputDirectory>${spring.osgi.deploy.dir}</outputDirectory>

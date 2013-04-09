@@ -1,4 +1,4 @@
-package org.societies.rdpartyService.enterprise.cal.controllers;
+package org.societies.thirdparty.enterprise.sharedCalendar.web;
 
 import java.lang.reflect.Type;
 import java.text.DateFormat;
@@ -8,16 +8,19 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
-import java.util.concurrent.Semaphore;
+import java.util.concurrent.Future;
 
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.societies.api.cis.management.ICis;
 import org.societies.api.cis.management.ICisManager;
+import org.societies.api.comm.xmpp.interfaces.ICommManager;
 import org.societies.api.ext3p.schema.sharedcalendar.Event;
 import org.societies.api.ext3p.schema.sharedcalendar.SharedCalendarResult;
-import org.societies.thirdparty.sharedCalendar.client.interfaces.ISharedCalendarClientRich;
+import org.societies.thirdparty.sharedCalendar.api.ISharedCalendarClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -31,6 +34,7 @@ import com.google.gson.reflect.TypeToken;
 public class CalendarWebController {
 	
 	private static long _DEADLINE = 3000;
+	static final Logger log = LoggerFactory.getLogger(CalendarWebController.class);
 	
 	public CalendarWebController() {
 		super();
@@ -42,18 +46,30 @@ public class CalendarWebController {
 	private Gson gson = new Gson();
 	
 	@Autowired
-	private ISharedCalendarClientRich calClientService = null;
+	private ISharedCalendarClient calClientService = null;
+	
 	@Autowired
 	private ICisManager cisManagerService = null;
 	
-	private CalendarWebResultCallback cb = null;
+	@Autowired
+	private ICommManager commManager = null;
+	
+	private CalendarWebResultCallback cb = new CalendarWebResultCallback();
 
-	public ISharedCalendarClientRich getCalClientService() {
+	public ISharedCalendarClient getCalClientService() {
 		return calClientService;
 	}
 	
-	public void setCalClientService(ISharedCalendarClientRich calClientService) {
+	public void setCalClientService(ISharedCalendarClient calClientService) {
 		this.calClientService = calClientService;
+	}
+
+	public ICommManager getCommManager() {
+		return commManager;
+	}
+
+	public void setCommManager(ICommManager commManager) {
+		this.commManager = commManager;
 	}
 	
 	public ICisManager getCisManagerService() {
@@ -75,26 +91,9 @@ public class CalendarWebController {
       <xs:enumeration value="deleteEventOnPrivateCalendar"/>
     */
 	
-	private boolean inDeadline(long start){
-		return (System.currentTimeMillis()-start<CalendarWebController._DEADLINE);
-	}
-	
-	private void wait4semaphore(){
-		Semaphore s = this.cb.getSem();
-		long start = System.currentTimeMillis();
-		//TODO Add a deadline to avoid infinite wait
-		while (!s.tryAcquire() && inDeadline(start)){
-			try {
-				Thread.sleep(1000);
-			} catch (InterruptedException e) {
-				//Do nothing
-			}
-		}		
-	}
 	
 	@RequestMapping("/getAllRelevantCis.do")
 	public @ResponseBody String getRelevantCis() {
-		this.cb = new CalendarWebResultCallback(this);
 		List<ICis> foundCiss = new ArrayList<ICis>();
 		List<MyCisRecord> foundCisRecords = new ArrayList<MyCisRecord>();
 		Type listType = new TypeToken<List<MyCisRecord>>(){}.getType();
@@ -110,40 +109,48 @@ public class CalendarWebController {
 	
 	@RequestMapping("/getAllCisCalendarsAjax.do")
 	public @ResponseBody String retrieveCISCalendarList(@RequestParam(defaultValue="TestCIS", value="cisId") String cisId) {
-		this.cb = new CalendarWebResultCallback(this);
-		this.calClientService.retrieveCISCalendars(this.cb, cisId);
-		this.wait4semaphore();
-		String ajaxResult = this.gson.toJson(this.result);
+		try{
+			CalendarWebResultCallback callback = new CalendarWebResultCallback();
+			this.calClientService.retrieveCISCalendars(callback, cisId);
+			Thread.sleep(30000);
+			String ajaxResult = this.gson.toJson(callback.getResult().getCalendarList());
+			log.info("ajaxResult: " + ajaxResult);
+		
 		return ajaxResult;
+		} catch(Exception ex){
+			ex.printStackTrace();
+		}
+		return null;
 	}
 	
 	@RequestMapping("/createCisCalendarAjax.do")
 	public @ResponseBody String createCisCalendarAjax(@RequestParam(defaultValue="TestCIS", value="cisId") String cisId, @RequestParam(defaultValue="Calendar Summary", value="cisSummary") String summary) {
-		this.cb = new CalendarWebResultCallback(this);
-		this.calClientService.createCISCalendar(this.cb, summary, cisId);
-		this.wait4semaphore();		
-		String ajaxResult = this.gson.toJson(this.result);
+		CalendarWebResultCallback callback = new CalendarWebResultCallback();
+		this.calClientService.createCISCalendar(callback, summary, cisId);
+		String ajaxResult = this.gson.toJson(callback.getResult().getCalendarId());
+		log.info("ajaxResult: " + ajaxResult);
 		return ajaxResult;
 	}
 	
 	@RequestMapping("/getCisCalendarEvents.do")
-	public @ResponseBody String getCisCalendarEvents(@RequestParam(defaultValue="myCisCalendarId", value="calendarId") String calendarId) {
-		this.cb = new CalendarWebResultCallback(this);
-		this.calClientService.retrieveCISCalendarEvents(this.cb, calendarId);
-		this.wait4semaphore();
-		String ajaxResult = this.calClientService.createJSONOEvents(this.result.getEventList());
+	public @ResponseBody String getCisCalendarEvents(@RequestParam(defaultValue="TestCIS", value="cisId") String cisId, @RequestParam(defaultValue="myCisCalendarId", value="calendarId") String calendarId) {
+		CalendarWebResultCallback callback = new CalendarWebResultCallback();
+		this.calClientService.retrieveCISCalendarEvents(callback, calendarId, cisId);
+		String ajaxResult = this.calClientService.createJSONOEvents(callback.getResult().getEventList());
+		log.info("ajaxResult: " + ajaxResult);
 		return ajaxResult;
 	}
 	
 	@RequestMapping("/createCisCalendarEvent.do")
 	public @ResponseBody String createCisCalendarEvent(
+			@RequestParam(defaultValue="TestCIS", value="cisId") String cisId,
 			@RequestParam(defaultValue="myCisCalendarId", value="calendarId") String calendarId,
 			@RequestParam(defaultValue="2012-09-10T10:00:00+0200", value="evt_start") String startDate,
 			@RequestParam(defaultValue="2012-09-10T12:00:00+0200", value="evt_end") String endDate,
 			@RequestParam(defaultValue="New Event", value="evtDescr") String evtDescr,
 			@RequestParam(defaultValue="New Event Summary", value="evtSummary") String evtSummary,
 			@RequestParam(defaultValue="Unknown", value="evtLocation") String evtLocation) {
-		this.cb = new CalendarWebResultCallback(this);
+		CalendarWebResultCallback callback = new CalendarWebResultCallback();
 		DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssz");
 		Event e = new Event();
 		Date sDate = new Date();
@@ -171,20 +178,21 @@ public class CalendarWebController {
 			// TODO Auto-generated catch block
 			return "{result: 'Invalid date format'}";
 		}
-		this.calClientService.createEventOnCISCalendar(this.cb, e, calendarId);
-		this.wait4semaphore();
-		String ajaxResult = this.gson.toJson(this.result.getEventId());
+		this.calClientService.createEventOnCISCalendar(callback, e, calendarId, cisId);
+		String ajaxResult = this.gson.toJson(callback.getResult().getCalendarId());
+		log.info("ajaxResult: "+ ajaxResult);
 		return ajaxResult;
 	}
 	
 	@RequestMapping("/deleteCisCalendarEvent.do")
 	public @ResponseBody String deleteCisCalendarEvent(
+			@RequestParam(defaultValue="TestCIS", value="cisId") String cisId,
 			@RequestParam(defaultValue="myCisCalendarId", value="calendarId") String calendarId,
 			@RequestParam(value="evtId") String evtId) {
-		this.cb = new CalendarWebResultCallback(this);
-		this.calClientService.deleteEventOnCISCalendar(this.cb, evtId, calendarId);
-		this.wait4semaphore();
-		String ajaxResult = this.gson.toJson(this.result.isLastOperationSuccessful());
+		CalendarWebResultCallback callback = new CalendarWebResultCallback();
+		this.calClientService.deleteEventOnCISCalendar(callback, evtId, calendarId,cisId);
+		String ajaxResult = this.gson.toJson(callback.getResult().isLastOperationSuccessful());
+		log.info("ajaxResult: " + ajaxResult);
 		return ajaxResult;
 	}
 	
@@ -195,7 +203,7 @@ public class CalendarWebController {
 			@RequestParam(defaultValue="New Event", value="evtDescr") String evtDescr,
 			@RequestParam(defaultValue="New Event Summary", value="evtSummary") String evtSummary,
 			@RequestParam(defaultValue="Unknown", value="evtLocation") String evtLocation) {
-		this.cb = new CalendarWebResultCallback(this);
+		CalendarWebResultCallback callback = new CalendarWebResultCallback();
 		DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssz");
 		Event e = new Event();
 		Date sDate = new Date();
@@ -223,55 +231,58 @@ public class CalendarWebController {
 			// TODO Auto-generated catch block
 			return "{result: 'Invalid date format'}";
 		}
-		this.calClientService.createEventOnPrivateCalendar(this.cb, e);
-		this.wait4semaphore();
-		String ajaxResult = this.gson.toJson(this.result.getEventId());
+		String myId = getCommManager().getIdManager().getThisNetworkNode().getJid();
+		this.calClientService.createEventOnPrivateCalendar(callback, e, myId);
+		String ajaxResult = this.gson.toJson(callback.getResult().getEventId());
+		log.info("ajaxResult: " + ajaxResult);
 		return ajaxResult;
 	}
 	
 	@RequestMapping("/deleteCssCalendarEvent.do")
-	public @ResponseBody String deleteCssCalendarEvent(
+	public @ResponseBody String deleteCssCalendarEvent(@RequestParam(defaultValue="myCisCalendarId", value="calendarId") String calendarId,
 			@RequestParam(value="evtId") String evtId) {
-		this.cb = new CalendarWebResultCallback(this);
-		this.calClientService.deleteEventOnPrivateCalendar(this.cb, evtId);
-		this.wait4semaphore();
-		String ajaxResult = this.gson.toJson(this.result.isLastOperationSuccessful());
+		CalendarWebResultCallback callback = new CalendarWebResultCallback();
+		this.calClientService.deleteEventOnPrivateCalendar(callback, evtId, calendarId);
+		String ajaxResult = this.gson.toJson(callback.getResult().isLastOperationSuccessful());
 		return ajaxResult;
 	}
 	
 	@RequestMapping("/createCssCalendarAjax.do")
 	public @ResponseBody String createCssCalendarAjax(@RequestParam(defaultValue="CSS Calendar Summary", value="cssSummary") String summary) {
-		this.cb = new CalendarWebResultCallback(this);
-		this.calClientService.createPrivateCalendar(this.cb, summary);
-		this.wait4semaphore();
-		String ajaxResult = this.gson.toJson(this.result);
+		CalendarWebResultCallback callback = new CalendarWebResultCallback();
+		this.calClientService.createPrivateCalendar(callback, summary);
+		String ajaxResult = this.gson.toJson(callback.getResult().isLastOperationSuccessful());
+		log.info("ajaxResult: " + ajaxResult);
 		return ajaxResult;
 	}
 		
 	@RequestMapping("/getPrivateEvents.do")
-	public @ResponseBody String getPrivateEvents() {
-		this.cb = new CalendarWebResultCallback(this);
-		this.calClientService.retrieveEventsPrivateCalendar(this.cb);
-		this.wait4semaphore();
-		String ajaxResult = this.calClientService.createJSONOEvents(this.result.getEventList());
+	public @ResponseBody String getPrivateEvents(@RequestParam(defaultValue="myCisCalendarId", value="calendarId") String calendarId) {
+		CalendarWebResultCallback callback = new CalendarWebResultCallback();
+		String myId = getCommManager().getIdManager().getThisNetworkNode().getJid();
+		this.calClientService.retrieveEventsPrivateCalendar(callback,calendarId,myId);
+		String ajaxResult = this.calClientService.createJSONOEvents(callback.getResult().getEventList());
+		log.info("ajaxResult: " + ajaxResult);
 		return ajaxResult;
 	}
 	
 	@RequestMapping("/deletePrivateCalendar.do")
-	public @ResponseBody String deletePrivateCalendar() {
-		this.cb = new CalendarWebResultCallback(this);
-		this.calClientService.deletePrivateCalendar(this.cb);
-		this.wait4semaphore();
-		String ajaxResult = this.gson.toJson(this.result);
+	public @ResponseBody String deletePrivateCalendar(@RequestParam(defaultValue="myCisCalendarId", value="calendarId") String calendarId) {
+		CalendarWebResultCallback callback = new CalendarWebResultCallback();
+		this.calClientService.deletePrivateCalendar(callback, calendarId);
+		String ajaxResult = this.gson.toJson(callback.getResult().isLastOperationSuccessful());
+		log.info("ajaxResult: " + ajaxResult);
 		return ajaxResult;
 	}
 	
 	@RequestMapping("/deleteCisCalendar.do")
-	public @ResponseBody String deleteCisCalendar(@RequestParam(defaultValue="myCisCalendarId", value="calendarId") String calendarId) {
-		this.cb = new CalendarWebResultCallback(this);
-		this.calClientService.deleteCISCalendar(this.cb, calendarId);
-		this.wait4semaphore();
-		String ajaxResult = this.gson.toJson(this.result);
+	public @ResponseBody String deleteCisCalendar(
+		@RequestParam(defaultValue="TestCIS", value="cisId") String cisId,
+		@RequestParam(defaultValue="myCisCalendarId", value="calendarId") String calendarId) {
+		CalendarWebResultCallback callback = new CalendarWebResultCallback();
+		this.calClientService.deleteCISCalendar(callback, calendarId, cisId);
+		String ajaxResult = this.gson.toJson(callback.getResult().isLastOperationSuccessful());
+		log.info("ajaxResult: " + ajaxResult);
 		return ajaxResult;
 	}
 	

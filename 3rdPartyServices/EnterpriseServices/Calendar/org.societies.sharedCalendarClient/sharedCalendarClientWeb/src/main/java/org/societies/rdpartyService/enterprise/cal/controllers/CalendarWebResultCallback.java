@@ -3,7 +3,7 @@ package org.societies.rdpartyService.enterprise.cal.controllers;
 import java.util.concurrent.Semaphore;
 
 import org.societies.api.ext3p.schema.sharedcalendar.SharedCalendarResult;
-import org.societies.rdpartyService.enterprise.interfaces.IReturnedResultCallback;
+import org.societies.thirdparty.sharedCalendar.client.interfaces.IReturnedResultCallback;
 
 
 

@@ -6,7 +6,7 @@
 		<artifactId>spring-osgi-parent</artifactId>
 		<version>RELEASE</version>
 	</parent>
-	<groupId>org.societies.rdpartyService.enterprise</groupId>
+	<groupId>org.societies.thirdparty.sharedCalendar.client</groupId>
 	<artifactId>sharedCalendarClientWeb</artifactId>
 	<version>0.1.0</version>
 	<packaging>war</packaging>
@@ -71,12 +71,12 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.societies.rdpartyService.enterprise</groupId>
+			<groupId>org.societies.thirdparty.sharedCalendar.client</groupId>
 			<artifactId>calendar-api</artifactId>
 			<version>${release.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>org.societies.rdpartyService.enterprise</groupId>
+			<groupId>org.societies.thirdparty.sharedCalendar.client</groupId>
 			<artifactId>sharedCalendarClientRich</artifactId>
 			<version>0.1.0</version>
 			<scope>provided</scope>
@@ -176,7 +176,7 @@
 						</Import-Package>
 <!-- 						<Export-Package> -->
 <!-- 						!org.societies.api.ext3p.schema.sharedcalendar, -->
-<!-- 						org.societies.rdpartyService.enterprise.cal.controllers -->
+<!-- 						org.societies.thirdparty.sharedCalendar.client.cal.controllers -->
 <!-- 						</Export-Package>						 -->
 					</instructions>
 				</configuration>

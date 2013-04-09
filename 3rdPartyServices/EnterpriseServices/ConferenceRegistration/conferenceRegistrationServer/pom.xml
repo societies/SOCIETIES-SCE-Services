@@ -45,7 +45,7 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.societies.rdpartyService.enterprise</groupId>
+			<groupId>org.societies.thirdparty.sharedCalendar.client</groupId>
 			<artifactId>sharedCalendarClientRich</artifactId>
 			<version>0.1.0</version>
 		</dependency>

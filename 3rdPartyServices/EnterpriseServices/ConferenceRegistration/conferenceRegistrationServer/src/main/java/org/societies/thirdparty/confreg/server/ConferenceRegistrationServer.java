@@ -30,12 +30,12 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.societies.rdpartyService.enterprise.interfaces.IReturnedResultCallback;
-import org.societies.rdpartyService.enterprise.interfaces.ISharedCalendarClientRich;
 import org.societies.thirdparty.conferenceregistration.schema.Conference;
 import org.societies.thirdparty.conferenceregistration.schema.ConferenceSession;
 import org.societies.thirdparty.confreg.api.IConferenceRegistration;
 import org.societies.thirdparty.confreg.database.ConferenceRegistry;
+import org.societies.thirdparty.sharedCalendar.client.interfaces.IReturnedResultCallback;
+import org.societies.thirdparty.sharedCalendar.client.interfaces.ISharedCalendarClientRich;
 import org.societies.api.cis.attributes.MembershipCriteria;
 import org.societies.api.cis.attributes.Rule;
 import org.societies.api.cis.management.ICisManager;

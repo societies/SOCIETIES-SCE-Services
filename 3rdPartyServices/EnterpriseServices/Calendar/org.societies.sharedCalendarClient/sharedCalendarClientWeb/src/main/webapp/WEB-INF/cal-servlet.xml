@@ -39,7 +39,7 @@
     <!-- Configures the annotation-driven Spring MVC Controller programming model -->
 	<mvc:annotation-driven />	
     
-    <context:component-scan base-package="org.societies.rdpartyService.enterprise.cal.controllers"/>
+    <context:component-scan base-package="org.societies.thirdparty.sharedCalendar.client.cal.controllers"/>
     <context:component-scan base-package="org.societies.api"/>
     
  

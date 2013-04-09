@@ -7,7 +7,7 @@
 		<artifactId>spring-osgi-parent</artifactId>
 		<version>RELEASE</version>
 	</parent>
-	<groupId>org.societies.rdpartyService.enterprise</groupId>
+	<groupId>org.societies.thirdparty.sharedCalendar.client</groupId>
 	<artifactId>sharedCalendarClientRich</artifactId>
 	<version>0.1.0</version>
 	<packaging>bundle</packaging>
@@ -26,7 +26,7 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.societies.rdpartyService.enterprise</groupId>
+			<groupId>org.societies.thirdparty.sharedCalendar</groupId>
 			<artifactId>calendar-api</artifactId>
 			<version>${release.version}</version>
 		</dependency>
@@ -93,7 +93,7 @@
 						<Bundle-Name>${project.name}</Bundle-Name>
 						<Bundle-Version>${project.version}</Bundle-Version>
 						<Export-Package>
-							org.societies.rdpartyService.enterprise.interfaces
+							org.societies.thirdparty.sharedCalendar.client.interfaces
 						</Export-Package>
 					</instructions>
 				</configuration>

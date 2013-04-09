@@ -14,7 +14,7 @@
 
     <tx:annotation-driven />
 	
-    <bean id="sharedCalendarClientRich"	class="org.societies.rdpartyService.enterprise.SharedCalendarClientRich" init-method="InitService">
+    <bean id="sharedCalendarClientRich"	class="org.societies.thirdparty.sharedCalendar.api.client.SharedCalendarClientRich" init-method="InitService">
         <property name="evtMgr" ref="eventManager" />
 		<property name="availableDevices" ref="availableDevicesSet" />
 		<property name="commManager" ref="CommManagerBundle" />
