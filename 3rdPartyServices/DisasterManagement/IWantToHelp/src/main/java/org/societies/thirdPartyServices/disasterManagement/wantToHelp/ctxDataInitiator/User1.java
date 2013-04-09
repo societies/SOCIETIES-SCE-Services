@@ -91,7 +91,7 @@ public class User1 extends BaseUser{
 	 */
 	@Override
 	public String getSkills() {
-		return "organisation,translation,communication";
+		return "management,translation,communication";
 	}
 	
 	/*	
@@ -103,8 +103,8 @@ public class User1 extends BaseUser{
 		(5, 'translation'),
 		(6, 'navigation'),
 		(7, 'chemical'),
-		(8, 'earthquake'),
-		(9, 'organisation');
+		(8, 'research'),
+		(9, 'management');
 	*/
 
 	

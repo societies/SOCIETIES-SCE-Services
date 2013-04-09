@@ -32,7 +32,7 @@ public abstract class BaseUser {
 	 
 	 public abstract String getFriends();
 	 
-	 public final static String[] SKILLS = new String[]{"computer", "infrastructure", "communication", "internet", "hospitals", "translation", "navigation", "chemical", "earthquake", "organisation"};
+	 public final static String[] SKILLS = new String[]{"computer", "infrastructure", "communication", "internet", "hospitals", "translation", "navigation", "chemical", "research", "management"};
 	 
 	 
 }
