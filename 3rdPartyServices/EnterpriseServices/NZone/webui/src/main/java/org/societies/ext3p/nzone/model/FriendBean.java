@@ -299,6 +299,8 @@ public class FriendBean implements Serializable, ValueChangeListener {
 			 shareflag += NZoneConsts.SHARE_EMPLOYMENT;
 		 if (this.isSharesns())
 			 shareflag += NZoneConsts.SHARE_SOCIAL;
+		 if (this.isShareinterests())
+			 shareflag += NZoneConsts.SHARE_INTERESTS; 
 		 
 		 info.setFriendid(friendid);		
 		 info.setShareHash(shareflag);

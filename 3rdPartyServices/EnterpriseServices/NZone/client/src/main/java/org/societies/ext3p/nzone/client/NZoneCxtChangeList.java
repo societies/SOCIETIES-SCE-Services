@@ -66,10 +66,14 @@ public class NZoneCxtChangeList implements CtxChangeEventListener {
 	 */
 	@Override
 	public void onUpdate(CtxChangeEvent event) {
-			LOG.info("Received UPDATED event " + event);
+			LOG.info("Received UPDATED event start" + event);
 			
 			// now we want to change zone
-			client.locationChanged();
+			//client.locationChanged();
+			
+			new Thread(new LocationChangedHandler(client)).start();
+			
+			LOG.info("Received UPDATED event end " + event);
 	}
 
 	/*
@@ -88,5 +92,21 @@ public class NZoneCxtChangeList implements CtxChangeEventListener {
 		LOG.info("Received REMOVED event " + event);
 	}
 	
+	
+	private class LocationChangedHandler implements Runnable {
+		
+		public NZoneClient client;
+		
+		private LocationChangedHandler(NZoneClient client) {
+
+			this.client = client;
+		}
+		
+		@Override
+		public void run() {
+			client.locationChanged();
+
+		}
+	}
 }	
 	

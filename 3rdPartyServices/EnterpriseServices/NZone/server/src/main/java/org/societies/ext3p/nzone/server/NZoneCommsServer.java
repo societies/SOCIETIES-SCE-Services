@@ -220,6 +220,13 @@ public class NZoneCommsServer implements IFeatureServer {
 						
 						break;
 					}
+					case UPDATE_INTERESTS:	{
+						messageResult.setResult(getNzoneServer().updateInterests(stanza.getFrom().getBareJid(), messageBean.getData()));
+						break;
+					}
+					
+					
+					
 					/*
 					case GETZONEEVENTS:
 					{

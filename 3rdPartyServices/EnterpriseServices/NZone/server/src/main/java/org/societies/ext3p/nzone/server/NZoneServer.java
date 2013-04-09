@@ -219,17 +219,17 @@ public class NZoneServer implements INZoneServer{
 		// TODO : do this with data from database
 		List<Action> actionsRo = new ArrayList<Action>();
 		actionsRo.add(new Action(ActionConstants.READ));
-		actionsRo.add(new Action(ActionConstants.WRITE, true));
-		
+		//actionsRo.add(new Action(ActionConstants.WRITE));
+		actionsRo.add(new Action(ActionConstants.CREATE));
 		
 
 		List<Condition> conditionsMembersOnly = new ArrayList<Condition>();
 		
 		// ConditionConstants.SHARE_WITH_CIS_MEMBERS_ONLY, doesn't work for entrepirse trial, as of 26/3/2013 , known issue
 		//conditionsMembersOnly.add(new Condition(ConditionConstants.SHARE_WITH_CIS_MEMBERS_ONLY, "1"));
-		//conditionsMembersOnly.add(new Condition(ConditionConstants.SHARE_WITH_3RD_PARTIES, "1"));
-		
-		conditionsMembersOnly.add(new Condition(ConditionConstants.SHARE_WITH_3RD_PARTIES, "Yes"));
+		conditionsMembersOnly.add(new Condition(ConditionConstants.SHARE_WITH_3RD_PARTIES,  "1", false));
+		conditionsMembersOnly.add(new Condition(ConditionConstants.STORE_IN_SECURE_STORAGE,  "1", false));
+		//conditionsMembersOnly.add(new Condition(ConditionConstants.SHARE_WITH_3RD_PARTIES, "Yes"));
 		
 		
 		List<RequestItem> requests = new ArrayList<RequestItem>();
@@ -423,6 +423,15 @@ public class NZoneServer implements INZoneServer{
 	public boolean updateMyDetails(UserDetails details) {
 		return getNzoneDirectory().updateUserRecord(details);
 		
+	}
+
+	public boolean updateInterests(String userid, List<String> interests) {
+		UserDetails userDets = getNzoneDirectory().getUserRecord(userid);
+		userDets.getInterests().clear();
+		userDets.setInterests(interests);
+		getNzoneDirectory().updateUserRecord(userDets);
+		
+		return true;
 	}
 	
 		

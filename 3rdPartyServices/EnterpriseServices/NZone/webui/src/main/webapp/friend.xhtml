@@ -77,6 +77,16 @@
 							<br />
 							<br />
 							<br />
+							<p:separator style="color: black;"/>
+				 			<br/>
+        					<h:outputText value="Share my Interests: " style="font-weight:bold" /> <pm:switch value="#{friendBean.shareinterests}" onLabel="Yes" offLabel="No"  style="width:100%" />  
+        					<br/>
+        			 			<p:selectManyCheckbox value="#{profileBean.selectedInterests}">  
+            		   				<f:selectItem itemLabel="Cloud Computing" itemValue="cloud" />  
+			           				<f:selectItem itemLabel="Internet Of Things" itemValue="internet" />  
+            		   				<f:selectItem itemLabel="Future of the Internet" itemValue="future" />  
+			        			</p:selectManyCheckbox>  
+							<br/><br/><br/>
 							<p:separator style="color: black;" />
 
 							<h:outputText value="Share my Social Network Data: "

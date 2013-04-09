@@ -19,13 +19,11 @@
 					<p:commandButton id="confirm" value="OK" action="gotoprofile" />
 				</p:confirmDialog>
 
-				<p:accordionPanel>
+				
 				<!--  seperate tab -->
 				<p:tab title="Zones">
-					You are currently located in the "#{mainBean.zoneName}", as shown in the image below.<br/>
-					Click on the image to retrive Zone Information<br/>
-					
-					<p:commandButton value="Zone Information" action="gotozone" image="images/#{mainBean.zoneImage}"/>
+					You are currently located in the <b>"#{mainBean.zoneName}"</b>, as shown in the image below.<br/>
+					Click on the image to retrieve this Zone's Information<br/>
 					
 					<h:form>
 					<p:commandLink action="gotozone" >
@@ -35,7 +33,16 @@
 				
 				</p:tab>
 				
-					<p:tab title="Suggested Contacts">
+				<p:accordionPanel>
+					<p:tab title="Conference Members">
+					This is a list of all conference members.<br/>
+					It is ranked based on information you provided to the application in conjunction with actions you preformed within the application.<br/>
+					<br/>
+					Click on a member, and their location will be shown in the map above.<br/>
+					You must be in the same location as them in order to conntect with them via the app.<br/>
+					 
+					
+					
 						<h:form id="form">
 							<p:dataList value="#{mainPeopleBean.suggestions}"
 								var="mainperson" itemType="square">

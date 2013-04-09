@@ -46,6 +46,7 @@
 				<xs:enumeration value="getSharePreferences"/>
 				<xs:enumeration value="getShareInfo"/>
 				<xs:enumeration value="updateShareInfo"/>
+				<xs:enumeration value="updateInterests"/>
 			</xs:restriction>
 		</xs:simpleType>
 		

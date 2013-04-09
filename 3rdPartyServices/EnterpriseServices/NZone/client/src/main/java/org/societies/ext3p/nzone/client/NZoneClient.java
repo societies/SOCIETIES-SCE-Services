@@ -73,7 +73,7 @@ public class NZoneClient implements INZoneClient, IActionConsumer {
 	private IIdentity myIdentity;
 
 	private String nzoneServerCssID;
-
+	
 	// private Requestor requestor;
 	private RequestorService requestorService;
 	private Requestor platformRequestor;
@@ -102,7 +102,6 @@ public class NZoneClient implements INZoneClient, IActionConsumer {
 
 	private NZoneCxtChangeList cxtChangeList;
 	
-
 	public ICtxBroker getCtxBroker() {
 		return ctxBroker;
 	}
@@ -597,9 +596,6 @@ public class NZoneClient implements INZoneClient, IActionConsumer {
 		return sortedlist;
 	}
 
-	@Override
-	public void saveShareInfo() {
-	};
 
 	@Override
 	public void getActivityFeed(boolean bMainZone) {
@@ -1262,7 +1258,6 @@ public class NZoneClient implements INZoneClient, IActionConsumer {
 	@Async
 	public void locationChanged() {
 		log.info("locationChanged Start ");
-		// TODO Auto-generated method stub
 		String newLoc = this.getContextAtributeAsPlatform(nzoneLocationCxtAttr);
 		log.info("locationChanged newLoc is " + newLoc);
 		
@@ -1285,6 +1280,7 @@ public class NZoneClient implements INZoneClient, IActionConsumer {
 				}
 			}
 		}
+
 	}
 	
 	
@@ -1471,6 +1467,13 @@ public class NZoneClient implements INZoneClient, IActionConsumer {
 		log.info("userSharedWithViewPreferredProfile : Sending action to UAM: "
 				+ action.toString());
 		getUam().monitor(myIdentity, action);
+	}
+
+	@Override
+	public void updateMyInterests(List<String> interests) 
+	{
+		getNzoneClientComms().updateMyInterests(interests);
+		
 	}
 	
 	

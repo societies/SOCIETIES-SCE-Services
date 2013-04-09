@@ -20,7 +20,7 @@ public interface INZoneClient {
 	public boolean bJoinZone(String zoneID);
 	public List<UserPreview> getSuggestedList(boolean bMainZone);
 	public UserDetails getUserProfile(String userID);
-	public void saveShareInfo();
+//	public void saveShareInfo();
 	public UserDetails getMyProfile();
 	public void getActivityFeed(boolean bMainZone);
 	public void sendSocFR();
@@ -36,6 +36,8 @@ public interface INZoneClient {
 	public void setAsSharePreferred(String type, String value, int sharevalue);
 	public void removeAsSharePreferred(String type, String value);
 	public int isSharePreferred(String type, String value);
+	
+	public void updateMyInterests(List<String> interests);
 	
 	
 

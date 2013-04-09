@@ -775,4 +775,40 @@ public class NZoneClientComms implements ICommCallback {
 		return sharedInfo;
 	}
 
+	public void updateMyInterests(List<String> interests) {
+		IIdentity toIdentity = null;
+		commsResult = null;
+		try {
+			toIdentity = getCommManager().getIdManager().fromJid(netServerID);
+		} catch (InvalidFormatException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		Stanza stanza = new Stanza(toIdentity);
+						
+		// CREATE MESSAGE BEAN
+		NzoneBean netBean = new NzoneBean();
+		netBean.setMethod(Method.UPDATE_INTERESTS);
+		netBean.setData(interests);
+			
+		startSignal = new CountDownLatch(1);
+						
+		try {
+			getCommManager().sendIQGet(stanza, netBean, this);
+							
+		} catch (CommunicationException e) {
+			LOG.warn(e.getMessage());
+		};
+
+		try {
+			startSignal.await();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+								
+				
+		
+	}
+
 }

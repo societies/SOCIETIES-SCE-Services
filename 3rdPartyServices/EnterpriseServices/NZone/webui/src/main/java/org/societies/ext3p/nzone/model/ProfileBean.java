@@ -1,6 +1,7 @@
 package org.societies.ext3p.nzone.model;  
   
 import java.io.Serializable;   
+import java.util.List;
 
 import javax.faces.application.FacesMessage;
 import javax.faces.bean.ApplicationScoped;
@@ -39,6 +40,7 @@ public class ProfileBean implements Serializable {
     private String twitterid;
     private String foursqid;
     private String googleplusid;
+    private List<String> selectedInterests;
     private boolean profilemissing;
     
     private boolean sharecompany;
@@ -155,6 +157,9 @@ public class ProfileBean implements Serializable {
 			else
 				this.setTwitterid(myDets.getTwitterID());
 			
+			if (myDets.getInterests() != null)
+				setSelectedInterests(myDets.getInterests());
+			
 		}
 		
 		//Default to showing nothing until we read value
@@ -250,6 +255,18 @@ public class ProfileBean implements Serializable {
 	public void setSex(String sex) {
 		this.sex = sex;
 	}
+	/**
+	 * @return the selectedInterests
+	 */
+	public List<String> getSelectedInterests() {
+		return selectedInterests;
+	}
+	/**
+	 * @param selectedInterests the selectedInterests to set
+	 */
+	public void setSelectedInterests(List<String> selectedInterests) {
+		this.selectedInterests = selectedInterests;
+	}
 	public String getFacebookid() {
 		return facebookid;
 	}
@@ -291,7 +308,13 @@ public class ProfileBean implements Serializable {
 	   }  
 	 
 
-	 public String saveShareInfo() {
+	public String saveProfile()
+	{
+		saveShareInfo();
+		saveInterests();
+		return "gotomain";
+	}
+	 public void saveShareInfo() {
 		 ShareInfo info = new ShareInfo();
 		 int shareflag = 0;
 		 
@@ -301,14 +324,21 @@ public class ProfileBean implements Serializable {
 			 shareflag += NZoneConsts.SHARE_EMPLOYMENT;
 		 if (this.isSharesns())
 			 shareflag += NZoneConsts.SHARE_SOCIAL;
+		 if (this.isShareinterests())
+			 shareflag += NZoneConsts.SHARE_INTERESTS;
+		 
 		 
 		 info.setFriendid("0");		
 		 info.setShareHash(shareflag);
 		 
 		 getNzoneClient().updateShareInfo(info);
 		 
-		return "gotomain";
+	 }
+	 
+	 public void saveInterests() {
 		 
+		getNzoneClient().updateMyInterests(this.getSelectedInterests());
+			
 	 }
 	 
 	 
