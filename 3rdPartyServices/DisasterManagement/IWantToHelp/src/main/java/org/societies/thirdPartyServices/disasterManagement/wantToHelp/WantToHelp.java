@@ -138,7 +138,7 @@ public class WantToHelp implements IWantToHelp, ActionListener {
 	// @Autowired(required=true)
 	private ICommManager commMgr;
 
-	private CtxEntityIdentifier ownerEntityIdentifier;
+	private CtxEntityIdentifier ownerCtxId;
 	private Requestor requestor;
 	private IIdentity cssOwnerId;
 
@@ -146,7 +146,6 @@ public class WantToHelp implements IWantToHelp, ActionListener {
 
 	private IIdentityManager idMgr;
 
-	private CtxEntityIdentifier ownerCtxId;
 	
 
 
@@ -186,7 +185,7 @@ public class WantToHelp implements IWantToHelp, ActionListener {
 			// resolves to "xcmanager.societies.local"
 			requestor = new Requestor(cssOwnerId);
 			
-			ownerEntityIdentifier = externalCtxBroker.retrieveIndividualEntityId(requestor, cssOwnerId).get();
+			ownerCtxId = externalCtxBroker.retrieveIndividualEntityId(requestor, cssOwnerId).get();
 		} catch (InvalidFormatException e1) {
 			e1.printStackTrace();
 		} catch (InterruptedException e) {
@@ -196,7 +195,11 @@ public class WantToHelp implements IWantToHelp, ActionListener {
 		} catch (CtxException e) {
 			e.printStackTrace();
 		} 
-		
+
+		this.idMgr = commMgr.getIdManager();
+
+		this.cssOwnerId = this.getLocalIdentity();
+		// cssOwnerId = commMgr.getIdManager().fromJid(commMgr.getIdManager().getThisNetworkNode().getBareJid());
 
 //		initialiseContext(externalCtxBroker, commMgr, requestor);
 		
@@ -212,21 +215,14 @@ public class WantToHelp implements IWantToHelp, ActionListener {
 	 */
 	private void initialiseContext(ICtxBroker ctxBroker, ICommManager commMgr,
 			Requestor requestor){
-		this.idMgr = commMgr.getIdManager();
-
-		this.cssOwnerId = this.getLocalIdentity();
-		// cssOwnerId =
-		// commMgr.getIdManager().fromJid(commMgr.getIdManager().getThisNetworkNode().getBareJid());
 
 
 		try {
 
-			ownerCtxId = ctxBroker.retrieveIndividualEntityId(requestor,
+			if (ownerCtxId==null)
+				ownerCtxId = ctxBroker.retrieveIndividualEntityId(requestor,
 					cssOwnerId).get();
 
-			System.out
-					.println("************ CtxDataInitiator: ownerCtxId.getOwnerId()="
-							+ ownerCtxId.getOwnerId());
 //			if (ownerCtxId.getOwnerId().equals("john.societies.local")) {
 //				BaseUser john = new John();
 //				addContext(john);
@@ -281,7 +277,6 @@ public class WantToHelp implements IWantToHelp, ActionListener {
 	void sendDataToCSDMandYRNA() {
 		
 		// Communicate with SOCIETIES to get context
-		printAndLog("*IW2H* ********* sendDataToCSDMandYRNA before context query skills="+skills);
 		try {
 			getUserDataFromCSS();
 		} catch (Exception e1) {
@@ -293,6 +288,7 @@ public class WantToHelp implements IWantToHelp, ActionListener {
 		if (skills==null || skills.isEmpty()) skillsAndLanguages = languages;
 		else if (skills.endsWith(",") && languages!=null) skillsAndLanguages += languages;
 		else if (languages!=null && !languages.isEmpty()) skillsAndLanguages+=","+languages;
+		if (skillsAndLanguages==null) skillsAndLanguages="";
 		
 		// Communicate with CSDM
 		if (NO_USER)
@@ -319,21 +315,27 @@ public class WantToHelp implements IWantToHelp, ActionListener {
 	}
 	
 	public void updateUserDataInCSSandYRNA(UserData userData) {
-		if (requestor != null && ownerEntityIdentifier != null) {
+		if (requestor != null && ownerCtxId != null) {
 			try {
 				
-				String skillsString = "";
-				for (String skill: userData.getSkills())
-					skillsString += skill + ",";
-				if (skillsString.endsWith(",")) skillsString = skillsString.substring(0, skillsString.length()-1);
-				
-				System.out.println("*IW2H* updating change from CSDM to Societies. Skills:="+skillsString);
-				updateContextAttribute(ownerEntityIdentifier, CtxAttributeTypes.SKILLS,skillsString);
-				
-				updateContextAttribute(ownerEntityIdentifier, CtxAttributeTypes.NAME_LAST,userData.getLastName());
-				updateContextAttribute(ownerEntityIdentifier, CtxAttributeTypes.NAME_FIRST,userData.getFirstName());
-				updateContextAttribute(ownerEntityIdentifier, CtxAttributeTypes.EMAIL,userData.getEmail());
-				updateContextAttribute(ownerEntityIdentifier, CtxAttributeTypes.AFFILIATION,userData.getInstitute());
+				if (userData.getSkills()!=null){
+					String skillsString = "";
+					for (String skill: userData.getSkills())
+						skillsString += skill + ",";
+					if (skillsString.endsWith(",")) skillsString = skillsString.substring(0, skillsString.length()-1);
+					
+					printAndLog("*IW2H* updating change from CSDM to Societies. Skills:="+skillsString);
+					updateContextAttribute(ownerCtxId, CtxAttributeTypes.SKILLS,skillsString);
+				}
+
+				if (userData.getLastName()!=null && !userData.getLastName().isEmpty())
+					updateContextAttribute(ownerCtxId, CtxAttributeTypes.NAME_LAST,userData.getLastName());
+				if (userData.getFirstName()!=null && !userData.getFirstName().isEmpty())
+					updateContextAttribute(ownerCtxId, CtxAttributeTypes.NAME_FIRST,userData.getFirstName());
+				if (userData.getEmail()!=null && !userData.getEmail().isEmpty())
+					updateContextAttribute(ownerCtxId, CtxAttributeTypes.EMAIL,userData.getEmail());
+				if (userData.getInstitute()!=null)
+					updateContextAttribute(ownerCtxId, CtxAttributeTypes.AFFILIATION,userData.getInstitute());
 				
 			} catch (InterruptedException e) {
 				e.printStackTrace();
@@ -365,11 +367,14 @@ public class WantToHelp implements IWantToHelp, ActionListener {
 
 		printAndLog("********** retrieve user data from CSS ... ");
 
+		if (ownerCtxId==null)
+			ownerCtxId = externalCtxBroker.retrieveIndividualEntityId(requestor,
+					cssOwnerId).get();
 
 		String name = null;
 
 		CtxEntity ownerEntity = (CtxEntity) externalCtxBroker.retrieve(
-				requestor, ownerEntityIdentifier).get();
+				requestor, ownerCtxId).get();
 
 		Iterator<CtxAttribute> foundAttrsIt = ownerEntity.getAttributes(
 				CtxAttributeTypes.NAME).iterator();
@@ -412,20 +417,20 @@ public class WantToHelp implements IWantToHelp, ActionListener {
 		printAndLog("********** FirstName LastName:" + userFirstname + " "
 				+ userLastname);
 
-		if ((userLastname == null || userLastname.equals(""))
-				&& (userFirstname == null || userFirstname.equals(""))) {
+		if ((userLastname == null || userLastname.isEmpty())
+				&& (userFirstname == null || userFirstname.isEmpty())) {
 			
 			
 			System.out.println("TEST CASE ONLY. NO USER DATA AVAILABLE.");
 			
 			
 			CtxAttribute nameLast = externalCtxBroker.createAttribute(
-					requestor, ownerEntityIdentifier,
+					requestor, ownerCtxId,
 					CtxAttributeTypes.NAME_LAST).get();
 			nameLast.setStringValue("Test");
 			externalCtxBroker.update(requestor, nameLast).get();
 			CtxAttribute nameFirst = externalCtxBroker.createAttribute(
-					requestor, ownerEntityIdentifier,
+					requestor, ownerCtxId,
 					CtxAttributeTypes.NAME_FIRST).get();
 			nameFirst.setStringValue("First");
 			nameFirst = (CtxAttribute) externalCtxBroker.update(requestor,
@@ -443,7 +448,7 @@ public class WantToHelp implements IWantToHelp, ActionListener {
 			
 		// testUserEmail =
 		// testUserFirstname+"."+testUserLastname+"@ict-societies.eu";
-		printAndLog("********** email: " + userEmail);
+		printAndLog("********** cssOwnerId="+cssOwnerId+", firstname: "+userFirstname+ ", lastname: "+userLastname+", name: "+name+", email: " + userEmail);
 
 		testUserPassword = userFirstname.toLowerCase()
 				+ userLastname.toLowerCase();
@@ -467,7 +472,6 @@ public class WantToHelp implements IWantToHelp, ActionListener {
 
 		foundAttrsIt = ownerEntity.getAttributes(CtxAttributeTypes.LANGUAGES)
 				.iterator();
-		System.out.println("*IW2H* reading context. languages found="+foundAttrsIt.hasNext());
 		if (foundAttrsIt.hasNext()){
 			attribute = foundAttrsIt.next();
 			languages = attribute.getStringValue();
@@ -477,11 +481,9 @@ public class WantToHelp implements IWantToHelp, ActionListener {
 
 		foundAttrsIt = ownerEntity.getAttributes(CtxAttributeTypes.SKILLS)
 				.iterator();
-		System.out.println("*IW2H* reading context. skills found="+foundAttrsIt.hasNext());
 		if (foundAttrsIt.hasNext()){
 			attribute = foundAttrsIt.next();
 			skills = attribute.getStringValue();
-			System.out.println("*IW2H* reading context, skills found. skills="+skills);
 			if (!requestedCtxIds.contains(attribute.getId())) requestedCtxIds.add(attribute.getId());
 		}
 			
@@ -503,10 +505,6 @@ public class WantToHelp implements IWantToHelp, ActionListener {
 			else
 				skills += "," + interests;
 		}
-		
-
-		
-		System.out.println("*IW2H* reading context. Skills="+skills);
 
 	}
 
@@ -532,7 +530,7 @@ public class WantToHelp implements IWantToHelp, ActionListener {
 				.put(ClientResponse.class, volunteer);
 		printAndLog("********** send data to YRNA platform: " + r);
 		
-		System.out.println("*IW2H* updating change from CSDM to YRNA. Volunteer:="+volunteer.toString());
+		printAndLog("*IW2H* updating change from CSDM to YRNA. Volunteer:="+volunteer.toString());
 		
 	}
 
@@ -543,13 +541,13 @@ public class WantToHelp implements IWantToHelp, ActionListener {
 			CtxAttribute attr = (CtxAttribute) externalCtxBroker.retrieve(requestor, ctxIds.get(0)).get();
 			attr.setStringValue(value);
 			this.externalCtxBroker.update(requestor,attr);
-			LOG.info("*IW2H* attribute updated: "+type+"="+value);
+			LOG.debug("*IW2H* attribute updated: "+type+"="+value);
 		} else {
 			final CtxAttribute attr = this.externalCtxBroker.createAttribute(requestor,
 					cssOwnerId, type).get();
 			attr.setStringValue(value);
 			this.externalCtxBroker.update(requestor,attr);
-			LOG.info("*IW2H* attribute created: "+type+"="+value);
+			LOG.debug("*IW2H* attribute created: "+type+"="+value);
 		}
 	}
 
@@ -557,7 +555,7 @@ public class WantToHelp implements IWantToHelp, ActionListener {
 		if (feedbackTextArea != null)
 			feedbackTextArea.append(string + "\n");
 
-		LOG.info(string);
+		LOG.debug(string);
 		// System.out.println(string);
 
 	}
