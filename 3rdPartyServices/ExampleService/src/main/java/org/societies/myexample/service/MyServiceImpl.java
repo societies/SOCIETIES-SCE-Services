@@ -25,6 +25,7 @@
 package org.societies.myexample.service;
 
 import org.societies.api.context.broker.ICtxBroker;
+import org.societies.api.schema.servicelifecycle.model.ServiceResourceIdentifier;
 
 public class MyServiceImpl implements IMyService {
 

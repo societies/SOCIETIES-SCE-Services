@@ -46,6 +46,7 @@ import org.societies.api.identity.InvalidFormatException;
 import org.societies.api.ext3p.schema.nzone.Method;
 import org.societies.api.ext3p.schema.nzone.NzoneBean;
 import org.societies.api.ext3p.schema.nzone.NzoneBeanResult;
+import org.societies.api.ext3p.schema.nzone.ShareInfo;
 import org.societies.api.ext3p.schema.nzone.ZoneDetails;
 import org.societies.api.ext3p.schema.nzone.UserDetails;
 
@@ -63,10 +64,7 @@ public class NZoneClientComms implements ICommCallback {
 			.unmodifiableList(Arrays
 					.asList("org.societies.api.ext3p.schema.nzone"));
 
-	//TODO : Temporary while testing
-	private int TEST_TIME_MULTIPLER = 10;
-	private int WAIT_TIME_SECS = 100;
-	
+
 	// PRIVATE VARIABLES
 	private ICommManager commManager;
 	private static Logger LOG = LoggerFactory.getLogger(NZoneClientComms.class);
@@ -327,6 +325,53 @@ public class NZoneClientComms implements ICommCallback {
 		return null;
 	}
 	
+	
+	public UserDetails getUserDetails(String userID)
+	{
+		
+		// We want to sent all messages for Netowrking Client to the metworking server
+		// hardcode for now TODO : Read from properties
+		IIdentity toIdentity = null;
+		commsResult = null;
+				
+		try {
+			toIdentity = getCommManager().getIdManager().fromJid(netServerID);
+		} catch (InvalidFormatException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		Stanza stanza = new Stanza(toIdentity);
+		List<String> userLst = new ArrayList<String>();
+		userLst.add(userID);
+		// CREATE MESSAGE BEAN
+		NzoneBean netBean = new NzoneBean();
+		netBean.setMethod(Method.GET_USER_DETAILS);
+		netBean.setData(userLst);
+		startSignal = new CountDownLatch(1);
+				
+		try {
+			getCommManager().sendIQGet(stanza, netBean, this);
+						
+		} catch (CommunicationException e) {
+			LOG.warn(e.getMessage());
+		};
+
+		try {
+			startSignal.await();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+						
+		
+		if ((commsResult != null) && (this.commsResult.getUserdata() != null))
+			return this.commsResult.getUserdata().get(0);
+		
+		return null;
+		
+	}
+	
+	
 	public List<UserDetails> getUserDetailsList(List<String> userIDs)
 	{
 		
@@ -415,6 +460,51 @@ public class NZoneClientComms implements ICommCallback {
 		
 	}
 	
+	public boolean saveSharePreferences(String preferences)
+	{
+		
+		// We want to sent all messages for Netowrking Client to the metworking server
+		// hardcode for now TODO : Read from properties
+		IIdentity toIdentity = null;
+		commsResult = null;
+		
+		try {
+			toIdentity = getCommManager().getIdManager().fromJid(netServerID);
+		} catch (InvalidFormatException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		Stanza stanza = new Stanza(toIdentity);
+				
+		// CREATE MESSAGE BEAN
+		NzoneBean netBean = new NzoneBean();
+		netBean.setMethod(Method.SAVE_SHARE_PREFERENCES);
+		List<String> dataToSend = new ArrayList<String>();
+		dataToSend.add(preferences);
+		netBean.setData(dataToSend);
+		startSignal = new CountDownLatch(1);		
+		try {
+			getCommManager().sendIQGet(stanza, netBean, this);
+						
+		} catch (CommunicationException e) {
+			LOG.warn(e.getMessage());
+		};
+
+		try {
+			startSignal.await();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+						
+		
+		if (commsResult != null)
+			return this.commsResult.isResult();
+		
+		return false;
+		
+	}
+	
 	public String getPreferences()
 	{
 		
@@ -462,12 +552,227 @@ public class NZoneClientComms implements ICommCallback {
 		
 	}
 
+	public String getSharePreferences()
+	{
+		
+		// We want to sent all messages for Netowrking Client to the metworking server
+		// hardcode for now TODO : Read from properties
+		IIdentity toIdentity = null;
+		commsResult = null;
+		try {
+			toIdentity = getCommManager().getIdManager().fromJid(netServerID);
+		} catch (InvalidFormatException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		Stanza stanza = new Stanza(toIdentity);
+				
+		// CREATE MESSAGE BEAN
+		NzoneBean netBean = new NzoneBean();
+		netBean.setMethod(Method.GET_SHARE_PREFERENCES);
+				
+		startSignal = new CountDownLatch(1);
+		try {
+			
+			getCommManager().sendIQGet(stanza, netBean, this);
+						
+		} catch (CommunicationException e) {
+			LOG.warn(e.getMessage());
+		};
+
+		try {
+			startSignal.await();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+						
+		
+		if (commsResult != null)
+		{
+			if (commsResult.getData() != null && commsResult.getData().size() > 0)
+				return this.commsResult.getData().get(0);
+		}
+		
+		
+		return null;
+		
+	}
+
 	public String getNetServerID() {
 		return netServerID;
 	}
 
 	public void setNetServerID(String netServerID) {
 		this.netServerID = netServerID;
+	}
+
+	public UserDetails getMyDetails() {
+		IIdentity toIdentity = null;
+		commsResult = null;
+		try {
+			toIdentity = getCommManager().getIdManager().fromJid(netServerID);
+		} catch (InvalidFormatException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		Stanza stanza = new Stanza(toIdentity);
+						
+		// CREATE MESSAGE BEAN
+		NzoneBean netBean = new NzoneBean();
+		netBean.setMethod(Method.GET_MY_DETAILS);
+			
+		startSignal = new CountDownLatch(1);
+						
+		try {
+			getCommManager().sendIQGet(stanza, netBean, this);
+							
+		} catch (CommunicationException e) {
+			LOG.warn(e.getMessage());
+		};
+
+		try {
+			startSignal.await();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+								
+				
+		if ((commsResult != null) && (this.commsResult.getUserdata() != null))
+			return this.commsResult.getUserdata().get(0);
+				
+		return null;
+	}
+
+	
+	public boolean updateMyDetails(UserDetails dets) {
+		IIdentity toIdentity = null;
+		commsResult = null;
+		try {
+			toIdentity = getCommManager().getIdManager().fromJid(netServerID);
+		} catch (InvalidFormatException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		Stanza stanza = new Stanza(toIdentity);
+						
+		// CREATE MESSAGE BEAN
+		NzoneBean netBean = new NzoneBean();
+		netBean.setMethod(Method.UPDATE_MY_DETAILS);
+		
+		netBean.setDetails(dets);
+			
+		startSignal = new CountDownLatch(1);
+						
+		try {
+			getCommManager().sendIQGet(stanza, netBean, this);
+							
+		} catch (CommunicationException e) {
+			LOG.warn(e.getMessage());
+		};
+
+		try {
+			startSignal.await();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+								
+				
+		if (commsResult != null) 
+			return this.commsResult.isResult();
+				
+		return false;
+	}
+	
+	public boolean updateShareInfo(ShareInfo info) {
+		IIdentity toIdentity = null;
+		commsResult = null;
+		try {
+			toIdentity = getCommManager().getIdManager().fromJid(netServerID);
+		} catch (InvalidFormatException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		Stanza stanza = new Stanza(toIdentity);
+						
+		// CREATE MESSAGE BEAN
+		NzoneBean netBean = new NzoneBean();
+		netBean.setMethod(Method.UPDATE_SHARE_INFO);
+		netBean.setFriendid(info.getFriendid());
+		netBean.setSharevalue(info.getShareHash());
+			
+		startSignal = new CountDownLatch(1);
+						
+		try {
+			getCommManager().sendIQGet(stanza, netBean, this);
+							
+		} catch (CommunicationException e) {
+			LOG.warn(e.getMessage());
+		};
+
+		try {
+			startSignal.await();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+								
+				
+		if (commsResult != null) 
+			return this.commsResult.isResult();
+				
+		return false;
+	}
+
+	public ShareInfo getShareInfo(String friendid) {
+		IIdentity toIdentity = null;
+		ShareInfo sharedInfo = new ShareInfo();
+				
+		commsResult = null;
+		try {
+			toIdentity = getCommManager().getIdManager().fromJid(netServerID);
+		} catch (InvalidFormatException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		Stanza stanza = new Stanza(toIdentity);
+		
+		sharedInfo.setFriendid(friendid);
+		sharedInfo.setShareHash(0); // default to nothing!
+		sharedInfo.setDefaultShareValue(false); 
+		
+		// CREATE MESSAGE BEAN
+		NzoneBean netBean = new NzoneBean();
+		netBean.setMethod(Method.GET_SHARE_INFO);
+		
+		netBean.setMyid(toIdentity.getBareJid());
+		netBean.setFriendid(friendid);
+			
+		startSignal = new CountDownLatch(1);
+						
+		try {
+			getCommManager().sendIQGet(stanza, netBean, this);
+							
+		} catch (CommunicationException e) {
+			LOG.warn(e.getMessage());
+		};
+
+		try {
+			startSignal.await();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+								
+				
+		if ((commsResult != null) && (this.commsResult.isResult()))
+		{
+			sharedInfo.setShareHash(this.commsResult.getShareinfo().getShareHash());
+			sharedInfo.setDefaultShareValue(this.commsResult.getShareinfo().isDefaultShareValue());
+		}
+		return sharedInfo;
 	}
 
 }

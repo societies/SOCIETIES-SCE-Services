@@ -96,8 +96,8 @@ public class SettingsActivity extends Activity{
 	            	  if (!entitySelected.equalsIgnoreCase(entityStored) || !urlSelected.equalsIgnoreCase(urlStored) || 
 	            		  !cisSelected.equalsIgnoreCase(cisStored)){
 		            		  SharedPreferences.Editor editor = preferences.edit();
-			            	  editor.putString("vg.entity", entitySelected);
-			            	  editor.putString("vg.url", urlSelected);
+			            	  editor.putString("vg.entity", entitySelected.trim());
+			            	  editor.putString("vg.url", urlSelected.trim());
 			            	  editor.putString("vg.cis", cisSelected);
 			            	  editor.commit();
 			              

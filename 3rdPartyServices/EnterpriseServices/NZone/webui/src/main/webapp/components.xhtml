@@ -1,0 +1,38 @@
+<f:view xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:pm="http://primefaces.org/mobile" contentType="text/html">
+	<pm:page
+		title="hasCode.com PrimeFaces Mobile Tutorial - Mobile Components">
+		<pm:view id="components">
+			<pm:header title="Mobile Components" />
+			<pm:content>
+				<h:form>
+					<h:outputText value="Button Group" />
+					<pm:buttonGroup>
+						<p:commandButton value="Accept" />
+						<p:commandButton value="Deny" />
+					</pm:buttonGroup>
+					<p:separator />
+					<h:outputText value="Input Range" />
+					<pm:inputRange value="23" />
+					<p:separator />
+					<h:outputText value="Nav Bar" />
+					<pm:content>
+						<pm:navBar>
+							<p:button value="Home" icon="home" href="#components"
+								styleClass="ui-btn-active" />
+							<p:button value="Settings" icon="gear" href="#components" />
+							<p:button value="About" icon="info" href="#components" />
+						</pm:navBar>
+					</pm:content>
+					<p:separator />
+					<h:outputText value="Switch" />
+					<pm:switch value="#{true}" onLabel="Accept" offLabel="deny" />
+				</h:form>
+			</pm:content>
+		</pm:view>
+	</pm:page>
+</f:view>

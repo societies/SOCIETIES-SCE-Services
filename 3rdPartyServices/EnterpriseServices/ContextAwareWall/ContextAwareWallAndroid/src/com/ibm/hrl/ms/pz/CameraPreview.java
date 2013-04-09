@@ -6,14 +6,15 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -29,7 +30,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-//import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.Dialog;
@@ -39,13 +39,14 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.Typeface;
+import android.media.ExifInterface;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
@@ -57,11 +58,14 @@ import android.view.View.OnClickListener;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RadioButton;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
  
@@ -71,27 +75,42 @@ import android.widget.Toast;
 @TargetApi(9)
 public class CameraPreview extends Activity {
 
-	CustomCameraView cv;
-	TimerTask scanTask;
-	boolean scanTaskActive=false;
+	private CustomCameraView mCustomCameraView;
+	private ImageView mBackgroundImageView;
+	private TextView mCurrentZoneName;
+	private TimerTask mScanTask;
+	boolean mScanTaskActive=false;
 	
 	final Context context = this;
 	
 	private String DEFAULT_COLOR = "red";
 	private int DEFAULT_TEXT_SIZE = 30;
 	private int DEFAULT_NUM_MSG = 1;
-	private int DEFAULT_MSG_UPDATE_INTERVAL = 1000*20;
+	private int DEFAULT_MSG_UPDATE_INTERVAL = 1000*10;
 	
-	private String color = DEFAULT_COLOR;
-	private int textSize = DEFAULT_TEXT_SIZE;
-	private int numberOfMsgToDisplay = DEFAULT_NUM_MSG;
-	private Typeface textFont;
+	private String mColor = DEFAULT_COLOR;
+	private int mTextSize = DEFAULT_TEXT_SIZE;
+	private int mNumOfMsgToDisplay = DEFAULT_NUM_MSG;
+	private Typeface mTextFont;
 	
-	private int lastProcessedMsgId=0;
+	private int mLastProcessedMsgId=0;
 	
-	private LinkedList<JSONObject> messagesInClient = new LinkedList<JSONObject>();
-	private HashSet<Integer> messageIdsInClient = new HashSet<Integer>();
-	private HashSet<String> messagesZonesIds = new HashSet<String>();
+	private LinkedList<JSONObject> mMsgInClient = new LinkedList<JSONObject>();
+	private HashSet<Integer> mMsgIdsInClient = new HashSet<Integer>();
+	String mBackgroundImgName = "";
+	
+	private String mServerUrl;
+	private String mEntityId;
+	private String mCisId;
+	private boolean mInteractiveBackgroundActive; 
+	private String mCurrentPhotoPath;
+	private String mCurrentZoneNameStr;
+	
+	
+	private long mBackgroundImageTakenTS=0;
+	private static final int ACTION_TAKE_PHOTO_B = 1;
+	
+	private Map<String,ImageDetails> mBackgroundImagesNames = new HashMap<String,ImageDetails>();
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -103,16 +122,20 @@ public class CameraPreview extends Activity {
 		getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 		setContentView(R.layout.main);
 		
-		messagesZonesIds = new HashSet<String>();
-		
+		//mMsgZonesIds = new HashSet<String>();
+		mBackgroundImagesNames.clear();
 		initialUserPrefVars();
 		
-		textFont = Typeface.createFromAsset(getAssets(),"fonts/COMIC.TTF");
+		mTextFont = Typeface.createFromAsset(getAssets(),"fonts/COMIC.TTF");
 			
-		createTextViewsMsgs(numberOfMsgToDisplay);
+		createTextViewsMsgs(mNumOfMsgToDisplay);
 		
-		cv = (CustomCameraView) findViewById(R.id.surfaceView);
-		
+		mCustomCameraView = (CustomCameraView) findViewById(R.id.surfaceView);
+		mBackgroundImageView = (ImageView)findViewById(R.id.imageBackground);
+		mBackgroundImgName = "";
+		mCurrentZoneName = (TextView)findViewById(R.id.zoneName);
+		mCurrentZoneNameStr = "";
+				
 		ImageButton settings =(ImageButton) findViewById(R.id.settings);
 		
 		//add button listener
@@ -147,8 +170,9 @@ public class CameraPreview extends Activity {
 				
 				EditText editText = (EditText) findViewById(R.id.postMsgText);
 				String sprayText = editText.getText().toString();
-				editText = (EditText)findViewById(R.id.messageDest);
-				String msgDest = editText.getText().toString();
+				
+				EditText editTextMsgDest = (EditText)findViewById(R.id.messageDest);
+				String msgDest = editTextMsgDest.getText().toString();
 				msgDest = msgDest == null ? "": msgDest.trim();
 				
 				if (sprayText.trim().length() > 0){
@@ -158,15 +182,21 @@ public class CameraPreview extends Activity {
 				//sendNow.setVisibility(ImageButton.INVISIBLE);
 				//editText.setVisibility(EditText.INVISIBLE);
 				editText.setText("");	
+				editTextMsgDest.setText("");
 				
 				//hide keyboard
 				InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE); 
 				imm.hideSoftInputFromWindow(editText.getWindowToken(), 0);
+				imm.hideSoftInputFromWindow(editTextMsgDest.getWindowToken(), 0);
 				setTopGravityMsgContainer();
 			}
 		});
 		
-		
+		if (!mInteractiveBackgroundActive ){
+			disableInteractiveBackground();
+		}else{
+			enableInteractiveBackground();
+		}
 		ImageButton picSBtn = (ImageButton) findViewById(R.id.camera);
 		picSBtn.setOnClickListener(new OnClickListener(){
 			public void onClick(View v) {
@@ -177,27 +207,60 @@ public class CameraPreview extends Activity {
 		
 		getMessagesTask();
 		
-	
+		Map<String,ImageDetails> filesOnSD = SDHelper.readFileNamesInVgGallery();
+		mBackgroundImagesNames.putAll(filesOnSD);
+		 
 	}catch (Exception e) {
 		 Log.e("error", e.getMessage()+ " ; cause: "+e.getCause(), e);
 	}
 	}
 	
-	private String mCurrentPhotoPath;
-	private static final int ACTION_TAKE_PHOTO_B = 1;
+	
+	private void disableInteractiveBackground(){
+		ImageButton picSBtn = (ImageButton) findViewById(R.id.camera);
+		picSBtn.setVisibility(View.GONE);
+		mBackgroundImageView.setVisibility(View.GONE);
+		mCustomCameraView.onPauseMySurfaceView();
+		mCustomCameraView.onResumeMySurfaceView();
+		mCustomCameraView.setVisibility(View.VISIBLE);
+	}
+	
+	private void enableInteractiveBackground(){
+		ImageButton picSBtn = (ImageButton) findViewById(R.id.camera);
+		picSBtn.setVisibility(View.VISIBLE);
+		mCustomCameraView.setVisibility(View.GONE);
+		mBackgroundImageView.setImageResource(R.drawable.black);
+		mBackgroundImageView.setVisibility(View.VISIBLE);
+		mBackgroundImgName = ""; 
+		/*
+		if (mBackGroundImageView.getVisibility() != View.VISIBLE){
+			mBackGroundImageView.setVisibility(View.VISIBLE);
+			mCustomCameraView.setVisibility(View.GONE);
+			mCustomCameraView.onPauseMySurfaceView();
+		}else{
+			mCustomCameraView.onPauseMySurfaceView();
+			mCustomCameraView.onResumeMySurfaceView();	
+			mCustomCameraView.setVisibility(View.VISIBLE);
+			mBackGroundImageView.setVisibility(View.GONE);
+			
+		}*/
+	}
+	
 	private void dispatchTakePictureIntent() {
 
 		Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-		File f = null;
+		File file = null;
 			
 		try {
-			f = createImageFile();
-			mCurrentPhotoPath = f.getAbsolutePath();
-			takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(f));
-			cv.onPauseMySurfaceView();
+			String tempGeneratedImgName = SDHelper.generateImageName();
+			file = SDHelper.createImageFile(tempGeneratedImgName);
+			mCurrentPhotoPath = file.getAbsolutePath();
+			setBackgroundImageName(tempGeneratedImgName);
+			takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(file));
+			//mCustomCameraView.onPauseMySurfaceView();
 		} catch (IOException e) {
 			Log.e("error", e.getMessage()+ " ; cause: "+e.getCause(), e);
-			f = null;
+			file = null;
 			mCurrentPhotoPath = null;
 		}
 			
@@ -210,11 +273,19 @@ public class CameraPreview extends Activity {
 		switch (requestCode) {
 		case ACTION_TAKE_PHOTO_B: {
 			if (resultCode == RESULT_OK) {
+				Log.i("vg", "onActivityResult, resultCode == RESULT_OK");
 				if (mCurrentPhotoPath != null) {
-					setPic();
-					galleryAddPic();
+					//mCustomCameraView.onResumeMySurfaceView();
+					Log.i("vg", "going to upload image: "+mCurrentPhotoPath);
+					displayBackgroundImage(getLocalBackgroundImgName(),mCurrentPhotoPath,true,false);
+					DownloadUploadHelper dh = new DownloadUploadHelper();
+					dh.uploadImage(getLocalBackgroundImgName(), mCurrentPhotoPath,this.mCisId,mServerUrl);
 					mCurrentPhotoPath = null;
+					mBackgroundImageTakenTS = System.currentTimeMillis();
 				}
+			}else{
+				setBackgroundImageName("");
+				Log.e("vg", "failure on activity result 'ACTION_TAKE_PHOTO_B'");
 			}
 			break;
 		} // ACTION_TAKE_PHOTO_B
@@ -222,70 +293,51 @@ public class CameraPreview extends Activity {
 		} // switch
 	}
 	
-	
-
-	private static final String JPEG_FILE_PREFIX = "IMG_";
-	private static final String JPEG_FILE_SUFFIX = ".jpg";
-	// Standard storage location for digital camera files
-	private static final String CAMERA_DIR = "/dcim/";
-	
-	/*
-	private File setUpPhotoFile() throws IOException {
-		
-		File f = createImageFile();
-		//mCurrentPhotoPath = f.getAbsolutePath();
-		
-		return f;
-	}*/
-
-	
-	private File createImageFile() throws IOException {
-		// Create an image file name
-		String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-		String imageFileName = JPEG_FILE_PREFIX + timeStamp + "_";
-		File albumF = getAlbumDir();
-		File imageF = File.createTempFile(imageFileName, JPEG_FILE_SUFFIX, albumF);
-		return imageF;
-	}
-	
-	private File getAlbumDir() {
-		File storageDir = null;
-
-		if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) {
-			
-			storageDir = new File (Environment.getExternalStorageDirectory()+ CAMERA_DIR+ "VG");
-
-			if (storageDir != null) {
-				if (! storageDir.mkdirs()) {
-					if (! storageDir.exists()){
-						Log.d("CameraSample", "failed to create directory");
-						return null;
-					}
+	public synchronized File displayBackgroundImage(String imageName, String imagePath, boolean reduceImageSize,boolean downloaded){
+		File image = null;
+		try{
+				mCustomCameraView.setVisibility(View.GONE);
+				setPic(imagePath,reduceImageSize);
+				String generatedImageName = setBackgroundImageName(imageName);
+				
+				if (!mBackgroundImagesNames.containsKey(generatedImageName)){
+					//image = galleryAddPic(imagePath);
+					mBackgroundImagesNames.put(generatedImageName,new ImageDetails(generatedImageName,imagePath, downloaded));
 				}
-			}
-			
-		} else {
-			Log.v(getString(R.string.app_name), "External storage is not mounted READ/WRITE.");
+		}catch(Exception e){
+			mBackgroundImageView.setVisibility(View.GONE);
+			Log.e("vg", e.getMessage() ,e);
 		}
 		
-		return storageDir;
+		return image;
+	}
+
+	private String setBackgroundImageName(String originalName){
+		//first remove the file type (e.g. jpg) 
+		mBackgroundImgName = originalName.split("\\.")[0];
+		//then remove the unique android suffix (if exists)
+		mBackgroundImgName = mBackgroundImgName.split("\\-")[0];
+		return mBackgroundImgName;
 	}
 	
-	private ImageView mImageView;
 	
-	private void setPic() {
+	private void setPic(String photoPath, boolean reduceImageSize) {
 
+		Log.i("vg", "going to reduce image size: "+photoPath);
 		/* There isn't enough memory to open up more than a couple camera photos */
 		/* So pre-scale the target bitmap into which the file is decoded */
 
 		/* Get the size of the ImageView */
-		int targetW = mImageView.getWidth();
-		int targetH = mImageView.getHeight();
+		//mBackGroundImageView.setScaleType(ScaleType.FIT_XY);
+		int targetW = mBackgroundImageView.getWidth();
+		int targetH = mBackgroundImageView.getHeight();
 
 		/* Get the size of the image */
 		BitmapFactory.Options bmOptions = new BitmapFactory.Options();
 		bmOptions.inJustDecodeBounds = true;
-		BitmapFactory.decodeFile(mCurrentPhotoPath, bmOptions);
+
+		BitmapFactory.decodeFile(photoPath, bmOptions);
+		
 		int photoW = bmOptions.outWidth;
 		int photoH = bmOptions.outHeight;
 		
@@ -297,60 +349,117 @@ public class CameraPreview extends Activity {
 
 		/* Set bitmap options to scale the image decode target */
 		bmOptions.inJustDecodeBounds = false;
-		bmOptions.inSampleSize = scaleFactor;
+		//bmOptions.inSampleSize = scaleFactor;
+		if (reduceImageSize){
+			bmOptions.inSampleSize = 16;
+		}else{
+			bmOptions.inSampleSize = 1;
+		}
 		bmOptions.inPurgeable = true;
-
-		/* Decode the JPEG file into a Bitmap */
-		Bitmap bitmap = BitmapFactory.decodeFile(mCurrentPhotoPath, bmOptions);
+				/* Decode the JPEG file into a Bitmap */
+		Bitmap bitmap = BitmapFactory.decodeFile(photoPath, bmOptions);
+		
+		Matrix matrix = rotateImage(photoPath);
+		/*
+		ExifInterface exif=null;
+		try {
+			exif = new ExifInterface(photoPath);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		int orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, 1);
+		Matrix matrix = new Matrix();
+		matrix.postRotate(90);
+		*/
+		/*if (orientation == 6 ){
+			matrix.postRotate(90);
+		}*/
+		bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
 		
 		/* Associate the Bitmap to the ImageView */
-		mImageView.setImageBitmap(bitmap);
-		mImageView.setVisibility(View.VISIBLE);
+		mBackgroundImageView.setImageBitmap(bitmap);
 		
+		mBackgroundImageView.setVisibility(View.VISIBLE);
+		Log.i("vg", "done reducing image size: "+photoPath+" set visibility = VISIBLE");
 	}
 
-	private void galleryAddPic() {
-		    Intent mediaScanIntent = new Intent("android.intent.action.MEDIA_SCANNER_SCAN_FILE");
-			File f = new File(mCurrentPhotoPath);
-		    Uri contentUri = Uri.fromFile(f);
-		    mediaScanIntent.setData(contentUri);
-		    this.sendBroadcast(mediaScanIntent);
+	private Matrix rotateImage(String filePath){
+		Matrix matrix = new Matrix();
+		try{
+			ExifInterface exifReader = new ExifInterface(filePath);
+			int orientation = exifReader.getAttributeInt(ExifInterface.TAG_ORIENTATION, -1);
+	
+			if (orientation ==ExifInterface.ORIENTATION_NORMAL) {
+			      // Do nothing. The original image is fine.
+			} else if (orientation == ExifInterface.ORIENTATION_ROTATE_90) {
+			       matrix.postRotate(90);
+			} else if (orientation == ExifInterface.ORIENTATION_ROTATE_180) {
+			       matrix.postRotate(180);
+			} else if (orientation == ExifInterface.ORIENTATION_ROTATE_270) {
+			      matrix.postRotate(270);
+			}else if (orientation == 0 ){
+				//NEXUS s problem   
+				matrix.postRotate(90);
+			}
+		}catch(IOException e){
+			Log.e("vg",e.getMessage() , e);
+		}
+		return matrix;
 	}
 	
 	
+	private File galleryAddPic(String currentPhotoPath) {
+		File f = null;    
+			try{
+				Intent mediaScanIntent = new Intent("android.intent.action.MEDIA_SCANNER_SCAN_FILE");
+				f = new File(currentPhotoPath);
+			    Uri contentUri = Uri.fromFile(f);
+			    mediaScanIntent.setData(contentUri);
+			    this.sendBroadcast(mediaScanIntent);
+		    }catch(Exception e){
+		    	Log.e("vg",e.getMessage() , e);
+		    }
+		    return f;
+	}
 	
 	
 	private void initialUserPrefVars() {
 		SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
-		color = preferences.getString("vg.textColor",color);
-		textSize = preferences.getInt("vg.textSize",textSize);
-		numberOfMsgToDisplay = preferences.getInt("vg.numberOfMsgToDisplay",numberOfMsgToDisplay);
+		mColor = preferences.getString("vg.textColor",mColor);
+		mTextSize = preferences.getInt("vg.textSize",mTextSize);
+		mNumOfMsgToDisplay = preferences.getInt("vg.numberOfMsgToDisplay",mNumOfMsgToDisplay);
+		
+		mServerUrl = preferences.getString("vg.url", "");
+		mEntityId = preferences.getString("vg.entity", "");
+		mCisId = preferences.getString("vg.cis", "");
+		mInteractiveBackgroundActive = preferences.getBoolean("vg.interactiveBackgroundActive", false);
 	}
 
 	private synchronized void getMessagesTask() {
-		if (scanTaskActive){
+		if (mScanTaskActive){
 			return;
 		}
 		
 		final Handler handler = new Handler();
 		Timer t = new Timer();
-		scanTask = new TimerTask() {
+		mScanTask = new TimerTask() {
 	        public void run() {
 	                handler.post(new Runnable() {
 	                        public void run() {
 	                        	try{
 	                        		getMessages();
 	                        	}catch (Exception e) {
-	                        		 Log.e("error", e.getMessage()+ " ; cause: "+e.getCause(), e);
+	                        		 Log.e("vg", e.getMessage()+ " ; cause: "+e.getCause(), e);
 								}
 	                        }
 	               });
 	        }};
 		
-	        t.scheduleAtFixedRate(scanTask, 300,DEFAULT_MSG_UPDATE_INTERVAL);
+	        t.scheduleAtFixedRate(mScanTask, 300,DEFAULT_MSG_UPDATE_INTERVAL);
 
 	   synchronized (this) {
-		   scanTaskActive = true;
+		   mScanTaskActive = true;
 	   }
 	}
 
@@ -362,7 +471,7 @@ public class CameraPreview extends Activity {
 		TextView textView;
 		for (int i=0; i < number ; i++){
 			textView = new TextView(context);
-			textView.setTypeface(textFont);
+			textView.setTypeface(mTextFont);
 			textView.setVisibility(TextView.INVISIBLE);
 			messagesContainer.addView(textView);
 		}
@@ -393,8 +502,8 @@ public class CameraPreview extends Activity {
 		int iterateOver;
 		JSONObject singleMessage;
 		try{
-			iterateOver = Math.min(messagesInClient.size(),numberOfMsgToDisplay);
-			Iterator<JSONObject> iterator = messagesInClient.descendingIterator();
+			iterateOver = Math.min(mMsgInClient.size(),mNumOfMsgToDisplay);
+			Iterator<JSONObject> iterator = mMsgInClient.descendingIterator();
 			
 			int index=0;
 			String delimiter = "\\.";
@@ -410,9 +519,9 @@ public class CameraPreview extends Activity {
 					tv.setTextColor(Color.parseColor((String)singleMessage.get("style")));
 				}catch (Exception e) {
 					tv.setTextColor(Color.BLACK);
-					Log.e("error", "can't parse color '"+(String)singleMessage.get("style")+"' ; error msg "+e.getMessage(), e);
+					Log.e("vg", "can't parse color '"+(String)singleMessage.get("style")+"' ; error msg "+e.getMessage(), e);
 				}
-				tv.setTextSize(textSize);
+				tv.setTextSize(mTextSize);
 				tv.setVisibility(View.VISIBLE);
 				//Integer currentMsgId =  (Integer) singleMessage.get("messageId");
 				//lastProcessedMsgId = Math.max(lastProcessedMsgId, currentMsgId);
@@ -426,7 +535,7 @@ public class CameraPreview extends Activity {
 			}
 			
 		}catch (JSONException e) {
-			Log.e("error", "JSONException ; msg= "+e.getMessage(), e);
+			Log.e("vg", "JSONException ; msg= "+e.getMessage(), e);
 		}
 		messagesLayoutContainer.bringToFront();
 		
@@ -440,40 +549,63 @@ public class CameraPreview extends Activity {
 		int tempParamInt;
 		try{
 			SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
-			
-			EditText textColorEdit = (EditText) dialog.findViewById(R.id.textColor);
-			tempParamStr = textColorEdit.getText().toString();
-			if (tempParamStr != null && tempParamStr != null &&!tempParamStr.equals(color)){
-				color = textColorEdit.getText().toString();
+			Spinner textColor = (Spinner)dialog.findViewById(R.id.colorsCombo);
+			tempParamStr = (String) textColor.getSelectedItem();
+			if (tempParamStr != null && tempParamStr != null &&!tempParamStr.equals(mColor)){
+				mColor = tempParamStr;
 				paramsHaveChanged = true;
 			}
 			
+			/*
+			EditText textColorEdit = (EditText) dialog.findViewById(R.id.textColor);
+			tempParamStr = textColorEdit.getText().toString();
+			if (tempParamStr != null && tempParamStr != null &&!tempParamStr.equals(mColor)){
+				mColor = textColorEdit.getText().toString();
+				paramsHaveChanged = true;
+			}*/
+			
 			EditText textSizeEdit = (EditText) dialog.findViewById(R.id.textSize);
 			tempParamInt =Integer.parseInt(textSizeEdit.getText().toString()); 
-			if ( tempParamInt != textSize && tempParamInt > 0 ){
-				textSize = tempParamInt;
+			if ( tempParamInt != mTextSize && tempParamInt > 0 ){
+				mTextSize = tempParamInt;
 				paramsHaveChanged = true;
 			}
 				
 			EditText numMsgEdit = (EditText) dialog.findViewById(R.id.numOfMsg);
 			tempParamInt =  Integer.parseInt(numMsgEdit.getText().toString());
-			if (tempParamInt !=  numberOfMsgToDisplay && numberOfMsgToDisplay > 0){
-				numberOfMsgToDisplay = tempParamInt;
+			if (tempParamInt !=  mNumOfMsgToDisplay && mNumOfMsgToDisplay > 0){
+				mNumOfMsgToDisplay = tempParamInt;
 				paramsHaveChanged = true;
 			}
 			
+			RadioButton btn = (RadioButton)dialog.findViewById(R.id.radioYes);
+			if (btn.isChecked() && !mInteractiveBackgroundActive){
+				mInteractiveBackgroundActive = true;
+				enableInteractiveBackground();
+				paramsHaveChanged = true;
+			}
+			
+			btn = (RadioButton)dialog.findViewById(R.id.radioNo);
+			if (btn.isChecked() && mInteractiveBackgroundActive){
+				mInteractiveBackgroundActive = false;
+				disableInteractiveBackground();
+				paramsHaveChanged = true;
+			}
+			
+			
 			if (paramsHaveChanged){
-				createTextViewsMsgs(numberOfMsgToDisplay);
+				createTextViewsMsgs(mNumOfMsgToDisplay);
 				
 				SharedPreferences.Editor editor = preferences.edit();
-				editor.putString("vg.textColor", color);
-				editor.putInt("vg.numberOfMsgToDisplay", numberOfMsgToDisplay);
-				editor.putInt("vg.textSize", textSize);
+				editor.putString("vg.textColor", mColor);
+				editor.putInt("vg.numberOfMsgToDisplay", mNumOfMsgToDisplay);
+				editor.putInt("vg.textSize", mTextSize);
+				editor.putBoolean("vg.interactiveBackgroundActive", mInteractiveBackgroundActive);
 				editor.commit();
 			}
 				
 		}catch (Exception e) {
-			 Log.e("error", e.getMessage()+ " ; cause: "+e.getCause(), e);
+			 Log.e("vg", e.getMessage()+ " ; cause: "+e.getCause(), e);
 		}
 
 		dialog.dismiss();
@@ -487,19 +619,26 @@ public class CameraPreview extends Activity {
 		dialog.setTitle("Preferences");
 					
 		SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
-		 
+		createSpinner(dialog, mColor);
+		/*
 		EditText textColorEdit = (EditText) dialog.findViewById(R.id.textColor);
-		color = preferences.getString("vg.textColor",color);
-		textColorEdit.setText(color);
+		mColor = preferences.getString("vg.textColor",mColor);
+		textColorEdit.setText(mColor);
+		*/
 				
 		EditText textSizeEdit = (EditText) dialog.findViewById(R.id.textSize);
-		textSize = preferences.getInt("vg.textSize",textSize);
-		textSizeEdit.setText(String.valueOf(textSize));
+		mTextSize = preferences.getInt("vg.textSize",mTextSize);
+		textSizeEdit.setText(String.valueOf(mTextSize));
 					
 		EditText numMsgEdit = (EditText) dialog.findViewById(R.id.numOfMsg);
-		numberOfMsgToDisplay = preferences.getInt("vg.numberOfMsgToDisplay",numberOfMsgToDisplay);
-		numMsgEdit.setText(String.valueOf(numberOfMsgToDisplay));
-					
+		mNumOfMsgToDisplay = preferences.getInt("vg.numberOfMsgToDisplay",mNumOfMsgToDisplay);
+		numMsgEdit.setText(String.valueOf(mNumOfMsgToDisplay));
+		
+		RadioButton btn = (RadioButton)dialog.findViewById(R.id.radioYes);
+		btn.setChecked(mInteractiveBackgroundActive);
+		btn = (RadioButton)dialog.findViewById(R.id.radioNo);
+		btn.setChecked(!mInteractiveBackgroundActive);
+		
 		Button dialogButton = (Button) dialog.findViewById(R.id.dialogButtonOK);
 		// if button is clicked, close the custom dialog
 		dialogButton.setOnClickListener(new OnClickListener() {
@@ -509,6 +648,29 @@ public class CameraPreview extends Activity {
 		});
 
 		dialog.show();
+	}
+	
+	
+	void createSpinner(Dialog dialog, String pastSelectedColor){
+		Spinner spinner = (Spinner) dialog.findViewById(R.id.colorsCombo);
+		List<String> allColors = new ArrayList<String>();
+		allColors.add("Red");
+		allColors.add("Blue");
+		allColors.add("Green");
+		
+		ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_spinner_item, allColors);
+		dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		spinner.setAdapter(dataAdapter);
+		spinner.setEnabled(true);
+		
+		int index = 0;
+		for (String color: allColors){
+			if (color.equals(pastSelectedColor)){
+				spinner.setSelection(index);
+				break;
+			}
+			index++;
+		}
 	}
 	
 	
@@ -532,105 +694,132 @@ public class CameraPreview extends Activity {
 	}*/
 
 		
-	
+	private void downloadNewBackgroundImage(String url, String imageName) {
+		(new DownloadUploadHelper()).downloadImage(url, imageName,this);
+		
+	}
 
 	private void getMessages( )  {
-	
-		SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
-	
+		
 		 new AsyncTask<String, Void,JSONArray> (){
 			 Throwable error = null;
 
 			 String url;
 			 String thisEntityId;
 			 String cis;
+			 String imageNameServer;
 			 
 			 @Override
 			protected void onPostExecute(JSONArray result) {
 				
-				 Log.v("tag", "getMessages - onPostExecute");
+				 Log.i("vg", "getMessages - onPostExecute");
 				
 				try {
-					if (error == null && result != null){
-						JSONObject lastMsgObject = null;
-						int currentMsgId;
+					if (error != null){
+						Toast.makeText(getBaseContext(), "connection to server was lost", Toast.LENGTH_SHORT).show();
+						Log.e("vg", "showing error msg - getMessages - onPostExecute ",error);
+						return;
+					}
+
+					
+					JSONObject lastMsgObject = null;
+					int currentMsgId;
 						
-						
-						synchronized (messagesInClient) {
-							/*
-							HashSet<String>currZonesIdsSet = new HashSet<String>();
+					synchronized (mMsgInClient) {		
 							
-							lastProcessedMsgId = 0;
-							if (result.length() > 0){
-								
-								
-								JSONArray retZoneIDs = ((JSONObject)result.get(0)).getJSONArray("zoneId");
-								if (retZoneIDs != null){
-									for (int i=0; i < retZoneIDs.length(); i++){
-										currZonesIdsSet.add(retZoneIDs.getString(i));
-									}
-								}
-								
-								for (String zoneId : currZonesIdsSet){
-									if (!messagesZonesIds.contains(zoneId)){
-										resetFlag = true;
-										break;
-									}
-								}
-								
-								for (String zoneId : messagesZonesIds){
-									if (!currZonesIdsSet.contains(zoneId)){
-										resetFlag = true;
-										break;
-									}
-								}
-								
-								if (resetFlag){
-									messagesInClient.clear();
-									messageIdsInClient.clear();
-									messagesZonesIds.clear();
-									messagesZonesIds.addAll(currZonesIdsSet);
-								}
-								
-							}else{
-								messagesInClient.clear();
-								messageIdsInClient.clear();
-								messagesZonesIds.clear();
-							}
-							
-							}*/
-							
-							messagesInClient.clear();
-							boolean alertOnNewMessagePresented = false;
-							String postedBy;
+						mMsgInClient.clear();
+						boolean alertOnNewMessagePresented = false;
+						String postedBy;
+						if (result != null){
 							for (int i=0; i < result.length(); i++){
 								lastMsgObject = (JSONObject) result.get(i);
 								currentMsgId = lastMsgObject.getInt("messageId");
 								postedBy = lastMsgObject.getString("userId");
-								messagesInClient.addLast(lastMsgObject);
-								if (!messageIdsInClient.contains(currentMsgId)  ){
-									messageIdsInClient.add(currentMsgId);
+								mMsgInClient.addLast(lastMsgObject);
+								if (!mMsgIdsInClient.contains(currentMsgId)  ){
+									mMsgIdsInClient.add(currentMsgId);
 									if (!postedBy.equals(thisEntityId)){
 										alertOnNewMessagePresented = true;
 									}
 								}
 							}
-							displayText();
-							
-							if (alertOnNewMessagePresented){
-								playSoundAlert();	
-							}
+						}
+						displayText();
+						
+						if (alertOnNewMessagePresented){
+							playSoundAlert();	
+						}
+					}
+						
+					
+					if (shouldUpdateBackgroundImage(imageNameServer,getLocalBackgroundImgName() )){
+						ImageDetails imageDetails = null;
+						synchronized (mBackgroundImagesNames) {
+							imageDetails = mBackgroundImagesNames.get(imageNameServer);
 						}
 						
-					}else if (error != null){
-						Toast.makeText(getBaseContext(), "connection to server was lost", Toast.LENGTH_SHORT).show();
-						Log.e("error", "showing error msg - getMessages - onPostExecute ",error);
+						if (imageDetails != null){
+							//image exists in file System
+							Log.i("vg","the image: "+imageNameServer +" exists in local cache");
+							displayBackgroundImage(imageNameServer, imageDetails.imagePath, !imageDetails.downloaded, imageDetails.downloaded);
+						}else{
+							//need to download
+							Log.i("vg","image: "+imageNameServer +" doesn't exist in local cache; going to server");
+							downloadNewBackgroundImage(url,imageNameServer);	
+						}
+		            }
+					
+					if (shouldHideBackgroundImage(imageNameServer,getLocalBackgroundImgName())){
+		            	mBackgroundImageView.setImageResource(R.drawable.black);
+		            	mBackgroundImgName = "";
+		        		/*mCustomCameraView.onPauseMySurfaceView();
+		        		mCustomCameraView.onResumeMySurfaceView();
+		        		mCustomCameraView.setVisibility(View.VISIBLE);
+		        		*/
+		        		
+		            }
+					
+					if (!mCurrentZoneNameStr.equals(mCurrentZoneName.getText())){
+						mCurrentZoneName.setText("Zone: " + mCurrentZoneNameStr);
 					}
+					
 				} catch (Exception e) {
-					 Log.e("error", e.getMessage()+ " ; cause: "+e.getCause(), e);
+					 Log.e("vg", e.getMessage()+ " ; cause: "+e.getCause(), e);
 				};
 				
 			  }
+			
+			
+
+			private boolean shouldHideBackgroundImage(String imageNameServer,String localImageName) {
+				if (System.currentTimeMillis() - mBackgroundImageTakenTS <= (1000*15) ){
+					return false;
+				}else if (imageNameServer.length() == 0 || !imageNameServer.equals(localImageName)  ){
+					return true;
+				}
+				return false;
+			}
+
+			private boolean shouldUpdateBackgroundImage(String imageNameFromServer, String localImage){
+				 if (imageNameFromServer.length() > 0 && !imageNameFromServer.equals(localImage)){
+					 Log.i("vg","local image name != image name on server; local: " + localImage +"  server: "+imageNameFromServer);
+					 if (System.currentTimeMillis() - mBackgroundImageTakenTS < (1000*15)){
+						 Log.i("vg","file was just recently updated in the client side, waiting 15 seconds to let it be upated on the server");
+						 return false;
+					 }else{
+						 Log.i("vg","need to retrieve image " + imageNameFromServer + ", there might be a task already running");
+						 return true;
+					 }
+					 
+				 }else if (imageNameFromServer.length() == 0){
+					 Log.i("vg","imageNameFromServer is empty - no need to perform update");
+					 return false;
+				 }else{
+					 Log.i("vg","local image name equals image name on the server ("+imageNameFromServer +") - no need to perform update");
+					 return false;
+				 }
+			 }
+			 
 			@Override
 			protected JSONArray doInBackground(String... paramters) {
 				
@@ -639,37 +828,48 @@ public class CameraPreview extends Activity {
 					thisEntityId = (String) paramters[1];
 					cis = (String)paramters[2];
 					
-					Log.v("tag", "on getMessages - url= "+url +" ; entity= "+thisEntityId+" ; cis= "+cis);
+					Log.d("vg", "on getMessages - url= "+url +" ; entity= "+thisEntityId+" ; cis= "+cis);
 
 					//CIS might have white spaces 
-					cis = URLEncoder.encode(cis);
-					String request = url + "/getMsg.html?userID="+thisEntityId+"&cis="+cis+"&number="+lastProcessedMsgId;
+					try {
+						cis = URLEncoder.encode(cis,"utf-8");
+					} catch (UnsupportedEncodingException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+					String request = url + "/getMsg.html?userID="+thisEntityId+"&cis="+cis+"&number="+mLastProcessedMsgId;
 					HttpGet httpGet = new HttpGet(request);
 					
 					BufferedReader in = null;
 					try{
 						HttpClient client = new DefaultHttpClient();
 						HttpResponse response = client.execute(httpGet);
-						in = new BufferedReader
-			            (new InputStreamReader(response.getEntity().getContent()));
-			            StringBuffer sb = new StringBuffer("");
+						in = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
+			            String jsonBuffer = "";
 			            String line = "";
-			        
+			         
 			            while ((line = in.readLine()) != null) {
-			                sb.append(line);
+			                jsonBuffer+= line;
 			            }
 			            in.close();
-			            Log.v("tag", sb.toString());
-			            JSONArray ja = new JSONArray();
-			            if (sb.length() > 3){
-			            	ja =  new JSONArray(sb.toString());
+			            Log.d("vg", "on getMessages; Server reponse: "+jsonBuffer.toString());
+			            
+			            JSONObject jsonObject = new JSONObject(jsonBuffer);
+			            
+			            
+			            imageNameServer =  jsonObject.getString("imgName");	
+			            mCurrentZoneNameStr = jsonObject.getString("zoneName");
+			            
+			            JSONArray ja = null;
+			            if (jsonBuffer.length() > 0 && jsonObject.getString("data") != null && jsonObject.getString("data").length() > 3){
+			            	ja =  new JSONArray(jsonObject.getString("data"));
 			            }
 			            
-			            result =ja;// ja.getJSONObject(ja.length()-1);
+			            result =ja;
 			            
 					}  catch (Exception e) {
 						//if no connection - toast no connection..
-						Log.e("error", "error on getMessages ; "+e.getMessage()+ " ; cause: "+e.getCause(), e);
+						Log.e("vg", "error on getMessages ; "+e.getMessage()+ " ; cause: "+e.getCause(), e);
 						error = e;
 					}  finally {
 			            if (in != null) {
@@ -681,7 +881,7 @@ public class CameraPreview extends Activity {
 				return result;
 			
 		        
-			}}.execute(preferences.getString("vg.url", ""),preferences.getString("vg.entity", ""), preferences.getString("vg.cis", ""));
+			}}.execute(mServerUrl,mEntityId, mCisId);
 		
 	}
 	
@@ -695,27 +895,21 @@ public class CameraPreview extends Activity {
 	        Ringtone r = RingtoneManager.getRingtone(getApplicationContext(), notification);
 	        r.play();
 	    } catch (Exception e) {
-	    	Log.e("error", "Error while attempting to play sound and vibrate upon new message",e);
+	    	Log.e("vg", "Error while attempting to play sound and vibrate upon new message",e);
 	    }
 	}
 	
 	private void postMessages(String sprayText, String msgDest)  {
-		
-		SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
-		String url = preferences.getString("vg.url","");
-		String entity = preferences.getString("vg.entity","");
-		String cis = preferences.getString("vg.cis","");
-		
 		
 		 new AsyncTask<String, Void,JSONObject> (){
 			 Throwable error = null;
 			 
 			 @Override
 			protected void onPostExecute(JSONObject result) {
-				 Log.v("tag", "in postMessages -  onPostExecute");
+				 Log.i("tag", "in postMessages -  onPostExecute");
 				 if (error != null){
 					 Toast.makeText(getBaseContext(), "Server Error while posting message", Toast.LENGTH_SHORT).show();
-					 Log.e("error", "showing error msg on postMessages ; ", error);
+					 Log.e("vg", "showing error msg on postMessages ; ", error);
 				 }
 			 }
 			@Override
@@ -726,7 +920,7 @@ public class CameraPreview extends Activity {
 					String cis =  (String) paramters[3];
 					String msgDest =  (String) paramters[4];
 					
-					Log.v("tag", "on postMessage - url= "+url +" ; entity= "+entity+" ; cis= "+cis +" ; style= "+color+" ; msg= "+sprayText);
+					Log.v("vg", "on postMessage - url= "+url +" ; entity= "+entity+" ; cis= "+cis +" ; style= "+mColor+" ; msg= "+sprayText);
 		
 					String post = url+"/postMsg1.html";
 					HttpPost httpPost = new HttpPost(post);
@@ -735,39 +929,43 @@ public class CameraPreview extends Activity {
 						List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
 						nameValuePairs.add(new BasicNameValuePair("cisBox",cis));
 						nameValuePairs.add(new BasicNameValuePair("userId",entity));
-						nameValuePairs.add(new BasicNameValuePair("style",color));
+						nameValuePairs.add(new BasicNameValuePair("style",mColor.toLowerCase()));
 						nameValuePairs.add(new BasicNameValuePair("msg",sprayText));
 						nameValuePairs.add(new BasicNameValuePair("msgDest",msgDest));
 						httpPost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
 						client.execute(httpPost);
 											
 					}catch (Exception e) {
-						Log.e("error", e.getMessage()+ " ; cause: "+e.getCause(), e);
+						Log.e("vg", e.getMessage()+ " ; cause: "+e.getCause(), e);
 						error = e;
 					}
 					return null;
 
-			}}.execute(url,entity,sprayText,cis,msgDest);
+			}}.execute(mServerUrl,mEntityId,sprayText,mCisId,msgDest);
 	}
 	
 	
 	@Override
 	public void onPause() {
-	   super.onPause();  // Always call the superclass method first
-	   
-	   Log.i("info","onPause called");
-	   
-		   if (cv!= null){
-			   cv.onPauseMySurfaceView();
-		   }
-		      /*
-		   synchronized (this) {
-				
-			   	scanTaskActive = false;
-				  if (scanTask != null){
-					  scanTask.cancel();
-				  }
-		   }*/
+		try{
+			super.onPause();  // Always call the superclass method first
+		   
+		   Log.i("vg","onPause called");
+		   
+			   if (mCustomCameraView!= null){
+				   mCustomCameraView.onPauseMySurfaceView();
+			   }
+			      /*
+			   synchronized (this) {
+					
+				   	scanTaskActive = false;
+					  if (scanTask != null){
+						  scanTask.cancel();
+					  }
+			   }*/
+		}catch(Exception e){
+			Log.e("vg", "exception in pause");
+		}
 		
 	}
 	
@@ -775,10 +973,10 @@ public class CameraPreview extends Activity {
 	@Override
 	public void onStop(){
 		super.onStop();
-		Log.i("indo","onStop called");
-		scanTaskActive = false;
-		  if (scanTask != null){
-			  scanTask.cancel();
+		Log.i("vg","onStop called");
+		mScanTaskActive = false;
+		  if (mScanTask != null){
+			  mScanTask.cancel();
 		  }
 	}
 	
@@ -786,13 +984,17 @@ public class CameraPreview extends Activity {
 	public void onResume() {
 	    super.onResume();  // Always call the superclass method first
 	    
-	    Log.i("info","onResume called");
-		    if (cv!= null){
-		    	cv.onResumeMySurfaceView();
+	    Log.i("vg","onResume called");
+		    if (mCustomCameraView!= null){
+		    	mCustomCameraView.onResumeMySurfaceView();
 		    }
 			getMessagesTask();
 	}
 	
 	
-
+	public String getLocalBackgroundImgName(){
+		return mBackgroundImgName;
+	}
+	
+	
 }

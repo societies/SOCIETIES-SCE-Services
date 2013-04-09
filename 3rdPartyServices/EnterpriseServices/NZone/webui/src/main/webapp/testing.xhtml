@@ -1,0 +1,43 @@
+<f:view xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:pm="http://primefaces.org/mobile" contentType="text/html">
+
+	<pm:page title="Networking Zone - TEsting Page">
+
+		<pm:view id="viewTeting">
+			<pm:header title="Testing Page" />
+			<pm:content>
+
+				<h:form id="form" >
+
+					<p:commandButton value="Load" type="button" onclick="lazyload()"
+						id="btnLoad" />
+
+					<p:outputPanel id="lazypanel" layout="block">
+						<h:outputText
+							value="This part of page is lazily loaded on demand using a RemoteCommand"
+							rendered="#{requestScope.shouldRender}" />
+					</p:outputPanel>
+					
+					<p:outputPanel id="loadingpanel" layout="block">
+						<h:outputText
+							value="*** This part of page is loaded on startup if profile doesn't exist"
+							rendered="#{profileBean.profilemissing}" />
+					</p:outputPanel>
+					
+
+					<p:remoteCommand name="lazyload" update="lazypanel">
+						<f:setPropertyActionListener value="#{true}"
+							target="#{requestScope.shouldRender}" />
+					</p:remoteCommand>
+
+				</h:form>
+			</pm:content>
+		</pm:view>
+	</pm:page>
+</f:view>
+
+

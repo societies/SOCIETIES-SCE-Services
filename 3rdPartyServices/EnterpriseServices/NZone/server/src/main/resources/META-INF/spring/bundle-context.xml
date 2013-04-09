@@ -36,6 +36,7 @@
 				<value>org.societies.ext3p.nzone.server.model.NZUser</value>
 				<value>org.societies.ext3p.nzone.server.model.NZShareInfo</value>
 				<value>org.societies.ext3p.nzone.server.model.NZPreferences</value>
+				<value>org.societies.ext3p.nzone.server.model.NZSharePreferences</value>
 			</list>
 		</property>
 

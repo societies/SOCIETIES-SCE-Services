@@ -65,8 +65,10 @@ public class NZUser implements Serializable {
 	private String facebookID;
 	private String twitterID;
 	private String linkedInID;
+	private String foursqID;
+	private String googleplusID;
 	
-
+	private String interests;
 
 	/**
 	 * @return the userid
@@ -189,6 +191,24 @@ public class NZUser implements Serializable {
 		this.linkedInID = linkedInID;
 	}
 
+	@Column(name = "Foursqid")
+	public String getFoursqID() {
+		return foursqID;
+	}
+
+	public void setFoursqID(String foursqID) {
+		this.foursqID = foursqID;
+	}
+
+	@Column(name = "Googleplusid")
+	public String getGoogleplusID() {
+		return googleplusID;
+	}
+
+	public void setGoogleplusID(String googleplusID) {
+		this.googleplusID = googleplusID;
+	}
+
 	/**
 	 * @return the email
 	 */
@@ -232,6 +252,21 @@ public class NZUser implements Serializable {
 	 */
 	public void setSex(String sex) {
 		this.sex = sex;
+	}
+
+	/**
+	 * @return the interests
+	 */
+	@Column(name = "interests")
+	public String getInterests() {
+		return interests;
+	}
+
+	/**
+	 * @param interests the interests to set
+	 */
+	public void setInterests(String interests) {
+		this.interests = interests;
 	}
 
 	public NZUser() {

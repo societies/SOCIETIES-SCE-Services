@@ -14,7 +14,7 @@ public class NZonePreferences {
 	
 	String preferTypeDelim = ".";
 	String preferDelim = ",";
-	
+	String shareDelim = ":";
 	
 	//Define perferenceTypes
 	public static String company = "company"; 

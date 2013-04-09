@@ -4,6 +4,7 @@ import org.societies.android.api.cis.SocialContract;
 
 import android.app.ListFragment;
 import android.app.LoaderManager.LoaderCallbacks;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.CursorLoader;
 import android.content.Loader;
@@ -25,8 +26,21 @@ public class MainActivityCursorLoader extends ListFragment implements
 	private static final String LOG_TAG = MainActivityCursorLoader.class.getName();
     // This is the Adapter being used to display the list's data.
     SimpleCursorAdapter mAdapter;
-    Uri COMUNITIES_URI = Uri.parse(SocialContract.AUTHORITY_STRING + SocialContract.UriPathIndex.COMMINITIES);
+    
+    long serviceId = -1;
+    
+    public MainActivityCursorLoader(long servId){
+    	super();
+    	serviceId = servId;	
+    }
+    
+    Uri COMUNITIES_URI = Uri.parse(SocialContract.AUTHORITY_STRING + SocialContract.UriPathIndex.COMMUNITIES);
 
+    
+	 String spinnerSelecClause = null;
+	 String[] spinnerSelectArgument = null;
+
+    
     
     @Override public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
@@ -38,6 +52,35 @@ public class MainActivityCursorLoader extends ListFragment implements
 		
         // Start out with a progress indicator.
         setListShown(false);
+        
+        // first we get the list of communities where IJacket is shared
+        
+        // get communities where I am shared
+        Uri sharing_uri = Uri.parse(SocialContract.AUTHORITY_STRING + SocialContract.UriPathIndex.SHARING);
+    	String mSelectionClause = SocialContract.Sharing._ID_SERVICE + " = ?";
+    	String[] mSelectionArgs = {serviceId+ ""};
+    	ContentResolver cr = getActivity().getContentResolver();
+    	Cursor cursorOfSharedCommunities = cr.query(sharing_uri,null,mSelectionClause,mSelectionArgs,null);
+
+    	// Ill add the id of all those communities now on a selection args in order to get
+    	// theirs name
+    	if(null != cursorOfSharedCommunities && cursorOfSharedCommunities.getCount()>0){
+    		
+    		Log.d(LOG_TAG, "going to add " + cursorOfSharedCommunities.getCount() + " communities in the spinner");
+    		// add to spinner
+    		spinnerSelectArgument = new String[cursorOfSharedCommunities.getCount()];
+    		int idIndex = cursorOfSharedCommunities.getColumnIndex(SocialContract.Sharing._ID_COMMUNITY);
+    		for(int i= 0; cursorOfSharedCommunities.moveToNext(); i++)
+    			spinnerSelectArgument[i] = cursorOfSharedCommunities.getLong(idIndex) + "";
+	        	
+    		//building the spinner clause
+        	
+       	 	spinnerSelecClause = SocialContract.Communities._ID + " IN (";
+        	for(int i=0;i<spinnerSelectArgument.length; i++) spinnerSelecClause+="?,";
+        	spinnerSelecClause = spinnerSelecClause.substring(0, spinnerSelecClause.length() -1) + ")";
+        	Log.d(LOG_TAG, "in clause is " + spinnerSelecClause);
+        	// done building in clause
+    	}	
 
        	String[] columns = new String[] {SocialContract.Communities.NAME}; // field to display
        	int to[] = new int[] {android.R.id.text1}; // display item to bind the data
@@ -61,13 +104,13 @@ public class MainActivityCursorLoader extends ListFragment implements
 		int i = c.getColumnIndex(SocialContract.Communities.GLOBAL_ID); 
 		String comJid = c.getString(i);
 		i = c.getColumnIndex(SocialContract.Communities._ID); 
-		String comLocalId = c.getString(i);
+		long comLocalId = c.getLong(i);
 	    Log.d("LOG_TAG", "found community with JID " + comJid + " and id " + comLocalId);
 	    
 	    
         SharedPreferences mypref = getActivity().getSharedPreferences(IJacketApp.PREF_FILE_NAME, Context.MODE_PRIVATE);
         SharedPreferences.Editor e = mypref.edit();
-		e.putString(IJacketApp.CIS_JID_PREFERENCE_TAG, comJid);
+		e.putLong(IJacketApp.CIS_JID_PREFERENCE_TAG, comLocalId);
 		e.commit();
 
 	        
@@ -78,16 +121,13 @@ public class MainActivityCursorLoader extends ListFragment implements
 	@Override
 	public Loader<Cursor> onCreateLoader(int id, Bundle args) {
        
-         String[] mProjection = null;
-    	 String mSelectionClause = null;
-    	 String[] mSelectArgument = null;
-    	 String mSelectionOrder = null;
+
     	 
     	 Log.d(LOG_TAG, "on create loader");
         
         return new CursorLoader(getActivity(), COMUNITIES_URI,
-        		mProjection, mSelectionClause, mSelectArgument,
-        		mSelectionOrder);
+        		null, spinnerSelecClause, spinnerSelectArgument,
+        		null);
 				 
 	
 	}
@@ -118,5 +158,7 @@ public class MainActivityCursorLoader extends ListFragment implements
         mAdapter.swapCursor(null);
 		
 	}
+	
+
 	
 }

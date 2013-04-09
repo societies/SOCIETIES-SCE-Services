@@ -6,17 +6,17 @@
 		    <EditTextPreference 
    		    	android:title="Server" 
    		    	android:key="webserver" 
-   		    	android:defaultValue="societies.local" 
+   		    	android:defaultValue="54.228.222.47" 
    		    	android:summary="Machine name of webserver"/>
     		<EditTextPreference 
    		    	android:title="Port" 
    		    	android:key="webserverPort" 
-   		    	android:defaultValue="8080" 
+   		    	android:defaultValue="18080" 
    		    	android:summary="Apache port number"/>
     		<EditTextPreference 
    		    	android:title="Application Path" 
    		    	android:key="appPath" 
-   		    	android:defaultValue="/schmoozer/login.html" 
+   		    	android:defaultValue="/nzone-web" 
    		    	android:summary="path to web app"/>       
 	</PreferenceScreen>
 </PreferenceScreen>

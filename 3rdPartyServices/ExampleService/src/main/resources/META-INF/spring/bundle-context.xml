@@ -13,9 +13,11 @@ http://www.springframework.org/schema/tx http://www.springframework.org/schema/t
 	xmlns:ctx="http://www.springframework.org/schema/context">
 
 
-	<bean id="myService"
-		class="org.societies.myexample.service.MyServiceimpl">
-		<property name="cxtBrokerService" ref="cxtBrokerRef"/>
+	<bean id="myService" class="org.societies.myexample.service.MyServiceimpl">
+		<!-- a reference to a required service. 'name' should be the same as member 
+			variable in your impl class and the 'ref' should be the same as the osgi:service 
+			ref in the bundle-context-osgi.xml file -->
+		<property name="cxtBrokerService" ref="cxtBrokerRef" />
 	</bean>
 
 </beans>

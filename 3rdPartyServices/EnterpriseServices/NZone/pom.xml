@@ -26,6 +26,7 @@
 		<module>server</module>
 		<module>client</module>
 		<module>test</module>
+		<module>webui</module>
 	</modules>
 </project>
 

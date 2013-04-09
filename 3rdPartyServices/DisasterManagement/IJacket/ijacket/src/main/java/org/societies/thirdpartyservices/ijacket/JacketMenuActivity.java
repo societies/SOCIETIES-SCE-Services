@@ -11,6 +11,7 @@ import org.societies.thirdpartyservices.ijacket.com.ComLibException;
 import org.societies.thirdpartyservices.ijacket.com.ConnectionListener;
 import org.societies.thirdpartyservices.ijacket.com.ConnectionMetadata;
 import org.societies.thirdpartyservices.ijacket.com.ConnectionMetadata.DefaultServices;
+import org.societies.thirdpartyservices.ijacketlib.IJacketDefines;
 
 
 
@@ -115,13 +116,16 @@ public class JacketMenuActivity extends Activity {
          }
      } );
      addButton(connectButton);
-     
+
      Log.d(LOG_TAG, "done with buttons");
      
-     connectBT();
-    
-
-
+     IJacketApp appState = (IJacketApp) (getApplication());
+     if( appState.isTestMode()){
+    	 this.buttonsOnDisconnect();
+    	 connectButton.setEnabled(false);
+     }else{
+    	 connectBT();	 
+     }
      
      super.setContentView(layout);         
  }
@@ -352,8 +356,11 @@ public class JacketMenuActivity extends Activity {
  
  
 	class ActivityContentObserver extends ContentObserver {
+		  Handler h = null;
+		  
 		  public ActivityContentObserver( Handler h ) {
-			super( h );
+			  super( h );
+			  this.h =h;
 		  }
 
 		  public void onChange(boolean selfChange) {
@@ -372,29 +379,52 @@ public class JacketMenuActivity extends Activity {
 		    	 long row = ContentUris.parseId(uri);
 		    	 
          		SharedPreferences mypref = getSharedPreferences(IJacketApp.PREF_FILE_NAME, MODE_PRIVATE);
-     			String jid = mypref.getString(IJacketApp.CIS_JID_PREFERENCE_TAG, "");
-     			if(jid.isEmpty()){
+     			long jid = mypref.getLong(IJacketApp.CIS_JID_PREFERENCE_TAG, -1);
+     			if(jid == -1){
      				Log.d("LOG_TAG", "no community on obersever..." );
      				return;
      			}
 		    	 
 		    	 
-		    	 String mSelectionClause = SocialContract.CommunityActivity._ID + " = ? and " + SocialContract.CommunityActivity.GLOBAL_ID_FEED_OWNER + " = ?";
-		    	 String[] mSelectionArgs = {Long.toString(row),jid};
+		    	 String mSelectionClause = SocialContract.CommunityActivity._ID + " = ? and " + SocialContract.CommunityActivity._ID_FEED_OWNER + " = ? and " + SocialContract.CommunityActivity.TARGET + " = ?" ;
+		    	 String[] mSelectionArgs = {Long.toString(row),jid +"",org.societies.thirdpartyservices.ijacketlib.IJacketDefines.AccountData.IJACKET_SERVICE_NAME};
 		    	 ContentResolver cr = getContentResolver();
 		    	 Uri otherUri =  Uri.parse(SocialContract.AUTHORITY_STRING + SocialContract.UriPathIndex.COMMUNITY_ACTIVITIY);
 		    	 Log.d("LOG_TAG", "test " +  uri.getAuthority() + uri.getPath());
 		    	 Cursor cursor = cr.query(otherUri,null,mSelectionClause,mSelectionArgs,null);
 				if (cursor != null && cursor.getCount() >0) {
 				    while (cursor.moveToNext()) {
-				    	String actor = cursor.getString(cursor.getColumnIndex(SocialContract.CommunityActivity.GLOBAL_ID_ACTOR));
-				    	String verb  = cursor.getString(cursor.getColumnIndex(SocialContract.CommunityActivity.GLOBAL_ID_VERB));
-				    	String obj = cursor.getString(cursor.getColumnIndex(SocialContract.CommunityActivity.GLOBAL_ID_OBJECT));
+				    	String actor = cursor.getString(cursor.getColumnIndex(SocialContract.CommunityActivity.ACTOR));
+				    	String verb  = cursor.getString(cursor.getColumnIndex(SocialContract.CommunityActivity.VERB));
+				    	String obj = cursor.getString(cursor.getColumnIndex(SocialContract.CommunityActivity.OBJECT));
 				        Log.d("LOG_TAG", "found activity " + actor);
-				        con.print(actor + " " + verb + " " +obj, false);
+				        IJacketApp appState = (IJacketApp) (getApplication());
+				        if( appState.isTestMode()){
+				        	// if it is on test mode, I just launch a toast when something is observed
+				        	h.post(new MyRunnable(actor + " " + verb + " " +obj) );
+				        	
+				        	
+				        }else{
+				        	if (verb.equals(IJacketDefines.Verbs.DISPLAY))
+				        		con.print(obj, false);
+				        	if (verb.equals(IJacketDefines.Verbs.RING))
+				        		con.data(new byte[]{100, 75, 52, 15}, false);
+				        	if (verb.equals(IJacketDefines.Verbs.VIBRATE)){
+			             		//Vibrate mobile
+			             		Vibrator vib = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+			             		vib.vibrate(2000);
+			             		
+			             		
+			             		//Vibrate remote module
+								con.write(vibrationButton.pin, true, false);
+			                 	Thread.sleep(2000);
+			                 	con.write(vibrationButton.pin, false, false);
+				        	}
+				        		
+				        }
 				    }
 				} else {
-					Log.d(LOG_TAG, "empty CIS list query result");
+					Log.d(LOG_TAG, "no activity that triggered my criteria");
 				}
 				if(null != cursor) cursor.close();
 			}catch (Exception e) {
@@ -409,7 +439,17 @@ public class JacketMenuActivity extends Activity {
 		}
  
  
- 
+	private  class MyRunnable implements Runnable {
+	     private String message ="";
+
+	     public MyRunnable( String message) {
+	       this.message = message;
+	     }
+
+	     public void run() {
+	    	 Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
+	     }
+	  }
  /**
   * SERVICE_VIBRATION
   */

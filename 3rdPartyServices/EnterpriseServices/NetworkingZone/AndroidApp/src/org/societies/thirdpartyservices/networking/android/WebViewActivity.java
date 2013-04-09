@@ -63,8 +63,8 @@ public class WebViewActivity extends Activity {
 		    return true;
 		default:
 		    return super.onOptionsItemSelected(item);
-   }
-	 }
+		}
+	}
 	 
 	/**
 	 * The final call you receive before your activity is destroyed. 
@@ -72,5 +72,11 @@ public class WebViewActivity extends Activity {
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
+	}
+	
+	@Override
+	public void onBackPressed() {
+	   	//DO NOTHING
+		return;
 	}
 }
