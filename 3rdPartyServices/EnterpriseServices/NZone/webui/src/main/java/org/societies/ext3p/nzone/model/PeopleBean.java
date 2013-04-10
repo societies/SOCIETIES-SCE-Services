@@ -109,10 +109,82 @@ public class PeopleBean {
 		
 		
 		 
-		for ( int i = 0; i < currentdet.getTags().get(0).length() ; i++)
+		for ( int i = 0; i < currentdet.getTags().size() ; i++)
 		{
+			
 			if (currentdet.getTags().get(i).contains("Learned"))
 					return true;
+		}
+		return false;
+		
+		
+	}
+	
+	public boolean isfacebooktagged(UserPreview currentdet)
+	{
+		if (currentdet == null)
+			return false;
+		
+		if (currentdet.getTags() == null)
+			return false;
+		
+		
+		if (currentdet.getTags().size() == 0)
+			return false;
+		
+		 
+		for ( int i = 0; i < currentdet.getTags().size() ; i++)
+		{
+			
+				if (currentdet.getTags().get(i).contains("facebook"))
+						return true;
+		
+		}
+		return false;
+	}
+	
+	public boolean islinkedtagged(UserPreview currentdet)
+	{
+		if (currentdet == null)
+			return false;
+		
+		if (currentdet.getTags() == null)
+			return false;
+		
+		
+		if (currentdet.getTags().size() == 0)
+			return false;
+		
+		 
+		for ( int i = 0; i < currentdet.getTags().size() ; i++)
+		{
+			
+				if (currentdet.getTags().get(i).contains("linked"))
+						return true;
+		
+		}
+		return false;
+	}
+	
+	public boolean isPersontagged(UserPreview currentdet, String whatTag)
+	{
+		if (currentdet == null)
+			return false;
+		
+		if (currentdet.getTags() == null)
+			return false;
+		
+		
+		if (currentdet.getTags().size() == 0)
+			return false;
+		
+		 
+		for ( int i = 0; i < currentdet.getTags().size() ; i++)
+		{
+			
+				if (currentdet.getTags().get(i).contains(whatTag))
+						return true;
+		
 		}
 		return false;
 		

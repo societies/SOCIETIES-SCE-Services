@@ -1,6 +1,7 @@
 package org.societies.ext3p.nzone.model;  
   
 import java.io.Serializable;   
+import java.util.List;
 
 import javax.faces.bean.ApplicationScoped;
 import javax.faces.event.ValueChangeEvent;
@@ -28,8 +29,23 @@ public class FriendBean implements Serializable, ValueChangeListener {
 	private String friendid; 
 	private String name;   
     private String company;
+    
+    private String email;
+    private String sex;
+   
+    private String position;
+    private String facebookid;
+    private String linkedinid;
+    private String twitterid;
+    private String foursqid;
+    private String googleplusid;
+    
+    private List<String> selectedInterests;
+    
+    
     private String preferredcompany;
     private boolean pref;
+    
     private boolean sharecompany;
     private boolean sharesns;
     private boolean shareinterests;
@@ -56,6 +72,38 @@ public class FriendBean implements Serializable, ValueChangeListener {
 		this.friendid = friendid;
 		this.setName(det.getDisplayName());
 		this.setCompany(det.getCompany());
+		this.setEmail(det.getEmail());
+		this.setPosition(det.getPosition());
+		this.setSex(det.getSex());
+		
+		if (det.getFacebookID() == null)
+			this.setFacebookid("");
+		else
+			this.setFacebookid(det.getFacebookID());
+		
+		if (det.getLinkedInID() == null)
+			this.setLinkedinid("");
+		else
+			this.setLinkedinid(det.getLinkedInID());
+		
+		if (det.getFoursqID() == null)
+			this.setFoursqid("");
+		else
+			this.setFoursqid(det.getFoursqID());
+		
+		if (det.getGoogleplusID() == null)
+			this.setGoogleplusid("");
+		else
+			this.setGoogleplusid(det.getGoogleplusID());
+		
+		if (det.getTwitterID() == null)
+			this.setTwitterid("");
+		else
+			this.setTwitterid(det.getTwitterID());
+		
+		if (det.getInterests() != null)
+			setSelectedInterests(det.getInterests());
+		
 		
 		boolean perf = getNzoneClient().isPreferred("company", det.getCompany());
 		if (perf == true)
@@ -101,6 +149,84 @@ public class FriendBean implements Serializable, ValueChangeListener {
 		public void setSharecompany(boolean sharecompany) {
 			this.sharecompany = sharecompany;
 		}
+		/**
+		 * @return the email
+		 */
+		public String getEmail() {
+			return email;
+		}
+
+		/**
+		 * @param email the email to set
+		 */
+		public void setEmail(String email) {
+			this.email = email;
+		}
+
+		public String getSex() {
+			return sex;
+		}
+
+		public void setSex(String sex) {
+			this.sex = sex;
+		}
+
+		public String getPosition() {
+			return position;
+		}
+
+		public void setPosition(String position) {
+			this.position = position;
+		}
+
+		public String getFacebookid() {
+			return facebookid;
+		}
+
+		public void setFacebookid(String facebookid) {
+			this.facebookid = facebookid;
+		}
+
+		public String getLinkedinid() {
+			return linkedinid;
+		}
+
+		public void setLinkedinid(String linkedinid) {
+			this.linkedinid = linkedinid;
+		}
+
+		public String getTwitterid() {
+			return twitterid;
+		}
+
+		public void setTwitterid(String twitterid) {
+			this.twitterid = twitterid;
+		}
+
+		public String getFoursqid() {
+			return foursqid;
+		}
+
+		public void setFoursqid(String foursqid) {
+			this.foursqid = foursqid;
+		}
+
+		public String getGoogleplusid() {
+			return googleplusid;
+		}
+
+		public void setGoogleplusid(String googleplusid) {
+			this.googleplusid = googleplusid;
+		}
+
+		public List<String> getSelectedInterests() {
+			return selectedInterests;
+		}
+
+		public void setSelectedInterests(List<String> selectedInterests) {
+			this.selectedInterests = selectedInterests;
+		}
+
 		/**
 		 * @return the sharesns
 		 */
@@ -317,5 +443,20 @@ public class FriendBean implements Serializable, ValueChangeListener {
 		 
 	 }
 	 
+	 public String getInterestString(int index)
+	 {
+		 if (selectedInterests == null)
+			 return "";
+		 if (index >= selectedInterests.size())
+			 return "";
+		 
+		if (selectedInterests.get(index).contains("cloud"))
+			 return "Cloud Computing";
+		if (selectedInterests.get(index).contains("internet"))
+			 return "Internet Of Things"; 
+		if (selectedInterests.get(index).contains("future"))
+			 return "Future of the Internet"; 
+		 return "";
+	 }
 	   
 }  

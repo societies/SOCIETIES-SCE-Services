@@ -35,6 +35,7 @@
 		<property name="uam" ref="uam" />
 		<property name="persoMgr" ref="persoMgr" />
 		<property name="actFeedMgr" ref="actFeedMgr" />
+		<property name="cssManager" ref="cssManager" />
 	</bean>
 	
 	<bean class="org.springframework.context.annotation.CommonAnnotationBeanPostProcessor"/>

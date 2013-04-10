@@ -23,6 +23,10 @@
 	<osgi:reference id="serviceMgmt" interface="org.societies.api.services.IServices"/>
 	
 	<osgi:reference id="actFeedMgr" interface="org.societies.api.activity.IActivityFeedManager"/>
+	
+	<osgi:reference id="cssManager" interface="org.societies.api.css.ICSSManager" />
+	
+	
     
 	  <osgix:cm-properties id="networkclientConfig" persistent-id="networkclient"> 
        	<prop key="networkingserver">user2.ict-societies.eu</prop>

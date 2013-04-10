@@ -1,6 +1,7 @@
 package org.societies.ext3p.nzone.model;  
   
 import java.io.Serializable;   
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.faces.application.FacesMessage;
@@ -341,5 +342,23 @@ public class ProfileBean implements Serializable {
 			
 	 }
 	 
+	 public String getInterestString(int index)
+	 {
+		 if (selectedInterests == null)
+			 return "";
+		 if (index >= selectedInterests.size())
+			 return "";
+		 
+		if (selectedInterests.get(index).contains("cloud"))
+			 return "Cloud Computing";
+		if (selectedInterests.get(index).contains("internet"))
+			 return "Internet Of Things"; 
+		if (selectedInterests.get(index).contains("future"))
+			 return "Future of the Internet"; 
+		 return "";
+	 }
 	 
+	 
+
+	
 }  

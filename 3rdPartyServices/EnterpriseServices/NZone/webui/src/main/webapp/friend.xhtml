@@ -21,24 +21,70 @@
 							<h:outputText id="name" value="#{friendBean.name}" />
 							<p:separator style="color: black;" />
 							<br />
-							<h:outputText value="Company:" style="font-weight:bold" />
-							<h:outputText id="company" value="#{friendBean.company}" />
-							<h:outputText id="friendcompanypref" value=" *P*"
+							<h:panelGroup id="friendcompanypref">
+							<h:outputText value="Company:" style="font-weight:bold" rendered="#{friendBean.company.isEmpty() == false}" />
+							<h:outputText id="company" value="#{friendBean.company}" rendered="#{friendBean.company.isEmpty() == false}"  />
+							<h:outputText value=" "
 								rendered="#{friendBean.isPref()}" />
-
+							</h:panelGroup>
 							<br />
-							<p:selectOneRadio value="#{friendBean.preferredcompany}">
+							<p:selectOneRadio value="#{friendBean.preferredcompany}" rendered="#{friendBean.company.isEmpty() == false}" >
 								<f:selectItem
 									itemLabel="#{friendBean.company} is a Preferred Company"
 									itemValue="1" />
 								<f:selectItem
 									itemLabel="#{friendBean.company} is Not a Preferred Company"
 									itemValue="0" />
-								<f:ajax event="click" render="friendcompanypref" />
+								<f:ajax event="click" update="friendcompanypref" />
 							</p:selectOneRadio>
 					<p:separator style="color: black;" />
-						
+					
+							<br />
+							
+							<h:outputText value="Email:" style="font-weight:bold" rendered="#{friendBean.email.isEmpty() == false}" />
+							<h:outputText value="#{friendBean.email}" rendered="#{friendBean.email.isEmpty() == false}" />
+							<br />
+							<h:outputText value="Position:" style="font-weight:bold" rendered="#{friendBean.position.isEmpty() == false}" />
+							<h:outputText value="#{friendBean.position}" rendered="#{friendBean.position.isEmpty() == false}" />							
+							<br />
+							<h:outputText value="Sex:" style="font-weight:bold" rendered="#{friendBean.sex.isEmpty() == false}" />
+							<h:outputText value="#{friendBean.sex}" rendered="#{friendBean.sex.isEmpty() == false}" />							
+							<br />
+							<p:graphicImage value="/images/facebook-col.png" width="30" height="25" rendered="#{friendBean.facebookid.isEmpty() == false}" />
+							<h:outputText value="Facebook:" style="font-weight:bold" rendered="#{friendBean.facebookid.isEmpty() == false}" />
+							<h:outputText value="#{friendBean.facebookid}" rendered="#{friendBean.facebookid.isEmpty() == false}" />							
+							<br />
+							<p:graphicImage value="/images/linkedin-col.png" width="30" height="25" rendered="#{friendBean.linkedinid.isEmpty() == false}" />
+							<h:outputText value="LinkedIn:" style="font-weight:bold" rendered="#{friendBean.linkedinid.isEmpty() == false}" />
+							<h:outputText value="#{friendBean.linkedinid}" rendered="#{friendBean.linkedinid.isEmpty() == false}" />							
+							<br />
+							<p:graphicImage value="/images/twitter-col.png" width="30" height="25" rendered="#{friendBean.twitterid.isEmpty() == false}" />
+							<h:outputText value="Twitter:" style="font-weight:bold" rendered="#{friendBean.twitterid.isEmpty() == false}" />
+							<h:outputText value="#{friendBean.twitterid}" rendered="#{friendBean.twitterid.isEmpty() == false}" />							
+							<br />
+							<p:graphicImage value="/images/foursquare-col.png" width="30" height="25" rendered="#{friendBean.foursqid.isEmpty() == false}" />
+							<h:outputText value="Four Sq:" style="font-weight:bold" rendered="#{friendBean.foursqid.isEmpty() == false}" />
+							<h:outputText value="#{friendBean.foursqid}" rendered="#{friendBean.foursqid.isEmpty() == false}" />							
+							<br />
+							<p:graphicImage value="/images/googleplus-col.png" width="30" height="25" rendered="#{friendBean.googleplusid.isEmpty() == false}" />
+							<h:outputText value="Google+ : " style="font-weight:bold" rendered="#{friendBean.googleplusid.isEmpty() == false}" />
+							<h:outputText value="#{friendBean.googleplusid}" rendered="#{friendBean.googleplusid.isEmpty() == false}" />							
+							<br />
+							<h:outputText value="Interests : " style="font-weight:bold" />
+							 <p:outputPanel layout="block" style="text-align:center" rendered="#{friendBean.getInterestString(0).isEmpty()==false}">
+							 	#{friendBean.getInterestString(0)}
+							 </p:outputPanel>
+							  <p:outputPanel layout="block" style="text-align:center" rendered="#{friendBean.getInterestString(1).isEmpty()==false}">
+                        		#{friendBean.getInterestString(1)}
+                        	  </p:outputPanel>
+							  <p:outputPanel layout="block" style="text-align:center" rendered="#{friendBean.getInterestString(2).isEmpty()==false}">	
+                        		#{friendBean.getInterestString(2)}
+                    		</p:outputPanel>						
+							<br />
+						<p:separator style="color: black;" />
+						<br/>
 						Choose what information to share with #{friendBean.name}
+					<br />
 					<br />
 						#{friendBean.shareinfoMessage}
 					<br />	
@@ -74,6 +120,7 @@
 							<h:outputText id="myposition" value="#{profileBean.position}" />
 
 
+
 							<br />
 							<br />
 							<br />
@@ -81,11 +128,22 @@
 				 			<br/>
         					<h:outputText value="Share my Interests: " style="font-weight:bold" /> <pm:switch value="#{friendBean.shareinterests}" onLabel="Yes" offLabel="No"  style="width:100%" />  
         					<br/>
-        			 			<p:selectManyCheckbox value="#{profileBean.selectedInterests}">  
-            		   				<f:selectItem itemLabel="Cloud Computing" itemValue="cloud" />  
-			           				<f:selectItem itemLabel="Internet Of Things" itemValue="internet" />  
-            		   				<f:selectItem itemLabel="Future of the Internet" itemValue="future" />  
-			        			</p:selectManyCheckbox>  
+        					<br/>
+        					<br/>
+        					 <p:outputPanel layout="block" style="text-align:center" rendered="#{profileBean.getInterestString(0).isEmpty()==false}">
+                        		<h:outputText value="#{profileBean.getInterestString(0)}" rendered="#{profileBean.getInterestString(0).isEmpty()==false}"/>
+                        		
+                        	</p:outputPanel>
+                        	<p:outputPanel layout="block" style="text-align:center" rendered="#{profileBean.getInterestString(1).isEmpty()==false}">
+                        		<h:outputText value="#{profileBean.getInterestString(1)}" rendered="#{profileBean.getInterestString(1).isEmpty()==false}"/>
+                        	</p:outputPanel>
+                        	<p:outputPanel layout="block" style="text-align:center" rendered="#{profileBean.getInterestString(2).isEmpty()==false}">
+                        		<h:outputText value="#{profileBean.getInterestString(2)}" rendered="#{profileBean.getInterestString(2).isEmpty()==false}"/>
+                    		</p:outputPanel>
+                    
+        					
+
+        			 			  
 							<br/><br/><br/>
 							<p:separator style="color: black;" />
 

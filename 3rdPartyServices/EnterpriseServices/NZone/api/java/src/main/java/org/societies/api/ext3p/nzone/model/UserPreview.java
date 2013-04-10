@@ -19,7 +19,17 @@ public class UserPreview {
     protected String displayName;
     protected String company;
     protected String zone;
-    protected List<String> tags;
+    protected Integer rank;
+    
+    public Integer getRank() {
+		return rank;
+	}
+
+	public void setRank(Integer rank) {
+		this.rank = rank;
+	}
+
+	protected List<String> tags;
 
     /**
      * Gets the value of the userid property.

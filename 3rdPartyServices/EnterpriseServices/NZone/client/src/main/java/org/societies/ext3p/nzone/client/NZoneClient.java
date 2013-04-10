@@ -1,16 +1,17 @@
 package org.societies.ext3p.nzone.client;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
-import javax.annotation.PostConstruct;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.societies.api.activity.IActivity;
 import org.societies.api.activity.IActivityFeed;
 import org.societies.api.activity.IActivityFeedManager;
 import org.societies.api.cis.directory.ICisDirectoryRemote;
@@ -36,6 +37,7 @@ import org.societies.api.ext3p.schema.nzone.ShareInfo;
 import org.societies.api.ext3p.schema.nzone.UserDetails;
 import org.societies.api.ext3p.schema.nzone.ZoneDetails;
 import org.societies.api.identity.IIdentity;
+import org.societies.api.identity.InvalidFormatException;
 import org.societies.api.identity.Requestor;
 import org.societies.api.identity.RequestorService;
 import org.societies.api.personalisation.mgmt.IPersonalisationManager;
@@ -43,14 +45,17 @@ import org.societies.api.personalisation.model.Action;
 import org.societies.api.personalisation.model.IAction;
 import org.societies.api.personalisation.model.IActionConsumer;
 import org.societies.api.personalisation.model.PersonalisablePreferenceIdentifier;
-import org.societies.api.schema.cis.community.Criteria;
 import org.societies.api.schema.cis.community.Participant;
 import org.societies.api.schema.cis.community.ParticipantRole;
 import org.societies.api.schema.cis.directory.CisAdvertisementRecord;
+import org.societies.api.schema.css.directory.CssAdvertisementRecord;
 import org.societies.api.schema.servicelifecycle.model.ServiceResourceIdentifier;
 import org.societies.api.services.IServices;
 import org.societies.api.useragent.monitoring.IUserActionMonitor;
 import org.springframework.scheduling.annotation.Async;
+import org.societies.api.css.BitCompareUtil;
+import org.societies.api.css.FriendFilter;
+import org.societies.api.css.ICSSManager;
 
 public class NZoneClient implements INZoneClient, IActionConsumer {
 
@@ -66,6 +71,7 @@ public class NZoneClient implements INZoneClient, IActionConsumer {
 	IServices serviceMgmt;
 	private IActivityFeedManager actFeedMgr;
 	private IActivityFeed actFeed;
+	public ICSSManager cssManager;
 
 	private ServiceResourceIdentifier myServiceID;
 	private String myServiceName;
@@ -193,6 +199,14 @@ public class NZoneClient implements INZoneClient, IActionConsumer {
 	 */
 	public void setActFeedMgr(IActivityFeedManager actFeedMgr) {
 		this.actFeedMgr = actFeedMgr;
+	}
+
+	public ICSSManager getCssManager() {
+		return cssManager;
+	}
+
+	public void setCssManager(ICSSManager cssManager) {
+		this.cssManager = cssManager;
 	}
 
 	public NZoneClient(String networkingserver) {
@@ -408,14 +422,16 @@ public class NZoneClient implements INZoneClient, IActionConsumer {
 
 	}
 
+	
 	@Override
 	public List<UserPreview> getSuggestedList(boolean bMainZone) {
 
 		// Return a list of suggest contacts from the current zone,
 		// if no current zone, return a list from main zone
-		List<UserPreview> sortedlist = new ArrayList<UserPreview>();
+		
 		List<UserPreview> list = new ArrayList<UserPreview>();
 
+		HashMap<CssAdvertisementRecord, Integer> csslist = null; // what is returned from cssmanager
 		if (myServiceID == null)
 			myServiceID = getServiceMgmt().getMyServiceId(this.getClass());
 
@@ -432,6 +448,7 @@ public class NZoneClient implements INZoneClient, IActionConsumer {
 					cisCallback.iCisManagerCallback);
 
 			try {
+				
 				cisCallback.cisManagerCallbackSignal.await();
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
@@ -442,9 +459,43 @@ public class NZoneClient implements INZoneClient, IActionConsumer {
 			if (memberList == null) {
 				log.error("Problem getting member list for cis"
 						+ currentZoneCis.getName());
-				return sortedlist; // empty list ??
+				return list; // empty list ??
 			}
 
+			
+			try {
+				
+				//IIdentity[] identities = new IIdentity[1];
+				//try {
+				//	identities[0] = getCommManager().getIdManager().fromJid(currentZoneCis.getCisId());
+				//} catch (InvalidFormatException e) {
+				//	// TODO Auto-generated catch block
+				//	e.printStackTrace();
+				//}
+				FriendFilter filter = new FriendFilter();
+				//filter.setCis_Jids(identities);
+				int nzonefilterflag = BitCompareUtil.FACEBOOK_BIT + BitCompareUtil.LINKEDIN_BIT;
+				//nzonefilterflag += BitCompareUtil.CIS_MEMBERS_BIT;
+				filter.setFilterFlag(nzonefilterflag);
+				log.info("Calling cssmanager : " );
+				
+				Future<HashMap<CssAdvertisementRecord, Integer>> csslistfut = getCssManager().getSuggestedFriendsDetails(filter);
+				if (csslistfut != null)
+				{
+					csslist = csslistfut.get();
+					
+					log.info(" cssmanager : size" + csslist.size());
+					log.info(" cssmanager : to string" + csslist.toString());
+				}
+				
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (ExecutionException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
 			// TODO end: This need to change when css mnager suggest friends
 			// working
 			// otherwise, we now have list, get there details
@@ -457,40 +508,73 @@ public class NZoneClient implements INZoneClient, IActionConsumer {
 			List<UserDetails> userDets = this.getNzoneClientComms()
 					.getUserDetailsList(suggestionsIDs);
 			List<String> tags = new ArrayList<String>();
-			tags.add("Learned Preference");
-
+			
 			// Now populate UserPreview
 			for (int i = 0; i < memberList.size(); i++) {
-				if ((memberList.get(i).getRole() != ParticipantRole.OWNER)
-						&& !memberList.get(i).getJid()
-								.contains(myIdentity.getBareJid())) {
+				if ((memberList.get(i).getRole() != ParticipantRole.OWNER) && !memberList.get(i).getJid().contains(myIdentity.getBareJid())) 
+				{
+					
+					
 					UserPreview userPre = new UserPreview();
 					userPre.setUserid(memberList.get(i).getJid());
-					log.debug("userPre.getUserid[" + i + "] id is : "
-							+ userPre.getUserid());
-					if (userDets != null) {
-						for (int j = 0; j < userDets.size(); j++) {
-							log.debug("checking userDets.getUserid[" + j
-									+ "] : " + userDets.get(j).getUserid());
+					
+					Integer cssFlag = 0;
+					int rank = 0;
+					tags.clear();
+					if (csslist != null)
+					{
+						//try {
+						//	if (csslist.containsKey(getCommManager().getIdManager().fromJid(userPre.getUserid())))
+						//		cssFlag= csslist.get(getCommManager().getIdManager().fromJid(userPre.getUserid())).intValue();
+						//} catch (InvalidFormatException e) {
+							// TODO Auto-generated catch block
+						//	e.printStackTrace();
+						//}
+						
+							for (Entry<CssAdvertisementRecord, Integer> entry : csslist.entrySet()) {
+								if (entry.getKey().getId().contains(userPre.getUserid()))
+								{
+										cssFlag = entry.getValue();	
+										log.info(" cssmanager : found" + userPre.getUserid() + " " + cssFlag);
+										break;
+								}
+							}
+						
+					}
+					
+					if ((cssFlag & BitCompareUtil.FACEBOOK_BIT)  == BitCompareUtil.FACEBOOK_BIT)
+					{
+						log.info(" cssmanager : facebook set " + userPre.getUserid() + " " + cssFlag);
+						tags.add("facebook");
+						rank +=1;
+					}
+					if ((cssFlag & BitCompareUtil.LINKEDIN_BIT) == BitCompareUtil.LINKEDIN_BIT)
+					{
+						log.info(" cssmanager : linked set " + userPre.getUserid() + " " + cssFlag);
+						tags.add("linked");
+						rank +=1;
+					}
+					
+					
+					if (userDets != null) 
+					{
+						for (int j = 0; j < userDets.size(); j++) 
+						{
+							log.debug("checking userDets.getUserid[" + j + "] : " + userDets.get(j).getUserid());
 
-							if ((userDets.get(j) != null)
-									&& (userDets.get(j).getUserid() != null)) {
-								if (userPre.getUserid().contentEquals(
-										userDets.get(j).getUserid())) {
-									userPre.setCompany(userDets.get(j)
-											.getCompany());
-									userPre.setDisplayName(userDets.get(j)
-											.getDisplayName());
+							if ((userDets.get(j) != null) && (userDets.get(j).getUserid() != null)) {
+								if (userPre.getUserid().contentEquals(userDets.get(j).getUserid())) {
+									userPre.setCompany(userDets.get(j).getCompany());
+									userPre.setDisplayName(userDets.get(j).getDisplayName());
 									if (userDets.get(j).getCompany() != "") {
 										// Check is we have 'tagged' this
 										// company
 										// get UserPrefences
 										if (preferences != null) {
-											if (preferences.isPreferred(
-													"company", userDets.get(j)
-															.getCompany())) {
+											if (preferences.isPreferred("company", userDets.get(j).getCompany())) {
 												log.debug("Tagging user as preferred");
-												userPre.setTags(tags);
+												tags.add("Learned Preference");
+												rank +=10;
 											}
 										}
 									}
@@ -498,6 +582,8 @@ public class NZoneClient implements INZoneClient, IActionConsumer {
 							}
 						}
 					}
+					userPre.setTags(tags);
+					userPre.setRank(rank);
 					list.add(userPre);
 				}
 			}
@@ -518,7 +604,44 @@ public class NZoneClient implements INZoneClient, IActionConsumer {
 			if (memberList == null) {
 				log.error("Problem getting member list for cis"
 						+ mainCis.getName());
-				return sortedlist; // empty list
+				return list; // empty list
+			}
+
+			
+			
+				try {
+				
+				//IIdentity[] identities = new IIdentity[1];
+				//try {
+				//	identities[0] = getCommManager().getIdManager().fromJid(currentZoneCis.getCisId());
+				//} catch (InvalidFormatException e) {
+				//	// TODO Auto-generated catch block
+				//	e.printStackTrace();
+				//}
+				FriendFilter filter = new FriendFilter();
+				//filter.setCis_Jids(identities);
+				int nzonefilterflag = BitCompareUtil.FACEBOOK_BIT + BitCompareUtil.LINKEDIN_BIT;
+				//nzonefilterflag += BitCompareUtil.CIS_MEMBERS_BIT;
+				filter.setFilterFlag(nzonefilterflag);
+				log.info("Calling cssmanager : " );
+				
+				Future<HashMap<CssAdvertisementRecord, Integer>> csslistfut = getCssManager().getSuggestedFriendsDetails(filter);
+
+
+				if (csslistfut != null)
+				{
+						csslist = csslistfut.get();
+						log.info(" cssmanager : size" + csslist.size());
+						log.info(" cssmanager : to string" + csslist.toString());
+				}
+				
+				log.info(" cssmanager : size" + csslist.size());
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (ExecutionException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
 
 			// TODO end: This need to change when css mnager suggest friends
@@ -532,33 +655,62 @@ public class NZoneClient implements INZoneClient, IActionConsumer {
 
 			List<UserDetails> userDets = this.getNzoneClientComms()
 					.getUserDetailsList(suggestionsIDs);
-			List<String> tags = new ArrayList<String>();
-			tags.add("Learned Preference");
-
+		
 			// Now populate UserPreview
 			for (int i = 0; i < memberList.size(); i++) {
-				if ((memberList.get(i).getRole() != ParticipantRole.OWNER)
-						&& !memberList.get(i).getJid()
-								.contains(myIdentity.getBareJid())) {
+				if ((memberList.get(i).getRole() != ParticipantRole.OWNER) && !memberList.get(i).getJid().contains(myIdentity.getBareJid())) {
 					UserPreview userPre = new UserPreview();
 					userPre.setUserid(memberList.get(i).getJid());
 
-					log.debug("userPre.setUserid[" + i + "] id is : "
-							+ userPre.getUserid());
+					Integer cssFlag = 0;
+					int rank = 0;
+					List<String> tags = new ArrayList<String>();
+					if (csslist != null)
+					{
+						//try {
+						//	if (csslist.containsKey(getCommManager().getIdManager().fromJid(userPre.getUserid())))
+						//		cssFlag= csslist.get(getCommManager().getIdManager().fromJid(userPre.getUserid())).intValue();
+						//} catch (InvalidFormatException e) {
+							// TODO Auto-generated catch block
+						//	e.printStackTrace();
+						//}
+						
+							for (Entry<CssAdvertisementRecord, Integer> entry : csslist.entrySet()) {
+								if (entry.getKey().getId().contains(userPre.getUserid()))
+								{
+										cssFlag = entry.getValue();	
+										log.info(" cssmanager : found" + userPre.getUserid() + " " + cssFlag);
+										break;
+								}
+							    
+							}
+						
+					}
+					
+					if ((cssFlag & BitCompareUtil.FACEBOOK_BIT) == BitCompareUtil.FACEBOOK_BIT)
+					{
+						log.info(" cssmanager : found" + userPre.getUserid() + " facebook set" );
+						tags.add("facebook");
+						rank +=1;
+					}
+					if ((cssFlag & BitCompareUtil.LINKEDIN_BIT) == BitCompareUtil.LINKEDIN_BIT)
+					{
+						log.info(" cssmanager : found" + userPre.getUserid() + " linkedin set" );
+						tags.add("linked");
+						rank +=1;
+					}
+					
+				
+					
 
 					if (userDets != null) {
 						for (int j = 0; j < userDets.size(); j++) {
-							log.debug("checking userDets.getUserid[" + j
-									+ "] : " + userDets.get(j).getUserid());
+							log.debug("checking userDets.getUserid[" + j + "] : " + userDets.get(j).getUserid());
 
-							if ((userDets.get(j) != null)
-									&& (userDets.get(j).getUserid() != null)) {
-								if (userPre.getUserid().contentEquals(
-										userDets.get(j).getUserid())) {
-									userPre.setCompany(userDets.get(j)
-											.getCompany());
-									userPre.setDisplayName(userDets.get(j)
-											.getDisplayName());
+							if ((userDets.get(j) != null) && (userDets.get(j).getUserid() != null)) {
+								if (userPre.getUserid().contentEquals(userDets.get(j).getUserid())) {
+									userPre.setCompany(userDets.get(j).getCompany());
+									userPre.setDisplayName(userDets.get(j).getDisplayName());
 									if (userDets.get(j).getCompany() != "") {
 										// Check is we have 'tagged' this
 										// company
@@ -568,7 +720,9 @@ public class NZoneClient implements INZoneClient, IActionConsumer {
 													"company", userDets.get(j)
 															.getCompany())) {
 												log.debug("Tagging user as preferred");
-												userPre.setTags(tags);
+												tags.add("Learned Preference");
+												rank +=10;
+												
 											}
 										}
 									}
@@ -576,26 +730,22 @@ public class NZoneClient implements INZoneClient, IActionConsumer {
 							}
 						}
 					}
+					userPre.setTags(tags);
+					userPre.setRank(rank);
 					list.add(userPre);
 				}
 			}
 		}
 
-		for (int i = 0; i < list.size(); i++) {
-			if (list.get(i).getTags().size() > 0) {
-				sortedlist.add(list.get(i));
-			}
-		}
+		Collections.sort(list, new Comparator<UserPreview>() {
 
-		for (int i = 0; i < list.size(); i++) {
-			if (list.get(i).getTags().size() == 0) {
-				sortedlist.add(list.get(i));
-			}
-		}
-
-		return sortedlist;
+		        public int compare(UserPreview o1, UserPreview o2) {
+		            return o2.getRank().compareTo(o1.getRank());
+		        }
+		    });
+		 
+		return list;
 	}
-
 
 	@Override
 	public void getActivityFeed(boolean bMainZone) {

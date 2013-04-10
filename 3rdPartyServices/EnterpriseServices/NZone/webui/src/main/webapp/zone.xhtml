@@ -18,32 +18,31 @@
 							<p:dataTable id="zoneMembers" value="#{peopleBean.suggestions}"
 								var="person">
 
-								<p:column style="width:10%">
-								<p:graphicImage value="/images/profile_pic.jpg"  width="50" height="45" /> 
+							<p:column style="width:10%">
+							<p:commandLink action="gotofriend" >
+								<p:graphicImage value="/images/profile_pic.jpg"  width="30" height="27" /> 
+								<f:setPropertyActionListener value="#{person.userid}"
+											target="#{friendBean.friendid}" />
+							</p:commandLink>
+					
 								</p:column>
 								
-								<p:column headerText="Name" style="width:32%">
+								<p:column headerText="Name" style="width:30%">
 									<h:outputText value="#{person.displayName}" />
 								</p:column>
 
-								<p:column headerText="Company" style="width:22%">
+								<p:column headerText="Company" style="width:20%">
 									<h:outputText value="#{person.company}" />
 								</p:column>
 
-								<p:column headerText="Rank" style="width:22%">
-									<p:graphicImage value="/images/learning.jpg"  width="40" height="36" rendered="#{peopleBean.isperftagged(person)}"/>		
+								<p:column headerText="Rank">
+									<p:graphicImage value="/images/learning.jpg"  width="30" height="18" rendered="#{peopleBean.isperftagged(person)}"/>
+									<p:graphicImage value="/images/facebook-col.png"  width="30" height="18" rendered="#{peopleBean.isfacebooktagged(person)}"/>		
+									<p:graphicImage value="/images/linkedin-col.png"  width="30" height="18" rendered="#{peopleBean.islinkedtagged(person)}"/>		
 								</p:column>
-
-								<p:column headerText="View" style="width:4%">
-									<p:commandButton id="selectButton" 
-										action="gotofriend" icon="ui-icon-search" title="View">
-										<f:setPropertyActionListener value="#{person.userid}"
-											target="#{friendBean.friendid}" />
-									</p:commandButton>
-								</p:column>
-
+								
+								
 							</p:dataTable>
-
 
 							<h:outputText value="#{friendBean.friendid}" id="friendsid"
 								style="font-weight:bold" rendered="false" />
