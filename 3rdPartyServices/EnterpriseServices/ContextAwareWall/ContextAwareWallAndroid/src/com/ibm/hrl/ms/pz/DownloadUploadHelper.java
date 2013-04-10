@@ -17,12 +17,6 @@ import java.net.URLEncoder;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.FileEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.ByteArrayBuffer;
 
 import android.graphics.Bitmap;
@@ -36,8 +30,8 @@ public class DownloadUploadHelper {
 	private static ReentrantLock updateImageLock = new ReentrantLock();
 	private static AtomicBoolean updateStarted = new AtomicBoolean(); 
 	
-	public void uploadImage(File data, String fileName,String cis,String url){
-		 (new UploadFilesTask(data,fileName,cis)).execute(url+"/upload.html");
+	public void uploadImage(String fileName, String filePath,String cis,String url){
+		 (new UploadFilesTask(fileName, filePath,cis)).execute(url+"/upload.html");
 	}
 	
 	public void downloadImage(String url, String downloadedImageName, CameraPreview callback){
@@ -47,14 +41,14 @@ public class DownloadUploadHelper {
 	
 	class UploadFilesTask extends AsyncTask<String, Void,String>{
 		 Throwable error = null;
-		 File file;
 		 String fileName;
+		 String filePath;
 		 String cis;
 		 
-		 UploadFilesTask(File file,String fileName,String cis){
-			 this.file = file;
-			 this.fileName = fileName;
+		 UploadFilesTask(String fileName, String filePath,String cis){
+			 this.filePath = filePath;
 			 this.cis = cis;
+			 this.fileName = fileName;
 		 }
 		
 		@Override
@@ -64,8 +58,7 @@ public class DownloadUploadHelper {
 		@Override
 		protected String doInBackground(String... params) {
 			String url = params[0];
-			//postImageInternal(file,fileName,url);
-			upload(this.file, this.fileName,this.cis,url);
+			upload(this.fileName,this.filePath,this.cis,url);
 			return null;
 		}
 		
@@ -75,6 +68,8 @@ public class DownloadUploadHelper {
 	private byte[] decodeFile(File f){
 		byte[] byteArray= null;
 		try {
+			Log.i("vg", "going to decode file: "+f.getAbsolutePath());
+			
 	        //Decode image size
 	        BitmapFactory.Options o = new BitmapFactory.Options();
 	        o.inJustDecodeBounds = true;
@@ -89,6 +84,7 @@ public class DownloadUploadHelper {
 	        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
 	        byteArray = stream.toByteArray();
 	        
+	        Log.i("vg", "done decoding file: "+f.getAbsolutePath());
 	    } catch (FileNotFoundException e) {
 	    	e.printStackTrace();
 	    }
@@ -225,7 +221,7 @@ public class DownloadUploadHelper {
 	}
 	
 	
-	
+	/*
 	private void postImageInternal(File data, String fileName, String url) {
 
 	    try{
@@ -250,11 +246,9 @@ public class DownloadUploadHelper {
 	    }catch (Exception e){
 	    	e.printStackTrace();
 	    }
-
-	            
-	}
+	}*/
 	
-    private void upload(File data, String fileName,String cis, String urlServer){
+    private void upload(String fileName,String filePath, String cis, String urlServer){
     	HttpURLConnection connection = null;
     	DataOutputStream outputStream = null;
     	//DataInputStream inputStream = null;
@@ -271,9 +265,10 @@ public class DownloadUploadHelper {
 
     	try
     	{
-    	
+    	Log.i("vg", "upload started: "+fileName);
     	//FileInputStream fileInputStream = new FileInputStream(new File(pathToOurFile) );
-    	FileInputStream fileInputStream = new FileInputStream(data);
+    	File data = new File(filePath);
+    	//FileInputStream fileInputStream = new FileInputStream(data);
 
     	try {
 			cis = URLEncoder.encode(cis,"utf-8");
@@ -333,13 +328,14 @@ public class DownloadUploadHelper {
     	int serverResponseCode = connection.getResponseCode();
     	String serverResponseMessage = connection.getResponseMessage();
     	//Toast.makeText(getBaseContext(), serverResponseMessage, Toast.LENGTH_LONG).show();
-    	fileInputStream.close();
+    	//fileInputStream.close();
     	outputStream.flush();
     	outputStream.close();
+    	
+    	Log.i("vg", "upload done: "+fileName+"; response code: "+serverResponseCode+"; response message: "+serverResponseMessage);
     	}
-    	catch (Exception ex)
-    	{
-    		System.out.println(ex);
+    	catch (Exception ex){
+    		Log.e("vg", "error in upload "+fileName+"; msg: "+ex.getMessage(),ex);
     		//Toast.makeText(getBaseContext(), "exception!"+ex.getMessage(), Toast.LENGTH_LONG).show();
     	//Exception handling
     	}

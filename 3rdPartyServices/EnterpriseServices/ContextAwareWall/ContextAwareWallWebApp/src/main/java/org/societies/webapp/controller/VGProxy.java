@@ -575,10 +575,28 @@ public class VGProxy {
 			String responseString="";
 			responseString = perfromGetHttpRequest(url);
 			
-			JSONObject jsonObject = new JSONObject();
-			jsonObject.put("data", responseString);
 			
-			String currentZoneId = extractZoneId(responseString);
+			JSONObject jsonObjectPZResponse = null;
+			try{
+				jsonObjectPZResponse = new JSONObject(responseString);
+			}catch(Exception e){
+				LOG.error("Couldn't parse PZ reponse to valid JSON object; String is '"+responseString+"'");
+			}
+			if (jsonObjectPZResponse == null){
+				return "";
+			}
+			
+			JSONObject jsonObjectResponse = new JSONObject();
+			jsonObjectResponse.put("data", jsonObjectPZResponse.get("messages"));
+			
+			//String currentZoneId = extractZoneId(responseString);
+			String currentZoneId="";
+			String currentZoneName="";
+			JSONArray zonesArray = jsonObjectPZResponse.getJSONArray("location");
+			if (zonesArray.length() > 0){
+				currentZoneId = ((JSONObject)zonesArray.get(0)).getString("id");
+				currentZoneName = ((JSONObject)zonesArray.get(0)).getString("name");
+			}
 			
 			String logMsg = "";
 			synchronized (VGProxy.class) {
@@ -596,13 +614,15 @@ public class VGProxy {
 				
 				logMsg += "mBackgroundFileName = '"+mBackgroundFileName+"'\t mCurrentZone = '"+mCurrentZone +"'\t mCisOfImage = '"+mCisOfImage+"'"; 
 				
-				jsonObject.put("imgName",mBackgroundFileName);
-				jsonObject.put("zoneId",currentZoneId);
-				jsonObject.put("cis",cis);
+				jsonObjectResponse.put("imgName",mBackgroundFileName);
+				jsonObjectResponse.put("zoneId",currentZoneId);
+				jsonObjectResponse.put("cis",cis);
+				jsonObjectResponse.put("zoneId",currentZoneId);
+				jsonObjectResponse.put("zoneName",currentZoneName);
 			}
 			LOG.info(LOG_PREFIX + " in 'getMessagesInternal' ; Members values: "+logMsg);
 			
-			retResponseString = jsonObject.toString();
+			retResponseString = jsonObjectResponse.toString();
 			
 	    }catch (Exception e) {
 	    	LOG.error(LOG_PREFIX + " exception in method 'getMessagesInternal' ; generated URL is "+url,e);
@@ -890,7 +910,7 @@ public class VGProxy {
 	    	HttpClient httpclient = new DefaultHttpClient();
 	    	HttpResponse response = httpclient.execute(httpGetRequest);
 	    	statusCode = response.getStatusLine().getStatusCode();
-	    	if (response.getEntity() != null && response.getEntity().getContent() != null){
+	    	if (response.getEntity() != null && response.getEntity().getContent() != null && statusCode == 200){
 				BufferedReader bf = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
 				String temp;
 				while ((temp = bf.readLine()) != null) {

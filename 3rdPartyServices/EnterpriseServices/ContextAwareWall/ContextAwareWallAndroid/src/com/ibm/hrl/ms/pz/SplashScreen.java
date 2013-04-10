@@ -20,9 +20,9 @@ public class SplashScreen extends Activity{
 			super.onCreate(savedInstanceState);
 				getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);    
 				setContentView(R.layout.splash);
-			    Log.v("tag", "hi");
-			   Button button =(Button) findViewById(R.id.button1);
-			   Log.v("tag", "hi");
+				Button button=null;
+				button =(Button) findViewById(R.id.button1);
+				
 			    button.setOnClickListener(new View.OnClickListener() {
 		            public void onClick(View v) {
 		            	startActivity(new Intent("com.ibm.hrl.ms.pz.SettingsActivity"));

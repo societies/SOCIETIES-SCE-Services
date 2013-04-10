@@ -58,12 +58,14 @@ import android.view.View.OnClickListener;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
  
@@ -74,8 +76,8 @@ import android.widget.Toast;
 public class CameraPreview extends Activity {
 
 	private CustomCameraView mCustomCameraView;
-	private ImageView mBackGroundImageView;
-	
+	private ImageView mBackgroundImageView;
+	private TextView mCurrentZoneName;
 	private TimerTask mScanTask;
 	boolean mScanTaskActive=false;
 	
@@ -95,7 +97,6 @@ public class CameraPreview extends Activity {
 	
 	private LinkedList<JSONObject> mMsgInClient = new LinkedList<JSONObject>();
 	private HashSet<Integer> mMsgIdsInClient = new HashSet<Integer>();
-	private HashSet<String> mMsgZonesIds = new HashSet<String>();
 	String mBackgroundImgName = "";
 	
 	private String mServerUrl;
@@ -103,6 +104,7 @@ public class CameraPreview extends Activity {
 	private String mCisId;
 	private boolean mInteractiveBackgroundActive; 
 	private String mCurrentPhotoPath;
+	private String mCurrentZoneNameStr;
 	
 	
 	private long mBackgroundImageTakenTS=0;
@@ -120,7 +122,7 @@ public class CameraPreview extends Activity {
 		getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 		setContentView(R.layout.main);
 		
-		mMsgZonesIds = new HashSet<String>();
+		//mMsgZonesIds = new HashSet<String>();
 		mBackgroundImagesNames.clear();
 		initialUserPrefVars();
 		
@@ -129,9 +131,11 @@ public class CameraPreview extends Activity {
 		createTextViewsMsgs(mNumOfMsgToDisplay);
 		
 		mCustomCameraView = (CustomCameraView) findViewById(R.id.surfaceView);
-		mBackGroundImageView = (ImageView)findViewById(R.id.imageBackground);
+		mBackgroundImageView = (ImageView)findViewById(R.id.imageBackground);
 		mBackgroundImgName = "";
-		
+		mCurrentZoneName = (TextView)findViewById(R.id.zoneName);
+		mCurrentZoneNameStr = "";
+				
 		ImageButton settings =(ImageButton) findViewById(R.id.settings);
 		
 		//add button listener
@@ -215,7 +219,7 @@ public class CameraPreview extends Activity {
 	private void disableInteractiveBackground(){
 		ImageButton picSBtn = (ImageButton) findViewById(R.id.camera);
 		picSBtn.setVisibility(View.GONE);
-		mBackGroundImageView.setVisibility(View.GONE);
+		mBackgroundImageView.setVisibility(View.GONE);
 		mCustomCameraView.onPauseMySurfaceView();
 		mCustomCameraView.onResumeMySurfaceView();
 		mCustomCameraView.setVisibility(View.VISIBLE);
@@ -225,8 +229,8 @@ public class CameraPreview extends Activity {
 		ImageButton picSBtn = (ImageButton) findViewById(R.id.camera);
 		picSBtn.setVisibility(View.VISIBLE);
 		mCustomCameraView.setVisibility(View.GONE);
-		mBackGroundImageView.setImageResource(R.drawable.black);
-		mBackGroundImageView.setVisibility(View.VISIBLE);
+		mBackgroundImageView.setImageResource(R.drawable.black);
+		mBackgroundImageView.setVisibility(View.VISIBLE);
 		mBackgroundImgName = ""; 
 		/*
 		if (mBackGroundImageView.getVisibility() != View.VISIBLE){
@@ -269,11 +273,13 @@ public class CameraPreview extends Activity {
 		switch (requestCode) {
 		case ACTION_TAKE_PHOTO_B: {
 			if (resultCode == RESULT_OK) {
+				Log.i("vg", "onActivityResult, resultCode == RESULT_OK");
 				if (mCurrentPhotoPath != null) {
 					//mCustomCameraView.onResumeMySurfaceView();
-					File image = displayBackgroundImage(getLocalBackgroundImgName(),mCurrentPhotoPath,true,false);
+					Log.i("vg", "going to upload image: "+mCurrentPhotoPath);
+					displayBackgroundImage(getLocalBackgroundImgName(),mCurrentPhotoPath,true,false);
 					DownloadUploadHelper dh = new DownloadUploadHelper();
-					dh.uploadImage(image, getLocalBackgroundImgName(), this.mCisId,mServerUrl);
+					dh.uploadImage(getLocalBackgroundImgName(), mCurrentPhotoPath,this.mCisId,mServerUrl);
 					mCurrentPhotoPath = null;
 					mBackgroundImageTakenTS = System.currentTimeMillis();
 				}
@@ -290,20 +296,16 @@ public class CameraPreview extends Activity {
 	public synchronized File displayBackgroundImage(String imageName, String imagePath, boolean reduceImageSize,boolean downloaded){
 		File image = null;
 		try{
-			if (mInteractiveBackgroundActive){
 				mCustomCameraView.setVisibility(View.GONE);
 				setPic(imagePath,reduceImageSize);
 				String generatedImageName = setBackgroundImageName(imageName);
 				
 				if (!mBackgroundImagesNames.containsKey(generatedImageName)){
-					image = galleryAddPic(imagePath);
+					//image = galleryAddPic(imagePath);
 					mBackgroundImagesNames.put(generatedImageName,new ImageDetails(generatedImageName,imagePath, downloaded));
 				}
-			}
-			
 		}catch(Exception e){
-			mCustomCameraView.setVisibility(View.VISIBLE);
-			mBackGroundImageView.setVisibility(View.GONE);
+			mBackgroundImageView.setVisibility(View.GONE);
 			Log.e("vg", e.getMessage() ,e);
 		}
 		
@@ -321,13 +323,14 @@ public class CameraPreview extends Activity {
 	
 	private void setPic(String photoPath, boolean reduceImageSize) {
 
+		Log.i("vg", "going to reduce image size: "+photoPath);
 		/* There isn't enough memory to open up more than a couple camera photos */
 		/* So pre-scale the target bitmap into which the file is decoded */
 
 		/* Get the size of the ImageView */
 		//mBackGroundImageView.setScaleType(ScaleType.FIT_XY);
-		int targetW = mBackGroundImageView.getWidth();
-		int targetH = mBackGroundImageView.getHeight();
+		int targetW = mBackgroundImageView.getWidth();
+		int targetH = mBackgroundImageView.getHeight();
 
 		/* Get the size of the image */
 		BitmapFactory.Options bmOptions = new BitmapFactory.Options();
@@ -375,10 +378,10 @@ public class CameraPreview extends Activity {
 		bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
 		
 		/* Associate the Bitmap to the ImageView */
-		mBackGroundImageView.setImageBitmap(bitmap);
+		mBackgroundImageView.setImageBitmap(bitmap);
 		
-		mBackGroundImageView.setVisibility(View.VISIBLE);
-		
+		mBackgroundImageView.setVisibility(View.VISIBLE);
+		Log.i("vg", "done reducing image size: "+photoPath+" set visibility = VISIBLE");
 	}
 
 	private Matrix rotateImage(String filePath){
@@ -546,13 +549,20 @@ public class CameraPreview extends Activity {
 		int tempParamInt;
 		try{
 			SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+			Spinner textColor = (Spinner)dialog.findViewById(R.id.colorsCombo);
+			tempParamStr = (String) textColor.getSelectedItem();
+			if (tempParamStr != null && tempParamStr != null &&!tempParamStr.equals(mColor)){
+				mColor = tempParamStr;
+				paramsHaveChanged = true;
+			}
 			
+			/*
 			EditText textColorEdit = (EditText) dialog.findViewById(R.id.textColor);
 			tempParamStr = textColorEdit.getText().toString();
 			if (tempParamStr != null && tempParamStr != null &&!tempParamStr.equals(mColor)){
 				mColor = textColorEdit.getText().toString();
 				paramsHaveChanged = true;
-			}
+			}*/
 			
 			EditText textSizeEdit = (EditText) dialog.findViewById(R.id.textSize);
 			tempParamInt =Integer.parseInt(textSizeEdit.getText().toString()); 
@@ -609,10 +619,12 @@ public class CameraPreview extends Activity {
 		dialog.setTitle("Preferences");
 					
 		SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
-		 
+		createSpinner(dialog, mColor);
+		/*
 		EditText textColorEdit = (EditText) dialog.findViewById(R.id.textColor);
 		mColor = preferences.getString("vg.textColor",mColor);
 		textColorEdit.setText(mColor);
+		*/
 				
 		EditText textSizeEdit = (EditText) dialog.findViewById(R.id.textSize);
 		mTextSize = preferences.getInt("vg.textSize",mTextSize);
@@ -636,6 +648,29 @@ public class CameraPreview extends Activity {
 		});
 
 		dialog.show();
+	}
+	
+	
+	void createSpinner(Dialog dialog, String pastSelectedColor){
+		Spinner spinner = (Spinner) dialog.findViewById(R.id.colorsCombo);
+		List<String> allColors = new ArrayList<String>();
+		allColors.add("Red");
+		allColors.add("Blue");
+		allColors.add("Green");
+		
+		ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_spinner_item, allColors);
+		dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		spinner.setAdapter(dataAdapter);
+		spinner.setEnabled(true);
+		
+		int index = 0;
+		for (String color: allColors){
+			if (color.equals(pastSelectedColor)){
+				spinner.setSelection(index);
+				break;
+			}
+			index++;
+		}
 	}
 	
 	
@@ -725,16 +760,17 @@ public class CameraPreview extends Activity {
 						
 						if (imageDetails != null){
 							//image exists in file System
+							Log.i("vg","the image: "+imageNameServer +" exists in local cache");
 							displayBackgroundImage(imageNameServer, imageDetails.imagePath, !imageDetails.downloaded, imageDetails.downloaded);
 						}else{
 							//need to download
+							Log.i("vg","image: "+imageNameServer +" doesn't exist in local cache; going to server");
 							downloadNewBackgroundImage(url,imageNameServer);	
 						}
 		            }
 					
 					if (shouldHideBackgroundImage(imageNameServer,getLocalBackgroundImgName())){
-		            	mBackGroundImageView.setImageResource(R.drawable.black);
-						
+		            	mBackgroundImageView.setImageResource(R.drawable.black);
 		            	mBackgroundImgName = "";
 		        		/*mCustomCameraView.onPauseMySurfaceView();
 		        		mCustomCameraView.onResumeMySurfaceView();
@@ -742,6 +778,10 @@ public class CameraPreview extends Activity {
 		        		*/
 		        		
 		            }
+					
+					if (!mCurrentZoneNameStr.equals(mCurrentZoneName.getText())){
+						mCurrentZoneName.setText("Zone: " + mCurrentZoneNameStr);
+					}
 					
 				} catch (Exception e) {
 					 Log.e("vg", e.getMessage()+ " ; cause: "+e.getCause(), e);
@@ -752,9 +792,9 @@ public class CameraPreview extends Activity {
 			
 
 			private boolean shouldHideBackgroundImage(String imageNameServer,String localImageName) {
-				if ( imageNameServer.length() == 0 && System.currentTimeMillis() - mBackgroundImageTakenTS > (1000*10)){
-					return true;
-				}else if (imageNameServer.length() > 0 && !imageNameServer.equals(localImageName)){
+				if (System.currentTimeMillis() - mBackgroundImageTakenTS <= (1000*15) ){
+					return false;
+				}else if (imageNameServer.length() == 0 || !imageNameServer.equals(localImageName)  ){
 					return true;
 				}
 				return false;
@@ -767,7 +807,7 @@ public class CameraPreview extends Activity {
 						 Log.i("vg","file was just recently updated in the client side, waiting 15 seconds to let it be upated on the server");
 						 return false;
 					 }else{
-						 Log.i("vg","need to download img " + imageNameFromServer + " from the server, there might be a tasking already running");
+						 Log.i("vg","need to retrieve image " + imageNameFromServer + ", there might be a task already running");
 						 return true;
 					 }
 					 
@@ -807,21 +847,22 @@ public class CameraPreview extends Activity {
 						in = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
 			            String jsonBuffer = "";
 			            String line = "";
-			        
+			         
 			            while ((line = in.readLine()) != null) {
 			                jsonBuffer+= line;
 			            }
 			            in.close();
-			            Log.d("vg", jsonBuffer.toString());
+			            Log.d("vg", "on getMessages; Server reponse: "+jsonBuffer.toString());
 			            
 			            JSONObject jsonObject = new JSONObject(jsonBuffer);
 			            
+			            
+			            imageNameServer =  jsonObject.getString("imgName");	
+			            mCurrentZoneNameStr = jsonObject.getString("zoneName");
+			            
 			            JSONArray ja = null;
-			            if (jsonObject.getString("data") != null && jsonObject.getString("data").length() > 3){
+			            if (jsonBuffer.length() > 0 && jsonObject.getString("data") != null && jsonObject.getString("data").length() > 3){
 			            	ja =  new JSONArray(jsonObject.getString("data"));
-			            	imageNameServer = jsonObject.getString("imgName");	
-			            }else{
-			            	imageNameServer = "";
 			            }
 			            
 			            result =ja;
@@ -888,7 +929,7 @@ public class CameraPreview extends Activity {
 						List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
 						nameValuePairs.add(new BasicNameValuePair("cisBox",cis));
 						nameValuePairs.add(new BasicNameValuePair("userId",entity));
-						nameValuePairs.add(new BasicNameValuePair("style",mColor));
+						nameValuePairs.add(new BasicNameValuePair("style",mColor.toLowerCase()));
 						nameValuePairs.add(new BasicNameValuePair("msg",sprayText));
 						nameValuePairs.add(new BasicNameValuePair("msgDest",msgDest));
 						httpPost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
