@@ -2,9 +2,9 @@ Manifest-Version: 1.0
 Export-Package: org.societies.enterprise.collabtools;uses:="org.slf4j,
  org.societies.enterprise.collabtools.acquisition,org.osgi.framework,j
  avax.xml.xpath,javax.xml.parsers,org.xml.sax";version="0.1.0",org.soc
- ieties.enterprise.collabtools.acquisition;uses:="javax.xml.xpath,java
- x.xml.parsers,org.slf4j,org.xml.sax,org.osgi.framework,org.societies.
- context.externalBrokerConnector";version="0.1.0"
+ ieties.enterprise.collabtools.acquisition;uses:="org.slf4j,org.osgi.f
+ ramework,org.societies.context.externalBrokerConnector";version="0.1.
+ 0"
 Ignore-Package: ch.qos.logback.classic,ch.qos.logback.core,ch.qos.logb
  ack.core.joran.spi,ch.qos.logback.classic.joran
 Bundle-ClassPath: .,neo4j-kernel-1.8.M04.jar,classes,neo4j-graph-algo-
@@ -22,7 +22,7 @@ Import-Bundle: org.societies.context-management.context-3pbroker-conne
 Build-Jdk: 1.7.0_03
 Bundle-Version: 0.1.0
 Embed-Transitive: true
-Bnd-LastModified: 1364237525705
+Bnd-LastModified: 1365533868621
 Bundle-ManifestVersion: 2
 Bundle-Activator: org.societies.enterprise.collabtools.Activator
 Bundle-SymbolicName: org.societies.enterprise.CollabTools

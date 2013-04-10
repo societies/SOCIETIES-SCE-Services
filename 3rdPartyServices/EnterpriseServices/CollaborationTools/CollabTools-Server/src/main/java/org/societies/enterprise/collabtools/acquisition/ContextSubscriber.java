@@ -25,40 +25,42 @@
 
 package org.societies.enterprise.collabtools.acquisition;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
 
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.xpath.XPathExpressionException;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.societies.enterprise.collabtools.api.IContextSubscriber;
 import org.societies.enterprise.collabtools.interpretation.ContextAnalyzer;
+import org.societies.enterprise.collabtools.interpretation.ContextAnalyzer.EnrichmentTypes;
 import org.societies.enterprise.collabtools.runtime.CtxMonitor;
 import org.societies.enterprise.collabtools.runtime.SessionRepository;
-import org.xml.sax.SAXException;
 
-public class ContextSubscriber implements IContextSubscriber, Observer
+public class ContextSubscriber implements IContextSubscriber, Observer 
 {
 	private static final Logger logger = LoggerFactory.getLogger(ContextSubscriber.class);
 	private PersonRepository personRepository;
 	private SessionRepository sessionRepository;
-	InternalContextConnector ctxConnector = new InternalContextConnector(this);
+	InternalContextConnector ctxConnector;
+	private CtxMonitor monitor;
 	
 
 	public ContextSubscriber(PersonRepository personRepository, SessionRepository sessionRepository)
 	{
 		this.personRepository = personRepository;
 		this.sessionRepository = sessionRepository;
+		
+        //Starting Context Monitor
+        logger.info("Starting Context Monitor..." );
+        monitor = new CtxMonitor(personRepository, sessionRepository);
 	}
 
 	public void initialCtx(Object cisID) {
 		logger.info("Getting initial context..." );
+		ctxConnector = new InternalContextConnector(this);
 		//Parameter in this case is the group ID/cisID
 		HashMap<String, HashMap<String, String[]>> persons = ctxConnector.getInitialContext(cisID);
 		Iterator<String> personIterator = persons.keySet().iterator();
@@ -83,19 +85,8 @@ public class ContextSubscriber implements IContextSubscriber, Observer
         //Enrichment of ctx
         logger.info("Starting enrichment of context..." );
         ContextAnalyzer ctxRsn = new ContextAnalyzer(this.personRepository);
-		try {
-			ctxRsn.incrementInterestsByConcept();
-			ctxRsn.incrementInterestsByCategory();
-		} catch (XPathExpressionException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (SAXException e) {
-			e.printStackTrace();
-		} catch (ParserConfigurationException e) {
-			e.printStackTrace();
-		}
-
+			ctxRsn.incrementCtx(LongTermCtxTypes.INTERESTS, EnrichmentTypes.CONCEPT);
+			ctxRsn.incrementCtx(LongTermCtxTypes.INTERESTS, EnrichmentTypes.CATEGORY);
         
 		//Applying weight between edges
 		logger.info("Setup weight among participants..." );
@@ -108,15 +99,16 @@ public class ContextSubscriber implements IContextSubscriber, Observer
         this.registerForContextChanges(cisID);
         
         //Starting Context Monitor
-        logger.info("Starting Context Monitor..." );
-        CtxMonitor thread = new CtxMonitor(personRepository, sessionRepository);
-		thread.start(); 
+//        logger.info("Starting Context Monitor..." );
+//        monitor = new CtxMonitor(personRepository, sessionRepository);
+//	    monitor.wait();
 	}
 	
 	public void update(Observable o, Object arg)
 	{
 		//Arrays values: [0]model type, [1]string ctx value, [2]person
 		String[] msg = (String[])arg;
+		logger.info("\n");
 		logger.info("******************* update event  Ctx type*************** " + msg[0]);
 		logger.info("******************* update event  Ctx value************** " + msg[1]);
 		logger.info("******************* update event  Person***************** " + msg[2]);
@@ -132,6 +124,7 @@ public class ContextSubscriber implements IContextSubscriber, Observer
 		    shortTermCtx.put(type, context);
 	    }
 	    individual.addContextStatus(shortTermCtx, this.sessionRepository);
+	    monitor.run();
 	}
 
 	private void registerForContextChanges(Object cisID) {
@@ -139,12 +132,12 @@ public class ContextSubscriber implements IContextSubscriber, Observer
 	}
 
 	private void setContext(String type, String[] context, String person) throws Exception {
-		logger.info("******************************* Adding Context for: " + person + ", " + type + ", " + context[0].toString());
+		logger.info("******************************* Adding long term context for: " + person + ", " + type + ", " + context[0].toString());
 		
 		//Otherwise will be the first element, name : if (type == "name")
 		if (!this.personRepository.hasPerson(person)) {
 			Person individual = this.personRepository.createPerson(person);
-			individual.setLongTermCtx(Person.NAME, person);
+			individual.setLongTermCtx(LongTermCtxTypes.NAME, person);
 		}
 		
 		Person individual = this.personRepository.getPersonByName(person);
@@ -167,7 +160,7 @@ public class ContextSubscriber implements IContextSubscriber, Observer
 			individual.addContextStatus(shortTermCtx, this.sessionRepository);
 		}
 		//TODO: For now chat is default
-		individual.setLongTermCtx(Person.COLLAB_APPS, new String[] { "chat" });
+		individual.setLongTermCtx(LongTermCtxTypes.COLLAB_APPS, new String[] { "chat" });
 	}
 
 }

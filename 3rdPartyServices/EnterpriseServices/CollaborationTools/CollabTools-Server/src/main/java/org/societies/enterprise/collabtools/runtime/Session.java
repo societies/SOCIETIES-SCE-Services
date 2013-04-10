@@ -36,8 +36,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Observable;
-import java.util.Observer;
 
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Node;
@@ -49,6 +47,7 @@ import org.neo4j.graphdb.traversal.Evaluators;
 import org.neo4j.graphdb.traversal.TraversalDescription;
 import org.neo4j.helpers.collection.IterableWrapper;
 import org.neo4j.kernel.Traversal;
+import org.societies.enterprise.collabtools.acquisition.LongTermCtxTypes;
 import org.societies.enterprise.collabtools.acquisition.Person;
 import org.societies.enterprise.collabtools.acquisition.RelTypes;
 import org.societies.enterprise.collabtools.api.ICollabApps;
@@ -59,7 +58,7 @@ import org.societies.enterprise.collabtools.api.ICollabApps;
  * @author cviana
  *
  */
-public class Session implements Observer {
+public class Session {
 
 	    static final String DATE = "date";
 		static final String DATE_FORMAT = "HH:mm:ss dd-MM-yyyy";
@@ -86,7 +85,7 @@ public class Session implements Observer {
 		public Iterator<Person> getMembers()
 		{
 			Index<Node> index = this.underlyingNode.getGraphDatabase().index().forNodes("SessionNodes");
-			Iterator<Node> personNode = index.get(Person.NAME, this.getSessionName()).iterator();
+			Iterator<Node> personNode = index.get(LongTermCtxTypes.NAME, this.getSessionName()).iterator();
 			ArrayList<Person> persons = new ArrayList<Person>();
 			while (personNode.hasNext()) {
 				persons.add(new Person(personNode.next()));
@@ -130,7 +129,7 @@ public class Session implements Observer {
 				for (String key : member.getUnderlyingNode().getPropertyKeys()) {
 					tempNode.setProperty(key, member.getUnderlyingNode().getProperty(key));
 				}
-				index.add(tempNode, Person.NAME, this.getSessionName());
+				index.add(tempNode, LongTermCtxTypes.NAME, this.getSessionName());
 				
 //				//Insert members in session history..
 //				List<String> membersList = new ArrayList<String>();
@@ -160,7 +159,7 @@ public class Session implements Observer {
 			Transaction tx = this.underlyingNode.getGraphDatabase().beginTx();
 			try
 			{
-				Iterator<Node> personNode = index.get(Person.NAME, this.getSessionName()).iterator();
+				Iterator<Node> personNode = index.get(LongTermCtxTypes.NAME, this.getSessionName()).iterator();
 				Node personNodeToDelete = null;
 				Node temp = null;
 
@@ -177,7 +176,7 @@ public class Session implements Observer {
 					throw new IllegalArgumentException("Person[" + member.getName() + "] not found");
 				}
 
-				index.remove(personNodeToDelete, Person.NAME, this.getSessionName());
+				index.remove(personNodeToDelete, LongTermCtxTypes.NAME, this.getSessionName());
 
 				
 				//Updating members in session history...
@@ -231,13 +230,13 @@ public class Session implements Observer {
 
 		private void inviteMember(Person member)
 		{
-			String[] collabAppsAvailables = member.getArrayLongTermCtx(Person.COLLAB_APPS);
+			String[] collabAppsAvailables = member.getArrayLongTermCtx(LongTermCtxTypes.COLLAB_APPS);
 			this.collabApps.sendInvite(member.getName(), collabAppsAvailables, getSessionName());
 		}
 		
 		private void kickMember(Person member)
 		{
-			String[] collabAppsAvailables = member.getArrayLongTermCtx(Person.COLLAB_APPS);
+			String[] collabAppsAvailables = member.getArrayLongTermCtx(LongTermCtxTypes.COLLAB_APPS);
 			this.collabApps.sendKick(member.getName(), collabAppsAvailables, getSessionName());
 		}
 
@@ -248,14 +247,6 @@ public class Session implements Observer {
 
 		}
 
-		/* (non-Javadoc)
-		 * @see java.util.Observer#update(java.util.Observable, java.lang.Object)
-		 */
-		@Override
-		public void update(Observable o, Object arg) {
-			System.out.println("Location changed from Person.createNewStatusNode(): " + arg);
-		}
-		
 	    public Node addSessionHistoryStatus(Map ctxSessionHistory)
 	    {
 			Transaction tx = this.underlyingNode.getGraphDatabase().beginTx();

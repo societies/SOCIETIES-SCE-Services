@@ -24,10 +24,13 @@
  */
 package org.societies.enterprise.collabtools;
 
+import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.Properties;
 import java.util.Random;
+import java.util.ResourceBundle;
 
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
@@ -39,6 +42,7 @@ import org.neo4j.index.lucene.LuceneIndexProvider;
 import org.neo4j.kernel.ListIndexIterable;
 import org.neo4j.kernel.impl.cache.CacheProvider;
 import org.neo4j.kernel.impl.cache.SoftCacheProvider;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
@@ -46,6 +50,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.societies.enterprise.collabtools.acquisition.ContextSubscriber;
 import org.societies.enterprise.collabtools.acquisition.PersonRepository;
+import org.societies.enterprise.collabtools.api.ICollabAppConnector;
 import org.societies.enterprise.collabtools.runtime.CollabApps;
 import org.societies.enterprise.collabtools.runtime.SessionRepository;
 
@@ -61,14 +66,21 @@ public class Activator implements BundleActivator
     private PersonRepository personRepository;
     
 	private static Index<Node> indexPerson, indexSession, indexShortTermCtx;
-    private ServiceRegistration serviceRegistration, indexServiceRegistration, ctxSubServiceRegistration;
+    @SuppressWarnings("rawtypes")
+	private ServiceRegistration serviceRegistration, indexServiceRegistration, ctxSubServiceRegistration;
     
     ContextSubscriber ctxSub;
-    
+	private Properties prop = new Properties();
+
  
     @Override
     public void start(BundleContext context) throws Exception
     {
+//    	FileInputStream is = (FileInputStream) 	getClass().getResourceAsStream("config.properties");
+
+//		prop.load(new FileInputStream("config.properties"));
+		ResourceBundle rs = ResourceBundle.getBundle("config");
+		
         //cache providers
         ArrayList<CacheProvider> cacheList = new ArrayList<CacheProvider>();
         cacheList.add(new SoftCacheProvider());
@@ -89,18 +101,19 @@ public class Activator implements BundleActivator
         GraphDatabaseFactory gdbf = new GraphDatabaseFactory();
         gdbf.setIndexProviders(providers);
         gdbf.setCacheProviders(cacheList);
-      int random = new Random().nextInt(100);
-	    personGraphDb = gdbf.newEmbeddedDatabase("databases/PersonsGraphDb" + random );
-	    sessionGraphDb = gdbf.newEmbeddedDatabase("databases/SessionsGraphDb" + random);
+        int random = new Random().nextInt(100);
+	    personGraphDb = gdbf.newEmbeddedDatabase(rs.getString("personspath") + random );
+	    sessionGraphDb = gdbf.newEmbeddedDatabase(rs.getString("sessionspath") + random);
 	    indexPerson = personGraphDb.index().forNodes("PersonNodes");
 	    indexSession = sessionGraphDb.index().forNodes("SessionNodes");
 	    indexShortTermCtx = personGraphDb.index().forNodes("CtxNodes");
         
 
-	    HashMap<String, String> collabAppsConfig = new HashMap<String, String>();
-	    //App and server
-	    collabAppsConfig.put("chat", "societies.local");
-	    CollabApps collabApps = new CollabApps(collabAppsConfig);
+	    //Apps and server
+        //load a properties file
+	    ICollabAppConnector chat = new ChatAppIntegrator(prop.getProperty("applications"), prop.getProperty("server"));
+	    ICollabAppConnector[] connectorsApp = {chat};
+	    CollabApps collabApps = new CollabApps(connectorsApp);
 
         personRepository = new PersonRepository(personGraphDb, indexPerson);
         sessionRepository = new SessionRepository(sessionGraphDb, indexSession, collabApps);

@@ -45,8 +45,8 @@ public class InternalContextConnector implements IContextConnector {
 //	private Logger logger = LoggerFactory.getLogger(this.getClass());
 	
 	BundleContext bundleContext = FrameworkUtil.getBundle(this.getClass()).getBundleContext();
-	ServiceReference connectorServiceReference= bundleContext.getServiceReference(ExternalCtxBrokerConnector.class.getName());
-	ExternalCtxBrokerConnector connector =(ExternalCtxBrokerConnector)bundleContext.getService(connectorServiceReference);
+	ServiceReference<?> connectorServiceReference= bundleContext.getServiceReference(ExternalCtxBrokerConnector.class.getName());
+	ExternalCtxBrokerConnector ctxConnector =(ExternalCtxBrokerConnector)bundleContext.getService(connectorServiceReference);
 	private ContextSubscriber contextSubscriber;
 	
 	
@@ -55,21 +55,21 @@ public class InternalContextConnector implements IContextConnector {
 	 */
 	public InternalContextConnector(ContextSubscriber contextSubscriber) {
 		this.contextSubscriber = contextSubscriber;
-		this.connector.addObserver(this.contextSubscriber);
+		this.ctxConnector.addObserver(this.contextSubscriber);
 	}
 
 	/**
 	 * @return persons and context attributes
 	 */
 	public HashMap<String, HashMap<String, String[]>> getInitialContext(Object cisID) {
-		HashMap<String, HashMap<String, String[]>> persons = connector.retrieveLookupMembersCtxAttributes(cisID);
+		HashMap<String, HashMap<String, String[]>> persons = ctxConnector.retrieveLookupMembersCtxAttributes(cisID);
 		if (persons.isEmpty())
 			throw new NullPointerException("Community list persons cannot be null! ");
 		return persons;
 	}
 	
 	public void shortTermCtxUpdates(Object parameter) {
-		connector.registerForContextChanges(parameter);
+		ctxConnector.registerForContextChanges(parameter);
 	}
 
 	

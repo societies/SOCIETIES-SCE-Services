@@ -31,15 +31,19 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Scanner;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathExpressionException;
 
+import org.societies.enterprise.collabtools.acquisition.ContextSubscriber;
 import org.societies.enterprise.collabtools.acquisition.LongTermCtxTypes;
 import org.societies.enterprise.collabtools.acquisition.Person;
 import org.societies.enterprise.collabtools.acquisition.PersonRepository;
 import org.societies.enterprise.collabtools.acquisition.ShortTermCtxTypes;
 import org.societies.enterprise.collabtools.interpretation.ContextAnalyzer;
+import org.societies.enterprise.collabtools.interpretation.ContextAnalyzer.EnrichmentTypes;
 import org.societies.enterprise.collabtools.runtime.SessionRepository;
 import org.xml.sax.SAXException;
 
@@ -50,10 +54,12 @@ public class TestUtils {
 	private static int nrOfPersons;
     private PersonRepository personRepository;
     private SessionRepository sessionRepository;
+	private ContextSubscriber ctxSub;
     
     public TestUtils(PersonRepository personRepository,  SessionRepository sessionRepository) {
     	this.personRepository = personRepository;
         this.sessionRepository = sessionRepository;
+        ctxSub = new ContextSubscriber(personRepository, sessionRepository);
 	}
     
 	public void createPersons(int nrOfPersons) throws Exception
@@ -63,8 +69,8 @@ public class TestUtils {
         {    	
             Person person = personRepository.createPerson( "person#" + i);
             //Set long term context
-            person.setLongTermCtx(Person.NAME, "person#" + i);
-            person.setLongTermCtx(Person.COLLAB_APPS, new String[] { "chat" });
+            person.setLongTermCtx(LongTermCtxTypes.NAME, "person#" + i);
+            person.setLongTermCtx(LongTermCtxTypes.COLLAB_APPS, new String[] { "chat" });
             System.out.println("Person#" +i+" created");
         }
     }
@@ -72,15 +78,15 @@ public class TestUtils {
     public void deleteSocialGraph()
     {
 //    	clearDirectory( new File("target/PersonsGraphDb"));
-        for ( Person person : personRepository.getAllPersons() )
+        for (Person person : personRepository.getAllPersons())
         {
             personRepository.deletePerson(person);
         }
     }
 
-	public void setupFriendsBetweenPeople(String ctxType)
+	public void setupWeightAmongPeople(String ctxType)
     {
-        for ( Person person : personRepository.getAllPersons() )
+        for (Person person : personRepository.getAllPersons())
         {
 //                person.addFriend( getRandomPerson() );
         	Map<Person, Integer> persons = personRepository.getPersonWithSimilarCtx(person, ctxType);
@@ -95,20 +101,23 @@ public class TestUtils {
 	/**
 	 * 
 	 */
-	  public void createMockShortTermCtx()
-	  {
-	    Map<String, String> shortTermCtx = new HashMap<String, String>();
-	    for (Person friend : this.personRepository.getAllPersons()) {
-	      shortTermCtx.put(ShortTermCtxTypes.STATUS, getRandomStatus());
-//	      shortTermCtx.put(ShortTermCtxTypes.LOCATION, getRandomLocation());
-	      friend.addContextStatus(shortTermCtx, this.sessionRepository);
-	    }
-	    Map<String, String> shortTermCtx1 = new HashMap<String, String>();
-	    for (Person friend : this.personRepository.getAllPersons()) {
-		      shortTermCtx1.put(ShortTermCtxTypes.LOCATION, getRandomLocation());
-		      friend.addContextStatus(shortTermCtx1, this.sessionRepository);
-		    }
-	  }
+	public void createMockShortTermCtx()
+	{
+//		Map<String, String> shortTermCtx = new HashMap<String, String>();
+		for (Person friend : this.personRepository.getAllPersons()) {
+			String [] response = new String [] {ShortTermCtxTypes.STATUS, getRandomStatus(), friend.getName()};
+			ctxSub.update(null, response);
+//			shortTermCtx.put(ShortTermCtxTypes.STATUS, getRandomStatus());
+//			friend.addContextStatus(shortTermCtx, this.sessionRepository);
+		}
+//		Map<String, String> shortTermCtx1 = new HashMap<String, String>();
+		for (Person friend : this.personRepository.getAllPersons()) {
+			String [] response = new String [] {ShortTermCtxTypes.LOCATION, getRandomLocation(), friend.getName()};
+			ctxSub.update(null, response);
+//			shortTermCtx1.put(ShortTermCtxTypes.LOCATION, getRandomLocation());
+//			friend.addContextStatus(shortTermCtx1, this.sessionRepository);
+		}
+	}
 
 	/**
 	 * 
@@ -243,7 +252,7 @@ public class TestUtils {
 				createMockShortTermCtx();
 				break;
 			case 2:
-				setupFriendsBetweenPeople(LongTermCtxTypes.INTERESTS);
+				setupWeightAmongPeople(LongTermCtxTypes.INTERESTS);
 				break;
 			case 3:
 				enrichedCtx();
@@ -271,10 +280,11 @@ public class TestUtils {
 	 * @throws ParserConfigurationException
 	 */
 	public void enrichedCtx() throws XPathExpressionException, IOException,
-			SAXException, ParserConfigurationException {
-		ContextAnalyzer ctxRsn = new ContextAnalyzer(personRepository);
-		ctxRsn.incrementInterestsByConcept();
-		ctxRsn.incrementInterestsByCategory();
+	SAXException, ParserConfigurationException {
+		final ContextAnalyzer ctxRsn = new ContextAnalyzer(personRepository);
+		ctxRsn.incrementCtx(LongTermCtxTypes.INTERESTS, EnrichmentTypes.CONCEPT);
+		// context enrichment considering previous concept performed
+		ctxRsn.incrementCtx(LongTermCtxTypes.INTERESTS, EnrichmentTypes.CATEGORY);
 	}
 	
 //	private static void clearDirectory(File path)

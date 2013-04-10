@@ -36,4 +36,8 @@ public interface ICollabApps {
 	  
 	  public abstract void sendKick(String member, String[] collabApps, String sessionName);
 	  
+	  public abstract void joinEvent(String member, String[] collabApps, String sessionName);
+	  
+	  public abstract void leaveEvent(String member, String[] collabApps, String sessionName);
+	  
 }

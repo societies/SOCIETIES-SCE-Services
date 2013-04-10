@@ -27,6 +27,11 @@ package org.societies.enterprise.collabtools.runtime;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.Observable;
+import java.util.Observer;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,71 +46,69 @@ import org.societies.enterprise.collabtools.interpretation.Rules;
  * @author cviana
  *
  */
-public class CtxMonitor extends Thread{
+public class CtxMonitor implements Runnable, Observer{
 
 	private Rules conditions;
 	private SessionRepository sessionRepository;
 	private static final Logger logger  = LoggerFactory.getLogger(CtxMonitor.class);
-	private static final long SECONDS = 5 * 1000;
 
 	public CtxMonitor (PersonRepository personRepository, SessionRepository sessionRepository) {
 		conditions = new Rules(personRepository, sessionRepository);
 		this.sessionRepository = sessionRepository;
+
+//				ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+//				scheduler.submit(this);
+//				scheduler.scheduleAtFixedRate(this, 1, 3, TimeUnit.SECONDS);
 	}
 
 	public synchronized void run(){
-		try {
-			while (true) {
-
-				logger.info("Checking if people context match");
+		logger.info("Checking if people context match");
 
 
-				//First rule: location
-				Hashtable<String, HashSet<Person>> personsSameLocation = conditions.getPersonsSameLocation();
+		//First rule: location
+		Hashtable<String, HashSet<Person>> personsSameLocation = conditions.getPersonsSameLocation();
 
-				if (!personsSameLocation.isEmpty()) {
-					Enumeration<String> iterator = personsSameLocation.keys();
-					//For each different location, apply the follow rules...
-					while(iterator.hasMoreElements()) {
-						//Session name = actual location
-						String sessionName = iterator.nextElement();
-						logger.info("First rule: Location "+personsSameLocation.toString());
-						
-//						//Second rule: Company
-//						//Check company
-//						Hashtable<String, HashSet<Person>> personsWithSameCompany = conditions.getPersonsWithMatchingLongTermCtx(LongTermCtxTypes.COMPANY, personsSameLocation.get(sessionName));
-//						logger.info("Second rule: Company "+personsWithSameCompany.toString());
-						
-//						//Third rule: Interest
-//						//Check similar interest
-						Hashtable<String, HashSet<Person>> personsWithSameInterests = conditions.getPersonsByWeight(sessionName, personsSameLocation.get(sessionName));
-						logger.info("Third rule: Interests "+personsWithSameInterests.toString());
-//						
-//						//Fourth rule: Status
-//						//Check status of the user e.g busy, on phone, driving...
-//						Hashtable<String, HashSet<Person>> personsWithSameStatus = conditions.getPersonsWithMatchingShortTermCtx(ShortTermCtxTypes.STATUS, personsWithSameInterests.get(sessionName));
-//						logger.info("Fourth rule: Status "+personsWithSameStatus.toString());
-						
-						//Check conflict if actual users in the session
-			            if (!(personsWithSameInterests.get(sessionName)).isEmpty()) {
-			                if (!this.sessionRepository.containSession(sessionName)) {
-			                  logger.info("Starting a new session..");
-			                  logger.info("Inviting people..");
-			                  this.sessionRepository.createSession(sessionName);
-			                }
-			                this.sessionRepository.addMembers(sessionName, personsWithSameInterests.get(sessionName));
-			              }
+		if (!personsSameLocation.isEmpty()) {
+			Enumeration<String> iterator = personsSameLocation.keys();
+			//For each different location, apply the follow rules...
+			while(iterator.hasMoreElements()) {
+				//Session name = actual location
+				String sessionName = iterator.nextElement();
+				logger.info("First rule: Location "+personsSameLocation.toString());
+
+				//						//Second rule: Company
+				//						//Check company
+				//						Hashtable<String, HashSet<Person>> personsWithSameCompany = conditions.getPersonsWithMatchingLongTermCtx(LongTermCtxTypes.COMPANY, personsSameLocation.get(sessionName));
+				//						logger.info("Second rule: Company "+personsWithSameCompany.toString());
+
+				//						//Third rule: Interest
+				//						//Check similar interest
+				Hashtable<String, HashSet<Person>> personsWithSameInterests = conditions.getPersonsByWeight(sessionName, personsSameLocation.get(sessionName));
+				logger.info("Third rule: Interests "+personsWithSameInterests.toString());
+				//						
+				//						//Fourth rule: Status
+				//						//Check status of the user e.g busy, on phone, driving...
+				//						Hashtable<String, HashSet<Person>> personsWithSameStatus = conditions.getPersonsWithMatchingShortTermCtx(ShortTermCtxTypes.STATUS, personsWithSameInterests.get(sessionName));
+				//						logger.info("Fourth rule: Status "+personsWithSameStatus.toString());
+
+				//Check conflict if actual users in the session
+				if (!(personsWithSameInterests.get(sessionName)).isEmpty()) {
+					if (!this.sessionRepository.containSession(sessionName)) {
+						logger.info("Starting a new session..");
+						logger.info("Inviting people..");
+						this.sessionRepository.createSession(sessionName);
 					}
+					this.sessionRepository.addMembers(sessionName, personsWithSameInterests.get(sessionName));
 				}
-				//Sleep in seconds
-				Thread.sleep(SECONDS);
-
 			}
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
 	}
 
-
+	/* (non-Javadoc)
+	 * @see java.util.Observer#update(java.util.Observable, java.lang.Object)
+	 */
+	@Override
+	public void update(Observable o, Object arg) {
+		this.run();
+	}
 }

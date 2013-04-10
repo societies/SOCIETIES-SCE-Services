@@ -22,35 +22,41 @@
  * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.societies.enterprise.collabtools.runtime;
+package org.societies.enterprise.collabtools;
 
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import org.jivesoftware.smack.ConnectionConfiguration;
 import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smackx.Form;
+import org.jivesoftware.smackx.muc.DefaultParticipantStatusListener;
 import org.jivesoftware.smackx.muc.HostedRoom;
 import org.jivesoftware.smackx.muc.MultiUserChat;
-import org.societies.enterprise.collabtools.api.ICollabAppIntegrator;
+import org.societies.enterprise.collabtools.api.ICollabAppConnector;
 
 
 /**
- * Integrator for Chat application, in this case Openfire XMPP
+ * Connector for Chat application, in this case Openfire XMPP
  *
  * @author Christopher Viana Lima
  *
  */
-public class ChatAppIntegrator implements ICollabAppIntegrator {
+public class ChatAppIntegrator implements ICollabAppConnector {
 
+	private static String APP_NAME;
 	private static String HOST;
 	private XMPPConnection connection;
+	private MultiUserChat muc;
 
 	/**
 	 * 
 	 */
-	public ChatAppIntegrator(String host) {
+	public ChatAppIntegrator(final String appName, final String host) {
+		ChatAppIntegrator.APP_NAME = appName;
 		ChatAppIntegrator.HOST = host;
 		setup();
 	}
@@ -59,6 +65,7 @@ public class ChatAppIntegrator implements ICollabAppIntegrator {
 	 * 
 	 */
 	public ChatAppIntegrator() {
+		//Default server
 		ChatAppIntegrator.HOST = "societies.local";
 		setup();
 	}
@@ -68,30 +75,40 @@ public class ChatAppIntegrator implements ICollabAppIntegrator {
 	 */
 	@Override
 	public void setup() {
-		System.out.println("Openfire setup with host: "+HOST);
+		System.out.println("Openfire setup with host: "+ChatAppIntegrator.HOST);
 		ConnectionConfiguration config = new ConnectionConfiguration(ChatAppIntegrator.HOST, 5222);
 		config.setDebuggerEnabled(false);
 		XMPPConnection connection = new XMPPConnection(config);
 		try {
 			connection.connect();
-			connection.login("admin", "admin");
+			connection.loginAnonymously();
 		} catch (XMPPException e) {
-			// TODO Auto-generated catch block
-			throw new IllegalArgumentException("Verify host name and if user admin was created in Openfire Server");
+			//try as admin
+			try {
+				connection.login("admin", "admin");
+			} catch (XMPPException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+			throw new IllegalArgumentException("Verify host name and if you can login anonymously in Openfire Server");
 			//			e.printStackTrace();
 		}
 		this.connection = connection;
-
 	}
 
 	/* (non-Javadoc)
 	 * @see org.societies.enterprise.collabtools.api.ICollabAppIntegrator#join(java.lang.String)
 	 */
 	@Override
-	public void join(String user, String room) throws XMPPException {
-		MultiUserChat muc = new MultiUserChat(this.connection, room+"@conference."+HOST);
+	public void join(String user, String room) {
+		muc = new MultiUserChat(this.connection, room+"@conference."+HOST);
 		System.out.println("room: "+room);
-		Collection<HostedRoom> rooms = MultiUserChat.getHostedRooms(this.connection, "conference."+HOST);
+		Collection<HostedRoom> rooms = null;
+		try {
+			rooms = MultiUserChat.getHostedRooms(this.connection, "conference."+HOST);
+		} catch (XMPPException e) {
+			e.printStackTrace();
+		}
 		Iterator<HostedRoom> it = rooms.iterator();
 		boolean roomAlreadyExist = false;
 		while(it.hasNext()){
@@ -104,9 +121,32 @@ public class ChatAppIntegrator implements ICollabAppIntegrator {
 			}
 		}
 		if (!roomAlreadyExist){
-			muc.create(room);
-			//Empty form to create instant room 
-			muc.sendConfigurationForm(new Form(Form.TYPE_SUBMIT));
+			try {
+		        muc = new MultiUserChat(connection, room+"@conference."+HOST);
+		        muc.addParticipantStatusListener(new DefaultParticipantStatusListener() 
+		        {       
+		            @Override
+		            public void joined(String participant)
+		            {
+		            	joined(participant);
+		            }
+		        
+		            public void kicked(String participant, String actor, String reason)
+		            {
+		            	leaveEvent(participant);
+		            }
+		        
+		            public void left(String participant)
+		            {
+		            	leaveEvent(participant);
+		            }
+		        });
+				muc.create(room);
+				//Empty form to create instant room 
+				muc.sendConfigurationForm(new Form(Form.TYPE_SUBMIT));
+			} catch (XMPPException e) {
+				e.printStackTrace();
+			}
 		}
 		//TODO: Change message to inform which context information trigger the event 
         muc.invite(user+"@"+HOST, "CollabTools is inviting you to join "+room+" room");
@@ -116,11 +156,51 @@ public class ChatAppIntegrator implements ICollabAppIntegrator {
 	 * @see org.societies.enterprise.collabtools.api.ICollabAppIntegrator#kick(java.lang.String)
 	 */
 	@Override
-	public void kick(String user, String room) throws XMPPException {
-		MultiUserChat muc = new MultiUserChat(this.connection, room+"@conference."+HOST);
+	public void kick(String user, String room) {
+		muc = new MultiUserChat(this.connection, room+"@conference."+HOST);
 		//TODO: Change message to inform which context information trigger the event 
-		muc.kickParticipant(user, "Context change");
-		muc.kickParticipant(user+"@"+HOST, "Context change");
+		try {
+			// TODO Insert context reason!E.g. location changed
+			muc.kickParticipant(user, "Context change");
+			muc.kickParticipant(user+"@"+HOST, "Context change");
+		} catch (XMPPException e) {
+			e.printStackTrace();
+		}
+	}
+
+	/* (non-Javadoc)
+	 * @see org.societies.enterprise.collabtools.api.ICollabAppConnector#getAppName()
+	 */
+	@Override
+	public String getAppName() {
+		return APP_NAME;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.societies.enterprise.collabtools.api.ICollabAppConnector#getAppServerName()
+	 */
+	@Override
+	public String getAppServerName() {
+		return HOST;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.societies.enterprise.collabtools.api.ICollabAppConnector#joinEvent()
+	 */
+	@Override
+	public void joinEvent(String participant) {
+		// TODO Auto-generated method stub
+		System.out.println("Participant joined: "+ participant);
+		
+	}
+
+	/* (non-Javadoc)
+	 * @see org.societies.enterprise.collabtools.api.ICollabAppConnector#leaveEvent()
+	 */
+	@Override
+	public void leaveEvent(String participant) {
+		// TODO Auto-generated method stub
+		System.out.println("Participant left: "+ participant);
 	}
 
 }

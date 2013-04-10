@@ -36,18 +36,22 @@ import javax.xml.xpath.XPathExpressionException;
 import org.societies.enterprise.collabtools.acquisition.LongTermCtxTypes;
 import org.societies.enterprise.collabtools.acquisition.Person;
 import org.societies.enterprise.collabtools.acquisition.PersonRepository;
-import org.societies.enterprise.collabtools.api.IContextReasoning;
+import org.societies.enterprise.collabtools.api.IContextAnalyzer;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 /**
- * Describe your class here...
+ * Context Analyzer implementation suing Alchemy api
  *
  * @author cviana
  *
  */
-public class ContextAnalyzer implements IContextReasoning {
+public class ContextAnalyzer implements IContextAnalyzer {
+	
+	public static enum EnrichmentTypes {
+		CONCEPT, CATEGORY
+	}
 
 	private PersonRepository personRepository;
 	//TODO: api key hardcoded....
@@ -61,75 +65,64 @@ public class ContextAnalyzer implements IContextReasoning {
 	}
 
 	//Concepts enriched by Alchemy API
-	private final String[] ctxEnrichedByConcept(String[] interests) throws XPathExpressionException, IOException, SAXException, ParserConfigurationException{
+	private final String[] ctxEnrichment(String[] contexts, String ctxType, EnrichmentTypes enrichmentType){
 		// Create an AlchemyAPI object.
 		//AlchemyAPI api key, enable to 1000 queries a day
 		AlchemyAPISimple alchemyObj = AlchemyAPISimple.GetInstanceFromString(APIKEY);
 
-		Set<String> setInterests = new HashSet<String>(); 
+		Set<String> ctxCollection = new HashSet<String>(); 
 		// Extract concept tags for a text string.
-		for (String interest : interests) {
-			setInterests.add(interest);
-			//Check if interest is null
-			System.out.println("Interest: "+interest);
+		for (String ctx : contexts) {
+			ctxCollection.add(ctx);
+			//Check if context is null
+			System.out.println("Context "+ctxType+ " enriched by "+enrichmentType+": "+ctx);
 			//Check if word has at least 5 letters
-			if (interest.length() > 5){
-				Document doc = alchemyObj.TextGetRankedConcepts(interest);
+			if (ctx.length() > 5){
+				Document doc = null;
+				try {
+					if (enrichmentType.equals(EnrichmentTypes.CATEGORY)) {
+						doc = alchemyObj.TextGetCategory(ctx);
+					}
+					if (enrichmentType.equals(EnrichmentTypes.CONCEPT)) {
+						doc = alchemyObj.TextGetRankedConcepts(ctx);
+					}
+				} catch (XPathExpressionException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (SAXException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (ParserConfigurationException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 				if (doc != null) {
 					NodeList result = doc.getElementsByTagName("text");
 					for (int i = 0; i < result.getLength(); i++) {
-						setInterests.add(result.item(i).getTextContent().toLowerCase());
+						ctxCollection.add(result.item(i).getTextContent().toLowerCase());
 					}
 				}
 			}
 		}
-		return setInterests.toArray(new String[setInterests.size()]);
+		return ctxCollection.toArray(new String[ctxCollection.size()]);
 	}
 	
 	//Categorization enriched by Alchemy API
-	private final String[] ctxEnrichedByCategorization(String[] interests) throws XPathExpressionException, IOException, SAXException, ParserConfigurationException{
-		// Create an AlchemyAPI object.
-		//AlchemyAPI api key, enable to 1000 queries a day
-		AlchemyAPISimple alchemyObj = AlchemyAPISimple.GetInstanceFromString(APIKEY);
-
-		Set<String> setInterests = new HashSet<String>(); 
-		// Extract concept tags for a text string.
-		for (String interest : interests) {
-			setInterests.add(interest);
-			//Check if interest is null
-			System.out.println("Interest: "+interest);
-			//Check if word has at least 5 letters
-			if (interest.length() > 5){
-				Document doc = alchemyObj.TextGetCategory(interest);
-				if (doc != null) {
-					NodeList result = doc.getElementsByTagName("text");
-					for (int i = 0; i < result.getLength(); i++) {
-						setInterests.add(result.item(i).getTextContent().toLowerCase());
-					}
-				}
-			}
-		}
-		return setInterests.toArray(new String[setInterests.size()]);
-	}
 	
 	/**
-	 * @throws ParserConfigurationException 
-	 * @throws SAXException 
-	 * @throws IOException 
-	 * @throws XPathExpressionException 
+	 * 
+	 * ctxType Long term Context type. e.g LongTermCtxTypes.INTERESTS
+	 * enrichmentType concept or category
 	 * 
 	 */
-	public void incrementInterestsByConcept() throws XPathExpressionException, IOException, SAXException, ParserConfigurationException {
+	public void incrementCtx(String ctxType, EnrichmentTypes enrichmentType) {
     	for (Person friend :personRepository.getAllPersons()) {
-    		String[] newInterests = ctxEnrichedByConcept(friend.getArrayLongTermCtx(LongTermCtxTypes.INTERESTS));
-    		friend.setLongTermCtx(LongTermCtxTypes.INTERESTS, newInterests);
-    	}		
-	}
-	
-	public void incrementInterestsByCategory() throws XPathExpressionException, IOException, SAXException, ParserConfigurationException {
-    	for (Person friend :personRepository.getAllPersons()) {
-    		String[] newInterests = ctxEnrichedByCategorization(friend.getArrayLongTermCtx(LongTermCtxTypes.INTERESTS));
-    		friend.setLongTermCtx(LongTermCtxTypes.INTERESTS, newInterests);
+    		String[] newContexts = ctxEnrichment(friend.getArrayLongTermCtx(ctxType), ctxType.toString(), enrichmentType);
+    		friend.setLongTermCtx(ctxType, newContexts);
+    		System.out.println(enrichmentType+" done!");
     	}		
 	}
 	

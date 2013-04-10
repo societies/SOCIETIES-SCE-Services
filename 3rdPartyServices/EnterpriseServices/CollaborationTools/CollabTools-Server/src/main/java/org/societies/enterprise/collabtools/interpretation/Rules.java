@@ -26,6 +26,7 @@ package org.societies.enterprise.collabtools.interpretation;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -78,12 +79,14 @@ public class Rules {
 	}
 
 	public synchronized Hashtable<String, HashSet<Person>> getPersonsWithMatchingShortTermCtx(final String ctxAtributte, HashSet<Person> personHashSet) {
-		//Compare symbolic location
+		//Compare ctxAtributte
 		this.hashCtxList.clear();
-		HashSet<ShortTermContextUpdates> lastUpdates = new HashSet<ShortTermContextUpdates>();
+		Set<ShortTermContextUpdates> lastUpdates = new HashSet<ShortTermContextUpdates>();
 		Iterator<Person> it = personHashSet.iterator();
-		while(it.hasNext())
+		while(it.hasNext()) {
 			lastUpdates.add(it.next().getLastStatus());
+		}
+		lastUpdates.removeAll(Collections.singleton(null));
 		ShortTermContextUpdates[] statusUpdateArray = new ShortTermContextUpdates[lastUpdates.size()];
 		lastUpdates.toArray(statusUpdateArray);
 		return  getUniqueElements(statusUpdateArray, ctxAtributte);	
@@ -91,9 +94,10 @@ public class Rules {
 
 	/**
 	 * @param ctxAtributte
-	 * @param personsSameLocation
+	 * @param hashsetPersons
 	 * @return 
 	 */
+	@SuppressWarnings("unchecked")
 	public Hashtable<String, HashSet<Person>> getPersonsWithMatchingLongTermCtx(final String ctxAtributte, HashSet<Person> hashsetPersons) {
 		//For long term context types
 		this.hashCtxList.clear();
@@ -140,11 +144,9 @@ public class Rules {
 	}
 
 	/**
-	 * @param lastUpdates
-	 * @return
+	 * @return Hashtable of all graph people in the same location
 	 */
 	public Hashtable<String, HashSet<Person>> getPersonsSameLocation() {
-		log.info("Checking last short term context...");
 		HashSet<Person> personHashSet = new HashSet<Person>();
 		for (Person person : personRepository.getAllPersons() ) {
 			personHashSet.add(person);
@@ -152,26 +154,11 @@ public class Rules {
 		return getPersonsWithMatchingShortTermCtx(ShortTermCtxTypes.LOCATION, personHashSet);
 	}
 
-	//	/**
-	//	 * @param unique
-	//	 * @param statusList
-	//	 * @return
-	//	 */
-	//	private int[] getDuplicateIndices(ContextUpdates[] unique, ContextUpdates[] statusList) {
-	//        int[] indices = new int[unique.length];
-	//        for(int j = 0; j < unique.length; j++) {
-	//            for(int k = 0; k < statusList.length; k++) {
-	//                if(unique[j].equals(statusList[k]))
-	//                    indices[j]++;
-	//            }
-	//        }
-	//        return indices;
-	//	}
-
 	/**
 	 * @param statusList
 	 * @return
 	 */
+	@SuppressWarnings("unchecked")
 	private Hashtable<String, HashSet<Person>>  getUniqueElements(ShortTermContextUpdates[] statusArray, final String ctxAttribute) {
 		ShortTermContextUpdates[] temp = new ShortTermContextUpdates[statusArray.length]; // null elements
 		log.info("Number of persons: "+temp.length+" with context "+ctxAttribute);
@@ -183,10 +170,6 @@ public class Rules {
 		Hashtable<String, HashSet<Person>>  hashCtxList = new Hashtable<String, HashSet<Person>>(10,10);
 		hashCtxList = (Hashtable<String, HashSet<Person>>) this.hashCtxList.clone();
 		return hashCtxList;
-
-		//		StatusUpdate[] uniqueStrs = new StatusUpdate[count];
-		//		System.arraycopy(temp, 0, uniqueStrs, 0, count);
-		//		return uniqueStrs;
 	}
 
 	private boolean hasSameShortTermCtx(ShortTermContextUpdates ctx, ShortTermContextUpdates[] temp, final String ctxAttribute) {
@@ -207,18 +190,6 @@ public class Rules {
 		return true;
 	}
 
-	//	/**
-	//	 * @param statusText
-	//	 * @param temp
-	//	 * @return
-	//	 */
-	//	private boolean isUnique(String statusText, ContextUpdates[] temp) {
-	//        for(int j = 0; j < temp.length; j++) {
-	//            if(temp[j] != null && statusText.equals(temp[j].getStatusText()))
-	//                return false;
-	//        }
-	//        return true;
-	//	}
 	
 	/**
 	 * @param interests

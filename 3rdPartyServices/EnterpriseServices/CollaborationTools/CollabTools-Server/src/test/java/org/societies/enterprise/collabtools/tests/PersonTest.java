@@ -48,6 +48,7 @@ import org.societies.enterprise.collabtools.acquisition.LongTermCtxTypes;
 import org.societies.enterprise.collabtools.acquisition.Person;
 import org.societies.enterprise.collabtools.acquisition.PersonRepository;
 import org.societies.enterprise.collabtools.acquisition.ShortTermCtxTypes;
+import org.societies.enterprise.collabtools.api.ICollabAppConnector;
 import org.societies.enterprise.collabtools.interpretation.ContextAnalyzer;
 import org.societies.enterprise.collabtools.runtime.CollabApps;
 import org.societies.enterprise.collabtools.runtime.SessionRepository;
@@ -71,7 +72,7 @@ public class PersonTest
 		index = graphDb.index().forNodes( "nodes" );
 		indexStatus = graphDb.index().forNodes( "status" );
 		personRepository = new PersonRepository( graphDb, index );
-		sessionRepository = new SessionRepository( sessionGraphDb,index, new CollabApps(null) );
+		sessionRepository = new SessionRepository( sessionGraphDb,index, new CollabApps() );
 		registerShutdownHook();
 
 	}
@@ -250,7 +251,7 @@ public class PersonTest
 		Person start = personRepository.createPerson( "start"  );
 		start.setLongTermCtx(LongTermCtxTypes.WORK, "company" );
 		Person middleMan1 = personRepository.createPerson( "middle1" );
-		middleMan1.setLongTermCtx(LongTermCtxTypes.WORK, "company" );
+		middleMan1.setLongTermCtx(LongTermCtxTypes.WORK.toString(), "company" );
 		Person middleMan2 = personRepository.createPerson( "middle2" );
 		middleMan2.setLongTermCtx(LongTermCtxTypes.WORK, "company" );
 		Person endMan = personRepository.createPerson( "endMan");
@@ -377,7 +378,7 @@ public class PersonTest
 
 	private static String name( final Node node )
 	{
-		return (String) node.getProperty( Person.NAME );
+		return (String) node.getProperty(LongTermCtxTypes.NAME);
 	}
 
 	private static String name( final List<Node> nodes )
@@ -385,7 +386,7 @@ public class PersonTest
 		String[] names = new String[nodes.size()];
 		for ( int i = 0; i < names.length; i++ )
 		{
-			names[i] = (String) nodes.get( i ).getProperty( Person.NAME );
+			names[i] = (String) nodes.get( i ).getProperty(LongTermCtxTypes.NAME);
 		}
 		return Arrays.toString( names );
 	}

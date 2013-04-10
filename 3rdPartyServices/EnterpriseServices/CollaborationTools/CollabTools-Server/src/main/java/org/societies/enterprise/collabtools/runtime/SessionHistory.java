@@ -80,7 +80,7 @@ public class SessionHistory extends Observable
     
     public Date getDate()
     {
-        String strdate = (String)underlyingNode.getProperty( DATE );
+        String strdate = (String)underlyingNode.getProperty(DATE);
         SimpleDateFormat formatter = new SimpleDateFormat(DATE_FORMAT);
         Date date = null;
 		try {

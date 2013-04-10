@@ -96,14 +96,14 @@ public class PersonRepository
             Node newPersonNode = graphDb.createNode();
             personRefNode.createRelationshipTo(newPersonNode, A_PERSON);
             // lock now taken, we can check if  already exist in index
-            Node alreadyExist = index.get(Person.NAME, name).getSingle();
+            Node alreadyExist = index.get(LongTermCtxTypes.NAME, name).getSingle();
             if (alreadyExist != null)
             {
                 tx.failure();
                 throw new Exception("Person with this name already exists ");
             }
-            newPersonNode.setProperty(Person.NAME, name);
-            index.add(newPersonNode, Person.NAME, name);
+            newPersonNode.setProperty(LongTermCtxTypes.NAME, name);
+            index.add(newPersonNode, LongTermCtxTypes.NAME, name);
             tx.success();
             Person person = new Person(newPersonNode);
             //TODO:VERIFIY OBSERVER
@@ -119,7 +119,7 @@ public class PersonRepository
 
     public Person getPersonByName(String name)
     {
-        Node personNode = index.get(Person.NAME, name).getSingle();
+        Node personNode = index.get(LongTermCtxTypes.NAME, name).getSingle();
         if ( personNode == null )
         {
             throw new IllegalArgumentException( "Person[" + name
@@ -130,7 +130,7 @@ public class PersonRepository
     
     public boolean hasPerson(String name)
     {
-        Node personNode = index.get(Person.NAME, name).getSingle();
+        Node personNode = index.get(LongTermCtxTypes.NAME, name).getSingle();
         if (personNode == null)
         	return false;
         return true;
@@ -143,9 +143,9 @@ public class PersonRepository
     	{
         	int counter = 0;
     		if (!self.equals(person)) {
-    			List<String> personInterest = Arrays.asList(person.getArrayLongTermCtx(property));
+    			List<String> personCtx = Arrays.asList(person.getArrayLongTermCtx(property));
     			for (String match : self.getArrayLongTermCtx(property)) {    			
-    				if (personInterest.contains(match)) {
+    				if (personCtx.contains(match)) {
     					counter++;
     					persons.put(person, counter);
     				}
@@ -168,7 +168,7 @@ public class PersonRepository
 //        IndexManager indexManager =  graphDb.index();
 //        Index<Node> index = indexManager.forNodes("company",MapUtil.stringMap(IndexManager.PROVIDER, "lucene", "type", "fulltext"));
 //        IndexHits<Node> hits = index.query("company", new QueryContext("*"));
-//        Node personNode = index.get( Person.NAME, name ).getSingle();
+//        Node personNode = index.get( LongTermCtxTypes.NAME, name ).getSingle();
 //        if ( personNode == null )
 //        {
 //            throw new IllegalArgumentException( "Property from Person[" + name
@@ -185,7 +185,7 @@ public class PersonRepository
         try
         {
             Node personNode = person.getUnderlyingNode();
-            index.remove( personNode, Person.NAME, person.getName() );
+            index.remove( personNode, LongTermCtxTypes.NAME, person.getName() );
             for ( Person friend : person.getFriends() )
             {
                 person.removeFriend( friend );

@@ -24,30 +24,34 @@
  */
 package org.societies.enterprise.collabtools.api;
 
-import org.jivesoftware.smack.XMPPException;
-
 /**
- * Setup collaborative application. 1..1
+ * Setup collaborative application. 0..1
  *
  * @author cviana
  *
  */
-public interface ICollabAppIntegrator {
+public interface ICollabAppConnector {
+	
+	public String getAppName();
+	
+	public String getAppServerName();
 	
 	public void setup();
 	
 	/**
 	 * @param user
 	 * @param room
-	 * @throws XMPPException 
 	 */
-	void join(String user, String room) throws XMPPException;
+	void join(String user, String room);
 	
 	/**
 	 * @param user
 	 * @param room
-	 * @throws XMPPException 
 	 */
-	void kick(String user, String room) throws XMPPException;
+	void kick(String user, String room);
+	
+	void joinEvent(String participant);
+	
+	void leaveEvent(String participant);
 
 }

@@ -57,10 +57,10 @@ public final class ContextActivity {
 	
 	//Get context which change a few times
 	@Deprecated
-	public Hashtable<String, String[]> getPersonPropertiesContext(PersonRepository personRepository, final String ctxAttribute) {
+	public Hashtable<String, String[]> getPersonPropertiesContext(PersonRepository personRepository, String ctxAttribute) {
 		Hashtable<String, String[]> hashTable = new Hashtable<String, String[]>();
 		for (Person person : personRepository.getAllPersons() ) {
-			String[] interests = person.getArrayLongTermCtx(LongTermCtxTypes.INTERESTS);
+			String[] interests = person.getArrayLongTermCtx(ctxAttribute);
 			String personName = person.getName();
 			hashTable.put(personName, interests);
 		}

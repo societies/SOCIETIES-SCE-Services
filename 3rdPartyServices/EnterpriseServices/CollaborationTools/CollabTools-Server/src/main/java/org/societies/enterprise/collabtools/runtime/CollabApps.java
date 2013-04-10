@@ -24,55 +24,41 @@
  */
 package org.societies.enterprise.collabtools.runtime;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-
-import org.jivesoftware.smack.XMPPException;
+import org.societies.enterprise.collabtools.api.ICollabAppConnector;
 import org.societies.enterprise.collabtools.api.ICollabApps;
 
 /**
- * Describe your class here...
+ * Manager for Collaborative Applications
  *
  * @author Christopher Viana Lima
  *
  */
 public class CollabApps implements ICollabApps
 {
-	private static HashMap<String, String> collabAppsConfig;
-	//Instanciate the collab app
-	ChatAppIntegrator chat = new ChatAppIntegrator();
+	private ICollabAppConnector[] collabAppsconnectors;
 
-	//Application type and server application
-	public CollabApps(HashMap<String, String> collabAppsConfig)
+	public CollabApps(ICollabAppConnector... connectors)
 	{
-		CollabApps.collabAppsConfig = collabAppsConfig;
+		this.collabAppsconnectors =  connectors;
 	}
 
 	//member and applications available from this user
 	@Override
 	public void sendInvite(String member, String[] collabApps, String sessionName)
 	{
-//		System.out.println("collabAppsConfig.isEmpty(): "+collabAppsConfig.isEmpty());
-		Iterator<?> it = collabAppsConfig.entrySet().iterator();
-		while (it.hasNext()) {
-			Map.Entry pairs = (Map.Entry)it.next();
-			if (Arrays.asList(collabApps).contains(pairs.getKey()))
-			{
-				//TODO:Start invitation
-				System.out.println("Send invitation to member: " + member + " using app " + pairs.getKey());
-				try {
-					chat.join(member, sessionName);
-				} catch (XMPPException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+		for (String app : collabApps){
+			for (ICollabAppConnector connector : collabAppsconnectors) {
+				if (connector.getAppName().contains(app)){
+					//TODO:Start invitation
+					System.out.println("Send invitation to member: " + member + " using app " + connector.getAppName());
+					connector.join(member, sessionName);
+				}
+				else {				
+					throw new IllegalArgumentException(connector.getAppName()+" application not available");
 				}
 			}
-			else {				
-				throw new IllegalArgumentException(pairs.getKey()+" application not available");
-			}
 		}
+
 	}
 
 	/* (non-Javadoc)
@@ -80,14 +66,36 @@ public class CollabApps implements ICollabApps
 	 */
 	@Override
 	public void sendKick(String member, String[] collabApps, String sessionName) {
-		try {
-			System.out.println("Kicking member: " + member);
-			chat.kick(member, sessionName);
-		} catch (XMPPException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		for (String app : collabApps){
+			for (ICollabAppConnector connector : collabAppsconnectors) {
+				if (connector.getAppName().contains(app)){
+					//TODO:Start invitation
+					System.out.println("Kicking member: " + member);
+					connector.kick(member, sessionName);
+				}
+				else {				
+					throw new IllegalArgumentException(connector.getAppName()+" application not available");
+				}
+			}
 		}
-		
 	}
 
+	/* (non-Javadoc)
+	 * @see org.societies.enterprise.collabtools.api.ICollabApps#joinEvent(java.lang.String, java.lang.String[], java.lang.String)
+	 */
+	@Override
+	public void joinEvent(String member, String[] collabApps, String sessionName) {
+		// TODO Auto-generated method stub
+
+	}
+
+	/* (non-Javadoc)
+	 * @see org.societies.enterprise.collabtools.api.ICollabApps#leaveEvent(java.lang.String, java.lang.String[], java.lang.String)
+	 */
+	@Override
+	public void leaveEvent(String member, String[] collabApps,
+			String sessionName) {
+		// TODO Auto-generated method stub
+
+	}
 }

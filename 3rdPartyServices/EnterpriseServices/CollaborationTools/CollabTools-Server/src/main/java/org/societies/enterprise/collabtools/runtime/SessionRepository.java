@@ -41,6 +41,7 @@ import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.index.Index;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.societies.enterprise.collabtools.acquisition.LongTermCtxTypes;
 import org.societies.enterprise.collabtools.acquisition.Person;
 import org.societies.enterprise.collabtools.acquisition.RelTypes;
 import org.societies.enterprise.collabtools.acquisition.ShortTermCtxTypes;
@@ -132,7 +133,7 @@ public class SessionRepository implements Observer {
 
 	private synchronized boolean isInSession(Person person, String session)
 	{
-		Iterator<Node> personNode = this.indexSession.get(Person.NAME, session).iterator();
+		Iterator<Node> personNode = this.indexSession.get(LongTermCtxTypes.NAME, session).iterator();
 		while (personNode.hasNext()) {
 			Node temp = (Node)personNode.next();
 			if (person.getName().equals(new Person(temp).getName()))

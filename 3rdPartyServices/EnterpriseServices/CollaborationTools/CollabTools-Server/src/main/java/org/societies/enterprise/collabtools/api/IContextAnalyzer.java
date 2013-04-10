@@ -24,22 +24,18 @@
  */
 package org.societies.enterprise.collabtools.api;
 
-import java.io.IOException;
+import org.societies.enterprise.collabtools.interpretation.ContextAnalyzer.EnrichmentTypes;
 
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.xpath.XPathExpressionException;
-
-import org.xml.sax.SAXException;
 
 
 /**
- * Describe your class here...
+ * Interface for Context Analyzer
  *
  * @author cviana
  *
  */
-public interface IContextReasoning {
+public interface IContextAnalyzer {
 	
-	public void incrementInterestsByConcept() throws XPathExpressionException, IOException, SAXException, ParserConfigurationException;
+	public void incrementCtx(String ctxType, EnrichmentTypes enrichmentType);
 
 }

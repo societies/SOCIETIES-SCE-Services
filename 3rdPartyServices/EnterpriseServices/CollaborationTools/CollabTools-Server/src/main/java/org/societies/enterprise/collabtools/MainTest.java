@@ -25,7 +25,8 @@
 package org.societies.enterprise.collabtools;
 
 import java.io.File;
-import java.util.HashMap;
+import java.io.FileInputStream;
+import java.util.Properties;
 
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
@@ -37,6 +38,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.societies.enterprise.collabtools.acquisition.LongTermCtxTypes;
 import org.societies.enterprise.collabtools.acquisition.PersonRepository;
+import org.societies.enterprise.collabtools.api.ICollabAppConnector;
 import org.societies.enterprise.collabtools.runtime.CollabApps;
 import org.societies.enterprise.collabtools.runtime.CtxMonitor;
 import org.societies.enterprise.collabtools.runtime.SessionRepository;
@@ -57,28 +59,32 @@ public class MainTest {
 	private static PersonRepository personRepository;
 	private static SessionRepository sessionRepository; 
 	private static Index<Node> indexPerson, indexSession, indexShortTermCtx;
-
+	
+	private static Properties prop = new Properties();
+	
 	/**
 	 * @param args
 	 * @throws Exception 
 	 */
 	public static void main(String[] args) throws Exception {
 
-	    FileUtils.deleteRecursively(new File("target/PersonsGraphDb"));
-	    FileUtils.deleteRecursively(new File("target/SessionsGraphDb"));
+		prop.load(new FileInputStream("src/main/resources/config.properties"));
+
+	    FileUtils.deleteRecursively(new File(prop.getProperty("personspath")));
+	    FileUtils.deleteRecursively(new File(prop.getProperty("sessionspath")));
 		
 		//Database setup
 		logger.info("Database setup");
 		GraphDatabaseFactory gdbf = new GraphDatabaseFactory();
-	    personGraphDb = gdbf.newEmbeddedDatabase("target/PersonsGraphDb");
-	    sessionGraphDb = gdbf.newEmbeddedDatabase("target/SessionsGraphDb");
+	    personGraphDb = gdbf.newEmbeddedDatabase(prop.getProperty("personspath"));
+	    sessionGraphDb = gdbf.newEmbeddedDatabase(prop.getProperty("sessionspath"));
 	    indexPerson = personGraphDb.index().forNodes("PersonNodes");
 	    indexSession = sessionGraphDb.index().forNodes("SessionNodes");
 	    indexShortTermCtx = personGraphDb.index().forNodes("CtxNodes");
 	    
-	    HashMap<String, String> collabAppsConfig = new HashMap<String, String>();
-	    collabAppsConfig.put("chat", "societies.local");
-	    CollabApps collabApps = new CollabApps(collabAppsConfig);
+	    ICollabAppConnector chat = new ChatAppIntegrator(prop.getProperty("applications"), prop.getProperty("server"));
+	    ICollabAppConnector[] connectorsApp = {chat};
+	    CollabApps collabApps = new CollabApps(connectorsApp);
 
 	    personRepository = new PersonRepository(personGraphDb, indexPerson);
 	    sessionRepository = new SessionRepository(sessionGraphDb, indexSession, collabApps);
@@ -98,7 +104,7 @@ public class MainTest {
 		test.createMockLongTermCtx();
 		test.createMockShortTermCtx();
 		test.enrichedCtx();
-		test.setupFriendsBetweenPeople(LongTermCtxTypes.INTERESTS);
+		test.setupWeightAmongPeople(LongTermCtxTypes.INTERESTS);
 
 		
 //		YouMightKnow ymn = new YouMightKnow(personRepository.getPersonByName("person#"+3), new String[] {"project planning"}, 5);
@@ -108,9 +114,8 @@ public class MainTest {
 
 		//Find people to create dynamic relationship
 
-		System.out.println("Starting Context Monitor..." );
-		CtxMonitor thread = new CtxMonitor(personRepository, sessionRepository);
-		thread.start();
+//		System.out.println("Starting Context Monitor..." );
+//		new CtxMonitor(personRepository, sessionRepository);
 
 		//Creating more updates
 		while (true) {
