@@ -260,6 +260,8 @@ public class JacketMenuActivity extends Activity {
  	private void registerContentObservers() {
 	  ContentResolver cr = getContentResolver();
 	  
+	  	  
+	  
 	  actObs = new ActivityContentObserver( obsHandler );
 	  Uri activURI = Uri.parse(SocialContract.AUTHORITY_STRING + SocialContract.UriPathIndex.COMMUNITY_ACTIVITIY);
 	  cr.registerContentObserver(activURI , true, actObs );
@@ -357,6 +359,7 @@ public class JacketMenuActivity extends Activity {
  
 	class ActivityContentObserver extends ContentObserver {
 		  Handler h = null;
+		  //long lastActivityIndex = -1; 
 		  
 		  public ActivityContentObserver( Handler h ) {
 			  super( h );
@@ -378,55 +381,58 @@ public class JacketMenuActivity extends Activity {
 		     try{
 		    	 long row = ContentUris.parseId(uri);
 		    	 
-         		SharedPreferences mypref = getSharedPreferences(IJacketApp.PREF_FILE_NAME, MODE_PRIVATE);
-     			long jid = mypref.getLong(IJacketApp.CIS_JID_PREFERENCE_TAG, -1);
-     			if(jid == -1){
-     				Log.d("LOG_TAG", "no community on obersever..." );
-     				return;
-     			}
-		    	 
-		    	 
-		    	 String mSelectionClause = SocialContract.CommunityActivity._ID + " = ? and " + SocialContract.CommunityActivity._ID_FEED_OWNER + " = ? and " + SocialContract.CommunityActivity.TARGET + " = ?" ;
-		    	 String[] mSelectionArgs = {Long.toString(row),jid +"",org.societies.thirdpartyservices.ijacketlib.IJacketDefines.AccountData.IJACKET_SERVICE_NAME};
-		    	 ContentResolver cr = getContentResolver();
-		    	 Uri otherUri =  Uri.parse(SocialContract.AUTHORITY_STRING + SocialContract.UriPathIndex.COMMUNITY_ACTIVITIY);
-		    	 Log.d("LOG_TAG", "test " +  uri.getAuthority() + uri.getPath());
-		    	 Cursor cursor = cr.query(otherUri,null,mSelectionClause,mSelectionArgs,null);
-				if (cursor != null && cursor.getCount() >0) {
-				    while (cursor.moveToNext()) {
-				    	String actor = cursor.getString(cursor.getColumnIndex(SocialContract.CommunityActivity.ACTOR));
-				    	String verb  = cursor.getString(cursor.getColumnIndex(SocialContract.CommunityActivity.VERB));
-				    	String obj = cursor.getString(cursor.getColumnIndex(SocialContract.CommunityActivity.OBJECT));
-				        Log.d("LOG_TAG", "found activity " + actor);
-				        IJacketApp appState = (IJacketApp) (getApplication());
-				        if( appState.isTestMode()){
-				        	// if it is on test mode, I just launch a toast when something is observed
-				        	h.post(new MyRunnable(actor + " " + verb + " " +obj) );
-				        	
-				        	
-				        }else{
-				        	if (verb.equals(IJacketDefines.Verbs.DISPLAY))
-				        		con.print(obj, false);
-				        	if (verb.equals(IJacketDefines.Verbs.RING))
-				        		con.data(new byte[]{100, 75, 52, 15}, false);
-				        	if (verb.equals(IJacketDefines.Verbs.VIBRATE)){
-			             		//Vibrate mobile
-			             		Vibrator vib = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-			             		vib.vibrate(2000);
-			             		
-			             		
-			             		//Vibrate remote module
-								con.write(vibrationButton.pin, true, false);
-			                 	Thread.sleep(2000);
-			                 	con.write(vibrationButton.pin, false, false);
-				        	}
-				        		
-				        }
-				    }
-				} else {
-					Log.d(LOG_TAG, "no activity that triggered my criteria");
-				}
-				if(null != cursor) cursor.close();
+		    	 //if(row>lastActivityIndex){ // test so we are sure we dont print old activities. This test and the lastActivityIndex variable form a hack due to the syncing problems 
+		    	//	lastActivityIndex = row; 
+	         		SharedPreferences mypref = getSharedPreferences(IJacketApp.PREF_FILE_NAME, MODE_PRIVATE);
+	     			long jid = mypref.getLong(IJacketApp.CIS_JID_PREFERENCE_TAG, -1);
+	     			if(jid == -1){
+	     				Log.d("LOG_TAG", "no community on obersever..." );
+	     				return;
+	     			}
+			    	 
+			    	 
+			    	 String mSelectionClause = SocialContract.CommunityActivity._ID + " = ? and " + SocialContract.CommunityActivity._ID_FEED_OWNER + " = ? and " + SocialContract.CommunityActivity.TARGET + " = ?" ;
+			    	 String[] mSelectionArgs = {Long.toString(row),jid +"",org.societies.thirdpartyservices.ijacketlib.IJacketDefines.AccountData.IJACKET_SERVICE_NAME};
+			    	 ContentResolver cr = getContentResolver();
+			    	 Uri otherUri =  Uri.parse(SocialContract.AUTHORITY_STRING + SocialContract.UriPathIndex.COMMUNITY_ACTIVITIY);
+			    	 Log.d("LOG_TAG", "test " +  uri.getAuthority() + uri.getPath());
+			    	 Cursor cursor = cr.query(otherUri,null,mSelectionClause,mSelectionArgs,null);
+					if (cursor != null && cursor.getCount() >0) {
+					    while (cursor.moveToNext()) {
+					    	String actor = cursor.getString(cursor.getColumnIndex(SocialContract.CommunityActivity.ACTOR));
+					    	String verb  = cursor.getString(cursor.getColumnIndex(SocialContract.CommunityActivity.VERB));
+					    	String obj = cursor.getString(cursor.getColumnIndex(SocialContract.CommunityActivity.OBJECT));
+					        Log.d("LOG_TAG", "found activity " + actor);
+					        IJacketApp appState = (IJacketApp) (getApplication());
+					        if( appState.isTestMode()){
+					        	// if it is on test mode, I just launch a toast when something is observed
+					        	h.post(new MyRunnable(actor + " " + verb + " " +obj) );
+					        	
+					        	
+					        }else{
+					        	if (verb.equals(IJacketDefines.Verbs.DISPLAY))
+					        		con.print(obj, false);
+					        	if (verb.equals(IJacketDefines.Verbs.RING))
+					        		con.data(new byte[]{100, 75, 52, 15}, false);
+					        	if (verb.equals(IJacketDefines.Verbs.VIBRATE)){
+				             		//Vibrate mobile
+				             		Vibrator vib = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+				             		vib.vibrate(2000);
+				             		
+				             		
+				             		//Vibrate remote module
+									con.write(vibrationButton.pin, true, false);
+				                 	Thread.sleep(2000);
+				                 	con.write(vibrationButton.pin, false, false);
+					        	}
+					        		
+					        }
+					    }
+					} else {
+						Log.d(LOG_TAG, "no activity that triggered my criteria");
+					}
+					if(null != cursor) cursor.close();
+		     	//}// end of row vs index test 
 			}catch (Exception e) {
 				// TODO Auto-generated catch block
 				Log.d(LOG_TAG, "exception in the create");

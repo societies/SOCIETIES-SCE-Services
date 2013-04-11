@@ -284,7 +284,7 @@ public class IJacketClient extends Activity implements OnItemSelectedListener {
     	        	mSelectionClause = SocialContract.Sharing._ID_SERVICE + " = ? AND " + SocialContract.Sharing.TYPE + " = ? AND " + SocialContract.Sharing._ID_OWNER + " = ?";
     	        	mSelectionArgs[2] = this.CSS_sharing_jacket + "";
     	        }else{
-    	        	mSelectionArgs = new String[1];
+    	        	mSelectionArgs = new String[2];
     	        	mSelectionArgs[0] = this.iJacketServiceId + "";
     	        	mSelectionArgs[1] = SocialContract.ServiceConstants.SERVICE_SHARED;
     	        	mSelectionClause = SocialContract.Sharing._ID_SERVICE + " = ? AND " + SocialContract.Sharing.TYPE + " = ?";

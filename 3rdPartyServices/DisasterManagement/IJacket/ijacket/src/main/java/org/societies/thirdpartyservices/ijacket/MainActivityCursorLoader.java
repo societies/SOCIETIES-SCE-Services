@@ -34,6 +34,11 @@ public class MainActivityCursorLoader extends ListFragment implements
     	serviceId = servId;	
     }
     
+    public MainActivityCursorLoader(){
+    	super();
+    }
+    
+    
     Uri COMUNITIES_URI = Uri.parse(SocialContract.AUTHORITY_STRING + SocialContract.UriPathIndex.COMMUNITIES);
 
     
