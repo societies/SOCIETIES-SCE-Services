@@ -12,6 +12,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.ImageView;
 
 public class MainActivity extends Activity {
 
@@ -35,6 +36,14 @@ public class MainActivity extends Activity {
 			}
 		});
 
+		ImageView launchImage = (ImageView) findViewById(R.id.imageView1);
+		launchImage.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View arg0) {
+				Intent intent = new Intent(context, WebViewer.class);
+				startActivity(intent);
+			}
+		});
 	}
 	
 	@Override
