@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="org.societies.thirdpartyservices.crowdtasking"
-    android:versionCode="6"
+    android:versionCode="7"
     android:versionName="1.0" >
 
     <uses-sdk
@@ -33,9 +33,18 @@
 	            <category android:name="android.intent.category.DEFAULT" />
 	            <category android:name="android.intent.category.BROWSABLE" />
 	                <data android:scheme="http"
-	                  android:host="crowdtasking.appspot.com" />
+	                  android:host="crowdtasking.appspot.com" 
+	                  android:pathPrefix="/task"/>
 	        </intent-filter>
 	        <intent-filter>
+	            <action android:name="android.intent.action.VIEW" />
+	            <category android:name="android.intent.category.DEFAULT" />
+	            <category android:name="android.intent.category.BROWSABLE" />
+	                <data android:scheme="http"
+	                  android:host="crowdtasking.appspot.com" 
+	                  android:pathPrefix="/community"/>
+	        </intent-filter>
+	        	        <intent-filter>
 	            <action android:name="android.nfc.action.NDEF_DISCOVERED" />
 	            <category android:name="android.intent.category.DEFAULT" />
 	            <category android:name="android.intent.category.BROWSABLE" />
