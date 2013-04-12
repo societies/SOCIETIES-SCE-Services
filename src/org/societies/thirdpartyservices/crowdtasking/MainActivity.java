@@ -117,6 +117,7 @@ public class MainActivity extends Activity implements SensorEventListener {
         setContentView(R.layout.activity_main);
         
 		webView = (WebView) findViewById(R.id.webView);
+		//webView.clearCache(true);
         webView.setInitialScale(1);
         webView.getSettings().setJavaScriptEnabled(true);
         webView.getSettings().setLoadWithOverviewMode(true);
@@ -281,7 +282,7 @@ public class MainActivity extends Activity implements SensorEventListener {
     @Override
     public void onPause() {
         super.onPause();
-    	//unregisterReceiver(receiver);
+    	unregisterReceiver(receiver);
     	sensorManager.unregisterListener(this);
     }
   	
@@ -301,8 +302,21 @@ public class MainActivity extends Activity implements SensorEventListener {
         	if (historyUrl.equalsIgnoreCase(APPLICATION_URL+"/menu") ||
         			historyUrl.startsWith(APPLICATION_URL+"/login")) {
         		super.onBackPressed();
+        		return;
+        	}/*
+        	if (historyUrl.equalsIgnoreCase(APPLICATION_URL+"/task/new#&ui-state=dialog")) {
+        		// ignore back press from multi select because it clears all fields
+        		//return;
+        	}*/
+        	if (historyUrl.equalsIgnoreCase(APPLICATION_URL+"/task/new") ||
+        			historyUrl.startsWith(APPLICATION_URL+"/community/edit")) {
+        		//webView.loadUrl("javascript:CrowdTaskingApp.cancelTask();");
+    			Toast toast = Toast.makeText(getApplicationContext(), "Use Save or Cancel button.", Toast.LENGTH_SHORT);
+    			toast.show();
         	}
-        	webView.goBack();
+        	else {
+            	webView.goBack();
+        	}
         }
         else {
             super.onBackPressed();
@@ -320,6 +334,8 @@ public class MainActivity extends Activity implements SensorEventListener {
 
             case R.id.home:
             	webView.loadUrl(APPLICATION_URL);
+            	// reload
+            	//webView.loadUrl(webView.getUrl());
             	return true;
             
             case R.id.checkUpdate:
@@ -530,8 +546,12 @@ public class MainActivity extends Activity implements SensorEventListener {
 			toast.show();
 		}
 		
+		public void goBack() {
+			mAppView.goBack();
+		}
+		
 		public String loginData() {
-			final String JS_SETELEMENT = "javascript:document.getElementById('%s').value='%s'";
+			//final String JS_SETELEMENT = "javascript:document.getElementById('%s').value='%s'";
 
             /*String columns [] = {CSSContentProvider.CssRecord.CSS_RECORD_CSS_IDENTITY,
                     CSSContentProvider.CssRecord.CSS_RECORD_EMAILID,
