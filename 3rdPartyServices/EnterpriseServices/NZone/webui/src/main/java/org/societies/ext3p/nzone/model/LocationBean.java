@@ -1,12 +1,9 @@
 package org.societies.ext3p.nzone.model;  
   
-import java.io.Serializable;   
+import java.io.Serializable;
 import java.util.List;
 
 import javax.faces.bean.ApplicationScoped;
-import javax.faces.bean.ManagedBean;
-import javax.faces.bean.ManagedProperty;
-import javax.faces.bean.SessionScoped;
 
 import org.societies.api.ext3p.nzone.client.INZoneClient;
 import org.societies.api.ext3p.schema.nzone.ZoneDetails;

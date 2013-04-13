@@ -3,6 +3,7 @@ package org.societies.ext3p.nzone.server;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.Future;
 
 import org.slf4j.Logger;
@@ -12,6 +13,7 @@ import org.societies.api.cis.attributes.Rule;
 import org.societies.api.cis.management.ICis;
 import org.societies.api.cis.management.ICisManager;
 import org.societies.api.cis.management.ICisOwned;
+import org.societies.api.cis.management.ICisParticipant;
 import org.societies.api.comm.xmpp.interfaces.ICommManager;
 import org.societies.api.context.broker.ICtxBroker;
 import org.societies.api.context.model.CtxAttribute;
@@ -39,6 +41,7 @@ import org.societies.api.schema.identity.DataIdentifierScheme;
 
 
 
+@SuppressWarnings("deprecation")
 public class NZoneServer implements INZoneServer{
 	
 	
@@ -54,11 +57,10 @@ public class NZoneServer implements INZoneServer{
 	private ICisOwned mainCis;
 	private List<ICisOwned> subZones;
 	private Requestor requestor;
+
 	
-	//TODO : Probably move to somehwere
-	private static String nzoneMemberOfCxtAttr = "nzoneMemberOf";
-	private static String nzoneLocationCxtAttr = CtxAttributeTypes.LOCATION_SYMBOLIC.toString();
-		
+	
+	
 	
 	public NZoneServer()	
 	{
@@ -72,10 +74,9 @@ public class NZoneServer implements INZoneServer{
 		if (requestor == null)
 			requestor = new Requestor(getCommManager().getIdManager().getThisNetworkNode());
 		
-		if (getContextAtribute(nzoneMemberOfCxtAttr) == null)
-			updateContextAtribute(nzoneMemberOfCxtAttr, "true");
-		if (getContextAtribute(nzoneLocationCxtAttr) == null)
-			updateContextAtribute(nzoneLocationCxtAttr, "");
+		
+		if (getContextAtribute(CtxAttributeTypes.LOCATION_SYMBOLIC.toString()) == null)
+			updateContextAtribute(CtxAttributeTypes.LOCATION_SYMBOLIC.toString(), "");
 		
 		
 		netZoneDetails = getNzoneDirectory().getZoneDetails();
@@ -88,6 +89,11 @@ public class NZoneServer implements INZoneServer{
 		
 		for ( int index = 0; index < netZoneDetails.size(); index++)
 		{
+			
+			if (this.getContextAtribute(netZoneDetails.get(index).getCtxAttribName()) == null)
+				updateContextAtribute(netZoneDetails.get(index).getCtxAttribName(), "true");
+		
+			
 			// Check to see if a CIS exists for the networking zone
 			// if it doesn't create one
 			List<ICis> netCisList  = getCisManager().searchCisByName(netZoneDetails.get(index).getZonename());
@@ -106,7 +112,7 @@ public class NZoneServer implements INZoneServer{
 				memberOf.add("true");
 				Rule r = new Rule("equals",memberOf);
 				m.setRule(r);
-				cisCriteria.put(nzoneMemberOfCxtAttr, m);
+				cisCriteria.put(netZoneDetails.get(index).getCtxAttribName(), m);
 				
 				if (netZoneDetails.get(index).getMainzone() != 1)
 				{
@@ -116,12 +122,21 @@ public class NZoneServer implements INZoneServer{
 					symbolicLocations.add(netZoneDetails.get(index).getZonelocation());
 					Rule r2 = new Rule("equals",symbolicLocations);
 					m2.setRule(r2);
-					cisCriteria.put(nzoneLocationCxtAttr, m2);
+					cisCriteria.put(CtxAttributeTypes.LOCATION_SYMBOLIC.toString(), m2);
 				}
 				
-				Future<ICisOwned> cisResultFut = getCisManager().createCis(
+				Future<ICisOwned> cisResultFut = null;
+				
+						if (netZoneDetails.get(index).getCisCategory().isEmpty() == false)
+						{
+							cisResultFut = getCisManager().createCis(
+									netZoneDetails.get(index).getZonename(),
+									netZoneDetails.get(index).getCisCategory(),cisCriteria,netZoneDetails.get(index).getZonename(), createPrivacyPolicy(netZoneDetails.get(index).getCtxAttribName()).toXMLString());
+						}else{
+							cisResultFut = getCisManager().createCis(
 							netZoneDetails.get(index).getZonename(),
-							"RICH",cisCriteria,netZoneDetails.get(index).getZonename(), createPrivacyPolicy().toXMLString());	
+							"RICH",cisCriteria,netZoneDetails.get(index).getZonename(), createPrivacyPolicy(netZoneDetails.get(index).getCtxAttribName()).toXMLString());
+						}
 				try {
 					ICisOwned netCis = cisResultFut.get();
 					netZoneDetails.get(index).setZonemembercount(netCis.getMemberList().size());
@@ -214,28 +229,24 @@ public class NZoneServer implements INZoneServer{
 
 	
 	
-	private RequestPolicy createPrivacyPolicy()
+
+	private RequestPolicy createPrivacyPolicy(String contextAttribName)
 	{
-		// TODO : do this with data from database
-		List<Action> actionsRo = new ArrayList<Action>();
-		actionsRo.add(new Action(ActionConstants.READ));
-		//actionsRo.add(new Action(ActionConstants.WRITE));
-		actionsRo.add(new Action(ActionConstants.CREATE));
+	
+		List<Action> actionsRC = new ArrayList<Action>();
+		actionsRC.add(new Action(ActionConstants.READ));
+		actionsRC.add(new Action(ActionConstants.CREATE));
 		
 
-		List<Condition> conditionsMembersOnly = new ArrayList<Condition>();
+		List<Condition> conditionsPublic = new ArrayList<Condition>();
 		
-		// ConditionConstants.SHARE_WITH_CIS_MEMBERS_ONLY, doesn't work for entrepirse trial, as of 26/3/2013 , known issue
-		//conditionsMembersOnly.add(new Condition(ConditionConstants.SHARE_WITH_CIS_MEMBERS_ONLY, "1"));
-		conditionsMembersOnly.add(new Condition(ConditionConstants.SHARE_WITH_3RD_PARTIES,  "1", false));
-		conditionsMembersOnly.add(new Condition(ConditionConstants.STORE_IN_SECURE_STORAGE,  "1", false));
-		//conditionsMembersOnly.add(new Condition(ConditionConstants.SHARE_WITH_3RD_PARTIES, "Yes"));
-		
+		conditionsPublic.add(new Condition(ConditionConstants.SHARE_WITH_3RD_PARTIES,  "1", false));
+		conditionsPublic.add(new Condition(ConditionConstants.STORE_IN_SECURE_STORAGE,  "1", false));
 		
 		List<RequestItem> requests = new ArrayList<RequestItem>();
-		requests.add(new RequestItem(new Resource(DataIdentifierScheme.CONTEXT, nzoneMemberOfCxtAttr), actionsRo, conditionsMembersOnly));
-		requests.add(new RequestItem(new Resource(DataIdentifierScheme.CONTEXT, nzoneLocationCxtAttr), actionsRo, conditionsMembersOnly));
-		requests.add(new RequestItem(new Resource(DataIdentifierScheme.CIS, "cis-member-list"), actionsRo, conditionsMembersOnly));
+		requests.add(new RequestItem(new Resource(DataIdentifierScheme.CONTEXT, contextAttribName), actionsRC, conditionsPublic));
+		requests.add(new RequestItem(new Resource(DataIdentifierScheme.CONTEXT, CtxAttributeTypes.LOCATION_SYMBOLIC.toString()), actionsRC, conditionsPublic));
+		requests.add(new RequestItem(new Resource(DataIdentifierScheme.CIS, "cis-member-list"), actionsRC, conditionsPublic));
 
 		RequestPolicy privacyPolicy = new RequestPolicy(requests);
 		
@@ -362,6 +373,7 @@ public class NZoneServer implements INZoneServer{
 			 {
 				 friendDets.setEmail("");
 				 friendDets.setHomelocation("");
+				 friendDets.setSex("");
 			 }
 			
 		
@@ -433,7 +445,98 @@ public class NZoneServer implements INZoneServer{
 		
 		return true;
 	}
-	
+
+	public boolean updateUserLocation(String userid, String location) {
+		UserDetails userDets = getNzoneDirectory().getUserRecord(userid);
+		
+		if (userDets == null)
+			return false;
+		
+		if (userDets.getCurrentzone() == null)
+			userDets.setCurrentzone(new String(location));
+		else
+			userDets.setCurrentzone(location);
+		
+		getNzoneDirectory().updateUserRecord(userDets);
+		
+		return true;
+	}
+
+	@Override
+	public List<UserDetails> getZoneMembers(int zoneno) {
+		
+		List<UserDetails> userDets = new ArrayList<UserDetails>();
+		 UserDetails friendDets = null;
+		 ShareInfo sharedInfo = null;
+		
+		
+		 String cisid = getNetZoneDetails().get(zoneno).getCisid();
+		 
+		for ( int i = 0; i < subZones.size(); i++)
+		{
+			if (subZones.get(i).getCisId().contains(cisid))
+			{
+				Set<ICisParticipant> memberList = subZones.get(i).getMemberList();
+				
+				for(ICisParticipant mem : memberList)
+				{
+					if (!requestor.getRequestorId().getBareJid().contains(mem.getMembersJid()))
+					{
+					friendDets = getNzoneDirectory().getUserRecord(mem.getMembersJid());
+					sharedInfo = getNzoneDirectory().getShareInfo(mem.getMembersJid(), "0");
+					
+					
+					 //Blank of the info they don't want to share with this user
+					 if ((sharedInfo.getShareHash() & NZoneConsts.SHARE_ABOUT) != NZoneConsts.SHARE_ABOUT) 
+						 friendDets.setAbout("");
+				
+					 if ((sharedInfo.getShareHash() & NZoneConsts.SHARE_PERSONAL) != NZoneConsts.SHARE_PERSONAL)
+					 {
+						 friendDets.setEmail("");
+						 friendDets.setHomelocation("");
+						 friendDets.setSex("");
+					 }
+					
+				
+					 if ((sharedInfo.getShareHash() & NZoneConsts.SHARE_EMPLOYMENT)  != NZoneConsts.SHARE_EMPLOYMENT)
+					 {
+						 friendDets.setCompany("");
+						 friendDets.setPosition("");
+					 }
+					 
+					 if ((sharedInfo.getShareHash() & NZoneConsts.SHARE_SOCIAL)  != NZoneConsts.SHARE_SOCIAL)
+					 {
+						 friendDets.setAbout("");
+						 friendDets.setFacebookID("");
+						 friendDets.setTwitterID("");
+						 friendDets.setGoogleplusID("");
+						 friendDets.setLinkedInID("");
+						 friendDets.setFoursqID("");
+					 }
+					 
+					 if ((sharedInfo.getShareHash() & NZoneConsts.SHARE_INTERESTS)  != NZoneConsts.SHARE_INTERESTS)
+					 	 friendDets.getInterests().clear();
+					
+					 userDets.add(friendDets);
+					}
+				}
+				return userDets;
+			}
+		}
+		
+		
+		return userDets;
+		
+		
+	}
+
+	@Override
+	public String getZoneName(int arg0) {
+		return getNetZoneDetails().get(arg0).getZonename();
+	}
+
+
+
 		
 }
 

@@ -2,19 +2,16 @@ package org.societies.ext3p.nzone.model;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.atomic.AtomicBoolean;
 
-import javax.annotation.PostConstruct;
 import javax.faces.bean.ApplicationScoped;
-import javax.faces.bean.ManagedBean;
-import javax.faces.bean.ManagedProperty;
-import javax.faces.bean.SessionScoped;
-
+import javax.faces.event.ComponentSystemEvent;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.societies.api.ext3p.nzone.client.INZoneClient;
 import org.societies.api.ext3p.schema.nzone.ZoneDetails;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
@@ -28,21 +25,47 @@ public class MainBean implements Serializable {
 	
 	private static Logger log = LoggerFactory.getLogger(MainBean.class);
 	
+	final Semaphore checkinit = new Semaphore(1, true);
+	
 
 	private String zoneName;
 	private int currentZone;
 	private String zoneImage;
+	
+	private boolean initiailiseClient;
+	//private AtomicBoolean initialisingClient;
 
 	private List<ZoneDetails> dets;
 
 	public MainBean() {
 		currentZone = 0;
+		initiailiseClient = false;
+		//initialisingClient.getAndSet(false);
 	}
 	
-	@PostConstruct
-	public void init()
+		 
+	public void checkinit(ComponentSystemEvent ev)
 	{
-		this.getNzoneClient().delayedInit();
+		try {
+			checkinit.acquire();
+			if (!initiailiseClient)
+			{
+				
+				this.getNzoneClient().delayedInit();
+				
+				initiailiseClient = true;
+			}
+			
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally
+		{
+			//TODO : check if we know that he have gotten this???
+			checkinit.release();
+		}
+		
+		
 	}
 
 	/**

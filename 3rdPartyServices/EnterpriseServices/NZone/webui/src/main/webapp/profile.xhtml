@@ -35,7 +35,7 @@
 					<h:outputText id="email" value="#{profileBean.email}" />
 					<br/>	
 					<br/>
-					<h:outputText value="Sex" style="font-weight:bold" />
+					<h:outputText value="Gender:" style="font-weight:bold" />
 					<h:outputText id="sex" value="#{profileBean.sex}" />
 					<br/><br/><br/>
 				
@@ -59,69 +59,13 @@
         			 <p:selectManyCheckbox value="#{profileBean.selectedInterests}">  
             		   <f:selectItem itemLabel="Cloud Computing" itemValue="cloud" />  
 			           <f:selectItem itemLabel="Internet Of Things" itemValue="internet" />  
-            		   <f:selectItem itemLabel="Future of the Internet" itemValue="future" />  
+            		   <f:selectItem itemLabel="Future of the Internet" itemValue="future" />
+            		   <f:selectItem itemLabel="Entrepreneur" itemValue="entre" />  
 			        </p:selectManyCheckbox>  
 					<br/><br/><br/>
 					<p:separator style="color: black;"/>
 
-					<h:outputText value="Share my Social Network Data: " style="font-weight:bold" /> <pm:switch value="#{profileBean.sharesns}" onLabel="Yes" offLabel="No"  style="width:100%" />  
-        			<br/>
-					<p:graphicImage value="/images/facebook-col.png" width="30" height="25" />
-					<h:outputLabel for="facebooktrue" value="Facebook:"
-							style="font-weight:bold" rendered="#{profileBean.facebookid.isEmpty() == false}"/>
-					<h:outputText id="facebooktrue" value="#{profileBean.facebookid}"
-							rendered="#{profileBean.facebookid.isEmpty() == false}"/>
-					<h:outputLabel for="facebookfalse" value="Facebook:"
-							style="font-weight:bold" rendered="#{profileBean.facebookid.isEmpty()}"/>
-					<h:outputText id="facebookfalse" value="Not connected"
-							rendered="#{profileBean.facebookid.isEmpty()}"/>
-					<br/>
-					<p:graphicImage value="/images/twitter-col.png" width="30" height="25" />
-					<h:outputLabel for="twittertrue" value="Twitter:"
-							style="font-weight:bold" rendered="#{profileBean.twitterid.isEmpty() == false}"/>
-					<h:outputText id="twittertrue" value="#{profileBean.twitterid}"
-							rendered="#{profileBean.twitterid.isEmpty() == false}"/>
-					<h:outputLabel for="twitterfalse" value="Twitter:"
-							style="font-weight:bold" rendered="#{profileBean.twitterid.isEmpty()}"/>
-					<h:outputText id="twitterfalse" value="Not connected"
-							rendered="#{profileBean.twitterid.isEmpty()}"/>
-					<br/>
-					<p:graphicImage value="/images/linkedin-col.png" width="30" height="25" />
-					<h:outputLabel for="linkedintrue" value="LinkedIn:"
-							style="font-weight:bold" rendered="#{profileBean.linkedinid.isEmpty() == false}"/>
-					<h:outputText id="linkedintrue" value="#{profileBean.linkedinid}"
-							rendered="#{profileBean.linkedinid.isEmpty() == false}"/>
-					<h:outputLabel for="linkedinfalse" value="LinkedIn:"
-							style="font-weight:bold" rendered="#{profileBean.linkedinid.isEmpty()}"/>
-					<h:outputText id="linkedinfalse" value="Not connected"
-							rendered="#{profileBean.linkedinid.isEmpty()}"/>
-					<br/>
-					<p:graphicImage value="/images/googleplus-col.png" width="30" height="25" />
-					<h:outputLabel for="goggleplustrue" value="Google+:"
-							style="font-weight:bold" rendered="#{profileBean.googleplusid.isEmpty() == false}"/>
-					<h:outputText id="goggleplustrue" value="#{profileBean.googleplusid}"
-							rendered="#{profileBean.googleplusid.isEmpty() == false}"/>
-					<h:outputLabel for="goggleplusfalse" value="Google+:"
-							style="font-weight:bold" rendered="#{profileBean.googleplusid.isEmpty()}"/>
-					<h:outputText id="goggleplusfalse" value="Not connected"
-							rendered="#{profileBean.googleplusid.isEmpty()}"/>
-					<br/>
-					<p:graphicImage value="/images/foursquare-col.png" width="30" height="25" />
-					<h:outputLabel for="foursqtrue" value="FourSq:"
-							style="font-weight:bold" rendered="#{profileBean.foursqid.isEmpty() == false}"/>
-					<h:outputText id="foursqtrue" value="#{profileBean.foursqid}"
-							rendered="#{profileBean.foursqid.isEmpty() == false}"/>
-					<h:outputLabel for="foursqfalse" value="FourSq:"
-							style="font-weight:bold" rendered="#{profileBean.foursqid.isEmpty()}"/>
-					<h:outputText id="foursqfalse" value="Not connected"
-							rendered="#{profileBean.foursqid.isEmpty()}"/>
-					<br/>
-
-					<br/><br/><br/>							
-       				<p:separator style="color: black;"/>
-       
-					<p:commandButton icon="back" value="Back to Main Zone"
-						action="#{profileBean.saveProfile}" />
+					<p:commandButton icon="back" value="Back to Conference Zone" action="#{profileBean.saveProfile}" />
 				</h:form>
 				
 			</pm:content>

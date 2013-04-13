@@ -1,18 +1,13 @@
 package org.societies.ext3p.nzone.model;  
   
-import java.io.Serializable;   
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.faces.bean.ApplicationScoped;
-import javax.faces.event.ValueChangeEvent;
-import javax.faces.event.ValueChangeListener;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.societies.api.ext3p.nzone.client.INZoneClient;
-import org.societies.api.ext3p.schema.nzone.UserDetails;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
   
 @SuppressWarnings("serial")

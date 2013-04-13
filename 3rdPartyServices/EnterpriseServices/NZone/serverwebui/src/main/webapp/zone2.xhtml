@@ -1,0 +1,66 @@
+<f:view xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:pm="http://primefaces.org/mobile" contentType="text/html">
+
+	<pm:page title="Networking Zone">
+		<pm:view id="viewZone2">
+		
+		<pm:header title="#{zone2PeopleBean.zoneName}" />
+			<pm:content>
+		
+			
+			<p:layout id="layout" style="min-width:400px;min-height:1300px;" >
+			
+			 <p:layoutUnit position="west" resizable="false" size="33%"  style="background-color:#000000">
+				
+       		</p:layoutUnit>
+
+    		<p:layoutUnit position="center" resizable="false" size="30%" >
+       
+    
+			
+			<div style="text-align:center" >
+			<br/>
+			
+			<p:graphicImage value="#{zone2PeopleBean.zoneimage}"  width="300" height="200" />
+			<br/>
+			<br/>
+			<br/>
+			</div>
+			<p:accordionPanel id="ZoneMembers" collapsible="false">
+				<p:tab title="Zone Members">
+						<h:form id="form">
+						<div style="text-align:center" >
+							<p:dataTable id="peoplelist" value="#{zone2PeopleBean.suggestions}" var="mainperson" >
+								<p:column style="width:20%"><p:graphicImage value="/images/profile_pic.jpg"  width="40" height="36" /> </p:column>
+								<p:column style="width:35%" headerText="Name" > #{mainperson.displayName}</p:column>
+								<p:column style="width:35%" headerText="Company" > #{mainperson.company} </p:column>
+							</p:dataTable>
+							
+							<p:poll interval="#{peopleBean.refreshrate}" update="peoplelist" />
+						</div>	
+						</h:form>
+					</p:tab>
+			<br/>
+			<br/>
+			<br/>	
+			</p:accordionPanel>
+			
+			</p:layoutUnit>
+			
+			
+			
+			 <p:layoutUnit position="east" resizable="false" size="30%" style="background-color:#000000">
+       		</p:layoutUnit>
+       		</p:layout>
+			
+			</pm:content>
+		</pm:view>
+		
+	</pm:page>
+</f:view>
+
+

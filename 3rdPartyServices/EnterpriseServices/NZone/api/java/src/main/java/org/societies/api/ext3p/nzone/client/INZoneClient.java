@@ -39,11 +39,6 @@ public interface INZoneClient {
 	
 	public void updateMyInterests(List<String> interests);
 	
-	
-
-	public void recordActionShowProfile();
-	public void recordActionEnterZone();
-	
 	public int getCurrentZone();
 	
 	public boolean isProfileSetup();
@@ -54,8 +49,8 @@ public interface INZoneClient {
 	
 	public void updateLocationManual(String zoneLoc);
 	
-	public void userViewingPreferredProfile();
-	public void userSharedWithViewPreferredProfile();
+//	public void userViewingPreferredProfile();
+//	public void userSharedWithViewPreferredProfile();
 	
 	
 }

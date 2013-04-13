@@ -47,6 +47,7 @@
 				<xs:enumeration value="getShareInfo"/>
 				<xs:enumeration value="updateShareInfo"/>
 				<xs:enumeration value="updateInterests"/>
+				<xs:enumeration value="updateUserZone"/>
 			</xs:restriction>
 		</xs:simpleType>
 		
@@ -58,6 +59,8 @@
 				<xs:element name="zonelocationdisplay" type="xs:string" minOccurs="0" />
 				<xs:element name="zonetopics" type="xs:string" minOccurs="0" />
 				<xs:element name="mainzone" type="xs:int" minOccurs="0" />
+				<xs:element name="ctxAttribName" type="xs:string" minOccurs="0" />
+				<xs:element name="cisCategory" type="xs:string" minOccurs="0" />
 				<xs:element name="zonemembercount" type="xs:int" minOccurs="0" />
 				<xs:element name="cisid" type="xs:string" minOccurs="0" />
 			</xs:sequence>
@@ -80,6 +83,7 @@
 				<xs:element name="foursqID" type="xs:string" minOccurs="0" />
 				<xs:element name="interests" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
 				<xs:element name="tags" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
+				<xs:element name="currentzone" type="xs:string" minOccurs="0" />
 			</xs:sequence>
 		</xs:complexType>
 		

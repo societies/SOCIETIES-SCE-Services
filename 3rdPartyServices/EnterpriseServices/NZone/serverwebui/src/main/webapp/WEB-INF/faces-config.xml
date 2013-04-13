@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<faces-config version="2.1" xmlns="http://java.sun.com/xml/ns/javaee"
+	xmlns:xi="http://www.w3.org/2001/XInclude" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-facesconfig_2_1.xsd">
+
+	<name>nzone-server-web</name>
+	<application>
+		<default-render-kit-id>PRIMEFACES_MOBILE</default-render-kit-id>
+		<el-resolver>org.springframework.web.jsf.el.SpringBeanFacesELResolver</el-resolver>
+	</application>	
+
+
+	<navigation-rule>
+   	<from-view-id>main.xhtml</from-view-id>
+   	
+</navigation-rule>
+
+
+
+</faces-config>

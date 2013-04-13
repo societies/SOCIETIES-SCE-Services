@@ -61,6 +61,10 @@ public class NZZones implements Serializable {
 	public String zonelocation;
 	public String zonelocdisplay;
 	public String zonetopics;
+	public String ctxAttribName;
+	public String ciscategory;
+	
+
 	public Integer mainzone;
 	
 	
@@ -128,5 +132,21 @@ public class NZZones implements Serializable {
 		this.mainzone = mainzone;
 	}
 	
+	@Column(name = "ctxattribname")
+	public String getCtxAttribName() {
+		return ctxAttribName;
+	}
+
+	public void setCtxAttribName(String ctxAttribName) {
+		this.ctxAttribName = ctxAttribName;
+	}
+	@Column(name = "ciscategory")
+	public String getCiscategory() {
+		return ciscategory;
+	}
+
+	public void setCiscategory(String ciscategory) {
+		this.ciscategory = ciscategory;
+	}
 	
 }

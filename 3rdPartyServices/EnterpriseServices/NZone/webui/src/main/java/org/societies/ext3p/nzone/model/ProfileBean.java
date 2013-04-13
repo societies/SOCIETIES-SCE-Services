@@ -1,13 +1,11 @@
 package org.societies.ext3p.nzone.model;  
   
-import java.io.Serializable;   
-import java.util.ArrayList;
+import java.io.Serializable;
 import java.util.List;
 
 import javax.faces.application.FacesMessage;
 import javax.faces.bean.ApplicationScoped;
 import javax.faces.context.FacesContext;
-import javax.faces.event.ActionEvent;
 import javax.faces.event.ComponentSystemEvent;
 
 import org.slf4j.Logger;
@@ -355,6 +353,8 @@ public class ProfileBean implements Serializable {
 			 return "Internet Of Things"; 
 		if (selectedInterests.get(index).contains("future"))
 			 return "Future of the Internet"; 
+		if (selectedInterests.get(index).contains("entre"))
+			 return "Entrepreneur"; 
 		 return "";
 	 }
 	 

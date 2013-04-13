@@ -1,5 +1,9 @@
 package org.societies.api.ext3p.nzone.server;
 
+import java.util.List;
+
+import org.societies.api.ext3p.schema.nzone.UserDetails;
+
 
 
 /**
@@ -8,7 +12,9 @@ package org.societies.api.ext3p.nzone.server;
  */
 public interface INZoneServer {
 	
-
+	public String getZoneName(int zone);
+	public List<UserDetails> getZoneMembers(int zone);
+	
 
 }
 
