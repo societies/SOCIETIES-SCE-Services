@@ -3,11 +3,16 @@ package org.societies.thirdpartyservices.networking.android;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.app.Activity;
+import android.app.ProgressDialog;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
+import android.graphics.Bitmap;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.view.ViewGroup.LayoutParams;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -21,6 +26,7 @@ public class WebViewer extends Activity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        this.requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_web_viewer);
         //Initialize the UI
      	initUI();
@@ -59,11 +65,39 @@ public class WebViewer extends Activity {
 			webView.setScrollBarStyle(WebView.SCROLLBARS_OUTSIDE_OVERLAY);
 			webView.setScrollbarFadingEnabled(true);
 			webView.getSettings().setLoadsImagesAutomatically(true);
+			webView.getSettings().setJavaScriptEnabled(true);
 
 			// Load the URLs inside the WebView, not in the external web browser
-			webView.setWebViewClient(new WebViewClient());
+			webView.setWebViewClient(new WebViewClient() {
+				ProgressDialog _dialog;
+				@Override
+				public boolean shouldOverrideUrlLoading(WebView view, String url) {
+			    	view.loadUrl(url);
+			    	return true;
+				}
+				
+				@Override
+				public void onPageStarted(WebView view, String url, Bitmap favicon) {
+					_dialog =ProgressDialog.show(WebViewer.this, "Networking Zone", "Initializing...");
+					super.onPageStarted(view, url, favicon);
+				}
+				@Override
+				public void onPageFinished(WebView view, String url) {
+					super.onPageFinished(view, url);
+					_dialog.dismiss();
+				}
+
+				@Override
+				public void onReceivedError(WebView view, int errorCode,
+					String description, String failingUrl) {
+					super.onReceivedError(view, errorCode, description, failingUrl);
+					try{
+						_dialog.dismiss();
+					}catch (Exception e) { }
+				}
+			});
 			webView.loadUrl(url);
-			//webView.loadUrl("http://www.google.com");
+			//webView.loadUrl("http://societies.local:9090"); //USER FOR TESTING
 		}
 
 		// Attach the WebView to its placeholder
@@ -104,5 +138,22 @@ public class WebViewer extends Activity {
 
 		// Restore the state of the WebView
 		webView.restoreState(savedInstanceState);
+	}
+	
+	 @Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		// Handle item selection
+		switch (item.getItemId()) {
+		//case R.id.about:
+		//	Intent aboutIntent = new Intent(this, AboutActivity.class);
+		//	this.startActivity(aboutIntent);
+		//    return true;
+		case R.id.preference:
+			Intent prefIntent = new Intent(this, MasterPreferences.class);
+			this.startActivity(prefIntent);
+		    return true;
+		default:
+		    return super.onOptionsItemSelected(item);
+		}
 	}
 }

@@ -12,6 +12,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.webkit.WebView;
+import android.webkit.WebViewClient;
 
 public class WebViewActivity extends Activity {
 
@@ -37,9 +38,10 @@ public class WebViewActivity extends Activity {
 		Log.d(LOG_TAG, "getStringPrefValue for: " + url);
 		
 		webView = (WebView) findViewById(R.id.webView1);
+		webView.setWebViewClient(new WebViewClient());
 		webView.getSettings().setJavaScriptEnabled(true);
 		webView.loadUrl(url);
-		//webView.loadUrl("http://www.google.ie");
+		//webView.loadUrl("http://societies.local:9090");
 	}
 
 	@Override
@@ -78,5 +80,13 @@ public class WebViewActivity extends Activity {
 	public void onBackPressed() {
 	   	//DO NOTHING
 		return;
+	}
+	
+	private class WebClient extends WebViewClient {
+		@Override
+		public boolean shouldOverrideUrlLoading(WebView view, String url) {
+	    	view.loadUrl(url);
+	        return true;
+		}
 	}
 }

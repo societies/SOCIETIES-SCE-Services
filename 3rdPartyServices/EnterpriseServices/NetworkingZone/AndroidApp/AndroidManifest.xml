@@ -12,28 +12,31 @@
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name" >
         <activity
+            android:name=".WebViewer"
+            android:configChanges="keyboard|keyboardHidden|orientation"
+            android:label="@string/app_name" 
+            android:theme="@android:style/Theme.NoTitleBar" >
+            <intent-filter>
+                <action   android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
             android:name=".WebViewActivity"
             android:theme="@android:style/Theme.NoTitleBar" />
         <activity
             android:name=".MainActivity"
             android:label="@string/app_name" >
+            <!--  
             <intent-filter>
                 <action   android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+            -->
         </activity>
         <activity
             android:name=".MasterPreferences"
             android:label="@string/app_name" >
-        </activity>
-        <activity
-            android:name=".WebViewer"
-            android:configChanges="keyboard|keyboardHidden|orientation"
-            android:label="@string/title_activity_web_viewer" >
-            <intent-filter>
-                <action   android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
     </application>
 
