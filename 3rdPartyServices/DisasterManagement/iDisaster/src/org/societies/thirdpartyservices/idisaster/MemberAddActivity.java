@@ -285,15 +285,21 @@ public class MemberAddActivity extends ListActivity implements OnClickListener {
 		SparseBooleanArray checkedRows = listView.getCheckedItemPositions();
 
 // Used for Activity Feed
-			String selectedMembers = "Welcome to new members:";
+			String selectedMembers = "Welcome to new members: ";
 			Boolean selectedFlag = false;
 
 		for (int i=0; i<people; ++i) {
 			if (checkedRows.get(i)) {
-				selectedFlag = true;
 				peopleCursor.moveToPosition(peopleMap.get(i));
-				selectedMembers = selectedMembers + " " + peopleCursor.
-						getString(peopleCursor.getColumnIndex(SocialContract.People.NAME));
+				
+				if (selectedFlag) {		// Not first in list
+					selectedMembers = selectedMembers + peopleCursor.
+							getString(peopleCursor.getColumnIndex(SocialContract.People.NAME));					
+				} else {
+					selectedMembers = selectedMembers + ", "+ peopleCursor.
+							getString(peopleCursor.getColumnIndex(SocialContract.People.NAME));
+					selectedFlag = true;
+				}
 				
 				// Set the values related to the activity to store in SocialProvider
 				ContentValues membershipValues = new ContentValues ();
@@ -339,7 +345,7 @@ public class MemberAddActivity extends ListActivity implements OnClickListener {
 //TODO: what should be set here? global or local id? - local id seems to not work		
 					iDisasterApplication.getInstance().me.userName,	// Me
 					iDisasterApplication.getInstance().VERB_TEXT,			// Activity intent: Simple text
-					selectedMembers,												// List of new members
+					selectedMembers,										// Activity intent: list of new members
 					iDisasterApplication.getInstance().TARGET_ALL);			// Recipient for Activity
 		}
 

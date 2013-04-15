@@ -19,9 +19,10 @@
 	<group android:id="@+id/disasterMenuService">
 		<item android:id="@+id/disasterMenuRecommendService" android:icon="@android:drawable/ic_menu_view"
 			android:title="@string/disaster_menu_recommend_service" />
+<!-- Not implemneted		
 		<item android:id="@+id/disasterMenuAddService" android:icon="@android:drawable/ic_menu_add"
 			android:title="@string/disaster_menu_add_service" />		
-		
+-->		
 	</group>
 			
 	

@@ -211,15 +211,13 @@ public class ServiceRecommendActivity extends ListActivity implements OnClickLis
     				SocialContract.Services.DESCRIPTION};		// Description is used later on when the user selects services 
 
 //		String serviceSelection = SocialContract.Services.APP_TYPE + "<> ?";
+//		String serviceSelection = null;		
+//		String[] serviceSelectionArgs = null;	
     	
-//		String serviceSelection = SocialContract.Services.TYPE + "<> ?";
-//		
-//		String[] serviceSelectionArgs = new String[] {
-//					SocialContract.ServiceConstants.SERVICE_TYPE_CLIENT };	// Ignore services of type CLIENT
-
-		String serviceSelection = null;
+		String serviceSelection = SocialContract.Services.TYPE + "<> ?";
 		
-		String[] serviceSelectionArgs = null;	
+		String[] serviceSelectionArgs = new String[] {
+					SocialContract.ServiceConstants.SERVICE_TYPE_CLIENT };	// Ignore services of type CLIENT
 
     	try {
     		serviceCursor = resolver.query(serviceUri, serviceProjection,
@@ -374,7 +372,7 @@ public class ServiceRecommendActivity extends ListActivity implements OnClickLis
 //TODO: what should be set here? global or local id? - local id seems to not work		
 					iDisasterApplication.getInstance().me.userName,			// Me
 					iDisasterApplication.getInstance().VERB_TEXT,			// Activity intent: Simple text
-					recommendedServices,												// List of new members
+					recommendedServices,									// List of new recommended services
 					iDisasterApplication.getInstance().TARGET_ALL);			// Recipient for Activity
 		}
 

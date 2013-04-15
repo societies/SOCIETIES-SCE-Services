@@ -14,6 +14,10 @@
 	
 	<TextView android:id="@id/android:empty" android:layout_width="fill_parent"
 		android:layout_height="fill_parent" android:background="@color/white"
-		android:text="@string/add_item_menu"/>
+		android:text="@string/service_list_add_item"
+		android:textStyle="bold" android:textSize="20dip"
+		android:paddingLeft="5dip"		
+		
+		/>
 
 </RelativeLayout>

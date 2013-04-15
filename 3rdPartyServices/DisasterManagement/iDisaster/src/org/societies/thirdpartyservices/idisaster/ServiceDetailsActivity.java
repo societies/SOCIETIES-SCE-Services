@@ -27,10 +27,12 @@ package org.societies.thirdpartyservices.idisaster;
 
 import org.societies.android.api.cis.SocialContract;
 import org.societies.thirdpartyservices.idisaster.R;
+import org.societies.thirdpartyservices.idisaster.data.SocialActivity;
 import org.societies.thirdpartyservices.idisaster.data.ThirdPartyService;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.ContentResolver;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -277,7 +279,23 @@ public class ServiceDetailsActivity extends Activity implements OnClickListener 
     												iDisasterApplication.getInstance().selectedTeam.id)
     					.equals (iDisasterApplication.getInstance().INSERT_EXCEPTION)) {			// Update information in SocialProvider 
     				showQueryExceptionDialog (); 			/// SocialProvider exception: Display dialog and terminates activity
-    			} else {
+
+    			} else {	// Add an activity to the feed
+    				
+    				SocialActivity socialActivity = 
+    						new SocialActivity (iDisasterApplication.getInstance().me.userName); // account for synchronization
+    				ContentResolver activityResolver = getContentResolver();
+    				
+    	// The return code from addActivity is not exploited here		
+    				socialActivity.addActivity (activityResolver,			// Insert activity to the activity feed
+    	// TODO: what should be set here? local or global id?
+    						iDisasterApplication.getInstance().selectedTeam.id,		// Feed of the the selected team
+    	//TODO: what should be set here? global or local id? - local id seems to not work		
+    						iDisasterApplication.getInstance().me.userName,			// Me
+    						iDisasterApplication.getInstance().VERB_TEXT,			// Activity intent: Simple text
+    						"New shared service: " + thirdPartyService.serviceName,	// Shared service
+    						iDisasterApplication.getInstance().TARGET_ALL);			// Recipient for Activity
+    				
     				finish ();
     			}
     			
@@ -286,7 +304,23 @@ public class ServiceDetailsActivity extends Activity implements OnClickListener 
     			if (thirdPartyService.unshareService (this, getContentResolver(),
     												iDisasterApplication.getInstance().me.peopleId,
     												iDisasterApplication.getInstance().selectedTeam.id)
-    					.equals (iDisasterApplication.getInstance().UPDATE_SUCCESS)) {			// Update information in SocialProvider 
+    					.equals (iDisasterApplication.getInstance().UPDATE_SUCCESS)) {			// Update information in SocialProvider
+    				
+    				// Add an activity to the feed    				
+    				SocialActivity socialActivity = 
+    						new SocialActivity (iDisasterApplication.getInstance().me.userName); // account for synchronization
+    				ContentResolver activityResolver = getContentResolver();
+    				
+    	// The return code from addActivity is not exploited here		
+    				socialActivity.addActivity (activityResolver,			// Insert activity to the activity feed
+    	// TODO: what should be set here? local or global id?
+    						iDisasterApplication.getInstance().selectedTeam.id,		// Feed of the the selected team
+    	//TODO: what should be set here? global or local id? - local id seems to not work		
+    						iDisasterApplication.getInstance().me.userName,			// Me
+    						iDisasterApplication.getInstance().VERB_TEXT,			// Activity intent: Simple text
+    						"Service no longer shared: " + thirdPartyService.serviceName,	// Shared service
+    						iDisasterApplication.getInstance().TARGET_ALL);			// Recipient for Activity
+    				
     				finish ();
     			} else {
     				showQueryExceptionDialog (); 			/// SocialProvider exception: Display dialog and terminates activity

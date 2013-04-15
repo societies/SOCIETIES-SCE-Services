@@ -410,7 +410,7 @@ public class ServiceListActivity extends ListActivity {
 				if (recommendedServiceCursor.getCount() != 0) {
 					while (recommendedServiceCursor.moveToNext()) {
 						recommendedServices++;
-						String displayName = "recommended: " + recommendedServiceCursor.getString(recommendedServiceCursor
+						String displayName = "(recommended:) " + recommendedServiceCursor.getString(recommendedServiceCursor
 								.getColumnIndex(SocialContract.Services.NAME));
 						serviceList.add (displayName);
 					}
@@ -421,7 +421,7 @@ public class ServiceListActivity extends ListActivity {
 				if (sharedServiceCursor.getCount() != 0) {
 					while (sharedServiceCursor.moveToNext()) {
 						sharedServices++;
-						String displayName = "shared: " + sharedServiceCursor.getString(sharedServiceCursor
+						String displayName = "(shared:) " + sharedServiceCursor.getString(sharedServiceCursor
 								.getColumnIndex(SocialContract.Services.NAME));
 						serviceList.add (displayName);
 					}
@@ -432,7 +432,7 @@ public class ServiceListActivity extends ListActivity {
 				if (myServiceCursor.getCount() != 0) {
 					while (myServiceCursor.moveToNext()) {
 						myServices++;
-						String displayName = "My own: " + myServiceCursor.getString(myServiceCursor
+						String displayName = "(installed:) " + myServiceCursor.getString(myServiceCursor
 								.getColumnIndex(SocialContract.Services.NAME));
 						serviceList.add (displayName);
 					}
@@ -480,15 +480,15 @@ public class ServiceListActivity extends ListActivity {
 				startActivity(new Intent(ServiceListActivity.this, ServiceRecommendActivity.class));
 			break; 
 
-			case R.id.disasterMenuAddService:
-
-			////TODO: Remove code for testing the correct setting of preferences 
-				Toast.makeText(getApplicationContext(),
-						"Not implemented yet. To add a service, select a recommended service (eventually recommend a service first).", Toast.LENGTH_LONG)
-									.show();			
-//	The ServiceListActivity crashes...
-//				startActivity(new Intent(ServiceListActivity.this, ServiceAddActivity.class));
-			break;
+// Not implemnted
+//			case R.id.disasterMenuAddService:
+//				Toast.makeText(getApplicationContext(),
+//						"Not implemented yet. To add a service, select a recommended service (eventually recommend a service first).", Toast.LENGTH_LONG)
+//									.show();
+				
+				// The ServiceListActivity crashes...
+				// startActivity(new Intent(ServiceListActivity.this, ServiceAddActivity.class));
+//			break;
 		
 			default:
 			break;

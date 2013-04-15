@@ -336,7 +336,7 @@ public class DisasterListActivity extends ListActivity {
 					ownTeams++;					
 					long owner = ownTeamCursor.getLong(ownTeamCursor
 							.getColumnIndex(SocialContract.Communities._ID_OWNER));					
-					String displayName = "owned: " + ownTeamCursor.getString(ownTeamCursor
+					String displayName = "(owner of:) " + ownTeamCursor.getString(ownTeamCursor
 							.getColumnIndex(SocialContract.Communities.NAME));
 					disasterList.add (displayName);
 				}
@@ -346,7 +346,7 @@ public class DisasterListActivity extends ListActivity {
 			if (memberTeamCursor.getCount() != 0) {
 				while (memberTeamCursor.moveToNext()) {
 					memberTeams++;
-					String displayName = "member of: " + memberTeamCursor.getString(memberTeamCursor
+					String displayName = "(member of:) " + memberTeamCursor.getString(memberTeamCursor
 							.getColumnIndex(SocialContract.Communities.NAME));
 					disasterList.add (displayName);
 				}

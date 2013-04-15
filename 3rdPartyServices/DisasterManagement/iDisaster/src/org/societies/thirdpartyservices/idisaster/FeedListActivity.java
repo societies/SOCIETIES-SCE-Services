@@ -234,7 +234,7 @@ public class FeedListActivity extends ListActivity implements OnClickListener{
 							.getColumnIndex(SocialContract.CommunityActivity.VERB));
  
 					if (v.equals(iDisasterApplication.getInstance().VERB_TEXT)) { // simple text
-						displayName = displayName + ": " +
+						displayName = "(" + displayName + ") " +
 							feedCursor.getString(feedCursor.getColumnIndex(SocialContract.CommunityActivity.OBJECT));
 						String t = feedCursor.getString(feedCursor
 								.getColumnIndex(SocialContract.CommunityActivity.TARGET));
@@ -244,10 +244,9 @@ public class FeedListActivity extends ListActivity implements OnClickListener{
 						}
 						
 					} else {													// service command						
-						displayName = displayName + " " + v + " " +
-								feedCursor.getString(feedCursor.getColumnIndex(SocialContract.CommunityActivity.OBJECT));
 //TODO: consider other services than the Jacket
-						displayName = displayName + " iJacket";
+						displayName = "(" + displayName + ") " + " => iJacket/" + v + " " +
+								feedCursor.getString(feedCursor.getColumnIndex(SocialContract.CommunityActivity.OBJECT));
 						
 //						String t = feedCursor.getString(feedCursor
 //								.getColumnIndex(SocialContract.CommunityActivity.TARGET));

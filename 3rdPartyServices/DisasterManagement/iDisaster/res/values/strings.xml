@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="add_item_menu">\n\n\nActivate menu to add item</string>
+<!-- 
+    <string name="add_item_menu">\n\n\nActivate menu to create item</string>
+ -->
+    
     
     <string name="app_name">iDisaster</string>
     
@@ -20,6 +23,7 @@
 	<string name="dialogServiceQueryException">EXCEPTION:\nCannot retrieve services from SocialProvider </string>
     <string name="dialogSocialProviderException">EXCEPTION:\nSocialProvider is not installed.You should install SocialProvider and then re-install iDisaster.</string>
 	
+    <string name="disaster_list_add_item">\n\n\nActivate menu to create a new team</string>
     <string name="disaster_list_menu_createCommunity">Create disaster team</string>
 	<string name="disasterListDialogCIS">No teams yet. Select menu to add teams.</string>
     <string name="disasterListHeading">Disaster teams</string>
@@ -30,7 +34,9 @@
     <string name="noPreference">n/a</string>
 
     <string name="disaster_menu_add_feed">Add activity</string>
+<!--     
     <string name="disaster_menu_add_service">Add service</string>
+-->
     <string name="disaster_menu_add_member">Add member</string>
     <string name="disaster_menu_recommend_service">Recommend service</string>
     <string name="disaster_menu_selectDisaster">Select new team</string>
@@ -70,10 +76,14 @@
 <!-- <string name="loginUserNameLabel">Login as:</string>  -->
 
 <!-- <string name="memberListDialog">No members yet. Select menu to add members.</string>  -->
+	<string name="member_list_add_item">\n\n\nActivate menu to add new members</string>
+
 	<string name="memberAddButton">Add member(s)</string>
     <string name="memberAddHeading">Select new members</string>
 	<string name="memberAddNoPeople">No people to add</string>
-
+	
+	<string name="service_list_add_item">\n\n\nActivate menu to recommend new services</string>
+	
 	<string name="serviceAddButton">Add service(s)</string>
     <string name="serviceAddHeading">Select new services</string>
 	<string name="serviceAddNoService">No service to add</string>
