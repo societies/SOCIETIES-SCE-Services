@@ -1,6 +1,7 @@
 package org.societies.ext3p.nzone.model;  
   
 import java.io.Serializable;   
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.faces.bean.ApplicationScoped;
@@ -52,13 +53,23 @@ public class FriendBean implements Serializable, ValueChangeListener {
     private boolean sharepersonal;
     
     private String shareinfoMessage;
+    private String shareinfoMessageType;
        
     
-    FriendBean()
+    public String getShareinfoMessageType() {
+		return shareinfoMessageType;
+	}
+
+	public void setShareinfoMessageType(String shareinfoMessageType) {
+		this.shareinfoMessageType = shareinfoMessageType;
+	}
+
+	FriendBean()
     {
     	preferredcompany = new String("0");
     	pref = false;
     	setShareinfoMessage(new String(""));
+    	setShareinfoMessageType(new String(""));
     }
     
     public String getFriendid() {
@@ -75,7 +86,7 @@ public class FriendBean implements Serializable, ValueChangeListener {
 		this.setEmail(det.getEmail());
 		this.setPosition(det.getPosition());
 		this.setSex(det.getSex());
-		
+				
 		if (det.getFacebookID() == null)
 			this.setFacebookid("");
 		else
@@ -103,6 +114,12 @@ public class FriendBean implements Serializable, ValueChangeListener {
 		
 		if (det.getInterests() != null)
 			setSelectedInterests(det.getInterests());
+		else
+		{
+			List<String> emptyList = new ArrayList<String>();
+			setSelectedInterests(emptyList);
+		}
+			
 		
 		
 		boolean perf = getNzoneClient().isPreferred("company", det.getCompany());
@@ -341,12 +358,11 @@ public class FriendBean implements Serializable, ValueChangeListener {
 		 this.setSharesns(false);
 		 this.setShareinterests(false);
 		 
-		 
+		 this.setShareinfoMessageType("");
 		 
 		 if ((info != null) && (!info.isDefaultShareValue()))
 		 {
 				this.setShareinfoMessage("This is the information you have previous choosen to share with " + this.getName());
-		 
 			
 				if ((info.getShareHash() & NZoneConsts.SHARE_PERSONAL) == NZoneConsts.SHARE_PERSONAL)
 					this.setSharepersonal(true);
@@ -385,7 +401,7 @@ public class FriendBean implements Serializable, ValueChangeListener {
 					 this.setShareinterests(true);
 				 
 				 this.setShareinfoMessage("This is the information the system learned that you have previously shared with a person from preferred company "+ this.getCompany());
-				 
+				 this.setShareinfoMessageType("highlight");
 				 return;
 			 }
 		 
@@ -456,6 +472,8 @@ public class FriendBean implements Serializable, ValueChangeListener {
 			 return "Internet Of Things"; 
 		if (selectedInterests.get(index).contains("future"))
 			 return "Future of the Internet"; 
+		if (selectedInterests.get(index).contains("entre"))
+			 return "Entrepreneur"; 
 		 return "";
 	 }
 	   

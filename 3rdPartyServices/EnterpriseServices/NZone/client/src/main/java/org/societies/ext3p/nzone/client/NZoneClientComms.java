@@ -811,4 +811,41 @@ public class NZoneClientComms implements ICommCallback {
 		
 	}
 
+	public void updateMyZone(String zone) {
+		IIdentity toIdentity = null;
+		commsResult = null;
+		try {
+			toIdentity = getCommManager().getIdManager().fromJid(netServerID);
+		} catch (InvalidFormatException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		Stanza stanza = new Stanza(toIdentity);
+						
+		// CREATE MESSAGE BEAN
+		NzoneBean netBean = new NzoneBean();
+		netBean.setMethod(Method.UPDATE_USER_ZONE);
+		List<String> zonelist = new ArrayList<String>();
+		zonelist.add(zone);
+		netBean.setData(zonelist);
+			
+		startSignal = new CountDownLatch(1);
+						
+		try {
+			getCommManager().sendIQGet(stanza, netBean, this);
+							
+		} catch (CommunicationException e) {
+			LOG.warn(e.getMessage());
+		};
+
+		try {
+			startSignal.await();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+								
+				
+		
+	}
 }

@@ -105,6 +105,8 @@ public class NZoneDirectory {
 					zoneRec.setZonelocationdisplay(tmpList.get(i).getZonelocdisplay());
 					zoneRec.setZonetopics(tmpList.get(i).getZonetopics());
 					zoneRec.setMainzone(tmpList.get(i).getMainzone());
+					zoneRec.setCtxAttribName(tmpList.get(i).getCtxAttribName());
+					zoneRec.setCisCategory(tmpList.get(i).getCiscategory());
 					zoneList.add(zoneRec);
 				}		
 			}
@@ -158,6 +160,7 @@ public class NZoneDirectory {
 				for (int i = 0; i < tokens.length; i++)
 					interestList.add(tokens[i]);
 				userRec.setInterests(interestList);
+				userRec.setCurrentzone(tmpRegistryEntryList.get(0).getCurrentZone());
 			}
 			
 		} catch (Exception e) {
@@ -183,7 +186,7 @@ public class NZoneDirectory {
 		
 		try {
 			session = sessionFactory.openSession();
-			t = session.beginTransaction();
+			
 			
 			NZUser userDb = new NZUser();
 			
@@ -241,13 +244,19 @@ public class NZoneDirectory {
 
 			}
 			
+			if (userRec.getCurrentzone() != null)
+				userDb.setCurrentZone(userRec.getCurrentzone());
+			
+			
+			t = session.beginTransaction();
 			session.saveOrUpdate(userDb);
 			t.commit();
 			result = true;
 			
 		} catch (Exception e) {
 			e.printStackTrace();
-			t.rollback();
+			if (t != null)
+				t.rollback();
 		} finally {
 			if (session != null) {
 				session.close();

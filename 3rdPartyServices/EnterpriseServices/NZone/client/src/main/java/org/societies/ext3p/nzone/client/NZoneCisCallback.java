@@ -66,6 +66,7 @@ public class NZoneCisCallback {
 					{
 						log.info("Got response to getmembers : error");
 					}
+					bResponseReceived = true;
 					cisManagerCallbackSignal.countDown();
 							
 				}

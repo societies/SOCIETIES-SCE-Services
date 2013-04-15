@@ -93,15 +93,7 @@ public class NZoneTest {
 	};
 	
 	
-	public void runTest2()
-	{
-		// checking implicity
-		for (int i = 0; i < 20; i++)
-		{
-			getNzoneClient().recordActionEnterZone();
-			getNzoneClient().recordActionShowProfile();
-		}
-	}
+	
 	
 
 

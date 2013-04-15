@@ -151,10 +151,10 @@
 						</Import-Package>
 						<Bundle-ClassPath>
 							WEB-INF/classes,
-							WEB-INF/lib/primefaces-3.3.jar,
+						  	WEB-INF/lib/primefaces-3.3.jar,
 							WEB-INF/lib/primefaces-mobile-0.9.3.jar,
-							WEB-INF/lib/jstl-1.2.jar,
-						<!--  
+						<!--  	WEB-INF/lib/jstl-1.2.jar,
+						 
 							WEB-INF/lib/javax.servlet.jsp-api-2.2.1.jar,
 					
 							WEB-INF/lib/jstl-1.2.jar,
@@ -209,7 +209,9 @@
 						 WEB-INF/lib/spring-faces-2.3.2.RELEASE.jar,
 						 WEB-INF/lib/spring-js-2.3.2.RELEASE.jar,
 						 WEB-INF/lib/spring-js-resources-2.3.2.RELEASE.jar,
-						 WEB-INF/lib/spring-webflow-2.3.2.RELEASE.jar
+						 WEB-INF/lib/spring-webflow-2.3.2.RELEASE.jar,
+						 WEB-INF/lib/jstl-1.2.jar
+						
 						 
 						 
 						 

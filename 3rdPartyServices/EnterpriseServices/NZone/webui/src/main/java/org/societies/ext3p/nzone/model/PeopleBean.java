@@ -9,7 +9,6 @@ import org.societies.api.ext3p.nzone.model.UserPreview;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
-@SuppressWarnings("serial")
 @ApplicationScoped
 @Controller(value = "peopleBean")
 public class PeopleBean {
@@ -120,6 +119,28 @@ public class PeopleBean {
 		
 	}
 	
+	public boolean isinteresttagged(UserPreview currentdet)
+	{
+		if (currentdet == null)
+			return false;
+		
+		if (currentdet.getTags() == null)
+			return false;
+		
+		
+		if (currentdet.getTags().size() == 0)
+			return false;
+		
+		 
+		for ( int i = 0; i < currentdet.getTags().size() ; i++)
+		{
+			if (currentdet.getTags().get(i).contains("ommon"))
+				return true;
+		}
+		return false;
+	}
+	
+	
 	public boolean isfacebooktagged(UserPreview currentdet)
 	{
 		if (currentdet == null)
@@ -189,6 +210,11 @@ public class PeopleBean {
 		return false;
 		
 		
+	}
+	
+	void updatepeoplelist()
+	{
+		this.getSuggestions();
 	}
 }
                     

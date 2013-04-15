@@ -69,6 +69,7 @@ public class NZUser implements Serializable {
 	private String googleplusID;
 	
 	private String interests;
+	private String currentZone;
 
 	/**
 	 * @return the userid
@@ -267,6 +268,21 @@ public class NZUser implements Serializable {
 	 */
 	public void setInterests(String interests) {
 		this.interests = interests;
+	}
+
+	/**
+	 * @return the currentZone
+	 */
+	@Column(name = "currentzone")
+	public String getCurrentZone() {
+		return currentZone;
+	}
+
+	/**
+	 * @param currentZone the currentZone to set
+	 */
+	public void setCurrentZone(String currentZone) {
+		this.currentZone = currentZone;
 	}
 
 	public NZUser() {

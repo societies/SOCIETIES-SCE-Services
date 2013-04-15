@@ -190,17 +190,6 @@ public class NZoneCommsServer implements IFeatureServer {
 						break;
 					}
 					
-					/**
-					 * case GETUSERDETAILS:	{
-						// We need to check that the user only is allowed update their own record 
-						if (stanza.getFrom().getBareJid().contains(messageBean.getMyuserid()))
-						{
-							messageResult.setUserDetails(netServer.getUserDetails(messageBean.getMyuserid(), messageBean.getFrienduserid()));
-							messageResult.setResult(true);
-						}
-						break;
-					}
-					**/
 					case UPDATE_MY_DETAILS:
 					{
 						LOG.info("UPDATEMYDETAILS for user " + stanza.getFrom().getBareJid());
@@ -224,62 +213,11 @@ public class NZoneCommsServer implements IFeatureServer {
 						messageResult.setResult(getNzoneServer().updateInterests(stanza.getFrom().getBareJid(), messageBean.getData()));
 						break;
 					}
-					
-					
-					
-					/*
-					case GETZONEEVENTS:
-					{
-						messageResult.setZoneeventlist(netServer.getCisActivity(messageBean.getMycurrentzone()));
-						messageResult.setResult(true);
+					case UPDATE_USER_ZONE: {
+						messageResult.setResult(getNzoneServer().updateUserLocation(stanza.getFrom().getBareJid(),messageBean.getData().get(0)));
+						
 						break;
 					}
-					case GETMEMBERDETAILS:
-					{
-						messageResult.setMemberdetaillist(netServer.getMemberNames(messageBean.getUseridlist()));
-						messageResult.setResult(true);
-						break;
-					}
-					case GETNOTES: 
-					{
-						if (stanza.getFrom().getBareJid().contains(messageBean.getMyuserid()))
-						{
-							messageResult.setNotes(netServer.getNotes(messageBean.getMyuserid(), messageBean.getFrienduserid()));
-							messageResult.setResult(true);
-						}
-						break;
-					}
-					case ADDNOTE: 
-					{
-						if (stanza.getFrom().getBareJid().contains(messageBean.getMyuserid()))
-						{
-							messageResult.setNotes(netServer.addNote(messageBean.getMyuserid(), messageBean.getFrienduserid(), messageBean.getNote()));
-							messageResult.setResult(true);
-						}
-						break;
-					}
-					case GETSTARTUPINFO: 
-					{
-						if (stanza.getFrom().getBareJid().contains(messageBean.getMyuserid()))
-						{
-							messageResult.setNetworkingCis(netServer.getMyMainCisId());
-							messageResult.setZones(netServer.getZoneCisIDs());
-							messageResult.setZonedetails(netServer.getZoneDetails());
-							messageResult.setUserDetails(netServer.getMyDetails(messageBean.getMyuserid()));
-							messageResult.setResult(true);
-						}
-						break;
-					}
-					case GETUSERDETAILSLIST:
-					{
-						if (stanza.getFrom().getBareJid().contains(messageBean.getMyuserid()))
-						{
-							messageResult.setUserDetailsList(netServer.getUserDetailsList(messageBean.getMyuserid(), messageBean.getUseridlist()));
-							messageResult.setResult(true);
-						}
-					}
-					break;
-					*/
 				}
 			} catch (Exception e) {
 				e.printStackTrace();

@@ -7,6 +7,11 @@
 
 	<pm:page title="Networking Zone">
 		<pm:view id="viewMain">
+		
+			<f:event listener="#{mainBean.checkinit}" type="preRenderView" />
+			<f:event listener="#{profileBean.loadprofile}" type="preRenderView" />
+	
+	
 			<pm:header title="Networking Zones" />
 			<pm:content>
 
@@ -38,38 +43,22 @@
 				<p:accordionPanel>
 					<p:tab title="Conference Members">
 					This is a list of all conference members.<br/>
-					It is ranked based on information you provided to the application in conjunction with actions you preformed within the application.<br/>
-					<br/>
-					Click on a member, and their location will be shown in the map above.<br/>
-					You must be in the same location as them in order to conntect with them via the app.<br/>
-					 
-					
 					
 						<h:form id="form">
-							<p:dataList value="#{mainPeopleBean.suggestions}"
-								var="mainperson" itemType="square">
+							<p:dataTable id="mainroomlist" value="#{mainPeopleBean.suggestions}" var="mainperson" >
 								<p:column style="width:10%"><p:graphicImage value="/images/profile_pic.jpg"  width="50" height="45" /> </p:column>
-								<p:column style="width:20%"> #{mainperson.displayName}, </p:column>
-								<p:column style="width:20%"> #{mainperson.company} </p:column>
-								<p:column style="width:30%"> #{mainperson.zone} </p:column>
-								<p:column headerText="Rank">
-									<p:graphicImage value="/images/learning.jpg"  width="30" height="18" rendered="#{peopleBean.isperftagged(mainperson)}"/>
-									<p:graphicImage value="/images/facebook-col.png"  width="30" height="18" rendered="#{peopleBean.isfacebooktagged(mainperson)}"/>		
-									<p:graphicImage value="/images/linkedin-col.png"  width="30" height="18" rendered="#{peopleBean.islinkedtagged(mainperson)}"/>		
+								<p:column style="width:20%" headerText="Name" > #{mainperson.displayName}</p:column>
+								<p:column style="width:30%" headerText="Zone" > #{mainperson.zone} </p:column>
+								<p:column headerText="Relevance">
+									<p:graphicImage value="/images/learning.jpg"  width="25" height="18" rendered="#{peopleBean.isperftagged(mainperson)}"/>
+									<p:graphicImage value="/images/learning2.jpg"  width="25" height="18" rendered="#{peopleBean.isinteresttagged(mainperson)}"/>
+									<p:graphicImage value="/images/facebook-col.png"  width="25" height="18" rendered="#{peopleBean.isfacebooktagged(mainperson)}"/>		
+									<p:graphicImage value="/images/linkedin-col.png"  width="25" height="18" rendered="#{peopleBean.islinkedtagged(mainperson)}"/>		
 								</p:column>
-							</p:dataList>
-						</h:form>
-					</p:tab>
-					<p:tab title="Your Activity">
-						<h:form id="formact">
-							<br/>
-								<h:outputText  value="John installed Server NZone" />
-								<br/>	<br/>
-								<h:outputText  value="John joined Community NZone" />
-								<br/>	<br/>
-									<h:outputText  value="John shared information with Community NZone" />
-								<br/>	<br/>
-									
+								
+							</p:dataTable>
+							
+							<p:poll interval="30" listener="#{mainbean.updatepeoplelist}" update="mainroomlist" />
 							
 						</h:form>
 					</p:tab>
