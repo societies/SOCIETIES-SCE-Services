@@ -208,6 +208,11 @@ public class ThirdPartyService {
 		
 //		testSharing (cxt, resolver);
 
+		// Do not add to service to Social Provider if service client
+		if (serviceType.equals(SocialContract.ServiceConstants.SERVICE_TYPE_CLIENT)) {
+			return iDisasterApplication.getInstance().QUERY_SUCCESS;	
+		}
+		
 		
 		Uri sharingUri = SocialContract.Sharing.CONTENT_URI;
 
@@ -319,22 +324,31 @@ public class ThirdPartyService {
 	}
 
 /**
- * setServiceInstallStatus add an entry in the sharing table is the service has been installed.
+ * setServiceInstallStatus add an entry in the sharing table (Assume the service has been installed; no check).
  * 
  * return QUERY_SUCCESS if success;
  */
 
 	public String setServiceInstallStatus (Context cxt, ContentResolver resolver) {
 
-		// check availability on device
-		serviceInstallStatus = serviceInstalled (cxt, serviceGlobalId);
-		
-		// check consistency with information in sharing table
-		String installStatus = checkServiceInstallStatus (cxt, resolver);
-		
-		if (!(installStatus.equals(iDisasterApplication.getInstance().QUERY_SUCCESS))) {
-			return installStatus;
+
+		// Do not add to service to Social Provider if service client
+		if (serviceType.equals(SocialContract.ServiceConstants.SERVICE_TYPE_CLIENT)) {
+			return iDisasterApplication.getInstance().QUERY_SUCCESS;	
 		}
+
+		
+		serviceInstallStatus = SocialContract.ServiceConstants.SERVICE_INSTALLED;
+
+// The following code does not work when  service is being installed. Pb with concurrency of activities?
+		// check availability on device
+//		serviceInstallStatus = serviceInstalled (cxt, serviceGlobalId);
+		// check consistency with information in sharing table
+//		String installStatus = checkServiceInstallStatus (cxt, resolver);	
+//		if (!(installStatus.equals(iDisasterApplication.getInstance().QUERY_SUCCESS))) {
+//			return installStatus;
+//		}
+		
 
 		if (serviceInstallStatus.equals(SocialContract.ServiceConstants.SERVICE_INSTALLED)) {	// Service is installed and table should be updated
 

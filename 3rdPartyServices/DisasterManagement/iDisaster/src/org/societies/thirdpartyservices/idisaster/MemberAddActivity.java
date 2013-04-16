@@ -293,10 +293,10 @@ public class MemberAddActivity extends ListActivity implements OnClickListener {
 				peopleCursor.moveToPosition(peopleMap.get(i));
 				
 				if (selectedFlag) {		// Not first in list
-					selectedMembers = selectedMembers + peopleCursor.
+					selectedMembers = selectedMembers + ", "+ peopleCursor.
 							getString(peopleCursor.getColumnIndex(SocialContract.People.NAME));					
 				} else {
-					selectedMembers = selectedMembers + ", "+ peopleCursor.
+					selectedMembers = selectedMembers + peopleCursor.
 							getString(peopleCursor.getColumnIndex(SocialContract.People.NAME));
 					selectedFlag = true;
 				}
