@@ -8,7 +8,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no"/>
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <title>Virtual Grafitti</title>
-    <link href="http://ajax.googleapis.com/ajax/libs/dojo/1.6/dojox/mobile/themes/iphone/iphone.css" rel="stylesheet"></link>
+    <link href="http://ajax.googleapis.com/ajax/libs/dojo/1.8.3/dojox/mobile/themes/iphone/iphone.css" rel="stylesheet"></link>
  
 
   <style type='text/css'>
@@ -17,7 +17,7 @@ p.msg{font-family: Comic Sans MS,Brush Script MT,cursive;
     font-weight: bolder;
     }
 </style>
- <script src="http://ajax.googleapis.com/ajax/libs/dojo/1.6.0/dojo/dojo.xd.js"
+ <script src="http://ajax.googleapis.com/ajax/libs/dojo/1.8.3/dojo/dojo.xd.js"
     djConfig="isDebug:true, parseOnLoad:true"></script>
     <script type="text/javascript">
     // Load the widget parser

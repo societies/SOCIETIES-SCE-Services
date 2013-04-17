@@ -171,7 +171,7 @@
 	
 
 	<build>
-		<finalName>ContextAwareWall</finalName>
+		<finalName>CollabToolsWebApp</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.felix</groupId>

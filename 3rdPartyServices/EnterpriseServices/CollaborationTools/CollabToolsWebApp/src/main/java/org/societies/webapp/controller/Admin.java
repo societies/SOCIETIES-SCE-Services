@@ -34,8 +34,9 @@ import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
 import org.societies.api.cis.management.ICis;
 import org.societies.api.cis.management.ICisManager;
-import org.societies.context.externalBrokerConnector.ExternalCtxBrokerConnector;
-import org.societies.enterprise.collabtools.acquisition.*;
+import org.societies.enterprise.collabtools.api.ICollabAppConnector;
+import org.societies.enterprise.collabtools.api.ICollabApps;
+import org.societies.enterprise.collabtools.api.IContextSubscriber;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.osgi.context.BundleContextAware;
 import org.springframework.stereotype.Controller;
@@ -50,7 +51,6 @@ public class Admin implements BundleContextAware{
 	
 	@Autowired
 	private ICisManager cisManager;
-
 	
 	/**
 		 * This method get called when user request for login page by using
@@ -64,6 +64,31 @@ public class Admin implements BundleContextAware{
 			
 			List<ICis> cisList = new ArrayList<ICis>();
 			cisList = cisManager.getCisList();
+			List<String> cisNames = new ArrayList<String>();
+			List<String> cisIdList = new ArrayList<String>();
+			int size = cisList.size();
+			String result = "<br>"+"There are "+size+" CIS: "+"<br>";
+			result += "<form name=\"radioform\"\" method=\"get\">";
+			for (ICis list : cisList) {   
+				result +="<input type=\"radio\" id=\""+list.getCisId()+"\" name=\"cisIDListRadio\" onClick=\"setText('"+list.getCisId()+"')\" value=\""+list.getCisId()+"\">"+list.getName()+"   - Owner: "+list.getOwnerId()+"<br>";
+				cisNames.add(list.getName());
+				cisIdList.add(list.getCisId());
+			}
+			result += "</form>";
+			model.put("message", result);
+			model.put("cisNames", cisNames);
+			model.put("cisIdList", cisIdList);
+
+			return new ModelAndView("default", model) ;
+		}
+		
+		@RequestMapping(value="/index.html",method = RequestMethod.GET)
+		public ModelAndView IndexPage() {
+			//model is nothing but a standard Map object
+			Map<String, Object> model = new HashMap<String, Object>();
+			
+			List<ICis> cisList = new ArrayList<ICis>();
+			cisList = cisManager.getCisList();
 			int size = cisList.size();
 			String result = "<br>"+"There are "+size+" CIS: "+"<br>";
 			for (ICis list : cisList) {   
@@ -71,45 +96,90 @@ public class Admin implements BundleContextAware{
 				result +="<td>"+ list.getName() +"</td>";
 				result +="<td>"+list.getOwnerId()+"</td>";
 				result +="<td>"+list.getCisId()+"</td>";
-//	        	<td><input type="button" value="Services" onclick="updateForm('cis-fe7e5118-ab0c-4a5e-bf4e-230762f466dc.societies.local', 'GetServicesCis', 'servicediscovery.html')" ></td>
-//	        </tr>
-
 			}
-//			result = context.getClass().toString();
 			model.put("message", result);
 
-			return new ModelAndView("default", model) ;
+			return new ModelAndView("index", model) ;
 		}
 		
 		
-//		@RequestMapping(value = "/time.html", method = RequestMethod.GET)
-//		  public @ResponseBody String getTime(@RequestParam String name) {
-//		    String result = "Time for " + name + " is " + new Date().toString();
-//		    return result;
-//		  }
+		@RequestMapping(value = "/applications.html", method = RequestMethod.GET)
+		public ModelAndView collabApps() {
+			ICollabAppConnector[] collabAppsConnectors = getCollabAppsConnectors().getCollabAppConnectors();
+			List<String> appnames = new ArrayList<String>();
+			List<String> appserver = new ArrayList<String>();
+			for (ICollabAppConnector apps : collabAppsConnectors){
+				appnames.add(apps.getAppName());
+				appserver.add(apps.getAppServerName());
+			}
+			Map<String, Object> model = new HashMap<String, Object>();
+			model.put("appnames", appnames);
+			model.put("appserver", appserver);
+			return new ModelAndView("applications", model) ;
+		}
 		
-		@RequestMapping(value = "/time.html", method = RequestMethod.GET)
-		public @ResponseBody String getTime(@RequestParam String name) {
+		@RequestMapping(value = "/checkcis.html", method = RequestMethod.GET)
+		public @ResponseBody String checkCisID(@RequestParam String name) {
 			String result;
-			if (getCollabTools() == null){
+			if (getCtxSubscriber() == null){
 				return result="Collabtools is not running";
 			}
 			if (!name.isEmpty()) {
 				result = "Starting CollabTools with cisID: "+name;
-				getCollabTools().initialCtx(name);
+				getCtxSubscriber().initialCtx(name);
 			}
 			else {
-				result = "cisID is empty, please check again";
+				result = "CisID is empty, please check again";
 			}
 			return result;
 		}
 
 		@RequestMapping(value="/test.html",method = RequestMethod.GET)
-		public ModelAndView pageLoad() {
+		public ModelAndView mobileTest() {
 			//model is nothing but a standard Map object
 			Map<String, Object> model = new HashMap<String, Object>();
 
-			return new ModelAndView("mobile", model) ;
+			return new ModelAndView("mobile1", model) ;
+		}
+		
+		@RequestMapping(value="/iphone.html",method = RequestMethod.GET)
+		public ModelAndView iphoneTest() {
+			//model is nothing but a standard Map object
+			Map<String, Object> model = new HashMap<String, Object>();
+			List<ICis> cisList = new ArrayList<ICis>();
+			cisList = cisManager.getCisList();
+			int size = cisList.size();
+			String cisname = null;
+			String ownerID = null;
+			String cisID = null;
+			for (ICis list : cisList) {   
+				cisname = list.getName();
+				ownerID = list.getOwnerId();
+				cisID = list.getCisId();
+			}
+
+			model.put("cisname", cisname);
+			model.put("ownerID", ownerID);
+			model.put("cisID", cisID);
+			model.put("size", size);
+
+			return new ModelAndView("iphone", model) ;
+		}
+		
+		@RequestMapping(value="/android.html",method = RequestMethod.GET)
+		public ModelAndView androidTest() {
+			//model is nothing but a standard Map object
+			Map<String, Object> model = new HashMap<String, Object>();
+
+			return new ModelAndView("android", model) ;
+		}
+		
+		@RequestMapping(value="/notification.html",method = RequestMethod.GET)
+		public ModelAndView notificationTest() {
+			//model is nothing but a standard Map object
+			Map<String, Object> model = new HashMap<String, Object>();
+
+			return new ModelAndView("notification", model) ;
 		}
 		
 //		
@@ -119,17 +189,6 @@ public class Admin implements BundleContextAware{
 //				String result1 = "guy";
 //				return result1;
 //		}
-//		
-//	
-			
-			
-		public void setICisManager(ICisManager cisManager){
-			this.cisManager = cisManager;
-		}
-			
-		public ICisManager getICisManager(){
-			return this.cisManager;
-		}
 
 
 		/* (non-Javadoc)
@@ -143,10 +202,24 @@ public class Admin implements BundleContextAware{
 //			connector =(ExternalCtxBrokerConnector)bundleContext.getService(ref);			
 		}
 		
-		public ContextSubscriber getCollabTools(){
+		public IContextSubscriber getCtxSubscriber(){
 			BundleContext bc = FrameworkUtil.getBundle(this.getClass()).getBundleContext();
-			ServiceReference ref= bc.getServiceReference(ContextSubscriber.class.getName());
-			return (ContextSubscriber)bc.getService(ref);
+			ServiceReference<?> ref= bc.getServiceReference(IContextSubscriber.class.getName());
+			return (IContextSubscriber)bc.getService(ref);
+		}
+		
+		public ICollabApps getCollabAppsConnectors(){
+			BundleContext bc = FrameworkUtil.getBundle(this.getClass()).getBundleContext();
+			ServiceReference<?> ref= bc.getServiceReference(ICollabApps.class.getName());
+			return (ICollabApps)bc.getService(ref);
+		}
+		
+		@RequestMapping(value = "/setcollabapps.html", method = RequestMethod.GET)
+		public @ResponseBody String setCollabAppsConnectors(@RequestParam String name) {
+			BundleContext bc = FrameworkUtil.getBundle(this.getClass()).getBundleContext();
+			ServiceReference<?> ref= bc.getServiceReference(ICollabApps.class.getName());
+			ICollabApps collabApps = (ICollabApps)bc.getService(ref);
+			return name;
 		}
 		 
 }

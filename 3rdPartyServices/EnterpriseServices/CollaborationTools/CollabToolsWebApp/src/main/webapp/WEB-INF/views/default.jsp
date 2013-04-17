@@ -1,21 +1,29 @@
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1" pageEncoding="ISO-8859-1"%>
+<%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="xc"%>
 
 <html>
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-  <title>Societies Homepage</title>
+  <title>CollabTools</title>
 
  <script type="text/javascript" src="js/jquery.js"></script>
 
  <script type="text/javascript">
     function doAjax(input) {
       $.ajax({
-        url: 'time.html',
+        url: 'checkcis.html',
         data: ({name : input}),
         success: function(data) {
-          $('#time').html(data);
+          $('#checkcis').html(data);
         }
       });
+    }
+    
+    function setText(target) {
+    	var txt = document.getElementById(target);
+    	var temp = txt.value;
+    	var tf = document.getElementById("cisID");
+    	tf.value = temp;
     }
   </script>
 
@@ -30,18 +38,20 @@
 	<jsp:include page="leftbar.jsp" />
 	<!-- END LEFTBAR -->
 <!-- .................PLACE YOUR CONTENT HERE ................ -->
-<h1>Welcome to the CollabTools Admin page</h1>
+<h1>Welcome to CollabTools Admin</h1>
 ${message}
 <br>
-<br>
-Insert cisID to start CollabTools
+Choose a CIS to start CollabTools
 <br>
 
-<input type="text" id='cisID' size="50" name='msg'>
-<input type="button" id="demo" onclick="doAjax(document.getElementById('cisID').value)" value="Run CollabTools"/>
+	<input type="text" id='cisID' size="55" name='msg'>
+	<input type="button" id="demo" onclick="doAjax(document.getElementById('cisID').value)" value="Run CollabTools"/>
 
-<div id="time">
-</div>
+<br>
+	<div id="checkcis">
+	
+	</div>
+
 
 
 <!-- .................END PLACE YOUR CONTENT HERE ................ -->
