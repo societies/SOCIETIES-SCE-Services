@@ -1,6 +1,7 @@
 package org.societies.ext3p.nzone.model;  
   
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.faces.application.FacesMessage;
@@ -47,8 +48,14 @@ public class ProfileBean implements Serializable {
     private boolean shareinterests;
     private boolean sharepersonal;
     
+    
+    
    
-    public boolean isSharecompany() {
+    public ProfileBean() {
+		super();
+		selectedInterests = new ArrayList<String>();
+	}
+	public boolean isSharecompany() {
 		return sharecompany;
 	}
 	public void setSharecompany(boolean sharecompany) {
@@ -343,9 +350,14 @@ public class ProfileBean implements Serializable {
 	 public String getInterestString(int index)
 	 {
 		 if (selectedInterests == null)
-			 return "";
+			 return " ";
+		 if (selectedInterests.size() == 0)
+			 return " ";
 		 if (index >= selectedInterests.size())
-			 return "";
+			 return " ";
+		 
+		 if (selectedInterests.get(index) == null)
+			 return " ";
 		 
 		if (selectedInterests.get(index).contains("cloud"))
 			 return "Cloud Computing";
@@ -354,8 +366,8 @@ public class ProfileBean implements Serializable {
 		if (selectedInterests.get(index).contains("future"))
 			 return "Future of the Internet"; 
 		if (selectedInterests.get(index).contains("entre"))
-			 return "Entrepreneur"; 
-		 return "";
+			 return "Green IT";  
+		 return " ";
 	 }
 	 
 	 

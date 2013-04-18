@@ -11,6 +11,8 @@
 	</application>	
 
 
+	
+
 	<navigation-rule>
    	<from-view-id>main.xhtml</from-view-id>
    	<navigation-case>
@@ -55,6 +57,12 @@
        <to-view-id>/main.xhtml</to-view-id>
    </navigation-case>
 </navigation-rule>
-
+<navigation-rule>
+   	<from-view-id>init.xhtml</from-view-id>
+   	<navigation-case>
+       <from-outcome>gotomain</from-outcome>
+       <to-view-id>/main.xhtml</to-view-id>
+   </navigation-case>
+</navigation-rule>
 
 </faces-config>

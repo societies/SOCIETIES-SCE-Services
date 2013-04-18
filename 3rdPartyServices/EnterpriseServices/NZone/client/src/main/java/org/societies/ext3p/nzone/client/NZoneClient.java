@@ -600,7 +600,7 @@ public class NZoneClient implements INZoneClient, IActionConsumer {
 										{
 											if (userDets.get(j).getInterests().contains(getMyInterestsCached().get(index)))
 											{
-												rank +=10;
+												rank +=3;
 												if (!tags.contains("Common Interest"))
 													tags.add("Common Interest");
 											}

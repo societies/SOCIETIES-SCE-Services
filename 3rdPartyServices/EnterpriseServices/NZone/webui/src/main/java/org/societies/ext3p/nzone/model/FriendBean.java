@@ -70,6 +70,7 @@ public class FriendBean implements Serializable, ValueChangeListener {
     	pref = false;
     	setShareinfoMessage(new String(""));
     	setShareinfoMessageType(new String(""));
+    	selectedInterests = new ArrayList<String>();
     }
     
     public String getFriendid() {
@@ -122,8 +123,8 @@ public class FriendBean implements Serializable, ValueChangeListener {
 			
 		
 		
-		boolean perf = getNzoneClient().isPreferred("company", det.getCompany());
-		if (perf == true)
+		this.pref = getNzoneClient().isPreferred("company", det.getCompany());
+		if (this.pref == true)
 			this.setPreferredcompany("1");
 		else
 			this.setPreferredcompany("0");
@@ -305,17 +306,6 @@ public class FriendBean implements Serializable, ValueChangeListener {
 		log.info("Called  setPreferredcompany with [" + preferredcompany + "]");
 		
 		this.preferredcompany = preferredcompany;
-		if (preferredcompany.contentEquals("1"))
-		{
-			pref = true;
-		
-			getNzoneClient().setAsPreferred("company", this.getCompany());
-		}
-		else
-		{
-			getNzoneClient().removeAsPreferred("company", this.getCompany());
-			pref = false;
-		}
 	}
 	
 	 public boolean isPref() {
@@ -400,7 +390,7 @@ public class FriendBean implements Serializable, ValueChangeListener {
 				 if ((sharPref & NZoneConsts.SHARE_INTERESTS)  == NZoneConsts.SHARE_INTERESTS)
 					 this.setShareinterests(true);
 				 
-				 this.setShareinfoMessage("This is the information the system learned that you have previously shared with a person from preferred company "+ this.getCompany());
+				 this.setShareinfoMessage("SOCIETIES learning has kicked in! You have previously shared this with someone from your preferred company,  "+ this.getCompany());
 				 this.setShareinfoMessageType("highlight");
 				 return;
 			 }
@@ -449,6 +439,21 @@ public class FriendBean implements Serializable, ValueChangeListener {
 		 
 		 getNzoneClient().updateShareInfo(info);
 		 
+		 
+		// setPreferredcompany(getPreferredcompany());
+		 
+		 if (getPreferredcompany().contentEquals("1"))
+		{
+			this.pref = true;
+			getNzoneClient().setAsPreferred("company", this.getCompany());
+		}
+		else
+		{
+			getNzoneClient().removeAsPreferred("company", this.getCompany());
+			this.pref = false;
+		}
+		 
+		 
 		 if (this.isPref())
 		 {
 			 log.info("This is a preferred company, saving shared pref");	
@@ -462,9 +467,12 @@ public class FriendBean implements Serializable, ValueChangeListener {
 	 public String getInterestString(int index)
 	 {
 		 if (selectedInterests == null)
-			 return "";
+			 return " ";
 		 if (index >= selectedInterests.size())
-			 return "";
+			 return " ";
+		 
+		 if (selectedInterests.get(index) == null)
+			 return " ";
 		 
 		if (selectedInterests.get(index).contains("cloud"))
 			 return "Cloud Computing";
@@ -473,8 +481,8 @@ public class FriendBean implements Serializable, ValueChangeListener {
 		if (selectedInterests.get(index).contains("future"))
 			 return "Future of the Internet"; 
 		if (selectedInterests.get(index).contains("entre"))
-			 return "Entrepreneur"; 
-		 return "";
+			 return "Green IT"; 
+		 return " ";
 	 }
 	   
 }  

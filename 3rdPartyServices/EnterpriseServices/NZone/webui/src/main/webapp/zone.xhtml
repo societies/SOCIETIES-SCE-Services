@@ -36,20 +36,29 @@
 								</p:column>
 
 								<p:column headerText="Relevance">
-									<p:graphicImage value="/images/learning.jpg"  width="25" height="18" rendered="#{peopleBean.isperftagged(person)}"/>
-									<p:graphicImage value="/images/learning2.jpg"  width="25" height="18" rendered="#{peopleBean.isinteresttagged(person)}"/>
-									<p:graphicImage value="/images/facebook-col.png"  width="25" height="18" rendered="#{peopleBean.isfacebooktagged(person)}"/>		
-									<p:graphicImage value="/images/linkedin-col.png"  width="25" height="18" rendered="#{peopleBean.islinkedtagged(person)}"/>		
+									<p:graphicImage value="/images/company.png"  width="25" height="25" rendered="#{peopleBean.isperftagged(person)}"/>
+									<p:graphicImage value="/images/interest.png"  width="25" height="25" rendered="#{peopleBean.isinteresttagged(person)}"/>
+									<p:graphicImage value="/images/facebook-col.png"  width="25" height="25" rendered="#{peopleBean.isfacebooktagged(person)}"/>		
+									<p:graphicImage value="/images/linkedin-col.png"  width="25" height="25" rendered="#{peopleBean.islinkedtagged(person)}"/>		
 								</p:column>
 								
 							</p:dataTable>
 
 							<h:outputText value="#{friendBean.friendid}" id="friendsid"
 								style="font-weight:bold" rendered="false" />
-								
-							<p:poll interval="30" listener="#{mainbean.updatepeoplelist}" update="zoneMembers" />	
-
+							
 						</h:form>
+						<br/><br/><br/>
+						<p:fieldset legend="Relevance Icon Legend">  
+    						<h:panelGrid columns="2" cellpadding="2"> 
+    							<p:graphicImage value="/images/company.png" width="25" height="25"/>
+		            			<h:outputText value="Works for a preferred company"/>  
+		            			<p:graphicImage value="/images/interest.png" width="25" height="25"/>
+		            			<h:outputText value="Shares your interests"/>  
+    						   	<p:graphicImage value="/images/linkedin-col.png" width="25" height="25"/>
+		            			<h:outputText value="An existing LinkedIn connection"/>
+		            		</h:panelGrid>  
+						</p:fieldset>  
 
 					</p:tab>
 
