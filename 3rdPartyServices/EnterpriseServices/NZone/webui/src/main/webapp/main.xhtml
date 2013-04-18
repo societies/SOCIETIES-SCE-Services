@@ -31,10 +31,11 @@
 					Click on the image to retrieve this Zone's Information<br/>
 					
 					<h:form>
-					<div style="text-align:center">
+					<div style="text-align:center; position: relative; left: 0; top: 0;" id="zoneImg">
 					<p:commandLink action="gotozone" >
-						<p:graphicImage value="/images/#{mainBean.zoneImage}" width="300" height="225" />
+						<p:graphicImage value="/images/basiczone.png" style="position: relative; top: 0; left: 0; width: 300; height: 225;" />
 					</p:commandLink>
+					<p:graphicImage value="#{profileBean.avatar}" style="position: absolute; top: #{mainBean.zoneImageTop}; left: #{mainBean.zoneImageLeft}; width: 50; height: auto" id="profileImage"/>
 					</div>
 					</h:form>
 				
