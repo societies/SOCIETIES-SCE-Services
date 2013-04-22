@@ -1,0 +1,97 @@
+package org.societies.thirdPartyServices.disasterManagement.wantToHelp.ctxDataInitiator;
+
+public class User5 extends BaseUser{
+
+	@Override
+	public String getName() {
+		
+		return "User5";
+	}
+
+	@Override
+	public String getSex() {
+		
+		return "male";
+	}
+
+	@Override
+	public String getAge() {
+		
+		return "48";
+	}
+
+	@Override
+	public String getLanguages() {
+
+		return null;
+	}
+
+	@Override
+	public String getInterests() {
+	
+		return null;
+	}
+
+	@Override
+	public String getMovies() {
+
+		return "superman,forrest gump";
+	}
+
+	@Override
+	public String getOccupation() {
+
+		return "employed";
+	}
+
+	@Override
+	public String getStatus() {
+		
+		return "free";
+	}
+
+	@Override
+	public String getEmail() {
+		
+		return "";
+	}
+
+	@Override
+	public String getBirthday() {
+		
+		return "";
+	}
+
+	@Override
+	public String getPoliticalViews() {
+		
+		return "";
+	}
+
+	@Override
+	public String getLocationSymbolic() {
+
+		return null;
+	}
+
+	@Override
+	public String getLocationCoordinates() {
+
+		return null;
+	}
+
+	@Override
+	public String getFriends() {
+		
+		return "User1";
+	}
+
+	/* (non-Javadoc)
+	 * @see org.societies.context.dataInit.impl.BaseUser#getSkills()
+	 */
+	@Override
+	public String getSkills() {
+		return BaseUser.SKILLS[4]+","+BaseUser.SKILLS[3]+","+BaseUser.SKILLS[8];
+	}
+	
+}

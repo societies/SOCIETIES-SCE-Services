@@ -47,24 +47,26 @@ import javax.swing.text.DefaultCaret;
 
 import net.miginfocom.swing.MigLayout;
 
+import org.apache.log4j.BasicConfigurator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.societies.api.comm.xmpp.interfaces.ICommManager;
-import org.societies.api.context.broker.ICtxBroker;
-import org.societies.api.context.model.CtxAttributeTypes;
-import org.societies.api.context.model.CtxEntity;
-import org.societies.api.context.model.CtxEntityIdentifier;
-import org.societies.api.identity.IIdentity;
-import org.societies.api.identity.Requestor;
+import org.societies.api.privacytrust.trust.ITrustBroker;
+import org.societies.api.privacytrust.trust.evidence.ITrustEvidenceCollector;
 import org.societies.thirdPartyServices.disasterManagement.analyzeThis.data.TicketData;
+import org.societies.thirdPartyServices.disasterManagement.analyzeThis.xmlrpc.XMLRPCClient_AT;
+import org.societies.thirdPartyServices.disasterManagement.analyzeThis.xmlrpc.XMLRPCServer_AT;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+@SuppressWarnings("unused")
 @Service
 public class AnalyzeThis implements IAnalyzeThis, ActionListener {
 	
 	/** The logging facility. */
 	private static final Logger LOG = LoggerFactory.getLogger(AnalyzeThis.class);
-	
+
+	private XMLRPCServer_AT xmlRpcServer;
 	private XMLRPCClient_AT xmlRpcClient_AT;
 	private PullThread pullThread;
 	
@@ -85,105 +87,134 @@ public class AnalyzeThis implements IAnalyzeThis, ActionListener {
 	public static final String FEEDBACK_LAYOUT_CONSTRAINTS = "hidemode 3, gap 0 0, novisualpadding, ins 0, wrap 1"; //, debug 2000";
 	public static final String FEEDBACK_COLUMN_CONTSTRAINTS = "[fill, grow]";
 	public static final String FEEDBACK_ROW_CONSTRAINTS = "[fill, grow]";
-	
-	
-	
-	//@Autowired(required=true)	
-	private ICtxBroker externalCtxBroker;
-	//@Autowired(required=true)
-	private ICommManager commMgr;
 
-	public AnalyzeThis() {
-		LOG.info("*** " + this.getClass() + " instantiated");
+	private static final int BASIS_PORT = 54300;
+	
+	private static AnalyzeThis selfReference;
+	
+	
+	@Autowired(required=true)
+	private ICommManager commMgr;
+	@Autowired(required = true)
+	private ITrustEvidenceCollector trustEvidenceCollector;
+	@Autowired(required = true)
+	private ITrustBroker trustBroker;
+
+	@Autowired(required=true)
+	public AnalyzeThis(ICommManager commMgr) {
+		this.commMgr = commMgr;
+		printAndLog("^^^^^^^^^ " + this.getClass() + " instantiated");
 		
 		xmlRpcClient_AT = new XMLRPCClient_AT();
+
+		printAndLog("^^^^^^^^^ commMgr="+commMgr);
+		
+		String userName = commMgr.getIdManager().getThisNetworkNode().getIdentifier();
+		int userNumber = -1;
+		boolean NO_USER = false;
+		if (userName.startsWith("user"))
+			 userNumber = Integer.parseInt(userName.substring(4)); // starts with "user" - i.e. 4 digits
+		else NO_USER=true;
+		
+		if (NO_USER) userNumber = 0; //TODO remove. was only for local testing
+		int port = BASIS_PORT + userNumber;
+		
+    	BasicConfigurator.configure();
+        try {
+			xmlRpcServer = new XMLRPCServer_AT(port);
+		} catch (Exception e) {
+			LOG.error(e.getMessage());
+		}
+        
+        selfReference = this;
+		
+		// ++++++++++++   GUI start   ++++++++++++
 		
 		// otherwise it does not startup in VIRGO
-		UIManager.put("ClassLoader", ClassLoader.getSystemClassLoader());
-		
-		frame = new JFrame("AnalyzeThis");
-		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		frame.addWindowListener(new WindowEventHandler());
-		
-		JPanel panel = new JPanel();
-		panel.setLayout(new MigLayout(PANEL_LAYOUT_CONSTRAINTS, PANEL_COLUMN_CONTSTRAINTS, PANEL_ROW_CONSTRAINTS));
-		Dimension panelDimension = new Dimension(1200, 768); 
-		panel.setPreferredSize(panelDimension);
-		frame.getContentPane().add(panel);
-		
-		subscribe = new JButton("subscribe to recent CSDM requests");
-		subscribe.setActionCommand(subscribeCommand);
-		subscribe.addActionListener(this);
-		unsubscribe = new JButton("I am done");
-		unsubscribe.setActionCommand(unsubscribeCommand);
-		unsubscribe.addActionListener(this);
-		unsubscribe.setVisible(false);
-		
-		addticket = new JButton("add ticket");
-		addticket.setActionCommand(addticketCommand);
-		addticket.addActionListener(this);
+//		UIManager.put("ClassLoader", ClassLoader.getSystemClassLoader());
+//		
+//		frame = new JFrame("AnalyzeThis");
+//		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+//		frame.addWindowListener(new WindowEventHandler());
+//		
+//		JPanel panel = new JPanel();
+//		panel.setLayout(new MigLayout(PANEL_LAYOUT_CONSTRAINTS, PANEL_COLUMN_CONTSTRAINTS, PANEL_ROW_CONSTRAINTS));
+//		Dimension panelDimension = new Dimension(1200, 768); 
+//		panel.setPreferredSize(panelDimension);
+//		frame.getContentPane().add(panel);
+//		
+//		subscribe = new JButton("subscribe to recent CSDM requests");
+//		subscribe.setActionCommand(subscribeCommand);
+//		subscribe.addActionListener(this);
+//		unsubscribe = new JButton("I am done");
+//		unsubscribe.setActionCommand(unsubscribeCommand);
+//		unsubscribe.addActionListener(this);
+//		unsubscribe.setVisible(false);
+//		
+//		addticket = new JButton("add ticket");
+//		addticket.setActionCommand(addticketCommand);
+//		addticket.addActionListener(this);
+//
+//		feedbackTextArea = new JTextArea("");
+//		feedbackTextArea.setEditable(false);
+//		DefaultCaret caret = (DefaultCaret)feedbackTextArea.getCaret();
+//		caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
+//	    JScrollPane scrollPane = new JScrollPane(feedbackTextArea);
+//	    JPanel feedbackPanel = new JPanel(new MigLayout(FEEDBACK_LAYOUT_CONSTRAINTS, FEEDBACK_COLUMN_CONTSTRAINTS, FEEDBACK_ROW_CONSTRAINTS));
+//	    feedbackPanel.add(scrollPane);
+//
+//	    panel.add(subscribe);
+//	    panel.add(unsubscribe);
+//	    panel.add(feedbackPanel);
+//
+//		printAndLog("^^^^^^^^^ on activate -> AnalyzeThis service started");
+//		frame.pack();
+//		frame.setVisible(true);
 
-		feedbackTextArea = new JTextArea("");
-		feedbackTextArea.setEditable(false);
-		DefaultCaret caret = (DefaultCaret)feedbackTextArea.getCaret();
-		caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
-	    JScrollPane scrollPane = new JScrollPane(feedbackTextArea);
-	    JPanel feedbackPanel = new JPanel(new MigLayout(FEEDBACK_LAYOUT_CONSTRAINTS, FEEDBACK_COLUMN_CONTSTRAINTS, FEEDBACK_ROW_CONSTRAINTS));
-	    feedbackPanel.add(scrollPane);
+		// ------------   GUI end   ------------
 
-	    panel.add(subscribe);
-	    panel.add(unsubscribe);
-	    panel.add(feedbackPanel);
+		
+		// ++++++++++++   pull thread start   ++++++++++++
+        
+//		pullThread = new PullThread();
+//		pullThread.start();
+//		pullThread.setCheckData(false);
+		
+		// ------------   pull thread end   ------------
 	}
 	
-	@PostConstruct
-	public void activate() throws Exception {
-		feedbackTextArea.append("on activate -> AnalyzeThis service started\n");
-
-		pullThread = new PullThread();
-		pullThread.start();
-		pullThread.setCheckData(false);
-		
-		frame.pack();
-		frame.setVisible(true);	
+	public static AnalyzeThis getInstance(){
+		return selfReference;
 	}
 
-	@PreDestroy
+//	@PreDestroy
 	public void deactivate() throws Exception {
-		feedbackTextArea.append("on deactivate ->AnalyzeThis service stopped ... \n");
+		printAndLog("^^^^^^^^^ on deactivate ->AnalyzeThis service stopped ... ");
 
-		pullThread.setRun(false);
+//		pullThread.setRun(false);
 		
 		frame.dispose();
-	}
-
-	@SuppressWarnings("unused")
-	public void retrieveData () throws Exception{
-//		feedbackTextArea.append("retrieveData from CSS ... ");
-		IIdentity cssOwnerId = commMgr.getIdManager().fromJid(commMgr.getIdManager().getThisNetworkNode().getBareJid());
-		Requestor requestor = new Requestor(cssOwnerId);
-		
-		CtxEntityIdentifier ownerEntityIdentifier = externalCtxBroker.retrieveIndividualEntityId(requestor, cssOwnerId).get();
-		CtxEntity ownerEntity = (CtxEntity) externalCtxBroker.retrieve(requestor, ownerEntityIdentifier).get();
-		
-		String testUserLastname = ownerEntity.getAttributes(CtxAttributeTypes.NAME_LAST).iterator().next().getStringValue();
-		String testUserFirstname = ownerEntity.getAttributes(CtxAttributeTypes.NAME_FIRST).iterator().next().getStringValue();
-		String testUserEmail = "korbinian.frank@dlr.de";
-
 	}
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		String command = e.getActionCommand();
 		if (command.equalsIgnoreCase(subscribeCommand)) {
-			pullThread.setCheckData(true);
+//			pullThread.setCheckData(true);
 			subscribe.setVisible(false);
 			unsubscribe.setVisible(true);
 		} else if (command.equalsIgnoreCase(unsubscribeCommand)) {
-			pullThread.setCheckData(false);
+//			pullThread.setCheckData(false);
 			subscribe.setVisible(true);
 			unsubscribe.setVisible(false);
 		} else if (command.equalsIgnoreCase(addticketCommand)) {}
+	}
+	
+	private void printAndLog(String string) {
+		if (feedbackTextArea!=null)
+			feedbackTextArea.append(string+"");
+		
+		LOG.info(string);	
 	}
 	
 	private class PullThread extends Thread {
@@ -204,7 +235,7 @@ public class AnalyzeThis implements IAnalyzeThis, ActionListener {
 					
 					for (TicketData ticketData : xmlRpcClient_AT.getTickets(mysqlFormat.format(cal.getTime()))) 
 						if (!ticketDataMap.containsKey(ticketData.getID())) {
-							feedbackTextArea.append("new request> "+ ticketData + "\n");
+							printAndLog("^^^^^^^^^ new request> "+ ticketData + "");
 							ticketDataMap.put(ticketData.getID(), ticketData);
 						}
 				}
@@ -229,8 +260,8 @@ public class AnalyzeThis implements IAnalyzeThis, ActionListener {
 	 * main method for testing
 	 */
 	public static void main(String[] args) throws Exception {
-		AnalyzeThis analyzeThis = new AnalyzeThis();
-		analyzeThis.activate();
+		AnalyzeThis analyzeThis = new AnalyzeThis(null);
+//		analyzeThis.activate();
 	}
 	
 	private class WindowEventHandler extends WindowAdapter {
@@ -251,12 +282,34 @@ public class AnalyzeThis implements IAnalyzeThis, ActionListener {
 		this.commMgr = commMgr;
 	}
 
-	public ICtxBroker getExternalCtxBroker() {
-		return externalCtxBroker;
+	/**
+	 * @return the trustEvidenceCollector
+	 */
+	public ITrustEvidenceCollector getTrustEvidenceCollector() {
+		return trustEvidenceCollector;
 	}
 
-	public void setExternalCtxBroker(ICtxBroker externalCtxBroker) {
-		//textArea.append("got externalCtxBroker: " + externalCtxBroker+" \n");
-		this.externalCtxBroker = externalCtxBroker;
+	/**
+	 * @param trustEvidenceCollector
+	 *            the trustEvidenceCollector to set
+	 */
+	public void setTrustEvidenceCollector(
+			ITrustEvidenceCollector trustEvidenceCollector) {
+		this.trustEvidenceCollector = trustEvidenceCollector;
+	}
+
+	/**
+	 * @return the trustBroker
+	 */
+	public ITrustBroker getTrustBroker() {
+		return trustBroker;
+	}
+
+	/**
+	 * @param trustBroker
+	 *            the trustBroker to set
+	 */
+	public void setTrustBroker(ITrustBroker trustBroker) {
+		this.trustBroker = trustBroker;
 	}
 }
