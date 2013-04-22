@@ -4,16 +4,16 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<name>You R Not Alone</name>
-	<groupId>org.societies.3rdPartyServices.disaster</groupId>
+	<groupId>org.societies.thirdPartyServices.disasterManagement</groupId>
 	<artifactId>youRNotAlone</artifactId>
 	<version>0.1</version>
-	<packaging>jar</packaging>
+	<packaging>bundle</packaging>
 	<url>http://www.springframework.org/osgi</url>
 
 	<parent>
 		<groupId>org.societies</groupId>
 		<artifactId>spring-osgi-parent</artifactId>
-		<version>0.1</version>
+		<version>RELEASE</version>
 	</parent>
 
 	<dependencies>
@@ -58,10 +58,24 @@
 				<extensions>true</extensions>
 				<configuration>
 					<instructions>
-
-						<Embed-Dependency>scope=compile|runtime</Embed-Dependency>
+						
+						<Bundle-SymbolicName>${project.groupId}.${project.artifactId}</Bundle-SymbolicName>
+						<Bundle-Name>${project.name}</Bundle-Name>
+						<Bundle-Version>${project.version}</Bundle-Version>                
+						<Embed-Dependency>*;scope=compile|runtime;inline=false</Embed-Dependency>
 						<Embed-Transitive>true</Embed-Transitive>
-
+						
+                        <Import-Package>                    
+                        !com.sun.net.httpserver,!org.apache.tools.ant,
+                        !com.apple.eawt,*</Import-Package>
+                        
+                        <!-- <Export-Package>org.societies.thirdPartyServices.disasterManagement.youRNotAlone</Export-Package> 
+                        <Import-Package>!com.sun.jdmk.comm,!org.apache.avalon.framework.logger,!org.apache.log,!org.eclipse.jetty.continuation,
+                        !org.jaxen.saxpath,!org.eclipse.jetty.server,!org.eclipse.jetty.server.ssl,!org.eclipse.jetty.server.nio,!org.eclipse.jetty.server.handler,
+                        !org.jaxen.pattern,!org.jaxen.dom4j,!org.relaxng.datatype,!org.eclipse.jetty.io.nio,!com.sun.msv.datatype.xsd,!org.gjt.xpp,!org.jaxen,
+                        !org.eclipse.jetty.io,!org.eclipse.jetty.http,!com.sun.msv.datatype,!org.eclipse.jetty.http.security,
+                        !org.eclipse.jetty.server.session,!com.sun.net.httpserver,!org.apache.tools.ant,
+                        !com.apple.eawt,*</Import-Package>-->
 					</instructions>
 				</configuration>
 			</plugin>
