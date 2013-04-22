@@ -3,7 +3,9 @@ package org.societies.thirdpartyservices.networking.android;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
@@ -68,6 +70,8 @@ public class WebViewer extends Activity {
 			webView.getSettings().setJavaScriptEnabled(true);
 
 			// Load the URLs inside the WebView, not in the external web browser
+			webView.setWebViewClient(new WebViewClient() );
+			/*
 			webView.setWebViewClient(new WebViewClient() {
 				ProgressDialog _dialog;
 				@Override
@@ -88,14 +92,24 @@ public class WebViewer extends Activity {
 				}
 
 				@Override
-				public void onReceivedError(WebView view, int errorCode,
-					String description, String failingUrl) {
+				public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
 					super.onReceivedError(view, errorCode, description, failingUrl);
 					try{
 						_dialog.dismiss();
-					}catch (Exception e) { }
+						AlertDialog.Builder dlgAlert  = new AlertDialog.Builder(WebViewer.this);                      
+					    dlgAlert.setTitle("Error code: " + errorCode); 
+					    dlgAlert.setMessage(description); 
+					    dlgAlert.setPositiveButton("OK",new DialogInterface.OnClickListener() {
+					        public void onClick(DialogInterface dialog, int whichButton) {
+					             finish(); 
+					        }
+					   });
+					    dlgAlert.setCancelable(true);
+					    dlgAlert.create().show();
+					} catch (Exception e) { }
 				}
 			});
+			*/
 			webView.loadUrl(url);
 			//webView.loadUrl("http://societies.local:9090"); //USER FOR TESTING
 		}
@@ -107,14 +121,12 @@ public class WebViewer extends Activity {
 	@Override
 	public void onConfigurationChanged(Configuration newConfig)
 	{
-		if (webView != null)
-		{
+		if (webView != null) {
 			// Remove the WebView from the old placeholder
 			webViewPlaceholder.removeView(webView);
 		}
 
 		super.onConfigurationChanged(newConfig);
-
 		// Load the layout resource for the new configuration
 		setContentView(R.layout.activity_web_viewer);
 
@@ -126,7 +138,6 @@ public class WebViewer extends Activity {
 	protected void onSaveInstanceState(Bundle outState)
 	{
 		super.onSaveInstanceState(outState);
-
 		// Save the state of the WebView
 		webView.saveState(outState);
 	}
@@ -135,7 +146,6 @@ public class WebViewer extends Activity {
 	protected void onRestoreInstanceState(Bundle savedInstanceState)
 	{
 		super.onRestoreInstanceState(savedInstanceState);
-
 		// Restore the state of the WebView
 		webView.restoreState(savedInstanceState);
 	}
