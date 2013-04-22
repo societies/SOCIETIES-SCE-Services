@@ -350,10 +350,13 @@ public class WantToHelp implements IWantToHelp, ActionListener {
 				userData.getLastName(), userData.getInstitute(), userCountry,
 				userData.getEmail());
 		// TODO what happens if user changes his emailAddress in CSDM? Answer: CSDM cannot cope with it! So does not need handling here.
-		for (String skill : userData.getSkills())
-			volunteer.addSkill(skill.trim());
-		languagesArray = null;
-		skillsArray = null;
+
+		if (userData.getSkills()!=null){
+			for (String skill : userData.getSkills())
+				volunteer.addSkill(skill.trim());
+			languagesArray = null;
+			skillsArray = null;
+		}
 		
 		sendVolunteerToYRNA(volunteer);
 	}
