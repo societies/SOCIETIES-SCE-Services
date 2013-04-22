@@ -37,7 +37,7 @@ import org.societies.api.identity.Requestor;
 import org.societies.api.privacytrust.trust.TrustException;
 import org.societies.api.privacytrust.trust.evidence.TrustEvidenceType;
 import org.societies.api.privacytrust.trust.model.MalformedTrustedEntityIdException;
-//import org.societies.api.privacytrust.trust.model.TrustValueType;
+import org.societies.api.privacytrust.trust.model.TrustValueType;
 import org.societies.api.privacytrust.trust.model.TrustedEntityId;
 import org.societies.api.privacytrust.trust.model.TrustedEntityType;
 import org.societies.thirdPartyServices.disasterManagement.analyzeThis.AnalyzeThis;
@@ -102,8 +102,8 @@ public class TrustHandler {
 
 			Requestor requestor = new Requestor(idMgr.fromJid(idMgr.getThisNetworkNode().getBareJid()));
 
-			trustResult = AnalyzeThis.getInstance().getTrustBroker().retrieveTrust(questionerUserTEID, requiredUserTEID).get();
-			//trustResult = AnalyzeThis.getInstance().getTrustBroker().retrieveTrustValue(requestor, questionerUserTEID, requiredUserTEID, TrustValueType.USER_PERCEIVED).get();
+			//trustResult = AnalyzeThis.getInstance().getTrustBroker().retrieveTrust(questionerUserTEID, requiredUserTEID).get();
+			trustResult = AnalyzeThis.getInstance().getTrustBroker().retrieveTrustValue(requestor, questionerUserTEID, requiredUserTEID, TrustValueType.USER_PERCEIVED).get();
 			feedback += " ........ TRUST RESULT "+trustResult+"<br>";
 		} catch (InterruptedException e) {
 			LOG.error(e.getMessage());
