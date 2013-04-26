@@ -7,6 +7,7 @@ import java.util.List;
 import javax.faces.application.FacesMessage;
 import javax.faces.bean.ApplicationScoped;
 import javax.faces.context.FacesContext;
+import javax.faces.context.PartialViewContext;
 import javax.faces.event.ComponentSystemEvent;
 
 import org.slf4j.Logger;
@@ -41,19 +42,20 @@ public class ProfileBean implements Serializable {
     private String foursqid;
     private String googleplusid;
     private List<String> selectedInterests;
-    private boolean profilemissing;
     
     private boolean sharecompany;
     private boolean sharesns;
     private boolean shareinterests;
     private boolean sharepersonal;
     
+    private String avatar;
     
-    
+      
    
     public ProfileBean() {
 		super();
 		selectedInterests = new ArrayList<String>();
+		this.avatar = new String("/images/profile_pic.png");
 	}
 	public boolean isSharecompany() {
 		return sharecompany;
@@ -104,30 +106,15 @@ public class ProfileBean implements Serializable {
 		this.nzoneClient = nzoneClient;
 	}
 	
-	public void intialiseprofilebean(ComponentSystemEvent ev)
-	{
-		setProfilemissing(!getNzoneClient().isProfileSetup());
-		
-	}
-	
-	public boolean isProfilemissing()
-	{
-		log.info("isProfilemissing called value at start is " + this.profilemissing);
-		setProfilemissing(!getNzoneClient().isProfileSetup());
-		log.info("isProfilemissing called value at end is " + this.profilemissing);
-
-		return this.profilemissing;
-	}
-	
-	 public void setProfilemissing(boolean profilemissing) {
-		 log.info("setProfilemissing called with value" + profilemissing);
-		this.profilemissing = profilemissing;
-	}
-	 
   
-	public void loadprofile(ComponentSystemEvent ev)
+	public void loadprofile()
 	{
-		log.info("loadProfileDetails called start");
+		if (this.getAvatar().contains("profile_pic"))
+			this.setAvatar(this.getNzoneClient().getAvatar());
+		
+		if ((this.getName() != null) && !(this.getName().isEmpty()))
+			return;
+		
 		UserDetails myDets = getNzoneClient().getMyProfile();
 		
 		if (myDets != null)
@@ -193,11 +180,7 @@ public class ProfileBean implements Serializable {
 				 
 		}
 			
-		
-		
 		log.info("loadProfileDetails called end");
-	//	getNzoneClient().userViewingPreferredProfile();
-	//	getNzoneClient().userSharedWithViewPreferredProfile();
 	}
 	
 	
@@ -369,6 +352,18 @@ public class ProfileBean implements Serializable {
 			 return "Green IT";  
 		 return " ";
 	 }
+	/**
+	 * @return the avatar
+	 */
+	public String getAvatar() {
+		return avatar;
+	}
+	/**
+	 * @param avatar the avatar to set
+	 */
+	public void setAvatar(String avatar) {
+		this.avatar = avatar;
+	}
 	 
 	 
 

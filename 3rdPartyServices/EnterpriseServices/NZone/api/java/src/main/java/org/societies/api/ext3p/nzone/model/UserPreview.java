@@ -15,11 +15,19 @@ import java.util.List;
 
 public class UserPreview {
 
-    protected String userid;
+    public UserPreview() {
+		super();
+		useDefaultImage = true;
+	}
+
+	protected String userid;
     protected String displayName;
     protected String company;
     protected String zone;
-    protected Integer rank;
+    protected Boolean useDefaultImage;
+    protected String imageSrc;
+    
+	protected Integer rank;
     
     public Integer getRank() {
 		return rank;
@@ -174,5 +182,21 @@ public class UserPreview {
     public void setTags(List<String> tags) {
         this.tags = tags;
     }
+    
+    public Boolean getUseDefaultImage() {
+		return useDefaultImage;
+	}
+
+	public void setUseDefaultImage(Boolean useDefaultImage) {
+		this.useDefaultImage = useDefaultImage;
+	}
+
+	public String getImageSrc() {
+  		return imageSrc;
+  	}
+
+  	public void setImageSrc(String imageSrc) {
+  		this.imageSrc = imageSrc;
+  	}
 
 }

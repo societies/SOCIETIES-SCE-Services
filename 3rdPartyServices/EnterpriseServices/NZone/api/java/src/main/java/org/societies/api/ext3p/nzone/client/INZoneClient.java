@@ -4,6 +4,7 @@ import java.util.IllegalFormatException;
 import java.util.List;
 
 import org.societies.api.ext3p.nzone.model.UserPreview;
+import org.societies.api.ext3p.nzone.model.ZoneDisplayDetail;
 import org.societies.api.ext3p.schema.nzone.ShareInfo;
 import org.societies.api.ext3p.schema.nzone.UserDetails;
 import org.societies.api.ext3p.schema.nzone.ZoneDetails;
@@ -39,7 +40,7 @@ public interface INZoneClient {
 	
 	public void updateMyInterests(List<String> interests);
 	
-	public int getCurrentZone();
+	public ZoneDisplayDetail getCurrentZone();
 	
 	public boolean isProfileSetup();
 	
@@ -52,6 +53,8 @@ public interface INZoneClient {
 //	public void userViewingPreferredProfile();
 //	public void userSharedWithViewPreferredProfile();
 	
+	public String getAvatar(String jid);
+	public String getAvatar();
 	
 }
 

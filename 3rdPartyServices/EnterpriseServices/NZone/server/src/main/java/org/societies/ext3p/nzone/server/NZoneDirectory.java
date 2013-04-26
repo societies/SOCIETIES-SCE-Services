@@ -107,6 +107,11 @@ public class NZoneDirectory {
 					zoneRec.setMainzone(tmpList.get(i).getMainzone());
 					zoneRec.setCtxAttribName(tmpList.get(i).getCtxAttribName());
 					zoneRec.setCisCategory(tmpList.get(i).getCiscategory());
+					zoneRec.setImageoffsettopprofile(tmpList.get(i).getImageoffsettopprofile());
+					zoneRec.setImageoffsetleftprofile(tmpList.get(i).getImageoffsetleftprofile());
+					zoneRec.setImageoffsettopother(tmpList.get(i).getImageoffsettopothers());
+					zoneRec.setImageoffsetleftother(tmpList.get(i).getImageoffsetleftothers());
+					
 					zoneList.add(zoneRec);
 				}		
 			}
