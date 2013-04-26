@@ -16,4 +16,5 @@
     -->
     <!-- <context:component-scan base-package="org.societies.personalisation.management.impl"></context:component-scan> -->
     <context:component-scan base-package="org.societies.thirdPartyServices.disasterManagement.analyzeThis"></context:component-scan>
+    <context:component-scan base-package="org.societies.thirdPartyServices.disasterManagement.analyzeThis.xmlrpc"></context:component-scan>
 </beans>
