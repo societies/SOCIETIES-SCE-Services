@@ -11,7 +11,7 @@
     		<EditTextPreference 
    		    	android:title="Port" 
    		    	android:key="webserverPort" 
-   		    	android:defaultValue="18080" 
+   		    	android:defaultValue="28181" 
    		    	android:summary="Apache port number"/>
     		<EditTextPreference 
    		    	android:title="Application Path" 
