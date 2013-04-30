@@ -8,8 +8,6 @@
 	<pm:page title="Networking Zone">
 		<pm:view id="viewProfile">
 			
-			<f:event listener="#{profileBean.loadprofile}" type="preRenderView" />
-		
 			<pm:header title="Your Profile" />
 			<pm:content>
 			
@@ -21,7 +19,7 @@
 				Choose what information is available by default to other members
 				<br/>
 				<br/>
-					<p:graphicImage value="/images/profile_pic.jpg"  width="50" height="45" /> 
+					<p:graphicImage value="#{profileBean.avatar}"  width="50" height="45" /> 
 								
 					<h:outputText value="Name: " style="font-weight:bold" />
 					<h:outputText id="name" value="#{profileBean.name}" />

@@ -54,6 +54,8 @@ public class FriendBean implements Serializable, ValueChangeListener {
     
     private String shareinfoMessage;
     private String shareinfoMessageType;
+    
+    private String avator;
        
     
     public String getShareinfoMessageType() {
@@ -71,6 +73,7 @@ public class FriendBean implements Serializable, ValueChangeListener {
     	setShareinfoMessage(new String(""));
     	setShareinfoMessageType(new String(""));
     	selectedInterests = new ArrayList<String>();
+    	avator = new String("");
     }
     
     public String getFriendid() {
@@ -87,6 +90,7 @@ public class FriendBean implements Serializable, ValueChangeListener {
 		this.setEmail(det.getEmail());
 		this.setPosition(det.getPosition());
 		this.setSex(det.getSex());
+	
 				
 		if (det.getFacebookID() == null)
 			this.setFacebookid("");
@@ -131,6 +135,7 @@ public class FriendBean implements Serializable, ValueChangeListener {
 		
 		this.loadShareInfo();
 		
+		this.setAvator(getNzoneClient().getAvatar(friendid));
 	}
 
 	public String getName() {   
@@ -289,6 +294,20 @@ public class FriendBean implements Serializable, ValueChangeListener {
 		this.nzoneClient = nzoneClient;
 	}
 	
+	/**
+	 * @return the avator
+	 */
+	public String getAvator() {
+		return avator;
+	}
+
+	/**
+	 * @param avator the avator to set
+	 */
+	public void setAvator(String avator) {
+		this.avator = avator;
+	}
+
 	public void setAsPreferred()
 	{
 		log.info("Called  setAsPreferred");

@@ -3,7 +3,11 @@ package org.societies.ext3p.nzone.model;
 import java.util.List;
 
 import javax.faces.bean.ApplicationScoped;
+import javax.faces.context.FacesContext;
+import javax.faces.context.PartialViewContext;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.societies.api.ext3p.nzone.client.INZoneClient;
 import org.societies.api.ext3p.nzone.model.UserPreview;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,23 +19,26 @@ public class PeopleBean {
 
 	@Autowired
 	INZoneClient nzoneClient; 
+	private static Logger log = LoggerFactory.getLogger(PeopleBean.class);
+
 	
 	private List<UserPreview> suggestions;
 	
 	private boolean currentMainView; 
+
 	
 	
 	public PeopleBean() {
-        
 		setCurrentMainView(false);
+		
 	}
 
+	
 	/**
 	 * @return the suggestions
 	 */
 	public List<UserPreview> getSuggestions() {
-		
-		this.suggestions = getNzoneClient().getSuggestedList(isCurrentMainView());
+		log.info("getSuggestions called");
 		return this.suggestions;
 	}
 
@@ -39,6 +46,7 @@ public class PeopleBean {
 	 * @param suggestions the suggestions to set
 	 */
 	public void setSuggestions(List<UserPreview> suggestions) {
+		log.info("setSuggestions called");
 		this.suggestions = suggestions;
 	}
 	
@@ -235,9 +243,14 @@ public class PeopleBean {
 		
 	}
 	
-	void updatepeoplelist()
+	public void initialisepeoplelist()
 	{
-		this.getSuggestions();
+		log.info("initialisepeoplelist called");
+		this.setSuggestions(getNzoneClient().getSuggestedList(this.isCurrentMainView()));
+		log.info("initialisepeoplelist end");
 	}
+	
+	
+
 }
                     

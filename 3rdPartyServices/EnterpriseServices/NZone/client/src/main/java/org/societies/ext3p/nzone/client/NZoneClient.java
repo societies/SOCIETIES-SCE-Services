@@ -5,7 +5,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -37,6 +36,7 @@ import org.societies.api.ext3p.nzone.client.INZoneClient;
 import org.societies.api.ext3p.nzone.model.NZonePreferences;
 import org.societies.api.ext3p.nzone.model.NZoneSharePreferences;
 import org.societies.api.ext3p.nzone.model.UserPreview;
+import org.societies.api.ext3p.nzone.model.ZoneDisplayDetail;
 import org.societies.api.ext3p.schema.nzone.ShareInfo;
 import org.societies.api.ext3p.schema.nzone.UserDetails;
 import org.societies.api.ext3p.schema.nzone.ZoneDetails;
@@ -49,9 +49,7 @@ import org.societies.api.personalisation.model.IAction;
 import org.societies.api.personalisation.model.IActionConsumer;
 import org.societies.api.personalisation.model.PersonalisablePreferenceIdentifier;
 import org.societies.api.schema.cis.community.Participant;
-import org.societies.api.schema.cis.community.ParticipantRole;
 import org.societies.api.schema.cis.directory.CisAdvertisementRecord;
-import org.societies.api.schema.css.directory.CssAdvertisementRecord;
 import org.societies.api.schema.servicelifecycle.model.ServiceResourceIdentifier;
 import org.societies.api.services.IServices;
 import org.societies.api.useragent.monitoring.IUserActionMonitor;
@@ -90,12 +88,15 @@ public class NZoneClient implements INZoneClient, IActionConsumer {
 
 	private List<ZoneDetails> zoneDetails;
 	
+	protected HashMap<String,String> avatarMap = new HashMap<String,String>();
+	final Semaphore avatarMapLock = new Semaphore(1, true);
 	
 	private List<String> myInterestsCached; 
 	
 
 	private ICis mainCis;
 	private ICis currentZoneCis;
+	private String nzoneServerCssID;
 	
 	private boolean bInitialising = false;
 	private boolean bInitialised = false;
@@ -106,7 +107,18 @@ public class NZoneClient implements INZoneClient, IActionConsumer {
 	private List<CisAdvertisementRecord> cisDirCallbackResult;
 
 	private NZoneCxtChangeList cxtChangeList;
+	private String openfireIpAddress;
 	
+	private UserDetails myDets;
+	
+	public String getOpenfireIpAddress() {
+		return openfireIpAddress;
+	}
+
+	public void setOpenfireIpAddress(String openfireIpAddress) {
+		this.openfireIpAddress = openfireIpAddress;
+	}
+
 	public ICtxBroker getCtxBroker() {
 		return ctxBroker;
 	}
@@ -208,16 +220,19 @@ public class NZoneClient implements INZoneClient, IActionConsumer {
 		this.cssManager = cssManager;
 	}
 
-	public NZoneClient(String networkingserver) {
-//		this.nzoneServerCssID = new String(networkingserver);
-
+	public NZoneClient(String openfireip, String networkingserver) {
+		this.nzoneServerCssID = networkingserver;
+		openfireIpAddress = openfireip;
 		myServiceType = "client";
+		
+		
 
 	};
 
 	public NZoneClient() {
-//		this.nzoneServerCssID = new String("user2.ict-societies.eu");
+		this.nzoneServerCssID = new String("cssconf.ict-societies.eu");
 
+		openfireIpAddress = new String("127.0.0.1");
 		myServiceType = "client";
 		this.zoneDetails = null;
 
@@ -240,7 +255,6 @@ public class NZoneClient implements INZoneClient, IActionConsumer {
 		
 		sharepreferences = new NZoneSharePreferences(getNzoneClientComms().getSharePreferences());
 		preferences = new NZonePreferences(getNzoneClientComms().getPreferences());
-		
 		log.info("NZoneClient bundle initializing.end");
 		
 	}
@@ -300,6 +314,9 @@ public class NZoneClient implements INZoneClient, IActionConsumer {
 		
 		
 		mainCis = joinCis(mainCisId, true);
+		
+		// TODO:  kick off the threads to get the avators for each of the members of main zone
+		
 		// Now see if we should be part of a zone already
 		checkMembershipOnStartup();
 		
@@ -355,6 +372,7 @@ public class NZoneClient implements INZoneClient, IActionConsumer {
 			if (cisCallback.bResponseReceived)
 				retry = false;
 
+			cisCallback = null;
 			
 			joinedCis = getCisManager().getCis(cisJid);
 
@@ -392,6 +410,7 @@ public class NZoneClient implements INZoneClient, IActionConsumer {
 			// Problem leave cis
 			log.error("Problem leaving Cis");
 		}
+		cisCallback = null;
 		log.debug("leaveCis End");
 		return;
 	}
@@ -433,74 +452,33 @@ public class NZoneClient implements INZoneClient, IActionConsumer {
 		
 		List<UserPreview> list = new ArrayList<UserPreview>();
 
-		HashMap<CssAdvertisementRecord, Integer> csslist = null; // what is returned from cssmanager
-		if (myServiceID == null)
-			myServiceID = getServiceMgmt().getMyServiceId(this.getClass());
-
-		if (requestorService == null)
-			requestorService = new RequestorService(myIdentity, myServiceID);
-
-		// TODO start: This need to change when css mnager suggest friends
-		// working
-		memberList = null;
-		if ((bMainZone == false) && (currentZoneCis != null)) {
-			
-			NZoneCisCallback cisCallback = new NZoneCisCallback();
-
-			currentZoneCis.getListOfMembers(requestorService,cisCallback.iCisManagerCallback);
-
-			try {
-				
-				cisCallback.cisManagerCallbackSignal.await();
-			} catch (InterruptedException e) {
-				log.error("Problem getting member list for cis " + e.getLocalizedMessage());
-			}
-			memberList = cisCallback.memberList;
-			
-
-			if (memberList == null) {
-				log.error("Problem getting member list for cis" + currentZoneCis.getName());
-				return list; // empty list ??
-			}
-		} else {	
-			
-			NZoneCisCallback cisCallback = new NZoneCisCallback();
-			mainCis.getListOfMembers(requestorService,cisCallback.iCisManagerCallback);
-
-			try {
-				cisCallback.cisManagerCallbackSignal.await();
-			} catch (InterruptedException e) {
-				log.error("Problem getting member list for cis " + e.getLocalizedMessage());
-			}
-
-			memberList = cisCallback.memberList;
-			if (memberList == null) {
-				log.error("Problem getting member list for cis" + mainCis.getName());
-				return list; // empty list
-			}
-		}
-			
-
-			
+		HashMap<String, Integer> csslist = null; // what is returned from cssmanager
+	
 		try {
 				
-			//IIdentity[] identities = new IIdentity[1];
-			//try {
-			//	identities[0] = getCommManager().getIdManager().fromJid(currentZoneCis.getCisId());
-			//} catch (InvalidFormatException e) {
-			//	// TODO Auto-generated catch block
-			//	e.printStackTrace();
-			//}
+			IIdentity[] identities = new IIdentity[1];
+			try {
+				if (bMainZone)
+					identities[0] = getCommManager().getIdManager().fromJid(mainCis.getCisId());
+				else
+					identities[0] = getCommManager().getIdManager().fromJid(currentZoneCis.getCisId());
+			} catch (Exception  e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			FriendFilter filter = new FriendFilter();
-			//filter.setCis_Jids(identities);
-			int nzonefilterflag = BitCompareUtil.FACEBOOK_BIT + BitCompareUtil.LINKEDIN_BIT;
-			//nzonefilterflag += BitCompareUtil.CIS_MEMBERS_BIT;
+			filter.setCis_Jids(identities);
+			int nzonefilterflag = BitCompareUtil.CIS_MEMBERS_BIT + BitCompareUtil.LINKEDIN_BIT;
+			
 			filter.setFilterFlag(nzonefilterflag);
 			log.info("Calling cssmanager : " );
 				
-			Future<HashMap<CssAdvertisementRecord, Integer>> csslistfut = getCssManager().getSuggestedFriendsDetails(filter);
+			Future<HashMap<String, Integer>> csslistfut = getCssManager().getUserSNSDetails(filter);
 			if (csslistfut != null)
 				csslist = csslistfut.get();
+			
+			if (csslist == null || csslist.size() == 0)
+				return list; // return empty list
 				
 		} catch (InterruptedException e) {
 			log.error("Problem getting suggested friends list for css mnager " + e.getLocalizedMessage());
@@ -508,108 +486,88 @@ public class NZoneClient implements INZoneClient, IActionConsumer {
 			log.error("Problem getting suggested friends list for css mnager " + e.getLocalizedMessage());
 		}
 			
-		// TODO end: This need to change when css mnager suggest friends
-		// working
-		// otherwise, we now have list, get their details
-		List<String> suggestionsIDs = new ArrayList<String>();
-
-		for (int i = 0; i < memberList.size(); i++) {
-			suggestionsIDs.add(memberList.get(i).getJid());
-		}
-
-		List<UserDetails> userDets = this.getNzoneClientComms().getUserDetailsList(suggestionsIDs);
+		List<String>  userList = new ArrayList<String>();
+		userList.addAll(csslist.keySet());
+		
+		if ((nzoneServerCssID != null) && !(nzoneServerCssID.isEmpty()))// don't show conf admin on member list of gui
+			if (userList.contains(nzoneServerCssID))
+				userList.remove(nzoneServerCssID);
 			
+		List<UserDetails> userDets = this.getNzoneClientComms().getUserDetailsList(userList);
+		
+		Integer cssFlag = 0;
+		int rank = 0;
+		
 		// Now populate UserPreview
-		for (int i = 0; i < memberList.size(); i++) {
-			if ((memberList.get(i).getRole() != ParticipantRole.OWNER) && !memberList.get(i).getJid().contains(myIdentity.getBareJid())) 
+		for (int i = 0; i < userDets.size(); i++) {
+			if ((userDets.get(i).getUserid() != null) && !(userDets.get(i).getUserid().contains(myIdentity.getBareJid()))) 
 			{
 					
-					
 				UserPreview userPre = new UserPreview();
-				userPre.setUserid(memberList.get(i).getJid());
+				userPre.setUserid(userDets.get(i).getUserid());
 				
+				userPre.setImageSrc(this.getAvatar(userPre.getUserid()));
+				if ((userPre.getImageSrc() != null) && !(userPre.getImageSrc().isEmpty()))
+					userPre.setUseDefaultImage(false); 
+				else
+					userPre.setUseDefaultImage(true); 
 					
-				Integer cssFlag = 0;
-				int rank = 0;
+				cssFlag = 0;
+				rank = 0;
 				List<String> tags = new ArrayList<String>();
 				if (csslist != null)
 				{
-						//try {
-						//	if (csslist.containsKey(getCommManager().getIdManager().fromJid(userPre.getUserid())))
-						//		cssFlag= csslist.get(getCommManager().getIdManager().fromJid(userPre.getUserid())).intValue();
-						//} catch (InvalidFormatException e) {
+						try {
+							if (csslist.containsKey(userPre.getUserid()))
+								cssFlag = csslist.get(userPre.getUserid()).intValue();
+						} catch (Exception e) {
 							// TODO Auto-generated catch block
-						//	e.printStackTrace();
-						//}
-						
-						for (Entry<CssAdvertisementRecord, Integer> entry : csslist.entrySet()) {
-							if (entry.getKey().getId().contains(userPre.getUserid()))
-							{
-								cssFlag = entry.getValue();	
-								log.info(" cssmanager : found" + userPre.getUserid() + " " + cssFlag);
-								break;
-							}
+							e.printStackTrace();
 						}
-						
 				}
 					
-				if ((cssFlag & BitCompareUtil.FACEBOOK_BIT)  == BitCompareUtil.FACEBOOK_BIT)
-				{
-					log.info(" cssmanager : facebook set " + userPre.getUserid() + " " + cssFlag);
-					tags.add("facebook");
-					rank +=1;
-				}
 				if ((cssFlag & BitCompareUtil.LINKEDIN_BIT) == BitCompareUtil.LINKEDIN_BIT)
 				{
-					log.info(" cssmanager : linked set " + userPre.getUserid() + " " + cssFlag);
+					log.debug(" cssmanager : linked set " + userPre.getUserid() + " " + cssFlag);
 					tags.add("linked");
 					rank +=1;
 				}
 					
 					
-				if (userDets != null) 
-				{
-					for (int j = 0; j < userDets.size(); j++) 
+				
+				userPre.setCompany(userDets.get(i).getCompany());
+				userPre.setDisplayName(userDets.get(i).getDisplayName());
+				userPre.setZone(userDets.get(i).getCurrentzone());
+				if (userDets.get(i).getCompany() != "") {
+					// Check is we have 'tagged' this
+					// company
+					// get UserPrefences
+					if (preferences != null) {
+						if (preferences.isPreferred("company", userDets.get(i).getCompany())) {
+							log.debug("Tagging user as preferred");
+							tags.add("Learned Preference");
+							rank +=10;
+						}
+					}
+					
+					// check if we have shared interests
+					log.debug("checking shared interests");
+					if ((userDets.get(i).getInterests() != null) &&  (getMyInterestsCached() != null))
 					{
-						log.debug("checking userDets.getUserid[" + j + "] : " + userDets.get(j).getUserid());
-
-						if ((userDets.get(j) != null) && (userDets.get(j).getUserid() != null)) {
-							if (userPre.getUserid().contentEquals(userDets.get(j).getUserid())) {
-								userPre.setCompany(userDets.get(j).getCompany());
-								userPre.setDisplayName(userDets.get(j).getDisplayName());
-								userPre.setZone(userDets.get(j).getCurrentzone());
-								if (userDets.get(j).getCompany() != "") {
-									// Check is we have 'tagged' this
-									// company
-									// get UserPrefences
-									if (preferences != null) {
-										if (preferences.isPreferred("company", userDets.get(j).getCompany())) {
-											log.debug("Tagging user as preferred");
-											tags.add("Learned Preference");
-											rank +=10;
-										}
-									}
-								}
-								// check if we have shared interests
-								log.info("checking shared interests");
-								if ((userDets.get(j).getInterests() != null) &&  (getMyInterestsCached() != null))
+						if ((userDets.get(i).getInterests().size() > 0) && (getMyInterestsCached().size() > 0))
+						{
+							for (int index = 0; index < getMyInterestsCached().size(); index++)
+							{
+								if (userDets.get(i).getInterests().contains(getMyInterestsCached().get(index)))
 								{
-									if ((userDets.get(j).getInterests().size() > 0) && (getMyInterestsCached().size() > 0))
-									{
-										for (int index = 0; index < getMyInterestsCached().size(); index++)
-										{
-											if (userDets.get(j).getInterests().contains(getMyInterestsCached().get(index)))
-											{
-												rank +=3;
-												if (!tags.contains("Common Interest"))
-													tags.add("Common Interest");
-											}
-										}
-									}
+									rank +=3;
+									if (!tags.contains("Common Interest"))
+										tags.add("Common Interest");
 								}
 							}
 						}
 					}
+					
 				}
 				userPre.setTags(tags);
 				userPre.setRank(rank);
@@ -932,9 +890,12 @@ public class NZoneClient implements INZoneClient, IActionConsumer {
 	@Override
 	public List<ZoneDetails> getZoneDetails() {
 
-		log.info("Getting Zone details");
+		
 		if (this.zoneDetails == null)
+		{
+			log.info("Getting Zone details");
 			this.zoneDetails = getNzoneClientComms().getZoneDetails();
+		}
 		return this.zoneDetails;
 		
 		
@@ -1056,11 +1017,11 @@ public class NZoneClient implements INZoneClient, IActionConsumer {
 		// check if we have a profile saved, if not create a new profile with
 		// info from css record in context
 
-		UserDetails myDets = getNzoneClientComms().getMyDetails();
 		
+		if (this.myDets == null)
+			this. myDets = getNzoneClientComms().getMyDetails();
 		
-
-		if (myDets == null)
+		if (this.myDets == null)
 			myDets = new UserDetails();
 
 		if (myDets.getDisplayName() == null
@@ -1105,6 +1066,9 @@ public class NZoneClient implements INZoneClient, IActionConsumer {
 		}
 
 		this.setMyInterestsCached(myDets.getInterests());
+		
+		this.getAvatar();
+		
 		return myDets;
 
 		// getContextAtribute(CtxAttributeTypes.NAME.toString());
@@ -1113,19 +1077,27 @@ public class NZoneClient implements INZoneClient, IActionConsumer {
 	};
 
 	@Override
-	public int getCurrentZone() {
+	public ZoneDisplayDetail getCurrentZone() {
 
-		
+		ZoneDisplayDetail displayDets = new ZoneDisplayDetail();
 		if (currentZoneCis != null) {
 			for (int i = 0; i < this.getZoneDetails().size(); i++) {
 				// Find our one
 				if (this.getZoneDetails().get(i).getCisid()
 						.contains(currentZoneCis.getCisId()))
-					return (i);
+				{
+					displayDets.setZoneNo(i);
+					displayDets.setImageOffsetTopProfile(this.getZoneDetails().get(i).getImageoffsettopprofile());
+					displayDets.setImageOffsetLeftProfile(this.getZoneDetails().get(i).getImageoffsetleftprofile());
+					displayDets.setImageOffsetTopOther(this.getZoneDetails().get(i).getImageoffsettopother());
+					displayDets.setImageOffsetLeftOther(this.getZoneDetails().get(i).getImageoffsetleftother());
+					displayDets.setZoneName(this.getZoneDetails().get(i).getZonename());
+					return displayDets;
+				}
 			}
 		}
 
-		return 0;
+		return displayDets;
 
 	};
 
@@ -1530,6 +1502,33 @@ public class NZoneClient implements INZoneClient, IActionConsumer {
 	private void setMyInterestsCached(List<String> myInterests) {
 		this.myInterestsCached = myInterests;
 	}
+
+	@Override
+	public String getAvatar(String jid) {
+		// check if we have already a profile pic for this user
+		if (avatarMap.containsKey(jid))
+			return avatarMap.get(jid);
+		// otherwise, kick of thread to retrieve it from openfire, and return default image for now
+		new Thread(new AvatorHandler(this, jid)).start();
+		return "/images/profile_pic.png";
+	}
+	
+	@Override
+	public String getAvatar() {
+		// check if we have already a profile pic for this user
+		//TODO FIX this, replace john with myid!
+		
+		if (myIdentity != null)
+			myIdentity = getCommManager().getIdManager().getThisNetworkNode();
+
+		if (avatarMap.containsKey(myIdentity.getBareJid()))
+			return avatarMap.get(myIdentity.getBareJid());
+		// otherwise, kick of thread to retrieve it from openfire, and return default image for now
+		new Thread(new AvatorHandler(this, myIdentity.getBareJid())).start();
+		
+		return "/images/profile_pic.png";
+	}
+	
 	
 	
 }

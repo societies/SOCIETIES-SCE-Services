@@ -63,7 +63,12 @@ public class NZZones implements Serializable {
 	public String zonetopics;
 	public String ctxAttribName;
 	public String ciscategory;
+	public Integer imageoffsettopprofile;
+	public Integer imageoffsetleftprofile;
+	public Integer imageoffsettopothers;
+	public Integer imageoffsetleftothers;
 	
+
 
 	public Integer mainzone;
 	
@@ -147,6 +152,42 @@ public class NZZones implements Serializable {
 
 	public void setCiscategory(String ciscategory) {
 		this.ciscategory = ciscategory;
+	}
+	
+	@Column(name = "offsettopprofile")
+	public Integer getImageoffsettopprofile() {
+		return imageoffsettopprofile;
+	}
+
+	public void setImageoffsettopprofile(Integer imageoffsettopprofile) {
+		this.imageoffsettopprofile = imageoffsettopprofile;
+	}
+
+	@Column(name = "offsetleftprofile")
+	public Integer getImageoffsetleftprofile() {
+		return imageoffsetleftprofile;
+	}
+
+	public void setImageoffsetleftprofile(Integer imageoffsetleftprofile) {
+		this.imageoffsetleftprofile = imageoffsetleftprofile;
+	}
+
+	@Column(name = "offsettopother")
+	public Integer getImageoffsettopothers() {
+		return imageoffsettopothers;
+	}
+
+	public void setImageoffsettopothers(Integer imageoffsettopothers) {
+		this.imageoffsettopothers = imageoffsettopothers;
+	}
+
+	@Column(name = "offsetleftother")
+	public Integer getImageoffsetleftothers() {
+		return imageoffsetleftothers;
+	}
+
+	public void setImageoffsetleftothers(Integer imageoffsetleftothers) {
+		this.imageoffsetleftothers = imageoffsetleftothers;
 	}
 	
 }

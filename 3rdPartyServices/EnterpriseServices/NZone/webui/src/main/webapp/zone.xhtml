@@ -5,8 +5,12 @@
 	xmlns:p="http://primefaces.org/ui"
 	xmlns:pm="http://primefaces.org/mobile" contentType="text/html">
 
+	
 	<pm:page title="Networking Zone">
 		<pm:view id="viewZone">
+		
+			<f:event listener="#{peopleBean.initialisepeoplelist}" type="preRenderView" />
+			
 			<pm:header title="#{mainBean.zoneName}" />
 			<pm:content>
 				<p:accordionPanel>
@@ -23,7 +27,7 @@
 								<p:commandLink action="gotofriend" >
 								<f:setPropertyActionListener value="#{person.userid}"
 											target="#{friendBean.friendid}" />
-								<p:graphicImage value="/images/profile_pic.jpg"  width="30" height="27" />
+								<p:graphicImage value="#{person.imageSrc}"  width="30" height="27" />
 									</p:commandLink> 
 								</p:column>
 								

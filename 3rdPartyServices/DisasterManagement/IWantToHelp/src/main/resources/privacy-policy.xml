@@ -1,0 +1,19 @@
+<RequestPolicy>
+<Target>
+<Resource>
+	<Attribute AttributeId="contextType"
+			DataType="http://www.w3.org/2001/XMLSchema#string">
+		<AttributeValue>nameLast</AttributeValue>
+	</Attribute>
+</Resource>
+<optional>false</optional>
+</Target>
+<Target>
+<Resource>
+	<Attribute AttributeId="contextType"
+			DataType="http://www.w3.org/2001/XMLSchema#string">
+		<AttributeValue>nameFirst</AttributeValue>
+	</Attribute>
+</Resource>
+<optional>false</optional>
+</Target></RequestPolicy>

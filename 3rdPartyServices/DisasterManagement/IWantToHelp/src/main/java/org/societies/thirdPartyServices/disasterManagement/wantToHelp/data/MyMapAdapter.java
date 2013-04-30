@@ -25,85 +25,35 @@
 
 package org.societies.thirdPartyServices.disasterManagement.wantToHelp.data;
 
-public class UserData {
-	private String firstName = "";
-	private String lastName = "";
-	private String institute = "";
-	private String email = "";
-	private String societies_xmlrpc_url = "";
-	private String[] skills = null; 
-	private String separator = ":.:"; 
-	private String skillseparator = ",";
-	
-	public UserData(String seperated){
-		String[] tokens = seperated.split(separator);
-		if (tokens.length > 3) {
-			setFirstName(tokens[0]);
-			setLastName(tokens[1]);
-			setInstitute(tokens[2]);
-			setEmail(tokens[3]);
-		}
-		if (tokens.length > 4)
-			setSocieties_xmlrpc_url(tokens[4]);
-		if (tokens.length > 5)
-			setSkills(tokens[5].split(skillseparator));
-	}
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+import javax.xml.bind.annotation.adapters.XmlAdapter;
 
-	public String getFirstName() {
-		return firstName;
-	}
+public final class MyMapAdapter extends
 
-	public void setFirstName(String firstName) {
-		this.firstName = firstName;
-	}
+XmlAdapter<MyMapType,Map<String,Integer>> {
 
-	public String getLastName() {
-		return lastName;
-	}
+@Override
+public MyMapType marshal(Map<String,Integer> arg0) throws Exception {
+   MyMapType myMapType = new MyMapType();
+   for(Entry<String,Integer> entry : arg0.entrySet()) {
+      MyMapEntryType myMapEntryType = 
+         new MyMapEntryType();
+      myMapEntryType.key = entry.getKey();
+      myMapEntryType.value = entry.getValue();
+      myMapType.entry.add(myMapEntryType);
+   }
+   return myMapType;
+}
 
-	public void setLastName(String lastName) {
-		this.lastName = lastName;
-	}
-	
-	public String getInstitute() {
-		return institute;
-	}
+@Override
+public Map<String,Integer> unmarshal(MyMapType arg0) throws Exception {
+   HashMap<String,Integer> hashMap = new HashMap<String,Integer>();
+   for(MyMapEntryType myEntryType : arg0.entry) {
+      hashMap.put(myEntryType.key, myEntryType.value);
+   }
+   return hashMap;
+}
 
-	public void setInstitute(String institute) {
-		this.institute = institute;
-	}
-
-	public String getEmail() {
-		return email;
-	}
-
-	public void setEmail(String email) {
-		this.email = email;
-	}
-
-	public String getSocieties_xmlrpc_url() {
-		return societies_xmlrpc_url;
-	}
-
-	public void setSocieties_xmlrpc_url(String societies_xmlrpc_url) {
-		this.societies_xmlrpc_url = societies_xmlrpc_url;
-	}
-
-	public String[] getSkills() {
-		return skills;
-	}
-
-	public void setSkills(String[] skills) {
-		this.skills = skills;
-	}
-
-	public String toString(){
-		String returnString = getFirstName() + " "+separator+" " + getLastName() + " "+separator+" " + getInstitute() + " "+separator+" " + getEmail() 
-				+ " "+separator+" " + getSocieties_xmlrpc_url()+ " "+separator+" " ;
-		if (getSkills() != null)
-			for (String skill : getSkills()) 
-				returnString += skill+skillseparator;
-		
-		return returnString;
-	}
 }

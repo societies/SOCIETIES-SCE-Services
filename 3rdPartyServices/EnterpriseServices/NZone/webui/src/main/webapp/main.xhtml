@@ -5,52 +5,62 @@
 	xmlns:p="http://primefaces.org/ui"
 	xmlns:pm="http://primefaces.org/mobile" contentType="text/html">
 
+	<f:event listener="#{mainBean.checkinit}" type="preRenderView" />
+	<f:event listener="#{profileBean.loadprofile}" type="preRenderView" />
+	<f:event listener="#{mainPeopleBean.initialisepeoplelist}" type="preRenderView" />
+	
+	
 	<pm:page title="Networking Zone">
 		<pm:view id="viewMain">
 		
 		
-			<f:event listener="#{mainBean.checkinit}" type="preRenderView" />
-			<f:event listener="#{profileBean.loadprofile}" type="preRenderView" />
+		
 	
 			<pm:header title="Networking Zones" />
 			
 			
 			<pm:content>
 
-				<!-- This dialog will display if the user hasn't setup a profile
-			It directs them to the Profile Page -->
-				<p:confirmDialog id="confirmDialog"
-					message="Please set up a profie so that you can interact with other users"
-					header="Welcome To networking Zone" severity="alert"
-					rendered="#{profileBean.profilemissing}">
-					<p:commandButton id="confirm" value="OK" action="gotoprofile" />
-				</p:confirmDialog>
-
-				
-				<!--  seperate tab -->
+			<!--  seperate tab -->
 				<p:tab title="Zones">
-					You are currently located in the <b>"#{mainBean.zoneName}"</b>, as shown in the image below.<br/>
-					Click on the image to retrieve this Zone's Information<br/>
+					<div style="text-align:center;">
+					Your Current Location : <b>"#{mainBean.zoneName}"</b><br/><br/>
+					</div>
+					<h:form id="zoneForm">
 					
-					<h:form>
-					<div style="text-align:center">
+					<div style="text-align:center; position: relative; margin-left: auto; margin-right: auto; width: 310px ;" id="zoneImg">
+					
 					<p:commandLink action="gotozone" >
-						<p:graphicImage value="/images/#{mainBean.zoneImage}" width="300" height="225" />
+						<p:graphicImage value="/images/#{mainBean.zoneImage}" style="position: relative; top: 0; left: 0;" width="300" height="225" />
 					</p:commandLink>
+					
+					<p:graphicImage value="#{profileBean.avatar}" style="position: absolute; top: #{mainBean.zoneImageTop}px; left: #{mainBean.zoneImageLeft}px; width: 40px; height: auto" id="profileImage"/>
+					<p:graphicImage value="#{mainBean.otherToShow.imageSrc}" style="position: absolute; top: #{mainBean.zoneImageTopOther}px; left: #{mainBean.zoneImageLeftOther}px; width: 40px; height: auto" id="otherImage" rendered="#{mainBean.showotheravatar}"/>
+					<div style="text-align:center;">
+					<p:outputPanel rendered="#{mainBean.otherLocationMessage.isEmpty() == false}">
+						<b>#{mainBean.otherToShow.displayName}'s</b> Location : <b>#{mainBean.otherLocationMessage}</b>
+					</p:outputPanel>
+					</div>
 					</div>
 					</h:form>
-				
+					
 				</p:tab>
 				
 				<p:accordionPanel>
 					<p:tab title="Conference Members">
-					This is a list of all conference members.<br/>
+					Click on attendee image to view their location<br/>
 					
 						<h:form id="form">
 							<p:dataTable id="mainroomlist" value="#{mainPeopleBean.suggestions}" var="mainperson" >
-								<p:column style="width:10%"><p:graphicImage value="/images/profile_pic.jpg"  width="50" height="45" /> </p:column>
+								<p:column style="width:10%">
+									<p:commandLink id="link4_#{mainperson.displayName}" update=":zoneForm" >
+										<f:setPropertyActionListener target="#{mainBean.otherToShow}" value="#{mainperson}" />
+											<p:graphicImage value="/images/profile_pic.png"  width="50" height="45" rendered="#{mainperson.useDefaultImage}"/>
+											<p:graphicImage value="#{mainperson.imageSrc}"  width="50" height="45" rendered="#{mainperson.useDefaultImage == false}"/>
+									</p:commandLink>
+								</p:column>
 								<p:column style="width:20%" headerText="Name" > #{mainperson.displayName}</p:column>
-								<p:column style="width:30%" headerText="Zone" > #{mainperson.zone} </p:column>
+								<p:column style="width:30%" headerText="Company" > #{mainperson.company} </p:column>
 								<p:column headerText="Relevance">
 									<p:graphicImage value="/images/company.png"  width="25" height="25" rendered="#{peopleBean.isperftagged(mainperson)}"/>
 									<p:graphicImage value="/images/interest.png"  width="25" height="25" rendered="#{peopleBean.isinteresttagged(mainperson)}"/>

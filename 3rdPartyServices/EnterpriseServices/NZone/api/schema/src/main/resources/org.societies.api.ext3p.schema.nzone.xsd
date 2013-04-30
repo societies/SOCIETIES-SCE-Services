@@ -63,6 +63,10 @@
 				<xs:element name="cisCategory" type="xs:string" minOccurs="0" />
 				<xs:element name="zonemembercount" type="xs:int" minOccurs="0" />
 				<xs:element name="cisid" type="xs:string" minOccurs="0" />
+				<xs:element name="imageoffsettopprofile" type="xs:int" minOccurs="0" />
+				<xs:element name="imageoffsetleftprofile" type="xs:int" minOccurs="0" />
+				<xs:element name="imageoffsettopother" type="xs:int" minOccurs="0" />
+				<xs:element name="imageoffsetleftother" type="xs:int" minOccurs="0" />
 			</xs:sequence>
 		</xs:complexType>
 		
