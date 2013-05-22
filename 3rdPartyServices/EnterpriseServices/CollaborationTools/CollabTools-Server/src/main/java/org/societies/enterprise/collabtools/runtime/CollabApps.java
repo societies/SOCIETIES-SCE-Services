@@ -98,4 +98,12 @@ public class CollabApps implements ICollabApps
 		// TODO Auto-generated method stub
 
 	}
+
+	/* (non-Javadoc)
+	 * @see org.societies.enterprise.collabtools.api.ICollabApps#getCollabAppConnectors()
+	 */
+	@Override
+	public ICollabAppConnector[] getCollabAppConnectors() {
+		return collabAppsconnectors;
+	}
 }

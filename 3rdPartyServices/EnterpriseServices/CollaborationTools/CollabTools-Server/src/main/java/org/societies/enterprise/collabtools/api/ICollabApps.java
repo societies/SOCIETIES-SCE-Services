@@ -32,12 +32,14 @@ package org.societies.enterprise.collabtools.api;
  */
 public interface ICollabApps {
 
-	  public abstract void sendInvite(String member, String[] collabApps, String sessionName);
-	  
-	  public abstract void sendKick(String member, String[] collabApps, String sessionName);
-	  
-	  public abstract void joinEvent(String member, String[] collabApps, String sessionName);
-	  
-	  public abstract void leaveEvent(String member, String[] collabApps, String sessionName);
-	  
+	public abstract ICollabAppConnector[] getCollabAppConnectors();
+
+	public abstract void sendInvite(String member, String[] collabApps, String sessionName);
+
+	public abstract void sendKick(String member, String[] collabApps, String sessionName);
+
+	public abstract void joinEvent(String member, String[] collabApps, String sessionName);
+
+	public abstract void leaveEvent(String member, String[] collabApps, String sessionName);
+
 }

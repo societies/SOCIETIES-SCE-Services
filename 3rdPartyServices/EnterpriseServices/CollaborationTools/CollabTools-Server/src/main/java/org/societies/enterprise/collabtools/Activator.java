@@ -24,11 +24,10 @@
  */
 package org.societies.enterprise.collabtools;
 
-import java.io.FileInputStream;
+import java.io.File;
+import java.net.URL;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Hashtable;
-import java.util.Properties;
 import java.util.Random;
 import java.util.ResourceBundle;
 
@@ -42,15 +41,19 @@ import org.neo4j.index.lucene.LuceneIndexProvider;
 import org.neo4j.kernel.ListIndexIterable;
 import org.neo4j.kernel.impl.cache.CacheProvider;
 import org.neo4j.kernel.impl.cache.SoftCacheProvider;
+import org.osgi.application.Framework;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.framework.launch.FrameworkFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.societies.enterprise.collabtools.acquisition.ContextSubscriber;
 import org.societies.enterprise.collabtools.acquisition.PersonRepository;
 import org.societies.enterprise.collabtools.api.ICollabAppConnector;
+import org.societies.enterprise.collabtools.api.ICollabApps;
+import org.societies.enterprise.collabtools.api.IContextSubscriber;
 import org.societies.enterprise.collabtools.runtime.CollabApps;
 import org.societies.enterprise.collabtools.runtime.SessionRepository;
 
@@ -67,18 +70,17 @@ public class Activator implements BundleActivator
     
 	private static Index<Node> indexPerson, indexSession, indexShortTermCtx;
     @SuppressWarnings("rawtypes")
-	private ServiceRegistration serviceRegistration, indexServiceRegistration, ctxSubServiceRegistration;
+	private ServiceRegistration serviceRegistration, indexServiceRegistration, ctxSubServiceRegistration, collabAppsRegistration;
     
     ContextSubscriber ctxSub;
-	private Properties prop = new Properties();
-
+    CollabApps collabApps;
  
     @Override
     public void start(BundleContext context) throws Exception
     {
-//    	FileInputStream is = (FileInputStream) 	getClass().getResourceAsStream("config.properties");
+//		Bundle bc = context.installBundle("file:context-3pbroker-connector-0.1.0.jar");
+//    	bc.start();
 
-//		prop.load(new FileInputStream("config.properties"));
 		ResourceBundle rs = ResourceBundle.getBundle("config");
 		
         //cache providers
@@ -111,9 +113,9 @@ public class Activator implements BundleActivator
 
 	    //Apps and server
         //load a properties file
-	    ICollabAppConnector chat = new ChatAppIntegrator(prop.getProperty("applications"), prop.getProperty("server"));
+	    ICollabAppConnector chat = new ChatAppIntegrator(rs.getString("applications"), rs.getString("server"));
 	    ICollabAppConnector[] connectorsApp = {chat};
-	    CollabApps collabApps = new CollabApps(connectorsApp);
+	    this.collabApps = new CollabApps(connectorsApp);
 
         personRepository = new PersonRepository(personGraphDb, indexPerson);
         sessionRepository = new SessionRepository(sessionGraphDb, indexSession, collabApps);
@@ -132,7 +134,9 @@ public class Activator implements BundleActivator
         
         indexServiceRegistration = context.registerService(Index.class.getName(), indexPerson, new Hashtable<String,String>() );
         
-        ctxSubServiceRegistration =context.registerService(ContextSubscriber.class.getName(), ctxSub, null);
+        ctxSubServiceRegistration =context.registerService(IContextSubscriber.class.getName(), ctxSub, null);
+        
+        collabAppsRegistration =context.registerService(ICollabApps.class.getName(), collabApps, null);
         
     }
  
@@ -140,6 +144,7 @@ public class Activator implements BundleActivator
     public void stop(BundleContext context) throws Exception
     {
     	ctxSubServiceRegistration.unregister();
+    	collabAppsRegistration.unregister();
     	serviceRegistration.unregister();
 //    	sessionGraphDbRegistration.unregister();
         indexServiceRegistration.unregister();

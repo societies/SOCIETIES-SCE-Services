@@ -106,7 +106,7 @@
 <!-- 							javax.management,javax.management.remote,javax.tools,javax.xml.parsers, -->
 <!-- 							org.osgi.framework,org.xml.sax,org.xml.sax.ext,org.xml.sax.helpers -->
 						  org.osgi.framework, !ch.qos.logback.*, *;resolution:=optional</Import-Package> 
- 				          <Export-Package>org.societies.enterprise.collabtools, org.societies.enterprise.collabtools.acquisition</Export-Package> 
+ 				          <Export-Package>org.societies.enterprise.collabtools, org.societies.enterprise.collabtools.api, org.societies.enterprise.collabtools.acquisition</Export-Package> 
 <!-- 				      <Private-Package>no privates either</Private-Package> -->
 				      <Embed-Transitive>true</Embed-Transitive>
 		           	  <Embed-Dependency>*;scope=compile|runtime</Embed-Dependency>
