@@ -55,7 +55,7 @@ import org.springframework.stereotype.Service;
 /**
  * Connector for using Context Broker in SOCIETIES Platform
  *
- * @author NikosK and cviana
+ * @author NikosK and Chris Lima
  *
  */
 @Service
@@ -124,8 +124,6 @@ public class ContextAware3pService implements IContextAware3pService  {
 		IIdentity cisID = idMgr.fromJid(communityId.toString());
 		LOG.info("cisID retrieved: "+ cisID);
 
-		LOG.info("*** registerForContextChanges");
-
 		try {
 			CtxEntityIdentifier ctxCommunityEntityIdentifier = this.ctxBroker.retrieveCommunityEntityId(requestorService, cisID).get();
 			LOG.info("communityEntityIdentifier retrieved: " +ctxCommunityEntityIdentifier.toString()+ " based on cisID: "+ cisID);
@@ -136,13 +134,14 @@ public class ContextAware3pService implements IContextAware3pService  {
 
 			while(members.hasNext()){
 				CtxEntityIdentifier member = members.next();
-				LOG.info("*** member.toString "+member.toString());
-				//Register listener by specifying the context attribute scope and type
-				//				CtxEntity retrievedCtxEntity = (CtxEntity) this.ctxBroker.retrieve(requestorService, member).get();
-				//				Set<CtxAttribute> location = retrievedCtxEntity.getAttributes(CtxAttributeTypes.LOCATION_SYMBOLIC);
-				//TODO: Include here other ctx updates if necessary
+				LOG.info("*** Registering fro context changes member: "+member.toString());
+
+				//TODO: Include here other ctx updates if necessary. For short term context
 				this.ctxBroker.registerForChanges(requestorService, this.myCtxChangeEventListener, member, CtxAttributeTypes.LOCATION_SYMBOLIC);
 				this.ctxBroker.registerForChanges(requestorService, this.myCtxChangeEventListener, member, CtxAttributeTypes.STATUS);
+//				this.ctxBroker.registerForChanges(requestorService, this.myCtxChangeEventListener, member, CtxAttributeTypes.OCCUPATION);
+//				this.ctxBroker.registerForChanges(requestorService, this.myCtxChangeEventListener, member, CtxAttributeTypes.ADDRESS_WORK_CITY);
+//				this.ctxBroker.registerForChanges(requestorService, this.myCtxChangeEventListener, member, CtxAttributeTypes.ADDRESS_WORK_COUNTRY);
 
 			}
 		} catch (InterruptedException e1) {
@@ -153,30 +152,6 @@ public class ContextAware3pService implements IContextAware3pService  {
 			e1.printStackTrace();
 		}
 
-
-
-		//		try {
-		//			// 1a. Register listener by specifying the context attribute identifier
-		//			this.ctxBroker.registerForChanges(requestorService, myCtxChangeEventListener, ctxAttrDevLocationIdentifier);
-		//
-		//			// 1b. Register listener by specifying the context attribute scope and type
-		//			this.ctxBroker.registerForChanges(requestorService, myCtxChangeEventListener, deviceCtxEntity.getId(), CtxAttributeTypes.ID);
-		//
-		//			// 2. Update attribute to see some event action
-		//			CtxAttribute ctxAttr = (CtxAttribute) this.ctxBroker.retrieve(requestorService, ctxAttrDevLocationIdentifier).get();
-		//
-		//			ctxAttr.setStringValue("newDeviceLocation");
-		//			ctxAttr = (CtxAttribute) this.ctxBroker.update(requestorService,ctxAttr).get();
-		//
-		//		} catch (CtxException ce) {
-		//			LOG.error("*** CM sucks " + ce.getLocalizedMessage(), ce);
-		//		} catch (InterruptedException e) {
-		//			// TODO Auto-generated catch block
-		//			e.printStackTrace();
-		//		} catch (ExecutionException e) {
-		//			// TODO Auto-generated catch block
-		//			e.printStackTrace();
-		//		}
 		LOG.info("*** registerForContextChanges success");
 	}
 
@@ -248,9 +223,6 @@ public class ContextAware3pService implements IContextAware3pService  {
 				}
 
 			}
-			//			
-			//			List<CtxIdentifier> communityAttrIDList = this.ctxBroker.lookup(requestorService, ctxCommunityEntityIdentifier, CtxModelType.ATTRIBUTE, CtxAttributeTypes.INTERESTS).get();
-			//			LOG.info("lookup results communityAttrIDList: "+ communityAttrIDList);
 
 		} catch (InterruptedException e) {
 			e.printStackTrace();

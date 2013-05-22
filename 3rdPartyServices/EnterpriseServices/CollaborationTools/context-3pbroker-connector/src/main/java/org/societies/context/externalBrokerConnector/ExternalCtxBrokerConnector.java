@@ -66,7 +66,7 @@ public class ExternalCtxBrokerConnector extends Observable {
 
 		this.ctxBroker = externalCtxBroker;
 		this.ca3pService = ca3pService;
-	    this.requestorService = ca3pService.getRequestor();
+		this.requestorService = ca3pService.getRequestor();
 		this.ca3pService.setListener(new MyCtxChangeEventListener());
 
 	}
@@ -96,8 +96,8 @@ public class ExternalCtxBrokerConnector extends Observable {
 			e.printStackTrace();
 		}
 	}
-	
-	
+
+
 	private class MyCtxChangeEventListener implements CtxChangeEventListener {
 
 		/* (non-Javadoc)
@@ -162,7 +162,7 @@ public class ExternalCtxBrokerConnector extends Observable {
 
 			// Notify observers of change
 			setChanged();
-		    notifyObservers(response);
+			notifyObservers(response);
 		}
 	}
 

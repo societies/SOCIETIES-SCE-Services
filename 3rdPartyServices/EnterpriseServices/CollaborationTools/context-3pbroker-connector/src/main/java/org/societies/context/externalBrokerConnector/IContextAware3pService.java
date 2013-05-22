@@ -32,7 +32,7 @@ import org.societies.api.identity.InvalidFormatException;
 import org.societies.api.identity.RequestorService;
 
 /**
- * This is a 3p service Ifc that needs to access context through the societies platform ...
+ * This is a 3p service interface for access context information through the  platform.
  *
  * @author nikosk and cviana
  *
