@@ -24,6 +24,7 @@
  */
 package org.societies.webapp.controller;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -32,6 +33,8 @@ import java.util.Map;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.societies.api.cis.management.ICis;
 import org.societies.api.cis.management.ICisManager;
 import org.societies.enterprise.collabtools.api.ICollabAppConnector;
@@ -48,6 +51,8 @@ import org.springframework.web.servlet.ModelAndView;
 
 @Controller
 public class Admin implements BundleContextAware{
+	
+	private static final Logger logger = LoggerFactory.getLogger(Admin.class);
 	
 	@Autowired
 	private ICisManager cisManager;
@@ -125,7 +130,7 @@ public class Admin implements BundleContextAware{
 				return result="Collabtools is not running";
 			}
 			if (!name.isEmpty()) {
-				result = "Starting CollabTools with cisID: "+name;
+				result = "Started with cisID: "+name;
 				getCtxSubscriber().initialCtx(name);
 			}
 			else {
@@ -178,18 +183,44 @@ public class Admin implements BundleContextAware{
 		public ModelAndView notificationTest() {
 			//model is nothing but a standard Map object
 			Map<String, Object> model = new HashMap<String, Object>();
+		    List<String> values = getTypesList(org.societies.api.context.model.CtxAttributeTypes.class);
+		    values.addAll(getTypesList(org.societies.api.internal.context.model.CtxAttributeTypes.class));
+		    model.put("attributeTypes", values);
 
 			return new ModelAndView("notification", model) ;
 		}
-		
-//		
-//		@RequestMapping(value="/postMsg.html",method = RequestMethod.POST)
-//		public @ResponseBody String page(@Valid MessageForm form ,BindingResult result, Map model) {
-//				//model is nothing but a standard Map object
-//				String result1 = "guy";
-//				return result1;
-//		}
 
+
+		/**
+		 * @param class1
+		 * @return
+		 */
+		  private List<String> getTypesList(Class<?> name)
+		  {
+		    logger.info("Extracting parmas from: " + name.getCanonicalName());
+		    Field[] fields = name.getDeclaredFields();
+		    List<String> results = new ArrayList<String>();
+		    for (Field field : fields)
+		    {
+		      try
+		      {
+		        logger.info("add " + field.get(null));
+		        String field_string = "" + field.get(null);
+		        results.add(field_string);
+		      } catch (IllegalArgumentException e) {
+		        logger.error("Error casting to String:" + e.getLocalizedMessage());
+		        e.printStackTrace();
+		      } catch (IllegalAccessException e) {
+		        logger.error("Error casting to String:" + e.getLocalizedMessage());
+		        e.printStackTrace();
+		      }
+
+		      logger.info("add fields " + field.getName());
+		    }
+
+		    logger.info(" Return " + results.size() + "elements");
+		    return results;
+		  }
 
 		/* (non-Javadoc)
 		 * @see org.springframework.osgi.context.BundleContextAware#setBundleContext(org.osgi.framework.BundleContext)
@@ -219,6 +250,8 @@ public class Admin implements BundleContextAware{
 			BundleContext bc = FrameworkUtil.getBundle(this.getClass()).getBundleContext();
 			ServiceReference<?> ref= bc.getServiceReference(ICollabApps.class.getName());
 			ICollabApps collabApps = (ICollabApps)bc.getService(ref);
+			//TODO:
+			collabApps.toString();
 			return name;
 		}
 		 

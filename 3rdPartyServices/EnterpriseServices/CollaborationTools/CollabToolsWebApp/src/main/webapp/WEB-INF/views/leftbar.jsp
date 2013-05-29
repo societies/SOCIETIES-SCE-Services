@@ -3,7 +3,7 @@
 
 	<div id="userfeedback">
 		<h1>
-			Notification box
+			Notification:
 		</h1>
 		<a href="#" class="ufeedbackPoolingRefresh" title="Check now if there is new notification">Refresh</a>
 		<a class="ufeedbackPoolingStartStop stop" title="Start / Stop notification pooling">Stop</a>
@@ -18,7 +18,7 @@
 	  <tr><td align="right"><a href="${pageContext.request.contextPath}/default.html">Home</a></td></tr>
 	  <tr><td align="right"><a href="${pageContext.request.contextPath}/rules.html">Rules</a></td></tr>
 	  <tr><td align="right"><a href="${pageContext.request.contextPath}/applications.html">Applications</a></td></tr>
-	  <tr><td align="right"><a href="${pageContext.request.contextPath}/notification.html">Applications</a></td></tr>
+	  <tr><td align="right"><a href="${pageContext.request.contextPath}/notification.html">Notification</a></td></tr>
 	  <tr><td>&nbsp;</td></tr>
 	 
 
