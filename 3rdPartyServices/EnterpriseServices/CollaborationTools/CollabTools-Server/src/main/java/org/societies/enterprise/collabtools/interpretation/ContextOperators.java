@@ -52,9 +52,9 @@ import org.societies.enterprise.collabtools.runtime.SessionRepository;
  * @author cviana
  *
  */
-public class Rules {
+public class ContextOperators {
 
-	private static Logger log = LoggerFactory.getLogger(Rules.class);
+	private static Logger log = LoggerFactory.getLogger(ContextOperators.class);
 	public PersonRepository personRepository;
 	public SessionRepository sessionRepository;
 	//	private Index<Node> indexStatus;
@@ -62,18 +62,11 @@ public class Rules {
 	private Hashtable<String, HashSet<Person>>  hashCtxList = new Hashtable<String, HashSet<Person>>(10,10);
 
 	/**
-	 * @param indexStatus
-	 */
-	public Rules(Index<Node> indexStatus) {
-		//		this.indexStatus = indexStatus;
-	}
-
-	/**
 	 * @param sessionRepository 
 	 * @param personRepository 
 	 * 
 	 */
-	public Rules(PersonRepository personRepository, SessionRepository sessionRepository) {
+	public ContextOperators(PersonRepository personRepository, SessionRepository sessionRepository) {
 		this.personRepository = personRepository;
 		this.sessionRepository = sessionRepository;
 	}
@@ -98,7 +91,7 @@ public class Rules {
 	 * @return 
 	 */
 	@SuppressWarnings("unchecked")
-	public Hashtable<String, HashSet<Person>> getPersonsWithMatchingLongTermCtx(final String ctxAtributte, HashSet<Person> hashsetPersons) {
+	public synchronized Hashtable<String, HashSet<Person>> getPersonsWithMatchingLongTermCtx(final String ctxAtributte, HashSet<Person> hashsetPersons) {
 		//For long term context types
 		this.hashCtxList.clear();
 		Person[] person = new Person[hashsetPersons.size()];
@@ -118,6 +111,41 @@ public class Rules {
 		return hashCtxList;
 	}
 
+
+	/**
+	 * @return Hashtable of all graph people in the same location
+	 */
+	public Hashtable<String, HashSet<Person>> getAllWithSameCtx(final String ctxValue, final String ctxType) {
+		HashSet<Person> personHashSet = new HashSet<Person>();
+		for (Person person : personRepository.getAllPersons() ) {
+			personHashSet.add(person);
+		}
+		//Check context type, long or short
+		if (ctxType.equals(ShortTermCtxTypes.class.getSimpleName())){
+			return getPersonsWithMatchingShortTermCtx(ctxValue, personHashSet);
+		}
+		else {
+			return getPersonsWithMatchingLongTermCtx(ctxValue, personHashSet);
+		}
+	}
+
+	private boolean hasSameShortTermCtx(ShortTermContextUpdates ctx, ShortTermContextUpdates[] temp, final String ctxAttribute) {
+		HashSet<Person> hashsetTemp;
+		hashsetTemp = hashCtxList.get(ctx.getShortTermCtx(ctxAttribute));
+		for(int j = 0; j < temp.length; j++) {
+			if(temp[j] != null && ctx.getShortTermCtx(ctxAttribute).equals(temp[j].getShortTermCtx(ctxAttribute))) {
+				if (hashsetTemp==null) {
+					//has first element?
+					hashsetTemp = new HashSet<Person>();
+					hashsetTemp.add(temp[j].getPerson());
+				}
+				hashsetTemp.add(ctx.getPerson());
+				hashCtxList.put(ctx.getShortTermCtx(ctxAttribute), hashsetTemp);
+				return false;
+			}
+		}
+		return true;
+	}
 
 	/**
 	 * @param person
@@ -144,18 +172,8 @@ public class Rules {
 	}
 
 	/**
-	 * @return Hashtable of all graph people in the same location
-	 */
-	public Hashtable<String, HashSet<Person>> getPersonsSameLocation() {
-		HashSet<Person> personHashSet = new HashSet<Person>();
-		for (Person person : personRepository.getAllPersons() ) {
-			personHashSet.add(person);
-		}
-		return getPersonsWithMatchingShortTermCtx(ShortTermCtxTypes.LOCATION, personHashSet);
-	}
-
-	/**
-	 * @param statusList
+	 * @param statusArray
+	 * @param ctxAttribute
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
@@ -172,25 +190,6 @@ public class Rules {
 		return hashCtxList;
 	}
 
-	private boolean hasSameShortTermCtx(ShortTermContextUpdates ctx, ShortTermContextUpdates[] temp, final String ctxAttribute) {
-		HashSet<Person> hashsetTemp;
-		hashsetTemp = hashCtxList.get(ctx.getShortTermCtx(ctxAttribute));
-		for(int j = 0; j < temp.length; j++) {
-			if(temp[j] != null && ctx.getShortTermCtx(ctxAttribute).equals(temp[j].getShortTermCtx(ctxAttribute))) {
-				if (hashsetTemp==null) {
-					//has first element?
-					hashsetTemp = new HashSet<Person>();
-					hashsetTemp.add(temp[j].getPerson());
-				}
-				hashsetTemp.add(ctx.getPerson());
-				hashCtxList.put(ctx.getShortTermCtx(ctxAttribute), hashsetTemp);
-				return false;
-			}
-		}
-		return true;
-	}
-
-	
 	/**
 	 * @param interests
 	 * @param hashSet
@@ -238,41 +237,41 @@ public class Rules {
 
 	}
 
-	public static <T> List<T> getDuplicate(Collection<T> list) {
+//	public static <T> List<T> getDuplicate(Collection<T> list) {
+//
+//		final List<T> duplicatedObjects = new ArrayList<T>();
+//		Set<T> set = new HashSet<T>() {
+//			private static final long serialVersionUID = 1L;
+//
+//			@Override
+//			public boolean add(T e) {
+//				if (contains(e)) {
+//					duplicatedObjects.add(e);
+//				}
+//				return super.add(e);
+//			}
+//		};
+//		for (T t : list) {
+//			set.add(t);
+//		}
+//		return duplicatedObjects;
+//	}
 
-		final List<T> duplicatedObjects = new ArrayList<T>();
-		Set<T> set = new HashSet<T>() {
-			private static final long serialVersionUID = 1L;
+//	public static <T> boolean hasDuplicate(Collection<T> list) {
+//		if (getDuplicate(list).isEmpty())
+//			return false;
+//		return true;
+//	}
 
-			@Override
-			public boolean add(T e) {
-				if (contains(e)) {
-					duplicatedObjects.add(e);
-				}
-				return super.add(e);
-			}
-		};
-		for (T t : list) {
-			set.add(t);
-		}
-		return duplicatedObjects;
-	}
-
-	public static <T> boolean hasDuplicate(Collection<T> list) {
-		if (getDuplicate(list).isEmpty())
-			return false;
-		return true;
-	}
-
-	public static boolean checkDuplicate(List<ShortTermContextUpdates> list) {
-		HashSet<String> set = new HashSet<String>();
-		for (int i = 0; i < list.size(); i++) {
-			boolean val = set.add(list.get(i).getShortTermCtx(ShortTermCtxTypes.STATUS));
-			if (val == false) {
-				return val;
-			}
-		}
-		return true;
-	}
+//	public static boolean checkDuplicate(List<ShortTermContextUpdates> list) {
+//		HashSet<String> set = new HashSet<String>();
+//		for (int i = 0; i < list.size(); i++) {
+//			boolean val = set.add(list.get(i).getShortTermCtx(ShortTermCtxTypes.STATUS));
+//			if (val == false) {
+//				return val;
+//			}
+//		}
+//		return true;
+//	}
 
 }

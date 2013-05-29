@@ -24,34 +24,33 @@
  */
 package org.societies.enterprise.collabtools.interpretation;
 
-import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.FutureTask;
 
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.xpath.XPathExpressionException;
-
-import org.societies.enterprise.collabtools.acquisition.LongTermCtxTypes;
 import org.societies.enterprise.collabtools.acquisition.Person;
 import org.societies.enterprise.collabtools.acquisition.PersonRepository;
 import org.societies.enterprise.collabtools.api.IContextAnalyzer;
+import org.societies.enterprise.collabtools.api.IIncrementCtx;
+import org.societies.enterprise.collabtools.api.IIncrementCtx.EnrichmentTypes;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
 
 /**
- * Context Analyzer implementation suing Alchemy api
+ * Context Analyzer class
  *
  * @author cviana
  *
  */
 public class ContextAnalyzer implements IContextAnalyzer {
-	
-	public static enum EnrichmentTypes {
-		CONCEPT, CATEGORY
-	}
 
 	private PersonRepository personRepository;
 	//TODO: api key hardcoded....
@@ -64,11 +63,11 @@ public class ContextAnalyzer implements IContextAnalyzer {
 		this.personRepository = personRepository;
 	}
 
-	//Concepts enriched by Alchemy API
+	//Concepts and Categorization enriched by Alchemy API
 	private final String[] ctxEnrichment(String[] contexts, String ctxType, EnrichmentTypes enrichmentType){
-		// Create an AlchemyAPI object.
+		//Creating an AlchemyAPI object.
 		//AlchemyAPI api key, enable to 1000 queries a day
-		AlchemyAPISimple alchemyObj = AlchemyAPISimple.GetInstanceFromString(APIKEY);
+		IIncrementCtx alchemyObj = IncrementCtx.GetInstanceFromString(APIKEY);
 
 		Set<String> ctxCollection = new HashSet<String>(); 
 		// Extract concept tags for a text string.
@@ -78,50 +77,58 @@ public class ContextAnalyzer implements IContextAnalyzer {
 			System.out.println("Context "+ctxType+ " enriched by "+enrichmentType+": "+ctx);
 			//Check if word has at least 5 letters
 			if (ctx.length() > 5){
-				Document doc = null;
-				try {
-					if (enrichmentType.equals(EnrichmentTypes.CATEGORY)) {
-						doc = alchemyObj.TextGetCategory(ctx);
-					}
-					if (enrichmentType.equals(EnrichmentTypes.CONCEPT)) {
-						doc = alchemyObj.TextGetRankedConcepts(ctx);
-					}
-				} catch (XPathExpressionException e) {
-					e.printStackTrace();
-				} catch (IOException e) {
-					e.printStackTrace();
-				} catch (SAXException e) {
-					e.printStackTrace();
-				} catch (ParserConfigurationException e) {
-					e.printStackTrace();
-				}
-				if (doc != null) {
-					NodeList result = doc.getElementsByTagName("text");
-					for (int i = 0; i < result.getLength(); i++) {
-						ctxCollection.add(result.item(i).getTextContent().toLowerCase());
-					}
-				}
+				ctxCollection.addAll(Arrays.asList(alchemyObj.incrementString(ctx, enrichmentType)));
 			}
 		}
 		return ctxCollection.toArray(new String[ctxCollection.size()]);
 	}
-	
-	//Categorization enriched by Alchemy API
-	
+
+
 	/**
 	 * 
-	 * ctxType Long term Context type. e.g LongTermCtxTypes.INTERESTS
-	 * enrichmentType concept or category
-	 * 
+	 * @param ctxType Long term Context type. e.g LongTermCtxTypes.INTERESTS
+	 * @param enrichmentType concept or category
+	 * @param person if null will perform with all persons
 	 */
-	public void incrementCtx(String ctxType, EnrichmentTypes enrichmentType) {
-    	for (Person friend :personRepository.getAllPersons()) {
-    		String[] newContexts = ctxEnrichment(friend.getArrayLongTermCtx(ctxType), ctxType.toString(), enrichmentType);
-    		friend.setLongTermCtx(ctxType, newContexts);
-    		System.out.println(enrichmentType+" done!");
-    	}		
+	public void incrementCtx(final String ctxType, final EnrichmentTypes enrichmentType, Person person) {
+		if (person == null) {
+			ExecutorService executor = Executors.newCachedThreadPool();
+			List<FutureTask<Boolean>> results = new ArrayList<FutureTask<Boolean>>();
+			for (final Person friend :personRepository.getAllPersons()) {
+				// Start thread for the first half of the numbers
+				FutureTask<Boolean> task = new FutureTask<Boolean>(new Callable<Boolean>() {
+					@Override
+					public Boolean call() throws Exception {
+						String[] newContexts = ctxEnrichment(friend.getArrayLongTermCtx(ctxType), ctxType.toString(), enrichmentType);
+						friend.setLongTermCtx(ctxType, newContexts);
+						System.out.println(enrichmentType+" enrichment done for person "+friend.getName());
+						return true;
+					}
+				});
+				results.add(task);
+				executor.execute(task);
+			}
+			for(FutureTask<Boolean> fut : results){
+				try {
+					fut.get();
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (ExecutionException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			executor.shutdown();
+		}
+		else {
+			String[] newContexts = ctxEnrichment(person.getArrayLongTermCtx(ctxType), ctxType.toString(), enrichmentType);
+			person.setLongTermCtx(ctxType, newContexts);
+			System.out.println(enrichmentType+" done!");
+		}
+
 	}
-	
+
 	static public float personCtxSimilarity (int similarCtx, String ctxType, Person personA, Person personB) {
 		//Similarity Formula is: (similar ctx/ personA + similar ctx/personB) / 2
 		//Check if there is no similarity between both
@@ -135,12 +142,12 @@ public class ContextAnalyzer implements IContextAnalyzer {
 	}
 
 	//Based on automatic thresholding. Formula: (avg < Mean/avg > Mean)/2
-	static public float getAutoThreshold(ArrayList<Float> elements) {
+	public static float getAutoThreshold(ArrayList<Float> elements) {
 		float initialThreshold = 0;
 		for (float value : elements)
-	    {
+		{
 			initialThreshold += value;
-	    }
+		}
 		initialThreshold = initialThreshold / elements.size();
 		float finalThreshold = 0;
 		boolean done = false;
@@ -172,7 +179,7 @@ public class ContextAnalyzer implements IContextAnalyzer {
 		}
 		return finalThreshold;
 	}
-	
+
 	public void setupWeightBetweenPeople(Person person, String property)
 	{
 		Map<Person, Integer> persons = this.personRepository.getPersonWithSimilarCtx(person, property);

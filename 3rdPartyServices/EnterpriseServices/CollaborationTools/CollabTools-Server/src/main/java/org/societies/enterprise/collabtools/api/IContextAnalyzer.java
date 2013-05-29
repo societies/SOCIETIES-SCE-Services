@@ -24,7 +24,9 @@
  */
 package org.societies.enterprise.collabtools.api;
 
-import org.societies.enterprise.collabtools.interpretation.ContextAnalyzer.EnrichmentTypes;
+import org.societies.enterprise.collabtools.acquisition.Person;
+import org.societies.enterprise.collabtools.api.IIncrementCtx.EnrichmentTypes;
+
 
 
 
@@ -36,6 +38,6 @@ import org.societies.enterprise.collabtools.interpretation.ContextAnalyzer.Enric
  */
 public interface IContextAnalyzer {
 	
-	public void incrementCtx(String ctxType, EnrichmentTypes enrichmentType);
+	public void incrementCtx(String ctxType, EnrichmentTypes enrichmentType, Person person);
 
 }

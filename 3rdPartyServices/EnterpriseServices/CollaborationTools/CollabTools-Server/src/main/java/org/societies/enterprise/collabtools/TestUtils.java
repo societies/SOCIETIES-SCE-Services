@@ -25,14 +25,11 @@
 package org.societies.enterprise.collabtools;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Random;
 import java.util.Scanner;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathExpressionException;
@@ -42,8 +39,8 @@ import org.societies.enterprise.collabtools.acquisition.LongTermCtxTypes;
 import org.societies.enterprise.collabtools.acquisition.Person;
 import org.societies.enterprise.collabtools.acquisition.PersonRepository;
 import org.societies.enterprise.collabtools.acquisition.ShortTermCtxTypes;
+import org.societies.enterprise.collabtools.api.IIncrementCtx.EnrichmentTypes;
 import org.societies.enterprise.collabtools.interpretation.ContextAnalyzer;
-import org.societies.enterprise.collabtools.interpretation.ContextAnalyzer.EnrichmentTypes;
 import org.societies.enterprise.collabtools.runtime.SessionRepository;
 import org.xml.sax.SAXException;
 
@@ -282,9 +279,9 @@ public class TestUtils {
 	public void enrichedCtx() throws XPathExpressionException, IOException,
 	SAXException, ParserConfigurationException {
 		final ContextAnalyzer ctxRsn = new ContextAnalyzer(personRepository);
-		ctxRsn.incrementCtx(LongTermCtxTypes.INTERESTS, EnrichmentTypes.CONCEPT);
+		ctxRsn.incrementCtx(LongTermCtxTypes.INTERESTS, EnrichmentTypes.CONCEPT, null);
 		// context enrichment considering previous concept performed
-		ctxRsn.incrementCtx(LongTermCtxTypes.INTERESTS, EnrichmentTypes.CATEGORY);
+		ctxRsn.incrementCtx(LongTermCtxTypes.INTERESTS, EnrichmentTypes.CATEGORY, null);
 	}
 	
 //	private static void clearDirectory(File path)

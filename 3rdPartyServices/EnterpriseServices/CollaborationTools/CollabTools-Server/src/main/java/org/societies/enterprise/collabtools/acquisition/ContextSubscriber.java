@@ -34,8 +34,8 @@ import java.util.Observer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.societies.enterprise.collabtools.api.IContextSubscriber;
+import org.societies.enterprise.collabtools.api.IIncrementCtx.EnrichmentTypes;
 import org.societies.enterprise.collabtools.interpretation.ContextAnalyzer;
-import org.societies.enterprise.collabtools.interpretation.ContextAnalyzer.EnrichmentTypes;
 import org.societies.enterprise.collabtools.runtime.CtxMonitor;
 import org.societies.enterprise.collabtools.runtime.SessionRepository;
 
@@ -46,16 +46,16 @@ public class ContextSubscriber implements IContextSubscriber, Observer
 	private SessionRepository sessionRepository;
 	InternalContextConnector ctxConnector;
 	private CtxMonitor monitor;
-	
+
 
 	public ContextSubscriber(PersonRepository personRepository, SessionRepository sessionRepository)
 	{
 		this.personRepository = personRepository;
 		this.sessionRepository = sessionRepository;
-		
-        //Starting Context Monitor
-        logger.info("Starting Context Monitor..." );
-        monitor = new CtxMonitor(personRepository, sessionRepository);
+
+		//Starting Context Monitor
+		logger.info("Starting Context Monitor..." );
+		monitor = new CtxMonitor(personRepository, sessionRepository);
 	}
 
 	public void initialCtx(Object cisID) {
@@ -81,29 +81,29 @@ public class ContextSubscriber implements IContextSubscriber, Observer
 				}
 			}  
 		}
-		
-        //Enrichment of ctx
-        logger.info("Starting enrichment of context..." );
-        ContextAnalyzer ctxRsn = new ContextAnalyzer(this.personRepository);
-			ctxRsn.incrementCtx(LongTermCtxTypes.INTERESTS, EnrichmentTypes.CONCEPT);
-			ctxRsn.incrementCtx(LongTermCtxTypes.INTERESTS, EnrichmentTypes.CATEGORY);
-        
+
+		//Enrichment of ctx
+		logger.info("Starting enrichment of context..." );
+		ContextAnalyzer ctxRsn = new ContextAnalyzer(this.personRepository);
+		ctxRsn.incrementCtx(LongTermCtxTypes.INTERESTS, EnrichmentTypes.CONCEPT, null);
+		ctxRsn.incrementCtx(LongTermCtxTypes.INTERESTS, EnrichmentTypes.CATEGORY, null);
+
 		//Applying weight between edges
 		logger.info("Setup weight among participants..." );
-        for (Person person : personRepository.getAllPersons()) {
-            ctxRsn.setupWeightBetweenPeople(person, LongTermCtxTypes.INTERESTS);
-        }
-       
-        
-        //Registering for ctx changes
-        this.registerForContextChanges(cisID);
-        
-        //Starting Context Monitor
-//        logger.info("Starting Context Monitor..." );
-//        monitor = new CtxMonitor(personRepository, sessionRepository);
-//	    monitor.wait();
+		for (Person person : personRepository.getAllPersons()) {
+			ctxRsn.setupWeightBetweenPeople(person, LongTermCtxTypes.INTERESTS);
+		}
+
+
+		//Registering for ctx changes
+		this.registerForContextChanges(cisID);
+
+		//Starting Context Monitor
+		//        logger.info("Starting Context Monitor..." );
+		//        monitor = new CtxMonitor(personRepository, sessionRepository);
+		//	    monitor.wait();
 	}
-	
+
 	public void update(Observable o, Object arg)
 	{
 		//Arrays values: [0]model type, [1]string ctx value, [2]person
@@ -112,19 +112,19 @@ public class ContextSubscriber implements IContextSubscriber, Observer
 		logger.info("******************* update event  Ctx type*************** " + msg[0]);
 		logger.info("******************* update event  Ctx value************** " + msg[1]);
 		logger.info("******************* update event  Person***************** " + msg[2]);
-	    Map<String, String> shortTermCtx = new HashMap<String, String>();
-	    String type = msg[0];
-	    String context = msg[1];
+		Map<String, String> shortTermCtx = new HashMap<String, String>();
+		String type = msg[0];
+		String context = msg[1];
 		Person individual = this.personRepository.getPersonByName(msg[2]);
-	    
-	    if (type.equals("locationSymbolic")) {
-	      shortTermCtx.put(ShortTermCtxTypes.LOCATION, context);
-	    }
-	    else {
-		    shortTermCtx.put(type, context);
-	    }
-	    individual.addContextStatus(shortTermCtx, this.sessionRepository);
-	    monitor.run();
+
+		if (type.equals("locationSymbolic")) {
+			shortTermCtx.put(ShortTermCtxTypes.LOCATION, context);
+		}
+		else {
+			shortTermCtx.put(type, context);
+		}
+		individual.addContextStatus(shortTermCtx, this.sessionRepository);
+		monitor.run();
 	}
 
 	private void registerForContextChanges(Object cisID) {
@@ -133,13 +133,13 @@ public class ContextSubscriber implements IContextSubscriber, Observer
 
 	private void setContext(String type, String[] context, String person) throws Exception {
 		logger.info("******************************* Adding long term context for: " + person + ", " + type + ", " + context[0].toString());
-		
+
 		//Otherwise will be the first element, name : if (type == "name")
 		if (!this.personRepository.hasPerson(person)) {
 			Person individual = this.personRepository.createPerson(person);
 			individual.setLongTermCtx(LongTermCtxTypes.NAME, person);
 		}
-		
+
 		Person individual = this.personRepository.getPersonByName(person);
 		//shortTermCtx format: context type, ctx value
 		Map<String, String> shortTermCtx = new HashMap<String, String>();
@@ -150,12 +150,12 @@ public class ContextSubscriber implements IContextSubscriber, Observer
 		} else if (type.equals(LongTermCtxTypes.COMPANY)) {
 			individual.setLongTermCtx(LongTermCtxTypes.COMPANY, context[0]);
 		} else if (type.equals(ShortTermCtxTypes.LOCATION)) {
-//			shortTermCtx.put(individual.getLastStatus() == null ? "" : individual.getLastStatus().getShortTermCtx(ShortTermCtxTypes.STATUS), context[0]);
+			//			shortTermCtx.put(individual.getLastStatus() == null ? "" : individual.getLastStatus().getShortTermCtx(ShortTermCtxTypes.STATUS), context[0]);
 			shortTermCtx.put(ShortTermCtxTypes.LOCATION,context[0]);
 			individual.addContextStatus(shortTermCtx, this.sessionRepository);
 		}
 		else if (type.equals(ShortTermCtxTypes.STATUS)) {
-//			shortTermCtx.put(context[0], individual.getLastStatus() == null ? "" : individual.getLastStatus().getShortTermCtx(ShortTermCtxTypes.LOCATION));
+			//			shortTermCtx.put(context[0], individual.getLastStatus() == null ? "" : individual.getLastStatus().getShortTermCtx(ShortTermCtxTypes.LOCATION));
 			shortTermCtx.put(ShortTermCtxTypes.STATUS,context[0]);
 			individual.addContextStatus(shortTermCtx, this.sessionRepository);
 		}

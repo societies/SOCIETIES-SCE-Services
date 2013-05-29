@@ -29,15 +29,13 @@ import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Observable;
 import java.util.Observer;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.societies.enterprise.collabtools.acquisition.Person;
 import org.societies.enterprise.collabtools.acquisition.PersonRepository;
-import org.societies.enterprise.collabtools.interpretation.Rules;
+import org.societies.enterprise.collabtools.acquisition.ShortTermCtxTypes;
+import org.societies.enterprise.collabtools.interpretation.ContextOperators;
 
 
 /**
@@ -48,17 +46,13 @@ import org.societies.enterprise.collabtools.interpretation.Rules;
  */
 public class CtxMonitor implements Runnable, Observer{
 
-	private Rules conditions;
+	private ContextOperators conditions;
 	private SessionRepository sessionRepository;
 	private static final Logger logger  = LoggerFactory.getLogger(CtxMonitor.class);
 
 	public CtxMonitor (PersonRepository personRepository, SessionRepository sessionRepository) {
-		conditions = new Rules(personRepository, sessionRepository);
+		conditions = new ContextOperators(personRepository, sessionRepository);
 		this.sessionRepository = sessionRepository;
-
-//				ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-//				scheduler.submit(this);
-//				scheduler.scheduleAtFixedRate(this, 1, 3, TimeUnit.SECONDS);
 	}
 
 	public synchronized void run(){
@@ -66,7 +60,7 @@ public class CtxMonitor implements Runnable, Observer{
 
 
 		//First rule: location
-		Hashtable<String, HashSet<Person>> personsSameLocation = conditions.getPersonsSameLocation();
+		Hashtable<String, HashSet<Person>> personsSameLocation = conditions.getAllWithSameCtx(ShortTermCtxTypes.LOCATION, ShortTermCtxTypes.class.getSimpleName());
 
 		if (!personsSameLocation.isEmpty()) {
 			Enumeration<String> iterator = personsSameLocation.keys();
