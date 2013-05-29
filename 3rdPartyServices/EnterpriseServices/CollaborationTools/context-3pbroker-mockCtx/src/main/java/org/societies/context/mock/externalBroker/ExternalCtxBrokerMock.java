@@ -28,7 +28,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Hashtable;
-import java.util.List;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
@@ -37,20 +36,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.societies.api.cis.attributes.MembershipCriteria;
 import org.societies.api.cis.attributes.Rule;
-import org.societies.api.cis.management.ICis;
 import org.societies.api.cis.management.ICisManager;
-import org.societies.api.cis.management.ICisOwned;
 import org.societies.api.comm.xmpp.interfaces.ICommManager;
 import org.societies.api.context.CtxException;
 import org.societies.api.context.broker.ICtxBroker;
-import org.societies.api.context.model.CommunityCtxEntity;
-import org.societies.api.context.model.CtxAssociation;
-import org.societies.api.context.model.CtxAssociationIdentifier;
 import org.societies.api.context.model.CtxAttribute;
 import org.societies.api.context.model.CtxAttributeIdentifier;
 import org.societies.api.context.model.CtxAttributeTypes;
 import org.societies.api.context.model.CtxEntityIdentifier;
-import org.societies.api.context.model.CtxIdentifier;
 import org.societies.api.context.model.IndividualCtxEntity;
 import org.societies.api.identity.IIdentity;
 import org.societies.api.identity.INetworkNode;
@@ -110,49 +103,16 @@ public class ExternalCtxBrokerMock 	{
 		Hashtable<String,MembershipCriteria> cisCriteria = new Hashtable<String,MembershipCriteria>();
 		MembershipCriteria criteria = new MembershipCriteria();
 
-//		Rule rule1 = new Rule("equals",new ArrayList<String>(Arrays.asList("married")));
-//		criteria.setRule(rule1);
-//		cisCriteria.put(CtxAttributeTypes.STATUS, criteria);
-//		
-//		Rule rule2 = new Rule("equals",new ArrayList<String>(Arrays.asList("Brazil")));
-//		criteria.setRule(rule2);
-//		cisCriteria.put(CtxAttributeTypes.ADDRESS_HOME_COUNTRY, criteria);
+		Rule rule1 = new Rule("equals",new ArrayList<String>(Arrays.asList("married")));
+		criteria.setRule(rule1);
+		cisCriteria.put(CtxAttributeTypes.STATUS, criteria);
+		
+		Rule rule2 = new Rule("equals",new ArrayList<String>(Arrays.asList("Brazil")));
+		criteria.setRule(rule2);
+		cisCriteria.put(CtxAttributeTypes.ADDRESS_HOME_COUNTRY, criteria);
+		
+		cisManager.createCis("CIS-Test-"+new Random().nextInt(100), "RICH", cisCriteria, "CIS Test").get();
 
-
-		//		try {
-		//			//Deleting CIS-CollabTools if already exist 
-		//			List<ICis> listCIS = cisManager.searchCisByName("CIS-CollabTools");
-		////			LOG.info("*** listCIS: "+listCIS.size());
-		//			Iterator<ICis> itr = listCIS.iterator();
-		//			while (itr.hasNext()) {
-		//				String cisToRemove = itr.next().getCisId();
-		//				LOG.info("*** Deleting CIS-CollabTools = " + cisToRemove);
-		//				cisManager.deleteCis(cisToRemove);
-		//			}
-		//			
-		//		
-
-
-//		List<ICis> cisList = new ArrayList<ICis>();
-//		cisList = cisManager.getCisList();
-//		cisList = cisManager.searchCisByName("CIS-CollabTools");
-//		if (cisList.size() > 0){
-//			int size = cisList.size();
-//			LOG.info("there are "+size+" CIS - last one is : "+(cisList.get(size-1)).getName() + " \t id " + (cisList.get(size-1)).getCisId());
-//			this.cisID = commMgr.getIdManager().fromJid(cisList.get(size-1).getCisId());
-//		}
-//		else{
-//			//Creating CIS-CollabTools
-//			this.cisOwned = cisManager.createCis("CIS-CollabTools"+new Random().nextInt(100), "RICH", cisCriteria, "CSCW CIS").get();
-//			cisOwned.setCisType("RICH");
-//			this.cisID = this.commMgrService.getIdManager().fromJid(cisOwned.getCisId());
-//			LOG.info("*** created CIS = CIS-CollabTools ");
-//		}
-
-				
-//		cisOwned.addMember("admin.societies.local", "participant");
-
-		//		String cisIDString  = cisOwned.getCisId();
 
 		LOG.info("*** Starting community context samples...");
 
