@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="org.societies.thirdpartyservices.crowdtasking"
-    android:versionCode="8"
+    android:versionCode="9"
     android:versionName="1.0" >
 
     <uses-sdk
         android:minSdkVersion="14"
-        android:targetSdkVersion="17" />
+        android:targetSdkVersion="16" />
 
     <uses-permission android:name="android.permission.INTERNET" />
     <!--uses-permission android:name="android.permission.GET_ACCOUNTS" /-->
@@ -63,5 +63,4 @@
             android:label="@string/title_activity_settings" >
         </activity>
     </application>
-
 </manifest>

@@ -67,7 +67,7 @@ public class RestTask extends AsyncTask<HttpUriRequest, Void, String> {
 	protected String doInBackground(HttpUriRequest... params) {
 		try {
 			HttpUriRequest request = params[0];
-
+			Log.i("SCT RestTask(70)", request.getURI().toString());
 			HttpContext localContext = new BasicHttpContext();
 			CookieStore cookieStore = new BasicCookieStore();
 			localContext.setAttribute(ClientContext.COOKIE_STORE, cookieStore);
@@ -91,7 +91,7 @@ public class RestTask extends AsyncTask<HttpUriRequest, Void, String> {
 		} catch (Exception e) {
 			e.printStackTrace();
 			String msg = e.getMessage();
-			Log.e("SCT", msg);
+			Log.e("SCT RestTask(94)", msg);
 			return msg;
 		}
 	}

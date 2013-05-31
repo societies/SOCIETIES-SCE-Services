@@ -1,12 +1,8 @@
 package org.societies.thirdpartyservices.crowdtasking;
 
-import java.io.BufferedInputStream;
-import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
-import java.net.URLConnection;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -14,25 +10,32 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.CountDownLatch;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.util.ByteArrayBuffer;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.societies.android.api.comms.IMethodCallback;
 import org.societies.android.api.contentproviders.CSSContentProvider;
+import org.societies.android.api.privacytrust.trust.ITrustClientCallback;
+import org.societies.android.api.privacytrust.trust.TrustException;
+import org.societies.android.remote.helper.TrustClientHelper;
+import org.societies.api.schema.identity.RequestorBean;
+import org.societies.api.schema.privacytrust.trust.model.TrustRelationshipBean;
+import org.societies.api.schema.privacytrust.trust.model.TrustedEntityIdBean;
+import org.societies.api.schema.privacytrust.trust.model.TrustedEntityTypeBean;
 
 import si.setcce.societies.android.rest.RestTask;
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
@@ -40,9 +43,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
 import android.provider.CalendarContract.Events;
 import android.util.Log;
 import android.view.Menu;
@@ -82,11 +83,19 @@ public class MainActivity extends Activity implements SensorEventListener {
 	private ProgressDialog progress;
 	private SensorManager sensorManager;
 	private Sensor accelerometer;
-	private float mAccel; // acceleration apart from gravity
-	private float mAccelCurrent; // current acceleration including gravity
-	private float mAccelLast; // last acceleration including gravity
-	private Handler mHandler=new Handler();
-	private CheckUpdate checkUpdate;
+	private float mAccel;			// acceleration apart from gravity
+	private float mAccelCurrent;	// current acceleration including gravity
+	private float mAccelLast;		// last acceleration including gravity
+/*	//CIS MANAGER REMOTE
+    private boolean servCisMgrRemoteConnected = false;
+	private Messenger cisMgrMessenger = null;
+	//CIS SUBSCRIBED REMOTE
+	private boolean servCisSubscribeRemoteConnected = false;
+	private Messenger cisSubscribeMessenger = null;
+	//CIS DIRECTORY REMOTE
+	private boolean servCisDirRemoteConnected = false;
+	private Messenger cisDirMessenger = null;
+	private static final String LOG_TAG = MainActivity.class.getName();*/
 	
 	public MainActivity() {
 	}
@@ -116,9 +125,273 @@ public class MainActivity extends Activity implements SensorEventListener {
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_main);
         
+        webViewSetup();
+        checkIntent(getIntent());
+        CheckUpdateTask checkUpdateTask = new CheckUpdateTask(this);
+        checkUpdateTask.execute();
+        //long start = new Date().getTime();
+        System.out.println("CheckTrust before");
+        
+        TrustTask task = new TrustTask(this);
+		task.execute();
+
+		//checkTrustClient();
+        System.out.println("CheckTrust after");
+	}
+	
+	private void checkTrustClient() {
+		final CountDownLatch latch = new CountDownLatch(1);
+		final RequestorBean requestor = new RequestorBean();
+		requestor.setRequestorId("whatever.setcce.si");
+		final TrustedEntityIdBean trustorId = new TrustedEntityIdBean();
+		trustorId.setEntityId("user1.research.setcce.si");
+		trustorId.setEntityType(TrustedEntityTypeBean.CSS);
+		
+		final TrustClientHelper helper = new TrustClientHelper(getApplicationContext());
+		helper.setUpService(new IMethodCallback() {
+			
+			/*
+			 * @see org.societies.android.api.comms.IMethodCallback#returnException(java.lang.String)
+			 */
+			@Override
+			public void returnException(String exception) {
+				
+			}
+
+			/*
+			 * @see org.societies.android.api.comms.IMethodCallback#returnAction(java.lang.String)
+			 */
+			@Override
+			public void returnAction(String result) {
+				
+			}
+			
+			@Override
+			public void returnAction(boolean resultFlag) {
+				
+				helper.retrieveTrustRelationships(requestor, trustorId, 
+						new ITrustClientCallback() {
+
+					/*
+					 * @see org.societies.android.api.privacytrust.trust.ITrustClientCallback#onAddedDirectTrustEvidence()
+					 */
+					@Override
+					public void onAddedDirectTrustEvidence() {
+						System.out.println("onAddedDirectTrustEvidence");
+						// should not be called!
+					}
+
+					/*
+					 * @see org.societies.android.api.privacytrust.trust.ITrustClientCallback#onException(org.societies.android.api.privacytrust.trust.TrustException)
+					 */
+					@Override
+					public void onException(TrustException exception) {
+						System.out.println("onException");
+						exception.printStackTrace();
+						// should not be called!
+					}
+
+					/*
+					 * @see org.societies.android.api.privacytrust.trust.ITrustClientCallback#onRetrievedTrustRelationship(org.societies.api.schema.privacytrust.trust.model.TrustRelationshipBean)
+					 */
+					@Override
+					public void onRetrievedTrustRelationship(
+							TrustRelationshipBean trustRelationship) {
+						System.out.println("onRetrievedTrustRelationship");
+						// should not be called!
+					}
+
+					/*
+					 * @see org.societies.android.api.privacytrust.trust.ITrustClientCallback#onRetrievedTrustRelationships(java.util.Set)
+					 */
+					@Override
+					public void onRetrievedTrustRelationships(
+							Set<TrustRelationshipBean> trustRelationships) {
+
+						// success!
+						for (final TrustRelationshipBean trustRelationship : trustRelationships) {
+							System.out.println("TrustorId.entityId:"+trustRelationship.getTrustorId().getEntityId());
+							System.out.println("TrustorId.entityType:"+trustRelationship.getTrustorId().getEntityType());
+							System.out.println("TrusteeId.entityId:"+trustRelationship.getTrusteeId().getEntityId());
+							System.out.println("TrusteeId.entityType:"+trustRelationship.getTrusteeId().getEntityType());
+							
+							/*if (TEST_TRUSTEE_ID.equals(trustRelationship.getTrusteeId().getEntityId())
+									&& TrustedEntityTypeBean.CSS.equals(trustRelationship.getTrusteeId().getEntityType()))
+									assertTrue(trustRelationship.getTrustValue() > TEST_TRUST_VALUE_THRESHOLD);*/
+							System.out.println("TrustValueType:"+trustRelationship.getTrustValueType());
+							System.out.println("TrustValue:"+trustRelationship.getTrustValue());
+							
+						}
+						helper.tearDownService(new IMethodCallback() {
+
+							/*
+							 * @see org.societies.android.api.comms.IMethodCallback#returnException(java.lang.String)
+							 */
+							@Override
+							public void returnException(String exception) {
+								System.out.println("returnException");
+							}
+
+							/*
+							 * @see org.societies.android.api.comms.IMethodCallback#returnAction(java.lang.String)
+							 */
+							@Override
+							public void returnAction(String result) {
+								System.out.println("returnAction");
+							}
+
+							/*
+							 * @see org.societies.android.api.comms.IMethodCallback#returnAction(boolean)
+							 */
+							@Override
+							public void returnAction(boolean resultFlag) {
+								System.out.println("returnAction");
+								latch.countDown();
+							}
+						});
+					}
+
+					@Override
+					public void onRetrievedTrustValue(Double trustValue) {
+						System.out.println("onRetrievedTrustValue");
+						// should not be called!
+					}
+				});
+			}
+		});
+		
+		//latch.await(10000, TimeUnit.MILLISECONDS);
+		
+	}
+/*
+	private void checkCISManagerService() {
+		Log.d(LOG_TAG, ">>>>>>>>checkCISManagerService start");
+        //CREATE INTENT FOR CIS MANAGER
+        Intent intentCisMgrRemote = new Intent(this.getApplicationContext(), CisManagerRemote.class);
+        this.getApplicationContext().bindService(intentCisMgrRemote, remoteServiceCisManager, Context.BIND_AUTO_CREATE);
+        //CREATE INTENT FOR CIS SUBSCRIBED
+        Intent intentCisSubscribeRemote = new Intent(this.getApplicationContext(), CisManagerRemote.class);
+        this.getApplicationContext().bindService(intentCisSubscribeRemote, remoteServiceCisSubscribe, Context.BIND_AUTO_CREATE);
+        //CREATE INTENT FOR CIS DIRECTORY
+        Intent intentCisDirRemote = new Intent(this.getApplicationContext(), CisManagerRemote.class);
+        this.getApplicationContext().bindService(intentCisDirRemote, remoteServiceCisDir, Context.BIND_AUTO_CREATE);
+
+        //REGISTER BROADCAST
+        IntentFilter intentFilter = new IntentFilter() ;
+        //CIS Manager
+        intentFilter.addAction(ICisManager.CREATE_CIS);
+        intentFilter.addAction(ICisManager.DELETE_CIS);
+        intentFilter.addAction(ICisManager.GET_CIS_LIST);
+        intentFilter.addAction(ICisManager.JOIN_CIS);
+        //CIS Subscriber
+        intentFilter.addAction(ICisSubscribed.GET_MEMBERS);
+        intentFilter.addAction(ICisSubscribed.GET_ACTIVITY_FEED);
+        intentFilter.addAction(ICisSubscribed.ADD_ACTIVITY);
+        //CIS DIRECTORY
+        intentFilter.addAction(ICisDirectory.FIND_ALL_CIS);
+        intentFilter.addAction(ICisDirectory.FILTER_CIS);
+        intentFilter.addAction(ICisDirectory.FIND_CIS_ID);
+
+        //TEST THE SLM COMPONENT
+        TestRemoteUtility task = new TestRemoteUtility(this);
+        task.execute();
+		Log.d(LOG_TAG, ">>>>>>>>checkCISManagerService end");
+	}
+	
+	private class TestRemoteUtility extends AsyncTask<Void, Void, Void> {
+    	
+    	private Context context;
+    	private final String CLIENT_PACKAGE = "org.societies.android.platform.cis.cistester";
+    	
+    	public TestRemoteUtility(Context context) {
+    		this.context = context;
+    	}
+    	
+    	protected Void doInBackground(Void... args) {
+    		
+    		for (int i=1; i<6; i++) {
+        		Log.d(LOG_TAG, ">>>>>>>>ServiceUtilitiesRemote connected: " + servCisMgrRemoteConnected + "("+i+")");
+	    		if (! servCisMgrRemoteConnected) {
+		    		try {//	WAIT TILL SERVICE IS CONNECTED - OCCURS ASYNCHRONOUSLY
+						Thread.currentThread();
+						Thread.sleep(10 * 1000);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+	    		}
+	    		else break;
+    		}
+    		
+    		if (servCisMgrRemoteConnected) {
+	    		//TEST CIS DIRECTORY REMOTE
+	    		try {
+	    			//TEST: GET ALL CIS ADVERTISEMENTS FROM DIRECTORY
+	    			Log.d(LOG_TAG, "GET ALL CIS ADVERTISEMENTS FROM DIRECTORY");
+	    			String targetMethod = ICisDirectory.methodsArray[0]; // "findAllCisAdvertisementRecords(String client)"
+	        		Message outMessage = Message.obtain(null, ServiceMethodTranslator.getMethodIndex(ICisDirectory.methodsArray, targetMethod), 0, 0);
+	        		Bundle outBundle = new Bundle();
+	        		//PARAMETERS
+	        		outBundle.putString(ServiceMethodTranslator.getMethodParameterName(targetMethod, 0), CLIENT_PACKAGE);
+	        		outMessage.setData(outBundle);	
+	        		cisDirMessenger.send(outMessage);
+				} catch (RemoteException e) {
+					e.printStackTrace();
+				}
+    		} else {
+    			Log.d(LOG_TAG, "Still not connected to servCisMgrRemoteConnected");
+    		}
+ 
+    		return null;
+    	}
+    }
+	
+	private ServiceConnection remoteServiceCisManager = new ServiceConnection() {
+		
+		public void onServiceDisconnected(ComponentName name) {
+			servCisMgrRemoteConnected = false;
+        	Log.d(LOG_TAG, "Disconnecting from remoteServiceCisManager");
+			
+		}
+		
+		public void onServiceConnected(ComponentName name, IBinder service) {
+			servCisMgrRemoteConnected = true;
+			cisMgrMessenger = new Messenger(service);
+	    	Log.d(LOG_TAG, "remoteServiceCisManager connected");
+		}
+	};
+
+	private ServiceConnection remoteServiceCisSubscribe = new ServiceConnection() {
+		
+		public void onServiceDisconnected(ComponentName name) {
+			servCisMgrRemoteConnected = false;
+        	Log.d(LOG_TAG, "Disconnecting from remoteServiceCisManager");
+		}
+		
+		public void onServiceConnected(ComponentName name, IBinder service) {
+			servCisMgrRemoteConnected = true;
+			cisMgrMessenger = new Messenger(service);
+	    	Log.d(LOG_TAG, "remoteServiceCisManager connected");
+		}
+	};
+	
+	private ServiceConnection remoteServiceCisDir = new ServiceConnection() {
+		
+		public void onServiceDisconnected(ComponentName name) {
+			servCisDirRemoteConnected = false;
+        	Log.d(LOG_TAG, "Disconnecting from remoteServiceCisDir");
+		}
+		
+		public void onServiceConnected(ComponentName name, IBinder service) {
+			servCisDirRemoteConnected = true;
+			cisDirMessenger = new Messenger(service);
+	    	Log.d(LOG_TAG, "remoteServiceCisDir connected");
+		}
+	};
+*/	
+	@SuppressLint("SetJavaScriptEnabled")
+	private void webViewSetup() {
 		webView = (WebView) findViewById(R.id.webView);
-		//webView.clearCache(true);
-        webView.setInitialScale(1);
+		webView.setInitialScale(1);
         webView.getSettings().setJavaScriptEnabled(true);
         webView.getSettings().setLoadWithOverviewMode(true);
         webView.getSettings().setUseWideViewPort(true);
@@ -128,9 +401,6 @@ public class MainActivity extends Activity implements SensorEventListener {
         webView.setWebViewClient(new MyWebViewClient(this));
         webView.getSettings().setDefaultZoom(WebSettings.ZoomDensity.FAR);
         webView.addJavascriptInterface(new JSInterface(this, webView), "android");
-        //webView.loadData("<h1>Application is loading...</h1>", "text/html", "utf-8");
-        //webView.loadUrl("file:///android_asset/start.html");
-        //webView.loadUrl("file:///android_asset/test2.html");
         webView.setWebChromeClient(new WebChromeClient() {
 			public boolean onConsoleMessage(ConsoleMessage cm) {
 				Log.d("Crowd Tasking", cm.message() + 
@@ -147,92 +417,8 @@ public class MainActivity extends Activity implements SensorEventListener {
 				return false;
 			}
     	});
-        
-
         webView.loadUrl(startUrl);
-        checkIntent(getIntent());
-    	checkUpdate = new CheckUpdate();
-        checkUpdate.start();
 	}
-
-    /* This Thread checks for Updates in the Background */
-	class CheckUpdate extends Thread {
-		private boolean showIsUpToDate = false;
-
-		public CheckUpdate() {
-		}
-
-		public CheckUpdate(boolean showIsUpToDate) {
-			this.showIsUpToDate = showIsUpToDate;
-		}
-
-		public void run() {
-            try {
-            	Log.i("checkUpdate", "checkUpdate run");
-                URL updateURL = new URL("http://crowdtasking.appspot.com/apk/latest");                
-                URLConnection conn = updateURL.openConnection(); 
-                InputStream is = conn.getInputStream();
-                BufferedInputStream bis = new BufferedInputStream(is);
-                ByteArrayBuffer baf = new ByteArrayBuffer(50);
-                
-                int current = 0;
-                while((current = bis.read()) != -1){
-                     baf.append((byte)current);
-                }
-
-                int curVersion = getPackageManager().getPackageInfo(getPackageName(), 0).versionCode;
-            	Log.i("checkUpdate", "curVersion: "+curVersion);
-                int newVersion = Integer.valueOf(new String(baf.toByteArray()));
-            	Log.i("checkUpdate", "newVersion: "+newVersion);
-                
-                if (newVersion > curVersion) {
-                	mHandler.post(showUpdate);
-                }
-                else {
-                	if (showIsUpToDate) {
-                		mHandler.post(showUpToDate);
-                	}
-                }
-            } catch (Exception e) {
-            	Log.e("checkUpdate", "error in check update");
-            	Log.e("checkUpdate", e.getMessage());
-            }
-        }
-    };
-
-    private Runnable showUpdate = new Runnable(){
-        public void run(){
-         new AlertDialog.Builder(MainActivity.this)
-         .setTitle("Update Available")
-         .setMessage("An update for SCT Android is available! Do you want to download a new version?")
-         .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                 public void onClick(DialogInterface dialog, int whichButton) {
-                         Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://crowdtasking.appspot.com/apk/index.html"));
-                         intent.setClassName("com.android.browser", "com.android.browser.BrowserActivity");
-                         startActivity(intent);
-                 }
-         })
-         .setNegativeButton("No", new DialogInterface.OnClickListener() {
-                 public void onClick(DialogInterface dialog, int whichButton) {
-                 }
-         })
-         .show();
-        }
- };   
- 
- private Runnable showUpToDate = new Runnable(){
-     public void run(){
-      new AlertDialog.Builder(MainActivity.this)
-      //.setIcon(R.drawable.icon)
-      .setTitle("No Update Available")
-      .setMessage("You have the latest version of SCT Android.")
-      .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-              public void onClick(DialogInterface dialog, int whichButton) {
-              }
-      })
-      .show();
-     }
-};   
 
 	private void checkIntent(Intent intent) {
         String action = intent.getAction();
@@ -342,11 +528,13 @@ public class MainActivity extends Activity implements SensorEventListener {
             	//refreshData();
             	/*Intent startIntent=new Intent(this.getApplicationContext(),RemoteControlActivity.class);
             	startActivity(startIntent);*/
-            	if(checkUpdate.isAlive()){
+                CheckUpdateTask checkUpdateTask = new CheckUpdateTask(this, true);
+                checkUpdateTask.execute();
+            	/*if(checkUpdate.isAlive()){
             		checkUpdate.interrupt(); 
             	}
             	checkUpdate = new CheckUpdate(true);
-            	checkUpdate.start();
+            	checkUpdate.start();*/
                 return true;
 
             case R.id.logout:
@@ -417,10 +605,8 @@ public class MainActivity extends Activity implements SensorEventListener {
         	//Toast toast = Toast.makeText(getApplicationContext(), R.string.result_succeeded, Toast.LENGTH_SHORT);
         	//toast.show();
         } else {
-        	Toast toast = Toast.makeText(getApplicationContext(), R.string.result_failed, Toast.LENGTH_SHORT);
-        	toast.show();
-        	toast = Toast.makeText(getApplicationContext(), getString(R.string.result_failed_why), Toast.LENGTH_LONG);
-        	toast.show();
+        	Toast.makeText(getApplicationContext(), R.string.result_failed, Toast.LENGTH_SHORT).show();
+        	Toast.makeText(getApplicationContext(), getString(R.string.result_failed_why), Toast.LENGTH_LONG).show();
         }
       }
     }
@@ -535,6 +721,7 @@ public class MainActivity extends Activity implements SensorEventListener {
     public class JSInterface {
 		private WebView mAppView;
 		private Context context;
+		//@JavascriptInterface for API 17
 		public JSInterface(Context context, WebView appView) {
 			this.context = context;
 			this.mAppView = appView;
