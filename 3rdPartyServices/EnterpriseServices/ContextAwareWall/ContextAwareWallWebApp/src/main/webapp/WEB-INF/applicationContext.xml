@@ -40,17 +40,21 @@
 	
 	<osgi:reference id="CommManager" interface="org.societies.api.comm.xmpp.interfaces.ICommManager"/>
 	
-	 <bean id="SocietiesRegistryBean" 
+	<osgi:reference id="ctxBroker" interface="org.societies.api.context.broker.ICtxBroker" />
+	
+	<bean id="SocietiesRegistryBean" 
        		 class="org.societies.webapp.controller.SocietiesRegistryBean" >
        		
        		<!--  Intel's settings -->
+       		<!--
        		<property name="serverURL" value="http://srv-pz01.haifa.il.ibm.com:9080/VG4SWeb/"/>
        		<property name="pzQueriesURL" value="http://srv-pz01.haifa.il.ibm.com:9080/QueriesGatewayREST/"/>
-       		
-       		<!--  Guy's Settings
+			-->
+			       		
+       		<!--  Guy's Settings -->
        		<property name="serverURL" value="http://GUYF2-TP.haifa.ibm.com:9080/VG4SWeb/"/>
-       		<property name="pzQueriesURL" value="http://ta-proj02.haifa.ibm.com:9082/QueriesGatewayREST/"/>
-       		-->
+       		<property name="pzQueriesURL" value="http://srv-mobile01.haifa.ibm.com:9080/QueriesGatewayREST/"/>
+       		 
        		
        		<!-- <property name="serverURL" value="http://ta-proj02:9082/VG4SWeb/vg/message"/> -->
        		<!-- <property name="pzQueriesURL" value="http://ta-proj02.haifa.ibm.com:9082/QueriesGatewayREST/"/> -->
@@ -58,6 +62,8 @@
        		<!-- <property name="pzQueriesURL" value="http://socieitesserver.societies.local:9080/QueriesGatewayREST/"/> -->
        		<property name="mockEntity" value="registeredEntity_902_1"/>
        		<property name="mockEntityActive" value="false"/>
+       		<property name="contextLocationActive" value="true"/>
+       		
    </bean>
  
 	 

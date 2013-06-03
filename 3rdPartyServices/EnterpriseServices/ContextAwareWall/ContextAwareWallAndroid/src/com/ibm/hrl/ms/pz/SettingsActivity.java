@@ -47,26 +47,33 @@ public class SettingsActivity extends Activity{
 	    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
 	
 	    EditText entityText = (EditText) findViewById(R.id.txt_entity);
+	    entityText.setText(preferences.getString("vg.entity", ""));
 	    entityText.setOnEditorActionListener(new OnEditorActionListener() {
 			public boolean onEditorAction(TextView v, int actionId,	KeyEvent event) {
-				getCIS();
+				extractVarsAndRetrieveCIS();
 				return false;
 			}
 			
 	    });
 	    
-	    entityText.setText(preferences.getString("vg.entity", ""));
-	  
-	    EditText urlEditText = (EditText) findViewById(R.id.txt_url);
-
-	    urlEditText.setText(preferences.getString("vg.url", ""));
-	    urlEditText.setOnEditorActionListener(new OnEditorActionListener() {
+	    EditText serverEditText = (EditText) findViewById(R.id.txt_url);
+	    serverEditText.setText(preferences.getString("vg.server", ""));
+	    serverEditText.setOnEditorActionListener(new OnEditorActionListener() {
 			public boolean onEditorAction(TextView v, int actionId,	KeyEvent event) {
-				getCIS();
+				extractVarsAndRetrieveCIS();
 				return false;
 			}
 	    });
 	    
+	    
+	    EditText portEditText = (EditText) findViewById(R.id.editText_port);
+	    portEditText.setText(preferences.getString("vg.port", ""));
+	    portEditText.setOnEditorActionListener(new OnEditorActionListener() {
+			public boolean onEditorAction(TextView v, int actionId,	KeyEvent event) {
+				extractVarsAndRetrieveCIS();
+				return false;
+			}
+	    });
 	   
 	   
 	   Spinner spinner = (Spinner) findViewById(R.id.cis_list);
@@ -79,29 +86,38 @@ public class SettingsActivity extends Activity{
 				  SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
 				  EditText entityText = (EditText) findViewById(R.id.txt_entity);
 	              EditText urlEditText = (EditText) findViewById(R.id.txt_url);
+	              EditText portEditText= (EditText) findViewById(R.id.editText_port);
+	              
 	              Spinner spinner = (Spinner) findViewById(R.id.cis_list);
 	              
 	              String entitySelected = entityText.getText().toString();
-	              String urlSelected = urlEditText.getText().toString();
+	              String serverSelected = urlEditText.getText().toString();
 	              String cisSelected = (String) spinner.getSelectedItem();
+	              String portSelected = (String)portEditText.getText().toString(); 
 	              
 	              String entityStored = preferences.getString("vg.entity","");
-	              String urlStored  = preferences.getString("vg.url","");
 	              String cisStored  = preferences.getString("vg.cis","");
+	              String urlStored  = preferences.getString("vg.url","");
 	              
-	              if("".equals(entitySelected)    || "".equals(urlSelected) || cisSelected == null || "".equals(cisSelected) ){
-	            	  Toast.makeText(v.getContext(), "Missing entity, url or CIS", Toast.LENGTH_SHORT).show();
+	              if("".equals(entitySelected) || "".equals(serverSelected) || cisSelected == null || "".equals(cisSelected) || "".equals(portSelected) ){
+	            	  Toast.makeText(v.getContext(), "Missing entity, url, port or CIS", Toast.LENGTH_SHORT).show();
 	              
 	              }else{
-	            	  if (!entitySelected.equalsIgnoreCase(entityStored) || !urlSelected.equalsIgnoreCase(urlStored) || 
+	            	  String fullURL = encodeURL(serverSelected,portSelected);
+	            	  
+	            	  if (!entitySelected.equalsIgnoreCase(entityStored) || !fullURL.equals(urlStored) || 
 	            		  !cisSelected.equalsIgnoreCase(cisStored)){
 		            		  SharedPreferences.Editor editor = preferences.edit();
 			            	  editor.putString("vg.entity", entitySelected.trim());
-			            	  editor.putString("vg.url", urlSelected.trim());
+			            	  editor.putString("vg.url", fullURL);
 			            	  editor.putString("vg.cis", cisSelected);
+			            	  
+			            	  editor.putString("vg.server", serverSelected);
+			            	  editor.putString("vg.port", portSelected);
+			            	  
 			            	  editor.commit();
 			              
-			            	  Toast.makeText(v.getContext(), "Preferences stored", Toast.LENGTH_SHORT).show();  
+			            	  Toast.makeText(v.getContext(), "Preferences stored", Toast.LENGTH_LONG).show();  
 	            	  }
 	            	  startActivity(new Intent("com.ibm.hrl.ms.pz.CameraPreview"));
 	              }
@@ -109,14 +125,16 @@ public class SettingsActivity extends Activity{
 		}; 
 	    launch.setOnClickListener(l);
 	    
-	    
-	    String entityId = preferences.getString("vg.entity","");
-	    String url = preferences.getString("vg.url","");
-	    
-	    if (entityId.length() > 0 && url.length() > 0){
-	    	 getAllCisRestCall(entityId,url); 
+	    if (entityText.getText().length() > 0 && serverEditText.getText().length() > 0 ){
+	    	extractVarsAndRetrieveCIS();
+	    }else{
+	    	String entityId = preferences.getString("vg.entity","");
+	 	    String url = preferences.getString("vg.url","");
+	 	    
+	 	    if (entityId.length() > 0 && url.length() > 0){
+	 	    	 getAllCisRestCall(entityId,url); 
+	 	    } 	
 	    }
-	   
     }
 
 	void createSpinner(JSONArray cisList){
@@ -156,21 +174,26 @@ public class SettingsActivity extends Activity{
 		
 	}
 	
-	private void getCIS() {
+	private void extractVarsAndRetrieveCIS() {
 		EditText entityText = (EditText) findViewById(R.id.txt_entity);
-		EditText urlEditText = (EditText) findViewById(R.id.txt_url);
+		EditText serverEditText = (EditText) findViewById(R.id.txt_url);
+		EditText portEditText = (EditText) findViewById(R.id.editText_port);
 		
 		String entityStr = entityText.getText().toString(); 
-		String urlString = urlEditText.getText().toString();
+		String serverString = serverEditText.getText().toString();
+		String portString = portEditText.getText().toString();
 		
-		if (entityStr != null && urlString != null && entityStr.length() > 0 && urlString.length() > 0){
-			getAllCisRestCall(entityStr,urlString);
+		if (entityStr != null && serverString != null && portString != null && entityStr.length() > 0 && serverString.length() > 0 && portString.length() > 0){
+			
+			String url = encodeURL(serverString, portString);
+			getAllCisRestCall(entityStr,url);
 		}
 	}
 	
 	private ProgressDialog progressDialog=null;
 	private void showDialog(){
 		 progressDialog = ProgressDialog.show(this, "", "Loading...");
+		 progressDialog.setCancelable(true);
 	}
 	
 	private void dismissDialog(){
@@ -179,7 +202,7 @@ public class SettingsActivity extends Activity{
 		 }
 	}
 	
-	private void getAllCisRestCall(String entityStr, String urlString )  {
+	private void getAllCisRestCall(String entityStr, String urlString)  {
 		
 		 new AsyncTask<String, Void,JSONObject> (){
 			Throwable error = null;
@@ -191,18 +214,21 @@ public class SettingsActivity extends Activity{
 			 
 			 @Override
 			protected void onPostExecute(JSONObject result) {
-				 if (error != null){
-					 Toast.makeText(getBaseContext(), "Error retrieving CIS for the given entity", Toast.LENGTH_SHORT).show();
-					 
-				 }else if (result != null){
-					try {
-						JSONArray cis = (JSONArray)result.get("messages");
-						createSpinner(cis);
-					} catch (JSONException e) {
-						
-						e.printStackTrace();
+				 try{
+					 if (error != null){
+						 Toast.makeText(getBaseContext(), "Error retrieving CIS for the given entity", Toast.LENGTH_SHORT).show();
+						 
+					 }else if (result != null){
+						try {
+							JSONArray cis = (JSONArray)result.get("messages");
+							createSpinner(cis);
+						} catch (JSONException e) {
+							Log.e("vg", "Error - Json Exception; cause: "+e.getCause(), e);
+						}
 					}
-				}
+				 }catch(Exception e){
+					 Log.e("vg", "Error - Json Exception; cause: "+e.getCause(), e);
+				 }
 				dismissDialog();
 			  }
 			 
@@ -213,8 +239,8 @@ public class SettingsActivity extends Activity{
 					JSONObject result = null;
 					String url = (String) paramters[0];
 					String entity = (String) paramters[1];
-					Log.v("tag", url);
-					Log.v("tag", entity);
+										
+					Log.v("vg", "going to get CIS for "+entity);
 					
 					String request = url + "/initialUserDetails.html";
 					HttpGet httpGet = new HttpGet(request);
@@ -231,13 +257,13 @@ public class SettingsActivity extends Activity{
 			                sb.append(line);
 			            }
 			            in.close();
-			            Log.v("tag", sb.toString());
+			            Log.v("vg", sb.toString());
 			            
 			            result = new JSONObject( sb.toString());
 			            
 					}  catch (Exception e) {
 						error = e;
-						Log.e("error", "can't get setting for entity: "+entity+" ; "+e.getMessage()+ " ; cause: "+e.getCause(), e);
+						Log.e("vg", "can't get setting for entity: "+entity+" ; "+e.getMessage()+ " ; cause: "+e.getCause(), e);
 					}  finally {
 			            if (in != null) {
 			                try {
@@ -252,31 +278,15 @@ public class SettingsActivity extends Activity{
 		
 	}
 	
-	
-	/*
-	 
-	private static final int EXIT = 1;
-	private static final int SPRAY = 2;
-	 
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu){
-		menu.add(1, SPRAY, Menu.FIRST, "Spray Graffiti");
-		menu.add(1, EXIT, Menu.FIRST, "exit");	
-		return true;
+	private static String encodeURL(String url,String port){
+		String fullURL = "";
+		if (!url.startsWith("http://")){
+			fullURL = "http://";
+		}
+		fullURL += url +":"+port+"/VG";
+		
+		return fullURL;
 	}
 	
 	
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item){
-     
-		switch(item.getItemId()){
-			case EXIT:
-				System.exit(0);
-				break;
-			case SPRAY:
-				break;
-		}
-		
-		return super.onOptionsItemSelected(item);
-	}*/
 }
