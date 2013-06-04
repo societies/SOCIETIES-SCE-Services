@@ -28,6 +28,14 @@
 			<id>google-api-services</id>
 			<url>http://mavenrepo.google-api-java-client.googlecode.com/hg</url>
 		</repository>
+
+		<repository>
+			<id>prime-repo</id>
+			<name>PrimeFaces Maven Repository</name>
+			<url>http://repository.primefaces.org</url>
+			<layout>default</layout>
+		</repository>
+	
 	</repositories>
 
 	<dependencies>
@@ -164,7 +172,60 @@
 			<artifactId>gson</artifactId>
 			<version>2.2.1</version>
 			<scope>compile</scope>
-		</dependency>        
+		</dependency>
+		
+	<dependency>  
+        <groupId>org.primefaces</groupId>  
+        <artifactId>primefaces</artifactId>  
+        <version>3.5</version>  
+    </dependency>  
+    		<!-- Java EE6 dependencies -->
+		<dependency>
+			<groupId>com.sun.faces</groupId>
+			<artifactId>jsf-api</artifactId>
+			<version>2.1.17</version>
+		</dependency>
+		<dependency>
+			<groupId>com.sun.faces</groupId>
+			<artifactId>jsf-impl</artifactId>
+			<version>2.1.17</version>
+		</dependency>
+
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>jstl</artifactId>
+			<version>1.2</version>
+		</dependency>
+
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>servlet-api</artifactId>
+			<version>2.5</version>
+		</dependency>
+
+		<dependency>
+			<groupId>javax.servlet.jsp</groupId>
+			<artifactId>jsp-api</artifactId>
+			<version>2.2</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.webflow</groupId>
+			<artifactId>spring-faces</artifactId>
+			<version>2.3.2.RELEASE</version>
+		</dependency>
+
+		<!-- Virgo/Tomcat needs this -->
+		<dependency>
+			<groupId>org.glassfish</groupId>
+			<artifactId>javax.faces</artifactId>
+			<version>2.1.17</version>
+		</dependency>
+		<dependency>
+			<groupId>org.glassfish.web</groupId>
+			<artifactId>el-impl</artifactId>
+			<version>2.2</version>
+		</dependency>
 </dependencies>
 
 	<build>
@@ -248,6 +309,193 @@
 							org.springframework.web.servlet.tags;version="[3.0.0,4.0.0)",
 							org.springframework.web.servlet.tags.form;version="[3.0.0,4.0.0)",
 							org.springframework.web.servlet.theme;version="[3.0.0,4.0.0)",
+							<!-- JSF 2.0 -->
+							com.sun.faces;resolution:=optional,
+							com.sun.faces.config;resolution:=optional,
+							com.sun.faces.application;resolution:=optional,
+							com.sun.faces.context;resolution:=optional,
+							com.sun.faces.lifecycle;resolution:=optional,
+							com.sun.faces.application.view;resolution:=optional,
+							com.sun.faces.renderkit;resolution:=optional,
+							com.sun.faces.component.visit;resolution:=optional,
+							com.sun.faces.facelets.impl;resolution:=optional,
+							com.sun.faces.facelets.tag.jsf;resolution:=optional,
+							com.sun.faces.application.resource;resolution:=optional,
+							com.sun.faces.ext.render;resolution:=optional,
+							com.sun.faces.facelets.component;resolution:=optional,
+							com.sun.faces.renderkit.html_basic;resolution:=optional,
+							com.sun.faces.component;resolution:=optional,
+							com.sun.faces.facelets.tag.ui;resolution:=optional,
+							javax.faces;resolution:=optional,
+							javax.faces.webapp;resolution:=optional,
+							javax.faces.component;resolution:=optional,
+							javax.faces.component.html;resolution:=optional,
+							javax.faces.context;resolution:=optional,
+							<!-- PrimeFaces -->
+							org.primefaces;resolution:=optional,
+							org.primefaces.application;resolution:=optional,
+							org.primefaces.component.accordionpanel;resolution:=optional,
+							org.primefaces.component.ajaxstatus;resolution:=optional,
+							org.primefaces.component.api;resolution:=optional,
+							org.primefaces.component.autocomplete;resolution:=optional,
+							org.primefaces.component.behavior.ajax;resolution:=optional,
+							org.primefaces.component.behavior.printer;resolution:=optional,
+							org.primefaces.component.blockui;resolution:=optional,
+							org.primefaces.component.breadcrumb;resolution:=optional,
+							org.primefaces.component.button;resolution:=optional,
+							org.primefaces.component.calendar;resolution:=optional,
+							org.primefaces.component.captcha;resolution:=optional,
+							org.primefaces.component.carousel;resolution:=optional,
+							org.primefaces.component.celleditor;resolution:=optional,
+							org.primefaces.component.chart;resolution:=optional,
+							org.primefaces.component.chart.bar;resolution:=optional,
+							org.primefaces.component.chart.bubble;resolution:=optional,
+							org.primefaces.component.chart.donut;resolution:=optional,
+							org.primefaces.component.chart.line;resolution:=optional,
+							org.primefaces.component.chart.metergauge;resolution:=optional,
+							org.primefaces.component.chart.ohlc;resolution:=optional,
+							org.primefaces.component.chart.pie;resolution:=optional,
+							org.primefaces.component.clock;resolution:=optional,
+							org.primefaces.component.collector;resolution:=optional,
+							org.primefaces.component.colorpicker;resolution:=optional,
+							org.primefaces.component.column;resolution:=optional,
+							org.primefaces.component.columngroup;resolution:=optional,
+							org.primefaces.component.columns;resolution:=optional,
+							org.primefaces.component.commandbutton;resolution:=optional,
+							org.primefaces.component.commandlink;resolution:=optional,
+							org.primefaces.component.confirmdialog;resolution:=optional,
+							org.primefaces.component.contextmenu;resolution:=optional,
+							org.primefaces.component.dashboard;resolution:=optional,
+							org.primefaces.component.datagrid;resolution:=optional,
+							org.primefaces.component.datalist;resolution:=optional,
+							org.primefaces.component.datatable;resolution:=optional,
+							org.primefaces.component.datatable.feature;resolution:=optional,
+							org.primefaces.component.defaultcommand;resolution:=optional,
+							org.primefaces.component.dialog;resolution:=optional,
+							org.primefaces.component.dnd;resolution:=optional,
+							org.primefaces.component.dock;resolution:=optional,
+							org.primefaces.component.editor;resolution:=optional,
+							org.primefaces.component.effect;resolution:=optional,
+							org.primefaces.component.export;resolution:=optional,
+							org.primefaces.component.feedreader;resolution:=optional,
+							org.primefaces.component.fieldset;resolution:=optional,
+							org.primefaces.component.filedownload;resolution:=optional,
+							org.primefaces.component.fileupload;resolution:=optional,
+							org.primefaces.component.focus;resolution:=optional,
+							org.primefaces.component.galleria;resolution:=optional,
+							org.primefaces.component.gmap;resolution:=optional,
+							org.primefaces.component.graphicimage;resolution:=optional,
+							org.primefaces.component.growl;resolution:=optional,
+							org.primefaces.component.hotkey;resolution:=optional,
+							org.primefaces.component.idlemonitor;resolution:=optional,
+							org.primefaces.component.imagecompare;resolution:=optional,
+							org.primefaces.component.imagecropper;resolution:=optional,
+							org.primefaces.component.imageswitch;resolution:=optional,
+							org.primefaces.component.inplace;resolution:=optional,
+							org.primefaces.component.inputmask;resolution:=optional,
+							org.primefaces.component.inputtext;resolution:=optional,
+							org.primefaces.component.inputtextarea;resolution:=optional,
+							org.primefaces.component.keyboard;resolution:=optional,
+							org.primefaces.component.layout;resolution:=optional,
+							org.primefaces.component.lightbox;resolution:=optional,
+							org.primefaces.component.log;resolution:=optional,
+							org.primefaces.component.media;resolution:=optional,
+							org.primefaces.component.media.player;resolution:=optional,
+							org.primefaces.component.megamenu;resolution:=optional,
+							org.primefaces.component.menu;resolution:=optional,
+							org.primefaces.component.menubar;resolution:=optional,
+							org.primefaces.component.menubutton;resolution:=optional,
+							org.primefaces.component.menuitem;resolution:=optional,
+							org.primefaces.component.message;resolution:=optional,
+							org.primefaces.component.messages;resolution:=optional,
+							org.primefaces.component.mindmap;resolution:=optional,
+							org.primefaces.component.notificationbar;resolution:=optional,
+							org.primefaces.component.orderlist;resolution:=optional,
+							org.primefaces.component.outputlabel;resolution:=optional,
+							org.primefaces.component.outputpanel;resolution:=optional,
+							org.primefaces.component.overlaypanel;resolution:=optional,
+							org.primefaces.component.paginator;resolution:=optional,
+							org.primefaces.component.panel;resolution:=optional,
+							org.primefaces.component.panelgrid;resolution:=optional,
+							org.primefaces.component.panelmenu;resolution:=optional,
+							org.primefaces.component.password;resolution:=optional,
+							org.primefaces.component.photocam;resolution:=optional,
+							org.primefaces.component.picklist;resolution:=optional,
+							org.primefaces.component.poll;resolution:=optional,
+							org.primefaces.component.progressbar;resolution:=optional,
+							org.primefaces.component.radiobutton;resolution:=optional,
+							org.primefaces.component.rating;resolution:=optional,
+							org.primefaces.component.remotecommand;resolution:=optional,
+							org.primefaces.component.resetinput;resolution:=optional,
+							org.primefaces.component.resizable;resolution:=optional,
+							org.primefaces.component.resources;resolution:=optional,
+							org.primefaces.component.ring;resolution:=optional,
+							org.primefaces.component.row;resolution:=optional,
+							org.primefaces.component.roweditor;resolution:=optional,
+							org.primefaces.component.rowexpansion;resolution:=optional,
+							org.primefaces.component.rowtoggler;resolution:=optional,
+							org.primefaces.component.schedule;resolution:=optional,
+							org.primefaces.component.scrollpanel;resolution:=optional,
+							org.primefaces.component.selectbooleanbutton;resolution:=optional,
+							org.primefaces.component.selectbooleancheckbox;resolution:=optional,
+							org.primefaces.component.selectcheckboxmenu;resolution:=optional,
+							org.primefaces.component.selectmanybutton;resolution:=optional,
+							org.primefaces.component.selectmanycheckbox;resolution:=optional,
+							org.primefaces.component.selectmanymenu;resolution:=optional,
+							org.primefaces.component.selectonebutton;resolution:=optional,
+							org.primefaces.component.selectonelistbox;resolution:=optional,
+							org.primefaces.component.selectonemenu;resolution:=optional,
+							org.primefaces.component.selectoneradio;resolution:=optional,
+							org.primefaces.component.separator;resolution:=optional,
+							org.primefaces.component.slidemenu;resolution:=optional,
+							org.primefaces.component.slider;resolution:=optional,
+							org.primefaces.component.socket;resolution:=optional,
+							org.primefaces.component.spacer;resolution:=optional,
+							org.primefaces.component.spinner;resolution:=optional,
+							org.primefaces.component.splitbutton;resolution:=optional,
+							org.primefaces.component.stack;resolution:=optional,
+							org.primefaces.component.submenu;resolution:=optional,
+							org.primefaces.component.subtable;resolution:=optional,
+							org.primefaces.component.summaryrow;resolution:=optional,
+							org.primefaces.component.tabmenu;resolution:=optional,
+							org.primefaces.component.tabview;resolution:=optional,
+							org.primefaces.component.tagcloud;resolution:=optional,
+							org.primefaces.component.terminal;resolution:=optional,
+							org.primefaces.component.themeswitcher;resolution:=optional,
+							org.primefaces.component.tieredmenu;resolution:=optional,
+							org.primefaces.component.toolbar;resolution:=optional,
+							org.primefaces.component.tooltip;resolution:=optional,
+							org.primefaces.component.tree;resolution:=optional,
+							org.primefaces.component.treetable;resolution:=optional,
+							org.primefaces.component.watermark;resolution:=optional,
+							org.primefaces.component.wizard;resolution:=optional,
+							org.primefaces.context;resolution:=optional,
+							org.primefaces.event;resolution:=optional,
+							org.primefaces.event.data;resolution:=optional,
+							org.primefaces.event.map;resolution:=optional,
+							org.primefaces.facelets;resolution:=optional,
+							org.primefaces.json;resolution:=optional,
+							org.primefaces.lifecycle;resolution:=optional,
+							org.primefaces.model;resolution:=optional,
+							org.primefaces.model.chart;resolution:=optional,
+							org.primefaces.model.filter;resolution:=optional,
+							org.primefaces.model.map;resolution:=optional,
+							org.primefaces.model.mindmap;resolution:=optional,
+							org.primefaces.model.tagcloud;resolution:=optional,
+							org.primefaces.renderkit;resolution:=optional,
+							org.primefaces.util;resolution:=optional,
+							org.primefaces.visit;resolution:=optional,
+							org.primefaces.webapp;resolution:=optional,
+							org.primefaces.webapp.filter;resolution:=optional,
+							javax.faces.event;resolution:=optional,
+							javax.faces.convert;resolution:=optional,
+							org.springframework.web.jsf.el;resolution:=optional,
+							org.springframework.osgi.config
+							com.sun.faces.vendor;resolution:=optional,
+							javax.el;resolution:=optional,
+							javax.faces.render;resolution:=optional,
+							javax.faces.application;resolution:=optional,
+							javax.faces.lifecycle;resolution:=optional,
 							<!-- JSTL lib -->
 							org.apache.taglibs.standard; version="[1.2.0,2)",
 							org.apache.taglibs.standard.extra.spath; version="[1.2.0,2)",

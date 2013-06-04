@@ -57,16 +57,12 @@ public class EventDAO {
 	 * @param nodeId
 	 * @param calendarId
 	 */
-	public EventDAO(String nodeId, String calendarId, String eventId, String subscriberId) {
+	public EventDAO(String eventId, String calendarId, String nodeId, String subscriberId) {
 		super();
 		this.nodeId = nodeId;
 		this.calendarId = calendarId;
 		this.eventId = eventId;
 		this.subscriberId = subscriberId;
-		this.summary = summary;
-		this.description = description;
-		this.startDate = startDate;
-		this.endDate = endDate;
 	}
 	
 	@Column(name = "nodeId")

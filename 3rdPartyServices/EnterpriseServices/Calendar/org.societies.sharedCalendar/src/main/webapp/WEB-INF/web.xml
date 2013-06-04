@@ -2,51 +2,86 @@
 <web-app xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
 	version="2.5">
-    <display-name>Shared Calendar Web Application</display-name>
+    <display-name>Personal Agenda</display-name>
     
-	<welcome-file-list>
-	    <welcome-file>/views/index.jsp</welcome-file>
-	</welcome-file-list>
-    <!-- 
-     <context-param>
-	    <param-name>contextConfigLocation</param-name>      
-	    <param-value>
-	        /WEB-INF/applicationContext.xml,
-	        /WEB-INF/cal-servlet.xml
-	    </param-value>
-	 </context-param>
-     -->
-     
-   <!-- OSGI aware web application context declaration -->
-	<context-param>
-		<param-name>contextClass</param-name>
-		<param-value>org.eclipse.virgo.web.dm.ServerOsgiBundleXmlWebApplicationContext</param-value>
-	</context-param>
+    <welcome-file-list>
+        <welcome-file>/index.xhtml</welcome-file>
+    </welcome-file-list>
+    
+    <!-- primefaces theme -->
+    <context-param>
+        <param-name>primefaces.THEME</param-name>
+        <param-value>societies-theme</param-value>
+    </context-param>
+
+    <!-- OSGI aware web application context declaration -->
+    <context-param>
+        <param-name>contextClass</param-name>
+        <param-value>org.eclipse.virgo.web.dm.ServerOsgiBundleXmlWebApplicationContext</param-value>
+    </context-param>
+
+    <context-param>
+        <param-name>javax.faces.PROJECT_STAGE</param-name>
+        <param-value>Development</param-value>
+    </context-param>
+
+    <!-- JSF mapping -->
+    <servlet>
+        <servlet-name>Faces Servlet</servlet-name>
+        <servlet-class>javax.faces.webapp.FacesServlet</servlet-class>
+        <init-param>
+            <param-name>contextConfigLocation</param-name>
+            <param-value>/WEB-INF/sharedCal-servlet.xml</param-value>
+        </init-param>
+        <init-param>
+            <param-name>contextClass</param-name>
+            <param-value>org.eclipse.virgo.web.dm.ServerOsgiBundleXmlWebApplicationContext</param-value>
+        </init-param>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>Faces Servlet</servlet-name>
+        <url-pattern>*.xhtml</url-pattern>
+    </servlet-mapping>
+
+    <!-- PrimeFaces push servlet -->
+    <!--<servlet>
+        <servlet-name>Push Servlet</servlet-name>
+        <servlet-class>org.primefaces.push.PushServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>Push Servlet</servlet-name>
+        <url-pattern>/primepush/*</url-pattern>
+    </servlet-mapping>-->
+
+    <!--<servlet>
+        <servlet-name>AtmosphereServlet</servlet-name>
+        <servlet-class>org.atmosphere.weblogic.AtmosphereWebLogicServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>AtmosphereServlet</servlet-name>
+        <url-pattern>/*</url-pattern>
+    </servlet-mapping>-->
+
+
+    <context-param>
+        <param-name>contextConfigLocation</param-name>
+        <param-value>/WEB-INF/applicationContext.xml</param-value>
+    </context-param>
+
+    <listener>
+        <listener-class>com.sun.faces.config.ConfigureListener</listener-class>
+    </listener>
 
     <listener>
         <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
     </listener>
-	
-    <servlet>
-        <servlet-name>sharedCal</servlet-name>
-        <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
-        <!-- init-param>
-      		<param-name>contextClass</param-name>     
-      		<param-value>org.springframework.osgi.web.context.support.OsgiBundleXmlWebApplicationContext</param-value>
-    	</init-param>
-    	<init-param>
-			<param-name>contextConfigLocation</param-name>
-			<param-value>
-			    /WEB-INF/applicationContext.xml,
-			    /WEB-INF/cal-servlet.xml
-			</param-value>
-		</init-param-->
-    	<load-on-startup>2</load-on-startup>        
-    </servlet>
-	 
-	<servlet-mapping>
-        <servlet-name>sharedCal</servlet-name>
-        <url-pattern>*.do</url-pattern>
-    </servlet-mapping>
+
+    <listener>
+        <listener-class>org.springframework.web.context.request.RequestContextListener</listener-class>
+    </listener>
     
 </web-app>

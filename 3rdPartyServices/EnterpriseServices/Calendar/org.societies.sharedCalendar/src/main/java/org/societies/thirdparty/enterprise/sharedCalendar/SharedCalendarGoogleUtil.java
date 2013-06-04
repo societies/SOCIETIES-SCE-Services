@@ -65,6 +65,7 @@ import com.google.api.services.calendar.model.EventDateTime;
 import com.google.api.services.calendar.model.Events;
 
 import org.societies.api.identity.IIdentity;
+import org.societies.thirdparty.sharedCalendar.api.XMLGregorianCalendarConverter;
 
 
 /**
@@ -217,6 +218,7 @@ public class SharedCalendarGoogleUtil {
 		event.setEnd(new EventDateTime().setDateTime(end));
 
 		event.setLocation(location);
+		
 		// Store event
 		try {
 			Event createdEvent = service.events().insert(calendarId, event)
@@ -227,7 +229,23 @@ public class SharedCalendarGoogleUtil {
 		}
 		
 		return result;
-	}	
+	}
+	
+	public org.societies.api.ext3p.schema.sharedcalendar.Event getEvent(String eventId, String calendarId){
+		if(log.isDebugEnabled())
+			log.debug("Get event from Google!");
+		org.societies.api.ext3p.schema.sharedcalendar.Event returnedEvent = null;
+		
+		try{
+			Event googleEvent = this.findEventUsingId(calendarId, eventId);
+			returnedEvent = eventFromGoogleEvent(googleEvent);
+		} catch(Exception ex){
+			log.error("Exception trying to get event from Google!");
+			ex.printStackTrace();
+		}
+		
+		return returnedEvent;
+	}
 	
 	public void deleteEvent(String calendarId, String eventId) throws IOException{
 		try {
@@ -578,7 +596,7 @@ public class SharedCalendarGoogleUtil {
 		
 		newCalendar.setSummary(calendarEntry.getSummary());
 		newCalendar.setCalendarId(calendarEntry.getId());
-		newCalendar.setDescription(calendarEntry.getDescription());
+		newCalendar.setNodeId(calendarEntry.getDescription());
 		
 		return newCalendar;
 	}

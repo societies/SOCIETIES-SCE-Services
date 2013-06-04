@@ -80,7 +80,7 @@ public interface ISharedCalendarClient {
 	 * @param calendarId
 	 * @return true if the event is deleted successfully
 	 */
-	public void deleteEvent(ICalendarResultCallback calendarResultCallback, String eventId);
+	public void deleteEvent(ICalendarResultCallback calendarResultCallback, String eventId, String nodeId);
 	
 	/**
 	 * This method is used to subscribe to an event in a CIS calendar.
@@ -89,7 +89,7 @@ public interface ISharedCalendarClient {
 	 * @param subscriberId the identifier for the subscriber
 	 * @return true if the subscription is performed correctly false otherwise
 	 */
-	public void subscribeToEvent(ICalendarResultCallback calendarResultCallback, String eventId, String subscriberId);
+	public void subscribeToEvent(ICalendarResultCallback calendarResultCallback, String eventId, String nodeId, String subscriberId);
 	
 	/**
 	 * This method is used to retrieve events in a CIS calendar that match a keyword
@@ -114,7 +114,7 @@ public interface ISharedCalendarClient {
 	 * @param subscriberId
 	 * @return true if the unsubscription is performed correctly, false otherwise
 	 */
-	public void unsubscribeFromEvent(ICalendarResultCallback calendarResultCallback, String eventId, String nodeId, String subscriberId);
+	public void unsubscribeFromEvent(ICalendarResultCallback calendarResultCallback, String eventId, String subscriberId);
 
 	/**
 	 * Gets the events that are recommended for the subscriber
@@ -127,5 +127,16 @@ public interface ISharedCalendarClient {
 	 * @return the JSON equivalent.
 	 */
 	public String createJSONOEvents(List<Event> eventListToRender);
+
+	/**
+	 * @return
+	 */
+	public List<UserWarning> getUserWarnings();
+
+	/**
+	 * @param calendarResultCallback
+	 */
+	void getAllCalendars(ICalendarResultCallback calendarResultCallback);
+
 	
 }

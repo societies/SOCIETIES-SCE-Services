@@ -140,7 +140,7 @@ public class SharedCalendarCommServer implements IFeatureServer{
 			} else
 				requestor = stanza.getFrom();
 	
-			IIdentity node = getCommManager().getIdManager().fromJid(bean.getCISId());
+			IIdentity node = getCommManager().getIdManager().fromJid(bean.getNodeId());
 			
 			String subscriberId = bean.getSubscriberId();
 			
@@ -156,60 +156,36 @@ public class SharedCalendarCommServer implements IFeatureServer{
 				log.debug("The message came from " + stanza.getFrom().getJid());
 
 			switch (bean.getMethod()) {
-			case DELETE_CIS_CALENDAR:
-				resultBean.setLastOperationSuccessful(this.sharedCalendarService.deleteCalendar(bean.getCalendarId(), node, requestor));
+			case RETRIEVE_CALENDAR:
+				Calendar retrievedCalendar = this.sharedCalendarService.retrieveCalendar(node, requestor);
+				resultBean.setCalendar(retrievedCalendar);
 				break;
-			case RETRIEVE_CIS_CALENDAR_LIST:
-				List<Calendar> retrievedCalendars = this.sharedCalendarService.retrieveCalendarList(node, requestor);
-				resultBean.setCalendarList(retrievedCalendars);
-				break;
-			case RETRIEVE_CIS_CALENDAR_EVENTS:
-				List<Event> retrievedEvents = this.sharedCalendarService.retrieveCalendarEvents(bean.getCalendarId(), node, requestor);
+			case RETRIEVE_ALL_EVENTS:
+				List<Event> retrievedEvents = this.sharedCalendarService.retrieveEvents(node, requestor);
 				resultBean.setEventList(retrievedEvents);
 				break;
+			case RETRIEVE_EVENT:
+				Event retrievedEvent = this.sharedCalendarService.retrieveEvent(bean.getEventId(), node, requestor);
+				resultBean.setEvent(retrievedEvent);
+				break;
 			case SUBSCRIBE_TO_EVENT:
-				resultBean.setSubscribingResult(this.sharedCalendarService.subscribeToEvent(bean.getCalendarId(),bean.getEventId(), node, subscriber));
+				resultBean.setSubscribingResult(this.sharedCalendarService.subscribeToEvent(bean.getEventId(), node, subscriber));
 				break;
 			case FIND_EVENTS:
-				//List<Event> foundEvents = this.sharedCalendarService.findEvents(bean.getCalendarId(), bean.getKeyWord());
-				//resultBean.setEventList(foundEvents);
+				List<Event> foundEvents = this.sharedCalendarService.findEventsInCalendar(node, bean.getEvent());
+				resultBean.setEventList(foundEvents);
 				break;
 			case UNSUBSCRIBE_FROM_EVENT:
-				resultBean.setSubscribingResult(this.sharedCalendarService.unsubscribeFromEvent(bean.getCalendarId(),bean.getEventId(), node, subscriber));
+				resultBean.setSubscribingResult(this.sharedCalendarService.unsubscribeFromEvent(bean.getEventId(), subscriber));
 				break;
-			case CREATE_PRIVATE_CALENDAR:
-				resultBean.setCalendarId(this.sharedCalendarService.createCalendar(bean.getCalendarSummary(), node, requestor));
+			case UPDATE_EVENT:
+				resultBean.setLastOperationSuccessful(this.sharedCalendarService.updateEvent(bean.getEvent(), requestor));
 				break;
-			case DELETE_PRIVATE_CALENDAR:
-				resultBean.setLastOperationSuccessful(this.sharedCalendarService.deleteCalendar(bean.getCalendarId(), node, requestor));
+			case CREATE_EVENT:
+				resultBean.setEventId((this.sharedCalendarService.createEvent(bean.getEvent(), node, requestor)));
 				break;
-			case CREATE_EVENT_ON_PRIVATE_CALENDAR:
-				//String calendarId = this.sharedCalendarService.retrievePrivateCalendarId(stanza.getFrom().getJid());
-				//if (calendarId != null) {
-				//	String returnedEventId = this.sharedCalendarService.createEventOnPrivateCalendarUsingCSSId(calendarId, bean.getNewEvent());
-				//	resultBean.setEventId(returnedEventId);
-			//	}
-				break;
-			case RETRIEVE_EVENTS_ON_PRIVATE_CALENDAR:
-				//USE the same method for CIS but before retrieve the calendar id associated to the CSS using the Jid.
-				/*String calendarIdForAllEvents = this.sharedCalendarService.retrievePrivateCalendarId(stanza.getFrom().getJid());
-				if (calendarIdForAllEvents != null) {
-					List<Event> returnedPrivateCalendarEventList = this.sharedCalendarService.retrieveCISCalendarEvents(calendarIdForAllEvents);
-					resultBean.setEventList(returnedPrivateCalendarEventList);
-				}*/
-				break;
-			case CREATE_CIS_CALENDAR:
-				//resultBean.setLastOperationSuccessful(this.sharedCalendarService.createCISCalendar(bean.getCalendarSummary(), bean.getCISId()));
-				resultBean.setCalendarId(this.sharedCalendarService.createCalendar(bean.getCalendarSummary(), node, requestor));
-				break;
-			case CREATE_EVENT_ON_CIS_CALENDAR:
-				resultBean.setEventId((this.sharedCalendarService.createEventOnCalendar(bean.getNewEvent(), bean.getCalendarId(), node, requestor)));
-				break;
-			case DELETE_EVENT_ON_CIS_CALENDAR:
-				resultBean.setLastOperationSuccessful(this.sharedCalendarService.deleteEventOnCalendar(bean.getEventId(), bean.getCalendarId(), node, requestor));
-				break;
-			case DELETE_EVENT_ON_PRIVATE_CALENDAR:
-				resultBean.setLastOperationSuccessful(this.sharedCalendarService.deleteEventOnCalendar(bean.getEventId(), bean.getCalendarId(), node, requestor));
+			case DELETE_EVENT:
+				resultBean.setLastOperationSuccessful(this.sharedCalendarService.deleteEvent(bean.getEventId(), node, requestor));
 				break;
 				
 			default:

@@ -54,6 +54,7 @@ jaxb:extensionBindingPrefixes="xjc" >
     	<xs:element name="eventDescription" type="xs:string" minOccurs="0"/>
     	<xs:element name="eventId" type="xs:string" minOccurs="0"/>
     	<xs:element name="calendarId" type="xs:string" minOccurs="0"/>
+    	<xs:element name="nodeId" type="xs:string" minOccurs="0"/>
     	<xs:element name="eventSummary" type="xs:string" minOccurs="0"/>
     	<xs:element name="location" type="xs:string" minOccurs="0"/>
     	<xs:element name="attendees" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
@@ -63,7 +64,7 @@ jaxb:extensionBindingPrefixes="xjc" >
   <xs:complexType name="calendar">
     <xs:sequence>
       <xs:element name="calendarId" type="xs:string" minOccurs="0"/>
-      <xs:element name="description" type="xs:string" minOccurs="0"/>
+      <xs:element name="nodeId" type="xs:string" minOccurs="0"/>
       <xs:element name="summary" type="xs:string" minOccurs="0"/>
     </xs:sequence>
   </xs:complexType>
@@ -72,6 +73,7 @@ jaxb:extensionBindingPrefixes="xjc" >
   <xs:complexType >
     <xs:sequence>
       <xs:element name="calendar" type="tns:calendar" minOccurs="0" />
+      <xs:element name="calendarList" type="tns:calendar" minOccurs="0" maxOccurs="unbounded" />
       <xs:element name="event" type="tns:event" minOccurs="0" />
       <xs:element name="eventList" type="tns:event"  minOccurs="0" maxOccurs="unbounded"/>
       <xs:element name="subscribingResult" type="xs:boolean" minOccurs="0"/>

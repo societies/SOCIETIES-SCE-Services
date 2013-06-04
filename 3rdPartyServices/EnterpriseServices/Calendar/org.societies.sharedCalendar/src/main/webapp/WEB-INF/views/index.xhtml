@@ -1,0 +1,86 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+      			xmlns:h="http://java.sun.com/jsf/html"
+      			xmlns:f="http://java.sun.com/jsf/core"
+      			xmlns:ui="http://java.sun.com/jsf/facelets"
+      			xmlns:p="http://primefaces.org/ui">
+
+    <ui:define name="html_head">
+        <title>SOCIETIES</title>
+    </ui:define>
+
+    <ui:define name="body">
+ 
+	<p:layout fullPage="true" >
+ 	            
+        <p:growl id="messages" showDetail="true" />  
+      
+	<p:layoutUnit id="top" position="north" size="50">
+	</p:layoutUnit>
+
+	<p:layoutUnit id="left" position="west" size="300" resizable="true" closable="false" collapsible="false" header="Options" minSize="200">
+		<p:selectOneMenu value="#{calendarWebController.selectedCalendar}" effect="fade">  
+        	<f:selectItem itemLabel="Select One" itemValue="" />  
+            <f:selectItems value="#{calendarWebController.calendarList}" var="calendar" itemLabel="#{calendar.summary}" itemValue="#{calendar}"/>  
+            <p:ajax update="schedule" listener="#{calendarWebController.selectCalendar}" />
+        </p:selectOneMenu>
+        
+        <h:outputText value="Show all my events: " />  
+        <p:selectBooleanCheckbox value="#{calendarWebController.allEvents}" />  
+	</p:layoutUnit>
+      
+	<p:layoutUnit id="center" position="center">
+    	<h:form>
+        
+        <p:schedule id="schedule" value="#{calendarWebController.eventModel}" widgetVar="myschedule">  
+      
+            <p:ajax event="dateSelect" listener="#{calendarWebController.onDateSelect}" update="eventDetails" oncomplete="eventDialog.show()" />  
+            <p:ajax event="eventSelect" listener="#{calendarWebController.onEventSelect}" update="eventDetails" oncomplete="eventDialog.show()" />  
+            <p:ajax event="eventMove" listener="#{calendarWebController.onEventMove}" update="messages" />  
+            <p:ajax event="eventResize" listener="#{calendarWebController.onEventResize}" update="messages" />  
+      
+        </p:schedule>
+        
+		<p:dialog widgetVar="eventDialog" header="Event Details" showEffect="clip" hideEffect="clip">  
+            <h:panelGrid id="eventDetails" columns="2">  
+                <h:outputLabel for="title" value="Title:" />  
+                <p:inputText id="title" value="#{calendarWebController.event.title}" required="true"/>  
+      
+                <h:outputLabel for="from" value="From:" />  
+                <p:inputMask id="from" value="#{calendarWebController.event.startDate}" mask="99/99/9999">  
+                    <f:convertDateTime pattern="dd/MM/yyyy" />  
+                </p:inputMask>  
+      
+                <h:outputLabel for="to" value="To:" />  
+                <p:inputMask id="to" value="#{calendarWebController.event.endDate}" mask="99/99/9999">  
+                    <f:convertDateTime pattern="dd/MM/yyyy" />  
+                </p:inputMask>  
+      
+                <h:outputLabel for="allDay" value="All Day:" />  
+                <h:selectBooleanCheckbox id="allDay" value="#{calendarWebController.event.allDay}" />  
+      
+                <p:commandButton type="reset" value="Reset" />  
+                <p:commandButton id="addButton" value="Save" actionListener="#{calendarWebController.addEvent}" oncomplete="myschedule.update();eventDialog.hide();"/>  
+            </h:panelGrid>  
+        </p:dialog>  
+    	 
+
+       	</h:form>
+	</p:layoutUnit>
+	
+     <p:layoutUnit id="right" position="east" size="250" header="Recommended Events" resizable="true" closable="false" collapsible="true"
+                              style="text-align:center">
+    	
+    	<p:poll interval="60" listener="#{calendarWebController.updateRecommendedEvents}" update="recEventList" />
+
+        <p:selectOneListbox id="recEventList" value="#{calendarWebController.recommendedEvent}" var="e" style="height:250px">  
+            <f:selectItems value="#{calendarWebController.recommendedEvents}" var="event" itemLabel="#{event.eventSummary}" itemValue="#{event}" />  
+     		e.eventSummary
+        </p:selectOneListbox>  
+        
+     </p:layoutUnit>
+
+    </ui:define>
+</ui:composition>
+</html>

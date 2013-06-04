@@ -1,68 +1,71 @@
 package org.societies.thirdparty.enterprise.sharedCalendar.web;
 
-import java.lang.reflect.Type;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.GregorianCalendar;
+
+import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.Future;
 
-import javax.xml.datatype.DatatypeConfigurationException;
-import javax.xml.datatype.DatatypeFactory;
 
+import javax.faces.application.FacesMessage;
+import javax.faces.bean.ManagedBean;
+import javax.faces.bean.ManagedProperty;
+import javax.faces.bean.RequestScoped;
+import javax.faces.context.FacesContext;
+
+
+import org.primefaces.event.ScheduleEntryMoveEvent;
+import org.primefaces.event.ScheduleEntryResizeEvent;
+import org.primefaces.event.SelectEvent;
+import org.primefaces.model.DefaultScheduleEvent;
+import org.primefaces.model.DefaultScheduleModel;
+import org.primefaces.model.ScheduleEvent;
+import org.primefaces.model.ScheduleModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.societies.api.cis.management.ICis;
 import org.societies.api.cis.management.ICisManager;
 import org.societies.api.comm.xmpp.interfaces.ICommManager;
+import org.societies.api.ext3p.schema.sharedcalendar.Calendar;
 import org.societies.api.ext3p.schema.sharedcalendar.Event;
 import org.societies.api.ext3p.schema.sharedcalendar.SharedCalendarResult;
 import org.societies.thirdparty.sharedCalendar.api.ISharedCalendarClient;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.societies.thirdparty.sharedCalendar.api.UserWarning;
+import org.societies.thirdparty.sharedCalendar.api.XMLGregorianCalendarConverter;
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 
-@Controller
+@ManagedBean(name="calendarWebController")
+@RequestScoped
 public class CalendarWebController {
 	
 	private static long _DEADLINE = 3000;
 	static final Logger log = LoggerFactory.getLogger(CalendarWebController.class);
+		
+	@ManagedProperty(value = "#{sharedCalendar}")
+	private ISharedCalendarClient sharedCalendar;
 	
-	public CalendarWebController() {
-		super();
-		// TODO Auto-generated constructor stub
+	
+	public ISharedCalendarClient getSharedCalendar() {
+		return sharedCalendar;
+	}
+	
+	public void setSharedCalendar(ISharedCalendarClient sharedCalendar) {
+		this.sharedCalendar = sharedCalendar;
 	}
 
-	private SharedCalendarResult result = null;
 	
-	private Gson gson = new Gson();
-	
-	@Autowired
-	private ISharedCalendarClient calClientService = null;
-	
-	@Autowired
-	private ICisManager cisManagerService = null;
-	
-	@Autowired
-	private ICommManager commManager = null;
-	
-	private CalendarWebResultCallback cb = new CalendarWebResultCallback();
+	@ManagedProperty(value = "#{cisManager}")
+	private ICisManager cisManager;
 
-	public ISharedCalendarClient getCalClientService() {
-		return calClientService;
+	public ICisManager getCisManager() {
+		return cisManager;
+	}
+
+	public void setCisManager(ICisManager cisManager) {
+		this.cisManager = cisManager;
 	}
 	
-	public void setCalClientService(ISharedCalendarClient calClientService) {
-		this.calClientService = calClientService;
-	}
+	@ManagedProperty(value = "#{commManager}")
+	private ICommManager commManager;
+	
 
 	public ICommManager getCommManager() {
 		return commManager;
@@ -72,232 +75,260 @@ public class CalendarWebController {
 		this.commManager = commManager;
 	}
 	
-	public ICisManager getCisManagerService() {
-		return cisManagerService;
-	}
 
-	public void setCisManagerService(ICisManager cisManagerService) {
-		this.cisManagerService = cisManagerService;
+	// PROPERTIES that the Webpage will access
+	private Calendar selectedCalendar;
+	
+	public void setSelectedCalendar(Calendar selectedCalendar){
+		this.selectedCalendar = selectedCalendar;
 	}
 	
-	/*
-	     
-      <xs:enumeration value="deleteEventOnCISCalendar"/>
-      <xs:enumeration value="subscribeToEvent"/>
-      <xs:enumeration value="findEvents"/>
-      <xs:enumeration value="unsubscribeFromEvent"/>
-      <xs:enumeration value="createEventOnPrivateCalendar"/>
-      <xs:enumeration value="retrieveEventsOnPrivateCalendar"/>
-      <xs:enumeration value="deleteEventOnPrivateCalendar"/>
-    */
-	
-	
-	@RequestMapping("/getAllRelevantCis.do")
-	public @ResponseBody String getRelevantCis() {
-		List<ICis> foundCiss = new ArrayList<ICis>();
-		List<MyCisRecord> foundCisRecords = new ArrayList<MyCisRecord>();
-		Type listType = new TypeToken<List<MyCisRecord>>(){}.getType();
-		if (this.cisManagerService!=null){
-			foundCiss = this.cisManagerService.getCisList();
-		}
-		for (ICis currentCis : foundCiss) {
-			foundCisRecords.add(new MyCisRecord(currentCis.getName(), currentCis.getCisId()));
-		}
-		String ajaxResult = this.gson.toJson(foundCisRecords, listType);
-		return ajaxResult;
+	public Calendar getSelectedNode(){
+		return this.selectedCalendar;
 	}
 	
-	@RequestMapping("/getAllCisCalendarsAjax.do")
-	public @ResponseBody String retrieveCISCalendarList(@RequestParam(defaultValue="TestCIS", value="cisId") String cisId) {
-		try{
-			CalendarWebResultCallback callback = new CalendarWebResultCallback();
-			this.calClientService.retrieveCISCalendars(callback, cisId);
-			Thread.sleep(30000);
-			String ajaxResult = this.gson.toJson(callback.getResult().getCalendarList());
-			log.info("ajaxResult: " + ajaxResult);
+	
+	private boolean allEvents;
+	
+    public boolean isAllEvents() {  
+        return allEvents;  
+    }  
+  
+    public void setAllEvents(boolean allEvents) {  
+        this.allEvents = allEvents;  
+    }  
+	
+    
+	private ScheduleModel eventModel;
+	
+    public ScheduleModel getEventModel() {  
+        return eventModel;  
+    }  
+    
+    
+	private ScheduleEvent event = new DefaultScheduleEvent();
+	private HashMap<String, Event> currentEvents;
+	
+    public ScheduleEvent getEvent() {  
+        return event;  
+    }  
+  
+    public void setEvent(ScheduleEvent event) {  
+        this.event = event;  
+    }  
+	
+	public CalendarWebController() {
+		if(log.isDebugEnabled())
+			log.debug("CalendarWebController");
 		
-		return ajaxResult;
-		} catch(Exception ex){
-			ex.printStackTrace();
-		}
-		return null;
+		eventModel = new DefaultScheduleModel();
+
 	}
+
 	
-	@RequestMapping("/createCisCalendarAjax.do")
-	public @ResponseBody String createCisCalendarAjax(@RequestParam(defaultValue="TestCIS", value="cisId") String cisId, @RequestParam(defaultValue="Calendar Summary", value="cisSummary") String summary) {
-		CalendarWebResultCallback callback = new CalendarWebResultCallback();
-		this.calClientService.createCISCalendar(callback, summary, cisId);
-		String ajaxResult = this.gson.toJson(callback.getResult().getCalendarId());
-		log.info("ajaxResult: " + ajaxResult);
-		return ajaxResult;
-	}
-	
-	@RequestMapping("/getCisCalendarEvents.do")
-	public @ResponseBody String getCisCalendarEvents(@RequestParam(defaultValue="TestCIS", value="cisId") String cisId, @RequestParam(defaultValue="myCisCalendarId", value="calendarId") String calendarId) {
-		CalendarWebResultCallback callback = new CalendarWebResultCallback();
-		this.calClientService.retrieveCISCalendarEvents(callback, calendarId, cisId);
-		String ajaxResult = this.calClientService.createJSONOEvents(callback.getResult().getEventList());
-		log.info("ajaxResult: " + ajaxResult);
-		return ajaxResult;
-	}
-	
-	@RequestMapping("/createCisCalendarEvent.do")
-	public @ResponseBody String createCisCalendarEvent(
-			@RequestParam(defaultValue="TestCIS", value="cisId") String cisId,
-			@RequestParam(defaultValue="myCisCalendarId", value="calendarId") String calendarId,
-			@RequestParam(defaultValue="2012-09-10T10:00:00+0200", value="evt_start") String startDate,
-			@RequestParam(defaultValue="2012-09-10T12:00:00+0200", value="evt_end") String endDate,
-			@RequestParam(defaultValue="New Event", value="evtDescr") String evtDescr,
-			@RequestParam(defaultValue="New Event Summary", value="evtSummary") String evtSummary,
-			@RequestParam(defaultValue="Unknown", value="evtLocation") String evtLocation) {
-		CalendarWebResultCallback callback = new CalendarWebResultCallback();
-		DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssz");
-		Event e = new Event();
-		Date sDate = new Date();
-		Date eDate = new Date();
-		DatatypeFactory df = null;
-		try {
-            df = DatatypeFactory.newInstance();
-        } catch (DatatypeConfigurationException dce) {
-            throw new IllegalStateException(
-                "Exception while obtaining DatatypeFactory instance", dce);
-        }
-		try {
-			sDate = (Date) formatter.parse(startDate);
-			eDate = (Date) formatter.parse(endDate);
-			GregorianCalendar gcStart = new GregorianCalendar();
-			GregorianCalendar gcEnd = new GregorianCalendar();
-			gcStart.setTimeInMillis(sDate.getTime());
-            gcEnd.setTimeInMillis(eDate.getTime());
-            e.setStartDate(df.newXMLGregorianCalendar(gcStart));
-			e.setEndDate(df.newXMLGregorianCalendar(gcEnd));
-			e.setEventDescription(evtDescr);
-			e.setEventSummary(evtSummary);
-			e.setLocation(evtLocation);			
-		} catch (ParseException e1) {
-			// TODO Auto-generated catch block
-			return "{result: 'Invalid date format'}";
-		}
-		this.calClientService.createEventOnCISCalendar(callback, e, calendarId, cisId);
-		String ajaxResult = this.gson.toJson(callback.getResult().getCalendarId());
-		log.info("ajaxResult: "+ ajaxResult);
-		return ajaxResult;
-	}
-	
-	@RequestMapping("/deleteCisCalendarEvent.do")
-	public @ResponseBody String deleteCisCalendarEvent(
-			@RequestParam(defaultValue="TestCIS", value="cisId") String cisId,
-			@RequestParam(defaultValue="myCisCalendarId", value="calendarId") String calendarId,
-			@RequestParam(value="evtId") String evtId) {
-		CalendarWebResultCallback callback = new CalendarWebResultCallback();
-		this.calClientService.deleteEventOnCISCalendar(callback, evtId, calendarId,cisId);
-		String ajaxResult = this.gson.toJson(callback.getResult().isLastOperationSuccessful());
-		log.info("ajaxResult: " + ajaxResult);
-		return ajaxResult;
-	}
-	
-	@RequestMapping("/createCssCalendarEvent.do")
-	public @ResponseBody String createCssCalendarEvent(
-			@RequestParam(defaultValue="2012-09-10T10:00:00+0200", value="evt_start") String startDate,
-			@RequestParam(defaultValue="2012-09-10T12:00:00+0200", value="evt_end") String endDate,
-			@RequestParam(defaultValue="New Event", value="evtDescr") String evtDescr,
-			@RequestParam(defaultValue="New Event Summary", value="evtSummary") String evtSummary,
-			@RequestParam(defaultValue="Unknown", value="evtLocation") String evtLocation) {
-		CalendarWebResultCallback callback = new CalendarWebResultCallback();
-		DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssz");
-		Event e = new Event();
-		Date sDate = new Date();
-		Date eDate = new Date();
-		DatatypeFactory df = null;
-		try {
-            df = DatatypeFactory.newInstance();
-        } catch (DatatypeConfigurationException dce) {
-            throw new IllegalStateException(
-                "Exception while obtaining DatatypeFactory instance", dce);
-        }
-		try {
-			sDate = (Date) formatter.parse(startDate);
-			eDate = (Date) formatter.parse(endDate);
-			GregorianCalendar gcStart = new GregorianCalendar();
-			GregorianCalendar gcEnd = new GregorianCalendar();
-			gcStart.setTimeInMillis(sDate.getTime());
-            gcEnd.setTimeInMillis(eDate.getTime());
-            e.setStartDate(df.newXMLGregorianCalendar(gcStart));
-			e.setEndDate(df.newXMLGregorianCalendar(gcEnd));
-			e.setEventDescription(evtDescr);
-			e.setEventSummary(evtSummary);
-			e.setLocation(evtLocation);			
-		} catch (ParseException e1) {
-			// TODO Auto-generated catch block
-			return "{result: 'Invalid date format'}";
-		}
-		String myId = getCommManager().getIdManager().getThisNetworkNode().getJid();
-		this.calClientService.createEventOnPrivateCalendar(callback, e, myId);
-		String ajaxResult = this.gson.toJson(callback.getResult().getEventId());
-		log.info("ajaxResult: " + ajaxResult);
-		return ajaxResult;
-	}
-	
-	@RequestMapping("/deleteCssCalendarEvent.do")
-	public @ResponseBody String deleteCssCalendarEvent(@RequestParam(defaultValue="myCisCalendarId", value="calendarId") String calendarId,
-			@RequestParam(value="evtId") String evtId) {
-		CalendarWebResultCallback callback = new CalendarWebResultCallback();
-		this.calClientService.deleteEventOnPrivateCalendar(callback, evtId, calendarId);
-		String ajaxResult = this.gson.toJson(callback.getResult().isLastOperationSuccessful());
-		return ajaxResult;
-	}
-	
-	@RequestMapping("/createCssCalendarAjax.do")
-	public @ResponseBody String createCssCalendarAjax(@RequestParam(defaultValue="CSS Calendar Summary", value="cssSummary") String summary) {
-		CalendarWebResultCallback callback = new CalendarWebResultCallback();
-		this.calClientService.createPrivateCalendar(callback, summary);
-		String ajaxResult = this.gson.toJson(callback.getResult().isLastOperationSuccessful());
-		log.info("ajaxResult: " + ajaxResult);
-		return ajaxResult;
-	}
+	public void selectCalendar(){
 		
-	@RequestMapping("/getPrivateEvents.do")
-	public @ResponseBody String getPrivateEvents(@RequestParam(defaultValue="myCisCalendarId", value="calendarId") String calendarId) {
-		CalendarWebResultCallback callback = new CalendarWebResultCallback();
-		String myId = getCommManager().getIdManager().getThisNetworkNode().getJid();
-		this.calClientService.retrieveEventsPrivateCalendar(callback,calendarId,myId);
-		String ajaxResult = this.calClientService.createJSONOEvents(callback.getResult().getEventList());
-		log.info("ajaxResult: " + ajaxResult);
-		return ajaxResult;
+		if(log.isDebugEnabled())
+			log.debug("Selecting calendar: " + selectedCalendar);
+		
+		if(selectedCalendar != null){
+			viewCalendar(selectedCalendar.getNodeId());
+		}
 	}
 	
-	@RequestMapping("/deletePrivateCalendar.do")
-	public @ResponseBody String deletePrivateCalendar(@RequestParam(defaultValue="myCisCalendarId", value="calendarId") String calendarId) {
+	public List<Calendar> getCalendarList(){
+		
+		if(log.isDebugEnabled())
+			log.debug("Getting Calendar list");
+		
 		CalendarWebResultCallback callback = new CalendarWebResultCallback();
-		this.calClientService.deletePrivateCalendar(callback, calendarId);
-		String ajaxResult = this.gson.toJson(callback.getResult().isLastOperationSuccessful());
-		log.info("ajaxResult: " + ajaxResult);
-		return ajaxResult;
+		getSharedCalendar().getAllCalendars(callback);
+		
+		SharedCalendarResult result = callback.getResult();
+		List<Calendar> calendarList = result.getCalendarList();
+		
+		return calendarList;
+		
 	}
 	
-	@RequestMapping("/deleteCisCalendar.do")
-	public @ResponseBody String deleteCisCalendar(
-		@RequestParam(defaultValue="TestCIS", value="cisId") String cisId,
-		@RequestParam(defaultValue="myCisCalendarId", value="calendarId") String calendarId) {
+	private void viewCalendar(String nodeId){
+		if(log.isDebugEnabled())
+			log.debug("We need to update the Calendar we are viewing!");
+		
+		if(log.isDebugEnabled())
+			log.debug("Getting the events for this calendar!");
+		
 		CalendarWebResultCallback callback = new CalendarWebResultCallback();
-		this.calClientService.deleteCISCalendar(callback, calendarId, cisId);
-		String ajaxResult = this.gson.toJson(callback.getResult().isLastOperationSuccessful());
-		log.info("ajaxResult: " + ajaxResult);
-		return ajaxResult;
+		getSharedCalendar().retrieveEvents(callback, nodeId);
+		
+		SharedCalendarResult result = callback.getResult();
+		List<Event> calendarEvents = result.getEventList();
+		
+		if(log.isDebugEnabled())
+			log.debug("Got the events for the calendar: " + calendarEvents.size());
+		
+		currentEvents = new HashMap<String,Event>();
+		eventModel.clear();
+		
+		for(Event event: calendarEvents){
+			if(log.isDebugEnabled())
+				log.debug("Adding event: " + event.getEventSummary());
+			
+			Date startDate = XMLGregorianCalendarConverter.asDate(event.getStartDate());
+			Date endDate = XMLGregorianCalendarConverter.asDate(event.getEndDate());
+			ScheduleEvent newEvent = new DefaultScheduleEvent(event.getEventSummary(),startDate,endDate);
+
+			currentEvents.put(newEvent.getId(),event);
+			eventModel.addEvent(newEvent);
+		}
+		
 	}
 	
-	@RequestMapping("/index.do")
-	public String getHome() {
-		return "Index";
+	
+	public void updateRecommendedEvents(){
+		if(log.isDebugEnabled())
+			log.debug("Updating the recommended Events");
+		
 	}
-
-
-	public SharedCalendarResult getResult() {
-		return result;
+	
+	public void onEventSelect(SelectEvent selectEvent) {
+		if(log.isDebugEnabled())
+			log.debug("Selected an Event!");
+		
+		// We need to get all the event information!
+		ScheduleEvent selectedEvent = (ScheduleEvent) selectEvent.getObject();
+		
+		if(log.isDebugEnabled())
+			log.debug("Selected Event: " + selectedEvent.getTitle() + " : " + selectedEvent.getId());
+		
+		//Event calendarEvent = currentEvents.get(selectedEvent.getId());
+		
 	}
+	
+	public void onDateSelect(SelectEvent selectEvent) {
+		event = new DefaultScheduleEvent("", (Date) selectEvent.getObject(), (Date) selectEvent.getObject());
+	}
+	
+	public void onEventMove(ScheduleEntryMoveEvent event) {
+		
+		if(log.isDebugEnabled())
+			log.debug("Event was resized!");
+/*
+		//Event updatedEvent = currentEvents.get(event.getScheduleEvent().getId());
+		ScheduleEvent scheduleEvent = event.getScheduleEvent();
+		
+		Date originalStart = XMLGregorianCalendarConverter.asDate(updatedEvent.getStartDate());
+		Date originalEnd = XMLGregorianCalendarConverter.asDate(updatedEvent.getEndDate());
+		
+		if(log.isDebugEnabled()){
+			log.debug("Original Start Time: " + originalStart);
+			log.debug("New start time: " + scheduleEvent.getStartDate());
+			log.debug("Original End Time: " + originalEnd);
+			log.debug("New end time: " + scheduleEvent.getEndDate());
+		}
+		
+		updatedEvent.setStartDate(XMLGregorianCalendarConverter.asXMLGregorianCalendar(scheduleEvent.getStartDate()));
+		updatedEvent.setEndDate(XMLGregorianCalendarConverter.asXMLGregorianCalendar(scheduleEvent.getEndDate()));
+		
+		ICalendarResultCallback callback = new CalendarWebResultCallback();
+		getSharedCalendar().updateEvent(callback , updatedEvent);
+		
+		Boolean result = callback.getResult().isLastOperationSuccessful();
+		
+		if(result){
+			if(log.isDebugEnabled())
+				log.debug("We updated the event successfully!");
+			currentEvents.put(scheduleEvent.getId(), updatedEvent);
+			eventModel.updateEvent(scheduleEvent);
+			
+			addMessage("Event Updated!", updatedEvent.getEventSummary() + " was moved " + event.getDayDelta() + " days and " + event.getMinuteDelta() + " minutes.");
+		} else{
+			if(log.isDebugEnabled())
+				log.debug("Problem updating the event!");
+			
+			ScheduleEvent revertedEvent = new DefaultScheduleEvent(scheduleEvent.getTitle(),originalStart,originalEnd,scheduleEvent.getStyleClass());
+			revertedEvent.setId(scheduleEvent.getId());
+			
+			eventModel.updateEvent(revertedEvent);
+			
+			addMessage("Event Not Updated!", updatedEvent.getEventSummary() + " couldn't be changed!");
 
-	public void setResult(SharedCalendarResult result) {
-		this.result = result;
+		}
+		*/
+	}
+	
+	public void onEventResize(ScheduleEntryResizeEvent event) {
+		if(log.isDebugEnabled())
+			log.debug("Event was resized!");
+
+		/*
+		Event updatedEvent = currentEvents.get(event.getScheduleEvent().getId());
+		ScheduleEvent scheduleEvent = event.getScheduleEvent();
+		
+		Date originalStart = XMLGregorianCalendarConverter.asDate(updatedEvent.getStartDate());
+		Date originalEnd = XMLGregorianCalendarConverter.asDate(updatedEvent.getEndDate());
+		
+		if(log.isDebugEnabled()){
+			log.debug("Original Start Time: " + originalStart);
+			log.debug("New start time: " + scheduleEvent.getStartDate());
+			log.debug("Original End Time: " + originalEnd);
+			log.debug("New end time: " + scheduleEvent.getEndDate());
+		}
+		
+		updatedEvent.setStartDate(XMLGregorianCalendarConverter.asXMLGregorianCalendar(scheduleEvent.getStartDate()));
+		updatedEvent.setEndDate(XMLGregorianCalendarConverter.asXMLGregorianCalendar(scheduleEvent.getEndDate()));
+		
+		ICalendarResultCallback callback = new CalendarWebResultCallback();
+		getSharedCalendar().updateEvent(callback , updatedEvent);
+		
+		Boolean result = callback.getResult().isLastOperationSuccessful();
+		
+		if(result){
+			if(log.isDebugEnabled())
+				log.debug("We updated the event successfully!");
+			currentEvents.put(scheduleEvent.getId(), updatedEvent);
+			eventModel.updateEvent(scheduleEvent);
+			
+			addMessage("Event Updated!", updatedEvent.getEventSummary() + " was resized in " + event.getDayDelta() + " days and " + event.getMinuteDelta() + " minutes.");
+		} else{
+			if(log.isDebugEnabled())
+				log.debug("Problem updating the event!");
+			
+			ScheduleEvent revertedEvent = new DefaultScheduleEvent(scheduleEvent.getTitle(),originalStart,originalEnd,scheduleEvent.getStyleClass());
+			revertedEvent.setId(scheduleEvent.getId());
+			
+			eventModel.updateEvent(revertedEvent);
+			
+			addMessage("Event Not Updated!", updatedEvent.getEventSummary() + " couldn't be changed!");
+
+		}
+		*/
+	}
+	
+	public void viewRecommendedEvent(){
+		if(log.isDebugEnabled())
+			log.debug("View recommended event!");
+		
+	}
+	
+	private void addMessage(String title, String detail) {
+		if(log.isDebugEnabled())
+			log.debug("Adding a message to the Growl stuff: " + title + " : " + detail);
+		
+		FacesMessage faceMessage = new FacesMessage(FacesMessage.SEVERITY_INFO, title, detail);
+		FacesContext.getCurrentInstance().addMessage(null, faceMessage );
+	}
+	
+	public void updateUserWarnings(){
+		if(log.isDebugEnabled())
+			log.debug("Updating user warnings!");
+		
+		List<UserWarning> userWarnings = getSharedCalendar().getUserWarnings();
+		
+		for(UserWarning warning: userWarnings){
+			addMessage(warning.getTitle(),warning.getDetail());
+		}
+		
 	}
 
 }

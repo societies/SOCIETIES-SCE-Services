@@ -24,10 +24,22 @@
  */
 package org.societies.thirdparty.enterprise.sharedCalendar;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.societies.api.comm.xmpp.interfaces.ICommManager;
+import org.societies.api.context.CtxException;
 import org.societies.api.context.broker.ICtxBroker;
+import org.societies.api.context.model.CtxAttribute;
+import org.societies.api.context.model.CtxAttributeTypes;
 import org.societies.api.context.model.CtxEntityIdentifier;
+import org.societies.api.context.model.CtxIdentifier;
+import org.societies.api.context.model.CtxModelObject;
+import org.societies.api.context.model.CtxModelType;
 import org.societies.api.identity.IIdentity;
 import org.societies.api.identity.Requestor;
 
@@ -43,33 +55,127 @@ public class CalendarContextUtils {
 	private ICtxBroker ctxBroker;
 	private IIdentity myId;
 	private Requestor requestor;
+	private ICommManager commManager;
 	/**
 	 * 
 	 */
-	public CalendarContextUtils(ICtxBroker ctxBroker, IIdentity myId) {
+	public CalendarContextUtils(ICtxBroker ctxBroker, IIdentity myId, ICommManager commManager) {
 		if(log.isDebugEnabled())
 			log.debug("CalendarContextUtil created.");
 		
 		this.ctxBroker = ctxBroker;
 		this.myId = myId;
 		this.requestor = new Requestor(myId);
+		this.commManager = commManager;
+	}
+
+	protected String getHomeCity(){
+		if(log.isDebugEnabled())
+			log.debug("Trying to get my city!");
+		
+		return getContextAttribute(CtxAttributeTypes.ADDRESS_HOME_CITY);
 		
 	}
 	
-	private CtxEntityIdentifier getMyIdentifier(){
+	protected String getWorkCity(){
+		if(log.isDebugEnabled())
+			log.debug("Trying to get my work city!");
 		
-		return ctxBroker.retrieveIndividualEntityId(requestor, myId).get();
+		return getContextAttribute(CtxAttributeTypes.ADDRESS_WORK_CITY);
+		
+	}
+	
+	protected String getMyLocation(){
+		if(log.isDebugEnabled())
+			log.debug("Trying to get location!");
+		
+		return getContextAttribute(CtxAttributeTypes.LOCATION_SYMBOLIC);
 		
 	}
 	protected List<IIdentity> getMyFriends(){
 		
-		this.ctxBroker.
-	}
-	
-	protected String getMyInterests(){
+		if(log.isDebugEnabled())
+			log.debug("Trying to get my friends from context!");
+		String friendsCtx = getContextAttribute(CtxAttributeTypes.FRIENDS);
+		String[] friends = friendsCtx.split(",");
+		List<IIdentity> friendList = new ArrayList<IIdentity>();
 		
+		try{
+			for(int i = 0; i < friends.length; i++){
+				friendList.add(commManager.getIdManager().fromJid(friends[i]));
+			}
+		} catch(Exception ex){
+			ex.printStackTrace();
+		}
+
+		return friendList;
 	}
 	
-	protected String getMy
+	protected List<String> getMyInterests(){
+		
+		if(log.isDebugEnabled())
+			log.debug("Trying to get my interests from context!");
+		String interestCtx = getContextAttribute(CtxAttributeTypes.INTERESTS);
+		String[] interests = interestCtx.split(",");
+		List<String> interestList = new ArrayList<String>();
+		for(int i = 0; i < interests.length; i++){
+			interestList.add(interests[i]);
+		}
+		
+		return interestList;
+	}
+	
+	private String getContextAttribute(String ctxAttribName) {
+		if(log.isDebugEnabled())
+			log.debug("Getting Context Attribute: " + ctxAttribName);
+		
+		CtxAttribute ctxAttr = null;
+
+		try {
+		
+			CtxEntityIdentifier ownerEntityId = this.ctxBroker.retrieveIndividualEntityId(requestor,myId).get();
+			
+			Future<List<CtxIdentifier>> ctxIdentLookupFut = this.ctxBroker.lookup(requestor, ownerEntityId,
+							CtxModelType.ATTRIBUTE, ctxAttribName);
+			
+			// Thread.sleep(1000);
+			List<CtxIdentifier> ctxIdentLookup = ctxIdentLookupFut.get();
+			CtxIdentifier ctxIdent = null;
+
+			if ((ctxIdentLookup != null) && (ctxIdentLookup.size() > 0))
+				ctxIdent = ctxIdentLookup.get(0);
+
+			if (ctxIdent == null) {
+				ctxAttr = this.ctxBroker.createAttribute(requestor, ownerEntityId,ctxAttribName).get();
+				
+			} else {
+				Future<CtxModelObject> ctxAttrFut = this.ctxBroker.retrieve(requestor, ctxIdent);
+				// Thread.sleep(1000);
+				ctxAttr = (CtxAttribute) ctxAttrFut.get();
+				
+			}
+		
+
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ExecutionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (CtxException e) {
+			// TODO Auto-generated catch block
+			//e.printStackTrace();
+			log.error("Unable to read context atribute " + ctxAttribName);
+			
+		}
+
+		if (ctxAttr == null)
+			return null;
+		if(log.isDebugEnabled())
+			log.debug("getContextAtribute End");
+
+		return ctxAttr.getStringValue();
+
+	}
 
 }

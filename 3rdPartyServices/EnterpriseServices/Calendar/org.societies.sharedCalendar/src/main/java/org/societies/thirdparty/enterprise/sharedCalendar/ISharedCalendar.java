@@ -29,6 +29,7 @@ import java.util.List;
 import org.societies.api.ext3p.schema.sharedcalendar.Calendar;
 import org.societies.api.ext3p.schema.sharedcalendar.Event;
 import org.societies.api.identity.IIdentity;
+import org.societies.thirdparty.sharedCalendar.api.UserWarning;
 
 
 
@@ -45,6 +46,7 @@ public interface ISharedCalendar {
 	public static final String VERB_CIS_CALENDAR_CREATED = "CIS Calendar Created";
 	public static final String VERB_CIS_CALENDAR_DELETED = "CIS Calendar Deleted";
 	public static final String VERB_CIS_CALENDAR_EVENT_CREATED = "CIS Calendar Event Created";
+	public static final String VERB_CIS_CALENDAR_EVENT_UPDATED = "CIS Calendar Event Updated";
 	public static final String VERB_CIS_CALENDAR_EVENT_DELETED = "CIS Calendar Deleted";
 	public static final String VERB_CSS_CALENDAR_CREATED = "CSS Calendar Created";
 	public static final String VERB_CSS_CALENDAR_DELETED = "CSS Calendar Deleted";
@@ -79,5 +81,12 @@ public interface ISharedCalendar {
 	public List<Event> findEventsAll(Event searchEvent);
 
 	public List<Event> getMyRecommendedEvents();
+	
+	public List<Calendar> getAllCalendars();
+	
+	/**
+	 * @return
+	 */
+	List<UserWarning> getUserWarnings();
 	
 }
