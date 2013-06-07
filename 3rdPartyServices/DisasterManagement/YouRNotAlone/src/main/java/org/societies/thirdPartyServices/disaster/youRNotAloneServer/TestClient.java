@@ -37,6 +37,7 @@ import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.config.ClientConfig;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
+import com.sun.jersey.api.representation.Form;
 
 
 /**
@@ -48,6 +49,8 @@ import com.sun.jersey.api.client.config.DefaultClientConfig;
 public class TestClient {
 	// server main URL
 	final static String MainURL = "http://157.159.160.188:8080/YouRNotAloneServer";
+//	final static String MainURL = "http://localhost:8080/YouRNotAloneServer";
+	
 	
 //	test for main client functionality 
 	public static void main(String[] args) {
@@ -65,35 +68,40 @@ public class TestClient {
 			System.out.println(r.toString());
 		}
 
-		System.out.println("/nStarting get test ......");
-		//GET Test
-		// Get JSON for application
-		String volunteersXML = getVolunteers(service,MediaType.APPLICATION_XML);
-		System.out.println(volunteersXML);
-		// Get XML for application
-		String volunteersJSON = getVolunteers(service,MediaType.APPLICATION_JSON); 
-		System.out.println(volunteersJSON);
-		// Get the Volunteer with id 6
-		String volunteerXML = getVolunteer(service,"6",MediaType.APPLICATION_XML);
-		System.out.println(volunteerXML);
-		// Get the Volunteer with id 6
-		String volunteerJSON = getVolunteer(service,"6",MediaType.APPLICATION_JSON);
-		System.out.println(volunteerJSON);
-		// Get translators
-		String translator = getTranslator(service,MediaType.APPLICATION_JSON);
-		System.out.println(volunteerJSON);
-		// Get group with expertise
-		// expertise skills are seperated by "&"
-		String groupJSON = getVolunteersByExpertise(service,MediaType.APPLICATION_JSON, "english&Japanese&"); 
-		System.out.println(groupJSON);
-		
+//		System.out.println("/nStarting get test ......");
+//		//GET Test
+//		// Get JSON for application
+//		String volunteersXML = getVolunteers(service,MediaType.APPLICATION_XML);
+//		System.out.println(volunteersXML);
+//		// Get XML for application
+//		String volunteersJSON = getVolunteers(service,MediaType.APPLICATION_JSON); 
+//		System.out.println(volunteersJSON);
+//		// Get the Volunteer with id 6
+//		String volunteerXML = getVolunteer(service,"6",MediaType.APPLICATION_XML);
+//		System.out.println(volunteerXML);
+//		// Get the Volunteer with id 6
+//		String volunteerJSON = getVolunteer(service,"6",MediaType.APPLICATION_JSON);
+//		System.out.println(volunteerJSON);
+//		// Get translators
+//		String translator = getTranslator(service,MediaType.APPLICATION_JSON);
+//		System.out.println(volunteerJSON);
+//		// Get group with expertise
+//		// expertise skills are seperated by "&"
+//		String groupJSON = getVolunteersByExpertise(service,MediaType.APPLICATION_JSON, "internet%20research"); 
+//		System.out.println(groupJSON);
+//		
 		
 
 		//DELETE Test
-		System.out.println("Starting delete test ......");
-		// get Volunteer with id 1
-		String res = deleteVolunteer(service,"1");
-		System.out.println(res);
+//		System.out.println("Starting delete test ......");
+//		// get Volunteer with id 1
+//		System.out.println(deleteVolunteer(service,"1"));
+//		System.out.println(deleteAllVolunteer(service,"1&2&3"));
+		
+//		POST message test
+//		ClientResponse r = postMessage(service,"notification test from Dingqi");
+//		System.out.println(r.getStatus());
+//		System.out.println(r.toString());
 
 	}
 
@@ -130,8 +138,27 @@ public class TestClient {
 
 	}
 	
+	private static String deleteAllVolunteer(WebResource service, String ID){
+		return service.path("rest/volunteers/").path(ID).delete(ClientResponse.class).toString();
+
+	}
+	
 	private static String getTranslator(WebResource service,String type){
 		return service.path("rest").path("/translator")
 				.accept(type).get(String.class);
 	}
+	
+	private static ClientResponse postMessage(WebResource service, String msg){	
+		Form form = new Form();
+	    form.add("msg", msg);
+	    form.add("type", "request");
+	    form.add("tags", "request");
+	    ClientResponse response = service.path("rest").path("/message")
+				.type(MediaType.APPLICATION_FORM_URLENCODED)
+				.post(ClientResponse.class, form);
+		// Return code should be 201 == created resource	
+		return response;
+	}
+	
+	
 }

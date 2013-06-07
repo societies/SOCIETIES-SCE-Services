@@ -1,6 +1,7 @@
 package org.societies.thirdPartyServices.disaster.youRNotAloneServer;
 
 
+import org.societies.thirdPartyServices.disaster.youRNotAlone.model.Messager;
 import org.societies.thirdPartyServices.disaster.youRNotAlone.model.Volunteer;
 
 
@@ -12,6 +13,7 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -46,7 +48,7 @@ public class YouRNotAloneServer {
 		Request request;
 
 
-		// Return the list of todos to the user in the browser
+		// Return the list of volunteers to the user in the browser
 		@GET
 		@Produces(MediaType.TEXT_XML)
 		public List<Volunteer> getVolunteerBrowser() {
@@ -55,19 +57,17 @@ public class YouRNotAloneServer {
 			return volunteers; 
 		}
 		
-		// Return the list of todos for applications
+		// Return the list of volunteers for applications
 		@GET
 		@Produces({MediaType.APPLICATION_XML,MediaType.APPLICATION_JSON})
 		public List<Volunteer> getVolunteer() {
 			List<Volunteer> volunteers = new ArrayList<Volunteer>();
 			volunteers.addAll(YouRNotAloneDAO.instance.getVO().getVolunteers().values());
-			
 			return volunteers; 
 		}
 		
 		
-		// retuns the number of todos
-		// Use http://localhost:8080/de.vogella.jersey.todo/rest/todos/count
+		// retuns the number of volunteers
 		// to get the total number of records
 		@GET
 		@Path("count")
@@ -77,22 +77,51 @@ public class YouRNotAloneServer {
 			return String.valueOf(count);
 		}
 		
+//		return all the translators
 		@GET
 		@Path("translator")
 		@Produces({MediaType.APPLICATION_XML,MediaType.APPLICATION_JSON})
 		public List<Volunteer> getTranslator() {
-			System.out.println(YouRNotAloneDAO.instance.getVO().getTranslator().size());
+//			System.out.println(YouRNotAloneDAO.instance.getVO().getTranslator().size());
 			return YouRNotAloneDAO.instance.getVO().getTranslator();
 		}
 		
+//		return all volunteers by using properties
+		@GET
+		@Path("volunteers")
+		@Produces({MediaType.APPLICATION_XML,MediaType.APPLICATION_JSON})
+		public List<Volunteer> getAllVolunteer(@PathParam("v") String pro) {
+			List<Volunteer> volunteers = new ArrayList<Volunteer>();
+			volunteers.addAll(YouRNotAloneDAO.instance.getVO().getVolunteers().values());
+			return volunteers; 
+		}
+		
+//		return individual volunteers by using properties
 		@GET
 		@Path("volunteers/{v}")
 		@Produces({MediaType.APPLICATION_XML,MediaType.APPLICATION_JSON})
 		public List<Volunteer> getTranslatorByLang(@PathParam("v") String pro) {
-			System.out.println(YouRNotAloneDAO.instance.getVO().getTranslator().size());
+//			System.out.println(YouRNotAloneDAO.instance.getVO().getTranslator().size());
 			ArrayList<String> pros = new ArrayList<String>();
 			Collections.addAll(pros, pro.toLowerCase().split("&"));
 			return YouRNotAloneDAO.instance.getVO().getGroupByProperties(pros);
+		}
+		
+//		delete some/all volunteers
+		@DELETE
+		@Path("volunteers/{v}")
+		@Produces({MediaType.APPLICATION_XML,MediaType.APPLICATION_JSON})
+		public Response deleteAllVolunteers(@PathParam("v") String users) {
+			if(users.equalsIgnoreCase("all"))
+				YouRNotAloneDAO.instance.getVO().deleteAllVolunteers();
+//			System.out.println(YouRNotAloneDAO.instance.getVO().getTranslator().size());
+			ArrayList<String> ids = new ArrayList<String>();
+			Collections.addAll(ids, users.toLowerCase().split("&"));
+			if(ids.size()!=0)
+				for(int i=0;i<ids.size();i++)
+					if(YouRNotAloneDAO.instance.getVO().getVolunteers().containsKey(ids.get(i)))
+						YouRNotAloneDAO.instance.getVO().getVolunteers().remove(ids.get(i));
+			return Response.ok().build();
 		}
 		
 //		@POST
@@ -121,14 +150,18 @@ public class YouRNotAloneServer {
 		// Allows to type http://localhost:8080/de.vogella.jersey.todo/rest/todos/1
 		// 1 will be treaded as parameter todo and passed to TodoResource
 		
-		@Path("{v}")
-		public VolunteerServer getVolunteer(@PathParam("v") String id) {
-			return new VolunteerServer(uriInfo, request, id);
-		}
+//		get individual volunteers by id
+//		@Path("{v}")
+//		public VolunteerServer getVolunteer(@PathParam("v") String id) {
+//			return new VolunteerServer(uriInfo, request, id);
+//		}
 		
 
+//		update volunteers' information
 		@PUT
+		@Path("{v}")
 		@Consumes(MediaType.APPLICATION_XML)
+		@Produces({MediaType.APPLICATION_XML,MediaType.APPLICATION_JSON})
 		public Response putContact(JAXBElement<Volunteer> jaxbVolunteer) {
 			Volunteer c = jaxbVolunteer.getValue();
 			return putAndGetResponse(c);
@@ -140,9 +173,25 @@ public class YouRNotAloneServer {
 			} else {
 				res = Response.created(uriInfo.getAbsolutePath()).build();
 			}
-			YouRNotAloneDAO.instance.getVO().getVolunteers().put(v.getID(), v);
+			System.out.println("update");
+			YouRNotAloneDAO.instance.getVO().addVolunteer(v);
 			return res;
 		} 
+		
+//		update new messages in chat service
+		@POST
+		@Path("message")
+		@Produces(MediaType.TEXT_HTML)
+		@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+		public Response receiveMessage(@FormParam("msg") String msg){
+			System.out.println(msg);
+			Messager messager = new Messager();
+			messager.send(msg, "0", "0");
+			//todo check msg
+			return Response.ok().build();
+		}
+		
+		
 		
 		
 
