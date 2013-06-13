@@ -10,8 +10,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
-import java.util.concurrent.CountDownLatch;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -20,19 +18,13 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.societies.android.api.comms.IMethodCallback;
 import org.societies.android.api.contentproviders.CSSContentProvider;
-import org.societies.android.api.privacytrust.trust.ITrustClientCallback;
-import org.societies.android.api.privacytrust.trust.TrustException;
-import org.societies.android.remote.helper.TrustClientHelper;
-import org.societies.api.schema.identity.RequestorBean;
-import org.societies.api.schema.privacytrust.trust.model.TrustRelationshipBean;
-import org.societies.api.schema.privacytrust.trust.model.TrustedEntityIdBean;
-import org.societies.api.schema.privacytrust.trust.model.TrustedEntityTypeBean;
 
 import si.setcce.societies.android.rest.RestTask;
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.ActivityManager;
+import android.app.ActivityManager.RunningServiceInfo;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -65,7 +57,7 @@ import com.google.zxing.integration.android.IntentResult;
 
 @SuppressLint("SimpleDateFormat")
 public class MainActivity extends Activity implements SensorEventListener {
-	private static final String TEST_ACTION = "si.setcce.societies.android.rest.TEST";
+	//private static final String TEST_ACTION = "si.setcce.societies.android.rest.TEST";
 	private static final String CHECK_IN_OUT = "si.setcce.societies.android.rest.CHECK_IN_OUT";
 	private static final String LOG_EVENT = "si.setcce.societies.android.rest.LOG_EVENT";
 	private static final String GET_MEETING_ACTION = "si.setcce.societies.android.rest.meeting";
@@ -86,22 +78,10 @@ public class MainActivity extends Activity implements SensorEventListener {
 	private float mAccel;			// acceleration apart from gravity
 	private float mAccelCurrent;	// current acceleration including gravity
 	private float mAccelLast;		// last acceleration including gravity
-/*	//CIS MANAGER REMOTE
-    private boolean servCisMgrRemoteConnected = false;
-	private Messenger cisMgrMessenger = null;
-	//CIS SUBSCRIBED REMOTE
-	private boolean servCisSubscribeRemoteConnected = false;
-	private Messenger cisSubscribeMessenger = null;
-	//CIS DIRECTORY REMOTE
-	private boolean servCisDirRemoteConnected = false;
-	private Messenger cisDirMessenger = null;
-	private static final String LOG_TAG = MainActivity.class.getName();*/
 	
 	public MainActivity() {
 	}
 
-	//@SuppressLint("SetJavaScriptEnabled")
-	@SuppressLint("SetJavaScriptEnabled")
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -129,265 +109,24 @@ public class MainActivity extends Activity implements SensorEventListener {
         checkIntent(getIntent());
         CheckUpdateTask checkUpdateTask = new CheckUpdateTask(this);
         checkUpdateTask.execute();
-        //long start = new Date().getTime();
-        System.out.println("CheckTrust before");
         
-        TrustTask task = new TrustTask(this);
-		task.execute();
+        if (isTrustServiceRunning()) {
+            TrustTask task = new TrustTask(this);
+    		task.execute();
+        }
+	}
 
-		//checkTrustClient();
-        System.out.println("CheckTrust after");
+	private boolean isTrustServiceRunning() {
+	    ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+	    for (RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+	    	//System.out.println(service.service.getClassName());
+	        if ("org.societies.android.privacytrust.trust.TrustClientRemote".equals(service.service.getClassName())) {
+	            return true;
+	        }
+	    }
+	    return false;
 	}
 	
-	private void checkTrustClient() {
-		final CountDownLatch latch = new CountDownLatch(1);
-		final RequestorBean requestor = new RequestorBean();
-		requestor.setRequestorId("whatever.setcce.si");
-		final TrustedEntityIdBean trustorId = new TrustedEntityIdBean();
-		trustorId.setEntityId("user1.research.setcce.si");
-		trustorId.setEntityType(TrustedEntityTypeBean.CSS);
-		
-		final TrustClientHelper helper = new TrustClientHelper(getApplicationContext());
-		helper.setUpService(new IMethodCallback() {
-			
-			/*
-			 * @see org.societies.android.api.comms.IMethodCallback#returnException(java.lang.String)
-			 */
-			@Override
-			public void returnException(String exception) {
-				
-			}
-
-			/*
-			 * @see org.societies.android.api.comms.IMethodCallback#returnAction(java.lang.String)
-			 */
-			@Override
-			public void returnAction(String result) {
-				
-			}
-			
-			@Override
-			public void returnAction(boolean resultFlag) {
-				
-				helper.retrieveTrustRelationships(requestor, trustorId, 
-						new ITrustClientCallback() {
-
-					/*
-					 * @see org.societies.android.api.privacytrust.trust.ITrustClientCallback#onAddedDirectTrustEvidence()
-					 */
-					@Override
-					public void onAddedDirectTrustEvidence() {
-						System.out.println("onAddedDirectTrustEvidence");
-						// should not be called!
-					}
-
-					/*
-					 * @see org.societies.android.api.privacytrust.trust.ITrustClientCallback#onException(org.societies.android.api.privacytrust.trust.TrustException)
-					 */
-					@Override
-					public void onException(TrustException exception) {
-						System.out.println("onException");
-						exception.printStackTrace();
-						// should not be called!
-					}
-
-					/*
-					 * @see org.societies.android.api.privacytrust.trust.ITrustClientCallback#onRetrievedTrustRelationship(org.societies.api.schema.privacytrust.trust.model.TrustRelationshipBean)
-					 */
-					@Override
-					public void onRetrievedTrustRelationship(
-							TrustRelationshipBean trustRelationship) {
-						System.out.println("onRetrievedTrustRelationship");
-						// should not be called!
-					}
-
-					/*
-					 * @see org.societies.android.api.privacytrust.trust.ITrustClientCallback#onRetrievedTrustRelationships(java.util.Set)
-					 */
-					@Override
-					public void onRetrievedTrustRelationships(
-							Set<TrustRelationshipBean> trustRelationships) {
-
-						// success!
-						for (final TrustRelationshipBean trustRelationship : trustRelationships) {
-							System.out.println("TrustorId.entityId:"+trustRelationship.getTrustorId().getEntityId());
-							System.out.println("TrustorId.entityType:"+trustRelationship.getTrustorId().getEntityType());
-							System.out.println("TrusteeId.entityId:"+trustRelationship.getTrusteeId().getEntityId());
-							System.out.println("TrusteeId.entityType:"+trustRelationship.getTrusteeId().getEntityType());
-							
-							/*if (TEST_TRUSTEE_ID.equals(trustRelationship.getTrusteeId().getEntityId())
-									&& TrustedEntityTypeBean.CSS.equals(trustRelationship.getTrusteeId().getEntityType()))
-									assertTrue(trustRelationship.getTrustValue() > TEST_TRUST_VALUE_THRESHOLD);*/
-							System.out.println("TrustValueType:"+trustRelationship.getTrustValueType());
-							System.out.println("TrustValue:"+trustRelationship.getTrustValue());
-							
-						}
-						helper.tearDownService(new IMethodCallback() {
-
-							/*
-							 * @see org.societies.android.api.comms.IMethodCallback#returnException(java.lang.String)
-							 */
-							@Override
-							public void returnException(String exception) {
-								System.out.println("returnException");
-							}
-
-							/*
-							 * @see org.societies.android.api.comms.IMethodCallback#returnAction(java.lang.String)
-							 */
-							@Override
-							public void returnAction(String result) {
-								System.out.println("returnAction");
-							}
-
-							/*
-							 * @see org.societies.android.api.comms.IMethodCallback#returnAction(boolean)
-							 */
-							@Override
-							public void returnAction(boolean resultFlag) {
-								System.out.println("returnAction");
-								latch.countDown();
-							}
-						});
-					}
-
-					@Override
-					public void onRetrievedTrustValue(Double trustValue) {
-						System.out.println("onRetrievedTrustValue");
-						// should not be called!
-					}
-				});
-			}
-		});
-		
-		//latch.await(10000, TimeUnit.MILLISECONDS);
-		
-	}
-/*
-	private void checkCISManagerService() {
-		Log.d(LOG_TAG, ">>>>>>>>checkCISManagerService start");
-        //CREATE INTENT FOR CIS MANAGER
-        Intent intentCisMgrRemote = new Intent(this.getApplicationContext(), CisManagerRemote.class);
-        this.getApplicationContext().bindService(intentCisMgrRemote, remoteServiceCisManager, Context.BIND_AUTO_CREATE);
-        //CREATE INTENT FOR CIS SUBSCRIBED
-        Intent intentCisSubscribeRemote = new Intent(this.getApplicationContext(), CisManagerRemote.class);
-        this.getApplicationContext().bindService(intentCisSubscribeRemote, remoteServiceCisSubscribe, Context.BIND_AUTO_CREATE);
-        //CREATE INTENT FOR CIS DIRECTORY
-        Intent intentCisDirRemote = new Intent(this.getApplicationContext(), CisManagerRemote.class);
-        this.getApplicationContext().bindService(intentCisDirRemote, remoteServiceCisDir, Context.BIND_AUTO_CREATE);
-
-        //REGISTER BROADCAST
-        IntentFilter intentFilter = new IntentFilter() ;
-        //CIS Manager
-        intentFilter.addAction(ICisManager.CREATE_CIS);
-        intentFilter.addAction(ICisManager.DELETE_CIS);
-        intentFilter.addAction(ICisManager.GET_CIS_LIST);
-        intentFilter.addAction(ICisManager.JOIN_CIS);
-        //CIS Subscriber
-        intentFilter.addAction(ICisSubscribed.GET_MEMBERS);
-        intentFilter.addAction(ICisSubscribed.GET_ACTIVITY_FEED);
-        intentFilter.addAction(ICisSubscribed.ADD_ACTIVITY);
-        //CIS DIRECTORY
-        intentFilter.addAction(ICisDirectory.FIND_ALL_CIS);
-        intentFilter.addAction(ICisDirectory.FILTER_CIS);
-        intentFilter.addAction(ICisDirectory.FIND_CIS_ID);
-
-        //TEST THE SLM COMPONENT
-        TestRemoteUtility task = new TestRemoteUtility(this);
-        task.execute();
-		Log.d(LOG_TAG, ">>>>>>>>checkCISManagerService end");
-	}
-	
-	private class TestRemoteUtility extends AsyncTask<Void, Void, Void> {
-    	
-    	private Context context;
-    	private final String CLIENT_PACKAGE = "org.societies.android.platform.cis.cistester";
-    	
-    	public TestRemoteUtility(Context context) {
-    		this.context = context;
-    	}
-    	
-    	protected Void doInBackground(Void... args) {
-    		
-    		for (int i=1; i<6; i++) {
-        		Log.d(LOG_TAG, ">>>>>>>>ServiceUtilitiesRemote connected: " + servCisMgrRemoteConnected + "("+i+")");
-	    		if (! servCisMgrRemoteConnected) {
-		    		try {//	WAIT TILL SERVICE IS CONNECTED - OCCURS ASYNCHRONOUSLY
-						Thread.currentThread();
-						Thread.sleep(10 * 1000);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-	    		}
-	    		else break;
-    		}
-    		
-    		if (servCisMgrRemoteConnected) {
-	    		//TEST CIS DIRECTORY REMOTE
-	    		try {
-	    			//TEST: GET ALL CIS ADVERTISEMENTS FROM DIRECTORY
-	    			Log.d(LOG_TAG, "GET ALL CIS ADVERTISEMENTS FROM DIRECTORY");
-	    			String targetMethod = ICisDirectory.methodsArray[0]; // "findAllCisAdvertisementRecords(String client)"
-	        		Message outMessage = Message.obtain(null, ServiceMethodTranslator.getMethodIndex(ICisDirectory.methodsArray, targetMethod), 0, 0);
-	        		Bundle outBundle = new Bundle();
-	        		//PARAMETERS
-	        		outBundle.putString(ServiceMethodTranslator.getMethodParameterName(targetMethod, 0), CLIENT_PACKAGE);
-	        		outMessage.setData(outBundle);	
-	        		cisDirMessenger.send(outMessage);
-				} catch (RemoteException e) {
-					e.printStackTrace();
-				}
-    		} else {
-    			Log.d(LOG_TAG, "Still not connected to servCisMgrRemoteConnected");
-    		}
- 
-    		return null;
-    	}
-    }
-	
-	private ServiceConnection remoteServiceCisManager = new ServiceConnection() {
-		
-		public void onServiceDisconnected(ComponentName name) {
-			servCisMgrRemoteConnected = false;
-        	Log.d(LOG_TAG, "Disconnecting from remoteServiceCisManager");
-			
-		}
-		
-		public void onServiceConnected(ComponentName name, IBinder service) {
-			servCisMgrRemoteConnected = true;
-			cisMgrMessenger = new Messenger(service);
-	    	Log.d(LOG_TAG, "remoteServiceCisManager connected");
-		}
-	};
-
-	private ServiceConnection remoteServiceCisSubscribe = new ServiceConnection() {
-		
-		public void onServiceDisconnected(ComponentName name) {
-			servCisMgrRemoteConnected = false;
-        	Log.d(LOG_TAG, "Disconnecting from remoteServiceCisManager");
-		}
-		
-		public void onServiceConnected(ComponentName name, IBinder service) {
-			servCisMgrRemoteConnected = true;
-			cisMgrMessenger = new Messenger(service);
-	    	Log.d(LOG_TAG, "remoteServiceCisManager connected");
-		}
-	};
-	
-	private ServiceConnection remoteServiceCisDir = new ServiceConnection() {
-		
-		public void onServiceDisconnected(ComponentName name) {
-			servCisDirRemoteConnected = false;
-        	Log.d(LOG_TAG, "Disconnecting from remoteServiceCisDir");
-		}
-		
-		public void onServiceConnected(ComponentName name, IBinder service) {
-			servCisDirRemoteConnected = true;
-			cisDirMessenger = new Messenger(service);
-	    	Log.d(LOG_TAG, "remoteServiceCisDir connected");
-		}
-	};
-*/	
 	@SuppressLint("SetJavaScriptEnabled")
 	private void webViewSetup() {
 		webView = (WebView) findViewById(R.id.webView);
@@ -403,7 +142,7 @@ public class MainActivity extends Activity implements SensorEventListener {
         webView.addJavascriptInterface(new JSInterface(this, webView), "android");
         webView.setWebChromeClient(new WebChromeClient() {
 			public boolean onConsoleMessage(ConsoleMessage cm) {
-				Log.d("Crowd Tasking", cm.message() + 
+				Log.d("Crowd Tasking:", cm.message() + 
 						" -- From line " + cm.lineNumber() 
 						+ " of " + cm.sourceId());
 				return true;
@@ -412,8 +151,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 			@Override
 			public boolean onJsAlert(WebView view, String url, String message,
 					JsResult result) {
-				Toast toast = Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG);
-				toast.show();
+				Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG).show();
 				return false;
 			}
     	});
@@ -442,21 +180,11 @@ public class MainActivity extends Activity implements SensorEventListener {
 	@Override
     public void onResume() {
         super.onResume();
-        registerReceiver(receiver, new IntentFilter(TEST_ACTION));
         registerReceiver(receiver, new IntentFilter(GET_MEETING_ACTION));
         registerReceiver(receiver, new IntentFilter(CHECK_IN_OUT));
         registerReceiver(receiver, new IntentFilter("android.nfc.action.NDEF_DISCOVERED"));
         sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
 
-        /*progress = ProgressDialog.show(this, "Connecting", "Waiting For GAE...", true);
-        
-        try {
-			HttpGet searchRequest = new HttpGet(new URI(APPLICATION_URL));
-			RestTask task = new RestTask(this,TEST_ACTION,"");
-			task.execute(searchRequest);
-		} catch (URISyntaxException e) {
-			e.printStackTrace();
-		}*/
     	if (getIntent().getAction().equalsIgnoreCase(CHECK_IN_OUT)) {
     		String response = getIntent().getStringExtra(RestTask.HTTP_RESPONSE);
     		System.out.println(response);
@@ -481,7 +209,7 @@ public class MainActivity extends Activity implements SensorEventListener {
     @Override
     public void onBackPressed()
     {
-        if(webView.canGoBack()) {
+    	if(webView.canGoBack()) {
         	WebBackForwardList webBackForwardList = webView.copyBackForwardList();
         	//int i = webBackForwardList.getCurrentIndex();
         	String historyUrl = webBackForwardList.getItemAtIndex(webBackForwardList.getCurrentIndex()).getUrl();
@@ -489,14 +217,9 @@ public class MainActivity extends Activity implements SensorEventListener {
         			historyUrl.startsWith(APPLICATION_URL+"/login")) {
         		super.onBackPressed();
         		return;
-        	}/*
-        	if (historyUrl.equalsIgnoreCase(APPLICATION_URL+"/task/new#&ui-state=dialog")) {
-        		// ignore back press from multi select because it clears all fields
-        		//return;
-        	}*/
+        	}
         	if (historyUrl.equalsIgnoreCase(APPLICATION_URL+"/task/new") ||
         			historyUrl.startsWith(APPLICATION_URL+"/community/edit")) {
-        		//webView.loadUrl("javascript:CrowdTaskingApp.cancelTask();");
     			Toast toast = Toast.makeText(getApplicationContext(), "Use Save or Cancel button.", Toast.LENGTH_SHORT);
     			toast.show();
         	}
@@ -530,11 +253,6 @@ public class MainActivity extends Activity implements SensorEventListener {
             	startActivity(startIntent);*/
                 CheckUpdateTask checkUpdateTask = new CheckUpdateTask(this, true);
                 checkUpdateTask.execute();
-            	/*if(checkUpdate.isAlive()){
-            		checkUpdate.interrupt(); 
-            	}
-            	checkUpdate = new CheckUpdate(true);
-            	checkUpdate.start();*/
                 return true;
 
             case R.id.logout:
@@ -550,16 +268,6 @@ public class MainActivity extends Activity implements SensorEventListener {
     }
 	
 	private void checkInOut(String url) {
-    	/*if (resultQR.startsWith("http")) {
-        	webView.loadUrl(resultQR);
-    	}
-    	if (resultQR.startsWith("cs:")) {
-    		webView.loadUrl(resultQR.replaceFirst("cs", "http"));
-    	}
-		if (url.startsWith("cs:")) {
-			url = url.replaceFirst("cs", "http");
-		}*/
-		
 		HttpGet searchRequest;
 		try {
 			searchRequest = new HttpGet(new URI(url));
@@ -593,7 +301,6 @@ public class MainActivity extends Activity implements SensorEventListener {
 					} catch (URISyntaxException e) {
 						Log.e("CT4A", "Can't log event: "+e.getMessage());
 					} catch (UnsupportedEncodingException e) {
-						// TODO Auto-generated catch block
 						Log.e("CT4A", "Can't log event: "+e.getMessage());
 					}
             	}
@@ -602,8 +309,8 @@ public class MainActivity extends Activity implements SensorEventListener {
 	    	if (contents.startsWith("cs:")) {
 	    		checkInOut(contents.replaceFirst("cs", "http"));
 	    	}
-        	//Toast toast = Toast.makeText(getApplicationContext(), R.string.result_succeeded, Toast.LENGTH_SHORT);
-        	//toast.show();
+	    	// TODO: leave this?
+        	Toast.makeText(getApplicationContext(), R.string.result_succeeded, Toast.LENGTH_SHORT).show();
         } else {
         	Toast.makeText(getApplicationContext(), R.string.result_failed, Toast.LENGTH_SHORT).show();
         	Toast.makeText(getApplicationContext(), getString(R.string.result_failed_why), Toast.LENGTH_LONG).show();
@@ -617,23 +324,13 @@ public class MainActivity extends Activity implements SensorEventListener {
 			if (progress != null) {
 				progress.dismiss();
 			}
-        	if (intent.getAction().equalsIgnoreCase(TEST_ACTION)) {
-            	//webView.loadUrl("javascript:window.location.replace('"+startUrl+"')");
-        		if(!webView.canGoBack()) {
-           			webView.loadUrl(APPLICATION_URL+"/menu");
-        		}
-            	if (nfcUrl != null) {
-            		checkInOut(nfcUrl.replaceFirst("cs", "http"));
-					nfcUrl = null;
-            	}
-        	}
         	if (intent.getAction().equalsIgnoreCase(GET_MEETING_ACTION)) {
         		String response = intent.getStringExtra(RestTask.HTTP_RESPONSE);
         		sendMeetingEvent(response);
         	}
         	if (intent.getAction().equalsIgnoreCase(CHECK_IN_OUT)) {
         		String response = intent.getStringExtra(RestTask.HTTP_RESPONSE);
-        		if (!response.startsWith("Check")) {
+        		if (!response.startsWith("Check") && !response.startsWith("You are")) {
         			response = "Please sign in first.";
         		}
         		System.out.println(response);
@@ -657,7 +354,6 @@ public class MainActivity extends Activity implements SensorEventListener {
 			meeting = new JSONObject(meetingJSON);
 			space = meeting.getJSONObject("cs").optString("name");
 		} catch (JSONException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 			return;
 		}
@@ -738,8 +434,6 @@ public class MainActivity extends Activity implements SensorEventListener {
 		}
 		
 		public String loginData() {
-			//final String JS_SETELEMENT = "javascript:document.getElementById('%s').value='%s'";
-
             /*String columns [] = {CSSContentProvider.CssRecord.CSS_RECORD_CSS_IDENTITY,
                     CSSContentProvider.CssRecord.CSS_RECORD_EMAILID,
                     CSSContentProvider.CssRecord.CSS_RECORD_FORENAME,
@@ -750,24 +444,12 @@ public class MainActivity extends Activity implements SensorEventListener {
         		Cursor cursor = context.getContentResolver().query(CSSContentProvider.CssRecord.CONTENT_URI, null, null, null, null);
     	    	cursor.moveToFirst();
 
-    	    	/*toastIt(cursor.getCount());
-    	    	toastIt(cursor.getColumnCount());
-    	    	cursor.moveToFirst();
-    	    	for (int i=0; i<cursor.getColumnCount(); i++) {
-    	    		System.out.println(cursor.getColumnName(i)+": "+cursor.getString(i));
-    	    	}*/
-
         		societiesUser.put("userId", cursor.getString(cursor.getColumnIndex(CSSContentProvider.CssRecord.CSS_RECORD_CSS_IDENTITY)));
         		societiesUser.put("name", cursor.getString(cursor.getColumnIndex(CSSContentProvider.CssRecord.CSS_RECORD_NAME)));
         		societiesUser.put("foreName", cursor.getString(cursor.getColumnIndex(CSSContentProvider.CssRecord.CSS_RECORD_FORENAME)));
         		societiesUser.put("email", cursor.getString(cursor.getColumnIndex(CSSContentProvider.CssRecord.CSS_RECORD_EMAILID)));
         		cursor.close();
         		societiesUser.put("status", "ok");
-        		
-        		/*webView.loadUrl(String.format(JS_SETELEMENT, "userId", cursor.getString(cursor.getColumnIndex(CSSContentProvider.CssRecord.CSS_RECORD_CSS_IDENTITY))));
-    			webView.loadUrl(String.format(JS_SETELEMENT, "name", cursor.getString(cursor.getColumnIndex(CSSContentProvider.CssRecord.CSS_RECORD_NAME))));
-    			webView.loadUrl(String.format(JS_SETELEMENT, "foreName", cursor.getString(cursor.getColumnIndex(CSSContentProvider.CssRecord.CSS_RECORD_FORENAME))));
-    			webView.loadUrl(String.format(JS_SETELEMENT, "email", cursor.getString(cursor.getColumnIndex(CSSContentProvider.CssRecord.CSS_RECORD_EMAILID))));*/
     	    } catch (Exception e) {
     	        e.printStackTrace();
     	        return "";
@@ -852,7 +534,6 @@ public class MainActivity extends Activity implements SensorEventListener {
     		} catch (URISyntaxException e) {
     			e.printStackTrace();
     		}
-
 		}
 		
     	@Override
@@ -871,16 +552,6 @@ public class MainActivity extends Activity implements SensorEventListener {
         		addMeetingToCalendar(url);
         		return true;
         	}
-        	/*System.out.println(String.format("Url: %s",url));
-        	if (url.contains("/rest/")) {
-        		return false;
-        	}
-        	if (url.contains("?")) {
-        		url += "&android=true";
-        	}
-        	else {
-        		url += "?android=true";
-        	}*/
             view.loadUrl(url);
             return false;
         }
@@ -893,14 +564,6 @@ public class MainActivity extends Activity implements SensorEventListener {
             	webView.loadUrl(startUrl);
             	startUrl = APPLICATION_URL+"/menu";
     		}
-        	/*
-        	if (url.contains("/menu")) {
-        		//webView.loadUrl("javascript:$('#androidMenu').show()");
-        		webView.loadUrl("javascript:window.document.getElementById(androidMenu).style.display = 'block';");
-            	webView.loadUrl("javascript:window.location.alert('bu!')");
-        	}*/
-            //view.setInitialScale((int)(25*view.getScale()));
-    		//webView.loadUrl("javascript:bu()");
        }
     }
 }

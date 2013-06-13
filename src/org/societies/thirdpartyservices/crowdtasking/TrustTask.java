@@ -154,7 +154,15 @@ public class TrustTask extends AsyncTask<String, Void, Set<TrustRelationshipBean
 				}
 			};
 			System.out.println("setUpService");
-			helper.setUpService(methodCallBack);
+			try {
+				helper.setUpService(methodCallBack);
+			}
+			catch (Error e) {
+				e.printStackTrace();
+			}
+			catch (Exception e) {
+				e.printStackTrace();
+			}
 			
 			try {
 				System.out.println("waiting");
