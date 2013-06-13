@@ -50,12 +50,10 @@ public class TestUtils {
     private static final Random r = new Random( System.currentTimeMillis() );
 	private static int nrOfPersons;
     private PersonRepository personRepository;
-    private SessionRepository sessionRepository;
-	private ContextSubscriber ctxSub;
+    private ContextSubscriber ctxSub;
     
     public TestUtils(PersonRepository personRepository,  SessionRepository sessionRepository) {
     	this.personRepository = personRepository;
-        this.sessionRepository = sessionRepository;
         ctxSub = new ContextSubscriber(personRepository, sessionRepository);
 	}
     

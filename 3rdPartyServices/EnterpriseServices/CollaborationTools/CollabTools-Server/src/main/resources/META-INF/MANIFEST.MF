@@ -19,12 +19,10 @@ Built-By: cviana
 Tool: Bnd-1.43.0
 Bundle-Name: Collaboration Tools
 Created-By: Apache Maven Bundle Plugin
-Import-Bundle: org.societies.context-management.context-3pbroker-conne
- ctor;version="0.1.0"
 Build-Jdk: 1.7.0_03
 Bundle-Version: 0.1.0
+Bnd-LastModified: 1371134512366
 Embed-Transitive: true
-Bnd-LastModified: 1369849622039
 Bundle-ManifestVersion: 2
 Bundle-Activator: org.societies.enterprise.collabtools.Activator
 Bundle-SymbolicName: org.societies.enterprise.CollabTools
@@ -51,13 +49,12 @@ Import-Package: com.sun.source.tree;resolution:=optional,com.sun.sourc
  l,org.societies.api.context.model;resolution:=optional,org.societies.
  api.identity;resolution:=optional,org.societies.api.schema.servicelif
  ecycle.model;resolution:=optional,org.societies.context.externalBroke
- rConnector;resolution:=optional;version="[0.1,1)",org.societies.enter
- prise.collabtools.api;resolution:=optional;version="[0.1,1)",org.spri
- ngframework.beans.factory.annotation;resolution:=optional,org.springf
- ramework.stereotype;resolution:=optional,org.w3c.dom;resolution:=opti
- onal,org.xml.sax;resolution:=optional,org.xml.sax.ext;resolution:=opt
- ional,org.xml.sax.helpers;resolution:=optional,sun.misc;resolution:=o
- ptional
+ rConnector;version="[0.1,1)",org.societies.enterprise.collabtools.api
+ ;resolution:=optional;version="[0.1,1)",org.springframework.beans.fac
+ tory.annotation;resolution:=optional,org.springframework.stereotype;r
+ esolution:=optional,org.w3c.dom;resolution:=optional,org.xml.sax;reso
+ lution:=optional,org.xml.sax.ext;resolution:=optional,org.xml.sax.hel
+ pers;resolution:=optional,sun.misc;resolution:=optional
 Embed-Dependency: *;scope=compile|runtime
 Originally-Created-By: Apache Maven Bundle Plugin
 

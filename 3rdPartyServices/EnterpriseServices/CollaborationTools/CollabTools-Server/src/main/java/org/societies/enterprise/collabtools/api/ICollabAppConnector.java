@@ -25,7 +25,7 @@
 package org.societies.enterprise.collabtools.api;
 
 /**
- * Setup collaborative application. 0..1
+ * Configuration of collaborative application. 0..1
  *
  * @author cviana
  *
@@ -35,6 +35,10 @@ public interface ICollabAppConnector {
 	public String getAppName();
 	
 	public String getAppServerName();
+	
+	public void setAppName(String app_name);
+	
+	public void setAppServerName(String host);
 	
 	public void setup();
 	

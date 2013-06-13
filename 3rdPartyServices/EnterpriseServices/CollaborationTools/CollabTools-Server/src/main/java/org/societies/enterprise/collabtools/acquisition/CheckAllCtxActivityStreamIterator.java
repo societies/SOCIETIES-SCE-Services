@@ -32,6 +32,7 @@ import java.util.NoSuchElementException;
 
 import org.neo4j.helpers.collection.PositionedIterator;
 
+@Deprecated
 class CheckAllCtxActivityStreamIterator implements Iterator<ShortTermContextUpdates> {
     private ArrayList<PositionedIterator<ShortTermContextUpdates>> ctxUpdates = new ArrayList<PositionedIterator<ShortTermContextUpdates>>();
     private StatusUpdateComparator comparator = new StatusUpdateComparator();

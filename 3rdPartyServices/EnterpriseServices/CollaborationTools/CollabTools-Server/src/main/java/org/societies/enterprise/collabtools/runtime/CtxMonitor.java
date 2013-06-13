@@ -24,18 +24,20 @@
  */
 package org.societies.enterprise.collabtools.runtime;
 
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.societies.enterprise.collabtools.acquisition.LongTermCtxTypes;
 import org.societies.enterprise.collabtools.acquisition.Person;
 import org.societies.enterprise.collabtools.acquisition.PersonRepository;
 import org.societies.enterprise.collabtools.acquisition.ShortTermCtxTypes;
-import org.societies.enterprise.collabtools.interpretation.ContextOperators;
 
 
 /**
@@ -46,18 +48,24 @@ import org.societies.enterprise.collabtools.interpretation.ContextOperators;
  */
 public class CtxMonitor implements Runnable, Observer{
 
-	private ContextOperators conditions;
+	private Engine conditions;
 	private SessionRepository sessionRepository;
 	private static final Logger logger  = LoggerFactory.getLogger(CtxMonitor.class);
 
 	public CtxMonitor (PersonRepository personRepository, SessionRepository sessionRepository) {
-		conditions = new ContextOperators(personRepository, sessionRepository);
+		conditions = new Engine(personRepository, sessionRepository);
 		this.sessionRepository = sessionRepository;
+		
+//		Rule r01 = new Rule("r01",Operators.SAME, ShortTermCtxTypes.LOCATION, "value", 1, 0.5 ,ShortTermCtxTypes.class.getSimpleName());
+//		Rule r02 = new Rule("r02",Operators.SAME, LongTermCtxTypes.COMPANY, "value", 2, 0.1 ,LongTermCtxTypes.class.getSimpleName());
+//		Rule r03 = new Rule("r03",Operators.SAME, LongTermCtxTypes.INTERESTS, "value", 3, 0.4 ,LongTermCtxTypes.class.getSimpleName());
+//		Rule r04 = new Rule("r04",Operators.SAME, ShortTermCtxTypes.STATUS, "value", 4, 0.1 ,ShortTermCtxTypes.class.getSimpleName());
+//		List<Rule> rules = Arrays.asList(r01, r02, r03, r04);
+//		conditions.setRules(rules);
 	}
 
 	public synchronized void run(){
 		logger.info("Checking if people context match");
-
 
 		//First rule: location
 		Hashtable<String, HashSet<Person>> personsSameLocation = conditions.getAllWithSameCtx(ShortTermCtxTypes.LOCATION, ShortTermCtxTypes.class.getSimpleName());
@@ -85,6 +93,7 @@ public class CtxMonitor implements Runnable, Observer{
 				//						Hashtable<String, HashSet<Person>> personsWithSameStatus = conditions.getPersonsWithMatchingShortTermCtx(ShortTermCtxTypes.STATUS, personsWithSameInterests.get(sessionName));
 				//						logger.info("Fourth rule: Status "+personsWithSameStatus.toString());
 
+//				conditions.getMatchingResults();
 				//Check conflict if actual users in the session
 				if (!(personsWithSameInterests.get(sessionName)).isEmpty()) {
 					if (!this.sessionRepository.containSession(sessionName)) {
