@@ -136,6 +136,9 @@
     <Compile Include="Pages\Components\AnswerDisplay.xaml.cs">
       <DependentUpon>AnswerDisplay.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Pages\GameOver.xaml.cs">
+      <DependentUpon>GameOver.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Pages\LoadingPage.xaml.cs">
       <DependentUpon>LoadingPage.xaml</DependentUpon>
     </Compile>
@@ -162,6 +165,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Pages\Components\AnswerDisplay.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Pages\GameOver.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

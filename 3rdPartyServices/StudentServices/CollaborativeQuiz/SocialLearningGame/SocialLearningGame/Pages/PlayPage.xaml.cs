@@ -50,9 +50,6 @@ namespace SocialLearningGame.Pages
         private static readonly Uri correct = new Uri("/SocialLearningGame;component/Resources/yes.png", UriKind.Relative);
         public static readonly double SpeechConfidenceThreshold = 0.7;
 
-        private Category _requestedCategory;
-        private QuestionDifficulty _requestedDifficulty;
-
         // Skeleton tracking vars
         private Skeleton[] allSkeletons = new Skeleton[8]; // NB: this is a class var for memory efficency
         private bool userInCorrectPose;
@@ -64,14 +61,6 @@ namespace SocialLearningGame.Pages
         {
             InitializeComponent();
 
-            _requestedCategory = Category.All;
-            _requestedDifficulty = QuestionDifficulty.Any;
-        }
-
-        #region " Page events "
-
-        private void Page_Loaded(object sender, RoutedEventArgs e)
-        {
             // setup speech
             MainWindow.Instance.SensorChooser.KinectChanged += new EventHandler<Microsoft.Kinect.Toolkit.KinectChangedEventArgs>(SensorChooser_KinectChanged);
 
@@ -83,10 +72,9 @@ namespace SocialLearningGame.Pages
             }
 
             // start the game
+            GameLogic.NewGame();
             NextQuestion();
         }
-
-        #endregion
 
         #region " Kinect events "
 
@@ -234,6 +222,7 @@ namespace SocialLearningGame.Pages
                 }
             }
 
+#if DEBUG
             using (DrawingContext dc = this.drawingGroup.Open())
             {
                 // Draw a transparent background to set the render size
@@ -244,6 +233,7 @@ namespace SocialLearningGame.Pages
                 // prevent drawing outside of our render area
                 this.drawingGroup.ClipGeometry = new RectangleGeometry(new Rect(0.0, 0.0, RenderWidth, RenderHeight));
             }
+#endif
         }
 
         private void UpdatePoseIconBorder()
@@ -745,7 +735,7 @@ namespace SocialLearningGame.Pages
                 return;
             }
 
-            QuestionRound round = GameLogic.NextRound(_requestedCategory, _requestedDifficulty);
+            QuestionRound round = GameLogic.NextQuestion();
 
             if (round.Question == null)
             {
@@ -873,7 +863,7 @@ namespace SocialLearningGame.Pages
             bool correct = (answerIndex == GameLogic.CurrentRound.Question.CorrectAnswer);
 
             var selectionDisplay = new AnswerDisplay(answer, correct);
-            Grid.SetRowSpan(selectionDisplay, 5);
+            Grid.SetRowSpan(selectionDisplay, 6);
             Grid.SetColumnSpan(selectionDisplay, 5);
             this.grid.Children.Add(selectionDisplay);
 
@@ -883,7 +873,8 @@ namespace SocialLearningGame.Pages
 
         private void EndGame()
         {
-            MainWindow.SwitchPage(HomePage.Instance);
+            GameLogic.EndGame();
+            MainWindow.SwitchPage(new GameOver());
         }
 
 

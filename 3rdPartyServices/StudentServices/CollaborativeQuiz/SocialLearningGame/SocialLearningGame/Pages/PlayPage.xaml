@@ -6,7 +6,6 @@
       xmlns:k="http://schemas.microsoft.com/kinect/2013"
       mc:Ignorable="d" 
       d:DesignHeight="600" d:DesignWidth="1000"
-      Loaded="Page_Loaded"
       Title="Quiz">
 
     <Page.Resources>

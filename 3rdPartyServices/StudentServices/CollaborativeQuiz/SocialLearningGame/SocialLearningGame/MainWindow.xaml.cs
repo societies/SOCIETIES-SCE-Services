@@ -31,11 +31,8 @@ using System.Windows.Data;
 using Microsoft.Kinect;
 using Microsoft.Kinect.Toolkit;
 using Microsoft.Kinect.Toolkit.Controls;
-using Microsoft.Speech.AudioFormat;
-using Microsoft.Speech.Recognition;
 using SocialLearningGame.Logic;
 using SocialLearningGame.Pages;
-using SocialLearningGame.Speech;
 
 namespace SocialLearningGame
 {
@@ -178,11 +175,13 @@ namespace SocialLearningGame
 
             sensor.DepthStream.Enable(DepthImageFormat.Resolution640x480Fps30);
 
-            // near mode for debug
-#if DEBUG
             try
             {
+#if DEBUG
+                // near mode for debug
                 sensor.DepthStream.Range = DepthRange.Near;
+#endif
+
                 // NB the skeleton stream is used to track the silhouette of the player on all pages
                 sensor.SkeletonStream.EnableTrackingInNearRange = true;
                 //sensor.SkeletonStream.TrackingMode = SkeletonTrackingMode.Seated;
@@ -196,7 +195,6 @@ namespace SocialLearningGame
                 sensor.SkeletonStream.EnableTrackingInNearRange = false;
                 log.Warn("Error Setting depth range to near mode", ex);
             }
-#endif
         }
 
         private static void UnbindSensor(KinectSensor sensor)
@@ -235,6 +233,17 @@ namespace SocialLearningGame
                 return;
             }
 
+            if (newPage.GetType() == typeof(HomePage)
+                || newPage.GetType() == typeof(LoadingPage)
+                || newPage.GetType() == typeof(CommsError))
+            {
+                _windowInstance.menuButton.Visibility = Visibility.Hidden;
+            }
+            else
+            {
+                _windowInstance.menuButton.Visibility = Visibility.Visible;
+            }
+
             log.Debug("Switching to page " + newPage.GetType().Name);
             _windowInstance.title.Text = newPage.Title;
             _windowInstance._mainFrame.NavigationService.Navigate(newPage);
@@ -269,6 +278,11 @@ namespace SocialLearningGame
                 UnbindSensor(SensorChooser.Kinect);
 
             Environment.Exit(0x00);
+        }
+
+        private void menuButtonClick(object sender, RoutedEventArgs e)
+        {
+            SwitchPage(HomePage.Instance);
         }
 
     }

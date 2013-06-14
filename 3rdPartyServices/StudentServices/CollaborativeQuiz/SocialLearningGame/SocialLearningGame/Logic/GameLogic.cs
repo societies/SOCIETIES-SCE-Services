@@ -51,6 +51,9 @@ namespace SocialLearningGame.Logic
         private static ServerComms _comms;
 
         private static GameSession _gameSession;
+        public static Category RequestedCategory { get; set; }
+        public static QuestionDifficulty RequestedDifficulty { get; set; }
+
 
         private static void InitComms()
         {
@@ -122,15 +125,15 @@ namespace SocialLearningGame.Logic
             return _gameSession;
         }
 
-        public static QuestionRound NextRound(Category category, QuestionDifficulty difficulty)
+        public static QuestionRound NextQuestion()
         {
             log.Debug("Next round...");
 
             QuestionRound round = new QuestionRound();
 
-            round.Question = PickRandomQuestion(category, difficulty);
+            round.Question = PickRandomQuestion(RequestedCategory, RequestedDifficulty);
             log.Debug("round.Question = " + round.Question);
-            round.Category = category;
+            round.Category = RequestedCategory;
             log.Debug("round.Category = " + round.Category);
             round.RoundNumber = CurrentRoundNumber + 1;
             log.Debug("round.RoundNumber = " + round.RoundNumber);
@@ -153,6 +156,13 @@ namespace SocialLearningGame.Logic
 
             return (index == CurrentRound.Question.CorrectAnswer);
         }
+
+        public static void EndGame()
+        {
+            _gameSession.CurrentRound = null;
+            _gameSession.Stage = GameStage.Complete;
+        }
+
 
 
         private static AnswerMethod PickRandomAnswerMethod()
@@ -225,6 +235,8 @@ namespace SocialLearningGame.Logic
             // there's questions available? return a random one
             return availableQuestions[random.Next(availableQuestions.Count)];
         }
+
+
 
         public static int QuestionsInGame { get; set; }
 

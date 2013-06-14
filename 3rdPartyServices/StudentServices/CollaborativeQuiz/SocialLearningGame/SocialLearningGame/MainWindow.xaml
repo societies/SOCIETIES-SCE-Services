@@ -10,7 +10,8 @@
         <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="150" />
-                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="528*" />
+                <ColumnDefinition Width="150*" />
                 <ColumnDefinition Width="150" />
             </Grid.ColumnDefinitions>
 
@@ -25,9 +26,11 @@
                 </Ellipse.Fill>
             </Ellipse>
 
-            <k:KinectCircleButton x:Name="quitButton" Height="100" Width="150" Grid.Row="0" Grid.Column="2" Label="Quit" LabelPosition="Right" Click="exitButtonClick"/>
+            <k:KinectCircleButton Name="menuButton" Height="100" Width="150" Grid.Column="2" Label="Menu" LabelPosition="Right" Click="menuButtonClick"/>
 
-            <Grid Grid.Column="1">
+            <k:KinectCircleButton x:Name="quitButton" Height="100" Width="150" Grid.Column="3" Label="Quit" LabelPosition="Right" Click="exitButtonClick"/>
+
+            <Grid Grid.Column="1" Grid.ColumnSpan="1">
                 <TextBlock Name="title" Text="Social Learning Game" FontSize="36" HorizontalAlignment="Center" VerticalAlignment="Center" />
                 <k:KinectSensorChooserUI HorizontalAlignment="Left" VerticalAlignment="Center" Name="sensorChooserUi" />
             </Grid>
@@ -35,11 +38,10 @@
             <k:KinectUserViewer 
                 k:KinectRegion.KinectRegion="{Binding ElementName=kinectRegion}"
                 Grid.Row="1" Grid.Column="1"
-                HorizontalAlignment="Center" VerticalAlignment="Center" />
+                HorizontalAlignment="Center" VerticalAlignment="Center" Grid.ColumnSpan="2"/>
 
             <Frame x:Name="_mainFrame" NavigationUIVisibility="Hidden" 
-                   BorderBrush="Red" BorderThickness="3"
-                   Grid.Row="1" Grid.Column="1"/>
+                   Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" />
 
         </Grid>
     </k:KinectRegion>
