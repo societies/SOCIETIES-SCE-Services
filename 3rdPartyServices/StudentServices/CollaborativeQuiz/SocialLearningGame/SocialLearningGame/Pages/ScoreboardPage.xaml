@@ -7,7 +7,7 @@
       xmlns:my="clr-namespace:Microsoft.Samples.Kinect.WpfViewers;assembly=Microsoft.Samples.Kinect.WpfViewers"
       mc:Ignorable="d" 
       d:DesignHeight="600" d:DesignWidth="1000"
-      Title="HomePage" Loaded="Window_Loaded" Unloaded="Window_Closing" Height="600" Width="1000">
+      Title="HomePage" Height="600" Width="1000">
 
     <Canvas Background="Transparent" Height="600" VerticalAlignment="Top" Margin="0" Width="1000">
         <TextBlock Height="76" HorizontalAlignment="Left" Margin="353,44,0,0" Name="textBlock1" Text="Scoreboard" VerticalAlignment="Top" Width="304" TextAlignment="Center" FontSize="48" Canvas.Left="-4" Canvas.Top="-4" />

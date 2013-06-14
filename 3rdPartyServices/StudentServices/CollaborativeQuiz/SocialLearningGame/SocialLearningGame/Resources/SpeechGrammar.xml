@@ -1,0 +1,54 @@
+﻿<grammar version="1.0" xml:lang="en-US" root="rootRule" tag-format="semantics/1.0-literals" xmlns="http://www.w3.org/2001/06/grammar">
+  <rule id="rootRule">
+    <one-of>
+      <item>
+        <tag>RED</tag>
+        <one-of>
+          <item> red </item>
+        </one-of>
+      </item>
+      <item>
+        <tag>YELLOW</tag>
+        <one-of>
+          <item> yellow </item>
+        </one-of>
+      </item>
+      <item>
+        <tag>GREEN</tag>
+        <one-of>
+          <item> green </item>
+        </one-of>
+      </item>
+      <item>
+        <tag>BLUE</tag>
+        <one-of>
+          <item> blue </item>
+        </one-of>
+      </item>
+      <item>
+        <tag>ONE</tag>
+        <one-of>
+          <item> one </item>
+        </one-of>
+      </item>
+      <item>
+        <tag>TWO</tag>
+        <one-of>
+          <item> two </item>
+        </one-of>
+      </item>
+      <item>
+        <tag>THREE</tag>
+        <one-of>
+          <item> three </item>
+        </one-of>
+      </item>
+      <item>
+        <tag>FOUR</tag>
+        <one-of>
+          <item> four </item>
+        </one-of>
+      </item>
+    </one-of>
+  </rule>
+</grammar>

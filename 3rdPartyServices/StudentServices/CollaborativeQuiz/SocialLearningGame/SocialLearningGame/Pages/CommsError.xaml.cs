@@ -24,20 +24,28 @@
  */
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.Windows;
+using System.Windows.Controls;
 
-namespace SocialLearningGame
+namespace SocialLearningGame.Pages
 {
-    public class Question
+    /// <summary>
+    /// Interaction logic for NotRegistered.xaml
+    /// </summary>
+    public partial class CommsError : Page
     {
-        public string question { get; set; }
-        public string answer1 { get; set; }
-        public string answer2 { get; set; }
-        public string answer3 { get; set; }
-        public string answer4 { get; set; }
-        public string correctAnswer { get; set; }
-        public string category { get; set; }
+        private static CommsError _instance = new CommsError();
+        public static CommsError Instance { get { return _instance; } }
+
+        private CommsError()
+        {
+            InitializeComponent();
+        }
+
+        private void exitButtonClick(object Sender, RoutedEventArgs e)
+        {
+            Environment.Exit(0x00);
+        }
+
     }
 }

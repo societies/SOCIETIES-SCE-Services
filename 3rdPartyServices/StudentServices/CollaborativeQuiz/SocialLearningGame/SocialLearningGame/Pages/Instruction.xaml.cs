@@ -24,24 +24,13 @@
  */
 
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
 using System.Windows.Shapes;
-using Microsoft.Kinect;
 using Coding4Fun.Kinect.Wpf;
-using Coding4Fun.Kinect;
 using Coding4Fun.Kinect.Wpf.Controls;
-using Microsoft.Samples.Kinect.WpfViewers;
-using System.IO;
+using Microsoft.Kinect;
 
 namespace SocialLearningGame.Pages
 {
@@ -50,6 +39,9 @@ namespace SocialLearningGame.Pages
     /// </summary>
     public partial class Instruction : Page
     {
+        private static Instruction _instance = new Instruction();
+        public static Instruction Instance { get { return _instance; } }
+
         #region variables
         //variables used to detect hand over close button
         private static double _topBoundary;
@@ -64,7 +56,8 @@ namespace SocialLearningGame.Pages
         const int skeletonCount = 6;
         Skeleton[] allSkeletons = new Skeleton[skeletonCount];
         #endregion variables
-        public Instruction()
+
+        private Instruction()
         {
             InitializeComponent();
 
@@ -87,8 +80,8 @@ namespace SocialLearningGame.Pages
         {
             try
             {
-                MainWindow.student.first = 0;
-                this.NavigationService.Navigate(new HomePage());
+                //MainWindow.student.first = 0;
+                MainWindow.SwitchPage(HomePage.Instance);
             }
             catch (InvalidOperationException e2)
             {

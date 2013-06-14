@@ -11,10 +11,12 @@
     <RootNamespace>SocialLearningGame</RootNamespace>
     <AssemblyName>SocialLearningGame</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
-    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
+    <TargetFrameworkProfile>
+    </TargetFrameworkProfile>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <WarningLevel>4</WarningLevel>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
@@ -27,7 +29,6 @@
     <MapFileExtensions>true</MapFileExtensions>
     <ApplicationRevision>0</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
-    <IsWebBootstrapper>false</IsWebBootstrapper>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
@@ -50,21 +51,23 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject>SocialLearningGame.App</StartupObject>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="Coding4Fun.Kinect.Wpf">
       <HintPath>dll\Coding4Fun.Kinect.Wpf.dll</HintPath>
-      <Private>False</Private>
+    </Reference>
+    <Reference Include="log4net, Version=1.2.11.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>dll\log4net.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Expression.Drawing">
       <HintPath>dll\Microsoft.Expression.Drawing.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.Kinect, Version=1.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>C:\Program Files\Microsoft SDKs\Kinect\v1.5\Assemblies\Microsoft.Kinect.dll</HintPath>
-    </Reference>
+    <Reference Include="Microsoft.Kinect, Version=1.7.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
     <Reference Include="Microsoft.Samples.Kinect.WpfViewers">
       <HintPath>dll\Microsoft.Samples.Kinect.WpfViewers.dll</HintPath>
-      <Private>False</Private>
     </Reference>
     <Reference Include="Microsoft.Speech, Version=11.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -96,11 +99,45 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Challenge.cs" />
+    <Compile Include="Comms\ServerComms.cs" />
+    <Compile Include="Entities\Category.cs" />
+    <Compile Include="Entities\QuestionRound.cs" />
+    <Compile Include="Logic\AbstractPose.cs" />
+    <Compile Include="Logic\AnswerMethod.cs" />
+    <Compile Include="Logic\GameSession.cs" />
+    <Compile Include="Entities\Question.cs" />
+    <Compile Include="Entities\User.cs" />
+    <Compile Include="Logic\GameLogic.cs" />
+    <Compile Include="Logic\GameStage.cs" />
+    <Compile Include="Logic\Grammar.cs" />
+    <Compile Include="Logic\Poses\Pose10.cs" />
+    <Compile Include="Logic\Poses\Pose9.cs" />
+    <Compile Include="Logic\Poses\Pose8.cs" />
+    <Compile Include="Logic\Poses\Pose7.cs" />
+    <Compile Include="Logic\Poses\Pose6.cs" />
+    <Compile Include="Logic\Poses\Pose5.cs" />
+    <Compile Include="Logic\Poses\Pose4.cs" />
+    <Compile Include="Logic\Poses\Pose1.cs" />
+    <Compile Include="Logic\Poses\Pose2.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Logic\Poses\Pose3.cs" />
+    <Compile Include="Logic\QuestionDifficulty.cs" />
     <Compile Include="Pages\CategoriesPage.xaml.cs">
       <DependentUpon>CategoriesPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Pages\ChallengePage.xaml.cs">
       <DependentUpon>ChallengePage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\CommsError.xaml.cs">
+      <DependentUpon>CommsError.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Components\KinectHoverButton.cs" />
+    <Compile Include="Pages\Components\AnswerDisplay.xaml.cs">
+      <DependentUpon>AnswerDisplay.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\LoadingPage.xaml.cs">
+      <DependentUpon>LoadingPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Pages\HomePage.xaml.cs">
       <DependentUpon>HomePage.xaml</DependentUpon>
@@ -117,9 +154,21 @@
     <Compile Include="Pages\ScoreboardPage.xaml.cs">
       <DependentUpon>ScoreboardPage.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Question.cs" />
     <Compile Include="SocketClient.cs" />
+    <Compile Include="Speech\SpeechUtils.cs" />
     <Compile Include="Student.cs" />
+    <Page Include="Pages\CommsError.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Pages\Components\AnswerDisplay.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Pages\LoadingPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -175,6 +224,9 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <EmbeddedResource Include="dll\Microsoft.Expression.Drawing.dll" />
+    <EmbeddedResource Include="dll\RestSharp.dll" />
+    <EmbeddedResource Include="dll\ServiceStack.Text.dll" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
@@ -242,11 +294,33 @@
     <Resource Include="Resources\Pose9.png" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="dll\Coding4Fun.Kinect.Wpf.dll" />
-    <EmbeddedResource Include="dll\Microsoft.Expression.Drawing.dll" />
-    <EmbeddedResource Include="dll\Microsoft.Samples.Kinect.WpfViewers.dll" />
-    <EmbeddedResource Include="dll\RestSharp.dll" />
-    <EmbeddedResource Include="dll\ServiceStack.Text.dll" />
+    <Resource Include="Resources\SpeechGrammar.xml" />
+    <EmbeddedResource Include="dll\KinectInteraction170_32.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="dll\KinectInteraction170_64.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="dll\log4net.dll" />
+    <EmbeddedResource Include="dll\Microsoft.Kinect.Toolkit.Controls.dll" />
+    <EmbeddedResource Include="dll\Microsoft.Kinect.Toolkit.dll" />
+    <EmbeddedResource Include="dll\Microsoft.Kinect.Toolkit.Interaction.dll" />
+    <Content Include="Resources\log4net.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadata Include="Service References\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Microsoft.Kinect.Toolkit.Controls\Microsoft.Kinect.Toolkit.Controls.csproj">
+      <Project>{4508C4D1-85BB-4F3F-9E3B-CC93D231C65D}</Project>
+      <Name>Microsoft.Kinect.Toolkit.Controls</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Microsoft.Kinect.Toolkit\Microsoft.Kinect.Toolkit.csproj">
+      <Project>{C6F9C31B-6130-4443-A5CC-EF0664552ECD}</Project>
+      <Name>Microsoft.Kinect.Toolkit</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
