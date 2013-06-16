@@ -41,6 +41,8 @@ public interface IContextAware3pService {
 	
 	public void registerForContextChanges(Object communityId) throws InvalidFormatException;
 	
+	public void unregisterContextChanges(Object communityId) throws InvalidFormatException;
+	
 	public HashMap<String, HashMap<String, String[]>> retrieveLookupMembersCtxAttributes(Object communityId) throws InvalidFormatException;
 
 	public abstract RequestorService getRequestor();

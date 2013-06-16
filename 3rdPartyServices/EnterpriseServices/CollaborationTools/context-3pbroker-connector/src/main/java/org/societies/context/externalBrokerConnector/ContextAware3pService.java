@@ -134,7 +134,7 @@ public class ContextAware3pService implements IContextAware3pService  {
 
 			while(members.hasNext()){
 				CtxEntityIdentifier member = members.next();
-				LOG.info("*** Registering fro context changes member: "+member.toString());
+				LOG.info("*** Registering context changes for member: "+member.toString());
 
 				//TODO: Include here other ctx updates if necessary. For short term context
 				this.ctxBroker.registerForChanges(requestorService, this.myCtxChangeEventListener, member, CtxAttributeTypes.LOCATION_SYMBOLIC);
@@ -155,6 +155,40 @@ public class ContextAware3pService implements IContextAware3pService  {
 		LOG.info("*** registerForContextChanges success");
 	}
 
+	public void unregisterContextChanges(Object communityId) throws InvalidFormatException {
+		//Cast IIdentity for the societies platform
+		IIdentity cisID = idMgr.fromJid(communityId.toString());
+		LOG.info("cisID retrieved: "+ cisID);
+
+		try {
+			CtxEntityIdentifier ctxCommunityEntityIdentifier = this.ctxBroker.retrieveCommunityEntityId(requestorService, cisID).get();
+			LOG.info("communityEntityIdentifier retrieved: " +ctxCommunityEntityIdentifier.toString()+ " based on cisID: "+ cisID);
+			CommunityCtxEntity communityEntity = (CommunityCtxEntity) this.ctxBroker.retrieve(requestorService, ctxCommunityEntityIdentifier).get();
+
+			Set<CtxEntityIdentifier> ctxMembersIDs = communityEntity.getMembers();
+			Iterator<CtxEntityIdentifier> members = ctxMembersIDs.iterator();
+
+			while(members.hasNext()){
+				CtxEntityIdentifier member = members.next();
+				LOG.info("*** Unregistering  context changes for member: "+member.toString());
+
+				//TODO: Include here other ctx updates if necessary. For short term context
+				this.ctxBroker.unregisterFromChanges(requestorService, this.myCtxChangeEventListener, member, CtxAttributeTypes.LOCATION_SYMBOLIC);
+				this.ctxBroker.unregisterFromChanges(requestorService, this.myCtxChangeEventListener, member, CtxAttributeTypes.STATUS);
+//				this.ctxBroker.unregisterFromChanges(requestorService, this.myCtxChangeEventListener, member, CtxAttributeTypes.OCCUPATION);
+//				this.ctxBroker.unregisterFromChanges(requestorService, this.myCtxChangeEventListener, member, CtxAttributeTypes.ADDRESS_WORK_CITY);
+//				this.ctxBroker.unregisterFromChanges(requestorService, this.myCtxChangeEventListener, member, CtxAttributeTypes.ADDRESS_WORK_COUNTRY);
+			}
+		} catch (InterruptedException e1) {
+			e1.printStackTrace();
+		} catch (ExecutionException e1) {
+			e1.printStackTrace();
+		} catch (CtxException e1) {
+			e1.printStackTrace();
+		}
+
+		LOG.info("*** unregisterContextChanges success");
+	}
 
 	@Override
 	public HashMap<String, HashMap<String, String[]>> retrieveLookupMembersCtxAttributes(Object communityId) throws InvalidFormatException{
