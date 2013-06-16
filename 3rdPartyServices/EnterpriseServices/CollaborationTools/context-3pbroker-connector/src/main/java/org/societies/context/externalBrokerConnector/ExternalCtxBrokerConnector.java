@@ -96,6 +96,18 @@ public class ExternalCtxBrokerConnector extends Observable {
 			e.printStackTrace();
 		}
 	}
+	
+	/**
+	 * @param String cisID
+	 */
+	public void unregisterContextChanges(Object cisID) {
+		//registerForContextChanges()
+		try {
+			this.ca3pService.unregisterContextChanges(cisID);
+		} catch (InvalidFormatException e) {
+			e.printStackTrace();
+		}
+	}
 
 
 	private class MyCtxChangeEventListener implements CtxChangeEventListener {
