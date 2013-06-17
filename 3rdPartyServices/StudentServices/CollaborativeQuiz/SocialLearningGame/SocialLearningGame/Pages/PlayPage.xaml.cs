@@ -164,6 +164,10 @@ namespace SocialLearningGame.Pages
 
         private void sensor_SensorSkeletonFrameReady(object sender, SkeletonFrameReadyEventArgs e)
         {
+            if (GameLogic.CurrentRound == null
+                || GameLogic.CurrentRound.RequiredPose == null)
+                return;
+
             //Get a skeleton
             Skeleton firstSkeleton;
             using (SkeletonFrame frame = e.OpenSkeletonFrame())
