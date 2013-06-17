@@ -30,10 +30,8 @@
 
             <k:KinectCircleButton x:Name="quitButton" Height="100" Width="150" Grid.Column="3" Label="Quit" LabelPosition="Right" Click="exitButtonClick"/>
 
-            <Grid Grid.Column="1" Grid.ColumnSpan="1">
-                <TextBlock Name="title" Text="Social Learning Game" FontSize="36" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                <k:KinectSensorChooserUI HorizontalAlignment="Left" VerticalAlignment="Center" Name="sensorChooserUi" />
-            </Grid>
+            <TextBlock Name="title" Text="Social Learning Game" FontSize="36" HorizontalAlignment="Center" VerticalAlignment="Bottom" Grid.Column="1"  />
+            <k:KinectSensorChooserUI HorizontalAlignment="Center" VerticalAlignment="Top" Name="sensorChooserUi" Grid.Column="1" />
 
             <k:KinectUserViewer 
                 k:KinectRegion.KinectRegion="{Binding ElementName=kinectRegion}"

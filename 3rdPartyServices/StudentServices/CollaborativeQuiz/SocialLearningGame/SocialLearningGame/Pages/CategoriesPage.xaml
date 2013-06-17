@@ -3,8 +3,6 @@
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-      xmlns:Controls="clr-namespace:Coding4Fun.Kinect.Wpf.Controls;assembly=Coding4Fun.Kinect.Wpf"
-      xmlns:my="clr-namespace:Microsoft.Samples.Kinect.WpfViewers;assembly=Microsoft.Samples.Kinect.WpfViewers"
       mc:Ignorable="d" 
       d:DesignHeight="600" d:DesignWidth="990"
       Title="HomePage" Height="600" Width="1000">
@@ -17,11 +15,6 @@
         </Grid.ColumnDefinitions>
         <Canvas Background="Transparent" Height="561" VerticalAlignment="Top" Grid.ColumnSpan="2" Margin="0">
             <TextBlock Height="76" HorizontalAlignment="Left" Margin="353,44,0,0" Name="textBlock1" Text="Categories" VerticalAlignment="Top" Width="304" TextAlignment="Center" FontSize="48" Canvas.Left="-4" Canvas.Top="-4" />
-
-            <!-- Home Button -->
-            <Ellipse Name="ellipse1" Height="75" Width="75" Margin="222,172,717,377" Fill="Aqua" Canvas.Left="437" Canvas.Top="-119" />
-            <TextBlock Canvas.Left="624" Canvas.Top="71" Height="45" Name="textBlock2" Text="Home" Width="147" TextAlignment="Center" FontSize="28" />
-            <Controls:HoverButton x:Name="homeButton" ImageSize="100" TimeInterval="1500" Height="75" Width="75" Canvas.Left="659" Canvas.Top="53" />
 
             <!-- Category pictures -->
             <Image Name="GKPic" Source="/SocialLearningGame;component/Resources/GeneralKnowledge.png" Canvas.Left="107" Canvas.Top="160" Height="163" Width="188" />
@@ -40,15 +33,14 @@
                 </Ellipse.Fill>
             </Ellipse>
             <!-- Hover Button controls for the different categories -->
-            <Controls:HoverButton x:Name="generalKnowledgeButton" ImageSize="100" TimeInterval="1500" Height="73" Width="79" Canvas.Left="160" Canvas.Top="200" />
-            <Controls:HoverButton x:Name="courseRelatedButton" ImageSize="100" TimeInterval="1500" Height="73" Width="79" Canvas.Left="349" Canvas.Top="200" />
-            <Controls:HoverButton x:Name="musicButton" ImageSize="100" TimeInterval="1500" Height="73" Width="79" Canvas.Left="537" Canvas.Top="200" />
-            <Controls:HoverButton x:Name="videoGamesButton" ImageSize="100" TimeInterval="1500" Height="73" Width="79" Canvas.Left="739" Canvas.Top="200" />
-            <Controls:HoverButton x:Name="sportsButton" ImageSize="100" TimeInterval="1500" Height="73" Width="79" Canvas.Left="160" Canvas.Top="376" />
-            <Controls:HoverButton x:Name="historyButton" ImageSize="100" TimeInterval="1500" Height="73" Width="79" Canvas.Left="349" Canvas.Top="376" />
-            <Controls:HoverButton x:Name="scienceButton" ImageSize="100" TimeInterval="1500" Height="73" Width="79" Canvas.Left="537" Canvas.Top="376" />
-            <Controls:HoverButton x:Name="technologyButton" ImageSize="100" TimeInterval="1500" Height="73" Width="79" Canvas.Left="739" Canvas.Top="376" />
-            <my:KinectSensorChooser Name="kinectSensorChooser1" Width="693" Height="211" Canvas.Left="183" Canvas.Top="200" />
+            <!--<Controls:HoverButton x:Name="generalKnowledgeButton" ImageSize="100" TimeInterval="1500" Height="73" Width="79" Canvas.Left="160" Canvas.Top="200" />-->
+            <!--<Controls:HoverButton x:Name="courseRelatedButton" ImageSize="100" TimeInterval="1500" Height="73" Width="79" Canvas.Left="349" Canvas.Top="200" />-->
+            <!--<Controls:HoverButton x:Name="musicButton" ImageSize="100" TimeInterval="1500" Height="73" Width="79" Canvas.Left="537" Canvas.Top="200" />-->
+            <!--<Controls:HoverButton x:Name="videoGamesButton" ImageSize="100" TimeInterval="1500" Height="73" Width="79" Canvas.Left="739" Canvas.Top="200" />-->
+            <!--<Controls:HoverButton x:Name="sportsButton" ImageSize="100" TimeInterval="1500" Height="73" Width="79" Canvas.Left="160" Canvas.Top="376" />-->
+            <!--<Controls:HoverButton x:Name="historyButton" ImageSize="100" TimeInterval="1500" Height="73" Width="79" Canvas.Left="349" Canvas.Top="376" />-->
+            <!--<Controls:HoverButton x:Name="scienceButton" ImageSize="100" TimeInterval="1500" Height="73" Width="79" Canvas.Left="537" Canvas.Top="376" />-->
+            <!--<Controls:HoverButton x:Name="technologyButton" ImageSize="100" TimeInterval="1500" Height="73" Width="79" Canvas.Left="739" Canvas.Top="376" />-->
         </Canvas>
     </Grid>
     <Page.Background>

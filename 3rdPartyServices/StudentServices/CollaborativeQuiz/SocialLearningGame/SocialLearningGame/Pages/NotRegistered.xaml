@@ -3,18 +3,11 @@
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-      xmlns:Controls="clr-namespace:Coding4Fun.Kinect.Wpf.Controls;assembly=Coding4Fun.Kinect.Wpf"
-      xmlns:my="clr-namespace:Microsoft.Samples.Kinect.WpfViewers;assembly=Microsoft.Samples.Kinect.WpfViewers"
       mc:Ignorable="d" 
       Height="600" Width="1000"
-      Loaded="Window_Loaded" Unloaded="Window_Closing"
 	  Title="NotRegistered">
 
     <Canvas>
-        <!-- quit button -->
-        <Ellipse x:Name="ellipse5" Height="75" Width="75" Fill="Black" Canvas.Left="623" Canvas.Top="83"/>
-        <Controls:HoverButton x:Name="quitButton" ImageSize="100" TimeInterval="1500" Height="75" Width="75" Canvas.Left="623" Canvas.Top="83" />
-        <TextBlock Canvas.Left="623" Canvas.Top="95" Height="56" Name="textBlock6" Text="Quit" Width="75" Foreground="White" FontSize="32" TextAlignment="Center" />
 
         <!-- Right hand -->
         <Ellipse Height="80" Width="80" Name="RightHand" Canvas.Left="305" Canvas.Top="0" >
@@ -23,7 +16,6 @@
             </Ellipse.Fill>
         </Ellipse>
 
-        <my:KinectSensorChooser Canvas.Left="193" Canvas.Top="203" Name="kinectSensorChooser1" Width="693" Height="211" />
         <TextBlock Canvas.Left="217" Canvas.Top="203" Height="232" Name="textBlock1" Text="You Have Not Registered yet. Please register using the Social Learning Game running on your CSS" Width="633" FontSize="40" TextWrapping="Wrap" TextAlignment="Center" />
     </Canvas>
 
