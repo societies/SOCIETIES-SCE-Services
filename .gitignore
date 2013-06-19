@@ -1,4 +1,5 @@
-
+# IntelliJ Idea files
+.idea/
 # ignore Eclipse workspace files:
 build.properties
 .metadata
