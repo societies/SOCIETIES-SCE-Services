@@ -36,11 +36,11 @@ import org.neo4j.index.impl.lucene.LuceneIndex;
 import org.neo4j.kernel.impl.util.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.societies.enterprise.collabtools.acquisition.ContextSubscriber;
 import org.societies.enterprise.collabtools.acquisition.LongTermCtxTypes;
 import org.societies.enterprise.collabtools.acquisition.PersonRepository;
 import org.societies.enterprise.collabtools.api.ICollabAppConnector;
 import org.societies.enterprise.collabtools.runtime.CollabApps;
-import org.societies.enterprise.collabtools.runtime.CtxMonitor;
 import org.societies.enterprise.collabtools.runtime.SessionRepository;
 
 /**
@@ -98,7 +98,7 @@ public class MainTest {
 		test.deleteSocialGraph();
 		
 //		test.menu();
-		test.createPersons(10); //5 people by default
+		test.createPersons(4); //5 people by default
 		
 //		Creating some updates
 		test.createMockLongTermCtx();
@@ -112,11 +112,7 @@ public class MainTest {
 
 		System.out.println("TestUtils completed" );
 
-		//Find people to create dynamic relationship
-
-//		System.out.println("Starting Context Monitor..." );
-//		new CtxMonitor(personRepository, sessionRepository);
-
+		ContextSubscriber ctxSub = new ContextSubscriber(null, personRepository, sessionRepository);
 		//Creating more updates
 		while (true) {
 			// 5 sec

@@ -24,10 +24,7 @@
  */
 package org.societies.enterprise.collabtools;
 
-import java.io.File;
-import java.net.URL;
 import java.util.ArrayList;
-import java.util.Hashtable;
 import java.util.Random;
 import java.util.ResourceBundle;
 
@@ -41,12 +38,9 @@ import org.neo4j.index.lucene.LuceneIndexProvider;
 import org.neo4j.kernel.ListIndexIterable;
 import org.neo4j.kernel.impl.cache.CacheProvider;
 import org.neo4j.kernel.impl.cache.SoftCacheProvider;
-import org.osgi.application.Framework;
-import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
-import org.osgi.framework.launch.FrameworkFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.societies.enterprise.collabtools.acquisition.ContextSubscriber;
@@ -54,102 +48,112 @@ import org.societies.enterprise.collabtools.acquisition.PersonRepository;
 import org.societies.enterprise.collabtools.api.ICollabAppConnector;
 import org.societies.enterprise.collabtools.api.ICollabApps;
 import org.societies.enterprise.collabtools.api.IContextSubscriber;
+import org.societies.enterprise.collabtools.api.IEngine;
 import org.societies.enterprise.collabtools.runtime.CollabApps;
 import org.societies.enterprise.collabtools.runtime.SessionRepository;
 
 
 public class Activator implements BundleActivator
 {
-	
+
 	private static final Logger logger  = LoggerFactory.getLogger(Activator.class);
- 
-	private static GraphDatabaseService personGraphDb;
-	private static GraphDatabaseService sessionGraphDb;
-    private SessionRepository sessionRepository;
-    private PersonRepository personRepository;
-    
-	private static Index<Node> indexPerson, indexSession, indexShortTermCtx;
-    @SuppressWarnings("rawtypes")
-	private ServiceRegistration serviceRegistration, indexServiceRegistration, ctxSubServiceRegistration, collabAppsRegistration;
-    
-    ContextSubscriber ctxSub;
-    CollabApps collabApps;
- 
-    @Override
-    public void start(BundleContext context) throws Exception
-    {
-//		Bundle bc = context.installBundle("file:context-3pbroker-connector-0.1.0.jar");
-//    	bc.start();
 
-		ResourceBundle rs = ResourceBundle.getBundle("config");
+	private GraphDatabaseService personGraphDb;
+	private GraphDatabaseService sessionGraphDb;
+	private SessionRepository sessionRepository;
+	private PersonRepository personRepository;
+
+	private Index<Node> indexPerson, indexSession, indexShortTermCtx;
+	@SuppressWarnings("rawtypes")
+	private ServiceRegistration ctxSubServiceRegistration, collabAppsRegistration, engineRegistration/*, serviceRegistration, indexServiceRegistration*/;
+
+	ContextSubscriber ctxSub;
+	CollabApps collabApps;
+	ResourceBundle rs;
+
+	@Override
+	public void start(BundleContext context) throws Exception
+	{
+		//Configuration file: config.properties
+		rs = ResourceBundle.getBundle("config"); 
+
+		//comment this for persistence
+		//	    FileUtils.deleteRecursively(new File("databases/PersonsGraphDb"));
+		//	    FileUtils.deleteRecursively(new File("databases/SessionsGraphDb"));
+
+
+		//Apps and server
+		//load a properties file
+		ICollabAppConnector chat = new ChatAppIntegrator(rs.getString("applications"), rs.getString("server"));
+		ICollabAppConnector[] connectorsApp = {chat};
+		this.collabApps = new CollabApps(connectorsApp);
+
+		this.setup();
+
+		this.ctxSub = new ContextSubscriber(this, personRepository, sessionRepository);
+
+		//OSGi registration
+		//        serviceRegistration = context.registerService(GraphDatabaseService.class.getName(), personGraphDb, new Hashtable<String,String>() );
+		//        logger.info("registered " + serviceRegistration.getReference());
+
+		//        sessionGraphDbRegistration = context.registerService(GraphDatabaseService.class.getName(), sessionGraphDb, new Hashtable<String,String>() );
+		//        logger.info("registered " + sessionGraphDbRegistration.getReference());
+
+		//        indexServiceRegistration = context.registerService(Index.class.getName(), indexPerson, new Hashtable<String,String>() );
+
+		ctxSubServiceRegistration =context.registerService(IContextSubscriber.class.getName(), ctxSub, null);
+
+		collabAppsRegistration =context.registerService(ICollabApps.class.getName(), collabApps, null);
 		
-        //cache providers
-        ArrayList<CacheProvider> cacheList = new ArrayList<CacheProvider>();
-        cacheList.add(new SoftCacheProvider());
- 
-        //index providers
-        IndexProvider lucene = new LuceneIndexProvider();
-        ArrayList<IndexProvider> provs = new ArrayList<IndexProvider>();
-        provs.add(lucene);
-        ListIndexIterable providers = new ListIndexIterable();
-        providers.setIndexProviders(provs);
- 
-        //comment this for persistence
-//	    FileUtils.deleteRecursively(new File("databases/PersonsGraphDb"));
-//	    FileUtils.deleteRecursively(new File("databases/SessionsGraphDb"));
-        
-        //database setup
-        logger.info("Database setup");
-        GraphDatabaseFactory gdbf = new GraphDatabaseFactory();
-        gdbf.setIndexProviders(providers);
-        gdbf.setCacheProviders(cacheList);
-        int random = new Random().nextInt(100);
-	    personGraphDb = gdbf.newEmbeddedDatabase(rs.getString("personspath") + random );
-	    sessionGraphDb = gdbf.newEmbeddedDatabase(rs.getString("sessionspath") + random);
-	    indexPerson = personGraphDb.index().forNodes("PersonNodes");
-	    indexSession = sessionGraphDb.index().forNodes("SessionNodes");
-	    indexShortTermCtx = personGraphDb.index().forNodes("CtxNodes");
-        
+		engineRegistration =context.registerService(IEngine.class.getName(), ctxSub.monitor.conditions, null);
 
-	    //Apps and server
-        //load a properties file
-	    ICollabAppConnector chat = new ChatAppIntegrator(rs.getString("applications"), rs.getString("server"));
-	    ICollabAppConnector[] connectorsApp = {chat};
-	    this.collabApps = new CollabApps(connectorsApp);
+	}
 
-        personRepository = new PersonRepository(personGraphDb, indexPerson);
-        sessionRepository = new SessionRepository(sessionGraphDb, indexSession, collabApps);
+	@Override
+	public void stop(BundleContext context) throws Exception
+	{
+		ctxSubServiceRegistration.unregister();
+		collabAppsRegistration.unregister();
+		engineRegistration.unregister();
+		//    	serviceRegistration.unregister();
+		//    	sessionGraphDbRegistration.unregister();
+		//        indexServiceRegistration.unregister();
+		personGraphDb.shutdown();
+		sessionGraphDb.shutdown(); 
+	}
+
+	/**
+	 * 
+	 */
+	public void setup() {
+		//index providers
+		IndexProvider lucene = new LuceneIndexProvider();
+		ArrayList<IndexProvider> provs = new ArrayList<IndexProvider>();
+		provs.add(lucene);
+		ListIndexIterable providers = new ListIndexIterable();
+		providers.setIndexProviders(provs);
+
+		//cache providers
+		ArrayList<CacheProvider> cacheList = new ArrayList<CacheProvider>();
+		cacheList.add(new SoftCacheProvider());
+
+		//database setup
+		logger.info("Database setup...");
+		GraphDatabaseFactory gdbf = new GraphDatabaseFactory();
+		gdbf.setIndexProviders(providers);
+		gdbf.setCacheProviders(cacheList);
+		int random = new Random().nextInt(100);
+		personGraphDb = gdbf.newEmbeddedDatabase(rs.getString("personspath") + random );
+		sessionGraphDb = gdbf.newEmbeddedDatabase(rs.getString("sessionspath") + random);
+		indexPerson = personGraphDb.index().forNodes("PersonNodes");
+		indexSession = sessionGraphDb.index().forNodes("SessionNodes");
+		indexShortTermCtx = personGraphDb.index().forNodes("CtxNodes");
+		
+		personRepository = new PersonRepository(personGraphDb, indexPerson);
+		sessionRepository = new SessionRepository(sessionGraphDb, indexSession, collabApps);
 
 		//Caching last recently used for Location
 		((LuceneIndex<Node>) indexShortTermCtx).setCacheCapacity("name", 3000);
+	}  
 
-        this.ctxSub = new ContextSubscriber(personRepository, sessionRepository);
-
-        //OSGi registration
-        serviceRegistration = context.registerService(GraphDatabaseService.class.getName(), personGraphDb, new Hashtable<String,String>() );
-        logger.info("registered " + serviceRegistration.getReference());
-        
-//        sessionGraphDbRegistration = context.registerService(GraphDatabaseService.class.getName(), sessionGraphDb, new Hashtable<String,String>() );
-//        logger.info("registered " + sessionGraphDbRegistration.getReference());
-        
-        indexServiceRegistration = context.registerService(Index.class.getName(), indexPerson, new Hashtable<String,String>() );
-        
-        ctxSubServiceRegistration =context.registerService(IContextSubscriber.class.getName(), ctxSub, null);
-        
-        collabAppsRegistration =context.registerService(ICollabApps.class.getName(), collabApps, null);
-        
-    }
- 
-    @Override
-    public void stop(BundleContext context) throws Exception
-    {
-    	ctxSubServiceRegistration.unregister();
-    	collabAppsRegistration.unregister();
-    	serviceRegistration.unregister();
-//    	sessionGraphDbRegistration.unregister();
-        indexServiceRegistration.unregister();
-        personGraphDb.shutdown();
-		sessionGraphDb.shutdown(); 
-    }  
- 
 }

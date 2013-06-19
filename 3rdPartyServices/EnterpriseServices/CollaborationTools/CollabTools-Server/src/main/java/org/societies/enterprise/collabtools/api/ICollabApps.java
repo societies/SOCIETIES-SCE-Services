@@ -34,7 +34,7 @@ public interface ICollabApps {
 
 	public abstract ICollabAppConnector[] getCollabAppConnectors();
 
-	public abstract void sendInvite(String member, String[] collabApps, String sessionName);
+	public abstract void sendInvite(String member, String[] collabApps, String sessionName, String string);
 
 	public abstract void sendKick(String member, String[] collabApps, String sessionName);
 

@@ -32,13 +32,16 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.logging.Logger;
 
 import org.hamcrest.CoreMatchers;
 import org.junit.AfterClass;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -99,7 +102,7 @@ public class PersonTest
 	}
 
 	@Test
-	public void addStatusAndRetrieveIt() throws Exception
+	public void addShortCtxAndRetrieveIt() throws Exception
 	{
 		Map<String, String> shortTermCtx = new HashMap<String, String>();
 		for (int i = 0; i < 20; i++) {
@@ -131,7 +134,7 @@ public class PersonTest
 	//    }
 
 	@Test
-	public void multipleStatusesComeOutInTheRightOrder() throws Exception
+	public void multipleShortCtxComeOutInTheRightOrder() throws Exception
 	{
 		ArrayList<String> statuses = new ArrayList<String>();
 		statuses.add( "Test1" );
@@ -174,7 +177,7 @@ public class PersonTest
 	}
 
 	@Test
-	public void retrieveStatusUpdatesInDateOrder() throws Exception
+	public void retrieveShortTermCtxInDateOrder() throws Exception
 	{
 		Person person = getRandomPersonWithFriends();
 		int numberOfStatuses = 20;
@@ -363,10 +366,22 @@ public class PersonTest
 		test.createMockLongTermCtx();
 		test.createMockShortTermCtx();
 
-		ContextSubscriber ctxSub = new ContextSubscriber(personRepository, sessionRepository);
+		ContextSubscriber ctxSub = new ContextSubscriber(null, personRepository, sessionRepository);
 		//format: model type, string ctx value, person
 		String[] arg = {"locationSymbolic","Funfair","person#0"};
 		ctxSub.update(null, arg);
+		
+		Hashtable<String, List<String>> sessionHashtable = ctxSub.getSessions();
+		while (sessionHashtable.keys().hasMoreElements()){
+			String sessionName = sessionHashtable.keys().nextElement();
+			String result = "Session: "+sessionName;
+			result = " Members: "+sessionHashtable.get(sessionName).toString();
+			ctxSub.getSessionLanguage("language");
+			System.out.println(result);
+
+		}
+		
+		Assert.assertNotNull(sessionHashtable);
 	}
 	
     //TODO:

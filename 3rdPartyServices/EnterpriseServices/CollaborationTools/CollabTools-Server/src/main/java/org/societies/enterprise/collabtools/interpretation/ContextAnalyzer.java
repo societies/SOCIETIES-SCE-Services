@@ -171,7 +171,8 @@ public class ContextAnalyzer implements IContextAnalyzer {
 			if (Float.isNaN(finalThreshold)){
 				return initialThreshold;
 			}
-			if (initialThreshold == finalThreshold) {
+			//Because floating point calculations may involve rounding, calculated float and double values may not be accurate
+			if (Math.abs(initialThreshold - finalThreshold) < .0000001) {
 				done = true;
 			}
 			else

@@ -1,12 +1,17 @@
 Manifest-Version: 1.0
-Export-Package: org.societies.enterprise.collabtools;uses:="org.slf4j,
- org.societies.enterprise.collabtools.acquisition,org.osgi.framework,o
- rg.societies.enterprise.collabtools.api,javax.xml.xpath,javax.xml.par
- sers,org.xml.sax";version="0.1.0",org.societies.enterprise.collabtool
- s.api;uses:="org.societies.enterprise.collabtools.acquisition";versio
- n="0.1.0",org.societies.enterprise.collabtools.acquisition;uses:="org
- .slf4j,org.societies.enterprise.collabtools.api,org.osgi.framework,or
- g.societies.context.externalBrokerConnector";version="0.1.0"
+Export-Package: org.societies.enterprise.collabtools;uses:="org.societ
+ ies.enterprise.collabtools.runtime,org.slf4j,org.societies.enterprise
+ .collabtools.acquisition,org.osgi.framework,org.societies.enterprise.
+ collabtools.api,javax.xml.xpath,javax.xml.parsers,org.xml.sax";versio
+ n="0.1.0",org.societies.enterprise.collabtools.api;uses:="org.societi
+ es.enterprise.collabtools.acquisition,org.societies.enterprise.collab
+ tools.runtime";version="0.1.0",org.societies.enterprise.collabtools.a
+ cquisition;uses:="org.societies.enterprise.collabtools.runtime,org.so
+ cieties.enterprise.collabtools,org.slf4j,org.societies.enterprise.col
+ labtools.api,org.osgi.framework,org.societies.context.externalBrokerC
+ onnector";version="0.1.0",org.societies.enterprise.collabtools.runtim
+ e;uses:="org.societies.enterprise.collabtools.api,org.societies.enter
+ prise.collabtools.acquisition,org.slf4j";version="0.1.0"
 Ignore-Package: ch.qos.logback.classic,ch.qos.logback.core,ch.qos.logb
  ack.core.joran.spi,ch.qos.logback.classic.joran
 Bundle-ClassPath: .,neo4j-kernel-1.8.M04.jar,classes,neo4j-graph-algo-
@@ -21,7 +26,7 @@ Bundle-Name: Collaboration Tools
 Created-By: Apache Maven Bundle Plugin
 Build-Jdk: 1.7.0_03
 Bundle-Version: 0.1.0
-Bnd-LastModified: 1371134512366
+Bnd-LastModified: 1371652709756
 Embed-Transitive: true
 Bundle-ManifestVersion: 2
 Bundle-Activator: org.societies.enterprise.collabtools.Activator

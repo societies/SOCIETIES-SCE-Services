@@ -48,7 +48,7 @@ import org.societies.enterprise.collabtools.acquisition.ShortTermCtxTypes;
  */
 public class CtxMonitor implements Runnable, Observer{
 
-	private Engine conditions;
+	public Engine conditions;
 	private SessionRepository sessionRepository;
 	private static final Logger logger  = LoggerFactory.getLogger(CtxMonitor.class);
 
@@ -56,12 +56,12 @@ public class CtxMonitor implements Runnable, Observer{
 		conditions = new Engine(personRepository, sessionRepository);
 		this.sessionRepository = sessionRepository;
 		
-//		Rule r01 = new Rule("r01",Operators.SAME, ShortTermCtxTypes.LOCATION, "value", 1, 0.5 ,ShortTermCtxTypes.class.getSimpleName());
-//		Rule r02 = new Rule("r02",Operators.SAME, LongTermCtxTypes.COMPANY, "value", 2, 0.1 ,LongTermCtxTypes.class.getSimpleName());
-//		Rule r03 = new Rule("r03",Operators.SAME, LongTermCtxTypes.INTERESTS, "value", 3, 0.4 ,LongTermCtxTypes.class.getSimpleName());
-//		Rule r04 = new Rule("r04",Operators.SAME, ShortTermCtxTypes.STATUS, "value", 4, 0.1 ,ShortTermCtxTypes.class.getSimpleName());
-//		List<Rule> rules = Arrays.asList(r01, r02, r03, r04);
-//		conditions.setRules(rules);
+		Rule r01 = new Rule("r01",Operators.SAME, ShortTermCtxTypes.LOCATION, "--", 1, 0.5 ,ShortTermCtxTypes.class.getSimpleName());
+		Rule r02 = new Rule("r02",Operators.SAME, LongTermCtxTypes.COMPANY, "--", 2, 0.1 ,LongTermCtxTypes.class.getSimpleName());
+		Rule r03 = new Rule("r03",Operators.SIMILAR, LongTermCtxTypes.INTERESTS, "--", 3, 0.4 ,LongTermCtxTypes.class.getSimpleName());
+		Rule r04 = new Rule("r04",Operators.SAME, ShortTermCtxTypes.STATUS, "--", 4, 0.1 ,ShortTermCtxTypes.class.getSimpleName());
+		List<Rule> rules = Arrays.asList(r01, r02, r03, r04);
+		conditions.setRules(rules);
 	}
 
 	public synchronized void run(){

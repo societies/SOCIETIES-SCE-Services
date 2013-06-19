@@ -160,7 +160,7 @@ public class PersonRepository
     {
     	List<Person> persons = new ArrayList<Person>();
     	//E.g. LongTermCtxTypes.COMPANY
-    	for ( Node personNode : index.query(property, value) )
+    	for (Node personNode : index.query(property, value))
     	{
     		Person person = new Person(personNode);
     		persons.add(person);
@@ -176,7 +176,7 @@ public class PersonRepository
 //        }
 //        Person person = new Person( personNode );
 //        return person.getInterest(property);
-		return (Person[]) persons.toArray();
+		return persons.toArray(new Person[persons.size()]);
     }
 
     public void deletePerson(Person person)

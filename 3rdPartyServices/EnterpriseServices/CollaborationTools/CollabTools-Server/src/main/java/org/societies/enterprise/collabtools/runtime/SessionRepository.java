@@ -39,6 +39,7 @@ import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.index.Index;
+import org.neo4j.helpers.collection.IterableWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.societies.enterprise.collabtools.acquisition.LongTermCtxTypes;
@@ -58,6 +59,7 @@ public class SessionRepository implements Observer {
 	private final Index<Node> indexSession;
 	private final Node sessionRefNode;
 	private CollabApps collabApps;
+	private String language = "English";
 	private static final Logger logger = LoggerFactory.getLogger(SessionRepository.class);
 
 	public SessionRepository(GraphDatabaseService graphDb, Index<Node> indexSession, CollabApps collabApps)
@@ -98,8 +100,7 @@ public class SessionRepository implements Observer {
 		Node sessionNode = (Node)this.indexSession.get(Session.SESSION, sessionName).getSingle();
 		if (sessionNode == null)
 		{
-			throw new IllegalArgumentException("Session[" + sessionName + 
-					"] not found");
+			throw new IllegalArgumentException("Session[" + sessionName + "] not found");
 		}
 		return new Session(sessionNode, this.collabApps);
 	}
@@ -175,6 +176,10 @@ public class SessionRepository implements Observer {
 			this.indexSession.add(newSessionNode, Session.SESSION, sessionName);
 			tx.success();
 			Session session = new Session(newSessionNode, this.collabApps);
+			
+			//Setting language
+			System.out.println("Setting session language: "+language );
+			session.setLanguage(language);
 
 			logger.info("Session created: " + sessionName);
 			System.out.println("Session created: " + sessionName);
@@ -225,6 +230,27 @@ public class SessionRepository implements Observer {
 			ctxSessionHistory.put(Session.MEMBERS, membersList.toArray(new String[0]));
 			getSessionByName(sessionName).addSessionHistoryStatus(ctxSessionHistory);	
 		}
+	}
+	
+    public Iterable<Session> getAllSessions()
+    {
+        return new IterableWrapper<Session, Relationship>(
+        		sessionRefNode.getRelationships(RelTypes.A_SESSION) )
+        {
+            @Override
+            protected Session underlyingObjectToObject(Relationship sessionRel)
+            {
+                return new Session(sessionRel.getEndNode(), collabApps);
+            }
+        };
+    }
+
+	/**
+	 * @param string language of sessions
+	 */
+	public void setLanguage(String language) {
+		System.out.println("*Setting language: "+language );
+		this.language = language;		
 	}
 
 }

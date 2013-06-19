@@ -27,7 +27,6 @@ package org.societies.enterprise.collabtools.runtime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Hashtable;
@@ -45,6 +44,7 @@ import org.societies.enterprise.collabtools.acquisition.PersonRepository;
 import org.societies.enterprise.collabtools.acquisition.RelTypes;
 import org.societies.enterprise.collabtools.acquisition.ShortTermContextUpdates;
 import org.societies.enterprise.collabtools.acquisition.ShortTermCtxTypes;
+import org.societies.enterprise.collabtools.api.IEngine;
 import org.societies.enterprise.collabtools.interpretation.ContextAnalyzer;
 
 /**
@@ -55,13 +55,13 @@ import org.societies.enterprise.collabtools.interpretation.ContextAnalyzer;
  */
 
 
-public class Engine {
+public class Engine implements IEngine {
 
 	private static Logger log = LoggerFactory.getLogger(Engine.class);
 	public PersonRepository personRepository;
 	public SessionRepository sessionRepository;
 	private Hashtable<String, HashSet<Person>> hashCtxList = new Hashtable<String, HashSet<Person>>(10,10);
-	private final List<Rule> rules = new ArrayList<Rule>();
+	private List<Rule> rules = new ArrayList<Rule>();
 
 	/**
 	 * @param sessionRepository 
@@ -72,21 +72,49 @@ public class Engine {
 		this.personRepository = personRepository;
 		this.sessionRepository = sessionRepository;
 	}
-	
+
+	public synchronized void insertRule(Rule rule){
+		this.rules.add(rule);
+		log.info("insert rule: " + rule);
+
+		//order by priority
+		Collections.sort(this.rules,Collections.reverseOrder());
+	}
+
+	public synchronized void deleteRule(Rule rule){
+		this.rules.remove(rule);
+		log.info("delete rule: " + rule);
+		//order by priority
+		Collections.sort(this.rules,Collections.reverseOrder());
+	}
+
 	/** 
 	 * Handles the initialization 
 	 * 
 	 * @param rules The rules which define the system.
 	 * 
 	 * */
-	void setRules(final Collection<Rule> rules){
+	public synchronized void setRules(final Collection<Rule> rules){
 		for(Rule r : rules){
 			this.rules.add(r);
 			log.info("added rule: " + r);
 		}
 		//order by priority
-	    Collections.sort(this.rules,Collections.reverseOrder());
+		Collections.sort(this.rules,Collections.reverseOrder());
 	}
+
+	/* (non-Javadoc)
+	 * @see org.societies.enterprise.collabtools.runtime.IEngine#getRules()
+	 */
+	@Override
+	public synchronized List<Rule> getRules() {
+		return rules;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.societies.enterprise.collabtools.runtime.IEngine#getMatchingResults()
+	 */
+	@Override
 	public Hashtable<String, HashSet<Person>> getMatchingResults() {
 		log.info("\r\n\r\n*****Evaluating rules...*****");
 		long start = System.currentTimeMillis();
@@ -100,19 +128,16 @@ public class Engine {
 				log.info("matchingRules: " + e.nextElement());
 			}
 		}
-		
+
 		log.info("*****Engine evaluation completed in " + (System.currentTimeMillis()-start) + " ms*****\r\n");
 		return hashCtxList;
-		
+
 	}
 
-	/**
-	 * @param operator Filter operators available in {@link Operators}
-	 * @param ctx Context information 
-	 * @param value Value if wants to compare. Null for SAME or DIFFERENT operators
-	 * @param ctxType Context type. Can be {@link ShortTermCtxTypes} or {@link LongTermCtxTypes}
-	 * @return hashtable of persons
+	/* (non-Javadoc)
+	 * @see org.societies.enterprise.collabtools.runtime.IEngine#evaluateRule(org.societies.enterprise.collabtools.runtime.Operators, java.lang.String, java.lang.String, java.lang.String)
 	 */
+	@Override
 	public Hashtable<String, HashSet<Person>> evaluateRule(Operators operator, final String ctxAttribute, String value, final String ctxType) {
 		HashSet<Person> personHashSet = new HashSet<Person>();
 		for (Person person : personRepository.getAllPersons() ) {
@@ -128,26 +153,26 @@ public class Engine {
 			case DIFFERENT:
 
 			case EQUAL:
-//				if(number == (filterNumber)) return true;
-//				else return false;
+				//				if(number == (filterNumber)) return true;
+				//				else return false;
 			case NOT_EQUAL:
-//				if(number != (filterNumber))  return true;
-//				else return false;
+				//				if(number != (filterNumber))  return true;
+				//				else return false;
 			case GREATER:
-//				if(number > (filterNumber))  return true;
-//				else return false;
+				//				if(number > (filterNumber))  return true;
+				//				else return false;
 			case GREATER_OR_EQUAL:
-//				if(number >= (filterNumber))  return true;
-//				else return false;
+				//				if(number >= (filterNumber))  return true;
+				//				else return false;
 			case LESS:
-//				if(number < (filterNumber))  return true;
-//				else return false;
+				//				if(number < (filterNumber))  return true;
+				//				else return false;
 			case LESS_OR_EQUAL:
-//				if(number <= (filterNumber))  return true;
-//				else return false;
+				//				if(number <= (filterNumber))  return true;
+				//				else return false;
 			}
 			break;
-		//long term
+			//long term
 		case 2:
 			switch (operator){
 			case SAME:
@@ -155,23 +180,23 @@ public class Engine {
 			case DIFFERENT:
 
 			case EQUAL:
-//				if(number == (filterNumber)) return true;
-//				else return false;
+				//				if(number == (filterNumber)) return true;
+				//				else return false;
 			case NOT_EQUAL:
-//				if(number != (filterNumber))  return true;
-//				else return false;
+				//				if(number != (filterNumber))  return true;
+				//				else return false;
 			case GREATER:
-//				if(number > (filterNumber))  return true;
-//				else return false;
+				//				if(number > (filterNumber))  return true;
+				//				else return false;
 			case GREATER_OR_EQUAL:
-//				if(number >= (filterNumber))  return true;
-//				else return false;
+				//				if(number >= (filterNumber))  return true;
+				//				else return false;
 			case LESS:
-//				if(number < (filterNumber))  return true;
-//				else return false;
+				//				if(number < (filterNumber))  return true;
+				//				else return false;
 			case LESS_OR_EQUAL:
-//				if(number <= (filterNumber))  return true;
-//				else return false;
+				//				if(number <= (filterNumber))  return true;
+				//				else return false;
 			}
 			break;
 		}
@@ -179,7 +204,7 @@ public class Engine {
 
 		return null;
 	}
-	
+
 	/**
 	 * @param ctxAtributte Context attribute. The context needs to be short term
 	 * @param hashsetPersons
@@ -220,8 +245,7 @@ public class Engine {
 				temp[count++] = person[j];
 		}
 		log.info("Number of persons with context "+ctxAtributte);
-		Hashtable<String, HashSet<Person>>  hashCtxList = new Hashtable<String, HashSet<Person>>(10,10);
-		hashCtxList = (Hashtable<String, HashSet<Person>>) this.hashCtxList.clone();
+		Hashtable<String, HashSet<Person>> hashCtxList = (Hashtable<String, HashSet<Person>>) this.hashCtxList.clone();
 		return hashCtxList;
 	}
 
@@ -346,8 +370,7 @@ public class Engine {
 			if(hasSameShortTermCtx(statusArray[j], temp, ctxAttribute))
 				temp[count++] = statusArray[j];
 		}
-		Hashtable<String, HashSet<Person>>  hashCtxList = new Hashtable<String, HashSet<Person>>(10,10);
-		hashCtxList = (Hashtable<String, HashSet<Person>>) this.hashCtxList.clone();
+		Hashtable<String, HashSet<Person>>  hashCtxList = (Hashtable<String, HashSet<Person>>) this.hashCtxList.clone();
 		return hashCtxList;
 	}
 

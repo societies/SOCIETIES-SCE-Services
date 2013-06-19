@@ -45,8 +45,9 @@ public interface ICollabAppConnector {
 	/**
 	 * @param user
 	 * @param room
+	 * @param language 
 	 */
-	void join(String user, String room);
+	void join(String user, String room, String language);
 	
 	/**
 	 * @param user

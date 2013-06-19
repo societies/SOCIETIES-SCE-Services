@@ -54,7 +54,7 @@ public class TestUtils {
     
     public TestUtils(PersonRepository personRepository,  SessionRepository sessionRepository) {
     	this.personRepository = personRepository;
-        ctxSub = new ContextSubscriber(personRepository, sessionRepository);
+        ctxSub = new ContextSubscriber(null,personRepository, sessionRepository);
 	}
     
 	public void createPersons(int nrOfPersons) throws Exception

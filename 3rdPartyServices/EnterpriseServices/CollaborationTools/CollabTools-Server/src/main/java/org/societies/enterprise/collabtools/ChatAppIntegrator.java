@@ -100,7 +100,7 @@ public class ChatAppIntegrator implements ICollabAppConnector {
 	 * @see org.societies.enterprise.collabtools.api.ICollabAppIntegrator#join(java.lang.String)
 	 */
 	@Override
-	public void join(String user, String room) {
+	public void join(String user, String room, String language) {
 		muc = new MultiUserChat(this.connection, room+"@conference."+this.host);
 		System.out.println("room: "+room);
 		Collection<HostedRoom> rooms = null;
@@ -128,7 +128,7 @@ public class ChatAppIntegrator implements ICollabAppConnector {
 		            @Override
 		            public void joined(String participant)
 		            {
-		            	joined(participant);
+		            	super.joined(participant);
 		            }
 		        
 		            public void kicked(String participant, String actor, String reason)
@@ -148,8 +148,19 @@ public class ChatAppIntegrator implements ICollabAppConnector {
 				e.printStackTrace();
 			}
 		}
-		//TODO: Change message to inform which context information trigger the event 
-        muc.invite(user+"@"+this.host, "CollabTools is inviting you to join "+room+" room");
+		System.out.println(user+"@"+this.host+ " - CollabTools is inviting you to join "+room+" room");
+		//TODO: Change message to inform which context information trigger the event
+		System.out.println("Languague for chat: "+language);
+		if (language.equalsIgnoreCase("German")) {
+	        muc.invite(user+"@"+this.host, "CollabTools lädt Sie zu "+room+" betreten");
+		}
+		else if (language.equalsIgnoreCase("French")){
+	        muc.invite(user+"@"+this.host, "CollabTools vous invite à rejoindre "+room+" chambre");
+		}
+		else {
+	        muc.invite(user+"@"+this.host, "CollabTools is inviting you to join "+room+" room");
+
+		}
 	}
 
 	/* (non-Javadoc)

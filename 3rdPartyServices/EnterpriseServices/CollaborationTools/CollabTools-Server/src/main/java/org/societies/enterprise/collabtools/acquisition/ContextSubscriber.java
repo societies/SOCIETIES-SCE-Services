@@ -25,18 +25,23 @@
 
 package org.societies.enterprise.collabtools.acquisition;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.societies.enterprise.collabtools.Activator;
 import org.societies.enterprise.collabtools.api.IContextSubscriber;
 import org.societies.enterprise.collabtools.api.IIncrementCtx.EnrichmentTypes;
 import org.societies.enterprise.collabtools.interpretation.ContextAnalyzer;
 import org.societies.enterprise.collabtools.runtime.CtxMonitor;
+import org.societies.enterprise.collabtools.runtime.Session;
 import org.societies.enterprise.collabtools.runtime.SessionRepository;
 
 public class ContextSubscriber implements IContextSubscriber, Observer 
@@ -45,11 +50,13 @@ public class ContextSubscriber implements IContextSubscriber, Observer
 	private PersonRepository personRepository;
 	private SessionRepository sessionRepository;
 	InternalContextConnector ctxConnector;
-	private CtxMonitor monitor;
+	public CtxMonitor monitor;
+	private Activator activator;
 
 
-	public ContextSubscriber(PersonRepository personRepository, SessionRepository sessionRepository)
+	public ContextSubscriber(Activator activator, PersonRepository personRepository, SessionRepository sessionRepository)
 	{
+		this.activator = activator;
 		this.personRepository = personRepository;
 		this.sessionRepository = sessionRepository;
 
@@ -94,14 +101,33 @@ public class ContextSubscriber implements IContextSubscriber, Observer
 			ctxRsn.setupWeightBetweenPeople(person, LongTermCtxTypes.INTERESTS);
 		}
 
-
 		//Registering for ctx changes
-		this.registerForContextChanges(cisID);
-
+		ctxConnector.registerForshortTermCtxUpdates(cisID);
+		
+		//Setting language
+		HashMap<String, String> ctxAttributes = ctxConnector.getCommunityCtx(cisID);
+		if (ctxAttributes != null) {
+			System.out.println("sessionRepository.setLanguage: "+ctxAttributes.get("languages"));
+			sessionRepository.setLanguage(ctxAttributes.get("languages"));
+		}
+		else {
+			sessionRepository.setLanguage("English");
+		}
 		//Starting Context Monitor
 		//        logger.info("Starting Context Monitor..." );
 		//        monitor = new CtxMonitor(personRepository, sessionRepository);
 		//	    monitor.wait();
+	}
+
+	/* (non-Javadoc)
+	 * @see org.societies.enterprise.collabtools.api.IContextSubscriber#stopCtx(java.lang.Object)
+	 */
+	@Override
+	public void stopCtx(Object cisID) {
+		//Unregistering  ctx changes
+		ctxConnector.unregisterForshortTermCtxUpdates(cisID);
+		//Restarting graph database
+		this.activator.setup();
 	}
 
 	public void update(Observable o, Object arg)
@@ -127,9 +153,28 @@ public class ContextSubscriber implements IContextSubscriber, Observer
 		monitor.run();
 	}
 
-	private void registerForContextChanges(Object cisID) {
-		ctxConnector.shortTermCtxUpdates(cisID);
+	public Hashtable<String,List<String>> getSessions() {
+		//Format: session name, members
+		Hashtable<String,List<String>> sessionHashtable = new Hashtable<String,List<String>>();
+		for (Session session : sessionRepository.getAllSessions() ) {
+			List<String> membersList = new ArrayList<String>();
+			Iterator<Person> it = session.getMembers();
+			while (it.hasNext()) {
+				membersList.add(((Person)it.next()).getName());
+			}
+			sessionHashtable.put(session.getSessionName(), membersList);
+			logger.info("Session: "+session.getSessionName());
+			logger.info("Session members: "+membersList.toString());
+		}
+		return sessionHashtable;		
 	}
+	
+	public String getSessionLanguage(String sessionName) {
+		Session session =sessionRepository.getSessionByName(sessionName);
+			logger.info("Session language: "+session.getLanguage(null));
+		return session.getLanguage(Session.LANGUAGE);
+	}
+	
 
 	private void setContext(String type, String[] context, String person) throws Exception {
 		logger.info("******************************* Adding long term context for: " + person + ", " + type + ", " + context[0].toString());

@@ -25,6 +25,7 @@
 package org.societies.enterprise.collabtools.acquisition;
 
 import java.util.HashMap;
+import java.util.Hashtable;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
@@ -42,7 +43,7 @@ import org.societies.enterprise.collabtools.api.IContextConnector;
  */
 public class InternalContextConnector implements IContextConnector {
 
-//	private Logger logger = LoggerFactory.getLogger(this.getClass());
+	private Logger logger = LoggerFactory.getLogger(this.getClass());
 	
 	BundleContext bundleContext = FrameworkUtil.getBundle(this.getClass()).getBundleContext();
 	ServiceReference<?> connectorServiceReference= bundleContext.getServiceReference(ExternalCtxBrokerConnector.class.getName());
@@ -68,8 +69,26 @@ public class InternalContextConnector implements IContextConnector {
 		return persons;
 	}
 	
-	public void shortTermCtxUpdates(Object parameter) {
+	/* (non-Javadoc)
+	 * @see org.societies.enterprise.collabtools.api.IContextConnector#registerForshortTermCtxUpdates(java.lang.Object)
+	 */
+	@Override
+	public void registerForshortTermCtxUpdates(Object parameter) {
 		ctxConnector.registerForContextChanges(parameter);
+	}
+
+
+	/* (non-Javadoc)
+	 * @see org.societies.enterprise.collabtools.api.IContextConnector#unregisterForshortTermCtxUpdates(java.lang.Object)
+	 */
+	@Override
+	public void unregisterForshortTermCtxUpdates(Object parameter) {
+		ctxConnector.unregisterContextChanges(parameter);		
+	}
+	
+	public HashMap<String, String> getCommunityCtx(Object parameter) {
+		return ctxConnector.retrieveCommunityCtxAttributes(parameter);
+		
 	}
 
 	

@@ -44,14 +44,14 @@ public class CollabApps implements ICollabApps
 
 	//member and applications available from this user
 	@Override
-	public void sendInvite(String member, String[] collabApps, String sessionName)
+	public void sendInvite(String member, String[] collabApps, String sessionName, String language)
 	{
 		for (String app : collabApps){
 			for (ICollabAppConnector connector : collabAppsconnectors) {
 				if (connector.getAppName().contains(app)){
 					//TODO:Start invitation
 					System.out.println("Send invitation to member: " + member + " using app " + connector.getAppName());
-					connector.join(member, sessionName);
+					connector.join(member, sessionName, language);
 				}
 				else {				
 					throw new IllegalArgumentException(connector.getAppName()+" application not available");

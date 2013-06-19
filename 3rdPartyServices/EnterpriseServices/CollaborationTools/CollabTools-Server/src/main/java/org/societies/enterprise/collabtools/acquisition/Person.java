@@ -404,11 +404,11 @@ public class Person extends Observable
 	 */
 	private boolean contextHasChanged(final String contextType, String context) {
 		ShortTermContextUpdates ctxStatus= getLastStatus();
+//		if (ctxStatus == null){
+//			return false;
+//			//			throw new IllegalArgumentException("ctxStatus cannot be null!");
+//		}
 		String propValue= ctxStatus.getShortTermCtx(contextType);
-		//    	if (ctxStatus == null){
-		//    		return false;
-		//    		//			throw new IllegalArgumentException("ctxStatus cannot be null!");
-		//    	}
 		//Verify if old context is not empty
 		if (!ctxStatus.getShortTermCtx(contextType).isEmpty()) {
 			//Check old context with new context

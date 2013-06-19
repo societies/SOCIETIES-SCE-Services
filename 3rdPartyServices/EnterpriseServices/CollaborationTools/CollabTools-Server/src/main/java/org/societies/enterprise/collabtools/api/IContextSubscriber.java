@@ -24,6 +24,8 @@
  */
 package org.societies.enterprise.collabtools.api;
 
+import java.util.Hashtable;
+import java.util.List;
 import java.util.Observable;
 
 /**
@@ -35,6 +37,12 @@ import java.util.Observable;
 public interface IContextSubscriber {
 	//Societies integration.... miner
 	public void initialCtx(Object cisID);
+	
+	public void stopCtx(Object cisID);
+	
+	public  String getSessionLanguage(String sessionName);
+	
+	public Hashtable<String,List<String>> getSessions();
 	
 	public void update(Observable o, Object arg);	
 
