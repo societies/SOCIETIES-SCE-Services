@@ -84,6 +84,20 @@ public class ExternalCtxBrokerConnector extends Observable {
 		//TODO: FIX THIS!
 		return null;
 	}
+	
+	/**
+	 * @return retrieveLookupMembersCtxAttributes
+	 * @throws InvalidFormatException 
+	 */
+	public HashMap<String, String> retrieveCommunityCtxAttributes(Object cisID) {
+		try {
+			return this.ca3pService.retrieveCommunityCtxAttributes(cisID);
+		} catch (InvalidFormatException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+	}
 
 	/**
 	 * @param String cisID

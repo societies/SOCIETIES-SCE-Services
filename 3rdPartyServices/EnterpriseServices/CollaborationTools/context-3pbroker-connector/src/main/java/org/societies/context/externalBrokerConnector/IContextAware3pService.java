@@ -51,4 +51,12 @@ public interface IContextAware3pService {
 	 * @param myCtxChangeEventListener
 	 */
 	public abstract void setListener(CtxChangeEventListener myCtxChangeEventListener);
+
+	/**
+	 * @param communityId
+	 * @return Community CtxAttributes
+	 * @throws InvalidFormatException
+	 */
+	HashMap<String, String> retrieveCommunityCtxAttributes(Object communityId)
+			throws InvalidFormatException;
 }

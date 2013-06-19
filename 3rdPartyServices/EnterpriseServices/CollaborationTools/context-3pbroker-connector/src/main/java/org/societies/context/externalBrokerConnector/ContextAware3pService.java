@@ -53,7 +53,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
- * Connector for using Context Broker in SOCIETIES Platform
+ * Connector for using Context Broker in CollabTools
  *
  * @author NikosK and Chris Lima
  *
@@ -115,7 +115,7 @@ public class ContextAware3pService implements IContextAware3pService  {
 
 
 	/**
-	 * This method register for context change events in the context database
+	 * This method register for context events in the context database
 	 * @throws InvalidFormatException 
 	 */
 	@Override
@@ -128,7 +128,7 @@ public class ContextAware3pService implements IContextAware3pService  {
 			CtxEntityIdentifier ctxCommunityEntityIdentifier = this.ctxBroker.retrieveCommunityEntityId(requestorService, cisID).get();
 			LOG.info("communityEntityIdentifier retrieved: " +ctxCommunityEntityIdentifier.toString()+ " based on cisID: "+ cisID);
 			CommunityCtxEntity communityEntity = (CommunityCtxEntity) this.ctxBroker.retrieve(requestorService, ctxCommunityEntityIdentifier).get();
-
+			
 			Set<CtxEntityIdentifier> ctxMembersIDs = communityEntity.getMembers();
 			Iterator<CtxEntityIdentifier> members = ctxMembersIDs.iterator();
 
@@ -155,6 +155,11 @@ public class ContextAware3pService implements IContextAware3pService  {
 		LOG.info("*** registerForContextChanges success");
 	}
 
+	/**
+	 * This method unregister context events in the context database
+	 * @throws InvalidFormatException 
+	 */
+	@Override
 	public void unregisterContextChanges(Object communityId) throws InvalidFormatException {
 		//Cast IIdentity for the societies platform
 		IIdentity cisID = idMgr.fromJid(communityId.toString());
@@ -244,7 +249,7 @@ public class ContextAware3pService implements IContextAware3pService  {
 				String[] strArray = new String[list.size()];
 				othersCtx.put("interests", list.toArray(strArray));
 
-				//Name
+				//Name or ID
 				attribute = retrievedCtxEntity.getAttributes(CtxAttributeTypes.NAME);
 				if (attribute.isEmpty()){
 					throw new NullPointerException("Name of the person cannot be null! ");
@@ -284,6 +289,41 @@ public class ContextAware3pService implements IContextAware3pService  {
 	@Override
 	public RequestorService getRequestor() {
 		return this.requestorService;
+	}
+
+
+	/* (non-Javadoc)
+	 * @see org.societies.context.externalBrokerConnector.IContextAware3pService#retrieveCommunityCtxAttributes(java.lang.Object)
+	 */
+	@Override
+	public HashMap<String, String> retrieveCommunityCtxAttributes(Object communityId) throws InvalidFormatException {
+		//Cast IIdentity for the societies platform
+		IIdentity cisID = idMgr.fromJid(communityId.toString());
+		LOG.info("cisID retrieved for ctx attributes: "+ cisID);
+		HashMap<String, String> results = new HashMap<String, String>();
+		
+		try {
+			CtxEntityIdentifier ctxCommunityEntityIdentifier = this.ctxBroker.retrieveCommunityEntityId(requestorService, cisID).get();
+			LOG.info("communityEntityIdentifier retrieved: " +ctxCommunityEntityIdentifier.toString()+ " based on cisID: "+ cisID);
+			CommunityCtxEntity communityEntity = (CommunityCtxEntity) this.ctxBroker.retrieve(requestorService, ctxCommunityEntityIdentifier).get();
+			
+			Set<CtxAttribute> communityLanguages = communityEntity.getAttributes(CtxAttributeTypes.LANGUAGES);
+			Iterator<CtxAttribute> languagesIterator = communityLanguages.iterator();
+			while(languagesIterator.hasNext()){
+				String ctx = languagesIterator.next().getStringValue();
+				LOG.info("*** Community Languages:"+ctx);
+				results.put(CtxAttributeTypes.LANGUAGES, ctx);
+			}
+
+		} catch (InterruptedException e1) {
+			e1.printStackTrace();
+		} catch (ExecutionException e1) {
+			e1.printStackTrace();
+		} catch (CtxException e1) {
+			e1.printStackTrace();
+		}
+
+		return results;
 	}
 
 }
