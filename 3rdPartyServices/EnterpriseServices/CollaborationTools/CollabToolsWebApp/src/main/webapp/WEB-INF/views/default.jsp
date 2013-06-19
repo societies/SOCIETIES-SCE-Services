@@ -9,10 +9,10 @@
  <script type="text/javascript" src="js/jquery.js"></script>
 
  <script type="text/javascript">
-    function doAjax(input) {
+    function doAjax(input, input2) {
       $.ajax({
         url: 'checkcis.html',
-        data: ({name : input}),
+        data: ({name : input, check : input2}),
         success: function(data) {
           $('#checkcis').html(data);
         }
@@ -45,7 +45,8 @@ Choose a CIS to start CollabTools
 <br>
 
 	<input type="text" id='cisID' size="55" name='msg'>
-	<input type="button" id="demo" onclick="doAjax(document.getElementById('cisID').value)" value="Run CollabTools"/>
+	<input type="button" id="start" onclick="doAjax(document.getElementById('cisID').value, 'start')" value="Run CollabTools"/>
+	<input type="button" id="stop" onclick="doAjax(document.getElementById('cisID').value, 'stop')" value="Stop CollabTools"/>
 
 <br>
 	<div id="checkcis">

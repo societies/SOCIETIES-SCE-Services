@@ -26,7 +26,9 @@ package org.societies.webapp.controller;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 
@@ -37,11 +39,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.societies.api.cis.management.ICis;
 import org.societies.api.cis.management.ICisManager;
+import org.societies.api.context.model.CtxModelType;
 import org.societies.enterprise.collabtools.api.ICollabAppConnector;
 import org.societies.enterprise.collabtools.api.ICollabApps;
 import org.societies.enterprise.collabtools.api.IContextSubscriber;
+import org.societies.enterprise.collabtools.api.IEngine;
+import org.societies.enterprise.collabtools.runtime.Operators;
+import org.societies.enterprise.collabtools.runtime.Rule;
+import org.societies.webapp.model.ContextForm;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.osgi.context.BundleContextAware;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -50,209 +56,268 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
 @Controller
-public class Admin implements BundleContextAware{
-	
+public class Admin {
+
 	private static final Logger logger = LoggerFactory.getLogger(Admin.class);
-	
+
 	@Autowired
 	private ICisManager cisManager;
-	
+
 	/**
-		 * This method get called when user request for login page by using
-		 * url http://localhost:8080/societies/login.html
-		 * @return login jsp page and model object
-		 */
-		@RequestMapping(value="/default.html",method = RequestMethod.GET)
-		public ModelAndView DefaultPage() {
-			//model is nothing but a standard Map object
-			Map<String, Object> model = new HashMap<String, Object>();
-			
-			List<ICis> cisList = new ArrayList<ICis>();
-			cisList = cisManager.getCisList();
-			List<String> cisNames = new ArrayList<String>();
-			List<String> cisIdList = new ArrayList<String>();
-			int size = cisList.size();
-			String result = "<br>"+"There are "+size+" CIS: "+"<br>";
-			result += "<form name=\"radioform\"\" method=\"get\">";
-			for (ICis list : cisList) {   
-				result +="<input type=\"radio\" id=\""+list.getCisId()+"\" name=\"cisIDListRadio\" onClick=\"setText('"+list.getCisId()+"')\" value=\""+list.getCisId()+"\">"+list.getName()+"   - Owner: "+list.getOwnerId()+"<br>";
-				cisNames.add(list.getName());
-				cisIdList.add(list.getCisId());
-			}
-			result += "</form>";
-			model.put("message", result);
-			model.put("cisNames", cisNames);
-			model.put("cisIdList", cisIdList);
+	 * This method get called when user request for login page by using
+	 * url http://localhost:8080/societies/login.html
+	 * @return login jsp page and model object
+	 */
+	@RequestMapping(value="/default.html",method = RequestMethod.GET)
+	public ModelAndView DefaultPage() {
+		//model is nothing but a standard Map object
+		Map<String, Object> model = new HashMap<String, Object>();
 
-			return new ModelAndView("default", model) ;
+		List<ICis> cisList = new ArrayList<ICis>();
+		cisList = cisManager.getCisList();
+		List<String> cisNames = new ArrayList<String>();
+		List<String> cisIdList = new ArrayList<String>();
+		int size = cisList.size();
+		String result = "<br>"+"There are "+size+" CIS: "+"<br>";
+		result += "<form name=\"radioform\"\" method=\"get\">";
+		for (ICis list : cisList) {   
+			result +="<input type=\"radio\" id=\""+list.getCisId()+"\" name=\"cisIDListRadio\" onClick=\"setText('"+list.getCisId()+"')\" value=\""+list.getCisId()+"\">"+list.getName()+"   - Owner: "+list.getOwnerId()+"<br>";
+			cisNames.add(list.getName());
+			cisIdList.add(list.getCisId());
 		}
-		
-		@RequestMapping(value="/index.html",method = RequestMethod.GET)
-		public ModelAndView IndexPage() {
-			//model is nothing but a standard Map object
-			Map<String, Object> model = new HashMap<String, Object>();
-			
-			List<ICis> cisList = new ArrayList<ICis>();
-			cisList = cisManager.getCisList();
-			int size = cisList.size();
-			String result = "<br>"+"There are "+size+" CIS: "+"<br>";
-			for (ICis list : cisList) {   
-				result +="<table><tr><td><B>Name</B></td><td><B>Owner</B></td><td><B>ID</B></td></tr><tr>";
-				result +="<td>"+ list.getName() +"</td>";
-				result +="<td>"+list.getOwnerId()+"</td>";
-				result +="<td>"+list.getCisId()+"</td>";
-			}
-			model.put("message", result);
+		result += "</form>";
+		model.put("message", result);
+		model.put("cisNames", cisNames);
+		model.put("cisIdList", cisIdList);
 
-			return new ModelAndView("index", model) ;
+		return new ModelAndView("default", model) ;
+	}
+
+
+	@RequestMapping(value = "/applications.html", method = RequestMethod.GET)
+	public ModelAndView collabApps() {
+		ICollabAppConnector[] collabAppsConnectors = getCollabAppsConnectors().getCollabAppConnectors();
+		List<String> appnames = new ArrayList<String>();
+		List<String> appserver = new ArrayList<String>();
+		for (ICollabAppConnector apps : collabAppsConnectors){
+			appnames.add(apps.getAppName());
+			appserver.add(apps.getAppServerName());
 		}
-		
-		
-		@RequestMapping(value = "/applications.html", method = RequestMethod.GET)
-		public ModelAndView collabApps() {
-			ICollabAppConnector[] collabAppsConnectors = getCollabAppsConnectors().getCollabAppConnectors();
-			List<String> appnames = new ArrayList<String>();
-			List<String> appserver = new ArrayList<String>();
-			for (ICollabAppConnector apps : collabAppsConnectors){
-				appnames.add(apps.getAppName());
-				appserver.add(apps.getAppServerName());
-			}
-			Map<String, Object> model = new HashMap<String, Object>();
-			model.put("appnames", appnames);
-			model.put("appserver", appserver);
-			return new ModelAndView("applications", model) ;
+		Map<String, Object> model = new HashMap<String, Object>();
+		model.put("appnames", appnames);
+		model.put("appserver", appserver);
+		return new ModelAndView("applications", model) ;
+	}
+
+	@RequestMapping(value = "/checkcis.html", method = RequestMethod.GET)
+	public @ResponseBody String checkCisID(@RequestParam String name, String check) {
+		String result;
+		if (getCtxSubscriber() == null){
+			return result="Collabtools is not running";
 		}
-		
-		@RequestMapping(value = "/checkcis.html", method = RequestMethod.GET)
-		public @ResponseBody String checkCisID(@RequestParam String name) {
-			String result;
-			if (getCtxSubscriber() == null){
-				return result="Collabtools is not running";
-			}
-			if (!name.isEmpty()) {
+		if (!name.isEmpty()) {
+			if (check.equalsIgnoreCase("start")){
 				result = "Started with cisID: "+name;
 				getCtxSubscriber().initialCtx(name);
 			}
 			else {
-				result = "CisID is empty, please check again";
-			}
-			return result;
-		}
-
-		@RequestMapping(value="/test.html",method = RequestMethod.GET)
-		public ModelAndView mobileTest() {
-			//model is nothing but a standard Map object
-			Map<String, Object> model = new HashMap<String, Object>();
-
-			return new ModelAndView("mobile1", model) ;
-		}
-		
-		@RequestMapping(value="/iphone.html",method = RequestMethod.GET)
-		public ModelAndView iphoneTest() {
-			//model is nothing but a standard Map object
-			Map<String, Object> model = new HashMap<String, Object>();
-			List<ICis> cisList = new ArrayList<ICis>();
-			cisList = cisManager.getCisList();
-			int size = cisList.size();
-			String cisname = null;
-			String ownerID = null;
-			String cisID = null;
-			for (ICis list : cisList) {   
-				cisname = list.getName();
-				ownerID = list.getOwnerId();
-				cisID = list.getCisId();
+				result = "Stop cisID: "+name;
+				getCtxSubscriber().stopCtx(name);
 			}
 
-			model.put("cisname", cisname);
-			model.put("ownerID", ownerID);
-			model.put("cisID", cisID);
-			model.put("size", size);
-
-			return new ModelAndView("iphone", model) ;
 		}
+		else {
+			result = "CisID is empty, please check again";
+		}
+		return result;
+	}
+
+	@RequestMapping(value="/iphone.html",method = RequestMethod.GET)
+	public ModelAndView iphoneTest() {
+		//model is nothing but a standard Map object
+		Map<String, Object> model = new HashMap<String, Object>();
+		List<ICis> cisList = new ArrayList<ICis>();
+		cisList = cisManager.getCisList();
+		int size = cisList.size();
+		String cisname = null;
+		String ownerID = null;
+		String cisID = null;
+		for (ICis list : cisList) {   
+			cisname = list.getName();
+			ownerID = list.getOwnerId();
+			cisID = list.getCisId();
+		}
+
+		model.put("cisname", cisname);
+		model.put("ownerID", ownerID);
+		model.put("cisID", cisID);
+		model.put("size", size);
+
+		return new ModelAndView("iphone", model) ;
+	}
+
+	@RequestMapping(value="/android.html",method = RequestMethod.GET)
+	public ModelAndView androidTest() {
+		//model is nothing but a standard Map object
+		Map<String, Object> model = new HashMap<String, Object>();
+
+		return new ModelAndView("android", model) ;
+	}
+
+//	@RequestMapping(value="/notification.html",method = RequestMethod.GET)
+//	public ModelAndView notification() {
+//		//model is nothing but a standard Map object
+//		Map<String, Object> model = new HashMap<String, Object>();
+//		List<String> values = getTypesList(org.societies.api.context.model.CtxAttributeTypes.class);
+//		values.addAll(getTypesList(org.societies.api.internal.context.model.CtxAttributeTypes.class));
+//		model.put("attributeTypes", values);
+//
+//		return new ModelAndView("notification", model) ;
+//	}
+
+	@RequestMapping(value="/rules.html",method = RequestMethod.GET)
+	public ModelAndView Rules() {
+		Map<String, Object> model = new HashMap<String, Object>();
+		model.put("ctxForm", new ContextForm());
+
+		List<String> values1 = getTypesList(org.societies.api.context.model.CtxAttributeTypes.class);
+		values1.addAll(getTypesList(org.societies.api.internal.context.model.CtxAttributeTypes.class));
+		model.put("attributeTypes", values1);
+
+		List<String[]> results = new ArrayList<String[]>();
+		for (Rule rule : getEngine().getRules()) {
+			String[] elements = {rule.getName(), rule.getCtxAttribute(), rule.getOperator().toString(), rule.getCtxType(), Integer.toString(rule.getPriority()), rule.getValue()}; 
+			results.add(elements);
+		}
+
+		model.put("results1", results);
+		model.put("attribute_label", CtxModelType.ATTRIBUTE.name().toString());
+
+		return new ModelAndView("rules", model) ;
+	}
+
+	@RequestMapping(value = "/rulesmanager.html", method = RequestMethod.GET)
+	public @ResponseBody String RulesManager(
+			@RequestParam(value = "value0", required = true) String ruleName, 
+			@RequestParam(value = "value1", required = true) String ctxAttr, 
+			@RequestParam(value = "value2", required = true) Operators operator, 
+			@RequestParam(value = "value3", required = true) String ctxType,
+			@RequestParam(value = "value4", required = true) String priority,
+			@RequestParam(value = "value5", required = true) String value,
+			@RequestParam(value = "value6", required = true) String edit) {
+		logger.info("*** Edit: "+edit);
+		if (edit.equals("delete")) {
+			logger.info("*** Delete");
+			Rule ruleTodelete = null;
+			for (Rule rulesTemp : getEngine().getRules()) {
+				if(rulesTemp.getName().equalsIgnoreCase(ruleName)) {
+					ruleTodelete = rulesTemp;
+				}
+			}
+			getEngine().deleteRule(ruleTodelete);
+		}
+		else {
+			logger.info("*** Insert");
+			Rule newRule = new Rule(ruleName, operator, ctxAttr, value, Integer.parseInt(priority), 0, ctxType);
+			getEngine().insertRule(newRule);
+
+			return (ruleName +" included");
+		}
+		return (ruleName +" deleted");
+	}
+
+
+	/**
+	 * @param class1
+	 * @return
+	 */
+	private List<String> getTypesList(Class<?> name)
+	{
+		logger.info("Extracting parmas from: " + name.getCanonicalName());
+		Field[] fields = name.getDeclaredFields();
+		List<String> results = new ArrayList<String>();
+		for (Field field : fields)
+		{
+			try
+			{
+				logger.info("add " + field.get(null));
+				String field_string = "" + field.get(null);
+				results.add(field_string);
+			} catch (IllegalArgumentException e) {
+				logger.error("Error casting to String:" + e.getLocalizedMessage());
+				e.printStackTrace();
+			} catch (IllegalAccessException e) {
+				logger.error("Error casting to String:" + e.getLocalizedMessage());
+				e.printStackTrace();
+			}
+
+			logger.info("add fields " + field.getName());
+		}
+
+		logger.info(" Return " + results.size() + "elements");
+		return results;
+	}
+
+	public IContextSubscriber getCtxSubscriber(){
+		BundleContext bc = FrameworkUtil.getBundle(this.getClass()).getBundleContext();
+		ServiceReference<?> ref= bc.getServiceReference(IContextSubscriber.class.getName());
+		return (IContextSubscriber)bc.getService(ref);
+	}
+
+	public ICollabApps getCollabAppsConnectors(){
+		BundleContext bc = FrameworkUtil.getBundle(this.getClass()).getBundleContext();
+		ServiceReference<?> ref= bc.getServiceReference(ICollabApps.class.getName());
+		return (ICollabApps)bc.getService(ref);
+	}
+
+	public IEngine getEngine(){
+		BundleContext bc = FrameworkUtil.getBundle(this.getClass()).getBundleContext();
+		ServiceReference<?> ref= bc.getServiceReference(IEngine.class.getName());
+		return (IEngine)bc.getService(ref);
+	}
+
+	@RequestMapping(value = "/setcollabapps.html", method = RequestMethod.GET)
+	public @ResponseBody String setCollabAppsConnectors(@RequestParam String app, String server) {
+		ICollabAppConnector[] collabAppsConnectors = getCollabAppsConnectors().getCollabAppConnectors();
+		for (ICollabAppConnector apps : collabAppsConnectors){
+			if (apps.getAppName().equalsIgnoreCase(app)){
+				apps.setAppServerName(server);
+			}
+			//Restarting server
+			apps.setup();
+		}
+		return app+"change to server: "+server;
+	}
+
+//	@RequestMapping(value = "/getnotifications.html", method = RequestMethod.GET)
+//	public @ResponseBody  String getNotification() {
+//		Hashtable<String,List<String>> sessionHashtable = getCtxSubscriber().getSessions();
+//		String result = "No Sessions at the moment";
+//		Enumeration<String> enumKey = sessionHashtable.keys();
+//		while(enumKey.hasMoreElements()) {
+//			String sessionName = enumKey.nextElement();
+//			result = "Session: "+sessionName+"<br>";
+//			result += " - Members: "+sessionHashtable.get(sessionName).toString()+"<br>";
+//			result += " - Language: "+getCtxSubscriber().getSessionLanguage(sessionName);
+//			result +="<br>";
+//		}
+//		return result ;
+//	}
+	
+	@RequestMapping(value="/notification.html",method = RequestMethod.GET)
+	public ModelAndView getNotification() {
+		Map<String, Object> model = new HashMap<String, Object>();
+		Hashtable<String,List<String>> sessionHashtable = getCtxSubscriber().getSessions();
+		List<String[]> results = new ArrayList<String[]>();
+		Enumeration<String> enumKey = sessionHashtable.keys();
 		
-		@RequestMapping(value="/android.html",method = RequestMethod.GET)
-		public ModelAndView androidTest() {
-			//model is nothing but a standard Map object
-			Map<String, Object> model = new HashMap<String, Object>();
-
-			return new ModelAndView("android", model) ;
+		while(enumKey.hasMoreElements()) {
+			String sessionName = enumKey.nextElement();
+			String[] elements = {sessionName, sessionHashtable.get(sessionName).toString(), getCtxSubscriber().getSessionLanguage(sessionName)}; 
+			results.add(elements);
 		}
-		
-		@RequestMapping(value="/notification.html",method = RequestMethod.GET)
-		public ModelAndView notificationTest() {
-			//model is nothing but a standard Map object
-			Map<String, Object> model = new HashMap<String, Object>();
-		    List<String> values = getTypesList(org.societies.api.context.model.CtxAttributeTypes.class);
-		    values.addAll(getTypesList(org.societies.api.internal.context.model.CtxAttributeTypes.class));
-		    model.put("attributeTypes", values);
+		model.put("results", results);
+		return new ModelAndView("notification", model) ;
+	}
 
-			return new ModelAndView("notification", model) ;
-		}
-
-
-		/**
-		 * @param class1
-		 * @return
-		 */
-		  private List<String> getTypesList(Class<?> name)
-		  {
-		    logger.info("Extracting parmas from: " + name.getCanonicalName());
-		    Field[] fields = name.getDeclaredFields();
-		    List<String> results = new ArrayList<String>();
-		    for (Field field : fields)
-		    {
-		      try
-		      {
-		        logger.info("add " + field.get(null));
-		        String field_string = "" + field.get(null);
-		        results.add(field_string);
-		      } catch (IllegalArgumentException e) {
-		        logger.error("Error casting to String:" + e.getLocalizedMessage());
-		        e.printStackTrace();
-		      } catch (IllegalAccessException e) {
-		        logger.error("Error casting to String:" + e.getLocalizedMessage());
-		        e.printStackTrace();
-		      }
-
-		      logger.info("add fields " + field.getName());
-		    }
-
-		    logger.info(" Return " + results.size() + "elements");
-		    return results;
-		  }
-
-		/* (non-Javadoc)
-		 * @see org.springframework.osgi.context.BundleContextAware#setBundleContext(org.osgi.framework.BundleContext)
-		 */
-		@Override
-		public void setBundleContext(BundleContext bundleContext) {
-			// TODO Auto-generated method stub
-//			this.context = bundleContext;
-//			ServiceReference ref= bundleContext.getServiceReference(Activator.class.getName());
-//			connector =(ExternalCtxBrokerConnector)bundleContext.getService(ref);			
-		}
-		
-		public IContextSubscriber getCtxSubscriber(){
-			BundleContext bc = FrameworkUtil.getBundle(this.getClass()).getBundleContext();
-			ServiceReference<?> ref= bc.getServiceReference(IContextSubscriber.class.getName());
-			return (IContextSubscriber)bc.getService(ref);
-		}
-		
-		public ICollabApps getCollabAppsConnectors(){
-			BundleContext bc = FrameworkUtil.getBundle(this.getClass()).getBundleContext();
-			ServiceReference<?> ref= bc.getServiceReference(ICollabApps.class.getName());
-			return (ICollabApps)bc.getService(ref);
-		}
-		
-		@RequestMapping(value = "/setcollabapps.html", method = RequestMethod.GET)
-		public @ResponseBody String setCollabAppsConnectors(@RequestParam String name) {
-			BundleContext bc = FrameworkUtil.getBundle(this.getClass()).getBundleContext();
-			ServiceReference<?> ref= bc.getServiceReference(ICollabApps.class.getName());
-			ICollabApps collabApps = (ICollabApps)bc.getService(ref);
-			//TODO:
-			collabApps.toString();
-			return name;
-		}
-		 
 }
