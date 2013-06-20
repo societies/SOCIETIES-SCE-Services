@@ -43,28 +43,6 @@
         <url-pattern>*.xhtml</url-pattern>
     </servlet-mapping>
 
-    <!-- PrimeFaces push servlet -->
-    <!--<servlet>
-        <servlet-name>Push Servlet</servlet-name>
-        <servlet-class>org.primefaces.push.PushServlet</servlet-class>
-    </servlet>
-
-    <servlet-mapping>
-        <servlet-name>Push Servlet</servlet-name>
-        <url-pattern>/primepush/*</url-pattern>
-    </servlet-mapping>-->
-
-    <!--<servlet>
-        <servlet-name>AtmosphereServlet</servlet-name>
-        <servlet-class>org.atmosphere.weblogic.AtmosphereWebLogicServlet</servlet-class>
-    </servlet>
-
-    <servlet-mapping>
-        <servlet-name>AtmosphereServlet</servlet-name>
-        <url-pattern>/*</url-pattern>
-    </servlet-mapping>-->
-
-
     <context-param>
         <param-name>contextConfigLocation</param-name>
         <param-value>/WEB-INF/applicationContext.xml</param-value>
@@ -82,17 +60,19 @@
         <listener-class>org.springframework.web.context.request.RequestContextListener</listener-class>
     </listener>
 
+    <!-- Restlet adapter -->
+    <servlet>
+        <servlet-name>RestletServlet</servlet-name>
+        <servlet-class>org.restlet.ext.servlet.ServerServlet</servlet-class>
+    </servlet>
 
-    <!--   <servlet>
-           <servlet-name>CollabQuizServer</servlet-name>
-           <servlet-class>uk.ac.hw.services.collabquiz.CollabQuizServer</servlet-class>
-           <load-on-startup>1</load-on-startup>
-       </servlet>
+    <context-param>
+        <param-name>org.restlet.application</param-name>
+        <param-value>uk.ac.hw.services.collabquiz.CollabQuizServerApplication</param-value>
+    </context-param>
 
-       <servlet-mapping>
-           <servlet-name>CollabQuizServer</servlet-name>
-           <url-pattern>/rest/*</url-pattern>
-       </servlet-mapping>-->
-
-
+    <servlet-mapping>
+        <servlet-name>RestletServlet</servlet-name>
+        <url-pattern>/rest/*</url-pattern>
+    </servlet-mapping>
 </web-app>

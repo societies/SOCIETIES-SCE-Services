@@ -1,6 +1,5 @@
 package uk.ac.hw.services.collabquiz;
 
-
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
@@ -31,6 +30,8 @@ public class TestCollabQuizServer {
 
         // Fluent interfaces
         log.debug(service.path(REST_PATH).path(SERVICE_PATH).accept(MediaType.TEXT_PLAIN).get(ClientResponse.class).toString());
+        log.debug(service.path(REST_PATH).path(SERVICE_PATH).accept(MediaType.TEXT_XML).get(ClientResponse.class).toString());
+        log.debug(service.path(REST_PATH).path(SERVICE_PATH).accept(MediaType.TEXT_HTML).get(ClientResponse.class).toString());
 
         // Get plain text
         log.debug(service.path(REST_PATH).path(SERVICE_PATH).accept(MediaType.TEXT_PLAIN).get(String.class));

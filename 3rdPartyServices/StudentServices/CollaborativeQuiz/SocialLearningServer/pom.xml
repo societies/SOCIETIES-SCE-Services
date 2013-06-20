@@ -110,7 +110,11 @@
             <name>mvnrepository.com</name>
             <url>http://mvnrepository.com/artifact/</url>
         </repository>
-
+        <repository>
+            <id>maven-restlet</id>
+            <name>Public online Restlet repository</name>
+            <url>http://maven.restlet.org</url>
+        </repository>
     </repositories>
 
     <dependencies>
@@ -173,13 +177,6 @@
             <artifactId>com.springsource.javax.servlet</artifactId>
             <version>2.5.0</version>
         </dependency>
-        <!--
-                <dependency>
-                    <groupId>org.springframework</groupId>
-                    <artifactId>org.springframework.orm</artifactId>
-                    <version>3.0.5.RELEASE</version>
-                </dependency>
-        -->
 
         <!-- PrimeFaces dependencies -->
         <dependency>
@@ -200,18 +197,6 @@
             <version>2.1.17</version>
         </dependency>
 
-        <!--    <dependency>
-                <groupId>javax.servlet</groupId>
-                <artifactId>servlet-api</artifactId>
-                <version>2.5</version>
-            </dependency>
-
-            <dependency>
-                <groupId>javax.servlet.jsp</groupId>
-                <artifactId>jsp-api</artifactId>
-                <version>2.2</version>
-            </dependency>-->
-
         <dependency>
             <groupId>org.springframework.webflow</groupId>
             <artifactId>spring-faces</artifactId>
@@ -229,6 +214,24 @@
             <artifactId>el-impl</artifactId>
             <version>2.2</version>
         </dependency>
+
+        <!-- REST server -->
+        <dependency>
+            <groupId>javax.ws.rs</groupId>
+            <artifactId>com.springsource.javax.ws.rs</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.restlet.jee</groupId>
+            <artifactId>org.restlet.ext.servlet</artifactId>
+            <version>2.1.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.restlet.jee</groupId>
+            <artifactId>org.restlet.ext.xml</artifactId>
+            <version>2.1.2</version>
+        </dependency>
+
 
         <!-- Logging support -->
         <dependency>
@@ -319,6 +322,15 @@
                             org.springframework.web.context,
                             org.springframework.web.context.request,
                             org.springframework.web.jsf.el,
+
+                            <!-- REST server -->
+                            org.restlet,
+                            org.restlet.data,
+                            org.restlet.ext.servlet,
+                            org.restlet.ext.xml,
+                            org.restlet.representation,
+                            org.restlet.resource,
+                            org.restlet.routing,
 
                             <!-- PrimeFaces -->
                             org.primefaces;resolution:=optional,
@@ -495,7 +507,7 @@
                     <archive>
                         <manifestFile>${project.build.directory}/META-INF/MANIFEST.MF</manifestFile>
                     </archive>
-                    <!--<webappDirectory>src/main/webapp</webappDirectory>-->
+                    <webappDirectory>src/main/webapp</webappDirectory>
                 </configuration>
             </plugin>
 
