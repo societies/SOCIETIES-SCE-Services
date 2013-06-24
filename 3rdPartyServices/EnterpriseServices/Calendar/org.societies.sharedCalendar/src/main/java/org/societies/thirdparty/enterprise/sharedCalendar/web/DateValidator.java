@@ -22,82 +22,63 @@
  * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.societies.thirdparty.enterprise.sharedCalendar.persistence;
+package org.societies.thirdparty.enterprise.sharedCalendar.web;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import java.util.Date;
+
+import javax.faces.application.FacesMessage;
+import javax.faces.component.UIComponent;
+import javax.faces.component.UIInput;
+import javax.faces.context.FacesContext;
+import javax.faces.validator.FacesValidator;
+import javax.faces.validator.Validator;
+import javax.faces.validator.ValidatorException;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Describe your class here...
  *
- * @author solutanet
+ * @author 10036469
  *
  */
-@Entity
-@Table(name="SharedCalendarEvents")
-public class EventDAO {
+@FacesValidator("dateValidator")
+public class DateValidator implements Validator {
+
+	static final Logger log = LoggerFactory.getLogger(DateValidator.class);
 	
-	private long id;
-	private String nodeId;
-	private String calendarId;
-	private String eventId;
-	private String subscriberId;
-	
-	/**
-	 * 
-	 */
-	public EventDAO() {
-		super();
-		// TODO Auto-generated constructor stub
-	}
-	/**
-	 * @param nodeId
-	 * @param calendarId
-	 */
-	public EventDAO(String eventId, String calendarId, String nodeId, String subscriberId) {
-		super();
-		this.nodeId = nodeId;
-		this.calendarId = calendarId;
-		this.eventId = eventId;
-		this.subscriberId = subscriberId;
-	}
-	
-	@Column(name = "nodeId")
-	public String getNodeId() {
-		return nodeId;
-	}
-	public void setNodeId(String nodeId) {
-		this.nodeId = nodeId;
-	}
-	
-	@Column(name = "calendarId")
-	public String getCalendarId() {
-		return calendarId;
-	}
-	public void setCalendarId(String calendarId) {
-		this.calendarId = calendarId;
-	}
-	
-	@Id
-	@Column(name = "eventId")
-	public String getEventId(){
-		return eventId;
-	}
-	
-	public void setEventId(String eventId){
-		this.eventId = eventId;
-	}
-	
-	@Column(name = "subscriberId")
-	public String getSubscriberId(){
-		return subscriberId;
-	}
-	
-	public void setSubscriberId(String subscriberId){
-		this.subscriberId = subscriberId;
-	}
+    @Override
+    public void validate(FacesContext context, UIComponent component, Object value) throws ValidatorException {
+    	
+    	if(log.isDebugEnabled())
+    		log.debug("Validation called!");
+    	
+        if (value == null) {
+            return; // Let required="true" handle.
+        }
+
+        UIInput startDateComponent = (UIInput) component.getAttributes().get("startDate");
+
+        if (!startDateComponent.isValid()) {
+            return; // Already invalidated. Don't care about it then.
+        }
+
+        Date startDate = (Date) startDateComponent.getValue();
+
+        if (startDate == null) {
+            return; // Let required="true" handle.
+        }
+
+        Date endDate = (Date) value;
+
+        if (startDate.after(endDate)) {
+            startDateComponent.setValid(false);
+            throw new ValidatorException(new FacesMessage(
+                FacesMessage.SEVERITY_ERROR, "Start date may not be after end date.", null));
+        }
+    }
+
 
 }
+

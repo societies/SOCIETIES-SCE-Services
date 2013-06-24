@@ -56,7 +56,7 @@ public interface ISharedCalendarClient {
 	 * @param calendarId
 	 * @return the list of events inside a CIS Calendar
 	 */
-	public void viewEvent(ICalendarResultCallback calendarResultCallback, String eventId);
+	public void viewEvent(ICalendarResultCallback calendarResultCallback, String eventId, String nodeId);
 	
 	/**
 	 * This method create an Event on CIS Calendar
@@ -100,7 +100,7 @@ public interface ISharedCalendarClient {
 	public void findEventsInCalendar(ICalendarResultCallback calendarResultCallback, String nodeId, Event searchEvent);
 	
 	/**
-	 * This method is used to retrieve events in a CIS calendar that match a keyword
+	 * This method is used to retrieve events in that match a parameter
 	 * @param calendarId
 	 * @param keyWord
 	 * @return the list of events that match the input keyword
@@ -120,13 +120,6 @@ public interface ISharedCalendarClient {
 	 * Gets the events that are recommended for the subscriber
 	 */
 	public void getRecommendedEvents(ICalendarResultCallback calendarResultCallback, String subscriberId);
-	
-	/**
-	 * Return a list of events as a JSON String compliant with WeekCalendar
-	 * @param eventListToRender
-	 * @return the JSON equivalent.
-	 */
-	public String createJSONOEvents(List<Event> eventListToRender);
 
 	/**
 	 * @return

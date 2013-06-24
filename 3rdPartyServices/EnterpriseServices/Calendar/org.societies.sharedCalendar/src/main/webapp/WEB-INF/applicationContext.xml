@@ -49,7 +49,7 @@
 	<task:annotation-driven />
 	<context:annotation-config />
 	
-	<osgi:reference id="CommManagerBundle" interface="org.societies.api.comm.xmpp.interfaces.ICommManager" />
+	<osgi:reference id="commManager" interface="org.societies.api.comm.xmpp.interfaces.ICommManager" />
 	<osgi:reference id="dataSource" interface="javax.sql.DataSource" />
 	<osgi:reference id="eventManager" interface="org.societies.api.osgi.event.IEventMgr" />
 	<osgi:reference id="serviceMgmt" interface="org.societies.api.services.IServices" />
@@ -112,8 +112,8 @@
 
 	<bean id="sharedCalendarCommsManager"
 		class="org.societies.thirdparty.enterprise.sharedCalendar.commsServer.SharedCalendarCommServer"
-		depends-on="CommManagerBundle" init-method="initService">
-		<property name="commManager" ref="CommManagerBundle" />
+		depends-on="commManager" init-method="initService">
+		<property name="commManager" ref="commManager" />
 		<property name="sharedCalendarService" ref="sharedCalendar" />
 
 	</bean>
@@ -127,7 +127,7 @@
 		<property name="availableDevices" ref="availableDevicesSet" />
 		<property name="serviceMgmt" ref="serviceMgmt" />
 		<property name="cisManager" ref="CisManagementBundle" />
-		<property name="commManager" ref="CommManagerBundle" />
+		<property name="commManager" ref="commManager" />
 		<property name="ctxBroker" ref="ctxBroker" />
 		<property name="personalisation" ref="personalisationManager" />
 		<property name="userAction" ref="userActionMonitor" />
@@ -138,13 +138,13 @@
 		class="org.societies.thirdparty.enterprise.sharedCalendar.SharedCalendarClient"
 		init-method="init" >
 		<property name="sharedCalendar" ref="sharedCalendar" />
-		<property name="commManager" ref="CommManagerBundle" />
+		<property name="commManager" ref="commManager" />
 	</bean>
+	
 	<!-- Provided Services -->
 	<osgi:service ref="sharedCalendarClient">
 	<osgi:interfaces>
 		<value>org.societies.thirdparty.sharedCalendar.api.ISharedCalendarClient</value>
-		<value>org.societies.api.personalisation.model.IActionConsumer</value>
 	</osgi:interfaces>
 		<osgi:service-properties>
 			<entry key="TargetPlatform" value="SOCIETIES" />
@@ -161,6 +161,8 @@
 		<property name="serviceCategory" value="calendar" />
 	</bean>
 
+	<osgi:service ref="sharedCalendar" interface="org.societies.api.personalisation.model.IActionConsumer" />
+	
 	<osgi:set id="availableDevicesSet" interface="org.societies.api.css.devicemgmt.IDevice" cardinality="0..N">
 		<osgi:listener bind-method="onBind" unbind-method="onUnbind">
 			<bean

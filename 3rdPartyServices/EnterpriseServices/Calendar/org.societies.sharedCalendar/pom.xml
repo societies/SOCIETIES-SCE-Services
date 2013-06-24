@@ -267,6 +267,8 @@
  						<Export-Package>
  						org.societies.api.ext3p.schema.sharedCalendar,
  						org.societies.thirdparty.sharedCalendar.api
+ 						org.societies.thirdparty.enterprise.shardCalendar.web
+ 						com.google.common.base
  						</Export-Package>
 						<!-- See http://www.bradchen.com/node/10 for reasons of importing hibernate packages -->
 						<Import-Package>
@@ -596,7 +598,7 @@
 					<!-- <packagingExcludes>WEB-INF/lib/*.jar</packagingExcludes>-->
 					<packagingIncludes>WEB-INF/lib/gson*.jar,WEB-INF/lib/google*.jar,
 					WEB-INF/lib/calendar*.jar,
-					WEB-INF/lib/jackson*.jar,**/*.xml,**/*.properties,**/*.class,**/*.png,**/*.css,**/*.js,**/*.jsp</packagingIncludes>
+					WEB-INF/lib/jackson*.jar,**/*.xml,**/*.properties,**/*.class,**/*.png,**/*.css,**/*.js,**/*.jsp,**/*.xhtml,.</packagingIncludes>
 				</configuration>
 			</plugin>
 			<plugin>

@@ -37,11 +37,12 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.TimeZone;
 
-import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.apache.commons.codec.binary.Hex;
 import org.slf4j.Logger;
@@ -52,11 +53,13 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeToken
 import com.google.api.client.googleapis.auth.oauth2.GoogleTokenResponse;
 import com.google.api.client.googleapis.auth.oauth2.draft10.GoogleAccessProtectedResource;
 import com.google.api.client.googleapis.auth.oauth2.draft10.GoogleAuthorizationRequestUrl;
+
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.jackson.JacksonFactory;
 import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.Calendar;
+import com.google.api.services.calendar.Calendar.Events.Get;
 import com.google.api.services.calendar.model.CalendarList;
 import com.google.api.services.calendar.model.CalendarListEntry;
 import com.google.api.services.calendar.model.Event;
@@ -134,7 +137,7 @@ public class SharedCalendarGoogleUtil {
 			List<CalendarListEntry> entryList = retrieveAllCalendars();
 			
 			for(CalendarListEntry entry: entryList){
-				if(entry.getDescription().equals(nodeId)){
+				if(entry.getDescription() != null && entry.getDescription().equals(nodeId)){
 					if(log.isDebugEnabled())
 						log.debug("Found calendar!");
 					return calendarFromCalendarEntry(entry);
@@ -203,7 +206,7 @@ public class SharedCalendarGoogleUtil {
 	 * @throws IOException
 	 */
 	public String createEvent(String calendarId, String eventTitle,
-			String description, Date startDate, Date endDate,String location) throws IOException {
+			String description, Date startDate, Date endDate,String location, String creatorId, String nodeId) throws IOException {
 		String result = null;
 		Event event = new Event();
 		event.setSummary(eventTitle);
@@ -219,6 +222,26 @@ public class SharedCalendarGoogleUtil {
 
 		event.setLocation(location);
 		
+        Event.ExtendedProperties extendedProperties = new Event.ExtendedProperties();
+        Map<String, String> sharedExtendedProperties = new HashMap<String, String>();
+        sharedExtendedProperties.put("creatorId",creatorId);
+        sharedExtendedProperties.put("nodeId", nodeId);
+        extendedProperties.setShared(sharedExtendedProperties);
+        
+        event.setExtendedProperties(extendedProperties);
+        
+        if(log.isDebugEnabled()){
+        	log.debug("Event title: " + eventTitle);
+        	log.debug("Event description: " + description);
+        	log.debug("Event creatorId: " + creatorId);
+        	log.debug("Event calendarId: " + calendarId);
+        	log.debug("Event nodeId: " + nodeId);
+        	log.debug("Event location: " + location);
+        }
+        
+      //  List<EventAttendee> attendeesList = new ArrayList<EventAttendee>();
+       // event.setAttendees(attendeesList);
+        
 		// Store event
 		try {
 			Event createdEvent = service.events().insert(calendarId, event)
@@ -238,7 +261,7 @@ public class SharedCalendarGoogleUtil {
 		
 		try{
 			Event googleEvent = this.findEventUsingId(calendarId, eventId);
-			returnedEvent = eventFromGoogleEvent(googleEvent);
+			returnedEvent = eventFromGoogleEvent(googleEvent,calendarId);
 		} catch(Exception ex){
 			log.error("Exception trying to get event from Google!");
 			ex.printStackTrace();
@@ -249,6 +272,9 @@ public class SharedCalendarGoogleUtil {
 	
 	public void deleteEvent(String calendarId, String eventId) throws IOException{
 		try {
+			if(log.isDebugEnabled())
+				log.debug("Delete Event " + eventId + " from Calendar "+ calendarId);
+			
 			service.events().delete(calendarId, eventId).execute();
 		} catch (IOException e) {
 			log.error("Unable to delete event with id '"+eventId+"' from calendar with id '"+calendarId+"'", e);
@@ -261,6 +287,9 @@ public class SharedCalendarGoogleUtil {
 	 * @throws IOException 
 	 */
 	public org.societies.api.ext3p.schema.sharedcalendar.Event updateEvent(org.societies.api.ext3p.schema.sharedcalendar.Event eventToUpdate) throws IOException{
+		
+		if(log.isDebugEnabled())
+			log.debug("Update Event " + eventToUpdate.getEventId() + " from Calendar "+ eventToUpdate.getCalendarId());
 		
 		Event googleEvent = findEventUsingId(eventToUpdate.getCalendarId(), eventToUpdate.getEventId());
 		
@@ -280,10 +309,14 @@ public class SharedCalendarGoogleUtil {
 		
 		try {
 			Event updateGoogleEvent = service.events().update(eventToUpdate.getCalendarId(), googleEvent.getId(), googleEvent).execute();
-			updatedEvent = this.eventFromGoogleEvent(updateGoogleEvent);
+			updatedEvent = this.eventFromGoogleEvent(updateGoogleEvent,eventToUpdate.getCalendarId());
 		} catch (IOException e) {
 			log.error("Unable to update event '"+googleEvent.getId()+"' in calendar with id '"+eventToUpdate.getCalendarId()+"'", e);
 			throw e;
+			
+		} catch(Exception ex){
+			log.error("Exception while updating the event: " + ex);
+			ex.printStackTrace();
 		}
 		
 		return updatedEvent;
@@ -382,10 +415,27 @@ public class SharedCalendarGoogleUtil {
 			throws IOException {
 		
 		List<Event> returnedList = retrieveAllEventsForCalendar(calendarId);
-		return eventListFromGoogleEventList(returnedList);
+		if(log.isDebugEnabled())
+			log.debug("Found " + returnedList.size() + " events in calendar!");
+		
+		return eventListFromGoogleEventList(returnedList,calendarId);
 		
 	}
+	
+	/**
+	 * This methods cleans all events in a calendar
+	 */
+	public void cleanCalendar(String calendarId) throws Exception{
+		if(log.isDebugEnabled())
+			log.debug("Cleaning a calendar of all Events! : " + calendarId);
 		
+		List<Event> allEvents = retrieveAllEventsForCalendar(calendarId);
+		
+		for(Event event: allEvents)
+			deleteEvent(calendarId,event.getId());
+		
+	}
+	
 	/**
 	 * This method returns all calendars of the user associated to the Google account
 	 * @return
@@ -556,11 +606,37 @@ public class SharedCalendarGoogleUtil {
 	private Event findEventUsingId(String calendarId, String eventId)
 			throws IOException {
 		Event event = null;
+		
+		if(log.isDebugEnabled()){
+			log.debug("eventId: " + eventId);
+			log.debug("calendarId: " + calendarId);
+		}
+		
 		try {
-			event = service.events().get(calendarId, eventId).execute();
+			Get request = service.events().get(calendarId, eventId);
+			if(log.isDebugEnabled()){
+				log.debug("eventId: " + request.getEventId());
+				log.debug("calendarId: " + request.getCalendarId());
+			}
+				request.setCalendarId(calendarId);
+				request.setEventId(eventId);
+				event = request.execute();
+			///event = service.events().get(calendarId, eventId).execute();
 		} catch (IOException e) {
 			log.error("Unable to find event '"+eventId+"' in calendar with id '"+calendarId+"'", e);
+		} catch(Exception ex){
+			ex.printStackTrace();
+			log.error("Exception occured!!! Doing alternate");
+			List<Event> allEvents = retrieveAllEventsForCalendar(calendarId);
+			for(Event myEvent: allEvents){
+				if(myEvent.getId().equals(eventId)){
+					event = myEvent;
+					break;
+				}
+			}
 		}
+		
+
 		return event;
 	}
 	
@@ -602,18 +678,19 @@ public class SharedCalendarGoogleUtil {
 	}
 
 	private List<org.societies.api.ext3p.schema.sharedcalendar.Event> eventListFromGoogleEventList(
-			List<Event> inList) {
+			List<Event> inList, String calendarId) {
 		List<org.societies.api.ext3p.schema.sharedcalendar.Event> tmpEventList = new ArrayList<org.societies.api.ext3p.schema.sharedcalendar.Event>();
 		for (com.google.api.services.calendar.model.Event event : inList) {
-			org.societies.api.ext3p.schema.sharedcalendar.Event tmpEvent = eventFromGoogleEvent(event);
+			org.societies.api.ext3p.schema.sharedcalendar.Event tmpEvent = eventFromGoogleEvent(event, calendarId);
 			tmpEventList.add(tmpEvent);
 		}
 		return tmpEventList;
 	}	
 
-	private org.societies.api.ext3p.schema.sharedcalendar.Event eventFromGoogleEvent(Event googleEvent){
+	private org.societies.api.ext3p.schema.sharedcalendar.Event eventFromGoogleEvent(Event googleEvent,String calendarId){
 		
 		org.societies.api.ext3p.schema.sharedcalendar.Event tmpEvent = new org.societies.api.ext3p.schema.sharedcalendar.Event();
+			       
 		tmpEvent.setEndDate(XMLGregorianCalendarConverter
 				.asXMLGregorianCalendar(new Date(googleEvent.getEnd()
 						.getDateTime().getValue())));
@@ -622,13 +699,28 @@ public class SharedCalendarGoogleUtil {
 						.getDateTime().getValue())));
 		tmpEvent.setEventId(googleEvent.getId());
 		tmpEvent.setEventSummary(googleEvent.getSummary());
-		tmpEvent.setLocation(googleEvent.getLocation());
-		tmpEvent.setEventDescription(googleEvent.getDescription());
+		
+		if(googleEvent.getLocation() != null)
+			tmpEvent.setLocation(googleEvent.getLocation());
+
+		if(googleEvent.getDescription() != null)
+			tmpEvent.setEventDescription(googleEvent.getDescription());
+		
+		tmpEvent.setCalendarId(calendarId);
+		
+		Map<String, String> extendedProps = googleEvent.getExtendedProperties().getShared();
+		
+		if(extendedProps.get("creatorId") != null)
+			tmpEvent.setCreatorId(extendedProps.get("creatorId"));
+		
+		if(extendedProps.get("nodeId") != null)
+			tmpEvent.setNodeId(extendedProps.get("nodeId"));
 		
 		List<String> attendees = new ArrayList();
-		for(EventAttendee attendee : googleEvent.getAttendees()){
-			attendees.add(getSubscriberFromAttendee(attendee));
-		}
+		if(googleEvent.getAttendees() != null)
+			for(EventAttendee attendee : googleEvent.getAttendees()){
+				attendees.add(getSubscriberFromAttendee(attendee));
+			}
 		
 		tmpEvent.setAttendees(attendees);
 		return tmpEvent;

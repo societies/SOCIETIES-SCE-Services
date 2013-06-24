@@ -19,49 +19,4 @@
 
     </application>
 
-    <converter>
-        <converter-for-class>org.societies.personalisation.preference.api.model.OperatorConstants</converter-for-class>
-        <converter-class>javax.faces.convert.EnumConverter</converter-class>
-    </converter>
-
-    <navigation-rule>
-        <from-view-id>*</from-view-id>
-        <!--<navigation-case>
-            <from-action>#{loginController.loginButtonAction}</from-action>
-            <from-outcome>true</from-outcome>
-            <to-view-id>/index.xhtml</to-view-id>
-            <redirect/>
-        </navigation-case>-->
-        <navigation-case>
-            <from-action>#{loginController.logoutAction}</from-action>
-            <to-view-id>/index.xhtml</to-view-id>
-            <redirect/>
-        </navigation-case>
-
-        <!-- Redirect based on Privacy Policy Negotiation queue -->
-        <navigation-case>
-            <from-action>#{ppNegotiation.completeNegotiationAction}</from-action>
-            <!--<from-outcome>home</from-outcome>-->
-            <to-view-id>/index.xhtml</to-view-id>
-        </navigation-case>
-        <!--
-                <navigation-case>
-                    <from-action>#{ppNegotiation.completeNegotiationAction}</from-action>
-                    <from-outcome>next</from-outcome>
-                    <to-view-id>/privacy_policy_negotiation.xhtml?id=#{privacyPolicyNegotiationListener.nextNegotiationID}</to-view-id>
-                </navigation-case>
-        -->
-        <navigation-case>
-            <from-action>#{ppNegotiation.cancelNegotiationAction}</from-action>
-            <!--<from-outcome>home</from-outcome>-->
-            <to-view-id>/index.xhtml</to-view-id>
-        </navigation-case>
-        <!--
-                <navigation-case>
-                    <from-action>#{ppNegotiation.cancelNegotiationAction}</from-action>
-                    <from-outcome>next</from-outcome>
-                    <to-view-id>/privacy_policy_negotiation.xhtml?id=#{privacyPolicyNegotiationListener.nextNegotiationID}</to-view-id>
-                </navigation-case>
-        -->
-    </navigation-rule>
 </faces-config>

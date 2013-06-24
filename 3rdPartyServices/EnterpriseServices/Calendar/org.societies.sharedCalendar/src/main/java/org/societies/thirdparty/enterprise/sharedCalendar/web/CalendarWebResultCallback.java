@@ -30,6 +30,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.societies.api.ext3p.schema.sharedcalendar.Event;
 import org.societies.api.ext3p.schema.sharedcalendar.SharedCalendarResult;
 import org.societies.thirdparty.sharedCalendar.api.ICalendarResultCallback;
 
@@ -45,24 +46,34 @@ public class CalendarWebResultCallback implements ICalendarResultCallback {
 	private final long TIMEOUT = 45;
 	
 	private BlockingQueue<SharedCalendarResult> resultList;
+	private CalendarWebController parent;
+	private Event event;
 	
 	public CalendarWebResultCallback() {
 		
 		resultList = new ArrayBlockingQueue<SharedCalendarResult>(1);
-		if(logger.isDebugEnabled())
-			logger.debug("CalendarWebResultCallback created. Is empty? " + resultList.isEmpty());	
+		parent = null;
+	}
+	
+	public CalendarWebResultCallback(CalendarWebController parent, Event event) {
+		
+		this.event = event;
+		this.parent = parent;
 	}
 
 	@Override
 	public void receiveResult(SharedCalendarResult returnValue) {
-		if(logger.isDebugEnabled())
-			logger.debug("receivedResult: " + returnValue);
 		
-		try {
-			resultList.put(returnValue);
-		} catch (InterruptedException e) {
-			logger.error("Error putting result in List");
-			e.printStackTrace();
+		if(parent == null){
+			
+			try {
+				resultList.put(returnValue);
+			} catch (InterruptedException e) {
+				logger.error("Error putting result in List");
+				e.printStackTrace();
+			}
+		} else{
+			
 		}
 		
 	}
@@ -70,8 +81,6 @@ public class CalendarWebResultCallback implements ICalendarResultCallback {
 	@Override
 	public SharedCalendarResult getResult(){
 		try {
-			if(logger.isDebugEnabled())
-				logger.debug("Trying to get results, result list is empty?: " + resultList.isEmpty());
 			return resultList.poll(TIMEOUT, TimeUnit.SECONDS);
 		} catch (InterruptedException e) {
 			logger.error("Error getting result in List");

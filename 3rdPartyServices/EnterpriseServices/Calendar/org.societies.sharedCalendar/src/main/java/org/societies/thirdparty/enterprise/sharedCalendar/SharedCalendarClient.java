@@ -241,51 +241,29 @@ public class SharedCalendarClient implements ISharedCalendarClient {
 	}
 
 
-
-	/**
-	 * This method create the list JSON objects (compatible with the presentation framewok jquery-weekcalendar-1.2.2) starting from a list of events.
-	 * @param eventListToRender
-	 * @return the String that represent the Json array
-	 */
-	@Override
-	@Async
-	public String createJSONOEvents(List<Event> eventListToRender) {
-		/*
-		  "id":10182,
-	      "start":"2009-05-03T14:00:00.000+10:00",
-	      "end":"2009-05-03T15:00:00.000+10:00",
-	      "title":"Dev Meeting"
-	      */
-			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSZ");
-			Gson gson = new GsonBuilder().create();
-			String result = "";//gson.toJson(eventListToRender);
-			//log.debug("JSON Representation1:"+result);
-			
-			JsonArray jsonArray=new JsonArray();
-			JsonObject object= null;
-			
-			for (Event event : eventListToRender) {
-				object=new JsonObject();
-				object.addProperty("id", event.getEventId().toString());
-				object.addProperty("start", sdf.format(XMLGregorianCalendarConverter.asDate(event.getStartDate())));
-				object.addProperty("end", sdf.format(XMLGregorianCalendarConverter.asDate(event.getEndDate())));
-				object.addProperty("title", event.getEventDescription().toString());
-				jsonArray.add(object);
-			}
-			result = jsonArray.toString();
-			log.debug("JSON Representation2:"+result);
-			return result;
-	}
-
-
 	/* (non-Javadoc)
 	 * @see org.societies.thirdparty.sharedCalendar.api.ISharedCalendarClient#viewEvent(org.societies.thirdparty.sharedCalendar.api.ICalendarResultCallback, java.lang.String)
 	 */
 	@Override
 	@Async
 	public void viewEvent(ICalendarResultCallback calendarResultCallback,
-			String eventId) {
-		// TODO Auto-generated method stub
+			String eventId, String nodeId) {
+		
+		if(log.isDebugEnabled())
+			log.debug("View Event: " + eventId);
+		try{
+		IIdentity node = getIIdentityFromJid(nodeId);
+		
+		Event receivedEvent = getSharedCalendar().retrieveEvent(eventId, node, myId);
+		
+		SharedCalendarResult returnResult = new SharedCalendarResult();
+		returnResult.setEvent(receivedEvent);
+		calendarResultCallback.receiveResult(returnResult);
+		
+		}catch(Exception ex){
+			log.error("Exception occured!: " + ex);
+			ex.printStackTrace();
+		}
 		
 	}
 
@@ -309,16 +287,20 @@ public class SharedCalendarClient implements ISharedCalendarClient {
 			
 			SharedCalendarResult finalResult = new SharedCalendarResult();
 			finalResult.setEventId(eventId);
-			if(eventId != null)
+
+			if(eventId != null){
+				Event theEvent = getSharedCalendar().retrieveEvent(eventId, node, myId);
+				finalResult.setEvent(theEvent);
 				finalResult.setLastOperationSuccessful(true);
+			}
 			else
 				finalResult.setLastOperationSuccessful(false);
 			
 			calendarResultCallback.receiveResult(finalResult);	
 			
 		} catch(Exception ex){
-			ex.printStackTrace();
-		}
+			log.error("Exception occured!: " + ex);
+			ex.printStackTrace();		}
 		
 	}
 
@@ -382,12 +364,22 @@ public class SharedCalendarClient implements ISharedCalendarClient {
 
 
 	@Override
-	@Async
 	public List<UserWarning> getUserWarnings() {
 		if(log.isDebugEnabled())
 			log.debug("Get User Warnings!");
-		return null;
+		
+		List<UserWarning> userWarnings = getSharedCalendar().getUserWarnings();
+		
+		if(log.isDebugEnabled()){
+			for(UserWarning userWarning : userWarnings){
+				log.debug("User Warnings: " + userWarning.getTitle() +" : " + userWarning.getDetail());
+			}
+		}
+		
+		return userWarnings;
+		
 	}
+	
 
 	@Async
 	@Override

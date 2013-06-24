@@ -55,6 +55,7 @@ jaxb:extensionBindingPrefixes="xjc" >
     	<xs:element name="eventId" type="xs:string" minOccurs="0"/>
     	<xs:element name="calendarId" type="xs:string" minOccurs="0"/>
     	<xs:element name="nodeId" type="xs:string" minOccurs="0"/>
+    	<xs:element name="creatorId" type="xs:string" minOccurs="0"/>
     	<xs:element name="eventSummary" type="xs:string" minOccurs="0"/>
     	<xs:element name="location" type="xs:string" minOccurs="0"/>
     	<xs:element name="attendees" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
