@@ -28,7 +28,25 @@
                 <artifactId>android-maven-plugin</artifactId>
             </plugin>
         </plugins>
+        
+       <!--       <extensions>
+      <extension>
+        <groupId>org.apache.maven.wagon</groupId>
+        <artifactId>wagon-ftp</artifactId>
+        <version>1.0-alpha-6</version>
+      </extension>
+    </extensions>-->
+    
+        
     </build>
     
 
+
+  <!--   <distributionManagement>
+    <repository>
+      <id>testftp</id>
+      <url>ftp://maven@localhost/maven2</url>
+    </repository>
+  </distributionManagement>-->
+    
 </project>
