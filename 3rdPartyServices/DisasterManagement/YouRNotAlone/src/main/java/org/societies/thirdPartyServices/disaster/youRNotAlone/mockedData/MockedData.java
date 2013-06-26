@@ -12,56 +12,49 @@ public class MockedData{
 	public ArrayList<String> allSkills;
 	
 	public MockedData(){
-		Volunteer v1 = new Volunteer("1","Dingqi","Yang","Telecom SudParis",
+		Volunteer v1 = new Volunteer("dingqi.societies@gmail.com","Dingqi","Yang","Telecom SudParis",
 				"France","yangdingqi@gmail.com");
 		v1.addSpokenLanguage("english");
 		v1.addSpokenLanguage("french");
 		v1.addSpokenLanguage("chinese");
-		v1.addSkill("java");
-		v1.addSkill("C++");
-		v1.addSkill("C#");
-		v1.addSkill("matlab");
+		v1.addSkill("satellite_image_analysis");
+		v1.addSkill("medical_support");
+		v1.addSkill("insarag_mark_recognition");
 
-		Volunteer v2 = new Volunteer("2","James","Bande","Telecom SudParis",
+		Volunteer v2 = new Volunteer("james.societies@gmail.com","James","Bande","Telecom SudParis",
 				"France","james@gmail.com");
 		v2.addSpokenLanguage("english");
-		v2.addSkill("java");
-		v2.addSkill("C++");
-		v2.addSkill("python");
+		v2.addSkill("satellite_image_analysis");
+
 		
-		Volunteer v3 = new Volunteer("3","Luca","Lamorte","Telecom Italia",
+		Volunteer v3 = new Volunteer("lucas.societies@gmail.com","Lucas","Leblanc","Telecom Italia",
 				"Italia","luca@gmail.com");
 		v3.addSpokenLanguage("english");
 		v3.addSpokenLanguage("Italia");
-		v3.addSkill("java");
-		v3.addSkill("C++");
-		v3.addSkill("php");
+		v3.addSkill("satellite_image_analysis");
+		v3.addSkill("medical_support");
 		
-		Volunteer v4 = new Volunteer("4","Zhiyong","Yu","Telecom SudParis",
+		Volunteer v4 = new Volunteer("zhiyong.societies@gmail.com","Zhiyong","Yu","Telecom SudParis",
 				"france","zhiyong@gmail.com");
 		v4.addSpokenLanguage("english");
 		v4.addSpokenLanguage("japanese");
-		v4.addSkill("java");
-		v4.addSkill("C++");
-		v4.addSkill("ruby");
+		v4.addSkill("satellite_image_analysis");
 		
-		Volunteer v5 = new Volunteer("5","haoyi","Xiong","Telecom SudParis",
+		Volunteer v5 = new Volunteer("haoyi.societies@gmail.com","haoyi","Xiong","Telecom SudParis",
 				"france","haoyi@gmail.com");
 		v5.addSpokenLanguage("english");
 		v5.addSpokenLanguage("japanese");
 		v5.addSpokenLanguage("chinese");
-		v5.addSkill("java");
-		v5.addSkill("C++");
-		v5.addSkill("ruby");
+		v5.addSkill("satellite_image_analysis");
+		v5.addSkill("insarag_mark_recognition");
+
 		
-		Volunteer v6 = new Volunteer("6","daqiang","Zhang","Telecom SudParis",
+		Volunteer v6 = new Volunteer("daqiang.societies@gmail.com","daqiang","Zhang","Telecom SudParis",
 				"france","daqiang@gmail.com");
 //		v6.addSpokenLanguage("english");
 //		v6.addSpokenLanguage("japanese");
 //		v6.addSpokenLanguage("chinese");
-		v6.addSkill("java");
-		v6.addSkill("C++");
-		v6.addSkill("python");
+		v6.addSkill("satellite_image_analysis");
 		
 		volunteers = new ArrayList<Volunteer>();
 		volunteers.add(v1);

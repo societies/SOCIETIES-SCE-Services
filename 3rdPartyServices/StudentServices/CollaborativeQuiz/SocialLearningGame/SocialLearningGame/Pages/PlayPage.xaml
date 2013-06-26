@@ -3,52 +3,180 @@
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-      xmlns:Controls="clr-namespace:Coding4Fun.Kinect.Wpf.Controls;assembly=Coding4Fun.Kinect.Wpf"
-      xmlns:my="clr-namespace:Microsoft.Samples.Kinect.WpfViewers;assembly=Microsoft.Samples.Kinect.WpfViewers"
+      xmlns:k="http://schemas.microsoft.com/kinect/2013"
       mc:Ignorable="d" 
       d:DesignHeight="600" d:DesignWidth="1000"
-      Title="PlayPage" Loaded="Window_Loaded" Unloaded="Window_Closing" Width="1000" Height="600">
+      Title="Quiz">
 
-    <Grid>
-        <TextBlock Height="64" HorizontalAlignment="Left" Margin="202,29,0,0" Name="titleBox" Text="Quiz" VerticalAlignment="Top" Width="574" TextAlignment="Center" FontSize="40" />
-        <!-- image box to show current pose -->
-        <Image Height="213" HorizontalAlignment="Left" Margin="752,0,0,0" Name="currentPose" Stretch="Fill" VerticalAlignment="Top" Width="216" />
-        <!-- question and answer textblocks -->
-        <TextBlock Height="Auto" HorizontalAlignment="Left" Margin="87,82,0,0" Name="questionBox" Text="Current Question" VerticalAlignment="Top" Width="Auto" TextWrapping="Wrap" FontSize="32" MaxWidth="577" MaxHeight="211" />
-        <TextBlock Height="Auto" HorizontalAlignment="Left" Margin="87,337,0,0" Name="answerBox1" Text="Answer 1" VerticalAlignment="Top" Width="Auto" FontSize="20" UseLayoutRounding="True" TextWrapping="Wrap" MaxHeight="90" MaxWidth="337" />
-        <TextBlock Height="Auto" HorizontalAlignment="Left" Margin="87,429,0,0" Name="answerBox3" Text="Answer 3" VerticalAlignment="Top" Width="Auto" FontSize="20" UseLayoutRounding="True" TextWrapping="Wrap" MaxWidth="337" MaxHeight="90" />
-        <TextBlock Height="Auto" HorizontalAlignment="Left" Margin="526,337,0,0" Name="answerBox2" Text="Answer 2" VerticalAlignment="Top" Width="Auto" FontSize="20" UseLayoutRounding="True" TextWrapping="Wrap" MaxHeight="90" MaxWidth="337" />
-        <TextBlock Height="Auto" HorizontalAlignment="Left" Margin="526,429,0,0" Name="answerBox4" Text="Answer 4" VerticalAlignment="Top" Width="Auto" FontSize="20" UseLayoutRounding="True" TextWrapping="Wrap" MaxWidth="337" MaxHeight="90" />
+    <Page.Resources>
+        <Style x:Key="QuestionTextStyle" TargetType="TextBlock">
+            <Setter Property="VerticalAlignment" Value="Top"/>
+            <Setter Property="HorizontalAlignment" Value="Left"/>
+            <Setter Property="TextAlignment" Value="Left"/>
+            <Setter Property="FontSize" Value="32"/>
+            <Setter Property="UseLayoutRounding" Value="True"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
+            <Setter Property="Margin" Value="20 10 10 10"/>
+        </Style>
+        <Style x:Key="AnswerTextStyle" TargetType="TextBlock">
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="HorizontalAlignment" Value="Left"/>
+            <Setter Property="TextAlignment" Value="Left"/>
+            <Setter Property="FontSize" Value="20"/>
+            <Setter Property="UseLayoutRounding" Value="True"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
+        </Style>
+        <Style x:Key="buttonStyle" TargetType="k:KinectCircleButton">
+            <Setter Property="Height" Value="100"/>
+            <Setter Property="Width" Value="100"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+        </Style>
+        <Style x:Key="AnswerIconStyle" TargetType="Ellipse">
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="Width" Value="60"/>
+            <Setter Property="Height" Value="60"/>
+            <Setter Property="Stretch" Value="Fill"/>
+            <Setter Property="Margin" Value="10 10 10 10"/>
+        </Style>
+        <Style x:Key="AnswerIconTextStyle" TargetType="TextBlock">
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="TextAlignment" Value="Center"/>
+            <Setter Property="FontSize" Value="64"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="UseLayoutRounding" Value="True"/>
+            <Setter Property="Foreground" Value="Black"/>
+        </Style>
+    </Page.Resources>
 
-        <!-- numbers -->
-        <Ellipse Height="60" HorizontalAlignment="Left" Margin="12,337,0,0" Name="one" Stretch="Fill" VerticalAlignment="Top" Width="60" Fill="#FF32E600" />
-        <TextBlock Name="textOne" HorizontalAlignment="Left" Margin="23,348,0,0" VerticalAlignment="Top" Width="40" Height="40" Text="1" Padding="0" TextAlignment="Center" FontSize="32" />
-        <Ellipse Height="60" HorizontalAlignment="Left" Margin="12,425,0,0" Name="three" Stretch="Fill" VerticalAlignment="Top" Width="60" Fill="Yellow" />
-        <TextBlock Name="textThree" HorizontalAlignment="Left" Margin="23,434,0,0" VerticalAlignment="Top" Width="40" Height="40" Text="3" Padding="0" TextAlignment="Center" FontSize="32" />
-        <Ellipse Height="60" HorizontalAlignment="Left" Margin="455,337,0,0" Name="two" Stretch="Fill" VerticalAlignment="Top" Width="60" Fill="Red" />
-        <TextBlock Name="textTwo" HorizontalAlignment="Left" Margin="465,348,0,0" VerticalAlignment="Top" Width="40" Height="40" Text="2" Padding="0" TextAlignment="Center" FontSize="32" />
-        <Ellipse Height="60" HorizontalAlignment="Left" Margin="455,425,0,0" Name="four" Stretch="Fill" VerticalAlignment="Top" Width="60" Fill="Blue" />
-        <TextBlock Name="textFour" HorizontalAlignment="Left" Margin="465,434,0,0" VerticalAlignment="Top" Width="40" Height="40" Text="4" Padding="0" TextAlignment="Center" FontSize="32" />
+    <Grid Name="grid" >
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="85*" />
+            <ColumnDefinition Width="50*" />
+            <ColumnDefinition Width="350*" />
+            <ColumnDefinition Width="85*" />
+            <ColumnDefinition Width="400*" />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="40*" />
+            <RowDefinition Height="60*" />
+            <RowDefinition Height="220*" />
+            <RowDefinition Height="80*" />
+            <RowDefinition Height="80*" />
+            <RowDefinition Height="120" />
+        </Grid.RowDefinitions>
 
-        <!-- Players score  -->
-        <TextBlock HorizontalAlignment="Left" Margin="12,12,0,514" Name="scoreTitle" Text="Score" Width="60" TextWrapping="Wrap" FontSize="20" TextAlignment="Center" />
-        <TextBlock Height="52" HorizontalAlignment="Left" Margin="12,41,0,0" Name="scoreBox" VerticalAlignment="Top" Width="60" TextAlignment="Center" FontSize="32" />
-        
+        <!-- Player score  -->
+        <TextBlock Text="Score" FontSize="20" 
+                   HorizontalAlignment="Center" VerticalAlignment="Bottom" TextAlignment="Center"
+                   Grid.ColumnSpan="2"/>
+        <TextBlock Name="scoreBox" FontSize="32" Text="[0]"
+                   HorizontalAlignment="Center" VerticalAlignment="Top" TextAlignment="Center" 
+                   Grid.Row="1" Grid.ColumnSpan="2" />
+
+        <!-- Player name -->
+        <TextBlock Text="Score" FontSize="20" 
+                   HorizontalAlignment="Left" VerticalAlignment="Bottom"
+                   Grid.Column="2" />
+        <TextBlock Name="playerNameBox" FontSize="32" Text="[Player name]"
+                   HorizontalAlignment="Left" VerticalAlignment="Top" TextAlignment="Left" 
+                   Height="Auto" Width="Auto" Grid.Column="2" Grid.Row="1"/>
+
+        <!-- Question number -->
+        <TextBlock Text="Question" FontSize="20" 
+                   HorizontalAlignment="Left" VerticalAlignment="Bottom"
+                   Grid.Column="3" />
+        <TextBlock Name="questionNumberBox" FontSize="32" Text="[#/6]"
+                   HorizontalAlignment="Center" VerticalAlignment="Top" TextAlignment="Left" 
+                   Height="Auto" Width="Auto" Grid.Column="3" Grid.Row="1"/>
+
+        <!-- Question textblock -->
+        <TextBlock Name="questionBox" Text="Current Question" 
+                   Grid.Row="2" Grid.ColumnSpan="3" 
+                   Style="{StaticResource QuestionTextStyle}" Margin="20,10,0,0" />
+
+        <!-- Image box to show current pose -->
+        <Image Name="CurrentPoseBox" Stretch="Fill" Grid.RowSpan="6" Grid.ColumnSpan="5"/>
+
+        <!-- Answer 1 -->
+        <TextBlock Name="answerBox1" Text="Answer 1" 
+                   Style="{StaticResource AnswerTextStyle}" 
+                   Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="2"/>
+        <Ellipse Fill="#FF32E600" 
+                 Grid.Row="3" Style="{StaticResource AnswerIconStyle}"/>
+        <k:KinectCircleButton x:Name="answerButton1" 
+                              Click="answerButton_Click"
+                              Foreground="#FF32E600"
+                              Style="{StaticResource buttonStyle}"
+                              Grid.Row="3" >
+            <TextBlock Text="1" Style="{StaticResource AnswerIconTextStyle}"/>
+        </k:KinectCircleButton>
+
+        <!-- Answer 2 -->
+        <TextBlock Name="answerBox2" Text="Answer 2" 
+                   Style="{StaticResource AnswerTextStyle}"
+                   Grid.Row="3" Grid.Column="4" />
+        <Ellipse Fill="Yellow" 
+                 Grid.Row="3" Grid.Column="3"
+                 Style="{StaticResource AnswerIconStyle}"/>
+        <k:KinectCircleButton x:Name="answerButton2" 
+                              Click="answerButton_Click"
+                              Foreground="Yellow"
+                              Style="{StaticResource buttonStyle}"
+                              Grid.Row="3" Grid.Column="3">
+            <TextBlock Text="2" Style="{StaticResource AnswerIconTextStyle}"/>
+        </k:KinectCircleButton>
+
+        <!-- Answer 3 -->
+        <TextBlock Name="answerBox3" Text="Answer 3" 
+                   Style="{StaticResource AnswerTextStyle}" 
+                   Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="2"/>
+        <Ellipse Fill="Red" 
+                 Grid.Row="4" Style="{StaticResource AnswerIconStyle}"/>
+        <k:KinectCircleButton x:Name="answerButton3" 
+                              Click="answerButton_Click"
+                              Foreground="Red"
+                              Style="{StaticResource buttonStyle}"
+                              Grid.Row="4" >
+            <TextBlock Text="3" Style="{StaticResource AnswerIconTextStyle}"/>
+        </k:KinectCircleButton>
+
+        <!-- Answer 4 -->
+        <TextBlock Name="answerBox4" Text="Answer 4" 
+                   Style="{StaticResource AnswerTextStyle}" 
+                   Grid.Row="4" Grid.Column="4" />
+        <Ellipse Fill="Blue" 
+                 Grid.Row="4" Grid.Column="3"
+                 Style="{StaticResource AnswerIconStyle}"/>
+        <k:KinectCircleButton x:Name="answerButton4" 
+                              Click="answerButton_Click"
+                              Foreground="Blue"
+                              Style="{StaticResource buttonStyle}"
+                              Grid.Row="4" Grid.Column="3" >
+            <TextBlock Text="4" Style="{StaticResource AnswerIconTextStyle}"/>
+        </k:KinectCircleButton>
+
+
         <!-- status bar to show current grammar -->
-        <StatusBar Height="38" HorizontalAlignment="Left" Margin="30,516,0,0" Name="statusBar" VerticalAlignment="Top" Width="Auto" Background="Transparent">
-            <StatusBarItem Padding="0">
-                <TextBlock Name="statusBarText" FontSize="24" />
+        <StatusBar Name="statusBar" VerticalAlignment="Top" Background="Transparent" Grid.Row="5" Grid.ColumnSpan="5" >
+            <StatusBarItem  Padding="10 0 10 0" Name="poseIcon">
+                <Image Height="100" Width="100" Stretch="Uniform" Source="/SocialLearningGame;component/Resources/Pose1.png" Name="poseIconImage"/>
+            </StatusBarItem>
+            <StatusBarItem  Padding="10 0 10 0" Name="handIcon">
+                <Image Height="75" Width="75" Stretch="Uniform" Source="/SocialLearningGame;component/Resources/hand.png" />
+            </StatusBarItem>
+            <StatusBarItem  Padding="10 0 10 0" Name="micIcon">
+                <Image Height="60" Width="60" Source="/SocialLearningGame;component/Resources/microphone.png"  />
+            </StatusBarItem>
+            <StatusBarItem Padding="10 0 10 0" >
+                <TextBlock Name="statusBarText" 
+                           FontSize="24" Text="[Status bar]" TextWrapping="Wrap"/>
             </StatusBarItem>
         </StatusBar>
-        <Image Height="28" HorizontalAlignment="Left" Margin="12,521,0,0" Name="image1" Stretch="Fill" VerticalAlignment="Top" Width="15" Source="/SocialLearningGame;component/Resources/microphone.png" />
-        
-        <!-- skeleton viewer -->
-        <my:KinectSkeletonViewer Canvas.Left="648" Canvas.Top="321" Name="kinectSkeletonViewer1" Height="240" Width="320" Kinect="{Binding ElementName=kinectSensorChooser1, Path=Kinect}" Margin="648,320,0,0" Foreground="Black" />
-        
-        <my:KinectSensorChooser Canvas.Left="97" Canvas.Top="109" Name="kinectSensorChooser1" Width="693" Height="211" />
+
+
     </Grid>
-    
-    <Page.Background>
-        <ImageBrush ImageSource="/SocialLearningGame;component/Resources/background.jpg" />
-    </Page.Background>
+
 </Page>

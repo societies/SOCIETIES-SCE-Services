@@ -44,13 +44,34 @@
              android:layout_below="@+id/url_text"
              android:singleLine="true" 
              android:layout_gravity="center_vertical|center_horizontal"/>
+    
+    
+     <TextView android:id="@+id/text_port"
+        android:layout_centerHorizontal="true"  
+        android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/welcome_text"
+            android:textColor="@android:color/white"
+				android:textSize="15dip" 
+				android:padding="3dip" android:text="@string/port"
+				android:layout_gravity="center_vertical|center_horizontal"/> 
+        
+   
+    <EditText android:id="@+id/editText_port"
+             android:layout_height="wrap_content"
+             android:layout_width="250dp"
+             android:layout_centerHorizontal="true"
+             android:layout_below="@+id/text_port"
+             android:singleLine="true" 
+             android:layout_gravity="center_vertical|center_horizontal"/>
+    
              
              
     <TextView android:id="@+id/entity_text"
         android:layout_centerHorizontal="true"  
         android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/txt_url"
+                android:layout_below="@+id/editText_port"
                android:textColor="@android:color/white"
 				android:textSize="15dip" 
 				android:padding="3dip" android:text="@string/entity"
@@ -67,14 +88,14 @@
              android:layout_gravity="center_vertical|center_horizontal"/>
    
       <TextView android:id="@+id/cis_text"
-        android:layout_centerHorizontal="true"  
-        android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@+id/txt_entity"
-               android:textColor="@android:color/white"
-				android:textSize="15dip" 
-				android:padding="3dip" android:text="@string/cis"
-				android:layout_gravity="center_vertical|center_horizontal"/> 
+        	android:layout_centerHorizontal="true"  
+        	android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_below="@+id/txt_entity"
+			android:textColor="@android:color/white"
+			android:textSize="15dip" 
+			android:padding="3dip" android:text="@string/cis"
+			android:layout_gravity="center_vertical|center_horizontal"/> 
       		
          <Spinner android:id="@+id/cis_list"
     		 android:layout_height="wrap_content"

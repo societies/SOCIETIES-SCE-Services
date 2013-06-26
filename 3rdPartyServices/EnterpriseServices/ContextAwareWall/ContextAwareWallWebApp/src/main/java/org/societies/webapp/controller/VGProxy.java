@@ -46,6 +46,8 @@ import java.util.Map;
 import java.util.Timer;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.annotation.PreDestroy;
 import javax.servlet.http.HttpServletRequest;
@@ -70,6 +72,14 @@ import org.societies.api.cis.attributes.MembershipCriteria;
 import org.societies.api.cis.management.ICis;
 import org.societies.api.cis.management.ICisManager;
 import org.societies.api.comm.xmpp.interfaces.ICommManager;
+import org.societies.api.context.broker.ICtxBroker;
+import org.societies.api.context.model.CtxAttribute;
+import org.societies.api.context.model.CtxAttributeTypes;
+import org.societies.api.context.model.CtxEntityIdentifier;
+import org.societies.api.context.model.CtxIdentifier;
+import org.societies.api.context.model.CtxModelObject;
+import org.societies.api.context.model.CtxModelType;
+import org.societies.api.identity.Requestor;
 import org.societies.api.internal.css.management.ICSSLocalManager;
 import org.societies.api.schema.cssmanagement.CssInterfaceResult;
 import org.societies.api.schema.cssmanagement.CssRecord;
@@ -84,9 +94,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.support.DefaultMultipartHttpServletRequest;
 import org.springframework.web.servlet.ModelAndView;
-//import org.apache.http.entity.mime.HttpMultipartMode;
-//import org.apache.http.entity.mime.MultipartEntity;
-//import org.apache.http.entity.mime.content.FileBody;
+
 
 
 /**
@@ -104,9 +112,6 @@ public class VGProxy {
 	/** The logging facility. */
 	private static final Logger LOG = LoggerFactory.getLogger(VGProxy.class);
 	
-	//String SERVER_URL = "http://ta-proj02:9082/VG4SWeb/vg/message";
-	//String SERVER_URL = "http://societies.local.macs.hw.ac.uk:9080/VG4SWeb/vg/message";
-	//String SERVER_URL ="";
 	String MOCK_ENTITY = "";
 	boolean MOCK_ENTITY_ACTIVE = false;
 	
@@ -117,6 +122,9 @@ public class VGProxy {
 	static String mCurrentCis="";
 	static String mCurrentZone="";
 	static Map<String,String> mImagesInZonePool = new HashMap<String,String>();
+	
+	private Requestor requestor;
+	
 	
 	/*
 	 * {"userId" : "unknown7",  "cis": "111", "msg": "GuyGuyGuy", "style" : "", "zoneId":"1","messageId":"5","ts":null}
@@ -134,6 +142,8 @@ public class VGProxy {
 	@Autowired private ICSSLocalManager cssManager;
 	@Autowired private ICommManager commManager;
 	@Autowired private SocietiesRegistryBean societiesRegistryBean;
+	@Autowired private ICtxBroker ctxBroker;
+	
 	
 	private Timer getImgTimerTask;
     
@@ -512,10 +522,14 @@ public class VGProxy {
 	
 	@RequestMapping(value="/getMsg.html",method = RequestMethod.GET)
 	public @ResponseBody String getMessages(@RequestParam String userID,@RequestParam String cis, @RequestParam String number){
-		
-		String result = getMessagesInternal(userID,cis,number);
-		GetBackgroundImageTask imageTask = new GetBackgroundImageTask();
-		imageTask.start();
+		String result = "";
+		try{
+			result = getMessagesInternal(userID,cis,number);
+			GetBackgroundImageTask imageTask = new GetBackgroundImageTask();
+			imageTask.start();
+		}catch(Exception e){
+			LOG.error(e.getMessage(),e);
+		}
 		
 		return result;
 	}
@@ -557,20 +571,40 @@ public class VGProxy {
 	 * @param cis
 	 * @param number
 	 * @return
+	 * @throws Exception 
 	 */
-	private String getMessagesInternal(String userId, String cis, String number){
- 		LOG.debug(LOG_PREFIX + " enter getMessagesInternal");
+	private String getMessagesInternal(String userId, String cis, String number) throws Exception{
+ 		LOG.info(LOG_PREFIX + " enter getMessagesInternal");
 		
 		
 		String retResponseString = "";
+		String currentZoneId="";
+		String currentZoneName="";
 		
 		String url = "";
 		try {
+			String locationFromContext;
+			String locationIds=null;
+			Map<String,String> mappingZoneIdToName = new HashMap<String, String>();
+			if (societiesRegistryBean.isContextLocationActive()){
+				locationFromContext = getContextAtribute(CtxAttributeTypes.LOCATION_SYMBOLIC);
+				locationIds= decodeLocationSymbolic(locationFromContext,mappingZoneIdToName);
+				LOG.info("location attribute from context: "+locationFromContext+ " location Ids "+locationIds);
+			}else{
+				LOG.info("location attribute taken from PZ server directly");
+			}
+			
 			
 			url =  societiesRegistryBean.getServerURL() + "vg/message/";
 			String cisParam = URLEncoder.encode(cis, "UTF-8").replace("+", "%20");
 			String userIdParam = URLEncoder.encode(userId, "UTF-8").replace("+", "%20");
 			url = url + userIdParam+"/"+ cisParam+ "/"+number;
+			
+			if (locationIds != null){
+				String locationIdsParam = URLEncoder.encode(locationIds, "UTF-8").replace("+", "%20");
+				url+="/"+locationIdsParam;
+			}
+			
 			
 			String responseString="";
 			responseString = perfromGetHttpRequest(url);
@@ -589,14 +623,18 @@ public class VGProxy {
 			JSONObject jsonObjectResponse = new JSONObject();
 			jsonObjectResponse.put("data", jsonObjectPZResponse.get("messages"));
 			
-			//String currentZoneId = extractZoneId(responseString);
-			String currentZoneId="";
-			String currentZoneName="";
+			
 			JSONArray zonesArray = jsonObjectPZResponse.getJSONArray("location");
 			if (zonesArray.length() > 0){
 				currentZoneId = ((JSONObject)zonesArray.get(0)).getString("id");
-				currentZoneName = ((JSONObject)zonesArray.get(0)).getString("name");
+				if (societiesRegistryBean.isContextLocationActive()){
+					currentZoneName = mappingZoneIdToName.get(currentZoneId);
+				}else{
+					currentZoneName = ((JSONObject)zonesArray.get(0)).getString("name");
+				}
+			
 			}
+			
 			
 			String logMsg = "";
 			synchronized (VGProxy.class) {
@@ -626,11 +664,34 @@ public class VGProxy {
 			
 	    }catch (Exception e) {
 	    	LOG.error(LOG_PREFIX + " exception in method 'getMessagesInternal' ; generated URL is "+url,e);
+	    	throw e;
 		}
 		
 		LOG.debug(LOG_PREFIX + " finish 'getMessageInternal'; Return value: "+retResponseString);
 	    return retResponseString;
 	}
+	
+	private String decodeLocationSymbolic(String locationFromContext, Map<String, String> mappingZoneIdToName) {
+		if (locationFromContext == null || locationFromContext.length() == 0){
+			return "";
+		}
+		String locationIds="";
+		Pattern patronValidity = Pattern.compile("\\((.*?)\\)",Pattern.DOTALL);
+        Matcher matcherValidity = patronValidity.matcher(locationFromContext);
+        
+        String zoneName,zoneId;
+        String[] buffer;
+        while (matcherValidity.find()){
+        	buffer = matcherValidity.group(1).split("\\.");
+        	zoneId = buffer[0];
+        	zoneName = buffer[1];
+        	mappingZoneIdToName.put(zoneId, zoneName);
+        	locationIds += zoneId+",";
+        }
+		
+		return locationIds;
+	}
+
 	
 	private String extractZoneId(String json){
 		String zoneId = "";
@@ -926,6 +987,45 @@ public class VGProxy {
 		return responseString;
 	}
 	
+	
+	
+	private String getContextAtribute(String ctxAttribName){
+		CtxAttribute ctxAttr = null;
+		try {
+			if (requestor == null){
+				requestor = new Requestor(commManager.getIdManager().getThisNetworkNode());
+			}
+			
+			//retrieve the CtxEntityIdentifier of the CSS owner context entity
+			CtxEntityIdentifier ownerEntityId = ctxBroker.retrieveIndividualEntityId(requestor, commManager.getIdManager().getThisNetworkNode()).get();
+			// create a context attribute under the CSS owner context entity
+			
+			
+			Future<List<CtxIdentifier>> ctxIdentLookupFut = ctxBroker.lookup(requestor, ownerEntityId, CtxModelType.ATTRIBUTE, ctxAttribName);
+			List<CtxIdentifier> ctxIdentLookup =  ctxIdentLookupFut.get();
+			CtxIdentifier ctxIdent  = null;
+			
+			
+			if ((ctxIdentLookup != null) && (ctxIdentLookup.size() > 0))
+				ctxIdent = ctxIdentLookup.get(0);
+		
+			
+			if (ctxIdent == null){
+				ctxAttr = ctxBroker.createAttribute(requestor, ownerEntityId, ctxAttribName).get();
+			}else{
+				Future<CtxModelObject> ctxAttrFut = ctxBroker.retrieve(requestor, ctxIdent);
+				ctxAttr = (CtxAttribute) ctxAttrFut.get();
+			}
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		};
+
+		return ctxAttr.getStringValue();
+	}
+
+	
+	
 	public void setICisManager(ICisManager cisManager){
 		this.cisManager = cisManager;
 	}
@@ -949,11 +1049,12 @@ public class VGProxy {
 		this.societiesRegistryBean = societiesRegistryBean;
 	}
 	
-	/*
-	void action(final HttpServletRequest request) {
-	    final String paramValue = request.getSession().getServletContext().getInitParameter("paramName");
-	    System.out.println(paramValue);
-	}*/
+	@Autowired
+	public void setCtxBroker(ICtxBroker ctxBroker) {
+		this.ctxBroker = ctxBroker;
+	}
+
+
 
 	
 	

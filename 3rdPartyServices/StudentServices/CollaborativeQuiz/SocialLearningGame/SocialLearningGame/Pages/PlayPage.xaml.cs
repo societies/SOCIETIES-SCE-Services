@@ -24,25 +24,19 @@
  */
 
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using Microsoft.Kinect;
-using Coding4Fun.Kinect.Wpf;
-using Coding4Fun.Kinect.Wpf.Controls;
-using Microsoft.Samples.Kinect.WpfViewers;
 using Microsoft.Speech.AudioFormat;
 using Microsoft.Speech.Recognition;
-using RestSharp;
+using SocialLearningGame.Entities;
+using SocialLearningGame.Logic;
+using SocialLearningGame.Pages.Components;
+using SocialLearningGame.Speech;
+using System.Globalization;
 
 namespace SocialLearningGame.Pages
 {
@@ -51,700 +45,842 @@ namespace SocialLearningGame.Pages
     /// </summary>
     public partial class PlayPage : Page
     {
-        #region variables
+        protected static log4net.ILog log = log4net.LogManager.GetLogger(typeof(PlayPage));
 
-        const int skeletonCount = 6;
-        Skeleton[] allSkeletons = new Skeleton[skeletonCount];
-        int score;
-        int counter;
-        KinectSensor sensor;
-        bool closing = false;
+        private static readonly Uri correct = new Uri("/SocialLearningGame;component/Resources/yes.png", UriKind.Relative);
+        public static readonly double SpeechConfidenceThreshold = 0.7;
 
-        //random number initialised used to choose next pose
-        int ranNum;
-        Random random = new Random();
+        // Skeleton tracking vars
+        private Skeleton[] allSkeletons = new Skeleton[8]; // NB: this is a class var for memory efficency
+        private bool userInCorrectPose;
+        private readonly Object poseLockObject = new Object();
 
-        //variables for changing the bitmap image source
-        BitmapImage imgSource;
-        Uri currentUri;
+        private SpeechRecognitionEngine _speechEngine;
 
-        //boolean values for determining whether each stage of answering is complete
-        bool correctPose = false;
-        bool answerGiven = false;
-        bool pressureMat = false;
-
-        //creating an array of different poses available
-        private static Uri uri1 = new Uri("/SocialLearningGame;component/Resources/Pose1.png", UriKind.Relative);
-        private static Uri uri2 = new Uri("/SocialLearningGame;component/Resources/Pose2.png", UriKind.Relative);
-        private static Uri uri3 = new Uri("/SocialLearningGame;component/Resources/Pose3.png", UriKind.Relative);
-        private static Uri uri4 = new Uri("/SocialLearningGame;component/Resources/Pose4.png", UriKind.Relative);
-        private static Uri uri5 = new Uri("/SocialLearningGame;component/Resources/Pose5.png", UriKind.Relative);
-        private static Uri uri6 = new Uri("/SocialLearningGame;component/Resources/Pose6.png", UriKind.Relative);
-        private static Uri uri7 = new Uri("/SocialLearningGame;component/Resources/Pose7.png", UriKind.Relative);
-        private static Uri uri8 = new Uri("/SocialLearningGame;component/Resources/Pose8.png", UriKind.Relative);
-        private static Uri uri9 = new Uri("/SocialLearningGame;component/Resources/Pose9.png", UriKind.Relative);
-        private static Uri uri10 = new Uri("/SocialLearningGame;component/Resources/Pose10.png", UriKind.Relative);
-
-        Uri[] sources = { uri1, uri2, uri3, uri4, uri5, uri6, uri7, uri8, uri9, uri10 };
-
-        private static Uri correct = new Uri("/SocialLearningGame;component/Resources/yes.png", UriKind.Relative);
-
-        //variables for use with voice recognition
-        String[] availGrammars = { "colours", "numbers" };
-        private String currentGrammar;
-        private SpeechRecognitionEngine speechEngine;
-        //Get the voice recogniser from the kinect
-        RecognizerInfo ri;
-
-        //variable to set the current question
-        Question currentQuestion = new Question();
-        String category = null;
-        
-        bool challengebool = false;
-        bool challenged = false;
-        Student friend;
-        Challenge currentChallenge = new Challenge();
-
-        List<Question> questions = new List<Question>();
-        #endregion variables
-
-        #region page
-        //main constructor method
-        public PlayPage() 
-        {
-            InitializeComponent();
-            //initialise variables
-            score = 0;
-            counter = 1;
-            this.category = "all";
-            getQuestionSet();
-            nextQuestion();
-        }
-
-        //Constructor which takes a category as input and ensures only questions from that category are used
-        public PlayPage(String category)
+        public PlayPage()
         {
             InitializeComponent();
 
-            //initialise variables
-            score = 0;
-            counter = 1;
-            this.category = category;
-            getQuestionSet();
-            nextQuestion();
-        }
+            // setup speech
+            MainWindow.Instance.SensorChooser.KinectChanged += new EventHandler<Microsoft.Kinect.Toolkit.KinectChangedEventArgs>(SensorChooser_KinectChanged);
 
-        public PlayPage(Student friend, string category)
-        {
-            InitializeComponent();
-
-            score = 0;
-            counter = 1;
-            this.friend = friend;
-            challengebool = true;
-            this.category = category;
-            getQuestionSet();
-            nextQuestion();
-        }
-
-        public PlayPage(Challenge challenge)
-        {
-            InitializeComponent();
-
-            score = 0;
-            counter = 1;
-            currentChallenge = challenge;
-            Console.WriteLine(challenge.category);
-           
-            this.category = challenge.category;
-            challenged = true;
-            getQuestionSet();
-            nextQuestion();
-        }
-
-        //what to do when the page is loaded
-        private void Window_Loaded(object sender, RoutedEventArgs e)
-        {
-            kinectSensorChooser1.KinectSensorChanged += new DependencyPropertyChangedEventHandler(kinectSensorChooser1_KinectSensorChanged);
-        }
-
-        //what to do when the page is closing
-        private void Window_Closing(object sender, RoutedEventArgs e )
-        {
-            //update the students total score with the score from the current game
-            MainWindow.student.score = MainWindow.student.score+this.score;
-            closing = true;
-            StopKinect(kinectSensorChooser1.Kinect);
-        }
-        #endregion page
-
-        #region kinect processing
-
-        //called if a new kinect sensor is plugged in, i.e. if user forgot to connect the device, or was unplugged during play
-        void kinectSensorChooser1_KinectSensorChanged(object sender, DependencyPropertyChangedEventArgs e)
-        {
-            KinectSensor old = (KinectSensor)e.OldValue;
-
-            StopKinect(old);
-
-            sensor = (KinectSensor)e.NewValue;
-
-            if (sensor == null)
+            if (MainWindow.Instance.SensorChooser.Kinect != null)
             {
-                return;
+                KinectSensor kinect = MainWindow.Instance.SensorChooser.Kinect;
+                EnableSpeechEngine(kinect);
+                EnableSkeletonTracking(kinect);
             }
 
-            //parameters for smoothing movement
-            var parameters = new TransformSmoothParameters
-            {
-                Smoothing = 0.3f,
-                Correction = 0.0f,
-                Prediction = 0.0f,
-                JitterRadius = 1.0f,
-                MaxDeviationRadius = 0.5f
-            };
-
-            //Enabling the skeleton tracking comment out corresponding one, with/without smoothing
-            //sensor.SkeletonStream.Enable(parameters);
-
-            sensor.SkeletonStream.Enable();
-
-            sensor.AllFramesReady += new EventHandler<AllFramesReadyEventArgs>(sensor_AllFramesReady);
-            sensor.DepthStream.Enable(DepthImageFormat.Resolution640x480Fps30);
-            sensor.ColorStream.Enable(ColorImageFormat.RgbResolution640x480Fps30);
-
-            //try to start the sensor
-            try
-            {
-                sensor.Start();
-            }
-            catch (InvalidOperationException)
-            {
-                kinectSensorChooser1.AppConflictOccurred();
-            }
-
-            //Get the voice recogniser from the kinect
-            ri = GetKinectRecognizer();
-
-            changeGrammar();
-
-            
+            // start the game
+            GameLogic.NewGame();
+            NextQuestion();
         }
 
-        //stop the kinect called when the window is closed, or the sensor is replaced 
-        private void StopKinect(KinectSensor sensor)
+        #region " Kinect events "
+
+        private void SensorChooser_KinectChanged(object sender, Microsoft.Kinect.Toolkit.KinectChangedEventArgs args)
         {
-            if (sensor != null)
+            log.Debug("Kinect sensor changed");
+
+            if (args.OldSensor != null)
             {
-                if (sensor.IsRunning)
+                log.Debug("Unbinding old sensor");
+
+                try
                 {
-                    //stop sensor 
-                    sensor.Stop();
+                    args.OldSensor.AudioSource.Stop();
 
-                    //stop audio if not null
-                    if (sensor.AudioSource != null)
-                    {
-                        sensor.AudioSource.Stop();
-                        this.speechEngine.RecognizeAsyncCancel();
-                        this.speechEngine.RecognizeAsyncStop();
-                    }
+                    log.Debug("Completed unbinding old sensor");
+                }
+                catch (InvalidOperationException ex)
+                {
+                    // KinectSensor might enter an invalid state while enabling/disabling streams or stream features.
+                    // E.g.: sensor might be abruptly unplugged.
+                    log.Warn("Error unbinding old sensor", ex);
                 }
             }
+
+            if (args.NewSensor != null)
+            {
+                KinectSensor newSensor = args.NewSensor;
+
+                log.Debug("Binding new sensor");
+
+                try
+                {
+                    EnableSkeletonTracking(newSensor);
+                    EnableSpeechEngine(newSensor);
+
+                    log.Debug("Completed binding new sensor");
+                }
+                catch (InvalidOperationException ex)
+                {
+                    // KinectSensor might enter an invalid state while enabling/disabling streams or stream features.
+                    // E.g.: sensor might be abruptly unplugged.
+                    log.Warn("Error binding new sensor", ex);
+                }
+
+            }
         }
 
-        #endregion kinect processing
+        #endregion
 
-        #region pose recognition
-        private void checkPose(Joint head, Joint handLeft, Joint handRight, Joint hipLeft, Joint hipRight, Joint elbowLeft, Joint elbowRight)
+        #region " Skeleton tracking "
+
+        private void EnableSkeletonTracking(KinectSensor sensor)
         {
-            //Pose with both hands in the air (1)
-            if (handLeft.Position.Y > head.Position.Y && handRight.Position.Y > head.Position.Y &&
-                currentUri == new Uri("/SocialLearningGame;component/Resources/Pose1.png", UriKind.Relative))
-            {
-                //correct pose given so get a new pose (once question answered correctly)
-                //set a bool variable to true
-                correctPose = true;
-            }
-            //pose with right hand in the air and left hand down below the waist
-            else if (handRight.Position.Y > head.Position.Y && handLeft.Position.Y < hipLeft.Position.Y - 0.1 &&
-                currentUri == new Uri("/SocialLearningGame;component/Resources/Pose2.png", UriKind.Relative))
-            {
-                correctPose = true;
-            }
-            //pose with left hand in the air and right hand down below the waist 
-            else if (handLeft.Position.Y > head.Position.Y && handRight.Position.Y < hipRight.Position.Y - 0.1 &&
-                currentUri == new Uri("/SocialLearningGame;component/Resources/Pose3.png", UriKind.Relative))
-            {
-                correctPose = true;
-            }
-            //pose with both hands below the waist
-            else if (handRight.Position.Y < hipRight.Position.Y - 0.1 && handLeft.Position.Y < hipLeft.Position.Y - 0.1 &&
-                currentUri == new Uri("/SocialLearningGame;component/Resources/Pose4.png", UriKind.Relative))
-            {
-                correctPose = true;
-            }
-            //pose with right hand out and left hand below the waist
-            else if ((handRight.Position.Y <= elbowRight.Position.Y + 0.1 && handRight.Position.Y >= elbowRight.Position.Y - 0.1) &&
-                handLeft.Position.Y < hipLeft.Position.Y - 0.1 &&
-                currentUri == new Uri("/SocialLearningGame;component/Resources/Pose5.png", UriKind.Relative))
-            {
-                correctPose = true;
-            }
-            //pose with left hand out and right hand below the waist
-            else if ((handLeft.Position.Y <= elbowLeft.Position.Y + 0.1 && handLeft.Position.Y >= elbowLeft.Position.Y - 0.1) &&
-                handRight.Position.Y < hipRight.Position.Y - 0.1 &&
-                currentUri == new Uri("/SocialLearningGame;component/Resources/Pose6.png", UriKind.Relative))
-            {
-                correctPose = true;
-            }
-            //pose with both hands out (all hand and elbow joints equal on the Y axis)
-            else if ((handRight.Position.Y <= elbowRight.Position.Y + 0.1 && handRight.Position.Y >= elbowRight.Position.Y - 0.1) &&
-                (handLeft.Position.Y <= elbowLeft.Position.Y + 0.1 && handLeft.Position.Y >= elbowLeft.Position.Y - 0.1) &&
-                currentUri == new Uri("/SocialLearningGame;component/Resources/Pose7.png", UriKind.Relative))
-            {
-                correctPose = true;
-            }
-            //leaning to the right
-            else if (hipRight.Position.Y <= hipLeft.Position.Y - 0.05 && currentUri == new Uri("/SocialLearningGame;component/Resources/Pose8.png", UriKind.Relative))
-            {
-                correctPose = true;
-            }
-            //leaning to the left
-            else if ((hipLeft.Position.Y <= hipRight.Position.Y - 0.05) && (currentUri == new Uri("/SocialLearningGame;component/Resources/Pose9.png", UriKind.Relative)))
-            {
-                correctPose = true;
-            }
-            //both hands together and above head 
-            else if (((handRight.Position.X <= handLeft.Position.X - 0.1 || handRight.Position.X <= handLeft.Position.X + 0.1) && (handRight.Position.Y <= handLeft.Position.Y - 0.1 || handRight.Position.Y <= handLeft.Position.Y + 0.1)) &&
-                (handLeft.Position.Y > head.Position.Y + 0.1 && handRight.Position.Y > head.Position.Y + 0.1) &&
-                currentUri == new Uri("/SocialLearningGame;component/Resources/Pose10.png", UriKind.Relative))
-            {
-                correctPose = true;
-            }
+            /* The following is used for skeleton drawing */
+            // Create the drawing group we'll use for drawing
+            this.drawingGroup = new DrawingGroup();
+            // Create an image source that we can use in our image control
+            this.imageSource = new DrawingImage(this.drawingGroup);
+            // Display the drawing using our image control
+            CurrentPoseBox.Source = this.imageSource;
+
+            // Add an event handler to be called whenever there is new color frame data
+            sensor.SkeletonFrameReady += this.sensor_SensorSkeletonFrameReady;
         }
-
-        #endregion pose recognition
-
-        #region questions and answers
-        //set the next pose, questions and answers etc
-        private void nextQuestion()
-        {
-            //set the next pose in the currentPose image box
-            ranNum = random.Next(sources.Length); //generate a random number from 0 to the size of sources
-            currentUri = sources[ranNum];
-            imgSource = new BitmapImage(currentUri);
-            currentPose.Source = imgSource;
-
-            //set the next voice commands grammar to be used
-            ranNum = random.Next(availGrammars.Length);
-
-            currentGrammar = availGrammars[ranNum];
-
-            //set the next question in the questionBox text block (random)
-            ranNum = random.Next(questions.Count);
-            currentQuestion = questions.ElementAt(ranNum);
-            //MessageBox.Show(currentQuestion.answer1);
-            questionBox.Text = currentQuestion.question;
-
-            //set the answers in the answer boxes
-            //get answers 1-4 from corresponding question
-            answerBox1.Text = currentQuestion.answer1;
-            answerBox2.Text = currentQuestion.answer2;
-            answerBox3.Text = currentQuestion.answer3;
-            answerBox4.Text = currentQuestion.answer4;
-
-            //set the status bar for the current grammar
-            if (currentGrammar.Equals("colours"))
-            {
-                statusBarText.Text = "Say \"GREEN\",\"RED\",\"YELLOW\", or \"BLUE\"";
-            }
-            else
-            {
-                statusBarText.Text = "Say \"ONE\",\"TWO\",\"THREE\", or \"FOUR\"";
-            }
-
-            //set boolean values back to false
-            correctPose = false;
-            answerGiven = false;
-
-            //switch the grammar set to the currentGrammar
-            changeGrammar();
-
-            //update score box
-            scoreBox.Text = score.ToString();
-
-        }
-
-        //gets the questions within the category selected by the user -- if a category has been selected
-        private void getQuestionSet()
-        {
-            if (!category.Equals("all"))
-            {
-                //make the question set the questions contained only in a given category
-                questions.AddRange(MainWindow.questionSet.FindAll(delegate(Question q) { return q.category.Equals(category); }));
-            }
-            else
-            {
-                questions.AddRange(MainWindow.questionSet.FindAll(delegate(Question q) { return q.category.Equals("general knowledge"); }));
-                questions.AddRange(MainWindow.questionSet.FindAll(delegate(Question q) { return q.category.Equals("course related"); }));
-                if (MainWindow.student.score >= 10)
-                {
-                    questions.AddRange(MainWindow.questionSet.FindAll(delegate(Question q) { return q.category.Equals("music"); }));
-                }
-                if (MainWindow.student.score >= 25)
-                {
-                    questions.AddRange(MainWindow.questionSet.FindAll(delegate(Question q) { return q.category.Equals("video games"); }));
-                }
-                if (MainWindow.student.score >= 35)
-                {
-                    questions.AddRange(MainWindow.questionSet.FindAll(delegate(Question q) { return q.category.Equals("sports"); }));
-                }
-                if (MainWindow.student.score >= 50)
-                {
-                    questions.AddRange(MainWindow.questionSet.FindAll(delegate(Question q) { return q.category.Equals("history"); }));
-                }
-                if (MainWindow.student.score >= 65)
-                {
-                    questions.AddRange(MainWindow.questionSet.FindAll(delegate(Question q) { return q.category.Equals("science"); }));
-                }
-                if (MainWindow.student.score >= 80)
-                {
-                    questions.AddRange(MainWindow.questionSet.FindAll(delegate(Question q) { return q.category.Equals("technology"); }));
-                }
-            }
-        }
-
-        #endregion questions and answers
-
-        #region skeleton tracking
 
         //gets the first skeleton for the skeleton array - this skeleton is the player
-        Skeleton GetFirstSkeleton(AllFramesReadyEventArgs e)
+        private Skeleton GetFirstSkeleton(SkeletonFrame skeletonFrameData)
         {
-            using (SkeletonFrame skeletonFrameData = e.OpenSkeletonFrame())
+            if (skeletonFrameData == null)
             {
-                if (skeletonFrameData == null)
-                {
-                    return null;
-                }
-
-                skeletonFrameData.CopySkeletonDataTo(allSkeletons);
-
-                //get the first tracked skeleton
-                Skeleton first = (from s in allSkeletons
-                                  where s.TrackingState == SkeletonTrackingState.Tracked
-                                  select s).FirstOrDefault();
-
-                return first;
+                return null;
             }
+
+            if (skeletonFrameData.SkeletonArrayLength != allSkeletons.Length)
+                allSkeletons = new Skeleton[skeletonFrameData.SkeletonArrayLength];
+
+            skeletonFrameData.CopySkeletonDataTo(allSkeletons);
+
+            //get the first tracked skeleton
+            Skeleton first = (from s in allSkeletons
+                              where s.TrackingState == SkeletonTrackingState.Tracked
+                              select s).FirstOrDefault();
+
+            return first;
         }
 
-        //method called when all frames are ready to take outside input
-        void sensor_AllFramesReady(object sender, AllFramesReadyEventArgs e)
+        private void sensor_SensorSkeletonFrameReady(object sender, SkeletonFrameReadyEventArgs e)
         {
-            if (closing)
-            {
+            if (GameLogic.CurrentRound == null
+                || GameLogic.CurrentRound.RequiredPose == null)
                 return;
-            }
 
             //Get a skeleton
-            Skeleton first = GetFirstSkeleton(e);
+            Skeleton firstSkeleton;
+            using (SkeletonFrame frame = e.OpenSkeletonFrame())
+            {
+                firstSkeleton = GetFirstSkeleton(frame);
+            }
 
-            if (first == null)
+            if (firstSkeleton == null)
+            {
+                lock (poseLockObject)
+                {
+                    userInCorrectPose = false;
+                }
+                return;
+            }
+
+            GameLogic.CurrentRound.RequiredPose.SetCurrentJoints(
+                firstSkeleton.Joints[JointType.Head],
+                firstSkeleton.Joints[JointType.HandLeft],
+                firstSkeleton.Joints[JointType.HandRight],
+                firstSkeleton.Joints[JointType.WristLeft],
+                firstSkeleton.Joints[JointType.WristRight],
+                firstSkeleton.Joints[JointType.ElbowLeft],
+                firstSkeleton.Joints[JointType.ElbowRight],
+                firstSkeleton.Joints[JointType.HipLeft],
+                firstSkeleton.Joints[JointType.HipRight],
+                firstSkeleton.Joints[JointType.KneeLeft],
+                firstSkeleton.Joints[JointType.KneeRight],
+                firstSkeleton.Joints[JointType.ElbowLeft],
+                firstSkeleton.Joints[JointType.ElbowRight]
+                );
+
+
+            lock (poseLockObject)
+            {
+
+                if (GameLogic.CurrentRound.AnswerMethod != AnswerMethod.BodyPoseAndSpeech)
+                {
+                    userInCorrectPose = false;
+                }
+                else
+                {
+                    bool nowInCorrectPose = GameLogic.CurrentRound.RequiredPose.IsPoseValid();
+
+                    if (userInCorrectPose && !nowInCorrectPose)
+                    {
+                        userInCorrectPose = false;
+                        UpdatePoseIconBorder();
+                    }
+                    else if (!userInCorrectPose && nowInCorrectPose)
+                    {
+                        userInCorrectPose = true;
+                        UpdatePoseIconBorder();
+                    }
+
+                }
+            }
+
+#if DEBUG
+            using (DrawingContext dc = this.drawingGroup.Open())
+            {
+                // Draw a transparent background to set the render size
+                dc.DrawRectangle(Brushes.Transparent, null, new Rect(0.0, 0.0, RenderWidth, RenderHeight));
+
+                RenderSkeleton(dc, firstSkeleton, GameLogic.CurrentRound.RequiredPose);
+
+                // prevent drawing outside of our render area
+                this.drawingGroup.ClipGeometry = new RectangleGeometry(new Rect(0.0, 0.0, RenderWidth, RenderHeight));
+            }
+#endif
+        }
+
+        private void UpdatePoseIconBorder()
+        {
+            if (!userInCorrectPose)
+            {
+                // no longer in correct pose
+                //poseIcon.BorderBrush = Brushes.Green;
+                poseIcon.BorderThickness = new Thickness(0);
+            }
+            else
+            {
+                // now in correct pose
+                poseIcon.BorderBrush = Brushes.Green;
+                poseIcon.BorderThickness = new Thickness(2);
+            }
+
+        }
+
+        #region " Skeleton drawing "
+
+        /// <summary>
+        /// Thickness of drawn joint lines
+        /// </summary>
+        private const double JointThickness = 3;
+
+        /// <summary>
+        /// Thickness of body center ellipse
+        /// </summary>
+        private const double BodyCenterThickness = 10;
+
+        /// <summary>
+        /// Thickness of clip edge rectangles
+        /// </summary>
+        private const double ClipBoundsThickness = 10;
+
+        /// <summary>
+        /// Brush used to draw skeleton center point
+        /// </summary>
+        private readonly Brush centerPointBrush = Brushes.Blue;
+
+        /// <summary>
+        /// Brush used for drawing joints that are currently tracked
+        /// </summary>
+        private readonly Brush trackedJointBrush = new SolidColorBrush(Color.FromArgb(255, 68, 192, 68));
+
+        /// <summary>
+        /// Brush used for drawing joints that are currently inferred
+        /// </summary>        
+        private readonly Brush inferredJointBrush = Brushes.Yellow;
+
+        /// <summary>
+        /// Pen used for drawing bones that are currently tracked
+        /// </summary>
+        private readonly Pen trackedBonePen = new Pen(Brushes.Green, 6);
+
+        /// <summary>
+        /// Pen used for drawing bones that are currently inferred
+        /// </summary>        
+        private readonly Pen inferredBonePen = new Pen(Brushes.Gray, 1);
+
+        /// <summary>
+        /// Drawing group for skeleton rendering output
+        /// </summary>
+        private DrawingGroup drawingGroup;
+
+        /// <summary>
+        /// Drawing image that we will display
+        /// </summary>
+        private DrawingImage imageSource;
+
+
+        //private double RenderHeight = this.CurrentPoseBox.Height;
+        //private double RenderWidth = this.CurrentPoseBox.Width;
+        private double RenderWidth = 1280;
+        private double RenderHeight = 720;
+
+
+        private void RenderSkeleton(DrawingContext dc, Skeleton skel, AbstractPose pose)
+        {
+            RenderClippedEdges(skel, dc);
+
+            if (skel.TrackingState == SkeletonTrackingState.Tracked)
+            {
+                DrawBonesAndJoints(skel, dc, pose);
+            }
+            else if (skel.TrackingState == SkeletonTrackingState.PositionOnly)
+            {
+                dc.DrawEllipse(
+                this.centerPointBrush,
+                null,
+                this.SkeletonPointToScreen(skel.Position),
+                BodyCenterThickness,
+                BodyCenterThickness);
+            }
+        }
+
+        /// <summary>
+        /// Draws indicators to show which edges are clipping skeleton data
+        /// </summary>
+        /// <param name="skeleton">skeleton to draw clipping information for</param>
+        /// <param name="drawingContext">drawing context to draw to</param>
+        private void RenderClippedEdges(Skeleton skeleton, DrawingContext drawingContext)
+        {
+            if (skeleton.ClippedEdges.HasFlag(FrameEdges.Bottom))
+            {
+                drawingContext.DrawRectangle(
+                    Brushes.Red,
+                    null,
+                    new Rect(0, RenderHeight - ClipBoundsThickness, RenderWidth, ClipBoundsThickness));
+            }
+
+            if (skeleton.ClippedEdges.HasFlag(FrameEdges.Top))
+            {
+                drawingContext.DrawRectangle(
+                    Brushes.Red,
+                    null,
+                    new Rect(0, 0, RenderWidth, ClipBoundsThickness));
+            }
+
+            if (skeleton.ClippedEdges.HasFlag(FrameEdges.Left))
+            {
+                drawingContext.DrawRectangle(
+                    Brushes.Red,
+                    null,
+                    new Rect(0, 0, ClipBoundsThickness, RenderHeight));
+            }
+
+            if (skeleton.ClippedEdges.HasFlag(FrameEdges.Right))
+            {
+                drawingContext.DrawRectangle(
+                    Brushes.Red,
+                    null,
+                    new Rect(RenderWidth - ClipBoundsThickness, 0, ClipBoundsThickness, RenderHeight));
+            }
+        }
+
+        /// <summary>
+        /// Draws a skeleton's bones and joints
+        /// </summary>
+        /// <param name="skeleton">skeleton to draw</param>
+        /// <param name="drawingContext">drawing context to draw to</param>
+        private void DrawBonesAndJoints(Skeleton skeleton, DrawingContext drawingContext, AbstractPose pose)
+        {
+            // Render Torso
+            this.DrawBone(skeleton, drawingContext, JointType.Head, JointType.ShoulderCenter);
+            this.DrawBone(skeleton, drawingContext, JointType.ShoulderCenter, JointType.ShoulderLeft);
+            this.DrawBone(skeleton, drawingContext, JointType.ShoulderCenter, JointType.ShoulderRight);
+            this.DrawBone(skeleton, drawingContext, JointType.ShoulderCenter, JointType.Spine);
+            this.DrawBone(skeleton, drawingContext, JointType.Spine, JointType.HipCenter);
+            this.DrawBone(skeleton, drawingContext, JointType.HipCenter, JointType.HipLeft);
+            this.DrawBone(skeleton, drawingContext, JointType.HipCenter, JointType.HipRight);
+
+            // Left Arm
+            this.DrawBone(skeleton, drawingContext, JointType.ShoulderLeft, JointType.ElbowLeft);
+            this.DrawBone(skeleton, drawingContext, JointType.ElbowLeft, JointType.WristLeft);
+            this.DrawBone(skeleton, drawingContext, JointType.WristLeft, JointType.HandLeft);
+
+            // Right Arm
+            this.DrawBone(skeleton, drawingContext, JointType.ShoulderRight, JointType.ElbowRight);
+            this.DrawBone(skeleton, drawingContext, JointType.ElbowRight, JointType.WristRight);
+            this.DrawBone(skeleton, drawingContext, JointType.WristRight, JointType.HandRight);
+
+            // Left Leg
+            this.DrawBone(skeleton, drawingContext, JointType.HipLeft, JointType.KneeLeft);
+            this.DrawBone(skeleton, drawingContext, JointType.KneeLeft, JointType.AnkleLeft);
+            this.DrawBone(skeleton, drawingContext, JointType.AnkleLeft, JointType.FootLeft);
+
+            // Right Leg
+            this.DrawBone(skeleton, drawingContext, JointType.HipRight, JointType.KneeRight);
+            this.DrawBone(skeleton, drawingContext, JointType.KneeRight, JointType.AnkleRight);
+            this.DrawBone(skeleton, drawingContext, JointType.AnkleRight, JointType.FootRight);
+
+            // Render Joints
+            foreach (Joint joint in skeleton.Joints)
+            {
+                Brush drawBrush = null;
+                bool correct;
+
+                if (joint.TrackingState == JointTrackingState.Tracked && pose != null)
+                {
+                    switch (joint.JointType)
+                    {
+                        case JointType.Head:
+                            correct = pose.IsHeadCorrect();
+                            break;
+
+                        case JointType.HandLeft:
+                            correct = pose.IsHandLeftCorrect();
+                            break;
+
+                        case JointType.HandRight:
+                            correct = pose.IsHandRightCorrect();
+                            break;
+
+                        case JointType.WristLeft:
+                            correct = pose.IsWristLeftCorrect();
+                            break;
+
+                        case JointType.WristRight:
+                            correct = pose.IsWristRightCorrect();
+                            break;
+
+                        case JointType.ElbowLeft:
+                            correct = pose.IsElbowLeftCorrect();
+                            break;
+
+                        case JointType.ElbowRight:
+                            correct = pose.IsElbowRightCorrect();
+                            break;
+
+                        case JointType.HipLeft:
+                            correct = pose.IsHipLeftCorrect();
+                            break;
+
+                        case JointType.HipRight:
+                            correct = pose.IsHipRightCorrect();
+                            break;
+
+                        case JointType.KneeLeft:
+                            correct = pose.IsKneeLeftCorrect();
+                            break;
+
+                        case JointType.KneeRight:
+                            correct = pose.IsKneeRightCorrect();
+                            break;
+
+                        case JointType.AnkleLeft:
+                            correct = pose.IsAnkleLeftCorrect();
+                            break;
+
+                        case JointType.AnkleRight:
+                            correct = pose.IsAnkleRightCorrect();
+                            break;
+
+                        default:
+                            correct = true;
+                            break;
+                    }
+
+                    drawBrush = correct ? this.trackedJointBrush : this.inferredJointBrush;
+                }
+                else if (joint.TrackingState == JointTrackingState.Tracked && pose == null)
+                {
+                    drawBrush = this.trackedJointBrush;
+                }
+                else if (joint.TrackingState == JointTrackingState.Inferred)
+                {
+                    drawBrush = this.inferredJointBrush;
+                }
+
+                if (drawBrush != null)
+                {
+                    Point position = this.SkeletonPointToScreen(joint.Position);
+
+                    FormattedText formattedText = new FormattedText(
+                           joint.JointType + " (" + position.X + "," + position.Y + ")",
+                           CultureInfo.GetCultureInfo("en-us"),
+                           FlowDirection.LeftToRight,
+                           new Typeface("Verdana"),
+                           10,
+                           drawBrush);
+
+                    drawingContext.DrawEllipse(drawBrush, null, position, JointThickness, JointThickness);
+                    drawingContext.DrawText(formattedText, position);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Draws a bone line between two joints
+        /// </summary>
+        /// <param name="skeleton">skeleton to draw bones from</param>
+        /// <param name="drawingContext">drawing context to draw to</param>
+        /// <param name="jointType0">joint to start drawing from</param>
+        /// <param name="jointType1">joint to end drawing at</param>
+        private void DrawBone(Skeleton skeleton, DrawingContext drawingContext, JointType jointType0, JointType jointType1)
+        {
+            Joint joint0 = skeleton.Joints[jointType0];
+            Joint joint1 = skeleton.Joints[jointType1];
+
+            // If we can't find either of these joints, exit
+            if (joint0.TrackingState == JointTrackingState.NotTracked ||
+                joint1.TrackingState == JointTrackingState.NotTracked)
             {
                 return;
             }
 
-            GetCameraPoint(first, e);
-            
-            //if the correct pose has been done and an answer has been given, and the user has not completed the quiz add 1 to the question counter
-            //and get the next question
-            if ((correctPose && answerGiven) && counter < 4) //TODO add pressure mat boolean (&& pressureMat)
+            // Don't draw if both points are inferred
+            if (joint0.TrackingState == JointTrackingState.Inferred &&
+                joint1.TrackingState == JointTrackingState.Inferred)
             {
-                counter += 1;
-                nextQuestion();
-            }
-            //if the user has answered all the questions return to the homepage and let the user know their score
-            else if (counter == 4 && (correctPose && answerGiven))
-            {
-                questionBox.Text = "";
-                answerBox1.Text = "";
-                answerBox2.Text = "";
-                answerBox3.Text = "";
-                answerBox4.Text = "";
-                currentPose.Source = null;
-                if (!challengebool && !challenged)
-                {
-                    this.NavigationService.Navigate(new HomePage("Well Done! You scored " + score.ToString() + " points!"));
-                }
-                else if (challenged)
-                {
-                    try
-                    {
-                        this.NavigationService.Navigate(new HomePage(currentChallenge, score));
-                    }
-                    catch (NullReferenceException ex)
-                    {
-                        Console.WriteLine("Exception: " + ex);
-                        Console.WriteLine("Error navigating Home");
-                        this.NavigationService.Navigate(new HomePage("Sorry something went wrong"));
-                    }
-                }
-                else
-                {
-                    try
-                    {
-                        this.NavigationService.Navigate(new HomePage(friend, category, score));
-                    }
-                    catch (NullReferenceException ex)
-                    {
-                        Console.WriteLine("Error: " + ex.Message);
-                        Console.WriteLine("Error navigating Home");
-                        this.NavigationService.Navigate(new HomePage("Sorry something went wrong"));
-                    }
-                }
-            }
-            //otherwise check the pose, and voice recognition is being carried out elsewhere, and take input from pressure mats
-            else
-            {
-                //check to see if the user has completed the correct pose relating to the picture shown
-                if (!correctPose)
-                {
-                    checkPose(first.Joints[JointType.Head], first.Joints[JointType.HandLeft], first.Joints[JointType.HandRight], first.Joints[JointType.HipLeft], first.Joints[JointType.HipRight], first.Joints[JointType.ElbowLeft], first.Joints[JointType.ElbowRight]);
-                }
-                else
-                {
-                    //let the user know the correct pose has been done by displaying a tick on screen
-                    currentPose.Source = new BitmapImage(correct);
-                }
-
-                if (!pressureMat)
-                {
-                    //check to see whether the user is on or off the pressure mat
-                }
-                else
-                {
-                    //let the user know that the correct pressure mat action has been taken
-                }
-                //input from pressure mats??
+                return;
             }
 
+            // We assume all drawn bones are inferred unless BOTH joints are tracked
+            Pen drawPen = this.inferredBonePen;
+            if (joint0.TrackingState == JointTrackingState.Tracked && joint1.TrackingState == JointTrackingState.Tracked)
+            {
+                drawPen = this.trackedBonePen;
+            }
+
+            drawingContext.DrawLine(drawPen, this.SkeletonPointToScreen(joint0.Position), this.SkeletonPointToScreen(joint1.Position));
         }
 
-        #endregion skeleton tracking
-
-        #region camera
-        void GetCameraPoint(Skeleton first, AllFramesReadyEventArgs e)
+        /// <summary>
+        /// Maps a SkeletonPoint to lie within our render space and converts to Point
+        /// </summary>
+        /// <param name="skelpoint">point to map</param>
+        /// <returns>mapped point</returns>
+        private Point SkeletonPointToScreen(SkeletonPoint skelpoint)
         {
+            //return new Point(skelpoint.X, skelpoint.Y);
 
-            using (DepthImageFrame depth = e.OpenDepthImageFrame())
-            {
-                if (depth == null ||
-                    kinectSensorChooser1.Kinect == null)
-                {
-                    return;
-                }
-            }
+            // Convert point to depth space.  
+            // We are not using depth directly, but we do want the points in our 640x480 output resolution.
+            DepthImagePoint depthPoint = MainWindow.Instance.SensorChooser.Kinect.CoordinateMapper.MapSkeletonPointToDepthPoint(skelpoint, DepthImageFormat.Resolution640x480Fps30);
+            return new Point(depthPoint.X, depthPoint.Y);
         }
 
-        private void CameraPosition(FrameworkElement element, ColorImagePoint point)
-        {
-            //Divide by 2 for width and height so point is right in the middle 
-            // instead of in top/left corner
-            Canvas.SetLeft(element, point.X - element.Width / 2);
-            Canvas.SetTop(element, point.Y - element.Height / 2);
+        #endregion
 
-        }
-        #endregion camera
+        #endregion
 
-        #region voice recognition
-        //set up the kinect to be the input source for voice recognition
-        private static RecognizerInfo GetKinectRecognizer()
-        {
-            foreach (RecognizerInfo recognizer in SpeechRecognitionEngine.InstalledRecognizers())
-            {
-                string value;
-                recognizer.AdditionalInfo.TryGetValue("Kinect", out value);
-                if ("True".Equals(value, StringComparison.OrdinalIgnoreCase) && "en-US".Equals(recognizer.Culture.Name, StringComparison.OrdinalIgnoreCase))
-                {
-                    return recognizer;
-                }
-            }
-
-            return null;
-        }
-
-        //to change the grammar from numbers to colours/colours to numbers
-        private void changeGrammar()
-        {
-            if (null != ri)
-            {
-
-                this.speechEngine = new SpeechRecognitionEngine(ri.Id);
-
-                //set the grammar to be the current option (colours or numbers)
-                var grammar = new Choices();
-
-                if (currentGrammar.Equals("colours"))
-                {
-                    grammar.Add("red");
-                    grammar.Add("green");
-                    grammar.Add("blue");
-                    grammar.Add("yellow");
-                }
-                else
-                {
-                    grammar.Add("one");
-                    grammar.Add("two");
-                    grammar.Add("three");
-                    grammar.Add("four");
-                }
-
-                var gb = new GrammarBuilder { Culture = ri.Culture };
-                gb.Append(grammar);
-
-                // Create the actual Grammar instance, and then load it into the speech recognizer.
-                var g = new Grammar(gb);
-
-                speechEngine.LoadGrammar(g);
-
-                speechEngine.SpeechRecognized += SpeechRecognized;
-                speechEngine.SpeechRecognitionRejected += SpeechRejected;
-
-                speechEngine.SetInputToAudioStream(sensor.AudioSource.Start(), 
-                    new SpeechAudioFormatInfo(EncodingFormat.Pcm, 16000, 16, 1, 32000, 2, null));
-                speechEngine.RecognizeAsync(RecognizeMode.Multiple);
-            }
-        }
+        #region " Voice recognition "
 
         //what to do if the speech is recognised
         private void SpeechRecognized(object sender, SpeechRecognizedEventArgs e)
         {
             // Speech utterance confidence below which we treat speech as if it hadn't been heard
-            const double ConfidenceThreshold = 0.7;
-
-            if (answerGiven == false)
+            if (e.Result.Confidence < SpeechConfidenceThreshold)
             {
-                if (e.Result.Confidence >= ConfidenceThreshold)
-                {
-                    //do something with the recognised words
-                    //if the player gets the answer right and answerGiven is false change correctAnswerGiven to true
-                    //if the recognised word is in the correct grammar set answerGiven to true
-
-                    //get the recognised word
-                    var word = e.Result.Text.ToUpperInvariant();
-                    //if the current grammar is colours check which colour has been recognised
-                    if (currentGrammar.Equals("colours"))
-                    {
-                        switch (word)
-                        {
-                            case "GREEN":
-                                answerBox2.Text = "";
-                                answerBox3.Text = "";
-                                answerBox4.Text = "";
-                                if (currentQuestion.correctAnswer.Equals(currentQuestion.answer1))
-                                {
-                                    score = score + 1;
-                                }
-                                answerGiven = true;
-                                break;
-
-                            case "RED":
-                                answerBox1.Text = "";
-                                answerBox3.Text = "";
-                                answerBox4.Text = "";
-                                if (currentQuestion.correctAnswer.Equals(currentQuestion.answer2))
-                                {
-                                    score = score + 1;
-                                }
-                                answerGiven = true;
-                                break;
-
-                            case "YELLOW":
-                                answerBox1.Text = "";
-                                answerBox2.Text = "";
-                                answerBox4.Text = "";
-                                if (currentQuestion.correctAnswer.Equals(currentQuestion.answer3))
-                                {
-                                    score = score + 1;
-                                }
-                                answerGiven = true;
-                                break;
-
-                            case "BLUE":
-                                answerBox1.Text = "";
-                                answerBox3.Text = "";
-                                answerBox2.Text = "";
-                                if (currentQuestion.correctAnswer.Equals(currentQuestion.answer4))
-                                    score = score + 1;
-                                answerGiven = true;
-                                break;
-                        }
-                    }
-                    //if the current grammar is numbers check which number has been recognised
-                    else
-                    {
-                        switch (word)
-                        {
-                            case "ONE":
-                                answerBox2.Text = "";
-                                answerBox3.Text = "";
-                                answerBox4.Text = "";
-                                if (currentQuestion.correctAnswer.Equals(currentQuestion.answer1))
-                                {
-                                    score++;
-                                }
-                                answerGiven = true;
-                                break;
-
-                            case "TWO":
-                                answerBox1.Text = "";
-                                answerBox3.Text = "";
-                                answerBox4.Text = "";
-                                if (currentQuestion.correctAnswer.Equals(currentQuestion.answer2))
-                                {
-                                    score++;
-                                }
-                                answerGiven = true;
-                                break;
-
-                            case "THREE":
-                                answerBox1.Text = "";
-                                answerBox4.Text = "";
-                                answerBox2.Text = "";
-                                if (currentQuestion.correctAnswer.Equals(currentQuestion.answer3))
-                                {
-                                    score++;
-                                }
-                                answerGiven = true;
-                                break;
-
-                            case "FOUR":
-                                answerBox1.Text = "";
-                                answerBox2.Text = "";
-                                answerBox3.Text = "";
-                                if (currentQuestion.correctAnswer.Equals(currentQuestion.answer4))
-                                {
-                                    score++;
-                                }
-                                answerGiven = true;
-                                break;
-                        }
-                    }
-                }
-            }
-            else
-            {
+                log.Debug(String.Format("Speech below confidence level of {0}: {1} ({2})",
+                    SpeechConfidenceThreshold,
+                    e.Result.Text,
+                    e.Result.Confidence));
                 return;
             }
+
+
+            String spokenText = e.Result.Text.ToUpper();
+
+            if ("QUIT GAME".Equals(spokenText)
+                || "EXIT GAME".Equals(spokenText))
+            {
+                log.Debug(String.Format("Quit due to voice command: {0} ({1})",
+                    e.Result.Text,
+                    e.Result.Confidence));
+                Environment.Exit(0x00);
+            }
+
+            // if the current mode doesn't require speech, don't do any of this
+            if (GameLogic.CurrentRound.AnswerMethod != AnswerMethod.Speech
+                && GameLogic.CurrentRound.AnswerMethod != AnswerMethod.BodyPoseAndSpeech)
+                return;
+
+            // if the current mode is pose and speech, don't process speech unless the pose is correct
+            if (GameLogic.CurrentRound.AnswerMethod == AnswerMethod.BodyPoseAndSpeech)
+            {
+                lock (poseLockObject)
+                {
+                    if (!userInCorrectPose)
+                        return;
+                }
+            }
+
+
+            if (GameLogic.CurrentRound.RequiredGrammar == Logic.Grammar.Color)
+            {
+                if (spokenText.Equals("GREEN"))
+                    SelectAnswer(1);
+                else if (spokenText.Equals("YELLOW"))
+                    SelectAnswer(2);
+                else if (spokenText.Equals("RED"))
+                    SelectAnswer(3);
+                else if (spokenText.Equals("BLUE"))
+                    SelectAnswer(4);
+            }
+            else if (GameLogic.CurrentRound.RequiredGrammar == Logic.Grammar.Number)
+            {
+                if (spokenText.Equals("ONE"))
+                    SelectAnswer(1);
+                else if (spokenText.Equals("TWO"))
+                    SelectAnswer(2);
+                else if (spokenText.Equals("THREE"))
+                    SelectAnswer(3);
+                else if (spokenText.Equals("FOUR"))
+                    SelectAnswer(4);
+            }
+
         }
 
         //what to do if the speech is rejected
         private void SpeechRejected(object sender, SpeechRecognitionRejectedEventArgs e)
         {
-            Console.WriteLine("Speech has been rejected");
+            // do nothing
         }
 
-        #endregion voice recognition
+        private void EnableSpeechEngine(KinectSensor sensor)
+        {
+            log.Debug("Enabling speech engine");
+
+            if (_speechEngine != null)
+            {
+                try
+                {
+                    log.Debug("Stopping old speech engine");
+                    _speechEngine.RecognizeAsyncStop();
+                }
+                catch (Exception ex)
+                {
+                    log.Warn("Error stopping old speech engine", ex);
+                }
+            }
+
+            // Speech recognition
+            try
+            {
+                RecognizerInfo ri = SpeechUtils.GetKinectRecognizer();
+                this._speechEngine = new SpeechRecognitionEngine(ri.Id);
+
+                // For long recognition sessions (a few hours or more), it may be beneficial to turn off adaptation of the acoustic model. 
+                // This will prevent recognition accuracy from degrading over time.
+                ////speechEngine.UpdateRecognizerSetting("AdaptationOn", 0);
+
+                Choices grammar = new Choices();
+
+                grammar.Add("red");
+                grammar.Add("green");
+                grammar.Add("blue");
+                grammar.Add("yellow");
+                grammar.Add("one");
+                grammar.Add("two");
+                grammar.Add("three");
+                grammar.Add("four");
+
+                grammar.Add("quit game");
+                grammar.Add("exit game");
+
+                GrammarBuilder gb = new GrammarBuilder { Culture = _speechEngine.RecognizerInfo.Culture };
+                gb.Append(grammar);
+
+                // Create the actual Grammar instance, and then load it into the speech recognizer.
+                Microsoft.Speech.Recognition.Grammar g = new Microsoft.Speech.Recognition.Grammar(gb);
+
+                _speechEngine.LoadGrammar(g);
+
+                _speechEngine.SpeechRecognized += SpeechRecognized;
+                _speechEngine.SpeechRecognitionRejected += SpeechRejected;
+
+                this._speechEngine.SetInputToAudioStream(
+                    sensor.AudioSource.Start(),
+                    new SpeechAudioFormatInfo(EncodingFormat.Pcm, 16000, 16, 1, 32000, 2, null));
+                this._speechEngine.RecognizeAsync(RecognizeMode.Multiple);
+
+                log.Debug("Speech engine grammar updated");
+            }
+            catch (Exception ex)
+            {
+                this._speechEngine = null;
+                log.Error("Error setting up speech engine", ex);
+                return;
+            }
+
+            log.Debug("Speech engine enabled");
+        }
+
+        #endregion
+
+        #region " Guesture tracking "
+
+        private void answerButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (GameLogic.CurrentRound.AnswerMethod != AnswerMethod.Guesture)
+                return;
+
+            if (sender == answerButton1)
+                SelectAnswer(1);
+            else if (sender == answerButton2)
+                SelectAnswer(2);
+            else if (sender == answerButton3)
+                SelectAnswer(3);
+            else if (sender == answerButton4)
+                SelectAnswer(4);
+        }
+
+        #endregion
+
+        private void NextQuestion()
+        {
+            userInCorrectPose = false;
+            UpdatePoseIconBorder();
+            //playerNameBox.Text = GameLogic.CurrentRound.
+
+            if (GameLogic.CurrentRound != null &&
+                GameLogic.CurrentRound.RoundNumber == GameLogic.QuestionsInGame)
+            {
+                EndGame();
+                return;
+            }
+
+            QuestionRound round = GameLogic.NextQuestion();
+
+            if (round.Question == null)
+            {
+                // we've run out of questions
+                // TODO: Do something sensible
+                return;
+            }
+
+
+#if DEBUG
+            // TODO: Remove me after testing
+            //round.AnswerMethod = AnswerMethod.BodyPoseAndSpeech;
+            //log.Warn("Testing mode: AnswerMethod = " + round.AnswerMethod);
+            // TODO: Remove until here
+
+            // quick hack to skip kinect actions if in debugging mode
+            if (_speechEngine == null)
+            {
+                log.Warn("Speech engine is null, reverting to AnswerMethod.Guesture");
+                round.AnswerMethod = AnswerMethod.Guesture;
+            }
+            //else if (_speechEngine.AudioState == AudioState.Stopped)
+            //{
+            //    log.Warn("Speech engine is offline, reverting to AnswerMethod.Guesture");
+            //    round.AnswerMethod = AnswerMethod.Guesture;
+            //}
+#endif
+
+            questionBox.Text = round.Question.QuestionText;
+            questionNumberBox.Text = GameLogic.CurrentRoundNumber + "/" + GameLogic.QuestionsInGame;
+
+            ////set the answers in the answer boxes
+            ////get answers 1-4 from corresponding question
+            answerBox1.Text = round.Question.Answer1;
+            answerBox2.Text = round.Question.Answer2;
+            answerBox3.Text = round.Question.Answer3;
+            answerBox4.Text = round.Question.Answer4;
+
+            //set the status bar for the current answer format
+            handIcon.Visibility = System.Windows.Visibility.Hidden;
+            micIcon.Visibility = System.Windows.Visibility.Hidden;
+            poseIcon.Visibility = System.Windows.Visibility.Hidden;
+
+            switch (round.AnswerMethod)
+            {
+                case AnswerMethod.BodyPoseAndSpeech:
+                    micIcon.Visibility = System.Windows.Visibility.Visible;
+                    poseIcon.Visibility = System.Windows.Visibility.Visible;
+                    poseIconImage.Source = new BitmapImage(round.RequiredPose.ImageUri);
+
+                    statusBarText.Text = "Pose: " + round.RequiredPose.Name + " and ";
+
+                    if (round.RequiredGrammar == Logic.Grammar.Color)
+                    {
+                        statusBarText.Text += "say \"GREEN\",\"RED\",\"YELLOW\", or \"BLUE\"";
+                    }
+                    else if (round.RequiredGrammar == Logic.Grammar.Number)
+                    {
+                        statusBarText.Text += "say \"ONE\",\"TWO\",\"THREE\", or \"FOUR\"";
+                    }
+
+                    break;
+                case AnswerMethod.Speech:
+                    micIcon.Visibility = System.Windows.Visibility.Visible;
+                    if (round.RequiredGrammar == Logic.Grammar.Color)
+                    {
+                        statusBarText.Text = "Say \"GREEN\",\"RED\",\"YELLOW\", or \"BLUE\"";
+                    }
+                    else if (round.RequiredGrammar == Logic.Grammar.Number)
+                    {
+                        statusBarText.Text = "Say \"ONE\",\"TWO\",\"THREE\", or \"FOUR\"";
+                    }
+                    break;
+
+                case AnswerMethod.Guesture:
+                    handIcon.Visibility = System.Windows.Visibility.Visible;
+                    statusBarText.Text = "Select an option by waving at the coloured circle";
+                    break;
+            }
+
+            //update score box
+            scoreBox.Text = GameLogic.Score.ToString();
+
+        }
+
+        private void SelectAnswer(int answerIndex)
+        {
+            if (GameLogic.CurrentRound.AnswerMethod == AnswerMethod.BodyPoseAndSpeech)
+            {
+                lock (poseLockObject)
+                {
+                    if (!userInCorrectPose)
+                        return;
+                }
+            }
+
+            if (answerIndex != 1) answerBox1.Text = "";
+            if (answerIndex != 2) answerBox2.Text = "";
+            if (answerIndex != 3) answerBox3.Text = "";
+            if (answerIndex != 4) answerBox4.Text = "";
+
+            bool result = GameLogic.UserAnsweredQuestion(answerIndex);
+
+            // TODO: Display result
+            String answer;
+            switch (answerIndex)
+            {
+                case 1:
+                    answer = GameLogic.CurrentRound.Question.Answer1;
+                    break;
+                case 2:
+                    answer = GameLogic.CurrentRound.Question.Answer2;
+                    break;
+                case 3:
+                    answer = GameLogic.CurrentRound.Question.Answer3;
+                    break;
+                case 4:
+                    answer = GameLogic.CurrentRound.Question.Answer4;
+                    break;
+                default:
+                    answer = "Unknown answer";
+                    break;
+            }
+
+            bool correct = (answerIndex == GameLogic.CurrentRound.Question.CorrectAnswer);
+
+            var selectionDisplay = new AnswerDisplay(answer, correct);
+            Grid.SetRowSpan(selectionDisplay, 6);
+            Grid.SetColumnSpan(selectionDisplay, 5);
+            this.grid.Children.Add(selectionDisplay);
+
+            // next round
+            NextQuestion();
+        }
+
+        private void EndGame()
+        {
+            GameLogic.EndGame();
+            MainWindow.SwitchPage(new GameOver());
+        }
+
+
     }
 }

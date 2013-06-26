@@ -1,0 +1,478 @@
+<!DOCTYPE html> 
+<html>
+  <head> 
+	<meta charset="UTF-8">
+	<title>Societies</title>
+	<script type="text/javascript" charset="utf-8" src="js/cordova-1.8.1.js"></script>
+	<!-- Uncomment line below to enable PhoneGap desktop and comment out real PhoneGap jS library-->
+	<!--<script type="text/javascript" charset="utf-8" src="js/phonegap-desktop.js"></script> -->
+	<link rel="stylesheet" href="css/jquery.mobile.structure-1.1.2.css" /> 
+	<link rel="stylesheet" href="css/custom/custom-theme-societies.css"/>
+	<link rel="stylesheet" href="css/custom/societies.css"/> 
+	<script type="text/javascript" src="js/jquery-1.7.2.js"></script>
+	<script type="text/javascript">
+	jQuery(document).on('mobileinit', function() {
+	  console.log("Setting up jQuery options, CORS:" + jQuery.support.cors);
+	  jQuery.mobile.allowCrossDomainPages = true;
+	});
+	</script>
+	<script type="text/javascript" src="js/jquery.mobile-1.1.2.js"></script> 
+  </head> 
+<body> 
+
+<!-- Start of first page (cf. http://jquerymobile.com/themeroller/ to create custom themes -->
+
+<!-- Start of Splash page --> 
+<div data-role="page" id="splash" data-theme="h">
+  <div data-role="header" data-position="fixed">
+    <p><img src="images/societies_xsmall.png" alt="Societies" class="logo" /></p>
+  </div><!-- /header -->
+
+  <div data-role="footer" data-theme="a" data-position="fixed">
+    <a href="#main" data-role="button" data-icon="back" data-inline="true">menu</a>
+  </div><!-- /footer -->
+</div><!-- /page -->
+
+
+<!-- Start of login page, if we have not logged in before -->
+<div data-role="page" id="login" data-theme="h">
+  <div data-role="header" data-position="fixed" >
+    <p><img src="images/societies_xsmall.png" alt="Societies" class="logo"/></p>
+      <!-- Invoke a new page via an icon -->
+      <!--<a href="#main" data-role="button" data-icon="gear" data-inline="true" data-theme="a">&nbsp;&nbsp;&nbsp;Menu</a> -->
+  </div><!-- /header -->
+
+  <div data-role="content">	
+    <h1>Event Herald</h1>
+    <div id="la"> <!-- loginDialog -->
+      <div data-role="fieldcontain" >
+	<label for="username">User Name: </label>
+	<input type="text" name="username" id="username" value=""  />
+      </div>
+
+      <div data-role="fieldcontain" >
+      
+	<label for="userpass">Password: </label>
+	<input type="password" name="userpass" id="userpass" value="" />
+      </div>
+
+      <div data-role="collapsible" data-theme="b" data-content-theme="h">
+	<h3>Settings:</h3>
+	<div data-role="fieldcontain" >
+	  <label for="userdomain">SN Domain: </label>
+	  <input type="text" name="userdomain" id="userdomain" value="statusnet"/>
+	</div>
+      </div>
+      
+      <div>
+	<p id="loginStatus"><br/></p>
+      	<input id="connectSN" type="button" value="Connect" data-icon="gear" data-inline="true" /> 
+      </div>
+
+    </div>
+    <div id="lb"> <!-- floating content -->
+	<!--<a href="#registration" data-role="button" data-icon="gear" data-inline="true" data-theme="a">Register</a> -->
+	<a href="#main" data-role="none" id="bypass" class="center"><img src="images/trumpet_white.png"/></a>
+	 			
+	<h2 class="center">Version: 0.4</h2>			
+    </div> <!-- /loginDialog -->
+  </div><!-- /content -->
+
+  <div data-role="footer" data-position="fixed" > 
+  </div><!-- /footer -->
+</div><!-- /page -->
+
+
+<!-- Event Herald/Status Net registration page -->
+<div data-role="page" id="registration">
+
+	<div data-role="header" data-theme="a" data-position="fixed">
+		<p><img src="images/societies_xsmall.png" alt="Societies" />&nbsp;&nbsp;&nbsp;StatusNet Registration</p>
+	</div><!-- /header -->
+
+	<div data-role="content" data-theme="a">	
+   		<div id= "xmppRegDialog">
+			<div data-role="fieldcontain" >
+		    	<label for="regUsername">Username: </label>
+		    	<input type="text" name="regUserLogin" id="regUsername" value=""  />
+			</div>
+
+			<div data-role="fieldcontain" >
+		    	<label for="regUserpass">Password: </label>
+		    	<input type="password" name="regUserPass" id="regUserpass" value="" />
+			</div>
+
+			<div data-role="fieldcontain" >
+		    	<label for="repeatRegUserpass">Repeat Password: </label>
+		    	<input type="password" name="repeatRegUserPass" id="repeatRegUserpass" value="" />
+			</div>
+
+			<div>
+				<label for="snServers">Status Net Servers</label>
+				
+				<select name="snServersList" id="snServers">
+		  			<option value="societies.local" selected="selected">societies.local</option>
+		  			<option value="societies.alternative">societies.alternative</option>
+				</select> 
+			</div>
+	
+			<div data-role="collapsible">
+				<h3>Event Herald Terms</h3>
+			
+				<label for="societiesTCs">SOCIETIES Terms of Use:</label>
+				<textarea name="textareaSocietiesTCs" id="societiesTCs">
+				Societies Terms &amp; Conditions.
+				</textarea>
+			</div>
+			<div>
+				<label for="regSocietiesTerms">I agree with the Terms of Use for SOCIETIES software</label>
+				<input type="checkbox" name="regSocietiesTerms" id="regSocietiesTerms" class="custom" value="true"/>
+			</div>
+						
+			<input id="registerSN" type="button" value="Register" data-icon="gear" data-inline="true" /> 
+			
+		</div>
+	</div><!-- /content -->
+
+	<div data-role="footer" data-theme="a" >
+		<a href="#login" data-role="button" data-icon="home" data-inline="true">home</a>
+	</div><!-- /footer -->
+</div><!-- /page -->
+
+
+<!-- Start of main Menu page  the landing page if we are logged in -->
+<div data-role="page" id="main" data-theme="h">
+
+  <div data-role="header" data-position="fixed">
+    <p><img src="images/societies_xsmall.png" alt="Societies" class="logo"/></p>
+  </div><!-- /header -->
+
+  <div data-role="content">	
+    <h1>Menu</h1>
+    
+    <div id="la"> <!-- grid -->
+      <ul data-role="listview" data-inset="true" data-theme="e" >
+	<li data-role="list-divider" class="centre">Announcing Adhoc events</li>
+	<li><a href="#upcomingevents"><img src="./images/dco_d.png"/>Upcoming</a><span class="ui-li-count" id="upcomingCount">0</span></li>
+	<li data-role="list-divider" class="centre">Or manage your own events</li>
+	<li><a href="#attendingevents"><img src="./images/dco_c.png"/>Attending</a><span class="ui-li-count" id="attendingCount">0</span></li>
+	<li><a href="#proposeevent"><img src="./images/dco_o.png"/>Propose event</a></li>
+      </ul>
+    </div> <!-- grid -->
+    <div id="lb"> <!-- grid -->
+      <img src="images/trumpet_white.png" align="middle" class="ui-block-b"/>    
+    </div> <!-- grid -->
+  </div><!-- /content -->
+
+  <div data-role="footer" data-position="fixed">
+    <a href="#login" id="logoutIcon" data-role="button" data-icon="gear" data-inline="true" class="ui-btn-right">Logout</a>
+  </div><!-- /footer -->
+</div><!-- /page -->
+
+
+<!-- Start of Upcoming Events page -->
+<div data-role="page" id="upcomingevents" data-theme="h">
+
+  <div data-role="header" data-position="fixed">
+    <p><img src="images/societies_xsmall.png" alt="Societies" class="logo" /></p>
+  </div><!-- /header -->
+
+  <div data-role="content">	
+    	
+    <h2>Upcoming events</h2>
+    <div id="la">
+      <button id="refreshUpcomingEvents" data-icon="refresh">Refresh events</button>	
+
+      <!-- Status information -->
+      <ul data-role="listview" data-inset="true" data-theme="e" id="upcomingEventsContent">
+	<li data-role="list-divider" >No events</li>
+      </ul>
+    </div>
+    
+    <div id="lb">
+      <!-- Status information -->
+      <ul data-role="listview" data-inset="true" data-theme="e" id="upcomingEventsContent1">
+	<li data-role="list-divider" >No events</li>
+      </ul>
+    </div>
+<!--    <table border="0">
+    <thead>
+      <tr>
+	<th width="50%">Name</th>
+	<th width="50%">Title</th>
+      </tr>
+    </thead>
+    <tbody id="upcomingEventsContent1">
+      <tr>
+	<td><a href="#eventdetail">No events</a></td>
+	<td>None scheduled</td>
+      </tr>
+    </tbody>
+    </table> -->
+  </div><!-- /content -->
+
+  <div data-role="footer" data-position="fixed">
+    <a href="#main" data-role="button" data-icon="home" data-inline="true">Home</a>
+  </div><!-- /footer -->
+</div><!-- /page -->
+
+
+<div data-role="page" id="attendingevents" data-theme="h">
+
+  <div data-role="header" data-position="fixed">
+    <p><img src="images/societies_xsmall.png" alt="Societies" class="logo" /></p>
+  </div><!-- /header -->
+
+  <div data-role="content">
+    <h2>Events you wish to attend</h2>
+    <div id="la">
+      <button id="refreshAttendingEvents" data-icon="refresh">Refresh events</button>	
+
+      <ul data-role="listview" data-inset="true" data-theme="c" id="attendingEventsContent" class="swiperemove">
+	<li data-role="list-divider" >Attending no events</li>
+      </ul>
+    </div>
+<!-- Replaced with a list view     
+    <table id="attendingEventsTable" border="0" class="ui-grid-a" width="100%">
+      <thead><tr>
+	<th class="ui-block-a">Name</th>
+	<th class="ui-block-b">When</th>
+      </tr></thead>
+      <tbody id="attendingEventsContent1">
+	<tr>
+	  <td class="ui-block-a"><a href="#attendingevent">My Event</a></td>
+	  <td class="ui-block-b">20 mins</td>
+	</tr>
+	<tr>
+	  <td class="ui-block-a"><a href="#attendingevent">My Event</a></td>
+	  <td class="ui-block-b">30 mins</td>
+	</tr>
+      </tbody>
+    </table> -->
+  </div><!-- /content -->
+
+  <div data-role="footer" data-position="fixed">
+    <a href="#main" data-role="button" data-icon="home" data-inline="true">Home</a>
+  </div><!-- /footer -->
+</div><!-- /page -->
+
+
+<!-- Start of Attending Event Information page -->
+<div data-role="page" id="attendingevent" data-theme="h">
+
+  <div data-role="header"  data-position="fixed">
+    <img src="images/societies_xsmall.png" alt="Societies" class="logo" />
+  </div><!-- /header -->
+
+  <div data-role="content">	
+    <h2>Attending this event</h2>
+    <table id="attendingEventTable" border="1">
+	<thead>
+	  <tr>
+	    <th>Name</th>
+	    <th colspan="2">My Event Name</th>
+	  </tr>
+	</thead>
+	<tbody>
+	  <tr>
+	    <td rowspan="3">A picture</td>
+	    <td><p>Location:</p></td>
+	    <td>-</td>
+	  </tr>
+	  <tr>
+	    <td>When:</td>
+	    <td>-</td>
+	  </tr>
+	  <tr>
+	    <td>Walking time:</td>
+	    <td>-</td>
+	  </tr>
+	</tbody>
+      </table>
+		
+  <!-- Optional map interface here -->		
+      
+  </div><!-- /content -->
+
+  <div data-role="footer" data-position="fixed">
+    <a href="#main" data-role="button" data-icon="home" data-inline="true">Home</a>
+    <a href="#attendingEvent" data-role="button" data-icon="gear" data-inline="true">Back</a>
+  </div><!-- /footer -->
+</div><!-- /page -->
+
+
+<!-- Start of Event Detail page -->
+<div data-role="page" id="eventdetail" data-theme="h">
+
+  <div data-role="header" data-position="fixed">
+    <img src="images/societies_xsmall.png" alt="Societies" class="logo" />
+  </div><!-- /header -->
+ 
+  <div data-role="content">	
+    <h2>Details of the event</h2>
+    <table id="eventDetailTable" border="0" width="100%">
+      <thead><tr>
+	<th colspan="3" id="eventDetailTitle">My Event Name</th>
+      </tr></thead>
+    
+      <tbody id="eventDetailContent">
+      <tr>
+	<td rowspan="3">A picture</td>
+	<td width="20%"><p>Attending:</p></td>
+	<td>4</td>
+      </tr><tr>
+	<td><p>When:</p></td>
+	<td>20 mins</td>
+      </tr><tr>
+	<td><p>Location:</p></td>
+	<td>GB 101</td>
+      </tr><tr><td>&nbsp;</td></tr><tr>
+	<td>More info:</td>
+	 <td colspan="2">A detailed descrtiption of the event</td>
+      </tr>
+      </tbody>
+    </table>
+		
+    <!-- Display any errors -->
+    <div>
+      <p id="eventDetailStatus"></p>
+    </div>
+		
+    <div class="ui-grid-a">
+      <div class="ui-block-a"><button id="likeEvent" data-theme="c" >Like</button></div>	
+<!--      <div class="ui-block-b"><button id="attendEvent" data-theme="c" >Attend</button></div>-->
+      <div class="ui-block-b"><a href="#" id="attendEvent" data-role="button" data-theme="c" >Attend</a></div> 
+<!--      <div class="ui-block-c"><a href="#scheduleevent" data-role="button" >Schedule</a></div> -->
+      <div class="ui-block-a"><a href="#" id="confirmEvent" data-role="button" data-theme="h">Confirm</a></div>
+    </div>
+ 		
+  </div><!-- /content -->
+
+  <div data-role="footer" data-theme="a" data-position="fixed">
+    <a href="#upcomingevents" data-role="button" data-icon="back" data-inline="true">Back</a>
+    <a href="#main" data-role="button" data-icon="gear" data-inline="true" data-theme="a">Menu</a>
+  </div><!-- /footer -->
+</div><!-- /page -->
+
+
+<!-- Start of Active Services page -->
+<div data-role="page" id="scheduleevent" data-add-back-btn="true">
+
+	<div data-role="header" data-theme="a" data-position="fixed">
+		<p><img src="images/societies_xsmall.png" alt="Societies" class="logo" />Schedule event</p>
+	</div><!-- /header -->
+
+	<div data-role="content" data-theme="a">		
+		<h2>Schedule the event</h2>
+		<table id="scheduleEventTable" border="1">
+		<thead>
+			<tr>
+				<th>Name</th>
+				<th colspan="2">My Event Name</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr>
+				<td rowspan="3">A picture</td>
+				<td>Location:</td>
+				<td>Unknown</td>
+			</tr>
+			<tr>
+				<td>When:</td>
+				<td>Unknown</td>
+			</tr>
+			<tr>
+				<td/>
+				<td><br/></td>
+			</tr>
+			<tr>
+				<td><input type="checkbox" name="slot1" id="slot1" class="custom" value="true"/></td>
+				<td colspan="2">Tuesday 14:00</td>
+			</tr>
+			<tr>
+				<td><input type="checkbox" name="slot2" id="slot2" class="custom" value="false"/></td>
+				<td colspan="2">Tuesday 16:00</td>
+			</tr>
+		</tbody>
+		</table>
+		<button id="voteEvent" data-theme="a">Vote</button>	
+	</div><!-- /content -->
+
+	<div data-role="footer" data-theme="a" >
+		<a href="#eventdetail" data-role="button" data-icon="back" data-inline="true">Back</a>
+		<a href="#main" data-role="button" data-icon="gear" data-inline="true" data-theme="a">Menu</a>
+		
+	</div><!-- /footer -->
+  </div><!-- /page -->
+
+<!-- New event page -->
+<div data-role="page" id="proposeevent" data-theme="h">
+  
+  <div data-role="header" data-position="fixed">
+    <p><img src="images/societies_xsmall.png" alt="Societies" class="logo"/></p>
+  </div><!-- /header -->
+
+  <div data-role="content">
+    <h2>Propose an event</h2>
+  
+    <form id="proposeEventDialog">
+    <div id="la"> <!-- proposeEventDialog -->
+      <div data-role="fieldcontain" >
+	<label for="newEventTitle">Title: </label>
+	<input type="text" name="newEventTitle" id="newEventTitle" value="" />
+      </div>
+    
+      <div data-role="fieldcontain" >
+	<label for="newEventDesc">Description: </label>
+	<input type="text" name="newEventDesc" id="newEventDesc" value="" data-icon="microphone"/>
+      </div>
+    
+      <div data-role="fieldcontain" >
+	<label for="newEventEnd">Duration (mins): </label>
+	<!-- <input type="text" name="newEventEnd" id="newEventEnd" value="" /> -->
+	<input type="range" name="newEventEnd" id="newEventEnd" value="60" min="30" max="120" step="30" />
+      </div>
+    </div>	<!-- proposeEventDialog -->			
+
+    <div id="lb">
+      <div data-role="fieldcontain" >
+	<label for="newEventWhen">When: </label>
+	<input type="text" name="newEventWhen" id="newEventWhen" value="" />
+	<p id="newEventParse">For example, friday at 10am<br/></p>
+      </div>
+	
+      <div data-role="fieldcontain" >
+	<label for="newEventDate">Date: </label>
+    	<input type="date" name="newEventDate" id="newEventDate" value=""  />
+      </div>
+
+      <div data-role="fieldcontain" >
+	<label for="newEventStart">Time: </label>
+	<input type="datetime" name="newEventStart" id="newEventStart" value="" />
+      </div>      <!-- Display any errors -->
+      <div>
+	<p id="proposeEventStatus"><br/></p>
+	<input id="proposeEvent" type="button" value="Propose" data-icon="gear" data-inline="true" /> 	
+
+      </div>
+		
+    </div>		
+    </form> 	<!-- proposeEventDialog -->			
+
+  </div><!-- /content -->
+
+  <div data-role="footer" >
+    <a href="#main" data-role="button" data-icon="home" data-inline="true">Menu</a>
+    <a href="#" id="proposeSpeak" data-role="button" class="ui-icon-microphone" data-inline="true">&nbsp;</a>
+  </div><!-- /footer -->
+  
+</div><!-- /page -->
+  
+<!--
+    <script type="application/dart" src="eh2.dart"></script>
+-->
+  <script type="text/javascript" src="js/out.app.js"></script>
+
+</body>
+
+</html>

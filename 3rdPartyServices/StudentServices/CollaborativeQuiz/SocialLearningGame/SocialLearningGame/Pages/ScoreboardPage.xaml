@@ -3,19 +3,13 @@
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-      xmlns:Controls="clr-namespace:Coding4Fun.Kinect.Wpf.Controls;assembly=Coding4Fun.Kinect.Wpf"
-      xmlns:my="clr-namespace:Microsoft.Samples.Kinect.WpfViewers;assembly=Microsoft.Samples.Kinect.WpfViewers"
+      xmlns:k="http://schemas.microsoft.com/kinect/2013"
       mc:Ignorable="d" 
       d:DesignHeight="600" d:DesignWidth="1000"
-      Title="HomePage" Loaded="Window_Loaded" Unloaded="Window_Closing" Height="600" Width="1000">
+      Title="HomePage" Height="600" Width="1000">
 
     <Canvas Background="Transparent" Height="600" VerticalAlignment="Top" Margin="0" Width="1000">
         <TextBlock Height="76" HorizontalAlignment="Left" Margin="353,44,0,0" Name="textBlock1" Text="Scoreboard" VerticalAlignment="Top" Width="304" TextAlignment="Center" FontSize="48" Canvas.Left="-4" Canvas.Top="-4" />
-
-        <!-- Home Button -->
-        <Ellipse Name="ellipse1" Height="75" Width="75" Margin="222,172,717,377" Fill="Aqua" Canvas.Left="437" Canvas.Top="-119" />
-        <TextBlock Canvas.Left="624" Canvas.Top="71" Height="45" Name="textBlock4" Text="Home" Width="147" TextAlignment="Center" FontSize="28" />
-        <Controls:HoverButton x:Name="homeButton" ImageSize="100" TimeInterval="1500" Height="75" Width="75" Canvas.Left="659" Canvas.Top="53" />
         
         <!-- Current student's score and rank details -->
         <TextBlock Canvas.Left="59" Canvas.Top="120" Height="44" Name="studentName" Text="You" Width="400" FontSize="28" MinWidth="50" MaxWidth="400" />
@@ -51,12 +45,20 @@
         <TextBlock Canvas.Left="59" Canvas.Top="436" FontSize="30" Height="43" Name="rank5" Width="57" />
         
         <!-- next and previous buttons -->
-        <TextBlock Height="56" Name="back" Text="Previous" Width="162" FontSize="38" Canvas.Left="707" Canvas.Top="483" />
-        <TextBlock Grid.Column="1" Height="56" HorizontalAlignment="Left" Margin="112,496,0,0" Name="next" Text="Next" VerticalAlignment="Top" Width="106" FontSize="38" Canvas.Left="777" Canvas.Top="-13" />
-        <Controls:HoverButton x:Name="backButton" ImageSize="100" TimeInterval="1500" Height="56" Width="100" Canvas.Left="740" Canvas.Top="483" />
-        <Controls:HoverButton x:Name="nextButton" HorizontalAlignment="Left" Grid.Column="1" ImageSize="100" VerticalAlignment="Top" TimeInterval="1500" Height="56" Width="84" Margin="112,496,0,0" Canvas.Left="777" Canvas.Top="-13" />
+        <k:KinectCircleButton x:Name="backButton" 
+                              Click="backButton_Click"
+                              Label="Previous"
+                              Grid.Row="3" Grid.Column="1" Canvas.Left="644" Canvas.Top="500" Height="100" Width="150">
+        </k:KinectCircleButton>
+        <!--<Controls:HoverButton x:Name="backButton" ImageSize="100" TimeInterval="1500" Height="56" Width="100" Canvas.Left="740" Canvas.Top="483" />-->
+
+        <k:KinectCircleButton x:Name="nextButton" 
+                              Click="nextButton_Click"
+                              Label="Next"
+                              Grid.Row="3" Grid.Column="1" Canvas.Left="800" Canvas.Top="500" Height="100" Width="150">
+        </k:KinectCircleButton>
+        <!--<Controls:HoverButton x:Name="nextButton" HorizontalAlignment="Left" Grid.Column="1" ImageSize="100" VerticalAlignment="Top" TimeInterval="1500" Height="56" Width="84" Margin="112,496,0,0" Canvas.Left="777" Canvas.Top="-13" />-->
         
-        <my:KinectSensorChooser Name="kinectSensorChooser1" Width="693" Height="211" Grid.ColumnSpan="3" Margin="510,558,-203,-169" Canvas.Left="-309" Canvas.Top="-299" />
     </Canvas>
     
     <Page.Background>
