@@ -1,5 +1,13 @@
-﻿/* 
- * Copyright (coffee) 2011, SOCIETIES Consortium (WATERFORD INSTITUTE OF TECHNOLOGY (TSSG), HERIOT-WATT UNIVERSITY (HWU), SOLUTA.NET 
+package uk.ac.hw.services.collabquiz.dao;
+
+import org.hibernate.SessionFactory;
+import org.hibernate.cfg.AnnotationConfiguration;
+
+import uk.ac.hw.services.collabquiz.entities.Question;
+import uk.ac.hw.services.collabquiz.entities.Category;
+
+/*
+ * Copyright (coffee) 2011, SOCIETIES Consortium (WATERFORD INSTITUTE OF TECHNOLOGY (TSSG), HERIOT-WATT UNIVERSITY (HWU), SOLUTA.NET
  * (SN), GERMAN AEROSPACE CENTRE (Deutsches Zentrum fuer Luft- und Raumfahrt e.V.) (DLR), Zavod za varnostne tehnologije
  * informacijske družbe in elektronsko poslovanje (SETCCE), INSTITUTE OF COMMUNICATION AND COMPUTER SYSTEMS (ICCS), LAKE
  * COMMUNICATIONS (LAKE), INTEL PERFORMANCE LEARNING SOLUTIONS LTD (INTEL), PORTUGAL TELECOM INOVAÇÃO, SA (PTIN), IBM Corp., 
@@ -23,14 +31,27 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace SocialLearningGame.Entities
-{
-    public class Category
-    {
-        public static readonly Category All = new Category() { ID = -1, Name = "All" };
+public class HibernateUtil {
 
-        public int ID { get; set; }
-        public string Name { get; set; }
+    private static final SessionFactory sessionFactory;
 
+    static {
+        try {
+            sessionFactory = new AnnotationConfiguration()
+                    .configure()
+                    .addPackage("uk.ac.hw.services.collabquiz.entities") //the fully qualified package name
+                    .addAnnotatedClass(Question.class)
+                    .addAnnotatedClass(Category.class)
+                    .buildSessionFactory();
+
+        } catch (Throwable ex) {
+            System.err.println("Initial SessionFactory creation failed." + ex);
+            throw new ExceptionInInitializerError(ex);
+        }
+    }
+
+    public static SessionFactory getSessionFactory() {
+        return sessionFactory;
     }
 }
+
