@@ -301,6 +301,10 @@
     <WCFMetadata Include="Service References\" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\CommsFrwk\CommsFrwk.csproj">
+      <Project>{c9d23e3b-8c13-4a11-bf07-2e4f49a1cb5c}</Project>
+      <Name>CommsFrwk</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Microsoft.Kinect.Toolkit.Controls\Microsoft.Kinect.Toolkit.Controls.csproj">
       <Project>{4508C4D1-85BB-4F3F-9E3B-CC93D231C65D}</Project>
       <Name>Microsoft.Kinect.Toolkit.Controls</Name>
