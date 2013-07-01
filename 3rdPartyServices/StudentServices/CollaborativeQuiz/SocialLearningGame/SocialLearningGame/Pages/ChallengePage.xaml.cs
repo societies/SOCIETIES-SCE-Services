@@ -28,8 +28,6 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Shapes;
-using Coding4Fun.Kinect.Wpf;
-using Coding4Fun.Kinect.Wpf.Controls;
 using Microsoft.Kinect;
 
 namespace SocialLearningGame.Pages
@@ -57,7 +55,7 @@ namespace SocialLearningGame.Pages
         Skeleton[] allSkeletons = new Skeleton[skeletonCount];
         Student student = new Student();
 
-        HoverButton[] buttons;
+        //HoverButton[] buttons;
         int friendNumber; //used to know which friend is at the start of the current list, if 0 then first page
 
         #endregion variables
@@ -102,38 +100,38 @@ namespace SocialLearningGame.Pages
 
         public void navigateCategoriesChallengeSent(object Sender, RoutedEventArgs e)
         {
-            Student friend = new Student();
-            var sender = new HoverButton();
-            sender = (HoverButton)Sender;
+            //Student friend = new Student();
+            ////var sender = new HoverButton();
+            ////sender = (HoverButton)Sender;
 
-            try
-            {
-                for (int i = 0; i < buttons.Length; i++)
-                {
-                    if (("button" + i).Equals(sender.Name))
-                    {
-                        //friend = MainWindow.allStudents.ElementAt(i);
-                        //this.NavigationService.Navigate(new CategoriesPage(friend));
-                    }
-                }
+            //try
+            //{
+            //    for (int i = 0; i < buttons.Length; i++)
+            //    {
+            //        if (("button" + i).Equals(sender.Name))
+            //        {
+            //            //friend = MainWindow.allStudents.ElementAt(i);
+            //            //this.NavigationService.Navigate(new CategoriesPage(friend));
+            //        }
+            //    }
 
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Error: " + ex.Message);
-            }
+            //}
+            //catch (Exception ex)
+            //{
+            //    Console.WriteLine("Error: " + ex.Message);
+            //}
 
         }
 
         public void navigateAcceptChallenge(object Sender, RoutedEventArgs e)
         {
-            var sender = new HoverButton();
-            sender = (HoverButton)Sender;
+            //var sender = new HoverButton();
+            //sender = (HoverButton)Sender;
 
             try
             {
-                var challenger = sender.Name;
-                Console.WriteLine("sender = " + challenger);
+                //var challenger = sender.Name;
+                //Console.WriteLine("sender = " + challenger);
                 //for (int i = 0; i < MainWindow.challenges.Count; i++)
                 //{
                 //    if (("button"+i).Equals(sender.Name))
@@ -150,24 +148,24 @@ namespace SocialLearningGame.Pages
 
         }
 
-        private static void CheckButton(HoverButton button, Ellipse thumbStick)
-        {
-            try
-            {
-                if (IsItemMidpointInContainer(button, thumbStick))
-                {
-                    button.Hovering();
-                }
-                else
-                {
-                    button.Release();
-                }
-            }
-            catch (System.InvalidOperationException e)
-            {
-                //Console.WriteLine("Error: " + e.Message);
-            }
-        }
+        //private static void CheckButton(HoverButton button, Ellipse thumbStick)
+        //{
+        //    try
+        //    {
+        //        if (IsItemMidpointInContainer(button, thumbStick))
+        //        {
+        //            button.Hovering();
+        //        }
+        //        else
+        //        {
+        //            button.Release();
+        //        }
+        //    }
+        //    catch (System.InvalidOperationException e)
+        //    {
+        //        //Console.WriteLine("Error: " + e.Message);
+        //    }
+        //}
 
         public static bool IsItemMidpointInContainer(FrameworkElement container, FrameworkElement target)
         {
@@ -242,7 +240,7 @@ namespace SocialLearningGame.Pages
             //}
 
             //Create the hoverbuttons and add them to the buttons array, and display them onscreen
-            buttons = new HoverButton[amount];
+            //buttons = new HoverButton[amount];
             try
             {
                 //for (int i = start; start < (start + amount); i++)

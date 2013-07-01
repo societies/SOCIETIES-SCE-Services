@@ -28,6 +28,7 @@ using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
+using CommsFrwk;
 using Microsoft.Kinect;
 using Microsoft.Kinect.Toolkit;
 using Microsoft.Kinect.Toolkit.Controls;
@@ -46,6 +47,8 @@ namespace SocialLearningGame
         public static MainWindow Instance { get { return _windowInstance; } }
 
         public KinectSensorChooser SensorChooser { get; private set; }
+
+        private readonly CommsManager commsManager;
 
         public MainWindow()
             : base()
@@ -76,6 +79,15 @@ namespace SocialLearningGame
             Page r = HomePage.Instance; // Hack to get this to init on the right thread;
 
             _windowInstance = this;
+
+            String HOST_URL = "puma-paddy-3";
+            String USERNAME = "osgims";
+            String PASSWORD = "osgims";
+            commsManager = new CommsManager(HOST_URL, USERNAME, PASSWORD);
+
+            String nodeName = "myNode1";
+
+            commsManager.RegisterListener(nodeName);
 
             this.Show();
         }

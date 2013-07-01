@@ -47,15 +47,7 @@ namespace SocialLearningGame.Pages
     {
         protected static log4net.ILog log = log4net.LogManager.GetLogger(typeof(PlayPage));
 
-        private static readonly Uri correct = new Uri("/SocialLearningGame;component/Resources/yes.png", UriKind.Relative);
-        public static readonly double SpeechConfidenceThreshold = 0.7;
-
-        // Skeleton tracking vars
-        private Skeleton[] allSkeletons = new Skeleton[8]; // NB: this is a class var for memory efficency
-        private bool userInCorrectPose;
-        private readonly Object poseLockObject = new Object();
-
-        private SpeechRecognitionEngine _speechEngine;
+        public static readonly double SpeechConfidenceThreshold = 0.55;
 
         public PlayPage()
         {
@@ -71,9 +63,7 @@ namespace SocialLearningGame.Pages
                 EnableSkeletonTracking(kinect);
             }
 
-            // start the game
-            GameLogic.NewGame();
-            NextQuestion();
+            NewGame();
         }
 
         #region " Kinect events "
@@ -126,6 +116,11 @@ namespace SocialLearningGame.Pages
         #endregion
 
         #region " Skeleton tracking "
+
+        // Skeleton tracking vars
+        private Skeleton[] allSkeletons = new Skeleton[8]; // NB: this is a class var for memory efficency
+        private bool userInCorrectPose;
+        private readonly Object poseLockObject = new Object();
 
         private void EnableSkeletonTracking(KinectSensor sensor)
         {
@@ -564,6 +559,78 @@ namespace SocialLearningGame.Pages
 
         #region " Voice recognition "
 
+        // speech recognition vars
+        private SpeechRecognitionEngine _speechEngine;
+
+        private void EnableSpeechEngine(KinectSensor sensor)
+        {
+            log.Debug("Enabling speech engine");
+
+            if (_speechEngine != null)
+            {
+                try
+                {
+                    log.Debug("Stopping old speech engine");
+                    _speechEngine.RecognizeAsyncStop();
+                }
+                catch (Exception ex)
+                {
+                    log.Warn("Error stopping old speech engine", ex);
+                }
+            }
+
+            // Speech recognition
+            try
+            {
+                RecognizerInfo ri = SpeechUtils.GetKinectRecognizer();
+                this._speechEngine = new SpeechRecognitionEngine(ri.Id);
+
+                // For long recognition sessions (a few hours or more), it may be beneficial to turn off adaptation of the acoustic model. 
+                // This will prevent recognition accuracy from degrading over time.
+                ////speechEngine.UpdateRecognizerSetting("AdaptationOn", 0);
+
+                Choices grammar = new Choices();
+
+                grammar.Add("red");
+                grammar.Add("green");
+                grammar.Add("blue");
+                grammar.Add("yellow");
+                grammar.Add("one");
+                grammar.Add("two");
+                grammar.Add("three");
+                grammar.Add("four");
+
+                grammar.Add("quit game");
+                  grammar.Add("exit game");
+
+               GrammarBuilder gb = new GrammarBuilder { Culture = _speechEngine.RecognizerInfo.Culture };
+                gb.Append(grammar);
+
+                // Create the actual Grammar instance, and then load it into the speech recognizer.
+                Microsoft.Speech.Recognition.Grammar g = new Microsoft.Speech.Recognition.Grammar(gb);
+
+                _speechEngine.LoadGrammar(g);
+
+                _speechEngine.SpeechRecognized += SpeechRecognized;
+                _speechEngine.SpeechRecognitionRejected += SpeechRejected;
+
+                this._speechEngine.SetInputToAudioStream(
+                    sensor.AudioSource.Start(),
+                    new SpeechAudioFormatInfo(EncodingFormat.Pcm, 16000, 16, 1, 32000, 2, null));
+                this._speechEngine.RecognizeAsync(RecognizeMode.Multiple);
+
+                log.Debug("Speech engine grammar updated");
+            }
+            catch (Exception ex)
+            {
+                this._speechEngine = null;
+                log.Error("Error setting up speech engine", ex);
+                return;
+            }
+
+            log.Debug("Speech engine enabled");
+        }
+
         //what to do if the speech is recognised
         private void SpeechRecognized(object sender, SpeechRecognizedEventArgs e)
         {
@@ -580,14 +647,14 @@ namespace SocialLearningGame.Pages
 
             String spokenText = e.Result.Text.ToUpper();
 
-            if ("QUIT GAME".Equals(spokenText)
-                || "EXIT GAME".Equals(spokenText))
-            {
-                log.Debug(String.Format("Quit due to voice command: {0} ({1})",
-                    e.Result.Text,
-                    e.Result.Confidence));
-                Environment.Exit(0x00);
-            }
+            //if ("QUIT GAME".Equals(spokenText)
+            //    || "EXIT GAME".Equals(spokenText))
+            //{
+            //    log.Debug(String.Format("Quit due to voice command: {0} ({1})",
+            //        e.Result.Text,
+            //        e.Result.Confidence));
+            //    Environment.Exit(0x00);
+            //}
 
             // if the current mode doesn't require speech, don't do any of this
             if (GameLogic.CurrentRound.AnswerMethod != AnswerMethod.Speech
@@ -636,75 +703,6 @@ namespace SocialLearningGame.Pages
             // do nothing
         }
 
-        private void EnableSpeechEngine(KinectSensor sensor)
-        {
-            log.Debug("Enabling speech engine");
-
-            if (_speechEngine != null)
-            {
-                try
-                {
-                    log.Debug("Stopping old speech engine");
-                    _speechEngine.RecognizeAsyncStop();
-                }
-                catch (Exception ex)
-                {
-                    log.Warn("Error stopping old speech engine", ex);
-                }
-            }
-
-            // Speech recognition
-            try
-            {
-                RecognizerInfo ri = SpeechUtils.GetKinectRecognizer();
-                this._speechEngine = new SpeechRecognitionEngine(ri.Id);
-
-                // For long recognition sessions (a few hours or more), it may be beneficial to turn off adaptation of the acoustic model. 
-                // This will prevent recognition accuracy from degrading over time.
-                ////speechEngine.UpdateRecognizerSetting("AdaptationOn", 0);
-
-                Choices grammar = new Choices();
-
-                grammar.Add("red");
-                grammar.Add("green");
-                grammar.Add("blue");
-                grammar.Add("yellow");
-                grammar.Add("one");
-                grammar.Add("two");
-                grammar.Add("three");
-                grammar.Add("four");
-
-                grammar.Add("quit game");
-                grammar.Add("exit game");
-
-                GrammarBuilder gb = new GrammarBuilder { Culture = _speechEngine.RecognizerInfo.Culture };
-                gb.Append(grammar);
-
-                // Create the actual Grammar instance, and then load it into the speech recognizer.
-                Microsoft.Speech.Recognition.Grammar g = new Microsoft.Speech.Recognition.Grammar(gb);
-
-                _speechEngine.LoadGrammar(g);
-
-                _speechEngine.SpeechRecognized += SpeechRecognized;
-                _speechEngine.SpeechRecognitionRejected += SpeechRejected;
-
-                this._speechEngine.SetInputToAudioStream(
-                    sensor.AudioSource.Start(),
-                    new SpeechAudioFormatInfo(EncodingFormat.Pcm, 16000, 16, 1, 32000, 2, null));
-                this._speechEngine.RecognizeAsync(RecognizeMode.Multiple);
-
-                log.Debug("Speech engine grammar updated");
-            }
-            catch (Exception ex)
-            {
-                this._speechEngine = null;
-                log.Error("Error setting up speech engine", ex);
-                return;
-            }
-
-            log.Debug("Speech engine enabled");
-        }
-
         #endregion
 
         #region " Guesture tracking "
@@ -726,11 +724,21 @@ namespace SocialLearningGame.Pages
 
         #endregion
 
+        #region " Game Flow Control "
+
+        private void NewGame()
+        {
+            // start the game
+            GameLogic.NewGame();
+            NextQuestion();
+        }
+
         private void NextQuestion()
         {
             userInCorrectPose = false;
             UpdatePoseIconBorder();
             //playerNameBox.Text = GameLogic.CurrentRound.
+            playerNameBox.Text = "Paddy"; // TODO: actual player name
 
             if (GameLogic.CurrentRound != null &&
                 GameLogic.CurrentRound.RoundNumber == GameLogic.QuestionsInGame)
@@ -881,6 +889,7 @@ namespace SocialLearningGame.Pages
             MainWindow.SwitchPage(new GameOver());
         }
 
+        #endregion
 
     }
 }
