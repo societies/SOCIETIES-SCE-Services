@@ -125,9 +125,9 @@
             <scope>compile</scope>
         </dependency>
         <dependency>
-            <groupId>org.societies.api.ext3p</groupId>
-            <artifactId>societies-api-ext3p</artifactId>
-            <version>${societies.platform.version}</version>
+            <groupId>org.societies.api.ext3p.schema</groupId>
+            <artifactId>societies-api-ext3p-schema</artifactId>
+            <version>1.0</version>
             <scope>compile</scope>
         </dependency>
 
