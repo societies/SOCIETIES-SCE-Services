@@ -12,12 +12,14 @@
   		<topic href="html/dev/virgo/eclipse.html" label="Running Virgo from Eclipse"></topic>
   		<topic href="html/dev/virgo/properties.html" label="SOCIETIES Platform Properties"></topic> 
 	</topic>
-	<topic href="html/dev/openfire/maintopic.html" label="Installing OpenFire2">
+	<topic href="html/dev/openfire/maintopic.html" label="Installing OpenFire">
 		<topic href="html/dev/openfire/configuration.html" label="OpenFire Configuration">
   </topic>
   <topic href="html/dev/openfire/PSIconfiguration.html" label="PSI Configuration">
   </topic>
   <topic href="html/dev/openfire/CreateOpenfireAccountsViatheSocialWeb.html" label="Create Openfire Accounts via Web">
+  </topic>
+  <topic href="html/dev/openfire/CreateOpenfireAccountsViatheSocialWeb.html" label="CreateOpenfireAccountsViatheSocialWeb">
   </topic>
 	</topic>
  <topic href="html/dev/osgimaven/maintopic.html" label="OSGi/SpringDM Bundle Development with Maven">
