@@ -35,4 +35,5 @@ public class CategoryController {
     public List<Category> getCategories() {
         return categories;
     }
+
 }

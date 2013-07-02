@@ -29,6 +29,7 @@ public class QuestionController {
         questionRepository = new QuestionRepository();
     }
 
+
     @PostConstruct
     public void postConstruct() {
         log.debug("postConstruct()");
