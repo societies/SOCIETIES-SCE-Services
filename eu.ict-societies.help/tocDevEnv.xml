@@ -121,11 +121,11 @@
  <topic href="html/dev/MySQLdb/maintopic.html" label="Installing/Connecting a MySQL db">
  </topic>
  <topic href="html/dev/Create a 3rd Party Service for Virgo/maintopic.html" label="Create a 3rd Party Service for Virgo">
-    <topic href="/html/dev/Create a 3rd Party Service for Virgo/CreateSpringOSGIBundleProjectStructureWithMavenEclipse.html" label="CreateSpringOSGIProjectStructure">
+    <topic href="html/dev/Create a 3rd Party Service for Virgo/CreateSpringOSGIBundleProjectStructureWithMavenEclipse.html" label="CreateSpringOSGIProjectStructure">
     </topic>
     <topic href="html/dev/Create a 3rd Party Service for Virgo/ImplementingTheService.html" label="Implementing Your Service">
     </topic>
-    <topic label="Create a Privacy Policy">
+    <topic href="html/dev/Create a 3rd Party Service for Virgo/PrivacyPolicy.html" label="Create a Privacy Policy">
     </topic>
     <topic href="html/dev/Create a 3rd Party Service for Virgo/BundleConfigurationForPublishing3PService.html" label="Create a 3rd Party Service for Virgo/BundleConfigurationForPublishing3PService.html&quot; label=&quot;Bundle Configuration for Publishing a 3rd Party Service">
     </topic>
