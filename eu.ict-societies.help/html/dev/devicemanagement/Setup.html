@@ -40,17 +40,11 @@ Also, in the build section of the pom.xml file, as part of the maven-bundle-plug
 	...
 &lt;/Import-Package&gt;
 </pre>
-
-The only mandatory service reference that needs to be injected by the runtime environment is an instance of IEventManager, so the bundle-context-osgi.xml file associated with the Third Party must include:
-<pre>
-&lt;osgi:reference id="EventManager" interface="org.societies.api.osgi.event.IEventMgr"/&gt;
-</pre>
-
-Finally, the following bundles should be added in your Virgo plan file (together with other SOCIETIES platform bundles such as the Communication Manager, not listed here as they are mandatory):
-<pre>
-&lt;!-- Device Management bundles.  --&gt;
-&lt;artifact type="bundle" name="org.societies.css.devicemgmt.DeviceCommsMgr"/&gt;
-&lt;artifact type="bundle" name="org.societies.css.devicemgmt.devicemanager"/&gt;
-</pre>
+<p>
+In order to use the Device Management feature, a 3rd party service should use two interfaces provided by two components of the Societies platform.
+<br>	IDevice interface (provided by Device Management bundle): used to be informed about the nature of a newly discovered device.
+<br>	IEventMgr interface (provided by Event Management): used to be informed of new data from drivers...
+The IDevice interface shall be tracked directly from the OSGi service registry while the IEventMgr interface is bind through the Spring service reference. The picture below shows the example o system where 3 device is connected to the CSS nodes. The drivers and devices are not represented in the picture. In this case, the 3P service Consumer has binded two interfaces IDevice among the 3 available.
+</p>
 </body>
 </html>

@@ -1,0 +1,16 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Personalisation</title>
+<p>The SOCIETIES platform provides personalisation functionality that enable third party services to customise their appearance and functionality for their users to provide better value for service. The SOCIETIES platform supports both explicit as well as proactive personalisation. Preferences are created both manually by the user as well as by monitoring the user's behaviour and inferring user preferences from their behaviour. The monitoring of the user's behaviour depends on information sent by the third party services that the user interacts with. Third party services send user behaviour information to the societies platform in the form of Action objects (interface: org.societies.api.personalisation.model.IAction, class: org.societies.api.personalisation.model.Action). These objects embed information about the third party service and the action that was performed by the user in that service. For example, consider a media player service in which the user muted the volume of the service using the full constructor:</p>
+<xmp>public Action(ServiceResourceIdentifier serviceID, String serviceType, String parameterName, String value)
+IAction action = new Action(myServiceID, "mediaPlayer", "volume","0");
+</xmp>
+<p>User Actions are sent to the SOCIETIES platform from third party services using the org.societies.api.useragent.monitoring.IUserActionMonitor.monitor(IIdentity owner, IAction action) method. This information is collected by the platform from third party services and analysed to create user preferences and user intent models by combining this information with other context information that described the environment and activities of the user at the time the action was performed by the user.</p>
+
+</head>
+<body>
+
+</body>
+</html>

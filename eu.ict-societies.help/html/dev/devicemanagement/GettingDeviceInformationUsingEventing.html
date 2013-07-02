@@ -1,0 +1,80 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Getting device information using the Eventing.</title>
+</head>
+<body>
+<p>To be able to receive events from the device management, a 3P service has to subscribe on the eventmgmt bundle (Internal eventing). The event type to use to receive the device management events is: EventTypes.DEVICE_MANAGEMENT_EVENT
+You can refine the subscription by adding an LDAP filter string to receive events from a specific device.The LDAP filter could contain the property CSSEventConstants.EVENT_SOURCE that is equal to deviceId (the device Id is got from the IDevice service) and the property CSSEventConstants.EVENT_NAME that is equal to a constant in DeviceMgmtEventConstants class.
+don't forget to import</p>
+<xmp>org.societies.api.osgi.event.EventListener, org.societies.api.osgi.event.EventTypes, org.societies.api.osgi.event.CSSEventConstants, org.societies.api.css.devicemgmt.model.DeviceMgmtEventConstants
+import org.societies.api.osgi.event.EventListener;
+import org.societies.api.osgi.event.EventTypes;
+import org.societies.api.osgi.event.CSSEventConstants;
+import org.societies.api.css.devicemgmt.model.DeviceMgmtEventConstants;
+
+//The class must extends EventListener
+public class DeviceManagerConsumer extends EventListener
+{
+
+        public void initConsumer()
+    {    
+             // -- Subscribe to LightSensorEvent
+         // Set filter
+         String lightEventFilter = "(&" +
+                "(" + CSSEventConstants.EVENT_NAME + "="+DeviceMgmtEventConstants.LIGHT_SENSOR_EVENT+")" +
+                                "(" + CSSEventConstants.EVENT_SOURCE + "="+deviceId"+")" +
+                ")";
+
+             // Subscribe using EventTypes.DEVICE_MANAGEMENT_EVENT
+         eventManager.subscribeInternalEvent(this, new String[] {EventTypes.DEVICE_MANAGEMENT_EVENT}, lightEventFilter);
+
+             // -- Subscribe to Screen event
+         // Set filter
+         String screenEventFilter = "(&" +
+                "(" + CSSEventConstants.EVENT_NAME + "="+DeviceMgmtEventConstants.SCREEN_EVENT+")" +
+                ")";
+             // Subscribe
+         eventManager.subscribeInternalEvent(this, new String[] {EventTypes.DEVICE_MANAGEMENT_EVENT}, screenEventFilter);
+        }
+
+        /* --- IEventMgr Injections --- */
+    public IEventMgr getEventManager()
+        {
+             return eventManager;
+        }
+    public void setEventManager(IEventMgr eventManager)
+        {
+        if (null == eventManager) {
+            LOG.error("[COMM02] EventManager not available");
+        }
+        this.eventManager = eventManager;
+    }
+
+        @Override
+    public void handleInternalEvent(InternalEvent event) {
+
+                //check if the event is the one you are looking for (Light Sensor events)
+        if (event.geteventName().equals(DeviceMgmtEventConstants.LIGHT_SENSOR_EVENT))
+                {
+            HashMap<String, Object> payload = (HashMap<String, Object>)event.geteventInfo();
+            LOG.info("DeviceMgmtConsumer %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% handleEvent lightLevel : "+ payload.get("lightLevel"));
+        }
+                //check if the event is the one you are looking for (Screen Events)
+        else if (event.geteventName().equals(DeviceMgmtEventConstants.SCREEN_EVENT))
+        {
+            HashMap<String, Object> payload = (HashMap<String, Object>)event.geteventInfo();
+            LOG.info("DeviceMgmtConsumer: %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% handleEvent screenMessage: " + payload.get("screenEvent"));
+        }
+
+    }
+
+    @Override
+    public void handleExternalEvent(CSSEvent event) {
+
+    }
+}
+</xmp>
+</body>
+</html>

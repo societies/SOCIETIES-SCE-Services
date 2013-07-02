@@ -1,22 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?NLS TYPE="org.eclipse.help.toc"?>
 
-<toc label="Integrating With the SOCIETIES Platform on Android" link_to="toc.xml#android">
-	<topic label="Guidelines for Component Design"  href="html/Android/Integration/GuidelinesForComponentDesign/GuidelinesForComponentDesign.html">
-	
-		<topic label="How to Create a PhoneGup Plugin" href="html/Android/Integration/GuidelinesForComponentDesign/HowToCreateAPhoneGapPlugin.html"/>
+<toc label="Android" link_to="toc.xml#android"> 
+<topic href="html/Android/Deployment/AndroidDeployment.html" label="Android Deployment"></topic>
+<topic label="Guidelines for Component Design"  href="html/Android/Integration/GuidelinesForComponentDesign/GuidelinesForComponentDesign.html">
+
+<topic label="How to Create a PhoneGup Plugin" href="html/Android/Integration/GuidelinesForComponentDesign/HowToCreateAPhoneGapPlugin.html"/>
 		<topic label="How to Install/Use a PhoneGap Plugin" href="html/Android/Integration/GuidelinesForComponentDesign/HowToInstallAndUseAPhoneGapPlugin.html" />
 		<topic label="Tips to Manage the JSON Format" href="html/Android/Integration/GuidelinesForComponentDesign/TipsToManageTheJSONFormat.html" />
 		<topic label="Create and Use a Content Provider" href="html/Android/Integration/GuidelinesForComponentDesign/CreateAndUseAContentProvider.html" />
-	
-	</topic>
-	
-	<topic label="Connecting Android GUIs to Native Components"  href="html/Android/Integration/ConnectingAndroidGUIsToNativeComponents/ConnectingAndroidGUIsToNativeComponents.html">
+</topic>
+<topic label="Connecting Android GUIs to Native Components"  href="html/Android/Integration/ConnectingAndroidGUIsToNativeComponents/ConnectingAndroidGUIsToNativeComponents.html">
 		
 		<topic label="Step-by-Step Guide / Service Discovery Example"  href="html/Android/Integration/ConnectingAndroidGUIsToNativeComponents/StepByStepGuideServiceDiscoveryExample.html"/>
 	
 	</topic>
-	<topic label="How to Create Android Services"  href="html/Android/Integration/HowToCreateAndroidServices.html"/>
+	
+		<topic label="How to Create Android Services"  href="html/Android/Integration/HowToCreateAndroidServices.html"/>
 	<topic label="How to Generate PhoneGap JS Plugin Documentation"  href="html/Android/Integration/HowToGeneratePhoneGapJSPluginDocumentation.html"/>
 	<topic label="How to Develop Android Components"  href="html/Android/Integration/HowToDevelopAndroidComponents.html"/>
 	<topic label="Data Persistence On Android"  href="html/Android/Integration/DataPersistenceOnAndroid.html"/>

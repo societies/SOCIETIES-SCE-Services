@@ -1,0 +1,22 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+	<title>IDriverService Example Usage</title>
+</head>
+
+<body>Binding IEventMgr interface</h1>
+
+<p>The only OSGi service reference to be added in the bundle-context-osgi.xml file associated with the 3rd party service is:</p>
+<xmp><osgi:reference id="EventManager" 
+interface="org.societies.api.osgi.event.IEventMgr"/>
+</xmp>
+<p> Finally, the following bundles should be added in your Virgo plan file (together with other SOCIETIES platform bundles such as the Communication Manager, not listed here as they are mandatory):</p>
+<xmp><!-- Device Management bundles.  -->
+<artifact type="bundle" name="org.societies.css.devicemgmt.DeviceCommsMgr"/>
+<artifact type="bundle" name="org.societies.css.devicemgmt.devicemanager"/>
+</xmp>
+
+</body>
+</html>

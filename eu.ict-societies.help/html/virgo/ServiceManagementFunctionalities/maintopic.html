@@ -1,0 +1,45 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Service Management Functionalities</title>
+</head>
+<body>
+<p>
+While the Service Lifecycle Manager of SOCIETIES is an internal component not accessible to 3rd party services, it exposes an interface org.societies.api.services.IServices that provides some functionalities to 3rd party developers. Access to this component is obtained via normal Spring and OSGI methods. This API is still in development, with the current version offering these methods:</p>
+<xmp>2     /**
+ 3      * This method allows a third-party service to get its own ServiceResourceIdentifier by passing a reference to itself.
+ 4      * Note that it only works after the service is fully started, so shouldn't be used in "init" methods of the bean.
+ 5      *
+ 6      * @param callingClass (i.e., "this")
+ 7      * @return the service resource identifier of the service
+ 8      */
+ 9     public ServiceResourceIdentifier getMyServiceId(java.lang.Class<?> callingClass);
+10
+11     /**
+12      * This method allows a service to retrieve its own name
+13      *
+14      * @param serviceId
+15      * @return the name of the service
+16      */
+17     public String getMyName(ServiceResourceIdentifier serviceId);
+18
+19     /**
+20      * This method allows a service to retrieve its version
+21      *
+22      * @param serviceId
+23      * @return the service version
+24      */
+25     public String getMyVersion(ServiceResourceIdentifier serviceId);
+26
+27     /**
+28      * This method is used by a third-party client service to get the node of its parent/server
+29      *
+30      * @param serviceId
+31      * @return the node of the parent
+32      */
+33     public IIdentity getServer(ServiceResourceIdentifier serviceId);
+</xmp>
+
+</body>
+</html>

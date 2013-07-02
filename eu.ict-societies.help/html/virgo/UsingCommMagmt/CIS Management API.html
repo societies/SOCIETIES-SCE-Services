@@ -1,0 +1,242 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>CIS Management API</title>
+</head>
+<body>
+<h2>CIS Management Interfaces</h2>
+<p>There are 4 major Interfaces for managing CISs: ICisManager, ICisOwned, Icis and ICisManagerCallback (and one more interface for dealing with Activity Feeds, including the CIS Activity Feeds)
+<br>	ICisManager: Exposes local methods (such as createCIS, deleteCIS, listSubscribedCIS, listOwnedCIs) for interfacing CISs which are hosted locally, and methods with remote calls regarding CISs Management (joinCIS and leaveCIS). This interface is exposed directly by the CIS Manager Bundle
+<b>	    Icis: exposes the methods on the CISs themsevels such as (listMembers, getCisinfo, setCisinfo, etc). This interface can be retrieved as a return object resulting from some methods of the ICisManager, such as getCis and listCiss.
+<br>    ICisOwned: exposes methods on owned (and consequently local) CIS. It extends the Icis but it also include methods which can be applied just to an owned CIS (addMember, removeMember). This interface can also be retrieved as a return object resulting from some methods of the ICisManager.
+<br>	ICisManagerCallback: callback inteface for remote methods. At the moment, the data is encapsulated in the object org.societies.api.schema.cis.community generated from the community schema
+<br>	IActivityFeed: for dealing with activity feed (publishing, retrieving history and browsing), you must retrieve an IActivityFeed interface and use its methods for the activities. You can retrieve it from the CISs interface. This interface has callbacks because we have the same interface for dealing both with local and remote activity feeds. The callbacks return a activity feed marshaled object which may include marshaled activity objects . For subscribing (and receiving notifications) from activity feed, you have to check the wiki section on subscription
+
+<h2>Community/CIS xsd object</h2>
+<p>All the CIS funtions that returns through callback will return the following xsd object.</p>
+<xmp> 1     <xs:element name='communityMethods'>
+ 2       <xs:complexType>
+ 3           <xs:sequence>
+ 4
+ 5              <!-- methods -->
+ 6             <xs:choice minOccurs='0' maxOccurs='1'>
+ 7                 <xs:element ref='join'/>
+ 8                 <xs:element ref='leave'/>
+ 9                 <xs:element ref='invite'/>
+10                 <xs:element ref='who'/>
+11                 <xs:element ref='addMember'/>
+12                 <xs:element ref='subscription'/>
+13                 <xs:element ref='deleteMember'/>
+14                 <xs:element ref='getInfo'/>
+15                 <xs:element ref='setInfo'/>
+16                 <xs:element ref='joinResponse'/>
+17                 <xs:element ref='leaveResponse'/>
+18                 <xs:element ref='addMemberResponse'/>
+19                 <xs:element ref='deleteMemberResponse'/>
+20                 <xs:element ref='getInfoResponse'/>
+21                 <xs:element ref='setInfoResponse'/>
+22                 <xs:element ref='insact:activityfeed'/>
+23                 <xs:element ref='setMembershipCriteria'/>
+24                 <xs:element ref='setMembershipCriteriaResponse'/>
+25                 <xs:element ref='getMembershipCriteria'/>
+26                 <xs:element ref='getMembershipCriteriaResponse'/>
+27
+28 <!--                 <xs:element ref='deleteActivity'/>
+29                 <xs:element ref='deleteActivityResponse'/>-->
+30             </xs:choice>
+31         </xs:sequence>
+32      </xs:complexType>
+</xmp>
+<p>where most of the Response Methods have a boolean result element. All the responses that returns community information will return it as the following xsd:</p>
+<xmp> 1      <xs:element name='community'>
+ 2       <xs:complexType>
+ 3           <xs:sequence>
+ 4             <xs:element ref='membershipCrit' minOccurs='0' maxOccurs='1'/>
+ 5             <xs:element name='privacyPolicy' type='xs:string' minOccurs='0' maxOccurs='1'/>
+ 6         </xs:sequence>
+ 7
+ 8           <xs:attribute name='owner-jid' type='xs:string'/>
+ 9           <xs:attribute name='community-jid' type='xs:string'/>  
+10           <xs:attribute name='community-type' type='xs:string'/>
+11           <xs:attribute name='community-name' type='xs:string'/>
+12           <xs:attribute name='description' type='xs:string'/>
+13      </xs:complexType>
+14     </xs:element>
+</xmp>
+<p>where membership criteria is described as</p>
+<xmp> 1
+ 2     <xs:element name='membershipCrit'>
+ 3         <xs:complexType>
+ 4             <xs:sequence minOccurs='0' maxOccurs='unbounded'>
+ 5                 <xs:element ref='criteria'/>
+ 6             </xs:sequence>
+ 7         </xs:complexType>
+ 8     </xs:element>
+ 9
+10     <xs:element name='criteria'>
+11         <xs:complexType>
+12             <xs:sequence>
+13                 <xs:element name="attrib" type="xs:string" minOccurs="1" maxOccurs="1"/>
+14                 <xs:element name="operator" type="xs:string" minOccurs="1" maxOccurs="1"/>
+15                 <xs:element name="value1" type="xs:string" minOccurs="1" maxOccurs="1"/>
+16                 <xs:element name="value2" type="xs:string" minOccurs="0" maxOccurs="1"/>
+17                 <xs:element name="rank" type="xs:int" minOccurs="0" maxOccurs="1"/>
+18             </xs:sequence>
+19         </xs:complexType>
+20     </xs:element>
+</xmp>
+
+<h2>CIS Activity feed</h2>
+<p>All CISs have an activity feed and those activities can be manipulated using the IActivityFeed API (retrieved using the methode getActivityFeed() with a CIS) or by subscribing to the activity feed.</p>
+<h3>Subscribing to an activity feed</h3>
+<p>In order to subscribe to an activity feed, you must implement the Subscriber interface and use the PubSubClient to subscribe your interface for listening to the pubsub events. Besides that, you need to know the name of the pubsub node (which for CISs is equal to the jid of the cis) and the identity of the host of the CIS (JID of the CSS which owns the CIS).
+<br>Below follow an example of subscription to the activity feed.</p>
+<xmp> 1 public class CisMgmtTester implements Subscriber{
+ 2
+ 3     private ICommManager iCommMgr; // autowired
+ 4     PubsubClient pubsubClient; // autowired
+ 5
+ 6     private String CSShostingTheCIS = "xcmanager.thomas.local";
+ 7     private String CISnode = "cis-f4a329e1-eb28-413f-817c-47208e65c202.thomas.local";
+ 8
+ 9     public void StartTest() {
+10
+11                 // setting the pubsubclient to deal with the MarshaledActivity schema as that schema encapsulates the activities
+12         List<String> packageList = new ArrayList<String>();
+13         packageList.add("org.societies.api.schema.activity.MarshaledActivity");
+14         try {
+15             pubsubClient.addSimpleClasses(packageList);
+16         } catch (Exception e) {
+17             LOG.warn("Jaxb exception when trying to add packages to pubsub");
+18             e.printStackTrace();
+19         }
+20
+21         try {
+22             this.pubsubClient.subscriberSubscribe(iCommMgr.getIdManager().fromJid(CSShostingTheCIS), CISnode , this); // will set in the pubsubclient this class as a subscriber of the activity feed
+23         } catch (XMPPError e) {
+24             // TODO Auto-generated catch block
+25             e.printStackTrace();
+26         } catch (CommunicationException e) {
+27             // TODO Auto-generated catch block
+28             e.printStackTrace();
+29         } catch (InvalidFormatException e) {
+30             // TODO Auto-generated catch block
+31             e.printStackTrace();
+32         }
+33          }
+34
+35         // interface responsible to receive the publishing events (and therefore any new activity uploaded to the feed
+36     @Override
+37     public void pubsubEvent(IIdentity pubsubService, String node,
+38             String itemId, Object item) {
+39         if(item.getClass().equals(org.societies.api.schema.activity.MarshaledActivity.class)){
+40             MarshaledActivity a = (MarshaledActivity)item;
+41
+42             LOG.info("pubsubevent with acitvity " + a.getActor() + " " +a.getVerb()+ " " +a.getTarget());
+43         }
+44                  else{
+45
+46             LOG.info("something weird came on the pubsub" + item.getClass().toString());
+47         }
+48
+49     }
+</xmp>
+<h3>Using the CIS activity feed through the CIS API</h3>
+<p>Here is an example on how to use the CIS activity feed once you have a CIS Interface. In the example, we will consider a ICis interface, but a ICisOwned interface would work as well (the ICisOwned extends the ICis)</p>
+<xmp> 1
+ 2                 // we assume that you have a handler to a cis represented through the ICis interface instantiation "Iciss"
+ 3         IActivityFeed actFeedHandler= Iciss.getActivityFeed(); // get a handler for the activity feed corresponding to that CIS
+ 4
+ 5         IActivity newActivity1 = actFeedHandler.getEmptyIActivity(); // get an empty activity interface so you can use to fill up with the new activity data
+ 6         newActivity1.setActor("John");
+ 7         newActivity1.setObject("volleyball");
+ 8         newActivity1.setTarget("at the national tournament");
+ 9         newActivity1.setVerb("played");
+10
+11         actFeedHandler.addActivity(newActivity1, new AddActFeedCback()); // here I add the new activity feed and I pass a callback that implements IActivityFeedCallback
+12
+13                 // below is the source of the callback. I have created a simple class implementing it, which would only log that the activity has been added
+14                 // if you are not interested in the result, you can leave the overwritted "receiveResult(MarshaledActivityFeed activityFeedObject)" method empty
+15                 // the important point is that after you get your marshalled MarshaledActivityFeed result, you need to call the getAddActivityResponse() to get the result of the add operation
+16                 // and similarly to other methods
+17
+18                 // you can find an implementation of the IActivityFeedCallback in the class ActivityFeedClient
+19                 // https://github.com/societies/SOCIETIES-Platform/blob/development/common-modules/activityfeed/src/main/java/org/societies/activity/client/ActivityFeedClient.java
+20
+21         class AddActFeedCback implements IActivityFeedCallback {
+22             public void receiveResult(MarshaledActivityFeed activityFeedObject){
+23                               if(activityFeedObject.getAddActivityResponse().isResult()) // retrieve the AddResponse Marshalled object and the value of the result of the operation
+24                                     logger.info("Great! The acitivty has been added!!");
+25             }
+26         }
+27
+28                 //
+29
+</xmp>
+
+<h2>Example of Usage</h2>
+<p>The webapp project (https://github.com/societies/SOCIETIES-Platform/tree/development/platform-infrastructure/service-lifecycle/platform-webapp) has a web interface for interfacing with the CIS Manager Bundle and other Societies componentsnt.
+<br>Other than that, your code will need to add an osgi reference to the ICisManager interface exposed by the CIS Manager bundle. Once this is done, you can Autowire the interface.</p>
+<xmp>@Autowired
+private ICisManager cisClient;
+Once you get your reference to the ICisManager, you can call its API. For example:
+        Future<ICisOwned> testCIS = cisClient.createCis(CIS_MANAGER_CSS_ID, TEST_CSS_PWD,
+                TEST_CIS_NAME_1, TEST_CIS_TYPW , TEST_CIS_MODE);
+The method above, as some other ICisManager methods, returns an interface to a locally hosted CIS (ICisOwned). It is through the retrieved interface that you must call methods on the CISs themselves, such as AddMember, RemoveMember, etc. Example:
+1         ICisOwned ciss;         
+2         ciss =  (cisClient.createCis(CIS_MANAGER_CSS_ID, TEST_CSS_PWD,
+3                 TEST_CIS_NAME_1+"aa", TEST_CIS_TYPW , TEST_CIS_MODE)).get();
+4     // adding member
+5     ciss.addMember(MEMBER_JID_1, MEMBER_ROLE_1);
+6     // deleting member
+7     ciss.removeMemberFromCIS(MEMBER_JID_1);
+</xmp>
+<p>Some methods of the ICisManager will return an interface called ICis, which as we mentioned, serves for interface either CISs which are hosted locally or remotely. As it deals with remote communication, the return of those methods are given through callbacks which implements the inteface ICisManagerCallback. See below an example of a join request.</p>
+<xmp> 1 @Autowired
+ 2 private ICisManager cisClient;
+ 3
+ 4         JoinCallBack icall = new JoinCallBack(cisClient);
+ 5         LOG.info("join a remote CIS");
+ 6         this.cisClient.joinRemoteCIS(targetCisId, icall);
+ 7         LOG.info("join sent");
+ 8
+ 9     // callback code
+10         public class JoinCallBack implements ICisManagerCallback{
+11
+12         ICisManager cisClient;
+13
+14         public JoinCallBack(ICisManager cisClient){
+15             this.cisClient = cisClient;
+16         }
+17
+18         public void receiveResult(Community communityResultObject) {
+19
+20             if(communityResultObject == null){
+21                 LOG.info("null return on JoinCallBack");
+22                 return;
+23             }
+24             else{
+25                 LOG.info("good return on JoinCallBack");
+26                 LOG.info("Result Status: joined CIS " + communityResultObject.getCommunityJid());
+27                 try {
+28           // now we can get the ICis of the joined CIS and get more information about it with the remote call getInfo
+29                     ICis icis = cisClient.getCis("xcmanager1.thomas.local", communityResultObject.getCommunityJid());
+30                     GetInfoCallBack h = new GetInfoCallBack();
+31                     LOG.info("calling remote get info");
+32                     icis.getInfo(h);
+33                     LOG.info("remote get info done");
+34
+35             }
+36
+37         }
+38
+39     }
+</xmp>
+<p>For simplicity, at the moment, all the callback returns will be encapsulated through a CommunityMethods marshalled object generated through his XSD . The same object can be obtained by executing the equivalent steps using a XMPP client and the XMPP api using the CommunityMethods</p>
+
+
+
+
+</body>
+</html>

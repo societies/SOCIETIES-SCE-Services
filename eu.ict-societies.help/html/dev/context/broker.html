@@ -12,5 +12,239 @@ The Context Broker component  manages access to current, past and future context
 The latter is used by platform services, therefore it does not perform any access control when handling context data.<br />
 <br />
 Some of the methods that the internal Context Broker interface provides allow the creation, update, retrieval, and removal of context model objects. The following section demonstrates what are the necessary interfaces and classes that need to be imported and how to use them. 
+<h2>Creating and updating context model objects</h2>
+<xmp>1 import org.societies.api.context.broker.ICtxBroker;
+ 2 import org.societies.api.context.model.CtxAttribute;
+ 3 import org.societies.api.context.model.CtxAttributeIdentifier;
+ 4 import org.societies.api.context.model.CtxAttributeTypes;
+ 5 import org.societies.api.context.model.CtxEntity;
+ 6 import org.societies.api.context.model.CtxEntityIdentifier;
+ 7 import org.societies.api.context.model.CtxEntityTypes;
+ 8 import org.societies.api.context.model.CtxIdentifier;
+ 9 import org.societies.api.context.model.CtxModelObject;
+10
+11 /** The 3P Context Broker service reference. */
+12 @Autowired
+13 private ICtxBroker ctxBroker;
+14
+15 // The IIdentity of the context data owner, i.e. the target CSS (or CIS)
+16 IIdentity targetId;
+17
+18 // The IIdentity of the requestor of context data
+19 IIdentity requestorId;
+20 Requestor requestor = new Requestor(requestorId);
+21
+22 // retrieve the CtxEntityIdentifier of the CSS owner context entity  based on IIdentity
+23 CtxEntityIdentifier ownerEntityId = this.ctxBroker.retrieveIndividualEntityId(requestor, targetId).get();
+24
+25 // create a context attribute under the CSS owner context entity
+26 CtxAttribute aboutMeAttr = this.ctxBroker.createAttribute(requestor, ownerEntityId, CtxAttributeTypes.ABOUT).get();
+27 // assign a String value to the attribute
+28 aboutMeAttr.setStringValue("a cool CSS user");
+29 aboutMeAttr.setValueType(CtxAttributeValueType.STRING);
+30 // update the attribute in the Context DB
+31 aboutMeAttr = (CtxAttribute) this.ctxBroker.update(requestor, aboutMeAttr).get();
+32
+33 // create a context entity that represents a device
+34 CtxEntity deviceEntity = this.ctxBroker.createEntity(requestor, targetId, CtxEntityTypes.DEVICE).get();
+35 // get the context identifier of the created entity
+36 CtxEntityIdentifier deviceEntityId = deviceEntity.getId();
+37
+38 // create an attribute to model the name of the device entity
+39 CtxAttribute deviceNameAttr = this.ctxBroker.createAttribute(requestor, deviceEntityId, CtxAttributeTypes.NAME).get();
+40 // assign a String value to the attribute
+41 deviceNameAttr.setStringValue("device1234");
+42 deviceNameAttr.setValueType(CtxAttributeValueType.STRING);
+43 // update the attribute in the Context DB
+44 deviceNameAttr = (CtxAttribute) this.ctxBroker.update(requestor, deviceNameAttr).get();
+45
+46 // create an attribute to model the temperature of the device
+47 CtxAttribute deviceTempAttr = this.externalCtxBroker.createAttribute(requestor, deviceCtxEntity.getId(), CtxAttributeTypes.TEMPERATURE).get();
+48 // assign a double value and set value type and metric
+49 deviceTempAttr.setDoubleValue(25.0);
+50 deviceTempAttr.setValueType(CtxAttributeValueType.DOUBLE);
+51 deviceTempAttr.setValueMetric(CtxAttributeValueMetrics.CELSIUS);
+52 // update the attribute in the Context DB
+53 deviceTempAttr = (CtxAttribute) this.externalCtxBroker.update(requestor, deviceTempAttr).get();
+54
+55 // create an attribute with a Binary value
+56 CtxAttribute deviceBinAttr = this.ctxBroker.createAttribute(requestor, deviceEntityId, "serializableData").get();
+57
+58 // this is a mock Serializable class
+59 MockBlobClass blob = new MockBlobClass();
+60 byte[] blobBytes = SerialisationHelper.serialise(blob);
+61 deviceBinAttr.setBinaryValue(blobBytes);
+62 deviceBinAttr.setValueType(CtxAttributeValueType.BINARY);
+63
+64 // update the attribute in the Context DB
+65 deviceBinAttr = (CtxAttribute) this.ctxBroker.update(requestor, deviceBinAttr).get();
+66
+67 //create an Association
+68 usesServiceAssoc = this.externalCtxBroker.createAssociation(requestor, cssOwnerId, CtxAssociationTypes.USES_SERVICES).get();
+69 //add child entities
+70 usesServiceAssoc .addChildEntity(operator.getId());
+71 usesServiceAssoc .addChildEntity(deviceEntity.getId());
+72 //update entities
+73 usesServiceAssoc = (CtxAssociation) this.ctxBroker.update(requestor, associationUsesService).get();
+</xmp>
+
+<h2>Retrieving and Looking-up context information</h2>
+<xmp>1 // if the CtxEntityID or CtxAttributeID is known the retrieval is performed by using the ctxBroker.retrieve(CtxIdentifier) method
+ 2 // alternatively context identifiers can be retrieved with the help of lookup mehtods
+ 3 CtxEntityIdentifier deviceCtxEntIdentifier = null;
+ 4 try {
+ 5     List<CtxIdentifier> idsEntities = this.externalCtxBroker.lookup(requestor, cssOwnerId, CtxModelType.ENTITY, CtxEntityTypes.DEVICE).get();
+ 6     if(idsEntities.size()>0){
+ 7      deviceCtxEntIdentifier = (CtxEntityIdentifier) idsEntities.get(0);
+ 8      }
+ 9      // the retrieved identifier is used in order to retrieve the context model object (CtxEntity)
+10      CtxEntity retrievedCtxEntity = (CtxEntity) this.externalCtxBroker.retrieve(requestor, deviceCtxEntIdentifier).get();
+11
+12      // Retrieve CtxAttributes assigned to retrievedCtxEntity
+13      Set<CtxAttribute> ctxAttrSet = retrievedCtxEntity.getAttributes(CtxAttributeTypes.ID);
+14
+15      if( ctxAttrSet.size()>0 ){
+16         List<CtxAttribute>     ctxAttrList = new ArrayList(ctxAttrSet);
+17         CtxAttribute ctxAttr = ctxAttrList.get(0);
+18         }
+19     // retrieve ctxAttribute with the binary value based on a known identifier
+20     CtxAttribute ctxAttributeWeight = (CtxAttribute) this.externalCtxBroker.retrieve(requestor, weightAttrIdentifier).get();
+21
+22         //deserialise object
+23     MockBlobClass retrievedBlob = (MockBlobClass) SerialisationHelper.deserialise(ctxAttributeWeight.getBinaryValue(),    this.getClass().getClassLoader());
+</xmp>
+
+<h2>Removing context model objects</h2>
+<xmp>this.internalCtxBroker.remove(requestor, identifier);</xmp>
+
+<h2>Subscribing for and reacting to context change events</h2>
+<p>The ICtxBroker interface provides methods for registering CtxChangeEventListeners in order to listen for context change events. There are two ways to subscriber for context change event notification:</p>
+<xmp>// 1a. Register listener by specifying the context attribute identifier
+this.internalCtxBroker.registerForChanges(requestor, new MyCtxChangeEventListener(), this.ctxAttributeStringIdentifier);
+
+// 1b. Register listener by specifying the context attribute scope and type
+this.internalCtxBroker.registerForChanges(requestor, new MyCtxChangeEventListener(), this.ctxEntityIdentifier, "DeviceID");
+</xmp>
+<p>The subscriber's implementation of the CtxChangeEventListener interface allows reacting to the following event notifications:
+<br>private class MyCtxChangeEventListener implements CtxChangeEventListener
+</p>
+<xmp>1 public void onCreation(CtxChangeEvent event) {
+ 2     LOG.info(event.getId() + ": *** CREATED event ***");
+ 3     }
+ 4 public void onModification(CtxChangeEvent event) {
+ 5     LOG.info(event.getId() + ": *** MODIFIED event ***");
+ 6     }
+ 7 public void onRemoval(CtxChangeEvent event) {
+ 8     LOG.info(event.getId() + ": *** REMOVED event ***");
+ 9     }
+10 public void onUpdate(CtxChangeEvent event) {
+11     LOG.info(event.getId() + ": *** UPDATED event ***");
+12     }
+13 }
+</xmp>
+
+<h2>Maintaining history of context attributes</h2>
+<p>Context Attributes can be registered for recording each time an update on the attribute value is performed. Old values are recorded along with timestamps and stored in order to form a Context History log. Context History data can be retrieved or removed by methods provided by the ICtxBroker.</p>
+<xmp>
+1 // by setting the history recording flag to true the CtxAttribute values will be stored to Context History Database upon update
+2 ctxAttributeString.setHistoryRecorded(true);
+3
+4 // Retrieval of Context history data for a specified time period
+5 // if null values are used for starting and ending Date the whole set of history data is retrieved
+6 List<CtxHistoryAttribute> ctxHistoryData =  internalCtxBroker.retrieveHistory(requestor, (CtxAttributeIdentifier) ctxAttributeStringIdentifier, startDate, endDate).get();
+</xmp>
+
+<h2>Managing community context entities and attributes</h2>
+<p>As it is already stated a pervasive community (CIS) is modelled as a CommunityCtxEntity. As with individual Context Entities (IndividualCtxEntity), a CommunityCtxEntity maintains CtxAttributes describing the current properties of the community. The types and values of these CtxAttributes derive from the aggregation of each member's attributes. Alternatively, it is possible for a 3p service to assign additional CtxAttributes. It should be noted that the CommunityCtxEntity representing a CIS is automatically generated upon creation of that CIS.
+<br>The CtxAttributeComplexValue has been introduced in order to model complex context attribute values referring to a community of CSS modeled as CommunityCtxEntity. As it is also indicated in the respective javadoc of CtxAttributeComplexValue.java class the values supported are:
+<br>/** The average value of the community ctx attribute derived by the ctxAttribute values of the individual members */
+private Double average;
+<br>/** The median value of the community ctx attribute derived by the ctxAttribute values of the individual members */
+private Double median;
+<br>/** The min and max range values derived by the ctxAttribute values of the individual members */
+private Number rangeMin, rangeMax;
+<br>/** A pair of coordinates modeled as comma separated string derived by the location coordinates of the individual community members */
+private String locationgps;
+<br>/** The mode value of the community ctx attribute derived by the ctxAttribute values of the individual members */
+private Double mode;
+<br>/** This applies to context information of enumerated/descrete values. It is a map that represents the occurences of the various attribute values accross the members of a given community. The keys of the map are the string values of the individual ctxAttributes and its values capture the number of occurences aforementioned. */
+<br>HashMap<String, Integer> occurences = new HashMap<String, Integer>();
+<br>Example code follows:
+<xmp>1
+ 2 /*
+ 3  * The following example code assumes that (at least) two containers are up and running and a CSS has been created on each one.
+ 4  * Each context Database maintains an IndividualCtxEntity that corresponds to the CSS user. This IndividualCtxEntity has been assigned with
+ 5  * context attributes.
+ 6  * For this example the jid's for each CSS are: john.societies.local and jane.societies.local  
+ 7  */
+ 8
+ 9 // necessary services
+10
+11 /** The Context Broker service reference */
+12 private org.societies.api.context.broker.ICtxBroker ctxBroker;
+13
+14 /** The Comms Manager service reference. */
+15 private org.societies.api.comm.xmpp.interfaces.ICommManager commManager;
+16
+17 /** The CIS Manager service reference - only required to create the CIS. */
+18 public org.societies.api.cis.management.ICisManager cisManager;
+19
+20 // the CIS identity
+21 private IIdentity cisID;
+22
+23 // the CSS identities of various users
+24 private IIdentity johnIdentity ;
+25 private IIdentity janeIdentity ;
+26
+27 //create a CIS
+28 Hashtable<String, MembershipCriteria> cisCriteria = new Hashtable<String, MembershipCriteria> ();
+29 ICisOwned cisOwned = this.cisManager.createCis("testCIS", "cisType", cisCriteria, "nice CIS").get();
+30 cisID = this.commManager.getIdManager().fromJid(cisOwned.getCisId());
+31
+32 // At this point a CommunityCtxEntity has been automatically created and contains only one member (the creator of the community)
+33
+34 // Add members to CIS , this action can be performed by the web-app but also with the help of cisManager
+35 // (see CIS manager component's documentation)
+36 // After adding members to CIS the CommunityCtxEntity has been automatically populated with the respective members.
+37
+38 // retrieve the identifier of a Community Entity based on a cisID
+39 CtxEntityIdentifier ctxCommunityEntityIdentifier = ctxBroker.retrieveCommunityEntityId(requestor, cisID).get();
+40
+41 // retrieve the Community Entity object
+42 CommunityCtxEntity communityEntity = (CommunityCtxEntity) this.ctxBroker.retrieve(requestor, ctxCommunityEntityIdentifier).get();
+43
+44 //retrieve a set with member CtxEntityIdentifier's of the community
+45 Set<CtxEntityIdentifier> membersSet = communityEntity.getMembers()
+46
+47 // iterate through the CtxEntityIdentifier set and retrieve individual entities
+48 IndividualCtxEntity individualCtxEntity = (IndividualCtxEntity)this.ctxBroker.retrieve(requestor, ctxEntityIdentifier).get();
+49
+50 // at this point ctxAttributes assigned to the individualCtxEntity can be retrieved and utilized as it has already been explained earlier in this tutorial.
+51
+52 // lookup for specific CtxAttribute types in the specified community
+53 List<CtxIdentifier> communityAttrIDList = externalCtxBroker.lookup(requestor, ctxCommunityEntityIdentifier , CtxModelType.ATTRIBUTE, CtxAttributeTypes.INTERESTS).get();
+54
+55 // if the returned list with identifiers is not empty get the identifier of a context attribute
+56 CtxIdentifier communityAttrID = communityAttrIDList.get(0);
+57
+58 CtxAttribute communityInterestsAttr = (CtxAttribute) this.ctxBroker.retrieve(requestor,communityAttrId).get();
+59
+60 // in case community context attribute value is expressed as a string
+61 if (CtxAttributeValueType.STRING == communityInterestsAttr.getValueType()) {
+62     String communityInterestsStringValue = communityInterestsAttr.getStringValue();
+63     // handle string value
+64 // in case community context attribute value is expressed as a CtxAttributeComplexValue.
+65 } else if (CtxAttributeValueType.COMPLEX == communityInterestsAttr.getValueType()) {
+66     CtxAttributeComplexValue communityInterestsComplexValue = communityInterestsAttr.getComplexValue();
+67     // handle complex value
+68 }
+</xmp>
+</p>
+
+
+
+
+
+
 </body>
 </html>

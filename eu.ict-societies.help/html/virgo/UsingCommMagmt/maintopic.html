@@ -1,0 +1,28 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Using the Community Management for 3rd Party Services</title>
+</head>
+<body>
+<p>This section provides guidelines regarding the use of the SOCIETIES CIS Manager component by third party and internal services. The CIS Manager Cloud is the component used by the user to manage his own CISs and the CISs in which he is part of.</p>
+<h1>Dependencies (pom.xml)</h1>
+<p>Add the following dependencies to your pom.xml file:</p>
+<xmp>1 <dependency>
+2    <groupId>org.societies.api.external</groupId>
+3    <artifactId>societies-api</artifactId>
+4    <version>${release.version}</version>
+5    <scope>provided</scope>
+6 </dependency>
+</xmp>
+
+
+<h1>SGi service configuration (bundle-context-osgi.xml)</h1>
+<xmp><osgi:reference id="CisManagementBundle" interface="org.societies.api.cis.management.ICisManager"/></xmp>
+
+
+<h1>OpenFire Configuration</h1>
+<p>The CIS Manager connects to the XMPP server through the XCComunication Manager. That component must be configured with a properties file such as this one and so that the secretKey matches with the "Default shared secret" in OpenFire (Service Enabled box under Server Settings - External Component Settings) allowing any component to connect to it.</p>
+
+</body>
+</html>
