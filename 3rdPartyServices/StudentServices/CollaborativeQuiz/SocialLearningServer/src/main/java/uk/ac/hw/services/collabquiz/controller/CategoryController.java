@@ -1,10 +1,8 @@
 package uk.ac.hw.services.collabquiz.controller;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
+import uk.ac.hw.services.collabquiz.dao.impl.CategoryRepository;
 import uk.ac.hw.services.collabquiz.dao.ICategoryRepository;
-import uk.ac.hw.services.collabquiz.dao.CategoryRepository;
 import uk.ac.hw.services.collabquiz.entities.Category;
 
 import javax.annotation.PostConstruct;
@@ -13,9 +11,7 @@ import java.util.List;
 
 @Controller
 @ManagedBean(name = "categoryController")
-public class CategoryController {
-    private static final Logger log = LoggerFactory.getLogger(CategoryController.class);
-
+public class CategoryController extends BasePageController {
     private ICategoryRepository categoryRepository;
 
     private List<Category> categories;

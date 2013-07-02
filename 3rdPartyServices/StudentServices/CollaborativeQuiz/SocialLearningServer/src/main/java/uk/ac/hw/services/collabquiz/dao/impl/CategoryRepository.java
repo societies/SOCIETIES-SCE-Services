@@ -1,4 +1,4 @@
-package uk.ac.hw.services.collabquiz.dao;/* 
+package uk.ac.hw.services.collabquiz.dao.impl;/*
  * Copyright (coffee) 2011, SOCIETIES Consortium (WATERFORD INSTITUTE OF TECHNOLOGY (TSSG), HERIOT-WATT UNIVERSITY (HWU), SOLUTA.NET 
  * (SN), GERMAN AEROSPACE CENTRE (Deutsches Zentrum fuer Luft- und Raumfahrt e.V.) (DLR), Zavod za varnostne tehnologije
  * informacijske družbe in elektronsko poslovanje (SETCCE), INSTITUTE OF COMMUNICATION AND COMPUTER SYSTEMS (ICCS), LAKE
@@ -26,92 +26,57 @@ package uk.ac.hw.services.collabquiz.dao;/*
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
-import uk.ac.hw.services.collabquiz.entities.Question;
+import uk.ac.hw.services.collabquiz.dao.ICategoryRepository;
+import uk.ac.hw.services.collabquiz.entities.Category;
 
 import java.util.List;
 
-public class QuestionRepository implements IQuestionRepository {
+public class CategoryRepository extends HibernateRepository implements ICategoryRepository {
     @Override
-    public List<Question> list() {
-        Session session = HibernateUtil.getSessionFactory().openSession();
+    public List<Category> list() {
+        Session session = getSessionFactory().openSession();
         Transaction transaction = null;
-        List<Question> questions = null;
+        List<Category> categorys = null;
         try {
             transaction = session.beginTransaction();
-            questions = session.createQuery("from Question").list();
+            categorys = session.createQuery("from Category").list();
             transaction.commit();
-        } catch (HibernateException e){
-            transaction.rollback();
-            e.printStackTrace();
-        } finally{
-            session.close();
-        }
-        return questions;    }
-
-    @Override
-    public List<Question> listByCategory(int categoryId) {
-        Session session = HibernateUtil.getSessionFactory().openSession();
-        Transaction transaction = null;
-        List<Question> questions = null;
-        try {
-            transaction = session.beginTransaction();
-            String hql = "from Question where category_ID = :categoryID";
-            questions = session.createQuery(hql)
-                                .setParameter("categoryID", categoryId)
-                                .list();
-            transaction.commit();
-        } catch (HibernateException e){
-            transaction.rollback();
-            e.printStackTrace();
-        } finally{
-            session.close();
-        }
-        return questions;
-    }
-
-    @Override
-    public Question getByID(int questionId) {
-        Session session = HibernateUtil.getSessionFactory().openSession();
-        Transaction transaction = null;
-        Question question = null;
-        try {
-            transaction = session.beginTransaction();
-            question = (Question) session.get(Question.class, questionId);
-            transaction.commit();
-        } catch (HibernateException e){
-            transaction.rollback();
-            e.printStackTrace();
-        } finally{
-            session.close();
-        }
-        return question;
-    }
-
-    @Override
-    public void insert(Question question) {
-        Session session = HibernateUtil.getSessionFactory().openSession();
-        Transaction transaction = null;
-        try {
-            transaction = session.beginTransaction();
-            //City city = new City();
-            //city.setName(cityName);
-            session.save(question);
-            transaction.commit();
-        }catch (HibernateException e) {
+        } catch (HibernateException e) {
             transaction.rollback();
             e.printStackTrace();
         } finally {
             session.close();
         }
+        return categorys;
     }
 
     @Override
-    public void update(Question question) {
-        Session session = HibernateUtil.getSessionFactory().openSession();
+    public Category getByID(int categoryId) {
+        Session session = getSessionFactory().openSession();
+        Transaction transaction = null;
+        Category category = null;
+        try {
+            transaction = session.beginTransaction();
+            category = (Category) session.get(Category.class, categoryId);
+            transaction.commit();
+        } catch (HibernateException e) {
+            transaction.rollback();
+            e.printStackTrace();
+        } finally {
+            session.close();
+        }
+        return category;
+    }
+
+    @Override
+    public void insert(Category category) {
+        Session session = getSessionFactory().openSession();
         Transaction transaction = null;
         try {
             transaction = session.beginTransaction();
-            session.update(question);
+            //City city = new City();
+            //city.setName(cityName);
+            session.save(category);
             transaction.commit();
         } catch (HibernateException e) {
             transaction.rollback();
@@ -122,12 +87,28 @@ public class QuestionRepository implements IQuestionRepository {
     }
 
     @Override
-    public void physicalDelete(Question question) {
-        Session session = HibernateUtil.getSessionFactory().openSession();
+    public void update(Category category) {
+        Session session = getSessionFactory().openSession();
         Transaction transaction = null;
         try {
             transaction = session.beginTransaction();
-            session.delete(question);
+            session.update(category);
+            transaction.commit();
+        } catch (HibernateException e) {
+            transaction.rollback();
+            e.printStackTrace();
+        } finally {
+            session.close();
+        }
+    }
+
+    @Override
+    public void physicalDelete(Category category) {
+        Session session = getSessionFactory().openSession();
+        Transaction transaction = null;
+        try {
+            transaction = session.beginTransaction();
+            session.delete(category);
             transaction.commit();
         } catch (HibernateException e) {
             transaction.rollback();

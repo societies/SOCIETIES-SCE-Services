@@ -30,8 +30,7 @@ import javax.persistence.*;
  */
 
 @Entity
-@Table(name="city")
-
+@Table(name = "question")
 public class Question {
 
     private int questionID;
@@ -46,7 +45,7 @@ public class Question {
     private int pointsIfCorrect;
     private QuestionDifficulty difficulty;
 
-    public Question(){
+    public Question() {
         this.questionID = -1;
         this.pointsIfCorrect = 1;
         this.difficulty = QuestionDifficulty.Easy;
@@ -59,15 +58,9 @@ public class Question {
         this.categoryID = -1;
     }
 
-    /**
-     * <summary>
-     * 1-based answer index (1-4)
-     * </summary>
-     */
-
     @Id
     @GeneratedValue
-    @Column(name="question_id")
+    @Column(name = "question_id")
     public int getQuestionID() {
         return questionID;
     }
@@ -76,7 +69,7 @@ public class Question {
         this.questionID = questionID;
     }
 
-    @Column(name="question_text")
+    @Column(name = "question_text")
     public String getQuestionText() {
         return questionText;
     }
@@ -85,7 +78,7 @@ public class Question {
         this.questionText = questionText;
     }
 
-    @Column(name="answer_1")
+    @Column(name = "answer_1")
     public String getAnswer1() {
         return answer1;
     }
@@ -94,7 +87,7 @@ public class Question {
         this.answer1 = answer1;
     }
 
-    @Column(name="answer_2")
+    @Column(name = "answer_2")
     public String getAnswer2() {
         return answer2;
     }
@@ -103,7 +96,7 @@ public class Question {
         this.answer2 = answer2;
     }
 
-    @Column(name="answer_3")
+    @Column(name = "answer_3")
     public String getAnswer3() {
         return answer3;
     }
@@ -112,7 +105,7 @@ public class Question {
         this.answer3 = answer3;
     }
 
-    @Column(name="answer_4")
+    @Column(name = "answer_4")
     public String getAnswer4() {
         return answer4;
     }
@@ -121,16 +114,22 @@ public class Question {
         this.answer4 = answer4;
     }
 
-    @Column(name="correct_answer")
+    /**
+     * 1-based answer index (1-4)
+     */
+    @Column(name = "correct_answer")
     public int getCorrectAnswer() {
         return correctAnswer;
     }
 
+    /**
+     * 1-based answer index (1-4)
+     */
     public void setCorrectAnswer(int correctAnswer) {
         this.correctAnswer = correctAnswer;
     }
 
-    @Column(name="category_ID")
+    @Column(name = "category_ID")
     public int getCategoryID() {
         return categoryID;
     }
@@ -139,7 +138,7 @@ public class Question {
         this.categoryID = categoryID;
     }
 
-    @Column(name="points_if_correct")
+    @Column(name = "points_if_correct")
     public int getPointsIfCorrect() {
         return pointsIfCorrect;
     }
@@ -148,7 +147,7 @@ public class Question {
         this.pointsIfCorrect = pointsIfCorrect;
     }
 
-    @Column(name="difficulty")
+    @Column(name = "difficulty")
     public QuestionDifficulty getDifficulty() {
         return difficulty;
     }

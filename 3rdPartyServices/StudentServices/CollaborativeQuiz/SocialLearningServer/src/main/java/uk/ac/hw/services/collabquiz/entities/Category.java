@@ -28,34 +28,14 @@ import javax.persistence.*;
  */
 
 @Entity
-@Table(name="question")
-
+@Table(name = "category")
 public class Category {
 
     public static final Category all = new Category(-1, "All");
 
-    @Id
-    @GeneratedValue
-    @Column(name="category_id")
-    public int getCategoryID() {
-        return categoryID;
-    }
-
-    public void setCategoryID(int categoryID) {
-        this.categoryID = categoryID;
-    }
-
-    @Column(name="name")
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
     private int categoryID;
     private String name;
+
 
     public Category() {
     }
@@ -64,5 +44,25 @@ public class Category {
         this.categoryID = categoryID;
         this.name = name;
 
+    }
+
+    @Id
+    @GeneratedValue
+    @Column(name = "category_id")
+    public int getCategoryID() {
+        return categoryID;
+    }
+
+    public void setCategoryID(int categoryID) {
+        this.categoryID = categoryID;
+    }
+
+    @Column(name = "name")
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 }

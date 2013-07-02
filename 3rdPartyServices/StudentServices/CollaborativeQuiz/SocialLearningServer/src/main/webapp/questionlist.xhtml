@@ -10,67 +10,67 @@
     <title>Hello SOCIETIES 3PS</title>
 </h:head>
 
-<body>
+<h:body>
 
-<h:form id="form">
-    <p:growl id="growl" showDetail="true" sticky="true" />
+    <h:form id="form">
+        <p:growl id="growl" showDetail="true" sticky="true"/>
 
-    <p:panel header="Growl">
-        <p:commandButton value="Growl" actionListener="#{questionController.growl}" update="growl"/>
-    </p:panel>
+        <p:panel header="Growl">
+            <p:commandButton value="Growl" actionListener="#{questionController.growl}" update="growl"/>
+        </p:panel>
 
-    <p:dataTable var="question" value="#{questionController.questions}">
+        <p:dataTable var="question" value="#{questionController.questions}">
 
-        <f:facet name="header">
-            Expand question rows to edit answers, difficulty, etc
-        </f:facet>
+            <f:facet name="header">
+                Expand question rows to edit answers, difficulty, etc
+            </f:facet>
 
-        <p:column>
-            <p:rowToggler />
-        </p:column>
-
-        <p:column headerText="Question ID">
-            <h:outputText value="#{question.questionID}"/>
-        </p:column>
-
-        <p:column headerText="Category ID">
-            <h:outputText value="#{question.categoryID}"/>
-        </p:column>
-
-        <p:column headerText="Question">
-            <h:outputText value="#{question.questionText}"/>
-        </p:column>
-
-        <p:rowExpansion>
-
-            <p:column headerText="Answer Choice 1">
-                <h:outputText value="#{question.answer1}"/>
+            <p:column>
+                <p:rowToggler/>
             </p:column>
 
-            <p:column headerText="Answer Choice 2">
-                <h:outputText value="#{question.answer2}"/>
+            <p:column headerText="Question ID">
+                <h:outputText value="#{question.questionID}"/>
             </p:column>
 
-            <p:column headerText="Answer Choice 3">
-                <h:outputText value="#{question.answer3}"/>
+            <p:column headerText="Category ID">
+                <h:outputText value="#{question.categoryID}"/>
             </p:column>
 
-            <p:column headerText="Answer Choice 4">
-                <h:outputText value="#{question.answer4}"/>
+            <p:column headerText="Question">
+                <h:outputText value="#{question.questionText}"/>
             </p:column>
 
-            <p:column headerText="Correct Answer">
-                <h:outputText value="#{question.correctAnswer}"/>
-            </p:column>
+            <p:rowExpansion>
 
-            <p:column headerText="Difficulty">
-                <h:outputText value="#{question.answer1}"/>
-            </p:column>
+                <p:column headerText="Answer Choice 1">
+                    <h:outputText value="#{question.answer1}"/>
+                </p:column>
 
-        </p:rowExpansion>
-    </p:dataTable>
+                <p:column headerText="Answer Choice 2">
+                    <h:outputText value="#{question.answer2}"/>
+                </p:column>
 
-</h:form>
+                <p:column headerText="Answer Choice 3">
+                    <h:outputText value="#{question.answer3}"/>
+                </p:column>
 
-</body>
+                <p:column headerText="Answer Choice 4">
+                    <h:outputText value="#{question.answer4}"/>
+                </p:column>
+
+                <p:column headerText="Correct Answer">
+                    <h:outputText value="#{question.correctAnswer}"/>
+                </p:column>
+
+                <p:column headerText="Difficulty">
+                    <h:outputText value="#{question.answer1}"/>
+                </p:column>
+
+            </p:rowExpansion>
+        </p:dataTable>
+
+    </h:form>
+
+</h:body>
 </html>

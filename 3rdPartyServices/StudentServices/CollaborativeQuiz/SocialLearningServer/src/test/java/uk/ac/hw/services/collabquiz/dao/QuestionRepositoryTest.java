@@ -1,11 +1,11 @@
 package uk.ac.hw.services.collabquiz.dao;
 
 import junit.framework.Assert;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import uk.ac.hw.services.collabquiz.Logic.QuestionDifficulty;
+import uk.ac.hw.services.collabquiz.dao.impl.QuestionRepository;
 import uk.ac.hw.services.collabquiz.entities.Question;
 
 import java.util.List;

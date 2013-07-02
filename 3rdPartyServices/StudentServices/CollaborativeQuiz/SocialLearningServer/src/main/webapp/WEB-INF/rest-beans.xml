@@ -27,43 +27,24 @@
 	USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. -->
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xmlns:ctx="http://www.springframework.org/schema/context"
-       xmlns:mvc="http://www.springframework.org/schema/mvc"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-           http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
-           http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd">
+       xmlns:jaxws="http://cxf.apache.org/jaxws"
+       xmlns:jaxrs="http://cxf.apache.org/jaxrs"
+       xsi:schemaLocation="
+         http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+         http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd
+         http://cxf.apache.org/jaxrs http://cxf.apache.org/schemas/jaxrs.xsd">
 
-    <!-- Configures the annotation-driven Spring MVC Controller programming model -->
-    <mvc:annotation-driven/>
+    <import resource="classpath:META-INF/cxf/cxf.xml"/>
+    <!--<import resource="classpath:META-INF/cxf/cxf-extension-soap.xml"/>-->
+    <!--<import resource="classpath:META-INF/cxf/cxf-extension-jaxrs-binding.xml"/>-->
+    <import resource="classpath:META-INF/cxf/cxf-servlet.xml"/>
 
+    <jaxws:endpoint id="greeter"
+                    implementor="uk.ac.hw.services.collabquiz.GreeterImpl"
+                    address="/Greeter1"/>
 
-    <!-- Scans the classpath for annotated components that will be auto-registered as Spring beans. -->
-    <ctx:component-scan base-package="uk.ac.hw.services.collabquiz"/>
-
-
-    <bean class="org.springframework.web.servlet.view.ContentNegotiatingViewResolver">
-        <property name="mediaTypes">
-            <map>
-                <entry key="atom" value="application/atom+xml"/>
-                <entry key="html" value="text/html"/>
-                <entry key="xhtml" value="text/html"/>
-                <entry key="json" value="application/json"/>
-            </map>
-        </property>
-        <property name="viewResolvers">
-            <list>
-                <bean class="org.springframework.web.servlet.view.BeanNameViewResolver"/>
-                <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
-                    <property name="prefix" value="/"/>
-                    <property name="suffix" value=".xhtml"/>
-                </bean>
-            </list>
-        </property>
-        <property name="defaultViews">
-            <list>
-                <bean class="org.springframework.web.servlet.view.json.MappingJacksonJsonView"/>
-            </list>
-        </property>
-    </bean>
+    <jaxrs:server id="greeterRest"
+                  serviceClass="uk.ac.hw.services.collabquiz.GreeterImpl"
+                  address="/GreeterRest"/>
 
 </beans>

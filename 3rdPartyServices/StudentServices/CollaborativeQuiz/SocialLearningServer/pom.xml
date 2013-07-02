@@ -178,6 +178,8 @@
             <version>2.5.0</version>
         </dependency>
 
+
+
         <!-- Hibernate dependencies -->
         <dependency>
             <groupId>org.hibernate</groupId>
@@ -243,7 +245,7 @@
         </dependency>
 
         <!-- REST server -->
-        <dependency>
+      <!--  <dependency>
             <groupId>javax.ws.rs</groupId>
             <artifactId>com.springsource.javax.ws.rs</artifactId>
             <version>1.0.0</version>
@@ -257,7 +259,7 @@
             <groupId>org.restlet.jee</groupId>
             <artifactId>org.restlet.ext.xml</artifactId>
             <version>2.1.2</version>
-        </dependency>
+        </dependency>-->
 
 
         <!-- Logging support -->
@@ -341,6 +343,7 @@
                             javax.faces.application,
                             javax.faces.component,
                             javax.faces.component.html,
+                            javax.faces.context,
                             javax.faces.event,
                             javax.faces.webapp,
                             javax.servlet.http,
@@ -350,14 +353,22 @@
                             org.springframework.web.context.request,
                             org.springframework.web.jsf.el,
 
+
+                            <!-- Hibernate -->
+                            org.hibernate,
+                            org.hibernate.cfg,
+                            org.springframework.orm.hibernate3,
+                            org.springframework.jdbc.datasource,
+                            com.mysql.jdbc,
+
                             <!-- REST server -->
-                            org.restlet,
-                            org.restlet.data,
-                            org.restlet.ext.servlet,
-                            org.restlet.ext.xml,
-                            org.restlet.representation,
-                            org.restlet.resource,
-                            org.restlet.routing,
+                            <!--org.restlet,-->
+                            <!--org.restlet.data,-->
+                            <!--org.restlet.ext.servlet,-->
+                            <!--org.restlet.ext.xml,-->
+                            <!--org.restlet.representation,-->
+                            <!--org.restlet.resource,-->
+                            <!--org.restlet.routing,-->
 
                             <!-- PrimeFaces -->
                             org.primefaces;resolution:=optional,

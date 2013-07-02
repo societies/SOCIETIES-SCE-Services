@@ -1,10 +1,8 @@
 package uk.ac.hw.services.collabquiz.controller;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import uk.ac.hw.services.collabquiz.dao.IQuestionRepository;
-import uk.ac.hw.services.collabquiz.dao.QuestionRepository;
 import uk.ac.hw.services.collabquiz.entities.Question;
 
 import javax.annotation.PostConstruct;
@@ -17,18 +15,16 @@ import java.util.List;
 @Controller
 @ManagedBean(name = "questionController")
 @ViewScoped
-public class QuestionController {
-    private static final Logger log = LoggerFactory.getLogger(QuestionController.class);
+public class QuestionController extends BasePageController {
 
+    @Autowired
     private IQuestionRepository questionRepository;
 
     private List<Question> questions;
 
     public QuestionController() {
         log.debug("QuestionController ctor()");
-        questionRepository = new QuestionRepository();
     }
-
 
     @PostConstruct
     public void postConstruct() {
@@ -45,5 +41,15 @@ public class QuestionController {
         FacesContext context = FacesContext.getCurrentInstance();
         context.addMessage(null, new FacesMessage("Second Message", "Additional Info Here..."));
     }
+
+    public IQuestionRepository getQuestionRepository() {
+        return questionRepository;
+    }
+
+    public void setQuestionRepository(IQuestionRepository questionRepository) {
+        this.questionRepository = questionRepository;
+    }
+
+
 
 }
