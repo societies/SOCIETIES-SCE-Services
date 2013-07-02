@@ -1,0 +1,121 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Creating3rdPS</title>
+</head>
+<body>
+<h1>Service Class Structure</h1>
+<p>A naive approach to creating Android Services results in a class source that combines all of the service's interface(s) implementation and the Service interface implementation. Apart from the pollution of the class's code, the requirement for services to optionally allow local (other components within the container project) and remote (components within other projects or apps) access requires that two forms of the service are required. This is due to the fact that the Android Service interface can only return one type of Binder object and calling of this method is by the Android OS and not by a calling component.
+As a result, a better class structure is to have a minimum of two and optionally three classes representing a service.
+</p>
+<h2>Service POJO</h2>
+<p>This class implements the relevant interfaces required for the service. All interface method implementations should not return a value other than null and return values should be returned via Intents. The methods should be minimal and all method processing should be handed off to an AsyncTask class to allow the processing be processed on a thread other than the main app thread.</p>
+<h2>Local Service Wrapper</h2>
+<p>If the service is required to be exposed to local components this class is required and it will export a local binder to the calling component.
+The following example illustrates the main features:
+</p>
+<xmp>public class ServicePlatformEventsLocal extends Service {
+
+    private IBinder binder = null;
+
+    public void onCreate() {
+        this.binder = new LocalPlatformEventsBinder();
+    }
+
+    public void onDestroy() {
+    }
+
+    /**Create Binder object for local service invocation */
+    public class LocalPlatformEventsBinder extends Binder {
+
+        public IAndroidSocietiesEvents getService() {
+            PubsubClientAndroid pubsubClient = createPubSubClientAndroid();
+            ClientCommunicationMgr ccm = createClientCommunicationMgr();
+
+            PlatformEventsBase serviceBase = new PlatformEventsBase(ServicePlatformEventsLocal.this.getApplicationContext(), pubsubClient, ccm, false);
+
+            return serviceBase;
+        }
+    }
+
+    public IBinder onBind(Intent arg0) {
+        return this.binder;
+    }
+
+    /**
+     * Factory method to get instance of {@link PubsubClientAndroid}
+     * @return PubsubClientAndroid
+     */
+    protected PubsubClientAndroid createPubSubClientAndroid() {
+        return new PubsubClientAndroid(getApplicationContext());
+    }
+
+    /**
+     * Factory method to get instance of {@link ClientCommunicationMgr}
+     * @return ClientCommunicationMgr
+     */
+    protected ClientCommunicationMgr createClientCommunicationMgr() {
+        return new ClientCommunicationMgr(getApplicationContext());
+    }
+
+}
+</xmp>
+<p>Points to note:
+<br>1.	Class implements the Android Service interface. The one mandatory method, public void onBind(Intent arg0), allows for a Binder object to be exported to a calling component. The main one is to create a Binder object to allow a service to be exported locally.
+<br>2.	The internal class, public class LocalPlatformEventsBinder extends Binder, defines the Binder object. It's main task is create an instance of the Service POJO and export it as certain type of interface. One of the required parameters to the service POJO class is the app context which will be required for tasks such as creating intents.
+<br>3.	The factory methods are convenience methods to allow a test version of a service wrapper to supply mock objects. By only changing the factory methods, the mock objects can be supplied to the POJO instead of the real objects that would involve more configuration and linkages to to the Virgo platform. As an example of some mock objects refer to https://github.com/societies/SOCIETIES-Platform/tree/development/platform-infrastructure/client-frwk/SocietiesLibraries/AndroidEvents/SocietiesAndroidEvents/src/org/societies/android/platform/events/mocks
+<br>4.	The non-mandatory methods, onCreate() and onDestroy(), allow actions to be taken when a service starts or stops.
+
+<h2>Remote Service Wrapper</h2>
+<p>If the service is required to be exposed to other apps this class is required and it will export a remote binder to the calling component.
+<br>The following example illustrates the main features:
+<xmp>public class ServicePlatformEventsRemote extends Service {
+    private Messenger inMessenger;
+
+    public void onCreate () {
+        PubsubClientAndroid pubsubClient = new PubsubClientAndroid(getApplicationContext());
+        ClientCommunicationMgr ccm = new ClientCommunicationMgr(getApplicationContext());
+
+        PlatformEventsBase serviceBase = new PlatformEventsBase(this.getApplicationContext(), pubsubClient, ccm, false);
+
+        this.inMessenger = new Messenger(new RemoteServiceHandler(serviceBase.getClass(), serviceBase, IAndroidSocietiesEvents.methodsArray));
+    }
+
+    public IBinder onBind(Intent arg0) {
+        return inMessenger.getBinder();
+    }
+
+    @Override
+    public void onDestroy() {
+    }
+}
+</xmp>
+<p>Points to note:
+<br>1.	The class again implements the Android Service interface.
+<br>2.	Instead of a Binder class, a Messenger object is created using the Societies Android utility class, RemoteServiceHandler (https://github.com/societies/SOCIETIES-Platform/blob/development/api/android/external/src/main/java/org/societies/android/api/utilities/RemoteServiceHandler.java). This utility class should be used as it masks the Messenger IPC mechanism in such as way as to make the process more developer-friendly.
+</p>
+
+<h2>Which Type of Service to Use ?</h2>
+<p>If a service will definitely only ever be consumed by other components in the application then making the service a Local service makes sense as no IPC support is required and the service can be consumed as a normal class. It should be stressed that using intents to return values should be preferred as it makes the invocation and return result detached actions and will not block the calling component in the event that API invocation takes relatively long.
+In all other cases, the service should be a Remote type service. The fact that the service is consumed by host application components in exactly the same way as other application components means that the service should be well-tested before exposure to other apps. It does have the drawback that invocation will have more overhead.
+</p>
+<h2>Remote Service APIs</h2>
+<p>The way in which remote services are being constructed is based on the Messenger mechanism. The mechanism works fine but is a fragile construct. In order to make the mechanism more robust, each service API has an array of method signatures to allow Java Reflection to be used on the service side of the IPC border. In order for the classes that support this Societies extension to the Messenger mechanism to work, current and future Service APIs' method signatures arrays should use fully qualified classes in the event that a parameter class does not fall into the following categories:
+<br>1. Java Primitives: int, long etc.
+<br>2. Java String and Object
+<br>3. Java Primitive arrays: all variants are hopefully covered, e.g. int [] string, int string [] etc.
+<br>4. Java Object and String arrays: all variants are hopefully covered, e.g. String [] string, String string [] etc.
+<br>As an example:
+<xmp> String methodsArray [] = {"registerXMPPServer(String client, org.societies.api.schema.cssmanagement.CssRecord profile)",
+            "unregisterXMPPServer(String client, Aorg.societies.api.schema.cssmanagement.CssRecord profile)",
+            "loginXMPPServer(String client, org.societies.api.schema.cssmanagement.CssRecord profile)",        
+            "logoutXMPPServer(String client)",
+            "loginCSS(String client, org.societies.api.schema.cssmanagement.CssRecord profile)", ....
+</xmp>
+<h2>Remote Service Helpers</h2>
+<p>While Remote services can be consumed directly, a lot of boilerplate code is required and certain provisions must be made certain connection events. In order to make a Remote service more 3rd party developer friendly, it is recommended that a simple asynchronous API and a helper class is created for each Remote service to shield 3rd party developers from the complexity of using remote services.
+The service helper classes should be included in the https://github.com/societies/SOCIETIES-Platform/tree/development/android/client-frwk/SocietiesServiceHelpers/CoreServicesHelpers project and the class, should be used as a template. The API, https://github.com/societies/SOCIETIES-Platform/blob/development/api/android/external2/src/main/java/org/societies/android/api/events/IAndroidSocietiesEventsHelper.java gives an example of a simple asynchronous service helper API.
+</p>
+</body>
+</html>

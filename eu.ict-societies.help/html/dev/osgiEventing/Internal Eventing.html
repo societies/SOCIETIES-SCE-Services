@@ -1,0 +1,100 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+	<title>Internal Eventing</title>
+</head>
+
+<body>
+<h1>Internal Eventing</h1>
+<p>The internal eventing interface extends the OSGI eventing system. It is targeted at eventing between bundles running within the same Virgo container. These events are not visible outside of that node, in other terms, they are not available between CSS nodes of the same CSS. As we are contained within the Virgo container, developers are free to add their own Java object types as the payload or event info.
+<br>See TestInternalEventing class for full code listing from the Git code repository.
+<br>As we are extending the OSGI EventListener, you need to add the following reference in your POM file:
+<xmp><dependency>
+    <groupId>org.osgi</groupId>
+    <artifactId>org.osgi.compendium</artifactId>
+    <version>4.1.0</version>
+    <scope>provided</scope>
+</dependency>
+</xmp>
+<img src=../../img/image055.png></img>
+</p>
+<p>You do need a dependency injection so you should get a reference to the IEventMgr service by registering in the Bundle-context-osgi.xml and Bundle-context.xml.
+In the Bundle-context-osgi.xml file, get a reference to the IEventMgr service by registering in the Bundle-context-osgi.xml and Bundle-context.xml.:</p>
+<xmp><osgi:reference id="eventMgmtRef" interface="org.societies.api.osgi.event.IEventMgr" /></xmp>
+<p>In the Bundle-context.xml file, ensure you set a property to receive a reference to the IEventMgr:
+</p>
+<xmp><bean id="ClientTester"
+       class="org.societies.examples.testclient.ClientTester"
+       depends-on="eventMgmtRef">
+     <property name="eventMgr" ref="eventMgmtRef"/>
+</bean>
+</xmp>
+<p>In your Virgo Plan ensure that the Event Manager Bundle (org.societies.comm.event.mgmt) is deployed:</p>
+<xmp><artifact type="bundle" name="org.societies.comm.event.mgmt" /></xmp>
+<p>If needed, ensure that Communications Bundles are also deployed on your Virgo plan.</p>
+<xmp><artifact type="bundle" name="org.societies.comm.CommonLibraries"/>
+<artifact type="bundle" name="org.societies.comm.xmpp.XCCommunicationMgr"/>
+</xmp>
+<h2>Creating an Event Type</h2>
+<p>Add your custom event types to the EventTypes.java class in the External API project, org.societies.api.osgi.event. eg,</p>
+<xmp>/**Used by Service Management (Service Discovery) to notify a local peer of a failed service */
+public static final String ADD_SERVICE_EVENT="org/societies/servicemgmt/service/addservice";
+/**Used by Service Management (Service Discovery) to notify peers of a removed service*/
+public static final String REMOVED_SERVICE_EVENT="org/societies/servicemgmt/service/removeservice";
+</xmp>
+<h2>Subscribing to an Event</h2>
+<p>The interface for subscribing to an internal event is:</p>
+<xmp>/**To subscribe a listener for events
+ * @param listener instance of the EventListener
+ * @param eventType    String array of event types {@link EventTypes}
+ * @param filterOption a String containing an LDAP-style filter specification {@link EventConstants}
+ */
+public void subscribeInternalEvent(EventListener listener, String[] eventTypes, String filterOption);
+</xmp>
+<p>As the EventTypes paramater is an array, you can subscribe to multiple events at the same time. You can also set a filter option using the LDAP style filter spec, based on any of the CSSEventConstants such that the event filter string looks like:</p>
+<xmp>String eventFilter = "(&" +
+    "(" + CSSEventConstants.EVENT_NAME + "=test_event_name)" +
+    "(" + CSSEventConstants.EVENT_SOURCE + "=test_event_source)" +  ")";
+</xmp>
+<p>And the filtering subscription is set up as:</p>
+<xmp>//SUBSCRIBING TO INTERNAL EVENT
+getEventMgr().subscribeInternalEvent(this, new String[] {EventTypes.CONTEXT_EVENT}, eventFilter);
+</xmp>
+
+<h2>Publishing an Event</h2>
+<p>InternalEvent is the object type that is published.</p>
+<xmp>/**Constructor
+ * @param eventType String for the type of event {@link EventTypes}
+ * @param eventName String for the name of event
+ * @param eventSource String for the source component or peer id
+ * @param eventInfo object for the event info. Must implement {@link Serializable}
+ */
+public InternalEvent(String eventType, String eventName, String eventSource, Serializable eventInfo);
+</xmp>
+<p>The EventInfo property is where developers will add their own object types. In the following example, an instance of the TestObject Class represents the payload:</p>
+<xmp> //GENERATE TEST PAYLOAD
+ TestObject myPayload = new TestObject();
+
+ //GENERATE EVENT
+ InternalEvent event = new InternalEvent(EventTypes.CONTEXT_EVENT, "test_event_name", "test_event_source", payload);
+
+ getEventMgr().publishInternalEvent(event);
+</xmp>
+
+<h2>Receiving an Event</h2>
+<p>Developers must extend the org.societies.api.osgi.event.EventListener abstract class to react to the receiving of a given event type. As there may be multiple events occuring within the same class, you should check which eventsType has raised this event by calling the getEventType() method of the InternalEvent. You can then extract your payload using the getEventInfo() method.</p>
+<xmp> public class SpringEventTest extends EventListener {
+ @Override
+ public void handleInternalEvent(InternalEvent event) {
+   LOG.info("*** internal event received *****");    
+   LOG.info("*** event name : "+ event.geteventName());
+   LOG.info("*** event source : "+ event.geteventSource());
+   LOG.info("*** event type : "+ event.geteventType());
+   TestObject payload = (TestObject)event.geteventInfo();
+   LOG.info("*** event name : "+ payload.getName());
+ }
+</xmp>
+</body>
+</html>

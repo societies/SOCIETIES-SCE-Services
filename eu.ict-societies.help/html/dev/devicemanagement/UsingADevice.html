@@ -1,0 +1,72 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+	<title>Using A Device</title>
+</head>
+
+<body>
+<h1>Using a Device</h1>
+
+<h2>IDevice interface</h2>
+<p>This is a provided interface, it is used by the Third Party service to get device metadata (device name, type, description, id, the type of network used to connect the device, the location, the manufacturer, etc). It also provides system informations such as the name of the associated OSGi services and the events managed by the underlying driver.</p>
+<pre>
+IDevice ls2 = iDevice;
+LOG.info("Device Type: "+ ls2.getDeviceName());
+LOG.info("Device Type: "+ ls2.getDeviceType());
+LOG.info("Device ID: "+ ls2.getDeviceId());
+</pre>
+<h2>IDriverService interface
+</h2>
+<p>This interface represents a service provided by the driver, this means that the driver exports its osgi services using this interface. This service provides actions and state varibales that can be used to interact with the physical device.
+A 3rd party service doesn't interact directly with this interface, it can get a reference to the service from the IDevice interface.
+</p>
+<xmp>IDevice screen1 = iDevice;
+IDriverService driverService = screen1.getService(DeviceMgmtDriverServiceNames.SCREEN_DRIVER_SERVICE);
+IAction ia = driverService.getAction("displayMessage");
+</xmp>
+
+<h2>IAction interface</h2>
+<p>This interface is used by the 3P service to invoke actions to interact whith a device, i.e. To control an actuator, get data from a sensor and configure a device parameter.
+<br>To get the IAction object from the IDriverService interface you have to call getAction method with the action name as parameter. This returns a IAction object. To invoke an action, you have to call invokeAction method from the IAction interface. An action receives a Dictionary of object or null as a parameter and returns a Dictionary of object or null.
+<br>The Keys used in the dictionary are well-known by the driver, so you can not put any key you want in the dictionary because it will be ignored by the driver.
+<br>Note: The Strings to be used to get actions, the strings to be used to fill the dictionaty of object used as a parameter of a given action and the strings used to retreive a result from a dictionary returned by the action will be provided in a constant Classes in the external API
+<br>We assume in the two examples bellow that the strings constants have been provided by the driver developer in an ad-hoc documentation.
+<br>The example bellow shows how to invoke the action "displayMessage" on a Screen device. The action receives a dictionary containing the key "message" for which the value represents the message to display to the screen.
+</p>
+<xmp>   //iDevice is the IDevice object tracked
+   IDevice screen1 = iDevice;
+
+   // Getting the device driver service from the iDevice by using the SCREEN_DRIVER_SERVICE contant
+   IDriverService driverService = screen1.getService(DeviceMgmtDriverServiceNames.SCREEN_DRIVER_SERVICE);
+
+   // Getting the action "displayMessage" from the device driver service
+   IAction ia = driverService.getAction("displayMessage");
+
+   //Prepare the dictionary of object to send to the device driver
+   Dictionary<String, Object> dic = new Hashtable<String, Object>();
+   dic.put("message", "Display this message for me please ! ");
+
+   //Invoke the action
+   ia.invokeAction(dic);
+</xmp>
+<p>The example bellow shows how to invoke the action "getLightLevel" on a Light Sensor. The action receives a null as parameter and returns a dictionary containing the light level value. To get the light level value from the dictionary, the key "outputLightLevel" is used.</p>
+<xmp>//iDevice is the IDevice object tracked
+IDevice ls1= iDevice;
+
+// Getting the device driver service from the iDevice by using LIGHT_SENSOR_DRIVER_SERVICE constant
+IDriverService driverService = ls1.getService(DeviceMgmtDriverServiceNames.LIGHT_SENSOR_DRIVER_SERVICE);
+
+// Getting the action "getLightLevel" from the device driver service
+IAction ia = driverService.getAction("getLightLevel");
+
+//Invoke the action with null parameter
+Dictionnary dic = ia.invokeAction(null);
+
+//retreive the light level from the returned dictionary
+LOG.info("getLightLevel action Return: " + dic.get("outputLightLevel"));
+</xmp>
+
+</body>
+</html>

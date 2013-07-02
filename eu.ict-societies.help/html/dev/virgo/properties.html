@@ -10,30 +10,28 @@
 <body>
 <h1>SOCIETIES Platform Configuration Properties</h1>
 <p>For any custom configuration, the folder <span class="code">VIRGO_HOME\config</span> has to be used. 
-To allow certain bundles that use a database (currently Derby) to work correctly, a properties file named <span class="code">org.societies.platform.properties</span> 
+To allow certain bundles that use a database to work correctly, a properties file named <span class="code">org.societies.platform.properties</span> 
 is required in the <span class="code">$VIRGO_HOME/config</span> directory 
 (N.B. The VIRGO_HOME environment variable must be created to allow this properties to work).</p>
 
 <p>Its contents for Windows are:</p>
 <pre class="code">
-jdbc.driverClassName=org.apache.derby.jdbc.EmbeddedDriver
-jdbc.url=jdbc\:derby\:${VIRGO_HOME}\\Databases\\servicceregdb;create\=true
-jdbc.password=app
-jdbc.username=app
-hibernate.dialect=org.hibernate.dialect.DerbyDialect
-hibernate.connection.url=jdbc\:derby\:target/database/message;create\=true
-hibernate.dialect=org.hibernate.dialect.DerbyDialect
-hbm2ddl.auto=create-drop
+jdbc.driverClassName=com.mysql.jdbc.Driver
+jdbc.url=jdbc\:mysql\://127.0.0.1\:3306/societies1
+jdbc.password=root
+jdbc.username=root
+hibernate.dialect=org.hibernate.dialect.MySQLDialect
+hibernate.dialect=org.hibernate.dialect.MySQLDialect
+hbm2ddl.auto=create
 show_sql=true
 current_session_context_class=thread
-#log4j.logger.org.springframework.osgi=DEBUG
-#log4j.logger.org.springframework=DEBUG
+
 </pre>
  
 <p>Whilst for Linux there are some minor changes. These are the entries that have to be altered:</p>
 <pre class="code">
 jdbc.url=jdbc:derby:${VIRGO_HOME}/Databases/serviceregdb;create=true
-hibernate.connection.url=jdbc:derby:target/database/message;create=true
+hibernate.connection.url=jdbc:mysql:target/database/message;create=true
 </pre>
 <p>all other entries remain untouched.</p>
 </body>

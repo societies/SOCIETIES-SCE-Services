@@ -1,0 +1,282 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Activity Feed</title>
+</head>
+<body>
+<p>Activityfeed is a part of CISManager and it is the library that facilitates the managing of activities for a CIS.</p>
+<h1>Activity Feeds for 3rd Party Services</h1>
+<p>This section provides guidelines regarding the use of the SOCIETIES CIS Manager activityfeed facilities by third party context-aware services. The Activityfeed is the library that facilitates the managing of activities for a CIS.</p>
+<h2>Setup</h2>
+<p>Please note that activityfeed is not a standalone service/bundle/component, but comes as a part of the CISManager, where each CIS will have a activityfeed. Thus having connected with the CIS, you will be able to access the activityfeed.</p>
+<h3>Dependencies (pom.xml)</h3>
+<p>Add the following dependencies to your pom.xml file:</p>
+<xmp><dependency>
+   <groupId>org.societies.api.external</groupId>
+   <artifactId>societies-api</artifactId>
+   <version>${release.version}</version>
+   <scope>provided</scope>
+</dependency>
+</xmp>
+<h3>Virgo Deployment</h3>
+<p>To use this component you must deploy the actitifyeedservice bundle and it's requirements:</p>
+<xmp><artifact type="bundle" name="org.societies.comm.CloudCommsBundle"/>
+<artifact type="bundle" name="org.societies.comm.event.mgmt" />
+<artifact type="bundle" name="org.societies.data-source"/>
+<artifact type="bundle" name="org.societies.activityfeedservice"/>
+</xmp>
+<h3>OSGi service configuration</h3>
+<p>bundle-context-osgi.xml:</p>
+<xmp> 1 <?xml version="1.0" encoding="UTF-8"?>
+ 2 <beans xmlns="http://www.springframework.org/schema/beans"
+ 3     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ 4     xmlns:osgi="http://www.springframework.org/schema/osgi"
+ 5     xsi:schemaLocation="http://www.springframework.org/schema/beans
+ 6                         http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+ 7                           http://www.springframework.org/schema/osgi
+ 8                           http://www.springframework.org/schema/osgi/spring-osgi.xsd">
+ 9     <osgi:reference id="activityFeedManager"
+10                     interface="org.societies.api.activity.IActivityFeedManager" />
+11 </beans>
+</xmp>
+<p>bundle-context.xml: (where you exchange "YourBean" with the name of your bean class, and 'name="activityFeedManager"' with name="TheNameOfTheVariableThatShouldContainYourActivityFeedManager" (with correct setters ofcourse)</p>
+<xmp> 1 <?xml version="1.0" encoding="UTF-8"?>
+ 2 <beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ 3     xmlns="http://www.springframework.org/schema/beans"
+ 4     xsi:schemaLocation="
+ 5         http://www.springframework.org/schema/beans
+ 6         http://www.springframework.org/schema/beans/spring-beans.xsd" >
+ 7
+ 8     <bean
+ 9         id="YourBean"
+10         class="org.societies.integration.test.bit.activityfeedmanager.TestCase10961"
+11         depends-on="cisManager,activityFeedManager"
+12         init-method="run" destroy-method="destroy">
+13         <property name="activityFeedManager" ref="activityFeedManager"/>
+14     </bean>
+15
+16 </beans>
+</xmp>
+<p>Now you are ready to access and use activityfeedmanager , which is a helper class that lets you create new activityfeeds or get old ones already created. The activityfeed is a feed of activities, with helper/CRUD methods for getting, setting and deleting activities. All of them are described in the api: https://github.com/societies/SOCIETIES-Platform/blob/development/api/java/external/src/main/java/org/societies/api/activity/IActivityFeed.java</p>
+<h2>Example of Usage</h2>
+<p>This example is originally a integration test, but serves well as an example of how you connect to activityfeedmanager, create a feed and use some of the methods for manipulating the activityfeed.
+
+<br>spring-context-osgi.xml:
+<xmp>1 <?xml version="1.0" encoding="UTF-8"?>
+ 2 <beans xmlns="http://www.springframework.org/schema/beans"
+ 3     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ 4     xmlns:osgi="http://www.springframework.org/schema/osgi"
+ 5     xsi:schemaLocation="http://www.springframework.org/schema/beans
+ 6                         http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+ 7                           http://www.springframework.org/schema/osgi
+ 8                           http://www.springframework.org/schema/osgi/spring-osgi.xsd">
+ 9
+10     <osgi:reference id="cisManager" interface="org.societies.api.cis.management.ICisManager"/>
+11     <osgi:reference id="activityFeedManager"
+12                     interface="org.societies.api.activity.IActivityFeedManager" />
+13     <osgi:reference id="commManager" interface="org.societies.api.comm.xmpp.interfaces.ICommManager"/>
+14 </beans>
+</xmp>
+<p>spring-context.xml:</p>
+<xmp> 1 <?xml version="1.0" encoding="UTF-8"?>
+ 2 <beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ 3     xmlns="http://www.springframework.org/schema/beans"
+ 4     xsi:schemaLocation="
+ 5         http://www.springframework.org/schema/beans
+ 6         http://www.springframework.org/schema/beans/spring-beans.xsd" >
+ 7
+ 8     <bean
+ 9         id="TestCase1096"
+10         class="org.societies.integration.test.bit.activityfeedmanager.TestCase10961"
+11         depends-on="cisManager,activityFeedManager"
+12         init-method="run" destroy-method="destroy">
+13         <property name="cisManager" ref="cisManager"/>
+14         <property name="activityFeedManager" ref="activityFeedManager"/>
+15         <property name="commManager" ref="commManager"/>
+16     </bean>
+17
+18 </beans>
+
+31 import org.slf4j.Logger;
+32 import org.slf4j.LoggerFactory;
+33 import org.societies.api.activity.IActivityFeedManager;
+34 import org.societies.api.cis.management.ICisManager;
+35 import org.societies.api.comm.xmpp.interfaces.ICommManager;
+36 import org.societies.integration.test.IntegrationTestCase;
+37
+38 public class TestCase10961 extends IntegrationTestCase {
+39     private static Logger LOG = LoggerFactory.getLogger(TestCase10961.class);
+40     public static ICisManager cisManager;
+41     public static IActivityFeedManager activityFeedManager;
+42     public static ICommManager commManager;
+43
+44     /**
+45      * Privacy Log Appender (injected)
+46      */
+47
+48     public TestCase10961() {
+49         super(10961, new Class[] {NominalTestCase.class});
+50         NominalTestCase.testCaseNumber = testCaseNumber;
+51     }
+52
+53     public  void setCisManager(ICisManager cisManager) {
+54         LOG.debug("[TEST CASE #"+testCaseNumber+"] setCisManager()");
+55         this.cisManager = cisManager;
+56     }
+57
+58     public  void setActivityFeedManager(IActivityFeedManager activityFeedManager) {
+59         LOG.debug("[TEST CASE #"+testCaseNumber+"] setActivityFeedManager()");
+60         this.activityFeedManager = activityFeedManager;
+61     }
+62
+63     public void setCommManager(ICommManager commManager) {
+64         LOG.debug("[TEST CASE #"+testCaseNumber+"] setCommManager()");
+65         this.commManager = commManager;
+66     }
+67
+68     public void destroy(){
+69
+70     }
+71
+72 }
+</xmp>
+<p> This class does all the actual manipulating of the activityfeedmanager and activityfeeds, it does not have any main() or runner class directly (it is run by the TestCase10961 class via run() inherited from the IntegrationTestCase class) NominalTestCase.java:</p>
+<xmp>25 package org.societies.integration.test.bit.activityfeedmanager;
+ 26
+ 27 import org.junit.After;
+ 28 import org.junit.Before;
+ 29 import org.junit.Test;
+ 30 import org.slf4j.Logger;
+ 31 import org.slf4j.LoggerFactory;
+ 32 import org.societies.activity.model.Activity;
+ 33 import org.societies.api.activity.IActivityFeedCallback;
+ 34 import org.societies.api.cis.attributes.MembershipCriteria;
+ 35 import org.societies.api.cis.management.ICisOwned;
+ 36 import org.societies.api.schema.activityfeed.MarshaledActivityFeed;
+ 37 import java.util.ArrayList;
+ 38 import java.util.Hashtable;
+ 39 import java.util.List;
+ 40 import java.util.concurrent.ExecutionException;
+ 41 import java.util.concurrent.Future;
+ 42
+ 43 /**
+ 44  * @author  Bjørn Magnus based on work from Rafik and Olivier
+ 45  */
+ 46 public class NominalTestCase {
+ 47     private static Logger LOG = LoggerFactory.getLogger(NominalTestCase.class.getSimpleName());
+ 48     public static Integer testCaseNumber;
+ 49
+ 50     private String privacyPolicyWithoutRequestor;
+ 51     private String cssId;
+ 52     private List<String> cisIds;
+ 53     private String cssPassword;
+ 54     private String cisName;
+ 55     private String cisDescription;
+ 56     private String cisType;
+ 57     private int numCIS = 6;
+ 58     private Hashtable<String, MembershipCriteria> cisMembershipCriteria;
+ 59
+ 60     @Before
+ 61     public void setUp() {
+ 62         LOG.info("[#"+testCaseNumber+"] setUp");
+ 63         cisIds = new ArrayList<String>();
+ 64         cssId = TestCase10961.commManager.getIdManager().getThisNetworkNode().getJid();
+ 65         cssPassword = "password.societies.local";
+ 66         cisName = "CisTest";
+ 67         cisDescription = "CIS to Test ActivityFeedManager";
+ 68         cisType = "testCis";
+ 69     }
+ 70
+ 71     @After
+ 72     public void tearDown() {
+ 73         LOG.info("[#"+testCaseNumber+"] tearDown");
+ 74     }
+ 75
+ 76  @Test
+ 77     public void testActivityFeedManager() {
+ 78         IActivityFeed activityFeed1 = null; IActivityFeed activityFeed2 = null;
+ 79         LOG.info("[#"+testCaseNumber+"] creating activityFeed1");
+ 80         activityFeed1 =
+ 81     TestCase10961.activityFeedManager.getOrCreateFeed("admin.societies.local",
+ 82     "onlyFeedId1"); //where admin.societies.local must be an actual
+ 83     JID (resolvable)
+ 84         LOG.info("[#"+testCaseNumber+"] creating activityFeed2");
+ 85         activityFeed2 =
+ 86     TestCase10961.activityFeedManager.getOrCreateFeed("admin.societies.local",
+ 87     "onlyFeedId2"); //where admin.societies.local must be an actual
+ 88     JID (resolvable)
+ 89
+ 90         LOG.info("[#"+testCaseNumber+"] inserting 1 activity into cis1");
+ 91         //inserting 1 activity into cis1
+ 92
+ 93         activityFeed1.addActivity(makeMessage("heh", "heh", "nonsense", "0"), new IActivityFeedCallback() {
+ 94             @Override
+ 95             public void receiveResult(MarshaledActivityFeed activityFeedObject) {
+ 96             }
+ 97         });
+ 98         LOG.info("[#"+testCaseNumber+"] checking that cis1 has one activity");
+ 99         //checking that cis1 has one activity
+100         activityFeed1.getActivities("0 " + Long.toString(System.currentTimeMillis()), new IActivityFeedCallback() {
+101             @Override
+102             public void receiveResult(MarshaledActivityFeed activityFeedObject) {
+103                 assert (activityFeedObject.getGetActivitiesResponse().getMarshaledActivity().size() == 1);
+104             }
+105         });
+106         LOG.info("[#"+testCaseNumber+"] checking that cis2 has zero activities");
+107         //checking that cis2 has zero activities
+108         activityFeed2.getActivities("0 "+Long.toString(System.currentTimeMillis()),new IActivityFeedCallback() {
+109             @Override
+110             public void receiveResult(MarshaledActivityFeed activityFeedObject) {
+111                 assert (activityFeedObject.getGetActivitiesResponse().getMarshaledActivity().size()==0);
+112             }
+113         });
+114         LOG.info("[#"+testCaseNumber+"] inserting two activities into cis2");
+115         //inserting two activities into cis2
+116         activityFeed2.addActivity(makeMessage("heh", "heh", "nonsense", "0"), new IActivityFeedCallback() {
+117             @Override
+118             public void receiveResult(MarshaledActivityFeed activityFeedObject) {
+119             }
+120         });
+121         activityFeed2.addActivity(makeMessage("heh","heh","nonsense","0"),new IActivityFeedCallback() {
+122             @Override
+123             public void receiveResult(MarshaledActivityFeed activityFeedObject) {
+124             }
+125         });
+126         LOG.info("[#"+testCaseNumber+"] checking that cis1 still only has one activity");
+127         //checking that cis1 still only has one activity
+128         activityFeed1.getActivities("0 "+Long.toString(System.currentTimeMillis()),new IActivityFeedCallback() {
+129             @Override
+130             public void receiveResult(MarshaledActivityFeed activityFeedObject) {
+131                 assert (activityFeedObject.getGetActivitiesResponse().getMarshaledActivity().size()==1);
+132             }
+133         });
+134         LOG.info("[#"+testCaseNumber+"] checking that cis2 now has two activities");
+135         //checking that cis2 now has two activities
+136         activityFeed2.getActivities("0 "+Long.toString(System.currentTimeMillis()),new IActivityFeedCallback() {
+137             @Override
+138             public void receiveResult(MarshaledActivityFeed activityFeedObject) {
+139                 assert (activityFeedObject.getGetActivitiesResponse().getMarshaledActivity().size()==2);
+140             }
+141         });
+142     }
+143
+144     //util methods
+145
+146     public Activity makeMessage(String user1, String user2, String message, String published){
+147         Activity ret = new Activity();
+148         ret.setActor(user1);
+149         ret.setObject(message);
+150         ret.setTarget(user2);
+151         ret.setPublished(published);
+152         return ret;
+153     }
+154
+155 }
+</xmp>
+
+
+
+
+</body>
+</html>

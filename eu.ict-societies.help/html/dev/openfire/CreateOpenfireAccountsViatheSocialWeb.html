@@ -1,0 +1,60 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>CreateOpenfireAccountsViaTheSocialWeb</title>
+</head>
+<body>
+<h1>Introduction</h1>
+<br>The below steps will allow you to create openfire user accounts. These accounts will be registered with the domain authority node, so after some administration of these accounts ( described below), the user will be able to log onto their Societies account using their openfire credentials and automatically be re-directed to their container's Societies Web Application</br>
+
+<h1>Assumption</h1>
+<br>This article is written with the assumption that the reader already knows how to configure and run mutiple virgo containers. It is also based on the assumption that we have the following configuration: Domain Authority Node (admin.ict-societies.eu) running in container A ( config using tomcat port 8080) User Container for Jane (jane.ict-societies.eu) running in container B ( config1 using tomcat port 18080) User Container for John (john.ict-societies.eu) running in container C ( config2 using tomcat port 28080) This configuration is not necessary to be set up in this way, but it is worth keeping in mind when reading the instructions below.
+Please note: the user accounts here can be different and changed in the relevant properties file of each container, i.e. VIRGO_HOME/config*/org.socities.platform.properties
+</br>
+
+<h1>Installing Societies Plugin to Openfire</h1>
+<li>Download plugin from https://maven.ict-societies.eu/nexus/content/repositories/thirdparty/org/societies/da/openfire/plugin/societies-openfire-plugin/0.1/societies-openfire-plugin-0.1.jar</li>
+<li>Copy the societies-openfire-plugin jar into your openfire plugin directory</li>
+<li>Restart openfire</li>
+
+<h1>Run the Domain Authority Node</h1>
+<br> In order to create the openfire account the domain authoity node container needs to be running.
+<h1>Creating Openfire Accounts</h1>
+<br>Once the domain authority node has started sucessfully open the following address in your webbrowser  http://localhost:8080/societies-platform/index.html
+please note: 'societies.local' should be replaced with 'ict-societies.eu'
+<img src="../../img/image071CreateOpenFireAccounts.png" /><br />
+<br>Enter the details of the openfire user account that you would like to create. For this example, we are creating an account for Jane Societies, running on a container with the openfire address jane.ict-socities.eu
+Create another account for John using the same form
+We have now created the openfire account for both Jane and John, and created skeleton societies account details in the Domain Authority node. We now need to complete the account setup on the domain authority node before the user can access their container's webapp.
+<h1>Completing Account Setup</h1>
+<br>Open the following address in your webbrowser http://localhost:8080/societies-platform/adminlogin.html
+<br>Log on to the administrator account with the default admin account details
+<br>Username : Administrator
+<br>Password : Administrator
+<br>You will see the following screen (please note: 'societies.local' should be replaced with 'ict-societies.eu')</br>
+<img src="../../img/image072.png" /><br />
+We need to tell the domain authority node what tomcat ports these user containers are running on.
+The only fields we need to change on this screen are Host, Port and Status
+<br>For Jane, we enter the following details:
+<br>Under the host field we enter localhost
+<br>In the port field we enter 18080
+<br>In the status field we select Active
+<br>For John, we enter the following details:
+<br>Under the host field we enter localhost
+<br>In the port field we enter 28080
+<br>In the status field we select Active
+<br>please note: 'societies.local' should be replaced with 'ict-societies.eu'
+<br><img src="../../img/image073.png" /><br />
+<br> Press submit
+The openfire and socieites account setup is now complete
+You should now start Jane and John's virgo containers if they are not already running.
+<br>
+<h1>User Log On</h1>
+Direct users to the following address
+http://localhost:8080/societies-platform/
+The user should log on using their openfire details.
+Once openfire has validated their details, the user will be directed to their containers webapp.
+
+</body>
+</html>

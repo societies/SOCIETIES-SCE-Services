@@ -8,7 +8,10 @@
    <topic label="Third Party Service APIs">
       <anchor id="apis"/>
    </topic>
-   <topic label="Samples">
+   <topic label="Samples2">
       <anchor id="samples"/>
+   </topic>
+   <topic label="Android">
+      <anchor id="android"/>
    </topic>
 </toc>

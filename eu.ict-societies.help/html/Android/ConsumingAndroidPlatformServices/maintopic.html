@@ -1,0 +1,141 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Consuming Android Platform Services</title>
+</head>
+<body>
+<p>There are two main ways that a 3rd party service can interact with the Societies platform:
+<br>	Use the Android Communication app XMPP communications and the XMPP Pubsub services to interact with a CSS's cloud node and/or Domain Authority
+<br>	Use the exposed Societies Android Client components to access information and platform events, publish events and push information
+<br>A third strategy could be a hybrid approach whereby the above two modes are used together.
+From a 3rd party developer point of view the second approach is preferable as all interaction is mediated through exposed APIs and no further knowledge is required. Due to various development timelines, current 3rd party services are probably using the first approach along with other communication channels such as SOAP and REST protocols. As more core components are made available, the second approach will become more compelling and the existing services should consider adapting to these APIs.
+</p>
+<h1>Android Components</h1>
+<p>There are four main components that comprise applications in Android. Activities correspond to GUI screens and are not covered in this section as other apps cannot meaningfully interact with this type of component.</p>
+<h2>Services</h2>
+<p>Services are either long running compute tasks and/or components that offer an API to either local and/or remote components where local means within the service's host application and remote refers to other applications. All of the Societies Android Client exposed services are of the API type and allow both local and remote access to an exposed API.</p>
+<h2>Content Providers</h2>
+<p>This component type allows data to be exposed to local and more predominantly, remote components. The API is defined by Android, access to data can be of a fine-grained granularity and data access is essentially based on the REST paradigm.</p>
+<h2>Broadcast Receivers</h2>
+<p>This component is not exposed by the Societies Android Client app but is used to receive API invocation return results via intents. Intents can also be used as intra-node events and again, receivers in conjunction with intent filters are used to subscribe to and receive intents.</p>
+<h1>CSSManager Content Provider</h1>
+<p>This read-only provider allows 3rd party apps to access CSS user details such as the user name, domain XMPP server, Domain Authority and local CSS device JIDs. Other user attributes can also be accessed. The provider's Contract Class can be examined at: https://github.com/societies/SOCIETIES-Platform/blob/development/api/android/external2/src/main/java/org/societies/android/api/contentproviders/CSSContentProvider.java .
+<br>Content Providers are not directly interacted with but indirectly through the client component's Context's ContentResolver query method. The general form is:
+</p>
+<xmp>Cursor cursor = this.getContentResolver().query(Uri, String, String, String, String);
+
+cursor.moveToFirst();
+cursor.getString(cursor.getColumnIndex(CSSContentProvider.CssRecord.CSS_RECORD_CSS_IDENTITY));
+cursor.getString(cursor.getColumnIndex(CSSContentProvider.CssRecord.CSS_RECORD_DOMAIN_SERVER));
+cursor.getString(cursor.getColumnIndex(CSSContentProvider.CssRecord.CSS_RECORD_NAME));
+</xmp>
+<p>where the query method parameters are defined by: http://developer.android.com/reference/android/content/ContentResolver.html
+The return object is a Cursor which should be familiar to anyone who has used SQL databases. The URI parameter can be any of the URIs defined in the provider's Contract Class, CSSContentProvider.java.
+</p>
+<h1>Societies Platform Events Service</h1>
+<p>This service allows both Core Android components and 3rd party apps to subscribe and unsubscribe to Societies platform inter-node Pubsub nodes (events). Clients of this service can also publish events. The class, https://github.com/societies/SOCIETIES-Platform/blob/development/api/android/external2/src/main/java/org/societies/android/api/events/IAndroidSocietiesEvents.java , describes the intents to be used when subscribing/unsubscribing to and from platform events.
+Although the service can be interacted with via the service class, a simpler, asynchronous class, https://github.com/societies/SOCIETIES-Platform/blob/development/android/client-frwk/SocietiesServiceHelpers/SocietiesPlatformEventsHelper/src/org/societies/android/platform/events/helper/EventsHelper.java which acts as a facade for complexities and boilerplate code required to use the service is recommended. A typical example of using this service is as follows:
+</p>
+<xmp>final EventsHelper helper = new EventsHelper(<component context>);
+
+helper.setUpService(new IMethodCallback() {
+
+    @Override
+    public void returnAction(String result) {
+    }
+
+    @Override
+    public void returnAction(boolean resultFlag) {
+        if (resultFlag) {
+           try {
+            helper.subscribeToEvent(IAndroidSocietiesEvents.<intent name>, new IPlatformEventsCallback() {
+
+            @Override
+            public void returnAction(int result) {
+            }
+
+            @Override
+            public void returnAction(boolean resultFlag) {
+                if (resultFlag) {
+
+                                   do something ...
+                }
+            });
+           } catch (PlatformEventsHelperNotConnectedException e) {
+            e.printStackTrace();
+            fail();
+           }
+             }
+    }
+});
+</xmp>
+<p>The tearDownService() method must be invoked when the client component has finished with this service to prevent the service being kept active when all other clients have unbound from this service.</p>
+<h1>Android Societies Dependencies</h1>
+<p>In order to integrate with the Android Societies exposed components the following APKLIB dependencies are required:
+<br>	Android Societies Remote Services: Contains helper classes to allow the exposed services to be used (https://github.com/societies/SOCIETIES-Platform/tree/development/android/client-frwk/SocietiesServiceHelpers/CoreServicesHelpers)
+<br>	Android External API: Interfaces and classes required by developers (https://github.com/societies/SOCIETIES-Platform/tree/development/api/android/external2)
+These dependencies can be included into a relevant 3rd party app via one of three methods:
+</p>
+<h2>Maven
+</h2>
+<p>In order to include these dependencies insert the following into app's POM file:</p>
+<xmp><dependencies>
+    .
+    .
+    .
+        <dependency>
+           <groupId>org.societies.android.remote.helper</groupId>
+           <artifactId>SocietiesAndroidRemoteHelpers</artifactId>
+           <version>${release.version}</version>
+           <type>apklib</type>
+        </dependency>
+    .
+    .
+    .
+</dependencies>
+</xmp>
+<h2>Eclipse</h2>
+<p>Create Eclipse projects for the above APKLIBs and manually link them to the relevant APK project.</p>
+<h1>Android Societies Deployment</h1>
+<p>Two Android APK apps are required to deploy the Societies Android platform:
+<br>1.	SocietiesAndroidApp (https://github.com/societies/SOCIETIES-Platform/tree/development/android/client-frwk/SocietiesAndroidApp)
+<br>2.	SocietiesAndroidCommsApp (https://github.com/societies/SOCIETIES-Platform/tree/development/android/client-frwk/SocietiesAndroidCommsApp)
+<br>These can be deployed from a developer's machine in one of two ways:
+</p>
+<h3>Bash Script</h3>
+<p>Use the Bash script: https://github.com/societies/SOCIETIES-Platform/blob/development/android/client-frwk/AndroidConfiguration/installSocieties.sh</p>
+<h3>Maven</h3>
+<p>Locate to both of the above projects and execute the following comannd:</p>
+<xmp>$ mvn clean install android:deploy android:run</xmp>
+
+<h2>App References</h2>
+<p>There are currently two sets of app preferences:</p>
+<h3>Behavioural</h3>
+<p>The Credential Passwords preference allows the user to show or hide passwords displayed in the app</p>
+<img src=../../img/image80.png>
+
+<h2>CSS Configuration</h2>
+<p>	XMPP Server Name: The XMPP Server Name property displayed on the Openfire web dashboard Server page
+<br>	XMPP Server IP address: The IP address of the XMPP server. This preference is optional. If it is blank then the previous preference value must be assigned a DNS entry in order to resolve the XMPP server. Enter the server's IP address if it is not possible to create a DNS entry.
+<br>	Domain Authority Node: The XMPP JID of the Domain Authority node
+<br>	CSS Identity: The user's username
+<br>	Identity Password: The user's password
+<br>	Android CSS Node JID Resource: The resource used to create the Android CSS node's full JID
+<br>	Domain Authority Server Port: Default of 5222. Alter if XMPP server's port is altered
+<img src=../../img/image081.png>
+
+<h1>Minimum Configuration Required for Successful Platform Usage</h1>
+<p>The following conditions must be satisfied in order to facilitate a successful CSS login from and Android device:
+<br>1.	Up to date Societies Communications and Societies Android apps must be installed on the target AVD /device - preferably as recent as possible.
+<br>2.	The required Societies Client app preferences must be specified prior to app usage - cf.previous section.
+<br>3.	The specified XMPP Openfire server must be running.
+<br>4.	The User credentials entered into the Societies Client app must exist on the specified XMPP server.
+<br>5.	The CSS that relates to the user specified in the Societies Client app login must be successfully deployed and its XMPP communication component successfully detected by the Openfire server.
+</p>
+
+</p>
+
+
+</body>
+</html>

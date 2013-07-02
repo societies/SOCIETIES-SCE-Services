@@ -10,12 +10,16 @@
   		<topic href="html/dev/virgo/env.html" label="Environment Variables Setup"></topic>
   		<topic href="html/dev/virgo/debug.html" label="Starting, stopping and debugging Virgo"></topic>
   		<topic href="html/dev/virgo/eclipse.html" label="Running Virgo from Eclipse"></topic>
-  		<topic href="html/dev/virgo/properties.html" label="SOCIETIES Platform Properties"></topic> 
+  		<topic href="html/dev/virgo/properties.html" label="SOCIETIES Platform Properties"></topic>
+    <topic href="html/dev/Create a 3rd Party Service for Virgo/maintopic.html" label="Create a 3rd Party Service for Virgo">
+    </topic> 
 	</topic>
 	<topic href="html/dev/openfire/maintopic.html" label="Installing OpenFire">
 		<topic href="html/dev/openfire/configuration.html" label="OpenFire Configuration">
   </topic>
   <topic href="html/dev/openfire/PSIconfiguration.html" label="PSI Configuration">
+  </topic>
+  <topic href="html/dev/openfire/CreateOpenfireAccountsViatheSocialWeb.html" label="Create Openfire Accounts via Web">
   </topic>
 	</topic>
  <topic href="html/dev/osgimaven/maintopic.html" label="OSGi/SpringDM Bundle Development with Maven">
@@ -113,5 +117,19 @@
  <topic href="html/dev/identity/maintopic.html" label="Identity">
     <topic href="html/dev/identity/interfaceiidentity.html" label="Interface IIdentity">
     </topic>
- </topic>  
+ </topic>
+ <topic href="html/dev/MySQLdb/maintopic.html" label="Installing/Connecting a MySQL db">
+ </topic>
+ <topic href="html/dev/Create a 3rd Party Service for Virgo/maintopic.html" label="Create a 3rd Party Service for Virgo">
+    <topic href="html/dev/Create a 3rd Party Service for Virgo/CreateSpringOSGIBundleProjectStructureWithMavenEclipse.html" label="CreateSpringOSGIProjectStructure">
+    </topic>
+    <topic href="html/dev/Create a 3rd Party Service for Virgo/ImplementingTheService.html" label="Implementing Your Service">
+    </topic>
+    <topic href="html/dev/Create a 3rd Party Service for Virgo/PrivacyPolicy.html" label="Create a Privacy Policy">
+    </topic>
+    <topic href="html/dev/Create a 3rd Party Service for Virgo/BundleConfigurationForPublishing3PService.html" label="Create a 3rd Party Service for Virgo/BundleConfigurationForPublishing3PService.html&quot; label=&quot;Bundle Configuration for Publishing a 3rd Party Service">
+    </topic>
+    <topic href="html/dev/Create a 3rd Party Service for Virgo/BuildDeployBundle.html" label="Build And Deploy Your Bundle">
+    </topic>
+ </topic>
 </toc>

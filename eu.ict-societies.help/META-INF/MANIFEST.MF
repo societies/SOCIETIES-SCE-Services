@@ -1,11 +1,12 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Help
+Bundle-Name: PluginProject_main
 Bundle-SymbolicName: eu.ict-societies.help; singleton:=true
 Bundle-Version: 1.0.0.qualifier
-Bundle-Activator: eu.ict_societies.help.Activator
+Bundle-Activator: pluginproject_main.Activator
 Require-Bundle: org.eclipse.ui,
+ org.eclipse.core.runtime,
+ org.eclipse.ui,
  org.eclipse.core.runtime
 Bundle-ActivationPolicy: lazy
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Bundle-Vendor: The SOCIETIES Consortium
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7

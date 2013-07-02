@@ -1,0 +1,34 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Explicit</title>
+
+</head>
+<body>
+<p>
+A third party service can request user preference and user intent information from the SOCIETIES platform explicitly by using the org.societies.api.personalisation.mgmt.IPersonalisationManager interface. The following two methods allow a 3p service to request a user preference and a user intent action respectively from the Personalisation system.
+</p>
+
+
+
+<xmp>
+
+public Future<IAction> getPreference(Requestor requestor, IIdentity ownerID, String serviceType, ServiceResourceIdentifier serviceID, String preferenceName);
+
+public Future<IAction> getIntentAction(Requestor requestor, IIdentity ownerID, ServiceResourceIdentifier serviceID, String preferenceName);
+
+</xmp>
+<p>
+The requestor parameter defines the identity of the third party service that is requesting the preference information. The Requestor class has a subclass org.societies.api.identity.RequestorService which should be used to instantiate the identity of the third party service. If the requestor parameter is not properly defined, the Personalisation system will not return valid preference information.
+<br>The ownerID parameter defines the identity of the user for which the third party service is requesting the information. Currently, as the platform does not support multiple identities, the third party service should utilise the org.societies.api.identity.IIdentityManager.getThisNetworkNode(); to retrieve the identity of the user on the current node as long as the service is running on a user's node.
+<br>The serviceType parameter is defined by the third party service developer in the service meta data.
+<br>The serviceID parameter is defined by the platform and should be retrieved by calling the method
+</p>
+<xmp>ServiceResourceIdentifier org.societies.api.internal.servicelifecycle.ServiceModelUtils.generateServiceResourceIdentifier(IIdentity identity, Class<?> callingClass)</xmp>
+<p>where the identity parameter is the identity of the CSS that provides the service and callingClass is the class defined in the bean definition of the jar (in bundle-context.xml).
+The preferenceName parameter is also defined by the third party service developer and it is the service that is able to understand the semantics of this parameter and apply it properly since it was the service that sent this information to the platform using the
+</p>
+<xmp>org.societies.api.useragent.monitoring.IUserActionMonitor.monitor(IIdentity owner, IAction action) method.</xmp>
+</body>
+</html>
