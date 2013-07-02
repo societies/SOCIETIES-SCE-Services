@@ -1,0 +1,38 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Connect & Install MySQL</title>
+</head>
+<body>
+Download and install MySql Community Edition 5.5 from http://dev.mysql.com/downloads/mysql/
+Log in for the first time to your MySql Server and set the password for the root user.
+<br>
+<h1>Societies Setup</h1>
+Edit your org.societies.platform.properties file (you will find this in your VIRGO_HOME config directory)
+<br>jdbc.url=jdbc\:mysql\://127.0.0.1\:3306/<dbname>
+<br>jdbc.password=<password>
+<br>where <dbname> is the name of the database that you will connect to from your societies container and <password> is the password that you have set for the root user
+
+<h1>Create the database</h1>
+Run the MySql Server command line client, e.g.
+<br>mysql --user=root --password
+At the prompt mysql> type
+<br>create database societiesdb;
+<br>exit;
+<br>If necessary replace societiesdb in the command with the name of the database you specified in your org.societies.platform.properties file. Please note: one uniquely named database table is required for each user or domain authority or combined node container.
+
+<h1>Database Refreshing</h1>
+Sometimes the schema of tables change within our bundles. If this happens, there are 2 choices open to the developer. You can drop the table(s), and then the new table(s) schema will be created when the bundles start up. Note this only applies to standalone tables that are not required as references by other tables for foreign keys etc.
+<br>drop table societiesdb.tablename
+<br>exit;
+<br>If necessary replace societiesdb in the command with the name of the database you specified in your org.societies.platform.properties file  Replace tablename with the name of the table that you wish to drop. The new table schema will be created when the bundles start up in virgo.
+The second option is to drop the database, and recreate it. All the table sturcture will be recreated again when the bundles start up. This is the recommended option for now, as it is the easier option and until we go to the trials, any data stored in the database is not critical.
+<br>drop database societiesdb;
+<br>create database societiesdb;
+<br>exit;<br>
+If necessary replace societiesdb in the command with the name of the database you specified in your org.societies.platform.properties file.
+Note: This has to happen for every container that you want to connect to your MySQL database.
+
+</body>
+</html>

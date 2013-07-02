@@ -7,8 +7,22 @@
 </head>
 
 <body>
-<h1>Context</h1>
+<h1>Context Management</h1>
 
-The Context Management (CM) component block acts as an intermediate layer between context-aware services and the sources of context information. An outline of the CM components can be found in D5.2.
+<p>This section provides guidelines regarding the use of the SOCIETIES Context Management facilities by third party context-aware services. The Context Management (CM) component block acts as an intermediate layer between context-aware services and the sources of context information.</p>
+
+<h2>Setup</h2>
+<p>Add the following dependencies to your pom.xml file:</p>
+<xmp><dependency>
+   <groupId>org.societies.api.external</groupId>
+   <artifactId>societies-api</artifactId>
+   <version>${release.version}</version>
+   <scope>provided</scope>
+</dependency>
+</xmp>
+<p>And the following configuration on your bundle-context-osgi.xml</p>
+<xmp><osgi:reference id="ctxBroker" 
+interface="org.societies.api.context.broker.ICtxBroker" />
+</xmp>
 </body>
 </html>

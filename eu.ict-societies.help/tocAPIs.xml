@@ -2,10 +2,92 @@
 <?NLS TYPE="org.eclipse.help.toc"?>
 
 <toc label="Getting Started" link_to="toc.xml#apis"> 
-	<topic label="Main Topic"  href="html/apis/maintopic.html"> 
-		<topic label="Sub Topic" href="html/apis/subtopic.html" /> 
+	<topic label="CreateSpringOSGIProjectStructure"  href="html/dev/Create a 3rd Party Service for Virgo/CreateSpringOSGIBundleProjectStructureWithMavenEclipse.html"> 
 	</topic>
-	<topic label="Main Topic 2">
-		<topic label="Sub Topic 2" href="html/apis/subtopic2.html" />
-	</topic> 
+	<topic href="html/dev/Create a 3rd Party Service for Virgo/ImplementingTheService.html" label="Implementing Your Service">
+	</topic>
+ <topic href="html/dev/Create a 3rd Party Service for Virgo/BuildDeployBundle.html" label="Build And Deploy Your Bundle">
+ </topic>
+ <topic href="html/dev/Create a 3rd Party Service for Virgo/PrivacyPolicy.html" label="Create a Privacy Policy">
+ </topic>
+ <topic href="html/dev/Create a 3rd Party Service for Virgo/BundleConfigurationForPublishing3PService.html" label="Create a 3rd Party Service for Virgo/BundleConfigurationForPublishing3PService.html&quot; label=&quot;Bundle Configuration for Publishing a 3rd Party Service">
+ </topic>
+ <topic href="html/dev/osgiEventing/maintopic.html" label="OSGI Eventing">
+    <topic href="html/dev/osgiEventing/Internal Eventing.html" label="Internal Eventing">
+    </topic>
+    <topic href="html/dev/osgiEventing/External Eventing.html" label="External Eventing">
+    </topic>
+    <topic href="html/dev/osgiEventing/Event Bean Persistency Format.html" label="Event Bean Persistency Format">
+    </topic>
+ </topic>
+ <topic href="html/virgo/activityfeed/maintopic.html" label="Activity Feed">
+    <topic href="html/virgo/UsingCommMagmt/CIS Management API.html" label="CIS Management API">
+    </topic>
+    <topic href="html/virgo/UsingCommMagmt/Setup.html" label="Setup">
+    </topic>
+    <topic href="html/virgo/UsingCommMagmt/Example of Usage.html" label="Example of Usage">
+    </topic>
+ </topic>
+ <topic href="html/virgo/UsingCommMagmt/maintopic.html" label="Using The Communiyt Management">
+    <topic href="html/virgo/UsingCommMagmt/Setup.html" label="Setup">
+    </topic>
+    <topic href="html/virgo/UsingCommMagmt/CIS Management API.html" label="CIS Management API">
+    </topic>
+    <topic href="html/virgo/UsingCommMagmt/Example of Usage.html" label="Example of Usage">
+    </topic>
+ </topic>
+ <topic href="html/virgo/CSS-CIS Directory Usage/maintopic.html" label="CSS/CIS Directory Usage">
+ </topic>
+ <topic href="html/dev/context/maintopic.html" label="Broker">
+    <topic href="html/dev/context/model.html" label="Model">
+    </topic>
+    <topic href="html/dev/context/broker.html" label="Broker">
+    </topic>
+ </topic>
+ <topic href="html/dev/devicemanagement/maintopic.html" label="Device Management">
+    <topic href="html/dev/devicemanagement/Setup.html" label="Setup">
+    </topic>
+    <topic href="html/dev/devicemanagement/TrackingIdeviceInterface.html" label="Tracking IDevice Interface">
+    </topic>
+    <topic href="html/dev/devicemanagement/BindingIEventMgrInterface.html" label="Binding IEventMgr Interface">
+    </topic>
+    <topic href="html/dev/devicemanagement/DeviceModel.html" label="Device Model">
+    </topic>
+    <topic href="html/dev/devicemanagement/UsingADevice.html" label="Using A Device">
+    </topic>
+    <topic href="html/dev/devicemanagement/GettingDeviceInformationUsingEventing.html" label="Getting Device Information Through Eventing">
+    </topic>
+    <topic href="html/dev/devicemanagement/MoreFeatures.html" label="More Features">
+    </topic>
+ </topic>
+ <topic href="html/virgo/Personalisation/maintopic.html" label="Personalisation">
+    <topic href="html/virgo/Personalisation/Implicit.html" label="Proactive (implicit)">
+    </topic>
+    <topic href="html/virgo/Personalisation/Explicit.html" label="On Demand (Explicit)">
+    </topic>
+ </topic>
+ <topic href="html/dev/communicationxmpp/maintopic.html" label="Communication/XMPP">
+    <topic href="html/dev/communicationxmpp/technicalarchitecture.html" label="Technical Architecture">
+    </topic>
+    <topic href="html/dev/communicationxmpp/schemadefinition.html" label="Schema Definition">
+       <topic href="html/dev/communicationxmpp/step1.html" label="Step1">
+       </topic>
+       <topic href="html/dev/communicationxmpp/step2.html" label="Step2">
+       </topic>
+       <topic href="html/dev/communicationxmpp/step3.html" label="Step3">
+       </topic>
+    </topic>
+    <topic href="html/dev/communicationxmpp/cgm.html" label="Communication Group Manager">
+       <topic href="html/dev/communicationxmpp/servermode.html" label="Server Mode">
+       </topic>
+       <topic href="html/dev/communicationxmpp/processingincomingrequests.html" label="Processing Incoming REquests">
+       </topic>
+       <topic href="html/dev/communicationxmpp/clientmode.html" label="Client Mode">
+       </topic>
+       <topic href="html/dev/communicationxmpp/receivingacallback.html" label="Receiving a Callback from the Platform Gateway">
+       </topic>
+    </topic>
+    <topic href="html/dev/communicationxmpp/fromtheclientside.html" label="From the Client Side">
+    </topic>
+ </topic>
 </toc>

@@ -1,0 +1,45 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+	<title>Configure your bundle to publish a 3rd party service with the SOCIETIES platform</title>
+	<link rel="stylesheet" type="text/css" href="../../css/societies_help.css" />
+</head>
+
+<body>
+<p><img align="middle" src="../../img/image063.png"></p>
+<p>On the cloud node, Service Discovery has a listener registered with the OSGI registry for deployed bundles being added/removed from the OSGI Registry. To allow your 3rd Party Service to be picked up by Service Discovery, it will need to contain a TargetPlatform property of "SOCIETIES". Below is the bundle-context-osgi.xml file for the Calculator Service, an example.
+
+</p>
+<p>The serMetaModel bean contains part of the ServiceModel's metadata for that service. It does not contain all, however. Metadata such as version, bundle ID are part of the implementation and are read directly from the OSGI registry when deployed. The ServiceResouceIdentifier is also generated at run-time.</p>
+<xmp>1 <!-- Provided Services -->
+ 2 <osgi:service ref="myService" interface="org.societies.myexample.service.IMyService">
+ 3      <osgi:service-properties>
+ 4     <entry key="TargetPlatform" value="SOCIETIES" />
+ 5     <entry key="ServiceProvider" value="ICT-SOCIETIES" />
+ 6     <entry key="ServiceMetaModel" value-ref="serMetamodel" />
+ 7     <entry key="ServiceClient" value="http://societies.local/client.jar" />
+ 8      </osgi:service-properties>
+ 9 </osgi:service>
+10
+11 <bean id="serMetamodel" class="org.societies.api.schema.servicelifecycle.model.Service">
+12     <property name="authorSignature" value="Your Name" />
+13     <property name="serviceDescription" value="Some description" />
+14     <property name="serviceName" value="My Exmaple Service" />
+15     <property name="serviceType" value="THIRD_PARTY_SERVER" />
+16     <property name="serviceCategory" value="example" />
+17     <property name="privacyPolicy" value="privacy-policy.xml" />
+18 </bean>
+</xmp>
+<p>The Service Category and Service Type metadata parameters might cause some confusion due to the similar names, but serve vastly different purposes.</p>
+<p>Service Category is a free text property field, where the developer might tag the service with a keyword that indicates its purpose e.g. media player.</p>
+<p>Service Type, on the other hand, tells the platform about the deployment strategy of the 3rd party service, as regards service sharing. It may take three values:</p>
+<br>1.	THIRD_PARTY_SERVER - this is the most common type of service. If a ServiceClient is supplied, it may be shared and other CSS will use special client versions to interact with it.
+<br>2.	THIRD_PARTY_CLIENT - this type of service is a client of a THIRD_PARTY_SERVER type of service; when in use, it will remotely call a server in order to obtain functionality.
+<br>3.	THIRD_PARTY_WEB - this type of service merely offers a web-interface. It may be shared, but other CSS will access a web URL to interact with.
+<p>As a point of note, when a 3rd Party Service is of the THIRD_PARTY_SERVER type then it may also include the ServiceClient property, pointing to the .jar of the client bundle. If it does not, then the service will not be allowed to be shared.</p>
+<p>The privacyPolicy parameter points to the privacy-policy.xml. It should only be included if the privacy-policy.xml has not been added to the bundle.
+</p>
+
+</body>

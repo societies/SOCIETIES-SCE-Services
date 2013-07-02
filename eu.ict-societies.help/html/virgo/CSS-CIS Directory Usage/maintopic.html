@@ -1,0 +1,103 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>CSS-CIS Directory Usage</title>
+</head>
+<body>
+<h1>Querying the CSS/CIS Directories</h1>
+<p>A new bundle called the CSS Directory Client exposes the CSS Directory interface ICssDirectoryRemote within each users container. This bundle is actually a proxy bundle that will perform the necessary messaging with the Domain Authority node. The consuming bundle does not need to worry about remote messaging and simply calls a local interface to retrieve the records.</p>
+<img src=../../img/image078.png>
+
+
+<h1>Setup</h1>
+<h2>Dependencies</h2>
+<p>If not already done for the 3P service purpose, the following dependencies to your pom.xml file should be presented:</p>
+<xmp><dependency>
+   <groupId>org.societies.api.external</groupId>
+   <artifactId>societies-api</artifactId>
+   <version>${release.version}</version>
+   <scope>provided</scope>
+</dependency>
+<dependency>
+   <groupId>org.societies.comm.xmpp</groupId>
+   <artifactId>CommunicationFrameworkCommons</artifactId>
+   <version>${version.comm}</version>
+   <scope>compile</scope>
+</dependency>
+</xmp>
+<h2>OSGi service configuration</h2>
+<p>The OSGi service references to be added in the bundle-context-osgi.xml file is:</p>
+<xmp><osgi:service ref="CisDirectoryRemote" interface="org.societies.api.cis.directory.ICisDirectoryRemote" />
+<osgi:reference id="CommManagerBundle" interface="org.societies.api.comm.xmpp.interfaces.ICommManager" />
+</xmp>
+
+<h1>Methods available to the developer</h1>
+<xmp>public void addCisAdvertisementRecord(CisAdvertisementRecord cisAdvert);
+public void deleteCisAdvertisementRecord(CisAdvertisementRecord cisAdvert);
+public void updateCisAdvertisementRecord(CisAdvertisementRecord oldCisAdvert, CisAdvertisementRecord updatedCisAdvert);
+public void findAllCisAdvertisementRecords(ICisDirectoryCallback callback);
+public void findForAllCis(CisAdvertisementRecord filteredcis, String filter, ICisDirectoryCallback callback);
+</xmp>
+<p> The above methods are available to the developer to allow them to do such things as add or delete CIS Advertisements, update existing Advertisements and to return a full list of all advertisements available in the system</p>
+<h2>Adding an Advertisement</h2>
+<p>In order for the developer to add an advertisement record to the CIS Directory on the Domain Authority node they must implement the below method from the directory client class, passing in the relevant record as the parameter.
+<br>getCisDirectoryRemote().addCisAdvertisementRecord(record);
+<br>From the code snippet below it can be seen that this method gets the identity of the domain authority node and creates the message bean with the advertisement as the payload and then in turn uses the commManager to send the message to the CSS / CIS Directory on the domain authority node for processing.
+</p>
+<xmp>public void addCisAdvertisementRecord(CisAdvertisementRecord cisAdvert) {
+        // We want to send all messages for CisDirectory to the domain authority Node
+        IIdentity toIdentity = idMgr.getDomainAuthorityNode();
+        Stanza stanza = new Stanza(toIdentity);
+
+        LOG.info("CISDirectory Client Advertisement: ----- "+cisAdvert);
+
+        // CREATE MESSAGE BEAN
+        CisDirectoryBean cisDir = new CisDirectoryBean();
+        cisDir.setCisA(cisAdvert);
+        cisDir.setMethod(MethodType.ADD_CIS_ADVERTISEMENT_RECORD);
+        try {
+            commManager.sendMessage(stanza, cisDir);
+        } catch (CommunicationException e) {
+            LOG.warn(e.getMessage());
+        }
+        ;
+    }
+</xmp>
+<h2>Finding all Advertisement</h2>
+<p>In order for the developer to get a list of all advertisement records from the CIS Directory on the Domain Authority node they must implement the below method from the directory client class, creating the callback and passing it in as the parameter.</p>
+<xmp>CisDirectoryRemoteClient callback = new CisDirectoryRemoteClient();
+
+getCisDirectoryRemote().findAllCisAdvertisementRecords(callback);
+</xmp>
+<p>From the code snippet below it can be seen that this method gets the identity of the domain authority node and creates the message bean and then in turn uses the commManager to send the message to the CSS / CIS Directory on the domain authority node for processing.</p>
+<xmp>public void findAllCisAdvertisementRecords(ICisDirectoryCallback cisDirCallback) {
+        // We want to send all messages for CisDirectory to the domain authority Node
+        IIdentity toIdentity = idMgr.getDomainAuthorityNode();
+        Stanza stanza = new Stanza(toIdentity);
+
+        LOG.info("CISDirectory Client FIND ALL RECORDs cisDirCallback: "+cisDirCallback);
+        // SETUP CisDirectory CLIENT RETURN STUFF
+        CisDirectoryClientCallback callback = new CisDirectoryClientCallback(stanza.getId(), cisDirCallback);
+
+        // CREATE MESSAGE BEAN
+        CisDirectoryBean cisDirBean = new CisDirectoryBean();
+
+        cisDirBean.setMethod(MethodType.FIND_ALL_CIS_ADVERTISEMENT_RECORDS);
+        LOG.info("CISDirectory Client FIND ALL RECORDs cisDirBean: ----- "+cisDirBean.getMethod());
+        try {
+            // SEND INFORMATION QUERY - RESPONSE WILL BE IN
+            // "callback.RecieveMessage()"
+            commManager.sendIQGet(stanza, cisDirBean, callback);
+        } catch (CommunicationException e) {
+            LOG.warn(e.getMessage());
+        }
+        ;
+    }
+</xmp>
+
+
+
+
+</body>
+</html>

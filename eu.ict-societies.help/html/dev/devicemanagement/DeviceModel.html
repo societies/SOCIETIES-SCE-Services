@@ -1,0 +1,19 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+	<title>Device Model</title>
+</head>
+
+<body>
+<p>The DM model can be found in the extenal APIs: org.societies.api.css.devicemgmt.model.
+<br>The Device model is used in order to represent all the necessary information that describes the situation of a CSS entity or a group of entities that form a CIS. In more detail, the model consists of the following main classes:
+<br>	DeviceMgmtConstants: This class contains property key constants used when registering IDevice services. All these properties are provided by the DeviceManager when it registers a new IDevice service. These property keys can be used by the consumer of the service as an LADP filter when tracking a given service in order to track only device services which is interested in. See below the section "Tracking with filter".
+<br>	DeviceTypeConstants: This class defines static string identifying type of device that should be integrated in the User Trials. For instance "public static final String SCREEN = "screen";". This class should be used both by the driver developer and the 3P developer in order to agree on the semantic information related to the device. A new driver developer can used its own class or update this class.
+<br>	DeviceMgmtEventConstants: This class define constants used to subscribe a particular event related to the device type. For instance : " public static final String SCREEN_EVENT = "actuator/screenEvent";". This class should be used both by the driver developer and the 3P developer in order to agree on the semantic information related to the device. A new driver developer can used its own class or update this class.
+<br>	DeviceMgmtDriverServiceNames: This class define constant used to get the driver service name object which will be used to invoke actions on the associated devices type. For instance : public static final String SCREEN_DRIVER_SERVICE = "actuator/screenDriverService"; This class should be used both by the driver developer and the 3P developer in order to agree on the semantic information related to the device. A new driver developer can used its own class or update this class.
+<br>	DeviceActionsConstants : this class does not yet exist. It is used to provide the list of actions implemented by a device type.
+</p>
+</body>
+</html>
