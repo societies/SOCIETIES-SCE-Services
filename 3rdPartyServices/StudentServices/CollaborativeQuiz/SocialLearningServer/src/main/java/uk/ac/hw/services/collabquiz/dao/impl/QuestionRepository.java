@@ -25,11 +25,7 @@ package uk.ac.hw.services.collabquiz.dao.impl;/*
 
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
-import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import uk.ac.hw.services.collabquiz.dao.IQuestionRepository;
 import uk.ac.hw.services.collabquiz.entities.Question;
 
@@ -47,8 +43,10 @@ public class QuestionRepository extends HibernateRepository implements IQuestion
             questions = session.createQuery("from Question").list();
             transaction.commit();
         } catch (HibernateException e) {
-            transaction.rollback();
-            e.printStackTrace();
+            if (transaction != null) {
+                transaction.rollback();
+            }
+            log.error("Error listing", e);
         } finally {
             session.close();
         }
@@ -68,8 +66,10 @@ public class QuestionRepository extends HibernateRepository implements IQuestion
                     .list();
             transaction.commit();
         } catch (HibernateException e) {
-            transaction.rollback();
-            e.printStackTrace();
+            if (transaction != null) {
+                transaction.rollback();
+            }
+            log.error("Error listing by category", e);
         } finally {
             session.close();
         }
@@ -86,8 +86,10 @@ public class QuestionRepository extends HibernateRepository implements IQuestion
             question = (Question) session.get(Question.class, questionId);
             transaction.commit();
         } catch (HibernateException e) {
-            transaction.rollback();
-            e.printStackTrace();
+            if (transaction != null) {
+                transaction.rollback();
+            }
+            log.error("Error getByID", e);
         } finally {
             session.close();
         }
@@ -105,8 +107,10 @@ public class QuestionRepository extends HibernateRepository implements IQuestion
             session.save(question);
             transaction.commit();
         } catch (HibernateException e) {
-            transaction.rollback();
-            e.printStackTrace();
+            if (transaction != null) {
+                transaction.rollback();
+            }
+            log.error("Error inserting", e);
         } finally {
             session.close();
         }
@@ -121,8 +125,10 @@ public class QuestionRepository extends HibernateRepository implements IQuestion
             session.update(question);
             transaction.commit();
         } catch (HibernateException e) {
-            transaction.rollback();
-            e.printStackTrace();
+            if (transaction != null) {
+                transaction.rollback();
+            }
+            log.error("Error updating", e);
         } finally {
             session.close();
         }
@@ -137,8 +143,10 @@ public class QuestionRepository extends HibernateRepository implements IQuestion
             session.delete(question);
             transaction.commit();
         } catch (HibernateException e) {
-            transaction.rollback();
-            e.printStackTrace();
+            if (transaction != null) {
+                transaction.rollback();
+            }
+            log.error("Error physicalDelete", e);
         } finally {
             session.close();
         }
