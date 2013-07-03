@@ -12,7 +12,7 @@ import javax.faces.bean.ViewScoped;
 import javax.faces.context.FacesContext;
 import java.util.List;
 
-@Controller
+@Controller("questionController")
 @ManagedBean(name = "questionController")
 @ViewScoped
 public class QuestionController extends BasePageController {
@@ -49,7 +49,6 @@ public class QuestionController extends BasePageController {
     public void setQuestionRepository(IQuestionRepository questionRepository) {
         this.questionRepository = questionRepository;
     }
-
 
 
 }

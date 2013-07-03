@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+        "-//Hibernate/Hibernate Mapping DTD//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping>
+    <class name="uk.ac.hw.services.collabquiz.entities.Category"
+           table="category">
+
+        <id name="categoryID" type="int" column="category_id">
+            <generator class="native"/>
+        </id>
+
+        <property name="name" column="name"/>
+
+    </class>
+</hibernate-mapping>

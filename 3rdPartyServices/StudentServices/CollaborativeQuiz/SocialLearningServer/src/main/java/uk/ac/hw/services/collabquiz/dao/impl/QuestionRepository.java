@@ -1,4 +1,5 @@
-package uk.ac.hw.services.collabquiz.dao.impl;/*
+package uk.ac.hw.services.collabquiz.dao.impl;
+/*
  * Copyright (coffee) 2011, SOCIETIES Consortium (WATERFORD INSTITUTE OF TECHNOLOGY (TSSG), HERIOT-WATT UNIVERSITY (HWU), SOLUTA.NET 
  * (SN), GERMAN AEROSPACE CENTRE (Deutsches Zentrum fuer Luft- und Raumfahrt e.V.) (DLR), Zavod za varnostne tehnologije
  * informacijske družbe in elektronsko poslovanje (SETCCE), INSTITUTE OF COMMUNICATION AND COMPUTER SYSTEMS (ICCS), LAKE
@@ -31,11 +32,13 @@ import uk.ac.hw.services.collabquiz.entities.Question;
 
 import java.util.List;
 
+//@Repository("questionRepository")
 public class QuestionRepository extends HibernateRepository implements IQuestionRepository {
 
     @Override
     public List<Question> list() {
         Session session = getSessionFactory().openSession();
+
         Transaction transaction = null;
         List<Question> questions = null;
         try {
@@ -60,7 +63,7 @@ public class QuestionRepository extends HibernateRepository implements IQuestion
         List<Question> questions = null;
         try {
             transaction = session.beginTransaction();
-            String hql = "from Question where category_ID = :categoryID";
+            String hql = "from Question where categoryID = :categoryID";
             questions = session.createQuery(hql)
                     .setParameter("categoryID", categoryId)
                     .list();

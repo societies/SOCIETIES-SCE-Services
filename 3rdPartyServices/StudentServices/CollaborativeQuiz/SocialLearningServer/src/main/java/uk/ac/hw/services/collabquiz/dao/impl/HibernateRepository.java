@@ -17,6 +17,7 @@ public class HibernateRepository {
 
     public SessionFactory getSessionFactory() {
         return sessionFactory;
+//        return HibernateUtil.getSessionFactory();
     }
 
     public void setSessionFactory(SessionFactory sessionFactory) {

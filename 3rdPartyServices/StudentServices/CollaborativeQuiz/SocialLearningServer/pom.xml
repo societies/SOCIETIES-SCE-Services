@@ -179,7 +179,6 @@
         </dependency>
 
 
-
         <!-- Hibernate dependencies -->
         <dependency>
             <groupId>org.hibernate</groupId>
@@ -193,8 +192,8 @@
         </dependency>
         <dependency>
             <groupId>org.hibernate.javax.persistence</groupId>
-            <artifactId>hibernate-jpa-2.0-api</artifactId>
-            <version>1.0.1.Final</version>
+            <artifactId>hibernate-jpa-2.1-api</artifactId>
+            <version>1.0.0.Draft-14</version>
         </dependency>
         <dependency>
             <groupId>javax.transaction</groupId>
@@ -202,10 +201,11 @@
             <version>1.1.0</version>
         </dependency>
         <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
-            <version>5.1.25</version>
+            <groupId>com.mysql.jdbc</groupId>
+            <artifactId>com.springsource.com.mysql.jdbc</artifactId>
+            <version>5.1.6</version>
         </dependency>
+
 
         <!-- PrimeFaces dependencies -->
         <dependency>
@@ -213,6 +213,7 @@
             <artifactId>primefaces</artifactId>
             <version>3.5</version>
         </dependency>
+
 
         <!-- Java EE6 dependencies -->
         <dependency>
@@ -225,12 +226,12 @@
             <artifactId>jsf-impl</artifactId>
             <version>2.1.17</version>
         </dependency>
-
         <dependency>
             <groupId>org.springframework.webflow</groupId>
             <artifactId>spring-faces</artifactId>
             <version>2.3.2.RELEASE</version>
         </dependency>
+
 
         <!-- Virgo/Tomcat needs this -->
         <dependency>
@@ -243,23 +244,6 @@
             <artifactId>el-impl</artifactId>
             <version>2.2</version>
         </dependency>
-
-        <!-- REST server -->
-      <!--  <dependency>
-            <groupId>javax.ws.rs</groupId>
-            <artifactId>com.springsource.javax.ws.rs</artifactId>
-            <version>1.0.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.restlet.jee</groupId>
-            <artifactId>org.restlet.ext.servlet</artifactId>
-            <version>2.1.2</version>
-        </dependency>
-        <dependency>
-            <groupId>org.restlet.jee</groupId>
-            <artifactId>org.restlet.ext.xml</artifactId>
-            <version>2.1.2</version>
-        </dependency>-->
 
 
         <!-- Logging support -->
@@ -357,9 +341,12 @@
                             <!-- Hibernate -->
                             org.hibernate,
                             org.hibernate.cfg,
+                            org.hibernate.jdbc,
                             org.springframework.orm.hibernate3,
-                            org.springframework.jdbc.datasource,
+                            org.springframework.orm.hibernate3.annotation,
+                            <!--org.springframework.jdbc.datasource,-->
                             com.mysql.jdbc,
+                            com.mysql.jdbc.jdbc2.optional,
 
                             <!-- REST server -->
                             <!--org.restlet,-->
@@ -529,7 +516,7 @@
 
                             *;scope=compile|runtime;resolution:=optional
                         </Import-Package>
-                        <Bundle-ClassPath>WEB-INF/classes,.</Bundle-ClassPath>
+                        <Bundle-ClassPath>WEB-INF/classes,WEB-INF/lib,.</Bundle-ClassPath>
                         <Webapp-Context>collabquiz</Webapp-Context>
                         <Web-ContextPath>collabquiz</Web-ContextPath>
                     </instructions>
@@ -545,7 +532,7 @@
                     <archive>
                         <manifestFile>${project.build.directory}/META-INF/MANIFEST.MF</manifestFile>
                     </archive>
-                    <webappDirectory>src/main/webapp</webappDirectory>
+                    <!--<webappDirectory>src/main/webapp</webappDirectory>-->
                 </configuration>
             </plugin>
 

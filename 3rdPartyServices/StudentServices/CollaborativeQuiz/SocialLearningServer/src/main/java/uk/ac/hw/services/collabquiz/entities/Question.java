@@ -3,6 +3,7 @@ package uk.ac.hw.services.collabquiz.entities;
 import uk.ac.hw.services.collabquiz.Logic.QuestionDifficulty;
 
 import javax.persistence.*;
+import java.io.Serializable;
 
 /*
  * Copyright (coffee) 2011, SOCIETIES Consortium (WATERFORD INSTITUTE OF TECHNOLOGY (TSSG), HERIOT-WATT UNIVERSITY (HWU), SOLUTA.NET
@@ -31,7 +32,7 @@ import javax.persistence.*;
 
 @Entity
 @Table(name = "question")
-public class Question {
+public class Question implements Serializable {
 
     private int questionID;
     private String questionText;
@@ -59,7 +60,7 @@ public class Question {
     }
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "question_id")
     public int getQuestionID() {
         return questionID;

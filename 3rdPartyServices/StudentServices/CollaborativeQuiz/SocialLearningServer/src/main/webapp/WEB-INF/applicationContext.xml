@@ -1,12 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xmlns:mvc="http://www.springframework.org/schema/mvc"
        xmlns:ctx="http://www.springframework.org/schema/context"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
-
-    <!-- Configures the annotation-driven Spring MVC Controller programming model -->
-    <mvc:annotation-driven/>
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+                           http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
 
     <!-- Scans the classpath for annotated components that will be auto-registered as Spring beans. -->
     <ctx:component-scan base-package="uk.ac.hw.services.collabquiz"/>
@@ -21,23 +18,36 @@
         <property name="sessionFactory" ref="sessionFactory"/>
     </bean>
 
-
-    <bean id="sessionFactory" class="org.springframework.orm.hibernate3.LocalSessionFactoryBean">
+    <!-- Hibernate session factory -->
+    <bean id="sessionFactory"
+          class="org.springframework.orm.hibernate3.LocalSessionFactoryBean">
         <property name="dataSource" ref="dataSource"/>
         <property name="configLocation" value="classpath:hibernate.cfg.xml"/>
-        <property name="configurationClass" value="org.hibernate.cfg.AnnotationConfiguration"/>
         <property name="hibernateProperties">
             <props>
                 <prop key="hibernate.dialect">org.hibernate.dialect.MySQLDialect</prop>
                 <prop key="hibernate.show_sql">true</prop>
+                <prop key="hbm2ddl.auto">create</prop>
             </props>
         </property>
+        <property name="mappingResources">
+            <list>
+                <value>WEB-INF/hbm/Category.hbm.xml</value>
+                <value>WEB-INF/hbm/Question.hbm.xml</value>
+            </list>
+        </property>
+        <!--<property name="annotatedClasses">
+            <list>
+                <value>uk.ac.hw.services.collabquiz.entities.Category</value>
+                <value>uk.ac.hw.services.collabquiz.entities.Question</value>
+            </list>
+        </property>-->
     </bean>
 
-    <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
-        <property name="driverClassName" value="com.mysql.jdbc.Driver"/>
-        <property name="url" value="jdbc:mysql://localhost/collabquiz"/>
-        <property name="username" value="root"/>
+    <bean id="dataSource"
+          class="com.mysql.jdbc.jdbc2.optional.MysqlDataSource">
+        <property name="url" value="jdbc:mysql://localhost:3306/collabquiz"/>
+        <property name="user" value="root"/>
         <property name="password" value="root"/>
     </bean>
 
