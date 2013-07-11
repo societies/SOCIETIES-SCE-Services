@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="SocietiesAndroidRemoteHelpers">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/libs/SocietiesAndroidRemoteHelpers.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="societies-api-schema-1.0">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/libs/societies-api-schema-1.0.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
