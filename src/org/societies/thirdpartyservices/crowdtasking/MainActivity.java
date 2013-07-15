@@ -119,8 +119,9 @@ public class MainActivity extends Activity implements SensorEventListener {
 	private boolean isTrustServiceRunning() {
 	    ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
 	    for (RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
-	    	//System.out.println(service.service.getClassName());
+	    	System.out.println(service.service.getClassName());
 	        if ("org.societies.android.privacytrust.trust.TrustClientRemote".equals(service.service.getClassName())) {
+		    	System.out.println("trust client helper is running");
 	            return true;
 	        }
 	    }
