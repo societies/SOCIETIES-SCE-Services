@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/Crowd Tasking Android.iml" filepath="$PROJECT_DIR$/Crowd Tasking Android.iml" />
+      <module fileurl="file://$PROJECT_DIR$/crowdtaskingandroid.iml" filepath="$PROJECT_DIR$/crowdtaskingandroid.iml" />
     </modules>
   </component>
 </project>
