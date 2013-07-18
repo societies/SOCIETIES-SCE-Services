@@ -13,6 +13,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.text.Html;
 import android.util.Log;
 
 public class CheckUpdateTask extends AsyncTask<String, Void, Boolean> {
@@ -60,7 +61,7 @@ public class CheckUpdateTask extends AsyncTask<String, Void, Boolean> {
 	protected void onPostExecute(Boolean newVersion) {
         if (newVersion) {
             new AlertDialog.Builder(context)
-            .setTitle("Update Available")
+            .setTitle(Html.fromHtml("<font color='#FFF'>Update Available</font>"))
             .setMessage("An update for SCT Android is available! Do you want to download a new version?")
             .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
@@ -77,15 +78,18 @@ public class CheckUpdateTask extends AsyncTask<String, Void, Boolean> {
         }
         else {
         	if (showIsUpToDate) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(context);
+
       	      new AlertDialog.Builder(context)
     	      //.setIcon(R.drawable.icon)
-    	      .setTitle("No Update Available")
-    	      .setMessage("You have the latest version of SCT Android.")
-    	      .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-    	              public void onClick(DialogInterface dialog, int whichButton) {
-    	              }
-    	      })
-    	      .show();
+    	      .setTitle(Html.fromHtml("<font color='#000000'>No Update Available</font>"))
+                      //.setTitle("No Update Available")
+                      .setMessage("You have the latest version of SCT Android.")
+                      .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                          public void onClick(DialogInterface dialog, int whichButton) {
+                          }
+                      })
+                      .show();
         	}
         }
 	}

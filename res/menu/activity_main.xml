@@ -1,18 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:id="@+id/scanQRcode"
-        android:title="@string/scanQRcode"
-        android:orderInCategory="10"
-        android:showAsAction="ifRoom" />
-    <item android:id="@+id/checkUpdate"
-        android:title="@string/checkUpdate"
-        android:orderInCategory="100"
-        android:showAsAction="ifRoom" />
-    <item android:id="@+id/home"
-        android:title="@string/home"
-        android:orderInCategory="50"
-        android:showAsAction="ifRoom" />
-    <item android:id="@+id/logout"
-        android:title="@string/logout"
-        android:orderInCategory="150"
-        android:showAsAction="ifRoom" />
+    <item
+            android:id="@+id/saveSettings"
+            android:icon="@drawable/ic_action_save"
+            android:showAsAction="ifRoom|withText"
+            android:title="@string/saveSettings"/>
+    <item
+            android:id="@+id/options"
+            android:icon="@drawable/ic_action_overflow"
+            android:showAsAction="ifRoom|withText"
+            android:title="@string/options">
+        <menu>
+            <item
+                    android:id="@+id/scanQRCode"
+                    android:showAsAction="ifRoom|withText"
+                    android:title="@string/scanQRcode"/>
+            <item
+                    android:id="@+id/checkUpdate"
+                    android:showAsAction="ifRoom|withText"
+                    android:title="@string/checkUpdate"/>
+            <item
+                    android:id="@+id/logout"
+                    android:showAsAction="ifRoom|withText"
+                    android:title="@string/logout"/>
+        </menu>
+    </item>
 </menu>

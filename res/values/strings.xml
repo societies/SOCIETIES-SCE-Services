@@ -1,12 +1,16 @@
 <resources>
+
     <string name="app_name">Crowd Tasking</string>
     <string name="scanQRcode">Scan QR code</string>
     <string name="checkUpdate">Check for update</string>
     <string name="home">Home</string>
     <string name="logout">Logout</string>
     <string name="title_activity_main">Crowd tasking</string>
-	<string name="result_failed">No barcode found</string>
-	<string name="result_failed_why">"The user gave up and pressed Back"</string>
+    <string name="result_failed">No barcode found</string>
+    <string name="result_failed_why">"The user gave up and pressed Back"</string>
     <string name="result_succeeded">Found QR code</string>
     <string name="title_activity_remote_control">Remote control</string>
+    <string name="options">Options</string>
+    <string name="saveSettings">Save</string>
+
 </resources>

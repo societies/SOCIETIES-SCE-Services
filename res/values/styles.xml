@@ -2,4 +2,7 @@
 
     <style name="AppTheme" parent="android:Theme.Light" />
 
+    <style name="Theme.crowdtaskingandroid" parent="@android:style/Theme.Holo.Light.DarkActionBar">
+        <item name="android:textColor">#FFF</item>
+    </style>
 </resources>
