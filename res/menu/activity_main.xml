@@ -2,10 +2,16 @@
 
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
-            android:id="@+id/saveSettings"
+            android:id="@+id/cancel"
+            android:icon="@drawable/ic_action_cancel"
+            android:showAsAction="ifRoom|withText"
+            android:title="@string/cancel"/>
+
+    <item
+            android:id="@+id/save"
             android:icon="@drawable/ic_action_save"
             android:showAsAction="ifRoom|withText"
-            android:title="@string/saveSettings"/>
+            android:title="@string/save"/>
     <item
             android:id="@+id/options"
             android:icon="@drawable/ic_action_overflow"

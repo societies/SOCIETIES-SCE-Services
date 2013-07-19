@@ -235,14 +235,13 @@ public class MainActivity extends Activity implements SensorEventListener {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         actionBar = getActionBar();
-        actionBar.show();
-        actionBar.setDisplayHomeAsUpEnabled(true);
+        //actionBar.show();
+        //actionBar.setDisplayHomeAsUpEnabled(true);
 
         getMenuInflater().inflate(R.menu.activity_main, menu);
         createPagesMenu();
 
         menuTemp = menu;
-        // getMenuInflater().inflate(R.menu.activity_main, menu);
         return true;
     }
 
@@ -280,6 +279,9 @@ public class MainActivity extends Activity implements SensorEventListener {
                     case 6:
                         webView.loadUrl(APPLICATION_URL + "/settings");
                         return true;
+                    case 7:
+                        webView.loadUrl(APPLICATION_URL + "/remoteControl.html");
+                        return true;
                     default:
                         webView.loadUrl(APPLICATION_URL);
                         return true;
@@ -289,7 +291,7 @@ public class MainActivity extends Activity implements SensorEventListener {
             ;
         });
 
-        //actionBar.setSelectedNavigationItem(1);
+        //actionBar.setSelectedNavigationItem(0);
     }
 
     @Override
@@ -360,22 +362,25 @@ public class MainActivity extends Activity implements SensorEventListener {
                     // int i = webBackForwardList.getCurrentIndex();
                     String historyUrl = webBackForwardList.getItemAtIndex(
                             webBackForwardList.getCurrentIndex()).getUrl();
-                    if (historyUrl.equalsIgnoreCase(APPLICATION_URL + "/menu")
-                            || historyUrl.startsWith(APPLICATION_URL + "/login")) {
-                        super.onBackPressed();
-                    }
                     if (historyUrl.equalsIgnoreCase(APPLICATION_URL + "/task/new")
                             || historyUrl.startsWith(APPLICATION_URL
                             + "/community/edit")) {
-                        /*Toast toast = Toast.makeText(getApplicationContext(),
+                        Toast toast = Toast.makeText(getApplicationContext(),
                                 "Use Save or Cancel button.", Toast.LENGTH_SHORT);
-                        toast.show();*/
+                        toast.show();
+                    } else if (historyUrl.equalsIgnoreCase(APPLICATION_URL + "/tasks/interesting") ||
+                            historyUrl.equalsIgnoreCase(APPLICATION_URL + "/tasks/my") ||
+                            historyUrl.equalsIgnoreCase(APPLICATION_URL + "/newsfeed") ||
+                            historyUrl.equalsIgnoreCase(APPLICATION_URL + "/community/browse") ||
+                            historyUrl.equalsIgnoreCase(APPLICATION_URL + "/profile") ||
+                            historyUrl.equalsIgnoreCase(APPLICATION_URL + "/settings") ||
+                            (historyUrl.equalsIgnoreCase(APPLICATION_URL + "/remoteControl") || historyUrl.equalsIgnoreCase(APPLICATION_URL + "/remoteControl.html"))) {
+                        actionBar.setSelectedNavigationItem(0);
+                    } else if (historyUrl.contains(APPLICATION_URL + "/task/view") || historyUrl.equalsIgnoreCase(APPLICATION_URL + "/community/view")) {
                         webView.goBack();
                     } else {
-                        webView.goBack();
+                        actionBar.setSelectedNavigationItem(0);
                     }
-                } else {
-                    super.onBackPressed();
                 }
                 ;
 
@@ -576,7 +581,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 
         public String loginData() {
             /*
-			 * String columns [] =
+             * String columns [] =
 			 * {CSSContentProvider.CssRecord.CSS_RECORD_CSS_IDENTITY,
 			 * CSSContentProvider.CssRecord.CSS_RECORD_EMAILID,
 			 * CSSContentProvider.CssRecord.CSS_RECORD_FORENAME,
@@ -726,24 +731,39 @@ public class MainActivity extends Activity implements SensorEventListener {
         }
 
         public void onPageFinished(WebView view, String url) {
-            MenuItem logout = menuTemp.findItem(R.id.logout);
-            MenuItem saveSettings = menuTemp.findItem(R.id.saveSettings);
-            MenuItem checkUpdate = menuTemp.findItem(R.id.checkUpdate);
+            MenuItem cancel = menuTemp.findItem(R.id.cancel);
+            MenuItem save = menuTemp.findItem(R.id.save);
             MenuItem options = menuTemp.findItem(R.id.options);
             MenuItem scanQRcode = menuTemp.findItem(R.id.scanQRCode);
+            MenuItem checkUpdate = menuTemp.findItem(R.id.checkUpdate);
+            MenuItem logout = menuTemp.findItem(R.id.logout);
 
-            if (url.equals(APPLICATION_URL) || url.equals(APPLICATION_URL + "/menu") || url.equals(APPLICATION_URL + "/")) {
-                logout.setVisible(true);
-                saveSettings.setVisible(false);
-                checkUpdate.setVisible(true);
-                options.setVisible(true);
-                scanQRcode.setVisible(true);
+            if (url.startsWith(APPLICATION_URL + "/login") || !url.startsWith(APPLICATION_URL)) {
+                actionBar.hide();
             } else {
-                logout.setVisible(true);
-                saveSettings.setVisible(true);
-                checkUpdate.setVisible(true);
-                options.setVisible(true);
-                scanQRcode.setVisible(true);
+                actionBar.show();
+                if (url.equals(APPLICATION_URL) || url.startsWith(APPLICATION_URL + "/menu") || url.equals(APPLICATION_URL + "/")) {
+                    cancel.setVisible(false);
+                    save.setVisible(false);
+                    options.setVisible(true);
+                    actionBar.setDisplayHomeAsUpEnabled(false);
+                } else if (url.equalsIgnoreCase(APPLICATION_URL + "/task/new")|| url.startsWith(APPLICATION_URL + "/tasks/my#/task/new") || url.startsWith(APPLICATION_URL + "/community/edit")|| url.startsWith(APPLICATION_URL + "/community/browse#/community/edit")) {
+                    cancel.setVisible(true);
+                    save.setVisible(true);
+                    options.setVisible(true);
+                    actionBar.setDisplayHomeAsUpEnabled(true);
+                } else if (url.equalsIgnoreCase(APPLICATION_URL + "/profile") ||
+                        url.equalsIgnoreCase(APPLICATION_URL + "/settings")) {
+                    cancel.setVisible(true);
+                    save.setVisible(true);
+                    options.setVisible(true);
+                    actionBar.setDisplayHomeAsUpEnabled(true);
+                } else {
+                    cancel.setVisible(false);
+                    save.setVisible(false);
+                    options.setVisible(true);
+                    actionBar.setDisplayHomeAsUpEnabled(true);
+                }
             }
 
 

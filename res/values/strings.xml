@@ -11,6 +11,7 @@
     <string name="result_succeeded">Found QR code</string>
     <string name="title_activity_remote_control">Remote control</string>
     <string name="options">Options</string>
-    <string name="saveSettings">Save</string>
+    <string name="cancel">Cancel</string>
+    <string name="save">Save</string>
 
 </resources>
