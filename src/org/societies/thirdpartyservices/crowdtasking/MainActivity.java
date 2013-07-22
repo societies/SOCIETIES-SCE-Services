@@ -54,6 +54,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 import si.setcce.societies.android.rest.RestTask;
@@ -91,6 +92,8 @@ public class MainActivity extends Activity implements SensorEventListener {
 
     private Menu menuTemp;
     private ActionBar actionBar;
+    private boolean menuPagesLoaded = false;
+    private HashMap urlMap;
 
     public MainActivity() {
     }
@@ -126,6 +129,26 @@ public class MainActivity extends Activity implements SensorEventListener {
             TrustTask task = new TrustTask(this);
             task.execute();
         }
+
+        urlMap = new HashMap();
+        urlMap.put("0", APPLICATION_URL);
+        urlMap.put("10", APPLICATION_URL + "/menu");
+        urlMap.put("20", APPLICATION_URL + "/");
+        urlMap.put("1", APPLICATION_URL + "/tasks/interesting");
+        urlMap.put("2", APPLICATION_URL + "/tasks/my");
+        urlMap.put("3", APPLICATION_URL + "/newsfeed");
+        urlMap.put("4", APPLICATION_URL + "/community/browse");
+        urlMap.put("5", APPLICATION_URL + "/profile");
+        urlMap.put("6", APPLICATION_URL + "/settings");
+        urlMap.put("7", APPLICATION_URL + "/remoteControl");
+        urlMap.put("70", APPLICATION_URL + "/remoteControl.html");
+        urlMap.put("8", APPLICATION_URL + "/task/new");
+        urlMap.put("80", APPLICATION_URL + "/tasks/my#/task/new");
+        urlMap.put("9", APPLICATION_URL + "/community/edit");
+        urlMap.put("90", APPLICATION_URL + "/community/browse#/community/edit");
+        urlMap.put("11", APPLICATION_URL + "/task/view");
+        urlMap.put("12", APPLICATION_URL + "/community/view");
+        urlMap.put("13", APPLICATION_URL + "/login");
     }
 
     private boolean isTrustServiceRunning() {
@@ -251,25 +274,25 @@ public class MainActivity extends Activity implements SensorEventListener {
                         webView.loadUrl(APPLICATION_URL);
                         return true;
                     case 1:
-                        webView.loadUrl(APPLICATION_URL + "/tasks/interesting");
+                        webView.loadUrl((String) urlMap.get("1"));
                         return true;
                     case 2:
-                        webView.loadUrl(APPLICATION_URL + "/tasks/my");
+                        webView.loadUrl((String) urlMap.get("2"));
                         return true;
                     case 3:
-                        webView.loadUrl(APPLICATION_URL + "/newsfeed");
+                        webView.loadUrl((String) urlMap.get("3"));
                         return true;
                     case 4:
-                        webView.loadUrl(APPLICATION_URL + "/community/browse");
+                        webView.loadUrl((String) urlMap.get("4"));
                         return true;
                     case 5:
-                        webView.loadUrl(APPLICATION_URL + "/profile");
+                        webView.loadUrl((String) urlMap.get("5"));
                         return true;
                     case 6:
-                        webView.loadUrl(APPLICATION_URL + "/settings");
+                        webView.loadUrl((String) urlMap.get("6"));
                         return true;
                     case 7:
-                        webView.loadUrl(APPLICATION_URL + "/remoteControl.html");
+                        webView.loadUrl((String) urlMap.get("7"));
                         return true;
                     default:
                         webView.loadUrl(APPLICATION_URL);
@@ -355,13 +378,13 @@ public class MainActivity extends Activity implements SensorEventListener {
                         Toast toast = Toast.makeText(getApplicationContext(),
                                 "Use Save or Cancel button.", Toast.LENGTH_SHORT);
                         toast.show();
-                    } else if (historyUrl.equalsIgnoreCase(APPLICATION_URL + "/tasks/interesting") ||
-                            historyUrl.equalsIgnoreCase(APPLICATION_URL + "/tasks/my") ||
-                            historyUrl.equalsIgnoreCase(APPLICATION_URL + "/newsfeed") ||
-                            historyUrl.equalsIgnoreCase(APPLICATION_URL + "/community/browse") ||
-                            historyUrl.equalsIgnoreCase(APPLICATION_URL + "/profile") ||
-                            historyUrl.equalsIgnoreCase(APPLICATION_URL + "/settings") ||
-                            (historyUrl.equalsIgnoreCase(APPLICATION_URL + "/remoteControl") || historyUrl.equalsIgnoreCase(APPLICATION_URL + "/remoteControl.html"))) {
+                    } else if (historyUrl.equalsIgnoreCase((String) urlMap.get("1")) ||
+                            historyUrl.equalsIgnoreCase((String) urlMap.get("2")) ||
+                            historyUrl.equalsIgnoreCase((String) urlMap.get("3")) ||
+                            historyUrl.equalsIgnoreCase((String) urlMap.get("4")) ||
+                            historyUrl.equalsIgnoreCase((String) urlMap.get("5")) ||
+                            historyUrl.equalsIgnoreCase((String) urlMap.get("6")) ||
+                            (historyUrl.equalsIgnoreCase((String) urlMap.get("7")) || historyUrl.equalsIgnoreCase((String) urlMap.get("70")))) {
                         actionBar.setSelectedNavigationItem(0);
                     } else if (historyUrl.contains(APPLICATION_URL + "/task/view") || historyUrl.equalsIgnoreCase(APPLICATION_URL + "/community/view")) {
                         webView.goBack();
@@ -713,7 +736,33 @@ public class MainActivity extends Activity implements SensorEventListener {
                 addMeetingToCalendar(url);
                 return true;
             }
-            view.loadUrl(url);
+            //view.loadUrl(url);
+            if(url.equals(urlMap.get("0")) ||
+                    url.equals(urlMap.get("10")) ||
+                    url.equals(urlMap.get("20"))){
+                actionBar.setSelectedNavigationItem(0);
+            }
+            else if(url.equals(urlMap.get("1"))){
+                actionBar.setSelectedNavigationItem(1);
+            }
+            else if(url.equals(urlMap.get("2"))){
+                actionBar.setSelectedNavigationItem(2);
+            }
+            else if(url.equals(urlMap.get("3"))){
+                actionBar.setSelectedNavigationItem(3);
+            }
+            else if(url.equals(urlMap.get("4"))){
+                actionBar.setSelectedNavigationItem(4);
+            }
+            else if(url.equals(urlMap.get("5"))){
+                actionBar.setSelectedNavigationItem(5);
+            }
+            else if(url.equals(urlMap.get("6"))){
+                actionBar.setSelectedNavigationItem(6);
+            }
+            else if(url.equals(urlMap.get("7")) || url.equals(urlMap.get("70"))){
+                actionBar.setSelectedNavigationItem(7);
+            }
             return false;
         }
 
@@ -725,22 +774,22 @@ public class MainActivity extends Activity implements SensorEventListener {
             MenuItem checkUpdate = menuTemp.findItem(R.id.checkUpdate);
             MenuItem logout = menuTemp.findItem(R.id.logout);
 
-            if (url.startsWith(APPLICATION_URL + "/login") || !url.startsWith(APPLICATION_URL)) {
+            if (url.startsWith((String) urlMap.get("13")) || !url.startsWith(APPLICATION_URL)) {
                 actionBar.hide();
             } else {
                 actionBar.show();
-                if (url.equals(APPLICATION_URL) || url.startsWith(APPLICATION_URL + "/menu") || url.equals(APPLICATION_URL + "/")) {
+                if (url.equals(APPLICATION_URL) || url.startsWith((String) urlMap.get("10")) || url.equals(APPLICATION_URL + "/")) {
                     cancel.setVisible(false);
                     save.setVisible(false);
                     options.setVisible(true);
                     actionBar.setDisplayHomeAsUpEnabled(false);
-                } else if (url.equalsIgnoreCase(APPLICATION_URL + "/task/new")|| url.startsWith(APPLICATION_URL + "/tasks/my#/task/new") || url.startsWith(APPLICATION_URL + "/community/edit")|| url.startsWith(APPLICATION_URL + "/community/browse#/community/edit")) {
+                } else if (url.equalsIgnoreCase((String) urlMap.get("8"))|| url.startsWith((String)urlMap.get("80")) || url.startsWith((String) urlMap.get("9"))|| url.startsWith((String) urlMap.get("90"))) {
                     cancel.setVisible(true);
                     save.setVisible(true);
                     options.setVisible(true);
                     actionBar.setDisplayHomeAsUpEnabled(true);
-                } else if (url.equalsIgnoreCase(APPLICATION_URL + "/profile") ||
-                        url.equalsIgnoreCase(APPLICATION_URL + "/settings")) {
+                } else if (url.equalsIgnoreCase((String) urlMap.get("5")) ||
+                        url.equalsIgnoreCase((String) urlMap.get("6"))) {
                     cancel.setVisible(true);
                     save.setVisible(true);
                     options.setVisible(true);
