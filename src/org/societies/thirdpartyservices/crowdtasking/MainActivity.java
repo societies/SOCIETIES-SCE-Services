@@ -5,28 +5,21 @@ import android.app.ActionBar;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningServiceInfo;
-import android.app.FragmentTransaction;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
-import android.graphics.drawable.Drawable;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
-import android.provider.CalendarContract;
 import android.provider.CalendarContract.Events;
 import android.util.Log;
-import android.view.ActionProvider;
-import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.SubMenu;
-import android.view.View;
 import android.view.Window;
 import android.webkit.ConsoleMessage;
 import android.webkit.CookieManager;
@@ -38,7 +31,6 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.ArrayAdapter;
-import android.widget.SpinnerAdapter;
 import android.widget.Toast;
 
 import com.google.zxing.integration.android.IntentIntegrator;
@@ -64,7 +56,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
-import si.setcce.societies.android.crowdtasking.RemoteControlActivity;
 import si.setcce.societies.android.rest.RestTask;
 
 @SuppressLint("SimpleDateFormat")
@@ -99,9 +90,7 @@ public class MainActivity extends Activity implements SensorEventListener {
     private float mAccelLast; // last acceleration including gravity
 
     private Menu menuTemp;
-    private boolean loaded = false;
     private ActionBar actionBar;
-    private boolean menuPagesLoaded = false;
 
     public MainActivity() {
     }
@@ -287,8 +276,6 @@ public class MainActivity extends Activity implements SensorEventListener {
                         return true;
                 }
             }
-
-            ;
         });
 
         //actionBar.setSelectedNavigationItem(0);

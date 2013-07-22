@@ -40,7 +40,7 @@ public class CheckUpdateTask extends AsyncTask<String, Void, Boolean> {
             BufferedInputStream bis = new BufferedInputStream(is);
             ByteArrayBuffer baf = new ByteArrayBuffer(50);
             
-            int current = 0;
+            int current;
             while((current = bis.read()) != -1){
                  baf.append((byte)current);
             }
@@ -78,8 +78,6 @@ public class CheckUpdateTask extends AsyncTask<String, Void, Boolean> {
         }
         else {
         	if (showIsUpToDate) {
-                AlertDialog.Builder builder = new AlertDialog.Builder(context);
-
       	      new AlertDialog.Builder(context)
     	      //.setIcon(R.drawable.icon)
     	      .setTitle(Html.fromHtml("<font color='#000000'>No Update Available</font>"))
