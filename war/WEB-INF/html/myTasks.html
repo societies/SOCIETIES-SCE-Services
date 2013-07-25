@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no">
+	<title>Welcome to Crowd tasking!</title>
+	{{ head }}
+	<script src="/js/remoteControl.js" type="text/javascript" charset="utf-8"></script>
+</head>
+<body>
+	<div class="_wrapper" data-role="page" id="myTasksPage" data-theme="b">
+		<div class="header" data-role="header" data-position="fixed" data-theme="a">
+	        <a data-icon="back" data-rel="back" data-direction="reverse">Back</a>
+			<h2>Crowd tasking</h2>
+		</div>
+		<div class="main" data-role="content">
+	        <ul data-role="listview" data-divider-theme="b" data-theme="c" id="taskList" data-inset="true">
+	            <li data-role="list-divider" role="heading" style='white-space:normal;'>My tasks</li>
+	        </ul>
+			<a href="/task/new" id="addTaskButton" data-transition="slide" data-role="button" data-icon="plus"
+			    class="ui-btn-right">Add a new task</a>
+		</div>
+	</div>
+</body>
+</html>

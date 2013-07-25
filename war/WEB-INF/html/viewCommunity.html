@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no">
+	<title>Welcome to Crowd tasking!</title>
+	{{ head }}
+	<script src="/js/communities.js" type="text/javascript" charset="utf-8"></script>
+</head>
+<body>
+	<div data-role="page" id="viewCommunity" data-theme="c">
+		<div data-role="header" id="header" data-position="fixed"
+			data-theme="b">
+			<a id='backButton' data-icon="back" data-rel="back" data-direction="reverse"">Back</a>
+			<h3 id='formTitle'>View community</h3>
+			<a id="editCommunityButton" data-role="button" data-icon="arrow-r">Edit</a>
+		</div>
+		<div data-role="popup" id="popupCSUrl" class="ui-corner-all">
+			<input type="text" name="csUrl" id="csUrl" value="http://crowdtasking.appspot.com/cs/research.lab">
+		</div>
+		<div data-role="popup" id="popupEditCS" class="ui-corner-all">
+			<form action="" id="editSpaceForm">
+				<input type="hidden" name="communityId" id="communityId">
+				<input type="hidden" name="spaceId" id="spaceId">
+				<input type="hidden" name="memberId" id="memberId" value="0">
+				<div style="padding:10px 20px;">
+					<h3>Collaborative space</h3>
+		            <ul data-role="listview" data-theme="c">
+		                <li data-role="fieldcontain">
+		                    <label for="spaceName">Name*</label>
+		                    <input type="text" name="spaceName" id="spaceName">
+		                </li>
+		                <li data-role="fieldcontain">
+		                    <label style='width:100%;' for="urlMapping">URL mapping</label>
+		                    <input type="text" name="urlMapping" id="urlMapping">
+		                </li>
+		                <li data-role="fieldcontain">
+		                    <label for="symbolicLocation">Symbolic location</label>
+		                    <input type="text" name="symbolicLocation" id="symbolicLocation">
+		                </li>
+		            </ul>
+		            <div data-role="collapsible-set" data-content-theme="C" id="set">
+					    <div data-role="collapsible" id="URLs" data-collapsed="true">
+					    	<ul data-role="listview" data-inset="true">
+					    		<li><a id="urlToClipboard" href="javascript:copyToClipboard('PD')" data-rel="popup">Public display URL</a></li>
+					    		<li id="checkinURL"><a href="javascript:copyToClipboard('CI')" data-rel="popup">Check-in code</a></li>
+					    		<li id="checkoutURL"><a href="javascript:copyToClipboard('CO')" data-rel="popup">Check-out code</a></li>
+					    	</ul>
+					        <h3>URLs</h3>
+					    </div>
+					</div>
+					<a id="cancelCSButton" data-role="button" data-inline="true" data-theme="c">Cancel</a>    
+					<a id="saveCSButton" data-role="button" data-inline="true" data-transition="flow" data-theme="b">Save</a>  
+				</div>
+			</form>
+		</div>
+		<div data-role="content" data-theme="c">
+			<div data-role="collapsible" data-collapsed="false" data-theme="b">
+				<h3>Community details</h3>
+				<table>
+					<tr>
+						<td>Name:</td>
+						<td id="name"><a href="#"></a></td>
+					</tr>
+					<tr>
+						<td>Description:</td>
+						<td id="description"></td>
+					</tr>
+					<tr>
+						<td>Collaborative spaces:</td>
+						<td id="csNames"></td>
+					</tr>
+					<tr>
+						<td>Your status</td>
+						<td id="memberStatus"></td>
+					</tr>
+					<tr>
+						<td></td>
+						<td id="csNames">
+							<a id="addCSButton" data-rel="popup" data-position-to="window" data-role="button" data-inline="true">Add CS</a>
+							<a id="joinCommunityButton" data-rel="popup" data-position-to="window" data-role="button" data-inline="true" style="display:none">Join community</a>
+							<a id="leaveCommunityButton" data-rel="popup" data-position-to="window" data-role="button" data-inline="true" style="display:none">Leave community</a>
+						</td>
+					</tr>
+				</table>
+
+				<div data-role="popup" id="confirmPopup" data-theme="d" data-overlay-theme="b" class="ui-content" style="max-width:340px; padding-bottom:2em;">
+				    <h3>Approve user request?</h3>
+				    <p>User will become a member of community.</p>
+				    <a id="confirmUserButton" data-role="button" data-rel="back" data-theme="b" data-icon="check" data-inline="true" data-mini="true">Approve</a>
+				    <a id="rejectUserButton" data-role="button" data-rel="back" data-theme="b" data-icon="check" data-inline="true" data-mini="true">Reject</a>
+				    <a data-role="button" data-rel="back" data-inline="true" data-mini="true">Cancel</a>
+				</div>				
+				
+				<ul data-role="listview" id="requestList" data-split-icon="check" data-split-theme="d" data-inset="true" style='white-space: normal; display:none'>
+					<li></li>
+				</ul>
+				<ul data-role="listview" id="memeberList" data-theme="c" data-inset="true" style='white-space: normal; display:none'>
+					<li></li>
+				</ul>
+			</div>
+		</div>
+	</div>
+</body>
+</html>

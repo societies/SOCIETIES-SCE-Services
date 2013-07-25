@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<meta name="description" content="Crowd Tasking"/>
+	<meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no">
+	<title>Settings</title>
+	<link rel="stylesheet" href="/css/jquery.mobile-1.3.1.min.css" type="text/css" media="screen"/>
+	<script src="/js/jquery-2.0.0.min.js" type="text/javascript" charset="utf-8"></script>
+	<script src="/js/jquery.mobile-1.3.1.min.js" type="text/javascript" charset="utf-8"></script>
+	<script src="/js/mobile.js" type="text/javascript" charset="utf-8"></script>
+</head>
+<body>
+        <div data-role="page" id="settingsPage" data-theme="c">
+            <div data-role="header" id="header" data-position="fixed" data-theme="b">
+		        <a id="backButton" data-icon="back" data-rel="back" data-direction="reverse">Back</a>
+                <h3 id='pageTitle'>Settings</h3>
+            </div>
+            <form action="" id="settingsForm">
+               	<input id="action" name="action" type="hidden" value="settings"/>
+	            <ul data-role="listview">
+					<li data-role="list-divider">Notifications</li>
+					<li>Send me an email when:
+	                	<label><input type="checkbox" id="cbNewTaskInCommunity" name="newTaskInCommunity" />New task is created in my community.</label>
+	                	<label><input type="checkbox" id="cbNewComment" name="newComment" />New comment on a task I participate.</label>
+	                	<label><input type="checkbox" id="cbJoinCommunityRequest" name="joinCommunityRequest" />New request to join a community.</label>
+	                	<label><input type="checkbox" id="cbLikeTask" name="likeTask" />Someone liked my task.</label>
+	                	<label><input type="checkbox" id="cbLikeComment" name="likeComment" />Someone liked my comment.</label>
+	                	<label><input type="checkbox" id="cbExecuteTask" name="executeTask" />Task is being executed.</label>
+	                	<label><input type="checkbox" id="cbFinalizeTask" name="finalizeTask" />Task is being finalized.</label>
+                	</li>
+				</ul>
+	            <ul id="appSetiings" data-role="listview" style="display:none">
+					<li data-role="list-divider">Application settings</li>
+                	<li>
+						<div id="timeoutDiv" data-role="fieldcontain">
+							<label for="timeout">Check-in timeout (minutes)</label>
+							<input id="timeout" name="timeout" type="text" />
+						</div>
+                	</li>
+				</ul>
+	                	<button id='submitSettingsButton' data-theme="b">Save settings</button>
+			</form>
+        </div>
+</body>
+</html>
