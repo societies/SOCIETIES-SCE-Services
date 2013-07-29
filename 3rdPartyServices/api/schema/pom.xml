@@ -55,8 +55,13 @@
 		    <artifactId>SimpleXMLConverters</artifactId>
 		    <version>${release.version}</version>
 		    <scope>provided</scope>
-		</dependency>			
-	</dependencies>
+		</dependency>
+        <dependency>
+            <groupId>org.societies.simple.converters</groupId>
+            <artifactId>SimpleXMLConvertersBasic</artifactId>
+            <version>1.0</version>
+        </dependency>
+    </dependencies>
 
 	<build>
 		<sourceDirectory>src/main/resources</sourceDirectory>

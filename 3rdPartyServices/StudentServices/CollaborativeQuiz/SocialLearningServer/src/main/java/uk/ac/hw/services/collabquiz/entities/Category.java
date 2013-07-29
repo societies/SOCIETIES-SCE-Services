@@ -1,5 +1,6 @@
 package uk.ac.hw.services.collabquiz.entities;
 
+import javax.faces.bean.ManagedBean;
 import javax.persistence.*;
 
 /*
@@ -29,9 +30,11 @@ import javax.persistence.*;
 
 @Entity
 @Table(name = "category")
+@ManagedBean(name="categoryBean")
 public class Category {
 
     public static final Category all = new Category(-1, "All");
+
 
     private int categoryID;
     private String name;

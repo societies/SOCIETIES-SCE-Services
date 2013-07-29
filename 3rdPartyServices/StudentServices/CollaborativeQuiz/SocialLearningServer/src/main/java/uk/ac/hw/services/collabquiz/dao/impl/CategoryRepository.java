@@ -36,10 +36,10 @@ public class CategoryRepository extends HibernateRepository implements ICategory
     public List<Category> list() {
         Session session = getSessionFactory().openSession();
         Transaction transaction = null;
-        List<Category> categorys = null;
+        List<Category> categories = null;
         try {
             transaction = session.beginTransaction();
-            categorys = session.createQuery("from Category").list();
+            categories = session.createQuery("from Category").list();
             transaction.commit();
         } catch (HibernateException e) {
             transaction.rollback();
@@ -47,7 +47,7 @@ public class CategoryRepository extends HibernateRepository implements ICategory
         } finally {
             session.close();
         }
-        return categorys;
+        return categories;
     }
 
     @Override
