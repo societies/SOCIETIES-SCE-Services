@@ -10,73 +10,67 @@
     <title>Hello SOCIETIES 3PS</title>
 </h:head>
 
-<body>
+<h:body>
 
-<h:form id="form">
+    <h:form id="form">
 
-    <p:dataTable id="categoryTable" var="category" value="#{categoryController.categories}"
-                 rowKey="#{category.categoryID}" selection="#{categoryController.selectedCategories}">
+        <p:dataTable id="categoryTable" var="category" value="#{categoryController.categories}"
+                     rowKey="#{category.categoryID}" selection="#{categoryController.selectedCategories}">
 
-        <f:facet name="header">
-            Category List
-        </f:facet>
+            <f:facet name="header">
+                Category List
+            </f:facet>
 
-        <p:column selectionMode="multiple" style="width:18px" />
+            <p:column selectionMode="multiple" style="width:18px"/>
 
-        <p:column headerText="Category ID">
-            <h:outputText value="#{category.categoryID}"/>
-        </p:column>
+            <p:column headerText="Category ID">
+                <h:outputText value="#{category.categoryID}"/>
+            </p:column>
 
-        <p:column headerText="Category">
-            <h:outputText value="#{category.name}"/>
-        </p:column>                                                         h
+            <p:column headerText="Category">
+                <h:outputText value="#{category.name}"/>
+            </p:column>
 
-        <f:facet name="footer">
-            <p:commandButton value="Add Category" action="#{CategoryController.initCategory}"
-                             process="@this" update=":form:newCategoryDlg" oncomplete="newCategoryDialog.show()"
-                             icon="ui-icon-plusthick" title="Adds new category"/>
-            <p:commandButton value="Delete Category" icon="ui-icon-trash"
-                             actionListener= "#{categoryController.deleteCategory}" update="categoryTable" />
-        </f:facet>
+            <f:facet name="footer">
+                <p:commandButton value="Add Category"
+                                 actionListener="#{categoryController.initCategory}"
+                                 process="@this"
+                                 update=":form:newCategoryDlg"
+                                 oncomplete="newCategoryDialog.show()"
+                                 icon="ui-icon-plusthick"
+                                 title="Adds new category"/>
+                <p:commandButton value="Delete Category"
+                                 icon="ui-icon-trash"
+                                 actionListener="#{categoryController.deleteCategory}"
+                                 update="categoryTable"/>
+            </f:facet>
 
-    </p:dataTable>
+        </p:dataTable>
 
-    <p:dialog id="newCategoryDlg" header="Add New Category" widgetVar="newCategoryDialog" resizable="false">
+        <p:dialog id="newCategoryDlg" header="Add New Category" widgetVar="newCategoryDialog" resizable="false">
 
-        <h:form id="newCategoryForm">
             <p:panelGrid id="displayNewCategory" columns="2" cellpadding="4" style="margin:0 auto;">
 
-                <h:outputText value="Category Name :"></h:outputText>
+                <h:outputText value="Category Name :"/>
                 <p:inputText value="#{categoryController.newCategory.name}"
-                             required="true" requiredMessage="Please Enter a Category Name!" />
+                             id="newCategoryName"
+                             required="true" requiredMessage="Please Enter a Category Name!"/>
+
+                <p:message for="newCategoryName" id="msgNewCategoryName"/>
 
                 <f:facet name="footer">
-                    <p:commandButton value="Submit" update=":form:categoryTable"
+                    <p:commandButton value="Submit"
+                                     process="newCategoryDlg"
+                                     update="msgNewCategoryName,categoryTable"
                                      oncomplete="newCategoryDialog.hide();"
-                                     actionListener="#{categoryController.addCategory}">
-
-                    </p:commandButton>
-                    <p:commandButton type="reset" value="Reset"></p:commandButton>
+                                     actionListener="#{categoryController.addCategory}"/>
+                    <p:commandButton type="reset" value="Reset"/>
                 </f:facet>
             </p:panelGrid>
 
 
+        </p:dialog>
+    </h:form>
 
-
-        </h:form>
-    </p:dialog>
-</h:form>
-
-<script type="text/javascript">
-    function handleSubmitRequest(xhr, status, args) {
-        if(!args.questionAdded) { //questionAdded is a java method.
-             asDialogue.jq.effect("shake", { times:5 }, 100);
-         }
-         else {
-            asDialogue.hide();
-        }
-    }
-</script>
-
-</body>
+</h:body>
 </html>

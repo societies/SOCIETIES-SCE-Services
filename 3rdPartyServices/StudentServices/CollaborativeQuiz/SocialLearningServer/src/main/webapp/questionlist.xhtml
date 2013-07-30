@@ -14,8 +14,8 @@
 
     <h:form id="form">
 
-        <p:dataTable id = "questionTable" var="question" value="#{questionController.questions}"
-                rowKey="#{question.questionID}" selection="#{questionController.selectedQuestions}">
+        <p:dataTable id="questionTable" var="question" value="#{questionController.questions}"
+                     rowKey="#{question.questionID}" selection="#{questionController.selectedQuestions}">
 
             <f:facet name="header">
                 Expand question rows to edit answers, difficulty, etc
@@ -25,7 +25,7 @@
                 <p:rowToggler/>
             </p:column>
 
-            <p:column selectionMode="multiple" style="width:18px" />
+            <p:column selectionMode="multiple" style="width:18px"/>
 
             <p:column headerText="Question ID">
                 <h:outputText value="#{question.questionID}"/>
@@ -64,66 +64,74 @@
             </p:rowExpansion>
 
             <f:facet name="footer">
-                <p:commandButton value="Add Question" oncomplete="newQuestionDialog.show()" icon="ui-icon-plusthick" title="Adds new question"/>
-                <p:commandButton value="Delete Question" actionListener="#{questionController.deleteQuestion}" update="questionTable" icon="ui-icon-trash"/>
+                <p:commandButton value="Add Question"
+                                 process="@this"
+                                 update=":form:newQuestionDlg"
+                                 oncomplete="newQuestionDialog.show()"
+                                 icon="ui-icon-plusthick"
+                                 title="Adds new question"/>
+                <p:commandButton value="Delete Question" actionListener="#{questionController.deleteQuestion}"
+                                 update="questionTable" icon="ui-icon-trash"/>
             </f:facet>
         </p:dataTable>
 
-        <p:dialog header="Add New Question" widgetVar="newQuestionDialog" resizable="false" id="newQuestionDlg" >
-            <h:form id="newQuestionForm">
-                <p:panelGrid id="displayNewQuestion" columns="2" cellpadding="4" style="margin:0 auto;">
+        <p:dialog id="newQuestionDlg" header="Add New Question" widgetVar="newQuestionDialog" resizable="false">
+
+            <p:panelGrid id="displayNewQuestion" columns="2" cellpadding="4" style="margin:0 auto;">
+
+                <h:outputText value="Category: "/>
+                <p:selectOneMenu
+                        value="#{questionController.newQuestion.categoryID}"> <!--This is the value of a single selected item. -->
+                    <f:selectItem itemLabel="Select One" itemValue=""/>
+                    <f:selectItems value="#{categoryController.categories}" var="cat" itemLabel="#{cat.name}"
+                                   itemValue="#{cat.categoryID}"/>
+                </p:selectOneMenu>
+
+                <h:outputText value="Question Text :"/>
+                <p:inputText value="#{questionController.newQuestion.questionText}" required="true"
+                             requiredMessage="Please Enter Question Text"/>
+
+                <h:outputText value="Answer 1 :"/>
+                <p:inputText value="#{questionController.newQuestion.answer1}" required="true"
+                             requiredMessage="Please Enter an Answer 1!"/>
+
+                <h:outputText value="Answer 2 :"/>
+                <p:inputText value="#{questionController.newQuestion.answer2}"/>
+
+                <h:outputText value="Answer 3 :"/>
+                <p:inputText value="#{questionController.newQuestion.answer3}"/>
+
+                <h:outputText value="Answer 4 :"/>
+                <p:inputText value="#{questionController.newQuestion.answer4}"/>
+
+                <h:outputText value="Correct Answer :"/>
+                <p:inputText value="#{questionController.newQuestion.correctAnswer}"/>
+
+                <!--<h:outputText value="Difficulty :"></h:outputText>
+                <p:inputText value="#-{questionController.newQuestion.difficulty}"/>-->
+
+                <p:selectOneListbox value="#{questionController.newQuestion.difficulty}">
+                    <f:selectItems value="#{questionController.availableDifficulties}"/>
+                </p:selectOneListbox>
+
+                <h:outputText value="Points if Correct :"/>
+                <p:inputText value="#{questionController.newQuestion.pointsIfCorrect}"/>
+
+                <p:messages id="msgs"/>
+
+                <f:facet name="footer">
+                    <p:commandButton value="Submit"
+                                     process="newQuestionDlg"
+                                     update="questionTable,msgs"
+                                     oncomplete="newQuestionDialog.hide();"
+                                     actionListener="#{questionController.addQuestion}"/>
+                    <p:commandButton type="reset" value="Reset"/>
+                </f:facet>
+            </p:panelGrid>
 
 
-
-                    <h:outputText value="Category: " />
-                    <p:selectOneMenu value="#{categoryController.selectedCategory.categoryID}"> <!--This is the value of a single selected item. -->
-                        <f:selectItem itemLabel="Select One" itemValue="" />
-                        <f:selectItems value="#{categoryController.categories}" var="cat" itemLabel="#{cat.name}" itemValue="#{cat.categoryID}"/>
-                    </p:selectOneMenu>
-
-                    <h:outputText value="Question Text :"></h:outputText>
-                    <p:inputText value="#{questionController.newQuestion.questionText}" required="true" requiredMessage="Please Enter Question Text" />
-
-                    <h:outputText value="Answer 1 :"></h:outputText>
-                    <p:inputText value="#{questionController.newQuestion.answer1}" required="true" requiredMessage="Please Enter an Answer 1!" />
-
-                    <h:outputText value="Answer 2 :"></h:outputText>
-                    <p:inputText value="#{questionController.newQuestion.answer2}"/>
-
-                    <h:outputText value="Answer 3 :"></h:outputText>
-                    <p:inputText value="#{questionController.newQuestion.answer3}"/>
-
-                    <h:outputText value="Answer 4 :"></h:outputText>
-                    <p:inputText value="#{questionController.newQuestion.answer4}" />
-
-                    <h:outputText value="Correct Answer :"></h:outputText>
-                    <p:inputText value="#{questionController.newQuestion.correctAnswer}" />
-
-                    <!--<h:outputText value="Difficulty :"></h:outputText>
-                    <p:inputText value="#-{questionController.newQuestion.difficulty}"/>-->
-
-                    <p:selectOneListbox value="#{questionController.newQuestion.difficulty}">
-                        <f:selectItems value="#{questionController.availableDifficulties}"/>
-                    </p:selectOneListbox>
-
-                    <h:outputText value="Points if Correct :"></h:outputText>
-                    <p:inputText value="#{questionController.newQuestion.pointsIfCorrect}"/>
-
-                    <f:facet name="footer">
-                        <p:commandButton value="Submit" update=":form:questionTable"
-                                         oncomplete="newQuestionDialog.hide();"
-                                         actionListener="#{questionController.addQuestion}"/>
-                        <p:commandButton type="reset" value="Reset"></p:commandButton>
-                    </f:facet>
-                </p:panelGrid>
-            </h:form>
         </p:dialog>
-
     </h:form>
 
 </h:body>
-
-
-
-
 </html>
