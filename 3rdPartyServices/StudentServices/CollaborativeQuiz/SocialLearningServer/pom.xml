@@ -36,7 +36,7 @@
 
     <properties>
         <societies.platform.version>1.0</societies.platform.version>
-        <deploy.dir>C:\virgo-tomcat-server-3.0.2.RELEASE\pickup</deploy.dir>
+        <deploy.dir>D:\virgo-tomcat-server-3.0.2.RELEASE\pickup</deploy.dir>
     </properties>
 
     <developers>
@@ -336,6 +336,7 @@
                             org.springframework.web.context,
                             org.springframework.web.context.request,
                             org.springframework.web.jsf.el,
+                            javax.faces.convert,
 
 
                             <!-- Hibernate -->
