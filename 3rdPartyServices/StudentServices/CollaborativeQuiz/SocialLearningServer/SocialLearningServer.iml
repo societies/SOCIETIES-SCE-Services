@@ -38,8 +38,7 @@
     <facet type="Spring" name="Spring">
       <configuration>
         <fileset id="fileset" name="Quiz Server Spring Context" removed="false">
-          <file>file://$MODULE_DIR$/src/main/webapp/WEB-INF/bundle-context.xml</file>
-          <file>file://$MODULE_DIR$/src/main/webapp/WEB-INF/web-context.xml</file>
+          <file>file://$MODULE_DIR$/src/main/webapp/WEB-INF/applicationContext.xml</file>
         </fileset>
       </configuration>
     </facet>
@@ -50,7 +49,6 @@
           <unit-entry name="sessionFactory" value="dataSource" />
         </datasource-map>
         <deploymentDescriptor name="hibernate.cfg.xml" url="file://$MODULE_DIR$/src/main/resources/hibernate.cfg.xml" />
-        <deploymentDescriptor name="hibernate.cfg.xml" url="file://$MODULE_DIR$/src/main/webapp/WEB-INF/hibernate.cfg.xml" />
       </configuration>
     </facet>
   </component>

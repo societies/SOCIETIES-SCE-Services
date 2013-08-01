@@ -4,8 +4,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import uk.ac.hw.services.collabquiz.Logic.QuestionDifficulty;
 import uk.ac.hw.services.collabquiz.dao.IQuestionRepository;
-import uk.ac.hw.services.collabquiz.dao.impl.QuestionRepository;
-import uk.ac.hw.services.collabquiz.entities.Question;
 import uk.ac.hw.services.collabquiz.entities.Question;
 
 import javax.annotation.PostConstruct;
@@ -14,6 +12,7 @@ import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ViewScoped;
 import javax.faces.context.FacesContext;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Controller("questionController")
@@ -24,28 +23,18 @@ public class QuestionController extends BasePageController {
     @Autowired
     private IQuestionRepository questionRepository;
 
-    private List<Question> questions;
+    private final List<Question> questions = new ArrayList<Question>();
 
     // Creating new question
     private Question newQuestion = new Question();
 
-    private Question selectedQuestion = new Question();
+    private Question selectedQuestion;
 
     // Question selected using checkbox
     private Question[] selectedQuestions;
 
     public QuestionController() {
         log.debug("QuestionController ctor()");
-
-        //this.questionRepository = new QuestionRepository();
-
-//        try {
-//            String driverClass = "com.mysql.jdbc.Driver";
-//            Class.forName(driverClass);
-//            log.debug("Successfully loaded class " + driverClass);
-//        } catch (ClassNotFoundException e) {
-//            log.error("Error loading mysql class", e);
-//        }
     }
 
     @PostConstruct
@@ -53,13 +42,10 @@ public class QuestionController extends BasePageController {
         log.debug("postConstruct ()");
 
         try {
-            questions = questionRepository.list();
-            if(questions==null){
-                log.debug("question list is null");
-            }
+            List<Question> storedQuestions = questionRepository.list();
+            questions.addAll(storedQuestions);
         } catch (Exception ex) {
             log.error("Error loading questions from repository, none loaded", ex);
-            questions = new ArrayList<Question>();
         }
 
         if (log.isDebugEnabled())
@@ -79,6 +65,10 @@ public class QuestionController extends BasePageController {
         return questionRepository;
     }
 
+    public void setQuestionRepository(IQuestionRepository questionRepository) {
+        this.questionRepository = questionRepository;
+    }
+
     public Question getSelectedQuestion() {
         return selectedQuestion;
     }
@@ -95,27 +85,22 @@ public class QuestionController extends BasePageController {
         this.selectedQuestions = selectedQuestions;
     }
 
-    public void setQuestionRepository(IQuestionRepository questionRepository) {
-        this.questionRepository = questionRepository;
-    }
-
     public Question getNewQuestion() {
         return newQuestion;
     }
 
-    public void setNewQuestion(Question newQuestion) {
-        this.newQuestion = newQuestion;
-    }
-
     public void addQuestion() {
+        log.debug("Inserting new question with question text: " + newQuestion.getQuestionText());
         questionRepository.insert(newQuestion);
         questions.add(newQuestion);
-        newQuestion = new Question(); //Safe longterm solution?
+        newQuestion = new Question();
     }
 
     public void deleteQuestion() {
+        log.debug("Deleting selected categories: " + Arrays.toString(selectedQuestions));
+
         for (Question current : selectedQuestions) {
-            //log.debug("deleteing: " + current +" OUT OF: " + selectedCategories.toString());
+            log.debug("Deleting: " + current);
             questionRepository.physicalDelete(current);
             questions.remove(current);
         }

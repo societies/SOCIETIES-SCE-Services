@@ -9,8 +9,8 @@ import javax.annotation.PostConstruct;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ViewScoped;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import org.primefaces.context.RequestContext;
 
 @Controller("categoryController")
 @ManagedBean(name = "categoryController")
@@ -20,26 +20,17 @@ public class CategoryController extends BasePageController {
     @Autowired
     private ICategoryRepository categoryRepository;
 
-    private List<Category> categories;
+    private final List<Category> categories = new ArrayList<Category>();
 
     // Creating new category
     private Category newCategory = new Category();
 
-    private Category selectedCategory = new Category();
-
     // Category selected using checkbox
     private Category[] selectedCategories;
+    private Category selectedCategory;
 
     public CategoryController() {
         log.debug("CategoryController ctor()");
-
-//        try {
-//            String driverClass = "com.mysql.jdbc.Driver";
-//            Class.forName(driverClass);
-//            log.debug("Successfully loaded class " + driverClass);
-//        } catch (ClassNotFoundException e) {
-//            log.error("Error loading mysql class", e);
-//        }
     }
 
     @PostConstruct
@@ -47,10 +38,10 @@ public class CategoryController extends BasePageController {
         log.debug("postConstruct ()");
 
         try {
-            categories = categoryRepository.list();
+            List<Category> storedCategories = categoryRepository.list();
+            categories.addAll(storedCategories);
         } catch (Exception ex) {
             log.error("Error loading categories from repository, none loaded", ex);
-            categories = new ArrayList<Category>();
         }
 
         if (log.isDebugEnabled())
@@ -58,15 +49,12 @@ public class CategoryController extends BasePageController {
     }
 
     public void initCategory() {
-        RequestContext.getCurrentInstance().reset("form:newCategoryDlg");
+        log.debug("initCategory()");
+        newCategory = new Category();
     }
 
     public List<Category> getCategories() {
         return categories;
-    }
-
-    public ICategoryRepository getCategoryRepository() {
-        return categoryRepository;
     }
 
     public Category getSelectedCategory() {
@@ -85,6 +73,9 @@ public class CategoryController extends BasePageController {
         this.selectedCategories = selectedCategories;
     }
 
+    public ICategoryRepository getCategoryRepository() {
+        return categoryRepository;
+    }
 
     public void setCategoryRepository(ICategoryRepository categoryRepository) {
         this.categoryRepository = categoryRepository;
@@ -94,19 +85,17 @@ public class CategoryController extends BasePageController {
         return newCategory;
     }
 
-    public void setNewCategory(Category newCategory) {
-        this.newCategory = newCategory;
-    }
-
     public void addCategory() {
+        log.debug("Inserting new category with name: " + newCategory.getName());
         categoryRepository.insert(newCategory);
         categories.add(newCategory);
-        newCategory = new Category(); //Safe longterm solution?
+        newCategory = new Category();
     }
 
     public void deleteCategory() {
+        log.debug("Deleting selected categories: " + Arrays.toString(selectedCategories));
         for (Category current : selectedCategories) {
-            log.debug("deleteing: " + current +" OUT OF: " + selectedCategories.toString());
+            log.debug("Deleting: " + current);
             categoryRepository.physicalDelete(current);
             categories.remove(current);
         }

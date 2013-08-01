@@ -5,10 +5,6 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
                            http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
 
-    <!-- Scans the classpath for annotated components that will be auto-registered as Spring beans. -->
-    <ctx:component-scan base-package="uk.ac.hw.services.collabquiz"/>
-
-
     <bean class="uk.ac.hw.services.collabquiz.controller.QuestionController" name="questionController"
           init-method="postConstruct">
         <property name="questionRepository" ref="questionRepository"/>

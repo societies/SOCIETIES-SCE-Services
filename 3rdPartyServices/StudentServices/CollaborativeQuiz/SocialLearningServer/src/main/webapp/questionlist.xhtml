@@ -21,13 +21,14 @@
                 Expand question rows to edit answers, difficulty, etc
             </f:facet>
 
-            <p:column selectionMode="multiple" style="width:18px" />
-
-            <p:column headerText="Detail" style="width:2%">
+            <p:column>
                 <p:rowToggler/>
             </p:column>
 
             <p:column headerText="ID" style="width:2%">
+            <p:column selectionMode="multiple" style="width:18px"/>
+
+            <p:column headerText="Question ID">
                 <h:outputText value="#{question.questionID}"/>
             </p:column>
 
@@ -35,36 +36,31 @@
                 <h:outputText value="#{question.questionText}"/>
             </p:column>
 
-            <p:column headerText="Category">
-                <h:outputText value="#{question.questionText}"/>
-            </p:column>
-
             <p:rowExpansion>
-                <h:panelGrid id="display" columns="2" cellpadding="4" style="width:300px;"
-                             styleClass=" ui-widget-content grid">
 
-                    <h:outputText value="Answer 1:" />
-                    <h:outputText value="#{question.answer1}" />
+                <p:column headerText="Answer Choice 1">
+                    <h:outputText value="#{question.answer1}"/>
+                </p:column>
 
-                    <h:outputText value="Answer 2:" />
-                    <h:outputText value="#{question.answer2}" />
+                <p:column headerText="Answer Choice 2">
+                    <h:outputText value="#{question.answer2}"/>
+                </p:column>
 
-                    <h:outputText value="Answer 3:" />
-                    <h:outputText value="#{question.answer3}" />
+                <p:column headerText="Answer Choice 3">
+                    <h:outputText value="#{question.answer3}"/>
+                </p:column>
 
-                    <h:outputText value="Answer 4:" />
-                    <h:outputText value="#{question.answer4}" />
+                <p:column headerText="Answer Choice 4">
+                    <h:outputText value="#{question.answer4}"/>
+                </p:column>
 
-                    <h:outputText value="Correct Answer:" />
-                    <h:outputText value="#{question.correctAnswer}" />
+                <p:column headerText="Correct Answer">
+                    <h:outputText value="#{question.correctAnswer}"/>
+                </p:column>
 
-                    <h:outputText value="Difficulty:" />
-                    <h:outputText value="#{question.difficulty}" />
-
-                    <h:outputText value="Points if Correct:" />
-                    <h:outputText value="#{question.pointsIfCorrect}" />
-
-                </h:panelGrid>
+                <p:column headerText="Difficulty">
+                    <h:outputText value="#{question.difficulty}"/>
+                </p:column>
 
             </p:rowExpansion>
 
@@ -78,8 +74,10 @@
             <h:form id="newQuestionForm">
                 <p:panelGrid id="displayNewQuestion" columns="2" cellpadding="4" style="margin:0 auto;">
 
+
+
                     <h:outputText value="Category: " />
-                    <p:selectOneMenu value="#{questionController.newQuestion.categoryID}"> <!--This is the value of a single selected item. -->
+                    <p:selectOneMenu value="#{categoryController.selectedCategory.categoryID}"> <!--This is the value of a single selected item. -->
                         <f:selectItem itemLabel="Select One" itemValue="" />
                         <f:selectItems value="#{categoryController.categories}" var="cat" itemLabel="#{cat.name}" itemValue="#{cat.categoryID}"/>
                     </p:selectOneMenu>
