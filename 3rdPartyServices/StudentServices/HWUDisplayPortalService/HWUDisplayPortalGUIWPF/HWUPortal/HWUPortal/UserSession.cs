@@ -16,7 +16,7 @@ namespace HWUPortal
         private List<ServiceInfo> services;
         private IPAddress userIPAddress;
         private int port;
-
+        protected static log4net.ILog log = log4net.LogManager.GetLogger(typeof(UserSession));
         public UserSession()
         {
             this.userIdentity = string.Empty;
@@ -111,6 +111,14 @@ namespace HWUPortal
         public void setPort(int port)
         {
             this.port = port;
+        }
+
+        public String ToString()
+        {
+            String str = "UserSession with : " + this.getUserIdentity();
+            str = str + "\nIPAddress: " + this.getIPAddress() + ":" + this.getPort();
+            str = str + "\nNumber of services loaded:" + this.getServices().Count;
+            return str;
         }
     }
 }

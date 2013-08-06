@@ -42,12 +42,12 @@
 			<scope>provided</scope>
 		</dependency>
 		
-		<dependency>
+		<!-- <dependency>
 		    <groupId>org.societies.api.ext3p</groupId>
 		    <artifactId>societies-api-ext3p</artifactId>
 		    <version>${release.version}</version>
 		    <scope>provided</scope>
-		</dependency>
+		</dependency> -->
 		
 		<!-- <dependency>
 			<groupId>org.springframework</groupId>

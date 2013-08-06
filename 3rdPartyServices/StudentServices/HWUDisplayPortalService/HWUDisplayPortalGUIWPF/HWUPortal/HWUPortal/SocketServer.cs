@@ -305,6 +305,8 @@ namespace HWUPortal
                     if (servicesToFollow == 0)
                     {
                         if (log.IsDebugEnabled) log.Debug(userSession.ToString());
+                        this.gui.Login(userSession);
+                        this.stream.Write(okBytes, 0, okBytes.Length);
                         return true;
                     }
 
@@ -490,7 +492,9 @@ namespace HWUPortal
             }
             else
             {
+                if (log.IsDebugEnabled) log.Debug("Starting user login");
                 this.gui.Login(userSession);
+                if (log.IsDebugEnabled) log.Debug("User logged in. Sending OK to societies platform");
                 stream.Write(okBytes, 0, okBytes.Length);
 
             }

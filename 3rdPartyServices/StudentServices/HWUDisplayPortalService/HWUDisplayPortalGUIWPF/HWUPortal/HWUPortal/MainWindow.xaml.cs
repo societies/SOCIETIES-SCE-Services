@@ -45,7 +45,7 @@ namespace HWUPortal
         {
             Thread.CurrentThread.Name = "MainWindowThread";
 
-            log.Debug("Init components");
+            Console.WriteLine("Init components");
             this.InitializeComponent();
 
             this.webBrowser.Visibility = System.Windows.Visibility.Hidden;
@@ -59,18 +59,17 @@ namespace HWUPortal
                 button.IsEnabled = false;
             }
 
-            log.Error("Be sure to re-enable me #61");
-            //this.closeShowingServiceBtn.IsEnabled = false;
-            //this.closeShowingServiceBtn.Visibility = System.Windows.Visibility.Hidden;
-            //this.logoutButton.IsEnabled = false;
-            //this.logoutButton.Visibility = System.Windows.Visibility.Hidden;
+           // log.Error("Be sure to re-enable me #61");
+            this.closeShowingServiceBtn.IsEnabled = false;
+            this.closeShowingServiceBtn.Visibility = System.Windows.Visibility.Hidden;
+            this.logoutButton.IsEnabled = false;
+            this.logoutButton.Visibility = System.Windows.Visibility.Hidden;
+            //log.Error("Be sure to re-enable me #67");
+            this.Visibility = System.Windows.Visibility.Hidden;
 
-            log.Error("Be sure to re-enable me #67");
-            //this.Visibility = System.Windows.Visibility.Hidden;
-
-            log.Debug("Setup background threads");
+            Console.WriteLine("Setup background threads");
             this.runningService = new ServiceInfo();
-            //this.binaryDataTransferServer = new BinaryDataTransfer();
+            this.binaryDataTransferServer = new BinaryDataTransfer(this);
 
             socketServer = new SocketServer(this);
             socketThread = new Thread(socketServer.run);
@@ -90,7 +89,7 @@ namespace HWUPortal
             standaloneAppControl = new StandaloneAppControl();
             standaloneAppControl.appExit += new StandaloneAppControl.ApplicationExitedHandler(onExeDestroyed);
 
-            log.Debug("Init Kinect sensor");
+            Console.WriteLine("Init Kinect sensor");
             // initialize the sensor chooser and UI
             this.SensorChooser = new KinectSensorChooser();
             this.SensorChooser.KinectChanged += SensorChooserOnKinectChanged;
@@ -105,7 +104,7 @@ namespace HWUPortal
             // Bind the sensor chooser's current sensor to the KinectRegion
             Binding regionSensorBinding = new Binding("Kinect") { Source = this.SensorChooser };
             BindingOperations.SetBinding(this.kinectRegion, KinectRegion.KinectSensorProperty, regionSensorBinding);
-            log.Debug("Kinect initialized");
+            Console.WriteLine("Kinect initialized");
 
         }
 
@@ -119,12 +118,12 @@ namespace HWUPortal
             if (sInfo != null)
             {
                 if (log.IsDebugEnabled)
-                    log.Debug(serviceName + " starting now");
+                    Console.WriteLine(serviceName + " starting now");
 
                 if (sInfo.button.Dispatcher.CheckAccess())
                 {
                     if (log.IsDebugEnabled)
-                        log.Debug("dispatcher has access. raising event");
+                        Console.WriteLine("dispatcher has access. raising event");
                     //sInfo.button.Release();
                     //sInfo.button.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
                     this.startService(new RoutedEventArgs(Button.ClickEvent), sInfo);
@@ -132,7 +131,7 @@ namespace HWUPortal
                 else
                 {
                     if (log.IsDebugEnabled)
-                        log.Debug("dispatcher doesn't have access. using delegate");
+                        Console.WriteLine("dispatcher doesn't have access. using delegate");
                     sInfo.button.Dispatcher.Invoke(new startServiceDelegate(startService), serviceName);
 
                 }
@@ -157,7 +156,7 @@ namespace HWUPortal
 
         private void startService(EventArgs e, ServiceInfo sInfo)
         {
-            log.Debug("Starting service: " + sInfo.serviceName);
+            Console.WriteLine("Starting service: " + sInfo.serviceName);
 
             if (sInfo.serviceType == ServiceType.EXE || sInfo.serviceType == ServiceType.JAR)
             {
@@ -184,7 +183,7 @@ namespace HWUPortal
             this.closeShowingServiceBtn.Content = "Close " + sInfo.serviceName;
             this.enableThisButton(this.closeShowingServiceBtn, true);
             if (log.IsDebugEnabled)
-                log.Debug("Service: " + sInfo.serviceName + " has started. Sending information messsage to display portal.");
+                Console.WriteLine("Service: " + sInfo.serviceName + " has started. Sending information messsage to display portal.");
             try
             {
                 ServiceInformationSocketClient sClient = new ServiceInformationSocketClient();
@@ -218,13 +217,13 @@ namespace HWUPortal
 
         private void startWeb(ServiceInfo sInfo)
         {
-            log.Debug("Starting web service");
+            Console.WriteLine("Starting web service");
             //webBrowser = new System.Windows.Controls.WebBrowser();
             //appControl.Controls.Add(webBrowser);
             webBrowser.Navigate(new Uri(sInfo.serviceURL));
             //webBrowser.Url = new Uri(sInfo.serviceURL);
             webBrowser.Visibility = System.Windows.Visibility.Visible;
-            //            if (log.IsDebugEnabled)  log.Debug(webBrowser.IsVisible);
+            //            if (log.IsDebugEnabled)  Console.WriteLine(webBrowser.IsVisible);
             webBrowser.Focus();
 
         }
@@ -238,12 +237,12 @@ namespace HWUPortal
             else
             {
                 if (log.IsDebugEnabled)
-                    log.Debug("Service exited gracefully");
+                    Console.WriteLine("Service exited gracefully");
             }
 
             if (this.runningService != null)
             {
-                if (log.IsDebugEnabled) log.Debug("Closing running service");
+                if (log.IsDebugEnabled) Console.WriteLine("Closing running service");
                 //if (!this.runningService.serviceName.Equals(string.Empty))
                 //{
                 //raise close service event;
@@ -252,9 +251,9 @@ namespace HWUPortal
 
                 ServiceInformationSocketClient socket = new ServiceInformationSocketClient();
                 socket.sendServiceInformationEvent(this.userSession.getIPAddress(), userSession.getPort(), runningService.serviceName, ServiceInformationSocketClient.ServiceRuntimeInformation.STOPPED_SERVICE);
-                if (log.IsDebugEnabled) log.Debug("sent service information");
+                if (log.IsDebugEnabled) Console.WriteLine("sent service information");
                 this.runningService = new ServiceInfo();
-                if (log.IsDebugEnabled) log.Debug("running service re-initialised");
+                if (log.IsDebugEnabled) Console.WriteLine("running service re-initialised");
                 try
                 {
 
@@ -288,7 +287,7 @@ namespace HWUPortal
             if (sInfo.serviceType == ServiceType.EXE || sInfo.serviceType == ServiceType.JAR)
             {
                 if (log.IsDebugEnabled)
-                    log.Debug("Stopping Service (executable).");
+                    Console.WriteLine("Stopping Service (executable).");
                 //appWindow.Close();
                 standaloneAppControl.DestroyExe(e);
                 //appControl.DestroyExe(e);
@@ -297,7 +296,7 @@ namespace HWUPortal
             else if (sInfo.serviceType == ServiceType.WEB)
             {
                 if (log.IsDebugEnabled)
-                    log.Debug("Stopping Service (Web).");
+                    Console.WriteLine("Stopping Service (Web).");
                 this.webBrowser.Navigate("about:blank");
                 //this.webBrowser.Visibility = System.Windows.Visibility.Hidden;
             }
@@ -339,20 +338,20 @@ namespace HWUPortal
         internal void logOut()
         {
             if (log.IsDebugEnabled)
-                log.Debug("Logout called");
+                Console.WriteLine("Logout called");
             try
             {
                 this.logoutMethod(logoutButton, new RoutedEventArgs());
                 //if (logoutButton.Dispatcher.CheckAccess())
                 //{
                 //                if (log.IsDebugEnabled) 
-                //log.Debug("Directly invoking button click on logout");
+                //Console.WriteLine("Directly invoking button click on logout");
                 //    logoutButton.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
                 //}
                 //else
                 //{
                 //                if (log.IsDebugEnabled)  
-                //log.Debug("Logout delegate method called");
+                //Console.WriteLine("Logout delegate method called");
                 //    logoutButton.Dispatcher.Invoke(new logOutDelegate(logOut));
                 //}
 
@@ -380,11 +379,13 @@ namespace HWUPortal
         private delegate void loginDelegate(UserSession userSession);
         internal void Login(UserSession userSession)
         {
-            this.setApplicationVisible(true);
+
+           
             if (this.Dispatcher.CheckAccess())
             {
+                this.setApplicationVisible(true);
                 if (log.IsDebugEnabled)
-                    log.Debug("User: " + userSession.getUserIdentity() + " logging in and loading " + userSession.getServices().Count + " services");
+                    Console.WriteLine("User: " + userSession.getUserIdentity() + " logging in and loading " + userSession.getServices().Count + " services");
 
                 if (!this.loggedIn)
                 {
@@ -425,16 +426,11 @@ namespace HWUPortal
             }
             else
             {
+                
                 this.Dispatcher.Invoke(new loginDelegate(Login), userSession);
+               
             }
-            //if (this.InvokeRequired)
-            //{
-            //    Invoke(new loginDelegate(this.Login), userSession);
-            //}
-            //else
-            //{
-
-            //}
+           
         }
 
         private void logoutButton_Click(object sender, RoutedEventArgs e)
@@ -452,16 +448,16 @@ namespace HWUPortal
             if (this.Dispatcher.CheckAccess())
             {
                 if (log.IsDebugEnabled)
-                    log.Debug("logoutButton_Clicked from sender: " + sender.ToString());
+                    Console.WriteLine("logoutButton_Clicked from sender: " + sender.ToString());
                 if (this.loggedIn)
                 {
 
                     String user = this.userSession.getUserIdentity();
                     if (log.IsDebugEnabled)
-                        log.Debug("logging out user");
+                        Console.WriteLine("logging out user");
 
                     if (log.IsDebugEnabled)
-                        log.Debug("Stopping service");
+                        Console.WriteLine("Stopping service");
 
                     if (!this.runningService.serviceName.Equals(string.Empty))
                     {
@@ -481,7 +477,7 @@ namespace HWUPortal
                     this.enableThisButton(this.logoutButton, false);
 
                     if (log.IsDebugEnabled)
-                        log.Debug("User: " + user + " is logged out");
+                        Console.WriteLine("User: " + user + " is logged out");
                     //this.notifyIcon1.ShowBalloonTip(5000, "SOCIETIES Display Portal", "User: " + user + " has logged out", ToolTipIcon.Info);
                     if (iViewer != null)
                     {
@@ -531,11 +527,11 @@ namespace HWUPortal
         /// <param name="args">event arguments</param>
         private void SensorChooserOnKinectChanged(object sender, KinectChangedEventArgs args)
         {
-            log.Debug("Kinect sensor changed");
+            Console.WriteLine("Kinect sensor changed");
 
             if (args.OldSensor != null)
             {
-                log.Debug("Unbinding old sensor");
+                Console.WriteLine("Unbinding old sensor");
 
                 try
                 {
@@ -543,7 +539,7 @@ namespace HWUPortal
 
                     UnbindSensor(oldSensor);
 
-                    log.Debug("Completed unbinding old sensor");
+                    Console.WriteLine("Completed unbinding old sensor");
                 }
                 catch (InvalidOperationException ex)
                 {
@@ -555,7 +551,7 @@ namespace HWUPortal
 
             if (args.NewSensor != null)
             {
-                log.Debug("Binding new sensor");
+                Console.WriteLine("Binding new sensor");
 
                 try
                 {
@@ -563,7 +559,7 @@ namespace HWUPortal
 
                     BindSensor(newSensor);
 
-                    log.Debug("Completed binding new sensor");
+                    Console.WriteLine("Completed binding new sensor");
                 }
                 catch (InvalidOperationException ex)
                 {
@@ -591,7 +587,7 @@ namespace HWUPortal
             if (sensor == null)
                 return;
 
-            log.Debug("BindSensor(KinectSensor)");
+            Console.WriteLine("BindSensor(KinectSensor)");
             // Sensor
             sensor.Start();
 
@@ -637,7 +633,7 @@ namespace HWUPortal
             if (sensor == null)
                 return;
 
-            log.Debug("UnbindSensor()");
+            Console.WriteLine("UnbindSensor()");
 
             if (sensor.DepthStream != null)
                 sensor.DepthStream.Disable();
@@ -655,7 +651,7 @@ namespace HWUPortal
 
         private void WindowClosing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            log.Debug("Window is closing");
+            Console.WriteLine("Window is closing");
             if (socketServer != null)
             {
                 this.logOut();
@@ -668,20 +664,20 @@ namespace HWUPortal
                 if (this.socketServer == null)
                 {
                     if (log.IsDebugEnabled)
-                        log.Debug("socket server destroyed");
+                        Console.WriteLine("socket server destroyed");
 
                 }
                 if (this.binaryDataTransferServer == null)
                 {
                     if (log.IsDebugEnabled)
-                        log.Debug("binary data transfer socket server destroyed");
+                        Console.WriteLine("binary data transfer socket server destroyed");
                 }
 
             }
             else
             {
                 if (log.IsDebugEnabled)
-                    log.Debug("SocketService is already null");
+                    Console.WriteLine("SocketService is already null");
             }
 
             if (this.SensorChooser != null)
@@ -765,8 +761,12 @@ namespace HWUPortal
         private delegate void setApplicationVisibleDelegate(Boolean enabled);
         private void setApplicationVisible(Boolean enabled)
         {
+            if (log.IsDebugEnabled)
+                Console.WriteLine("Changing application visibility");
             if (this.Dispatcher.CheckAccess())
             {
+                if (log.IsDebugEnabled)
+                    Console.WriteLine("Changing application visibility - dispatcher has access");
                 if (enabled)
                 {
                     this.Visibility = System.Windows.Visibility.Visible;
@@ -779,6 +779,9 @@ namespace HWUPortal
             }
             else
             {
+                if (log.IsDebugEnabled)
+                    Console.WriteLine("Changing application visibility through dispatcher");
+                
                 this.Dispatcher.Invoke(new setApplicationVisibleDelegate(setApplicationVisible), enabled);
             }
         }
@@ -814,13 +817,13 @@ namespace HWUPortal
             if (button.Dispatcher.CheckAccess())
             {
                 if (log.IsDebugEnabled)
-                    log.Debug("I have access to change the content of the button. Current content: " + button.Content + "| new content: " + content);
+                    Console.WriteLine("I have access to change the content of the button. Current content: " + button.Content + "| new content: " + content);
                 button.Content = content;
             }
             else
             {
                 if (log.IsDebugEnabled)
-                    log.Debug("I don't have access to the button. Using delegate method");
+                    Console.WriteLine("I don't have access to the button. Using delegate method");
                 button.Dispatcher.Invoke(new setButtonContextDelegate(setButtonContext), button, content);
             }
 
@@ -836,20 +839,20 @@ namespace HWUPortal
                 if (enabled)
                 {
                     if (log.IsDebugEnabled)
-                        log.Debug("enabling button" + button.Name);
+                        Console.WriteLine("enabling button" + button.Name);
                     button.Visibility = System.Windows.Visibility.Visible;
                 }
                 else
                 {
                     if (log.IsDebugEnabled)
-                        log.Debug("disabling button" + button.Name);
+                        Console.WriteLine("disabling button" + button.Name);
                     button.Visibility = System.Windows.Visibility.Hidden;
                 }
             }
             else
             {
                 if (log.IsDebugEnabled)
-                    log.Debug("using dispatcher to enable/disable button");
+                    Console.WriteLine("using dispatcher to enable/disable button");
                 button.Dispatcher.Invoke(new enableThisButtonDelegate(enableThisButton), button, enabled);
             }
 
@@ -896,7 +899,7 @@ namespace HWUPortal
 
         private void closeShowingServiceBtn_Click(object sender, RoutedEventArgs e)
         {
-            if (log.IsDebugEnabled) log.Debug("Close showing service button clicked");
+            if (log.IsDebugEnabled) Console.WriteLine("Close showing service button clicked");
             if (!this.runningService.serviceName.Equals(string.Empty))
             {
                 this.stopService(e, this.runningService);
@@ -907,7 +910,7 @@ namespace HWUPortal
                 setButtonContext(this.closeShowingServiceBtn, "");
                 //this.closeShowingServiceBtn.Text = "";
                 this.enableThisButton(this.closeShowingServiceBtn, false);
-                if (log.IsDebugEnabled) log.Debug("Disabled button: " + this.closeShowingServiceBtn.Name);
+                if (log.IsDebugEnabled) Console.WriteLine("Disabled button: " + this.closeShowingServiceBtn.Name);
 
             }
         }

@@ -49,6 +49,7 @@ import org.societies.api.personalisation.mgmt.IPersonalisationManager;
 import org.societies.api.personalisation.model.Action;
 import org.societies.api.personalisation.model.IAction;
 import org.societies.api.personalisation.model.IActionConsumer;
+import org.societies.api.personalisation.model.PersonalisablePreferenceIdentifier;
 import org.societies.api.schema.servicelifecycle.model.ServiceResourceIdentifier;
 import org.societies.api.services.IServices;
 import org.societies.api.services.ServiceMgmtEvent;
@@ -128,6 +129,11 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 		registerForDisplayEvents();
 	}
 
+	@Override
+	public List<PersonalisablePreferenceIdentifier> getPersonalisablePreferences() {
+		List<PersonalisablePreferenceIdentifier> myList = new ArrayList<PersonalisablePreferenceIdentifier>();
+		return myList;
+	}
 
 	/*
 	 * Register for events from SLM so I can get my service parameters and finish initialising
