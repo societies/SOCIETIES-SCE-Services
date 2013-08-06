@@ -20,9 +20,10 @@ namespace HWUPortal
     ]
     public class ApplicationControlPanel : System.Windows.Forms.Panel
     {
+        protected static log4net.ILog log = log4net.LogManager.GetLogger(typeof(ApplicationControlPanel));
 
         public delegate void ApplicationExitedHandler(object sender, ApplicationControlArgs args);
-        
+
         public event ApplicationExitedHandler appExit;
         /// <summary>
         /// Track if the application has been created
@@ -33,7 +34,7 @@ namespace HWUPortal
         /// Handle to the application Window
         /// </summary>
         IntPtr appWin;
-        
+
         /// <summary>
         /// The name of the exe to launch
         /// </summary>
@@ -141,7 +142,7 @@ namespace HWUPortal
         //protected override void OnRenderSizeChanged(SizeChangedInfo sInfo)
         //{
         //    this.InvalidateVisual();
-            
+
         //    base.OnRenderSizeChanged(sInfo);
         //}
 
@@ -156,7 +157,7 @@ namespace HWUPortal
         /// <param name="e">Not used</param>
         public void LoadExe(EventArgs e)
         {
-            Console.WriteLine("Starting exe" + exeName);
+            if (log.IsDebugEnabled) log.Debug("Starting exe" + exeName);
             // If control needs to be initialized/created
             if (created == false)
             {
@@ -168,41 +169,41 @@ namespace HWUPortal
                 appWin = IntPtr.Zero;
 
                 // Start the remote application
-                
+
                 try
                 {
                     // Start the process
                     p = System.Diagnostics.Process.Start(this.exeName);
-                    
+
 
                     // Wait for process to be created and enter idle condition
                     bool idle = p.WaitForInputIdle();
-                    Console.WriteLine("process entered idle state: "+idle);
+                    if (log.IsDebugEnabled) log.Debug("process entered idle state: " + idle);
                     //BUG fix for windows vista/7
                     System.Threading.Thread.Sleep(50);
                     p.OutputDataReceived += new DataReceivedEventHandler(outputDataReceived);
                     while (p.MainWindowHandle == IntPtr.Zero)
                     {
                         Thread.Sleep(1000);
-                        Console.WriteLine("waiting for main handle");
+                        if (log.IsDebugEnabled) log.Debug("waiting for main handle");
                         p.Refresh();
                     }
                     // Get the main handle
                     appWin = p.MainWindowHandle;
 
                     // Put it into this form
-                    
-                   
+
+
                     SetParent(appWin, this.Handle);
 
                     // Remove border 
                     SetWindowLong(appWin, GWL_STYLE, WS_VISIBLE);
 
                     // Move the window to overlay it on this window
-                    
-                    MoveWindow(appWin, 0, 0, (int) this.Width, (int) this.Height, true);
 
-                    Console.WriteLine("started exe " + exeName);
+                    MoveWindow(appWin, 0, 0, (int)this.Width, (int)this.Height, true);
+
+                    if (log.IsDebugEnabled) log.Debug("started exe " + exeName);
                     p.Exited += new EventHandler(p_Exited);
                     p.EnableRaisingEvents = true;
 
@@ -210,7 +211,7 @@ namespace HWUPortal
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine("exception occured: " + ex.Message);
+                    log.Error("", ex);
                     //MessageBox.Show(this, ex.Message, "Error");
                     ApplicationControlArgs cArgs = new ApplicationControlArgs(this.exeName, false);
                     this.appExit(this, cArgs);
@@ -219,11 +220,11 @@ namespace HWUPortal
 
 
 
-                Console.WriteLine("Finished starting exe");
+                            if (log.IsDebugEnabled)  log.Debug("Finished starting exe");
             }
 
             //base.OnVisibleChanged(e);
-            
+
         }
 
         private void p_Exited(object sender, EventArgs args)
@@ -235,24 +236,24 @@ namespace HWUPortal
 
         private void outputDataReceived(object sender, DataReceivedEventArgs args)
         {
-            Console.WriteLine("Process: " + args.Data);
+                        if (log.IsDebugEnabled)  log.Debug("Process: " + args.Data);
         }
         public void DestroyExe(EventArgs e)
         {
-            Console.WriteLine("Destroying exe");
+                        if (log.IsDebugEnabled)  log.Debug("Destroying exe");
             // Stop the application
             if (appWin != IntPtr.Zero)
             {
-                Console.WriteLine("closing down: "+appWin);
+                            if (log.IsDebugEnabled)  log.Debug("closing down: " + appWin);
                 IntPtr parentWindowHandle = new WindowInteropHelper(Application.Current.MainWindow).Handle;
-                Console.WriteLine("application pointer: " + parentWindowHandle);
+                            if (log.IsDebugEnabled)  log.Debug("application pointer: " + parentWindowHandle);
                 Window win = new Window();
                 IntPtr winHandle = new WindowInteropHelper(win).Handle;
                 SetParent(appWin, winHandle);
-                Console.WriteLine("equals parent" + (GetParent(winHandle) == parentWindowHandle));
-                
+                            if (log.IsDebugEnabled)  log.Debug("equals parent" + (GetParent(winHandle) == parentWindowHandle));
+
                 // Post a close message
-               //PostMessage(p.MainWindowHandle, WM_CLOSE, 0, 0);
+                //PostMessage(p.MainWindowHandle, WM_CLOSE, 0, 0);
                 //p.Close();
                 //p.Dispose();
                 // Delay for it to get the message
@@ -261,28 +262,28 @@ namespace HWUPortal
                 PostMessage(appWin, WM_CLOSE, 0, 0);
                 // Clear internal handle
                 appWin = IntPtr.Zero;
-                
+
 
                 this.created = false;
-                Console.WriteLine("Destroyed exe" + this.exeName);
+                            if (log.IsDebugEnabled)  log.Debug("Destroyed exe" + this.exeName);
             }
             else
             {
-                Console.WriteLine("Could not destroy exe" + this.exeName);
+                            if (log.IsDebugEnabled)  log.Debug("Could not destroy exe" + this.exeName);
             }
 
             //base.OnHandleDestroyed(e);
-            
+
         }
 
 
-         //<summary>
-         //Update display of the executable
-         //</summary>
-         /// <summary>
-         /// 
-         /// </summary>
-         /// <param name="e"></param>
+        //<summary>
+        //Update display of the executable
+        //</summary>
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="e"></param>
         //<param name="e">Not used</param>
 
         protected override void OnResize(EventArgs e)
@@ -301,36 +302,36 @@ namespace HWUPortal
             // ApplicationControlPanel
             // 
             this.Size = new System.Drawing.Size(1300, 690);
-           
+
             this.ResumeLayout(false);
 
         }
 
 
-    //    protected override void ParentLayoutInvalidated(UIElement child)
-    //    {
-    //        Console.WriteLine("ParentLayoutInvalidated");
-    //        if (this.appWin != IntPtr.Zero)
-    //        {
-    //            MoveWindow(appWin, 0, 0, (int)this.Width, (int)this.Height, true);
-    //        }
-    //        base.ParentLayoutInvalidated(child);
-    //    }
+        //    protected override void ParentLayoutInvalidated(UIElement child)
+        //    {
+        //                    if (log.IsDebugEnabled)  log.Debug("ParentLayoutInvalidated");
+        //        if (this.appWin != IntPtr.Zero)
+        //        {
+        //            MoveWindow(appWin, 0, 0, (int)this.Width, (int)this.Height, true);
+        //        }
+        //        base.ParentLayoutInvalidated(child);
+        //    }
 
-    //    protected override void OnRender(System.Windows.Media.DrawingContext dc)
-    //    {
-    //        Console.WriteLine("onRender");
-    //        if (this.appWin != IntPtr.Zero)
-    //        {
-    //            MoveWindow(appWin, 0, 0, (int)this.Width, (int)this.Height, true);
-    //        }
-    //        base.OnRender(dc);
-    //        this.Visibility = System.Windows.Visibility.Visible;
-    //        this.Focus();
-    //    }
-    
-    
-    
+        //    protected override void OnRender(System.Windows.Media.DrawingContext dc)
+        //    {
+        //                    if (log.IsDebugEnabled)  log.Debug("onRender");
+        //        if (this.appWin != IntPtr.Zero)
+        //        {
+        //            MoveWindow(appWin, 0, 0, (int)this.Width, (int)this.Height, true);
+        //        }
+        //        base.OnRender(dc);
+        //        this.Visibility = System.Windows.Visibility.Visible;
+        //        this.Focus();
+        //    }
+
+
+
     }
 
 

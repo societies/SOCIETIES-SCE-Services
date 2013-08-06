@@ -8,6 +8,8 @@ namespace HWUPortal
 {
     class ServiceInformationSocketClient
     {
+        protected static log4net.ILog log = log4net.LogManager.GetLogger(typeof(ServiceInformationSocketClient));
+
         public static readonly String started_Service = "STARTED_SERVICE";
         public static readonly String stopped_Service = "STOPPED_SERVICE";
         public static readonly String logged_Out = "LOGGED_OUT";
@@ -29,7 +31,7 @@ namespace HWUPortal
             }
             catch (SocketException e)
             {
-                Console.WriteLine("Unable to connect to server.");
+                log.Error("Unable to connect to server.", e);
                 return;
             }
             server.Send(Encoding.ASCII.GetBytes(logged_Out));
@@ -37,24 +39,28 @@ namespace HWUPortal
         }
         public void sendServiceInformationEvent(IPAddress remoteIPAddress, int port, String serviceName, ServiceRuntimeInformation sInformation)
         {
-            Console.WriteLine("Sending serviceInformation message: "+sInformation+" for service: "+serviceName+" using: "+remoteIPAddress+":"+port);
+            if (log.IsDebugEnabled)
+                log.Debug("Sending serviceInformation message: " + sInformation + " for service: " + serviceName + " using: " + remoteIPAddress + ":" + port);
             IPEndPoint ip = new IPEndPoint(remoteIPAddress, port);
             Socket server = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
             try
             {
                 server.Connect(ip);
-                Console.WriteLine("Sending :  " + sInformation.ToString() + ":" + serviceName);
+                if (log.IsDebugEnabled)
+                    log.Debug("Sending :  " + sInformation.ToString() + ":" + serviceName);
                 server.Send(Encoding.ASCII.GetBytes(sInformation.ToString() + ":" + serviceName));
-                Console.WriteLine("message sent");
+                if (log.IsDebugEnabled)
+                    log.Debug("message sent");
                 server.Close();
 
-                Console.WriteLine("socket closed");
-                
+                if (log.IsDebugEnabled)
+                    log.Debug("socket closed");
+
             }
             catch (SocketException e)
             {
-                Console.WriteLine("Exception while trying to send service information message over socket. \n"+e.Message);
+                log.Error("Exception while trying to send service information message over socket", e);
             }
             //string input = Console.ReadLine();
             //if (input == "exit")
@@ -64,14 +70,15 @@ namespace HWUPortal
             //int receivedDataLength = server.Receive(data);
             //string stringData = Encoding.ASCII.GetString(data, 0, receivedDataLength);
 
-            
+
 
         }
         public static void main()
         {
             ServiceRuntimeInformation sinfo = new ServiceRuntimeInformation();
             sinfo = ServiceRuntimeInformation.STARTED_SERVICE;
-            Console.WriteLine(sinfo);
+            if (log.IsDebugEnabled)
+                log.Debug(sinfo);
         }
     }
 

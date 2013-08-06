@@ -11,6 +11,8 @@ namespace HWUPortal
 {
     public partial class ApplicationForm : Form
     {
+        protected static log4net.ILog log = log4net.LogManager.GetLogger(typeof(ApplicationForm));
+
         MainWindow mainWindow;
         private Boolean isServiceRunning = false;
 
@@ -37,15 +39,16 @@ namespace HWUPortal
 
 
 
-        public string ExeName {
-            get { return this.appControlPanel.ExeName;  }
-            set { this.appControlPanel.ExeName = value; } 
+        public string ExeName
+        {
+            get { return this.appControlPanel.ExeName; }
+            set { this.appControlPanel.ExeName = value; }
         }
 
 
         public void LoadExe(EventArgs e)
         {
-            
+
             this.appControlPanel.LoadExe(e);
             this.isServiceRunning = true;
         }
@@ -58,7 +61,7 @@ namespace HWUPortal
         private void appControlPanel_Leave(object sender, EventArgs e)
         {
             this.Focus();
-            Console.WriteLine(this.AccessibleName + " got focus");
+            if (log.IsDebugEnabled) log.Debug(this.AccessibleName + " got focus");
         }
     }
 }

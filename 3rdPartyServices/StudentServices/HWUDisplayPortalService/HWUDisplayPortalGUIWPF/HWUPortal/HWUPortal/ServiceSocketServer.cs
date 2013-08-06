@@ -12,6 +12,7 @@ namespace HWUPortal
     class ServiceSocketServer
     {
 
+        protected static log4net.ILog log = log4net.LogManager.GetLogger(typeof(ServiceSocketServer));
 
 
         private UserSession currentUserSession;
@@ -30,11 +31,11 @@ namespace HWUPortal
             this.mainWindow = mainWindow;
         }
 
-        
+
         public void run()
         {
 
-            Console.WriteLine("Starting: Creating Socket object");
+            if (log.IsDebugEnabled) log.Debug("Starting: Creating Socket object");
 
             listener = new Socket(AddressFamily.InterNetwork,
             SocketType.Stream,
@@ -48,7 +49,7 @@ namespace HWUPortal
                 try
                 {
 
-                    Console.WriteLine("Waiting for connection on port 2114");
+                    if (log.IsDebugEnabled) log.Debug("Waiting for connection on port 2114");
 
                     socket = listener.Accept();
 
@@ -56,24 +57,24 @@ namespace HWUPortal
                     Boolean finishedReceiving = false;
                     while (!finishedReceiving)
                     {
-                        Console.WriteLine(socket.RemoteEndPoint.ToString());
+                        if (log.IsDebugEnabled) log.Debug(socket.RemoteEndPoint.ToString());
                         byte[] receivedBytes = new byte[1024];
-                        Console.WriteLine("waiting to receive");
+                        if (log.IsDebugEnabled) log.Debug("waiting to receive");
                         int numBytes = socket.Receive(receivedBytes);
-                        Console.WriteLine("Receiving .");
+                        if (log.IsDebugEnabled) log.Debug("Receiving .");
 
                         receivedValue = Encoding.ASCII.GetString(receivedBytes, 0, numBytes);
                         receivedValue = receivedValue.Normalize();
-                        Console.WriteLine("Received message: " + receivedValue);
+                        if (log.IsDebugEnabled) log.Debug("Received message: " + receivedValue);
                         if (receivedValue.Equals(String.Empty))
                         {
-                            Console.WriteLine("received empty string. ignoring");
+                            if (log.IsDebugEnabled) log.Debug("received empty string. ignoring");
 
                         }
                         else if (receivedValue.IndexOf("CURRENT_USER") > -1)
                         {
                             byte[] jidInBytes = Encoding.ASCII.GetBytes(this.currentUserSession.getUserIdentity());
-                            
+
                             socket.Send(jidInBytes);
                             finishedReceiving = true;
                         }
@@ -114,8 +115,8 @@ namespace HWUPortal
                             else
                             {
                                 byte[] okInBytes = Encoding.ASCII.GetBytes("OK");
-                                
-                                Console.WriteLine("Stopping service: " + sInfo.serviceName);
+
+                                if (log.IsDebugEnabled) log.Debug("Stopping service: " + sInfo.serviceName);
                                 socket.Send(okInBytes);
                                 finishedReceiving = true;
                                 mainWindow.stopService(new System.Windows.RoutedEventArgs(Button.ClickEvent), sInfo);
@@ -128,7 +129,7 @@ namespace HWUPortal
 
                 catch (Exception exc)
                 {
-                    Console.WriteLine(exc.ToString());
+                    log.Error("", exc);
                     listener.Close();
                     alive = false;
                 }

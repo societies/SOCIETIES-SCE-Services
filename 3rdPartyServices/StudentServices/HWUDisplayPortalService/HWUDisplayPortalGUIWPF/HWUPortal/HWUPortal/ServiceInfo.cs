@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Windows.Controls;
-using Coding4Fun.Kinect.Wpf.Controls;
+using Microsoft.Kinect.Toolkit.Controls;
+
 namespace HWUPortal
 {
     public class ServiceInfo
@@ -11,7 +8,7 @@ namespace HWUPortal
         public String serviceName;
         public String serviceExe;
         public String serviceURL;
-        public HoverButton button;
+        public KinectCircleButton button;
         public ServiceType serviceType;
         public Boolean requiresKinect;
         public int servicePortNumber;
@@ -30,8 +27,8 @@ namespace HWUPortal
             return "ServiceName: " + serviceName + "\n" +
                 "ServiceExe: " + serviceExe + "\n" +
                 "Service URL " + serviceURL + "\n" +
-                "Service Type: " + serviceType + "\n"+
-                "Service Port Number" +servicePortNumber+"\n";
+                "Service Type: " + serviceType + "\n" +
+                "Service Port Number" + servicePortNumber + "\n";
             //"Button: " + button.Name;
         }
     }

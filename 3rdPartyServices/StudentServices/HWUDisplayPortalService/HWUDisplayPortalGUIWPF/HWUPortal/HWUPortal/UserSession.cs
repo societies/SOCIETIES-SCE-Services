@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Windows.Controls;
-using Coding4Fun.Kinect.Wpf.Controls;
 using System.Net;
+using Microsoft.Kinect.Toolkit.Controls;
 
 namespace HWUPortal
 {
@@ -67,7 +64,7 @@ namespace HWUPortal
                 }
             }
         }
-        public void setButton(String serviceName, HoverButton button)
+        public void setButton(String serviceName, KinectCircleButton button)
         {
             foreach (ServiceInfo s in services)
             {

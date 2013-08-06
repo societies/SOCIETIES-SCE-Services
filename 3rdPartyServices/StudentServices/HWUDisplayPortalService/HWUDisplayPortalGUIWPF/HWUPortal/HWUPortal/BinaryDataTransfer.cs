@@ -13,6 +13,8 @@ namespace HWUPortal
     // file
     class BinaryDataTransfer
     {
+        protected static log4net.ILog log = log4net.LogManager.GetLogger(typeof(BinaryDataTransfer));
+
         String outputFileName;
         Boolean transferImageInProgress = false;
 
@@ -61,7 +63,7 @@ namespace HWUPortal
                             if (transferImageInProgress)
                             {
                                 counter = counter + i;
-                               
+
                                 fileStream.Write(bytes, 0, i);
                             }
 
@@ -69,7 +71,7 @@ namespace HWUPortal
                             {
 
                                 data = System.Text.Encoding.ASCII.GetString(bytes, 0, i);
-                                Console.WriteLine(String.Format("Received: {0}", data));
+                                if (log.IsDebugEnabled) log.Debug(String.Format("Received: {0}", data));
 
 
                                 this.outputFileName = data.Trim();
@@ -78,17 +80,17 @@ namespace HWUPortal
                                 this.createfullPath();
 
                                 fileStream = File.OpenWrite(outputFileName);
-                                Console.WriteLine("Writing to file: " + outputFileName);
+                                if (log.IsDebugEnabled) log.Debug("Writing to file: " + outputFileName);
 
                                 //stream.Flush();
                             }
 
 
                             i = stream.Read(bytes, 0, bytes.Length);
-                            //Console.WriteLine("After :" + i);
+                            //            if (log.IsDebugEnabled)  log.Debug("After :" + i);
                         }
-                        Console.WriteLine("copied: " + this.outputFileName);
-                        Console.WriteLine("bytes read:" + counter);
+                        if (log.IsDebugEnabled) log.Debug("copied: " + this.outputFileName);
+                        if (log.IsDebugEnabled) log.Debug("bytes read:" + counter);
                         fileStream.Close();
                         fileStream = null;
                         this.transferImageInProgress = false;
@@ -96,14 +98,14 @@ namespace HWUPortal
                     }
 
                     incoming.Close();
-                    
+
                 }
 
 
             }
             catch (Exception exc)
             {
-                Console.WriteLine(exc.ToString());
+                log.Error("", exc);
             }
         }
 

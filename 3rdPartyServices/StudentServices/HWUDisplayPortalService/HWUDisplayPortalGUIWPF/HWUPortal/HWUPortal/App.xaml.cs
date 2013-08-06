@@ -1,12 +1,33 @@
-﻿using System.Collections.Generic;
-using System.Configuration;
-using System.Data;
-using System.Linq;
-using System.Windows;
-using System.Windows.Threading;
-using System.Reflection;
+﻿/* 
+ * Copyright (coffee) 2011, SOCIETIES Consortium (WATERFORD INSTITUTE OF TECHNOLOGY (TSSG), HERIOT-WATT UNIVERSITY (HWU), SOLUTA.NET 
+ * (SN), GERMAN AEROSPACE CENTRE (Deutsches Zentrum fuer Luft- und Raumfahrt e.V.) (DLR), Zavod za varnostne tehnologije
+ * informacijske družbe in elektronsko poslovanje (SETCCE), INSTITUTE OF COMMUNICATION AND COMPUTER SYSTEMS (ICCS), LAKE
+ * COMMUNICATIONS (LAKE), INTEL PERFORMANCE LEARNING SOLUTIONS LTD (INTEL), PORTUGAL TELECOM INOVAÇÃO, SA (PTIN), IBM Corp., 
+ * INSTITUT TELECOM (ITSUD), AMITEC DIACHYTI EFYIA PLIROFORIKI KAI EPIKINONIES ETERIA PERIORISMENIS EFTHINIS (AMITEC), TELECOM 
+ * ITALIA S.p.a.(TI),  TRIALOG (TRIALOG), Stiftelsen SINTEF (SINTEF), NEC EUROPE LTD (NEC))
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following
+ * conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+ *
+ * 2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following
+ *    disclaimer in the documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING,
+ * BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT 
+ * SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+ * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
 using System;
 using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Windows;
 
 namespace HWUPortal
 {
@@ -15,31 +36,40 @@ namespace HWUPortal
     /// </summary>
     public partial class App : Application
     {
+        protected static log4net.ILog log = log4net.LogManager.GetLogger(typeof(App));
+
         public App()
+            : base()
         {
-            Console.WriteLine("Display Portal Starting up");
+            if (log.IsDebugEnabled) log.Debug("Display Portal Starting up");
             AppDomain.CurrentDomain.AssemblyResolve +=
                 new ResolveEventHandler(ResolveAssembly);
 
             // proceed starting app...
+            log4net.Config.XmlConfigurator.Configure(new System.IO.FileInfo("./Resources/log4net.config.xml"));
+            log.Info("Logging configured");
+
         }
-        static Assembly ResolveAssembly(object sender, ResolveEventArgs args)
+
+        private static Assembly ResolveAssembly(object sender, ResolveEventArgs args)
         {
             Assembly parentAssembly = Assembly.GetExecutingAssembly();
 
             var name = args.Name.Substring(0, args.Name.IndexOf(',')) + ".dll";
 
-            Console.WriteLine("Searching for dependency: " + name.ToString() + " in ->");
-            string[] resourceList = parentAssembly.GetManifestResourceNames();
-            for (int i = 0; i < resourceList.Length; i++)
-            {
-                Console.WriteLine(resourceList[i]);
-            }
+            //if (log.IsDebugEnabled) log.Debug("Searching for dependency: " + name.ToString() + " in ->");
+
+            //string[] resourceList = parentAssembly.GetManifestResourceNames();
+            //for (int i = 0; i < resourceList.Length; i++)
+            //{
+            //    if (log.IsDebugEnabled) log.Debug(resourceList[i]);
+            //}
 
             var resourceName = parentAssembly.GetManifestResourceNames()
                 .First(s => s.EndsWith(name));
 
-            Console.WriteLine("Found resource " + resourceName);
+            //if (log.IsDebugEnabled) log.Debug("Found resource " + resourceName);
+
             using (Stream stream = parentAssembly.GetManifestResourceStream(resourceName))
             {
                 byte[] block = new byte[stream.Length];
@@ -48,9 +78,11 @@ namespace HWUPortal
             }
         }
 
+        //richarddingwall.name/2009/05/14/wpf-how-to-combine-mutliple-assemblies-into-a-single-exe/
+
         private void Application_Exit(object sender, ExitEventArgs e)
         {
-            Console.WriteLine("Portal exiting");
+            if (log.IsDebugEnabled) log.Debug("Portal exiting");
         }
     }
 }
