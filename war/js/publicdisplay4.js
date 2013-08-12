@@ -51,7 +51,7 @@ function showEvents(events) {
 	var stage = $('#tabContent');
 	stage.empty();
 	for (var i = 0; i < events.length && i <MAX_EVENTS; i++) {
-		var $event = $('<div style="display: none;">'+events[i].eventText+'</div>');
+		var $event = $('<div style="display: none;">'+events[i].eventTextHTML+'</div>');
 		stage.append($event);
 		$event.show('slow');
 	}

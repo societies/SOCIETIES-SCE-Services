@@ -734,7 +734,7 @@ function showNewsFeed() {
 	            editLink.attr('href', events[i].taskLink);
 	            editLink.attr('data-transition', 'slide');
 	            //editLink.bind('tap', createTapHandler(i));
-	            editLink.append('<h3 style="white-space:normal;">'+events[i].eventText+'</h3>');
+	            editLink.append('<h3 style="white-space:normal;">'+events[i].eventTextHTML+'</h3>');
 	            //editLink.append('<h3 style="white-space:normal;">eventText</h3>');
 
 	            var newLi = $('<li style="white-space:normal;">');

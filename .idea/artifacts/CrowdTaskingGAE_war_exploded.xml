@@ -12,7 +12,6 @@
           <element id="library" level="project" name="jersey1.12" />
           <element id="library" level="project" name="asm-3.1" />
           <element id="library" level="project" name="objectify-appengine-4.0b1" />
-          <element id="library" level="module" name="AppEngineAPI" module-name="CrowdTaskingGAE" />
           <element id="library" level="application" name="AppEngineAPI" />
           <element id="library" level="application" name="AppEngineDev" />
         </element>
