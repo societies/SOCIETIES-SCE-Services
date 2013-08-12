@@ -91,7 +91,11 @@ public class EventAPI {
 				Collections.sort(events, new EventComparator());
 			}
 			Gson gson = new Gson();
-			return gson.toJson(events);
+            ArrayList<EventJS> list = new ArrayList<EventJS>();
+            for (Event event: events) {
+                list.add(new EventJS(event));
+            }
+			return gson.toJson(list);
 		}
 		else {
 			return getEventsForUser(UsersAPI.getLoggedInUser(request.getSession()), limit);
@@ -146,10 +150,6 @@ public class EventAPI {
 		return list;
 	}
 	
-	/**
-	 * @param userId
-	 * @return
-	 */
 	// news feed
 	private String getEventsForUser(CTUser user, int limit) {
 		Gson gson = new Gson();

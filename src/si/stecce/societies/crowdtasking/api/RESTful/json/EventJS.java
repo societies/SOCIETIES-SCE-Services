@@ -25,9 +25,9 @@
 package si.stecce.societies.crowdtasking.api.RESTful.json;
 
 import com.googlecode.objectify.Ref;
-import si.stecce.societies.crowdtasking.Util;
 import si.stecce.societies.crowdtasking.model.Community;
 import si.stecce.societies.crowdtasking.model.Event;
+import si.stecce.societies.crowdtasking.model.EventType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,18 +45,23 @@ public class EventJS {
     private String eventTextHTML;
 	private String taskLink="";
     private List communityIds;
+    private EventType eventType;
 	
 	public EventJS(Event event) {
 		this.eventId = event.getId();
 		this.eventText = event.getEventText();
         this.taskId = event.getTaskId();
         this.eventTextHTML = event.getEventTextHTML();
+        if (this.eventTextHTML == null) {
+            this.eventTextHTML = eventText;
+        }
         if (event.getCommunityRefs() != null) {
             communityIds = new ArrayList();
             for (Ref<Community> commRef:event.getCommunityRefs()) {
                 communityIds.add(commRef.getKey().getId());
             }
         }
+        this.eventType = event.getType();
 		this.taskLink = "/task/view?id="+event.getTaskId();
 	}
 }
