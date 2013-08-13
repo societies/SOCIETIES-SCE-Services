@@ -211,7 +211,7 @@ public class EventAPI {
 		UsersAPI.saveUser(user);
 		createEvent(EventType.ENTER_COLLABORATIVE_SPACE, 
 			Ref.create(Key.create(CollaborativeSpace.class, collaborativeSpaceId)), 
-			null, null, eventDate, user, null, communitiesRefs);
+			null, null, eventDate, user, null, communitiesRefs, null);  // TODO: add communityJid?
 	}
 	
 	public static void logLeaveCollaborativeSpace(Long collaborativeSpaceId, Date eventDate, CTUser user, List<Ref<Community>> communitiesRefs) {
@@ -220,7 +220,7 @@ public class EventAPI {
 		UsersAPI.saveUser(user);
 		createEvent(EventType.LEAVE_COLLABORATIVE_SPACE, 
 			Ref.create(Key.create(CollaborativeSpace.class, collaborativeSpaceId)), 
-			null, null, eventDate, user, null, communitiesRefs);
+			null, null, eventDate, user, null, communitiesRefs, null);  // TODO: add communityJid?
 	}
 
 	public static void logShowTaskOnPd(Long taskId, CTUser user) {
@@ -231,29 +231,35 @@ public class EventAPI {
 		createEvent(EventType.PICK_TASK_FROM_PD, null, TaskDao.getTaskById(taskId), null, new Date(), user, null);
 	}
 	
-	public static void logRequestToJoinCommunity(Long communityId, CTUser user) {
+	public static void logRequestToJoinCommunity(Long communityId, String communityJid, CTUser user) {
 		List<Ref<Community>> communityRefs = new ArrayList<Ref<Community>>();
 		communityRefs.add(Ref.create(Key.create(Community.class, communityId)));
-		createEvent(EventType.REQUEST_TO_JOIN_COMMUNITY, null, null, null, new Date(), user, null, communityRefs);
+        List<String> communityJids = new ArrayList<String>();
+        communityJids.add(communityJid);
+		createEvent(EventType.REQUEST_TO_JOIN_COMMUNITY, null, null, null, new Date(), user, null, communityRefs, communityJids);
 	}
 	
-	public static void logNewMemeberJoinedCommunity(Long communityId, CTUser user) {
+	public static void logNewMemeberJoinedCommunity(Long communityId, String communityJid, CTUser user) {
 		List<Ref<Community>> communityRefs = new ArrayList<Ref<Community>>();
 		communityRefs.add(Ref.create(Key.create(Community.class, communityId)));
-		createEvent(EventType.JOINED_COMMUNITY, null, null, null, new Date(), user, null, communityRefs);
+        List<String> communityJids = new ArrayList<String>();
+        communityJids.add(communityJid);
+		createEvent(EventType.JOINED_COMMUNITY, null, null, null, new Date(), user, null, communityRefs, communityJids);
 	}
 	
 	public static void createEvent(EventType type, Ref<CollaborativeSpace> collaborativeSpaceRef, Task task, Long commentId,
 			Date eventDate, CTUser user, Meeting meeting) {
 		List<Ref<Community>> communityRefs = null;
+        List<String> communityJids=null;
 		if (task != null) {
 			communityRefs = task.getCommunitiesRefs();
+            communityJids = task.getCommunityJids();
 		}
-		createEvent(type, collaborativeSpaceRef, task, commentId, eventDate, user, meeting, communityRefs);
+		createEvent(type, collaborativeSpaceRef, task, commentId, eventDate, user, meeting, communityRefs, communityJids);
 	}
 
 	public static void createEvent(EventType type, Ref<CollaborativeSpace> collaborativeSpaceRef, Task task, Long commentId,
-			Date eventDate, CTUser user, Meeting meeting, List<Ref<Community>> communityRefs) {
+			Date eventDate, CTUser user, Meeting meeting, List<Ref<Community>> communityRefs, List<String> communityJids) {
 
 		String communityName=null;
 		Long taskId = null;
@@ -268,7 +274,7 @@ public class EventAPI {
 			
 		
 		Event event = new Event(type, user, communityRefs, collaborativeSpaceRef, 
-				taskId, commentId, eventDate, meeting, communityName);
+				taskId, commentId, eventDate, meeting, communityName, communityJids);
     	ofy().save().entity(event);
 
     	try {

@@ -86,7 +86,8 @@ public class CommunityAPI {
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 	public Response createCommunity(
 			@PathParam("querytype") String querytype,
-			@FormParam("communityId") String communityId,
+            @FormParam("communityId") String communityId,
+            @FormParam("communityJid") String communityJid,
 			@FormParam("name") String name,
 			@FormParam("description") String description,
 			@FormParam("csName") String csName,
@@ -117,7 +118,7 @@ public class CommunityAPI {
 			CommunityDAO.saveCommunity(community);
 			// notify admin
 			NotificationsSender.requestToJoinCommunity(community, user);
-			EventAPI.logRequestToJoinCommunity(new Long(communityId), user);
+			EventAPI.logRequestToJoinCommunity(new Long(communityId), communityJid, user);
 		}
 		if ("confirm".equalsIgnoreCase(querytype)) {
 			community = CommunityDAO.loadCommunity(new Long(communityId));
@@ -128,7 +129,7 @@ public class CommunityAPI {
 			CTUser newMember = UsersAPI.getUserById(memberId);
 			NotificationsSender.requestToJoinCommunityApproved(community, newMember);
 			// add notifcation to news feed
-			EventAPI.logNewMemeberJoinedCommunity(new Long(communityId), newMember);
+			EventAPI.logNewMemeberJoinedCommunity(new Long(communityId), communityJid, newMember);
 		}
 		if ("leave".equalsIgnoreCase(querytype)) {
 			community = CommunityDAO.loadCommunity(new Long(communityId));

@@ -63,12 +63,13 @@ public class Event {
 	private Ref<Meeting> meetingRef;
 	@Ignore private Meeting meeting;
 	@Ignore private String communityName;
-	
+    @Index private List<String> communityJids;
+
 	public Event() {}
 	
 	public Event(EventType type, CTUser user, List<Ref<Community>> communityRefs,
 			Ref<CollaborativeSpace> collaborativeSpaceRef, Long taskId, Long commentId,
-			Date eventDate, Meeting meeting, String communityName) {
+			Date eventDate, Meeting meeting, String communityName, List<String> communityJids) {
 
 		this.id = null;
 		this.type = type;
@@ -82,6 +83,7 @@ public class Event {
 		this.meeting = meeting;
 		this.meetingRef = meeting == null ? null : Ref.create(Key.create(Meeting.class, meeting.getId()));
 		this.communityName = communityName;
+        this.communityJids = communityJids;
 		setEventText();
 	}
 
@@ -286,6 +288,10 @@ public class Event {
 
         } catch (NullPointerException e) {
         }
+    }
+
+    public List<String> getCommunityJids() {
+        return communityJids;
     }
 
     public String getEventText() {

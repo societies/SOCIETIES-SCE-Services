@@ -27,6 +27,7 @@ package si.stecce.societies.crowdtasking.controller;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.CharBuffer;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.logging.Logger;
@@ -95,7 +96,7 @@ public class CSController extends HttpServlet {
 		    			return;
 		    		}
 
-                    List<Ref<Community>> communitiesRefs = null;
+                    List<Ref<Community>> communitiesRefs = new ArrayList<Ref<Community>>();
                     for (Community comm:communities) {
                         communitiesRefs.add(Ref.create(Key.create(Community.class, comm.getId())));
                     }

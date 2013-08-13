@@ -44,7 +44,7 @@ public class EventJS {
     private String eventText;
     private String eventTextHTML;
 	private String taskLink="";
-    private List communityIds;
+    private List<Long> communityIds;
     private EventType eventType;
 	
 	public EventJS(Event event) {
@@ -56,7 +56,7 @@ public class EventJS {
             this.eventTextHTML = eventText;
         }
         if (event.getCommunityRefs() != null) {
-            communityIds = new ArrayList();
+            communityIds = new ArrayList<Long>();
             for (Ref<Community> commRef:event.getCommunityRefs()) {
                 communityIds.add(commRef.getKey().getId());
             }
