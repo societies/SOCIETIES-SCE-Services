@@ -19,6 +19,7 @@ import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.societies.android.api.contentproviders.CSSContentProvider;
+import org.societies.integration.service.CommunityManagementClient;
 
 import si.setcce.societies.android.rest.RestTask;
 import android.annotation.SuppressLint;
@@ -78,7 +79,8 @@ public class MainActivity extends Activity implements SensorEventListener {
 	private float mAccel;			// acceleration apart from gravity
 	private float mAccelCurrent;	// current acceleration including gravity
 	private float mAccelLast;		// last acceleration including gravity
-	
+    final private CommunityManagementClient communityManagementClient = new CommunityManagementClient(this);
+
 	public MainActivity() {
 	}
 
@@ -113,6 +115,7 @@ public class MainActivity extends Activity implements SensorEventListener {
         if (isTrustServiceRunning()) {
             TrustTask task = new TrustTask(this);
     		task.execute();
+            communityManagementClient.setUpService();
         }
 	}
 
@@ -500,7 +503,8 @@ public class MainActivity extends Activity implements SensorEventListener {
         mAccelCurrent = (float) Math.sqrt((double) (x*x + y*y + z*z));
         float delta = mAccelCurrent - mAccelLast;
         mAccel = mAccel * 0.9f + delta; // perform low-cut filter
-        if (mAccel > 10) {
+        if (mAccel > 1) {
+            Toast.makeText(getApplicationContext(), "shake detected ("+mAccel+")", Toast.LENGTH_SHORT).show();
         	mAccel = 0;
         	refreshData();
         }
@@ -566,5 +570,11 @@ public class MainActivity extends Activity implements SensorEventListener {
             	startUrl = APPLICATION_URL+"/menu";
     		}
        }
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        communityManagementClient.tearDownService();
     }
 }
