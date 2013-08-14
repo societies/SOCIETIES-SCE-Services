@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="action_list">
+        <item>Home</item>
+        <item>Tasks in my communities</item>
+        <item>My tasks</item>
+        <item>News feed</item>
+        <item>Communities</item>
+        <item>Profile</item>
+        <item>Settings</item>
+        <item>Remote control</item>
+    </string-array>
+</resources>
