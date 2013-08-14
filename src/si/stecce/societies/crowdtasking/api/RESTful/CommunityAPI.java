@@ -171,10 +171,6 @@ public class CommunityAPI {
 		return gson.toJson(communityJS);
 	}
 
-	
-	/**
-	 * @return
-	 */
 	private String getCommunities(CTUser user) {
 		Gson gson = new Gson();
 		ArrayList<CommunityJS> list = new ArrayList<CommunityJS>();

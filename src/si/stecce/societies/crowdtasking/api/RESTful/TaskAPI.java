@@ -96,7 +96,13 @@ public class TaskAPI {
 		}
 		
 		Gson gson = new Gson();
-		String[] tags = gson.fromJson(tagsString, String[].class);
+		String[] tags;
+        try {
+            tags = gson.fromJson(tagsString, String[].class);
+        }
+        catch (Exception e) {
+            return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Error while parsing tags: "+e.getMessage()).type("text/plain").build();
+        }
 		List<Tag> tagList = getTagListFromStringList(tags);
 		Map<String, Tag> tagMap = TagAPI.getTagsMap();
 		for (int i=0; i<tags.length; i++) {
