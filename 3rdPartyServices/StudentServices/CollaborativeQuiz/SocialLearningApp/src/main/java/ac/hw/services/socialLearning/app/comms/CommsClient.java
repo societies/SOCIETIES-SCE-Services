@@ -90,6 +90,7 @@ public class CommsClient implements ISocialLearningServer, ICommCallback{
 	}
 
 	public void InitService() {
+		this.serviceIDResults = new Hashtable<SocialLearningMethodType, SocialLearningServerBean>();
 		//REGISTER OUR ServiceManager WITH THE XMPP Communication Manager
 		try {
 			getCommManager().register(this); 
@@ -215,7 +216,7 @@ public class CommsClient implements ISocialLearningServer, ICommCallback{
 		bean.setMethod(SocialLearningMethodType.SERVER_SOCKET_INFO_REQUEST);
 		logging.debug(bean.toString());
 		try {
-			this.commManager.sendMessage(stanza, bean);
+			this.commManager.sendIQSet(stanza, bean, this);
 			//getCommManager().sendIQGet(stanza, bean, this);
 		} catch (CommunicationException e) {
 			logging.debug("FAILED SENDING MESSAGE!");
