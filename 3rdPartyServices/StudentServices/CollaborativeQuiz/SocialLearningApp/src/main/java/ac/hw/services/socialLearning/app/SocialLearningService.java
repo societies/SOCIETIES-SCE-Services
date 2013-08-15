@@ -75,6 +75,7 @@ import ac.hw.services.socialLearning.app.comms.ISocialLearningServer;
 import org.societies.api.sociallearning.schema.serverbean.SocialLearningMethodType;
 import org.societies.api.sociallearning.schema.serverbean.SocialLearningServerBean;
 
+import ac.hw.services.socialLearning.api.ISocialLearningService;
 
 /**
  * Describe your class here...
@@ -82,7 +83,7 @@ import org.societies.api.sociallearning.schema.serverbean.SocialLearningServerBe
  * @author Eliza
  *
  */
-public class SocialLearningService extends EventListener implements IDisplayableService{
+public class SocialLearningService extends EventListener implements ISocialLearningService, IDisplayableService{
 
 	private IDisplayDriver displayDriverService;
 	private Logger logging = LoggerFactory.getLogger(this.getClass());
@@ -207,8 +208,17 @@ public class SocialLearningService extends EventListener implements IDisplayable
 					//GET ID OF SERVICE FOR XMPP COMMUNICATION
 					this.serverIdentity = serviceMgmt.getServer(slmEvent.getServiceId());
 					logging.debug("Got my servers Identity: " + serverIdentity);
+					try {
+						Thread.sleep(2000);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					//GET ADDRESS & PORT OF REMOTE SERVER
+					String addressPort[] = this.server.getServerPortAddress(serverIdentity);
+					logging.debug("Remote Address: " + addressPort[0]+":"+addressPort[1]);
 					//SEND MESSAGE TO GET REMOTE SOCKET LISTENER INFO
-					SocialLearningServerBean serverBean = new SocialLearningServerBean();
+					/*SocialLearningServerBean serverBean = new SocialLearningServerBean();
 					logging.debug("BEAN INIT!");
 					serverBean.setMethod(SocialLearningMethodType.SERVER_SOCKET_INFO_REQUEST);
 					logging.debug("BEAN METHOD CHANGED");
@@ -226,7 +236,7 @@ public class SocialLearningService extends EventListener implements IDisplayable
 						}
 						// TODO Auto-generated catch block
 						//logging.debug(e.getStackTrace());
-					}
+					}*/
 					
 					
 			
@@ -390,16 +400,17 @@ public class SocialLearningService extends EventListener implements IDisplayable
 	/**
 	 * @return the server
 	 */
-//	public ISocialLearningServer getServer() {
-//		return server;
-//	}
+	public ISocialLearningServer getServer() {
+		return server;
+	}
 
 	/**
 	 * @param server the server to set
 	 */
-//	public void setServer(ISocialLearningServer server) {
-//		this.server = server;
-//	}
+	public void setServer(ISocialLearningServer server) {
+		this.server = server;
+	}
+	
 
 	/**
 	 * @return the serviceMgmt

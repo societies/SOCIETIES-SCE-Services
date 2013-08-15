@@ -214,9 +214,12 @@ public class CommsClient implements ISocialLearningServer, ICommCallback{
 		Stanza stanza = new Stanza(serverIdentity);
 		SocialLearningServerBean bean = new SocialLearningServerBean();
 		bean.setMethod(SocialLearningMethodType.SERVER_SOCKET_INFO_REQUEST);
+		bean.setAddress("");
+		bean.setPort(0);
 		logging.debug(bean.toString());
 		try {
-			this.commManager.sendIQSet(stanza, bean, this);
+		//	this.commManager.sendMessage(stanza, "Hello there!");
+			this.commManager.sendIQGet(stanza, bean, this);//, this);
 			//getCommManager().sendIQGet(stanza, bean, this);
 		} catch (CommunicationException e) {
 			logging.debug("FAILED SENDING MESSAGE!");
@@ -227,9 +230,9 @@ public class CommsClient implements ISocialLearningServer, ICommCallback{
 			{
 			logging.debug(x[i].toString());	
 			}
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
+
+
 		
 		//WAIT FOR RESULTS
 		
