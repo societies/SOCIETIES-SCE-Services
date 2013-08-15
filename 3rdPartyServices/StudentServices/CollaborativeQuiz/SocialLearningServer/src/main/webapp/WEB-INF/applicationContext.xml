@@ -1,12 +1,45 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<beans xmlns="http://www.springframework.org/schema/beans"
-       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
 
-<!--
-    <bean id="quizRestServer"
-          class="uk.ac.hw.services.collabquiz.CollabQuizServer"
-          init-method="init"/>
--->
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:osgi="http://www.springframework.org/schema/osgi"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+	http://www.springframework.org/schema/osgi http://www.springframework.org/schema/osgi/spring-osgi.xsd">
+
+	<bean id="quizRestServer" class="uk.ac.hw.services.collabquiz.CollabQuizServer"
+		init-method="init" name="quizRestServer" >
+		<property name="commsManager" ref="commsManager" />
+		<property name="services" ref="services" />
+		</bean>
+		
+	<osgi:reference id="commsManager" interface="org.societies.api.comm.xmpp.interfaces.ICommManager"/>
+	<osgi:reference id="services" interface="org.societies.api.services.IServices"/>
+	
+	 <osgi:service ref="quizRestServer"
+		interface="uk.ac.hw.services.collabquiz.ICollabQuizServer">
+		<osgi:service-properties>
+			<entry key="TargetPlatform" value="SOCIETIES" />
+			<entry key="ServiceProvider" value="ICT-SOCIETIES" />
+			<entry key="ServiceMetaModel" value-ref="serMetamodel" />
+		 	<entry key="ServiceClient" value="http://societies.local.macs.hw.ac.uk:8080/3p-service/SocialLearningApp-1.0.jar" /> 
+		</osgi:service-properties>
+	</osgi:service>
+
+
+
+	<bean id="serMetamodel" class="org.societies.api.schema.servicelifecycle.model.Service">
+		<property name="authorSignature" value="Stuart Whyte" />
+		<property name="serviceDescription" value="Social Learning Game Virgo Application" />
+		<property name="serviceName" value="SocialLearning" />
+		<property name="serviceType" value="THIRD_PARTY_SERVER" />
+		<property name="serviceCategory" value="socialLearning" />
+	</bean> 
+	
+<bean id="collabQuizCommsServer" name="collabQuizCommsServer" class="uk.ac.hw.services.collabquiz.comms.CommsServer" init-method="init">
+		<property name="collabQuizServer" ref="quizRestServer" />
+		<property name="commsManager" ref="commsManager" />
+		</bean>
+
+
 
 </beans>
