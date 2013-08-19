@@ -542,6 +542,8 @@
 						<manifestFile>${project.build.directory}/META-INF/MANIFEST.MF</manifestFile>
 					</archive>
 					<webappDirectory>src/main/webapp</webappDirectory>
+					<!-- Make a skinny WAR -->
+					<packagingExcludes>WEB-INF/lib/*.jar</packagingExcludes>
 				</configuration>
 			</plugin>
 

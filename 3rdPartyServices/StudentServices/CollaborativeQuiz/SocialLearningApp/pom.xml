@@ -40,18 +40,12 @@
 			<artifactId>societies-api-internal</artifactId>
 			<scope>provided</scope>
 		</dependency>
-
-		<dependency>
-			<groupId>org.societies.api.ext3p</groupId>
-			<artifactId>societies-api-ext3p</artifactId>
-			<version>${release.version}</version>
-			<scope>provided</scope>
-		</dependency>
 		<dependency>
 			<groupId>org.societies.api.sociallearning</groupId>
 			<artifactId>societies-api-sociallearning</artifactId>
 			<version>1.0</version>
 		</dependency>
+
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>org.springframework.context</artifactId>

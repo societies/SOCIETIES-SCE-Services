@@ -11,15 +11,21 @@
        keeping these definitions separate is to facilitate integration
        testing of the bundle outside of an OSGi container -->
        
-    <!--   <osgi:service ref="socialLearning" interface="ac.hw.display.server.api.remote.IDisplayPortalServer"> 
+       <osgi:service ref="socialLearning" interface="ac.hw.services.socialLearning.api.ISocialLearningService"> 
         <osgi:service-properties>
 			<entry key="TargetPlatform" value="SOCIETIES" />
 			<entry key="ServiceProvider" value="ICT-SOCIETIES" />
 			<entry key="ServiceMetaModel" value-ref="serMetamodel" />
 		</osgi:service-properties>
-        </osgi:service> -->
+        </osgi:service> 
         
-
+        <osgi:service ref="commsClient">
+        	<osgi:interfaces>
+        		<value>org.societies.api.comm.xmpp.interfaces.ICommCallback</value>
+        	</osgi:interfaces>
+        </osgi:service>
+        
+        
 		<osgi:reference id="serviceMgmt" interface = "org.societies.api.services.IServices"></osgi:reference>
        	<osgi:reference id="eventMgmtRef" interface="org.societies.api.osgi.event.IEventMgr">
         </osgi:reference>

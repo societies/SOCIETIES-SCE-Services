@@ -214,8 +214,6 @@ public class CommsClient implements ISocialLearningServer, ICommCallback{
 		Stanza stanza = new Stanza(serverIdentity);
 		SocialLearningServerBean bean = new SocialLearningServerBean();
 		bean.setMethod(SocialLearningMethodType.SERVER_SOCKET_INFO_REQUEST);
-		bean.setAddress("");
-		bean.setPort(0);
 		logging.debug(bean.toString());
 		try {
 		//	this.commManager.sendMessage(stanza, "Hello there!");

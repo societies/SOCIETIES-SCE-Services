@@ -133,10 +133,7 @@ public class SocialLearningService extends EventListener implements ISocialLearn
 		{
 			logging.debug("COMM IS NULL!");
 		}
-		else
-		{
-			logging.debug("COMM ISNT NULL");
-		}
+
 		/*
 		this.registerForDisplayEvents();
 		try {
@@ -208,15 +205,11 @@ public class SocialLearningService extends EventListener implements ISocialLearn
 					//GET ID OF SERVICE FOR XMPP COMMUNICATION
 					this.serverIdentity = serviceMgmt.getServer(slmEvent.getServiceId());
 					logging.debug("Got my servers Identity: " + serverIdentity);
-					try {
-						Thread.sleep(2000);
-					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
+	
 					//GET ADDRESS & PORT OF REMOTE SERVER
 					String addressPort[] = this.server.getServerPortAddress(serverIdentity);
 					logging.debug("Remote Address: " + addressPort[0]+":"+addressPort[1]);
+					
 					//SEND MESSAGE TO GET REMOTE SOCKET LISTENER INFO
 					/*SocialLearningServerBean serverBean = new SocialLearningServerBean();
 					logging.debug("BEAN INIT!");

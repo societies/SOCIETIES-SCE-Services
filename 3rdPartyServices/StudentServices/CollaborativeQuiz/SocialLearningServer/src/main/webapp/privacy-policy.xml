@@ -1,0 +1,49 @@
+<RequestPolicy>
+<Target>
+<Resource>
+	<Attribute AttributeId="context"
+			DataType="http://www.w3.org/2001/XMLSchema#string">
+		<AttributeValue>ABOUT</AttributeValue>
+	</Attribute>
+</Resource>
+<Action>
+	<Attribute AttributeId="urn:oasis:names:tc:xacml:1.0:action:action-id" 
+			DataType="org.societies.api.schema.privacytrust.privacy.model.privacypolicy.ActionConstants">
+		<AttributeValue>READ</AttributeValue>
+	</Attribute>
+<optional>false</optional>
+</Action>
+<optional>false</optional>
+</Target>
+<Target>
+<Resource>
+	<Attribute AttributeId="cis"
+			DataType="http://www.w3.org/2001/XMLSchema#string">
+		<AttributeValue>cis-member-list</AttributeValue>
+	</Attribute>
+</Resource>
+<Action>
+	<Attribute AttributeId="urn:oasis:names:tc:xacml:1.0:action:action-id" 
+			DataType="org.societies.api.schema.privacytrust.privacy.model.privacypolicy.ActionConstants">
+		<AttributeValue>READ</AttributeValue>
+	</Attribute>
+<optional>false</optional>
+</Action>
+<optional>false</optional>
+</Target>
+<Target>
+<Resource>
+	<Attribute AttributeId="cis"
+			DataType="http://www.w3.org/2001/XMLSchema#string">
+		<AttributeValue>cis-list</AttributeValue>
+	</Attribute>
+</Resource>
+<Action>
+	<Attribute AttributeId="urn:oasis:names:tc:xacml:1.0:action:action-id" 
+			DataType="org.societies.api.schema.privacytrust.privacy.model.privacypolicy.ActionConstants">
+		<AttributeValue>READ</AttributeValue>
+	</Attribute>
+<optional>false</optional>
+</Action>
+<optional>false</optional>
+</Target></RequestPolicy>
