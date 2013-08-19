@@ -70,6 +70,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 	private static final String PICK_TASK_URL = APPLICATION_URL + "/task/view?id=";
 	private static final String EVENT_API_URL = APPLICATION_URL + "/rest/event";
 	private static final String SHARE_CS_URL = APPLICATION_URL + "/android/shareCsUrl";
+    private static final String SERVICE_CONNECTED = "org.societies.integration.service.CONNECTED";
 	private String startUrl;
 	public String nfcUrl=null;
 	private WebView webView;
@@ -187,6 +188,7 @@ public class MainActivity extends Activity implements SensorEventListener {
         registerReceiver(receiver, new IntentFilter(GET_MEETING_ACTION));
         registerReceiver(receiver, new IntentFilter(CHECK_IN_OUT));
         registerReceiver(receiver, new IntentFilter("android.nfc.action.NDEF_DISCOVERED"));
+        registerReceiver(receiver, new IntentFilter(SERVICE_CONNECTED));
         sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
 
     	if (getIntent().getAction().equalsIgnoreCase(CHECK_IN_OUT)) {
@@ -328,10 +330,14 @@ public class MainActivity extends Activity implements SensorEventListener {
 			if (progress != null) {
 				progress.dismiss();
 			}
-        	if (intent.getAction().equalsIgnoreCase(GET_MEETING_ACTION)) {
-        		String response = intent.getStringExtra(RestTask.HTTP_RESPONSE);
-        		sendMeetingEvent(response);
-        	}
+            if (intent.getAction().equalsIgnoreCase(SERVICE_CONNECTED)) {
+                String response = intent.getStringExtra("serviceName");
+                System.out.println(response);
+            }
+            if (intent.getAction().equalsIgnoreCase(GET_MEETING_ACTION)) {
+                String response = intent.getStringExtra(RestTask.HTTP_RESPONSE);
+                sendMeetingEvent(response);
+            }
         	if (intent.getAction().equalsIgnoreCase(CHECK_IN_OUT)) {
         		String response = intent.getStringExtra(RestTask.HTTP_RESPONSE);
         		if (!response.startsWith("Check") && !response.startsWith("You are")) {

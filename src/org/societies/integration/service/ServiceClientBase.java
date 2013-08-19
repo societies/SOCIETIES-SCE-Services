@@ -14,11 +14,13 @@ import android.util.Log;
 
 public abstract class ServiceClientBase {
 	private final static String LOG_TAG = "ServiceClientBase";
+    protected static final String SERVICE_CONNECTED = "org.societies.integration.service.CONNECTED";
 	protected boolean connectedToContextClient;
 	protected Context context;
 	protected Messenger targetService;
 	BroadcastReceiver receiver;
 	RequestorBean requestor;
+    protected String serviceName = "base";
 
 	public ServiceClientBase(Context context) {
 		this.context = context;
@@ -65,6 +67,9 @@ public abstract class ServiceClientBase {
         	Log.d(LOG_TAG, "Target service " + name.getShortClassName() + " acquired: " + targetService.getClass().getName());
 			Log.d(LOG_TAG, "Retrieve setup callback");
 			//btnGetLocation.setEnabled(true);
+            Intent intent = new Intent(SERVICE_CONNECTED);
+            intent.putExtra("serviceName", serviceName);
+            context.sendBroadcast(intent);
         }
     };
     

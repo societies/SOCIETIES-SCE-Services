@@ -45,7 +45,7 @@ public class TrustTask extends
 	protected Set<TrustRelationshipBean> doInBackground(String... params) {
 		final CountDownLatch latch = new CountDownLatch(1);
 		final RequestorBean requestor = new RequestorBean();
-		requestor.setRequestorId("whatever.setcce.si");
+		requestor.setRequestorId("user1.research.setcce.si");
 		final TrustedEntityIdBean trustorId = new TrustedEntityIdBean();
 		trustorId.setEntityId("user1.research.setcce.si");
 		trustorId.setEntityType(TrustedEntityTypeBean.CSS);

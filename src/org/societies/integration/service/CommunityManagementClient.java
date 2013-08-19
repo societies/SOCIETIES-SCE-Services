@@ -17,6 +17,7 @@ public class CommunityManagementClient extends ServiceClientBase {
 
 	public CommunityManagementClient(Context context) {
 		super(context);
+        serviceName = "CommunityManagement";
 	}
 
 	@Override
