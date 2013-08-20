@@ -35,10 +35,13 @@ import javax.swing.UIManager;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.societies.api.comm.xmpp.datatypes.Stanza;
+import org.societies.api.comm.xmpp.exceptions.CommunicationException;
 import org.societies.api.comm.xmpp.interfaces.ICommManager;
 import org.societies.api.context.CtxException;
 import org.societies.api.context.broker.ICtxBroker;
 import org.societies.api.context.model.CtxAttribute;
+import org.societies.api.context.model.CtxAttributeTypes;
 import org.societies.api.context.model.CtxAttributeValueType;
 import org.societies.api.context.model.CtxEntity;
 import org.societies.api.context.model.CtxEntityIdentifier;
@@ -59,17 +62,29 @@ import org.societies.api.osgi.event.EventTypes;
 import org.societies.api.osgi.event.IEventMgr;
 import org.societies.api.osgi.event.EventListener;
 import org.societies.api.osgi.event.InternalEvent;
+import org.societies.api.personalisation.model.IAction;
+import org.societies.api.personalisation.model.IActionConsumer;
+import org.societies.api.personalisation.model.PersonalisablePreferenceIdentifier;
 import org.societies.api.schema.servicelifecycle.model.ServiceResourceIdentifier;
 import org.societies.api.services.IServices;
+import org.societies.api.services.ServiceMgmtEvent;
+import org.societies.api.services.ServiceMgmtEventType;
 
+import ac.hw.services.socialLearning.app.comms.CommsServerListener;
 import ac.hw.services.socialLearning.app.comms.ISocialLearningServer;
+
+import org.societies.api.sociallearning.schema.serverbean.SocialLearningMethodType;
+import org.societies.api.sociallearning.schema.serverbean.SocialLearningServerBean;
+
+import ac.hw.services.socialLearning.api.ISocialLearningService;
+
 /**
  * Describe your class here...
  *
  * @author Eliza
  *
  */
-public class SocialLearningService extends EventListener implements IDisplayableService{
+public class SocialLearningService extends EventListener implements ISocialLearningService, IDisplayableService{
 
 	private IDisplayDriver displayDriverService;
 	private Logger logging = LoggerFactory.getLogger(this.getClass());
@@ -93,11 +108,38 @@ public class SocialLearningService extends EventListener implements IDisplayable
 	private CtxAttribute gameUserCtxAttribute;
 	private IServices serviceMgmt;
 	
-	public SocialLearningService(){
-		
-	}
+	private Thread serverThread;
+	private CommsServerListener commsServerListener;
+	
+	private int listenerPort;
+	private String listenerAddress;
+	
+	
 	
 	public void Init(){
+		//FIRST REGISTER FOR SERVICE EVENTS
+		this.registerForServiceEvents();
+		//THEN REGISTER WITH IDISPLAYPORTAL
+		this.registerForDisplayEvents();
+		
+		
+		//SET UP SOCKET TO LISTEN FROM GUI (C#)
+		this.commsServerListener = new CommsServerListener(this);
+		//GET PORT
+		this.listenerPort=this.commsServerListener.getSocket();
+		//START LISTENING
+		this.serverThread = new Thread(commsServerListener);
+		this.serverThread.start();
+		
+		if(this.commMgr==null)
+		{
+			logging.debug("COMM IS NULL!");
+		}
+		
+		//REGISTER AS A DISPLAYABLE SERVICE
+		//this.displayDriverService.registerDisplayableService(this, "CollabQuiz", listenerPort, URL, true);
+
+		/*
 		this.registerForDisplayEvents();
 		try {
 			
@@ -111,19 +153,128 @@ public class SocialLearningService extends EventListener implements IDisplayable
 		}
 
 		UIManager.put("ClassLoader", ClassLoader.getSystemClassLoader());
-		//myGui = new ExampleServiceGUI(this);
+		//myGui = new ExampleServiceGUI(this); */
 	}
 	
+
+	
+	/*
+	 * Register for events from SLM so I can get my service parameters and finish initialising
+	 */
+	private void registerForServiceEvents(){
+		String eventFilter = "(&" + 
+				"(" + CSSEventConstants.EVENT_NAME + "="+ServiceMgmtEventType.SERVICE_STARTED+")" +
+				"(" + CSSEventConstants.EVENT_SOURCE + "=org/societies/servicelifecycle)" +
+				")";
+		this.evMgr.subscribeInternalEvent(this, new String[]{EventTypes.SERVICE_LIFECYCLE_EVENT}, eventFilter);
+		this.logging.debug("Subscribed to "+EventTypes.SERVICE_LIFECYCLE_EVENT+" events");
+	}
+
+	private void unregisterForServiceEvents()
+	{
+		String eventFilter = "(&" + 
+				"(" + CSSEventConstants.EVENT_NAME + "="+ServiceMgmtEventType.NEW_SERVICE+")" +
+				"(" + CSSEventConstants.EVENT_SOURCE + "=org/societies/servicelifecycle)" +
+				")";
+
+		this.evMgr.unSubscribeInternalEvent(this, new String[]{EventTypes.SERVICE_LIFECYCLE_EVENT}, eventFilter);
+		//this.evMgr.subscribeInternalEvent(this, new String[]{EventTypes.SERVICE_LIFECYCLE_EVENT}, eventFilter);
+		this.logging.debug("Unsubscribed from "+EventTypes.SERVICE_LIFECYCLE_EVENT+" events");
+	}
+	
+	/*
+	 * Register for display events
+	 */
+	private void registerForDisplayEvents() {
+		String eventFilter = "(&" + 
+				"(" + CSSEventConstants.EVENT_NAME + "=displayUpdate)" +
+				"(" + CSSEventConstants.EVENT_SOURCE + "=org/societies/css/device)" +
+				")";
+		this.evMgr.subscribeInternalEvent(this, new String[]{EventTypes.DISPLAY_EVENT}, eventFilter);
+		this.logging.debug("Subscribed to "+EventTypes.DISPLAY_EVENT+" events");
+
+	}
+	
+	@Override
+	public void handleInternalEvent(InternalEvent event) {
+		logging.debug("Received internal event: "+event.geteventName());
+
+	//	if(event.geteventName().equalsIgnoreCase("NEW_SERVICE")){
+			//logging.debug("Received SLM event");
+			ServiceMgmtEvent slmEvent = (ServiceMgmtEvent) event.geteventInfo();
+			logging.debug("EventBundle: " + slmEvent.getBundleSymbolName());
+			if (slmEvent.getBundleSymbolName().equalsIgnoreCase("CollabQuizServer")){
+				this.logging.debug("Received SLM event for my bundle");
+				if (slmEvent.getEventType().equals(ServiceMgmtEventType.SERVICE_STARTED)){
+					
+					//GET ID OF SERVICE FOR XMPP COMMUNICATION
+					this.serverIdentity = serviceMgmt.getServer(slmEvent.getServiceId());
+					logging.debug("Got my servers Identity: " + serverIdentity);
+	
+					//GET ADDRESS & PORT OF REMOTE SERVER
+					String addressPort[] = this.server.getServerPortAddress(serverIdentity);
+					logging.debug("Remote Address: " + addressPort[0]+":"+addressPort[1]);
+					
+					//SEND MESSAGE TO GET REMOTE SOCKET LISTENER INFO
+					/*SocialLearningServerBean serverBean = new SocialLearningServerBean();
+					logging.debug("BEAN INIT!");
+					serverBean.setMethod(SocialLearningMethodType.SERVER_SOCKET_INFO_REQUEST);
+					logging.debug("BEAN METHOD CHANGED");
+					Stanza stanza = new Stanza(serverIdentity);
+					try {
+						logging.debug("ABOUT TO SEND MESSAGE!");
+						this.commMgr.sendMessage(stanza, serverBean);
+						logging.debug("SENT MESSAGE TO SERVER");
+					} catch (CommunicationException e) {
+						StackTraceElement[] x = e.getStackTrace();
+						logging.debug(e.toString());
+						for(int i=0;i < x.length; i++)
+						{
+						logging.debug(x[i].toString());	
+						}
+						// TODO Auto-generated catch block
+						//logging.debug(e.getStackTrace());
+					}*/
+					
+					
+			
+				}
+			
+		}else if(event.geteventName().equalsIgnoreCase("displayUpdate")){
+			logging.debug("Received DisplayPortal event");
+		}else{
+			logging.debug("Received unknown event with name: "+event.geteventName());
+		}
+		
+			if (event.geteventInfo() instanceof DisplayEvent){
+				DisplayEvent eventObj  = (DisplayEvent) event.geteventInfo();
+				if (eventObj.getDisplayStatus().equals(DisplayEventConstants.DEVICE_AVAILABLE)){
+					this.deviceAvailable = true;
+				//	this.getDataFromContext();
+				}else{
+					this.deviceAvailable  = false;
+				}
+			}
+			// TODO Auto-generated method stub
+			//this.displayDriverService.sendNotification(myServiceName, "Hello, I am an example service and I wanted to notify you that I can send you notifications!");
+		}
+	
+	public void getUserInterests() {
+		List<CtxIdentifier> idsEntities = this.ctxBroker.lookup(requestor, cssOwnerId, CtxModelType.ENTITY, CtxEntityTypes.DEVICE).get();
+		List<CtxIdentifier> entities = this.ctxBroker.lookup(userIdentity, CtxModelType.ENTITY, CtxAttributeTypes.INTERESTS).get();
+
+	}
+			
 	
 	
 	
-	
-	private void getDataFromContext() {
+	/*private void getDataFromContext() {
 		
 		if (this.requestor==null){
 			//TODO: replace this with method to service registry when it becomes available
 			this.requestServerIdentity();
 			this.serverServiceId  = this.server.getServerServiceId(serverIdentity);
+			this.logging.debug("Server ID: " + serverIdentity);
 			this.requestor = new RequestorService(serverIdentity, serverServiceId);
 		}
 		try {
@@ -161,24 +312,10 @@ public class SocialLearningService extends EventListener implements IDisplayable
 			e.printStackTrace();
 		}
 		
-	}
+	}*/
 
-	private void requestServerIdentity() {
-		
-		ServiceResourceIdentifier myClientServiceID = this.serviceMgmt.getMyServiceId(getClass());
-		this.serverIdentity = this.serviceMgmt.getServer(myClientServiceID);
-		
-	}
 
-	private void registerForDisplayEvents() {
-		String eventFilter = "(&" + 
-				"(" + CSSEventConstants.EVENT_NAME + "=displayUpdate)" +
-				"(" + CSSEventConstants.EVENT_SOURCE + "=org/societies/css/device)" +
-				")";
-		this.evMgr.subscribeInternalEvent(this, new String[]{EventTypes.DISPLAY_EVENT}, eventFilter);
-		this.logging.debug("Subscribed to "+EventTypes.DISPLAY_EVENT+" events");
-
-	}
+	
 
 	
 	@Override
@@ -187,22 +324,7 @@ public class SocialLearningService extends EventListener implements IDisplayable
 		
 	}
 
-	@Override
-	public void handleInternalEvent(InternalEvent event) {
-		
-		if (event.geteventInfo() instanceof DisplayEvent){
-			DisplayEvent eventObj  = (DisplayEvent) event.geteventInfo();
-			if (eventObj.getDisplayStatus().equals(DisplayEventConstants.DEVICE_AVAILABLE)){
-				this.deviceAvailable = true;
-				this.getDataFromContext();
-			}else{
-				this.deviceAvailable  = false;
-			}
-		}
-		// TODO Auto-generated method stub
-		//this.displayDriverService.sendNotification(myServiceName, "Hello, I am an example service and I wanted to notify you that I can send you notifications!");
-	}
-		
+
 
 	
 	/**
@@ -292,6 +414,7 @@ public class SocialLearningService extends EventListener implements IDisplayable
 	public void setServer(ISocialLearningServer server) {
 		this.server = server;
 	}
+	
 
 	/**
 	 * @return the serviceMgmt
@@ -306,6 +429,8 @@ public class SocialLearningService extends EventListener implements IDisplayable
 	public void setServiceMgmt(IServices serviceMgmt) {
 		this.serviceMgmt = serviceMgmt;
 	}
+
+	
 
 
 
