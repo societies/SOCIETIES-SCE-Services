@@ -110,7 +110,7 @@ public class SessionRepository implements Observer {
 		Person person = (Person)arg;
 		//TODO: Fix for "has_session"
 		//		logger.info(person.getLongTermCtx("has_sessions"));
-		String sessionName = person.getLastStatus().getShortTermCtx(ShortTermCtxTypes.LOCATION);
+		String sessionName = person.getLastShortTermUpdate().getShortTermCtx(ShortTermCtxTypes.LOCATION);
 
 		if (isInSession(person, sessionName))
 		{

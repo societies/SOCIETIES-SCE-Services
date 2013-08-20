@@ -26,8 +26,6 @@ package org.societies.enterprise.collabtools;
 
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import org.jivesoftware.smack.ConnectionConfiguration;
 import org.jivesoftware.smack.XMPPConnection;
@@ -42,7 +40,7 @@ import org.societies.enterprise.collabtools.api.ICollabAppConnector;
 /**
  * Connector for Chat application, in this case Openfire XMPP
  *
- * @author Christopher Viana Lima
+ * @author Chris Lima
  *
  */
 public class ChatAppIntegrator implements ICollabAppConnector {

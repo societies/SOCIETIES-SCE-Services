@@ -97,9 +97,8 @@ public class ContextSubscriber implements IContextSubscriber, Observer
 
 		//Applying weight between edges
 		logger.info("Setup weight among participants..." );
-		for (Person person : personRepository.getAllPersons()) {
-			ctxRsn.setupWeightBetweenPeople(person, LongTermCtxTypes.INTERESTS);
-		}
+		ctxRsn.setupWeightAmongPeople(LongTermCtxTypes.INTERESTS);
+
 
 		//Registering for ctx changes
 		ctxConnector.registerForshortTermCtxUpdates(cisID);
@@ -190,8 +189,8 @@ public class ContextSubscriber implements IContextSubscriber, Observer
 		Map<String, String> shortTermCtx = new HashMap<String, String>();
 		if (type.equals(LongTermCtxTypes.INTERESTS)) {
 			individual.setLongTermCtx(LongTermCtxTypes.INTERESTS, context);
-		} else if (type.equals(LongTermCtxTypes.WORK)) {
-			individual.setLongTermCtx(LongTermCtxTypes.WORK, context[0]);
+		} else if (type.equals(LongTermCtxTypes.OCCUPATION)) {
+			individual.setLongTermCtx(LongTermCtxTypes.OCCUPATION, context[0]);
 		} else if (type.equals(LongTermCtxTypes.COMPANY)) {
 			individual.setLongTermCtx(LongTermCtxTypes.COMPANY, context[0]);
 		} else if (type.equals(ShortTermCtxTypes.LOCATION)) {

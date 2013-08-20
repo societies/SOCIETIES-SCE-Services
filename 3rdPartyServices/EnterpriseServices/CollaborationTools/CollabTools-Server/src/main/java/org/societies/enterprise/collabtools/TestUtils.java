@@ -88,7 +88,7 @@ public class TestUtils {
 			for (Map.Entry<Person, Integer> entry : persons.entrySet()) {
 				//Similarity Formula is: (similar ctx/ personA + similar ctx/personB) / 2
 				float weight = ContextAnalyzer.personCtxSimilarity(entry.getValue(), ctxType, entry.getKey(), person);
-        		person.addFriend(entry.getKey(),weight);  
+        		person.addSimilarityRelationship(entry.getKey(),weight, ctxType);  
 			}
         }
     }
@@ -119,7 +119,7 @@ public class TestUtils {
 	 */
 	public void createMockLongTermCtx() {
     	for (Person friend :personRepository.getAllPersons()) {
-        	friend.setLongTermCtx(LongTermCtxTypes.WORK, getRandomOccupation());
+        	friend.setLongTermCtx(LongTermCtxTypes.OCCUPATION, getRandomOccupation());
         	friend.setLongTermCtx(LongTermCtxTypes.INTERESTS, getRandomInterests());
         	friend.setLongTermCtx(LongTermCtxTypes.COMPANY, getRandomCompanies());
     	}	
@@ -250,7 +250,7 @@ public class TestUtils {
 				setupWeightAmongPeople(LongTermCtxTypes.INTERESTS);
 				break;
 			case 3:
-				enrichedCtx();
+				enrichedCtx(LongTermCtxTypes.INTERESTS);
 				break;
 			case 4:
 				deleteSocialGraph();
@@ -274,11 +274,12 @@ public class TestUtils {
 	 * @throws SAXException
 	 * @throws ParserConfigurationException
 	 */
-	public void enrichedCtx() throws XPathExpressionException, IOException,
+	public void enrichedCtx(String CtxType) throws XPathExpressionException, IOException,
 	SAXException, ParserConfigurationException {
 		final ContextAnalyzer ctxRsn = new ContextAnalyzer(personRepository);
+//		ctxRsn.incrementCtx(LongTermCtxTypes.INTERESTS, EnrichmentTypes.ALL, null);
 		ctxRsn.incrementCtx(LongTermCtxTypes.INTERESTS, EnrichmentTypes.CONCEPT, null);
-		// context enrichment considering previous concept performed
+//		// context enrichment considering previous concept performed
 		ctxRsn.incrementCtx(LongTermCtxTypes.INTERESTS, EnrichmentTypes.CATEGORY, null);
 	}
 	

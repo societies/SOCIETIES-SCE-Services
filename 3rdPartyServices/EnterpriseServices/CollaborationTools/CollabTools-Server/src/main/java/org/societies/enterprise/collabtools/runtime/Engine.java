@@ -32,17 +32,11 @@ import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
-import org.neo4j.graphdb.Direction;
-import org.neo4j.graphdb.Relationship;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.societies.enterprise.collabtools.acquisition.LongTermCtxTypes;
 import org.societies.enterprise.collabtools.acquisition.Person;
 import org.societies.enterprise.collabtools.acquisition.PersonRepository;
-import org.societies.enterprise.collabtools.acquisition.RelTypes;
-import org.societies.enterprise.collabtools.acquisition.ShortTermContextUpdates;
 import org.societies.enterprise.collabtools.acquisition.ShortTermCtxTypes;
 import org.societies.enterprise.collabtools.api.IEngine;
 import org.societies.enterprise.collabtools.interpretation.ContextAnalyzer;
@@ -60,8 +54,9 @@ public class Engine implements IEngine {
 	private static Logger log = LoggerFactory.getLogger(Engine.class);
 	public PersonRepository personRepository;
 	public SessionRepository sessionRepository;
-	private Hashtable<String, HashSet<Person>> hashCtxList = new Hashtable<String, HashSet<Person>>(10,10);
+
 	private List<Rule> rules = new ArrayList<Rule>();
+	private ContextAnalyzer ctxRsn;
 
 	/**
 	 * @param sessionRepository 
@@ -71,21 +66,34 @@ public class Engine implements IEngine {
 	public Engine(PersonRepository personRepository, SessionRepository sessionRepository) {
 		this.personRepository = personRepository;
 		this.sessionRepository = sessionRepository;
+		this.ctxRsn = new ContextAnalyzer(personRepository);
 	}
 
+	/** 
+	 * Insert individual rule
+	 * 
+	 * @param rules individual rule for the engine.
+	 * 
+	 * */
 	public synchronized void insertRule(Rule rule){
+		if (rule.getOperator().equals(Operators.SIMILAR)){
+			// context enrichment with Concept and Category
+			ctxRsn.enrichedCtx(rule.getCtxAttribute());
+			//Assigning new weights or update the existing one
+			ctxRsn.setupWeightAmongPeople(rule.getCtxAttribute());
+		}
 		this.rules.add(rule);
-		log.info("insert rule: " + rule);
 
 		//order by priority
 		Collections.sort(this.rules,Collections.reverseOrder());
+		log.info("inserted rule: " + rule);
 	}
 
 	public synchronized void deleteRule(Rule rule){
 		this.rules.remove(rule);
-		log.info("delete rule: " + rule);
 		//order by priority
 		Collections.sort(this.rules,Collections.reverseOrder());
+		log.info("delete rule: " + rule);
 	}
 
 	/** 
@@ -96,6 +104,12 @@ public class Engine implements IEngine {
 	 * */
 	public synchronized void setRules(final Collection<Rule> rules){
 		for(Rule r : rules){
+			if (r.getOperator().equals(Operators.SIMILAR)){
+				// context enrichment with Concept and Category
+				ctxRsn.enrichedCtx(r.getCtxAttribute());
+				//Assigning new weights or update the existing one
+				ctxRsn.setupWeightAmongPeople(r.getCtxAttribute());
+			}
 			this.rules.add(r);
 			log.info("added rule: " + r);
 		}
@@ -115,14 +129,28 @@ public class Engine implements IEngine {
 	 * @see org.societies.enterprise.collabtools.runtime.IEngine#getMatchingResults()
 	 */
 	@Override
-	public Hashtable<String, HashSet<Person>> getMatchingResults() {
+	public Hashtable<String, HashSet<Person>> getMatchingResultsByPriority() {
 		log.info("\r\n\r\n*****Evaluating rules...*****");
 		long start = System.currentTimeMillis();
 		//Format ctx info and people
 		Hashtable<String, HashSet<Person>> matchingRules = new Hashtable<String, HashSet<Person>>(10,10);
 		for(Rule r : this.rules){
-			matchingRules = evaluateRule(r.getOperator(), r.getCtxAttribute(), r.getValue(), r.getCtxType());
-			log.info("matched rule: " + r.getName() + " with priority: "+ r.getPriority()*10 +"%");
+			if (matchingRules.isEmpty()) {
+				matchingRules = evaluateRule(r.getOperator(), r.getCtxAttribute(), r.getValue(), r.getCtxType(), null);
+			}
+			else {
+				Enumeration<String> iterator = matchingRules.keys();
+				while(iterator.hasMoreElements()) {
+					String htKey = iterator.nextElement();
+					HashSet<Person> primarySet  = matchingRules.get(htKey);
+					Hashtable<String, HashSet<Person>> htTemp = evaluateRule(r.getOperator(), r.getCtxAttribute(), r.getValue(), r.getCtxType(), primarySet);
+					//Check here for SAME operator
+					HashSet<Person> secondarySet  = htTemp.get(r.getCtxAttribute());
+					primarySet.retainAll(secondarySet);
+					matchingRules.put(htKey, primarySet);					
+				}
+			}
+			log.info("matched rule: " + r.getName() + " with priority "+ r.getPriority()+" and weight "+r.getWeight()*10 +"%");
 			Enumeration<String> e = matchingRules.keys();
 			while (e.hasMoreElements()) {
 				log.info("matchingRules: " + e.nextElement());
@@ -130,248 +158,280 @@ public class Engine implements IEngine {
 		}
 
 		log.info("*****Engine evaluation completed in " + (System.currentTimeMillis()-start) + " ms*****\r\n");
-		return hashCtxList;
-
+		return matchingRules;
 	}
 
 	/* (non-Javadoc)
 	 * @see org.societies.enterprise.collabtools.runtime.IEngine#evaluateRule(org.societies.enterprise.collabtools.runtime.Operators, java.lang.String, java.lang.String, java.lang.String)
 	 */
 	@Override
-	public Hashtable<String, HashSet<Person>> evaluateRule(Operators operator, final String ctxAttribute, String value, final String ctxType) {
-		HashSet<Person> personHashSet = new HashSet<Person>();
-		for (Person person : personRepository.getAllPersons() ) {
-			personHashSet.add(person);
+	public Hashtable<String, HashSet<Person>> evaluateRule(Operators operator, final String ctxAttribute, String value, final String ctxType, HashSet<Person> personHashSet) {
+		if (personHashSet == null) {
+			personHashSet = new HashSet<Person>();
+			//Get all people in the graph 
+			for (Person person : personRepository.getAllPersons()) {
+				personHashSet.add(person);
+			}
 		}
+
+		Iterator<Person> itPerson = personHashSet.iterator();
+		HashSet<Person> setPersons = new HashSet<Person>();
+		Hashtable<String, HashSet<Person>> tablePersons = new Hashtable<String, HashSet<Person>>();
+
 		//Check if ctxType is short term or long term
 		switch (ctxType.equals(ShortTermCtxTypes.class.getSimpleName()) ? 1 : 2){
+
 		//short term
-		case 1:
+		case 1:			
 			switch (operator){
 			case SAME:
-				return getPersonsWithMatchingShortTermCtx(ctxAttribute, personHashSet);
+				return ctxRsn.getPersonsWithMatchingShortTermCtx(operator, ctxAttribute, personHashSet);
 			case DIFFERENT:
 
 			case EQUAL:
-				//				if(number == (filterNumber)) return true;
-				//				else return false;
+				while(itPerson.hasNext()) {
+					Person person = itPerson.next();
+					String valueToCompare = person.getLastShortTermUpdate().getShortTermCtx(ctxAttribute);
+					//Check if the given value is a string or a number
+					if (isNumeric(value)) {
+						if(Double.parseDouble(value) == Double.parseDouble(valueToCompare)){
+							setPersons.add(person);
+						}
+					}
+					else if(value.equalsIgnoreCase(valueToCompare)) {
+						setPersons.add(person);
+					}						
+				}
+				tablePersons.put(ctxAttribute, setPersons);
+				return tablePersons;
+
 			case NOT_EQUAL:
-				//				if(number != (filterNumber))  return true;
-				//				else return false;
+				while(itPerson.hasNext()) {
+					Person person = itPerson.next();
+					String valueToCompare = person.getLastShortTermUpdate().getShortTermCtx(ctxAttribute);
+					//Check if the given value is a string or a number
+					if (isNumeric(value)) {
+						if(Double.parseDouble(value) != Double.parseDouble(valueToCompare)){
+							setPersons.add(person);
+						}
+					}
+					else if(!value.equalsIgnoreCase(valueToCompare)) {
+						setPersons.add(person);
+					}						
+				}
+				tablePersons.put(ctxAttribute, setPersons);
+				return tablePersons;
 			case GREATER:
-				//				if(number > (filterNumber))  return true;
-				//				else return false;
+				while(itPerson.hasNext()) {
+					Person person = itPerson.next();
+					String valueToCompare = person.getLastShortTermUpdate().getShortTermCtx(ctxAttribute);
+					//Check if the given value is a string or a number
+					if (isNumeric(value)) {
+						if(Double.parseDouble(value) > Double.parseDouble(valueToCompare)){
+							setPersons.add(person);
+						}
+					}
+					else {
+						//TODO: Fix for string values...
+					}						
+				}
+				tablePersons.put(ctxAttribute, setPersons);
+				return tablePersons;
 			case GREATER_OR_EQUAL:
-				//				if(number >= (filterNumber))  return true;
-				//				else return false;
+				while(itPerson.hasNext()) {
+					Person person = itPerson.next();
+					String valueToCompare = person.getLastShortTermUpdate().getShortTermCtx(ctxAttribute);
+					//Check if the given value is a string or a number
+					if (isNumeric(value)) {
+						if(Double.parseDouble(value) >= Double.parseDouble(valueToCompare)){
+							setPersons.add(person);
+						}
+					}
+					else {
+						//TODO: Fix for string values...
+					}						
+				}
+				tablePersons.put(ctxAttribute, setPersons);
+				return tablePersons;
 			case LESS:
-				//				if(number < (filterNumber))  return true;
-				//				else return false;
+				while(itPerson.hasNext()) {
+					Person person = itPerson.next();
+					String valueToCompare = person.getLastShortTermUpdate().getShortTermCtx(ctxAttribute);
+					//Check if the given value is a string or a number
+					if (isNumeric(value)) {
+						if(Double.parseDouble(value) < Double.parseDouble(valueToCompare)){
+							setPersons.add(person);
+						}
+					}
+					else {
+						//TODO: Fix for string values...
+					}						
+				}
+				tablePersons.put(ctxAttribute, setPersons);
+				return tablePersons;
 			case LESS_OR_EQUAL:
-				//				if(number <= (filterNumber))  return true;
-				//				else return false;
+				while(itPerson.hasNext()) {
+					Person person = itPerson.next();
+					String valueToCompare = person.getLastShortTermUpdate().getShortTermCtx(ctxAttribute);
+					//Check if the given value is a string or a number
+					if (isNumeric(value)) {
+						if(Double.parseDouble(value) <= Double.parseDouble(valueToCompare)){
+							setPersons.add(person);
+						}
+					}
+					else {
+						//TODO: Fix for string values...
+					}						
+				}
+				tablePersons.put(ctxAttribute, setPersons);
+				return tablePersons;
 			}
 			break;
-			//long term
+
+			//********Long term
 		case 2:
 			switch (operator){
 			case SAME:
-				return getPersonsWithMatchingLongTermCtx(ctxAttribute, personHashSet);
+				return ctxRsn.getPersonsWithMatchingLongTermCtx(ctxAttribute, personHashSet);
 			case DIFFERENT:
-
+				//TODO: fix this
+				return tablePersons;
 			case EQUAL:
-				//				if(number == (filterNumber)) return true;
-				//				else return false;
+				while(itPerson.hasNext()) {
+					Person person = itPerson.next();
+					String valueToCompare = person.getLongTermCtx(ctxAttribute);
+					//Check if the given value is a string or a number
+					if (isNumeric(value)) {
+						if(Double.parseDouble(value) == Double.parseDouble(valueToCompare)){
+							setPersons.add(person);
+						}
+					}
+					else if(value.equalsIgnoreCase(valueToCompare)) {
+						setPersons.add(person);
+					}						
+				}
+				tablePersons.put(ctxAttribute, setPersons);
+				return tablePersons;
 			case NOT_EQUAL:
-				//				if(number != (filterNumber))  return true;
-				//				else return false;
+				while(itPerson.hasNext()) {
+					Person person = itPerson.next();
+					String valueToCompare = person.getLongTermCtx(ctxAttribute);
+					//Check if the given value is a string or a number
+					if (isNumeric(value)) {
+						if(Double.parseDouble(value) != Double.parseDouble(valueToCompare)){
+							setPersons.add(person);
+						}
+					}
+					else if(!value.equalsIgnoreCase(valueToCompare)) {
+						setPersons.add(person);
+					}						
+				}
+				tablePersons.put(ctxAttribute, setPersons);
+				return tablePersons;
 			case GREATER:
-				//				if(number > (filterNumber))  return true;
-				//				else return false;
+				while(itPerson.hasNext()) {
+					Person person = itPerson.next();
+					String valueToCompare = person.getLongTermCtx(ctxAttribute);
+					//Check if the given value is a string or a number
+					if (isNumeric(value)) {
+						if(Double.parseDouble(value) > Double.parseDouble(valueToCompare)){
+							setPersons.add(person);
+						}
+					}
+					else {
+						//TODO: Fix for string values...
+					}							
+				}
+				tablePersons.put(ctxAttribute, setPersons);
+				return tablePersons;
 			case GREATER_OR_EQUAL:
-				//				if(number >= (filterNumber))  return true;
-				//				else return false;
+				while(itPerson.hasNext()) {
+					Person person = itPerson.next();
+					String valueToCompare = person.getLongTermCtx(ctxAttribute);
+					//Check if the given value is a string or a number
+					if (isNumeric(value)) {
+						if(Double.parseDouble(value) >= Double.parseDouble(valueToCompare)){
+							setPersons.add(person);
+						}
+					}
+					else {
+						//TODO: Fix for string values...
+					}							
+				}
+				tablePersons.put(ctxAttribute, setPersons);
+				return tablePersons;
 			case LESS:
-				//				if(number < (filterNumber))  return true;
-				//				else return false;
+				while(itPerson.hasNext()) {
+					Person person = itPerson.next();
+					String valueToCompare = person.getLongTermCtx(ctxAttribute);
+					//Check if the given value is a string or a number
+					if (isNumeric(value)) {
+						if(Double.parseDouble(value) < Double.parseDouble(valueToCompare)){
+							setPersons.add(person);
+						}
+					}
+					else {
+						//TODO: Fix for string values...
+					}							
+				}
+				tablePersons.put(ctxAttribute, setPersons);
+				return tablePersons;
 			case LESS_OR_EQUAL:
-				//				if(number <= (filterNumber))  return true;
-				//				else return false;
+				while(itPerson.hasNext()) {
+					Person person = itPerson.next();
+					String valueToCompare = person.getLongTermCtx(ctxAttribute);
+					//Check if the given value is a string or a number
+					if (isNumeric(value)) {
+						if(Double.parseDouble(value) <= Double.parseDouble(valueToCompare)){
+							setPersons.add(person);
+						}
+					}
+					else {
+						//TODO: Fix for string values...
+					}							
+				}
+				tablePersons.put(ctxAttribute, setPersons);
+				return tablePersons;
+			case SIMILAR:
+				if (isNumeric(value)) {
+					//TODO: Fix for numeric values...
+					return tablePersons;
+				}
+				else {
+					return ctxRsn.getPersonsBySimilarity(ctxAttribute, personHashSet, ctxAttribute);
+				}						
 			}
 			break;
 		}
-
-
-		return null;
+		return tablePersons;
 	}
 
-	/**
-	 * @param ctxAtributte Context attribute. The context needs to be short term
-	 * @param hashsetPersons
-	 * @return Hashtable of everyone in the graph with same context attribute
-	 */
-	public synchronized Hashtable<String, HashSet<Person>> getPersonsWithMatchingShortTermCtx(final String ctxAtributte, HashSet<Person> personHashSet) {
-		//Compare ctxAtributte
-		this.hashCtxList.clear();
-		Set<ShortTermContextUpdates> lastestUpdates = new HashSet<ShortTermContextUpdates>();
-		Iterator<Person> it = personHashSet.iterator();
-		while(it.hasNext()) {
-			lastestUpdates.add(it.next().getLastStatus());
-		}
-		lastestUpdates.removeAll(Collections.singleton(null));
-		ShortTermContextUpdates[] statusUpdateArray = new ShortTermContextUpdates[lastestUpdates.size()];
-		lastestUpdates.toArray(statusUpdateArray);
-		return  getUniqueElements(statusUpdateArray, ctxAtributte);	
-	}
-
-	/**
-	 * @param ctxAtributte Context attribute. The context needs to be long term
-	 * @param hashsetPersons
-	 * @return Hashtable of everyone in the graph with same context attribute
-	 */
-	@SuppressWarnings("unchecked")
-	public synchronized Hashtable<String, HashSet<Person>> getPersonsWithMatchingLongTermCtx(final String ctxAtributte, HashSet<Person> hashsetPersons) {
-		//For long term context types
-		this.hashCtxList.clear();
-		Person[] person = new Person[hashsetPersons.size()];
-		hashsetPersons.toArray(person);
-		for (Person p : person) {
-			log.info(p.getLongTermCtx(ctxAtributte));
-		}
-		Person[] temp = new Person[person.length]; // null array of persons
-		int count = 0;
-		for(int j = 0; j < person.length; j++) {
-			if(hasSameLongTermCtx(person[j], temp, ctxAtributte))
-				temp[count++] = person[j];
-		}
-		log.info("Number of persons with context "+ctxAtributte);
-		Hashtable<String, HashSet<Person>> hashCtxList = (Hashtable<String, HashSet<Person>>) this.hashCtxList.clone();
-		return hashCtxList;
-	}
-
-
-	/**
-	 * @return Hashtable of everyone in the graph with same context attribute
-	 */
-	public Hashtable<String, HashSet<Person>> getAllWithSameCtx(final String ctxAttribute, final String ctxType) {
-		HashSet<Person> personHashSet = new HashSet<Person>();
-		for (Person person : personRepository.getAllPersons() ) {
-			personHashSet.add(person);
-		}
-		//Check context type, long or short
-		if (ctxType.equals(ShortTermCtxTypes.class.getSimpleName())){
-			return getPersonsWithMatchingShortTermCtx(ctxAttribute, personHashSet);
-		}
-		else {
-			return getPersonsWithMatchingLongTermCtx(ctxAttribute, personHashSet);
-		}
-	}
-
-	/**
-	 * @param sessionName Name of the session
-	 * @param hashSet
-	 * @return Hashtable of persons
-	 */
-	public Hashtable<String, HashSet<Person>> getPersonsByWeight(String sessionName, HashSet<Person> hashsetPersons) {
-		//For long term context types
-		Hashtable<String, HashSet<Person>> hashCtxListTemp = new Hashtable<String, HashSet<Person>>(10,10);
-		if (!hashsetPersons.isEmpty()) {
-			Person[] person = new Person[hashsetPersons.size()];
-			hashsetPersons.toArray(person);
-			ArrayList<Float> elements = new ArrayList<Float>(); 
-			for (Person p : person) {
-				Iterable<Relationship> knows = p.getUnderlyingNode().getRelationships(RelTypes.SIMILARITY, Direction.OUTGOING);
-				while (knows.iterator().hasNext()) {
-					Relationship rel = knows.iterator().next();
-					elements.add((Float) rel.getProperty("weight"));//Property of relationship similarity
-				}
+	@Override
+	public Hashtable<String, HashSet<Person>> evaluateRule(String ruleName) {
+		for (Rule r : rules) {
+			if (r.getName().equalsIgnoreCase(ruleName)){
+				return evaluateRule(r.getOperator(), r.getCtxAttribute(), r.getValue(), r.getCtxType(), null);
 			}
-			float weight = ContextAnalyzer.getAutoThreshold(elements);
-			log.info("automaticThresholding: "+weight);
-			HashSet<Person> newHashsetPersons = new HashSet<Person>();
-			HashSet<Long> hashsetTemp = new HashSet<Long>();
-			for (Person individual : person) {
-				for (Person otherPerson : person) {
-					Relationship rel = individual.getFriendRelationshipTo(otherPerson);
-					//Check by relationship ID if the weight was included in the hashset
-					if (rel != null &&  !hashsetTemp.contains(rel.getId())) {
-						//							log.info(((Float)rel.getProperty("weight")));
-						hashsetTemp.add(rel.getId());
-						if ((Float)rel.getProperty("weight") >= weight) {
-							newHashsetPersons.add(individual);
-							newHashsetPersons.add(otherPerson);
-						}
-					}
-				}
-			}
-			hashCtxListTemp.put(sessionName, newHashsetPersons);
-			return hashCtxListTemp;
 		}
-		else {
-			hashCtxListTemp.put(sessionName, hashsetPersons);
-		}
-		return hashCtxListTemp;
-
+		throw new IllegalArgumentException("Rule name doesn't exist!");
+//		return new Hashtable<String, HashSet<Person>>();		
 	}
 
-	private boolean hasSameShortTermCtx(ShortTermContextUpdates ctx, ShortTermContextUpdates[] temp, final String ctxAttribute) {
-		HashSet<Person> hashsetTemp;
-		hashsetTemp = hashCtxList.get(ctx.getShortTermCtx(ctxAttribute));
-		for(int j = 0; j < temp.length; j++) {
-			if(temp[j] != null && ctx.getShortTermCtx(ctxAttribute).equals(temp[j].getShortTermCtx(ctxAttribute))) {
-				if (hashsetTemp==null) {
-					//has first element?
-					hashsetTemp = new HashSet<Person>();
-					hashsetTemp.add(temp[j].getPerson());
-				}
-				hashsetTemp.add(ctx.getPerson());
-				hashCtxList.put(ctx.getShortTermCtx(ctxAttribute), hashsetTemp);
+	/**
+	 * 
+	 * Return true if the string is a numeric value.
+	 * 
+	 * @return True for numeric values
+	 */
+	private static boolean isNumeric(String str)
+	{
+		for (char character : str.toCharArray())
+		{
+			if (!Character.isDigit(character)) {
 				return false;
 			}
 		}
 		return true;
-	}
-
-	/**
-	 * @param person
-	 * @param people
-	 * @param ctxAtributte 
-	 * @return True if person has same context attribute
-	 */
-	private boolean hasSameLongTermCtx(Person person, Person[] people, final String ctxAtributte) {
-		HashSet<Person> hashsetTemp;
-		hashsetTemp = hashCtxList.get(person.getLongTermCtx(ctxAtributte));
-		for(int j = 0; j < people.length; j++) {
-			if(people[j] != null && person.getLongTermCtx(ctxAtributte).equals(people[j].getLongTermCtx(ctxAtributte))) {
-				if (hashsetTemp==null) {
-					//has first element?
-					hashsetTemp = new HashSet<Person>();
-					hashsetTemp.add(people[j]);
-				}
-				hashsetTemp.add(person);
-				hashCtxList.put(person.getLongTermCtx(ctxAtributte), hashsetTemp);
-				return false;
-			}
-		}
-		return true;
-	}
-
-	/**
-	 * @param statusArray
-	 * @param ctxAttribute
-	 * @return
-	 */
-	@SuppressWarnings("unchecked")
-	private Hashtable<String, HashSet<Person>>  getUniqueElements(ShortTermContextUpdates[] statusArray, final String ctxAttribute) {
-		ShortTermContextUpdates[] temp = new ShortTermContextUpdates[statusArray.length]; // null elements
-		log.info("Number of persons: "+temp.length+" with context "+ctxAttribute);
-		int count = 0;
-		for(int j = 0; j < statusArray.length; j++) {
-			if(hasSameShortTermCtx(statusArray[j], temp, ctxAttribute))
-				temp[count++] = statusArray[j];
-		}
-		Hashtable<String, HashSet<Person>>  hashCtxList = (Hashtable<String, HashSet<Person>>) this.hashCtxList.clone();
-		return hashCtxList;
 	}
 
 	//	public static <T> List<T> getDuplicate(Collection<T> list) {

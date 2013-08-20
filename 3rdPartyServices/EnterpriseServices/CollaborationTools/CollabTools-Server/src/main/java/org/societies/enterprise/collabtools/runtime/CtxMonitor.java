@@ -38,6 +38,7 @@ import org.societies.enterprise.collabtools.acquisition.LongTermCtxTypes;
 import org.societies.enterprise.collabtools.acquisition.Person;
 import org.societies.enterprise.collabtools.acquisition.PersonRepository;
 import org.societies.enterprise.collabtools.acquisition.ShortTermCtxTypes;
+import org.societies.enterprise.collabtools.interpretation.ContextAnalyzer;
 
 
 /**
@@ -48,60 +49,48 @@ import org.societies.enterprise.collabtools.acquisition.ShortTermCtxTypes;
  */
 public class CtxMonitor implements Runnable, Observer{
 
-	public Engine conditions;
+	public Engine engine;
 	private SessionRepository sessionRepository;
 	private static final Logger logger  = LoggerFactory.getLogger(CtxMonitor.class);
+	ContextAnalyzer ctxAnalyzer;
 
 	public CtxMonitor (PersonRepository personRepository, SessionRepository sessionRepository) {
-		conditions = new Engine(personRepository, sessionRepository);
+		engine = new Engine(personRepository, sessionRepository);
 		this.sessionRepository = sessionRepository;
 		
+		ctxAnalyzer = new ContextAnalyzer(personRepository);
+		
+		//Default rules when the FW starts, location and interests
 		Rule r01 = new Rule("r01",Operators.SAME, ShortTermCtxTypes.LOCATION, "--", 1, 0.5 ,ShortTermCtxTypes.class.getSimpleName());
-		Rule r02 = new Rule("r02",Operators.SAME, LongTermCtxTypes.COMPANY, "--", 2, 0.1 ,LongTermCtxTypes.class.getSimpleName());
-		Rule r03 = new Rule("r03",Operators.SIMILAR, LongTermCtxTypes.INTERESTS, "--", 3, 0.4 ,LongTermCtxTypes.class.getSimpleName());
-		Rule r04 = new Rule("r04",Operators.SAME, ShortTermCtxTypes.STATUS, "--", 4, 0.1 ,ShortTermCtxTypes.class.getSimpleName());
-		List<Rule> rules = Arrays.asList(r01, r02, r03, r04);
-		conditions.setRules(rules);
+		Rule r02 = new Rule("r02",Operators.SIMILAR, LongTermCtxTypes.INTERESTS, "--", 2, 0.4 ,LongTermCtxTypes.class.getSimpleName());
+//		Rule r03 = new Rule("r03",Operators.EQUAL, ShortTermCtxTypes.STATUS, "Available", 3, 0.1 ,ShortTermCtxTypes.class.getSimpleName()); //Check status of the user e.g busy, on phone, driving...
+		List<Rule> rules = Arrays.asList(r01, r02);
+		engine.setRules(rules);
 	}
 
 	public synchronized void run(){
 		logger.info("Checking if people context match");
 
-		//First rule: location
-		Hashtable<String, HashSet<Person>> personsSameLocation = conditions.getAllWithSameCtx(ShortTermCtxTypes.LOCATION, ShortTermCtxTypes.class.getSimpleName());
+		//First rule: location Mandatory
+		Hashtable<String, HashSet<Person>> personsSameLocation = engine.evaluateRule("r01");
 
 		if (!personsSameLocation.isEmpty()) {
 			Enumeration<String> iterator = personsSameLocation.keys();
-			//For each different location, apply the follow rules...
+			//For each different location, apply the following rules...
 			while(iterator.hasMoreElements()) {
 				//Session name = actual location
 				String sessionName = iterator.nextElement();
-				logger.info("First rule: Location "+personsSameLocation.toString());
-
-				//						//Second rule: Company
-				//						//Check company
-				//						Hashtable<String, HashSet<Person>> personsWithSameCompany = conditions.getPersonsWithMatchingLongTermCtx(LongTermCtxTypes.COMPANY, personsSameLocation.get(sessionName));
-				//						logger.info("Second rule: Company "+personsWithSameCompany.toString());
-
-				//						//Third rule: Interest
-				//						//Check similar interest
-				Hashtable<String, HashSet<Person>> personsWithSameInterests = conditions.getPersonsByWeight(sessionName, personsSameLocation.get(sessionName));
-				logger.info("Third rule: Interests "+personsWithSameInterests.toString());
-				//						
-				//						//Fourth rule: Status
-				//						//Check status of the user e.g busy, on phone, driving...
-				//						Hashtable<String, HashSet<Person>> personsWithSameStatus = conditions.getPersonsWithMatchingShortTermCtx(ShortTermCtxTypes.STATUS, personsWithSameInterests.get(sessionName));
-				//						logger.info("Fourth rule: Status "+personsWithSameStatus.toString());
-
-//				conditions.getMatchingResults();
+				HashSet<Person> possibleMembers = engine.getMatchingResultsByPriority().get(sessionName);
 				//Check conflict if actual users in the session
-				if (!(personsWithSameInterests.get(sessionName)).isEmpty()) {
+				if (!(possibleMembers).isEmpty()) {
 					if (!this.sessionRepository.containSession(sessionName)) {
 						logger.info("Starting a new session..");
 						logger.info("Inviting people..");
+						System.out.println("New Engine: "+possibleMembers.toString());
 						this.sessionRepository.createSession(sessionName);
 					}
-					this.sessionRepository.addMembers(sessionName, personsWithSameInterests.get(sessionName));
+					this.sessionRepository.addMembers(sessionName, possibleMembers);
+					System.out.println("New Engine: "+possibleMembers.toString());
 				}
 			}
 		}

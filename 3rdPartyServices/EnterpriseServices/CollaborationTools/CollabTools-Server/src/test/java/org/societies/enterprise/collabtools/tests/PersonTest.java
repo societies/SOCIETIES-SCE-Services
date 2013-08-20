@@ -37,7 +37,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.logging.Logger;
 
 import org.hamcrest.CoreMatchers;
 import org.junit.AfterClass;
@@ -52,12 +51,12 @@ import org.neo4j.graphdb.index.Index;
 import org.neo4j.helpers.collection.IteratorUtil;
 import org.societies.enterprise.collabtools.TestUtils;
 import org.societies.enterprise.collabtools.acquisition.ContextSubscriber;
-import org.societies.enterprise.collabtools.acquisition.ShortTermContextUpdates;
 import org.societies.enterprise.collabtools.acquisition.LongTermCtxTypes;
 import org.societies.enterprise.collabtools.acquisition.Person;
 import org.societies.enterprise.collabtools.acquisition.PersonRepository;
+import org.societies.enterprise.collabtools.acquisition.RelTypes;
+import org.societies.enterprise.collabtools.acquisition.ShortTermContextUpdates;
 import org.societies.enterprise.collabtools.acquisition.ShortTermCtxTypes;
-import org.societies.enterprise.collabtools.api.ICollabAppConnector;
 import org.societies.enterprise.collabtools.interpretation.ContextAnalyzer;
 import org.societies.enterprise.collabtools.runtime.CollabApps;
 import org.societies.enterprise.collabtools.runtime.SessionRepository;
@@ -65,23 +64,23 @@ import org.societies.enterprise.collabtools.runtime.SessionRepository;
 public class PersonTest
 {
 	private static final Random r = new Random( System.currentTimeMillis() );
-	private static GraphDatabaseService graphDb, sessionGraphDb;
-	private static Index<Node> index;
-	private static Index<Node> indexStatus;
+	private static GraphDatabaseService personGraphDb, sessionGraphDb;
+	private static Index<Node> indexPerson, indexSession, indexShortTermCtx;
 	private static PersonRepository personRepository;
 	private static SessionRepository sessionRepository;
-	private static int nrOfPersons;
+	private static int nrOfPersons = 4;
 
 	@BeforeClass
 	public static void setup() throws Exception
 	{
 		int random = new Random().nextInt(100);
-		graphDb = new GraphDatabaseFactory().newEmbeddedDatabase( "target/persontestdb"  + random);
-		sessionGraphDb = new GraphDatabaseFactory().newEmbeddedDatabase( "target/sessiontestdb"  + random);
-		index = graphDb.index().forNodes( "nodes" );
-		indexStatus = graphDb.index().forNodes( "status" );
-		personRepository = new PersonRepository( graphDb, index );
-		sessionRepository = new SessionRepository( sessionGraphDb,index, new CollabApps() );
+		personGraphDb = new GraphDatabaseFactory().newEmbeddedDatabase("target/persontestdb"  + random);
+		sessionGraphDb = new GraphDatabaseFactory().newEmbeddedDatabase("target/sessiontestdb"  + random);
+	    indexPerson = personGraphDb.index().forNodes("PersonNodes");
+	    indexSession = sessionGraphDb.index().forNodes("SessionNodes");
+	    indexShortTermCtx = personGraphDb.index().forNodes("CtxNodes");
+		personRepository = new PersonRepository(personGraphDb, indexPerson);
+		sessionRepository = new SessionRepository(sessionGraphDb,indexSession, new CollabApps());
 		registerShutdownHook();
 
 	}
@@ -90,7 +89,6 @@ public class PersonTest
 	public void doBefore() throws Exception
 	{
 		deleteSocialGraph();
-		nrOfPersons = 4;
 		createPersons();
 		setupFriendsBetweenPeople( 10 );
 	}
@@ -98,7 +96,8 @@ public class PersonTest
 	@AfterClass
 	public static void teardown()
 	{
-		graphDb.shutdown();
+		personGraphDb.shutdown();
+		sessionGraphDb.shutdown();
 	}
 
 	@Test
@@ -165,7 +164,7 @@ public class PersonTest
 	{
 		Person person1 = personRepository.getPersonByName( "person#1" );
 		Person person2 = personRepository.getPersonByName( "person#2" );
-		person1.addFriend( person2, 1 );
+		person1.addSimilarityRelationship(person2, 1, RelTypes.SIMILARITY.toString());
 
 		int noOfFriends = person1.getNrOfFriends();
 
@@ -218,7 +217,7 @@ public class PersonTest
 	{
 		Person person = getRandomPerson();
 		Map<String, String> shortTermCtx = new HashMap<String, String>();
-		shortTermCtx.put(ShortTermCtxTypes.LOCATION, null);
+		shortTermCtx.put(ShortTermCtxTypes.LOCATION, "place");
 
 		shortTermCtx.put(ShortTermCtxTypes.STATUS, "Foo");
 		person.addContextStatus(shortTermCtx, null );
@@ -245,7 +244,7 @@ public class PersonTest
 		//        	System.out.println(p.getCompany());
 		//        }
 
-		for ( Node node : indexStatus.query( ShortTermCtxTypes.STATUS, "*o*" ) )
+		for (Node node : indexShortTermCtx.query(ShortTermCtxTypes.STATUS, "*o*"))
 		{
 			// This will return
 			ShortTermContextUpdates s = new ShortTermContextUpdates(node);
@@ -258,19 +257,19 @@ public class PersonTest
 	{
 		deleteSocialGraph();
 		Person start = personRepository.createPerson( "start"  );
-		start.setLongTermCtx(LongTermCtxTypes.WORK, "company" );
+		start.setLongTermCtx(LongTermCtxTypes.OCCUPATION, "company" );
 		Person middleMan1 = personRepository.createPerson( "middle1" );
-		middleMan1.setLongTermCtx(LongTermCtxTypes.WORK.toString(), "company" );
+		middleMan1.setLongTermCtx(LongTermCtxTypes.OCCUPATION.toString(), "company" );
 		Person middleMan2 = personRepository.createPerson( "middle2" );
-		middleMan2.setLongTermCtx(LongTermCtxTypes.WORK, "company" );
+		middleMan2.setLongTermCtx(LongTermCtxTypes.OCCUPATION, "company" );
 		Person endMan = personRepository.createPerson( "endMan");
-		endMan.setLongTermCtx(LongTermCtxTypes.WORK, "company" );
+		endMan.setLongTermCtx(LongTermCtxTypes.OCCUPATION, "company" );
 
 		// Start -> middleMan1 -> middleMan2 -> endMan
 
-		start.addFriend( middleMan1, 0 );
-		middleMan1.addFriend( middleMan2, 0 );
-		middleMan2.addFriend( endMan, 0 );
+		start.addSimilarityRelationship(middleMan1, 0, RelTypes.SIMILARITY.toString() );
+		middleMan1.addSimilarityRelationship(middleMan2, 0, RelTypes.SIMILARITY.toString() );
+		middleMan2.addSimilarityRelationship(endMan, 0, RelTypes.SIMILARITY.toString() );
 
 		Iterable<Person> path = start.getShortestPathTo( endMan, 4 );
 
@@ -289,14 +288,14 @@ public class PersonTest
 		Person e = personRepository.createPerson( "e" );
 
 		// A is friends with B,C and D
-		a.addFriend( b, 0 );
-		a.addFriend( c, 0 );
-		a.addFriend( d, 0 );
+		a.addSimilarityRelationship( b, 0, RelTypes.SIMILARITY.toString() );
+		a.addSimilarityRelationship( c, 0 , RelTypes.SIMILARITY.toString());
+		a.addSimilarityRelationship( d, 0 , RelTypes.SIMILARITY.toString());
 
 		// E is also friend with B, C and D
-		e.addFriend( b, 0 );
-		e.addFriend( c, 0 );
-		e.addFriend( d, 0 );
+		e.addSimilarityRelationship( b, 0, RelTypes.SIMILARITY.toString() );
+		e.addSimilarityRelationship( c, 0, RelTypes.SIMILARITY.toString() );
+		e.addSimilarityRelationship( d, 0, RelTypes.SIMILARITY.toString() );
 
 		Person recommendation = IteratorUtil.single( a.getFriendRecommendation( 1 ).iterator() );
 
@@ -316,17 +315,17 @@ public class PersonTest
 
 
 		// A is friends with B,C and D
-		a.addFriend( b, 0 );
-		a.addFriend( c, 0 );
-		a.addFriend( d, 0 );
+		a.addSimilarityRelationship( b, 0, RelTypes.SIMILARITY.toString() );
+		a.addSimilarityRelationship( c, 0, RelTypes.SIMILARITY.toString() );
+		a.addSimilarityRelationship( d, 0, RelTypes.SIMILARITY.toString() );
 
 		// E is only friend with B
-		e.addFriend( b, 0 );
+		e.addSimilarityRelationship( b, 0, RelTypes.SIMILARITY.toString() );
 
 		// F is friend with B, C, D
-		f.addFriend( b, 0 );
-		f.addFriend( c, 0 );
-		f.addFriend( d, 0 );
+		f.addSimilarityRelationship( b, 0, RelTypes.SIMILARITY.toString() );
+		f.addSimilarityRelationship( c, 0, RelTypes.SIMILARITY.toString() );
+		f.addSimilarityRelationship( d, 0, RelTypes.SIMILARITY.toString() );
 
 		ArrayList<Person> recommendations = fromIterableToArrayList( a.getFriendRecommendation( 2 ).iterator() );
 
@@ -445,14 +444,14 @@ public class PersonTest
 		}
 	}
 
-	private static void setupFriendsBetweenPeople( int maxNrOfFriendsEach )
+	private static void setupFriendsBetweenPeople(int maxNrOfFriendsEach)
 	{
 		for ( Person person : personRepository.getAllPersons() )
 		{
 			int nrOfFriends = r.nextInt( maxNrOfFriendsEach ) + 1;
 			for ( int j = 0; j < nrOfFriends; j++ )
 			{
-				person.addFriend( getRandomPerson(), j );
+				person.addSimilarityRelationship( getRandomPerson(), j, RelTypes.SIMILARITY.toString() );
 			}
 		}
 	}
@@ -520,7 +519,7 @@ public class PersonTest
 			@Override
 			public void run()
 			{
-				graphDb.shutdown();
+				personGraphDb.shutdown();
 			}
 		} );
 	}

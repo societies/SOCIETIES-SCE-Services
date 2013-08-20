@@ -103,7 +103,7 @@ public class MainTest {
 //		Creating some updates
 		test.createMockLongTermCtx();
 		test.createMockShortTermCtx();
-		test.enrichedCtx();
+		test.enrichedCtx(LongTermCtxTypes.INTERESTS);
 		test.setupWeightAmongPeople(LongTermCtxTypes.INTERESTS);
 
 		

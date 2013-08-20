@@ -139,7 +139,7 @@ public class PersonRepository
     public Map<Person, Integer> getPersonWithSimilarCtx(Person self, String property)
     {
     	Map<Person,Integer> persons = new HashMap<Person, Integer>();
-    	for ( Person person : getAllPersons() )
+    	for (Person person : getAllPersons())
     	{
         	int counter = 0;
     		if (!self.equals(person)) {
@@ -186,16 +186,16 @@ public class PersonRepository
         {
             Node personNode = person.getUnderlyingNode();
             index.remove( personNode, LongTermCtxTypes.NAME, person.getName() );
-            for ( Person friend : person.getFriends() )
+            for (Person friend : person.getFriends())
             {
-                person.removeFriend( friend );
+                person.removeFriend(friend);
             }
             personNode.getSingleRelationship(A_PERSON, Direction.INCOMING).delete();
 
-            for ( ShortTermContextUpdates status : person.getStatus() )
+            for (ShortTermContextUpdates status : person.getStatus())
             {
                 Node statusNode = status.getUnderlyingNode();
-                for ( Relationship r : statusNode.getRelationships() )
+                for (Relationship r : statusNode.getRelationships())
                 {
                     r.delete();
                 }

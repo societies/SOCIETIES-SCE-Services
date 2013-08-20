@@ -28,9 +28,9 @@ import org.societies.enterprise.collabtools.api.ICollabAppConnector;
 import org.societies.enterprise.collabtools.api.ICollabApps;
 
 /**
- * Manager for Collaborative Applications
+ * Collaborative Applications Manager
  *
- * @author Christopher Viana Lima
+ * @author Chris Lima
  *
  */
 public class CollabApps implements ICollabApps

@@ -25,38 +25,63 @@
 package org.societies.enterprise.collabtools.api;
 
 /**
- * Configuration of collaborative application. 0..1
+ * Interface to integrate synchronous collaborative applications. 1..1
  *
- * @author cviana
+ * @author Chris Lima
  *
  */
 public interface ICollabAppConnector {
 	
+	/**
+	 * Name of integrated application
+	 */
 	public String getAppName();
 	
+	/**
+	 * Name of integrated application host
+	 */
 	public String getAppServerName();
 	
+	/**
+	 * Set the name of integrated application
+	 */
 	public void setAppName(String app_name);
 	
+	/**
+	 * Set the host of integrated application
+	 */
 	public void setAppServerName(String host);
 	
+	/**
+	 * Setup the initial configuration for the Collaborative application
+	 */
 	public void setup();
 	
 	/**
-	 * @param user
-	 * @param room
-	 * @param language 
+	 * @param user individual who wants to join the room
+	 * @param room conference room to join
+	 * @param language default language for discussion
 	 */
 	void join(String user, String room, String language);
 	
 	/**
-	 * @param user
-	 * @param room
+	 * @param user individual who wants to leave the room
+	 * @param room conference room 
 	 */
 	void kick(String user, String room);
 	
+	/**
+	 * Trigger some event if a user joins the conference
+	 * 
+	 * @param participant individual who wants to leave the room
+	 */
 	void joinEvent(String participant);
 	
+	/**
+	 * Trigger some event if a user leaves the conference
+	 * 
+	 * @param participant individual who wants to leave the room
+	 */
 	void leaveEvent(String participant);
 
 }

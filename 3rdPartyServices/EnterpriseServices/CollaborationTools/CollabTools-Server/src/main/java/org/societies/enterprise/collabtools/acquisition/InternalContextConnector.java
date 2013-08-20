@@ -25,7 +25,6 @@
 package org.societies.enterprise.collabtools.acquisition;
 
 import java.util.HashMap;
-import java.util.Hashtable;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
