@@ -14,9 +14,11 @@ import android.util.Log;
 
 public class CommunityManagementClient extends ServiceClientBase {
 	private final static String LOG_TAG = "CommunityManagementClient";
+    private BroadcastReceiver receiver;
 
-	public CommunityManagementClient(Context context) {
+	public CommunityManagementClient(Context context, BroadcastReceiver receiver) {
 		super(context);
+        this.receiver = receiver;
         serviceName = "CommunityManagement";
 	}
 
@@ -39,35 +41,9 @@ public class CommunityManagementClient extends ServiceClientBase {
 
 	@Override
 	protected BroadcastReceiver getBroadcastReceiver() {
-		return new ClientReceiver();
+		return receiver;
 	}
 
-	private class ClientReceiver extends BroadcastReceiver {
-		@Override
-		public void onReceive(Context context, Intent intent) {
-			if (intent.getAction().equals(ICisManager.GET_CIS_LIST)) {
-				Object[] objekti = intent.getParcelableArrayExtra(ICisManager.INTENT_RETURN_VALUE);
-				Log.i(LOG_TAG,"package: "+intent.getPackage());
-	        	for(Object objekt:objekti) {
-	        		//Log.i(LOG_TAG, objekt.toString());
-	        		Log.i(LOG_TAG, "objekt name: "+objekt.getClass().getName());
-	        		Log.i(LOG_TAG, "objekt simple name: "+objekt.getClass().getSimpleName());
-	        		Log.i(LOG_TAG, "objekt declared fields: "+objekt.getClass().getDeclaredFields());
-	        		Community cis = (Community)objekt;
-	        		Log.i(LOG_TAG, cis.getCommunityJid());
-	        		Log.i(LOG_TAG, cis.getCommunityName());
-
-	        	}
-				Log.i(LOG_TAG, "on recieve: "+ICisManager.GET_CIS_LIST);
-	        	/*Community[] listing = (Community[]) intent.getParcelableArrayExtra(ICisManager.INTENT_RETURN_VALUE);
-	        	for(Community cis: listing) {
-	        		Log.i(LOG_TAG, cis.getCommunityJid());
-	        		Log.i(LOG_TAG, cis.getCommunityName());
-	        	}*/
-	        }
-		}
-	}
-	
 	public void listCommunities() {
 		//cisManager.getCisList(CLIENT, "all");
 		if (this.connectedToContextClient) {

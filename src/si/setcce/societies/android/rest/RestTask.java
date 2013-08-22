@@ -29,6 +29,7 @@ import org.apache.http.client.CookieStore;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.protocol.ClientContext;
+import org.apache.http.cookie.Cookie;
 import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -55,6 +56,7 @@ public class RestTask extends AsyncTask<HttpUriRequest, Void, String> {
 	private HttpClient client;
 	private String action;
 	private String cookie;
+    private CookieStore cookieStore = new BasicCookieStore();
 
 	public RestTask(Context context, String action, String cookie) {
 		this.context = context;
@@ -69,16 +71,17 @@ public class RestTask extends AsyncTask<HttpUriRequest, Void, String> {
 			HttpUriRequest request = params[0];
 			Log.i("SCT RestTask(70)", request.getURI().toString());
 			HttpContext localContext = new BasicHttpContext();
-			CookieStore cookieStore = new BasicCookieStore();
 			localContext.setAttribute(ClientContext.COOKIE_STORE, cookieStore);
-			if (!cookie.equals("")) {
+			if (cookie != null && !cookie.equals("")) {
 				String[] cookies = cookie.split(";");
 				for (int i = 0; i < cookies.length; i++) {
 					String[] nvp = cookies[i].split("=");
-					BasicClientCookie c = new BasicClientCookie(nvp[0], nvp[1]);
-					// c.setVersion(1);
-					c.setDomain("crowdtasking.appspot.com");
-					cookieStore.addCookie(c);
+                    if (nvp.length == 2) {
+                        BasicClientCookie c = new BasicClientCookie(nvp[0], nvp[1]);
+                        // c.setVersion(1);
+                        c.setDomain("crowdtasking.appspot.com");
+                        cookieStore.addCookie(c);
+                    }
 				}
 			}
 
@@ -87,6 +90,7 @@ public class RestTask extends AsyncTask<HttpUriRequest, Void, String> {
 
 			BasicResponseHandler handler = new BasicResponseHandler();
 			String response = handler.handleResponse(serverResponse);
+
 			return response;
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -101,6 +105,13 @@ public class RestTask extends AsyncTask<HttpUriRequest, Void, String> {
 		Intent intent = new Intent(action);
 		intent.putExtra(HTTP_RESPONSE, result);
 		// Broadcast the completion
+        if (action.equalsIgnoreCase("si.setcce.societies.android.rest.LOGIN_USER")) {
+            for (Cookie kuki:cookieStore.getCookies()) {
+                if (kuki.getDomain().equalsIgnoreCase("crowdtasking.appspot.com")) {
+                    intent.putExtra("cookie", kuki.toString());
+                }
+            }
+        }
 		context.sendBroadcast(intent);
 	}
 

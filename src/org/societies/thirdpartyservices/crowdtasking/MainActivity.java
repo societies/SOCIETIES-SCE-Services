@@ -1,27 +1,5 @@
 package org.societies.thirdpartyservices.crowdtasking;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-
-import org.apache.http.NameValuePair;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.message.BasicNameValuePair;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.societies.android.api.contentproviders.CSSContentProvider;
-import org.societies.integration.service.CommunityManagementClient;
-
-import si.setcce.societies.android.rest.RestTask;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ActivityManager;
@@ -56,15 +34,46 @@ import android.widget.Toast;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
+import org.apache.http.NameValuePair;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.message.BasicNameValuePair;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.societies.android.api.cis.management.ICisManager;
+import org.societies.android.api.contentproviders.CSSContentProvider;
+import org.societies.api.schema.cis.community.Community;
+import org.societies.integration.model.SocietiesUser;
+import org.societies.integration.service.CommunityManagementClient;
+
+import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+
+import si.setcce.societies.android.rest.RestTask;
+import si.setcce.societies.crowdtasking.api.RESTful.json.CommunityJS;
+
 @SuppressLint("SimpleDateFormat")
 public class MainActivity extends Activity implements SensorEventListener {
 	//private static final String TEST_ACTION = "si.setcce.societies.android.rest.TEST";
-	private static final String CHECK_IN_OUT = "si.setcce.societies.android.rest.CHECK_IN_OUT";
+    private static final String CHECK_IN_OUT = "si.setcce.societies.android.rest.CHECK_IN_OUT";
+    private static final String GET_USER = "si.setcce.societies.android.rest.GET_USER";
 	private static final String LOG_EVENT = "si.setcce.societies.android.rest.LOG_EVENT";
+	private static final String LOGIN_USER = "si.setcce.societies.android.rest.LOGIN_USER";
 	private static final String GET_MEETING_ACTION = "si.setcce.societies.android.rest.meeting";
-	private static final String APPLICATION_URL = "http://crowdtasking.appspot.com";
+    private static final String APPLICATION_URL = "http://23-08-2013.crowdtasking.appspot.com";
+    private static final String LOGIN_URL = APPLICATION_URL + "/login";
 	//private static final String APPLICATION_URL = "http://192.168.1.102:8888";
-	private static final String MEETING_URL = APPLICATION_URL + "/android/meeting/";
+    private static final String MEETING_URL = APPLICATION_URL + "/android/meeting/";
+    private static final String GET_USER_REST_API_URL = APPLICATION_URL + "/rest/users/me";
 	private static final String MEETING_REST_API_URL = APPLICATION_URL + "/rest/meeting";
 	private static final String SCAN_QR_URL = APPLICATION_URL + "/android/scanQR";
 	private static final String PICK_TASK_URL = APPLICATION_URL + "/task/view?id=";
@@ -80,9 +89,13 @@ public class MainActivity extends Activity implements SensorEventListener {
 	private float mAccel;			// acceleration apart from gravity
 	private float mAccelCurrent;	// current acceleration including gravity
 	private float mAccelLast;		// last acceleration including gravity
-    final private CommunityManagementClient communityManagementClient = new CommunityManagementClient(this);
+    private CommunityManagementClient communityManagementClient;
+    private boolean isSocietiesUser=false, societiesServicesRunning;
+    private SocietiesUser societiesUser = null;
+    private final static String LOG_TAG = "Crowd Tasking";
 
-	public MainActivity() {
+
+    public MainActivity() {
 	}
 
 	@Override
@@ -107,34 +120,74 @@ public class MainActivity extends Activity implements SensorEventListener {
         
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_main);
-        
         webViewSetup();
+        if (isSocietiesServiceRunning()) {
+/*
+            TrustTask task = new TrustTask(this);
+    		task.execute();
+*/
+            societiesServicesRunning = true;
+            communityManagementClient = new CommunityManagementClient(this, clientReceiver);
+            communityManagementClient.setUpService();
+        }
+        else {
+            System.out.println("Societies services are not running?");
+            Toast.makeText(getApplicationContext(), "SOCIETIES services are not running", Toast.LENGTH_LONG).show();
+        }
+        loginUser();
         checkIntent(getIntent());
         CheckUpdateTask checkUpdateTask = new CheckUpdateTask(this);
         checkUpdateTask.execute();
-        
-        if (isTrustServiceRunning()) {
-            TrustTask task = new TrustTask(this);
-    		task.execute();
-            communityManagementClient.setUpService();
-        }
-	}
+    }
 
-	private boolean isTrustServiceRunning() {
+/*
+    private void checkSession() {
+        try {
+            RestTask task = new RestTask(getApplicationContext(), GET_USER, CookieManager.getInstance().getCookie("crowdtasking.appspot.com"));
+            task.execute(new HttpGet(new URI(GET_USER_REST_API_URL)));
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+            Toast toast = Toast.makeText(getApplicationContext(), "Error: "+e.getMessage(), Toast.LENGTH_LONG);
+            toast.show();
+        }
+    }
+*/
+
+    private boolean isSocietiesServiceRunning() {
+        boolean trust=false;
+        boolean context=false;
+        boolean cis=false;
+
 	    ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        System.out.println("Are Societies services running?");
 	    for (RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
-	    	System.out.println(service.service.getClassName());
-	        if ("org.societies.android.privacytrust.trust.TrustClientRemote".equals(service.service.getClassName())) {
-		    	System.out.println("trust client helper is running");
-	            return true;
-	        }
+	    	//System.out.println(service.service.getClassName());
+            if ("org.societies.android.privacytrust.trust.TrustClientRemote".equals(service.service.getClassName())) {
+                System.out.println("Trust client service is running");
+                trust = true;
+            }
+            if ("org.societies.android.platform.context.ServiceContextBrokerRemote".equals(service.service.getClassName())) {
+                System.out.println("Context client service is running");
+                context = true;
+            }
+            if ("org.societies.android.platform.cis.CisManagerRemote".equals(service.service.getClassName())) {
+                System.out.println("CisManager client service is running");
+                cis = true;
+            }
 	    }
-	    return false;
+	    return trust && context && cis;
 	}
 	
 	@SuppressLint("SetJavaScriptEnabled")
 	private void webViewSetup() {
 		webView = (WebView) findViewById(R.id.webView);
+
+/*
+        CookieSyncManager.createInstance(this);
+        CookieManager cookieManager = CookieManager.getInstance();
+        cookieManager.removeAllCookie();
+*/
+
 		webView.setInitialScale(1);
         webView.getSettings().setJavaScriptEnabled(true);
         webView.getSettings().setLoadWithOverviewMode(true);
@@ -144,11 +197,11 @@ public class MainActivity extends Activity implements SensorEventListener {
         webView.setScrollbarFadingEnabled(false);
         webView.setWebViewClient(new MyWebViewClient(this));
         webView.getSettings().setDefaultZoom(WebSettings.ZoomDensity.FAR);
-        webView.addJavascriptInterface(new JSInterface(this, webView), "android");
+        webView.addJavascriptInterface(new JSInterface(webView), "android");
         webView.setWebChromeClient(new WebChromeClient() {
 			public boolean onConsoleMessage(ConsoleMessage cm) {
-				Log.d("Crowd Tasking:", cm.message() + 
-						" -- From line " + cm.lineNumber() 
+				Log.d(LOG_TAG, cm.message() +
+						" -- From the line " + cm.lineNumber()
 						+ " of " + cm.sourceId());
 				return true;
 			}
@@ -160,7 +213,6 @@ public class MainActivity extends Activity implements SensorEventListener {
 				return false;
 			}
     	});
-        webView.loadUrl(startUrl);
 	}
 
 	private void checkIntent(Intent intent) {
@@ -187,6 +239,8 @@ public class MainActivity extends Activity implements SensorEventListener {
         super.onResume();
         registerReceiver(receiver, new IntentFilter(GET_MEETING_ACTION));
         registerReceiver(receiver, new IntentFilter(CHECK_IN_OUT));
+        registerReceiver(receiver, new IntentFilter(GET_USER));
+        registerReceiver(receiver, new IntentFilter(LOGIN_USER));
         registerReceiver(receiver, new IntentFilter("android.nfc.action.NDEF_DISCOVERED"));
         registerReceiver(receiver, new IntentFilter(SERVICE_CONNECTED));
         sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
@@ -287,6 +341,35 @@ public class MainActivity extends Activity implements SensorEventListener {
 
 	}
 
+    private void loginUser() {
+//        HttpPost eventRequest;
+//        try {
+//            eventRequest = new HttpPost(new URI(LOGIN_URL));
+        if (societiesServicesRunning) {
+            SocietiesUser user = getSocietiesUserData();
+            if (user != null) {
+                List<NameValuePair> parameters = new ArrayList<NameValuePair>();
+                parameters.add(new BasicNameValuePair("federatedIdentity","SOCIETIES"));
+                parameters.add(new BasicNameValuePair("userId", user.getUserId()));
+                parameters.add(new BasicNameValuePair("name", user.getName()));
+                parameters.add(new BasicNameValuePair("foreName", user.getForeName()));
+                parameters.add(new BasicNameValuePair("email", user.getEmail()));
+                parameters.add(new BasicNameValuePair("continue", "/"));
+                startUrl = LOGIN_URL+"?continue=/&federatedIdentity=SOCIETIES&userId="+user.getUserId()+
+                        "&name="+user.getName()+"&foreName="+user.getForeName()+"&email="+user.getEmail();
+            }
+        }
+//            eventRequest.setEntity(new UrlEncodedFormEntity(parameters));
+//            RestTask task = new RestTask(getApplicationContext(), LOGIN_USER, null);
+//            task.execute(eventRequest);
+//        } catch (URISyntaxException e) {
+//            e.printStackTrace();
+//        } catch (UnsupportedEncodingException e) {
+//            e.printStackTrace();
+//        }
+        webView.loadUrl(startUrl);
+    }
+
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent intent) {
       IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, intent);
@@ -305,9 +388,9 @@ public class MainActivity extends Activity implements SensorEventListener {
 	        			RestTask task = new RestTask(getApplicationContext(), LOG_EVENT, CookieManager.getInstance().getCookie("crowdtasking.appspot.com"));
 	        			task.execute(eventRequest);
 					} catch (URISyntaxException e) {
-						Log.e("CT4A", "Can't log event: "+e.getMessage());
+						Log.e(LOG_TAG, "Can't log event: "+e.getMessage());
 					} catch (UnsupportedEncodingException e) {
-						Log.e("CT4A", "Can't log event: "+e.getMessage());
+						Log.e(LOG_TAG, "Can't log event: "+e.getMessage());
 					}
             	}
         		webView.loadUrl(contents);
@@ -324,14 +407,66 @@ public class MainActivity extends Activity implements SensorEventListener {
       }
     }
 
+    private BroadcastReceiver clientReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent.getAction().equals(ICisManager.GET_CIS_LIST)) {
+                Object[] communities = intent.getParcelableArrayExtra(ICisManager.INTENT_RETURN_VALUE);
+                Log.i(LOG_TAG,"package: "+intent.getPackage());
+                List<CommunityJS> societiesCommunities = new ArrayList<CommunityJS>();
+                for(Object community:communities) {
+                    societiesCommunities.add(new CommunityJS((Community)community, getSocietiesUserData()));
+/*
+                    Log.i(LOG_TAG, "objekt name: " + community.getClass().getName());
+                    Log.i(LOG_TAG, "objekt simple name: "+community.getClass().getSimpleName());
+                    Log.i(LOG_TAG, "objekt declared fields: " + community.getClass().getDeclaredFields());
+                    Community cis = (Community)community;
+                    Log.i(LOG_TAG, cis.getCommunityJid());
+                    Log.i(LOG_TAG, cis.getCommunityName());
+*/
+
+                }
+                ((CrowdTasking)getApplication()).setSocietiesCommunities(societiesCommunities);
+/*
+                Log.i(LOG_TAG, "on recieve: "+ICisManager.GET_CIS_LIST);
+	        	Community listing[] = (Community[]) intent.getParcelableArrayExtra(ICisManager.INTENT_RETURN_VALUE);
+	        	for(Community cis: listing) {
+	        		Log.i(LOG_TAG, cis.getCommunityJid());
+	        		Log.i(LOG_TAG, cis.getCommunityName());
+	        	}
+*/
+            }
+        }
+    };
+
+
     private BroadcastReceiver receiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
 			if (progress != null) {
 				progress.dismiss();
 			}
+/*
+            if (intent.getAction().equalsIgnoreCase(GET_USER)) {
+                String response = intent.getStringExtra(RestTask.HTTP_RESPONSE);
+                if ("\"Not authorized!\"".equalsIgnoreCase(response)) {
+                    // user is not logged in
+                    Toast.makeText(getApplicationContext(), "Logging in user", Toast.LENGTH_SHORT).show();
+                    loginUser();
+                }
+                else {
+                    webView.loadUrl(startUrl);
+                }
+            }
+            if (intent.getAction().equalsIgnoreCase(LOGIN_USER)) {
+                String kuki = intent.getStringExtra("cookie");
+                CookieManager.getInstance().setCookie("crowdtasking.appspot.com", kuki);
+                checkSession();
+            }
+*/
             if (intent.getAction().equalsIgnoreCase(SERVICE_CONNECTED)) {
                 String response = intent.getStringExtra("serviceName");
+                communityManagementClient.listCommunities();
                 System.out.println(response);
             }
             if (intent.getAction().equalsIgnoreCase(GET_MEETING_ACTION)) {
@@ -423,13 +558,38 @@ public class MainActivity extends Activity implements SensorEventListener {
 		}
 		return datum;
 	}
-    
+
+    public SocietiesUser getSocietiesUserData() {
+            /*String columns [] = {CSSContentProvider.CssRecord.CSS_RECORD_CSS_IDENTITY,
+                    CSSContentProvider.CssRecord.CSS_RECORD_EMAILID,
+                    CSSContentProvider.CssRecord.CSS_RECORD_FORENAME,
+                    CSSContentProvider.CssRecord.CSS_RECORD_NAME};*/
+        if (societiesUser != null) {
+            return societiesUser;
+        }
+        societiesUser = new SocietiesUser();
+        try {
+            //Cursor cursor = context.getContentResolver().query(CSSContentProvider.CssRecord.CONTENT_URI, columns, null, null, null);
+            Cursor cursor = getContentResolver().query(CSSContentProvider.CssRecord.CONTENT_URI, null, null, null, null);
+            cursor.moveToFirst();
+
+            societiesUser.setUserId(cursor.getString(cursor.getColumnIndex(CSSContentProvider.CssRecord.CSS_RECORD_CSS_IDENTITY)));
+            societiesUser.setName(cursor.getString(cursor.getColumnIndex(CSSContentProvider.CssRecord.CSS_RECORD_NAME)));
+            societiesUser.setForeName(cursor.getString(cursor.getColumnIndex(CSSContentProvider.CssRecord.CSS_RECORD_FORENAME)));
+            societiesUser.setEmail(cursor.getString(cursor.getColumnIndex(CSSContentProvider.CssRecord.CSS_RECORD_EMAILID)));
+            cursor.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+        isSocietiesUser = true && societiesServicesRunning;
+        return societiesUser;
+    }
+
     public class JSInterface {
 		private WebView mAppView;
-		private Context context;
 		//@JavascriptInterface for API 17
-		public JSInterface(Context context, WebView appView) {
-			this.context = context;
+		public JSInterface(WebView appView) {
 			this.mAppView = appView;
 		}
 		
@@ -442,34 +602,35 @@ public class MainActivity extends Activity implements SensorEventListener {
 		public void goBack() {
 			mAppView.goBack();
 		}
-		
-		public String loginData() {
-            /*String columns [] = {CSSContentProvider.CssRecord.CSS_RECORD_CSS_IDENTITY,
-                    CSSContentProvider.CssRecord.CSS_RECORD_EMAILID,
-                    CSSContentProvider.CssRecord.CSS_RECORD_FORENAME,
-                    CSSContentProvider.CssRecord.CSS_RECORD_NAME};*/
-    		JSONObject societiesUser = new JSONObject();
-        	try {
-        		//Cursor cursor = context.getContentResolver().query(CSSContentProvider.CssRecord.CONTENT_URI, columns, null, null, null);
-        		Cursor cursor = context.getContentResolver().query(CSSContentProvider.CssRecord.CONTENT_URI, null, null, null, null);
-    	    	cursor.moveToFirst();
 
-        		societiesUser.put("userId", cursor.getString(cursor.getColumnIndex(CSSContentProvider.CssRecord.CSS_RECORD_CSS_IDENTITY)));
-        		societiesUser.put("name", cursor.getString(cursor.getColumnIndex(CSSContentProvider.CssRecord.CSS_RECORD_NAME)));
-        		societiesUser.put("foreName", cursor.getString(cursor.getColumnIndex(CSSContentProvider.CssRecord.CSS_RECORD_FORENAME)));
-        		societiesUser.put("email", cursor.getString(cursor.getColumnIndex(CSSContentProvider.CssRecord.CSS_RECORD_EMAILID)));
-        		cursor.close();
-        		societiesUser.put("status", "ok");
-    	    } catch (Exception e) {
-    	        e.printStackTrace();
-    	        return "";
-    	    }
-        	System.out.println(societiesUser.toString());
-			return societiesUser.toString();
-		}
+        public boolean isSocietiesUser() {
+            return isSocietiesUser;
+        }
 		
-		public void share(String spejs, String action) {
-			if (spejs == null || "".equalsIgnoreCase(spejs)) {
+		public String getSocietiesUser() {
+            SocietiesUser societiesUser = getSocietiesUserData();
+            JSONObject societiesUserJSON = new JSONObject();
+            try {
+                societiesUserJSON.put("userId", societiesUser.getUserId());
+                societiesUserJSON.put("name", societiesUser.getName());
+                societiesUserJSON.put("foreName", societiesUser.getForeName());
+                societiesUserJSON.put("email", societiesUser.getEmail());
+            } catch (JSONException e) {
+                e.printStackTrace();
+                return null;
+            }
+            return societiesUserJSON.toString();
+        }
+
+        public String getSocietiesCommunities() {
+            //Gson gson = new Gson();
+            //String response = "societies communities";
+            //return response;
+            return ((CrowdTasking)getApplication()).getSocietiesCommunitiesJSON();
+        }
+
+        public void share(String spejs, String action) {
+            if (spejs == null || "".equalsIgnoreCase(spejs)) {
 				Toast toast = Toast.makeText(mAppView.getContext(), "Enter URL mapping", Toast.LENGTH_SHORT);
 				toast.show();
 				return;
@@ -509,7 +670,7 @@ public class MainActivity extends Activity implements SensorEventListener {
         mAccelCurrent = (float) Math.sqrt((double) (x*x + y*y + z*z));
         float delta = mAccelCurrent - mAccelLast;
         mAccel = mAccel * 0.9f + delta; // perform low-cut filter
-        if (mAccel > 1) {
+        if (mAccel > 5) {
             Toast.makeText(getApplicationContext(), "shake detected ("+mAccel+")", Toast.LENGTH_SHORT).show();
         	mAccel = 0;
         	refreshData();
@@ -571,16 +732,20 @@ public class MainActivity extends Activity implements SensorEventListener {
         	if (url.contains("enter") || url.contains("leave")) {
         		webView.goBack();
         	}
+/*
     		if (!startUrl.equalsIgnoreCase(APPLICATION_URL+"/menu")) {
             	webView.loadUrl(startUrl);
             	startUrl = APPLICATION_URL+"/menu";
     		}
+*/
        }
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        communityManagementClient.tearDownService();
+        if (communityManagementClient != null) {
+            communityManagementClient.tearDownService();
+        }
     }
 }

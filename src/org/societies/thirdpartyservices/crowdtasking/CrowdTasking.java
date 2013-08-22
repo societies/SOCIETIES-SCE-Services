@@ -26,6 +26,15 @@ package org.societies.thirdpartyservices.crowdtasking;
 
 import android.app.Application;
 
+import com.google.gson.Gson;
+
+import org.societies.api.schema.cis.community.Community;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import si.setcce.societies.crowdtasking.api.RESTful.json.CommunityJS;
+
 /**
  * Describe your class here...
  *
@@ -33,8 +42,26 @@ import android.app.Application;
  *
  */
 public class CrowdTasking extends Application {
+    private List<CommunityJS> societiesCommunities = new ArrayList<CommunityJS>();
+    private String societiesCommunitiesJSON;
+    Gson gson = new Gson();
+
 	@Override
 	public void onCreate() {
 		super.onCreate();
 	}
+
+    public String getSocietiesCommunitiesJSON() {
+        System.out.println(gson.toJson(societiesCommunities));
+        return gson.toJson(societiesCommunities);
+    }
+
+    public List<CommunityJS> getSocietiesCommunities() {
+        return societiesCommunities;
+    }
+
+    public void setSocietiesCommunities(List<CommunityJS> societiesCommunities) {
+        this.societiesCommunities = societiesCommunities;
+        societiesCommunitiesJSON = gson.toJson(societiesCommunities);;
+    }
 }
