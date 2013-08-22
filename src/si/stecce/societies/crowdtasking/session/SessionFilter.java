@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.StringTokenizer;
+import java.util.logging.Logger;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -51,6 +52,7 @@ import si.stecce.societies.crowdtasking.model.CTUser;
  *
  */
 public class SessionFilter implements Filter {
+    private static final Logger log = Logger.getLogger(SessionFilter.class.getName());
 	private List<String> urlList;
 	private String loginUrl, logoutUrl, registerUrl;
 	/* (non-Javadoc)
@@ -85,6 +87,7 @@ public class SessionFilter implements Filter {
 			
 			// logged in?
 			if (session.getAttribute("loggedIn") == null) {
+                log.info("loggedIn attribute is not yet set");
 				AuthenticatedUser authenticatedUser = UsersAPI.getAuthenticatedUser(session);
 				if (authenticatedUser != null) {
 					session.setAttribute("loggedIn", "true");
@@ -99,6 +102,7 @@ public class SessionFilter implements Filter {
 					}
 				}
 				else {
+                    log.info("user is not authenticated");
 					if (!url.startsWith("/rest")) {
 						response.sendRedirect(loginUrl+"?continue="+url);
 					}

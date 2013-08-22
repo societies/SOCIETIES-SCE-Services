@@ -48,6 +48,7 @@ import com.googlecode.objectify.annotation.Load;
 @Entity
 public class Community {
 	@Index @Id private Long id;
+    @Index private String jid;
 	private String name;
 	private String description;
 	@Load private Ref<CTUser> ownerRef;

@@ -17,6 +17,7 @@ import com.googlecode.objectify.annotation.Load;
 public class Task {
 	@Id private Long id;
 	private String title;
+    @Index private boolean societiesTask;
 	private String description;
 	private Date dueDate;
 	private Date created;

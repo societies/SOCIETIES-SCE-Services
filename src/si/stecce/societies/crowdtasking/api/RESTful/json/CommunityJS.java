@@ -1,4 +1,4 @@
-/**
+package si.stecce.societies.crowdtasking.api.RESTful.json; /**
  * Copyright (c) 2011, SOCIETIES Consortium (WATERFORD INSTITUTE OF TECHNOLOGY (TSSG), HERIOT-WATT UNIVERSITY (HWU), SOLUTA.NET 
  * (SN), GERMAN AEROSPACE CENTRE (Deutsches Zentrum fuer Luft- und Raumfahrt e.V.) (DLR), Zavod za varnostne tehnologije
  * informacijske družbe in elektronsko poslovanje (SETCCE), INSTITUTE OF COMMUNICATION AND COMPUTER SYSTEMS (ICCS), LAKE
@@ -22,7 +22,6 @@
  * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package si.stecce.societies.crowdtasking.api.RESTful.json;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,6 +42,7 @@ import com.googlecode.objectify.Ref;
 @SuppressWarnings("unused")
 public class CommunityJS {
 	private Long id;
+    private String jid;
 	private String name = "";
 	private String description = "";
 	private List<CollaborativeSpace> spaces;

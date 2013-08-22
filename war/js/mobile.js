@@ -20,6 +20,13 @@ var refreshOnShake = function() {
 	}
 };
 
+var isSocietiesUser = function() {
+    if (typeof(android) !== "undefined") {
+        return (window.android.isSocietiesUser);
+    }
+    return false;
+};
+
 var CrowdTaskingApp = function() {
 
     var tasks = [];
@@ -459,21 +466,30 @@ var CrowdTaskingApp = function() {
         }
         return currentTaskIndex;
     };
-    
+
+    function fillCommunityComboBox(communities) {
+        $taskCommunity = $('#taskCommunity');
+        $taskCommunity.empty();
+        for (var i = 0; i < communities.length; i++) {
+            $taskCommunity.append('<option value=' + communities[i].id + '>' + communities[i].name + '</option>');
+        }
+        $taskCommunity.selectmenu('refresh');
+    }
+
     var getComunites4User = function() {
-    	$.ajax({
-    		type: 'GET',
-    		url: '/rest/community/4user',
-    		//data: { 'id': id },
-    		success: function(communities) {
-    			$taskCommunity = $('#taskCommunity');
-    			$taskCommunity.empty();
-       			for (var i=0; i<communities.length; i++) {
-    				$taskCommunity.append('<option value='+communities[i].id+'>'+communities[i].name+'</option>');
-    			}
-    			$taskCommunity.selectmenu('refresh');
-    		}
-    	});
+        if (isSocietiesUser()) {
+            fillCommunityComboBox(JSON.parse(window.android.getSocietiesCommunities()));
+        }
+        else {
+            $.ajax({
+                type: 'GET',
+                url: '/rest/community/4user',
+                //data: { 'id': id },
+                success: function(communities) {
+                    fillCommunityComboBox(communities);
+                }
+            });
+        }
 
     };
 
@@ -874,6 +890,7 @@ $(document).on('pageshow', '#indexPage', function(event, data){
 	CrowdTaskingApp.user();
 	if (typeof(android) !== "undefined") {
 		$('#androidMenu').show();
+		$('#logoutOption').hide();
 	}
 	//trackPageView(event);
 /*	var android = getUrlVars()["android"];

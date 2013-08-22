@@ -25,6 +25,7 @@ if ("SOCIETIES".equalsIgnoreCase(federatedIdentity)) {
 	session.setAttribute("loggedIn", "true");
 	session.setAttribute("authenticatedUser", authenticatedUser);
 
+    System.out.println("user logged in & authenticated");
 	CTUser user = UsersAPI.getUserByFederatedId(authenticatedUser);
 	if (user != null) {
 		user.setLastLogin(new Date());
@@ -32,6 +33,7 @@ if ("SOCIETIES".equalsIgnoreCase(federatedIdentity)) {
 			session.setAttribute("CTUserId", user.getId());
 		}
 		UsersAPI.saveUser(user);
+        System.out.println("user got by federated ID");
 	}
 	response.sendRedirect(request.getParameter("continue"));
 }
@@ -54,7 +56,7 @@ if ("SOCIETIES".equalsIgnoreCase(federatedIdentity)) {
 			<h2>Crowd tasking</h2>
 		</div>
 		<div class="main" data-role="content">
-			<a href="" id="societiesButton" data-ajax="false" data-role="button" class="ui-disabled">Sign in with Societies!</a>
+			<!--a href="" id="societiesButton" data-ajax="false" data-role="button" class="ui-disabled">Sign in with Societies!</a-->
 			<a href='<%=UserServiceFactory.getUserService().createLoginURL(suffix, null, "https://www.google.com/accounts/o8/id", null) %>' data-ajax="false" data-role="button">Sign in with Google</a>
 			<a href='<%=UserServiceFactory.getUserService().createLoginURL(suffix, null, "yahoo.com", null) %>' data-ajax="false" data-role="button">Sign in with Yahoo</a>
 			<a href='<%=UserServiceFactory.getUserService().createLoginURL(suffix, null, "myopenid.com", null) %>' data-ajax="false" data-role="button">Sign in with MyOpenId.com</a>
@@ -75,7 +77,7 @@ if ("SOCIETIES".equalsIgnoreCase(federatedIdentity)) {
 		if (typeof(android) !== "undefined") {
 			$('#societiesButton').removeClass('ui-disabled');
 			$('#societiesButton').bind('tap', function(event, data) {
-				var result = window.android.loginData()
+				var result = window.android.getSocietiesUser();
 				if (result) {
 					var user = JSON.parse(result);
 					$("#userId").val(user.userId);
