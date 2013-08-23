@@ -24,6 +24,8 @@ var isSocietiesUser = function() {
     if (typeof(android) !== "undefined") {
         return (window.android.isSocietiesUser);
     }
+    if (window.location.hostname === 'localhost') return true;
+
     return false;
 };
 
@@ -409,15 +411,24 @@ var CrowdTaskingApp = function() {
             $('#taskCreated').text(d1.getDate()+"."+(d1.getMonth()+1)+"."+d1.getFullYear());
             d1=new Date(task.dueDate);
             $('#taskDate').text(d1.getDate()+"."+(d1.getMonth()+1)+"."+d1.getFullYear());
-            
-            var communities = "";
-    		if (task.communities != null && task.communities.length > 0) {
-    			communities = task.communities[0].name;
-    			for (var i=1; i<task.communities.length; i++) {
-    				communities += ", " + task.communities[i].name;
-    			}
-    		}
-        	$('#taskCommunities').text(communities);
+
+            var communities = [];
+            var communitiesText = "";
+            if (task.communities !== undefined) {
+                var communities = task.communities;
+            }
+            if (task.communityJids !== undefined) {
+                // get Societies communities from android
+                // TODO change later
+                communities = [{"description":"Open community. Join us.","id":"cis-2ea7bb44-31cc-466b-a0e8-3015a2ce852d.research.setcce.si", "name":"community 1","memberStatus":"You are the owner.","member":false,"owner":true,"pending":false}];
+            }
+            if (communities != null && communities.length > 0) {
+                communitiesText = communities[0].name;
+                for (var i=1; i<communities.length; i++) {
+                    communitiesText += ", " + communities[i].name;
+                }
+            }
+            $('#taskCommunities').text(communitiesText);
             $('#taskTags').text(task.tags);
 
             $('#commentForExecution').val(task.status == 'inprogress' || task.status == 'finished');
@@ -468,7 +479,15 @@ var CrowdTaskingApp = function() {
     };
 
     function fillCommunityComboBox(communities) {
-        $taskCommunity = $('#taskCommunity');
+        var $taskCommunity;
+        if (isSocietiesUser()) {
+            $('#ctCommunities').hide();
+            $taskCommunity = $('#taskCommunityJids');
+        }
+        else {
+            $('#societiesCommunities').hide();
+            $taskCommunity = $('#taskCommunity');
+        }
         $taskCommunity.empty();
         for (var i = 0; i < communities.length; i++) {
             $taskCommunity.append('<option value=' + communities[i].id + '>' + communities[i].name + '</option>');
@@ -478,7 +497,14 @@ var CrowdTaskingApp = function() {
 
     var getComunites4User = function() {
         if (isSocietiesUser()) {
-            fillCommunityComboBox(JSON.parse(window.android.getSocietiesCommunities()));
+            var societiesCommunities;
+            if (window.location.hostname === 'localhost') {
+                societiesCommunities =[{"description":"Open community. Join us.","id":"cis-2ea7bb44-31cc-466b-a0e8-3015a2ce852d.research.setcce.si", "name":"community 1","memberStatus":"You are the owner.","member":false,"owner":true,"pending":false}];
+            }
+            else {
+                societiesCommunities = JSON.parse(window.android.getSocietiesCommunities());
+            }
+            fillCommunityComboBox(societiesCommunities);
         }
         else {
             $.ajax({

@@ -199,6 +199,10 @@ public class Event {
 			eventText = userName + " joined the community " + communityName + when(eventDate);
             eventTextHTML = eventText;
 			break;
+		case ACCOUNT_CREATED:
+			eventText = userName + " created Crowd Tasking account. " + when(eventDate);
+            eventTextHTML = eventText;
+			break;
 		default:
 			break;
 		}		

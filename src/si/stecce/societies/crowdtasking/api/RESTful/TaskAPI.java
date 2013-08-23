@@ -83,7 +83,7 @@ public class TaskAPI {
 	}
 	
 	public Response newTask(String title, String description, String taskDate,
-			Long spaceId, List<Long> communities, String tagsString, CTUser user, List<String> communityJids) throws IOException, URISyntaxException {
+			List<Long> communities, String tagsString, CTUser user, List<String> communityJids) throws IOException, URISyntaxException {
 
 		DateFormat formatter = new SimpleDateFormat("dd.MM.yyyy");
 		Date dueDate;
@@ -156,7 +156,6 @@ public class TaskAPI {
 			@FormParam("title") String title,
 			@FormParam("description") String description,
 			@DefaultValue("") @FormParam("taskDate") String taskDate,
-			@FormParam("spaceId") Long spaceId,
 			@FormParam("taskCommunity") List<Long> communities,
 			@FormParam("taskCommunityJids") List<String> communityJids,
 			@FormParam("taskTags") String tagsString,
@@ -167,7 +166,7 @@ public class TaskAPI {
 			if (title == null || "".equalsIgnoreCase(title)) {
 				return Response.status(Status.NOT_ACCEPTABLE).entity("Title is required.").type("text/plain").build();
 			}
-			return newTask(title, description, taskDate, spaceId, communities, tagsString, user, communityJids);
+			return newTask(title, description, taskDate, communities, tagsString, user, communityJids);
 		}
 		if ("execute".equalsIgnoreCase(action)) {
 			if (activeComments == null || activeComments.isEmpty()) {
