@@ -52,15 +52,5 @@
 	                  android:host="crowdtasking.appspot.com"/>
 	        </intent-filter>
 	        </activity>
-        <activity
-            android:name="si.setcce.societies.android.crowdtasking.RemoteControlActivity"
-            android:configChanges="orientation|keyboardHidden"
-            android:label="@string/title_activity_remote_control"
-            android:screenOrientation="portrait" >
-        </activity>
-        <activity
-            android:name="si.setcce.societies.android.crowdtasking.SettingsActivity"
-            android:label="@string/title_activity_settings" >
-        </activity>
     </application>
 </manifest>
