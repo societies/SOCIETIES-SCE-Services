@@ -64,6 +64,7 @@ public class TaskJS {
 	private Long interestScore;
 	private List<MeetingJS> meetings;
 	private List<Community> communities;
+    private List<String> communityJids;
 	private Set<CollaborativeSpace> spaces;
 	private String trustLevel;
 	
@@ -94,6 +95,7 @@ public class TaskJS {
 			}
 		}
 		this.communities = task.getCommunities();
+        this.communityJids = task.getCommunityJids();
 		this.spaces = task.getSpaces();
 		if (loggedinUser == null) {
 			this.trustLevel = "unknown";

@@ -17,6 +17,7 @@ import com.googlecode.objectify.annotation.Load;
 public class Task {
 	@Id private Long id;
 	private String title;
+    @Index private boolean societiesTask;
 	private String description;
 	private Date dueDate;
 	private Date created;
@@ -33,6 +34,7 @@ public class Task {
 	@Ignore private Long interestScore;
 	@Load private List<Ref<Meeting>> meetingsRefs;
 	@Index @Load private List<Ref<Community>> communityRefs;
+	@Index private List<String> communityJids;
 	@Ignore private Set<CollaborativeSpace> spaces;
 
 	public Task() {
@@ -43,7 +45,7 @@ public class Task {
 	}
 
 	public Task(String title, String description, Date dueDate,
-			Long ownerId, String postedBy, List<Long> communityIds, List<String> tagList) {
+			Long ownerId, String postedBy, List<Long> communityIds, List<String> tagList, List<String> communityJids) {
 		super();
 		this.id = null;
 		this.title = title;
@@ -60,6 +62,7 @@ public class Task {
 				communityRefs.add(Ref.create(Key.create(Community.class, communityId)));
 			}
 		}
+        this.communityJids = communityJids;
 	}
 
 	public void setId(Long id) {
@@ -230,7 +233,11 @@ public class Task {
 		return spaces;
 	}
 
-	public void setSpaces(Set<CollaborativeSpace> spaces) {
+    public List<String> getCommunityJids() {
+        return communityJids;
+    }
+
+    public void setSpaces(Set<CollaborativeSpace> spaces) {
 		this.spaces = spaces;
 	}
 

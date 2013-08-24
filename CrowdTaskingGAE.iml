@@ -28,8 +28,8 @@
     <orderEntry type="library" name="gson-2.2.4" level="project" />
     <orderEntry type="library" name="objectify-appengine-4.0b1" level="project" />
     <orderEntry type="library" name="asm-3.1" level="project" />
-    <orderEntry type="library" name="AppEngineAPI" level="application" />
-    <orderEntry type="library" name="AppEngineDev" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="AppEngineAPI" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="AppEngineDev" level="application" />
   </component>
 </module>
 

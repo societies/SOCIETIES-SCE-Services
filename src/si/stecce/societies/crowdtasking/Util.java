@@ -38,7 +38,8 @@ public final class Util {
 		if (taskId == null) {
 			return "";
 		}
-		return domain+"/task/view?id="+taskId;
+		//return domain+"/task/view?id="+taskId;
+		return "/task/view?id="+taskId;
 	}
 
 	//task/view?id=X

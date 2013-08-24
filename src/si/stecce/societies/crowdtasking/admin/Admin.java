@@ -33,7 +33,15 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.googlecode.objectify.cmd.Query;
 import si.stecce.societies.crowdtasking.JavaMail;
+import si.stecce.societies.crowdtasking.Util;
+import si.stecce.societies.crowdtasking.api.RESTful.CommentAPI;
+import si.stecce.societies.crowdtasking.api.RESTful.SpaceAPI;
+import si.stecce.societies.crowdtasking.model.Event;
+import si.stecce.societies.crowdtasking.model.Task;
+
+import static si.stecce.societies.crowdtasking.model.dao.OfyService.ofy;
 
 /**
  * Describe your class here...
@@ -50,13 +58,23 @@ public class Admin extends HttpServlet {
 			throws ServletException, IOException {
 		
 		long startTime = System.currentTimeMillis();
-		JavaMail.sendJavaMail(SENDER, "simon.juresa@setcce.si", "hoj", "navaden text", "HTML text", getBody());
+		//JavaMail.sendJavaMail(SENDER, "simon.juresa@setcce.si", "hoj", "navaden text", "HTML text", getBody());
 		//sendMeetingRequest1();
 		//sendMeetingRequest2();
+        convertEvents();
 		long diff = System.currentTimeMillis() - startTime;
 		response.getWriter().write("time: " + diff);
 	}
-/*	
+
+    private void convertEvents() {
+        Query<Event> q = ofy().load().type(Event.class);
+        for (Event event: q) {
+            event.convertEventText();
+            ofy().save().entity(event);
+        }
+    }
+
+    /*
 	private void sendMeetingRequest2() {
 
 		Multipart multipart = new MimeMultipart();

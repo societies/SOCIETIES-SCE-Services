@@ -27,6 +27,7 @@ package si.stecce.societies.crowdtasking.controller;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.CharBuffer;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.logging.Logger;
@@ -94,34 +95,38 @@ public class CSController extends HttpServlet {
 		    		    response.getWriter().write("You are not a member of this community!");
 		    			return;
 		    		}
-		    		
-		    		if (path.length > 2) {
-		    			List<Ref<Community>> communitiesRefs = null;
-		    			if ("enter".equalsIgnoreCase(path[2])) {	// .../sc/spaceUrl/enter
-		    				EventAPI.logEnterCollaborativeSpace(spaceId, new Date(), user, communitiesRefs);
-		    				response.getWriter().write("Check-in successful");
-		    				System.out.println(user.getUserName()+ " checked in to "+space.getName());
-		    				return;
-		    			}
-		    			if ("leave".equalsIgnoreCase(path[2])) {	// .../sc/spaceUrl/leave
-		    				EventAPI.logLeaveCollaborativeSpace(spaceId, new Date(), user, communitiesRefs);
-		    				response.getWriter().write("Check-out successful");
-		    				System.out.println(user.getUserName()+ " checked out from "+space.getName());
-		    				return;
-		    			}
-		    			if ("showTask".equalsIgnoreCase(path[2])) {	// .../sc/spaceUrl/showTask?id=x
-	    		    		sendMessage(spaceId, "showTask:"+request.getParameter("id"));
-	    		    		return;
-		    			}
-		    			if ("change".equalsIgnoreCase(path[2])) {	// .../sc/spaceUrl/change?p=x
-	    		    		sendMessage(spaceId, "changeTo:/cs/"+path[1]+"?p="+page);
-		    				return;
-		    			}
-		    		}
-	    		    ChannelService channelService = ChannelServiceFactory.getChannelService();
-	    		    String token = channelService.createChannel(spaceId.toString());
-	    		    System.out.println("Channel created with id: "+spaceId.toString());
-	    		    log.info("token created:"+token);
+
+                    List<Ref<Community>> communitiesRefs = new ArrayList<Ref<Community>>();
+                    for (Community comm:communities) {
+                        communitiesRefs.add(Ref.create(Key.create(Community.class, comm.getId())));
+                    }
+
+                    if (path.length > 2) {
+                        if ("enter".equalsIgnoreCase(path[2])) {	// .../sc/spaceUrl/enter
+                            EventAPI.logEnterCollaborativeSpace(spaceId, new Date(), user, communitiesRefs);
+                            response.getWriter().write("Check-in successful");
+                            System.out.println(user.getUserName()+ " checked in to "+space.getName());
+                            return;
+                        }
+                        if ("leave".equalsIgnoreCase(path[2])) {	// .../sc/spaceUrl/leave
+                            EventAPI.logLeaveCollaborativeSpace(spaceId, new Date(), user, communitiesRefs);
+                            response.getWriter().write("Check-out successful");
+                            System.out.println(user.getUserName()+ " checked out from "+space.getName());
+                            return;
+                        }
+                        if ("showTask".equalsIgnoreCase(path[2])) {	// .../sc/spaceUrl/showTask?id=x
+                            sendMessage(spaceId, "showTask:"+request.getParameter("id"));
+                            return;
+                        }
+                        if ("change".equalsIgnoreCase(path[2])) {	// .../sc/spaceUrl/change?p=x
+                            sendMessage(spaceId, "changeTo:/cs/"+path[1]+"?p="+page);
+                            return;
+                        }
+                    }
+                    ChannelService channelService = ChannelServiceFactory.getChannelService();
+                    String token = channelService.createChannel(spaceId.toString());
+                    System.out.println("Channel created with id: "+spaceId.toString());
+                    log.info("token created:"+token);
 
 	    			FileReader reader = new FileReader("WEB-INF/html/publicDisplay"+page+".html");
 	    		    CharBuffer buffer = CharBuffer.allocate(16384);

@@ -101,9 +101,9 @@ function showEvents(events) {
 	stage.empty();
 	for (var i = 0; i < events.length && i <MAX_EVENTS; i++) {
 		/*var newRow = $('<tr>');
-		newRow.append(events[i].eventText);
+		newRow.append(events[i].eventTextHTML);
 		eventsTable.append(newRow);*/
-		var $event = $('<div style="display: none;">'+events[i].eventText+'</div>');
+		var $event = $('<div style="display: none;">'+events[i].eventTextHTML+'</div>');
 		stage.append($event);
 		$event.show('slow');
 	}

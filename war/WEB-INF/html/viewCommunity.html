@@ -12,12 +12,12 @@
 	<div data-role="page" id="viewCommunity" data-theme="c">
 		<div data-role="header" id="header" data-position="fixed"
 			data-theme="b">
-			<a id='backButton' data-icon="back" data-rel="back" data-direction="reverse"">Back</a>
+			<a id='backButton' data-icon="back" data-rel="back" data-direction="reverse">Back</a>
 			<h3 id='formTitle'>View community</h3>
 			<a id="editCommunityButton" data-role="button" data-icon="arrow-r">Edit</a>
 		</div>
 		<div data-role="popup" id="popupCSUrl" class="ui-corner-all">
-			<input type="text" name="csUrl" id="csUrl" value="http://crowdtasking.appspot.com/cs/research.lab">
+            <label for="csUrl"></label><input type="text" name="csUrl" id="csUrl" value="http://crowdtasking.appspot.com/cs/research.lab">
 		</div>
 		<div data-role="popup" id="popupEditCS" class="ui-corner-all">
 			<form action="" id="editSpaceForm">
@@ -77,7 +77,7 @@
 					</tr>
 					<tr>
 						<td></td>
-						<td id="csNames">
+						<td>
 							<a id="addCSButton" data-rel="popup" data-position-to="window" data-role="button" data-inline="true">Add CS</a>
 							<a id="joinCommunityButton" data-rel="popup" data-position-to="window" data-role="button" data-inline="true" style="display:none">Join community</a>
 							<a id="leaveCommunityButton" data-rel="popup" data-position-to="window" data-role="button" data-inline="true" style="display:none">Leave community</a>

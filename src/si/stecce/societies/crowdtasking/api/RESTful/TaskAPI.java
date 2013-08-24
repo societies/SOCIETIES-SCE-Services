@@ -83,7 +83,7 @@ public class TaskAPI {
 	}
 	
 	public Response newTask(String title, String description, String taskDate,
-			Long spaceId, List<Long> communities, String tagsString, CTUser user) throws IOException, URISyntaxException {
+			List<Long> communities, String tagsString, CTUser user, List<String> communityJids) throws IOException, URISyntaxException {
 
 		DateFormat formatter = new SimpleDateFormat("dd.MM.yyyy");
 		Date dueDate;
@@ -96,7 +96,13 @@ public class TaskAPI {
 		}
 		
 		Gson gson = new Gson();
-		String[] tags = gson.fromJson(tagsString, String[].class);
+		String[] tags;
+        try {
+            tags = gson.fromJson(tagsString, String[].class);
+        }
+        catch (Exception e) {
+            return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Error while parsing tags: "+e.getMessage()).type("text/plain").build();
+        }
 		List<Tag> tagList = getTagListFromStringList(tags);
 		Map<String, Tag> tagMap = TagAPI.getTagsMap();
 		for (int i=0; i<tags.length; i++) {
@@ -107,7 +113,7 @@ public class TaskAPI {
 			tag.setTagFrequency(tag.getTagFrequency()+1);
 		}
 		
-	    Task task = new Task(title, description, dueDate, user.getId(), user.getFirstName()+" "+user.getLastName(), communities, Arrays.asList(tags));
+	    Task task = new Task(title, description, dueDate, user.getId(), user.getFirstName()+" "+user.getLastName(), communities, Arrays.asList(tags), communityJids);
 	    task.setScore(user.getKarma());
 	    TaskDao.save(task);
 		TagAPI.updateTags(tagList);
@@ -150,8 +156,8 @@ public class TaskAPI {
 			@FormParam("title") String title,
 			@FormParam("description") String description,
 			@DefaultValue("") @FormParam("taskDate") String taskDate,
-			@FormParam("spaceId") Long spaceId,
 			@FormParam("taskCommunity") List<Long> communities,
+			@FormParam("taskCommunityJids") List<String> communityJids,
 			@FormParam("taskTags") String tagsString,
 			@Context HttpServletRequest request)  throws IOException, URISyntaxException {
 			
@@ -160,7 +166,7 @@ public class TaskAPI {
 			if (title == null || "".equalsIgnoreCase(title)) {
 				return Response.status(Status.NOT_ACCEPTABLE).entity("Title is required.").type("text/plain").build();
 			}
-			return newTask(title, description, taskDate, spaceId, communities, tagsString, user);
+			return newTask(title, description, taskDate, communities, tagsString, user, communityJids);
 		}
 		if ("execute".equalsIgnoreCase(action)) {
 			if (activeComments == null || activeComments.isEmpty()) {

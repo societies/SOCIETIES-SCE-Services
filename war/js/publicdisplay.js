@@ -135,7 +135,7 @@ function showEvents(events) {
 	var eventsTable = $('#event_list');
 	for (var i = 0; i < events.length; i++) {
 		var newRow = $('<tr>');
-		newRow.append(events[i].eventText);
+		newRow.append(events[i].eventTextHTML);
 		eventsTable.append(newRow);
 	}
 }

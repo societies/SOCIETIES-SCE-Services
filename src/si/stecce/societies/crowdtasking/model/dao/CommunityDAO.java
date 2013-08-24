@@ -52,7 +52,7 @@ public final class CommunityDAO {
 		Community community = null;
 		try {
 			community = ofy().load().type(Community.class).id(id).get();
-		} catch (NotFoundException e) {
+		} catch (NotFoundException ignored) {
 		}
 		return community;
 	}
@@ -61,7 +61,7 @@ public final class CommunityDAO {
 		Community community = null;
 		try {
 			community = ofy().load().ref(communityRef).get();
-		} catch (NotFoundException e) {
+		} catch (NotFoundException ignored) {
 		}
 		return community;
 	}

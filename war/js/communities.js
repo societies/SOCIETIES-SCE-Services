@@ -1,12 +1,39 @@
 var Community = function() {
-	var communities = [];
+    var communities = [];
+    var societiesCommunities = [];
+    var societiesCommunity = false;
     var currentIndex = -1;
     var _mode = 'new';
+
+    function listCommunities(_communities, tapHandler, list) {
+        console.log("listCommunities - _communities.length="+_communities.length);
+        for (var index = 0; index < _communities.length; index++) {
+            var community = _communities[index];
+            var editLink = $('<a>');
+            editLink.attr('href', '/community/view');
+            editLink.attr('data-transition', 'slide');
+            editLink.bind('tap', tapHandler(index));
+            editLink.append('<h3 style="white-space:normal;">' + community.name + '</h3>');
+            editLink.append('<p>' + community.memberStatus + '</p>');
+
+            var newLi = $('<li style="white-space:normal;">');
+            newLi.append(editLink);
+            list.append(newLi);
+        }
+    }
 
 	var displayCommunities = function() {
         var createTapHandler = function(currentIndex) {
             return function (event, data) {
             	Community.setCurrentIndex(currentIndex);
+                societiesCommunity=false;
+            };
+        };
+
+        var createSocietiesTapHandler = function(currentIndex) {
+            return function (event, data) {
+            	Community.setCurrentIndex(currentIndex);
+                societiesCommunity=true;
             };
         };
 
@@ -14,31 +41,44 @@ var Community = function() {
         list.empty();
 
         list.append('<li data-role="list-divider" role="heading">Communities</li>');
-        for (var index = 0; index < communities.length; index++) {
-            var community = communities[index];
-            var editLink = $('<a>');
-            editLink.attr('href', '/community/view');
-            editLink.attr('data-transition', 'slide');
-            editLink.bind('tap', createTapHandler(index));
-            editLink.append('<h3 style="white-space:normal;">'+community.name+'</h3>');
-            editLink.append('<p>'+community.memberStatus+'</p>');
-
-            var newLi = $('<li style="white-space:normal;">');
-            newLi.append(editLink);
-            list.append(newLi);
-        }
+        listCommunities(communities, createTapHandler, list);
+        listCommunities(societiesCommunities, createSocietiesTapHandler, list);
         list.listview('refresh', true);
+        if (isSocietiesUser()) {
+            $('#addCommunityButton').hide();
+        }
     };
-    
+
+
+    var isSocietiesUser = function() {
+        if (typeof(android) !== "undefined") {
+            return (window.android.isSocietiesUser);
+        }
+        if (window.location.hostname === 'localhost') return true;
+
+        return false;
+    };
+
     var getCommunities = function(successFn) {
-    	$.ajax({
-    		type: 'GET',
-    		url: '/rest/community/browse',
-    		success: function(result) {
-    		  communities = result;
-    		  successFn();
-    		}
-    	});
+        console.log("getCommunities");
+        if (isSocietiesUser()) {
+            if (window.location.hostname === 'localhost') {
+                societiesCommunities =[{"description":"Open community. Join us.","id":"cis-2ea7bb44-31cc-466b-a0e8-3015a2ce852d.research.setcce.si", "name":"community 1","memberStatus":"You are the owner.","member":false,"owner":true,"pending":false}];
+            }
+            else {
+                societiesCommunities = JSON.parse(window.android.getSocietiesCommunities());
+            }
+        }
+        // TODO: remove after testing
+        //societiesCommunities =[{"description":"Open community. Join us.","id":"cis-2ea7bb44-31cc-466b-a0e8-3015a2ce852d.research.setcce.si", "name":"community 1","memberStatus":"You are the owner.","member":false,"owner":true,"pending":false}];
+        $.ajax({
+            type: 'GET',
+            url: '/rest/community/browse',
+            success: function(result) {
+                communities = result;
+                successFn();
+            }
+        });
     };
 
     var getCommunityById = function(communityId) {
@@ -69,7 +109,7 @@ var Community = function() {
     		},
     		success: function(result) {
     			successFn(result);
-    		},
+    		}
     	});
     };
     
@@ -107,7 +147,7 @@ var Community = function() {
           }
         });
     };
-    
+
     var postSpace = function(completeFn) {
         var form_data = $('#editSpaceForm').serialize();
         $.ajax({
@@ -125,10 +165,16 @@ var Community = function() {
           }
         });
     };
-    
+
     var viewCommunity = function() {
     	var list;
-        var community = communities[currentIndex];
+        var community;
+        if (societiesCommunity) {
+            community = societiesCommunities[currentIndex];
+        }
+        else {
+            community = communities[currentIndex];
+        }
     	$('#name').text(community.name);
     	$('#description').text(community.description);
     	$('#memberStatus').text(community.memberStatus);
@@ -152,21 +198,15 @@ var Community = function() {
         	        newLi.append('<a href="#"><img src="'+picUrl+'" style="left:30px; top:25px;"><h2>'+request.username+'</h2></a>');
         	        newLi.append('<a href="javascript:confirm('+request.id+')" data-rel="popup" data-position-to="window" data-transition="pop">Approve user</a>');
         	        list.append(newLi);
-                }    	
+                }
                 list.listview('refresh', true);
                 list.show();
             }
             else {
                 list.hide();
             }
-        	/*if (typeof(android) === 'undefined') {
-            	$('#checkinURL').show();
-            	$('#checkoutURL').show();
-        	}
-        	$('#URLs').listview();
-        	$('#URLs').listview('refresh', true);*/
     	}
-    	if (community.owner || community.member) {
+    	if ((community.owner || community.member) && !isSocietiesUser()) {
     		list = $('#memeberList');
             list.empty();
             list.append('<li data-role="list-divider" role="heading">Members:</li>');
@@ -180,13 +220,13 @@ var Community = function() {
     	        }
     	        newLi.append('<img src="'+picUrl+'" class="ui-li-icon" style="left:12px; top:22px;">');
     	        list.append(newLi);
-            }    	
+            }
             list.listview('refresh', true);
             list.show();
     	}
 
     	var spaces = "";
-    	if (community.spaces != null && community.spaces.length > 0) {
+    	if (community.spaces !== undefined && community.spaces != null && community.spaces.length > 0) {
     		//spaces = community.spaces[0].name;
     		spaces = community.owner ? getCSEditLink(community.spaces[0], 0) : community.spaces[0].name;
     		for (var i=1; i<community.spaces.length; i++) {
@@ -197,16 +237,16 @@ var Community = function() {
     	}
     	$('#csNames').html(spaces);
     	$('#communityId').val(community.id);
-    	if (!community.member && !community.pending) {
+    	if (!community.member && !community.pending && !isSocietiesUser()) {
         	$('#joinCommunityButton').show();
         }
     	else {
-    		if (!community.owner && !community.pending) {
+    		if (!community.owner && !community.pending && !isSocietiesUser()) {
     			$('#leaveCommunityButton').show();
     		}
     	}
     };
-    
+
     var getCSEditLink = function(space, index) {
     	return '<a href="javascript:Community.editSpace('+index+')">'+space.name+'</a>';
     };
