@@ -9,6 +9,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
 
+import si.stecce.societies.crowdtasking.model.Community;
 import si.stecce.societies.crowdtasking.model.Meeting;
 import si.stecce.societies.crowdtasking.model.Task;
 
@@ -28,6 +29,10 @@ public final class Util {
 		return "<a href=\""+Util.taskLink(task.getId())+"\">'"+task.getTitle()+"'</a>";
 	}
 
+	public static String communityHTMLLink(Community community) {
+		return "<a href=\""+Util.communityLink(community.getId())+"\">'"+community.getName()+"'</a>";
+	}
+
 	public static String taskHTMLLink(Meeting meeting, Task task) {
 		return "<a href=\""+Util.taskLink(task.getId())+"\">'"+meeting.getSubject()+"'</a>";
 	}
@@ -38,8 +43,8 @@ public final class Util {
 		if (taskId == null) {
 			return "";
 		}
-		//return domain+"/task/view?id="+taskId;
-		return "/task/view?id="+taskId;
+		return domain+"/task/view?id="+taskId;
+		//return "/task/view?id="+taskId;
 	}
 
 	//task/view?id=X

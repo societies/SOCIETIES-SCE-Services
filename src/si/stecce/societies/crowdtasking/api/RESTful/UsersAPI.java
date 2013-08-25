@@ -189,9 +189,12 @@ public class UsersAPI {
 			user.setLastLogin(new Date());
 			saveUser(user);
 			HttpSession session = request.getSession();
-			session.setAttribute("loggedIn", "true");
+//            System.out.println(session.getAttribute("loggedIn"));
 			// registered user
-			session.setAttribute("CTUserId", user.getId());
+            if (session.getAttribute("CTUserId") == null) {
+                session.setAttribute("CTUserId", user.getId());
+                EventAPI.logNewAccount(user);
+            }
 		}
 		if ("settings".equalsIgnoreCase(querytype)) {
 			NotificationSettings notifications = user.getNotifications();

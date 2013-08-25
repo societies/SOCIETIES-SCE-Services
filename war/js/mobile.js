@@ -751,38 +751,32 @@ function getLike() {
 
 function showNewsFeed() {
 	$.ajax({
-	  type: "GET",
-	  url: '/rest/event',
-	  error: function() {
-	  },
-	  success: function(events) {
-		  var list = $('#eventList');
-	      list.empty();
-	      $("#eventList").append('<li data-role="list-divider" role="heading">News feed</li>');
-/*	      for (var i = 0; i<events.length; i++) {
-	            var newLi = $('<li style="white-space:normal;">');
-	            newLi.append(events[i].eventText);
-	            list.append(newLi);
-	      }*/
+        type: "GET",
+        url: '/rest/event',
+        error: function() {
+        },
+        success: function(events) {
+        var list = $('#eventList');
+        list.empty();
+        $("#eventList").append('<li data-role="list-divider" role="heading">News feed</li>');
+        /*	      for (var i = 0; i<events.length; i++) {
+            var newLi = $('<li style="white-space:normal;">');
+            newLi.append(events[i].eventText);
+            list.append(newLi);
+        }*/
 
-	        var createTapHandler = function(currentIndex) {
-	            return function (event, data) {
-	                ;
-	            };
-	        };
+        for (var i = 0; i<events.length; i++) {
+/*
+        var editLink = $('<a>');
+        editLink.attr('href', events[i].taskLink);
+        editLink.attr('data-transition', 'slide');
+        editLink.append('<h3 style="white-space:normal;">'+events[i].eventTextHTML+'</h3>');
+*/
 
-		      for (var i = 0; i<events.length; i++) {
-	            var editLink = $('<a>');
-	            editLink.attr('href', events[i].taskLink);
-	            editLink.attr('data-transition', 'slide');
-	            //editLink.bind('tap', createTapHandler(i));
-	            editLink.append('<h3 style="white-space:normal;">'+events[i].eventTextHTML+'</h3>');
-	            //editLink.append('<h3 style="white-space:normal;">eventText</h3>');
-
-	            var newLi = $('<li style="white-space:normal;">');
-	            newLi.append(editLink);
-	            list.append(newLi);
-	        }
+        var newLi = $('<li style="white-space:normal;">');
+        newLi.append('<h3 style="white-space:normal;">'+events[i].eventTextHTML+'</h3>');
+        list.append(newLi);
+    }
 	      
 	      
 	      list.listview('refresh', true);

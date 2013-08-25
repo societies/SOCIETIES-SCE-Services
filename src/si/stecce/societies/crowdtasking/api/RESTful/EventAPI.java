@@ -169,10 +169,14 @@ public class EventAPI {
 		return gson.toJson(list);
 	}
 	
+	public static void logNewAccount(CTUser user) {
+		createEvent(EventType.ACCOUNT_CREATED, null, null, null, new Date(), user, null);
+	}
+	
 	public static void logCreateTask(Task task, CTUser user) {
 		createEvent(EventType.CREATE_TASK, null, task, null, task.getCreated(), user, null);
 	}
-	
+
 	public static void logNewMeeting(Task task, Meeting meeting, Date eventDate, CTUser user) {
 		createEvent(EventType.NEW_MEETING, meeting.getCsRef(), task, null, eventDate, user, meeting);
 	}
@@ -261,7 +265,7 @@ public class EventAPI {
 	public static void createEvent(EventType type, Ref<CollaborativeSpace> collaborativeSpaceRef, Task task, Long commentId,
 			Date eventDate, CTUser user, Meeting meeting, List<Ref<Community>> communityRefs, List<String> communityJids) {
 
-		String communityName=null;
+		Community community=null;
 		Long taskId = null;
 
 		if (task != null) {
@@ -269,12 +273,12 @@ public class EventAPI {
 		}
 
 		if (communityRefs != null && !communityRefs.isEmpty()) {
-			communityName = CommunityDAO.loadCommunity(communityRefs.get(0)).getName(); 
+            community = CommunityDAO.loadCommunity(communityRefs.get(0));
 		}
 			
 		
 		Event event = new Event(type, user, communityRefs, collaborativeSpaceRef, 
-				taskId, commentId, eventDate, meeting, communityName, communityJids);
+				taskId, commentId, eventDate, meeting, community, communityJids);
     	ofy().save().entity(event);
 
     	try {
@@ -285,7 +289,7 @@ public class EventAPI {
     		else {
         		if (communityRefs != null) {
         			for (Ref<Community> communityRef:communityRefs) {
-        				Community community = CommunityDAO.loadCommunity(communityRef); 
+        				community = CommunityDAO.loadCommunity(communityRef);
         				List<CollaborativeSpace> spaces = community.getCollaborativeSpaces();
         				if (spaces != null) {
             				for (CollaborativeSpace space:spaces) {

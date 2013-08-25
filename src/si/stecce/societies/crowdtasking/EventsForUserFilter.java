@@ -49,8 +49,10 @@ import com.googlecode.objectify.cmd.Query;
  */
 public class EventsForUserFilter {
 	private Set<Long> taskIds, communityIds;
+    private CTUser user;
 	
 	public EventsForUserFilter(CTUser user) {
+        this.user = user;
 		findTaskIdsByInvolvedUser(user);	// and collaborative spaces
 	}
 	
@@ -66,6 +68,10 @@ public class EventsForUserFilter {
 				}
 			}
 		}
+        if (user.getId().longValue() == event.getUserRef().getKey().getId()) {
+            return true;
+        }
+
 		return false;
 	}
 
@@ -73,7 +79,7 @@ public class EventsForUserFilter {
 	 * get task IDs where useres is involved
 	 * (tasks's owner, tasks's commenter)
 	 * 
-	 * @param Long userId
+	 * @param java.lang.Long userId
 	 */
     private List<Long> findTaskIdsByInvolvedUser(CTUser user) {
     	Query<Comment> q = CommentAPI.findCommentsByUser(user.getId());
