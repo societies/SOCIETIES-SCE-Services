@@ -30,11 +30,7 @@ import java.util.List;
 import java.util.Set;
 
 import si.stecce.societies.crowdtasking.api.RESTful.CommentAPI;
-import si.stecce.societies.crowdtasking.model.CTUser;
-import si.stecce.societies.crowdtasking.model.Comment;
-import si.stecce.societies.crowdtasking.model.Community;
-import si.stecce.societies.crowdtasking.model.Event;
-import si.stecce.societies.crowdtasking.model.Task;
+import si.stecce.societies.crowdtasking.model.*;
 import si.stecce.societies.crowdtasking.model.dao.CommunityDAO;
 import si.stecce.societies.crowdtasking.model.dao.TaskDao;
 
@@ -71,6 +67,9 @@ public class EventsForUserFilter {
         if (user.getId().longValue() == event.getUserRef().getKey().getId()) {
             return true;
         }
+        if (event.getType() == EventType.COMMUNITY_CREATED) {
+            return true;
+        }
 
 		return false;
 	}
@@ -79,7 +78,7 @@ public class EventsForUserFilter {
 	 * get task IDs where useres is involved
 	 * (tasks's owner, tasks's commenter)
 	 * 
-	 * @param java.lang.Long userId
+	 * @param CTUser user
 	 */
     private List<Long> findTaskIdsByInvolvedUser(CTUser user) {
     	Query<Comment> q = CommentAPI.findCommentsByUser(user.getId());

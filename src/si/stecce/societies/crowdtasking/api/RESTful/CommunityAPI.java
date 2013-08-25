@@ -162,6 +162,7 @@ public class CommunityAPI {
 			community.addMembers(members);
 		}
 		CommunityDAO.saveCommunity(community);
+        EventAPI.logNewCommunity(community.getId(), null, user);
 	}
 
 	private String getCommunity(Long communityId, CTUser user) {

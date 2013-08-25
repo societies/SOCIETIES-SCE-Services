@@ -173,6 +173,14 @@ public class EventAPI {
 		createEvent(EventType.ACCOUNT_CREATED, null, null, null, new Date(), user, null);
 	}
 	
+	public static void logNewCommunity(Long communityId, String communityJid, CTUser user) {
+        List<Ref<Community>> communityRefs = new ArrayList<Ref<Community>>();
+        communityRefs.add(Ref.create(Key.create(Community.class, communityId)));
+        List<String> communityJids = new ArrayList<String>();
+        communityJids.add(communityJid);
+        createEvent(EventType.COMMUNITY_CREATED, null, null, null, new Date(), user, null, communityRefs, communityJids);
+	}
+
 	public static void logCreateTask(Task task, CTUser user) {
 		createEvent(EventType.CREATE_TASK, null, task, null, task.getCreated(), user, null);
 	}
