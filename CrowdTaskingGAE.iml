@@ -12,7 +12,7 @@
       </configuration>
       <facet type="google-app-engine" name="Google App Engine">
         <configuration>
-          <sdk-home-path>$MODULE_DIR$/../../lib/appengine-java-sdk-1.8.3</sdk-home-path>
+          <sdk-home-path>$MODULE_DIR$/../../../libs/appengine-java-sdk-1.8.3</sdk-home-path>
         </configuration>
       </facet>
     </facet>

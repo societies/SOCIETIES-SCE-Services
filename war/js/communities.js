@@ -4,6 +4,7 @@ var Community = function() {
     var societiesCommunity = false;
     var currentIndex = -1;
     var _mode = 'new';
+    var TEST_HOST = "localhost";
 
     function listCommunities(_communities, tapHandler, list) {
         console.log("listCommunities - _communities.length="+_communities.length);
@@ -54,7 +55,7 @@ var Community = function() {
         if (typeof(android) !== "undefined") {
             return (window.android.isSocietiesUser);
         }
-        if (window.location.hostname === 'localhost') return true;
+        if (window.location.hostname === TEST_HOST) return true;
 
         return false;
     };
@@ -62,23 +63,24 @@ var Community = function() {
     var getCommunities = function(successFn) {
         console.log("getCommunities");
         if (isSocietiesUser()) {
-            if (window.location.hostname === 'localhost') {
+            if (window.location.hostname === TEST_HOST) {
                 societiesCommunities =[{"description":"Open community. Join us.","id":"cis-2ea7bb44-31cc-466b-a0e8-3015a2ce852d.research.setcce.si", "name":"community 1","memberStatus":"You are the owner.","member":false,"owner":true,"pending":false}];
             }
             else {
                 societiesCommunities = JSON.parse(window.android.getSocietiesCommunities());
             }
+            successFn();
         }
-        // TODO: remove after testing
-        //societiesCommunities =[{"description":"Open community. Join us.","id":"cis-2ea7bb44-31cc-466b-a0e8-3015a2ce852d.research.setcce.si", "name":"community 1","memberStatus":"You are the owner.","member":false,"owner":true,"pending":false}];
-        $.ajax({
-            type: 'GET',
-            url: '/rest/community/browse',
-            success: function(result) {
-                communities = result;
-                successFn();
-            }
-        });
+        else {
+            $.ajax({
+                type: 'GET',
+                url: '/rest/community/browse',
+                success: function(result) {
+                    communities = result;
+                    successFn();
+                }
+            });
+        }
     };
 
     var getCommunityById = function(communityId) {

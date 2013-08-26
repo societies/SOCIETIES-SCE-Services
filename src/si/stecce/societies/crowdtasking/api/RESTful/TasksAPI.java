@@ -89,13 +89,9 @@ public class TasksAPI {
 		return null;
 	}
 
-	/**
-	 * @param communityId
-	 * @return
-	 */
 	private String getInerestingTasksForCS(Long communityId, CTUser user) {
 		Query<Task> highestRatedCommunityTasks = TaskDao.getHighestRatedTasksForCommunity(communityId, HIGHEST_RATED_NUM);
-		ArrayList<Task> list = new ArrayList<Task>();
+		ArrayList<Task> list = new ArrayList<>();
 		for (Task task: highestRatedCommunityTasks) {
 			TaskDao.setTransientTaskParams(user, task);
 			list.add(task);
@@ -111,7 +107,7 @@ public class TasksAPI {
 				if (list.size() == 5) break;
 			}
 		}*/
-		ArrayList<TaskJS> tasksJS = new ArrayList<TaskJS>();
+		ArrayList<TaskJS> tasksJS = new ArrayList<>();
 		for (Task task:list) {
 			tasksJS.add(new TaskJS(task, null));
 		}
@@ -119,7 +115,7 @@ public class TasksAPI {
 		return gson.toJson(tasksJS);
 	}
 
-	/**
+	/* *
 	 * @param task
 	 * @param list
 	 * @return
@@ -132,17 +128,10 @@ public class TasksAPI {
 		return true;
 	}
 */
-	/**
-	 * @param searchString
-	 * @return
-	 */
 	private String getSearchedTasks(String searchString) {
 		return searchString;
 	}
 
-	/**
-	 * @return
-	 */
 	private String getInerestingTasks(CTUser user) {
 		// get tasks
 		Gson gson = new Gson();
@@ -152,7 +141,7 @@ public class TasksAPI {
 		// get highest rated task
 		List<Task> highestRatedTasks = TaskDao.getHighestRatedTasks4User(user);
 		List<Task> list = rateTaskByInterest(tasksByInterest, highestRatedTasks);
-		ArrayList<TaskJS> tasksJS = new ArrayList<TaskJS>();
+		ArrayList<TaskJS> tasksJS = new ArrayList<>();
 		for (Task task:list) {
 			TaskDao.setTransientTaskParams(user, task);
 			tasksJS.add(new TaskJS(task, user));
@@ -162,9 +151,9 @@ public class TasksAPI {
 
 	private List<Task> rateTaskByInterest(Collection<Task> tasksByInterest, 
 			List<Task> highestRatedTasks) {
-		HashMap<Long, Task> taskMap = new HashMap<Long, Task>();
+		HashMap<Long, Task> taskMap = new HashMap<>();
 		long INTEREST_POINTS = 10L;
-		int NUM_TASKS = 500;	// TODO:  fix this, ther is no more interesting task, just tasks in my communities
+		int NUM_TASKS = 500;	// TODO:  fix this, there is no more interesting task, just tasks in my communities
 		
 		if (highestRatedTasks != null) {
 			for (Task task: highestRatedTasks) {
@@ -183,10 +172,10 @@ public class TasksAPI {
 			}
 		}
 		
-		List<Task> taskList = new ArrayList<Task>(taskMap.values());
+		List<Task> taskList = new ArrayList<>(taskMap.values());
 		Collections.sort(taskList, new TaskInterestScoreComparator());
 
-		ArrayList<Task> list = new ArrayList<Task>();
+		ArrayList<Task> list = new ArrayList<>();
 		int last = taskList.size()-1;
 		for (int i=0; i<NUM_TASKS && i<=last; i++) {
 			Task task = taskList.get(i);
@@ -195,21 +184,15 @@ public class TasksAPI {
 		return list;
 	}
 
-	/**
-	 * @return
-	 */
 	private String getFollowedTasks() {
 		return null;
 	}
 
-	/**
-	 * @return
-	 */
 	private String getMyTasks(CTUser user) {
-		Query<Task> qt = TaskDao.findTasksByUser(user.getId());
+        List<Task> tasks = TaskDao.findTasksByUser(user);
 		Gson gson = new Gson();
-		ArrayList<TaskJS> list = new ArrayList<TaskJS>();
-		for (Task task:qt) {
+		ArrayList<TaskJS> list = new ArrayList<>();
+		for (Task task:tasks) {
 			TaskDao.setTransientTaskParams(user, task);
 			list.add(new TaskJS(task, user));
 		}

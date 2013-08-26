@@ -131,10 +131,25 @@ public final class TaskDao {
 		return ofy().load().type(Task.class);
 	}
 
-	public static Query<Task> findTasksByUser(Long userId) {
-		return ofy().load().type(Task.class).filter("ownerId", userId);
-	}
+	public static List<Task> findTasksByUser(CTUser user) {
+//		return ofy().load().type(Task.class).filter("ownerId", userId);
+
+        Query<Task> tasks = ofy().load().type(Task.class).filter("ownerId", user.getId());
+        List<Task> filteredTasks = new ArrayList<Task>();
+        Query<Community> communities4User = CommunityDAO.loadCommunities4User(user);
+        for (Task task:tasks) {
+            if (taskIsVisibleToUser(task, communities4User)) {
+                filteredTasks.add(task);
+            }
+        }
+        return filteredTasks;
+
+    }
 	
+	public static Query<Task> findSocietiesTasksByUser(Long userId) {
+		return ofy().load().type(Task.class).filter("ownerId", userId).filter(" !=", null);
+	}
+
 	public static Collection<Task> getTasksByInterests(CTUser user) {
 		List<Long> taskIds = TagTaskDao.getTaskIdsForInterests(user
 				.getInterests());

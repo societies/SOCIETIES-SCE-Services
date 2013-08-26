@@ -64,7 +64,7 @@ public class EventsForUserFilter {
 				}
 			}
 		}
-        if (user.getId().longValue() == event.getUserRef().getKey().getId()) {
+        if (user.getId() == event.getUserRef().getKey().getId()) {
             return true;
         }
         if (event.getType() == EventType.COMMUNITY_CREATED) {
@@ -83,23 +83,23 @@ public class EventsForUserFilter {
     private List<Long> findTaskIdsByInvolvedUser(CTUser user) {
     	Query<Comment> q = CommentAPI.findCommentsByUser(user.getId());
 
-    	taskIds = new HashSet<Long>();
+    	taskIds = new HashSet<>();
 		for (Comment comment:q) {
     		taskIds.add(comment.getTask().getId());
 		}
 
-    	communityIds = new HashSet<Long>();
+    	communityIds = new HashSet<>();
     	Query<Community> communities = CommunityDAO.loadCommunities4User(user);
 		for (Community community:communities) {
 			communityIds.add(community.getId());
 		}
     	
-    	Query<Task> qt = TaskDao.findTasksByUser(user.getId());
-		for (Task task:qt) {
+    	List<Task> tasks = TaskDao.findTasksByUser(user);
+		for (Task task:tasks) {
     		taskIds.add(task.getId());
 		}
 		
-		return new ArrayList<Long>(taskIds); 
+		return new ArrayList<>(taskIds);
     }
 	
 }
