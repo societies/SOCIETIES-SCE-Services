@@ -122,6 +122,8 @@ public class MainActivity extends Activity implements SensorEventListener {
         setContentView(R.layout.activity_main);
         webViewSetup();
         if (isSocietiesServiceRunning()) {
+            System.out.println("Societies services are not running?");
+            Toast.makeText(getApplicationContext(), "SOCIETIES services are not running", Toast.LENGTH_LONG).show();
 /*
             TrustTask task = new TrustTask(this);
     		task.execute();

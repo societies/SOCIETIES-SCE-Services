@@ -94,6 +94,11 @@ public abstract class ServiceClientBase {
      */
     private void teardownBroadcastReceiver() {
         Log.d(LOG_TAG, "Tear down broadcast receiver");
-        context.unregisterReceiver(this.receiver);
+        try {
+            context.unregisterReceiver(this.receiver);
+        } catch (IllegalArgumentException e) {
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
