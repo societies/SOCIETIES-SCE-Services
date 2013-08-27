@@ -35,6 +35,7 @@ var CrowdTaskingApp = function() {
     var currentTaskIndex = -1;
     var mode = 'new';
     var currentUser = null;
+    var communities = [];
 
     var getTaskById = function(id) {
     	$.ajax({
@@ -478,7 +479,7 @@ var CrowdTaskingApp = function() {
         return currentTaskIndex;
     };
 
-    function fillCommunityComboBox(communities) {
+    function fillCommunityComboBox() {
         var $taskCommunity;
         if (isSocietiesUser()) {
             $('#ctCommunities').hide();
@@ -493,30 +494,36 @@ var CrowdTaskingApp = function() {
             $taskCommunity.append('<option value=' + communities[i].id + '>' + communities[i].name + '</option>');
         }
         $taskCommunity.selectmenu('refresh');
-    }
+    };
 
-    var getComunites4User = function() {
+    var getCommunities4User = function(successFn) {
         if (isSocietiesUser()) {
-            var societiesCommunities;
             if (window.location.hostname === 'localhost') {
-                societiesCommunities =[{"description":"Open community. Join us.","id":"cis-2ea7bb44-31cc-466b-a0e8-3015a2ce852d.research.setcce.si", "name":"community 1","memberStatus":"You are the owner.","member":false,"owner":true,"pending":false}];
+                communities =[{"description":"Open community. Join us.","id":"cis-2ea7bb44-31cc-466b-a0e8-3015a2ce852d.research.setcce.si", "name":"community 1","memberStatus":"You are the owner.","member":false,"owner":true,"pending":false}];
             }
             else {
-                societiesCommunities = JSON.parse(window.android.getSocietiesCommunities());
+                communities = JSON.parse(window.android.getSocietiesCommunities());
             }
-            fillCommunityComboBox(societiesCommunities);
+            successFn();
         }
         else {
             $.ajax({
                 type: 'GET',
                 url: '/rest/community/4user',
                 //data: { 'id': id },
-                success: function(communities) {
-                    fillCommunityComboBox(communities);
+                success: function(result) {
+                    communities = result;
+                    successFn();
+//                    fillCommunityComboBox(communities);
                 }
             });
         }
+    };
 
+    var setAddTaskButton = function() {
+        if (communities === null || communities.length === 0) {
+            $('#addTaskButton').hide();
+        }
     };
 
     return {
@@ -532,8 +539,8 @@ var CrowdTaskingApp = function() {
         	console.log("addTask function");
             currentTaskIndex = -1;
             //clearNewTaskForm();
-        	console.log("getComunites4User");
-            getComunites4User();
+        	console.log("getCommunites4User");
+            getCommunities4User(fillCommunityComboBox);
         },
 
         init: function() {
@@ -541,6 +548,7 @@ var CrowdTaskingApp = function() {
         },
         
         myTasks: function() {
+            getCommunities4User(setAddTaskButton);
             loadTasks('my');
         },
         
@@ -580,11 +588,19 @@ var CrowdTaskingApp = function() {
         },
 
         saveTask: function() {
+            var ctCommunities = $("#ctCommunities option:selected");
+            var societiesCommunities = $("#societiesCommunities option:selected");
+            if (ctCommunities.val() === undefined && societiesCommunities.val() === undefined) {
+                toast("At least one community has to be selected.");
+                $('#saveButton').show();
+                return true;
+            }
         	var newTag = $('#newTag').val().trim();
         	if (newTag != "") {
         		$("#tagWarning").text('Do you want to add: "'+newTag+'"?');
         		$("#popupDialog").popup("open");
-        		return;
+                $('#saveButton').show();
+        		return true;
         	}
         	// div to html
         	var tags = [];
@@ -926,7 +942,7 @@ $(document).on('pageinit', '#mobilePage', function(event, data){
 	CrowdTaskingApp.init();
 });
 
-$(document).on('pageinit', '#myTasksPage', function(event, data){       
+$(document).on('pageshow', '#myTasksPage', function(event, data){
 //$('#myTasksPage').live('pageinit', function() {
 	refreshFunction = CrowdTaskingApp.myTasks;
 	CrowdTaskingApp.myTasks();
@@ -955,8 +971,8 @@ $(document).on('pageinit', '#formPage', function(event, data){
     $('#cancelTaskSaveButton').bind('tap', function(event, data) {
         event.preventDefault();
     	$("#cancelDialog").popup("close");
-        CrowdTaskingApp.saveTask();
         $('#saveButton').hide();
+        CrowdTaskingApp.saveTask();
     });
     $('#cancelTaskNoButton').bind('tap', function(event, data) {
         event.preventDefault();
@@ -972,8 +988,8 @@ $(document).on('pageinit', '#formPage', function(event, data){
     });
     $('#saveButton').bind('tap', function(event, data) {
         event.preventDefault();
-        CrowdTaskingApp.saveTask();
         $('#saveButton').hide();
+        CrowdTaskingApp.saveTask();
         //$('#saveButton').unbind('tap');
     });
     $('#commentButton').bind('tap', function(event, data) {
