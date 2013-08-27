@@ -24,44 +24,16 @@
  */
 package org.societies.enterprise.collabtools.api;
 
-import java.util.Hashtable;
-import java.util.List;
-import java.util.Observable;
-
 /**
- * Interface for subscribe context information
+ * Interface for increment context information
  *
- * @author cviana
+ * @author Chris Lima
  *
  */
-public interface IContextSubscriber {
-	//Societies integration.... miner
+public interface IIncrementCtx {
+
+	public enum EnrichmentTypes {CONCEPT, CATEGORY, ALL};
 	
-	/**
-	 * 
-	 * @param cisID community ID
-	 */
-	public void initialCtx(Object cisID);
-	
-	/**
-	 * 
-	 * @param cisID community ID
-	 */
-	public void stopCtx(Object cisID);
-	
-	/**
-	 * 
-	 * @param sessionName name of the session
-	 * @return the language chosen for the session
-	 */
-	public String getSessionLanguage(String sessionName);
-	
-	/**
-	 * 
-	 * @return current sessions
-	 */
-	public Hashtable<String,List<String>> getSessions();
-	
-	public void update(Observable o, Object arg);	
+	public abstract String[] incrementString(String text, EnrichmentTypes type);
 
 }

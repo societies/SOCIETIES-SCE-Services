@@ -152,6 +152,11 @@ public class SessionRepository implements Observer {
 		return true;
 	}
 
+	/**
+	 * Create a collaborative sessions if doesn't exists
+	 * @param Session name
+	 * @return A session object
+	 */
 	public Session createSession(String sessionName)
 	{
 		Transaction tx = this.graphDb.beginTx();
@@ -192,10 +197,17 @@ public class SessionRepository implements Observer {
 	}
 
 
-	public synchronized void addMembers(String sessionName, HashSet<Person> members)
+	/**
+	 * Include members in a session previously created
+	 * @param Session name
+	 * @param Members to participate
+	 * @return Members include in the session if necessary
+	 */
+	public synchronized String[] addMembers(String sessionName, HashSet<Person> members)
 	{
+		List<String> membersIncluded = new ArrayList<String>();
+		
 		//Add member to the session
-
 		List<Person> membersPersonList = new ArrayList<Person>();
 		Iterator<Person> personIterator = members.iterator();
 		while (personIterator.hasNext()) {
@@ -203,22 +215,25 @@ public class SessionRepository implements Observer {
 			//Verify if person is already in session
 			if (!isInSession(person, sessionName)) {
 				person.addSession(sessionName);  
-				membersPersonList.add(person);
+				membersPersonList.add(person);				
+				//Insert names in string name for async app	
+				membersIncluded.add(person.getName());
 			}
 		}
-		//Including in session if not yet
+		//Including in session if not yet present
 		personIterator = membersPersonList.iterator();
 		boolean sessionChanges = false;
 
+
 		while (personIterator.hasNext()) {
 			//TODO: Implement floor control
-			Person person = (Person)personIterator.next();
+			Person person = (Person)personIterator.next();		
 			getSessionByName(sessionName).addMember(person, Session.LISTENER);
 			sessionChanges = true;
             System.out.println("Inviting new members...");
 		}
 		
-		//Insert members in session history if session has changes
+		//Insert members in session history if session had changes
 		if (sessionChanges) {
 			Iterator<Person> it = getSessionByName(sessionName).getMembers();
 			List<String> membersList = new ArrayList<String>();
@@ -226,10 +241,15 @@ public class SessionRepository implements Observer {
 				membersList.add(((Person)it.next()).getName());
 			}
 			HashMap<String, String[]> ctxSessionHistory = new HashMap<String, String[]>();
-			System.out.println("members to the session history: " +Arrays.toString(membersList.toArray(new String[0])));
-			ctxSessionHistory.put(Session.MEMBERS, membersList.toArray(new String[0]));
-			getSessionByName(sessionName).addSessionHistoryStatus(ctxSessionHistory);	
+			String [] historyPeople = membersList.toArray(new String[0]);
+			System.out.println("members to the session history: " +Arrays.toString(historyPeople));
+			ctxSessionHistory.put(Session.MEMBERS, historyPeople);
+			getSessionByName(sessionName).addSessionHistoryStatus(ctxSessionHistory);
+			//Returning members which were inserted in a existed session
+			return historyPeople;
 		}
+		//Returning members which were inserted in a new session
+		return membersIncluded.toArray(new String[0]);
 	}
 	
     public Iterable<Session> getAllSessions()

@@ -47,7 +47,7 @@ import org.societies.enterprise.collabtools.interpretation.ContextAnalyzer;
  * @author cviana
  *
  */
-public class CtxMonitor implements Runnable, Observer{
+public class CtxMonitor extends Observable implements Runnable, Observer {
 
 	public Engine engine;
 	private SessionRepository sessionRepository;
@@ -57,13 +57,13 @@ public class CtxMonitor implements Runnable, Observer{
 	public CtxMonitor (PersonRepository personRepository, SessionRepository sessionRepository) {
 		engine = new Engine(personRepository, sessionRepository);
 		this.sessionRepository = sessionRepository;
-		
+
 		ctxAnalyzer = new ContextAnalyzer(personRepository);
-		
+
 		//Default rules when the FW starts, location and interests
 		Rule r01 = new Rule("r01",Operators.SAME, ShortTermCtxTypes.LOCATION, "--", 1, 0.5 ,ShortTermCtxTypes.class.getSimpleName());
 		Rule r02 = new Rule("r02",Operators.SIMILAR, LongTermCtxTypes.INTERESTS, "--", 2, 0.4 ,LongTermCtxTypes.class.getSimpleName());
-//		Rule r03 = new Rule("r03",Operators.EQUAL, ShortTermCtxTypes.STATUS, "Available", 3, 0.1 ,ShortTermCtxTypes.class.getSimpleName()); //Check status of the user e.g busy, on phone, driving...
+		//		Rule r03 = new Rule("r03",Operators.EQUAL, ShortTermCtxTypes.STATUS, "Available", 3, 0.1 ,ShortTermCtxTypes.class.getSimpleName()); //Check status of the user e.g busy, on phone, driving...
 		List<Rule> rules = Arrays.asList(r01, r02);
 		engine.setRules(rules);
 	}
@@ -89,8 +89,17 @@ public class CtxMonitor implements Runnable, Observer{
 						System.out.println("New Engine: "+possibleMembers.toString());
 						this.sessionRepository.createSession(sessionName);
 					}
-					this.sessionRepository.addMembers(sessionName, possibleMembers);
-					System.out.println("New Engine: "+possibleMembers.toString());
+					String[] membersIncluded = this.sessionRepository.addMembers(sessionName, possibleMembers);
+
+					//System.out.println("New Engine: "+possibleMembers.toString());
+
+					// Notify observers of change
+					if (membersIncluded.length>0){
+						Hashtable<String, String[]> response = new Hashtable<String, String[]>();
+						response.put(sessionName, membersIncluded);
+						setChanged();
+						notifyObservers(response);
+					}
 				}
 			}
 		}

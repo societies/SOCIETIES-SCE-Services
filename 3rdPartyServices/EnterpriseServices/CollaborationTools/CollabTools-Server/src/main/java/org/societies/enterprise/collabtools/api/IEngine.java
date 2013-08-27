@@ -24,44 +24,62 @@
  */
 package org.societies.enterprise.collabtools.api;
 
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
-import java.util.Observable;
+
+import org.societies.enterprise.collabtools.acquisition.LongTermCtxTypes;
+import org.societies.enterprise.collabtools.acquisition.Person;
+import org.societies.enterprise.collabtools.acquisition.ShortTermCtxTypes;
+import org.societies.enterprise.collabtools.runtime.Operators;
+import org.societies.enterprise.collabtools.runtime.Rule;
 
 /**
- * Interface for subscribe context information
+ * Interface for Rule engine
  *
- * @author cviana
+ * @author Chris Lima
  *
  */
-public interface IContextSubscriber {
-	//Societies integration.... miner
+public interface IEngine {
+	/**
+	 * Insert a individual rule
+	 **/
+	public void insertRule(Rule rule);
 	
 	/**
-	 * 
-	 * @param cisID community ID
-	 */
-	public void initialCtx(Object cisID);
+	 * Delete a individual rule
+	 **/
+	public void deleteRule(Rule rule);
 	
+	/** 
+	 * Handles the initialization 
+	 * 
+	 * @param rules The rules which define the system.
+	 * 
+	 * */
+	public void setRules(final Collection<Rule> rules);
+
 	/**
-	 * 
-	 * @param cisID community ID
+	 * @return a List of rules
 	 */
-	public void stopCtx(Object cisID);
-	
+	public abstract List<Rule> getRules();
+
+	public abstract Hashtable<String, HashSet<Person>> getMatchingResultsByPriority();
+
 	/**
-	 * 
-	 * @param sessionName name of the session
-	 * @return the language chosen for the session
+	 * @param operator Filter operators available in {@link Operators}
+	 * @param ctx Context information 
+	 * @param value Value if wants to compare. Null for SAME or DIFFERENT operators
+	 * @param ctxType Context type. Can be {@link ShortTermCtxTypes} or {@link LongTermCtxTypes}
+	 * @return hashtable of persons
 	 */
-	public String getSessionLanguage(String sessionName);
-	
+	public abstract Hashtable<String, HashSet<Person>> evaluateRule(Operators operator, final String ctxAttribute, String value, final String ctxType, HashSet<Person> primarySet);
+
 	/**
-	 * 
-	 * @return current sessions
+	 * @param ruleName Name of the rule to evaluate
+	 * @return hashtable of persons
 	 */
-	public Hashtable<String,List<String>> getSessions();
-	
-	public void update(Observable o, Object arg);	
+	Hashtable<String, HashSet<Person>> evaluateRule(String ruleName);
 
 }

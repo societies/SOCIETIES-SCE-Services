@@ -25,7 +25,7 @@
 package org.societies.enterprise.collabtools.api;
 
 /**
- * Interface to integrate synchronous collaborative applications. 1..1
+ * Interface to integrate SYNCHRONOUS collaborative applications. 1..1
  *
  * @author Chris Lima
  *

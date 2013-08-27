@@ -82,6 +82,7 @@ public class MainTest {
 	    indexSession = sessionGraphDb.index().forNodes("SessionNodes");
 	    indexShortTermCtx = personGraphDb.index().forNodes("CtxNodes");
 	    
+	    //Synchronous integration
 	    ICollabAppConnector chat = new ChatAppIntegrator(prop.getProperty("applications"), prop.getProperty("server"));
 	    ICollabAppConnector[] connectorsApp = {chat};
 	    CollabApps collabApps = new CollabApps(connectorsApp);
@@ -110,9 +111,11 @@ public class MainTest {
 //		YouMightKnow ymn = new YouMightKnow(personRepository.getPersonByName("person#"+3), new String[] {"project planning"}, 5);
 //		ymn.printMightKnow(ymn.findYouMightKnow(personRepository.getPersonByName("person#"+3)) , new String[] {"project planning"} );
 
-		System.out.println("TestUtils completed" );
+		System.out.println("TestUtils completed");
 
-		ContextSubscriber ctxSub = new ContextSubscriber(null, personRepository, sessionRepository);
+//		ContextSubscriber ctxSub = new ContextSubscriber(null, personRepository, sessionRepository);
+
+		
 		//Creating more updates
 		while (true) {
 			// 5 sec

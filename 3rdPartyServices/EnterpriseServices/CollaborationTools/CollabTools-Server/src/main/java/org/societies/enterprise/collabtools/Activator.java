@@ -105,7 +105,7 @@ public class Activator implements BundleActivator
 
 		collabAppsRegistration =context.registerService(ICollabApps.class.getName(), collabApps, null);
 		
-		engineRegistration =context.registerService(IEngine.class.getName(), ctxSub.monitor.engine, null);
+		engineRegistration =context.registerService(IEngine.class.getName(), ctxSub.getMonitor().engine, null);
 
 	}
 

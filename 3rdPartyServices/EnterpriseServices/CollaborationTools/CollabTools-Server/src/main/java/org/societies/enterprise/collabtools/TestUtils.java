@@ -51,10 +51,14 @@ public class TestUtils {
 	private static int nrOfPersons;
     private PersonRepository personRepository;
     private ContextSubscriber ctxSub;
+    AsyncCollabAppConnector asyncIntegration;
     
     public TestUtils(PersonRepository personRepository,  SessionRepository sessionRepository) {
     	this.personRepository = personRepository;
         ctxSub = new ContextSubscriber(null,personRepository, sessionRepository);
+	    //Synchronous integration
+	    asyncIntegration = new AsyncCollabAppConnector();
+		ctxSub.getMonitor().addObserver(asyncIntegration);
 	}
     
 	public void createPersons(int nrOfPersons) throws Exception

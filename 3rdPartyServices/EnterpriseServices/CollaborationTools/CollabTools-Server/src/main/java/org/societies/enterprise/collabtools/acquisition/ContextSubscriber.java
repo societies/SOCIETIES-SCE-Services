@@ -50,7 +50,7 @@ public class ContextSubscriber implements IContextSubscriber, Observer
 	private PersonRepository personRepository;
 	private SessionRepository sessionRepository;
 	InternalContextConnector ctxConnector;
-	public CtxMonitor monitor;
+	private CtxMonitor monitor;
 	private Activator activator;
 
 
@@ -172,6 +172,13 @@ public class ContextSubscriber implements IContextSubscriber, Observer
 		Session session =sessionRepository.getSessionByName(sessionName);
 			logger.info("Session language: "+session.getLanguage(null));
 		return session.getLanguage(Session.LANGUAGE);
+	}
+	
+	/**
+	 * @return the monitor
+	 */
+	public CtxMonitor getMonitor() {
+		return monitor;
 	}
 	
 
