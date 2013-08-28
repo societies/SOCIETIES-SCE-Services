@@ -226,7 +226,7 @@ public class ContextAware3pService implements IContextAware3pService  {
 				//Job Position
 				Set<CtxAttribute> attribute = retrievedCtxEntity.getAttributes(CtxAttributeTypes.OCCUPATION);
 				for(CtxAttribute occupation : attribute)
-					othersCtx.put("work", new String[]{occupation.getStringValue()});
+					othersCtx.put("occupation", new String[]{occupation.getStringValue()});
 				//Company
 				attribute = retrievedCtxEntity.getAttributes(CtxAttributeTypes.ADDRESS_WORK_CITY);
 				for(CtxAttribute company : attribute)
@@ -250,14 +250,24 @@ public class ContextAware3pService implements IContextAware3pService  {
 				othersCtx.put("interests", list.toArray(strArray));
 
 				//Name or ID
+				//TODO: FIXED ID!!
+
 				attribute = retrievedCtxEntity.getAttributes(CtxAttributeTypes.NAME);
+				for(CtxAttribute name : attribute) {
+					//Associate a name for the ctx retrieved
+					System.out.println("CtxAttributeTypes.NAME**********************  "+name.getStringValue());
+				}
+
+//				attribute = retrievedCtxEntity.getAttributes(CtxAttributeTypes.NAME);
 				if (attribute.isEmpty()){
 					throw new NullPointerException("Name of the person cannot be null! ");
 				} 
 				else {
 					for(CtxAttribute name : attribute) {
-						//Associate a name for the ctx retrieved
-						persons.put(name.getStringValue(), othersCtx);
+						//Associatethe the name Jid for the ctx retrieved
+						String getOnlyNameSubstring[] = name.getStringValue().split("\\.");
+						System.out.println("CtxAttributeTypes.ID**********************  "+getOnlyNameSubstring[0]);
+						persons.put(getOnlyNameSubstring[0], othersCtx);
 					}
 				}
 
