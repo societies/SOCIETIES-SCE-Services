@@ -269,8 +269,13 @@ public class SessionRepository implements Observer {
 	 * @param string language of sessions
 	 */
 	public void setLanguage(String language) {
-		System.out.println("*Setting language: "+language );
-		this.language = language;		
+		if (language != null){
+			this.language = language;
+			System.out.println("*Setting language: "+language );
+		}
+		else {
+			System.out.println("*Setting language: "+language );
+		}
 	}
 
 }
