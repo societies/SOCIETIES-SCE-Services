@@ -250,13 +250,7 @@ public class ContextAware3pService implements IContextAware3pService  {
 				othersCtx.put("interests", list.toArray(strArray));
 
 				//Name or ID
-				//TODO: FIXED ID!!
-
-				attribute = retrievedCtxEntity.getAttributes(CtxAttributeTypes.NAME);
-				for(CtxAttribute name : attribute) {
-					//Associate a name for the ctx retrieved
-					System.out.println("CtxAttributeTypes.NAME**********************  "+name.getStringValue());
-				}
+				//TODO: Name FIXED!!
 
 //				attribute = retrievedCtxEntity.getAttributes(CtxAttributeTypes.NAME);
 				if (attribute.isEmpty()){
@@ -264,7 +258,7 @@ public class ContextAware3pService implements IContextAware3pService  {
 				} 
 				else {
 					for(CtxAttribute name : attribute) {
-						//Associatethe the name Jid for the ctx retrieved
+						//Associate the the name Jid for the ctx retrieved. Original format is joedoe.societies.local
 						String getOnlyNameSubstring[] = name.getStringValue().split("\\.");
 						System.out.println("CtxAttributeTypes.ID**********************  "+getOnlyNameSubstring[0]);
 						persons.put(getOnlyNameSubstring[0], othersCtx);
