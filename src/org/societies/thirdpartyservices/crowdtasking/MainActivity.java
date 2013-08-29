@@ -15,6 +15,7 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.provider.CalendarContract.Events;
 import android.util.Log;
 import android.view.Menu;
@@ -41,10 +42,13 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.societies.android.api.cis.directory.ICisDirectory;
 import org.societies.android.api.cis.management.ICisManager;
 import org.societies.android.api.contentproviders.CSSContentProvider;
 import org.societies.api.schema.cis.community.Community;
+import org.societies.api.schema.cis.directory.CisAdvertisementRecord;
 import org.societies.integration.model.SocietiesUser;
+import org.societies.integration.service.CisDirectoryClient;
 import org.societies.integration.service.CommunityManagementClient;
 
 import java.io.UnsupportedEncodingException;
@@ -69,7 +73,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 	private static final String LOG_EVENT = "si.setcce.societies.android.rest.LOG_EVENT";
 	private static final String LOGIN_USER = "si.setcce.societies.android.rest.LOGIN_USER";
 	private static final String GET_MEETING_ACTION = "si.setcce.societies.android.rest.meeting";
-    private static final String APPLICATION_URL = "http://23-08-2013.crowdtasking.appspot.com";
+    private static final String APPLICATION_URL = "http://crowdtasking.appspot.com";
     private static final String LOGIN_URL = APPLICATION_URL + "/login";
 	//private static final String APPLICATION_URL = "http://192.168.1.102:8888";
     private static final String MEETING_URL = APPLICATION_URL + "/android/meeting/";
@@ -90,6 +94,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 	private float mAccelCurrent;	// current acceleration including gravity
 	private float mAccelLast;		// last acceleration including gravity
     private CommunityManagementClient communityManagementClient;
+    private CisDirectoryClient cisDirectoryClient;
     private boolean isSocietiesUser=false, societiesServicesRunning;
     private SocietiesUser societiesUser = null;
     private final static String LOG_TAG = "Crowd Tasking";
@@ -122,15 +127,17 @@ public class MainActivity extends Activity implements SensorEventListener {
         setContentView(R.layout.activity_main);
         webViewSetup();
         if (isSocietiesServiceRunning()) {
-            System.out.println("Societies services are not running?");
-            Toast.makeText(getApplicationContext(), "SOCIETIES services are not running", Toast.LENGTH_LONG).show();
+            System.out.println("Societies services are running?");
+            Toast.makeText(getApplicationContext(), "SOCIETIES services are running", Toast.LENGTH_LONG).show();
 /*
             TrustTask task = new TrustTask(this);
     		task.execute();
 */
             societiesServicesRunning = true;
-            communityManagementClient = new CommunityManagementClient(this, clientReceiver);
+            communityManagementClient = new CommunityManagementClient(this, communityClientReceiver);
             communityManagementClient.setUpService();
+            cisDirectoryClient = new CisDirectoryClient(this, communityClientReceiver);
+            cisDirectoryClient.setUpService();
         }
         else {
             System.out.println("Societies services are not running?");
@@ -350,6 +357,7 @@ public class MainActivity extends Activity implements SensorEventListener {
         if (societiesServicesRunning) {
             SocietiesUser user = getSocietiesUserData();
             if (user != null) {
+/*
                 List<NameValuePair> parameters = new ArrayList<NameValuePair>();
                 parameters.add(new BasicNameValuePair("federatedIdentity","SOCIETIES"));
                 parameters.add(new BasicNameValuePair("userId", user.getUserId()));
@@ -357,6 +365,8 @@ public class MainActivity extends Activity implements SensorEventListener {
                 parameters.add(new BasicNameValuePair("foreName", user.getForeName()));
                 parameters.add(new BasicNameValuePair("email", user.getEmail()));
                 parameters.add(new BasicNameValuePair("continue", "/"));
+*/
+                // TODO: fix this!!
                 startUrl = LOGIN_URL+"?continue=/&federatedIdentity=SOCIETIES&userId="+user.getUserId()+
                         "&name="+user.getName()+"&foreName="+user.getForeName()+"&email="+user.getEmail();
             }
@@ -409,7 +419,23 @@ public class MainActivity extends Activity implements SensorEventListener {
       }
     }
 
-    private BroadcastReceiver clientReceiver = new BroadcastReceiver() {
+    private BroadcastReceiver cisDirectoryClientReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent.getAction().equals(ICisDirectory.FIND_ALL_CIS)) {
+                Parcelable[] objects = (Parcelable[])intent.getParcelableArrayExtra(ICisDirectory.INTENT_RETURN_VALUE);
+                for(Parcelable object: objects) {
+                    CisAdvertisementRecord advert = (CisAdvertisementRecord) object;
+                    Log.i(LOG_TAG, advert.getId());
+                    Log.i(LOG_TAG, advert.getName());
+                }
+
+                //Object[] advertismentRecords = intent.getParcelableArrayExtra(ICisDirectory.INTENT_RETURN_VALUE);
+            }
+        }
+    };
+
+    private BroadcastReceiver communityClientReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (intent.getAction().equals(ICisManager.GET_CIS_LIST)) {
@@ -441,7 +467,6 @@ public class MainActivity extends Activity implements SensorEventListener {
         }
     };
 
-
     private BroadcastReceiver receiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -468,7 +493,12 @@ public class MainActivity extends Activity implements SensorEventListener {
 */
             if (intent.getAction().equalsIgnoreCase(SERVICE_CONNECTED)) {
                 String response = intent.getStringExtra("serviceName");
-                communityManagementClient.listCommunities();
+                if (response.equalsIgnoreCase("CommunityManagement")) {
+                    communityManagementClient.listCommunities();
+                }
+                if (response.equalsIgnoreCase("CisDirectoryClient")) {
+                    cisDirectoryClient.findAllCisAdvertismentRecords();
+                }
                 System.out.println(response);
             }
             if (intent.getAction().equalsIgnoreCase(GET_MEETING_ACTION)) {
@@ -508,10 +538,10 @@ public class MainActivity extends Activity implements SensorEventListener {
     	
         
         Calendar beginTime = Calendar.getInstance();
-        beginTime.setTime(parseDateString(meeting.optString("startTime").toString()));
+        beginTime.setTime(parseDateString(meeting.optString("startTime")));
 		//beginTime.set(2013, 1, 15, 17, 00);
 		Calendar endTime = Calendar.getInstance();
-		endTime.setTime(parseDateString(meeting.optString("endTime").toString()));
+		endTime.setTime(parseDateString(meeting.optString("endTime")));
 		//endTime.set(2013, 1, 15, 17, 15);
 		Intent intent = new Intent(Intent.ACTION_EDIT);
 		intent.setType("vnd.android.cursor.item/event");
