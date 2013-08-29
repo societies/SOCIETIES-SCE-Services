@@ -24,13 +24,20 @@
  */
 package org.societies.webapp.controller;
 
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.Reader;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
@@ -59,9 +66,13 @@ import org.springframework.web.servlet.ModelAndView;
 public class Admin {
 
 	private static final Logger logger = LoggerFactory.getLogger(Admin.class);
+	
+	AsyncCollabAppConnector app = new AsyncCollabAppConnector();
 
 	@Autowired
 	private ICisManager cisManager;
+
+	private String cisName = "";
 
 	/**
 	 * This method get called when user request for login page by using
@@ -80,8 +91,13 @@ public class Admin {
 		int size = cisList.size();
 		String result = "<br>"+"There are "+size+" CIS: "+"<br>";
 		result += "<form name=\"radioform\"\" method=\"get\">";
-		for (ICis list : cisList) {   
-			result +="<input type=\"radio\" id=\""+list.getCisId()+"\" name=\"cisIDListRadio\" onClick=\"setText('"+list.getCisId()+"')\" value=\""+list.getCisId()+"\">"+list.getName()+"   - Owner: "+list.getOwnerId()+"<br>";
+		for (ICis list : cisList) {
+			if (cisName.equalsIgnoreCase(list.getCisId())) {
+				result +="<input type=\"radio\" id=\""+list.getCisId()+"\" name=\"cisIDListRadio\" onClick=\"setText('"+list.getCisId()+"')\" value=\""+list.getCisId()+"\">"+list.getName()+"   - Owner: "+list.getOwnerId()+" [Running] "+"<br>";
+			}
+			else {
+				result +="<input type=\"radio\" id=\""+list.getCisId()+"\" name=\"cisIDListRadio\" onClick=\"setText('"+list.getCisId()+"')\" value=\""+list.getCisId()+"\">"+list.getName()+"   - Owner: "+list.getOwnerId()+"<br>";
+			}
 			cisNames.add(list.getName());
 			cisIdList.add(list.getCisId());
 		}
@@ -119,10 +135,12 @@ public class Admin {
 			if (check.equalsIgnoreCase("start")){
 				result = "Started with cisID: "+name;
 				getCtxSubscriber().initialCtx(name);
+				cisName  = name;
 			}
 			else {
 				result = "Stop cisID: "+name;
 				getCtxSubscriber().stopCtx(name);
+				cisName  = "";
 			}
 
 		}
@@ -164,16 +182,6 @@ public class Admin {
 		return new ModelAndView("android", model) ;
 	}
 
-//	@RequestMapping(value="/notification.html",method = RequestMethod.GET)
-//	public ModelAndView notification() {
-//		//model is nothing but a standard Map object
-//		Map<String, Object> model = new HashMap<String, Object>();
-//		List<String> values = getTypesList(org.societies.api.context.model.CtxAttributeTypes.class);
-//		values.addAll(getTypesList(org.societies.api.internal.context.model.CtxAttributeTypes.class));
-//		model.put("attributeTypes", values);
-//
-//		return new ModelAndView("notification", model) ;
-//	}
 
 	@RequestMapping(value="/rules.html",method = RequestMethod.GET)
 	public ModelAndView Rules() {
@@ -289,35 +297,68 @@ public class Admin {
 		return app+"change to server: "+server;
 	}
 
-//	@RequestMapping(value = "/getnotifications.html", method = RequestMethod.GET)
-//	public @ResponseBody  String getNotification() {
-//		Hashtable<String,List<String>> sessionHashtable = getCtxSubscriber().getSessions();
-//		String result = "No Sessions at the moment";
-//		Enumeration<String> enumKey = sessionHashtable.keys();
-//		while(enumKey.hasMoreElements()) {
-//			String sessionName = enumKey.nextElement();
-//			result = "Session: "+sessionName+"<br>";
-//			result += " - Members: "+sessionHashtable.get(sessionName).toString()+"<br>";
-//			result += " - Language: "+getCtxSubscriber().getSessionLanguage(sessionName);
-//			result +="<br>";
-//		}
-//		return result ;
-//	}
-	
 	@RequestMapping(value="/notification.html",method = RequestMethod.GET)
 	public ModelAndView getNotification() {
 		Map<String, Object> model = new HashMap<String, Object>();
 		Hashtable<String,List<String>> sessionHashtable = getCtxSubscriber().getSessions();
 		List<String[]> results = new ArrayList<String[]>();
 		Enumeration<String> enumKey = sessionHashtable.keys();
-		
+
 		while(enumKey.hasMoreElements()) {
 			String sessionName = enumKey.nextElement();
 			String[] elements = {sessionName, sessionHashtable.get(sessionName).toString(), getCtxSubscriber().getSessionLanguage(sessionName)}; 
 			results.add(elements);
 		}
+		
+		this.app.setAppName("APP_NAME");
+		
+		List<String[]> resultsAsync = new ArrayList<String[]>();
+		for (Entry<String, String[]> entry : this.app.getHashTableResults().entrySet()) {
+			String[] elements = {"Location: "+entry.getKey()+ " people: "+Arrays.toString(entry.getValue())};
+			resultsAsync.add(elements);
+		}		
+
+		model.put("app_name", this.app.getAppName());
+		model.put("resultsAsync", resultsAsync);
+		
 		model.put("results", results);
+		model.put("log", readLogFile());
 		return new ModelAndView("notification", model) ;
+	}
+
+	private String readLogFile()  {
+		Reader fileReader = null;
+		try {
+			fileReader = new FileReader("databases/collabToolsLogFile.log");
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		BufferedReader input = new BufferedReader(fileReader);
+		String line = null;
+		while (true) {
+			try {
+				if ((line = input.readLine()) != null) {
+					return line;
+				}
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			try {
+				Thread.sleep(1000L);
+			} catch (InterruptedException x) {
+				Thread.currentThread().interrupt();
+			}
+
+			try {
+				input.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+
 	}
 
 }

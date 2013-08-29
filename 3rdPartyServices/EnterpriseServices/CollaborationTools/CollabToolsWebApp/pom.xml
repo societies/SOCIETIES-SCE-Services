@@ -164,7 +164,14 @@
 			<artifactId>CollabTools</artifactId>
 			<version>0.1.0</version>
 			<type>bundle</type>
-			<scope>provided</scope>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.societies.context-management</groupId>
+			<artifactId>context-3pbroker-connector</artifactId>
+			<version>0.1.0</version>
+			<type>bundle</type>
+			<scope>runtime</scope>
 		</dependency>
 	</dependencies>
 	

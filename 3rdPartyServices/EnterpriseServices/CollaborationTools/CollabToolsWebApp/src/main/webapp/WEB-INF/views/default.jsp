@@ -1,4 +1,5 @@
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1" pageEncoding="ISO-8859-1"%>
+<%@ taglib prefix="form" uri="http://www.springframework.org/tags/form"%>
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="xc"%>
 
 <html>
@@ -6,6 +7,11 @@
   <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
   <title>CollabTools</title>
 
+<link href="css/context.css" rel="stylesheet" type="text/css"
+	media="screen" />
+<link href="css/ctx-table-style.css" rel="stylesheet"
+	type="text/css" media="screen" />
+	
  <script type="text/javascript" src="js/jquery.js"></script>
 
  <script type="text/javascript">
