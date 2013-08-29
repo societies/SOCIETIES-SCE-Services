@@ -111,7 +111,7 @@ public class ExternalCtxBrokerMock 	{
 		criteria.setRule(rule2);
 		cisCriteria.put(CtxAttributeTypes.ADDRESS_HOME_COUNTRY, criteria);
 		
-		cisManager.createCis("CIS-Test-"+new Random().nextInt(100), "RICH", cisCriteria, "CIS Test").get();
+//		cisManager.createCis("CIS-Test-"+new Random().nextInt(100), "RICH", cisCriteria, "CIS Test").get();
 
 
 		LOG.info("*** Starting community context samples...");
