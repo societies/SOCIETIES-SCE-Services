@@ -43,7 +43,7 @@
 		<dependency>
 			<groupId>org.societies.api.sociallearning</groupId>
 			<artifactId>societies-api-sociallearning</artifactId>
-			<version>1.0</version>
+			<version>${release.version}</version>
 		</dependency>
 
 		<dependency>

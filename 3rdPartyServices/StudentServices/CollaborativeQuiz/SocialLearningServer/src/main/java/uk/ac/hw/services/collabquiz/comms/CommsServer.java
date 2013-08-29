@@ -48,23 +48,6 @@ public class CommsServer implements IFeatureServer {
 
 	public void init() {
 		log.debug("COMMS SERVER STARTED");
-	
-		if(getCommsManager()!=null) 
-		{
-			log.debug("YAY COMMMGR ISNT NULL!");
-		}
-		else
-		{
-			log.debug("BOOO COMMMGR IS NULL");
-		}
-		if(getCollabQuizServer()!=null)
-		{
-			log.debug("YAY COLLABQUIZ ISNT NULL!");
-		}
-		else
-		{
-			log.debug("BOOO COLLABQUIZ IS NULL");
-		}
 		//REGISTER OUR ServiceManager WITH THE XMPP Communication Manager
 		try {
 			getCommsManager().register(this);

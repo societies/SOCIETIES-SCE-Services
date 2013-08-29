@@ -40,6 +40,8 @@ import org.societies.api.comm.xmpp.interfaces.ICommManager;
 import org.societies.api.identity.IIdentity;
 import org.societies.api.identity.IIdentityManager;
 import org.societies.api.schema.servicelifecycle.model.ServiceResourceIdentifier;
+import org.societies.api.schema.css.devicemgmt.display.displayportalserverbean.DisplayPortalServerBean;
+import org.societies.api.schema.css.devicemgmt.display.displayportalserverbean.DisplayPortalServerMethodType;
 import org.societies.api.sociallearning.schema.serverbean.SocialLearningServerBean;
 import org.societies.api.sociallearning.schema.serverbean.SocialLearningMethodType;
 
@@ -216,9 +218,10 @@ public class CommsClient implements ISocialLearningServer, ICommCallback{
 		bean.setMethod(SocialLearningMethodType.SERVER_SOCKET_INFO_REQUEST);
 		logging.debug(bean.toString());
 		try {
-		//	this.commManager.sendMessage(stanza, "Hello there!");
-			this.commManager.sendIQGet(stanza, bean, this);//, this);
-			//getCommManager().sendIQGet(stanza, bean, this);
+
+			//this.commManager.sendMessage(stanza, bean);
+			//this.commManager.sendIQGet(stanza, bean, this);//, this);
+			getCommManager().sendIQGet(stanza, bean, this);
 		} catch (CommunicationException e) {
 			logging.debug("FAILED SENDING MESSAGE!");
 			logging.debug(e.toString());

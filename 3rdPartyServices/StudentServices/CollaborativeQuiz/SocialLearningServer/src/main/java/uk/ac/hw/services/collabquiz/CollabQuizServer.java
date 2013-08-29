@@ -65,8 +65,6 @@ public class CollabQuizServer implements ICollabQuizServer {
 		//NEED TO LISTEN AT SOME POINT FOR GUI {C#}
 		serverThread = new Thread(commsServerListener);
 		serverThread.start();
-		//GET A NEW COMMS CLIENT FOR XMPP COMMS
-		//this.commsClient = new CommsClient(this.commsManager);
 	}
 
 
@@ -79,14 +77,6 @@ public class CollabQuizServer implements ICollabQuizServer {
 		this.categoryList = categoryRepo.list();
 	}
 
-
-	//REGISTER FOR COMMS WITH CLIENT
-	public void receiveFromClient()
-	{
-
-
-
-	}
 
 	@Override
 	public ServiceResourceIdentifier getServerServiceId() {
