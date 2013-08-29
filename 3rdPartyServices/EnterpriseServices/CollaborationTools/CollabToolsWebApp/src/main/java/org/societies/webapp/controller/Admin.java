@@ -310,6 +310,10 @@ public class Admin {
 			results.add(elements);
 		}
 		
+		model.put("results", results);
+		model.put("log", readLogFile());
+		
+		//TODO: Example with async application here!!***************************
 		this.app.setAppName("APP_NAME");
 		
 		List<String[]> resultsAsync = new ArrayList<String[]>();
@@ -321,8 +325,8 @@ public class Admin {
 		model.put("app_name", this.app.getAppName());
 		model.put("resultsAsync", resultsAsync);
 		
-		model.put("results", results);
-		model.put("log", readLogFile());
+		//Until here*******************************
+
 		return new ModelAndView("notification", model) ;
 	}
 
