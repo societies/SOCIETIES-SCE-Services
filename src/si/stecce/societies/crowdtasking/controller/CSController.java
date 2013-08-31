@@ -37,9 +37,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import si.stecce.societies.crowdtasking.api.RESTful.EventAPI;
-import si.stecce.societies.crowdtasking.api.RESTful.SpaceAPI;
-import si.stecce.societies.crowdtasking.api.RESTful.UsersAPI;
+import si.stecce.societies.crowdtasking.api.RESTful.impl.EventAPI;
+import si.stecce.societies.crowdtasking.api.RESTful.impl.SpaceAPI;
+import si.stecce.societies.crowdtasking.api.RESTful.impl.UsersAPI;
 import si.stecce.societies.crowdtasking.model.CTUser;
 import si.stecce.societies.crowdtasking.model.CollaborativeSpace;
 import si.stecce.societies.crowdtasking.model.Community;

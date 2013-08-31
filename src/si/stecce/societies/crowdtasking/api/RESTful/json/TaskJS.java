@@ -27,16 +27,11 @@ package si.stecce.societies.crowdtasking.api.RESTful.json;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Random;
 import java.util.Set;
 
 import si.stecce.societies.crowdtasking.Util;
-import si.stecce.societies.crowdtasking.api.RESTful.UsersAPI;
-import si.stecce.societies.crowdtasking.model.CTUser;
-import si.stecce.societies.crowdtasking.model.CollaborativeSpace;
-import si.stecce.societies.crowdtasking.model.Community;
-import si.stecce.societies.crowdtasking.model.Meeting;
-import si.stecce.societies.crowdtasking.model.Task;
+import si.stecce.societies.crowdtasking.api.RESTful.impl.UsersAPI;
+import si.stecce.societies.crowdtasking.model.*;
 
 /**
  * Describe your class here...
@@ -56,7 +51,7 @@ public class TaskJS {
 	private List<String> tagList;
 	private boolean myTask;
 	private String tags;
-	private String status; // open (new), inprogress, finished, closed?
+	private TaskStatus status;
 	private List<Long> involvedUsers;
 	private List<String> informChannels;
 	private String executeMessage;
@@ -79,7 +74,7 @@ public class TaskJS {
 		this.tagList = task.getTagList();
 		this.myTask = task.isMyTask();
 		this.tags = task.getTags();
-		this.status = task.getStatus();
+		this.status = task.getTaskStatus();
 		this.involvedUsers = task.getInvolvedUsers();
 		this.informChannels = task.getInformChannels();
 		this.executeMessage = task.getExecuteMessage();

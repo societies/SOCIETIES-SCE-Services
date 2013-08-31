@@ -26,7 +26,7 @@ package si.stecce.societies.crowdtasking.api.RESTful.json; /**
 import java.util.ArrayList;
 import java.util.List;
 
-import si.stecce.societies.crowdtasking.api.RESTful.UsersAPI;
+import si.stecce.societies.crowdtasking.api.RESTful.impl.UsersAPI;
 import si.stecce.societies.crowdtasking.model.CTUser;
 import si.stecce.societies.crowdtasking.model.CollaborativeSpace;
 import si.stecce.societies.crowdtasking.model.Community;

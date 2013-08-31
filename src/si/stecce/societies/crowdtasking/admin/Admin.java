@@ -34,12 +34,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.googlecode.objectify.cmd.Query;
-import si.stecce.societies.crowdtasking.JavaMail;
-import si.stecce.societies.crowdtasking.Util;
-import si.stecce.societies.crowdtasking.api.RESTful.CommentAPI;
-import si.stecce.societies.crowdtasking.api.RESTful.SpaceAPI;
 import si.stecce.societies.crowdtasking.model.Event;
 import si.stecce.societies.crowdtasking.model.Task;
+import si.stecce.societies.crowdtasking.model.TaskStatus;
 
 import static si.stecce.societies.crowdtasking.model.dao.OfyService.ofy;
 
@@ -61,10 +58,29 @@ public class Admin extends HttpServlet {
 		//JavaMail.sendJavaMail(SENDER, "simon.juresa@setcce.si", "hoj", "navaden text", "HTML text", getBody());
 		//sendMeetingRequest1();
 		//sendMeetingRequest2();
-        convertEvents();
+        convertTasks();
 		long diff = System.currentTimeMillis() - startTime;
 		response.getWriter().write("time: " + diff);
 	}
+
+    private void convertTasks() {
+        Query<Task> q = ofy().load().type(Task.class);
+        for (Task task: q) {
+            switch (task.getStatus()) {
+                case "open":
+                    task.setTaskStatus(TaskStatus.OPEN);
+                    break;
+                case "inprogress":
+                    task.setTaskStatus(TaskStatus.IN_PROGRESS);
+                    break;
+                case "finished":
+                    task.setTaskStatus(TaskStatus.FINISHED);
+                    break;
+            }
+
+            ofy().save().entity(task);
+        }
+    }
 
     private void convertEvents() {
         Query<Event> q = ofy().load().type(Event.class);

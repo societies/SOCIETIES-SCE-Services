@@ -1,4 +1,4 @@
-package si.stecce.societies.crowdtasking.api.RESTful;
+package si.stecce.societies.crowdtasking.api.RESTful.impl;
 
 import static com.googlecode.objectify.ObjectifyService.ofy;
 
@@ -31,12 +31,9 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import si.stecce.societies.crowdtasking.NotificationsSender;
+import si.stecce.societies.crowdtasking.api.RESTful.ITaskAPI;
 import si.stecce.societies.crowdtasking.api.RESTful.json.TaskJS;
-import si.stecce.societies.crowdtasking.model.CTUser;
-import si.stecce.societies.crowdtasking.model.Comment;
-import si.stecce.societies.crowdtasking.model.Tag;
-import si.stecce.societies.crowdtasking.model.TagTask;
-import si.stecce.societies.crowdtasking.model.Task;
+import si.stecce.societies.crowdtasking.model.*;
 import si.stecce.societies.crowdtasking.model.dao.CommunityDAO;
 import si.stecce.societies.crowdtasking.model.dao.TagTaskDao;
 import si.stecce.societies.crowdtasking.model.dao.TaskDao;
@@ -45,16 +42,17 @@ import com.google.gson.Gson;
 import com.googlecode.objectify.cmd.Query;
 
 @Path("/task")
-public class TaskAPI {
+public class TaskAPI implements ITaskAPI {
     private static final Logger log = Logger.getLogger(TaskAPI.class.getName());
 
 	public TaskAPI() {
 	}
 
-	@GET
+	@Override
+    @GET
 	@Produces({MediaType.APPLICATION_JSON })
 	public String getTask(@DefaultValue("0") @QueryParam("id") Long id,
-			@Context HttpServletRequest request) {
+                          @Context HttpServletRequest request) {
 		CTUser user = UsersAPI.getLoggedInUser(request.getSession());
 	    if (user == null) {
 	    	return "";
@@ -82,7 +80,7 @@ public class TaskAPI {
 		return gson.toJson(list);
 	}
 	
-	public Response newTask(String title, String description, String taskDate,
+	private Response newTask(String title, String description, String taskDate,
 			List<Long> communities, String tagsString, CTUser user, List<String> communityJids) throws IOException, URISyntaxException {
 
 		DateFormat formatter = new SimpleDateFormat("dd.MM.yyyy");
@@ -145,21 +143,22 @@ public class TaskAPI {
 		return tagList;
 	}
 
-	@POST
+	@Override
+    @POST
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 	public Response postTask(
-			@FormParam("vwTaskId") String taskId,
-			@FormParam("activeComments") List<Long> activeComments,
-			@FormParam("inform") List<String> informChannels,
-			@FormParam("messageBody") String message,
-			@FormParam("action") String action,
-			@FormParam("title") String title,
-			@FormParam("description") String description,
-			@DefaultValue("") @FormParam("taskDate") String taskDate,
-			@FormParam("taskCommunity") List<Long> communities,
-			@FormParam("taskCommunityJids") List<String> communityJids,
-			@FormParam("taskTags") String tagsString,
-			@Context HttpServletRequest request)  throws IOException, URISyntaxException {
+            @FormParam("vwTaskId") String taskId,
+            @FormParam("activeComments") List<Long> activeComments,
+            @FormParam("inform") List<String> informChannels,
+            @FormParam("messageBody") String message,
+            @FormParam("action") String action,
+            @FormParam("title") String title,
+            @FormParam("description") String description,
+            @DefaultValue("") @FormParam("taskDate") String taskDate,
+            @FormParam("taskCommunity") List<Long> communities,
+            @FormParam("taskCommunityJids") List<String> communityJids,
+            @FormParam("taskTags") String tagsString,
+            @Context HttpServletRequest request)  throws IOException, URISyntaxException {
 			
 		CTUser user = UsersAPI.getLoggedInUser(request.getSession());
 		if ("create".equalsIgnoreCase(action)) {
@@ -198,7 +197,7 @@ public class TaskAPI {
 		task.setInvolvedUsers(new ArrayList<Long>(involvedUsers));
 		task.setInformChannels(informChannels);
 		task.setExecuteMessage(message);
-		task.setStatus("inprogress");
+		task.setTaskStatus(TaskStatus.IN_PROGRESS);
 		TaskDao.save(task);
 		CommentAPI.saveComments(comments);
 		// inform involved users
@@ -209,7 +208,7 @@ public class TaskAPI {
 	private Response finalizeTask(String taskId, CTUser user) {
 		// get active comments
 		Task task = TaskDao.getTaskById(new Long(taskId));
-		task.setStatus("finished");
+		task.setTaskStatus(TaskStatus.FINISHED);
 		ofy().save().entity(task);
 		EventAPI.logFinalizeTask(new Long(taskId), new Date(), user);
 		

@@ -22,14 +22,14 @@
  * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package si.stecce.societies.crowdtasking.api.RESTful.json;
+package si.stecce.societies.crowdtasking.api.RESTful.impl;
 
-import java.util.Date;
-import java.util.Random;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
 
-import si.stecce.societies.crowdtasking.Util;
-import si.stecce.societies.crowdtasking.model.CTUser;
-import si.stecce.societies.crowdtasking.model.Comment;
+import com.google.gson.Gson;
 
 /**
  * Describe your class here...
@@ -37,49 +37,13 @@ import si.stecce.societies.crowdtasking.model.Comment;
  * @author Simon Jureša
  *
  */
-@SuppressWarnings("unused")
-public class CommentJS {
-	private Long id;
-	private Long taskId;
-	private String postedBy;
-	private String commentText;
-	private String picUrl;
-	private Date posted;
-	private boolean execution;
-	private boolean liked;
-	private boolean myComment;
-	private String trustLevel;
-
-	public CommentJS(Comment comment, CTUser loggedinUser) {
-		id = comment.getId();
-		taskId = comment.getTask().getId();
-		picUrl = comment.getOwner().getPicUrl();
-		postedBy = comment.getOwner().getUserName();
-		commentText = comment.getComment();
-		posted = comment.getPosted();
-		execution = comment.isExecution();
-		this.trustLevel = getTrustLevel();
-		if (loggedinUser == null) {
-			this.trustLevel = "unknown";
-		}
-		else {
-			this.trustLevel = Util.getTrustLevelDescription(
-					loggedinUser.getTrustValueForIdentity(comment.getOwner().getSocietiesEntityId())); 
-		}
+@Path("/noaccess")
+public class NoAccess {
+	@GET
+	@Produces({MediaType.APPLICATION_JSON })
+	public String noAccess() {
+		Gson gson = new Gson();
+		return gson.toJson("Not authorized!");
 	}
 
-	public void setLiked(boolean liked) {
-		this.liked = liked;
-	}
-
-	public void setMyComment(boolean myComment) {
-		this.myComment = myComment;
-	}
-
-	private String getTrustLevel() {
-		int random = new Random().nextInt(3);
-		if (random == 2) return "trusted";
-		if (random == 1) return "marginallytrusted";
-		return "distrusted";
-	}
 }

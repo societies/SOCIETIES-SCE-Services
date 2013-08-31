@@ -20,13 +20,14 @@ public class Task {
     @Index private boolean societiesTask;
 	private String description;
 	private Date dueDate;
-	private Date created;
+    private Date created;
 	@Index private Long ownerId;
 	private String postedBy;	// userNickName
 	private List<String> tagList;
 	@Ignore private boolean myTask;
 	@Ignore private String tags;
-	private String status; // open (new), inprogress, finished, closed?
+    @Deprecated private String status; // open (new), inprogress, finished, closed?
+	@Index private TaskStatus taskStatus;
 	private List<Long> involvedUsers;
 	private List<String> informChannels;
 	private String executeMessage;
@@ -55,7 +56,7 @@ public class Task {
 		this.ownerId = ownerId;
 		this.postedBy = postedBy;
 		this.tagList = tagList;
-		this.status = "open";
+		this.taskStatus = TaskStatus.OPEN;
 		if (communityIds != null) {
 			communityRefs = new ArrayList<Ref<Community>>();
 			for (Long communityId:communityIds) {
@@ -133,10 +134,12 @@ public class Task {
 		return postedBy;
 	}
 
+    @Deprecated
 	public String getStatus() {
 		return status;
 	}
 
+    @Deprecated
 	public void setStatus(String status) {
 		this.status = status;
 	}
@@ -244,4 +247,12 @@ public class Task {
 	public List<Ref<Community>> getCommunitiesRefs() {
 		return communityRefs;
 	}
+
+    public TaskStatus getTaskStatus() {
+        return taskStatus;
+    }
+
+    public void setTaskStatus(TaskStatus taskStatus) {
+        this.taskStatus = taskStatus;
+    }
 }

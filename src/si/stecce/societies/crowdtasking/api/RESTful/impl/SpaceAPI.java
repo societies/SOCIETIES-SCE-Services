@@ -22,7 +22,7 @@
  * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package si.stecce.societies.crowdtasking.api.RESTful;
+package si.stecce.societies.crowdtasking.api.RESTful.impl;
 
 
 import static si.stecce.societies.crowdtasking.model.dao.OfyService.ofy;
@@ -48,6 +48,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import si.stecce.societies.crowdtasking.api.RESTful.ISpaceAPI;
 import si.stecce.societies.crowdtasking.model.CollaborativeSpace;
 import si.stecce.societies.crowdtasking.model.Community;
 import si.stecce.societies.crowdtasking.model.dao.CollaborativeSpaceDAO;
@@ -66,16 +67,17 @@ import com.googlecode.objectify.cmd.Query;
  *
  */
 @Path("/space")
-public class SpaceAPI {
+public class SpaceAPI implements ISpaceAPI {
     static {
 		ObjectifyService.register(CollaborativeSpace.class);
     }
 
-	@GET
+	@Override
+    @GET
 	@Produces({MediaType.APPLICATION_JSON })
 	public String getSpace(@DefaultValue("0") @QueryParam("id") Long id,
-			@DefaultValue("0") @QueryParam("userId") Long userId,
-			@Context HttpServletRequest request) {
+                           @DefaultValue("0") @QueryParam("userId") Long userId,
+                           @Context HttpServletRequest request) {
 		Gson gson = new Gson();
 		if (id != 0) {
 			return gson.toJson(getCollaborativeSpace(id));
@@ -125,13 +127,14 @@ public class SpaceAPI {
 		return spacesMap;
 	}
 	
-	@POST
+	@Override
+    @POST
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-	public Response newSpace(@FormParam("communityId") Long communityId, 
-			@FormParam("spaceId") Long spaceId,
-			@FormParam("spaceName") String name,
-			@FormParam("urlMapping") String urlMapping,
-			@FormParam("symbolicLocation") String symbolicLocation) throws IOException, URISyntaxException {
+	public Response newSpace(@FormParam("communityId") Long communityId,
+                             @FormParam("spaceId") Long spaceId,
+                             @FormParam("spaceName") String name,
+                             @FormParam("urlMapping") String urlMapping,
+                             @FormParam("symbolicLocation") String symbolicLocation) throws IOException, URISyntaxException {
 		
 		if ("".equals(communityId)) {
 			return Response.status(Status.BAD_REQUEST).entity("Unknown error.").type("text/plain").build();

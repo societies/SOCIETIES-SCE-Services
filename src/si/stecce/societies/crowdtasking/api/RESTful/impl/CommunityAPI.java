@@ -22,7 +22,7 @@
  * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package si.stecce.societies.crowdtasking.api.RESTful;
+package si.stecce.societies.crowdtasking.api.RESTful.impl;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,6 +42,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import si.stecce.societies.crowdtasking.NotificationsSender;
+import si.stecce.societies.crowdtasking.api.RESTful.ICommunityAPI;
 import si.stecce.societies.crowdtasking.api.RESTful.json.CommunityJS;
 import si.stecce.societies.crowdtasking.model.CTUser;
 import si.stecce.societies.crowdtasking.model.Community;
@@ -51,12 +52,13 @@ import com.google.gson.Gson;
 import com.googlecode.objectify.cmd.Query;
 
 @Path("/community/{querytype}")
-public class CommunityAPI {
-	@GET
+public class CommunityAPI implements ICommunityAPI {
+	@Override
+    @GET
 	@Produces({ MediaType.APPLICATION_JSON })
 	public String getCommunity(@PathParam("querytype") String querytype,
-			@QueryParam("communityId") Long communityId,
-			@Context HttpServletRequest request) {
+                               @QueryParam("communityId") Long communityId,
+                               @Context HttpServletRequest request) {
 
 		if ("browse".equalsIgnoreCase(querytype)) {
 			return getCommunities(UsersAPI.getLoggedInUser(request.getSession()));
@@ -82,20 +84,21 @@ public class CommunityAPI {
 		return gson.toJson(list);
 	}
 	
-	@POST
+	@Override
+    @POST
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 	public Response createCommunity(
-			@PathParam("querytype") String querytype,
+            @PathParam("querytype") String querytype,
             @FormParam("communityId") String communityId,
             @FormParam("communityJid") String communityJid,
-			@FormParam("name") String name,
-			@FormParam("description") String description,
-			@FormParam("csName") String csName,
-			@FormParam("urlMapping") String urlMapping,
-			@FormParam("symbolicLocation") String symbolicLocation,
-			@FormParam("members") List<Long> members,
-			@FormParam("memberId") Long memberId,
-			@Context HttpServletRequest request) {
+            @FormParam("name") String name,
+            @FormParam("description") String description,
+            @FormParam("csName") String csName,
+            @FormParam("urlMapping") String urlMapping,
+            @FormParam("symbolicLocation") String symbolicLocation,
+            @FormParam("members") List<Long> members,
+            @FormParam("memberId") Long memberId,
+            @Context HttpServletRequest request) {
 		CTUser user = UsersAPI.getLoggedInUser(request.getSession());
 		if (user == null) {
 			return Response.status(Status.UNAUTHORIZED).entity("Not authorized.").type("text/plain").build();	

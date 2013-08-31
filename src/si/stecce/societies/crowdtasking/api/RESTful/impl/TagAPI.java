@@ -1,4 +1,4 @@
-package si.stecce.societies.crowdtasking.api.RESTful;
+package si.stecce.societies.crowdtasking.api.RESTful.impl;
 
 import static si.stecce.societies.crowdtasking.model.dao.OfyService.ofy;
 
@@ -14,6 +14,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
+import si.stecce.societies.crowdtasking.api.RESTful.ITagAPI;
 import si.stecce.societies.crowdtasking.model.Tag;
 
 import com.google.gson.Gson;
@@ -21,10 +22,11 @@ import com.googlecode.objectify.NotFoundException;
 import com.googlecode.objectify.cmd.Query;
 
 @Path("/tag")
-public class TagAPI {
-	@GET
+public class TagAPI implements ITagAPI {
+	@Override
+    @GET
 	@Produces({MediaType.APPLICATION_JSON })
-	public String getTask(@DefaultValue("0") @QueryParam("id") Long id) {
+	public String getTag(@DefaultValue("0") @QueryParam("id") Long id) {
 		Gson gson = new Gson();
 		if (id != 0) {
 			Tag tag = null;

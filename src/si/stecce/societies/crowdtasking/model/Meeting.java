@@ -28,7 +28,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import si.stecce.societies.crowdtasking.api.RESTful.UsersAPI;
+import si.stecce.societies.crowdtasking.api.RESTful.impl.UsersAPI;
 import si.stecce.societies.crowdtasking.model.dao.CollaborativeSpaceDAO;
 
 import com.googlecode.objectify.Key;

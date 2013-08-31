@@ -275,7 +275,7 @@ var CrowdTaskingApp = function() {
     };
 
     var showMeetings = function(task) {
-    	if (task.status != 'inprogress') return;
+    	if (task.status != 'IN_PROGRESS') return;
     	
     	$('#meetingDiv').show();
     	$meetingList = $('#meetingList'); 
@@ -382,18 +382,19 @@ var CrowdTaskingApp = function() {
         	// ui-title
         	//var title = $('#formTitle').text();
         	var tazkId = $('#vwTaskId').val();
+/*
             if (mode === 'execute') {
             	form_data= $('#executeTaskForm').serialize();
             }
-            $('#vwTaskId').val(task.id);	// post coment form
-            if (mode === 'execute') {
-            	form_data= $('#executeTaskForm').serialize();
-            }
-            $('#taskId').val(task.id);	// new meeting form
+*/
+            $('#vwTaskId').val(task.id);	// post comment form
+            $('#taskId').val(task.id);	    // new meeting form
+/*
         	if (task.status === 'inprogress') {
         		$('#formTitle').text("Task's execution");
            		$("a.rightHeaderButton").hide();	// hide execute & finalize buttons
         	}
+*/
         	if (task.status === 'finished') {
         		$("a.rightHeaderButton").hide();
         	}
@@ -413,15 +414,16 @@ var CrowdTaskingApp = function() {
             d1=new Date(task.dueDate);
             $('#taskDate').text(d1.getDate()+"."+(d1.getMonth()+1)+"."+d1.getFullYear());
 
-            var communities = [];
+            //var communities = [];
             var communitiesText = "";
             if (task.communities !== undefined) {
                 var communities = task.communities;
             }
             if (task.communityJids !== undefined) {
                 // get Societies communities from android
-                // TODO change later
-                communities = [{"description":"Open community. Join us.","id":"cis-2ea7bb44-31cc-466b-a0e8-3015a2ce852d.research.setcce.si", "name":"community 1","memberStatus":"You are the owner.","member":false,"owner":true,"pending":false}];
+                // TODO getCISes(JIDs[])
+                // communities = android.getCommunites(String[] jids)
+                communities = [{"description":"Open community. Join us.","id":"cis-2ea7bb44-31cc-466b-a0e8-3015a2ce852d.research.setcce.si", "name":"community X","memberStatus":"You are the owner.","member":false,"owner":true,"pending":false}];
             }
             if (communities != null && communities.length > 0) {
                 communitiesText = communities[0].name;
@@ -446,7 +448,7 @@ var CrowdTaskingApp = function() {
    			$meetingCS.selectmenu('refresh');
             
             showMeetings(task);
-            showComments(task.id, $('#commentForExecution').val());
+            showComments(task.id, false);
         }
     };
 
@@ -496,15 +498,21 @@ var CrowdTaskingApp = function() {
         $taskCommunity.selectmenu('refresh');
     };
 
+    var getAllCIS4User = function() {
+        if (window.location.hostname === 'localhost') {
+            communities =[{"description":"Open community. Join us.","id":"cis-2ea7bb44-31cc-466b-a0e8-3015a2ce852d.research.setcce.si", "name":"community 1","memberStatus":"You are the owner.","member":false,"owner":true,"pending":false}];
+        }
+        else {
+            communities = JSON.parse(window.android.getSocietiesCommunities());
+        }
+        return communities;
+    }
     var getCommunities4User = function(successFn) {
         if (isSocietiesUser()) {
-            if (window.location.hostname === 'localhost') {
-                communities =[{"description":"Open community. Join us.","id":"cis-2ea7bb44-31cc-466b-a0e8-3015a2ce852d.research.setcce.si", "name":"community 1","memberStatus":"You are the owner.","member":false,"owner":true,"pending":false}];
+            communities = getAllCIS4User();
+            if (successFn !== undefined) {
+                successFn();
             }
-            else {
-                communities = JSON.parse(window.android.getSocietiesCommunities());
-            }
-            successFn();
         }
         else {
             $.ajax({
@@ -513,7 +521,9 @@ var CrowdTaskingApp = function() {
                 //data: { 'id': id },
                 success: function(result) {
                     communities = result;
-                    successFn();
+                    if (successFn !== undefined) {
+                        successFn();
+                    }
 //                    fillCommunityComboBox(communities);
                 }
             });
@@ -1032,6 +1042,12 @@ $(document).on('pageinit', '#viewTask', function(event, data){
     $('#likeButton').hide();
     $('#likedButton').hide();
 
+    $('#finalizeTaskSaveButton').bind('tap', function(event, data) {
+        event.preventDefault();
+        $("#finalizeDialog").popup("close");
+        $('#finalizeButton').hide();
+        CrowdTaskingApp.finalizeTask();
+    });
     $('#commentButton').bind('tap', function(event, data) {
         event.preventDefault();
         $('#commentButton').hide();
@@ -1039,8 +1055,7 @@ $(document).on('pageinit', '#viewTask', function(event, data){
     });
     $('#finalizeButton').bind('tap', function(event, data) {
         event.preventDefault();
-        $('#finalizeButton').unbind('tap');
-        CrowdTaskingApp.finalizeTask();
+        $("#finalizeDialog").popup("open");
     });
     $('#likeButton').bind('tap', function(event, data) {
         event.preventDefault();

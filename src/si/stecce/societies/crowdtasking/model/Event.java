@@ -28,9 +28,9 @@ import java.util.Date;
 import java.util.List;
 
 import si.stecce.societies.crowdtasking.Util;
-import si.stecce.societies.crowdtasking.api.RESTful.CommentAPI;
-import si.stecce.societies.crowdtasking.api.RESTful.SpaceAPI;
-import si.stecce.societies.crowdtasking.api.RESTful.UsersAPI;
+import si.stecce.societies.crowdtasking.api.RESTful.impl.CommentAPI;
+import si.stecce.societies.crowdtasking.api.RESTful.impl.SpaceAPI;
+import si.stecce.societies.crowdtasking.api.RESTful.impl.UsersAPI;
 import si.stecce.societies.crowdtasking.model.dao.CommunityDAO;
 import si.stecce.societies.crowdtasking.model.dao.MeetingDAO;
 import si.stecce.societies.crowdtasking.model.dao.TaskDao;

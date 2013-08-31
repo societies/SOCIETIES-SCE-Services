@@ -30,7 +30,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
-import si.stecce.societies.crowdtasking.api.RESTful.UsersAPI;
+import si.stecce.societies.crowdtasking.api.RESTful.impl.UsersAPI;
 import si.stecce.societies.crowdtasking.model.CTUser;
 import si.stecce.societies.crowdtasking.model.Comment;
 import si.stecce.societies.crowdtasking.model.Community;

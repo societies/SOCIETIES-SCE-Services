@@ -1,4 +1,4 @@
-package si.stecce.societies.crowdtasking.api.RESTful;
+package si.stecce.societies.crowdtasking.api.RESTful.impl;
 
 import static si.stecce.societies.crowdtasking.model.dao.OfyService.ofy;
 
@@ -26,6 +26,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import si.stecce.societies.crowdtasking.NotificationsSender;
+import si.stecce.societies.crowdtasking.api.RESTful.ICommentAPI;
 import si.stecce.societies.crowdtasking.api.RESTful.json.CommentJS;
 import si.stecce.societies.crowdtasking.model.CTUser;
 import si.stecce.societies.crowdtasking.model.Comment;
@@ -36,15 +37,18 @@ import com.googlecode.objectify.Key;
 import com.googlecode.objectify.NotFoundException;
 import com.googlecode.objectify.Ref;
 import com.googlecode.objectify.cmd.Query;
+import si.stecce.societies.crowdtasking.model.TaskStatus;
+import si.stecce.societies.crowdtasking.model.dao.TaskDao;
 
 @Path("/comment")
-public class CommentAPI {
+public class CommentAPI implements ICommentAPI {
 
-	@GET
+	@Override
+    @GET
 	@Produces({MediaType.APPLICATION_JSON })
 	public String getComment(@QueryParam("taskId") Long taskId,
-			@DefaultValue("false") @QueryParam("execution") boolean execution,
-			@Context HttpServletRequest request) {
+                             @DefaultValue("false") @QueryParam("execution") boolean execution,
+                             @Context HttpServletRequest request) {
 
 		ArrayList<CommentJS> list = new ArrayList<CommentJS>();
 		Gson gson = new Gson();
@@ -76,13 +80,14 @@ public class CommentAPI {
 		return gson.toJson(list);
 	}
 
-	@POST
+	@Override
+    @POST
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 	public Response newComment(@FormParam("vwTaskId") Long taskId,
-			@FormParam("commentText") String commentText,
-			@FormParam("execution") boolean execution,
-			@Context HttpServletRequest request,
-			@Context HttpServletResponse servletResponse) throws IOException, URISyntaxException {
+                               @FormParam("commentText") String commentText,
+                               @FormParam("execution") boolean execution,
+                               @Context HttpServletRequest request,
+                               @Context HttpServletResponse servletResponse) throws IOException, URISyntaxException {
 		
 		if (commentText == null || "".equalsIgnoreCase(commentText)) {
 			return Response.status(Status.BAD_REQUEST).build();
@@ -91,8 +96,17 @@ public class CommentAPI {
 		CTUser user = UsersAPI.getLoggedInUser(request.getSession());
 
 		Comment comment = new Comment(taskId, user, commentText);
-		comment.setExecution(execution);
+//		comment.setExecution(execution);
 		Long commentId = saveComment(comment);
+        Task task = TaskDao.getTaskById(taskId);
+        List<Long> involvedUsers = task.getInvolvedUsers();
+        if (involvedUsers == null) {
+            involvedUsers = new ArrayList<>();
+            task.setTaskStatus(TaskStatus.IN_PROGRESS);
+        }
+        involvedUsers.add(user.getId());
+        task.setInvolvedUsers(involvedUsers);
+        TaskDao.save(task);
 		
 		EventAPI.logTaskComment(taskId, commentId, comment.getPosted(), user);
 		NotificationsSender.commentOnTaskIParticipate(comment.getTask(), getInvolvedUsersOnTaskThatWasCommented(comment));

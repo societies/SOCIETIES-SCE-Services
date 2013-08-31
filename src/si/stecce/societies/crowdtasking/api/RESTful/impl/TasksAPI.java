@@ -22,7 +22,7 @@
  * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package si.stecce.societies.crowdtasking.api.RESTful;
+package si.stecce.societies.crowdtasking.api.RESTful.impl;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -39,6 +39,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 
+import si.stecce.societies.crowdtasking.api.RESTful.ITasksAPI;
 import si.stecce.societies.crowdtasking.api.RESTful.json.TaskJS;
 import si.stecce.societies.crowdtasking.model.CTUser;
 import si.stecce.societies.crowdtasking.model.Task;
@@ -61,15 +62,16 @@ import com.googlecode.objectify.cmd.Query;
  *
  */
 @Path("/tasks/{querytype}")
-public class TasksAPI {
+public class TasksAPI implements ITasksAPI {
 	private static final int HIGHEST_RATED_NUM = 5;
 
-	@GET
+	@Override
+    @GET
 	@Produces({MediaType.APPLICATION_JSON})
-	public String getTasks(@PathParam("querytype") String querytype, 
-			@QueryParam("searchString") String searchString,
-			@QueryParam("communityId") Long communityId,
-			@Context HttpServletRequest request) {
+	public String getTasks(@PathParam("querytype") String querytype,
+                           @QueryParam("searchString") String searchString,
+                           @QueryParam("communityId") Long communityId,
+                           @Context HttpServletRequest request) {
 		CTUser user = UsersAPI.getLoggedInUser(request.getSession());
 		if ("my".equalsIgnoreCase(querytype)) {
 			return getMyTasks(user);

@@ -22,7 +22,7 @@
  * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package si.stecce.societies.crowdtasking.api.RESTful;
+package si.stecce.societies.crowdtasking.api.RESTful.impl;
 
 import java.util.Date;
 
@@ -38,6 +38,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import si.stecce.societies.crowdtasking.api.RESTful.IRemoteControlAPI;
 import si.stecce.societies.crowdtasking.model.CTUser;
 
 import com.google.appengine.api.channel.ChannelMessage;
@@ -51,14 +52,15 @@ import com.google.appengine.api.channel.ChannelServiceFactory;
  *
  */
 @Path("/remote/{querytype}")
-public class RemoteControlAPI {
+public class RemoteControlAPI implements IRemoteControlAPI {
 
-	@GET
+	@Override
+    @GET
 	@Produces({MediaType.TEXT_PLAIN })
 	public Response get(@PathParam("querytype") String querytype,
-			@DefaultValue("") @QueryParam("page") String page,
-			@DefaultValue("") @QueryParam("taskId") String taskId,
-			@Context HttpServletRequest request) 
+                        @DefaultValue("") @QueryParam("page") String page,
+                        @DefaultValue("") @QueryParam("taskId") String taskId,
+                        @Context HttpServletRequest request)
 	{
 		CTUser user = UsersAPI.getLoggedInUser(request.getSession());
 		if (user == null) {
