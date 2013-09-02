@@ -91,7 +91,7 @@ public class EventAPI {
 				Collections.sort(events, new EventComparator());
 			}
 			Gson gson = new Gson();
-            ArrayList<EventJS> list = new ArrayList<EventJS>();
+            ArrayList<EventJS> list = new ArrayList<>();
             for (Event event: events) {
                 list.add(new EventJS(event));
             }
@@ -104,8 +104,7 @@ public class EventAPI {
 
 	@POST
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-	public Response newComment(@FormParam("eventType") String eventType,
-			@DefaultValue("-1") @FormParam("taskId") Long taskId,
+	public Response newComment(@DefaultValue("-1") @FormParam("taskId") Long taskId,
 			@Context HttpServletRequest request) {
 		
 		CTUser user = UsersAPI.getLoggedInUser(request.getSession());
@@ -125,7 +124,7 @@ public class EventAPI {
 		else {
 			return null;
 		}
-		ArrayList<Event> list = new ArrayList<Event>();
+		ArrayList<Event> list = new ArrayList<>();
 		for (Event event: q) {
 			if (event.getType() != EventType.REQUEST_TO_JOIN_COMMUNITY) {
 				list.add(event);
@@ -143,7 +142,7 @@ public class EventAPI {
 		else {
 			q = ofy().load().type(Event.class).order("-eventDate").limit(DEFAULT_NUM_EVENTS);
 		}
-		ArrayList<Event> list = new ArrayList<Event>();
+		ArrayList<Event> list = new ArrayList<>();
 		for (Event event: q) {
 			list.add(event);
 		}
@@ -154,7 +153,7 @@ public class EventAPI {
 	private String getEventsForUser(CTUser user, int limit) {
 		Gson gson = new Gson();
 		Query<Event> q = ofy().load().type(Event.class).order("-eventDate").limit(MAX_NUM_EVENTS);
-		ArrayList<EventJS> list = new ArrayList<EventJS>();
+		ArrayList<EventJS> list = new ArrayList<>();
 		int i=0;
 		EventsForUserFilter filter = new EventsForUserFilter(user);
 		for (Event event: q) {
@@ -174,9 +173,9 @@ public class EventAPI {
 	}
 	
 	public static void logNewCommunity(Long communityId, String communityJid, CTUser user) {
-        List<Ref<Community>> communityRefs = new ArrayList<Ref<Community>>();
+        List<Ref<Community>> communityRefs = new ArrayList<>();
         communityRefs.add(Ref.create(Key.create(Community.class, communityId)));
-        List<String> communityJids = new ArrayList<String>();
+        List<String> communityJids = new ArrayList<>();
         communityJids.add(communityJid);
         createEvent(EventType.COMMUNITY_CREATED, null, null, null, new Date(), user, null, communityRefs, communityJids);
 	}
@@ -244,17 +243,17 @@ public class EventAPI {
 	}
 	
 	public static void logRequestToJoinCommunity(Long communityId, String communityJid, CTUser user) {
-		List<Ref<Community>> communityRefs = new ArrayList<Ref<Community>>();
+		List<Ref<Community>> communityRefs = new ArrayList<>();
 		communityRefs.add(Ref.create(Key.create(Community.class, communityId)));
-        List<String> communityJids = new ArrayList<String>();
+        List<String> communityJids = new ArrayList<>();
         communityJids.add(communityJid);
 		createEvent(EventType.REQUEST_TO_JOIN_COMMUNITY, null, null, null, new Date(), user, null, communityRefs, communityJids);
 	}
 	
 	public static void logNewMemeberJoinedCommunity(Long communityId, String communityJid, CTUser user) {
-		List<Ref<Community>> communityRefs = new ArrayList<Ref<Community>>();
+		List<Ref<Community>> communityRefs = new ArrayList<>();
 		communityRefs.add(Ref.create(Key.create(Community.class, communityId)));
-        List<String> communityJids = new ArrayList<String>();
+        List<String> communityJids = new ArrayList<>();
         communityJids.add(communityJid);
 		createEvent(EventType.JOINED_COMMUNITY, null, null, null, new Date(), user, null, communityRefs, communityJids);
 	}
