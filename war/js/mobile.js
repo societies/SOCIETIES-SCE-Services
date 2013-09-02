@@ -421,9 +421,8 @@ var CrowdTaskingApp = function() {
             }
             if (task.communityJids !== undefined) {
                 // get Societies communities from android
-                // TODO getCISes(JIDs[])
-                // communities = android.getCommunites(String[] jids)
-                communities = [{"description":"Open community. Join us.","id":"cis-2ea7bb44-31cc-466b-a0e8-3015a2ce852d.research.setcce.si", "name":"community 1","memberStatus":"You are the owner.","member":false,"owner":true,"pending":false}];
+                communities = getCISes(task.communityJids)
+                //communities = [{"description":"Open community. Join us.","id":"cis-2ea7bb44-31cc-466b-a0e8-3015a2ce852d.research.setcce.si", "name":"community 1","memberStatus":"You are the owner.","member":false,"owner":true,"pending":false}];
             }
             if (communities != null && communities.length > 0) {
                 communitiesText = communities[0].name;
@@ -498,8 +497,18 @@ var CrowdTaskingApp = function() {
         $taskCommunity.selectmenu('refresh');
     };
 
+    var getCISes = function(jids) {
+        if (window.location.hostname === 'localhost') { // TODO for testing
+            communities =[{"description":"Open community. Join us.","id":"cis-2ea7bb44-31cc-466b-a0e8-3015a2ce852d.research.setcce.si", "name":"community 1","memberStatus":"You are the owner.","member":false,"owner":true,"pending":false}];
+        }
+        else {
+            communities = JSON.parse(window.android.getSocietiesCommunitiesByJids(jids));
+        }
+        return communities;
+    }
+
     var getAllCIS4User = function() {
-        if (window.location.hostname === 'localhost') {
+        if (window.location.hostname === 'localhost') { // TODO for testing
             communities =[{"description":"Open community. Join us.","id":"cis-2ea7bb44-31cc-466b-a0e8-3015a2ce852d.research.setcce.si", "name":"community 1","memberStatus":"You are the owner.","member":false,"owner":true,"pending":false}];
         }
         else {
@@ -507,6 +516,7 @@ var CrowdTaskingApp = function() {
         }
         return communities;
     }
+
     var getCommunities4User = function(successFn) {
         if (isSocietiesUser()) {
             communities = getAllCIS4User();

@@ -53,16 +53,24 @@ var Community = function() {
 
     var isSocietiesUser = function() {
         if (typeof(android) !== "undefined") {
-            return (window.android.isSocietiesUser);
+            console.log("on android");
+            console.log("societies user: "+window.android.getSocietiesUser());
+            console.log("societies user: "+window.android.getSocietiesCommunities());
+            return true;
+            //return (android.socUser);
         }
-        if (window.location.hostname === TEST_HOST) return true;
-
+        if (window.location.hostname === TEST_HOST) {
+            console.log("on "+TEST_HOST);
+            return true;
+        }
+        console.log("not on android");
         return false;
     };
 
     var getCommunities = function(successFn) {
         console.log("getCommunities");
         if (isSocietiesUser()) {
+            console.log("societies user");
             if (window.location.hostname === TEST_HOST) {
                 societiesCommunities =[{"description":"Open community. Join us.","id":"cis-2ea7bb44-31cc-466b-a0e8-3015a2ce852d.research.setcce.si", "name":"community 1","memberStatus":"You are the owner.","member":false,"owner":true,"pending":false}];
             }
@@ -72,6 +80,7 @@ var Community = function() {
             successFn();
         }
         else {
+            console.log("NOT societies user");
             $.ajax({
                 type: 'GET',
                 url: '/rest/community/browse',
