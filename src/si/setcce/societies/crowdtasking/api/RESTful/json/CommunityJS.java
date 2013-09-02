@@ -11,8 +11,8 @@ import org.societies.integration.model.SocietiesUser;
  */
 @SuppressWarnings("unused")
 public class CommunityJS {
-    private Long id;
-    private String jid;
+    public Long id;
+    public String jid;
     private String name = "";
     private String description = "";
 //    private List<CollaborativeSpace> spaces;

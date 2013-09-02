@@ -42,7 +42,7 @@ import si.setcce.societies.crowdtasking.api.RESTful.json.CommunityJS;
  *
  */
 public class CrowdTasking extends Application {
-    private List<CommunityJS> societiesCommunities = new ArrayList<CommunityJS>();
+    private List<CommunityJS> societiesCommunities = new ArrayList();
     private String societiesCommunitiesJSON;
     Gson gson = new Gson();
 
@@ -56,12 +56,24 @@ public class CrowdTasking extends Application {
         return gson.toJson(societiesCommunities);
     }
 
+    public String getSocietiesCommunitiesByJids(String[] jids) {
+        List<CommunityJS> selectedCommunities = new ArrayList();
+        for (CommunityJS commJS:societiesCommunities) {
+            for (String jid:jids) {
+                if (jid.equalsIgnoreCase(commJS.jid)) {
+                    selectedCommunities.add(commJS);
+                }
+            }
+        }
+        return gson.toJson(selectedCommunities);
+    }
+
     public List<CommunityJS> getSocietiesCommunities() {
         return societiesCommunities;
     }
 
     public void setSocietiesCommunities(List<CommunityJS> societiesCommunities) {
         this.societiesCommunities = societiesCommunities;
-        societiesCommunitiesJSON = gson.toJson(societiesCommunities);;
+        societiesCommunitiesJSON = gson.toJson(societiesCommunities);
     }
 }

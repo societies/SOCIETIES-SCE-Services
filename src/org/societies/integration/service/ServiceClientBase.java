@@ -8,8 +8,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Messenger;
+import android.os.RemoteException;
 import android.util.Log;
 
 public abstract class ServiceClientBase {
@@ -99,6 +101,22 @@ public abstract class ServiceClientBase {
         } catch (IllegalArgumentException e) {
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    protected Bundle getBundle() {
+        Bundle outBundle = new Bundle();
+        outBundle.putString("client", context.getPackageName());
+        return outBundle;
+    }
+
+    protected void callMethod(int methodNumber, Bundle outBundle) {
+        android.os.Message outMessage = android.os.Message.obtain(null, methodNumber, 0, 0);
+        outMessage.setData(outBundle);
+        try {
+            this.targetService.send(outMessage);
+        } catch (RemoteException e) {
+            Log.e(LOG_TAG, "Could not send remote method invocation", e);
         }
     }
 }

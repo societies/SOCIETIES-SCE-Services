@@ -73,9 +73,10 @@ public class MainActivity extends Activity implements SensorEventListener {
 	private static final String LOG_EVENT = "si.setcce.societies.android.rest.LOG_EVENT";
 	private static final String LOGIN_USER = "si.setcce.societies.android.rest.LOGIN_USER";
 	private static final String GET_MEETING_ACTION = "si.setcce.societies.android.rest.meeting";
+//    private static final String APPLICATION_URL = "http://06-09-2013.crowdtasking.appspot.com";
     private static final String APPLICATION_URL = "http://crowdtasking.appspot.com";
     private static final String LOGIN_URL = APPLICATION_URL + "/login";
-	//private static final String APPLICATION_URL = "http://192.168.1.102:8888";
+//	private static final String APPLICATION_URL = "http://192.168.1.102:8888";
     private static final String MEETING_URL = APPLICATION_URL + "/android/meeting/";
     private static final String GET_USER_REST_API_URL = APPLICATION_URL + "/rest/users/me";
 	private static final String MEETING_REST_API_URL = APPLICATION_URL + "/rest/meeting";
@@ -136,8 +137,8 @@ public class MainActivity extends Activity implements SensorEventListener {
             societiesServicesRunning = true;
             communityManagementClient = new CommunityManagementClient(this, communityClientReceiver);
             communityManagementClient.setUpService();
-            cisDirectoryClient = new CisDirectoryClient(this, communityClientReceiver);
-            cisDirectoryClient.setUpService();
+//            cisDirectoryClient = new CisDirectoryClient(this, communityClientReceiver);
+//            cisDirectoryClient.setUpService();
         }
         else {
             System.out.println("Societies services are not running?");
@@ -619,26 +620,32 @@ public class MainActivity extends Activity implements SensorEventListener {
     }
 
     public class JSInterface {
-		private WebView mAppView;
+		private WebView mWebView;
 		//@JavascriptInterface for API 17
 		public JSInterface(WebView appView) {
-			this.mAppView = appView;
+			this.mWebView = appView;
 		}
 		
 		public void toast(String echo) {
-			Toast toast = Toast.makeText(mAppView.getContext(), echo,
-					Toast.LENGTH_SHORT);
+			Toast toast = Toast.makeText(mWebView.getContext(), echo,
+                    Toast.LENGTH_SHORT);
 			toast.show();
 		}
 		
 		public void goBack() {
-			mAppView.goBack();
+			mWebView.goBack();
 		}
 
         public boolean isSocietiesUser() {
+            Log.i("isSocietiesUser()", "isSocietiesUser: " + isSocietiesUser);
             return isSocietiesUser;
         }
 		
+        public String socUser() {
+            Log.i("isSocietiesUser()", "isSocietiesUser: " + isSocietiesUser);
+            return new Boolean(isSocietiesUser).toString();
+        }
+
 		public String getSocietiesUser() {
             SocietiesUser societiesUser = getSocietiesUserData();
             JSONObject societiesUserJSON = new JSONObject();
@@ -655,15 +662,16 @@ public class MainActivity extends Activity implements SensorEventListener {
         }
 
         public String getSocietiesCommunities() {
-            //Gson gson = new Gson();
-            //String response = "societies communities";
-            //return response;
             return ((CrowdTasking)getApplication()).getSocietiesCommunitiesJSON();
+        }
+
+        public String getSocietiesCommunitiesByJids(String[] jids) {
+            return ((CrowdTasking)getApplication()).getSocietiesCommunitiesByJids(jids);
         }
 
         public void share(String spejs, String action) {
             if (spejs == null || "".equalsIgnoreCase(spejs)) {
-				Toast toast = Toast.makeText(mAppView.getContext(), "Enter URL mapping", Toast.LENGTH_SHORT);
+				Toast toast = Toast.makeText(mWebView.getContext(), "Enter URL mapping", Toast.LENGTH_SHORT);
 				toast.show();
 				return;
 			}
@@ -778,6 +786,9 @@ public class MainActivity extends Activity implements SensorEventListener {
         super.onStop();
         if (communityManagementClient != null) {
             communityManagementClient.tearDownService();
+        }
+        if (cisDirectoryClient != null) {
+            cisDirectoryClient.tearDownService();
         }
     }
 }
