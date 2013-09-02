@@ -72,7 +72,7 @@
 							The exclusion of internal package can be avoided as the plugin excludes automatically 
 							'internal' and 'impl' package names org.societies.api.** -->
 						<_exportcontents>
-							!org.societies.api.rfid.schema,
+							!org.societies.api.sociallearning.schema,
 							*
 						</_exportcontents>
 						<Embed-Dependency>*;scope=compile|runtime</Embed-Dependency>

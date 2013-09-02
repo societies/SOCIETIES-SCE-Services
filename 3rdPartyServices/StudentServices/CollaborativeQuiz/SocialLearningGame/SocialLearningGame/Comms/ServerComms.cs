@@ -61,6 +61,7 @@ namespace SocialLearningGame.Comms
             //return response.Data;
 
             List<string[]> data = ReadSeparatedFile("users.tsv", '\t');
+            log.Debug(data);
             List<User> users = new List<User>();
             log.Debug("Loading mock users...");
             foreach (string[] entry in data)
@@ -122,6 +123,7 @@ namespace SocialLearningGame.Comms
             log.Debug("Loading mock questions...");
             foreach (string[] entry in data)
             {
+                log.Debug("Entry: " + entry + " Size: " + entry.Length);
                 Question question = new Question()
                 {
                     ID = Int32.Parse(entry[0]),

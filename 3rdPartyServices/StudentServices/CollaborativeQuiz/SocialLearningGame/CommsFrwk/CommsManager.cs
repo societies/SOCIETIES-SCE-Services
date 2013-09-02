@@ -31,12 +31,11 @@ namespace CommsFrwk
         public void RegisterListener(String nodeName)
         {
             log.Debug("Registering listener for " + nodeName);
-
+            
             JID jid = new JID(username + "@" + hostUrl);
-
-            PubSubNode node = pubSubManager.GetNode(jid, nodeName, 1);
-            node.OnItemPublished += node_OnItemPublished;
-            node.Subscribe();
+            //PubSubNode node = pubSubManager.GetNode(jid, nodeName, 1);
+          //  node.OnItemPublished += node_OnItemPublished;
+           // node.Subscribe();
         }
 
         void node_OnItemPublished(PubSubNode node, jabber.protocol.iq.PubSubItem item)

@@ -26,56 +26,33 @@ package ac.hw.services.socialLearning.app;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-
-import javax.swing.JOptionPane;
-import javax.swing.UIManager;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.societies.api.comm.xmpp.datatypes.Stanza;
-import org.societies.api.comm.xmpp.exceptions.CommunicationException;
 import org.societies.api.comm.xmpp.interfaces.ICommManager;
-import org.societies.api.context.CtxException;
 import org.societies.api.context.broker.ICtxBroker;
 import org.societies.api.context.model.CtxAttribute;
-import org.societies.api.context.model.CtxAttributeValueType;
-import org.societies.api.context.model.CtxEntity;
-import org.societies.api.context.model.CtxEntityIdentifier;
-import org.societies.api.context.model.CtxIdentifier;
-import org.societies.api.context.model.CtxModelType;
 import org.societies.api.css.devicemgmt.display.DisplayEvent;
 import org.societies.api.css.devicemgmt.display.DisplayEventConstants;
 import org.societies.api.css.devicemgmt.display.IDisplayDriver;
 import org.societies.api.css.devicemgmt.display.IDisplayableService;
 import org.societies.api.identity.IIdentity;
 import org.societies.api.identity.IIdentityManager;
-import org.societies.api.identity.InvalidFormatException;
 import org.societies.api.identity.RequestorService;
-import org.societies.api.internal.servicelifecycle.ServiceModelUtils;
 import org.societies.api.osgi.event.CSSEvent;
 import org.societies.api.osgi.event.CSSEventConstants;
+import org.societies.api.osgi.event.EventListener;
 import org.societies.api.osgi.event.EventTypes;
 import org.societies.api.osgi.event.IEventMgr;
-import org.societies.api.osgi.event.EventListener;
 import org.societies.api.osgi.event.InternalEvent;
-import org.societies.api.personalisation.model.IAction;
-import org.societies.api.personalisation.model.IActionConsumer;
-import org.societies.api.personalisation.model.PersonalisablePreferenceIdentifier;
 import org.societies.api.schema.servicelifecycle.model.ServiceResourceIdentifier;
 import org.societies.api.services.IServices;
 import org.societies.api.services.ServiceMgmtEvent;
 import org.societies.api.services.ServiceMgmtEventType;
 
+import ac.hw.services.socialLearning.api.ISocialLearningService;
 import ac.hw.services.socialLearning.app.comms.CommsServerListener;
 import ac.hw.services.socialLearning.app.comms.ISocialLearningServer;
-
-import org.societies.api.sociallearning.schema.serverbean.SocialLearningMethodType;
-import org.societies.api.sociallearning.schema.serverbean.SocialLearningServerBean;
-
-import ac.hw.services.socialLearning.api.ISocialLearningService;
 
 /**
  * Describe your class here...
@@ -129,26 +106,22 @@ public class SocialLearningService extends EventListener implements ISocialLearn
 		this.serverThread = new Thread(commsServerListener);
 		this.serverThread.start();
 		
-		if(this.commMgr==null)
-		{
-			logging.debug("COMM IS NULL!");
-		}
+		
 
-		/*
-		this.registerForDisplayEvents();
+		
+		//this.registerForDisplayEvents();
+		
 		try {
 			
 			this.myServiceExeURL = new URL("http://www.macs.hw.ac.uk/~ceeep1/societies/services/SocialLearningGame.exe");
 			this.myServiceName = "Social Learning Game";
-			this.displayDriverService.registerDisplayableService(this, myServiceName, myServiceExeURL, false);
-			
+			this.displayDriverService.registerDisplayableService(this, myServiceName, myServiceExeURL, listenerPort, false);
+			logging.debug("Registered as a displayable service");
 		} catch (MalformedURLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
-		UIManager.put("ClassLoader", ClassLoader.getSystemClassLoader());
-		//myGui = new ExampleServiceGUI(this); */
 	}
 	
 
@@ -198,7 +171,7 @@ public class SocialLearningService extends EventListener implements ISocialLearn
 			//logging.debug("Received SLM event");
 			ServiceMgmtEvent slmEvent = (ServiceMgmtEvent) event.geteventInfo();
 			logging.debug("EventBundle: " + slmEvent.getBundleSymbolName());
-			if (slmEvent.getBundleSymbolName().equalsIgnoreCase("CollabQuizServer")){
+			if (slmEvent.getBundleSymbolName().equalsIgnoreCase("ac.hw.services.SocialLearningApp")){
 				this.logging.debug("Received SLM event for my bundle");
 				if (slmEvent.getEventType().equals(ServiceMgmtEventType.SERVICE_STARTED)){
 					

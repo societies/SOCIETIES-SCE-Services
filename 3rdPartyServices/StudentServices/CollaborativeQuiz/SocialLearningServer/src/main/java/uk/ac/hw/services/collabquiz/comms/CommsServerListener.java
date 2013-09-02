@@ -3,14 +3,12 @@ package uk.ac.hw.services.collabquiz.comms;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.ac.hw.services.collabquiz.CollabQuizServer;
 
 public class CommsServerListener implements Runnable {
 	
@@ -19,7 +17,7 @@ public class CommsServerListener implements Runnable {
 	
 	private ServerSocket serverSocket;
 	private int port;
-	private InetAddress address;
+	private String address;
 	
 	public CommsServerListener()
 	{
@@ -34,8 +32,9 @@ public class CommsServerListener implements Runnable {
 		try {
 			this.serverSocket = new ServerSocket(0);
 			this.port = this.serverSocket.getLocalPort();
-			this.address = this.serverSocket.getInetAddress();
+			this.address = this.serverSocket.getInetAddress().getLocalHost().getHostAddress();
 			this.serverSocket.close();
+			log.debug("Socket will listen on: " +address+":"+port);
 		} catch (IOException e) {
 			log.debug("Error when trying to get port and address!");
 		}
