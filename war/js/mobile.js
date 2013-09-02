@@ -423,7 +423,7 @@ var CrowdTaskingApp = function() {
                 // get Societies communities from android
                 // TODO getCISes(JIDs[])
                 // communities = android.getCommunites(String[] jids)
-                communities = [{"description":"Open community. Join us.","id":"cis-2ea7bb44-31cc-466b-a0e8-3015a2ce852d.research.setcce.si", "name":"community X","memberStatus":"You are the owner.","member":false,"owner":true,"pending":false}];
+                communities = [{"description":"Open community. Join us.","id":"cis-2ea7bb44-31cc-466b-a0e8-3015a2ce852d.research.setcce.si", "name":"community 1","memberStatus":"You are the owner.","member":false,"owner":true,"pending":false}];
             }
             if (communities != null && communities.length > 0) {
                 communitiesText = communities[0].name;
