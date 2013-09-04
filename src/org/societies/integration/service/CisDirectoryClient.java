@@ -13,7 +13,7 @@ import org.societies.android.api.cis.management.ICisManager;
 import org.societies.android.api.services.ICoreSocietiesServices;
 
 public class CisDirectoryClient extends ServiceClientBase {
-	private final static String LOG_TAG = "CommunityManagementClient";
+	private final static String LOG_TAG = "CisDirectoryClient";
     private BroadcastReceiver receiver;
 
 	public CisDirectoryClient(Context context, BroadcastReceiver receiver) {
@@ -45,7 +45,7 @@ public class CisDirectoryClient extends ServiceClientBase {
 	public void findAllCisAdvertismentRecords() {
 		//cisManager.getCisList(CLIENT, "all");
 		if (this.connectedToContextClient) {
-            callMethod(1, getBundle());
+            callMethod(0, getBundle());
 		}
 	}
 

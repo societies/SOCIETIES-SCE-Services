@@ -84,10 +84,10 @@ public abstract class ServiceClientBase {
      */
     private BroadcastReceiver setupBroadcastReceiver() {
         Log.d(LOG_TAG, "Set up broadcast receiver");
-        
+
         this.receiver = getBroadcastReceiver();
-        context.registerReceiver(this.receiver, createIntentFilter());    
-        Log.d(LOG_TAG, "Register broadcast receiver");
+        Log.d(LOG_TAG, "Register broadcast receiver: "+receiver.getClass().getName());
+        context.registerReceiver(this.receiver, createIntentFilter());
 
         return receiver;
     }

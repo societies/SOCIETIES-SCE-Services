@@ -24,6 +24,7 @@ import android.view.Window;
 import android.webkit.ConsoleMessage;
 import android.webkit.CookieManager;
 import android.webkit.CookieSyncManager;
+import android.webkit.JavascriptInterface;
 import android.webkit.JsResult;
 import android.webkit.WebBackForwardList;
 import android.webkit.WebChromeClient;
@@ -45,11 +46,13 @@ import org.json.JSONObject;
 import org.societies.android.api.cis.directory.ICisDirectory;
 import org.societies.android.api.cis.management.ICisManager;
 import org.societies.android.api.contentproviders.CSSContentProvider;
+import org.societies.android.api.events.IAndroidSocietiesEvents;
 import org.societies.api.schema.cis.community.Community;
 import org.societies.api.schema.cis.directory.CisAdvertisementRecord;
 import org.societies.integration.model.SocietiesUser;
 import org.societies.integration.service.CisDirectoryClient;
 import org.societies.integration.service.CommunityManagementClient;
+import org.societies.integration.service.SocietiesEventsClient;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
@@ -96,7 +99,8 @@ public class MainActivity extends Activity implements SensorEventListener {
 	private float mAccelLast;		// last acceleration including gravity
     private CommunityManagementClient communityManagementClient;
     private CisDirectoryClient cisDirectoryClient;
-    private boolean isSocietiesUser=false, societiesServicesRunning;
+    private SocietiesEventsClient societiesEventsClient;
+    private boolean isSocietiesUser=false, societiesServicesRunning, communityManagementClientConnected, cisDirectoryClientConnected, societiesEventsClientConnected;
     private SocietiesUser societiesUser = null;
     private final static String LOG_TAG = "Crowd Tasking";
 
@@ -137,7 +141,9 @@ public class MainActivity extends Activity implements SensorEventListener {
             societiesServicesRunning = true;
             communityManagementClient = new CommunityManagementClient(this, communityClientReceiver);
             communityManagementClient.setUpService();
-//            cisDirectoryClient = new CisDirectoryClient(this, communityClientReceiver);
+            societiesEventsClient = new SocietiesEventsClient(this, eventsClientReceiver);
+            societiesEventsClient.setUpService();
+//            cisDirectoryClient = new CisDirectoryClient(this, cisDirectoryClientReceiver);
 //            cisDirectoryClient.setUpService();
         }
         else {
@@ -436,6 +442,14 @@ public class MainActivity extends Activity implements SensorEventListener {
         }
     };
 
+    private BroadcastReceiver eventsClientReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            System.out.println("intent.getAction():"+intent.getAction());
+            System.out.println("intent:"+intent);
+        }
+    };
+
     private BroadcastReceiver communityClientReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -495,10 +509,16 @@ public class MainActivity extends Activity implements SensorEventListener {
             if (intent.getAction().equalsIgnoreCase(SERVICE_CONNECTED)) {
                 String response = intent.getStringExtra("serviceName");
                 if (response.equalsIgnoreCase("CommunityManagement")) {
+                    communityManagementClientConnected = true;
                     communityManagementClient.listCommunities();
                 }
                 if (response.equalsIgnoreCase("CisDirectoryClient")) {
+                    cisDirectoryClientConnected = true;
                     cisDirectoryClient.findAllCisAdvertismentRecords();
+                }
+                if (response.equalsIgnoreCase("SocietiesEventsClient")) {
+                    societiesEventsClientConnected = true;
+                    societiesEventsClient.subcribeToAllEvents();
                 }
                 System.out.println(response);
             }
@@ -625,27 +645,32 @@ public class MainActivity extends Activity implements SensorEventListener {
 		public JSInterface(WebView appView) {
 			this.mWebView = appView;
 		}
-		
+
+        @JavascriptInterface
 		public void toast(String echo) {
 			Toast toast = Toast.makeText(mWebView.getContext(), echo,
                     Toast.LENGTH_SHORT);
 			toast.show();
 		}
-		
+
+        @JavascriptInterface
 		public void goBack() {
 			mWebView.goBack();
 		}
 
+        @JavascriptInterface
         public boolean isSocietiesUser() {
             Log.i("isSocietiesUser()", "isSocietiesUser: " + isSocietiesUser);
             return isSocietiesUser;
         }
-		
+
+        @JavascriptInterface
         public String socUser() {
             Log.i("isSocietiesUser()", "isSocietiesUser: " + isSocietiesUser);
             return new Boolean(isSocietiesUser).toString();
         }
 
+        @JavascriptInterface
 		public String getSocietiesUser() {
             SocietiesUser societiesUser = getSocietiesUserData();
             JSONObject societiesUserJSON = new JSONObject();
@@ -661,14 +686,17 @@ public class MainActivity extends Activity implements SensorEventListener {
             return societiesUserJSON.toString();
         }
 
+        @JavascriptInterface
         public String getSocietiesCommunities() {
             return ((CrowdTasking)getApplication()).getSocietiesCommunitiesJSON();
         }
 
+        @JavascriptInterface
         public String getSocietiesCommunitiesByJids(String[] jids) {
             return ((CrowdTasking)getApplication()).getSocietiesCommunitiesByJids(jids);
         }
 
+        @JavascriptInterface
         public void share(String spejs, String action) {
             if (spejs == null || "".equalsIgnoreCase(spejs)) {
 				Toast toast = Toast.makeText(mWebView.getContext(), "Enter URL mapping", Toast.LENGTH_SHORT);
