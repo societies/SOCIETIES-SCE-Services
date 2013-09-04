@@ -42,8 +42,12 @@ var Community = function() {
         list.empty();
 
         list.append('<li data-role="list-divider" role="heading">Communities</li>');
-        listCommunities(communities, createTapHandler, list);
-        listCommunities(societiesCommunities, createSocietiesTapHandler, list);
+        if (isSocietiesUser()) {
+            listCommunities(societiesCommunities, createSocietiesTapHandler, list);
+        }
+        else {
+            listCommunities(communities, createTapHandler, list);
+        }
         list.listview('refresh', true);
         if (isSocietiesUser()) {
             $('#addCommunityButton').hide();

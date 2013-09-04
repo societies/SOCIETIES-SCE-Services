@@ -123,6 +123,18 @@ public final class TaskDao {
 				.order("-score").limit(limit);
 	}
 
+	public static Query<Task> getTasksInCommunities(List<Ref<Community>> communityRefs) {
+		return ofy().load().type(Task.class).filter("communityRefs in", communityRefs);
+	}
+
+	public static Query<Task> getTasksInSocietiesCommunities(List<Ref<Community>> communityRefs) {
+		return ofy().load().type(Task.class).filter("communityJidsRefs in", communityRefs);
+	}
+
+	public static Query<Task> getTasksInSocietiesCommunitiesJids(List<String> communityJids) {
+		return ofy().load().type(Task.class).filter("communityJids in", communityJids);
+	}
+
 	public static Query<Task> getTasks(int limit) {
 		return ofy().load().type(Task.class).limit(limit);
 	}
@@ -148,6 +160,10 @@ public final class TaskDao {
 	
 	public static Query<Task> findSocietiesTasksByUser(Long userId) {
 		return ofy().load().type(Task.class).filter("ownerId", userId).filter(" !=", null);
+	}
+
+	public static Query<Task> findSocietiesTasks() {
+		return ofy().load().type(Task.class).filter("communityJids !=", null);
 	}
 
 	public static Collection<Task> getTasksByInterests(CTUser user) {

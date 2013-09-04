@@ -80,7 +80,7 @@ public final class CollaborativeSpaceDAO {
 
 	public static Set<CollaborativeSpace> getCollaborativeSpaces4User(CTUser user) {
 		Query<Community> communities = CommunityDAO.loadCommunities4User(user);
-		Set<CollaborativeSpace> cses = new HashSet<CollaborativeSpace>();
+		Set<CollaborativeSpace> cses = new HashSet<>();
 		for (Community community:communities) {
 			if (community.getCollaborativeSpaces() != null) {
 				for (CollaborativeSpace cs:community.getCollaborativeSpaces()) {

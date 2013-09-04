@@ -1,5 +1,6 @@
 package si.stecce.societies.crowdtasking.model;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -36,6 +37,7 @@ public class Task {
 	@Load private List<Ref<Meeting>> meetingsRefs;
 	@Index @Load private List<Ref<Community>> communityRefs;
 	@Index private List<String> communityJids;
+    @Index private List<Ref<Community>> communityJidRefs;
 	@Ignore private Set<CollaborativeSpace> spaces;
 
 	public Task() {
@@ -254,5 +256,13 @@ public class Task {
 
     public void setTaskStatus(TaskStatus taskStatus) {
         this.taskStatus = taskStatus;
+    }
+
+    public List<Ref<Community>> getCommunityJidRefs() {
+        return communityJidRefs;
+    }
+
+    public void setCommunityJidRefs(List<Ref<Community>> communityJidRefs) {
+        this.communityJidRefs = communityJidRefs;
     }
 }

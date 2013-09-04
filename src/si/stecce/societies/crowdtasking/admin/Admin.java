@@ -26,14 +26,19 @@ package si.stecce.societies.crowdtasking.admin;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.googlecode.objectify.Key;
+import com.googlecode.objectify.Ref;
 import com.googlecode.objectify.cmd.Query;
+import si.stecce.societies.crowdtasking.model.Community;
 import si.stecce.societies.crowdtasking.model.Event;
 import si.stecce.societies.crowdtasking.model.Task;
 import si.stecce.societies.crowdtasking.model.TaskStatus;
@@ -66,6 +71,7 @@ public class Admin extends HttpServlet {
     private void convertTasks() {
         Query<Task> q = ofy().load().type(Task.class);
         for (Task task: q) {
+/*
             switch (task.getStatus()) {
                 case "open":
                     task.setTaskStatus(TaskStatus.OPEN);
@@ -77,8 +83,23 @@ public class Admin extends HttpServlet {
                     task.setTaskStatus(TaskStatus.FINISHED);
                     break;
             }
-
-            ofy().save().entity(task);
+*/
+            List<String> communityJids = task.getCommunityJids();
+            List<Ref<Community>> communityJidRefs = new ArrayList<>();
+            if (communityJids != null) {
+                for (String jid:communityJids) {
+                    communityJidRefs.add(Ref.create(Key.create(Community.class, jid)));
+                }
+                task.setCommunityJidRefs(communityJidRefs);
+            }
+            ofy().save().entities(task);
+/*
+            List<Community> communities = task.getCommunities();
+            for (Community community:communities) {
+                community.addTask(task);
+                ofy().save().entity(community);
+            }
+*/
         }
     }
 

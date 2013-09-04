@@ -7,6 +7,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import java.util.List;
 
 /**
  * @author: Simon Jureša
@@ -17,5 +18,7 @@ public interface ITasksAPI {
     String getTasks(@PathParam("querytype") String querytype,
                     @QueryParam("searchString") String searchString,
                     @QueryParam("communityId") Long communityId,
+                    @QueryParam("communityJids") String communityJidsJson,
+                    @QueryParam("societiesUser") boolean societiesUser,
                     @Context HttpServletRequest request);
 }

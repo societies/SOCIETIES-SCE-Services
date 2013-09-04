@@ -48,16 +48,17 @@ import com.googlecode.objectify.annotation.Load;
 @Entity
 public class Community {
 	@Index @Id private Long id;
-    @Index private String jid;
+//    @Index private String jid;
 	private String name;
 	private String description;
 	@Load private Ref<CTUser> ownerRef;
 	@Ignore private CTUser owner;
 	@Index @Load private List<Ref<CollaborativeSpace>> collaborativeSpaceRefs;
 	@Ignore private List<CollaborativeSpace> collaborativeSpaces;
-	private List<Ref<Community>> subCommunities;
+//	private List<Ref<Community>> subCommunities;
 	@Load @Index private Set<Ref<CTUser>> members;
 	@Load @Index private Set<Ref<CTUser>> requests;
+    @Index @Load private List<Ref<Task>> taskRefs;  // todo: Mike's idea to have list of tasks here, finnish it or ...
 
 	public Community() {
 	}
@@ -80,25 +81,45 @@ public class Community {
 		CollaborativeSpace collaborativeSpace = new CollaborativeSpace(name, urlMapping, symbolicLocation);
 		Key<CollaborativeSpace> key = CollaborativeSpaceDAO.save(collaborativeSpace);
 		if (collaborativeSpaceRefs == null) {
-			collaborativeSpaceRefs = new ArrayList<Ref<CollaborativeSpace>>();
+			collaborativeSpaceRefs = new ArrayList<>();
 		}
 		collaborativeSpaceRefs.add(Ref.create(key));
 	}
 	
+/*
 	public void addCommunity(Community community) {
 		if (subCommunities == null) {
 			subCommunities = new ArrayList<Ref<Community>>();
 		}
 		subCommunities.add(Ref.create(Key.create(Community.class, community.getId())));
 	}
-	
-	public void addRequest(CTUser user) {
+*/
+
+    public void addTask(Task task) {
+        if (taskRefs == null) {
+            taskRefs = new ArrayList<>();
+        }
+        taskRefs.add(Ref.create(Key.create(Task.class, task.getId())));
+    }
+
+    public List<Task> getTasks() {
+        if (taskRefs == null) {
+            return null;
+        }
+        List<Task> tasks = new ArrayList<>();
+        for (Ref<Task> communitiesRef:taskRefs) {
+            tasks.add(communitiesRef.get());
+        }
+        return tasks;
+    }
+
+    public void addRequest(CTUser user) {
 		addRequest(user.getId());
 	}
 	
 	public void addRequest(Long userId) {
 		if (requests == null) {
-			requests  = new HashSet<Ref<CTUser>>();
+			requests  = new HashSet<>();
 		}
 		requests.add(Ref.create(Key.create(CTUser.class, userId)));
 	}
@@ -131,13 +152,13 @@ public class Community {
 	
 	public void addMember(Long userId) {
 		if (members == null) {
-			members = new HashSet<Ref<CTUser>>();
+			members = new HashSet<>();
 		}
 		members.add(Ref.create(Key.create(CTUser.class, userId)));
 	}
 	
 	public void addMembers(List<Long> memberIDs) {
-		members = new HashSet<Ref<CTUser>>();
+		members = new HashSet<>();
 		members.add(ownerRef);
 		for (Long userId:memberIDs) {
 			addMember(userId);
@@ -154,7 +175,7 @@ public class Community {
 	
 	public List<CollaborativeSpace> getCollaborativeSpaces() {
 		if (collaborativeSpaces == null && collaborativeSpaceRefs != null) {
-			collaborativeSpaces = new ArrayList<CollaborativeSpace>();
+			collaborativeSpaces = new ArrayList<>();
 			for (Ref<CollaborativeSpace> collaborativeSpaceRef:collaborativeSpaceRefs) {
 				try {
 					CollaborativeSpace cs = collaborativeSpaceRef.get();
@@ -181,6 +202,7 @@ public class Community {
 		return collaborativeSpaces;
 	}
 
+/*
 	public List<Ref<Community>> getSubCommunities() {
 		return subCommunities;
 	}
@@ -188,7 +210,8 @@ public class Community {
 	public void setSubCommunities(List<Ref<Community>> subCommunities) {
 		this.subCommunities = subCommunities;
 	}
-	
+*/
+
 	public Set<Ref<CTUser>> getMembers() {
 		return members;
 	}

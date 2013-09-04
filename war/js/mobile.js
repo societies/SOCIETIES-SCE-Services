@@ -58,7 +58,7 @@ var CrowdTaskingApp = function() {
     var refreshTasks = function() {
     	$.ajax({
     		type: 'GET',
-    		url: '/rest/tasks/interesting',
+    		url: '/rest/tasks/inmycommunities',
     		success: function(allTasks) {
     			tasks = allTasks;
     		}
@@ -78,9 +78,21 @@ var CrowdTaskingApp = function() {
     };
 
     var loadTasks = function(apiUrl) {
+        var communityJids;
+        var ize = ["something", "communityJids" , "something1"];
+        if (isSocietiesUser()) {
+            var communities = getAllCIS4User();
+            // todo check if communities are not empty
+            communityJids=[];
+            for (var i = 0; i < communities.length; i++) {
+                communityJids.push(communities[i].id);
+            }
+        }
+        console.log("communityJids:"+communityJids);
     	$.ajax({
     		type: 'GET',
     		url: '/rest/tasks/'+apiUrl,
+            data: { 'communityJids' : JSON.stringify(communityJids) },
     		success: function(allTasks) {
     			tasks = allTasks;
     			if (apiUrl === 'my') {
@@ -118,7 +130,8 @@ var CrowdTaskingApp = function() {
         });
     };
     
-    var startExecution = function() {	  
+/*
+    var startExecution = function() {
     	var form_data = $('#executeTaskForm').serialize();
 
         $.ajax({
@@ -140,17 +153,12 @@ var CrowdTaskingApp = function() {
             		loadTasks('my');
             	}
             	
-            	/*tasks[currentTaskIndex].status = 'inprogress';	// je to ok???
-                $.mobile.changePage('/menu', {
-                    transition: 'slide',
-                    reverse: true
-                });
-                //loadTasks('interesting');*/
             },
             complete: function() {
             }
           });
     };
+*/
 
     var taskFinalize = function() {
     	var form_data = $('#viewTaskForm').serialize();
@@ -564,7 +572,7 @@ var CrowdTaskingApp = function() {
         },
 
         init: function() {
-            loadTasks('interesting');
+            loadTasks('inmycommunities');
         },
         
         myTasks: function() {
