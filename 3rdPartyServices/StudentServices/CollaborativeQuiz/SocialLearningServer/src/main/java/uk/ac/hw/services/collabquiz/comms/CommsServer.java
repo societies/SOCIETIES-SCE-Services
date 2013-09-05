@@ -11,9 +11,8 @@ import org.societies.api.comm.xmpp.exceptions.CommunicationException;
 import org.societies.api.comm.xmpp.exceptions.XMPPError;
 import org.societies.api.comm.xmpp.interfaces.ICommManager;
 import org.societies.api.comm.xmpp.interfaces.IFeatureServer;
-import org.societies.api.sociallearning.schema.serverbean.SocialLearningServerBean;
 import org.societies.api.sociallearning.schema.serverbean.SocialLearningMethodType;
-
+import org.societies.api.sociallearning.schema.serverbean.SocialLearningServerBean;
 
 import uk.ac.hw.services.collabquiz.ICollabQuizServer;
 
@@ -78,7 +77,6 @@ public class CommsServer implements IFeatureServer {
 
 	@Override
 	public Object getQuery(Stanza stanza, Object payload) throws XMPPError {
-		
 		log.debug("I have picked up a message!");
 		if(payload instanceof SocialLearningServerBean) {
 			SocialLearningServerBean bean = (SocialLearningServerBean) payload;
@@ -87,6 +85,8 @@ public class CommsServer implements IFeatureServer {
 				bean.setMethod(SocialLearningMethodType.SERVER_SOCKET_INFO);
 				bean.setAddress(collabQuizServer.getAddress());
 				bean.setPort(collabQuizServer.getPort());
+				//I ALSO WANT TO FIND OUT WHO SENT ME A MESSAGE, SO I CAN CHECK IF THEY ARE A NEW USER
+				collabQuizServer.checkUser(stanza.getFrom().getJid());
 				return bean;
 			}
 		}

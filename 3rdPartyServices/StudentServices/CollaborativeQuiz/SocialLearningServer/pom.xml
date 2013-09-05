@@ -127,6 +127,12 @@
 			<groupId>org.societies.api.sociallearning</groupId>
 			<artifactId>societies-api-sociallearning</artifactId>
 			<version>1.2</version>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.google.code.gson</groupId>
+			<artifactId>gson</artifactId>
+			<version>2.2.4</version>
 		</dependency>
 
 		<dependency>
@@ -311,9 +317,7 @@
 					<instructions>
 						<Embed-Dependency>*;scope=compile|runtime</Embed-Dependency>
 						<Embed-Transitive>false</Embed-Transitive>
-						<Export-Package>org.societies.api.sociallearning.schema.serverbean.*</Export-Package>
 						<Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
-						<Include-Resource>{maven-resources}</Include-Resource>
 						<Import-Package>
 							com.sun.faces.application,
 							com.sun.faces.application.view,
@@ -332,6 +336,7 @@
 							javax.faces.application,
 							javax.faces.component,
 							javax.faces.component.html,
+							javax.faces.convert,
 							javax.faces.event,
 							javax.faces.webapp,
 							javax.servlet.http,
@@ -350,6 +355,7 @@
 							org.societies.api.schema.servicelifecycle.model,
 
 
+
 							<!-- Hibernate -->
 							org.hibernate,
 							org.hibernate.cfg,
@@ -359,9 +365,11 @@
 							<!--org.springframework.jdbc.datasource, -->
 							com.mysql.jdbc,
 							com.mysql.jdbc.jdbc2.optional,
+							com.google.gson,
 
 
-							org.societies.api.sociallearning.schema.serverbean,
+
+
 
 							<!-- REST server -->
 							<!-- org.restlet, org.restlet.data, org.restlet.ext.servlet, org.restlet.ext.xml, 
@@ -526,7 +534,8 @@
 
 							*;scope=compile|runtime;resolution:=optional
 						</Import-Package>
-						<Bundle-ClassPath>WEB-INF/classes,.</Bundle-ClassPath>
+						<Bundle-ClassPath>WEB-INF/classes,.,
+						WEB-INF/lib/societies-sociallearning-schema-1.2.jar</Bundle-ClassPath>
 						<Webapp-Context>collabquiz</Webapp-Context>
 						<Web-ContextPath>collabquiz</Web-ContextPath>
 					</instructions>
@@ -544,7 +553,7 @@
 					</archive>
 					<webappDirectory>src/main/webapp</webappDirectory>
 					<!-- Make a skinny WAR -->
-					<packagingExcludes>WEB-INF/lib/*.jar</packagingExcludes>
+					<!-- <packagingExcludes>WEB-INF/lib/*.jar</packagingExcludes> -->
 				</configuration>
 			</plugin>
 

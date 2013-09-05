@@ -8,11 +8,11 @@ import org.slf4j.LoggerFactory;
 public class HibernateUtil {
     private static final Logger log = LoggerFactory.getLogger(HibernateUtil.class);
 
-    private static final SessionFactory sessionFactory;
+    private static final SessionFactory sessionFactory = buildSessionFactory();
 
-    static {
+    private static SessionFactory buildSessionFactory() {
         try {
-            sessionFactory = new AnnotationConfiguration()
+            return new AnnotationConfiguration()
                     .configure()
                     .addPackage("uk.ac.hw.services.collabquiz.entities")
                     .buildSessionFactory();

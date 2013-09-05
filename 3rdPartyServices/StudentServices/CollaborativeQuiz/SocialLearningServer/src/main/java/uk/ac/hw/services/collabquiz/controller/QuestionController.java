@@ -2,8 +2,10 @@ package uk.ac.hw.services.collabquiz.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+
 import uk.ac.hw.services.collabquiz.Logic.QuestionDifficulty;
 import uk.ac.hw.services.collabquiz.dao.IQuestionRepository;
+import uk.ac.hw.services.collabquiz.dao.impl.QuestionRepository;
 import uk.ac.hw.services.collabquiz.entities.Question;
 
 import javax.annotation.PostConstruct;
@@ -11,6 +13,7 @@ import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ViewScoped;
 import javax.faces.context.FacesContext;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -20,7 +23,7 @@ import java.util.List;
 @ViewScoped
 public class QuestionController extends BasePageController {
 
-    @Autowired
+    
     private IQuestionRepository questionRepository;
 
     private final List<Question> questions = new ArrayList<Question>();
@@ -34,12 +37,13 @@ public class QuestionController extends BasePageController {
     private Question[] selectedQuestions;
 
     public QuestionController() {
-        log.debug("QuestionController ctor()");
+        postConstruct();
     }
 
-    @PostConstruct
+    
     public void postConstruct() {
         log.debug("postConstruct ()");
+        questionRepository = new QuestionRepository();
 
         try {
             List<Question> storedQuestions = questionRepository.list();
@@ -90,7 +94,7 @@ public class QuestionController extends BasePageController {
     }
 
     public void addQuestion() {
-        log.debug("Inserting new question with question text: " + newQuestion.getQuestionText());
+        log.debug("Inserting new question with question text: " + newQuestion.getQuestionText() + " , and category ID: " + newQuestion.getCategoryID());
         questionRepository.insert(newQuestion);
         questions.add(newQuestion);
         newQuestion = new Question();

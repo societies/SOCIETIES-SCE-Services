@@ -42,8 +42,9 @@ import org.societies.api.identity.IIdentityManager;
 import org.societies.api.schema.servicelifecycle.model.ServiceResourceIdentifier;
 import org.societies.api.schema.css.devicemgmt.display.displayportalserverbean.DisplayPortalServerBean;
 import org.societies.api.schema.css.devicemgmt.display.displayportalserverbean.DisplayPortalServerMethodType;
-import org.societies.api.sociallearning.schema.serverbean.SocialLearningServerBean;
 import org.societies.api.sociallearning.schema.serverbean.SocialLearningMethodType;
+import org.societies.api.sociallearning.schema.serverbean.SocialLearningServerBean;
+
 
 
 

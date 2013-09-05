@@ -29,7 +29,7 @@
 
         <p:column headerText="Category">
             <h:outputText value="#{category.name}"/>
-        </p:column>                                                         h
+        </p:column>                                                         
 
         <f:facet name="footer">
             <p:commandButton value="Add Category" action="#{CategoryController.initCategory}"
@@ -67,16 +67,6 @@
     </p:dialog>
 </h:form>
 
-<script type="text/javascript">
-    function handleSubmitRequest(xhr, status, args) {
-        if(!args.questionAdded) { //questionAdded is a java method.
-             asDialogue.jq.effect("shake", { times:5 }, 100);
-         }
-         else {
-            asDialogue.hide();
-        }
-    }
-</script>
 
 </body>
 </html>

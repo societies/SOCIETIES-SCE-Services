@@ -53,6 +53,7 @@ namespace SocialLearningGame
         public MainWindow()
             : base()
         {
+            log4net.Config.XmlConfigurator.Configure();
             log.Debug("Init components");
             this.InitializeComponent();
 

@@ -33,8 +33,6 @@ import javax.persistence.*;
 @ManagedBean(name="categoryBean")
 public class Category {
 
-    public static final Category all = new Category(-1, "All");
-
 
     private int categoryID;
     private String name;

@@ -1,12 +1,13 @@
-<?xml version="1.0" encoding="UTF-8"?>
-
 <beans xmlns="http://www.springframework.org/schema/beans"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xmlns:osgi="http://www.springframework.org/schema/osgi"
 	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
 	http://www.springframework.org/schema/osgi http://www.springframework.org/schema/osgi/spring-osgi.xsd">
+	
+	<bean id="categoryController" name="categoryController" class="uk.ac.hw.services.collabquiz.controller.CategoryController" />
+	<bean id="questionController" name="questionController" class="uk.ac.hw.services.collabquiz.controller.QuestionController" />
 
-	<bean id="quizRestServer" class="uk.ac.hw.services.collabquiz.CollabQuizServer"
+	<!-- <bean id="quizRestServer" class="uk.ac.hw.services.collabquiz.CollabQuizServer"
 		init-method="init" name="quizRestServer" >
 		<property name="commsManager" ref="commsManager" />
 		<property name="services" ref="services" />
@@ -39,7 +40,7 @@
 		<property name="collabQuizServer" ref="quizRestServer" />
 		<property name="commsManager" ref="commsManager" />
 		</bean>
+		
 
-
-
-</beans>
+	-->
+</beans> 

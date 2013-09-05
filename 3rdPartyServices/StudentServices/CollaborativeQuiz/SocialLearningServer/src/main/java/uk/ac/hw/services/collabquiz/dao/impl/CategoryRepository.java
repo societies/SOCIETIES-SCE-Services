@@ -52,7 +52,7 @@ public class CategoryRepository extends HibernateRepository implements ICategory
 
     @Override
     public Category getByID(int categoryId) {
-        Session session = getSessionFactory().openSession();
+        Session session =getSessionFactory().openSession();
         Transaction transaction = null;
         Category category = null;
         try {

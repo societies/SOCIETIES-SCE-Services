@@ -2,12 +2,15 @@ package uk.ac.hw.services.collabquiz.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+
 import uk.ac.hw.services.collabquiz.dao.ICategoryRepository;
+import uk.ac.hw.services.collabquiz.dao.impl.CategoryRepository;
 import uk.ac.hw.services.collabquiz.entities.Category;
 
 import javax.annotation.PostConstruct;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ViewScoped;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -17,87 +20,88 @@ import java.util.List;
 @ViewScoped
 public class CategoryController extends BasePageController {
 
-    @Autowired
-    private ICategoryRepository categoryRepository;
 
-    private final List<Category> categories = new ArrayList<Category>();
+	private ICategoryRepository categoryRepository;
 
-    // Creating new category
-    private Category newCategory = new Category();
+	private final List<Category> categories = new ArrayList<Category>();
 
-    // Category selected using checkbox
-    private Category[] selectedCategories;
-    private Category selectedCategory;
+	// Creating new category
+	private Category newCategory = new Category();
 
-    public CategoryController() {
-        log.debug("CategoryController ctor()");
-    }
+	// Category selected using checkbox
+	private Category[] selectedCategories;
+	private Category selectedCategory;
 
-    @PostConstruct
-    public void postConstruct() {
-        log.debug("postConstruct ()");
+	public CategoryController() {
+		postConstruct();
+	}
 
-        try {
-            List<Category> storedCategories = categoryRepository.list();
-            categories.addAll(storedCategories);
-        } catch (Exception ex) {
-            log.error("Error loading categories from repository, none loaded", ex);
-        }
 
-        if (log.isDebugEnabled())
-            log.debug("Loaded " + categories.size() + " categories from DB");
-    }
+	public void postConstruct() {
+		log.debug("postConstruct ()");
+		categoryRepository = new CategoryRepository();
 
-    public void initCategory() {
-        log.debug("initCategory()");
-        newCategory = new Category();
-    }
+		try {
+			List<Category> storedCategories = categoryRepository.list();
+			categories.addAll(storedCategories);
+		} catch (Exception ex) {
+			log.error("Error loading categories from repository, none loaded", ex);
+		}
 
-    public List<Category> getCategories() {
-        return categories;
-    }
+		if (log.isDebugEnabled())
+			log.debug("Loaded " + categories.size() + " categories from DB");
+	}
 
-    public Category getSelectedCategory() {
-        return selectedCategory;
-    }
+	public void initCategory() {
+		log.debug("initCategory()");
+		newCategory = new Category();
+	}
 
-    public void setSelectedCategory(Category selectedCategory) {
-        this.selectedCategory = selectedCategory;
-    }
+	public List<Category> getCategories() {
+		return categories;
+	}
 
-    public Category[] getSelectedCategories() {
-        return selectedCategories;
-    }
+	public Category getSelectedCategory() {
+		return selectedCategory;
+	}
 
-    public void setSelectedCategories(Category[] selectedCategories) {
-        this.selectedCategories = selectedCategories;
-    }
+	public void setSelectedCategory(Category selectedCategory) {
+		this.selectedCategory = selectedCategory;
+	}
 
-    public ICategoryRepository getCategoryRepository() {
-        return categoryRepository;
-    }
+	public Category[] getSelectedCategories() {
+		return selectedCategories;
+	}
 
-    public void setCategoryRepository(ICategoryRepository categoryRepository) {
-        this.categoryRepository = categoryRepository;
-    }
+	public void setSelectedCategories(Category[] selectedCategories) {
+		this.selectedCategories = selectedCategories;
+	}
 
-    public Category getNewCategory() {
-        return newCategory;
-    }
+	public ICategoryRepository getCategoryRepository() {
+		return categoryRepository;
+	}
 
-    public void addCategory() {
-        log.debug("Inserting new category with name: " + newCategory.getName());
-        categoryRepository.insert(newCategory);
-        categories.add(newCategory);
-        newCategory = new Category();
-    }
+	public void setCategoryRepository(ICategoryRepository categoryRepository) {
+		this.categoryRepository = categoryRepository;
+	}
 
-    public void deleteCategory() {
-        log.debug("Deleting selected categories: " + Arrays.toString(selectedCategories));
-        for (Category current : selectedCategories) {
-            log.debug("Deleting: " + current);
-            categoryRepository.physicalDelete(current);
-            categories.remove(current);
-        }
-    }
+	public Category getNewCategory() {
+		return newCategory;
+	}
+
+	public void addCategory() {
+		log.debug("Inserting new category with name: " + newCategory.getName());
+		categoryRepository.insert(newCategory);
+		categories.add(newCategory);
+		newCategory = new Category();
+	}
+
+	public void deleteCategory() {
+		log.debug("Deleting selected categories: " + Arrays.toString(selectedCategories));
+		for (Category current : selectedCategories) {
+			log.debug("Deleting: " + current);
+			categoryRepository.physicalDelete(current);
+			categories.remove(current);
+		}
+	}
 }

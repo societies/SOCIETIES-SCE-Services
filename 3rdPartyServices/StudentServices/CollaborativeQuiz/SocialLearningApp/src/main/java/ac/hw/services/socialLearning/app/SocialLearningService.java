@@ -90,6 +90,8 @@ public class SocialLearningService extends EventListener implements ISocialLearn
 	private int listenerPort;
 	private String listernAddress;
 	
+	private String serverIPPort;
+	
 	
 	public void Init(){
 		//FIRST REGISTER FOR SERVICE EVENTS
@@ -98,7 +100,7 @@ public class SocialLearningService extends EventListener implements ISocialLearn
 		this.registerForDisplayEvents();
 		
 		//SET UP SOCKET TO LISTEN FROM GUI (C#)
-		this.commsServerListener = new CommsServerListener();
+		this.commsServerListener = new CommsServerListener(this);
 		//GET PORT & ADDRESS
 		this.listenerPort=this.commsServerListener.getSocket();
 		this.listernAddress=this.commsServerListener.getAddress();
@@ -113,8 +115,8 @@ public class SocialLearningService extends EventListener implements ISocialLearn
 		
 		try {
 			
-			this.myServiceExeURL = new URL("http://www.macs.hw.ac.uk/~ceeep1/societies/services/SocialLearningGame.exe");
-			this.myServiceName = "Social Learning Game";
+			this.myServiceExeURL = new URL("http://societies.local.macs.hw.ac.uk:8080/3p-services/SocialLearningGame.exe");
+			this.myServiceName = "SocialLearning";
 			this.displayDriverService.registerDisplayableService(this, myServiceName, myServiceExeURL, listenerPort, false);
 			logging.debug("Registered as a displayable service");
 		} catch (MalformedURLException e) {
@@ -181,6 +183,7 @@ public class SocialLearningService extends EventListener implements ISocialLearn
 	
 					//GET ADDRESS & PORT OF REMOTE SERVER
 					String addressPort[] = this.server.getServerPortAddress(serverIdentity);
+					this.serverIPPort=addressPort[0]+":"+addressPort[1];
 					logging.debug("Remote Address: " + addressPort[0]+":"+addressPort[1]);
 					
 					//SEND MESSAGE TO GET REMOTE SOCKET LISTENER INFO
@@ -275,6 +278,11 @@ public class SocialLearningService extends EventListener implements ISocialLearn
 		}
 		
 	}*/
+	@Override
+	public String getServerIPPort()
+	{
+		return this.serverIPPort;
+	}
 
 
 	

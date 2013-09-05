@@ -21,7 +21,7 @@
 			<entry key="TargetPlatform" value="SOCIETIES" />
 			<entry key="ServiceProvider" value="ICT-SOCIETIES" />
 			<entry key="ServiceMetaModel" value-ref="serMetamodel" />
-		 	<entry key="ServiceClient" value="http://societies.local.macs.hw.ac.uk:8080/3p-service/SocialLearningApp-1.2.jar" /> 
+		 	<entry key="ServiceClient" value="http://www.stu.com" /> 
 		</osgi:service-properties>
 	</osgi:service>
 

@@ -1,16 +1,20 @@
 package uk.ac.hw.services.collabquiz;
 
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.societies.api.cis.management.ICisManager;
+import org.societies.api.cis.management.ICisOwned;
+import org.societies.api.cis.management.ICisParticipant;
 import org.societies.api.comm.xmpp.datatypes.Stanza;
 import org.societies.api.comm.xmpp.datatypes.XMPPInfo;
 import org.societies.api.comm.xmpp.exceptions.XMPPError;
 import org.societies.api.comm.xmpp.interfaces.ICommCallback;
 import org.societies.api.comm.xmpp.interfaces.ICommManager;
 import org.societies.api.identity.IIdentity;
-
 import org.societies.api.schema.servicelifecycle.model.ServiceResourceIdentifier;
 import org.societies.api.services.IServices;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +38,7 @@ public class CollabQuizServer implements ICollabQuizServer {
 
 	private List<Question> questionList;
 	private List<Category> categoryList;
+	private ICisOwned cisOwned;
 
 	private CommsServerListener commsServerListener;
 	private Thread serverThread;
@@ -54,8 +59,8 @@ public class CollabQuizServer implements ICollabQuizServer {
 	public void init() {
 		//DATABASE REPO 
 		log.debug("COLLAB QUIZ SERVER STARTED");
-		this.categoryRepo = new CategoryRepository();
-		this.questionRepo = new QuestionRepository();
+		//this.categoryRepo = new CategoryRepository();
+		//this.questionRepo = new QuestionRepository();
 
 		//SET UP NEW SOCKET
 		commsServerListener = new CommsServerListener();
@@ -65,8 +70,15 @@ public class CollabQuizServer implements ICollabQuizServer {
 		//NEED TO LISTEN AT SOME POINT FOR GUI {C#}
 		serverThread = new Thread(commsServerListener);
 		serverThread.start();
-	}
+		
 
+	}
+	
+	@Override
+	public void checkUser(String jid)
+	{
+		
+	}
 
 	public List<Question> getQuestions(){
 		//this.questionList = questionRepo.list();

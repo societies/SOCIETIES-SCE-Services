@@ -28,32 +28,37 @@ namespace SocialLearningGame.Entities
 {
     public class Question
     {
-        public int ID { get; set; }
-        public string QuestionText { get; set; }
-        public string Answer1 { get; set; }
-        public string Answer2 { get; set; }
-        public string Answer3 { get; set; }
-        public string Answer4 { get; set; }
+        public int questionID { get; set; }
+        public string questionText { get; set; }
+        public string answer1 { get; set; }
+        public string answer2 { get; set; }
+        public string answer3 { get; set; }
+        public string answer4 { get; set; }
         /// <summary>
         /// 1-based answer index (1-4)
         /// </summary>
-        public int CorrectAnswer { get; set; }
-        public int CategoryID { get; set; }
-        public int PointsIfCorrect { get; set; }
-        public QuestionDifficulty Difficulty { get; set; }
+        public int correctAnswer { get; set; }
+        public int categoryID { get; set; }
+        public int pointsIfCorrect { get; set; }
+        public QuestionDifficulty difficulty { get; set; }
 
         public Question()
         {
-            this.ID = -1;
-            this.PointsIfCorrect = 1;
-            this.Difficulty = QuestionDifficulty.Easy;
-            this.QuestionText = "[New question]";
-            this.Answer1 = "[Answer 1]";
-            this.Answer2 = "[Answer 2]";
-            this.Answer3 = "[Answer 3]";
-            this.Answer4 = "[Answer 4]";
-            this.CorrectAnswer = 1;
-            this.CategoryID = -1;
+            /*this.questionID = -1;
+            this.pointsIfCorrect = 1;
+            this.difficulty = QuestionDifficulty.Easy;
+            this.questionText = "[New question]";
+            this.answer1 = "[Answer 1]";
+            this.answer2 = "[Answer 2]";
+            this.answer3 = "[Answer 3]";
+            this.answer4 = "[Answer 4]";
+            this.correctAnswer = 1;
+            this.categoryID = -1;*/
+        }
+
+        public string ToString()
+        {
+            return this.questionID + " " + this.pointsIfCorrect + " " + this.difficulty + " " + this.questionText + " " + this.answer1 + " " + this.answer2 + " " + this.answer3 + " " + this.answer4 + " " + this.correctAnswer + " " + this.categoryID;
         }
     }
 }

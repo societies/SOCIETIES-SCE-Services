@@ -1,14 +1,18 @@
 package ac.hw.services.socialLearning.app.comms;
 
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import ac.hw.services.socialLearning.api.ISocialLearningService;
 
 
 
@@ -20,10 +24,12 @@ public class CommsServerListener implements Runnable {
 	private ServerSocket serverSocket;
 	private int port;
 	private InetAddress address;
+	private ISocialLearningService socialApp;
 	
-	public CommsServerListener()
+	public CommsServerListener(ISocialLearningService socialApp)
 	{
 		init();
+		this.socialApp = socialApp;
 	}
 
 	public void run() {
@@ -32,9 +38,11 @@ public class CommsServerListener implements Runnable {
 	
 	public void init() {
 		try {
+			log.debug("Starting socket...");
 			this.serverSocket = new ServerSocket(0);
 			this.port = this.serverSocket.getLocalPort();
 			this.address = this.serverSocket.getInetAddress();
+			this.serverSocket.close();
 		} catch (IOException e) {
 			log.debug("Error when trying to get port and address!");
 		}
@@ -42,19 +50,51 @@ public class CommsServerListener implements Runnable {
 	
 	public void listen() {
 		try {
-			serverSocket = new ServerSocket(port);
+			
 			while(true)
 			{
-				log.debug("Listening for connection from GUI");
+				serverSocket = new ServerSocket(port);
+				BufferedReader stdIn = null;
+				PrintWriter out = null;
+				
+				log.debug("Listening for connection from GUI on port:"+ String.valueOf(port));
 
 				Socket clientSocket = serverSocket.accept();
 				String result = "";
 				try{
-					BufferedReader stdIn = new BufferedReader(
+					log.debug("GOT CONNECTION");
+					stdIn = new BufferedReader(
 							new InputStreamReader(clientSocket.getInputStream()));
-					result = stdIn.readLine();
+					
+					out = new PrintWriter(new BufferedOutputStream(clientSocket.getOutputStream()),true);
+					
+					boolean reading =true;
+					while(reading)
+					{
+						result = stdIn.readLine();
+						if(result.matches("REQUEST_SERVER"))
+						{
+							String reply = socialApp.getServerIPPort();
+							if(reply!=null)
+							{
+								out.println(reply);
+							}
+							else
+							{
+								out.println("NULL");
+							}
+						}
+					}
+					
+					
+
 					//RETURN RESULT TO APP
 				}catch(Exception e){e.printStackTrace();}
+				finally {
+					out.close();
+					stdIn.close();
+					serverSocket.close();
+				}
 
 			}
 		}catch (IOException e) {

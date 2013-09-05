@@ -126,14 +126,14 @@ namespace SocialLearningGame.Comms
                 log.Debug("Entry: " + entry + " Size: " + entry.Length);
                 Question question = new Question()
                 {
-                    ID = Int32.Parse(entry[0]),
-                    CategoryID = Int32.Parse(entry[1]),
-                    QuestionText = entry[2],
-                    Answer1 = entry[3],
-                    Answer2 = entry[4],
-                    Answer3 = entry[5],
-                    Answer4 = entry[6],
-                    CorrectAnswer = Int32.Parse(entry[7])
+                    questionID = Int32.Parse(entry[0]),
+                    categoryID = Int32.Parse(entry[1]),
+                    questionText = entry[2],
+                    answer1 = entry[3],
+                    answer2 = entry[4],
+                    answer3 = entry[5],
+                    answer4 = entry[6],
+                    correctAnswer = Int32.Parse(entry[7])
                 };
                 questions.Add(question);
                 log.Debug(" - " + question.ToString());

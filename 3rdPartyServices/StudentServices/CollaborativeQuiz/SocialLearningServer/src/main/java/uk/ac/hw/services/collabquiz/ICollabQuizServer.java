@@ -13,5 +13,6 @@ public interface ICollabQuizServer {
 	ServiceResourceIdentifier getServerServiceId();
 	int getPort();
 	String getAddress();
+	void checkUser(String jid);
 
 }
