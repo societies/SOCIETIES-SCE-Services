@@ -38,6 +38,7 @@ import com.googlecode.objectify.annotation.Id;
 import com.googlecode.objectify.annotation.Ignore;
 import com.googlecode.objectify.annotation.Index;
 import com.googlecode.objectify.annotation.Load;
+import si.stecce.societies.crowdtasking.model.dao.CommunityDAO;
 
 /**
  * Describe your class here...
@@ -176,6 +177,7 @@ public class Community {
 	public List<CollaborativeSpace> getCollaborativeSpaces() {
 		if (collaborativeSpaces == null && collaborativeSpaceRefs != null) {
 			collaborativeSpaces = new ArrayList<>();
+            try {
 			for (Ref<CollaborativeSpace> collaborativeSpaceRef:collaborativeSpaceRefs) {
 				try {
 					CollaborativeSpace cs = collaborativeSpaceRef.get();
@@ -198,6 +200,11 @@ public class Community {
 		    		}
 				}
 			}
+            } catch (Exception e) {
+                // TODO developing...
+//                collaborativeSpaceRefs = null;
+//                CommunityDAO.saveCommunity(this);
+            }
 		}
 		return collaborativeSpaces;
 	}

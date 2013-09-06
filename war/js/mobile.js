@@ -24,7 +24,7 @@ var isSocietiesUser = function() {
     if (typeof(android) !== "undefined") {
         return (window.android.isSocietiesUser);
     }
-    if (window.location.hostname === 'localhost') return true;
+    if (window.location.hostname === 'TEST_HOST') return true;
 
     return false;
 };
@@ -36,6 +36,7 @@ var CrowdTaskingApp = function() {
     var mode = 'new';
     var currentUser = null;
     var communities = [];
+    var TEST_HOST = "localhost1";
 
     var getTaskById = function(id) {
     	$.ajax({
@@ -443,16 +444,16 @@ var CrowdTaskingApp = function() {
 
             $('#commentForExecution').val(task.status == 'inprogress' || task.status == 'finished');
             
-            $meetingCS = $('#meetingCS');
-            $meetingCS.empty();
+            $spaces = $('#meetingCS');
+            $spaces.empty();
    			for (var i=0; i<task.spaces.length; i++) {
    				if (task.spaces[i] === undefined || task.spaces[i] === null) continue;
    				var spaceId = task.spaces[i].id;
    				var spaceName = task.spaces[i].name;
    				//$meetingCS.append('<option value='+task.spaces[i].id+'>'+task.spaces[i].name+'</option>');
-   				$meetingCS.append('<option value='+spaceId+'>'+spaceName+'</option>');
+   				$spaces.append('<option value='+spaceId+'>'+spaceName+'</option>');
 			}
-   			$meetingCS.selectmenu('refresh');
+   			$spaces.selectmenu('refresh');
             
             showMeetings(task);
             showComments(task.id, false);
@@ -506,7 +507,7 @@ var CrowdTaskingApp = function() {
     };
 
     var getCISes = function(jids) {
-        if (window.location.hostname === 'localhost') { // TODO for testing
+        if (window.location.hostname === 'TEST_HOST') { // TODO for testing
             communities =[{"description":"Open community. Join us.","id":"cis-2ea7bb44-31cc-466b-a0e8-3015a2ce852d.research.setcce.si", "name":"community 1","memberStatus":"You are the owner.","member":false,"owner":true,"pending":false}];
         }
         else {
@@ -516,7 +517,7 @@ var CrowdTaskingApp = function() {
     }
 
     var getAllCIS4User = function() {
-        if (window.location.hostname === 'localhost') { // TODO for testing
+        if (window.location.hostname === 'TEST_HOST') { // TODO for testing
             communities =[{"description":"Open community. Join us.","id":"cis-2ea7bb44-31cc-466b-a0e8-3015a2ce852d.research.setcce.si", "name":"community 1","memberStatus":"You are the owner.","member":false,"owner":true,"pending":false}];
         }
         else {

@@ -38,7 +38,7 @@ public class CollaborativeSpace {
 	@Id private Long id = null;
 	private String name;
 	@Index private String urlMapping; // na primer urlMapping = settce.lab => crowdtasking.appspot.com/cs/settce.lab
-	String symbolicLocation;
+    @Index String symbolicLocation;
 	
 	public CollaborativeSpace() {
 		

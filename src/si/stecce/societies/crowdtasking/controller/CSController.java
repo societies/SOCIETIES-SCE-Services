@@ -43,6 +43,7 @@ import si.stecce.societies.crowdtasking.api.RESTful.impl.UsersAPI;
 import si.stecce.societies.crowdtasking.model.CTUser;
 import si.stecce.societies.crowdtasking.model.CollaborativeSpace;
 import si.stecce.societies.crowdtasking.model.Community;
+import si.stecce.societies.crowdtasking.model.dao.CollaborativeSpaceDAO;
 import si.stecce.societies.crowdtasking.model.dao.CommunityDAO;
 
 import com.google.appengine.api.channel.ChannelMessage;
@@ -164,6 +165,6 @@ public class CSController extends HttpServlet {
 	private void mapSpaceToUrl(Long spaceId, String url) {
 		CollaborativeSpace space = SpaceAPI.getCollaborativeSpace(spaceId);
 		space.setUrlMapping(url);
-		SpaceAPI.putSpace(space);
+        CollaborativeSpaceDAO.save(space);
 	}
 }

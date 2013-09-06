@@ -4,7 +4,7 @@ var Community = function() {
     var societiesCommunity = false;
     var currentIndex = -1;
     var _mode = 'new';
-    var TEST_HOST = "localhost";
+    var TEST_HOST = "localhost1";
 
     function listCommunities(_communities, tapHandler, list) {
         console.log("listCommunities - _communities.length="+_communities.length);
@@ -181,6 +181,21 @@ var Community = function() {
         });
     };
 
+    var getSpaces = function(completeFn) {
+        $.ajax({
+            type: "GET",
+            url: "/rest/space",
+            error: function(error) {
+        	    toast(error.responseText);
+            },
+            success: function(result) {
+        	    completeFn(result);
+            },
+            complete: function() {
+            }
+        });
+    };
+
     var viewCommunity = function() {
     	var list;
         var community;
@@ -265,18 +280,31 @@ var Community = function() {
     var getCSEditLink = function(space, index) {
     	return '<a href="javascript:Community.editSpace('+index+')">'+space.name+'</a>';
     };
-    
+
+    function fillSpacesCombo(spaces) {
+        $spaces = $('#spaces');
+        $spaces.empty();
+        for (var i = 0; i < spaces.length; i++) {
+            var spaceId = spaces[i].id;
+            var spaceName = spaces[i].name;
+            $spaces.append('<option value=' + spaceId + '>' + spaceName + '</option>');
+        }
+        $spaces.selectmenu('refresh');
+    }
+
     var editCommunity = function() {
     	if (_mode == 'new') {
     		currentIndex = -1;
-        	getUsers(showUsers);
-    		return;
+        	//getUsers(showUsers);
+            getSpaces(fillSpacesCombo);
+            return;
     	}
         var community = communities[currentIndex];
     	$('#communityId').val(community.id);
     	$('#name').val(community.name);
     	$('#description').text(community.description);
-    	getUsers(showUsers);
+        getSpaces(fillSpacesCombo);
+    	//getUsers(showUsers);
     };
     
     var showUsers = function(users) {

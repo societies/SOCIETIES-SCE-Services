@@ -104,11 +104,6 @@ public class SpaceAPI implements ISpaceAPI {
 		return ofy().load().type(CollaborativeSpace.class).filter("urlMapping", urlMapping).first().get();
 	}
 
-	public static CollaborativeSpace putSpace(CollaborativeSpace collaborativeSpace) {
-		ofy().save().entity(collaborativeSpace);
-		return collaborativeSpace;
-	}
-
 	public static List<CollaborativeSpace> getCollaborativeSpaces() {
 		Query<CollaborativeSpace> q = ofy().load().type(CollaborativeSpace.class);
 		ArrayList<CollaborativeSpace> list = new ArrayList<CollaborativeSpace>();
@@ -136,23 +131,29 @@ public class SpaceAPI implements ISpaceAPI {
                              @FormParam("urlMapping") String urlMapping,
                              @FormParam("symbolicLocation") String symbolicLocation) throws IOException, URISyntaxException {
 		
+/*
 		if ("".equals(communityId)) {
 			return Response.status(Status.BAD_REQUEST).entity("Unknown error.").type("text/plain").build();
 		}
-		
+*/
+
 		if ("".equals(name)) {
 			return Response.status(Status.BAD_REQUEST).entity("Name is required.").type("text/plain").build();
 		}
 		if (spaceId.longValue() == 0L) {
+/*
 			Community community = CommunityDAO.loadCommunity(communityId);
 			if (community == null) {
 				return Response.status(Status.BAD_REQUEST).entity("Can't get the community.").type("text/plain").build();
 			}
+*/
 			if (ofy().load().type(CollaborativeSpace.class).filter("urlMapping", urlMapping).count() != 0){
 				return Response.status(Status.BAD_REQUEST).entity("URL mapping already exist.").type("text/plain").build();
 			}
-			community.addCollaborativeSpace(name, urlMapping, symbolicLocation);
-			CommunityDAO.saveCommunity(community);
+            CollaborativeSpace collaborativeSpace = new CollaborativeSpace(name, urlMapping, symbolicLocation);
+            CollaborativeSpaceDAO.save(collaborativeSpace);
+//			community.addCollaborativeSpace(name, urlMapping, symbolicLocation);
+//			CommunityDAO.saveCommunity(community);
 		}
 		else {
 			CollaborativeSpace space = getCollaborativeSpace(spaceId);
@@ -164,7 +165,7 @@ public class SpaceAPI implements ISpaceAPI {
 			}
 			space.setUrlMapping(urlMapping);
 			space.setSymbolicLocation(symbolicLocation);
-			putSpace(space);
+            CollaborativeSpaceDAO.save(space);
 		}
 		
 		return Response.ok().build();
