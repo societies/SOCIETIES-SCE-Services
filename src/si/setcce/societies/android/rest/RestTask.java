@@ -57,12 +57,14 @@ public class RestTask extends AsyncTask<HttpUriRequest, Void, String> {
 	private String action;
 	private String cookie;
     private CookieStore cookieStore = new BasicCookieStore();
+    private String domain;
 
-	public RestTask(Context context, String action, String cookie) {
+	public RestTask(Context context, String action, String cookie, String domain) {
 		this.context = context;
 		this.action = action;
 		this.cookie = cookie;
 		this.client = new DefaultHttpClient();
+        this.domain = domain;
 	}
 
 	@Override
@@ -79,7 +81,7 @@ public class RestTask extends AsyncTask<HttpUriRequest, Void, String> {
                     if (nvp.length == 2) {
                         BasicClientCookie c = new BasicClientCookie(nvp[0], nvp[1]);
                         // c.setVersion(1);
-                        c.setDomain("crowdtasking.appspot.com");
+                        c.setDomain(domain);
                         cookieStore.addCookie(c);
                     }
 				}

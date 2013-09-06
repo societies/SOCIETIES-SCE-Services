@@ -36,9 +36,11 @@ public class TrustTask extends
 	private static final String TRUST_RELATIONSHIP_POST = "si.setcce.societies.android.rest.LOG_EVENT";
 	private Context context;
 	private Set<TrustRelationshipBean> trustRelationships = null;
+    private String domain;
 
-	public TrustTask(Context context) {
+	public TrustTask(Context context, String domain) {
 		this.context = context;
+        this.domain = domain;
 	}
 
 	@Override
@@ -114,7 +116,7 @@ public class TrustTask extends
 			eventRequest.setEntity(new UrlEncodedFormEntity(parameters));
 			RestTask task = new RestTask(context, TRUST_RELATIONSHIP_POST,
 					CookieManager.getInstance().getCookie(
-							"crowdtasking.appspot.com"));
+							domain), domain);
 			task.execute(eventRequest);
 		} catch (URISyntaxException e) {
 			Log.e("CT4A", e.getMessage());

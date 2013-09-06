@@ -46,7 +46,6 @@ import org.json.JSONObject;
 import org.societies.android.api.cis.directory.ICisDirectory;
 import org.societies.android.api.cis.management.ICisManager;
 import org.societies.android.api.contentproviders.CSSContentProvider;
-import org.societies.android.api.events.IAndroidSocietiesEvents;
 import org.societies.api.schema.cis.community.Community;
 import org.societies.api.schema.cis.directory.CisAdvertisementRecord;
 import org.societies.integration.model.SocietiesUser;
@@ -76,10 +75,15 @@ public class MainActivity extends Activity implements SensorEventListener {
 	private static final String LOG_EVENT = "si.setcce.societies.android.rest.LOG_EVENT";
 	private static final String LOGIN_USER = "si.setcce.societies.android.rest.LOGIN_USER";
 	private static final String GET_MEETING_ACTION = "si.setcce.societies.android.rest.meeting";
-//    private static final String APPLICATION_URL = "http://06-09-2013.crowdtasking.appspot.com";
-    private static final String APPLICATION_URL = "http://crowdtasking.appspot.com";
+    private static final String SCHEME ="http";
+//    private static final String DOMAIN = "crowdtaskingtest.appspot.com";
+//    private static final String DOMAIN = "06-09-2013.crowdtasking.appspot.com";
+   	private static final String DOMAIN = "192.168.1.102";
+//   	private static final String DOMAIN = "192.168.1.78";
+//    private static final String PORT = ":80";
+    private static final String PORT = ":8888";
+    private static final String APPLICATION_URL = SCHEME +"://" + DOMAIN + PORT;
     private static final String LOGIN_URL = APPLICATION_URL + "/login";
-//	private static final String APPLICATION_URL = "http://192.168.1.102:8888";
     private static final String MEETING_URL = APPLICATION_URL + "/android/meeting/";
     private static final String GET_USER_REST_API_URL = APPLICATION_URL + "/rest/users/me";
 	private static final String MEETING_REST_API_URL = APPLICATION_URL + "/rest/meeting";
@@ -347,7 +351,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 		HttpGet searchRequest;
 		try {
 			searchRequest = new HttpGet(new URI(url));
-			RestTask task = new RestTask(getApplicationContext(), CHECK_IN_OUT, CookieManager.getInstance().getCookie("crowdtasking.appspot.com"));
+			RestTask task = new RestTask(getApplicationContext(), CHECK_IN_OUT, CookieManager.getInstance().getCookie(DOMAIN), DOMAIN);
 			task.execute(searchRequest);
 		} catch (URISyntaxException e) {
 			e.printStackTrace();
@@ -404,7 +408,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 						List<NameValuePair> parameters = new ArrayList<NameValuePair>();
 						parameters.add(new BasicNameValuePair("taskId",taskId));
 						eventRequest.setEntity(new UrlEncodedFormEntity(parameters));
-	        			RestTask task = new RestTask(getApplicationContext(), LOG_EVENT, CookieManager.getInstance().getCookie("crowdtasking.appspot.com"));
+	        			RestTask task = new RestTask(getApplicationContext(), LOG_EVENT, CookieManager.getInstance().getCookie(DOMAIN), DOMAIN);
 	        			task.execute(eventRequest);
 					} catch (URISyntaxException e) {
 						Log.e(LOG_TAG, "Can't log event: "+e.getMessage());
@@ -769,7 +773,7 @@ public class MainActivity extends Activity implements SensorEventListener {
     		try
             {
     			HttpGet searchRequest = new HttpGet(new URI(MEETING_REST_API_URL+"?id="+meetingID));
-    			RestTask task = new RestTask(parentActivity, GET_MEETING_ACTION, CookieManager.getInstance().getCookie("crowdtasking.appspot.com"));
+    			RestTask task = new RestTask(parentActivity, GET_MEETING_ACTION, CookieManager.getInstance().getCookie(DOMAIN), DOMAIN);
     			task.execute(searchRequest);
     		} catch (URISyntaxException e) {
     			e.printStackTrace();
@@ -812,11 +816,14 @@ public class MainActivity extends Activity implements SensorEventListener {
     @Override
     protected void onStop() {
         super.onStop();
-        if (communityManagementClient != null) {
+        if (communityManagementClientConnected) {
             communityManagementClient.tearDownService();
         }
-        if (cisDirectoryClient != null) {
+        if (cisDirectoryClientConnected) {
             cisDirectoryClient.tearDownService();
+        }
+        if (societiesEventsClientConnected) {
+            societiesEventsClient.tearDownService();
         }
     }
 }
