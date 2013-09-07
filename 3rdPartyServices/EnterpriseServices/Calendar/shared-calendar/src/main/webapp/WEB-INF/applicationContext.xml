@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns:osgi="http://www.springframework.org/schema/osgi"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xmlns="http://www.springframework.org/schema/beans"
+    xmlns:aop="http://www.springframework.org/schema/aop"
+    xmlns:task="http://www.springframework.org/schema/task"
+    xmlns:tx="http://www.springframework.org/schema/tx"
+    xmlns:osgi-compendium="http://www.springframework.org/schema/osgi-compendium"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+	 http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd
+	 http://www.springframework.org/schema/osgi http://www.springframework.org/schema/osgi/spring-osgi.xsd
+	 http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-3.0.xsd
+	 http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd
+	 http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+	 http://www.springframework.org/schema/osgi-compendium http://www.springframework.org/schema/osgi-compendium/spring-osgi-compendium-1.2.xsd" >
+
+	<!-- enable the configuration of transactional behavior based on annotations -->
+	<tx:annotation-driven transaction-manager="transactionManager" />	
+	<task:annotation-driven />
+	<context:annotation-config />
+	
+	<osgi:reference id="commManager" interface="org.societies.api.comm.xmpp.interfaces.ICommManager" />
+	<osgi:reference id="dataSource" interface="javax.sql.DataSource" />
+	<osgi:reference id="eventManager" interface="org.societies.api.osgi.event.IEventMgr" />
+	<osgi:reference id="serviceMgmt" interface="org.societies.api.services.IServices" />
+	<osgi:reference id="CisManagementBundle" interface="org.societies.api.cis.management.ICisManager"/>
+	<osgi:reference id="ctxBroker" interface="org.societies.api.context.broker.ICtxBroker" />
+	<osgi:reference id="userActionMonitor" interface="org.societies.api.useragent.monitoring.IUserActionMonitor" />
+	<osgi:reference id="personalisationManager" interface="org.societies.api.personalisation.mgmt.IPersonalisationManager" />
+	<osgi:reference id="activityFeed" interface="org.societies.api.activity.IActivityFeed" cardinality="0..1"/>
+	<osgi:reference id="PubsubClient" interface="org.societies.api.comm.xmpp.pubsub.PubsubClient"/>	
+	
+	<bean id="googleCalendarUtil"
+		class="org.societies.thirdparty.sharedcalendar.CalendarGoogleUtil">
+	</bean>
+
+	<bean id="ConfPropConfig"
+		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="ignoreResourceNotFound" value="true"></property>
+		<property name="locations">
+			<list>
+			<!-- 	<value>classpath:META-INF/spring/derby_database.properties</value> -->
+				<value>classpath:META-INF/backEnd.properties</value>
+				<value>file:${CONFIG_DIR}/org.societies.platform.properties</value>
+				</list>
+		</property>	
+	</bean>
+	
+	<bean id="sessionFactory"
+		class="org.springframework.orm.hibernate3.annotation.AnnotationSessionFactoryBean">
+		<property name="dataSource" ref="dataSource" />
+
+		<property name="annotatedClasses">
+			<list>
+				<value>org.societies.thirdparty.sharedcalendar.persistence.CalendarDAO
+				</value>
+				<value>org.societies.thirdparty.sharedcalendar.persistence.EventDAO
+				</value>
+			</list>
+		</property>
+
+		<property name="annotatedPackages">
+			<list>
+				<value>org.societies.thirdparty.sharedcalendar.persistence</value>
+			</list>
+		</property>
+
+		<property name="hibernateProperties">
+			<props>
+				<prop key="hibernate.show_sql">${show_sql}</prop>
+				<prop key="hibernate.cache.use_second_level_cache">${cache.use_second_level_cache}</prop>
+				<prop key="hibernate.hbm2ddl.auto">${hbm2ddl.auto}</prop>
+				<prop key="hibernate.format_sql">${format_sql}</prop>
+			</props>
+		</property>
+	</bean>
+
+	<bean id="transactionManager"
+		class="org.springframework.orm.hibernate3.HibernateTransactionManager">
+		<property name="sessionFactory" ref="sessionFactory" />
+	</bean>
+
+	<bean id="sharedCalendarCommsManager"
+		class="org.societies.thirdparty.sharedcalendar.commsServer.SharedCalendarCommServer"
+		depends-on="commManager" init-method="initService">
+		<property name="commManager" ref="commManager" />
+		<property name="sharedCalendarService" ref="sharedCalendar" />
+
+	</bean>
+
+	<bean id="sharedCalendar"
+		class="org.societies.thirdparty.sharedcalendar.SharedCalendar"
+		 init-method="init">
+		<property name="googleUtil" ref="googleCalendarUtil" />
+		<property name="sessionFactory" ref="sessionFactory" />
+		<property name="evtMgr" ref="eventManager" />
+		<property name="serviceMgmt" ref="serviceMgmt" />
+		<property name="cisManager" ref="CisManagementBundle" />
+		<property name="commManager" ref="commManager" />
+		<property name="ctxBroker" ref="ctxBroker" />
+		<property name="personalisation" ref="personalisationManager" />
+		<property name="userAction" ref="userActionMonitor" />
+		<property name="pubSub" ref="PubsubClient" />
+	</bean>
+
+	<bean id="sharedCalendarClient"
+		class="org.societies.thirdparty.sharedcalendar.SharedCalendarClient"
+		init-method="init" >
+		<property name="sharedCalendar" ref="sharedCalendar" />
+		<property name="commManager" ref="commManager" />
+	</bean>
+	
+	<!-- Provided Services -->
+	<osgi:service ref="sharedCalendarClient">
+	<osgi:interfaces>
+		<value>org.societies.thirdparty.sharedcalendar.api.ISharedCalendar</value>
+	</osgi:interfaces>
+		<osgi:service-properties>
+			<entry key="TargetPlatform" value="SOCIETIES" />
+			<entry key="ServiceProvider" value="ICT-SOCIETIES" />
+			<entry key="ServiceMetaModel" value-ref="serMetamodel" />
+		</osgi:service-properties>
+	</osgi:service>
+
+	<bean id="serMetamodel" class="org.societies.api.schema.servicelifecycle.model.Service">
+		<property name="authorSignature" value="sancho" />
+		<property name="serviceDescription" value="Shared Calendar" />
+		<property name="serviceName" value="Shared Calendar" />
+		<property name="serviceType" value="THIRD_PARTY_SERVER" />
+		<property name="serviceCategory" value="calendar" />
+	</bean>
+
+	<osgi:service ref="sharedCalendar" interface="org.societies.api.personalisation.model.IActionConsumer" />
+
+</beans>
