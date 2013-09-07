@@ -30,6 +30,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.eclipse.jetty.util.log.Log;
+import org.societies.api.identity.IIdentity;
 import org.societies.thirdparty.sharedcalendar.api.CalendarConverter;
 import org.societies.thirdparty.sharedcalendar.api.schema.Event;
 
@@ -185,6 +186,13 @@ public class CalendarEvent {
 		}
 		
 	}
+	
+	public boolean isMyEvent(){
+
+		return parent.isMyEvent(societiesEvent.getCreatorId());
+
+	}
+	
 	
 	private String dateText(Calendar date, Calendar now){
 		

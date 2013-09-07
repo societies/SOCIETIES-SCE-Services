@@ -27,10 +27,13 @@ package org.societies.thirdparty.sharedcalendar;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.Future;
 
 import org.hibernate.Criteria;
@@ -227,9 +230,7 @@ public class SharedCalendar extends EventListener implements ISharedCalendarServ
 		database = new CalendarDatabase();
 		context = new CalendarContextUtils(ctxBroker, myId, commManager);
 
-		
-		
-		recommendedEvents = new HashMap<String,Event>();
+		recommendedEvents = null;
 		recentCalendars =  new HashMap<String,Calendar>();
 		recentEvents = new HashMap<String,Event>();
 		userWarnings = new ArrayList<UserWarning>();
@@ -285,7 +286,6 @@ public class SharedCalendar extends EventListener implements ISharedCalendarServ
 					}
 					getPubSub().subscriberSubscribe(cisNode, cisCalendar.getCalendarId().replace('@', '-'), this);
 					
-					processRecommendedEvents(cisCalendar);
 				} catch(Exception ex){
 					log.error("Error creating pubsub node!");
 					ex.printStackTrace();
@@ -319,7 +319,6 @@ public class SharedCalendar extends EventListener implements ISharedCalendarServ
 					recentCalendars.put(otherCis.getCisId(), cisCalendar);
 					getPubSub().subscriberSubscribe(otherCisId, cisCalendar.getCalendarId().replace('@', '-'), this);
 					
-					processRecommendedEvents(cisCalendar);
 				} else{
 					if(log.isDebugEnabled())
 						log.debug("CIS does not have a calendar!");
@@ -1635,6 +1634,15 @@ public class SharedCalendar extends EventListener implements ISharedCalendarServ
 		return cssName;
 	}
 	
+	private void initRecommendedEvents(){
+		log.debug("Init the recommendedEvents!");
+		
+		Iterator<Calendar> calendars = recentCalendars.values().iterator();
+		while(calendars.hasNext())
+			processRecommendedEvents(calendars.next());
+
+	}
+	
 	private void processRecommendedEvents(Calendar cisCalendar){
 		log.debug("Processing recommended Events for Calendar: {}", cisCalendar.getName());
 		
@@ -2674,6 +2682,11 @@ public class SharedCalendar extends EventListener implements ISharedCalendarServ
 		
 		if(log.isDebugEnabled())
 			log.debug("Getting Recommended Events");
+		if(recommendedEvents == null){
+			recommendedEvents = new HashMap<String,Event>();
+			initRecommendedEvents();
+		}
+		
 		Collection<Event> eventCol = recommendedEvents.values();
 		List<Event> resultEvents = new ArrayList<Event>();
 		Date now = new Date();
@@ -2699,6 +2712,7 @@ public class SharedCalendar extends EventListener implements ISharedCalendarServ
 			}	
 		}
 		
+		Collections.sort(resultEvents, new EventSorter());
 		return resultEvents;
 	}
 

@@ -48,7 +48,7 @@ import org.societies.thirdparty.sharedcalendar.api.schema.Event;
 import org.societies.thirdparty.sharedcalendar.api.schema.SharedCalendarResult;
 
 
-@ManagedBean(name="calendarWebController")
+@ManagedBean(name="calendarController")
 @SessionScoped
 public class CalendarController {
 	
@@ -59,7 +59,7 @@ public class CalendarController {
 	private IIdentity myId;
 	private ServiceResourceIdentifier mySRI;
 	
-	private IIdentity getId(){
+	protected IIdentity getId(){
 		
 		if(myId != null)
 			return myId;
@@ -74,7 +74,7 @@ public class CalendarController {
 		return myId;
 	}
 	
-	private ServiceResourceIdentifier getSRI(){
+	protected ServiceResourceIdentifier getSRI(){
 		
 		if(mySRI != null)
 			return mySRI;
@@ -264,7 +264,17 @@ public class CalendarController {
 		return recommendedEvents;
 	}
 	
+	private String viewOption;
 	
+	
+	public String getViewOption() {
+		return viewOption;
+	}
+
+	public void setViewOption(String viewOption) {
+		this.viewOption = viewOption;
+	}
+
 	private CalendarEvent recommendedEvent;
 	
 	public void setRecommendedEvent(CalendarEvent recommendedEvent){
@@ -298,6 +308,21 @@ public class CalendarController {
 		
 		try{
 			IIdentity creatorId = getCommManager().getIdManager().fromJid(societiesEvent.getCreatorId());
+			isMine = creatorId.equals(getId());
+		} catch(Exception ex){
+			log.error("Exception occured: " + ex);
+			ex.printStackTrace();
+		}
+		
+		return isMine;
+	}
+	
+	public boolean isMyEvent(String creatorJid){
+		
+		boolean isMine = false;
+		
+		try{
+			IIdentity creatorId = getCommManager().getIdManager().fromJid(creatorJid);
 			isMine = creatorId.equals(getId());
 		} catch(Exception ex){
 			log.error("Exception occured: " + ex);
@@ -379,6 +404,7 @@ public class CalendarController {
 		eventModel = new DefaultScheduleModel();
 		eventConverter = new EventConverter(this);
 		
+		viewOption = "schedule";
 		myId = null;
 		recommendedEvent = null;
 		recommendedEvents = new ArrayList<CalendarEvent>();
@@ -396,12 +422,6 @@ public class CalendarController {
 		
 	}
 
-
-	@PostConstruct
-	public void doPostConstruct(){
-		if(log.isDebugEnabled())
-			log.debug("postConstruct!");
-	}
 	
 	public void preRender(){
 		if(log.isDebugEnabled())
