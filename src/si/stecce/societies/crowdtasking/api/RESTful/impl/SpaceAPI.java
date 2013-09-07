@@ -128,42 +128,28 @@ public class SpaceAPI implements ISpaceAPI {
 	public Response newSpace(@FormParam("communityId") Long communityId,
                              @FormParam("spaceId") Long spaceId,
                              @FormParam("spaceName") String name,
-                             @FormParam("urlMapping") String urlMapping,
+//                             @FormParam("urlMapping") String urlMapping,
                              @FormParam("symbolicLocation") String symbolicLocation) throws IOException, URISyntaxException {
 		
-/*
-		if ("".equals(communityId)) {
-			return Response.status(Status.BAD_REQUEST).entity("Unknown error.").type("text/plain").build();
-		}
-*/
 
 		if ("".equals(name)) {
 			return Response.status(Status.BAD_REQUEST).entity("Name is required.").type("text/plain").build();
 		}
 		if (spaceId.longValue() == 0L) {
-/*
-			Community community = CommunityDAO.loadCommunity(communityId);
-			if (community == null) {
-				return Response.status(Status.BAD_REQUEST).entity("Can't get the community.").type("text/plain").build();
+			if (ofy().load().type(CollaborativeSpace.class).filter("name", name).count() != 0){
+				return Response.status(Status.BAD_REQUEST).entity("Collaborative space "+name+" already exist.").type("text/plain").build();
 			}
-*/
-			if (ofy().load().type(CollaborativeSpace.class).filter("urlMapping", urlMapping).count() != 0){
-				return Response.status(Status.BAD_REQUEST).entity("URL mapping already exist.").type("text/plain").build();
-			}
-            CollaborativeSpace collaborativeSpace = new CollaborativeSpace(name, urlMapping, symbolicLocation);
+            CollaborativeSpace collaborativeSpace = new CollaborativeSpace(name, symbolicLocation);
             CollaborativeSpaceDAO.save(collaborativeSpace);
-//			community.addCollaborativeSpace(name, urlMapping, symbolicLocation);
-//			CommunityDAO.saveCommunity(community);
 		}
 		else {
 			CollaborativeSpace space = getCollaborativeSpace(spaceId);
-			space.setName(name);
-			if (!space.getUrlMapping().equalsIgnoreCase(urlMapping)) {
-				if (ofy().load().type(CollaborativeSpace.class).filter("urlMapping", urlMapping).count() != 0){
-					return Response.status(Status.BAD_REQUEST).entity("URL mapping already exist.").type("text/plain").build();
-				}
-			}
-			space.setUrlMapping(urlMapping);
+            if (!space.getName().equalsIgnoreCase(name)) {
+                if (ofy().load().type(CollaborativeSpace.class).filter("name", name).count() != 0){
+                    return Response.status(Status.BAD_REQUEST).entity("Collaborative space \"+name+\" already exist.").type("text/plain").build();
+                }
+            }
+            space.setName(name);
 			space.setSymbolicLocation(symbolicLocation);
             CollaborativeSpaceDAO.save(space);
 		}

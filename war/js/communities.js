@@ -181,7 +181,7 @@ var Community = function() {
         });
     };
 
-    var getSpaces = function(completeFn) {
+    var getSpaces = function(completeFn, communitySpaces) {
         $.ajax({
             type: "GET",
             url: "/rest/space",
@@ -189,7 +189,7 @@ var Community = function() {
         	    toast(error.responseText);
             },
             success: function(result) {
-        	    completeFn(result);
+        	    completeFn(result, communitySpaces);
             },
             complete: function() {
             }
@@ -209,9 +209,12 @@ var Community = function() {
     	$('#description').text(community.description);
     	$('#memberStatus').text(community.memberStatus);
 
+    	if (community.canAddCS) {
+        	$('#addCSButton').show();
+        	$('#spaceDetails').show();
+        }
     	if (!community.owner) {
         	$('#editCommunityButton').hide();
-        	$('#addCSButton').hide();
         }
     	else {
         	list = $('#requestList');
@@ -281,20 +284,33 @@ var Community = function() {
     	return '<a href="javascript:Community.editSpace('+index+')">'+space.name+'</a>';
     };
 
-    function fillSpacesCombo(spaces) {
-        $spaces = $('#spaces');
-        $spaces.empty();
+    function fillSpacesCombo(spaces, communitySpaces) {
+        var $spacesCombo = $('#spacesCombo');
+        $spacesCombo.empty();
         for (var i = 0; i < spaces.length; i++) {
             var spaceId = spaces[i].id;
             var spaceName = spaces[i].name;
-            $spaces.append('<option value=' + spaceId + '>' + spaceName + '</option>');
+            var selected = "";
+            if (communitySpaces !== undefined && communitySpaces.length !== undefined) {
+                for (var j = 0; j < communitySpaces.length; j++) {
+                    var comSpace = communitySpaces[j];
+                    if (spaceId === comSpace.id) {
+                        selected = "selected";
+                        break;
+                    }
+                }
+            }
+            $spacesCombo.append('<option value='+spaceId+' '+selected+'>'+spaceName+'</option>');
         }
-        $spaces.selectmenu('refresh');
+        $spacesCombo.selectmenu('refresh');
     }
 
     var editCommunity = function() {
     	if (_mode == 'new') {
     		currentIndex = -1;
+            $('#communityId').val('');
+            $('#name').val('');
+            $('#description').text('');
         	//getUsers(showUsers);
             getSpaces(fillSpacesCombo);
             return;
@@ -303,7 +319,7 @@ var Community = function() {
     	$('#communityId').val(community.id);
     	$('#name').val(community.name);
     	$('#description').text(community.description);
-        getSpaces(fillSpacesCombo);
+        getSpaces(fillSpacesCombo, community.spaces);
     	//getUsers(showUsers);
     };
     

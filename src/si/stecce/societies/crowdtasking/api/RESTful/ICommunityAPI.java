@@ -25,9 +25,7 @@ public interface ICommunityAPI {
             @FormParam("communityJid") String communityJid,
             @FormParam("name") String name,
             @FormParam("description") String description,
-            @FormParam("csName") String csName,
-            @FormParam("urlMapping") String urlMapping,
-            @FormParam("symbolicLocation") String symbolicLocation,
+            @FormParam("spaces") List<Long> csIds,
             @FormParam("members") List<Long> members,
             @FormParam("memberId") Long memberId,
             @Context HttpServletRequest request);

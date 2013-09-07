@@ -1147,11 +1147,11 @@ $(document).on('pageinit', '#settingsPage', function(event, data){
 $(document).on('pageinit', '#communitiesPage', function(event, data){       
 //$('#communitiesPage').live('pageinit', function() {
 	refreshFunction = Community.loadCommunities; 
-    /*$('#addCommunityButton').bind('tap', function(event, data) {
+    $('#addCommunityButton').bind('tap', function(event, data) {
         event.preventDefault();
-        $('#addCommunityButton').unbind('tap');
-    	Community.setMode('new');
-    });*/
+        Community.setMode('new');
+        $.mobile.changePage('/community/edit');
+    });
 	Community.loadCommunities();
 });
 

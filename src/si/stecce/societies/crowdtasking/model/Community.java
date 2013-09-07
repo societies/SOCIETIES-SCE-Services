@@ -38,7 +38,6 @@ import com.googlecode.objectify.annotation.Id;
 import com.googlecode.objectify.annotation.Ignore;
 import com.googlecode.objectify.annotation.Index;
 import com.googlecode.objectify.annotation.Load;
-import si.stecce.societies.crowdtasking.model.dao.CommunityDAO;
 
 /**
  * Describe your class here...
@@ -64,27 +63,30 @@ public class Community {
 	public Community() {
 	}
 	
-	public Community(String name, String description, CTUser owner, String csName, String urlMapping, String symbolicLocation, List<Long> members) {
+	public Community(String name, String description, CTUser owner, List<Long> csIds, List<Long> members) {
 		super();
 		this.name = name;
 		this.description = description;
 		this.ownerRef = Ref.create(Key.create(CTUser.class, owner.getId()));
-		if (csName != null) {
-			addCollaborativeSpace(csName, urlMapping, symbolicLocation);
-		}
+        setCollaborativeSpaces(csIds);
 		addMember(owner);
-		for (Long userId:members) {
-			addMember(userId);
-		}
+        addMembers(members);
 	}
 	
-	public void addCollaborativeSpace(String name, String urlMapping, String symbolicLocation) {
-		CollaborativeSpace collaborativeSpace = new CollaborativeSpace(name, urlMapping, symbolicLocation);
-		Key<CollaborativeSpace> key = CollaborativeSpaceDAO.save(collaborativeSpace);
+	public void setCollaborativeSpaces(List<Long> csIds) {
+        if (csIds != null) {
+            collaborativeSpaceRefs = new ArrayList<>();
+            for (Long csId:csIds){
+                collaborativeSpaceRefs.add(Ref.create(Key.create(CollaborativeSpace.class, csId)));
+            }
+        }
+    }
+
+	public void addCollaborativeSpace(Long csId) {
 		if (collaborativeSpaceRefs == null) {
 			collaborativeSpaceRefs = new ArrayList<>();
 		}
-		collaborativeSpaceRefs.add(Ref.create(key));
+		collaborativeSpaceRefs.add(Ref.create(Key.create(CollaborativeSpace.class, csId)));
 	}
 	
 /*
@@ -159,6 +161,9 @@ public class Community {
 	}
 	
 	public void addMembers(List<Long> memberIDs) {
+        if (memberIDs == null){
+            return;
+        }
 		members = new HashSet<>();
 		members.add(ownerRef);
 		for (Long userId:memberIDs) {

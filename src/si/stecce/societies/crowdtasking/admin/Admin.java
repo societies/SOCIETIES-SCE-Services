@@ -63,7 +63,7 @@ public class Admin extends HttpServlet {
 		//JavaMail.sendJavaMail(SENDER, "simon.juresa@setcce.si", "hoj", "navaden text", "HTML text", getBody());
 		//sendMeetingRequest1();
 		//sendMeetingRequest2();
-        convertTasks();
+        convertEvents();
 		long diff = System.currentTimeMillis() - startTime;
 		response.getWriter().write("time: " + diff);
 	}

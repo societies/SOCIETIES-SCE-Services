@@ -93,9 +93,7 @@ public class CommunityAPI implements ICommunityAPI {
             @FormParam("communityJid") String communityJid,
             @FormParam("name") String name,
             @FormParam("description") String description,
-            @FormParam("csName") String csName,
-            @FormParam("urlMapping") String urlMapping,
-            @FormParam("symbolicLocation") String symbolicLocation,
+            @FormParam("spacesCombo") List<Long> csIds,
             @FormParam("members") List<Long> members,
             @FormParam("memberId") Long memberId,
             @Context HttpServletRequest request) {
@@ -112,8 +110,12 @@ public class CommunityAPI implements ICommunityAPI {
 			if (name == null || "".equalsIgnoreCase(name)) {
 				return Response.status(Status.NOT_ACCEPTABLE).entity("Name is required.").type("text/plain").build();
 			}
-			createCommunity(communityId, name, description, csName, urlMapping,
-					symbolicLocation, members, user);
+            if (csIds != null) {
+                for (Long id:csIds) {
+                    System.out.println(id);
+                }
+            }
+			createCommunity(communityId, name, description, csIds, members, user);
 		}
 		if ("request".equalsIgnoreCase(querytype)) {
 			community = CommunityDAO.loadCommunity(new Long(communityId));
@@ -149,19 +151,16 @@ public class CommunityAPI implements ICommunityAPI {
 	}
 
 	private void createCommunity(String communityId, String name,
-			String description, String csName, String urlMapping,
-			String symbolicLocation, List<Long> members, CTUser user) {
+			String description, List<Long> csIds, List<Long> members, CTUser user) {
 		Community community;
 		if ("".equalsIgnoreCase(communityId)) {
-			community = new Community(name, description, user, csName, urlMapping, symbolicLocation, members);
+			community = new Community(name, description, user, csIds, members);
 		}
 		else {
 			community = CommunityDAO.loadCommunity(new Long(communityId));
 			community.setName(name);
 			community.setDescription(description);
-			if (!"".equalsIgnoreCase(csName) && community.getCollaborativeSpaces() == null) {
-				community.addCollaborativeSpace(csName, urlMapping, symbolicLocation);
-			}
+			community.setCollaborativeSpaces(csIds);
 			community.addMembers(members);
 		}
 		CommunityDAO.saveCommunity(community);
@@ -171,7 +170,7 @@ public class CommunityAPI implements ICommunityAPI {
 	private String getCommunity(Long communityId, CTUser user) {
 		Gson gson = new Gson();
 		Community community = CommunityDAO.loadCommunity(communityId);
-		CommunityJS communityJS = new CommunityJS(community, user.getId());
+		CommunityJS communityJS = new CommunityJS(community, user);
 		return gson.toJson(communityJS);
 	}
 
@@ -180,7 +179,7 @@ public class CommunityAPI implements ICommunityAPI {
 		ArrayList<CommunityJS> list = new ArrayList<CommunityJS>();
 		Query<Community> communities = CommunityDAO.loadCommunities();
 		for (Community communitiy:communities) {
-			CommunityJS communityJS = new CommunityJS(communitiy, user.getId());
+			CommunityJS communityJS = new CommunityJS(communitiy, user);
 			list.add(communityJS);
 		}
 		return gson.toJson(list);

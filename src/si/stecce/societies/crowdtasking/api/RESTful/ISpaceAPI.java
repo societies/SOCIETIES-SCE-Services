@@ -23,6 +23,6 @@ public interface ISpaceAPI {
     Response newSpace(@FormParam("communityId") Long communityId,
                       @FormParam("spaceId") Long spaceId,
                       @FormParam("spaceName") String name,
-                      @FormParam("urlMapping") String urlMapping,
+//                      @FormParam("urlMapping") String urlMapping,
                       @FormParam("symbolicLocation") String symbolicLocation) throws IOException, URISyntaxException;
 }

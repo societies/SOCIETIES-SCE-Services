@@ -37,25 +37,29 @@ import com.googlecode.objectify.annotation.Index;
 public class CollaborativeSpace {
 	@Id private Long id = null;
 	private String name;
-	@Index private String urlMapping; // na primer urlMapping = settce.lab => crowdtasking.appspot.com/cs/settce.lab
+	@Index private String urlMapping; // na primer urlMapping = settcelab => crowdtasking.appspot.com/cs/settcelab
     @Index String symbolicLocation;
 	
 	public CollaborativeSpace() {
 		
 	}
 
-	public CollaborativeSpace(String name, String urlMapping, String symbolicLocation) {
-		this.name = name;
-		this.urlMapping = urlMapping;
+	public CollaborativeSpace(String name, String symbolicLocation) {
+		setName(name);
 		this.symbolicLocation = symbolicLocation;
 	}
 
-	public String getName() {
+    private String createUrlMapping(String name) {
+        return name.replaceAll("\\P{Alnum}", "");
+    }
+
+    public String getName() {
 		return name;
 	}
 
 	public void setName(String name) {
 		this.name = name;
+        this.urlMapping = createUrlMapping(name);
 	}
 
 	public Long getId() {
