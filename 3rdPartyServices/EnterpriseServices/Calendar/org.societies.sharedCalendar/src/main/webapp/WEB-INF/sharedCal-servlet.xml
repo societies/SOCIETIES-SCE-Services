@@ -39,7 +39,7 @@
     <!-- Configures the annotation-driven Spring MVC Controller programming model -->
 	<mvc:annotation-driven />	
     
-    <context:component-scan base-package="org.societies.thirdparty.enterprise.sharedCalendar.web"/>
+    <context:component-scan base-package="org.societies.thirdparty.sharedcalendar.web"/>
     <context:component-scan base-package="org.societies.api"/>
     
      <bean class="org.springframework.web.servlet.view.ContentNegotiatingViewResolver">

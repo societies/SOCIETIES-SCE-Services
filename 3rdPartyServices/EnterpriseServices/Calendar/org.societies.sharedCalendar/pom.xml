@@ -2,7 +2,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>org.societies.thirdparty.enterprise</groupId>
+	<groupId>org.societies.thirdparty.sharedcalendar</groupId>
 	<artifactId>sharedCalendar</artifactId>
 	<packaging>war</packaging>
 	<name>SharedCalendar</name>
@@ -45,13 +45,13 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.societies.thirdparty.sharedCalendar</groupId>
+			<groupId>org.societies.thirdparty.sharedcalendar</groupId>
 			<artifactId>calendar-api</artifactId>
 			<version>${project.version}</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.societies.thirdparty.sharedCalendar</groupId>
+			<groupId>org.societies.thirdparty.sharedcalendar</groupId>
 			<artifactId>calendar-api-schema</artifactId>
 			<version>${project.version}</version>
 			<scope>compile</scope>
@@ -98,6 +98,12 @@
 			<scope>compile</scope>
 		</dependency>
 		
+	<dependency>
+        <groupId>com.google.collections</groupId>
+        <artifactId>google-collections</artifactId>
+        <version>0.8</version>
+      </dependency>
+      
 		<dependency>
 			<groupId>org.codehaus.jackson</groupId>
 			<artifactId>jackson-core-asl</artifactId>
@@ -260,23 +266,24 @@
 							google-api-client;groupId=com.google.api-client;version=1.7.0-beta,
 							google-http-client;groupId=com.google.http-client;version=1.7.0-beta,
 							google-oauth-client;groupId=com.google.oauth-client;version=1.7.0-beta,
+							google-collections;groupId=com.google.collections;version=0.8,
 							jackson-core-asl;groupId=org.codehaus.jackson;version=1.9.4,
- 							calendar-api;groupId=org.societies.thidparty.sharedCalendar;scope=compile|runtime
-							calendar-api-schema;groupId=org.societies.thidparty.sharedCalendar;scope=compile|runtime
+ 							calendar-api;groupId=org.societies.thidparty.sharedcalendar;scope=compile|runtime,
+							calendar-api-schema;groupId=org.societies.thidparty.sharedcalendar;scope=compile|runtime,
 						</Embed-Dependency>
  						<Export-Package>
- 						org.societies.api.ext3p.schema.sharedCalendar,
- 						org.societies.thirdparty.sharedCalendar.api
- 						org.societies.thirdparty.enterprise.shardCalendar.web
- 						com.google.common.base
+ 						<!--  org.societies.thidparty.sharedcalendar.api.schema,
+ 						
+ 						org.societies.thirdparty.enterprise.shardCalendar.web,-->
+ 						org.societies.thidparty.sharedcalendar.api.schema,
+ 						org.societies.thirdparty.sharedcalendar.api
  						</Export-Package>
 						<!-- See http://www.bradchen.com/node/10 for reasons of importing hibernate packages -->
 						<Import-Package>
-<!-- 							org.societies.api.ext3p.schema.sharedcalendar;version="[0.1,1)", 
-							javassist.util.proxy, -->
 							org.hibernate.proxy;resolution:=optional,
 							org.springframework.orm.hibernate3.annotation;resolution:=optional,
 							org.springframework.orm.hibernate3;resolution:=optional,
+							org.slf4j;resolution:=optional,
 							javax.xml.datatype;version="0";resolution:=optional,
 							javax.servlet.jsp.jstl.core;version="[1.2.0,2.0.0)",
 							javax.servlet;version="[3.0.0, 4.0.0)",
@@ -284,6 +291,8 @@
 							javax.servlet.resources;version="[2.4.0, 4.0.0)",
 							javax.sql;resolution:=optional,
 							<!-- spring DM -->
+							org.osgi.framework,
+							org.springframework.validation,
 							org.springframework.beans.factory.config,
 							org.springframework.osgi.web.context.support,
 							org.springframework.web.context.request,
@@ -522,25 +531,20 @@
 							org.apache.taglibs.standard.tag.rt.xml; version="[1.2.0,2)",
 							org.apache.taglibs.standard.tei; version="[1.2.0,2)",
 							org.apache.taglibs.standard.tlv; version="[1.2.0,2)",
-							org.osgi.framework,
-							org.springframework.validation,
+							<!-- SOCIETIES -->
 							org.societies.api.cis.management;resolution:=optional,
 							org.societies.api.cis.directory;resolution:=optional,
 							org.societies.api.schema.cis.directory;resolution:=optional,
 							org.societies.api.comm.xmpp.interfaces;resolution:=optional,
 							org.societies.api.comm.xmpp.datatypes;resolution:=optional,
 							org.societies.api.comm.xmpp.exceptions;resolution:=optional,
-							org.societies.api.identity;resolution:=optional,
-							org.slf4j;resolution:=optional,
+							org.societies.api.identity,
 							org.societies.api.schema.cis.community;resolution:=optional,
 							org.societies.api.context.broker;resolution:=optional,
 							org.societies.api.context;resolution:=optional,
 							org.societies.api.context.model;resolution:=optional,
-							org.societies.api.internal.css.management;resolution:=optional,
-							org.societies.api.internal.sns;resolution:=optional,
 							org.societies.api.schema.cssmanagement;resolution:=optional,
 							org.societies.api.activity;resolution:=optional,
-							<!-- org.codehaus.jackson;resolution:=optional, --> 
 							org.codehaus.jackson.map;resolution:=optional,
 							org.springframework.web.servlet.view.json;resolution:=optional,
 							org.societies.api.services;resolution:=optional,
@@ -555,6 +559,8 @@
 							<!-- Form validation -->
 							javax.validation,
 							com.google.common.*;resolution:=optional,
+							com.google.common.base;resolution:=optional,
+							com.google.common.base.Preconditions;resolution:=optional,
 							com.google.api.client.auth.oauth2;resolution:=optional,
 							com.google.api.client.googleapis.auth.oauth2;resolution:=optional,
 							com.google.api.client.http;resolution:=optional,
@@ -576,10 +582,11 @@
 						WEB-INF/lib/google-api-services-calendar-v3-rev3-1.4.0-beta.jar,
 						WEB-INF/lib/google-http-client-1.7.0-beta.jar,
 						WEB-INF/lib/google-oauth-client-1.7.0-beta.jar,
+						WEB-INF/lib/google-collections-0.8.jar,
 						WEB-INF/lib/gson-2.2.1.jar,
 						WEB-INF/lib/jackson-core-asl-1.9.4.jar
 						</Bundle-ClassPath>
-						<Webapp-Context>sharedCal</Webapp-Context>					
+						<Webapp-Context>sharedCal</Webapp-Context>		
 					</instructions>
 				</configuration>
 
@@ -625,7 +632,27 @@
 						</artifactItem>
 					</artifactItems>
 				</configuration>
-			</plugin>			
+			</plugin>
+			
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+	      		<artifactId>maven-antrun-plugin</artifactId>
+	      		<executions>
+	        		<execution>
+	          			<id>copy</id>
+	          			<phase>compile</phase>
+	          			<configuration>
+	            			<tasks>
+	              				<copy file="src/main/webapp/WEB-INF/applicationContext.xml" tofile="${project.build.directory}/${project.name}/META-INF/spring/bundle-context-osgi.xml"/>
+	            			</tasks>
+	          			</configuration>
+	          			<goals>
+	            			<goal>run</goal>
+	          			</goals>
+			        </execution> 
+			      </executions>
+		    </plugin>
+      			
 		</plugins>
 	</build>
 

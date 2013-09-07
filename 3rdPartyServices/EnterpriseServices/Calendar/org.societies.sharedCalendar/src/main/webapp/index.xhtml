@@ -14,53 +14,117 @@
     </h:head>
 
 	<h:body id="body">
+		
+		<f:event type="preRenderView" listener="#{calendarWebController.preRender}" />
+	
 	   	<h:form id="form">
-	<p:layout fullPage="true" id="mylayout" >
- 	            
+	   	
+	   	<p:confirmDialog widgetVar="deleteDialog" header="Delete Event?" message="Are you sure you wish to delete #{calendarWebController.event.title}?"
+ 		 severity="alert" showEffect="clip" hideEffect="clip" >          
+        	<p:commandButton id="confirmDeleteButton" value="Confirm" actionListener="#{calendarWebController.deleteEvent}" oncomplete="myschedule.update();deleteDialog.hide();eventDialog.hide()" update="form:messages,form:eventDetails" process="@this"/>          
+			<p:commandButton id="cancelDeleteButton" value="Cancel" onclick="deleteDialog.hide()" />        
+        </p:confirmDialog>
         
-      <!--    <p:poll interval="45" update="messages" process="@this" />-->
+        <p:dialog widgetVar="searchDialog" header="Search Parameters" modal="true" showEffect="clip" hideEffect="clip">  
+            <h:panelGrid id="searchDetails" columns="1">  
+            	<!--  <p:messages id="searchErrorMessage" />-->
+            	        		
+            	<h:outputLabel for="searchCalendar" value="Calendar:" /> 
+            	<p:selectOneMenu id="searchCalendar" value="#{calendarWebController.searchCalendarNode}" effect="fade" >
+            		<f:selectItem itemLabel="All Calendars" itemValue="allCalendars" /> 
+            		<f:selectItems value="#{calendarWebController.calendarList}" var="searchCal" itemLabel="#{searchCal.name}" itemValue="#{searchCal.nodeId}"/>  
+        		</p:selectOneMenu>
+        		            	
+                <h:outputLabel for="searchkeyword" value="Keyword:" />  
+                <p:inputText id="searchkeyword" value="#{calendarWebController.searchEvent.title}" />  
+      
+                <h:outputLabel for="searchfrom" value="From:" />  
+                <p:inputMask id="searchfrom" value="#{calendarWebController.searchEvent.startDate}" mask="99/99/9999 99:99" >  
+                    <f:convertDateTime pattern="dd/MM/yyyy HH:mm" />  
+                </p:inputMask>  
+      
+                <h:outputLabel for="searchto" value="To:" />  
+                <p:inputMask id="searchto" value="#{calendarWebController.searchEvent.endDate}" mask="99/99/9999 99:99">  
+                    <f:convertDateTime pattern="dd/MM/yyyy HH:mm" /> 
+                </p:inputMask>  
+
+                <h:outputLabel for="searchlocation" value="Location:" />  
+                <p:inputText id="searchlocation" value="#{calendarWebController.searchEvent.location}" disabled="#{calendarWebController.locationToggle}" />
+               
+               <h:outputLabel for="searchToggleLocation" value="My Location:" />
+               <p:selectBooleanCheckbox id="searchToggleLocation" value="#{calendarWebController.locationToggle}" >
+               <p:ajax update="searchDetails" listener="#{calendarWebController.updateLocation}" process="@this" />
+               </p:selectBooleanCheckbox>
+                            			
+				<p:commandButton type="reset" value="Reset" />  
+                <p:commandButton id="doSearchButton" value="Search" actionListener="#{calendarWebController.doEventSearch}" 
+                oncomplete="searchDialog.hide(); searchResultDialog.show()" update="form:messages,form:searchDetails,form:searchEventList" icon="ui-icon-search" process="@this,searchDetails"/>            	
+               
+               </h:panelGrid>
+        </p:dialog>
+          
+	<p:layout fullPage="true" id="mylayout" >
+ 	                   
+      	<p:poll interval="120" listener="#{calendarWebController.updateWebApp}" update="form:messages,form:calendarMenu,form:recEventList,form:recEventTable" oncomplete="myschedule.update()" process="@this" />
             
         <h:outputText value="SOCIETIES CALENDAR" />  
-      
+      	<p:growl id="messages" showDetail="true" life="5000" for="bigrowl"  />
+      	
 	<p:layoutUnit id="top" position="north" size="50">
+	
 	</p:layoutUnit>
 
 	<p:layoutUnit id="left" position="west" size="180" resizable="false" closable="false" collapsible="false" header="Options" minSize="180">
 		<p:selectOneMenu id="calendarMenu" value="#{calendarWebController.selectedNode}" effect="fade">
-            <f:selectItems value="#{calendarWebController.calendarList}" var="calendar" itemLabel="#{calendar.summary}" itemValue="#{calendar.nodeId}"/>  
+            <f:selectItems value="#{calendarWebController.calendarList}" var="calendar" itemLabel="#{calendar.name}" itemValue="#{calendar.nodeId}"/>
+            <f:selectItem itemLabel="All My Events" itemValue="mysubscribedevents" />
             <p:ajax update="form:schedule" listener="#{calendarWebController.selectCalendar}" process="@this"/>
         </p:selectOneMenu>
         <br></br>
         <h:outputText value="Show all my events: " />  
-        <p:selectBooleanCheckbox value="#{calendarWebController.allEvents}" />  
+        <p:selectBooleanCheckbox value="#{calendarWebController.allEvents}" /> 
+        
+         <p:commandButton id="startSearchButton" value="Find Events" actionListener="#{calendarWebController.prepareEventSearch}" 
+              oncomplete="searchDialog.show();" update="form:searchDetails" icon="ui-icon-search" style="width:150px" process="@this"/>            	
+ 
 	</p:layoutUnit>
       
 	<p:layoutUnit id="center" position="center">
       
         <p:schedule id="schedule" value="#{calendarWebController.eventModel}" widgetVar="myschedule">  
       
-            <p:ajax event="dateSelect" listener="#{calendarWebController.onDateSelect}" update="eventDetails,attendTest,editSaveEvents" oncomplete="eventDialog.show()" />  
-            <p:ajax event="eventSelect" listener="#{calendarWebController.onEventSelect}" update="eventDetails,attendTest,editSaveEvents" oncomplete="eventDialog.show()" />  
-            <p:ajax event="eventMove" listener="#{calendarWebController.onEventMove}" update="schedule" />  
-            <p:ajax event="eventResize" listener="#{calendarWebController.onEventResize}" update="schedule" />  
+            <p:ajax event="dateSelect" listener="#{calendarWebController.onDateSelect}" update="eventDetails,attendTest" oncomplete="eventDialog.show()" />  
+            <p:ajax event="eventSelect" listener="#{calendarWebController.onEventSelect}" update="eventDetails,attendTest" oncomplete="eventDialog.show()" />  
+            <p:ajax event="eventMove" listener="#{calendarWebController.onEventMove}" update="form:messages" />  
+            <p:ajax event="eventResize" listener="#{calendarWebController.onEventResize}" update="form:messages" />  
       
         </p:schedule>
         
 		<p:dialog widgetVar="eventDialog" header="Event Details" showEffect="clip" hideEffect="clip">  
             <h:panelGrid id="eventDetails" columns="1">  
+            	<p:messages id="errorMessage" />
+            	
+ 				<h:outputLabel for="calendarNameMenu" value="Calendar:" rendered="#{calendarWebController.multipleCalendars and calendarWebController.event.id == null}" /> 
+            	<p:selectOneMenu id="calendarNameMenu" value="#{calendarWebController.societiesEventNode}" effect="fade" rendered="#{calendarWebController.multipleCalendars and calendarWebController.event.id == null}">
+            		<f:selectItems value="#{calendarWebController.calendarList}" var="eventCal" itemLabel="#{eventCal.name}" itemValue="#{eventCal.nodeId}"/>  
+        		</p:selectOneMenu>
+        		
+        		<h:outputLabel for="calendarName" value="Calendar:" rendered="#{!calendarWebController.multipleCalendars or calendarWebController.event.id != null}" /> 
+                <p:inputText id="calendarName" value="#{calendarWebController.societiesEvent.calendarName}" readonly="true" rendered="#{!calendarWebController.multipleCalendars or calendarWebController.event.id != null}"/>  
+        		          	
                 <h:outputLabel for="title" value="Title:" />  
-                <p:inputText id="title" value="#{calendarWebController.event.title}" readonly="#{!calendarWebController.editable}"/>  
+                <p:inputText id="title" required="true" value="#{calendarWebController.event.title}" requiredMessage="Title is required!" readonly="#{!calendarWebController.editable}"/>  
       
                 <h:outputLabel for="from" value="From:" />  
-                <p:inputMask id="from" binding="#{startDate}" value="#{calendarWebController.event.startDate}" mask="99/99/9999 99:99" readonly="#{!calendarWebController.editable}">  
+                <p:inputMask id="from" binding="#{startDate}" required="true" value="#{calendarWebController.event.startDate}" mask="99/99/9999 99:99" readonly="#{!calendarWebController.editable}">  
                     <f:convertDateTime pattern="dd/MM/yyyy HH:mm" />  
                 </p:inputMask>  
       
                 <h:outputLabel for="to" value="To:" />  
-                <p:inputMask id="to" value="#{calendarWebController.event.endDate}" mask="99/99/9999 99:99" readonly="#{!calendarWebController.editable}">  
+                <p:inputMask id="to" value="#{calendarWebController.event.endDate}" required="true" mask="99/99/9999 99:99" readonly="#{!calendarWebController.editable}">  
                     <f:convertDateTime pattern="dd/MM/yyyy HH:mm" /> 
-                        <!--  <f:validator validatorId="dateValidator" />
-        				<f:attribute name="startDate" value="#{startDate}" />-->
+                        <f:validator validatorId="dateValidator" />
+        				<f:attribute name="startDate" value="#{startDate}" />
                 </p:inputMask>  
                       
                 <h:outputLabel for="description" value="Description" />
@@ -68,20 +132,17 @@
                 
                 <h:outputLabel for="location" value="Location:" />  
                 <p:inputText id="location" value="#{calendarWebController.societiesEvent.location}" readonly="#{!calendarWebController.editable}"/>  
-                
-                <h:outputText id="calendarName" value="#{calendarWebController.societiesEvent.calendarName}" readonly="true" rendered="#{calendarWebController.societiesEvent.calendarName != null}" />
-              
+                              
       			<h:panelGrid id="attendTest" columns="1" rendered="#{calendarWebController.event.id != null}" >  
       				<p:commandButton id="attendeeButton" value="Show Attendees" onclick="attendeeDialog.show()" /> 
-      				<p:commandButton id="joinButton" value="Join Event" actionListener="#{calendarWebController.joinEvent}" rendered="#{!calendarWebController.myEvent and !calendarWebController.subscribed}" oncomplete="myschedule.update();eventDialog.hide();"/>
-      				<p:commandButton id="leaveButton" value="Leave Event" actionListener="#{calendarWebController.leaveEvent}" rendered="#{!calendarWebController.myEvent and calendarWebController.subscribed}" oncomplete="myschedule.update();eventDialog.hide();"/>
+      				<p:commandButton id="joinButton" value="Join Event" actionListener="#{calendarWebController.joinEvent}" rendered="#{!calendarWebController.myEvent and !calendarWebController.subscribed}" oncomplete="myschedule.update();eventDialog.hide();" update="form:messages"/>
+      				<p:commandButton id="leaveButton" value="Leave Event" actionListener="#{calendarWebController.leaveEvent}" rendered="#{!calendarWebController.myEvent and calendarWebController.subscribed}" oncomplete="myschedule.update();eventDialog.hide();" update="form:messages"/>
       			</h:panelGrid> 
       			
-      			<h:panelGrid id="editSaveEvents" columns="1" rendered="#{calendarWebController.editable}">
-					<p:commandButton type="reset" value="Reset" />  
-                	<p:commandButton id="addButton" value="Save" actionListener="#{calendarWebController.saveEvent}" oncomplete="myschedule.update();eventDialog.hide();"/>
-                	<p:commandButton id="deleteButton" value="Delete" onclick="deleteDialog.show()" rendered="#{calendarWebController.event.id != null}" /> 
-            	</h:panelGrid>
+				<p:commandButton type="reset" value="Reset" rendered="#{calendarWebController.editable}" />  
+                <p:commandButton id="addButton" value="Save" actionListener="#{calendarWebController.saveEvent}" oncomplete="if (!args.validationFailed) eventDialog.hide(); myschedule.update();" update="form:messages,form:eventDetails" rendered="#{calendarWebController.editable}" process="@this,eventDetails" />            	
+                <p:commandButton id="deleteButton" value="Delete" onclick="deleteDialog.show()" rendered="#{calendarWebController.event.id != null and calendarWebController.editable}" /> 
+               
                </h:panelGrid>
         </p:dialog>  
     	 
@@ -91,30 +152,77 @@
 			</p:dataList> 	          
         </p:dialog>  
  
- 		<p:dialog widgetVar="deleteDialog" header="Delete Event?" showEffect="clip" hideEffect="clip" >           
-        	<p:commandButton id="confirmDeleteButton" value="Confirm" actionListener="#{calendarWebController.deleteEvent}" oncomplete="myschedule.update();deleteDialog.hide();eventDialog.hide();"/>          
-			<p:commandButton id="cancelDeleteButton" value="Cancel" onclick="deleteDialog.hide()" />        
-        </p:dialog>
+
                 	
 	</p:layoutUnit>
 	
-     <p:layoutUnit id="right" position="east" size="200" header="Recommended Events" resizable="true" closable="true" collapsible="true"
+     <p:layoutUnit id="right" position="east" size="230" header="Recommended Events" resizable="true" closable="false" collapsible="false"
                               style="text-align:center">
-    	 
-    	<p:poll interval="60" listener="#{calendarWebController.updateRecommendedEvents}" update="recEventList,messages" process="@this" />
-		<p:growl id="messages" showDetail="true" />
-
-        <p:selectOneListbox id="recEventList" value="#{calendarWebController.recommendedEvent}" var="e" style="width:180px">  
-            <f:selectItems value="#{calendarWebController.recommendedEvents}" var="event" itemValue="#{event}" />
+    	 	
+        <p:selectOneListbox id="recEventList" value="#{calendarWebController.recommendedEvent}" converter="#{calendarWebController.eventConverter}" var="e" style="width:180px">  
+            <f:selectItems value="#{calendarWebController.recommendedEvents}" var="event" itemLabel="#{event.title}" itemValue="#{event}" />
             <p:column>  
-            	#{e.title}
+            	<h5><b>#{e.title}</b><br></br></h5>
+            	<i>Calendar: </i> #{e.calendarName}<br></br>
+            	<i>When: </i> #{e.dateText}
             </p:column>
-     		<!-- itemLabel="#{event.title}" -->
-     		<p:ajax listener="#{calendarWebController.viewRecommendedEvent}" update="eventDetails" oncomplete="eventDialog.show()" />
+     		<p:ajax listener="#{calendarWebController.viewRecommendedEvent}" update="eventDetails" oncomplete="eventDialog.show()" process="@this" />
         </p:selectOneListbox>  
-
+        
+        
      </p:layoutUnit>
 	</p:layout>
+	
+	<p:dialog widgetVar="searchResultDialog" header="Search Results" showEffect="clip" hideEffect="clip">  
+		<p:selectOneListbox id="searchEventList" value="#{calendarWebController.selectedEvent}" converter="#{calendarWebController.eventConverter}" var="se" converterMessage="Problem converting" style="width:180px" >  
+            <f:selectItems value="#{calendarWebController.searchResults}" var="searcheventresult" itemLabel="#{searcheventresult.title}" itemValue="#{searcheventresult}" />
+            <p:column>  
+            	<h5><i>Event: </i><b>#{se.title}</b></h5><br></br>
+            	<i>Calendar: </i> #{se.calendarName}<br></br>
+            	<i>When: </i> #{se.dateText}
+            </p:column>
+     		<p:ajax listener="#{calendarWebController.viewSearchEvent}" update="form:eventDetails" oncomplete="eventDialog.show()" process="@this,searchEventList" />
+        </p:selectOneListbox>
+        
+                       <p:dataTable id="recEventTable" var="event" converter="#{calendarWebController.eventConverter}"
+    value="#{calendarWebController.searchResults}" sortMode="multiple" >  
+  
+  		<p:column style="width:4%">  
+            <p:rowToggler />  
+        </p:column> 
+        
+        <p:column headerText="Event" style="width:48%">  
+            <h:outputText value="#{event.title}" />  
+        </p:column>  
+  
+        <p:column headerText="When" style="width:48%">  
+            <h:outputText value="#{event.dateText}" />  
+        </p:column>  
+    
+  		<p:rowExpansion>  
+            <h:panelGrid id="displayRow" columns="2" cellpadding="4" style="width:100px;"  
+                            styleClass=" ui-widget-content grid">  
+   
+                <h:outputText value="Model:" />  
+                <h:outputText value="#{event.title}" />  
+  
+                <h:outputText value="Year:" />  
+                <h:outputText value="#{event.calendarName}" />   
+  
+                <h:outputText value="Manufacturer:" />  
+                <h:outputText value="#{event.dateText}" /> 
+  
+            </h:panelGrid>  
+       				<p:commandButton id="attendeeButton" value="Show Attendees" onclick=":form:attendeeDialog.show()" /> 
+      				<p:commandButton id="joinButton" value="Join Event" actionListener="#{calendarWebController.joinEvent}" update=":form:messages"/>
+      				<p:commandButton id="leaveButton" value="Leave Event" actionListener="#{calendarWebController.leaveEvent}"  update=":form:messages"/>
+  
+        </p:rowExpansion>  
+        
+    </p:dataTable>    
+    </p:dialog>
+          
+    
 	</h:form>
 	</h:body>
 

@@ -2,7 +2,7 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>org.societies.thirdparty.sharedCalendar</groupId>
+	<groupId>org.societies.thirdparty.sharedcalendar</groupId>
 	<!-- change the artifactid to your project artifactid -->
 	<artifactId>calendar-api</artifactId>
 	<name>SOCIETIES Calendar API</name>
@@ -36,7 +36,7 @@
 	<dependencies>
 		<!-- add your dependencies here -->
 		<dependency>
-			<groupId>org.societies.thirdparty.sharedCalendar</groupId>
+			<groupId>org.societies.thirdparty.sharedcalendar</groupId>
 			<artifactId>calendar-api-schema</artifactId>
 			<version>${project.version}</version>
 		</dependency>
@@ -100,7 +100,7 @@
 					<skipTests>true</skipTests>
 				</configuration>
 			</plugin>
-			<plugin>
+			<!--  <plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-dependency-plugin</artifactId>
 				<configuration>
@@ -115,7 +115,7 @@
 						</artifactItem>
 					</artifactItems>
 				</configuration>
-			</plugin>
+			</plugin>-->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-site-plugin</artifactId>
