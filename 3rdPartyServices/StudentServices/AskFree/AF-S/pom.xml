@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>im143.af</groupId>
+    <artifactId>askfree</artifactId>
+    <version>0.1</version>
+    <packaging>apk</packaging>
+    <name>AskFree</name>
+    
+    <parent>
+  		<groupId>org.societies</groupId>
+  		<artifactId>spring-osgi-parent</artifactId>
+  		<version>RELEASE</version>
+ 	</parent>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.google.android</groupId>
+            <artifactId>android</artifactId>
+            <version>4.1.1.4</version>
+            <scope>provided</scope>
+        </dependency>
+        
+        <dependency>
+            <groupId>de.tavendo.autobahn</groupId>
+			<artifactId>autobahn-android</artifactId>
+			<version>0.5.0</version>
+        </dependency>
+        
+        <dependency>
+			<groupId>org.codehaus.jackson</groupId>
+			<artifactId>jackson-core-asl</artifactId>
+			<version>1.9.7</version>
+		</dependency>
+		
+        <dependency>
+			<groupId>org.codehaus.jackson</groupId>
+			<artifactId>jackson-mapper-asl</artifactId>
+			<version>1.9.7</version>
+		</dependency>
+
+		<dependency>
+           <groupId>org.societies.android.remote.helper</groupId>
+           <artifactId>SocietiesAndroidRemoteHelpers</artifactId>
+           <version>${release.version}</version>
+           <type>apklib</type>
+        </dependency>
+        
+		<dependency>
+			<groupId>org.societies.android.api.external</groupId>
+			<artifactId>societies-android-api</artifactId>
+			<version>${release.version}</version>
+			<type>apklib</type>
+		</dependency>
+		
+    </dependencies>
+	
+    <build>
+        <finalName>${project.artifactId}</finalName>
+        <sourceDirectory>src</sourceDirectory>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>com.jayway.maven.plugins.android.generation2</groupId>
+                    <artifactId>android-maven-plugin</artifactId>
+                    <version>3.6.1</version>
+                    <extensions>true</extensions>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+        <plugins>
+            <plugin>
+                <groupId>com.jayway.maven.plugins.android.generation2</groupId>
+                <artifactId>android-maven-plugin</artifactId>
+                <configuration>
+                    <sdk>
+                        <!-- platform or api level (api level 16 = platform 4.1)-->
+                        <platform>16</platform>
+                    </sdk>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

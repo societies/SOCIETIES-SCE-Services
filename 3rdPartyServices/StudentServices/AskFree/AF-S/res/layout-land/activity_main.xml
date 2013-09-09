@@ -1,0 +1,67 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    style="@style/layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    tools:context=".MainActivity" >
+
+    <TextView
+        android:id="@+id/user_idTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/user_idTextView" 
+        style="@style/text_view"/>
+
+    <TextView
+        android:id="@+id/statusTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/user_idTextView"
+        android:layout_alignBottom="@+id/user_idTextView"
+        android:layout_alignRight="@+id/linearLayout1"
+        android:layout_marginRight="189dp"
+        android:text="@string/statusTextView" 
+        style="@style/text_view"/>
+    
+     <Spinner
+        android:id="@+id/spinner1"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="22dp"
+        android:prompt="@string/choose_module" />
+
+    <LinearLayout
+        android:id="@+id/linearLayout1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/user_idTextView"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="19dp"
+        android:orientation="horizontal" >
+
+        <EditText
+            android:id="@+id/questionEditText"
+            style="@style/big_edit_text"
+            android:layout_width="0dp"
+            android:layout_height="100dp"
+            android:layout_weight="1"
+            android:ems="10"
+            android:hint="@string/questionEditTextHint"
+            android:inputType="textMultiLine" />
+
+        <Button
+            android:id="@+id/submitButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/custom_button_selector"
+            android:text="@string/submitButton"
+            android:textColor="@color/blue" />
+    </LinearLayout>
+
+</RelativeLayout>

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">AF-S</string>
+    <string name="action_settings">Settings</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="statusTextView">Status</string>
+    <string name="publishButton">Publish</string>
+    <string name="subscribeButton">Subscribe</string>
+    <string name="choose_module">Choose a module</string>
+    <string name="questionEditText"></string>
+    
+    
+    <string name="title_activity_login">LoginActivity</string>
+    <string name="title_activity_registration">RegistrationActivity</string>
+    <string name="submitButton">Send</string>
+    <string name="loginButton">Login</string>
+    <string name="loginTextView">Please Log In</string>
+    <string name="usernameTextView">Username:</string>
+    <string name="passwordTextView">Password:</string>
+    <string name="loginSuccess">Login Successful</string>
+    <string name="title_activity_login_success">LoginSuccess</string>
+    <string name="Logo">AskFree</string>
+    <string name="regLogoTextView">Registration</string>
+    <string name="registerButton">Register</string>
+    <string name="emailRegTextView">e-mail</string>
+    <string name="passRegTextView">Password</string>
+    <string name="fnameRegTextView">First Name</string>
+    <string name="lnameRegTextView">Last Name</string>
+    <string name="registerRegButton">Register</string>
+    <string name="retypePassRegTextView">Re-type Password</string>
+    <string name="rePassRegEditView"></string>
+    <string name="title_activity_submit">Submit</string>
+    <string name="submitQuestionLogo">Submit a question</string>
+    <string name="user_idTextView">User Id:</string>
+    <string name="logoutButton">Logout</string>
+    <string name="title_activity_choose_class">ChooseClassActivity</string>
+    <string name="title_activity_main">MainActivity</string>
+    <string name="questionEditTextHint">Ask something...</string>
+    <string name="menu_item_log_out">Log out</string>
+    <string name="menu_item_refresh">Refresh</string>
+    <string name="title_activity_rep_points">Reputation Points</string>
+    <string name="title_activity_base">BaseActivity</string>
+    <string name="loginInternetStatus"></string>
+    <string name="loginLogo2">Inclass Questioning System</string>
+    <string name="LoginLogo">Login</string>
+    <string name="title_activity_subscribe_modules">SubscribeModulesActivity</string>
+    
+
+</resources>

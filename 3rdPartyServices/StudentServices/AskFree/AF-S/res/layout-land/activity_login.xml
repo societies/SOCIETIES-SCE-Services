@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+     style="@style/layout">
+
+    <TextView
+        android:id="@+id/askFreeLogoTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="17dp"
+        android:text="@string/Logo"
+        android:textAppearance="?android:attr/textAppearanceLarge" 
+        style="@style/text_view"/>
+
+    <EditText
+        android:id="@+id/usernameEditText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/usernameTextView"
+        android:layout_alignBottom="@+id/usernameTextView"
+        android:layout_alignLeft="@+id/askFreeLogoTextView"
+        android:layout_marginLeft="36dp"
+        android:ems="10"
+        android:inputType="text" 
+         style="@style/small_edit_text">
+
+        <requestFocus />
+    </EditText>
+
+    <TextView
+        android:id="@+id/usernameTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/askFreeLogoTextView"
+        android:layout_marginRight="55dp"
+        android:layout_marginTop="30dp"
+        android:layout_toLeftOf="@+id/usernameEditText"
+        android:text="@string/usernameTextView" 
+        style="@style/text_view"/>
+
+    <TextView
+        android:id="@+id/passwordTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignRight="@+id/usernameTextView"
+        android:layout_below="@+id/usernameEditText"
+        android:layout_marginTop="37dp"
+        android:text="@string/passwordTextView" 
+        style="@style/text_view"/>
+
+    <EditText
+        android:id="@+id/passwordEditText"
+        style="@style/small_edit_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/passwordTextView"
+        android:layout_alignLeft="@+id/usernameEditText"
+        android:layout_alignRight="@+id/usernameEditText"
+        android:ems="10"
+        android:inputType="textPassword" />
+
+    <Button
+        android:id="@+id/loginButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/passwordEditText"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="26dp"
+        android:text="@string/loginButton" 
+        android:textColor="#0064b1"
+        android:background="@drawable/custom_button_selector"/>
+
+    <Button
+        android:id="@+id/registerButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/loginButton"
+        android:layout_alignBottom="@+id/loginButton"
+        android:layout_alignRight="@+id/passwordEditText"
+        android:text="@string/registerButton" 
+        android:textColor="#0064b1"
+        android:background="@drawable/custom_button_selector"/>
+
+    <TextView
+        android:id="@+id/textView1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/askFreeLogoTextView"
+        android:layout_centerHorizontal="true"
+        android:text="@string/loginLogo2"
+        android:textAppearance="?android:attr/textAppearanceSmall" 
+        style="@style/text_view"/>
+
+</RelativeLayout>
