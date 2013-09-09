@@ -80,19 +80,11 @@ public class TaskAPI implements ITaskAPI {
 		return gson.toJson(list);
 	}
 	
-	private Response newTask(String title, String description, String taskDate,
+	private Response newTask(String title, String description,
 			List<Long> communities, String tagsString, CTUser user, List<String> communityJids) throws IOException, URISyntaxException {
 
 		DateFormat formatter = new SimpleDateFormat("dd.MM.yyyy");
-		Date dueDate;
-		
-		try {
-			dueDate = formatter.parse(taskDate);
-		} catch (ParseException e) {
-			log.severe(e.getLocalizedMessage());
-			dueDate = new Date();
-		}
-		
+
 		Gson gson = new Gson();
 		String[] tags;
         try {
@@ -111,7 +103,7 @@ public class TaskAPI implements ITaskAPI {
 			tag.setTagFrequency(tag.getTagFrequency()+1);
 		}
 		
-	    Task task = new Task(title, description, dueDate, user.getId(), user.getFirstName()+" "+user.getLastName(), communities, Arrays.asList(tags), communityJids);
+	    Task task = new Task(title, description, user.getId(), user.getFirstName()+" "+user.getLastName(), communities, Arrays.asList(tags), communityJids);
 	    task.setScore(user.getKarma());
 	    TaskDao.save(task);
 		TagAPI.updateTags(tagList);
@@ -154,7 +146,6 @@ public class TaskAPI implements ITaskAPI {
             @FormParam("action") String action,
             @FormParam("title") String title,
             @FormParam("description") String description,
-            @DefaultValue("") @FormParam("taskDate") String taskDate,
             @FormParam("taskCommunity") List<Long> communities,
             @FormParam("taskCommunityJids") List<String> communityJids,
             @FormParam("taskTags") String tagsString,
@@ -165,7 +156,7 @@ public class TaskAPI implements ITaskAPI {
 			if (title == null || "".equalsIgnoreCase(title)) {
 				return Response.status(Status.NOT_ACCEPTABLE).entity("Title is required.").type("text/plain").build();
 			}
-			return newTask(title, description, taskDate, communities, tagsString, user, communityJids);
+			return newTask(title, description, communities, tagsString, user, communityJids);
 		}
 		if ("execute".equalsIgnoreCase(action)) {
 			if (activeComments == null || activeComments.isEmpty()) {

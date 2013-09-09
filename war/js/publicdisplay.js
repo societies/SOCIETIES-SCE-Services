@@ -30,8 +30,6 @@ function task_template(row, task) {
 	row.find('.task_id').text(task.id);
 	row.find('.task_title').text(task.title);
 	row.find('.task_postedby').text(task.postedBy);
-	var d1=new Date(task.dueDate);
-	row.find('.task_duedate').text(d1.getDate()+"."+(d1.getMonth()+1)+"."+d1.getFullYear());
     var desc = task.description;
     if (desc.length > 200) {
     	desc = desc.substring(0, 200)+"...";

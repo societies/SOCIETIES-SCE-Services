@@ -20,7 +20,6 @@ public class Task {
 	private String title;
     @Index private boolean societiesTask;
 	private String description;
-	private Date dueDate;
     private Date created;
 	@Index private Long ownerId;
 	private String postedBy;	// userNickName
@@ -47,13 +46,11 @@ public class Task {
 		return id;
 	}
 
-	public Task(String title, String description, Date dueDate,
-			Long ownerId, String postedBy, List<Long> communityIds, List<String> tagList, List<String> communityJids) {
+	public Task(String title, String description, Long ownerId, String postedBy, List<Long> communityIds, List<String> tagList, List<String> communityJids) {
 		super();
 		this.id = null;
 		this.title = title;
 		this.description = description;
-		this.dueDate = dueDate;
 		this.created = new Date();
 		this.ownerId = ownerId;
 		this.postedBy = postedBy;
@@ -86,13 +83,6 @@ public class Task {
 
 	public void setDescription(String description) {
 		this.description = description;
-	}
-	public Date getDueDate() {
-		return dueDate;
-	}
-
-	public void setDueDate(Date dueDate) {
-		this.dueDate = dueDate;
 	}
 
 	public void setTags() {

@@ -28,7 +28,6 @@ public interface ITaskAPI {
             @FormParam("action") String action,
             @FormParam("title") String title,
             @FormParam("description") String description,
-            @DefaultValue("") @FormParam("taskDate") String taskDate,
             @FormParam("taskCommunity") List<Long> communities,
             @FormParam("taskCommunityJids") List<String> communityJids,
             @FormParam("taskTags") String tagsString,

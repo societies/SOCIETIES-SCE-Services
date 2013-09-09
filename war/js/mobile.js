@@ -265,7 +265,6 @@ var CrowdTaskingApp = function() {
             editLink.append('<h3 style="white-space:normal;">'+task.title+'</h3>');
             editLink.append('<p style="white-space:normal;"><strong>'+task.description+'</strong></p>');
             editLink.append('<p>'+task.postedBy+'<img class="'+task.trustLevel+'" src="/images/img_trans.gif" width="1" height="1" /> ('+formatDate(task.created)+')</p>');
-        	//var d1=new Date(task.dueDate);
             //editLink.append('<p>'+task.postedBy+', '+d1.getDate()+'.'+(d1.getMonth()+1)+'.'+d1.getFullYear()+'</p>');
 
             //editLink.append('<p class="ui-li-aside">'+task.postedBy+'</p>');
@@ -284,7 +283,7 @@ var CrowdTaskingApp = function() {
     };
 
     var showMeetings = function(task) {
-    	if (task.status != 'IN_PROGRESS') return;
+    	if (task.status != 'IN_PROGRESS' || task.meetings.length === 0) return;
     	
     	$('#meetingDiv').show();
     	$meetingList = $('#meetingList'); 
@@ -420,8 +419,6 @@ var CrowdTaskingApp = function() {
         	$('#taskDescription').text(task.description);
             var d1=new Date(task.created);
             $('#taskCreated').text(d1.getDate()+"."+(d1.getMonth()+1)+"."+d1.getFullYear());
-            d1=new Date(task.dueDate);
-            $('#taskDate').text(d1.getDate()+"."+(d1.getMonth()+1)+"."+d1.getFullYear());
 
             //var communities = [];
             var communitiesText = "";
@@ -446,15 +443,20 @@ var CrowdTaskingApp = function() {
             
             $spaces = $('#meetingCS');
             $spaces.empty();
-   			for (var i=0; i<task.spaces.length; i++) {
-   				if (task.spaces[i] === undefined || task.spaces[i] === null) continue;
-   				var spaceId = task.spaces[i].id;
-   				var spaceName = task.spaces[i].name;
-   				//$meetingCS.append('<option value='+task.spaces[i].id+'>'+task.spaces[i].name+'</option>');
-   				$spaces.append('<option value='+spaceId+'>'+spaceName+'</option>');
-			}
+            if (task.spaces.length > 0) {
+                for (var i=0; i<task.spaces.length; i++) {
+                    if (task.spaces[i] === undefined || task.spaces[i] === null) continue;
+                    var spaceId = task.spaces[i].id;
+                    var spaceName = task.spaces[i].name;
+                    //$meetingCS.append('<option value='+task.spaces[i].id+'>'+task.spaces[i].name+'</option>');
+                    $spaces.append('<option value='+spaceId+'>'+spaceName+'</option>');
+                }
+            }
+            else {
+                $('#newMeetingButton').hide();
+            }
    			$spaces.selectmenu('refresh');
-            
+
             showMeetings(task);
             showComments(task.id, false);
         }
@@ -559,7 +561,6 @@ var CrowdTaskingApp = function() {
         Task: function () {
             this.title = '';
             this.description = '';
-            this.dueDate = new Date();
             this.spaceId = -1;
             this.tags = '';
         },

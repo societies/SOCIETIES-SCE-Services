@@ -44,7 +44,6 @@ public class TaskJS {
 	private Long id;
 	private String title;
 	private String description;
-	private Date dueDate;
 	private Date created;
 	private Long ownerId;
 	private String postedBy;	// userNickName
@@ -67,7 +66,6 @@ public class TaskJS {
 		this.id = task.getId();
 		this.title = task.getTitle();
 		this.description = task.getDescription();
-		this.dueDate = task.getDueDate();
 		this.created = task.getCreated();
 		this.ownerId = task.getOwnerId();
 		this.postedBy = task.getPostedBy();
