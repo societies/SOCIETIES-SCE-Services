@@ -23,17 +23,44 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-
+using System.Collections.Generic;
 using SocialLearningGame.Entities;
-namespace SocialLearningGame
+
+namespace SocialLearningGame.Logic
 {
-    public class Challenge
+    public class GameSession
     {
-        public int ID { get; set; }
-        public UserScore Challenger { get; set; }
-        public UserScore Challenged { get; set; }
-        public Category Category { get; set; }
-        public int ChallengerScore { get; set; }
-        public int ChallengedScore { get; set; }
+
+        // Global vars
+        public List<UserScore> AllKnownUsers { get; private set; }
+        public List<Category> AllCategories { get; private set; }
+        public List<Question> AllQuestions { get; private set; }
+        public List<Question> AllAnsweredQuestions { get; private set; }
+        public Dictionary<Category, List<Question>> CategoryQuestionMap { get; private set; }
+
+        // Game specific vars
+        public UserScore MainUser { get; set; }
+        public List<UserScore> AdditionalUsers { get; private set; }
+        public Dictionary<UserScore, int> UserScoreMap { get; private set; }
+     //   public List<UserAnsweredQ> answeredQ { get; private set; }
+        //TODO: public static List<Challenge> challenges = new List<Challenge>();
+        //TODO: public static List<Challenge> challengesFrom = new List<Challenge>();
+        public GameStage Stage { get; set; }
+        public Queue<QuestionRound> QuestionHistory { get; private set; }
+
+        public QuestionRound CurrentRound { get; set; }
+
+        public GameSession()
+        {
+            AdditionalUsers = new List<UserScore>();
+            AllAnsweredQuestions = new List<Question>();
+            UserScoreMap = new Dictionary<UserScore, int>();
+            AllKnownUsers = new List<UserScore>();
+            AllCategories = new List<Category>();
+            AllQuestions = new List<Question>();
+            CategoryQuestionMap = new Dictionary<Category, List<Question>>();
+            QuestionHistory = new Queue<QuestionRound>();
+        }
+
     }
 }

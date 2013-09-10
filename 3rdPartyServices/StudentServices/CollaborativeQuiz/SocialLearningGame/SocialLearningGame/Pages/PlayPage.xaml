@@ -6,7 +6,8 @@
       xmlns:k="http://schemas.microsoft.com/kinect/2013"
       mc:Ignorable="d" 
       d:DesignHeight="600" d:DesignWidth="1000"
-      Title="Quiz">
+      Title="Quiz"
+      Loaded="Window_Loaded">
 
     <Page.Resources>
         <Style x:Key="QuestionTextStyle" TargetType="TextBlock">
@@ -88,7 +89,7 @@
         <TextBlock Text="Question" FontSize="20" 
                    HorizontalAlignment="Left" VerticalAlignment="Bottom"
                    Grid.Column="3" />
-        <TextBlock Name="questionNumberBox" FontSize="32" Text="[#/6]"
+        <TextBlock Name="questionNumberBox" FontSize="32"
                    HorizontalAlignment="Center" VerticalAlignment="Top" TextAlignment="Left" 
                    Height="Auto" Width="Auto" Grid.Column="3" Grid.Row="1"/>
 

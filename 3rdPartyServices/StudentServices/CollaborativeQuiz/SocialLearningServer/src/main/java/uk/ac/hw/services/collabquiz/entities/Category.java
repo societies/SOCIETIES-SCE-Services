@@ -33,37 +33,38 @@ import javax.persistence.*;
 @ManagedBean(name="categoryBean")
 public class Category {
 
+	@Id
+	@GeneratedValue
+	@Column(name = "category_id")
+	private int categoryID;
+	@Column(name = "name")
+	private String name;
 
-    private int categoryID;
-    private String name;
+
+	public Category() {
+	}
+
+	public Category(int categoryID, String name) {
+		this.categoryID = categoryID;
+		this.name = name;
+
+	}
 
 
-    public Category() {
-    }
+	public int getCategoryID() {
+		return categoryID;
+	}
 
-    public Category(int categoryID, String name) {
-        this.categoryID = categoryID;
-        this.name = name;
+	public void setCategoryID(int categoryID) {
+		this.categoryID = categoryID;
+	}
 
-    }
 
-    @Id
-    @GeneratedValue
-    @Column(name = "category_id")
-    public int getCategoryID() {
-        return categoryID;
-    }
+	public String getName() {
+		return name;
+	}
 
-    public void setCategoryID(int categoryID) {
-        this.categoryID = categoryID;
-    }
-
-    @Column(name = "name")
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
+	public void setName(String name) {
+		this.name = name;
+	}
 }

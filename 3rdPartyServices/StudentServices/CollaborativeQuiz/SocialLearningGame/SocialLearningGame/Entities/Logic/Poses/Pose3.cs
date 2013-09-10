@@ -23,12 +23,32 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace SocialLearningGame.Entities
+using System;
+
+namespace SocialLearningGame.Logic.Poses
 {
-    public class User
+    public class Pose3 : AbstractPose
     {
-        public int ID { get; set; }
-        public string Name { get; set; }
+        private static int _ID = 3;
+        private static String _Name = "Pose with left hand in the air and right hand down below the waist";
+        private static readonly Uri _uri = new Uri("/SocialLearningGame;component/Resources/Pose3.png", UriKind.Relative);
+
+        private const double tolerance = 0.1;
+
+        public Pose3()
+            : base(_ID, _Name, _uri)
+        {
+        }
+
+        public override bool IsHandLeftCorrect()
+        {
+            return (handLeft.Position.Y > head.Position.Y);
+        }
+
+        public override bool IsHandRightCorrect()
+        {
+            return (handRight.Position.Y < hipRight.Position.Y - tolerance);
+        }
 
     }
 }

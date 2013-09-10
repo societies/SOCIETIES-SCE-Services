@@ -28,7 +28,6 @@ using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
-using CommsFrwk;
 using Microsoft.Kinect;
 using Microsoft.Kinect.Toolkit;
 using Microsoft.Kinect.Toolkit.Controls;
@@ -42,28 +41,30 @@ namespace SocialLearningGame
     /// </summary>
     public partial class MainWindow : Window
     {
-        protected static log4net.ILog log = log4net.LogManager.GetLogger(typeof(MainWindow));
+        //protected static log4net.ILog log = log4net.LogManager.GetLogger(typeof(MainWindow));
         private static MainWindow _windowInstance;
         public static MainWindow Instance { get { return _windowInstance; } }
 
         public KinectSensorChooser SensorChooser { get; private set; }
 
-        private readonly CommsManager commsManager;
+      //  private readonly CommsManager commsManager;
 
         public MainWindow()
             : base()
         {
-            log4net.Config.XmlConfigurator.Configure();
-            log.Debug("Init components");
+            
+         //   log4net.Config.XmlConfigurator.Configure();
+          //  //log.Debug("Init components");
             this.InitializeComponent();
-
-            log.Debug("Init Kinect sensor");
+          //  log4net.Config.XmlConfigurator.Configure(new System.IO.FileInfo("./Resources/log4net.config.xml"));
+            //log.Info("Logging configured");
+           // //log.Debug("Init Kinect sensor");
             // initialize the sensor chooser and UI
             this.SensorChooser = new KinectSensorChooser();
             this.SensorChooser.KinectChanged += SensorChooserOnKinectChanged;
             this.sensorChooserUi.KinectSensorChooser = this.SensorChooser;
 #if DEBUG
-            //log.Warn("Sensor auto-start is disabled during debug");
+            ////log.Warn("Sensor auto-start is disabled during debug");
             //this.RightHand.MouseUp += new System.Windows.Input.MouseButtonEventHandler(sensorChooserUi_MouseDoubleClick);
             this.SensorChooser.Start();
 #else
@@ -73,22 +74,22 @@ namespace SocialLearningGame
             // Bind the sensor chooser's current sensor to the KinectRegion
             Binding regionSensorBinding = new Binding("Kinect") { Source = this.SensorChooser };
             BindingOperations.SetBinding(this.kinectRegion, KinectRegion.KinectSensorProperty, regionSensorBinding);
-            log.Debug("Kinect initialized");
+       //     //log.Debug("Kinect initialized");
 
             Page p = LoadingPage.Instance; // Hack to get this to init on the right thread;
             Page q = CommsError.Instance; // Hack to get this to init on the right thread;
-            Page r = HomePage.Instance; // Hack to get this to init on the right thread;
+            Page r = HomePage.Instance;// Hack to get this to init on the right thread;
 
             _windowInstance = this;
 
-            String HOST_URL = "puma-paddy-3";
+            /*String HOST_URL = "puma-paddy-3";
             String USERNAME = "osgims";
             String PASSWORD = "osgims";
             commsManager = new CommsManager(HOST_URL, USERNAME, PASSWORD);
 
             String nodeName = "myNode1";
 
-            commsManager.RegisterListener(nodeName);
+            commsManager.RegisterListener(nodeName);*/
 
             this.Show();
         }
@@ -104,6 +105,7 @@ namespace SocialLearningGame
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
+            Console.WriteLine("I am loaded...");
             // load data (on a different thread)
             Thread loaderThread = new Thread(new ThreadStart(LoadingThread));
             loaderThread.Name = "Data loader thread";
@@ -114,7 +116,7 @@ namespace SocialLearningGame
         {
             if (this.SensorChooser != null)
             {
-                log.Debug("Stopping Kinect");
+               // //log.Debug("Stopping Kinect");
                 this.SensorChooser.Stop();
 
                 if (this.SensorChooser.Kinect != null)
@@ -133,11 +135,11 @@ namespace SocialLearningGame
         /// <param name="args">event arguments</param>
         private void SensorChooserOnKinectChanged(object sender, KinectChangedEventArgs args)
         {
-            log.Debug("Kinect sensor changed");
+            //log.Debug("Kinect sensor changed");
 
             if (args.OldSensor != null)
             {
-                log.Debug("Unbinding old sensor");
+                //log.Debug("Unbinding old sensor");
 
                 try
                 {
@@ -145,19 +147,19 @@ namespace SocialLearningGame
 
                     UnbindSensor(oldSensor);
 
-                    log.Debug("Completed unbinding old sensor");
+                    //log.Debug("Completed unbinding old sensor");
                 }
                 catch (InvalidOperationException ex)
                 {
                     // KinectSensor might enter an invalid state while enabling/disabling streams or stream features.
                     // E.g.: sensor might be abruptly unplugged.
-                    log.Warn("Error unbinding old sensor", ex);
+                    //log.Warn("Error unbinding old sensor", ex);
                 }
             }
 
             if (args.NewSensor != null)
             {
-                log.Debug("Binding new sensor");
+                //log.Debug("Binding new sensor");
 
                 try
                 {
@@ -165,13 +167,13 @@ namespace SocialLearningGame
 
                     BindSensor(newSensor);
 
-                    log.Debug("Completed binding new sensor");
+                    //log.Debug("Completed binding new sensor");
                 }
                 catch (InvalidOperationException ex)
                 {
                     // KinectSensor might enter an invalid state while enabling/disabling streams or stream features.
                     // E.g.: sensor might be abruptly unplugged.
-                    log.Warn("Error binding new sensor", ex);
+                    //log.Warn("Error binding new sensor", ex);
                 }
 
             }
@@ -182,7 +184,7 @@ namespace SocialLearningGame
             if (sensor == null)
                 return;
 
-            log.Debug("BindSensor()");
+            //log.Debug("BindSensor()");
             // Sensor
             sensor.Start();
 
@@ -206,7 +208,7 @@ namespace SocialLearningGame
                 // Non Kinect for Windows devices do not support Near mode, so reset back to default mode.
                 sensor.DepthStream.Range = DepthRange.Default;
                 sensor.SkeletonStream.EnableTrackingInNearRange = false;
-                log.Warn("Error Setting depth range to near mode", ex);
+                //log.Warn("Error Setting depth range to near mode", ex);
             }
         }
 
@@ -215,7 +217,7 @@ namespace SocialLearningGame
             if (sensor == null)
                 return;
 
-            log.Debug("UnbindSensor()");
+            //log.Debug("UnbindSensor()");
 
             sensor.DepthStream.Range = DepthRange.Default;
             sensor.SkeletonStream.EnableTrackingInNearRange = false;
@@ -231,17 +233,17 @@ namespace SocialLearningGame
         private delegate void SwitchPageDelegate(Page newPage);
         public static void SwitchPage(Page newPage)
         {
-            //log.Debug("Switch page");
+            Console.WriteLine("Switch page: " + newPage.GetType().ToString());
 
             if (newPage == null)
             {
-                log.Error("SwitchPage - Page cannot be null");
+             //   //log.Error("SwitchPage - Page cannot be null");
                 return;
             }
 
             if (!_windowInstance.Dispatcher.CheckAccess())
             {
-                //log.Debug("Cross threading call required");
+                ////log.Debug("Cross threading call required");
                 _windowInstance.Dispatcher.Invoke(new SwitchPageDelegate(SwitchPage), newPage);
                 return;
             }
@@ -257,11 +259,12 @@ namespace SocialLearningGame
                 _windowInstance.menuButton.Visibility = Visibility.Visible;
             }
 
-            log.Debug("Switching to page " + newPage.GetType().Name);
+        //    //log.Debug("Switching to page " + newPage.GetType().Name);
             _windowInstance.title.Text = newPage.Title;
             _windowInstance._mainFrame.NavigationService.Navigate(newPage);
-            //log.Debug("Switched");
+          ////log.Debug("Switched");
         }
+
 
         #endregion
 

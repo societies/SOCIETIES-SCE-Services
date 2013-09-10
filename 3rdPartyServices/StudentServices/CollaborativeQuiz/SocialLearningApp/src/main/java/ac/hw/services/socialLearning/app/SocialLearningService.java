@@ -29,6 +29,7 @@ import java.net.URL;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.societies.api.cis.management.ICisManager;
 import org.societies.api.comm.xmpp.interfaces.ICommManager;
 import org.societies.api.context.broker.ICtxBroker;
 import org.societies.api.context.model.CtxAttribute;
@@ -115,7 +116,7 @@ public class SocialLearningService extends EventListener implements ISocialLearn
 		
 		try {
 			
-			this.myServiceExeURL = new URL("http://societies.local.macs.hw.ac.uk:8080/3p-services/SocialLearningGame.exe");
+			this.myServiceExeURL = new URL("http://www2.macs.hw.ac.uk/~sww2/societies/SocialLearningGame.exe");
 			this.myServiceName = "SocialLearning";
 			this.displayDriverService.registerDisplayableService(this, myServiceName, myServiceExeURL, listenerPort, false);
 			logging.debug("Registered as a displayable service");

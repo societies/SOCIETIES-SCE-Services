@@ -13,6 +13,7 @@ import org.societies.api.comm.xmpp.interfaces.ICommManager;
 import org.societies.api.comm.xmpp.interfaces.IFeatureServer;
 import org.societies.api.sociallearning.schema.serverbean.SocialLearningMethodType;
 import org.societies.api.sociallearning.schema.serverbean.SocialLearningServerBean;
+import org.societies.api.identity.IIdentity;
 
 import uk.ac.hw.services.collabquiz.ICollabQuizServer;
 
@@ -86,7 +87,8 @@ public class CommsServer implements IFeatureServer {
 				bean.setAddress(collabQuizServer.getAddress());
 				bean.setPort(collabQuizServer.getPort());
 				//I ALSO WANT TO FIND OUT WHO SENT ME A MESSAGE, SO I CAN CHECK IF THEY ARE A NEW USER
-				collabQuizServer.checkUser(stanza.getFrom().getJid());
+				IIdentity userID = stanza.getFrom();
+				collabQuizServer.checkUser(userID.getJid());
 				return bean;
 			}
 		}

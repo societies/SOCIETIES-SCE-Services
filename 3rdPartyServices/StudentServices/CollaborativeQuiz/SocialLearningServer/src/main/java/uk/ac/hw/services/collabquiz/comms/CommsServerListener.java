@@ -5,8 +5,10 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.lang.reflect.Type;
 import java.net.ServerSocket;
 import java.net.Socket;
+
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -17,13 +19,27 @@ import org.slf4j.LoggerFactory;
 
 
 
+
+
+
+
+
+
+
+
+
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import uk.ac.hw.services.collabquiz.dao.ICategoryRepository;
 import uk.ac.hw.services.collabquiz.dao.IQuestionRepository;
+import uk.ac.hw.services.collabquiz.dao.IUserAnsweredQRepository;
+import uk.ac.hw.services.collabquiz.dao.IUserScoreRepository;
 import uk.ac.hw.services.collabquiz.dao.impl.*;
 import uk.ac.hw.services.collabquiz.entities.Category;
 import uk.ac.hw.services.collabquiz.entities.Question;
+import uk.ac.hw.services.collabquiz.entities.UserAnsweredQ;
+import uk.ac.hw.services.collabquiz.entities.UserScore;
 
 
 public class CommsServerListener implements Runnable {
@@ -36,6 +52,9 @@ public class CommsServerListener implements Runnable {
 	private String address;
 	private IQuestionRepository questionRepo;
 	private ICategoryRepository categoryRepo;
+	private IUserAnsweredQRepository userAnswerRepo;
+	private IUserScoreRepository userScoreRepo;
+	private static final Type collectionType = new TypeToken<List<UserAnsweredQ>>(){}.getType();
 
 	public CommsServerListener()
 	{
@@ -47,6 +66,10 @@ public class CommsServerListener implements Runnable {
 	}
 
 	public void init() {
+		this.userAnswerRepo= new UserAnsweredQRepository();
+		this.userScoreRepo=new UserScoreRepository();
+		this.questionRepo = new QuestionRepository();
+		this.categoryRepo= new CategoryRepository();
 		try {
 			this.serverSocket = new ServerSocket(0);
 			this.port = this.serverSocket.getLocalPort();
@@ -78,25 +101,52 @@ public class CommsServerListener implements Runnable {
 					while(reading)
 					{
 						//result = stdIn.readLine();
-						if(result.matches("RETRIEVE_CIS_MEMBERS"))
+						if(result.matches("RETRIEVE_SCORES"))
 						{
-							//RETRIEVE CIS MEMBERS AND SEND BACK
-						}
-						else if(result.matches("RETRIEVE_SCORES"))
-						{
+							log.debug("RETRIEVING SCORES!");
+							//GET SCORES
+							List<UserScore> userScoresList = userScoreRepo.list();
+							if(!userScoresList.isEmpty())
+							{
+								log.debug("REPLY ISNT EMPTY");
+								String sendScores = objectToJSON(userScoresList);
+								out.println(sendScores);
+							}
+							else
+							{
+								log.debug("REPLY IS EMPTY");
+								out.println("NULL");
+							}
 
+						}
+						else if(result.matches("RETRIEVE_USER_HISTORY"))
+						{
+							log.debug("RETRIEVING USER ANSWERED Q'S");
+							//NEXT LINE SHOULD BE USER
+							result = stdIn.readLine();
+							//IF USER IS SOCIETIES
+							List<UserAnsweredQ> userAnswered = null;
+							if(result.contains(".societies"))
+							{
+								userAnswered = userAnswerRepo.getByJID(result);	
+							}						
+							if(userAnswered!=null)
+							{
+								String sendUserAnswered = objectToJSON(userAnswered);
+								out.println(sendUserAnswered);
+							}
+							else
+							{
+								out.println("NULL");
+							}
 						}
 						else if(result.matches("RETRIEVE_QUESTIONS"))
 						{
 							log.debug("RETRIEVING QUESTIONS!");
-							questionRepo = new QuestionRepository();
 							List<Question> questionList = questionRepo.list();
-							categoryRepo = new CategoryRepository();
-							List<Category> categoryList = categoryRepo.list();
-							String sendQuestion = objectToJSON(questionList);
-							String sendCategory = objectToJSON(categoryList);
-							if(sendQuestion!=null)
+							if(!questionList.isEmpty())
 							{
+								String sendQuestion = objectToJSON(questionList);
 								out.println(sendQuestion);
 							}
 							else
@@ -104,6 +154,51 @@ public class CommsServerListener implements Runnable {
 								out.println("NULL");
 							}
 
+						}
+						else if(result.matches("RETRIEVE_CATEGORIES"))
+						{
+							log.debug("RETRIEVING CATEGORIES!");
+							List<Category> categoryList = categoryRepo.list();
+							
+							if(!categoryList.isEmpty())
+							{
+								String sendCategory = objectToJSON(categoryList);
+								out.println(sendCategory);
+							}
+							else
+							{
+								out.println("NULL");
+							}
+
+						}
+						else if(result.matches("UPLOAD_PROGRESS"))
+						{
+							log.debug("Received progress update...");
+							result = stdIn.readLine();
+							UserScore updateUser = new Gson().fromJson(result, UserScore.class);
+							log.debug("Received user update...");
+							log.debug("USER: "+ updateUser.getUserJid() +"\n SCORE: "+String.valueOf(updateUser.getScore()));
+							userScoreRepo.update(updateUser);
+							log.debug("Updated user information in DB");
+							log.debug("Now getting update on questions answered");
+							List<UserAnsweredQ> alreadyAsked = userAnswerRepo.getByJID(updateUser.getUserJid());
+							result = stdIn.readLine();
+							if(result!=null && !result.isEmpty())
+							{
+								
+								log.debug("Received questions from GUI");
+								List<UserAnsweredQ> answeredQ = new Gson().fromJson(result, collectionType);
+								answeredQ.removeAll(alreadyAsked);
+								log.debug("Received following question IDs");
+								for(UserAnsweredQ u : answeredQ)
+								{
+									log.debug(String.valueOf(u.getQuestion().getQuestionID()));
+								}
+								log.debug("Now updating the database");
+								//List<UserAnsweredQ> answeredQ = Arrays.asList(new Gson().fromJson(result, UserAnsweredQ.class));
+								userAnswerRepo.update(answeredQ);
+							}
+							log.debug("Insertered correctly!");
 						}
 						else
 						{
@@ -129,6 +224,7 @@ public class CommsServerListener implements Runnable {
 			return;
 		}
 	}
+	
 
 	public String objectToJSON(Object data)
 	{
@@ -142,7 +238,7 @@ public class CommsServerListener implements Runnable {
 		{
 			return "NULL";
 		}
-		
+
 	}
 
 	public int getSocket(){

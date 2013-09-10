@@ -23,17 +23,36 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+using System;
 
-using SocialLearningGame.Entities;
-namespace SocialLearningGame
+namespace SocialLearningGame.Logic.Poses
 {
-    public class Challenge
+    public class Pose10 : AbstractPose
     {
-        public int ID { get; set; }
-        public UserScore Challenger { get; set; }
-        public UserScore Challenged { get; set; }
-        public Category Category { get; set; }
-        public int ChallengerScore { get; set; }
-        public int ChallengedScore { get; set; }
+        private static int _ID = 10;
+        private static String _Name = "Pose with both hands together and above head";
+        private static readonly Uri _uri = new Uri("/SocialLearningGame;component/Resources/Pose10.png", UriKind.Relative);
+
+        private const double tolerance = 0.1;
+
+        public Pose10()
+            : base(_ID, _Name, _uri)
+        {
+        }
+
+        public override bool IsWristLeftCorrect()
+        {
+            return ((wristRight.Position.X <= wristLeft.Position.X - tolerance || wristRight.Position.X <= wristLeft.Position.X + tolerance)
+                && (wristRight.Position.Y <= wristLeft.Position.Y - tolerance || wristRight.Position.Y <= wristLeft.Position.Y + tolerance))
+                && (wristLeft.Position.Y > head.Position.Y + tolerance);
+        }
+
+        public override bool IsWristRightCorrect()
+        {
+            return ((wristRight.Position.X <= wristLeft.Position.X - tolerance || wristRight.Position.X <= wristLeft.Position.X + tolerance)
+                && (wristRight.Position.Y <= wristLeft.Position.Y - tolerance || wristRight.Position.Y <= wristLeft.Position.Y + tolerance))
+                && (wristRight.Position.Y > head.Position.Y + tolerance);
+        }
+
     }
 }

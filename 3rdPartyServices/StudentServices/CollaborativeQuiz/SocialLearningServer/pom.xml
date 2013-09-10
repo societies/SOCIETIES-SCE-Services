@@ -348,12 +348,13 @@
 
 							<!-- COMM MANAGER -->
 							org.societies.api.comm.xmpp.interfaces,
+							org.societies.api.identity,
 							<!-- SERVICES -->
 							org.societies.api.services,
 							org.societies.api.comm.xmpp.exceptions,
 							org.societies.api.comm.xmpp.datatypes,
 							org.societies.api.schema.servicelifecycle.model,
-
+							org.societies.api.sociallearning.schema.serverbean,
 
 
 							<!-- Hibernate -->
@@ -366,6 +367,7 @@
 							com.mysql.jdbc,
 							com.mysql.jdbc.jdbc2.optional,
 							com.google.gson,
+							com.google.gson.reflect,
 
 
 
@@ -534,8 +536,8 @@
 
 							*;scope=compile|runtime;resolution:=optional
 						</Import-Package>
-						<Bundle-ClassPath>WEB-INF/classes,.,
-						WEB-INF/lib/societies-sociallearning-schema-1.2.jar</Bundle-ClassPath>
+						<Bundle-ClassPath>WEB-INF/classes,.<!-- ,
+						WEB-INF/lib/societies-sociallearning-schema-1.2.jar--></Bundle-ClassPath>
 						<Webapp-Context>collabquiz</Webapp-Context>
 						<Web-ContextPath>collabquiz</Web-ContextPath>
 					</instructions>
@@ -553,7 +555,7 @@
 					</archive>
 					<webappDirectory>src/main/webapp</webappDirectory>
 					<!-- Make a skinny WAR -->
-					<!-- <packagingExcludes>WEB-INF/lib/*.jar</packagingExcludes> -->
+					<packagingExcludes>WEB-INF/lib/*.jar</packagingExcludes>
 				</configuration>
 			</plugin>
 

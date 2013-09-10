@@ -23,17 +23,54 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+using System;
 
-using SocialLearningGame.Entities;
-namespace SocialLearningGame
+namespace SocialLearningGame.Logic.Poses
 {
-    public class Challenge
+    public class Pose1 : AbstractPose
     {
-        public int ID { get; set; }
-        public UserScore Challenger { get; set; }
-        public UserScore Challenged { get; set; }
-        public Category Category { get; set; }
-        public int ChallengerScore { get; set; }
-        public int ChallengedScore { get; set; }
+        private static int _ID = 1;
+        private static String _Name = "Pose with both hands in the air";
+        private static readonly Uri _uri = new Uri("/SocialLearningGame;component/Resources/Pose1.png", UriKind.Relative);
+
+        public Pose1()
+            : base(_ID, _Name, _uri)
+        {
+        }
+
+        public override bool IsHeadCorrect()
+        {
+            return true;
+        }
+
+        public override bool IsHandLeftCorrect()
+        {
+            return handLeft.Position.Y > head.Position.Y;
+        }
+
+        public override bool IsHandRightCorrect()
+        {
+            return handRight.Position.Y > head.Position.Y;
+        }
+
+        public override bool IsHipLeftCorrect()
+        {
+            return true;
+        }
+
+        public override bool IsHipRightCorrect()
+        {
+            return true;
+        }
+
+        public override bool IsElbowLeftCorrect()
+        {
+            return true;
+        }
+
+        public override bool IsElbowRightCorrect()
+        {
+            return true;
+        }
     }
 }

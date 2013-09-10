@@ -23,17 +23,10 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-
-using SocialLearningGame.Entities;
-namespace SocialLearningGame
+namespace SocialLearningGame.Logic
 {
-    public class Challenge
+    public enum GameStage
     {
-        public int ID { get; set; }
-        public UserScore Challenger { get; set; }
-        public UserScore Challenged { get; set; }
-        public Category Category { get; set; }
-        public int ChallengerScore { get; set; }
-        public int ChallengedScore { get; set; }
+        SetupError, ReadyToStart, InProgress, Complete
     }
 }

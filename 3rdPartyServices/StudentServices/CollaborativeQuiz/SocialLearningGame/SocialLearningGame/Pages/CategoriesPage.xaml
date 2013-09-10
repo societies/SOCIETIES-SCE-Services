@@ -33,7 +33,7 @@
                 </Ellipse.Fill>
             </Ellipse>
             <!-- Hover Button controls for the different categories -->
-            <!--<Controls:HoverButton x:Name="generalKnowledgeButton" ImageSize="100" TimeInterval="1500" Height="73" Width="79" Canvas.Left="160" Canvas.Top="200" />-->
+            <!--<Controls:HoverButton x:Name="generalKnowledgeButton" ImageSize="100" TimeInterval="1500" Height="73" Width="79" Canvas.Left="160" Canvas.Top="200" /> -->
             <!--<Controls:HoverButton x:Name="courseRelatedButton" ImageSize="100" TimeInterval="1500" Height="73" Width="79" Canvas.Left="349" Canvas.Top="200" />-->
             <!--<Controls:HoverButton x:Name="musicButton" ImageSize="100" TimeInterval="1500" Height="73" Width="79" Canvas.Left="537" Canvas.Top="200" />-->
             <!--<Controls:HoverButton x:Name="videoGamesButton" ImageSize="100" TimeInterval="1500" Height="73" Width="79" Canvas.Left="739" Canvas.Top="200" />-->

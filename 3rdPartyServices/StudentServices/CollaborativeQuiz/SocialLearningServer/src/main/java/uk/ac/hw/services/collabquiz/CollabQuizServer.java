@@ -23,10 +23,15 @@ import uk.ac.hw.services.collabquiz.comms.CommsServerListener;
 import uk.ac.hw.services.collabquiz.comms.CommsClient;
 import uk.ac.hw.services.collabquiz.dao.impl.CategoryRepository;
 import uk.ac.hw.services.collabquiz.dao.impl.QuestionRepository;
+import uk.ac.hw.services.collabquiz.dao.impl.UserAnsweredQRepository;
+import uk.ac.hw.services.collabquiz.dao.impl.UserScoreRepository;
 import uk.ac.hw.services.collabquiz.dao.ICategoryRepository;
 import uk.ac.hw.services.collabquiz.dao.IQuestionRepository;
+import uk.ac.hw.services.collabquiz.dao.IUserAnsweredQRepository;
+import uk.ac.hw.services.collabquiz.dao.IUserScoreRepository;
 import uk.ac.hw.services.collabquiz.entities.Question;
 import uk.ac.hw.services.collabquiz.entities.Category;
+import uk.ac.hw.services.collabquiz.entities.UserScore;
 
 
 public class CollabQuizServer implements ICollabQuizServer {
@@ -35,6 +40,8 @@ public class CollabQuizServer implements ICollabQuizServer {
 
 	private ICategoryRepository categoryRepo;
 	private IQuestionRepository questionRepo;
+	private IUserAnsweredQRepository userAnsweredRepo;
+	private IUserScoreRepository userScoreRepo;
 
 	private List<Question> questionList;
 	private List<Category> categoryList;
@@ -61,7 +68,8 @@ public class CollabQuizServer implements ICollabQuizServer {
 		log.debug("COLLAB QUIZ SERVER STARTED");
 		//this.categoryRepo = new CategoryRepository();
 		//this.questionRepo = new QuestionRepository();
-
+		this.userScoreRepo = new UserScoreRepository();
+		this.userAnsweredRepo = new UserAnsweredQRepository();
 		//SET UP NEW SOCKET
 		commsServerListener = new CommsServerListener();
 		//GET PORT & ADDRESS
@@ -74,10 +82,18 @@ public class CollabQuizServer implements ICollabQuizServer {
 
 	}
 	
+	//CHECK IF CURRENT USER HAS PREVIOUSLY PLAYED, IF NOT ADD IN TO DB
 	@Override
 	public void checkUser(String jid)
 	{
-		
+		if(userScoreRepo.getByJID(jid)==null)
+		{
+			log.debug("A user doesn't exists! Add the new user!");
+			UserScore newUser = new UserScore();
+			newUser.setUserJid(jid);
+			newUser.setScore(0);
+			userScoreRepo.insert(newUser);
+		}
 	}
 
 	public List<Question> getQuestions(){

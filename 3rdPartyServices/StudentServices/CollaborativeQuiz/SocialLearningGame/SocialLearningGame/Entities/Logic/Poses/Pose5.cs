@@ -23,17 +23,41 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+using System;
 
-using SocialLearningGame.Entities;
-namespace SocialLearningGame
+namespace SocialLearningGame.Logic.Poses
 {
-    public class Challenge
+    public class Pose5 : AbstractPose
     {
-        public int ID { get; set; }
-        public UserScore Challenger { get; set; }
-        public UserScore Challenged { get; set; }
-        public Category Category { get; set; }
-        public int ChallengerScore { get; set; }
-        public int ChallengedScore { get; set; }
+        private static int _ID = 5;
+        private static String _Name = "Pose with right hand out in front and left hand below the waist";
+        private static readonly Uri _uri = new Uri("/SocialLearningGame;component/Resources/Pose5.png", UriKind.Relative);
+
+        private const double tolerance = 0.1;
+
+        public Pose5()
+            : base(_ID, _Name, _uri)
+        {
+        }
+
+        public override bool IsHandLeftCorrect()
+        {
+            return (handLeft.Position.Y < hipLeft.Position.Y - tolerance);
+        }
+
+        public override bool IsHandRightCorrect()
+        {
+            return (handRight.Position.Y <= elbowRight.Position.Y + tolerance && handRight.Position.Y >= elbowRight.Position.Y - tolerance);
+        }
+
+        public override bool IsHipLeftCorrect()
+        {
+            return (handLeft.Position.Y < hipLeft.Position.Y - tolerance);
+        }
+
+        public override bool IsElbowRightCorrect()
+        {
+            return (handRight.Position.Y <= elbowRight.Position.Y + tolerance && handRight.Position.Y >= elbowRight.Position.Y - tolerance);
+        }
     }
 }

@@ -23,17 +23,23 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+using System.Windows.Controls;
 
-using SocialLearningGame.Entities;
-namespace SocialLearningGame
+namespace SocialLearningGame.Pages
 {
-    public class Challenge
+    /// <summary>
+    /// Interaction logic for NotRegistered.xaml
+    /// </summary>
+    public partial class NoQuestions : Page
     {
-        public int ID { get; set; }
-        public UserScore Challenger { get; set; }
-        public UserScore Challenged { get; set; }
-        public Category Category { get; set; }
-        public int ChallengerScore { get; set; }
-        public int ChallengedScore { get; set; }
+        public NoQuestions()
+        {
+            this.InitializeComponent();
+
+        }
+
+
+
+
     }
 }
