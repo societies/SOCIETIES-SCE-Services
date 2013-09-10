@@ -88,8 +88,7 @@ public class ContextClient extends ServiceClientBase {
 					return;
 				}
 				final List<CtxIdentifierBean> ctxIdsList = new ArrayList<CtxIdentifierBean>();
-				final Parcelable[] pCtxIdsList = (Parcelable[]) 
-						intent.getParcelableArrayExtra(ICtxClient.INTENT_RETURN_VALUE_KEY);
+				final Parcelable[] pCtxIdsList = intent.getParcelableArrayExtra(ICtxClient.INTENT_RETURN_VALUE_KEY);
 				for (final Parcelable pCtxIdList : pCtxIdsList) {
 					if (pCtxIdList instanceof CtxIdentifierBean) {
 						ctxIdsList.add((CtxIdentifierBean) pCtxIdList);
@@ -121,9 +120,14 @@ public class ContextClient extends ServiceClientBase {
 		}
     }
 
+    public void getSymbolicLocation(String cssId) {
+        RequestorBean requestor = null; // todo poglej kako je na testu
+        retrieveIndividualEntityId(requestor, cssId);
+    }
+
+
     //Step 1 get Entity
-	public void retrieveIndividualEntityId(RequestorBean requestor, String cssId)
-			throws CtxException {
+	private void retrieveIndividualEntityId(RequestorBean requestor, String cssId) {
 		if (requestor == null)
 			throw new NullPointerException("requestor can't be null");
 		if (cssId == null) 
@@ -149,7 +153,7 @@ public class ContextClient extends ServiceClientBase {
 
 	//Step 2 to retrieve location 
 	//lookup entities with retrieved entity id from step 1
-	public List<CtxIdentifierBean> lookup(RequestorBean requestor,
+    private List<CtxIdentifierBean> lookup(RequestorBean requestor,
 			CtxEntityIdentifierBean entityId, CtxModelTypeBean modelType,
 			String type) throws CtxException {
 		if (requestor == null)
@@ -183,7 +187,7 @@ public class ContextClient extends ServiceClientBase {
 
 	//Step 3 to retrieve location 
 	//retrieve the ctxModelObject that includes the desired location using the ctxIdentifier from step2
-	public CtxModelObjectBean retrieve(RequestorBean requestor, CtxIdentifierBean identifier) {
+    private CtxModelObjectBean retrieve(RequestorBean requestor, CtxIdentifierBean identifier) {
 		if (this.connectedToContextClient) {
 			//Select target method and create message to convey remote invocation
 			android.os.Message outMessage = android.os.Message.obtain(null, 7, 0, 0);

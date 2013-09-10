@@ -41,6 +41,7 @@ import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.message.BasicNameValuePair;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.societies.android.api.cis.directory.ICisDirectory;
@@ -51,6 +52,7 @@ import org.societies.api.schema.cis.directory.CisAdvertisementRecord;
 import org.societies.integration.model.SocietiesUser;
 import org.societies.integration.service.CisDirectoryClient;
 import org.societies.integration.service.CommunityManagementClient;
+import org.societies.integration.service.ContextClient;
 import org.societies.integration.service.SocietiesEventsClient;
 
 import java.io.UnsupportedEncodingException;
@@ -76,12 +78,14 @@ public class MainActivity extends Activity implements SensorEventListener {
 	private static final String LOGIN_USER = "si.setcce.societies.android.rest.LOGIN_USER";
 	private static final String GET_MEETING_ACTION = "si.setcce.societies.android.rest.meeting";
     private static final String SCHEME ="http";
-//    private static final String DOMAIN = "crowdtaskingtest.appspot.com";
+    private static final String DOMAIN = "crowdtaskingtest.appspot.com";
 //    private static final String DOMAIN = "06-09-2013.crowdtasking.appspot.com";
-   	private static final String DOMAIN = "192.168.1.102";
+//   	private static final String DOMAIN = "192.168.1.102";
+//   	private static final String DOMAIN = "192.168.1.66";
 //   	private static final String DOMAIN = "192.168.1.78";
+    private static final String PORT = "";
 //    private static final String PORT = ":80";
-    private static final String PORT = ":8888";
+//    private static final String PORT = ":8888";
     private static final String APPLICATION_URL = SCHEME +"://" + DOMAIN + PORT;
     private static final String LOGIN_URL = APPLICATION_URL + "/login";
     private static final String MEETING_URL = APPLICATION_URL + "/android/meeting/";
@@ -92,7 +96,8 @@ public class MainActivity extends Activity implements SensorEventListener {
 	private static final String EVENT_API_URL = APPLICATION_URL + "/rest/event";
 	private static final String SHARE_CS_URL = APPLICATION_URL + "/android/shareCsUrl";
     private static final String SERVICE_CONNECTED = "org.societies.integration.service.CONNECTED";
-	private String startUrl;
+    private static final String C4CSS_API_URL = APPLICATION_URL + "/rest/community/4CSS";
+    private String startUrl;
 	public String nfcUrl=null;
 	private WebView webView;
 	private ProgressDialog progress;
@@ -103,8 +108,9 @@ public class MainActivity extends Activity implements SensorEventListener {
 	private float mAccelLast;		// last acceleration including gravity
     private CommunityManagementClient communityManagementClient;
     private CisDirectoryClient cisDirectoryClient;
+    private ContextClient contextClient;
     private SocietiesEventsClient societiesEventsClient;
-    private boolean isSocietiesUser=false, societiesServicesRunning, communityManagementClientConnected, cisDirectoryClientConnected, societiesEventsClientConnected;
+    private boolean isSocietiesUser=false, societiesServicesRunning, contextClientRunning, communityManagementClientConnected, cisDirectoryClientConnected, societiesEventsClientConnected;
     private SocietiesUser societiesUser = null;
     private final static String LOG_TAG = "Crowd Tasking";
 
@@ -138,15 +144,16 @@ public class MainActivity extends Activity implements SensorEventListener {
         if (isSocietiesServiceRunning()) {
             System.out.println("Societies services are running?");
             Toast.makeText(getApplicationContext(), "SOCIETIES services are running", Toast.LENGTH_LONG).show();
-/*
-            TrustTask task = new TrustTask(this);
-    		task.execute();
-*/
+            societiesUser = getSocietiesUserData();
+            TrustTask task = new TrustTask(this, "crowdtasking.appspot.com");
+    		task.execute(societiesUser.getUserId());
             societiesServicesRunning = true;
             communityManagementClient = new CommunityManagementClient(this, communityClientReceiver);
             communityManagementClient.setUpService();
-            societiesEventsClient = new SocietiesEventsClient(this, eventsClientReceiver);
-            societiesEventsClient.setUpService();
+            contextClient = new ContextClient(this);
+            contextClient.setUpService();
+//            societiesEventsClient = new SocietiesEventsClient(this, eventsClientReceiver);
+//            societiesEventsClient.setUpService();
 //            cisDirectoryClient = new CisDirectoryClient(this, cisDirectoryClientReceiver);
 //            cisDirectoryClient.setUpService();
         }
@@ -257,6 +264,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 	@Override
     public void onResume() {
         super.onResume();
+        registerReceiver(receiver, new IntentFilter(C4CSS_API_URL));
         registerReceiver(receiver, new IntentFilter(GET_MEETING_ACTION));
         registerReceiver(receiver, new IntentFilter(CHECK_IN_OUT));
         registerReceiver(receiver, new IntentFilter(GET_USER));
@@ -271,7 +279,21 @@ public class MainActivity extends Activity implements SensorEventListener {
 			Toast toast = Toast.makeText(getApplicationContext(), response, Toast.LENGTH_SHORT);
 			toast.show();
     	}
-}
+        SocietiesUser societiesUser = getSocietiesUserData();
+        JSONObject societiesUserJSON = new JSONObject();
+        RestTask task = new RestTask(this, C4CSS_API_URL, CookieManager.getInstance().getCookie(DOMAIN), DOMAIN);
+        try {
+            societiesUserJSON.put("userId", societiesUser.getUserId());
+            societiesUserJSON.put("name", societiesUser.getName());
+            societiesUserJSON.put("foreName", societiesUser.getForeName());
+            societiesUserJSON.put("email", societiesUser.getEmail());
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return;
+        }
+        System.out.println(societiesUserJSON.toString());
+
+    }
     
     @Override
     public void onPause() {
@@ -516,6 +538,10 @@ public class MainActivity extends Activity implements SensorEventListener {
                     communityManagementClientConnected = true;
                     communityManagementClient.listCommunities();
                 }
+                if (response.equalsIgnoreCase("ContextClient")) {
+                    contextClientRunning = true;
+                    contextClient.getSymbolicLocation(societiesUser.getUserId()); // todo: dokončaj
+                }
                 if (response.equalsIgnoreCase("CisDirectoryClient")) {
                     cisDirectoryClientConnected = true;
                     cisDirectoryClient.findAllCisAdvertismentRecords();
@@ -525,6 +551,14 @@ public class MainActivity extends Activity implements SensorEventListener {
                     societiesEventsClient.subcribeToAllEvents();
                 }
                 System.out.println(response);
+            }
+            if (intent.getAction().equalsIgnoreCase(C4CSS_API_URL)) {
+                String response = intent.getStringExtra(RestTask.HTTP_RESPONSE);
+                try {
+                    JSONArray news = new JSONArray(response);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
             }
             if (intent.getAction().equalsIgnoreCase(GET_MEETING_ACTION)) {
                 String response = intent.getStringExtra(RestTask.HTTP_RESPONSE);
@@ -687,6 +721,7 @@ public class MainActivity extends Activity implements SensorEventListener {
                 e.printStackTrace();
                 return null;
             }
+            System.out.println(societiesUserJSON.toString());
             return societiesUserJSON.toString();
         }
 

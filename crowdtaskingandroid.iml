@@ -67,9 +67,9 @@
     <orderEntry type="jdk" jdkName="Android 4.2.2 Platform" jdkType="Android SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" exported="" name="simple-xml-2.7" level="project" />
-    <orderEntry type="library" exported="" name="societies-api-schema-1.0" level="project" />
     <orderEntry type="library" exported="" name="gson-2.2.4" level="project" />
     <orderEntry type="library" exported="" name="SocietiesAndroidRemoteHelpers" level="project" />
+    <orderEntry type="library" exported="" name="societies-api-schema-1.2" level="project" />
     <orderEntry type="library" exported="" name="DBC-1.0" level="project" />
   </component>
 </module>

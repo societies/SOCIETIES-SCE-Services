@@ -45,12 +45,12 @@ public class TrustTask extends
 
 	@Override
 	protected Set<TrustRelationshipBean> doInBackground(String... params) {
-		final CountDownLatch latch = new CountDownLatch(1);
 		final RequestorBean requestor = new RequestorBean();
-		requestor.setRequestorId("user1.research.setcce.si");
-		final TrustedEntityIdBean trustorId = new TrustedEntityIdBean();
-		trustorId.setEntityId("user1.research.setcce.si");
-		trustorId.setEntityType(TrustedEntityTypeBean.CSS);
+        requestor.setRequestorId(params[0]);    // TODO: get requestorID from Virgo
+        final TrustedEntityIdBean trustorId = new TrustedEntityIdBean();
+        trustorId.setEntityId(params[0]);
+        trustorId.setEntityType(TrustedEntityTypeBean.CSS);
+        final CountDownLatch latch = new CountDownLatch(1);
 
 		final TrustClientHelper helper = new TrustClientHelper(context);
 		helper.setUpService(new MethodCallback() {
