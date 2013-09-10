@@ -15,12 +15,14 @@ public interface ICommunityAPI {
     @Produces({ MediaType.APPLICATION_JSON })
     String getCommunity(@PathParam("querytype") String querytype,
                         @QueryParam("communityId") Long communityId,
+                        @QueryParam("ownerJid") String ownerJid,
                         @Context HttpServletRequest request);
 
     @POST
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     Response createCommunity(
             @PathParam("querytype") String querytype,
+            @FormParam("userJid") String userJid,
             @FormParam("communityId") String communityId,
             @FormParam("communityJid") String communityJid,
             @FormParam("name") String name,

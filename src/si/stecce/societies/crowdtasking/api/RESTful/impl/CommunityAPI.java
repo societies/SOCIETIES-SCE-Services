@@ -25,6 +25,7 @@
 package si.stecce.societies.crowdtasking.api.RESTful.impl;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -58,6 +59,7 @@ public class CommunityAPI implements ICommunityAPI {
 	@Produces({ MediaType.APPLICATION_JSON })
 	public String getCommunity(@PathParam("querytype") String querytype,
                                @QueryParam("communityId") Long communityId,
+                               @QueryParam("ownerJid") String ownerJid,
                                @Context HttpServletRequest request) {
 
 		if ("browse".equalsIgnoreCase(querytype)) {
@@ -70,27 +72,34 @@ public class CommunityAPI implements ICommunityAPI {
 		if ("4user".equalsIgnoreCase(querytype)) {
 			return getCommunities4User(UsersAPI.getLoggedInUser(request.getSession()));
 		}
+		if ("4CSS".equalsIgnoreCase(querytype)) {
+			return toJson(CommunityDAO.loadCommunities4CSS(ownerJid));
+		}
 		return null;
 	}
 	
 	private String getCommunities4User(CTUser loggedInUser) {
-		Gson gson = new Gson();
-		ArrayList<CommunityJS> list = new ArrayList<CommunityJS>();
-		Query<Community> communities = CommunityDAO.loadCommunities4User(loggedInUser);
-		for (Community community:communities) {
+        return toJson(CommunityDAO.loadCommunities4User(loggedInUser));
+	}
+
+    private String toJson(Collection<Community> communities) {
+        ArrayList<CommunityJS> list = new ArrayList<CommunityJS>();
+        Gson gson = new Gson();
+        for (Community community:communities) {
 			CommunityJS communityJS = new CommunityJS(community);
 			list.add(communityJS);
 		}
-		return gson.toJson(list);
-	}
-	
-	@Override
+        return gson.toJson(list);
+    }
+
+    @Override
     @POST
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 	public Response createCommunity(
             @PathParam("querytype") String querytype,
             @FormParam("communityId") String communityId,
             @FormParam("communityJid") String communityJid,
+            @FormParam("ownerJid") String ownerJid,
             @FormParam("name") String name,
             @FormParam("description") String description,
             @FormParam("spacesCombo") List<Long> csIds,
@@ -107,17 +116,16 @@ public class CommunityAPI implements ICommunityAPI {
 
 		Community community;
 		if ("create".equalsIgnoreCase(querytype)) {
-			if (name == null || "".equalsIgnoreCase(name)) {
-				return Response.status(Status.NOT_ACCEPTABLE).entity("Name is required.").type("text/plain").build();
-			}
-            if (csIds != null) {
-                for (Long id:csIds) {
-                    System.out.println(id);
+            if ("".equalsIgnoreCase(communityJid)) {
+                if (name == null || "".equalsIgnoreCase(name)) {
+                    return Response.status(Status.NOT_ACCEPTABLE).entity("Name is required.").type("text/plain").build();
                 }
+                createOrUpdateCommunity(communityId, name, description, csIds, members, user);
+            } else {
+                createOrUpdateCIS(communityJid, csIds, ownerJid);
             }
-			createCommunity(communityId, name, description, csIds, members, user);
-		}
-		if ("request".equalsIgnoreCase(querytype)) {
+        }
+        if ("request".equalsIgnoreCase(querytype)) {
 			community = CommunityDAO.loadCommunity(new Long(communityId));
 			community.addRequest(user.getId());
 			CommunityDAO.saveCommunity(community);
@@ -150,8 +158,7 @@ public class CommunityAPI implements ICommunityAPI {
 		return Response.ok().build();
 	}
 
-	private void createCommunity(String communityId, String name,
-			String description, List<Long> csIds, List<Long> members, CTUser user) {
+	private void createOrUpdateCommunity(String communityId, String name, String description, List<Long> csIds, List<Long> members, CTUser user) {
 		Community community;
 		if ("".equalsIgnoreCase(communityId)) {
 			community = new Community(name, description, user, csIds, members);
@@ -164,7 +171,20 @@ public class CommunityAPI implements ICommunityAPI {
 			community.addMembers(members);
 		}
 		CommunityDAO.saveCommunity(community);
-        EventAPI.logNewCommunity(community.getId(), null, user);
+        if ("".equalsIgnoreCase(communityId)) {
+            EventAPI.logNewCommunity(community.getId(), null, user);
+        }
+	}
+
+	private void createOrUpdateCIS(String communityJid, List<Long> csIds, String ownerJid) {
+		Community community = CommunityDAO.loadCommunity(communityJid);
+		if (community == null) {
+			community = new Community(communityJid, csIds, ownerJid);
+		}
+		else {
+			community.setCollaborativeSpaces(csIds);
+		}
+		CommunityDAO.saveCommunity(community);
 	}
 
 	private String getCommunity(Long communityId, CTUser user) {
@@ -175,13 +195,6 @@ public class CommunityAPI implements ICommunityAPI {
 	}
 
 	private String getCommunities(CTUser user) {
-		Gson gson = new Gson();
-		ArrayList<CommunityJS> list = new ArrayList<CommunityJS>();
-		Query<Community> communities = CommunityDAO.loadCommunities();
-		for (Community communitiy:communities) {
-			CommunityJS communityJS = new CommunityJS(communitiy, user);
-			list.add(communityJS);
-		}
-		return gson.toJson(list);
+        return toJson(CommunityDAO.loadCommunities());
 	}
 }

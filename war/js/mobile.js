@@ -36,7 +36,7 @@ var CrowdTaskingApp = function() {
     var mode = 'new';
     var currentUser = null;
     var communities = [];
-    var TEST_HOST = "localhost1";
+    var TEST_HOST = "localhost";
 
     var getTaskById = function(id) {
     	$.ajax({
@@ -428,7 +428,6 @@ var CrowdTaskingApp = function() {
             if (task.communityJids !== undefined) {
                 // get Societies communities from android
                 communities = getCISes(task.communityJids)
-                //communities = [{"description":"Open community. Join us.","id":"cis-2ea7bb44-31cc-466b-a0e8-3015a2ce852d.research.setcce.si", "name":"community 1","memberStatus":"You are the owner.","member":false,"owner":true,"pending":false}];
             }
             if (communities != null && communities.length > 0) {
                 communitiesText = communities[0].name;
@@ -510,7 +509,7 @@ var CrowdTaskingApp = function() {
 
     var getCISes = function(jids) {
         if (window.location.hostname === 'TEST_HOST') { // TODO for testing
-            communities =[{"description":"Open community. Join us.","id":"cis-2ea7bb44-31cc-466b-a0e8-3015a2ce852d.research.setcce.si", "name":"community 1","memberStatus":"You are the owner.","member":false,"owner":true,"pending":false}];
+            communities =[{"description":"Open community. Join us.","jid":"cis-2ea7bb44-31cc-466b-a0e8-3015a2ce852d.research.setcce.si", "name":"community 1","memberStatus":"You are the owner.","member":false,"owner":true,"pending":false}];
         }
         else {
             communities = JSON.parse(window.android.getSocietiesCommunitiesByJids(jids));
@@ -520,7 +519,7 @@ var CrowdTaskingApp = function() {
 
     var getAllCIS4User = function() {
         if (window.location.hostname === 'TEST_HOST') { // TODO for testing
-            communities =[{"description":"Open community. Join us.","id":"cis-2ea7bb44-31cc-466b-a0e8-3015a2ce852d.research.setcce.si", "name":"community 1","memberStatus":"You are the owner.","member":false,"owner":true,"pending":false}];
+            communities =[{"description":"Open community. Join us.","jid":"cis-2ea7bb44-31cc-466b-a0e8-3015a2ce852d.research.setcce.si", "name":"community 1","memberStatus":"You are the owner.","member":false,"owner":true,"pending":false}];
         }
         else {
             communities = JSON.parse(window.android.getSocietiesCommunities());

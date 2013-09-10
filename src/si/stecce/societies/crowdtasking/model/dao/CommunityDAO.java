@@ -57,6 +57,19 @@ public final class CommunityDAO {
 		return community;
 	}
 
+	public static Community loadCommunity(String jid) {
+		Community community = null;
+		try {
+			community = ofy().load().type(Community.class).filter("jid", jid).first().get();
+		} catch (NotFoundException ignored) {
+		}
+		return community;
+	}
+
+	public static List<Community> loadCommunities4CSS(String ownerJid) {
+		return ofy().load().type(Community.class).filter("ownerJid", ownerJid).list();
+	}
+
 	public static Community loadCommunity(Ref<Community> communityRef) {
 		Community community = null;
 		try {
@@ -66,12 +79,12 @@ public final class CommunityDAO {
 		return community;
 	}
 
-	public static Query<Community> loadCommunities() {
-		return ofy().load().type(Community.class);
+	public static List<Community> loadCommunities() {
+		return ofy().load().type(Community.class).list();
 	}
 
-	public static Query<Community> loadCommunities4User(CTUser user) {
-		return ofy().load().type(Community.class).filter("members", Ref.create(Key.create(CTUser.class, user.getId())));
+	public static List<Community> loadCommunities4User(CTUser user) {
+		return ofy().load().type(Community.class).filter("members", Ref.create(Key.create(CTUser.class, user.getId()))).list();
 	}
 	
 	public static Query<Community> loadCommunities(int limit) {

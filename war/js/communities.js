@@ -4,7 +4,7 @@ var Community = function() {
     var societiesCommunity = false;
     var currentIndex = -1;
     var _mode = 'new';
-    var TEST_HOST = "localhost1";
+    var TEST_HOST = "localhost";
 
     function listCommunities(_communities, tapHandler, list) {
         console.log("listCommunities - _communities.length="+_communities.length);
@@ -57,13 +57,10 @@ var Community = function() {
 
     var isSocietiesUser = function() {
         if (typeof(android) !== "undefined") {
-            console.log("on android");
-            console.log("societies user: "+window.android.getSocietiesUser());
-            console.log("societies user: "+window.android.getSocietiesCommunities());
             return true;
             //return (android.socUser);
         }
-        if (window.location.hostname === TEST_HOST) {
+        if (isTestHost()) {
             console.log("on "+TEST_HOST);
             return true;
         }
@@ -71,12 +68,25 @@ var Community = function() {
         return false;
     };
 
+    var getSocietiesUser = function() {
+        if (isTestHost() ) {
+            return {"foreName":"Arthur","userId":"arthur.societies.local.macs.hw.ac.uk"};
+        }
+        else {
+            return window.android.getSocietiesUser()
+        }
+    };
+
+    var isTestHost = function () {
+        return (window.location.hostname === TEST_HOST);
+    };
+
     var getCommunities = function(successFn) {
         console.log("getCommunities");
         if (isSocietiesUser()) {
             console.log("societies user");
-            if (window.location.hostname === TEST_HOST) {
-                societiesCommunities =[{"description":"Open community. Join us.","id":"cis-2ea7bb44-31cc-466b-a0e8-3015a2ce852d.research.setcce.si", "name":"community 1","memberStatus":"You are the owner.","member":false,"owner":true,"pending":false}];
+            if (isTestHost()) {
+                societiesCommunities =[{"description":"Open community. Join us.","jid":"cis-2ea7bb44-31cc-466b-a0e8-3015a2ce852d.research.setcce.si", "name":"community 1","memberStatus":"You are the owner.","member":false,"owner":true,"pending":false}];
             }
             else {
                 societiesCommunities = JSON.parse(window.android.getSocietiesCommunities());
@@ -196,8 +206,7 @@ var Community = function() {
         });
     };
 
-    var viewCommunity = function() {
-    	var list;
+    function getSelectedCommunity() {
         var community;
         if (societiesCommunity) {
             community = societiesCommunities[currentIndex];
@@ -205,11 +214,18 @@ var Community = function() {
         else {
             community = communities[currentIndex];
         }
-    	$('#name').text(community.name);
+        return community;
+    }
+
+    var viewCommunity = function() {
+    	var list;
+        var community = getSelectedCommunity(community);
+        $('#name').text(community.name);
     	$('#description').text(community.description);
     	$('#memberStatus').text(community.memberStatus);
 
     	if (community.canAddCS) {
+            console.log("user can add CS: "+community.canAddCS);
         	$('#addCSButton').show();
         	$('#spaceDetails').show();
         }
@@ -315,10 +331,23 @@ var Community = function() {
             getSpaces(fillSpacesCombo);
             return;
     	}
-        var community = communities[currentIndex];
-    	$('#communityId').val(community.id);
-    	$('#name').val(community.name);
-    	$('#description').text(community.description);
+        var community = getSelectedCommunity(community);
+//        var community = communities[currentIndex];
+        $('#name').val(community.name);
+        $('#description').text(community.description);
+        if (community.id !== undefined) {
+            $('#communityId').val(community.id);
+            $('#name').textinput('enable');
+            $('#description').textinput('enable');
+        }
+        if (community.jid !== undefined) {
+            $('#name').textinput('disable');
+            $('#description').textinput('disable');
+            $('#communityJid').val(community.jid);
+            var ownerJid = getSocietiesUser().userId;
+            $('#ownerJid').val(ownerJid);
+            ownerJid = $('#ownerJid').val();
+        }
         getSpaces(fillSpacesCombo, community.spaces);
     	//getUsers(showUsers);
     };

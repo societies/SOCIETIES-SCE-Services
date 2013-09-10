@@ -48,11 +48,12 @@ import com.googlecode.objectify.annotation.Load;
 @Entity
 public class Community {
 	@Index @Id private Long id;
-//    @Index private String jid;
+    @Index private String jid;
 	private String name;
 	private String description;
 	@Load private Ref<CTUser> ownerRef;
 	@Ignore private CTUser owner;
+	@Index private String ownerJid;
 	@Index @Load private List<Ref<CollaborativeSpace>> collaborativeSpaceRefs;
 	@Ignore private List<CollaborativeSpace> collaborativeSpaces;
 //	private List<Ref<Community>> subCommunities;
@@ -62,9 +63,16 @@ public class Community {
 
 	public Community() {
 	}
-	
-	public Community(String name, String description, CTUser owner, List<Long> csIds, List<Long> members) {
+
+    public Community(String jid, List<Long> csIds, String ownerJid) {
+        this.jid = jid;
+        setCollaborativeSpaces(csIds);
+        this.ownerJid = ownerJid;
+    }
+
+    public Community(String name, String description, CTUser owner, List<Long> csIds, List<Long> members) {
 		super();
+        this.jid = jid;
 		this.name = name;
 		this.description = description;
 		this.ownerRef = Ref.create(Key.create(CTUser.class, owner.getId()));
@@ -253,4 +261,12 @@ public class Community {
 		}
 		return owner;
 	}
+
+    public String getJid() {
+        return jid;
+    }
+
+    public void setJid(String jid) {
+        this.jid = jid;
+    }
 }
