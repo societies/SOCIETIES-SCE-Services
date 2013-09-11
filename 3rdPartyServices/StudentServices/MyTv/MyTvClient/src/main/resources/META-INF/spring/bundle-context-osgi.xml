@@ -15,7 +15,6 @@
           <entry key="TargetPlatform" value="SOCIETIES" />
           <entry key="ServiceProvider" value="ICT-SOCIETIES" />
           <entry key="ServiceMetaModel" value-ref="serMetamodel" />
-          <!-- <entry key="ServiceClient" value="" />  -->
       </osgi:service-properties>
   	</osgi:service>
   	
@@ -23,8 +22,7 @@
      	<property name="authorSignature" value="sgallacher" />
      	<property name="serviceDescription" value="MyTv personalised display service" />
      	<property name="serviceName" value="MyTv" />
-     	<property name="serviceType" value="THIRD_PARTY_SERVER" />
-<!--      	<property name="privacyPolicy" value="" /> -->
+     	<property name="serviceType" value="THIRD_PARTY_CLIENT" />
      	<property name="serviceCategory" value="media" />
  	</bean>
 

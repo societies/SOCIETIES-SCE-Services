@@ -78,7 +78,9 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 	//personalisable parameters
 	int currentChannel;
 	boolean mutedState;
-
+	private ServiceResourceIdentifier serverServiceIdentifier;
+	private IIdentity serverJid;
+	private RequestorService requestor;
 	public MyTvClient(){
 	}
 
@@ -208,7 +210,10 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 						userID = commsMgr.getIdManager().getThisNetworkNode();
 						LOG.debug("userID = "+userID.toString());
 					}
-
+					
+					this.serverJid = this.serviceMgmt.getServer(myServiceID);
+					serverServiceIdentifier = this.serviceMgmt.getServerServiceIdentifier(myServiceID);
+					this.requestor = new RequestorService(serverJid, serverServiceIdentifier);
 					//unregister for SLM events
 					unregisterForServiceEvents();
 				}
@@ -259,7 +264,7 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 	@Override
 	public boolean setIAction(IIdentity identity, IAction action) {
 
-		return false;
+		return true;
 	}
 
 	/*private void setChannel(int channel){
@@ -305,6 +310,8 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 	 * Handle commands from GUI
 	 */
 	public class CommandHandler{
+		
+
 		public void connectToGUI(String gui_ip){
 			LOG.debug("Connecting to service GUI on IP address: "+gui_ip);
 			//disconnect any existing connections
@@ -352,8 +359,6 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 			LOG.debug("Getting channel preference from personalisation manager");
 			String result = "PREFERENCE-ERROR";
 			try {
-				RequestorService requestor = new RequestorService(userID, myServiceID);
-				LOG.debug("Created RequestorService type for: "+userID.toString()+" with serviceID: "+myServiceID.toString());
 				Future<IAction> futureOutcome = persoMgr.getPreference(requestor, userID, myServiceType, myServiceID, "channel");
 				LOG.debug("Requested preference from personalisationManager");
 				IAction outcome = futureOutcome.get();
@@ -376,8 +381,6 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 			LOG.debug("Getting mute preference from personalisation manager");
 			String result = "PREFERENCE-ERROR";
 			try {
-				RequestorService requestor = new RequestorService(userID, myServiceID);
-				LOG.debug("Created RequestorService type for: "+userID.toString()+" with serviceID: "+myServiceID.toString());
 				Future<IAction> futureOutcome = persoMgr.getPreference(requestor, userID, myServiceType, myServiceID, "muted");
 				LOG.debug("Requested preference from personalisationManager");
 				IAction outcome = futureOutcome.get();
@@ -400,8 +403,7 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 			LOG.debug("Getting channel intent from Personalisation manager");
 			String result = "INTENT-ERROR";
 			try {
-				RequestorService requestor = new RequestorService(userID, myServiceID);
-				LOG.debug("Created RequestorService type for: "+userID.toString()+" with serviceID: "+myServiceID.toString());
+				
 				Future<IAction> futureOutcome = persoMgr.getIntentAction(requestor, userID, myServiceID, "channel");
 				LOG.debug("Requested intent from personalisationManager");
 				IAction outcome = futureOutcome.get();
@@ -423,8 +425,6 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 			LOG.debug("Getting muted intent from personalisation manager");
 			String result = "INTENT_ERROR";
 			try {
-				RequestorService requestor = new RequestorService(userID, myServiceID);
-				LOG.debug("Created RequestorService type for: "+userID.toString()+" with serviceID: "+myServiceID.toString());
 				Future<IAction> futureOutcome = persoMgr.getIntentAction(requestor, userID, myServiceID, "muted");
 				LOG.debug("Requested intent from personalisationManager");
 				IAction outcome = futureOutcome.get();

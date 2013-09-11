@@ -10,21 +10,19 @@
 		is to facilitate integration testing of the bundle outside of an OSGi container -->
 
 
-	<osgi:service ref="MyTv" interface="ac.hw.mytv.MyTvServer" >
+	<osgi:service ref="MyTv" >
       <osgi:service-properties>
           <entry key="TargetPlatform" value="SOCIETIES" />
           <entry key="ServiceProvider" value="ICT-SOCIETIES" />
           <entry key="ServiceMetaModel" value-ref="serMetamodel" />
-          <entry key="ServiceClient" value="" />
       </osgi:service-properties>
   	</osgi:service>
   	
 	<bean id="serMetamodel" class="org.societies.api.schema.servicelifecycle.model.Service">
-     	<property name="authorSignature" value="sgallacher" />
+     	<property name="authorSignature" value="eliza" />
      	<property name="serviceDescription" value="MyTv personalised display service" />
      	<property name="serviceName" value="MyTv" />
      	<property name="serviceType" value="THIRD_PARTY_SERVER" />
-     	<property name="privacyPolicy" value="" />
      	<property name="serviceCategory" value="media" />
  	</bean>
 
@@ -36,4 +34,6 @@
 	<osgi:reference id="commsMgr" interface="org.societies.api.comm.xmpp.interfaces.ICommManager">
 	</osgi:reference>
 	
+	<osgi:reference id="evMgr" interface="org.societies.api.osgi.event.IEventMgr" >
+	</osgi:reference>
 </beans>

@@ -20,6 +20,9 @@
 		<property name="eventMgr" ref="eventMgr"/>
 		<property name="commsMgr" ref="commsMgr"/>
 		<property name="displayDriver" ref="displayDriver"/>
+		<property name="commsClient" ref="commsClient" />
+		
 	</bean>	
 	
+
 </beans>
