@@ -85,6 +85,7 @@ public class TaskAPI implements ITaskAPI {
 
 		DateFormat formatter = new SimpleDateFormat("dd.MM.yyyy");
 
+        System.out.println("communityJids:"+communityJids);
 		Gson gson = new Gson();
 		String[] tags;
         try {
@@ -151,6 +152,7 @@ public class TaskAPI implements ITaskAPI {
             @FormParam("taskTags") String tagsString,
             @Context HttpServletRequest request)  throws IOException, URISyntaxException {
 			
+        System.out.println("Create a new task. taskCommunityJids:"+communityJids);
 		CTUser user = UsersAPI.getLoggedInUser(request.getSession());
 		if ("create".equalsIgnoreCase(action)) {
 			if (title == null || "".equalsIgnoreCase(title)) {

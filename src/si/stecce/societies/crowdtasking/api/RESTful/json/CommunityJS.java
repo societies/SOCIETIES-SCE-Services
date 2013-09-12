@@ -52,7 +52,7 @@ public class CommunityJS {
 	private boolean canAddCS;
 	private boolean member;
 	private boolean pending;
-	private String memberStatus;
+	private String memberStatus="";
 
 	public CommunityJS(Community community) {
 		setBasicParameters(community);
@@ -60,6 +60,7 @@ public class CommunityJS {
 
 	private void setBasicParameters(Community community) {
 		id = community.getId();
+		jid = community.getJid();
 		name = community.getName();
 		description = community.getDescription();
 		if (community.getCollaborativeSpaces() != null) {
@@ -73,7 +74,10 @@ public class CommunityJS {
 	public CommunityJS(Community community, CTUser user) {
         Long loggedInUserId = user.getId();
 		setBasicParameters(community);
-		owner = community.getOwner().getId().longValue() == loggedInUserId.longValue(); 
+        try {
+            owner = community.getOwner().getId().longValue() == loggedInUserId.longValue();
+        } catch (NullPointerException e) {
+        }
 		canAddCS = user.isAdmin();
 		if (community.getMembers() != null) {
 			members = new ArrayList<UserJS>();

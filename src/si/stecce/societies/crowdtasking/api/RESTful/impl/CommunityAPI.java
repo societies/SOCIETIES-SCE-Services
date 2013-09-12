@@ -73,20 +73,27 @@ public class CommunityAPI implements ICommunityAPI {
 			return getCommunities4User(UsersAPI.getLoggedInUser(request.getSession()));
 		}
 		if ("4CSS".equalsIgnoreCase(querytype)) {
-			return toJson(CommunityDAO.loadCommunities4CSS(ownerJid));
+            System.out.println("4CSS");
+            System.out.println("ownerJid:"+ownerJid);
+            if (ownerJid == null) {
+                ownerJid = UsersAPI.getLoggedInUser(request.getSession()).getSocietiesEntityId();
+            }
+            System.out.println("ownerJid:"+ownerJid);
+            List<Community> communities = CommunityDAO.loadCommunities4CSS(ownerJid);
+			return toJson(communities, UsersAPI.getLoggedInUser(request.getSession())); // todo: is it ok?
 		}
 		return null;
 	}
 	
 	private String getCommunities4User(CTUser loggedInUser) {
-        return toJson(CommunityDAO.loadCommunities4User(loggedInUser));
+        return toJson(CommunityDAO.loadCommunities4User(loggedInUser), loggedInUser);
 	}
 
-    private String toJson(Collection<Community> communities) {
+    private String toJson(Collection<Community> communities, CTUser user) {
         ArrayList<CommunityJS> list = new ArrayList<CommunityJS>();
         Gson gson = new Gson();
         for (Community community:communities) {
-			CommunityJS communityJS = new CommunityJS(community);
+			CommunityJS communityJS = new CommunityJS(community, user);
 			list.add(communityJS);
 		}
         return gson.toJson(list);
@@ -116,13 +123,17 @@ public class CommunityAPI implements ICommunityAPI {
 
 		Community community;
 		if ("create".equalsIgnoreCase(querytype)) {
+            System.out.println("ownerJid:"+ownerJid);
+            System.out.println("csIds:"+csIds);
             if ("".equalsIgnoreCase(communityJid)) {
                 if (name == null || "".equalsIgnoreCase(name)) {
                     return Response.status(Status.NOT_ACCEPTABLE).entity("Name is required.").type("text/plain").build();
                 }
                 createOrUpdateCommunity(communityId, name, description, csIds, members, user);
             } else {
-                createOrUpdateCIS(communityJid, csIds, ownerJid);
+                community = createOrUpdateCIS(communityJid, name, description, csIds, ownerJid);
+                Gson gson = new Gson();
+                return Response.ok().entity(gson.toJson(new CommunityJS(community, user))).build();
             }
         }
         if ("request".equalsIgnoreCase(querytype)) {
@@ -176,15 +187,16 @@ public class CommunityAPI implements ICommunityAPI {
         }
 	}
 
-	private void createOrUpdateCIS(String communityJid, List<Long> csIds, String ownerJid) {
+	private Community createOrUpdateCIS(String communityJid, String name, String description, List<Long> csIds, String ownerJid) {
 		Community community = CommunityDAO.loadCommunity(communityJid);
 		if (community == null) {
-			community = new Community(communityJid, csIds, ownerJid);
+			community = new Community(communityJid, name, description, csIds, ownerJid);
 		}
 		else {
 			community.setCollaborativeSpaces(csIds);
 		}
 		CommunityDAO.saveCommunity(community);
+        return community;
 	}
 
 	private String getCommunity(Long communityId, CTUser user) {
@@ -195,6 +207,6 @@ public class CommunityAPI implements ICommunityAPI {
 	}
 
 	private String getCommunities(CTUser user) {
-        return toJson(CommunityDAO.loadCommunities());
+        return toJson(CommunityDAO.loadCommunities(), user);
 	}
 }

@@ -1,6 +1,7 @@
 var Community = function() {
     var communities = [];
     var societiesCommunities = [];
+    var collaborativeSpaces = [];
     var societiesCommunity = false;
     var currentIndex = -1;
     var _mode = 'new';
@@ -73,7 +74,7 @@ var Community = function() {
             return {"foreName":"Arthur","userId":"arthur.societies.local.macs.hw.ac.uk"};
         }
         else {
-            return window.android.getSocietiesUser()
+            return JSON.parse(window.android.getSocietiesUser());
         }
     };
 
@@ -139,7 +140,9 @@ var Community = function() {
     };
     
     var postCommunity = function(successFn) {
+        console.log("post community");
         var form_data = $('#editCommunityForm').serialize();
+        console.log("form data:"+form_data);
         $.ajax({
           type: "POST",
           url: "/rest/community/create",
@@ -147,8 +150,13 @@ var Community = function() {
   		  error: function(error) {
   			toast(error.responseText);
           },
-          success: function() {
-        	  successFn();
+          success: function(response) {
+              if (isSocietiesUser()) {
+                  //var community = jQuery.parseJSON(response);
+                  window.android.setCommunitySpaces(response);
+                  societiesCommunities = JSON.parse(window.android.getSocietiesCommunities());
+              }
+              successFn();
           },
           complete: function() {
           }
@@ -199,6 +207,7 @@ var Community = function() {
         	    toast(error.responseText);
             },
             success: function(result) {
+                collaborativeSpaces = result;
         	    completeFn(result, communitySpaces);
             },
             complete: function() {
@@ -317,6 +326,7 @@ var Community = function() {
                 }
             }
             $spacesCombo.append('<option value='+spaceId+' '+selected+'>'+spaceName+'</option>');
+            console.log("space:"+spaceName+", id:"+spaceId);
         }
         $spacesCombo.selectmenu('refresh');
     }
@@ -337,16 +347,22 @@ var Community = function() {
         $('#description').text(community.description);
         if (community.id !== undefined) {
             $('#communityId').val(community.id);
-            $('#name').textinput('enable');
-            $('#description').textinput('enable');
+//            $('#name').textinput('enable');
+//            $('#description').textinput('enable');
         }
         if (community.jid !== undefined) {
-            $('#name').textinput('disable');
-            $('#description').textinput('disable');
+//            $('#name').textinput('disable');
+            $('#sctCommunity').hide();
+            $('#cisCommunity').show();
+            $('#txtName').text(community.name);
+            $('#txtDescription').text(community.description);
             $('#communityJid').val(community.jid);
-            var ownerJid = getSocietiesUser().userId;
+            var societiesUser = getSocietiesUser();
+            console.log("societiesUser:"+societiesUser);
+            var ownerJid = societiesUser.userId;
+            console.log("societiesUser.userId:"+societiesUser.userId);
+            console.log("ownerJid:"+ownerJid);
             $('#ownerJid').val(ownerJid);
-            ownerJid = $('#ownerJid').val();
         }
         getSpaces(fillSpacesCombo, community.spaces);
     	//getUsers(showUsers);
@@ -400,7 +416,7 @@ var Community = function() {
 	      			displayCommunities();
 	      		};
 	      		getCommunities(onGotCommunitites);
-		    }; 
+		    };
 	    	postCommunity(onCommunityCreated);
 	    },
 	    

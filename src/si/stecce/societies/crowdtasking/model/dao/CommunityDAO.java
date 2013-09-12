@@ -80,7 +80,7 @@ public final class CommunityDAO {
 	}
 
 	public static List<Community> loadCommunities() {
-		return ofy().load().type(Community.class).list();
+		return ofy().load().type(Community.class).filter("jid", null).list();
 	}
 
 	public static List<Community> loadCommunities4User(CTUser user) {

@@ -77,11 +77,11 @@ public final class TaskDao {
 	}
 	
 	private static boolean taskIsVisibleToUser(Task task, CTUser user) {
-		Query<Community> communities4User = CommunityDAO.loadCommunities4User(user);
+		List<Community> communities4User = CommunityDAO.loadCommunities4User(user);
 		return taskIsVisibleToUser(task, communities4User);
 	}
 	
-	private static boolean taskIsVisibleToUser(Task task, Query<Community> communities4User) {
+	private static boolean taskIsVisibleToUser(Task task, List<Community> communities4User) {
 		List<Community> communities = task.getCommunities(); 
 		if (communities == null) {
 			return true;
@@ -108,17 +108,21 @@ public final class TaskDao {
 
 	public static List<Task> getHighestRatedTasks4User(CTUser user) {
 		Query<Task> tasks = ofy().load().type(Task.class).order("-score").limit(MAX_HIGHEST_RATED_TASKS);
-		List<Task> filteredTasks = new ArrayList<Task>();
-		Query<Community> communities4User = CommunityDAO.loadCommunities4User(user);
-		for (Task task:tasks) {
+		List<Community> communities4User = CommunityDAO.loadCommunities4User(user);
+        return filterVisibleToUser(tasks, communities4User);
+	}
+
+    private static List<Task> filterVisibleToUser(Query<Task> tasks, List<Community> communities4User) {
+        List<Task> filteredTasks = new ArrayList<Task>();
+        for (Task task:tasks) {
 			if (taskIsVisibleToUser(task, communities4User)) {
 				filteredTasks.add(task);
 			}
 		}
-		return filteredTasks;
-	}
+        return filteredTasks;
+    }
 
-	public static Query<Task> getHighestRatedTasksForCommunity(Long communityId, int limit) {
+    public static Query<Task> getHighestRatedTasksForCommunity(Long communityId, int limit) {
 		return ofy().load().type(Task.class).filter("communityRefs", Ref.create(Key.create(Community.class, communityId)))
 				.order("-score").limit(limit);
 	}
@@ -147,14 +151,8 @@ public final class TaskDao {
 //		return ofy().load().type(Task.class).filter("ownerId", userId);
 
         Query<Task> tasks = ofy().load().type(Task.class).filter("ownerId", user.getId());
-        List<Task> filteredTasks = new ArrayList<Task>();
-        Query<Community> communities4User = CommunityDAO.loadCommunities4User(user);
-        for (Task task:tasks) {
-            if (taskIsVisibleToUser(task, communities4User)) {
-                filteredTasks.add(task);
-            }
-        }
-        return filteredTasks;
+        List<Community> communities4User = CommunityDAO.loadCommunities4User(user);
+        return filterVisibleToUser(tasks, communities4User);
 
     }
 	
@@ -175,7 +173,7 @@ public final class TaskDao {
 
 		Collection<Task> tasks = ofy().load().type(Task.class).ids(taskIds).values();
 		ArrayList<Task> filteredTasks = new ArrayList<Task>();
-		Query<Community> communities4User = CommunityDAO.loadCommunities4User(user);
+		List<Community> communities4User = CommunityDAO.loadCommunities4User(user);
 		for (Task task:tasks) {
 			if (taskIsVisibleToUser(task, communities4User)) {
 				filteredTasks.add(task);

@@ -89,7 +89,7 @@ public class EventsForUserFilter {
 		}
 
     	communityIds = new HashSet<>();
-    	Query<Community> communities = CommunityDAO.loadCommunities4User(user);
+    	List<Community> communities = CommunityDAO.loadCommunities4User(user);
 		for (Community community:communities) {
 			communityIds.add(community.getId());
 		}

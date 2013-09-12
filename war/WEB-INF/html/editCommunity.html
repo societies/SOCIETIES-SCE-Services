@@ -23,6 +23,7 @@
 	        	<input type=hidden name=action value="create"/>
 	            <ul data-role="listview" data-theme="c">
 	                <li data-role="list-divider">Community Details</li>
+                    <div id="sctCommunity">
 	                <li data-role="fieldcontain">
 	                    <label for="name">Name*</label>
 	                    <input type="text" name="name" id="name">
@@ -31,6 +32,17 @@
 	                    <label for="description">Description</label>
 	                    <textarea name="description" id="description"></textarea>
 	                </li>
+                    </div>
+                    <div id="cisCommunity" style="display: none">
+	                <li data-role="fieldcontain">
+	                    <label for="name">Name*</label>
+                        <span id=txtName></span>
+	                </li>
+	                <li data-role="fieldcontain">
+	                    <label for="description">Description</label>
+                        <span id=txtDescription></span>
+	                </li>
+                    </div>
                     <li data-role="fieldcontain">
                         <label for="spacesCombo">Collaborative spaces</label>
                         <select name="spacesCombo" id="spacesCombo" multiple="multiple" data-native-menu="false">

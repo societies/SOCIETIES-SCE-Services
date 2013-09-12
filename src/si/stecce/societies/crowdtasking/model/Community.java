@@ -64,15 +64,17 @@ public class Community {
 	public Community() {
 	}
 
-    public Community(String jid, List<Long> csIds, String ownerJid) {
+    public Community(String jid, String name, String description, List<Long> csIds, String ownerJid) {
         this.jid = jid;
+        this.name = name;
+        this.description = description;
         setCollaborativeSpaces(csIds);
         this.ownerJid = ownerJid;
     }
 
     public Community(String name, String description, CTUser owner, List<Long> csIds, List<Long> members) {
 		super();
-        this.jid = jid;
+//        this.jid = jid;
 		this.name = name;
 		this.description = description;
 		this.ownerRef = Ref.create(Key.create(CTUser.class, owner.getId()));

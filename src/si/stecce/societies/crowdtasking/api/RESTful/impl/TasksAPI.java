@@ -158,7 +158,7 @@ public class TasksAPI implements ITasksAPI {
 //            return getTasksInSocietiesCommunities(user, communityRefs);
         }
         else {
-            Query<Community> communities = CommunityDAO.loadCommunities4User(user);
+            List<Community> communities = CommunityDAO.loadCommunities4User(user);
             for (Community community:communities) {
                 communityRefs.add(Ref.create(Key.create(Community.class, community.getId())));
             }

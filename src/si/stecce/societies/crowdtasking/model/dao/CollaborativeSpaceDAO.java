@@ -27,6 +27,7 @@ package si.stecce.societies.crowdtasking.model.dao;
 import static si.stecce.societies.crowdtasking.model.dao.OfyService.ofy;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import si.stecce.societies.crowdtasking.model.CTUser;
@@ -79,7 +80,7 @@ public final class CollaborativeSpaceDAO {
     }
 
 	public static Set<CollaborativeSpace> getCollaborativeSpaces4User(CTUser user) {
-		Query<Community> communities = CommunityDAO.loadCommunities4User(user);
+		List<Community> communities = CommunityDAO.loadCommunities4User(user);
 		Set<CollaborativeSpace> cses = new HashSet<>();
 		for (Community community:communities) {
 			if (community.getCollaborativeSpaces() != null) {
