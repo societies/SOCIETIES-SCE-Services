@@ -10,7 +10,7 @@
 		is to facilitate integration testing of the bundle outside of an OSGi container -->
 
 
-	<osgi:service ref="MyTv" >
+	<osgi:service ref="mytvServer" >
       <osgi:service-properties>
           <entry key="TargetPlatform" value="SOCIETIES" />
           <entry key="ServiceProvider" value="ICT-SOCIETIES" />
@@ -21,7 +21,7 @@
 	<bean id="serMetamodel" class="org.societies.api.schema.servicelifecycle.model.Service">
      	<property name="authorSignature" value="eliza" />
      	<property name="serviceDescription" value="MyTv personalised display service" />
-     	<property name="serviceName" value="MyTv" />
+     	<property name="serviceName" value="MyTvServer" />
      	<property name="serviceType" value="THIRD_PARTY_SERVER" />
      	<property name="serviceCategory" value="media" />
  	</bean>
