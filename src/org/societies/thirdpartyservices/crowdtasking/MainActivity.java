@@ -15,6 +15,7 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.Parcelable;
 import android.provider.CalendarContract.Events;
 import android.util.Log;
@@ -41,7 +42,6 @@ import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.message.BasicNameValuePair;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.societies.android.api.cis.directory.ICisDirectory;
@@ -65,6 +65,8 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import si.setcce.societies.android.rest.RestTask;
 import si.setcce.societies.crowdtasking.api.RESTful.json.CommunityJS;
@@ -76,10 +78,11 @@ public class MainActivity extends Activity implements SensorEventListener {
     private static final String GET_USER = "si.setcce.societies.android.rest.GET_USER";
 	private static final String LOG_EVENT = "si.setcce.societies.android.rest.LOG_EVENT";
 	private static final String LOGIN_USER = "si.setcce.societies.android.rest.LOGIN_USER";
+	private static final String C4CSS_INTENT = "si.setcce.societies.android.rest.C4CSS";
 	private static final String GET_MEETING_ACTION = "si.setcce.societies.android.rest.meeting";
     private static final String SCHEME ="http";
     private static final String DOMAIN = "crowdtaskingtest.appspot.com";
-//    private static final String DOMAIN = "06-09-2013.crowdtasking.appspot.com";
+//    private static final String DOMAIN = "13-09-2013.crowdtasking.appspot.com";
 //   	private static final String DOMAIN = "192.168.1.102";
 //   	private static final String DOMAIN = "192.168.1.66";
 //   	private static final String DOMAIN = "192.168.1.78";
@@ -145,13 +148,14 @@ public class MainActivity extends Activity implements SensorEventListener {
             System.out.println("Societies services are running?");
             Toast.makeText(getApplicationContext(), "SOCIETIES services are running", Toast.LENGTH_LONG).show();
             societiesUser = getSocietiesUserData();
-            TrustTask task = new TrustTask(this, "crowdtasking.appspot.com");
+            TrustTask task = new TrustTask(this, DOMAIN, APPLICATION_URL);
     		task.execute(societiesUser.getUserId());
             societiesServicesRunning = true;
             communityManagementClient = new CommunityManagementClient(this, communityClientReceiver);
             communityManagementClient.setUpService();
-            contextClient = new ContextClient(this);
-            contextClient.setUpService();
+            checkLocation();
+//            contextClient = new ContextClient(this);
+//            contextClient.setUpService();
 //            societiesEventsClient = new SocietiesEventsClient(this, eventsClientReceiver);
 //            societiesEventsClient.setUpService();
 //            cisDirectoryClient = new CisDirectoryClient(this, cisDirectoryClientReceiver);
@@ -165,6 +169,31 @@ public class MainActivity extends Activity implements SensorEventListener {
         checkIntent(getIntent());
         CheckUpdateTask checkUpdateTask = new CheckUpdateTask(this);
         checkUpdateTask.execute();
+    }
+
+    private void checkLocation() {
+        final Handler handler = new Handler();
+        Timer timer = new Timer();
+        TimerTask doAsynchronousTask = new TimerTask() {
+            @Override
+            public void run() {
+                handler.post(new Runnable() {
+                    public void run() {
+                        try {
+                            if (contextClientRunning) {
+                                contextClient.getSymbolicLocation(societiesUser.getUserId());
+                            } else {
+                                contextClient = new ContextClient(getApplicationContext());
+                                contextClient.setUpService();
+                            }
+                        } catch (Exception e) {
+                            // TODO Auto-generated catch block
+                        }
+                    }
+                });
+            }
+        };
+        timer.schedule(doAsynchronousTask, 0, 10000); //execute in every 10000 ms
     }
 
 /*
@@ -227,7 +256,7 @@ public class MainActivity extends Activity implements SensorEventListener {
         webView.addJavascriptInterface(new JSInterface(webView), "android");
         webView.setWebChromeClient(new WebChromeClient() {
 			public boolean onConsoleMessage(ConsoleMessage cm) {
-				Log.d(LOG_TAG, cm.message() +
+				Log.i(LOG_TAG, cm.message() +
 						" -- From the line " + cm.lineNumber()
 						+ " of " + cm.sourceId());
 				return true;
@@ -264,7 +293,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 	@Override
     public void onResume() {
         super.onResume();
-        registerReceiver(receiver, new IntentFilter(C4CSS_API_URL));
+        registerReceiver(receiver, new IntentFilter(C4CSS_INTENT));
         registerReceiver(receiver, new IntentFilter(GET_MEETING_ACTION));
         registerReceiver(receiver, new IntentFilter(CHECK_IN_OUT));
         registerReceiver(receiver, new IntentFilter(GET_USER));
@@ -279,9 +308,9 @@ public class MainActivity extends Activity implements SensorEventListener {
 			Toast toast = Toast.makeText(getApplicationContext(), response, Toast.LENGTH_SHORT);
 			toast.show();
     	}
+/*
         SocietiesUser societiesUser = getSocietiesUserData();
         JSONObject societiesUserJSON = new JSONObject();
-        RestTask task = new RestTask(this, C4CSS_API_URL, CookieManager.getInstance().getCookie(DOMAIN), DOMAIN);
         try {
             societiesUserJSON.put("userId", societiesUser.getUserId());
             societiesUserJSON.put("name", societiesUser.getName());
@@ -291,8 +320,7 @@ public class MainActivity extends Activity implements SensorEventListener {
             e.printStackTrace();
             return;
         }
-        System.out.println(societiesUserJSON.toString());
-
+*/
     }
     
     @Override
@@ -372,9 +400,8 @@ public class MainActivity extends Activity implements SensorEventListener {
 	private void checkInOut(String url) {
 		HttpGet searchRequest;
 		try {
-			searchRequest = new HttpGet(new URI(url));
 			RestTask task = new RestTask(getApplicationContext(), CHECK_IN_OUT, CookieManager.getInstance().getCookie(DOMAIN), DOMAIN);
-			task.execute(searchRequest);
+			task.execute(new HttpGet(new URI(url)));
 		} catch (URISyntaxException e) {
 			e.printStackTrace();
 			Toast toast = Toast.makeText(getApplicationContext(), "Error: "+e.getMessage(), Toast.LENGTH_LONG);
@@ -485,28 +512,21 @@ public class MainActivity extends Activity implements SensorEventListener {
                 List<CommunityJS> societiesCommunities = new ArrayList<CommunityJS>();
                 for(Object community:communities) {
                     societiesCommunities.add(new CommunityJS((Community)community, getSocietiesUserData()));
-/*
-                    Log.i(LOG_TAG, "objekt name: " + community.getClass().getName());
-                    Log.i(LOG_TAG, "objekt simple name: "+community.getClass().getSimpleName());
-                    Log.i(LOG_TAG, "objekt declared fields: " + community.getClass().getDeclaredFields());
-                    Community cis = (Community)community;
-                    Log.i(LOG_TAG, cis.getCommunityJid());
-                    Log.i(LOG_TAG, cis.getCommunityName());
-*/
-
                 }
                 ((CrowdTasking)getApplication()).setSocietiesCommunities(societiesCommunities);
-/*
-                Log.i(LOG_TAG, "on recieve: "+ICisManager.GET_CIS_LIST);
-	        	Community listing[] = (Community[]) intent.getParcelableArrayExtra(ICisManager.INTENT_RETURN_VALUE);
-	        	for(Community cis: listing) {
-	        		Log.i(LOG_TAG, cis.getCommunityJid());
-	        		Log.i(LOG_TAG, cis.getCommunityName());
-	        	}
-*/
+                getCommunitiesForUserFromGAE();
             }
         }
     };
+
+    private void getCommunitiesForUserFromGAE() {
+        try {
+            RestTask task = new RestTask(getApplicationContext(), C4CSS_INTENT, CookieManager.getInstance().getCookie(DOMAIN), DOMAIN);
+            task.execute(new HttpGet(new URI(C4CSS_API_URL)));
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
+    }
 
     private BroadcastReceiver receiver = new BroadcastReceiver() {
         @Override
@@ -552,13 +572,9 @@ public class MainActivity extends Activity implements SensorEventListener {
                 }
                 System.out.println(response);
             }
-            if (intent.getAction().equalsIgnoreCase(C4CSS_API_URL)) {
+            if (intent.getAction().equalsIgnoreCase(C4CSS_INTENT)) {
                 String response = intent.getStringExtra(RestTask.HTTP_RESPONSE);
-                try {
-                    JSONArray news = new JSONArray(response);
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
+                ((CrowdTasking)getApplication()).setSpaces(response);
             }
             if (intent.getAction().equalsIgnoreCase(GET_MEETING_ACTION)) {
                 String response = intent.getStringExtra(RestTask.HTTP_RESPONSE);
@@ -673,7 +689,7 @@ public class MainActivity extends Activity implements SensorEventListener {
             e.printStackTrace();
             return null;
         }
-        isSocietiesUser = true && societiesServicesRunning;
+        isSocietiesUser = societiesServicesRunning;
         return societiesUser;
     }
 
@@ -705,7 +721,7 @@ public class MainActivity extends Activity implements SensorEventListener {
         @JavascriptInterface
         public String socUser() {
             Log.i("isSocietiesUser()", "isSocietiesUser: " + isSocietiesUser);
-            return new Boolean(isSocietiesUser).toString();
+            return Boolean.valueOf(isSocietiesUser).toString();
         }
 
         @JavascriptInterface
@@ -721,13 +737,23 @@ public class MainActivity extends Activity implements SensorEventListener {
                 e.printStackTrace();
                 return null;
             }
-            System.out.println(societiesUserJSON.toString());
             return societiesUserJSON.toString();
         }
 
         @JavascriptInterface
         public String getSocietiesCommunities() {
+            communityManagementClient.listCommunities();
             return ((CrowdTasking)getApplication()).getSocietiesCommunitiesJSON();
+        }
+
+        @JavascriptInterface
+        public void setCommunitySpaces(String community) {
+            ((CrowdTasking)getApplication()).setCommunitySpaces(community);
+        }
+
+        @JavascriptInterface
+        public void refreshCommunities() {
+            getCommunitiesForUserFromGAE();
         }
 
         @JavascriptInterface
@@ -749,7 +775,8 @@ public class MainActivity extends Activity implements SensorEventListener {
 			if ("PD".equalsIgnoreCase(action)) {
 				schema="http:";
 			}
-			String text = schema+"//crowdtasking.appspot.com/cs/"+spejs;
+			String text = APPLICATION_URL+"/cs/"+spejs;
+//			String text = schema+"//crowdtasking.appspot.com/cs/"+spejs;
 			if ("CI".equalsIgnoreCase(action)) {
 				text+="/enter";
 			}

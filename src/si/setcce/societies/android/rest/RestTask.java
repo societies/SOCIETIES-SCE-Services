@@ -97,7 +97,7 @@ public class RestTask extends AsyncTask<HttpUriRequest, Void, String> {
 		} catch (Exception e) {
 			e.printStackTrace();
 			String msg = e.getMessage();
-			Log.e("SCT RestTask(94)", msg);
+			Log.e("SCT RestTask exception message: ", msg);
 			return msg;
 		}
 	}

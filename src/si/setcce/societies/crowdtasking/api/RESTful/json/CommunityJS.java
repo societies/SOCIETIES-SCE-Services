@@ -1,7 +1,12 @@
 package si.setcce.societies.crowdtasking.api.RESTful.json;
 
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.societies.api.schema.cis.community.Community;
 import org.societies.integration.model.SocietiesUser;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Describe your class here...
@@ -15,7 +20,7 @@ public class CommunityJS {
     public String jid;
     private String name = "";
     private String description = "";
-//    private List<CollaborativeSpace> spaces;
+    private List<CollaborativeSpaceJS> spaces;
 //    private List<UserJS> members;
 //    private List<UserJS> requests;
     private boolean owner;
@@ -79,6 +84,17 @@ public class CommunityJS {
         }
         if (!pending && !owner && !member) {
             memberStatus = "";
+        }
+    }
+
+    public void setSpaces(JSONArray spacesJS) {
+        this.spaces = new ArrayList<CollaborativeSpaceJS>();
+        for (int i = 0; i < spacesJS.length(); i++) {
+            try {
+                spaces.add(new CollaborativeSpaceJS(spacesJS.getJSONObject(i)));
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
         }
     }
 }

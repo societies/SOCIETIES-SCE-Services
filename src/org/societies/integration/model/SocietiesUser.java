@@ -22,6 +22,9 @@ public class SocietiesUser {
     }
 
     public void setName(String name) {
+        if (name == null) {
+            name="";
+        }
         this.name = name;
     }
 
@@ -30,6 +33,9 @@ public class SocietiesUser {
     }
 
     public void setForeName(String foreName) {
+        if (foreName == null) {
+            foreName="";
+        }
         this.foreName = foreName;
     }
 
@@ -38,6 +44,9 @@ public class SocietiesUser {
     }
 
     public void setEmail(String email) {
+        if (email == null) {
+            email="";
+        }
         this.email = email;
     }
 

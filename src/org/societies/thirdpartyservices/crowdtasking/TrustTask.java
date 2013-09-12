@@ -32,15 +32,16 @@ import android.webkit.CookieManager;
 
 public class TrustTask extends
 		AsyncTask<String, Void, Set<TrustRelationshipBean>> {
-	private static final String TRUST_API_URL = "http://crowdtasking.appspot.com/rest/users/trust";
+	private static String TRUST_API_URL;
 	private static final String TRUST_RELATIONSHIP_POST = "si.setcce.societies.android.rest.LOG_EVENT";
 	private Context context;
 	private Set<TrustRelationshipBean> trustRelationships = null;
-    private String domain;
+    private final String DOMAIN;
 
-	public TrustTask(Context context, String domain) {
+	public TrustTask(Context context, String domain, String APPLICATION_URL) {
 		this.context = context;
-        this.domain = domain;
+        this.DOMAIN = domain;
+        TRUST_API_URL = APPLICATION_URL + "/rest/users/trust";
 	}
 
 	@Override
@@ -116,7 +117,7 @@ public class TrustTask extends
 			eventRequest.setEntity(new UrlEncodedFormEntity(parameters));
 			RestTask task = new RestTask(context, TRUST_RELATIONSHIP_POST,
 					CookieManager.getInstance().getCookie(
-							domain), domain);
+                            DOMAIN), DOMAIN);
 			task.execute(eventRequest);
 		} catch (URISyntaxException e) {
 			Log.e("CT4A", e.getMessage());

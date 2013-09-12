@@ -8,25 +8,35 @@ import android.os.Bundle;
 import android.os.Parcelable;
 import android.os.RemoteException;
 import android.util.Log;
+import android.webkit.CookieManager;
+import android.widget.Toast;
 
+import org.apache.http.client.methods.HttpGet;
 import org.societies.android.api.context.CtxException;
 import org.societies.android.api.context.ICtxClient;
 import org.societies.android.api.context.model.CtxAttributeTypes;
 import org.societies.android.api.services.ICoreSocietiesServices;
+import org.societies.api.schema.context.model.CtxAttributeBean;
 import org.societies.api.schema.context.model.CtxEntityIdentifierBean;
 import org.societies.api.schema.context.model.CtxIdentifierBean;
 import org.societies.api.schema.context.model.CtxModelObjectBean;
 import org.societies.api.schema.context.model.CtxModelTypeBean;
 import org.societies.api.schema.identity.RequestorBean;
+import org.societies.thirdpartyservices.crowdtasking.CrowdTasking;
+import org.societies.thirdpartyservices.crowdtasking.MainActivity;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+
+import si.setcce.societies.android.rest.RestTask;
 
 public class ContextClient extends ServiceClientBase {
 	private final static String LOG_TAG = "ContextClient";
 
 	public ContextClient(Context context) {
 		super(context);
+        serviceName = "ContextClient";
 	}
 
 	@Override
@@ -110,7 +120,29 @@ public class ContextClient extends ServiceClientBase {
 				final CtxModelObjectBean modelObject;
 				final Parcelable pModelObject = (Parcelable) intent.getParcelableExtra(ICtxClient.INTENT_RETURN_VALUE_KEY);	
 				if (pModelObject instanceof CtxModelObjectBean) {
-						modelObject = (CtxModelObjectBean) pModelObject;
+					modelObject = (CtxModelObjectBean) pModelObject;
+                    String location = ((CtxAttributeBean) modelObject).getStringValue();
+                    String oldLocation = ((CrowdTasking)context).symbolicLocation;
+                    if ("".equalsIgnoreCase(oldLocation)) {
+                        ((CrowdTasking) context).symbolicLocation = location;
+                        oldLocation = location;
+                        Toast.makeText(context, "User location: " + location, Toast.LENGTH_LONG).show();
+                    }
+                    if (!oldLocation.equalsIgnoreCase(location)) {
+                        Toast.makeText(context, "Location changed to: " + location, Toast.LENGTH_LONG).show();
+                        ((CrowdTasking) context).symbolicLocation = location;
+                        // TODO: get from central location
+/*
+                        String CHECK_IN_OUT = "si.setcce.societies.android.rest.CHECK_IN_OUT";
+                        String DOMAIN = "crowdtaskingtest.appspot.com";
+                        RestTask task = new RestTask(context, CHECK_IN_OUT, CookieManager.getInstance().getCookie(DOMAIN), DOMAIN);
+                        task.execute(new HttpGet(new URI(url)));
+*/
+
+                    } else {
+//                        Toast.makeText(context, "Location is still the same", Toast.LENGTH_LONG).show();
+                    }
+                    System.out.println("location:"+location);
 				} else { 
 					Log.e(LOG_TAG, "Unexpected return value type: "+ ((pModelObject != null) ? pModelObject.getClass() : "null"));
 					return;
@@ -121,7 +153,9 @@ public class ContextClient extends ServiceClientBase {
     }
 
     public void getSymbolicLocation(String cssId) {
-        RequestorBean requestor = null; // todo poglej kako je na testu
+//        RequestorBean requestor = null; // todo poglej kako je na testu
+        final RequestorBean requestor = new RequestorBean();
+        requestor.setRequestorId(cssId);
         retrieveIndividualEntityId(requestor, cssId);
     }
 
