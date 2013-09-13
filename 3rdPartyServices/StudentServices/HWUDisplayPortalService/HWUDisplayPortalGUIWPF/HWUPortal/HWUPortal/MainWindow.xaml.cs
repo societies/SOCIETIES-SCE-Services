@@ -106,6 +106,9 @@ namespace HWUPortal
             BindingOperations.SetBinding(this.kinectRegion, KinectRegion.KinectSensorProperty, regionSensorBinding);
             Console.WriteLine("Kinect initialized");
 
+            iViewer = new ImageViewer();
+            Console.WriteLine("ImageViewer initialized");
+
         }
 
         #region " Service Control Methods "
@@ -298,7 +301,7 @@ namespace HWUPortal
                 if (log.IsDebugEnabled)
                     Console.WriteLine("Stopping Service (Web).");
                 this.webBrowser.Navigate("about:blank");
-                //this.webBrowser.Visibility = System.Windows.Visibility.Hidden;
+                this.webBrowser.Visibility = System.Windows.Visibility.Hidden;
             }
 
             BindSensor();

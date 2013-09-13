@@ -23,8 +23,15 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-
+using System.Windows;
 using System.Windows.Controls;
+using SocialLearningGame.Entities;
+using SocialLearningGame.Logic;
+using System.Collections.Generic;
+using Microsoft.Kinect.Toolkit.Controls;
+using System;
+using System.Linq;
+
 
 namespace SocialLearningGame.Pages
 {
@@ -33,12 +40,139 @@ namespace SocialLearningGame.Pages
     /// </summary>
     public partial class CategoriesPage : Page
     {
-        private static CategoriesPage _instance = new CategoriesPage();
-        public static CategoriesPage Instance { get { return _instance; } }
 
-        private CategoriesPage()
+        private static Dictionary<KinectCircleButton, Category> buttonToCat;
+
+        public CategoriesPage()
         {
             InitializeComponent();
+            addButtons();
+
+        }
+
+        private List<String> getKeywords(List<String> userInterests)
+        {
+            List<String> keywords = new List<String>();
+            foreach (String s in userInterests)
+            {
+               String[] array = s.Split(' ');
+               foreach (String s2 in array)
+               {
+                   Console.WriteLine("Adding " + s2);
+                   keywords.Add(s2.Trim());
+               }
+            }
+            return keywords;
+        }
+
+        private void addButtons()
+        {
+            Console.WriteLine("In add buttons");
+            buttonToCat = new Dictionary<KinectCircleButton, Category>();
+            List<Category> categories = GameLogic.getCategories();
+            List<Category> superCategories = new List<Category>();
+            List<String> userInterests = GameLogic.getUserInterests();
+            List<String> keywords = getKeywords(userInterests);
+ 
+            int general = 0;
+            int personal = 0;
+            foreach (Category c in categories.ToList())
+            {
+                Console.WriteLine(c.Name);
+                if (c.superCatID == 0)
+                {
+                    superCategories.Add(c);
+                    categories.Remove(c);
+                    if (c.Name.Equals("General"))
+                    {
+                        general = c.categoryID;
+                        Console.WriteLine("Got general ID");
+                    }
+                    else if (c.Name.Equals("Personal"))
+                    {
+                        personal = c.categoryID;
+                    }
+                }
+            }
+            int xCount = 0;
+            int yCount = 1;
+            foreach (Category c in categories)
+            {
+                if (xCount == 3)
+                {
+                    yCount+=3;
+                    xCount = 0;
+                }
+                if (c.superCatID == general)
+                {
+                    Console.WriteLine("General Q found, Add Button");
+                    createButton(c, xCount, yCount);
+                    xCount++;
+                }
+                if (c.superCatID == personal)
+                {
+                    if (keywords.Contains(c.Name) || userInterests.Contains(c.Name))
+                    {
+                        Console.WriteLine("Keywords match, creating a button");
+                        createButton(c, xCount, yCount);
+                        xCount++;
+                    }
+                    else
+                    {
+                        Console.WriteLine("Keywords don't match, not creating a button for...");
+                        Console.WriteLine(c.Name);
+                    }
+                }
+            }
+        }
+
+        private void createButton(Category c, int xCount, int yCount)
+        {
+                            TextBlock tb = new TextBlock();
+                tb.Text = c.Name;
+                tb.TextAlignment = TextAlignment.Center;
+                tb.FontSize = 28;
+                Grid.SetColumn(tb, xCount);
+                Grid.SetRow(tb, yCount);
+                catGrid.Children.Add(tb);
+              //  yCount++;
+
+
+                KinectCircleButton button = new KinectCircleButton();
+             //   button.Height = 150.0;
+              //  button.MaxWidth = 200.0;
+                button.Click += buttonClick;
+                buttonToCat.Add(button, c);
+             //  Grid.SetRow(button, xCount);
+              // Grid.SetColumn(button, yCount);//.LeftProperty, 30.0*xCount);
+               // button.SetValue(Canvas.TopProperty, 100.0 + (15.0*yCount));
+                Grid.SetColumn(button, xCount);
+                Grid.SetRow(button, yCount+1);
+                catGrid.Children.Add(button);
+               // CategoryPage.Children.Add(button);
+                
+              //  Canvas.SetLeft(button, 55 + (150 * xCount));
+               // Canvas.SetTop(button, 105 + ( 200 * yCount));
+                xCount++;
+                
+                //ADD A NEW BUTTON
+
+            }
+        
+        private void buttonClick(object sender, RoutedEventArgs e)
+        {
+            Category c = buttonToCat[(KinectCircleButton)sender];
+            Console.WriteLine(c.Name);
+           /* List<Category> c = GameLogic.getCategories();
+            Category cc1 = null;
+            foreach (Category f in c)
+            {
+                if(f.Name.Equals("Math"))
+                {
+                    cc1=f;
+                }
+            }*/
+            MainWindow.SwitchPage(new PlayPage(c));
         }
     }
 }

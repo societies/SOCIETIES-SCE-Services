@@ -45,7 +45,7 @@ namespace SocialLearningGame.Pages
 
         private void playButton_Click(object sender, RoutedEventArgs e)
         {
-            MainWindow.SwitchPage(new PlayPage());
+            MainWindow.SwitchPage(new PlayPage(null));
         }
 
         private void scoreboardButton_Click(object sender, RoutedEventArgs e)
@@ -60,7 +60,7 @@ namespace SocialLearningGame.Pages
 
         private void categoriesButton_Click(object sender, RoutedEventArgs e)
         {
-            MainWindow.SwitchPage(CategoriesPage.Instance);
+            MainWindow.SwitchPage(new CategoriesPage());
         }
     }
 }

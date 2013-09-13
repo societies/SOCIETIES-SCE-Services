@@ -8,15 +8,15 @@
       d:DesignHeight="600" d:DesignWidth="1000"
       Title="HomePage" Height="600" Width="1000">
 
-    <Canvas Background="Transparent" Height="600" VerticalAlignment="Top" Margin="0" Width="1000">
+    <Canvas Name="scoreBoard" Background="Transparent" Height="600" VerticalAlignment="Top" Margin="0" Width="1000">
         <TextBlock Height="76" HorizontalAlignment="Left" Margin="353,44,0,0" Name="textBlock1" Text="Scoreboard" VerticalAlignment="Top" Width="304" TextAlignment="Center" FontSize="48" Canvas.Left="-4" Canvas.Top="-4" />
         
         <!-- Current student's score and rank details -->
-        <TextBlock Canvas.Left="59" Canvas.Top="120" Height="44" Name="studentName" Text="You" Width="400" FontSize="28" MinWidth="50" MaxWidth="400" />
+      <!--  <TextBlock Canvas.Left="59" Canvas.Top="120" Height="44" Name="studentName" Text="You" Width="400" FontSize="28" MinWidth="50" MaxWidth="400" /> -->
         <TextBlock Canvas.Left="511" Canvas.Top="97" Height="31" Name="rankTitle" Text="Rank" Width="50" FontSize="20" />
         <TextBlock Canvas.Left="594" Canvas.Top="97" FontSize="20" Height="31" Name="scoreTitle" Text="Score" Width="55" />
-        <TextBlock Canvas.Left="523" Canvas.Top="134" Name="studentRank" MinWidth="20" MinHeight="20" FontSize="20" />
-        <TextBlock Canvas.Left="612" Canvas.Top="134" Name="scoreBlock" MinWidth="20" MinHeight="20" FontSize="20" />
+       <!-- <TextBlock Canvas.Left="523" Canvas.Top="134" Name="studentRank" MinWidth="20" MinHeight="20" FontSize="20" />
+        <TextBlock Canvas.Left="612" Canvas.Top="134" Name="scoreBlock" MinWidth="20" MinHeight="20" FontSize="20" /> -->
 
         <!-- Right hand -->
         <Ellipse Height="80" Width="80" Name="RightHand" Canvas.Left="305" Canvas.Top="0">

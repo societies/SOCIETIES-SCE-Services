@@ -28,6 +28,8 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Windows;
+using System.Collections.Generic;
+using System.Globalization;
 
 namespace SocialLearningGame
 {
@@ -36,34 +38,63 @@ namespace SocialLearningGame
     /// </summary>
     public partial class App : Application
     {
-        protected static log4net.ILog log = log4net.LogManager.GetLogger(typeof(App));
+        private static Dictionary<String, Assembly> assemblyDictionary = new Dictionary<string, Assembly>();
+       // protected static log4net.ILog log = log4net.LogManager.GetLogger(typeof(App));
 
-        public App()
-            : base()
+    public App()
+
+    {
+        Console.WriteLine("Getting assemblies");
+        AppDomain.CurrentDomain.AssemblyResolve += OnResolveAssembly;
+
+   }
+
+ 
+
+    private static Assembly OnResolveAssembly(object sender, ResolveEventArgs args)
+
+    {
+
+        Assembly executingAssembly = Assembly.GetExecutingAssembly();
+
+        AssemblyName assemblyName = new AssemblyName(args.Name);
+
+
+        string path = assemblyName.Name + ".dll";
+        Console.WriteLine("Path:" + path);
+
+        if (assemblyName.CultureInfo.Equals(CultureInfo.InvariantCulture) == false)
+
         {
-            //event handler to resolve assembly references when running as a standalone exe
-            //AppDomain.CurrentDomain.AssemblyResolve += new ResolveEventHandler(ResolveAssembly);
 
-            log4net.Config.XmlConfigurator.Configure(new System.IO.FileInfo("./Resources/log4net.config.xml"));
-            log.Info("Logging configured");
+           path = String.Format(@"{0}\{1}", assemblyName.CultureInfo, path);
 
         }
 
-        private static Assembly ResolveAssembly(object sender, ResolveEventArgs args)
+ 
+
+        using (Stream stream = executingAssembly.GetManifestResourceStream(path))
+
         {
-            Assembly parentAssembly = Assembly.GetExecutingAssembly();
 
-            var name = args.Name.Substring(0, args.Name.IndexOf(',')) + ".dll";
-            var resourceName = parentAssembly.GetManifestResourceNames()
-                .First(s => s.EndsWith(name));
+            if (stream == null)
 
-            using (Stream stream = parentAssembly.GetManifestResourceStream(resourceName))
-            {
-                byte[] block = new byte[stream.Length];
-                stream.Read(block, 0, block.Length);
-                return Assembly.Load(block);
-            }
+                return null;
+
+ 
+
+            byte[] assemblyRawBytes = new byte[stream.Length];
+
+            stream.Read(assemblyRawBytes, 0, assemblyRawBytes.Length);
+
+            return Assembly.Load(assemblyRawBytes);
+
         }
+
+    }
+
+
+
 
         //richarddingwall.name/2009/05/14/wpf-how-to-combine-mutliple-assemblies-into-a-single-exe/
 

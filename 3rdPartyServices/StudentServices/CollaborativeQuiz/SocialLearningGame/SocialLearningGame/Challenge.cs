@@ -30,8 +30,8 @@ namespace SocialLearningGame
     public class Challenge
     {
         public int ID { get; set; }
-        public User Challenger { get; set; }
-        public User Challenged { get; set; }
+        public UserScore Challenger { get; set; }
+        public UserScore Challenged { get; set; }
         public Category Category { get; set; }
         public int ChallengerScore { get; set; }
         public int ChallengedScore { get; set; }

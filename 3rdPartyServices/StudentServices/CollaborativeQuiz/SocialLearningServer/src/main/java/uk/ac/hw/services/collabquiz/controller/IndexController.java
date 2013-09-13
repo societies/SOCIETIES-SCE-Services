@@ -1,7 +1,5 @@
 package uk.ac.hw.services.collabquiz.controller;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 
 import javax.annotation.PostConstruct;
@@ -9,9 +7,7 @@ import javax.faces.bean.ManagedBean;
 
 @Controller
 @ManagedBean(name = "index")
-public class IndexController {
-    private static final Logger log = LoggerFactory.getLogger(IndexController.class);
-
+public class IndexController extends BasePageController {
     private String color1;
     private String color2;
 

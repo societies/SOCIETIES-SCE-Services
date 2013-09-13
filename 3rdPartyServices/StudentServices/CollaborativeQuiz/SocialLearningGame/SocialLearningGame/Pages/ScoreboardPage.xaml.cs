@@ -22,8 +22,12 @@
  * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
+using System.Collections.Generic;
 using System.Windows.Controls;
+using SocialLearningGame.Logic;
+using SocialLearningGame.Entities;
+using System.Linq;
+using System;
 
 namespace SocialLearningGame.Pages
 {
@@ -33,11 +37,65 @@ namespace SocialLearningGame.Pages
     public partial class ScoreboardPage : Page
     {
         private static ScoreboardPage _instance = new ScoreboardPage();
-        public static ScoreboardPage Instance { get { return _instance; } }
+        public static ScoreboardPage Instance { get { _instance.refreshPage(); return _instance; } }
+        private List<UserScore> allUsers;
+        private List<TextBlock> childNodes;
+     
+        
+
+        //<TextBlock Canvas.Left="59" Canvas.Top="120" Height="44" Name="studentName" Text="You" Width="400" FontSize="28" MinWidth="50" MaxWidth="400" />
 
         private ScoreboardPage()
         {
             InitializeComponent();
+            childNodes = new List<TextBlock>();
+            refreshPage();
+        }
+
+
+        private void refreshPage()
+        {
+            foreach (TextBlock oldTB in childNodes)
+            {
+                scoreBoard.Children.Remove(oldTB);
+            }
+            childNodes.Clear();
+            Console.WriteLine("Getting new user score...");
+            allUsers = GameLogic.getAllUsers().OrderByDescending(o => o.score).ToList();
+            double top_margin = 0;
+            int rank = 1;
+            TextBlock tb;
+            foreach (UserScore user in allUsers)
+            {
+                tb = new TextBlock();
+                tb.SetValue(Canvas.LeftProperty, 59.0);
+                tb.SetValue(Canvas.TopProperty, 120.0 + top_margin);
+                tb.Height = 44;
+                tb.Width = 400;
+                tb.Text = user.name;
+                tb.FontSize = 30;
+                scoreBoard.Children.Add(tb);
+                childNodes.Add(tb);
+                top_margin = top_margin + 63.0;
+                //        <TextBlock Canvas.Left="523" Canvas.Top="134" Name="studentRank" MinWidth="20" MinHeight="20" FontSize="20" />
+                //<TextBlock Canvas.Left="612" Canvas.Top="134" Name="scoreBlock" MinWidth="20" MinHeight="20" FontSize="20" />
+                tb = new TextBlock();
+                tb.SetValue(Canvas.LeftProperty, 523.0);
+                tb.SetValue(Canvas.TopProperty, 67.5 + top_margin);//= new System.Windows.Thickness(523, 120+top_margin, 1, 1);
+                tb.FontSize = 20;
+                tb.Text = rank.ToString();
+                scoreBoard.Children.Add(tb);
+                childNodes.Add(tb);
+                rank++;
+
+                tb = new TextBlock();
+                tb.SetValue(Canvas.LeftProperty, 612.0);
+                tb.SetValue(Canvas.TopProperty, 67.5 + top_margin);
+                tb.FontSize = 20;
+                tb.Text = user.score.ToString();
+                scoreBoard.Children.Add(tb);
+                childNodes.Add(tb);
+            }
         }
 
         private void backButton_Click(object sender, System.Windows.RoutedEventArgs e)

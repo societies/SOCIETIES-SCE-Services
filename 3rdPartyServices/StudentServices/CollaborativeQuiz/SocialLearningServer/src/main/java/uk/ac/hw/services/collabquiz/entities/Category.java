@@ -1,5 +1,6 @@
 package uk.ac.hw.services.collabquiz.entities;
 
+import javax.faces.bean.ManagedBean;
 import javax.persistence.*;
 
 /*
@@ -28,41 +29,52 @@ import javax.persistence.*;
  */
 
 @Entity
-@Table(name="question")
-
+@Table(name = "category")
+@ManagedBean(name="categoryBean")
 public class Category {
 
-    public static final Category all = new Category(-1, "All");
+	@Id
+	@GeneratedValue
+	@Column(name = "category_id")
+	private int categoryID;
+	@Column(name = "name")
+	private String name;
+	
+	private int superCatID;
 
-    @Id
-    @GeneratedValue
-    @Column(name="category_id")
-    public int getCategoryID() {
-        return categoryID;
-    }
 
-    public void setCategoryID(int categoryID) {
-        this.categoryID = categoryID;
-    }
+	public Category() {
+	}
 
-    @Column(name="name")
-    public String getName() {
-        return name;
-    }
+	public Category(int categoryID, String name) {
+		this.categoryID = categoryID;
+		this.name = name;
 
-    public void setName(String name) {
-        this.name = name;
-    }
+	}
 
-    private int categoryID;
-    private String name;
 
-    public Category() {
-    }
+	public int getCategoryID() {
+		return categoryID;
+	}
 
-    public Category(int categoryID, String name) {
-        this.categoryID = categoryID;
-        this.name = name;
+	public void setCategoryID(int categoryID) {
+		this.categoryID = categoryID;
+	}
+	
+	public int getSuperCatID() {
+		return superCatID;
+	}
 
-    }
+	public void setSuperCatID(int superCatID) {
+		this.superCatID = superCatID;
+	}
+
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
 }

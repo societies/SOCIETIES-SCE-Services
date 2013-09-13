@@ -5,6 +5,9 @@ using System.Text;
 using System.Net.Sockets;
 using System.Net;
 using System.ComponentModel;
+using System.IO;
+using System.Collections;
+
 
 namespace HWUPortal
 {
@@ -427,6 +430,11 @@ namespace HWUPortal
             String userProfile = System.Environment.GetEnvironmentVariable("USERPROFILE");
             String directory = userProfile + @"\Downloads\";
             String fileName = this.extractFilename(sInfo.serviceURL);
+
+            if (!Directory.Exists(directory))
+            {
+                Directory.CreateDirectory(directory);
+            }
 
             String pathToExe = directory + fileName;
             sInfo.serviceExe = pathToExe;

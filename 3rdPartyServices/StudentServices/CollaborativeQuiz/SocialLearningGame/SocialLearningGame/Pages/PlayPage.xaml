@@ -6,7 +6,8 @@
       xmlns:k="http://schemas.microsoft.com/kinect/2013"
       mc:Ignorable="d" 
       d:DesignHeight="600" d:DesignWidth="1000"
-      Title="Quiz">
+      Title="Quiz"
+      Loaded="Window_Loaded">
 
     <Page.Resources>
         <Style x:Key="QuestionTextStyle" TargetType="TextBlock">
@@ -72,7 +73,7 @@
         <TextBlock Text="Score" FontSize="20" 
                    HorizontalAlignment="Center" VerticalAlignment="Bottom" TextAlignment="Center"
                    Grid.ColumnSpan="2"/>
-        <TextBlock Name="scoreBox" FontSize="32" Text="[0]"
+        <TextBlock Name="scoreBox" FontSize="32"
                    HorizontalAlignment="Center" VerticalAlignment="Top" TextAlignment="Center" 
                    Grid.Row="1" Grid.ColumnSpan="2" />
 
@@ -80,7 +81,7 @@
         <TextBlock Text="Score" FontSize="20" 
                    HorizontalAlignment="Left" VerticalAlignment="Bottom"
                    Grid.Column="2" />
-        <TextBlock Name="playerNameBox" FontSize="32" Text="[Player name]"
+        <TextBlock Name="playerNameBox" FontSize="32"
                    HorizontalAlignment="Left" VerticalAlignment="Top" TextAlignment="Left" 
                    Height="Auto" Width="Auto" Grid.Column="2" Grid.Row="1"/>
 
@@ -88,12 +89,12 @@
         <TextBlock Text="Question" FontSize="20" 
                    HorizontalAlignment="Left" VerticalAlignment="Bottom"
                    Grid.Column="3" />
-        <TextBlock Name="questionNumberBox" FontSize="32" Text="[#/6]"
+        <TextBlock Name="questionNumberBox" FontSize="32"
                    HorizontalAlignment="Center" VerticalAlignment="Top" TextAlignment="Left" 
                    Height="Auto" Width="Auto" Grid.Column="3" Grid.Row="1"/>
 
         <!-- Question textblock -->
-        <TextBlock Name="questionBox" Text="Current Question" 
+        <TextBlock Name="questionBox" 
                    Grid.Row="2" Grid.ColumnSpan="3" 
                    Style="{StaticResource QuestionTextStyle}" Margin="20,10,0,0" />
 
@@ -101,7 +102,7 @@
         <Image Name="CurrentPoseBox" Stretch="Fill" Grid.RowSpan="6" Grid.ColumnSpan="5"/>
 
         <!-- Answer 1 -->
-        <TextBlock Name="answerBox1" Text="Answer 1" 
+        <TextBlock Name="answerBox1"
                    Style="{StaticResource AnswerTextStyle}" 
                    Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="2"/>
         <Ellipse Fill="#FF32E600" 
@@ -115,7 +116,7 @@
         </k:KinectCircleButton>
 
         <!-- Answer 2 -->
-        <TextBlock Name="answerBox2" Text="Answer 2" 
+        <TextBlock Name="answerBox2" 
                    Style="{StaticResource AnswerTextStyle}"
                    Grid.Row="3" Grid.Column="4" />
         <Ellipse Fill="Yellow" 
@@ -130,7 +131,7 @@
         </k:KinectCircleButton>
 
         <!-- Answer 3 -->
-        <TextBlock Name="answerBox3" Text="Answer 3" 
+        <TextBlock Name="answerBox3"  
                    Style="{StaticResource AnswerTextStyle}" 
                    Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="2"/>
         <Ellipse Fill="Red" 
@@ -144,7 +145,7 @@
         </k:KinectCircleButton>
 
         <!-- Answer 4 -->
-        <TextBlock Name="answerBox4" Text="Answer 4" 
+        <TextBlock Name="answerBox4" 
                    Style="{StaticResource AnswerTextStyle}" 
                    Grid.Row="4" Grid.Column="4" />
         <Ellipse Fill="Blue" 

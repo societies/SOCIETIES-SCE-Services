@@ -1,22 +1,64 @@
 ﻿<Page x:Class="SocialLearningGame.Pages.CategoriesPage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:k="http://schemas.microsoft.com/kinect/2013"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       mc:Ignorable="d" 
       d:DesignHeight="600" d:DesignWidth="990"
       Title="HomePage" Height="600" Width="1000">
 
-    <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="649*" />
-            <ColumnDefinition Width="319*" />
-            <ColumnDefinition Width="0*" />
+    <Page.Resources>
+        <Style x:Key="labelStyle" TargetType="TextBlock">
+            <Setter Property="VerticalAlignment" Value="Bottom"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="TextAlignment" Value="Center"/>
+            <Setter Property="FontSize" Value="28"/>
+        </Style>
+        <Style x:Key="buttonStyle" TargetType="k:KinectCircleButton">
+            <Setter Property="MaxHeight" Value="500"/>
+            <Setter Property="MaxWidth" Value="500"/>
+            <!--<Setter Property="Height" Value="250"/>-->
+            <!--<Setter Property="Width" Value="250"/>-->
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+        </Style>
+        <Style x:Key="iconStyle" TargetType="Ellipse" >
+            <Setter Property="Height" Value="100"/>
+            <Setter Property="Width" Value="100"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+        </Style>
+    </Page.Resources>
+
+        <Grid Name="catGrid">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="30*" />
+                <RowDefinition Height="10*" />
+                <RowDefinition Height="20*" />
+            <RowDefinition Height="10*" />
+            <RowDefinition Height="10*" />
+                <RowDefinition Height="20*" />
+        </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="33*" />
+                <ColumnDefinition Width="33*" />
+                <ColumnDefinition Width="33*" />
         </Grid.ColumnDefinitions>
-        <Canvas Background="Transparent" Height="561" VerticalAlignment="Top" Grid.ColumnSpan="2" Margin="0">
+            <Canvas Name="CategoryPage" Background="Transparent" Height="590" VerticalAlignment="Top" Grid.ColumnSpan="2" Margin="0,0,0.4,0" Grid.RowSpan="6">
             <TextBlock Height="76" HorizontalAlignment="Left" Margin="353,44,0,0" Name="textBlock1" Text="Categories" VerticalAlignment="Top" Width="304" TextAlignment="Center" FontSize="48" Canvas.Left="-4" Canvas.Top="-4" />
 
             <!-- Category pictures -->
+          <!--  <k:KinectCircleButton x:Name="MathCategory" 
+                              Click="mathCategory_Click"  
+                              Style="{StaticResource buttonStyle}"
+                              Grid.Row="1" Grid.Column="1">
+                <Ellipse Style="{StaticResource iconStyle}">
+                    <Ellipse.Fill>
+                        <ImageBrush ImageSource="/SocialLearningGame;component/Resources/GeneralKnowledge.png" />
+                    </Ellipse.Fill>
+                </Ellipse>
+            </k:KinectCircleButton>
             <Image Name="GKPic" Source="/SocialLearningGame;component/Resources/GeneralKnowledge.png" Canvas.Left="107" Canvas.Top="160" Height="163" Width="188" />
             <Image Name="CRPic" Source="/SocialLearningGame;component/Resources/CourseRelated.png" Canvas.Left="302" Canvas.Top="160" Height="163" Width="188" />
             <Image Name="MusPic" Source="/SocialLearningGame;component/Resources/Music.png" Canvas.Left="495" Canvas.Top="160" Height="163" Width="188" />
@@ -25,7 +67,7 @@
             <Image Name="SciPic" Source="/SocialLearningGame;component/Resources/Science.png" Canvas.Left="495" Canvas.Top="328" Height="163" Width="188" />
             <Image Name="TechPic" Source="/SocialLearningGame;component/Resources/Technology.png" Canvas.Left="688" Canvas.Top="328" Height="163" Width="188" />
             <Image Name="HistPic" Source="/SocialLearningGame;component/Resources/History.png" Canvas.Left="302" Canvas.Top="328" Height="163" Width="188" />
-
+-->
             <!-- Right hand -->
             <Ellipse Height="80" Width="80" Name="RightHand" Canvas.Left="177" Canvas.Top="6" >
                 <Ellipse.Fill>
@@ -33,7 +75,7 @@
                 </Ellipse.Fill>
             </Ellipse>
             <!-- Hover Button controls for the different categories -->
-            <!--<Controls:HoverButton x:Name="generalKnowledgeButton" ImageSize="100" TimeInterval="1500" Height="73" Width="79" Canvas.Left="160" Canvas.Top="200" />-->
+            <!--<Controls:HoverButton x:Name="generalKnowledgeButton" ImageSize="100" TimeInterval="1500" Height="73" Width="79" Canvas.Left="160" Canvas.Top="200" /> -->
             <!--<Controls:HoverButton x:Name="courseRelatedButton" ImageSize="100" TimeInterval="1500" Height="73" Width="79" Canvas.Left="349" Canvas.Top="200" />-->
             <!--<Controls:HoverButton x:Name="musicButton" ImageSize="100" TimeInterval="1500" Height="73" Width="79" Canvas.Left="537" Canvas.Top="200" />-->
             <!--<Controls:HoverButton x:Name="videoGamesButton" ImageSize="100" TimeInterval="1500" Height="73" Width="79" Canvas.Left="739" Canvas.Top="200" />-->
