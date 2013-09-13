@@ -203,7 +203,7 @@
 						<Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
 						<Export-Package>!*</Export-Package>
 						<Import-Package>
-						 	org.societies.enterprise.collabtools;version="[0.1.0,1.0.0)",
+						 	org.societies.enterprise;version="[0.1.0,1.0.0)",
 <!-- 							org.json;version="1.0.0", -->
 <!-- 							org.apache.http*;version="4.2",  -->
 							javax.servlet.jsp.jstl.core;version="[1.2.0,2.0.0)",
