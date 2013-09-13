@@ -104,7 +104,7 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 		socketServer.start();
 
 		try {
-			myUIExeLocation = new URL("http://www.macs.hw.ac.uk/~ceesmm1/societies/mytv/MyTvUI.exe");
+			myUIExeLocation = new URL("http://www2.macs.hw.ac.uk/~sww2/societies/MyTvUI.exe");
 			displayDriver.registerDisplayableService(
 					this, 
 					myServiceName, 
