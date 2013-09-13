@@ -55,11 +55,6 @@
     </StartupObject>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Coding4Fun.Kinect.Wpf, Version=1.5.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>dll\Coding4Fun.Kinect.Wpf.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
     <Reference Include="CoreAudioApi">
       <HintPath>dll\CoreAudioApi.dll</HintPath>
     </Reference>
@@ -77,12 +72,6 @@
     </Reference>
     <Reference Include="Microsoft.Kinect.Toolkit.Controls">
       <HintPath>C:\Program Files\Microsoft SDKs\Kinect\Developer Toolkit v1.7.0\Assemblies\Microsoft.Kinect.Toolkit.Controls.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.Samples.Kinect.WpfViewers, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>dll\Microsoft.Samples.Kinect.WpfViewers.dll</HintPath>
-      <Private>False</Private>
-      <EmbedInteropTypes>False</EmbedInteropTypes>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -134,7 +123,6 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-    <EmbeddedResource Include="dll\Microsoft.Kinect.dll" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
@@ -167,15 +155,6 @@
       <ProductName>Windows Installer 3.1</ProductName>
       <Install>true</Install>
     </BootstrapperPackage>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="dll\Microsoft.Samples.Kinect.WpfViewers.dll" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="dll\Coding4Fun.Kinect.Wpf.dll" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="dll\Microsoft.Expression.Drawing.dll" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Images\channel_background.png" />
