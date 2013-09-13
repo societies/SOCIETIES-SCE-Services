@@ -1,28 +1,19 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.Collections;
+using System.IO;
+using System.Net;
+using System.Net.Sockets;
+using System.Reflection;
+using System.Runtime.InteropServices;
+using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
-using System.Windows.Shapes;
-using Coding4Fun.Kinect.Wpf;
-using Coding4Fun.Kinect;
-using Coding4Fun.Kinect.Wpf.Controls;
-using System.Reflection;
-using System.IO;
-using System.Threading;
-using System.Runtime.InteropServices;
-using System.Net;
-using Microsoft.Kinect;
-using System.Collections;
-using System.Net.Sockets;
 using CoreAudioApi;
+using Microsoft.Kinect;
+using Microsoft.Kinect.Toolkit;
 
 namespace MyTvUI
 {
@@ -33,54 +24,46 @@ namespace MyTvUI
     {
         #region variables
         //user variables
-        String userID;
-        int currentChannel = 0;
-        Boolean currentlyMuted = true;
+        private String userID;
+        private int currentChannel = 0;
+        private Boolean currentlyMuted = true;
 
         //socket variables
-        SocketClient socketClient;
-        SocketServer socketServer;
-        Boolean commsInitialised = false;
+        private SocketClient socketClient;
+        private SocketServer socketServer;
+        private Boolean commsInitialised = false;
 
         //window variables
-        bool closing = false;
+        private bool closing = false;
 
         //button variables
-        ImageBrush channelBg_deselected;
-        ImageBrush channelBg_selected;
-        ImageBrush offBg_deselected;
-        ImageBrush offBg_selected;
-        ImageBrush muteBg_deselected;
-        ImageBrush muteBg_selected;
-        ImageBrush unmuteBg_deselected;
-        ImageBrush unmuteBg_selected;
+        private ImageBrush channelBg_deselected;
+        private ImageBrush channelBg_selected;
+        private ImageBrush offBg_deselected;
+        private ImageBrush offBg_selected;
+        private ImageBrush muteBg_deselected;
+        private ImageBrush muteBg_selected;
+        private ImageBrush unmuteBg_deselected;
+        private ImageBrush unmuteBg_selected;
 
         //console variables
-        FileStream ostrm;
-        StreamWriter writer;
-        TextWriter oldOut = Console.Out;
-
-        //variables used to detect hand over hover button area
-        private static double _topBoundary;
-        private static double _bottomBoundary;
-        private static double _leftBoundary;
-        private static double _rightBoundary;
-        private static double _itemLeft;
-        private static double _itemTop;
-
-        //skeleton tracking variables
-        const int skeletonCount = 6;
-        Skeleton[] allSkeletons = new Skeleton[skeletonCount];
+        private FileStream ostrm;
+        private StreamWriter writer;
+        private TextWriter oldOut = Console.Out;
 
         //Channel constants
-        private static String channel0 = "http://www.macs.hw.ac.uk/~ceesmm1/societies/mytv/channels/splashScreen.html";
-        private static String channel1 = "http://www.macs.hw.ac.uk/~ceesmm1/societies/mytv/channels/channel1.html";
-        private static String channel2 = "http://www.macs.hw.ac.uk/~ceesmm1/societies/mytv/channels/channel2.html";
-        private static String channel3 = "http://www.macs.hw.ac.uk/~ceesmm1/societies/mytv/channels/channel3.html";
-        private static String channel4 = "http://www.macs.hw.ac.uk/~ceesmm1/societies/mytv/channels/channel4.html";
+        private static readonly String channel0 = "http://www.macs.hw.ac.uk/~ceesmm1/societies/mytv/channels/splashScreen.html";
+        private static readonly String channel1 = "http://www.macs.hw.ac.uk/~ceesmm1/societies/mytv/channels/channel1.html";
+        private static readonly String channel2 = "http://www.macs.hw.ac.uk/~ceesmm1/societies/mytv/channels/channel2.html";
+        private static readonly String channel3 = "http://www.macs.hw.ac.uk/~ceesmm1/societies/mytv/channels/channel3.html";
+        private static readonly String channel4 = "http://www.macs.hw.ac.uk/~ceesmm1/societies/mytv/channels/channel4.html";
+
+        private static readonly String[] channels = { channel0, channel1, channel2, channel3, channel4 };
+
+        private KinectSensorChooser sensorChooser;
 
         //activity feed variables
-        //ArrayList activities;
+        //private ArrayList activities;
 
         #endregion variables
 
@@ -113,20 +96,12 @@ namespace MyTvUI
                 //}
                 Console.WriteLine("Initialising GUI");
                 InitializeComponent();
-                channel1HoverRegion.Click += new RoutedEventHandler(channel1HoverRegion_Click);
-                channel2HoverRegion.Click += new RoutedEventHandler(channel2HoverRegion_Click);
-                channel3HoverRegion.Click += new RoutedEventHandler(channel3HoverRegion_Click);
-                channel4HoverRegion.Click += new RoutedEventHandler(channel4HoverRegion_Click);
-                offHoverRegion.Click += new RoutedEventHandler(offHoverRegion_Click);
-                volumeUpHoverRegion.Click += new RoutedEventHandler(volumeUpHoverRegion_Click);
-                volumeDownHoverRegion.Click += new RoutedEventHandler(volumeDownHoverRegion_Click);
-                exitHoverRegion.Click += new RoutedEventHandler(exitHoverRegion_Click);
                 tvBrowser.Navigated += new NavigatedEventHandler(tvBrowser_Navigated);
 
                 //load button images
                 channelBg_deselected = new ImageBrush(getImageSourceFromResource("MyTvUI", "Images/channel_background.png"));
                 channelBg_selected = new ImageBrush(getImageSourceFromResource("MyTvUI", "Images/channel_background_selected.png"));
-                offBg_deselected = new ImageBrush(getImageSourceFromResource("MyTvUI", "Images/off_button.png")); 
+                offBg_deselected = new ImageBrush(getImageSourceFromResource("MyTvUI", "Images/off_button.png"));
                 offBg_selected = new ImageBrush(getImageSourceFromResource("MyTvUI", "Images/off_button_selected.png"));
                 muteBg_deselected = new ImageBrush(getImageSourceFromResource("MyTvUI", "Images/volume_down.png"));
                 muteBg_selected = new ImageBrush(getImageSourceFromResource("MyTvUI", "Images/volume_down_selected.png"));
@@ -135,13 +110,13 @@ namespace MyTvUI
 
                 //initialise GUI settings
                 //channel = 0
-                offButton.Fill = offBg_selected;
+                //offButton.Fill = offBg_selected;
                 //mute = true
-                volumeDown.Fill = muteBg_selected;
+                //volumeDown.Fill = muteBg_selected;
 
                 //initialise socket server to listen for service client connections
                 Console.WriteLine("Initialising SocketServer and SocketClient");
-                if(initialiseSocketServer() && initialiseSocketClient())
+                if (initialiseSocketServer() && initialiseSocketClient())
                 {
                     commsInitialised = true;
                     //get preferences
@@ -151,14 +126,14 @@ namespace MyTvUI
                     //if ARTHUR -> getUserIntent
                     //if(this.userID.Equals("emma.societies.local.macs.hw.ac.uk"))
                     //{
-                        Console.WriteLine("Getting preferences for user: "+userID);
-                        initialisePreferences();
+                    Console.WriteLine("Getting preferences for user: " + userID);
+                    initialisePreferences();
                     //}else if(this.userID.Equals("arthur.societies.local.macs.hw.ac.uk"))
                     //{
-                      //  Console.WriteLine("Getting intent for user: "+userID);
-                      //  initialiseIntent();
+                    //  Console.WriteLine("Getting intent for user: "+userID);
+                    //  initialiseIntent();
                     //}
-                    
+
                 }
 
                 //initialise activity feeds
@@ -170,13 +145,17 @@ namespace MyTvUI
             {
                 Console.WriteLine(e.ToString());
             }
+
+            this.sensorChooser = new KinectSensorChooser();
+            this.sensorChooser.KinectChanged += SensorChooserOnKinectChanged;
+            this.sensorChooserUi.KinectSensorChooser = this.sensorChooser;
+
         }
 
         //when window loaded
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            //add sensor change listener to the kinect sensor chooser
-            kinectSensorChooser1.KinectSensorChanged += new DependencyPropertyChangedEventHandler(kinectSensorChooser1_KinectSensorChanged);
+            this.sensorChooser.Start();
         }
 
         //close window
@@ -199,8 +178,15 @@ namespace MyTvUI
 
             Console.WriteLine("Stopping kinect");
             closing = true;
-            StopKinect(kinectSensorChooser1.Kinect);
 
+            if (this.sensorChooser != null)
+            {
+                // //log.Debug("Stopping Kinect");
+                this.sensorChooser.Stop();
+
+                if (this.sensorChooser.Kinect != null)
+                    UnbindSensor(this.sensorChooser.Kinect);
+            }
             Console.WriteLine("Stopping sockets");
             //stop sockets
             if (commsInitialised)
@@ -220,18 +206,18 @@ namespace MyTvUI
         #endregion window
 
         #region serviceactions
-        private Boolean setChannel1()
+        private Boolean setChannel(int channel)
         {
-            Console.WriteLine("Setting channel to 1");
+            Console.WriteLine("Setting channel to " + channel);
             tvBrowser.Navigate(channel1);
-            channel1Button.Fill = channelBg_selected;
-            channel2Button.Fill = channelBg_deselected;
-            channel3Button.Fill = channelBg_deselected;
-            channel4Button.Fill = channelBg_deselected;
-            offButton.Fill = offBg_deselected;
+            //channel1Button.Fill = channelBg_selected;
+            //channel2Button.Fill = channelBg_deselected;
+            //channel3Button.Fill = channelBg_deselected;
+            //channel4Button.Fill = channelBg_deselected;
+            //offButton.Fill = offBg_deselected;
             if (commsInitialised)
             {
-                Console.WriteLine("Sending channel 1 action to UAM");
+                Console.WriteLine("Sending channel " + channel + " action to UAM");
                 String response = socketClient.sendMessage(
                 "START_MSG\n" +
                 "USER_ACTION\n" +
@@ -240,121 +226,9 @@ namespace MyTvUI
                 "END_MSG\n");
                 if (response.Contains("RECEIVED"))
                 {
-                    Console.WriteLine("UAM received channel 1 action");
+                    Console.WriteLine("UAM received channel " + channel + " action");
                     //set channel button backgrounds
-                    currentChannel = 1;
-                }
-            }
-            return true;
-        }       
-
-        private Boolean setChannel2()
-        {
-            Console.WriteLine("Setting channel to 2");
-            tvBrowser.Navigate(channel2);
-            channel1Button.Fill = channelBg_deselected;
-            channel2Button.Fill = channelBg_selected;
-            channel3Button.Fill = channelBg_deselected;
-            channel4Button.Fill = channelBg_deselected;
-            offButton.Fill = offBg_deselected;
-            if (commsInitialised)
-            {
-                Console.WriteLine("Sending channel 2 action to UAM");
-                String response = socketClient.sendMessage(
-                "START_MSG\n" +
-                "USER_ACTION\n" +
-                "channel\n" +
-                "2\n" +
-                "END_MSG\n");
-                if (response.Contains("RECEIVED"))
-                {
-                    Console.WriteLine("UAM received channel 2 action");
-                    //set channel button backgrounds
-                    currentChannel = 2;
-                }
-            }
-            return true;
-        }
-
-        private Boolean setChannel3()
-        {
-            Console.WriteLine("Setting channel to 3");
-            tvBrowser.Navigate(channel3);
-            channel1Button.Fill = channelBg_deselected;
-            channel2Button.Fill = channelBg_deselected;
-            channel3Button.Fill = channelBg_selected;
-            channel4Button.Fill = channelBg_deselected;
-            offButton.Fill = offBg_deselected;
-            if (commsInitialised)
-            {
-                Console.WriteLine("Sending channel 3 action to UAM");
-                String response = socketClient.sendMessage(
-                "START_MSG\n" +
-                "USER_ACTION\n" +
-                "channel\n" +
-                "3\n" +
-                "END_MSG\n");
-                if (response.Contains("RECEIVED"))
-                {
-                    Console.WriteLine("UAM received channel 3 action");
-                    //set channel button backgrounds
-                    currentChannel = 3;
-                }
-            }
-            return true;
-        }
-
-        private Boolean setChannel4()
-        {
-            Console.WriteLine("Setting channel to 4");
-            tvBrowser.Navigate(channel4);
-            channel1Button.Fill = channelBg_deselected;
-            channel2Button.Fill = channelBg_deselected;
-            channel3Button.Fill = channelBg_deselected;
-            channel4Button.Fill = channelBg_selected;
-            offButton.Fill = offBg_deselected;
-            if (commsInitialised)
-            {
-                Console.WriteLine("Sending channel 4 action to UAM");
-                String response = socketClient.sendMessage(
-               "START_MSG\n" +
-               "USER_ACTION\n" +
-               "channel\n" +
-               "4\n" +
-               "END_MSG\n");
-                if (response.Contains("RECEIVED"))
-                {
-                    Console.WriteLine("UAM received channel 4 action");
-                    //set channel button backgrounds
-                    currentChannel = 4;
-                }
-            }
-            return true;
-        }
-
-        private Boolean setChannel0()
-        {
-            Console.WriteLine("Setting channel to 0");
-            tvBrowser.Navigate(channel0);
-            channel1Button.Fill = channelBg_deselected;
-            channel2Button.Fill = channelBg_deselected;
-            channel3Button.Fill = channelBg_deselected;
-            channel4Button.Fill = channelBg_deselected;
-            offButton.Fill = offBg_selected;
-            if (commsInitialised)
-            {
-                Console.WriteLine("Sending channel 0 action to UAM");
-                String response = socketClient.sendMessage(
-                "START_MSG\n" +
-                "USER_ACTION\n" +
-                "channel\n" +
-                "0\n" +
-                "END_MSG\n");
-                if (response.Contains("RECEIVED"))
-                {
-                    Console.WriteLine("UAM received channel 0 action");
-                    //set channel button backgrounds
-                    currentChannel = 0;
+                    currentChannel = channel;
                 }
             }
             return true;
@@ -362,15 +236,7 @@ namespace MyTvUI
 
         private Boolean setDefaultChannel()
         {
-            Console.WriteLine("Setting channel to default - 0");
-            tvBrowser.Navigate(channel0);
-            channel1Button.Fill = channelBg_deselected;
-            channel2Button.Fill = channelBg_deselected;
-            channel3Button.Fill = channelBg_deselected;
-            channel4Button.Fill = channelBg_deselected;
-            offButton.Fill = offBg_selected;
-            currentChannel = 0;
-            return true;
+            return setChannel(0);
         }
 
         private Boolean setDefaultVolume()
@@ -454,31 +320,31 @@ namespace MyTvUI
                     "END_MSG\n";
 
             String channelPref = socketClient.sendMessage(prefRequest).Trim();
-            Console.WriteLine("Got channel preference: [" + channelPref +"]");
+            Console.WriteLine("Got channel preference: [" + channelPref + "]");
             if (channelPref.Equals("1"))
             {
                 Console.WriteLine("Personalising to channel 1");
-                setChannel1();
+                setChannel(1);
             }
             else if (channelPref.Equals("2"))
             {
                 Console.WriteLine("Personalising to channel 2");
-                setChannel2();
+                setChannel(2);
             }
             else if (channelPref.Equals("3"))
             {
                 Console.WriteLine("Personalising to channel 3");
-                setChannel3();
+                setChannel(3);
             }
             else if (channelPref.Equals("4"))
             {
                 Console.WriteLine("Personalising to channel 4");
-                setChannel4();
+                setChannel(4);
             }
             else if (channelPref.Equals("0"))
             {
                 Console.WriteLine("Personalising to channel 0");
-                setChannel0();
+                setChannel(0);
             }
             else  //default channel is 0
             {
@@ -493,7 +359,7 @@ namespace MyTvUI
                     "END_MSG\n";
 
             String mutedPref = socketClient.sendMessage(muteRequest).Trim();
-            Console.WriteLine("Got mute preference: [" + mutedPref+"]");
+            Console.WriteLine("Got mute preference: [" + mutedPref + "]");
             if (mutedPref.Equals("false"))
             {
                 //unmute tv
@@ -521,26 +387,26 @@ namespace MyTvUI
                     "END_MSG\n";
 
             String channelIntent = socketClient.sendMessage(intentRequest);
-            Console.WriteLine("Got channel intent :"+channelIntent);
+            Console.WriteLine("Got channel intent :" + channelIntent);
             if (channelIntent.Equals("1"))
             {
-                setChannel1();
+                setChannel(1);
             }
             else if (channelIntent.Equals("2"))
             {
-                setChannel2();
+                setChannel(2);
             }
             else if (channelIntent.Equals("3"))
             {
-                setChannel3();
+                setChannel(3);
             }
             else if (channelIntent.Equals("4"))
             {
-                setChannel4();
+                setChannel(4);
             }
             else  //default channel is 0
             {
-                setChannel0();
+                setChannel(0);
             }
 
             //set muted
@@ -645,287 +511,194 @@ namespace MyTvUI
                 userID = socketClient.getUserID();
                 Console.WriteLine("Received user identity: " + userID);
 
-                    //send handshake message with GUI IP address
-                    String myIP = this.getLocalIPAddress();
-                    if (myIP != null)
+                //send handshake message with GUI IP address
+                String myIP = this.getLocalIPAddress();
+                if (myIP != null)
+                {
+                    Console.WriteLine("Starting handshake");
+                    Console.WriteLine("Sending service client my local IP address: " + myIP);
+                    if (socketClient.connect())
                     {
-                        Console.WriteLine("Starting handshake");
-                        Console.WriteLine("Sending service client my local IP address: " + myIP);
-                        if(socketClient.connect())
+                        String response = socketClient.sendMessage(
+                        "START_MSG\n" +
+                        "GUI_STARTED\n" +
+                        myIP + "\n" +
+                        "END_MSG\n");
+                        if (response.Contains("RECEIVED"))
                         {
-                            String response = socketClient.sendMessage(
-                            "START_MSG\n" +
-                            "GUI_STARTED\n" +
-                            myIP+"\n" +
-                            "END_MSG\n");
-                            if(response.Contains("RECEIVED"))
-                            {
-                                Console.WriteLine("Handshake complete");
-                                return true;
-                            }
-                            else
-                            {
-                                Console.WriteLine("Handshake failed");
-                            }
+                            Console.WriteLine("Handshake complete");
+                            return true;
                         }
-                        else{
-                            Console.WriteLine("Could not connect to service client");
+                        else
+                        {
+                            Console.WriteLine("Handshake failed");
                         }
                     }
                     else
                     {
-                        Console.WriteLine("Error - could not get IP address of local machine");
-                    } 
+                        Console.WriteLine("Could not connect to service client");
+                    }
                 }
+                else
+                {
+                    Console.WriteLine("Error - could not get IP address of local machine");
+                }
+            }
             else
             {
-               Console.WriteLine("Error - could not get session parameters - userID, endpoint IP and port");
+                Console.WriteLine("Error - could not get session parameters - userID, endpoint IP and port");
             }
             return false;
         }
         #endregion sockets
-        
-        #region kinect
-        //listener for kinect sensor change events
-        void kinectSensorChooser1_KinectSensorChanged(object sender, DependencyPropertyChangedEventArgs e)
-        {
-            KinectSensor oldSensor = (KinectSensor)e.OldValue;
-            StopKinect(oldSensor);
 
-            KinectSensor newSensor = (KinectSensor)e.NewValue;
-            newSensor.ColorStream.Enable(ColorImageFormat.RgbResolution640x480Fps30);
-            newSensor.DepthStream.Enable(DepthImageFormat.Resolution640x480Fps30);
-            newSensor.SkeletonStream.Enable();
-            newSensor.AllFramesReady += new EventHandler<AllFramesReadyEventArgs>(_sensor_AllFramesReady);
+        #region " Kinect Events "
+
+        /// <summary>
+        /// Called when the KinectSensorChooser gets a new sensor
+        /// </summary>
+        /// <param name="sender">sender of the event</param>
+        /// <param name="args">event arguments</param>
+        private void SensorChooserOnKinectChanged(object sender, KinectChangedEventArgs args)
+        {
+            //log.Debug("Kinect sensor changed");
+
+            if (args.OldSensor != null)
+            {
+                //log.Debug("Unbinding old sensor");
+
+                try
+                {
+                    KinectSensor oldSensor = args.OldSensor;
+
+                    UnbindSensor(oldSensor);
+
+                    //log.Debug("Completed unbinding old sensor");
+                }
+                catch (InvalidOperationException ex)
+                {
+                    // KinectSensor might enter an invalid state while enabling/disabling streams or stream features.
+                    // E.g.: sensor might be abruptly unplugged.
+                    //log.Warn("Error unbinding old sensor", ex);
+                }
+            }
+
+            if (args.NewSensor != null)
+            {
+                //log.Debug("Binding new sensor");
+
+                try
+                {
+                    KinectSensor newSensor = args.NewSensor;
+
+                    BindSensor(newSensor);
+
+                    //log.Debug("Completed binding new sensor");
+                }
+                catch (InvalidOperationException ex)
+                {
+                    // KinectSensor might enter an invalid state while enabling/disabling streams or stream features.
+                    // E.g.: sensor might be abruptly unplugged.
+                    //log.Warn("Error binding new sensor", ex);
+                }
+
+            }
+        }
+
+        private static void BindSensor(KinectSensor sensor)
+        {
+            if (sensor == null)
+                return;
+
+            //log.Debug("BindSensor()");
+            // Sensor
+            sensor.Start();
+
+            sensor.DepthStream.Enable(DepthImageFormat.Resolution640x480Fps30);
+
             try
             {
-                newSensor.Start();
+#if DEBUG
+                // near mode for debug
+                sensor.DepthStream.Range = DepthRange.Near;
+#endif
+
+                // NB the skeleton stream is used to track the silhouette of the player on all pages
+                sensor.SkeletonStream.EnableTrackingInNearRange = true;
+                //sensor.SkeletonStream.TrackingMode = SkeletonTrackingMode.Seated;
+                // Turn on the skeleton stream to receive skeleton frames
+                sensor.SkeletonStream.Enable();
             }
-            catch (System.IO.IOException)
+            catch (InvalidOperationException ex)
             {
-                kinectSensorChooser1.AppConflictOccurred();
+                // Non Kinect for Windows devices do not support Near mode, so reset back to default mode.
+                sensor.DepthStream.Range = DepthRange.Default;
+                sensor.SkeletonStream.EnableTrackingInNearRange = false;
+                //log.Warn("Error Setting depth range to near mode", ex);
             }
         }
 
-        //stop connect sensor
-        void StopKinect(KinectSensor sensor)
+        private static void UnbindSensor(KinectSensor sensor)
         {
-            if (sensor != null)
-            {
-                sensor.Stop();
-                sensor.AudioSource.Stop();
-            }
-        }
-
-        void _sensor_AllFramesReady(object sender, AllFramesReadyEventArgs e)
-        {
-            if (closing)
-            {
+            if (sensor == null)
                 return;
-            }
 
-            Skeleton first = GetFirstSkeleton(e);
+            //log.Debug("UnbindSensor()");
 
-            if (first == null)
-            {
-                return;
-            }
-
-            GetCameraPoint(first, e);
-
-            //ScalePosition(leftEllipse, first.Joints[JointType.HandLeft]);
-            ScalePosition(rightEllipse, first.Joints[JointType.HandRight]);
-
-            if (currentChannel != 1)
-            {
-                CheckHoverButton(channel1HoverRegion, rightEllipse);
-            }
-            if (currentChannel != 2)
-            {
-                CheckHoverButton(channel2HoverRegion, rightEllipse);
-            }
-            if (currentChannel != 3)
-            {
-                CheckHoverButton(channel3HoverRegion, rightEllipse);
-            }
-            if (currentChannel != 4)
-            {
-                CheckHoverButton(channel4HoverRegion, rightEllipse);
-            }
-            if (currentChannel != 0)
-            {
-                CheckHoverButton(offHoverRegion, rightEllipse);
-            }
-            if (currentlyMuted)
-            {
-                CheckHoverButton(volumeUpHoverRegion, rightEllipse);
-            }
-            if (!currentlyMuted)
-            {
-                CheckHoverButton(volumeDownHoverRegion, rightEllipse);
-            }
-            CheckHoverButton(exitHoverRegion, rightEllipse);
+            sensor.DepthStream.Range = DepthRange.Default;
+            sensor.SkeletonStream.EnableTrackingInNearRange = false;
+            sensor.DepthStream.Disable();
+            sensor.SkeletonStream.Disable();
+            sensor.AudioSource.Stop();
+            sensor.Stop();
         }
-        #endregion kinect
-        
-        #region skeleton
-        private Skeleton GetFirstSkeleton(AllFramesReadyEventArgs e)
+
+        #endregion
+
+        #region " Button click handlers "
+
+        private void channelButtonClick(object sender, RoutedEventArgs e)
         {
-            using (SkeletonFrame skeletonFrameData = e.OpenSkeletonFrame())
-            {
-                if (skeletonFrameData == null)
-                {
-                    return null;
-                }
-
-                skeletonFrameData.CopySkeletonDataTo(allSkeletons);
-
-                Skeleton first = (from s in allSkeletons
-                                  where s.TrackingState == SkeletonTrackingState.Tracked
-                                  select s).FirstOrDefault();
-
-                return first;
-            }
+            if (sender == channel1Button)
+                setChannel(1);
+            else if (sender == channel2Button)
+                setChannel(2);
+            else if (sender == channel3Button)
+                setChannel(3);
+            else if (sender == channel4Button)
+                setChannel(4);
         }
 
-        private void GetCameraPoint(Skeleton first, AllFramesReadyEventArgs e)
+        private void offButtonClick(object sender, RoutedEventArgs e)
         {
-            using (DepthImageFrame depth = e.OpenDepthImageFrame())
-            {
-                if (depth == null ||
-                    kinectSensorChooser1.Kinect == null)
-                {
-                    return;
-                }
 
-                //get right hand depth from skeleton
-                DepthImagePoint rightDepthPoint =
-                    depth.MapFromSkeletonPoint(first.Joints[JointType.HandRight].Position);
-
-                //get right hand colour from depth
-                ColorImagePoint rightColorPoint =
-                    depth.MapToColorImagePoint(rightDepthPoint.X, rightDepthPoint.Y,
-                    ColorImageFormat.RgbResolution640x480Fps30);
-
-                CameraPosition(rightEllipse, rightColorPoint);
-            }
         }
 
-        private void ScalePosition(FrameworkElement element, Joint joint)
+        private void exitButtonClick(object sender, RoutedEventArgs e)
         {
-            Joint scaledJoint = joint.ScaleTo(1340, 700, .3f, .3f);
-
-            Canvas.SetLeft(element, scaledJoint.Position.X);
-            Canvas.SetTop(element, scaledJoint.Position.Y);
+            Environment.Exit(0x00);
         }
 
-        private void CameraPosition(FrameworkElement element, ColorImagePoint point)
-        {
-            Canvas.SetLeft(element, point.X - element.Width / 2);
-            Canvas.SetTop(element, point.Y - element.Height / 2);
-        }
-        #endregion skeleton
-
-        #region hoverbutton
-        //check to see if right hand ellipse is in hover button region
-        private void CheckHoverButton(HoverButton hoverButtonRegion, Ellipse ellipse)
-        {
-            if (IsPointInRegion(hoverButtonRegion, ellipse))
-            {
-                hoverButtonRegion.Hovering();
-            }
-            else
-            {
-                hoverButtonRegion.Release();
-            }
-        }
-
-        private bool IsPointInRegion(FrameworkElement region, FrameworkElement point)
-        {
-            FindValues(region, point);
-
-            if (_itemTop < _topBoundary || _bottomBoundary < _itemTop)
-            {
-                //Midpoint of target is outside of top or bottom
-                return false;
-            }
-
-            if (_itemLeft < _leftBoundary || _rightBoundary < _itemLeft)
-            {
-                //Midpoint of target is outside of left or right
-                return false;
-            }
-
-            return true;
-        }
-
-        private static void FindValues(FrameworkElement region, FrameworkElement point)
-        {
-            var containerTopLeft = region.PointToScreen(new Point());
-            var itemTopLeft = point.PointToScreen(new Point());
-
-            _topBoundary = containerTopLeft.Y;
-            _bottomBoundary = _topBoundary + region.ActualHeight;
-            _leftBoundary = containerTopLeft.X;
-            _rightBoundary = _leftBoundary + region.ActualWidth;
-
-            //use midpoint of item (width or height divided by 2)
-            _itemLeft = itemTopLeft.X + (point.ActualWidth / 2);
-            _itemTop = itemTopLeft.Y + (point.ActualHeight / 2);
-        }
-
-        //listener for channel1 hover button click events
-        void channel1HoverRegion_Click(object sender, RoutedEventArgs e)
-        {
-            setChannel1();
-        }
-
-        //listener for channel2 hover button click events
-        void channel2HoverRegion_Click(object sender, RoutedEventArgs e)
-        {
-            setChannel2();
-        }
-
-        //listener for channel3 hover button click events
-        void channel3HoverRegion_Click(object sender, RoutedEventArgs e)
-        {
-            setChannel3();   
-        }
-
-        void channel4HoverRegion_Click(object sender, RoutedEventArgs e)
-        {
-            setChannel4();
-        }
-
-        void offHoverRegion_Click(object sender, RoutedEventArgs e)
-        {
-            setChannel0();
-        }
-
-        void volumeDownHoverRegion_Click(object sender, RoutedEventArgs e)
-        {
-            setMute();
-        }
-
-        void volumeUpHoverRegion_Click(object sender, RoutedEventArgs e)
+        private void volumeUpButtonClick(object sender, RoutedEventArgs e)
         {
             setUnMute();
         }
 
-        void exitHoverRegion_Click(object sender, RoutedEventArgs e)
+        private void volumeDownButtonClick(object sender, RoutedEventArgs e)
         {
-            mytvWindow.Close();
+            setMute();
         }
 
-        static internal ImageSource getImageSourceFromResource(string psAssemblyName, string psResourceName)
+        #endregion
+
+        #region additional
+
+        internal static ImageSource getImageSourceFromResource(string psAssemblyName, string psResourceName)
         {
             Uri oUri = new Uri("pack://application:,,,/" + psAssemblyName + ";component/" + psResourceName, UriKind.RelativeOrAbsolute);
             return BitmapFrame.Create(oUri);
         }
-
-        #endregion hoverbutton
         
-        #region additional
         private void tvBrowser_WindowLoaded(object sender, RoutedEventArgs e)
         {
             //tvBrowser.Navigate("http://www.macs.hw.ac.uk/~ceesmm1/societies/mytv/channels/splashScreen.html");
@@ -984,7 +757,11 @@ namespace MyTvUI
         {
             Console.WriteLine("Window closed called");
         }
-    }
 
         #endregion additional
+
+
+
+    }
+
 }
