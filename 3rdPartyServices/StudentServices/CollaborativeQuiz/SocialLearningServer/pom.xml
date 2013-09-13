@@ -28,14 +28,14 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>uk.ac.hw.services.collabquiz</groupId>
+	<groupId>ac.hw.services.collabquiz</groupId>
 	<artifactId>CollabQuizServer</artifactId>
 	<packaging>war</packaging>
 	<version>1.2</version>
 	<name>Collaborative Quiz Server (University CSS)</name>
 
 	<properties>
-		<deploy.dir>E:\virgo-tomcat-server-3.0.3.RELEASE\repository\usr\</deploy.dir>
+		<deploy.dir>${env.VIRGO_HOME}\repository\usr\</deploy.dir>
 	</properties>
 
 	<developers>
@@ -121,13 +121,12 @@
 			<groupId>org.societies.api.external</groupId>
 			<artifactId>societies-api</artifactId>
 			<version>1.2</version>
-			<scope>compile</scope>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.societies.api.sociallearning</groupId>
 			<artifactId>societies-api-sociallearning</artifactId>
 			<version>1.2</version>
-			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.google.code.gson</groupId>
