@@ -101,6 +101,7 @@ public class Listener {
 			}
 			Listener.lastUpdateLoc.get(this.location).add(this);
 			Listener.lastUpdateUsr.put(this.uid, this);
+			CtxBrokerBridge.getBridge(uid).reportLocation(loc);
 		}
 
 		public void moveTo(String loc) {

@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
-import org.temp.CISIntegeration.ContextBinder;
+import org.temp.CISIntegeration.*;
 
 public class DBConnections {
 	public String dblink = "jdbc:mysql://localhost:3306/asocom";
@@ -26,6 +26,8 @@ public class DBConnections {
 	public static String CHECKIN_SQL = "insert into ucheckin(uid,SSID,Time) values(?,?,?)";
 	public static String GET_LAST_CHECKIN_TIME = "select max(Time) from ucheckin where uid=? and SSID=?";
 	
+	public ContextBinderInf ctxbinder=ContextBinder.instance;
+	
 	static {
 		try {
 			Class.forName("javax.sql.DataSource");
@@ -37,9 +39,7 @@ public class DBConnections {
 
 	private Connection getConnection() {
 		try {
-		//	Class.forName("com.mysql.jdbc.Driver");
-		//	Connection temp = DriverManager.getConnection(dblink, dbusr, dbpwd);
-			Connection temp =ContextBinder.getDataSource().getConnection();
+			Connection temp =ctxbinder.getDataSource().getConnection();
 			return temp;
 		} catch (Exception e) {
 			// TODO Auto-generated catch block

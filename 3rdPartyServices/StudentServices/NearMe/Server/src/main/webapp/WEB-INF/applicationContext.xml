@@ -54,7 +54,7 @@
 		/> -->
 	<bean id="ctxBinder" class="org.temp.CISIntegeration.ContextBinder">
 
-		<property name="cisMgm" ref="CisManagementBundle" />
+		<!--  <property name="cisMgm" ref="CisManagementBundle" />
 
 		<property name="ctxBrk" ref="ctxBroker" />
 
@@ -62,7 +62,7 @@
 
 		<property name="services" ref="servicesRef" />
 		
-		<property name="dataSource" ref="dataSource" />
+		<property name="dataSource" ref="dataSource" />-->
 	</bean>
 	<osgi:service ref="ctxBinder">
 	    <osgi:interfaces>

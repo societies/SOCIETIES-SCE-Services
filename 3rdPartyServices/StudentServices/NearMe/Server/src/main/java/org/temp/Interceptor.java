@@ -4,6 +4,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.temp.CISIntegeration.CISBridge;
 import org.temp.CISIntegeration.CISData;
+import org.societies.api.activity.IActivity;
+
 
 public class Interceptor {
 
@@ -38,13 +40,25 @@ public class Interceptor {
 						.equals(jobj.getString("senderId"))) {
 					String content = jobj.getString("chatData");
 
-				if (content.startsWith("migrate ")) {
+					if (content.startsWith("migrate ")) {
 						String[] givenName = content.split(" ");
-						if (givenName.length > 1&&!givenName[1].equals("")) {
+						if (givenName.length > 1 && !givenName[1].equals("")) {
+							System.out.println("migration:\t" + content);
 							CISData inst = CISData.getCISData(comm
 									.getString("receiver"));
-							inst.givenName=givenName[1];
+							inst.givenName = givenName[1];
 							CISBridge.migrateCIS(inst);
+						}
+					}else {
+						CISData inst = CISData.getCISData(comm
+								.getString("receiver"));
+						if(inst.cis!=null){
+							IActivity ret = new NearMeActivity();
+							ret.setActor(comm.getString("senderId").replace('@','.'));
+							ret.setObject(content);
+							ret.setTarget(inst.cis.getCisId());
+							ret.setPublished("0");
+						    inst.cis.getActivityFeed().addActivity(ret); 
 						}
 					}
 				}

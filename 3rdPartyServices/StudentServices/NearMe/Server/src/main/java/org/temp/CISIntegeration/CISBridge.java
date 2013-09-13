@@ -8,34 +8,43 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.temp.CISIntegeration.*;
+
 
 public class CISBridge {
 	
 	public static boolean migrateCIS(CISData data){
-		return migrateCIS(data.owner,data.participants,data.givenName,data.cisDescription);
+		if(data.cis!=null){
+			return true;
+		}
+		ICisOwned ciso= migrateCIS(data.owner,data.participants,data.givenName,data.cisDescription);
+		data.cis=ciso;
+		if(ciso==null)
+			return false;
+		return true;
 	}
 	
-	private static boolean migrateCIS(String owner, Set<String> uids, String cisname,String cisdep) {
+	private static ICisOwned migrateCIS(String owner, Set<String> uids, String cisname,String cisdep) {
 		try {
-			Future<ICisOwned> cisf=ContextBinder.getCisMgm().createCis(cisname, "student-service", 
+			Future<ICisOwned> cisf=ContextBinder.instance.getCisMgm().createCis(cisname, "student-service", 
 					new Hashtable<String, org.societies.api.cis.attributes.MembershipCriteria>(),cisdep);
 			ICisOwned cis=cisf.get();
 			if(cis==null)
-				return false;
-			for(String uid:uids)
-				cis.addMember(uid, "participant");
-			cis.addMember(owner, "owner");
-			return true;
+				return null;
+			for(String uid:uids){
+				if(!uid.equals(owner))
+					cis.addMember(uid.replace('@','.'), "participant");
+			}
+			cis.addMember(owner.replace('@','.'), "owner");
+			return cis;
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}  catch (ExecutionException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}catch (CommunicationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
-		return false;
+		return null;
 	}
 }

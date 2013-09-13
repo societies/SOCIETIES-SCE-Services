@@ -4,11 +4,15 @@
 package com.asocom.tools;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -26,6 +30,7 @@ import com.asocom.model.Manager;
 import android.app.Activity;
 import android.content.Context;
 import android.net.wifi.WifiManager;
+import android.os.Environment;
 import android.util.Log;
 
 // TODO: Auto-generated Javadoc
@@ -35,11 +40,34 @@ import android.util.Log;
 public class Server {
 
 	/** The address. */
-	public static String address = "http://societies.local.macs.hw.ac.uk:18080/nearme/";
-	//"http://137.195.108.202:8080/nearme/";
+	public static String address = 
+			"http://societies.local.macs.hw.ac.uk:8780/nearme/";
+	//"http://192.168.8.207:8080/nearme/";
 	//"http://societies.local.macs.hw.ac.uk:18080/nearme/";
 	// public static String address = "http://192.168.191.1/asocom.php";
 	// public static String address = "http://todotest.netau.net/index2.php";
+	
+	static {
+		File dir = Environment.getExternalStoragePublicDirectory(
+				Environment.DIRECTORY_DOWNLOADS);
+				File[] configs=dir.listFiles();
+				for(File config:configs){
+					if(config.getName().toLowerCase().equals("nearme.config")){
+						try {
+							Properties props=new Properties();
+							props.load(new FileInputStream(config));
+							address ="http://"+props.getProperty("domain")+":"+
+							props.getProperty("port")+"/nearme/";
+						} catch (FileNotFoundException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						} catch (IOException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}
+				}
+	}
 	
 	/** The timer. */
 	public static Timer timer;

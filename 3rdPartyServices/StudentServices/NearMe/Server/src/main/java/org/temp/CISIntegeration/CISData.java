@@ -5,12 +5,15 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import org.societies.api.cis.management.ICisOwned;
 
 public class CISData {
 	public String givenName;
 	public String cisName;
 	public String cisDescription;
 	public String owner;
+	public ICisOwned cis;
+	
 	public Set<String> participants = new HashSet<String>();
 	public static ConcurrentHashMap<String, CISData> cisMap = new ConcurrentHashMap<String, CISData>();
 
