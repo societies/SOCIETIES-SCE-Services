@@ -40,20 +40,11 @@ import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-<<<<<<< HEAD
-import org.societies.api.comm.xmpp.datatypes.Stanza;
-import org.societies.api.comm.xmpp.exceptions.CommunicationException;
-=======
 import org.societies.api.cis.management.ICisManager;
->>>>>>> refs/remotes/origin/stuart_Development
 import org.societies.api.comm.xmpp.interfaces.ICommManager;
 import org.societies.api.context.broker.ICtxBroker;
 import org.societies.api.context.model.CtxAttribute;
 import org.societies.api.context.model.CtxAttributeTypes;
-<<<<<<< HEAD
-import org.societies.api.context.model.CtxAttributeValueType;
-=======
->>>>>>> refs/remotes/origin/stuart_Development
 import org.societies.api.context.model.CtxEntity;
 import org.societies.api.context.model.CtxEntityTypes;
 import org.societies.api.context.model.CtxModelType;
@@ -73,29 +64,15 @@ import org.societies.api.osgi.event.EventListener;
 import org.societies.api.osgi.event.EventTypes;
 import org.societies.api.osgi.event.IEventMgr;
 import org.societies.api.osgi.event.InternalEvent;
-import org.societies.api.personalisation.model.IAction;
-import org.societies.api.personalisation.model.IActionConsumer;
-import org.societies.api.personalisation.model.PersonalisablePreferenceIdentifier;
 import org.societies.api.schema.servicelifecycle.model.ServiceResourceIdentifier;
 import org.societies.api.services.IServices;
 import org.societies.api.services.ServiceMgmtEvent;
 import org.societies.api.services.ServiceMgmtEventType;
 
-<<<<<<< HEAD
-=======
 import ac.hw.services.socialLearning.api.ISocialLearningService;
->>>>>>> refs/remotes/origin/stuart_Development
 import ac.hw.services.socialLearning.app.comms.CommsServerListener;
 import ac.hw.services.socialLearning.app.comms.ISocialLearningServer;
 
-<<<<<<< HEAD
-import org.societies.api.sociallearning.schema.serverbean.SocialLearningMethodType;
-import org.societies.api.sociallearning.schema.serverbean.SocialLearningServerBean;
-
-import ac.hw.services.socialLearning.api.ISocialLearningService;
-
-=======
->>>>>>> refs/remotes/origin/stuart_Development
 /**
  * Describe your class here...
  *
@@ -125,17 +102,6 @@ public class SocialLearningService extends EventListener implements ISocialLearn
 	private ServiceResourceIdentifier serverServiceId;
 	private CtxAttribute gameUserCtxAttribute;
 	private IServices serviceMgmt;
-<<<<<<< HEAD
-	
-	private Thread serverThread;
-	private CommsServerListener commsServerListener;
-	
-	private int listenerPort;
-	private String listenerAddress;
-	
-	
-	
-=======
 
 	private Thread serverThread;
 	private CommsServerListener commsServerListener;
@@ -148,34 +114,10 @@ public class SocialLearningService extends EventListener implements ISocialLearn
 	private List<String> interests;
 
 
->>>>>>> refs/remotes/origin/stuart_Development
 	public void Init(){
 		//FIRST REGISTER FOR SERVICE EVENTS
 		this.registerForServiceEvents();
 		//THEN REGISTER WITH IDISPLAYPORTAL
-<<<<<<< HEAD
-		this.registerForDisplayEvents();
-		
-		
-		//SET UP SOCKET TO LISTEN FROM GUI (C#)
-		this.commsServerListener = new CommsServerListener(this);
-		//GET PORT
-		this.listenerPort=this.commsServerListener.getSocket();
-		//START LISTENING
-		this.serverThread = new Thread(commsServerListener);
-		this.serverThread.start();
-		
-		if(this.commMgr==null)
-		{
-			logging.debug("COMM IS NULL!");
-		}
-		
-		//REGISTER AS A DISPLAYABLE SERVICE
-		//this.displayDriverService.registerDisplayableService(this, "CollabQuiz", listenerPort, URL, true);
-
-		/*
-=======
->>>>>>> refs/remotes/origin/stuart_Development
 		this.registerForDisplayEvents();
 
 		//SET UP SOCKET TO LISTEN FROM GUI (C#)
@@ -305,133 +247,11 @@ public void handleInternalEvent(InternalEvent event) {
 
 		}
 
-<<<<<<< HEAD
-		UIManager.put("ClassLoader", ClassLoader.getSystemClassLoader());
-		//myGui = new ExampleServiceGUI(this); */
-=======
 	}else if(event.geteventName().equalsIgnoreCase("displayUpdate")){
 		logging.debug("Received DisplayPortal event");
 	}else{
 		logging.debug("Received unknown event with name: "+event.geteventName());
->>>>>>> refs/remotes/origin/stuart_Development
 	}
-<<<<<<< HEAD
-	
-
-	
-	/*
-	 * Register for events from SLM so I can get my service parameters and finish initialising
-	 */
-	private void registerForServiceEvents(){
-		String eventFilter = "(&" + 
-				"(" + CSSEventConstants.EVENT_NAME + "="+ServiceMgmtEventType.SERVICE_STARTED+")" +
-				"(" + CSSEventConstants.EVENT_SOURCE + "=org/societies/servicelifecycle)" +
-				")";
-		this.evMgr.subscribeInternalEvent(this, new String[]{EventTypes.SERVICE_LIFECYCLE_EVENT}, eventFilter);
-		this.logging.debug("Subscribed to "+EventTypes.SERVICE_LIFECYCLE_EVENT+" events");
-	}
-
-	private void unregisterForServiceEvents()
-	{
-		String eventFilter = "(&" + 
-				"(" + CSSEventConstants.EVENT_NAME + "="+ServiceMgmtEventType.NEW_SERVICE+")" +
-				"(" + CSSEventConstants.EVENT_SOURCE + "=org/societies/servicelifecycle)" +
-				")";
-
-		this.evMgr.unSubscribeInternalEvent(this, new String[]{EventTypes.SERVICE_LIFECYCLE_EVENT}, eventFilter);
-		//this.evMgr.subscribeInternalEvent(this, new String[]{EventTypes.SERVICE_LIFECYCLE_EVENT}, eventFilter);
-		this.logging.debug("Unsubscribed from "+EventTypes.SERVICE_LIFECYCLE_EVENT+" events");
-	}
-	
-	/*
-	 * Register for display events
-	 */
-	private void registerForDisplayEvents() {
-		String eventFilter = "(&" + 
-				"(" + CSSEventConstants.EVENT_NAME + "=displayUpdate)" +
-				"(" + CSSEventConstants.EVENT_SOURCE + "=org/societies/css/device)" +
-				")";
-		this.evMgr.subscribeInternalEvent(this, new String[]{EventTypes.DISPLAY_EVENT}, eventFilter);
-		this.logging.debug("Subscribed to "+EventTypes.DISPLAY_EVENT+" events");
-
-	}
-	
-	@Override
-	public void handleInternalEvent(InternalEvent event) {
-		logging.debug("Received internal event: "+event.geteventName());
-
-	//	if(event.geteventName().equalsIgnoreCase("NEW_SERVICE")){
-			//logging.debug("Received SLM event");
-			ServiceMgmtEvent slmEvent = (ServiceMgmtEvent) event.geteventInfo();
-			logging.debug("EventBundle: " + slmEvent.getBundleSymbolName());
-			if (slmEvent.getBundleSymbolName().equalsIgnoreCase("CollabQuizServer")){
-				this.logging.debug("Received SLM event for my bundle");
-				if (slmEvent.getEventType().equals(ServiceMgmtEventType.SERVICE_STARTED)){
-					
-					//GET ID OF SERVICE FOR XMPP COMMUNICATION
-					this.serverIdentity = serviceMgmt.getServer(slmEvent.getServiceId());
-					logging.debug("Got my servers Identity: " + serverIdentity);
-	
-					//GET ADDRESS & PORT OF REMOTE SERVER
-					String addressPort[] = this.server.getServerPortAddress(serverIdentity);
-					logging.debug("Remote Address: " + addressPort[0]+":"+addressPort[1]);
-					
-					//SEND MESSAGE TO GET REMOTE SOCKET LISTENER INFO
-					/*SocialLearningServerBean serverBean = new SocialLearningServerBean();
-					logging.debug("BEAN INIT!");
-					serverBean.setMethod(SocialLearningMethodType.SERVER_SOCKET_INFO_REQUEST);
-					logging.debug("BEAN METHOD CHANGED");
-					Stanza stanza = new Stanza(serverIdentity);
-					try {
-						logging.debug("ABOUT TO SEND MESSAGE!");
-						this.commMgr.sendMessage(stanza, serverBean);
-						logging.debug("SENT MESSAGE TO SERVER");
-					} catch (CommunicationException e) {
-						StackTraceElement[] x = e.getStackTrace();
-						logging.debug(e.toString());
-						for(int i=0;i < x.length; i++)
-						{
-						logging.debug(x[i].toString());	
-						}
-						// TODO Auto-generated catch block
-						//logging.debug(e.getStackTrace());
-					}*/
-					
-					
-			
-				}
-			
-		}else if(event.geteventName().equalsIgnoreCase("displayUpdate")){
-			logging.debug("Received DisplayPortal event");
-		}else{
-			logging.debug("Received unknown event with name: "+event.geteventName());
-		}
-		
-			if (event.geteventInfo() instanceof DisplayEvent){
-				DisplayEvent eventObj  = (DisplayEvent) event.geteventInfo();
-				if (eventObj.getDisplayStatus().equals(DisplayEventConstants.DEVICE_AVAILABLE)){
-					this.deviceAvailable = true;
-				//	this.getDataFromContext();
-				}else{
-					this.deviceAvailable  = false;
-				}
-			}
-			// TODO Auto-generated method stub
-			//this.displayDriverService.sendNotification(myServiceName, "Hello, I am an example service and I wanted to notify you that I can send you notifications!");
-		}
-	
-	public void getUserInterests() {
-		List<CtxIdentifier> idsEntities = this.ctxBroker.lookup(requestor, cssOwnerId, CtxModelType.ENTITY, CtxEntityTypes.DEVICE).get();
-		List<CtxIdentifier> entities = this.ctxBroker.lookup(userIdentity, CtxModelType.ENTITY, CtxAttributeTypes.INTERESTS).get();
-
-	}
-			
-	
-	
-	
-	/*private void getDataFromContext() {
-		
-=======
 
 	if (event.geteventInfo() instanceof DisplayEvent){
 		DisplayEvent eventObj  = (DisplayEvent) event.geteventInfo();
@@ -472,7 +292,6 @@ private void getContext() throws InterruptedException, ExecutionException, CtxEx
 
 /*private void getDataFromContext() {
 
->>>>>>> refs/remotes/origin/stuart_Development
 		if (this.requestor==null){
 			//TODO: replace this with method to service registry when it becomes available
 			this.requestServerIdentity();
@@ -514,55 +333,19 @@ private void getContext() throws InterruptedException, ExecutionException, CtxEx
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-<<<<<<< HEAD
-		
-	}*/
-=======
->>>>>>> refs/remotes/origin/stuart_Development
 
-<<<<<<< HEAD
-=======
 	}*/
 @Override
 public String getServerIPPort()
 {
 	return this.serverIPPort;
 }
->>>>>>> refs/remotes/origin/stuart_Development
 
-<<<<<<< HEAD
-	
-
-	
-	@Override
-	public void handleExternalEvent(CSSEvent arg0) {
-		// TODO Auto-generated method stub
-		
-	}
-
-
-
-	
-	/**
-	 * @return the displayDriverService
-	 */
-	public IDisplayDriver getDisplayDriverService() {
-		return displayDriverService;
-	}
-
-	/**
-	 * @param displayDriverService the displayDriverService to set
-	 */
-	public void setDisplayDriverService(IDisplayDriver displayDriverService) {
-		this.displayDriverService = displayDriverService;
-	}
-=======
 @Override
 public List<String> getUserInterests()
 {
 	return this.interests;
 }
->>>>>>> refs/remotes/origin/stuart_Development
 
 
 
@@ -614,15 +397,6 @@ public ICommManager getCommMgr() {
 }
 
 
-<<<<<<< HEAD
-	/**
-	 * @param server the server to set
-	 */
-	public void setServer(ISocialLearningServer server) {
-		this.server = server;
-	}
-	
-=======
 /**
  * @param commMgr the commMgr to set
  */
@@ -631,7 +405,6 @@ public void setCommMgr(ICommManager commMgr) {
 	this.idMgr = commMgr.getIdManager();
 	this.userIdentity = this.idMgr.getThisNetworkNode();
 }
->>>>>>> refs/remotes/origin/stuart_Development
 
 @Override
 public void serviceStarted(String ipAddr) {
@@ -689,8 +462,6 @@ public void setServiceMgmt(IServices serviceMgmt) {
 }
 
 
-
-	
 
 
 
