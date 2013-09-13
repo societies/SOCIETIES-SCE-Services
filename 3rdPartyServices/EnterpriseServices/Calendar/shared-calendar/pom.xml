@@ -1,0 +1,659 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>org.societies.thirdparty.sharedcalendar</groupId>
+	<artifactId>sharedCalendar</artifactId>
+	<packaging>war</packaging>
+	<name>SharedCalendar</name>
+	<version>0.1</version>
+	<url>http://www.springframework.org/osgi</url>
+
+
+	<parent>
+		<groupId>org.societies</groupId>
+		<artifactId>spring-osgi-parent</artifactId>
+		<version>RELEASE</version>
+	</parent>
+	
+	<!--  <properties>
+		<slf4j-version>1.6.4</slf4j-version>
+		<spring.maven.artifact.version>2.5.6.SEC01</spring.maven.artifact.version>
+		<spring.osgi.version>1.2.1</spring.osgi.version>
+		<equinox.ver>3.2.2</equinox.ver>
+	</properties>-->
+	<!-- Repositories -->
+	<repositories>
+		<repository>
+			<id>google-api-services</id>
+			<url>http://mavenrepo.google-api-java-client.googlecode.com/hg</url>
+		</repository>
+
+		<repository>
+			<id>prime-repo</id>
+			<name>PrimeFaces Maven Repository</name>
+			<url>http://repository.primefaces.org</url>
+			<layout>default</layout>
+		</repository>
+	
+	</repositories>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.societies.api.external</groupId>
+			<artifactId>societies-api</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.societies.thirdparty.sharedcalendar</groupId>
+			<artifactId>calendar-api</artifactId>
+			<version>${project.version}</version>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.societies.thirdparty.sharedcalendar</groupId>
+			<artifactId>calendar-api-schema</artifactId>
+			<version>${project.version}</version>
+			<scope>compile</scope>
+		</dependency>		
+		<!-- Common external libraries -->
+        <dependency>
+                <groupId>org.societies</groupId>
+                <artifactId>common-ext-libs</artifactId>
+                <scope>provided</scope>
+        </dependency>
+        <!-- Common external database libraries -->
+        <dependency>
+                <groupId>org.societies</groupId>
+                <artifactId>hibernate_classes</artifactId>
+                <scope>provided</scope>
+        </dependency>
+		<!-- Google API -->
+		
+		<dependency>
+			<groupId>com.google.api-client</groupId>
+			<artifactId>google-api-client</artifactId>
+			<version>1.7.0-beta</version>
+			<scope>compile</scope>
+		</dependency>
+		
+		<dependency>
+			<groupId>com.google.http-client</groupId>
+			<artifactId>google-http-client</artifactId>
+			<version>1.7.0-beta</version>
+			<scope>compile</scope>
+		</dependency>
+		
+		<dependency>
+			<groupId>com.google.oauth-client</groupId>
+			<artifactId>google-oauth-client</artifactId>
+			<version>1.7.0-beta</version>
+			<scope>compile</scope>
+		</dependency>
+		
+		<dependency>
+			<groupId>com.google.apis</groupId>
+			<artifactId>google-api-services-calendar</artifactId>
+			<version>v3-rev3-1.4.0-beta</version>
+			<scope>compile</scope>
+		</dependency>
+		
+	<dependency>
+        <groupId>com.google.collections</groupId>
+        <artifactId>google-collections</artifactId>
+        <version>0.8</version>
+      </dependency>
+      
+		<dependency>
+			<groupId>org.codehaus.jackson</groupId>
+			<artifactId>jackson-core-asl</artifactId>
+			<version>1.9.4</version>
+			<scope>compile</scope>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>org.springframework.test</artifactId>
+			<version>3.0.5.RELEASE</version>
+			<scope>test</scope>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>org.springframework.spring-library</artifactId>
+			<type>libd</type>
+			<scope>provided</scope>
+		</dependency>
+		
+		<dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>org.springframework.beans</artifactId>
+            <scope>provided</scope>
+            <exclusions>
+              <exclusion>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>com.springsource.org.apache.commons.logging</artifactId>
+              </exclusion>
+            </exclusions>
+        </dependency>
+        
+		<dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>org.springframework.context</artifactId>
+            <scope>provided</scope>
+            <exclusions>
+              <exclusion>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>com.springsource.org.apache.commons.logging</artifactId>
+              </exclusion>
+            </exclusions>
+        </dependency>
+        
+		<dependency>
+			<groupId>org.simpleframework</groupId>
+			<artifactId>simple-xml</artifactId>
+			<version>2.6.4</version>
+			<scope>provided</scope>
+			<exclusions>
+				<!-- StAX is not available on Android -->
+				<exclusion>
+					<artifactId>stax</artifactId>
+					<groupId>stax</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>stax-api</artifactId>
+					<groupId>stax</groupId>
+				</exclusion>
+				<!-- Provided by Android -->
+				<exclusion>
+					<artifactId>xpp3</artifactId>
+					<groupId>xpp3</groupId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		
+		<!-- GSON is a bundle, no need to embed it -->
+		<dependency>
+			<groupId>com.google.code.gson</groupId>
+			<artifactId>gson</artifactId>
+			<version>2.2.1</version>
+			<scope>compile</scope>
+		</dependency>
+		
+	<dependency>  
+        <groupId>org.primefaces</groupId>  
+        <artifactId>primefaces</artifactId>  
+        <version>3.5</version>  
+    </dependency>  
+    		<!-- Java EE6 dependencies -->
+		<dependency>
+			<groupId>com.sun.faces</groupId>
+			<artifactId>jsf-api</artifactId>
+			<version>2.1.17</version>
+		</dependency>
+		<dependency>
+			<groupId>com.sun.faces</groupId>
+			<artifactId>jsf-impl</artifactId>
+			<version>2.1.17</version>
+		</dependency>
+
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>jstl</artifactId>
+			<version>1.2</version>
+		</dependency>
+
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>servlet-api</artifactId>
+			<version>2.5</version>
+		</dependency>
+
+		<dependency>
+			<groupId>javax.servlet.jsp</groupId>
+			<artifactId>jsp-api</artifactId>
+			<version>2.2</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.webflow</groupId>
+			<artifactId>spring-faces</artifactId>
+			<version>2.3.2.RELEASE</version>
+		</dependency>
+
+		<!-- Virgo/Tomcat needs this -->
+		<dependency>
+			<groupId>org.glassfish</groupId>
+			<artifactId>javax.faces</artifactId>
+			<version>2.1.17</version>
+		</dependency>
+		<dependency>
+			<groupId>org.glassfish.web</groupId>
+			<artifactId>el-impl</artifactId>
+			<version>2.2</version>
+		</dependency>
+</dependencies>
+
+	<build>
+		<finalName>${project.name}</finalName>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<extensions>true</extensions>
+				<executions>
+					<execution>
+						<id>bundle-manifest</id>
+						<phase>process-classes</phase>
+						<goals>
+							<goal>manifest</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<manifestLocation>${project.build.directory}/META-INF</manifestLocation>
+					<supportedProjectTypes>
+						<supportedProjectType>bundle</supportedProjectType>
+						<supportedProjectType>war</supportedProjectType>
+					</supportedProjectTypes>
+					<unpackBundle>false</unpackBundle>
+					<instructions>
+						<Bundle-SymbolicName>${project.groupId}.${project.artifactId}</Bundle-SymbolicName>
+						<Bundle-Name>${project.name}</Bundle-Name>
+						<Bundle-Version>${project.version}</Bundle-Version>
+						<Embed-Dependency>
+							google-api-services-calendar;groupId=com.google.apis;version=v3-rev3-1.4.0-beta,
+							google-api-client;groupId=com.google.api-client;version=1.7.0-beta,
+							google-http-client;groupId=com.google.http-client;version=1.7.0-beta,
+							google-oauth-client;groupId=com.google.oauth-client;version=1.7.0-beta,
+							google-collections;groupId=com.google.collections;version=0.8,
+							jackson-core-asl;groupId=org.codehaus.jackson;version=1.9.4,
+ 							calendar-api;groupId=org.societies.thidparty.sharedcalendar;scope=compile|runtime,
+							calendar-api-schema;groupId=org.societies.thidparty.sharedcalendar;scope=compile|runtime,
+						</Embed-Dependency>
+ 						<Export-Package>
+ 						<!--  org.societies.thidparty.sharedcalendar.api.schema,
+ 						
+ 						org.societies.thirdparty.enterprise.shardCalendar.web,-->
+ 						org.societies.thidparty.sharedcalendar.api.schema,
+ 						org.societies.thirdparty.sharedcalendar.api
+ 						</Export-Package>
+						<!-- See http://www.bradchen.com/node/10 for reasons of importing hibernate packages -->
+						<Import-Package>
+							org.hibernate.proxy;resolution:=optional,
+							org.springframework.orm.hibernate3.annotation;resolution:=optional,
+							org.springframework.orm.hibernate3;resolution:=optional,
+							org.slf4j;resolution:=optional,
+							javax.xml.datatype;version="0";resolution:=optional,
+							javax.servlet.jsp.jstl.core;version="[1.2.0,2.0.0)",
+							javax.servlet;version="[3.0.0, 4.0.0)",
+							javax.servlet.http;version="[3.0.0, 4.0.0)";resolution:=optional,
+							javax.servlet.resources;version="[2.4.0, 4.0.0)",
+							javax.sql;resolution:=optional,
+							<!-- spring DM -->
+							org.osgi.framework,
+							org.springframework.validation,
+							org.springframework.beans.factory.config,
+							org.springframework.osgi.web.context.support,
+							org.springframework.web.context.request,
+							org.springframework.web.context.support,
+							org.springframework.web.context,
+							org.springframework.stereotype,
+							org.springframework.web.bind.annotation,
+							org.springframework.web.servlet,
+							org.eclipse.virgo.web.dm;version="[3.0.0, 4.0.0)",
+							org.springframework.beans.factory.annotation,
+							org.springframework.context,
+							org.springframework.context.config,
+							org.springframework.web.util,
+							org.springframework.aop,
+							org.springframework.aop.framework,
+							org.aopalliance.aop,
+							<!-- servlet -->
+							org.springframework.scheduling.annotation;resolution:=optional,
+							org.springframework.web.servlet.config;version="[3.0.0, 4.0.0)",
+							org.springframework.web.servlet.view;version="[3.0.0, 4.0.0)",
+							org.springframework.web.servlet.handler;version="[3.0.0, 4.0.0)",
+							org.springframework.web.servlet.mvc;version="[3.0.0, 4.0.0)",
+							org.springframework.web.servlet.resource;version="[3.0.0,4.0.0)",
+							org.springframework.web.servlet.support;version="[3.0.0,4.0.0)",
+							org.springframework.web.servlet.tags;version="[3.0.0,4.0.0)",
+							org.springframework.web.servlet.tags.form;version="[3.0.0,4.0.0)",
+							org.springframework.web.servlet.theme;version="[3.0.0,4.0.0)",
+							<!-- JSF 2.0 -->
+							com.sun.faces;resolution:=optional,
+							com.sun.faces.config;resolution:=optional,
+							com.sun.faces.application;resolution:=optional,
+							com.sun.faces.context;resolution:=optional,
+							com.sun.faces.lifecycle;resolution:=optional,
+							com.sun.faces.application.view;resolution:=optional,
+							com.sun.faces.renderkit;resolution:=optional,
+							com.sun.faces.component.visit;resolution:=optional,
+							com.sun.faces.facelets.impl;resolution:=optional,
+							com.sun.faces.facelets.tag.jsf;resolution:=optional,
+							com.sun.faces.application.resource;resolution:=optional,
+							com.sun.faces.ext.render;resolution:=optional,
+							com.sun.faces.facelets.component;resolution:=optional,
+							com.sun.faces.renderkit.html_basic;resolution:=optional,
+							com.sun.faces.component;resolution:=optional,
+							com.sun.faces.facelets.tag.ui;resolution:=optional,
+							javax.faces;resolution:=optional,
+							javax.faces.webapp;resolution:=optional,
+							javax.faces.component;resolution:=optional,
+							javax.faces.component.html;resolution:=optional,
+							javax.faces.context;resolution:=optional,
+							<!-- PrimeFaces -->
+							org.primefaces;resolution:=optional,
+							org.primefaces.application;resolution:=optional,
+							org.primefaces.component.accordionpanel;resolution:=optional,
+							org.primefaces.component.ajaxstatus;resolution:=optional,
+							org.primefaces.component.api;resolution:=optional,
+							org.primefaces.component.autocomplete;resolution:=optional,
+							org.primefaces.component.behavior.ajax;resolution:=optional,
+							org.primefaces.component.behavior.printer;resolution:=optional,
+							org.primefaces.component.blockui;resolution:=optional,
+							org.primefaces.component.breadcrumb;resolution:=optional,
+							org.primefaces.component.button;resolution:=optional,
+							org.primefaces.component.calendar;resolution:=optional,
+							org.primefaces.component.captcha;resolution:=optional,
+							org.primefaces.component.carousel;resolution:=optional,
+							org.primefaces.component.celleditor;resolution:=optional,
+							org.primefaces.component.chart;resolution:=optional,
+							org.primefaces.component.chart.bar;resolution:=optional,
+							org.primefaces.component.chart.bubble;resolution:=optional,
+							org.primefaces.component.chart.donut;resolution:=optional,
+							org.primefaces.component.chart.line;resolution:=optional,
+							org.primefaces.component.chart.metergauge;resolution:=optional,
+							org.primefaces.component.chart.ohlc;resolution:=optional,
+							org.primefaces.component.chart.pie;resolution:=optional,
+							org.primefaces.component.clock;resolution:=optional,
+							org.primefaces.component.collector;resolution:=optional,
+							org.primefaces.component.colorpicker;resolution:=optional,
+							org.primefaces.component.column;resolution:=optional,
+							org.primefaces.component.columngroup;resolution:=optional,
+							org.primefaces.component.columns;resolution:=optional,
+							org.primefaces.component.commandbutton;resolution:=optional,
+							org.primefaces.component.commandlink;resolution:=optional,
+							org.primefaces.component.confirmdialog;resolution:=optional,
+							org.primefaces.component.contextmenu;resolution:=optional,
+							org.primefaces.component.dashboard;resolution:=optional,
+							org.primefaces.component.datagrid;resolution:=optional,
+							org.primefaces.component.datalist;resolution:=optional,
+							org.primefaces.component.datatable;resolution:=optional,
+							org.primefaces.component.datatable.feature;resolution:=optional,
+							org.primefaces.component.defaultcommand;resolution:=optional,
+							org.primefaces.component.dialog;resolution:=optional,
+							org.primefaces.component.dnd;resolution:=optional,
+							org.primefaces.component.dock;resolution:=optional,
+							org.primefaces.component.editor;resolution:=optional,
+							org.primefaces.component.effect;resolution:=optional,
+							org.primefaces.component.export;resolution:=optional,
+							org.primefaces.component.feedreader;resolution:=optional,
+							org.primefaces.component.fieldset;resolution:=optional,
+							org.primefaces.component.filedownload;resolution:=optional,
+							org.primefaces.component.fileupload;resolution:=optional,
+							org.primefaces.component.focus;resolution:=optional,
+							org.primefaces.component.galleria;resolution:=optional,
+							org.primefaces.component.gmap;resolution:=optional,
+							org.primefaces.component.graphicimage;resolution:=optional,
+							org.primefaces.component.growl;resolution:=optional,
+							org.primefaces.component.hotkey;resolution:=optional,
+							org.primefaces.component.idlemonitor;resolution:=optional,
+							org.primefaces.component.imagecompare;resolution:=optional,
+							org.primefaces.component.imagecropper;resolution:=optional,
+							org.primefaces.component.imageswitch;resolution:=optional,
+							org.primefaces.component.inplace;resolution:=optional,
+							org.primefaces.component.inputmask;resolution:=optional,
+							org.primefaces.component.inputtext;resolution:=optional,
+							org.primefaces.component.inputtextarea;resolution:=optional,
+							org.primefaces.component.keyboard;resolution:=optional,
+							org.primefaces.component.layout;resolution:=optional,
+							org.primefaces.component.lightbox;resolution:=optional,
+							org.primefaces.component.log;resolution:=optional,
+							org.primefaces.component.media;resolution:=optional,
+							org.primefaces.component.media.player;resolution:=optional,
+							org.primefaces.component.megamenu;resolution:=optional,
+							org.primefaces.component.menu;resolution:=optional,
+							org.primefaces.component.menubar;resolution:=optional,
+							org.primefaces.component.menubutton;resolution:=optional,
+							org.primefaces.component.menuitem;resolution:=optional,
+							org.primefaces.component.message;resolution:=optional,
+							org.primefaces.component.messages;resolution:=optional,
+							org.primefaces.component.mindmap;resolution:=optional,
+							org.primefaces.component.notificationbar;resolution:=optional,
+							org.primefaces.component.orderlist;resolution:=optional,
+							org.primefaces.component.outputlabel;resolution:=optional,
+							org.primefaces.component.outputpanel;resolution:=optional,
+							org.primefaces.component.overlaypanel;resolution:=optional,
+							org.primefaces.component.paginator;resolution:=optional,
+							org.primefaces.component.panel;resolution:=optional,
+							org.primefaces.component.panelgrid;resolution:=optional,
+							org.primefaces.component.panelmenu;resolution:=optional,
+							org.primefaces.component.password;resolution:=optional,
+							org.primefaces.component.photocam;resolution:=optional,
+							org.primefaces.component.picklist;resolution:=optional,
+							org.primefaces.component.poll;resolution:=optional,
+							org.primefaces.component.progressbar;resolution:=optional,
+							org.primefaces.component.radiobutton;resolution:=optional,
+							org.primefaces.component.rating;resolution:=optional,
+							org.primefaces.component.remotecommand;resolution:=optional,
+							org.primefaces.component.resetinput;resolution:=optional,
+							org.primefaces.component.resizable;resolution:=optional,
+							org.primefaces.component.resources;resolution:=optional,
+							org.primefaces.component.ring;resolution:=optional,
+							org.primefaces.component.row;resolution:=optional,
+							org.primefaces.component.roweditor;resolution:=optional,
+							org.primefaces.component.rowexpansion;resolution:=optional,
+							org.primefaces.component.rowtoggler;resolution:=optional,
+							org.primefaces.component.schedule;resolution:=optional,
+							org.primefaces.component.scrollpanel;resolution:=optional,
+							org.primefaces.component.selectbooleanbutton;resolution:=optional,
+							org.primefaces.component.selectbooleancheckbox;resolution:=optional,
+							org.primefaces.component.selectcheckboxmenu;resolution:=optional,
+							org.primefaces.component.selectmanybutton;resolution:=optional,
+							org.primefaces.component.selectmanycheckbox;resolution:=optional,
+							org.primefaces.component.selectmanymenu;resolution:=optional,
+							org.primefaces.component.selectonebutton;resolution:=optional,
+							org.primefaces.component.selectonelistbox;resolution:=optional,
+							org.primefaces.component.selectonemenu;resolution:=optional,
+							org.primefaces.component.selectoneradio;resolution:=optional,
+							org.primefaces.component.separator;resolution:=optional,
+							org.primefaces.component.slidemenu;resolution:=optional,
+							org.primefaces.component.slider;resolution:=optional,
+							org.primefaces.component.socket;resolution:=optional,
+							org.primefaces.component.spacer;resolution:=optional,
+							org.primefaces.component.spinner;resolution:=optional,
+							org.primefaces.component.splitbutton;resolution:=optional,
+							org.primefaces.component.stack;resolution:=optional,
+							org.primefaces.component.submenu;resolution:=optional,
+							org.primefaces.component.subtable;resolution:=optional,
+							org.primefaces.component.summaryrow;resolution:=optional,
+							org.primefaces.component.tabmenu;resolution:=optional,
+							org.primefaces.component.tabview;resolution:=optional,
+							org.primefaces.component.tagcloud;resolution:=optional,
+							org.primefaces.component.terminal;resolution:=optional,
+							org.primefaces.component.themeswitcher;resolution:=optional,
+							org.primefaces.component.tieredmenu;resolution:=optional,
+							org.primefaces.component.toolbar;resolution:=optional,
+							org.primefaces.component.tooltip;resolution:=optional,
+							org.primefaces.component.tree;resolution:=optional,
+							org.primefaces.component.treetable;resolution:=optional,
+							org.primefaces.component.watermark;resolution:=optional,
+							org.primefaces.component.wizard;resolution:=optional,
+							org.primefaces.context;resolution:=optional,
+							org.primefaces.event;resolution:=optional,
+							org.primefaces.event.data;resolution:=optional,
+							org.primefaces.event.map;resolution:=optional,
+							org.primefaces.facelets;resolution:=optional,
+							org.primefaces.json;resolution:=optional,
+							org.primefaces.lifecycle;resolution:=optional,
+							org.primefaces.model;resolution:=optional,
+							org.primefaces.model.chart;resolution:=optional,
+							org.primefaces.model.filter;resolution:=optional,
+							org.primefaces.model.map;resolution:=optional,
+							org.primefaces.model.mindmap;resolution:=optional,
+							org.primefaces.model.tagcloud;resolution:=optional,
+							org.primefaces.renderkit;resolution:=optional,
+							org.primefaces.util;resolution:=optional,
+							org.primefaces.visit;resolution:=optional,
+							org.primefaces.webapp;resolution:=optional,
+							org.primefaces.webapp.filter;resolution:=optional,
+							javax.faces.event;resolution:=optional,
+							javax.faces.convert;resolution:=optional,
+							org.springframework.web.jsf.el;resolution:=optional,
+							org.springframework.osgi.config
+							com.sun.faces.vendor;resolution:=optional,
+							javax.el;resolution:=optional,
+							javax.faces.render;resolution:=optional,
+							javax.faces.application;resolution:=optional,
+							javax.faces.lifecycle;resolution:=optional,
+							<!-- JSTL lib -->
+							org.apache.taglibs.standard; version="[1.2.0,2)",
+							org.apache.taglibs.standard.extra.spath; version="[1.2.0,2)",
+							org.apache.taglibs.standard.functions; version="[1.2.0,2)",
+							org.apache.taglibs.standard.lang.jstl; version="[1.2.0,2)",
+							org.apache.taglibs.standard.lang.jstl.parser;version="[1.2.0,2)",
+							org.apache.taglibs.standard.lang.jstl.test; version="[1.2.0,2)",
+							org.apache.taglibs.standard.lang.jstl.test.beans;version="[1.2.0,2)",
+							org.apache.taglibs.standard.lang.support; version="[1.2.0,2)",
+							org.apache.taglibs.standard.resources; version="[1.2.0,2)",
+							org.apache.taglibs.standard.tag.common.core; version="[1.2.0,2)",
+							org.apache.taglibs.standard.tag.common.fmt; version="[1.2.0,2)",
+							org.apache.taglibs.standard.tag.common.sql; version="[1.2.0,2)",
+							org.apache.taglibs.standard.tag.common.xml; version="[1.2.0,2)",
+							org.apache.taglibs.standard.tag.el.core; version="[1.2.0,2)",
+							org.apache.taglibs.standard.tag.el.fmt; version="[1.2.0,2)",
+							org.apache.taglibs.standard.tag.el.sql; version="[1.2.0,2)",
+							org.apache.taglibs.standard.tag.el.xml; version="[1.2.0,2)",
+							org.apache.taglibs.standard.tag.rt.core; version="[1.2.0,2)",
+							org.apache.taglibs.standard.tag.rt.fmt; version="[1.2.0,2)",
+							org.apache.taglibs.standard.tag.rt.sql; version="[1.2.0,2)",
+							org.apache.taglibs.standard.tag.rt.xml; version="[1.2.0,2)",
+							org.apache.taglibs.standard.tei; version="[1.2.0,2)",
+							org.apache.taglibs.standard.tlv; version="[1.2.0,2)",
+							<!-- SOCIETIES -->
+							org.societies.api.cis.management;resolution:=optional,
+							org.societies.api.cis.directory;resolution:=optional,
+							org.societies.api.schema.cis.directory;resolution:=optional,
+							org.societies.api.comm.xmpp.interfaces;resolution:=optional,
+							org.societies.api.comm.xmpp.datatypes;resolution:=optional,
+							org.societies.api.comm.xmpp.exceptions;resolution:=optional,
+							org.societies.api.identity,
+							org.societies.api.schema.cis.community;resolution:=optional,
+							org.societies.api.context.broker;resolution:=optional,
+							org.societies.api.context;resolution:=optional,
+							org.societies.api.context.model;resolution:=optional,
+							org.societies.api.schema.cssmanagement;resolution:=optional,
+							org.societies.api.activity;resolution:=optional,
+							org.codehaus.jackson.map;resolution:=optional,
+							org.springframework.web.servlet.view.json;resolution:=optional,
+							org.societies.api.services;resolution:=optional,
+							org.societies.api.schema.servicelifecycle.model;resolution:=optional,
+							org.springframework.osgi.context;resolution:=optional,
+							org.societies.activity;resolution:=optional,
+							org.societies.api.schema.css.directory;resolution:=optional,
+							org.societies.api.useragent.monitoring;resolution:=optional,
+							org.societies.api.personalisation.mgmt;resolution:=optional,
+							org.societies.api.personalisation.model;resolution:=optional,
+							org.societies.api.osgi.event;resolution:=optional,
+							<!-- Form validation -->
+							javax.validation,
+							com.google.common.*;resolution:=optional,
+							com.google.common.base;resolution:=optional,
+							com.google.common.base.Preconditions;resolution:=optional,
+							com.google.api.client.auth.oauth2;resolution:=optional,
+							com.google.api.client.googleapis.auth.oauth2;resolution:=optional,
+							com.google.api.client.http;resolution:=optional,
+							com.google.api.client.json.jackson;resolution:=optional,
+							com.google.api.client.util;resolution:=optional,
+							com.google.api.client.*;resolution:=optional,
+							com.google.api.services.calendar;resolution:=optional,
+							com.google.api.services.calendar.model;resolution:=optional,
+							!com.google.*,
+							!junit.framework,
+							!javax.xml.*,
+							*;resolution:=optional
+						</Import-Package>
+						<Web-ContextPath>sharedCal</Web-ContextPath>
+						<Bundle-ClassPath>WEB-INF/classes,.,
+						WEB-INF/lib/calendar-api-0.1.jar,
+						WEB-INF/lib/calendar-api-schema-0.1.jar,
+						WEB-INF/lib/google-api-client-1.7.0-beta.jar,
+						WEB-INF/lib/google-api-services-calendar-v3-rev3-1.4.0-beta.jar,
+						WEB-INF/lib/google-http-client-1.7.0-beta.jar,
+						WEB-INF/lib/google-oauth-client-1.7.0-beta.jar,
+						WEB-INF/lib/google-collections-0.8.jar,
+						WEB-INF/lib/gson-2.2.1.jar,
+						WEB-INF/lib/jackson-core-asl-1.9.4.jar
+						</Bundle-ClassPath>
+						<Webapp-Context>sharedCal</Webapp-Context>		
+					</instructions>
+				</configuration>
+
+			</plugin>
+			
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-war-plugin</artifactId>
+				<version>2.2</version>
+				<configuration>
+					<attachClasses>true</attachClasses>
+					<archive>
+						<manifestFile>${project.build.directory}/META-INF/MANIFEST.MF</manifestFile>
+					</archive>
+					<!-- Make a skinny WAR -->
+					<!-- <packagingExcludes>WEB-INF/lib/*.jar</packagingExcludes>-->
+					<packagingIncludes>WEB-INF/lib/gson*.jar,WEB-INF/lib/google*.jar,
+					WEB-INF/lib/calendar*.jar,
+					WEB-INF/lib/jackson*.jar,**/*.xml,**/*.properties,**/*.class,**/*.png,**/*.css,**/*.js,**/*.jsp,**/*.xhtml,.</packagingIncludes>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>1.6</source>
+					<target>1.6</target>
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<configuration>
+					<artifactItems>
+						<artifactItem>
+							<groupId>${project.groupId}</groupId>
+							<artifactId>${project.artifactId}</artifactId>
+							<version>${project.version}</version>
+							<type>war</type>
+							<overWrite>true</overWrite>
+							<outputDirectory>${spring.osgi.deploy.dir}</outputDirectory>
+						</artifactItem>
+					</artifactItems>
+				</configuration>
+			</plugin>
+			
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+	      		<artifactId>maven-antrun-plugin</artifactId>
+	      		<executions>
+	        		<execution>
+	          			<id>copy</id>
+	          			<phase>compile</phase>
+	          			<configuration>
+	            			<tasks>
+	              				<copy file="src/main/webapp/WEB-INF/applicationContext.xml" tofile="${project.build.directory}/${project.name}/META-INF/spring/bundle-context-osgi.xml"/>
+	            			</tasks>
+	          			</configuration>
+	          			<goals>
+	            			<goal>run</goal>
+	          			</goals>
+			        </execution> 
+			      </executions>
+		    </plugin>
+      			
+		</plugins>
+	</build>
+
+</project>

@@ -3,7 +3,7 @@
 <Resource>
 	<Attribute AttributeId="contextType"
 			DataType="http://www.w3.org/2001/XMLSchema#string">
-		<AttributeValue>course</AttributeValue>
+		<AttributeValue>locationSymbolic</AttributeValue>
 	</Attribute>
 </Resource>
 <Action>
