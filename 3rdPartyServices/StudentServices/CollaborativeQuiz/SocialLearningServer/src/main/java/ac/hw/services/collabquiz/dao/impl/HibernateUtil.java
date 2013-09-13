@@ -14,7 +14,7 @@ public class HibernateUtil {
         try {
             return new AnnotationConfiguration()
                     .configure()
-                    .addPackage("uk.ac.hw.services.collabquiz.entities")
+                    .addPackage("ac.hw.services.collabquiz.entities")
                     .buildSessionFactory();
 
         } catch (Throwable ex) {

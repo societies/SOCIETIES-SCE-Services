@@ -16,7 +16,7 @@
 	<osgi:reference id="services" interface="org.societies.api.services.IServices"/>
 	
 	 <osgi:service ref="quizRestServer"
-		interface="uk.ac.hw.services.collabquiz.ICollabQuizServer">
+		interface="ac.hw.services.collabquiz.ICollabQuizServer">
 		<osgi:service-properties>
 			<entry key="TargetPlatform" value="SOCIETIES" />
 			<entry key="ServiceProvider" value="ICT-SOCIETIES" />
@@ -35,7 +35,7 @@
 		<property name="serviceCategory" value="socialLearning" />
 	</bean> 
 	
-<bean id="collabQuizCommsServer" name="collabQuizCommsServer" class="uk.ac.hw.services.collabquiz.comms.CommsServer" init-method="init">
+<bean id="collabQuizCommsServer" name="collabQuizCommsServer" class="ac.hw.services.collabquiz.comms.CommsServer" init-method="init">
 		<property name="collabQuizServer" ref="quizRestServer" />
 		<property name="commsManager" ref="commsManager" />
 		</bean>
