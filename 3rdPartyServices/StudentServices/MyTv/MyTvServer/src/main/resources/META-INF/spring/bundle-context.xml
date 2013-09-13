@@ -13,10 +13,9 @@
 	<bean id="mytvServer" 
 	    class="ac.hw.mytv.MyTvServer"
 		name="mytvServer" 
-		depends-on="serviceMgmt, commsMgr, evMgr" 
+		depends-on="serviceMgmt, evMgr" 
 		init-method="initialiseMyTvServer">
 		<property name="serviceMgmt" ref="serviceMgmt"/>
-		<property name="commsMgr" ref="commsMgr"/>
 		<property name="evMgr" ref="evMgr"/>
 	</bean>	
 	

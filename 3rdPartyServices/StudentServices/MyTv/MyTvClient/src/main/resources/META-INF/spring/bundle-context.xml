@@ -19,9 +19,7 @@
 		<property name="serviceMgmt" ref="serviceMgmt"/>
 		<property name="eventMgr" ref="eventMgr"/>
 		<property name="commsMgr" ref="commsMgr"/>
-		<property name="displayDriver" ref="displayDriver"/>
-		<property name="commsClient" ref="commsClient" />
-		
+		<property name="displayDriver" ref="displayDriver"/>		
 	</bean>	
 	
 

@@ -1,7 +1,5 @@
 package ac.hw.mytv;
 
-import javax.xml.ws.ServiceMode;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.societies.api.osgi.event.CSSEvent;
@@ -17,7 +15,7 @@ import org.societies.api.services.ServiceMgmtEventType;
 import org.societies.api.services.ServiceUtils;
 
 
-public class MyTvServer extends EventListener
+public class MyTvServer extends EventListener implements IMyTVServer
 {
 	
 	private IServices serviceMgmt;
