@@ -537,7 +537,7 @@
 							*;scope=compile|runtime;resolution:=optional
 						</Import-Package>
 						<Bundle-ClassPath>WEB-INF/classes,.,
-						WEB-INF/lib/societies-sociallearning-schema-1.2.jar</Bundle-ClassPath>
+							WEB-INF/lib/societies-sociallearning-schema-1.2.jar</Bundle-ClassPath>
 						<Webapp-Context>collabquiz</Webapp-Context>
 						<Web-ContextPath>collabquiz</Web-ContextPath>
 					</instructions>
@@ -553,56 +553,41 @@
 					<archive>
 						<manifestFile>${project.build.directory}/META-INF/MANIFEST.MF</manifestFile>
 					</archive>
-					<webappDirectory>src/main/webapp</webappDirectory>
 					<!-- Make a skinny WAR -->
 					<packagingExcludes>WEB-INF/lib/*.jar</packagingExcludes>
 				</configuration>
 			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>1.6</source>
+					<target>1.6</target>
+				</configuration>
+			</plugin>
+
+
+
+
 
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-dependency-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>copy</id>
-						<phase>package</phase>
-						<goals>
-							<goal>copy</goal>
-						</goals>
-						<configuration>
-							<outputDirectory>${deploy.dir}</outputDirectory>
-
-							<artifactItems>
-								<artifactItem>
-									<groupId>${project.groupId}</groupId>
-									<artifactId>${project.artifactId}</artifactId>
-									<version>${project.version}</version>
-									<type>${project.packaging}</type>
-									<overWrite>true</overWrite>
-									<outputDirectory>${deploy.dir}</outputDirectory>
-								</artifactItem>
-							</artifactItems>
-						</configuration>
-					</execution>
-				</executions>
-
-			</plugin>
-
-			<plugin>
-				<artifactId>maven-clean-plugin</artifactId>
-				<version>2.5</version>
 				<configuration>
-					<filesets>
-						<fileset>
-							<directory>${deploy.dir}</directory>
-							<includes>
-								<include>${project.build.finalName}.*</include>
-							</includes>
-							<followSymlinks>false</followSymlinks>
-						</fileset>
-					</filesets>
+					<artifactItems>
+						<artifactItem>
+							<groupId>${project.groupId}</groupId>
+							<artifactId>${project.artifactId}</artifactId>
+							<version>${project.version}</version>
+							<type>war</type>
+							<overWrite>true</overWrite>
+							<outputDirectory>${spring.osgi.deploy.dir}</outputDirectory>
+						</artifactItem>
+					</artifactItems>
 				</configuration>
 			</plugin>
+
+
 		</plugins>
 	</build>
 
