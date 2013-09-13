@@ -4,8 +4,8 @@
 	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
 	http://www.springframework.org/schema/osgi http://www.springframework.org/schema/osgi/spring-osgi.xsd">
 	
-	<bean id="categoryController" name="categoryController" class="uk.ac.hw.services.collabquiz.controller.CategoryController" />
-	<bean id="questionController" name="questionController" class="uk.ac.hw.services.collabquiz.controller.QuestionController" />
+	<bean id="categoryController" name="categoryController" class="ac.hw.services.collabquiz.controller.CategoryController" />
+	<bean id="questionController" name="questionController" class="ac.hw.services.collabquiz.controller.QuestionController" />
 
 	<!-- <bean id="quizRestServer" class="uk.ac.hw.services.collabquiz.CollabQuizServer"
 		init-method="init" name="quizRestServer" >

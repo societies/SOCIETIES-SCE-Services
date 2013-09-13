@@ -6,7 +6,7 @@
 	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
 	http://www.springframework.org/schema/osgi http://www.springframework.org/schema/osgi/spring-osgi.xsd">
 
-	<bean id="quizRestServer" class="uk.ac.hw.services.collabquiz.CollabQuizServer"
+	<bean id="quizRestServer" class="ac.hw.services.collabquiz.CollabQuizServer"
 		init-method="init" name="quizRestServer" >
 		<property name="commsManager" ref="commsManager" />
 		<property name="services" ref="services" />
