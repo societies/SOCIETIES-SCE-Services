@@ -1,0 +1,40 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+	<title>Tracking IDevice Interface</title>
+</head>
+
+<body>
+<img src=../../img/image059.png>
+
+<p>The tracking mechanism is explained in the OSGi specification R4.3 compendium specification (chapter 701): http://www.osgi.org/download/r4v43/osgi.cmpn-4.3.0.pdf. The code below is an extract of the code example showing the tracker part, to get reference of a device of type "Screen"...</p>
+<xmp>
+public class DeviceManagerConsumer implements ServiceTrackerCustomizer, BundleContextAware {
+       ...
+
+       public void InitConsumer () {         
+          this.serviceTracker = new ServiceTracker(bundleContext, IDevice.class.getName(), this);
+          this.serviceTracker.open();
+       }
+
+        @Override
+    public Object addingService(ServiceReference reference)    {
+        Object obj = bundleContext.getService(reference);
+
+        IDevice iDevice = (IDevice)obj;
+                // _iDevice would not need to be tested but it should better to do it...  ??_
+
+                // The following condition is to test the type of the device before to use it.
+                if (iDevice.getDeviceType() == DeviceTypeConstants.SCREEN) {
+                   //store the iDevice object for future usage
+           IDevice screen1 = iDevice;
+                }
+         }
+}
+</xmp>
+
+
+</body>
+</html>

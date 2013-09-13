@@ -1,0 +1,128 @@
+
+<!DOCTYPE html>
+<html><head><meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1" /><title>Networking Zone</title>
+<link type="text/css" rel="stylesheet" href="mobile.css" />
+<script type="text/javascript" src="jquery/jquery.js">
+</script><script type="text/javascript">
+$(document).bind('mobileinit', function(){
+	$.mobile.ajaxEnabled = false;
+	$.mobile.linkBindingEnabled = false;
+	$.mobile.hashListeningEnabled = false;
+	$.mobile.pushStateEnabled = false;
+});
+
+function displayLocation(name, room) {
+	if (room==1) {
+		//IN OUR ROOM, SHIFT OUR PROFILE PIC LEFT
+		var myImage = document.getElementById("profileImage1");
+		myImage.style.left="40px";
+	}
+	//GET ROOM IMAGE
+	var image = document.getElementById("profileContact" + room);
+	if (image == null)
+		return;
+	
+	image.src = "profiles/" + name + ".jpg";
+	image.style.visibility = "";
+}
+</script>
+<script type="text/javascript" src="mobile.js"></script>
+<script type="text/javascript" src="primefaces.js"></script>
+<script type="text/javascript" src="primefaces-mobile.js"></script>
+<link type="text/css" rel="stylesheet" href="primefaces.css" />
+</head>
+<body>
+<div id="viewMain" data-role="page" class="ui-page"><div id="j_idt2" data-role="header" data-backbtn="false"><h1>Networking Zones</h1></div><div id="j_idt3" data-role="content">
+
+			<!--  seperate tab -->
+					<div style="text-align:center;">
+					Your Current Location : <b>&quot;Breakout Zone&quot;</b><br /><br />
+					</div>
+<form id="zoneForm" name="zoneForm" method="post" action="/nzone-web//main.xhtml;jsessionid=9AB64D26699D35E18E598D226A7C7219" enctype="application/x-www-form-urlencoded">
+<input type="hidden" name="zoneForm" value="zoneForm" />
+
+					
+<div style="text-align:center; position: relative; margin-left: auto; margin-right: auto; width: 310px ;" id="zoneImg">
+ <a id="zoneForm:j_idt8" href="demo2-MyProfile.html" class="ui-commandlink" >
+  <img id="zoneForm:j_idt9" src="images/basiczone.png" alt="" width="300" height="225" style="position: relative; top: 0; left: 0;" />
+ </a>
+  <img id="profileImage1" src="profiles/stephen.jpg" alt="" style="position: absolute; top: 45px; left: 70px; width: 40px; height: auto; visibility: " />
+  <img id="profileImage2" src="images/profile_pic.jpg" alt="" style="position: absolute; top: 140px; left: 100px; width: 40px; height: auto; visibility: hidden" />
+  <img id="profileImage3" src="images/profile_pic.jpg" alt="" style="position: absolute; top: 80px; left: 240px; width: 40px; height: auto; visibility: hidden" />
+  <img id="profileContact1" src="images/profile_pic.jpg" alt="" style="position: absolute; top: 45px; left: 90px; width: 40px; height: auto; visibility: hidden" />
+  <img id="profileContact2" src="images/profile_pic.jpg" alt="" style="position: absolute; top: 140px; left: 120px; width: 40px; height: auto; visibility: hidden" />
+  <img id="profileContact3" src="images/profile_pic.jpg" alt="" style="position: absolute; top: 80px; left: 250px; width: 40px; height: auto; visibility: hidden" />
+<div style="text-align:center;">
+</div>
+</div>
+
+<input type="hidden" name="javax.faces.ViewState" id="javax.faces.ViewState" value="4473591262272105830:7649907394212451960" autocomplete="off" /><input type="hidden" name="javax.faces.RenderKitId" value="PRIMEFACES_MOBILE" />
+</form>
+<div id="j_idt14" data-role="collapsible-set"><div data-role="collapsible" data-collapsed="false"><h3>Conference Members</h3>
+<p>Click on attendee to view their location<br />
+<div id="j_idt14:form:mainroomlist" class="ui-datatable ui-widget"><table role="grid"><thead>
+<tr role="row"><th id="j_idt14:form:mainroomlist:j_idt17" class="ui-state-default" role="columnheader" style="width:10%"><div class="ui-dt-c"><span></span></div></th><th id="j_idt14:form:mainroomlist:j_idt20" class="ui-state-default" role="columnheader" style="width:20%"><div class="ui-dt-c"><span>Name</span></div></th><th id="j_idt14:form:mainroomlist:j_idt24" class="ui-state-default" role="columnheader"><div class="ui-dt-c"><span>Relevance</span></div></th></tr></thead><tfoot></tfoot>
+<tbody id="j_idt14:form:mainroomlist_data" class="ui-datatable-data ui-widget-content">
+<tr data-ri="0" class="ui-widget-content ui-datatable-even" role="row"><td role="gridcell" style="width:10%"><div class="ui-dt-c">
+ <a href="#" onclick="displayLocation('michael', '1'); return false;">
+ <img id="j_idt14:form:mainroomlist:0:j_idt19" src="profiles/michael.jpg" alt="" width="50" height="45" /></a></div></td>
+ <td role="gridcell"><div class="ui-dt-c"><b>Michael Griffen</b><br />Rainmaker<br />Technologies</div></td><td role="gridcell"><div class="ui-dt-c"><img id="j_idt14:form:mainroomlist:0:j_idt28" src="images/linkedin-col.png" alt="" width="25" height="25" /></div></td></tr>
+<tr data-ri="1" class="ui-widget-content ui-datatable-odd" role="row"><td role="gridcell" style="width:10%"><div class="ui-dt-c">
+ <a href="#" onclick="displayLocation('tim', '1'); return false;">
+ <img id="j_idt14:form:mainroomlist:1:j_idt19" src="profiles/tim.jpg" alt="" width="50" height="45" /></a></div></td>
+ <td role="gridcell" ><div class="ui-dt-c"><b>Tim ONeill</b><br />MOhJoey</div></td><td role="gridcell"><div class="ui-dt-c"><img id="j_idt14:form:mainroomlist:1:j_idt28" src="images/linkedin-col.png" alt="" width="25" height="25" /></div></td></tr>
+<tr data-ri="7" class="ui-widget-content ui-datatable-odd" role="row"><td role="gridcell" style="width:10%"><div class="ui-dt-c">
+ <a href="#" onclick="displayLocation('helen', '1'); return false;">
+ <img id="j_idt14:form:mainroomlist:7:j_idt19" src="profiles/helen.jpg" alt="" width="50" height="45" /></a></div></td>
+ <td role="gridcell"><div class="ui-dt-c"><b>Helen OConnell</b><br />Rainmaker<br />Technologies</div></td><td role="gridcell"><div class="ui-dt-c"></div></td></tr>
+<tr data-ri="2" class="ui-widget-content ui-datatable-even" role="row"><td role="gridcell" style="width:10%"><div class="ui-dt-c">
+ <a href="#" onclick="displayLocation('paul', '2'); return false;">
+ <img id="j_idt14:form:mainroomlist:2:j_idt19" src="profiles/paul.jpg" alt="" width="50" height="45" /></a></div></td>
+ <td role="gridcell" ><div class="ui-dt-c"><b>Paul Coffee</b><br />SuperCloud</div></td><td role="gridcell"><div class="ui-dt-c"></div></td></tr>
+<tr data-ri="3" class="ui-widget-content ui-datatable-odd" role="row"><td role="gridcell" style="width:10%"><div class="ui-dt-c">
+ <a href="#" onclick="displayLocation('john', '3');return false;">
+ <img id="j_idt14:form:mainroomlist:3:j_idt19" src="profiles/john.jpg" alt="" width="50" height="45" /></a></div></td>
+ <td role="gridcell" ><div class="ui-dt-c"><b>John Breen</b><br />SuperCloud</div></td><td role="gridcell"><div class="ui-dt-c"></div></td></tr>
+<tr data-ri="4" class="ui-widget-content ui-datatable-even" role="row"><td role="gridcell" style="width:10%"><div class="ui-dt-c">
+ <a href="#" onclick="displayLocation('brian', '1'); return false;">
+ <img id="j_idt14:form:mainroomlist:4:j_idt19" src="profiles/brian.jpg" alt="" width="50" height="45" /></a></div></td>
+ <td role="gridcell" ><div class="ui-dt-c"><b>Brian Nevelle</b><br />Carnegie Mellon<br />University</div></td><td role="gridcell"><div class="ui-dt-c"></div></td></tr>
+<tr data-ri="5" class="ui-widget-content ui-datatable-odd" role="row"><td role="gridcell" style="width:10%"><div class="ui-dt-c">
+ <a href="#" onclick="displayLocation('dan', '1'); return false;">
+ <img id="j_idt14:form:mainroomlist:5:j_idt19" src="profiles/dan.jpg" alt="" width="50" height="45" /></a></div></td>
+ <td role="gridcell" ><div class="ui-dt-c"><b>Dan Matthews</b><br />BrightStreams</div></td><td role="gridcell"><div class="ui-dt-c"></div></td></tr>
+<tr data-ri="6" class="ui-widget-content ui-datatable-even" role="row"><td role="gridcell" style="width:10%"><div class="ui-dt-c">
+ <a href="#" onclick="displayLocation('harry', '2'); return false;">
+ <img id="j_idt14:form:mainroomlist:6:j_idt19" src="profiles/harry.jpg" alt="" width="50" height="45" /></a></div></td>
+ <td role="gridcell" ><div class="ui-dt-c"><b>Harry McDonald</b><br />Rainmaker<br />Technologies</div></td><td role="gridcell"><div class="ui-dt-c"></div></td></tr>
+<tr data-ri="8" class="ui-widget-content ui-datatable-even" role="row"><td role="gridcell" style="width:10%"><div class="ui-dt-c">
+ <a href="#" onclick="displayLocation('eduard', '1'); return false;">
+ <img id="j_idt14:form:mainroomlist:8:j_idt19" src="profiles/eduard.jpg" alt="" width="50" height="45" /></a></div></td>
+ <td role="gridcell" ><div class="ui-dt-c"><b>Eduard Delaney</b><br />SuperCloud<br />Solutions</div></td><td role="gridcell"><div class="ui-dt-c"></div></td></tr>
+<tr data-ri="9" class="ui-widget-content ui-datatable-odd" role="row"><td role="gridcell" style="width:10%"><div class="ui-dt-c">
+ <a href="#" onclick="displayLocation('george', '3'); return false;">
+ <img id="j_idt14:form:mainroomlist:9:j_idt19" src="profiles/george.jpg" alt="" width="50" height="45" /></a></div></td>
+ <td role="gridcell" ><div class="ui-dt-c"><b>George Chalopin</b><br />SuperCloud<br />Solutions</div></td><td role="gridcell"><div class="ui-dt-c"></div></td></tr>
+</tbody>
+</table>
+
+</div><script id="j_idt14:form:mainroomlist_s" type="text/javascript">$(function() {PrimeFaces.cw('DataTable','widget_j_idt14_form_mainroomlist',{id:'j_idt14:form:mainroomlist'});});</script><input type="hidden" name="javax.faces.ViewState" id="javax.faces.ViewState" value="4473591262272105830:7649907394212451960" autocomplete="off" /><input type="hidden" name="javax.faces.RenderKitId" value="PRIMEFACES_MOBILE" />
+
+<br />
+<fieldset id="j_idt14:j_idt30" class="ui-fieldset ui-widget ui-widget-content ui-corner-all">
+<legend class="ui-fieldset-legend ui-corner-all ui-state-default">Relevance Icon Legend</legend>
+<div class="ui-fieldset-content">
+<div id="j_idt14:j_idt31" class="ui-grid-a">
+<div class="ui-block-a"><img id="j_idt14:j_idt32" src="images/company.png" alt="" width="25" height="25" /></div>
+<div class="ui-block-b">Preferred company</div>
+<div class="ui-block-a"><img id="j_idt14:j_idt34" src="images/interest.png" alt="" width="25" height="25" /></div>
+<div class="ui-block-b">Shared interests</div>
+<div class="ui-block-a"><img id="j_idt14:j_idt36" src="images/linkedin-col.png" alt="" width="25" height="25" /></div>
+<div class="ui-block-b">LinkedIn connection</div></div></div></fieldset>
+<script id="j_idt14:j_idt30_s" type="text/javascript">PrimeFaces.cw('Fieldset','widget_j_idt14_j_idt30',{id:'j_idt14:j_idt30'});</script>
+</p></div></div>
+
+<button id="j_idt38" name="j_idt38" type="submit" data-icon="back" data-iconpos="left" onclick="document.location='demo2-MyProfile.html'">Your Profile</button>
+</div></div>
+</body>
+</html>

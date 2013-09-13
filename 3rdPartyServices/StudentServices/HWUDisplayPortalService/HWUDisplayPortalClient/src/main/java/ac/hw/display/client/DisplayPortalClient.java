@@ -43,12 +43,17 @@ import org.societies.api.identity.IIdentity;
 import org.societies.api.identity.IIdentityManager;
 import org.societies.api.identity.InvalidFormatException;
 import org.societies.api.identity.RequestorService;
+import org.societies.api.osgi.event.CSSEvent;
+import org.societies.api.osgi.event.CSSEventConstants;
 import org.societies.api.osgi.event.EMSException;
+import org.societies.api.osgi.event.EventListener;
 import org.societies.api.osgi.event.EventTypes;
 import org.societies.api.osgi.event.IEventMgr;
 import org.societies.api.osgi.event.InternalEvent;
 import org.societies.api.schema.servicelifecycle.model.ServiceResourceIdentifier;
 import org.societies.api.services.IServices;
+import org.societies.api.services.ServiceMgmtEvent;
+import org.societies.api.services.ServiceMgmtEventType;
 
 import ac.hw.display.server.api.remote.IDisplayPortalServer;
 
@@ -58,7 +63,7 @@ import ac.hw.display.server.api.remote.IDisplayPortalServer;
  * @author Eliza
  *
  */
-public class DisplayPortalClient implements IDisplayDriver{
+public class DisplayPortalClient extends EventListener implements IDisplayDriver{
 
 	private ICommManager commManager;
 	private IIdentityManager idMgr;
@@ -78,143 +83,231 @@ public class DisplayPortalClient implements IDisplayDriver{
 	private ServiceRuntimeSocketServer servRuntimeSocketThread;
 
 	private UserSession userSession;
-	
+	private ContextEventListener ctxEvListener;
+	private Integer serviceRuntimeSocketPort;
+
 	public DisplayPortalClient(){
 		this.screenLocations = new ArrayList<String>();
 		this.servRuntimeSocketThread = new ServiceRuntimeSocketServer(this);
+		this.serviceRuntimeSocketPort = this.servRuntimeSocketThread.setListenPort();
 		this.servRuntimeSocketThread.start();
-	}
-	
-	//this method should be called after the bundle has started so it should be called by the OsgiContextListener when the event has been received
-	public void Init(){
-		JOptionPane.showMessageDialog(null, "Initialising DisplayPortalClient");
-		//ServiceResourceIdentifier serviceId = getServices().getMyServiceId(this.getClass());
-		
-			this.requestServerIdentityFromUser();
-			ServiceResourceIdentifier serviceId = this.portalServerRemote.getServerServiceId(serverIdentity);
-		
-		//this.serverIdentity = this.services.getServer(serviceId);
-		UIManager.put("ClassLoader", ClassLoader.getSystemClassLoader());
 
-		this.requestor = new RequestorService(serverIdentity, serviceId);
-		ContextEventListener ctxEvListener = new ContextEventListener(this, getCtxBroker(), userIdentity, requestor);
-		String[] locs = this.portalServerRemote.getScreenLocations(serverIdentity);
-		
-		for (int i=0; i<locs.length; i++){
-			this.screenLocations.add(locs[i]);
-		}
-		
-		userSession = new UserSession(this.userIdentity.getJid());
-		
-		JOptionPane.showMessageDialog(null, "DisplayPortalClient initialised");
+
+	}
+
+
+	public void Init(){
+		this.LOG.debug("Initialising DisplayPortalClient");
+		this.registerForSLMEvents();
+		//ServiceResourceIdentifier serviceId = getServices().getMyServiceId(this.getClass());
+
+
+		this.LOG.debug("DisplayPortalClient initialised");
 		//return true;
 	}
 
+	private void registerForSLMEvents() {
+		String eventFilter = "(&" + 
+				"(" + CSSEventConstants.EVENT_NAME + "="+ServiceMgmtEventType.NEW_SERVICE+")" +
+				"(" + CSSEventConstants.EVENT_SOURCE + "=org/societies/servicelifecycle)" +
+				")";
+		this.evMgr.subscribeInternalEvent(this, new String[]{EventTypes.SERVICE_LIFECYCLE_EVENT}, eventFilter);
+		this.LOG.debug("Subscribed to "+EventTypes.SERVICE_LIFECYCLE_EVENT+" events");
 
-	private void requestServerIdentityFromUser(){
-		
-		if (this.serverIdentity==null){
-			String serverIdentityStr = JOptionPane.showInputDialog("Please enter the JID of the CSS hosting the server application", "xcmanager.societies.local");
-			
-			try {
-				this.serverIdentity = this.idMgr.fromJid(serverIdentityStr);
-				
-				
-			} catch (InvalidFormatException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+	}
+
+	private void unRegisterFromSLMEvents()
+	{
+		String eventFilter = "(&" + 
+				"(" + CSSEventConstants.EVENT_NAME + "="+ServiceMgmtEventType.NEW_SERVICE+")" +
+				"(" + CSSEventConstants.EVENT_SOURCE + "=org/societies/servicelifecycle)" +
+				")";
+
+		this.evMgr.unSubscribeInternalEvent(this, new String[]{EventTypes.SERVICE_LIFECYCLE_EVENT}, eventFilter);
+		//this.evMgr.subscribeInternalEvent(this, new String[]{EventTypes.SERVICE_LIFECYCLE_EVENT}, eventFilter);
+		this.LOG.debug("Unsubscribed from "+EventTypes.SERVICE_LIFECYCLE_EVENT+" events");
+	}
+	/*
+	 * NOT USED
+	 * (non-Javadoc)
+	 * @see org.societies.api.osgi.event.EventListener#handleExternalEvent(org.societies.api.osgi.event.CSSEvent)
+	 */
+	@Override
+	public void handleExternalEvent(CSSEvent arg0) {
+		// TODO Auto-generated method stub
+
+	}
+
+
+	/*
+	 * Used to receive SLM events and specifically, to know that this bundle has been started in osgi 
+	 * so that it can retrieve it's generated SRI.
+	 * (non-Javadoc)
+	 * @see org.societies.api.osgi.event.EventListener#handleInternalEvent(org.societies.api.osgi.event.InternalEvent)
+	 */
+	@Override
+	public void handleInternalEvent(InternalEvent event) {
+		ServiceMgmtEvent slmEvent = (ServiceMgmtEvent) event.geteventInfo();
+
+		if (slmEvent.getBundleSymbolName().equalsIgnoreCase("ac.hw.display.DisplayPortalClientApp")){
+			this.LOG.debug("Received SLM event for my bundle");
+
+			if (slmEvent.getEventType().equals(ServiceMgmtEventType.NEW_SERVICE)){
+				ServiceResourceIdentifier myClientServiceID = slmEvent.getServiceId();
+				this.serverIdentity = services.getServer(myClientServiceID);
+				this.LOG.debug("Retrieved my server's identity: "+this.serverIdentity.getJid());
+				//this.requestServerIdentityFromUser();
+				//ServiceResourceIdentifier serviceId = this.portalServerRemote.getServerServiceId(serverIdentity);
+
+				//UIManager.put("ClassLoader", ClassLoader.getSystemClassLoader());
+
+				ServiceResourceIdentifier serviceId = this.services.getServerServiceIdentifier(myClientServiceID);
+				this.LOG.debug("Retrieved my server's serviceID: "+serviceId.getIdentifier().toASCIIString());
+				this.requestor = new RequestorService(serverIdentity, serviceId);
+				ctxEvListener = new ContextEventListener(this, getCtxBroker(), userIdentity, requestor);
+				String[] locs = this.portalServerRemote.getScreenLocations(serverIdentity);
+				this.LOG.debug("Retrieved screen locations from my server");
+				for (int i=0; i<locs.length; i++){
+					this.screenLocations.add(locs[i]);
+					this.LOG.debug("Screen location: "+i+": "+locs[i]);
+				}
 			}
+			userSession = new UserSession(this.userIdentity.getJid(), this.serviceRuntimeSocketPort);
+			this.unRegisterFromSLMEvents();
+		}else{
+			this.LOG.debug("Received SLM event but was not related to my bundle. Related to: "+slmEvent.getBundleSymbolName());
 		}
+
+	}
+
+	private boolean matchesLocation(String location){
+		this.LOG.debug("User location length: "+location.length());
+
+		for (int i=0; i<screenLocations.size(); i++){
+			String scrLoc = screenLocations.get(i);
+			this.LOG.debug("Screen location length: "+scrLoc.length());	
+			if (scrLoc.trim().equalsIgnoreCase(location.trim())){
+				this.LOG.debug(scrLoc+" matches "+location+". Returning true");
+				return true;
+			}
+			this.LOG.debug(scrLoc+" doesn't match "+location);
+
+		}
+		this.LOG.debug("return false");
+		return false;
 	}
 	public void updateUserLocation(String location){
-		//if near a screen
-		if (this.screenLocations.contains(location)){
-			this.LOG.debug("Requesting access");
-			//request access
-			String reply = this.portalServerRemote.requestAccess(serverIdentity, userIdentity.getJid(), location);
-			//if access refused do nothing
-			if (reply=="REFUSED"){
-				this.LOG.debug("Refused access to screen.");
-			}
-			else //if access is granted 
-			{
-				this.LOG.debug("Access to screen granted. IP Address is: "+reply);
+
+		this.LOG.debug("location of user: "+location);
+		this.LOG.debug("Location of screens: ");
+		for (int i=0; i<screenLocations.size(); i++){
+			this.LOG.debug("Screen location: "+i+": "+screenLocations.get(i));
+		}
+
+		if (!location.trim().equalsIgnoreCase(currentUsedScreenLocation.trim())){
+			//if near a screen
+			if (this.matchesLocation(location)){
 				//check if the user is already using another screen
 				if (this.hasSession){
-					this.LOG.debug("Releasing previous screen session");
+					this.LOG.debug("Releasing previous screen session from: "+currentUsedScreenIP);
 					//release currently used screen
+					SocketClient sClient = new SocketClient(currentUsedScreenIP);
+					sClient.logOut(userSession);
+					this.LOG.debug("Sent logout msg to: "+currentUsedScreenIP);
 					this.portalServerRemote.releaseResource(serverIdentity, userIdentity.getJid(), currentUsedScreenIP);
+					this.LOG.debug("Released screen: "+currentUsedScreenIP);
+
 				}
-				//now setup new screen
-				SocketClient socketClient = new SocketClient(reply);
-				
-				socketClient.startSession(userSession);
-				//TODO: send services TO DISPLAY
-				this.currentUsedScreenIP = reply;
-				this.currentUsedScreenLocation = location;
-				this.hasSession = true;
-				DisplayEvent dEvent = new DisplayEvent(this.currentUsedScreenIP, DisplayEventConstants.DEVICE_AVAILABLE);
-				InternalEvent iEvent = new InternalEvent(EventTypes.DISPLAY_EVENT, "displayUpdate", "org/societies/css/device", dEvent);
-				try {
-					this.evMgr.publishInternalEvent(iEvent);
-				} catch (EMSException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+
+				this.LOG.debug("Requesting access to screen in location: "+location);
+				//request access
+				String reply = this.portalServerRemote.requestAccess(serverIdentity, userIdentity.getJid(), location);
+				//if access refused do nothing
+				if (reply=="REFUSED"){
+					this.LOG.debug("Refused access to screen.");
 				}
-				
+				else //if access is granted 
+				{
+					this.LOG.debug("Access to screen granted. IP Address is: "+reply);
+
+
+					//now setup new screen
+					SocketClient socketClient = new SocketClient(reply);
+
+					socketClient.startSession(userSession);
+					//TODO: send services TO DISPLAY
+					this.currentUsedScreenIP = reply;
+					this.currentUsedScreenLocation = location;
+					this.hasSession = true;
+					DisplayEvent dEvent = new DisplayEvent(this.currentUsedScreenIP, DisplayEventConstants.DEVICE_AVAILABLE);
+					InternalEvent iEvent = new InternalEvent(EventTypes.DISPLAY_EVENT, "displayUpdate", "org/societies/css/device", dEvent);
+					try {
+						this.evMgr.publishInternalEvent(iEvent);
+					} catch (EMSException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+
+				}
+			}//user is not near a screen
+			else{
+				this.LOG.debug("User not near screen");
+				//if he's using a screen
+				if (this.hasSession){
+					this.LOG.debug("User in session with portal GUI. Attempting to logout");
+					//release resource
+					this.portalServerRemote.releaseResource(serverIdentity, userIdentity.getJid(), currentUsedScreenLocation);
+
+					this.hasSession = false;
+
+
+					SocketClient socketClient = new SocketClient(this.currentUsedScreenIP);
+					socketClient.endSession(this.userSession.getUserIdentity());
+					this.currentUsedScreenIP = "";
+					this.currentUsedScreenLocation = "";
+
+					this.servRuntimeSocketThread.finalize();
+					DisplayEvent dEvent = new DisplayEvent(this.currentUsedScreenIP, DisplayEventConstants.DEVICE_UNAVAILABLE);
+					InternalEvent iEvent = new InternalEvent(EventTypes.DISPLAY_EVENT, "displayUpdate", "org/societies/css/device", dEvent);
+					try {
+						this.evMgr.publishInternalEvent(iEvent);
+					} catch (EMSException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}else{
+					this.LOG.debug("User not in a session with the screen. Nothing to do.");
+				}
 			}
-		}//user is not near a screen
-		else{
-			this.LOG.debug("User not near screen");
-			//if he's using a screen
-			if (this.hasSession){
-				//release resource
-				this.portalServerRemote.releaseResource(serverIdentity, userIdentity.getJid(), currentUsedScreenLocation);
-				
-				this.hasSession = false;
-				
-				
-				SocketClient socketClient = new SocketClient(this.currentUsedScreenIP);
-				socketClient.endSession(this.userSession.getUserIdentity());
-				this.currentUsedScreenIP = "";
-				this.currentUsedScreenLocation = "";
-				
-				DisplayEvent dEvent = new DisplayEvent(this.currentUsedScreenIP, DisplayEventConstants.DEVICE_UNAVAILABLE);
-				InternalEvent iEvent = new InternalEvent(EventTypes.DISPLAY_EVENT, "displayUpdate", "org/societies/css/device", dEvent);
-				try {
-					this.evMgr.publishInternalEvent(iEvent);
-				} catch (EMSException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
+		}else{
+			this.LOG.debug("Ignoring same value for symloc> new: "+location+" - current: "+this.currentUsedScreenLocation);
 		}
 	}
-	
-	
+
+
 	@Override
 	public void displayImage(String serviceName, String pathToFile){
 		if (this.hasSession){
-			
-				BinaryDataTransfer dataTransfer = new BinaryDataTransfer(currentUsedScreenIP);
-				dataTransfer.sendImage(this.userIdentity.getJid(), pathToFile);
-				
-			
+
+			BinaryDataTransfer dataTransfer = new BinaryDataTransfer(currentUsedScreenIP);
+			dataTransfer.sendImage(this.userIdentity.getJid(), pathToFile);
+
+
 		}
-		
+
 	}
 
 	@Override
 	public void displayImage(String serviceName, URL remoteImageLocation){
 		if (this.hasSession){
-			
-				SocketClient socketClient = new SocketClient(currentUsedScreenIP);
-				
-				socketClient.sendImage(userSession, remoteImageLocation);
-				
-			
+
+			SocketClient socketClient = new SocketClient(currentUsedScreenIP);
+
+			socketClient.sendImage(userSession, remoteImageLocation);
+
+
 		}
-		
+
 	}
 
 
@@ -224,24 +317,32 @@ public class DisplayPortalClient implements IDisplayDriver{
 			if (this.userSession.containsService(serviceName)){
 				SocketClient socketClient = new SocketClient(currentUsedScreenIP);
 				socketClient.sendText(serviceName, userSession, text);
-				
-				
+
+
 			}
 		}
-		
+
 	}
 
 	@Override
 	public void registerDisplayableService(IDisplayableService service, String serviceName, URL executableLocation, boolean requiresKinect){
-		ServiceInfo sInfo  = new ServiceInfo(service, serviceName, executableLocation.toString(), requiresKinect);
+		ServiceInfo sInfo  = new ServiceInfo(service, serviceName, executableLocation.toString(), 0, requiresKinect);
 		this.userSession.addService(sInfo);
 	}
-	
+
+	@Override
+	public void registerDisplayableService(IDisplayableService service, String serviceName, URL executableLocation, int servicePortNumber, boolean requiresKinect) {
+		ServiceInfo sInfo  = new ServiceInfo(service, serviceName, executableLocation.toString(), servicePortNumber, requiresKinect);
+		this.userSession.addService(sInfo);
+
+	}
+
+
 	/*
 	 * get/set methods
 	 */
-	
-	
+
+
 	/**
 	 * @return the commManager
 	 */
@@ -256,7 +357,7 @@ public class DisplayPortalClient implements IDisplayDriver{
 		this.idMgr = commManager.getIdManager();
 		this.userIdentity = idMgr.getThisNetworkNode();
 	}
-	
+
 
 
 	/**
@@ -317,41 +418,46 @@ public class DisplayPortalClient implements IDisplayDriver{
 
 	public void notifyServiceStarted(String serviceName) {
 		if (this.userSession.containsService(serviceName)){
+			this.LOG.debug("Found service: "+serviceName+". Calling serviceStarted method");
 			ServiceInfo sInfo = this.userSession.getService(serviceName);
 			if (sInfo!=null){
 				IDisplayableService service = sInfo.getService();
 				if (service!=null){
 					service.serviceStarted(currentUsedScreenIP);
+					return;
 				}
 			}
 		}
-		
+		this.LOG.debug("Could not find service: "+serviceName);
 	}
 	public void notifyServiceStopped(String serviceName) {
 		if (this.userSession.containsService(serviceName)){
+			this.LOG.debug("Found service: "+serviceName+". Calling serviceStopped method");
 			ServiceInfo sInfo = this.userSession.getService(serviceName);
 			if (sInfo!=null){
 				IDisplayableService service = sInfo.getService();
 				if (service!=null){
 					service.serviceStopped(currentUsedScreenIP);
+					return;
 				}
 			}
 		}
-		
+
+		this.LOG.debug("Could not find service: "+serviceName);
+
 	}
 
 	public void notifyLogOutEvent() {
-		
+
 		if (this.hasSession){
 			//release resource
 			this.portalServerRemote.releaseResource(serverIdentity, userIdentity.getJid(), currentUsedScreenLocation);
-			
+
 			this.hasSession = false;
 			DisplayEvent dEvent = new DisplayEvent(this.currentUsedScreenIP, DisplayEventConstants.DEVICE_UNAVAILABLE);
-			
+
 			this.currentUsedScreenIP = "";
 			this.currentUsedScreenLocation = "";
-			
 			InternalEvent iEvent = new InternalEvent(EventTypes.DISPLAY_EVENT, "displayUpdate", "org/societies/css/device", dEvent);
 			try {
 				this.evMgr.publishInternalEvent(iEvent);
@@ -360,7 +466,7 @@ public class DisplayPortalClient implements IDisplayDriver{
 				e.printStackTrace();
 			}
 		}
-		
+
 	}
 
 

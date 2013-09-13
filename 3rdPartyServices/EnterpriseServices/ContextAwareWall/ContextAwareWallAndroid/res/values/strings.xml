@@ -4,8 +4,10 @@
     <string name="app_name">Context Aware Wall</string>
     <string name="main_screen">PZ Registrar</string>
     <string name="splash_screen">SplashScreen</string>
-    <string name="URL">URL</string>
-    <string name="entity">entity</string>
-    <string name="cis">CIS</string>
+    <string name="URL">Server</string>
+    <string name="port">Port</string>
+    <string name="entity">User</string>
+    <string name="cis">Community</string>
     <string name="Set">Set</string>
+    <color name="black">#000000</color>
 </resources>

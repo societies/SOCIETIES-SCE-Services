@@ -35,5 +35,7 @@ import org.societies.api.schema.servicelifecycle.model.ServiceResourceIdentifier
  */
 public interface ISocialLearningServer {
 
-	public ServiceResourceIdentifier getServerServiceId(IIdentity serverIdentity);
+	//public ServiceResourceIdentifier getServerServiceId(IIdentity serverIdentity);
+	
+	public String[] getServerPortAddress(IIdentity serverIdentity);
 }

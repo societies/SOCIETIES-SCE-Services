@@ -1,0 +1,101 @@
+<f:view xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:pm="http://primefaces.org/mobile" contentType="text/html">
+
+	<f:event listener="#{mainBean.checkinit}" type="preRenderView" />
+	<f:event listener="#{profileBean.loadprofile}" type="preRenderView" />
+	<f:event listener="#{mainPeopleBean.initialisepeoplelist}" type="preRenderView" />
+	
+	
+	<pm:page title="Networking Zone">
+		<pm:view id="viewMain">
+		
+		
+		
+	
+			<pm:header title="Networking Zones" />
+			
+			
+			<pm:content>
+
+			<!--  seperate tab -->
+				<p:tab title="Zones">
+					<div style="text-align:center;">
+					Your Current Location : <b>"#{mainBean.zoneName}"</b><br/><br/>
+					</div>
+					<h:form id="zoneForm">
+					
+					<div style="text-align:center; position: relative; margin-left: auto; margin-right: auto; width: 310px ;" id="zoneImg">
+					
+					<p:commandLink action="gotozone" >
+						<p:graphicImage value="/images/#{mainBean.zoneImage}" style="position: relative; top: 0; left: 0;" width="300" height="225" />
+					</p:commandLink>
+					
+					<p:graphicImage value="#{profileBean.avatar}" style="position: absolute; top: #{mainBean.zoneImageTop}px; left: #{mainBean.zoneImageLeft}px; width: 40px; height: auto" id="profileImage"/>
+					<p:graphicImage value="#{mainBean.otherToShow.imageSrc}" style="position: absolute; top: #{mainBean.zoneImageTopOther}px; left: #{mainBean.zoneImageLeftOther}px; width: 40px; height: auto" id="otherImage" rendered="#{mainBean.showotheravatar}"/>
+					<div style="text-align:center;">
+					<p:outputPanel rendered="#{mainBean.otherLocationMessage.isEmpty() == false}">
+						<b>#{mainBean.otherToShow.displayName}'s</b> Location : <b>#{mainBean.otherLocationMessage}</b>
+					</p:outputPanel>
+					</div>
+					</div>
+					</h:form>
+					
+				</p:tab>
+				
+				<p:accordionPanel>
+					<p:tab title="Conference Members">
+					Click on attendee image to view their location<br/>
+					
+						<h:form id="form">
+							<p:dataTable id="mainroomlist" value="#{mainPeopleBean.suggestions}" var="mainperson" >
+								<p:column style="width:10%">
+									<p:commandLink id="link4_#{mainperson.displayName}" update=":zoneForm" >
+										<f:setPropertyActionListener target="#{mainBean.otherToShow}" value="#{mainperson}" />
+											<p:graphicImage value="/images/profile_pic.png"  width="50" height="45" rendered="#{mainperson.useDefaultImage}"/>
+											<p:graphicImage value="#{mainperson.imageSrc}"  width="50" height="45" rendered="#{mainperson.useDefaultImage == false}"/>
+									</p:commandLink>
+								</p:column>
+								<p:column style="width:20%" headerText="Name" > #{mainperson.displayName}</p:column>
+								<p:column style="width:30%" headerText="Company" > #{mainperson.company} </p:column>
+								<p:column headerText="Relevance">
+									<p:graphicImage value="/images/company.png"  width="25" height="25" rendered="#{peopleBean.isperftagged(mainperson)}"/>
+									<p:graphicImage value="/images/interest.png"  width="25" height="25" rendered="#{peopleBean.isinteresttagged(mainperson)}"/>
+									<p:graphicImage value="/images/facebook-col.png"  width="25" height="25" rendered="#{peopleBean.isfacebooktagged(mainperson)}"/>		
+									<p:graphicImage value="/images/linkedin-col.png"  width="25" height="25" rendered="#{peopleBean.islinkedtagged(mainperson)}"/>		
+								</p:column>
+								
+							</p:dataTable>
+							
+							
+						</h:form>
+						<br/><br/><br/>
+						<p:fieldset legend="Relevance Icon Legend">  
+    						<h:panelGrid columns="2" cellpadding="2"> 
+    							 <p:graphicImage value="/images/company.png" width="25" height="25"/>
+		            			<h:outputText value="Works for a preferred company"/>  
+		            			<p:graphicImage value="/images/interest.png" width="25" height="25"/>
+		            			<h:outputText value="Shares your interests"/>  
+    						   <p:graphicImage value="/images/linkedin-col.png" width="25" height="25"/>
+		            			<h:outputText value="An existing LinkedIn connection"/>
+		            		</h:panelGrid>  
+						</p:fieldset>  
+						
+						
+					</p:tab>
+				</p:accordionPanel>
+
+				<p:commandButton icon="back" value="Your Profile" action="gotoprofile" />
+			</pm:content>
+			
+		
+							
+		</pm:view>
+		
+	</pm:page>
+</f:view>
+
+

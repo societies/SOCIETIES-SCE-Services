@@ -3,6 +3,12 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
-         
+
+        <ResourceDictionary>
+            <SolidColorBrush x:Key="BlueBrush" Color="#FF00BCF2" />
+            <SolidColorBrush x:Key="MediumGreyBrush" Color="#ff6e6e6e"/>
+        </ResourceDictionary>
+
     </Application.Resources>
+    
 </Application>

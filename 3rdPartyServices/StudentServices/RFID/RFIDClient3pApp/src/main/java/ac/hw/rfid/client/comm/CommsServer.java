@@ -51,11 +51,9 @@ import ac.hw.rfid.client.api.IRfidClient;
 
 public class CommsServer implements IFeatureServer {
 	private static final List<String> NAMESPACES = Collections.unmodifiableList(
-			  Arrays.asList("http://societies.org/api/ext3p/schema/rfidclientbean", 
-				  		"http://societies.org/api/ext3p/schema/rfidserverbean"));
+			  Arrays.asList("http://societies.org/api/ext3p/schema/rfidclientbean"));
 private static final List<String> PACKAGES = Collections.unmodifiableList(
-		  Arrays.asList("org.societies.api.ext3p.schema.rfidserverbean",
-				  "org.societies.api.ext3p.schema.rfidclientbean"));
+		  Arrays.asList("org.societies.api.ext3p.schema.rfidclientbean"));
 	
 	
 	//PRIVATE VARIABLES
@@ -104,12 +102,14 @@ private static final List<String> PACKAGES = Collections.unmodifiableList(
 	/* Put your functionality here if there is NO return object, ie, VOID  */
 	@Override
 	public void receiveMessage(Stanza stanza, Object payload) {
+		this.LOG.debug("Received a message: "+payload);
 		if (payload instanceof RfidClientBean){
 			RfidClientBean clientBean = (RfidClientBean) payload;
 			if (clientBean.getMethod().equals(RfidClientMethodType.ACKNOWLEDGE_REGISTRATION)){
 				this.rfidClient.acknowledgeRegistration(clientBean.getRStatus());
 			}else if(clientBean.getMethod().equals(RfidClientMethodType.SEND_UPDATE)){
-				this.rfidClient.sendUpdate(clientBean.getSymLoc(), clientBean.getTagNumber());
+				this.LOG.debug("Received rfid update: "+clientBean.getSymLoc()+" for my tag number: "+clientBean.getTagNumber());
+				this.rfidClient.sendUpdate(clientBean.getSymLoc().trim(), clientBean.getTagNumber().trim());
 			}else{
 				this.LOG.debug("Payload object not of type: "+RfidClientBean.class.getName()+". Ignoring message from: "+stanza.getFrom().getJid());
 			}

@@ -10,16 +10,20 @@
                       http://www.springframework.org/schema/osgi-compendium/spring-osgi-compendium-1.2.xsd"
 	xmlns:context="http://www.springframework.org/schema/context">
 
-	<!-- -->
-	<osgi:service ref="AnalyzeThisService_____" interface="org.societies.thirdPartyServices.disasterManagement.analyzeThis.IAnalyzeThis">
+	
+	<osgi:service ref="analyzeThis" interface="org.societies.thirdPartyServices.disasterManagement.analyzeThis.IAnalyzeThis" />
+	<!-- 
 		<osgi:service-properties>
 			<entry key="TargetPlatform" value="SOCIETIES" />
 			<entry key="ServiceProvider" value="ICT-SOCIETIES" />
 		</osgi:service-properties>
 	</osgi:service> 
+	-->
 	
-	<!--
-	<bean id="AnalyzeThisServiceBean" class="org.societies.thirdPartyServices.disasterManagement.analyzeThis.AnalyzeThis" />
-	   -->
-	<osgi:reference id="externalCtxBroker" interface="org.societies.api.context.broker.ICtxBroker" cardinality="1..1" />
+	<!-- <bean id="AnalyzeThisServiceBean" class="org.societies.thirdPartyServices.disasterManagement.analyzeThis.AnalyzeThis" /> -->
+   
+	<osgi:reference id="trustEvidenceCollector" interface="org.societies.api.privacytrust.trust.evidence.ITrustEvidenceCollector" cardinality="1..1" />
+	<osgi:reference id="trustBroker" interface="org.societies.api.privacytrust.trust.ITrustBroker" cardinality="1..1" />
+	<osgi:reference id="commMgr" interface="org.societies.api.comm.xmpp.interfaces.ICommManager" cardinality="1..1" />
+	
 </beans>

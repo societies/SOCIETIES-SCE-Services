@@ -29,15 +29,18 @@ When complete, login to the admin website and perform the following changes:
 	<ul>
 		<li>Under "Users/Groups", select "Create New User" and create a new user account, e.g. alec</li>
 		<li>Under "Server" -> "Server Settings" -> "External Components". In the "Service Enabled" box, click the "Enabled" checkbox and enter a "Default shared secret", e.g. "password" and click "Save Settings"</li>
-		<li>In the "Allowed to Connect" box, create a new subdomain (which represents a new External Component) and provide the values as in Figure 13</li>
+		<li>In the "Allowed to Connect" box, , ensure 'Anyone' is selected.</li>
 	</ul>
 
 	<img src="../../img/image025.png" /><br />
 
 <br /><br />
 
-Click "Add Component" to finish adding the external component. You do not have to provide any implementation file: this setting simply represents the connection informations of an external component that will connect later on (ie the XCManager component).<br />
-<br />
-Finally, edit your local "hosts" file to ensure that "societies.local" maps to 127.0.0.1. Confirm this by pinging societies.local from a command prompt.
+Click on "Save Settings". Also edit your local hosts file to ensure that your chosen domain name, e.g. "societies.local", maps to 127.0.0.1. Confirm this by pinging societies.local or ict-societies.eu from command prompt. There is a societies openfire plugin that should be deployed. This plugin is necessary to create a openfire accounts via the societies webapp. Install the plugin as follows:<br />
+<ul>
+<li>Copy the societies-openfire-plugin jar into your openfire plugin directory</li>
+<li>Restart openfire</li>
+</ul>
+
 </body>
 </html>

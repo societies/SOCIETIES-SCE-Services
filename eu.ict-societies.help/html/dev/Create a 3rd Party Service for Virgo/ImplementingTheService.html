@@ -1,0 +1,46 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+	<title>Main Topic</title>
+	<link rel="stylesheet" type="text/css" href="../../css/societies_help.css" />
+</head>
+
+<body>
+
+<h1>Implementing your service</h1>
+<p>Use the previously created Eclipse project to implement your service in Java. The SOCIETIES Interfaces and classes will be available for consumption on your classpath when the API External jar is configured in your project's Maven pom.xml, as below:</p>
+<xmp> 
+1<dependency>
+2     <groupId>org.societies.api.external</groupId>
+3     <artifactId>societies-api</artifactId>
+4     <version>0.5</version>
+5     <scope>provided</scope>
+6 </dependency>
+</xmp>
+
+<p>To integrate your service implementation with the SOCIETIES API include Spring OSGi references in the bundle-context-osgi.xml file, as follows:</p>
+<xmp>
+1 <bean id="myService" class="org.societies.myexample.service.MyServiceimpl">
+2     <!-- a reference to a required service. 'name' should be the same as member
+3              variable in your impl class and the 'ref' should be the same as the
+4              osgi:service ref in the bundle-context-osgi.xml file -->
+5     <property name="cxtBrokerService" ref="cxtBrokerRef" />
+6 </bean>
+</xmp>
+<p>The definition of your service implementation (or Spring bean) should include a property of service reference that you wish to use, as below:</p>
+<xmp>1 <!-- Service References -->
+2 <osgi:reference id="cxtBrokerRef" interface="org.societies.api.context.broker.ICtxBroker" />
+3
+4 <!-- Provided Services -->
+5 <osgi:service ref="myService" interface="org.societies.myexample.service.IMyService">
+6     <osgi:service-properties>
+7         <entry key="TargetPlatform" value="SOCIETIES" />
+8         <entry key="ServiceProvider" value="ICT-SOCIETIES" />
+9         <entry key="ServiceMetaModel" value-ref="serMetamodel" />
+10         <entry key="ServiceClient" value="http://societies.local/client.jar" />
+11     </osgi:service-properties>
+12 </osgi:service>
+</xmp>
+</body>

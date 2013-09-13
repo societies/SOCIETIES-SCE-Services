@@ -1,0 +1,374 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>org.societies.ext3p.nzone</groupId>
+	<artifactId>nzone-web</artifactId>
+	<packaging>war</packaging>
+	<version>0.6</version>
+	<name>SOCIETIES 3p Networking Zone Web</name>
+	<url>http://maven.apache.org</url>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<jsf.version>2.0.0</jsf.version>
+	</properties>
+
+	<repositories>
+		<repository>
+			<id>prime-repo</id>
+			<name>PrimeFaces Maven Repository</name>
+			<url>http://repository.primefaces.org</url>
+			<layout>default</layout>
+		</repository>
+		<repository>
+			<id>maven2-repository.dev.java.net</id>
+			<name>Java.net Repository for Maven</name>
+			<url>http://download.java.net/maven/2</url>
+		</repository>
+	</repositories>
+
+	<build>
+		<finalName>nzone-web</finalName>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<extensions>true</extensions>
+				<executions>
+					<execution>
+						<id>bundle-manifest</id>
+						<phase>process-classes</phase>
+						<goals>
+							<goal>manifest</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<manifestLocation>${project.build.directory}/META-INF</manifestLocation>
+					<supportedProjectTypes>
+						<supportedProjectType>bundle</supportedProjectType>
+						<supportedProjectType>war</supportedProjectType>
+					</supportedProjectTypes>
+					<instructions>
+						<Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
+						<Export-Package>!*</Export-Package>
+						<Import-Package>
+							<!-- 
+							javax.faces.webapp;resolution:=optional,
+							com.sun.faces.config;resolution:=optional,
+							 
+							 com.sun.faces.application;resolution:=optional, 
+								com.sun.faces.context;resolution:=optional, com.sun.faces.lifecycle;resolution:=optional, 
+								com.sun.faces.application.view;resolution:=optional, com.sun.faces.renderkit;resolution:=optional, 
+								com.sun.faces.component.visit;resolution:=optional, com.sun.faces.facelets.impl;resolution:=optional, 
+								com.sun.faces.facelets.tag.jsf;resolution:=optional, com.sun.faces.application.resource;resolution:=optional, 
+								com.sun.faces.ext.render;resolution:=optional, com.sun.faces.facelets.component;resolution:=optional, 
+								com.sun.faces.renderkit.html_basic;resolution:=optional, 
+							javax.faces.component;resolution:=optional,
+							javax.faces.component.html;resolution:=optional,
+							javax.faces.context;resolution:=optional,
+							javax.faces.application;resolution:=optional,
+							javax.faces.event;resolution:=optional,
+							javax.faces.render;resolution:=optional,
+							javax.faces;resolution:=optional,
+							javax.faces.component.behavior;resolution:=optional,
+							javax.el;resolution:=optional,
+							javax.faces.convert;resolution:=optional,
+							javax.servlet;resolution:=optional,
+							javax.faces.view.facelets;resolution:=optional,
+							javax.faces.view;resolution:=optional,
+							com.sun.faces.component;resolution:=optional,
+							javax.faces.model;resolution:=optional,
+							javax.faces.component.visit;resolution:=optional, 
+
+
+							org.springframework.web.jsf.el, -->
+
+							org.simpleframework.xml;resolution:=optional,
+							org.eclipse.virgo.web.dm,
+							org.springframework.web.context;resolution:=optional,
+							org.springframework.osgi.config;resolution:=optional,
+							
+
+							org.societies.api.ext3p.nzone.model;resolution:=optional,
+							  
+							javax.servlet;resolution:=optional,
+							javax.servlet.http;resolution:=optional,
+							javax.naming;resolution:=optional,
+							
+							org.springframework.util;resolution:=optional,
+							org.springframework.context;resolution:=optional,
+							org.apache.commons.logging;resolution:=optional,
+							org.springframework.validation;resolution:=optional,
+							org.springframework.web.jsf;resolution:=optional,
+							javax.faces.el;resolution:=optional,
+							com.sun.faces.config;resolution:=optional,
+							com.sun.faces.application;resolution:=optional,
+							javax.faces.application;resolution:=optional,
+							com.sun.faces.context;resolution:=optional,
+							com.sun.faces.lifecycle;resolution:=optional,
+							com.sun.faces.application.view;resolution:=optional,
+							com.sun.faces.facelets.impl;resolution:=optional,
+							javax.faces.context;resolution:=optional,
+							com.sun.faces.renderkit;resolution:=optional,
+							com.sun.faces.component.visit;resolution:=optional,
+							com.sun.faces.facelets.tag.jsf;resolution:=optional,
+							javax.faces.component.visit;resolution:=optional,
+							
+							javax.faces.component;resolution:=optional,
+							javax.faces.component.html;resolution:=optional,
+							
+							javax.faces.event;resolution:=optional,
+							javax.faces.render;resolution:=optional,
+							javax.faces;resolution:=optional,
+							javax.faces.component.behavior;resolution:=optional,
+							javax.el;resolution:=optional,
+							javax.faces.convert;resolution:=optional,
+							com.sun.faces.application.resource;resolution:=optional,
+							javax.faces.view.facelets;resolution:=optional,
+							javax.faces.view;resolution:=optional,
+							org.springframework.beans.factory;resolution:=optional,
+							org.springframework.beans.factory.support;resolution:=optional,
+							org.springframework.web.jsf.el;resolution:=optional,
+							com.sun.faces.ext.render;resolution:=optional,
+							com.sun.faces.facelets.component;resolution:=optional,
+							com.sun.faces.renderkit.html_basic;resolution:=optional,
+							javax.faces.webapp;resolution:=optional,
+							com.sun.faces.component;resolution:=optional,
+							javax.faces.lifecycle;resolution:=optional,
+							javax.faces.model;resolution:=optional,
+							<!--  
+							org.springframework.binding.expression;resolution:=optional,
+							org.springframework.webflow.execution;resolution:=optional,
+							-->
+							
+							<!--  javax.faces.lifecycle-->
+							
+							*;resolution:=optional
+
+						</Import-Package>
+						<Bundle-ClassPath>
+							WEB-INF/classes,
+						  	WEB-INF/lib/primefaces-3.3.jar,
+							WEB-INF/lib/primefaces-mobile-0.9.3.jar,
+						<!--  	WEB-INF/lib/jstl-1.2.jar,
+						 
+							WEB-INF/lib/javax.servlet.jsp-api-2.2.1.jar,
+					
+							WEB-INF/lib/jstl-1.2.jar,
+							WEB-INF/lib/primefaces-3.3.jar,
+							WEB-INF/lib/primefaces-mobile-0.9.3.jar,
+					
+							WEB-INF/lib/spring-binding-2.3.2.RELEASE.jar,
+					
+							WEB-INF/lib/spring-expression-3.2.1.RELEASE.jar,
+							WEB-INF/lib/spring-faces-2.3.2.RELEASE.jar,
+							WEB-INF/lib/spring-js-2.3.2.RELEASE.jar,
+							WEB-INF/lib/spring-js-resources-2.3.2.RELEASE.jar,
+						
+							WEB-INF/lib/spring-webflow-2.3.2.RELEASE.jar,
+					-->
+							.</Bundle-ClassPath>
+					</instructions>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-war-plugin</artifactId>
+				<version>2.2</version>
+				<configuration>
+					<attachClasses>true</attachClasses>
+					<archive>
+						<manifestFile>${project.build.directory}/META-INF/MANIFEST.MF</manifestFile>
+					</archive>
+					<packagingExcludes>
+					 	WEB-INF/lib/aopalliance-1.0.jar,
+					 	WEB-INF/lib/el-api-2.2.jar,
+					 		WEB-INF/lib/el-impl-2.2.jar,
+							WEB-INF/lib/javax.el-api-2.2.1.jar,
+						WEB-INF/lib/spring-context-3.2.1.RELEASE.jar, 
+						WEB-INF/lib/spring-core-3.2.1.RELEASE.jar, 
+						WEB-INF/lib/spring-web-3.0.5.RELEASE.jar,
+						WEB-INF/lib/spring-webmvc-3.2.1.RELEASE.jar,
+						 WEB-INF/lib/spring-beans-3.2.1.RELEASE.jar,
+						 WEB-INF/lib/spring-aop-3.2.1.RELEASE.jar,
+						 WEB-INF/lib/servlet-api-2.5.jar,
+						 WEB-INF/lib/javax.faces-2.1.17.jar,
+						WEB-INF/lib/jsf-api-2.1.17.jar,
+						 WEB-INF/lib/jsf-impl-2.1.17.jar,
+						 WEB-INF/lib/com.springsource.slf4j.api-1.6.1.jar,
+						 WEB-INF/lib/com.springsource.slf4j.org.apache.commons.logging-1.6.1.jar,
+						
+						 WEB-INF/lib/commons-logging-1.1.1.jar,
+						 WEB-INF/lib/javax.servlet.jsp-api-2.2.1.jar,
+						<!--   WEB-INF/lib/jstl-1.2.jar, -->
+						 WEB-INF/lib/spring-binding-2.3.2.RELEASE.jar,
+						 WEB-INF/lib/spring-expression-3.2.1.RELEASE.jar,
+						 WEB-INF/lib/spring-faces-2.3.2.RELEASE.jar,
+						 WEB-INF/lib/spring-js-2.3.2.RELEASE.jar,
+						 WEB-INF/lib/spring-js-resources-2.3.2.RELEASE.jar,
+						 WEB-INF/lib/spring-webflow-2.3.2.RELEASE.jar,
+						 WEB-INF/lib/jstl-1.2.jar
+						
+						 
+						 
+						 
+						 
+						 
+						 
+					</packagingExcludes>
+
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>2.0.2</version>
+				<configuration>
+					<source>1.6</source>
+					<target>1.6</target>
+					<encoding>${project.build.sourceEncoding}</encoding>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+	<dependencies>
+		<!-- PrimeFaces dependencies -->
+		<dependency>
+			<groupId>org.primefaces</groupId>
+			<artifactId>primefaces</artifactId>
+			<version>3.3</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.primefaces</groupId>
+			<artifactId>primefaces-mobile</artifactId>
+			<version>0.9.3</version>
+		</dependency>
+
+		<!-- Java EE6 dependencies -->
+		<dependency>
+			<groupId>com.sun.faces</groupId>
+			<artifactId>jsf-api</artifactId>
+			<version>2.1.17</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.sun.faces</groupId>
+			<artifactId>jsf-impl</artifactId>
+			<version>2.1.17</version>
+		</dependency>
+
+
+		<dependency>
+			<groupId>javax.el</groupId>
+			<artifactId>javax.el-api</artifactId>
+			<version>2.2.1</version>
+		</dependency>
+
+
+		<dependency>
+			<groupId>javax.servlet.jsp.jstl</groupId>
+			<artifactId>jstl-api</artifactId>
+			<version>1.2</version>
+			<scope>provided</scope>
+		</dependency>
+
+
+		<dependency>
+			<groupId>javax.servlet.jsp</groupId>
+			<artifactId>javax.servlet.jsp-api</artifactId>
+			<version>2.2.1</version>
+		</dependency>
+
+
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>jstl</artifactId>
+			<version>1.2</version>
+		</dependency>
+<!-- 
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>servlet-api</artifactId>
+			<version>2.5</version>
+		</dependency>
+-->
+		<dependency>
+			<groupId>org.springframework.webflow</groupId>
+			<artifactId>spring-faces</artifactId>
+			<version>2.3.2.RELEASE</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.webflow</groupId>
+			<artifactId>spring-binding</artifactId>
+			<version>2.3.2.RELEASE</version>
+		</dependency>
+
+		<!-- Virgo/Tomcat needs this -->
+		<dependency>
+			<groupId>org.glassfish</groupId>
+			<artifactId>javax.faces</artifactId>
+			<version>2.1.17</version>
+		</dependency>
+		<dependency>
+			<groupId>org.glassfish.web</groupId>
+			<artifactId>el-impl</artifactId>
+			<version>2.2</version>
+		</dependency>
+
+
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-web</artifactId>
+			<version>3.0.5.RELEASE</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.societies.ext3p.nzone</groupId>
+			<artifactId>nzone-api</artifactId>
+			<version>${project.version}</version>
+			<scope>provided</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.simpleframework</groupId>
+			<artifactId>simple-xml</artifactId>
+			<version>2.6.9</version>
+			<scope>provided</scope>
+			<exclusions>
+				<!-- StAX is not available on Android -->
+				<exclusion>
+					<artifactId>stax</artifactId>
+					<groupId>stax</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>stax-api</artifactId>
+					<groupId>stax</groupId>
+				</exclusion>
+				<!-- Provided by Android -->
+				<exclusion>
+					<artifactId>xpp3</artifactId>
+					<groupId>xpp3</groupId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>com.springsource.slf4j.org.apache.commons.logging</artifactId>
+			<version>1.6.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>com.springsource.slf4j.api</artifactId>
+			<version>1.6.1</version>
+		</dependency>
+
+	</dependencies>
+
+</project>

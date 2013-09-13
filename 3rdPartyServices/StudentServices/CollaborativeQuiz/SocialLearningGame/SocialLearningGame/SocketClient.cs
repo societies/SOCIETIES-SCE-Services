@@ -38,6 +38,8 @@ namespace SocialLearningGame
         String userName = "";
         public String getUserIdentity()
         {
+            this.userIdentity = "paddy";
+
             if (this.userIdentity == string.Empty)
             {
                 IPEndPoint ip = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 2114);
@@ -66,15 +68,15 @@ namespace SocialLearningGame
                 string endPointData = Encoding.ASCII.GetString(data, 0, receivedDataLength);
                 Console.Write("Received IPAddress from server: " + endPointData);
 
-                
+
                 server.Close();
                 this.userIdentity = stringData;
                 this.serverIPAddress = endPointData;
                 return stringData;
             }
-            
-                return this.userIdentity;
-            
+
+            return this.userIdentity;
+
         }
 
         public String getUserName()
@@ -123,5 +125,5 @@ namespace SocialLearningGame
         }
     }
 
-    
+
 }

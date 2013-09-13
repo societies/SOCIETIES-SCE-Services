@@ -24,23 +24,15 @@
  */
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using RestSharp; //commmunicating with server
-using System.Threading;
-using System.IO;
-using ServiceStack.Text; //JSON (de)serialisation
-using System.Reflection; //handling assembly reference
+using Microsoft.Kinect;
+using Microsoft.Kinect.Toolkit;
+using Microsoft.Kinect.Toolkit.Controls;
+using SocialLearningGame.Logic;
+using SocialLearningGame.Pages;
 
 namespace SocialLearningGame
 {
@@ -49,341 +41,265 @@ namespace SocialLearningGame
     /// </summary>
     public partial class MainWindow : Window
     {
-        //variables to use in whole project (user details etc.)
-        public static int playerScore;
-        public static Student student = new Student();
-        public static string baseURL = "http://societies.local.macs.hw.ac.uk:5678/laura.rest.server/"; //137.195.27.87
-        public static List<Question> questionSet = new List<Question>();
-        public static List<Student> allStudents = new List<Student>();
-        public static List<Challenge> challenges = new List<Challenge>();
-        public static List<Challenge> challengesFrom = new List<Challenge>();
+        //protected static log4net.ILog log = log4net.LogManager.GetLogger(typeof(MainWindow));
+        private static MainWindow _windowInstance;
+        public static MainWindow Instance { get { return _windowInstance; } }
 
-        bool errored = false;
+        public KinectSensorChooser SensorChooser { get; private set; }
+
+      //  private readonly CommsManager commsManager;
 
         public MainWindow()
-        {
-            //event handler to resolve assembly references when running as a standalone exe
-            AppDomain.CurrentDomain.AssemblyResolve += new ResolveEventHandler(ResolveAssembly);
-            
-            InitializeComponent();
-
-            //initialise variables
-            challenges = null;
-            challengesFrom = null;
-            Thread questions = new Thread(new ThreadStart(getQuestionSet));
-            questions.Start();
-            getStudent();
-
-            try
-            {
-                if (!errored)
-                {
-                    if (student.first == 1)
-                    {
-                        _mainFrame.NavigationService.Navigate(new Pages.Instruction());
-                    }
-                    else
-                    {
-                        _mainFrame.NavigationService.Navigate(new Pages.HomePage());
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Error in Main Window, trying to load home page" + ex.Message);
-            }
-        }
-
-        //get student HERE!
-        void getStudent()
-        {
-            //use the socket client to find the jid for the current user
-            SocketClient socketClient = new SocketClient();
-            string id = socketClient.getUserIdentity();
-            Console.WriteLine(id);
-            //get the current user information by using a get request to the server
-            //find the student and get the friends list
-            //create a new rest client
-            var client = new RestClient();
-            //set the baseurl to be where the server is
-            client.BaseUrl = baseURL;
-            //get request for the student
-            var request = new RestRequest("student");
-            //add parameters, ID, to find the correct student
-            request.AddParameter("id", id);
-            try
-            {
-                //get the response from the server
-                IRestResponse<Student> response = client.Execute<Student>(request);
-
-                if (response.Content != null)
-                {
-                    //get the student details from the response
-                    student.id = response.Data.id;
-                    student.name = response.Data.name;
-                    student.score = response.Data.score;
-                    student.first = response.Data.first;
-                    Console.WriteLine("first:" + student.first);
-                }
-                if(student.name.Equals(""))
-                {
-                    _mainFrame.NavigationService.Navigate(new Pages.NotRegistered());
-                }
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine("Exception: " + e.Message);
-                Console.WriteLine("Error trying to get the student from the server");
-                _mainFrame.NavigationService.Navigate(new Pages.NotRegistered());
-                errored = true;
-            }
-            
-            //get a list of any challenges the current player has
-            Thread challenges = new Thread(new ThreadStart(getChallengesTo));
-            challenges.Start();
-            
-            //get a list of all the students excluding the current player
-            getStudentList();
-            getChallengesFrom();
-            
-        }
-
-        void getStudentList()
+            : base()
         {
             
-            //create a new rest client
-            var client = new RestClient();
-            //set the baseurl to be where the server is
-            client.BaseUrl = baseURL;
-            //get request for the student
-            var request = new RestRequest("student/all");
-            request.AddParameter("id", student.id);
-            try
-            {
-                var response = client.Execute<List<Student>>(request);
-                allStudents = response.Data;
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine("Exception: " + e.Message);
-                Console.WriteLine("Error trying to get the list of students from server");
-            }
+         //   log4net.Config.XmlConfigurator.Configure();
+          //  //log.Debug("Init components");
+            this.InitializeComponent();
+          //  log4net.Config.XmlConfigurator.Configure(new System.IO.FileInfo("./Resources/log4net.config.xml"));
+            //log.Info("Logging configured");
+           // //log.Debug("Init Kinect sensor");
+            // initialize the sensor chooser and UI
+            this.SensorChooser = new KinectSensorChooser();
+            this.SensorChooser.KinectChanged += SensorChooserOnKinectChanged;
+            this.sensorChooserUi.KinectSensorChooser = this.SensorChooser;
+#if DEBUG
+            ////log.Warn("Sensor auto-start is disabled during debug");
+            //this.RightHand.MouseUp += new System.Windows.Input.MouseButtonEventHandler(sensorChooserUi_MouseDoubleClick);
+            this.SensorChooser.Start();
+#else
+            this.SensorChooser.Start();
+#endif
+
+            // Bind the sensor chooser's current sensor to the KinectRegion
+            Binding regionSensorBinding = new Binding("Kinect") { Source = this.SensorChooser };
+            BindingOperations.SetBinding(this.kinectRegion, KinectRegion.KinectSensorProperty, regionSensorBinding);
+       //     //log.Debug("Kinect initialized");
+
+            Page p = LoadingPage.Instance; // Hack to get this to init on the right thread;
+            Page q = CommsError.Instance; // Hack to get this to init on the right thread;
+            Page r = HomePage.Instance;// Hack to get this to init on the right thread;
+
+            _windowInstance = this;
+
+            /*String HOST_URL = "puma-paddy-3";
+            String USERNAME = "osgims";
+            String PASSWORD = "osgims";
+            commsManager = new CommsManager(HOST_URL, USERNAME, PASSWORD);
+
+            String nodeName = "myNode1";
+
+            commsManager.RegisterListener(nodeName);*/
+
+            this.Show();
         }
 
-        //closeWindow method which updates the server with scores etc. when the window is closed
+#if DEBUG
+        public void sensorChooserUi_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            this.SensorChooser.Start();
+        }
+#endif
+
+        #region " Window events "
+
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            Console.WriteLine("I am loaded...");
+            // load data (on a different thread)
+            Thread loaderThread = new Thread(new ThreadStart(LoadingThread));
+            loaderThread.Name = "Data loader thread";
+            loaderThread.Start();
+        }
+
         private void WindowClosing(object sent, System.ComponentModel.CancelEventArgs e)
         {
-            updateStudent();
-        }
+            if (this.SensorChooser != null)
+            {
+               // //log.Debug("Stopping Kinect");
+                this.SensorChooser.Stop();
 
-        void updateStudent()
-        {
-            //create a new rest client
-            var client = new RestClient();
-            //set the baseurl to be where the server is
-            client.BaseUrl = baseURL;
-            //get request for the student
-            var request = new RestRequest("student", Method.POST);
-            request.RequestFormat = RestSharp.DataFormat.Json;
-            string body = request.JsonSerializer.Serialize(student);
-            request.AddParameter("application/json", body, ParameterType.RequestBody);
-            try
-            {
-                var response = client.Execute(request);
-                Console.WriteLine(response.Content);
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine("Exception: " + e.Message);
-                Console.WriteLine("Error trying to update the student");
+                if (this.SensorChooser.Kinect != null)
+                    UnbindSensor(this.SensorChooser.Kinect);
             }
         }
 
+        #endregion
 
-        //do all communication with the server here :) get questions elsewhere, as need to know if a category is specified
-        public static void sendChallenge(Student friend, String category, int score)
+        #region " Kinect Events "
+
+        /// <summary>
+        /// Called when the KinectSensorChooser gets a new sensor
+        /// </summary>
+        /// <param name="sender">sender of the event</param>
+        /// <param name="args">event arguments</param>
+        private void SensorChooserOnKinectChanged(object sender, KinectChangedEventArgs args)
         {
-            //create a new challenge to send to the server
-            Challenge challenge = new Challenge();
-            challenge.challenger = student;
-            challenge.challenged = friend;
-            challenge.category = category;
-            challenge.challengerScore = score;
+            //log.Debug("Kinect sensor changed");
 
-            //create a new rest client
-            var client = new RestClient();
-            //set the baseurl to be where the server is
-            client.BaseUrl = baseURL;
-            //post request for the challenge
-            var request = new RestRequest("challenge", Method.POST);
-            request.RequestFormat = RestSharp.DataFormat.Json; //change the request format to JSON
-            var body = request.JsonSerializer.Serialize(challenge); //serialise the challenge object to JSON object
-            request.AddParameter("application/json", body, ParameterType.RequestBody); //make the serialised challenge the body of the post request
-            try
+            if (args.OldSensor != null)
             {
-                var response = client.Execute<Challenge>(request);
+                //log.Debug("Unbinding old sensor");
 
-                Console.WriteLine(response.Content);
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine("Exception: " + e.Message);
-                Console.WriteLine("Error trying to send a challenge");
-            }
-        }
-
-        public static void updateChallenge(Challenge challenge)
-        {
-            //create a new rest client
-            var client = new RestClient();
-            //set the baseurl to be where the server is
-            client.BaseUrl = baseURL;
-            //post request for the challenge
-            var request = new RestRequest("challenge", Method.POST);
-            request.RequestFormat = RestSharp.DataFormat.Json; //change the request format to JSON
-            var body = request.JsonSerializer.Serialize(challenge); //serialise the challenge object to JSON object
-            request.AddParameter("application/json", body, ParameterType.RequestBody); //make the serialised challenge the body of the post request
-            try
-            {
-                var response = client.Execute<Challenge>(request);
-
-                Console.WriteLine(response.Content);
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine("Exception: " + e.Message);
-                Console.WriteLine("Error trying to update a challenge");
-            }
-        }
-
-        public static void deleteChallenge(Challenge challenge)
-        {
-            //create a new rest client
-            var client = new RestClient();
-            //set the baseurl to be where the server is
-            client.BaseUrl = baseURL;
-            //post request for the challenge
-            var request = new RestRequest("challenge/delete", Method.DELETE);
-            request.AddParameter("id",challenge.id);
-            try
-            {
-                var response = client.Execute(request);
-
-                Console.WriteLine(response.Content);
-                getChallengesFrom();
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine("Exception: "+ e.Message);
-                Console.WriteLine("Error trying to delete a challenge");
-            }
-        }
-
-        public static void getQuestionSet()
-        {
-            //get all the questions as a list of Question type from the server
-            var client = new RestClient();
-            client.BaseUrl = baseURL;
-            var request = new RestRequest("question");
-            try
-            {
-                var response = client.Execute<List<Question>>(request);
-                questionSet = response.Data;
-                //in case response returns some null values remove anything that does not have a question
-                questionSet.RemoveAll(delegate(Question q) { return q.question == null; });
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine("Exception: " + e.Message);
-                Console.WriteLine("Error trying to get the question set from server");
-            }
-
-        }
-
-        public static void getChallengesTo()
-        {
-            try
-            {
-                var client = new RestClient();
-                client.BaseUrl = baseURL;
-                var request = new RestRequest("challenge");
-                request.AddParameter("id", student.id);
                 try
                 {
-                    var response = client.Execute<List<Challenge>>(request);
-                    if (response == null)
-                    {
-                        challenges = null;
-                    }
-                    else
-                    {
-                        challenges = response.Data;
-                        challenges.RemoveAll(delegate(Challenge c) { return c.challenger == null; });
-                    }
+                    KinectSensor oldSensor = args.OldSensor;
+
+                    UnbindSensor(oldSensor);
+
+                    //log.Debug("Completed unbinding old sensor");
                 }
-                catch (Exception e)
+                catch (InvalidOperationException ex)
                 {
-                    Console.WriteLine("Exception: " + e.Message);
-                    Console.WriteLine("Error trying to get a list of challenges to the user from the server");
+                    // KinectSensor might enter an invalid state while enabling/disabling streams or stream features.
+                    // E.g.: sensor might be abruptly unplugged.
+                    //log.Warn("Error unbinding old sensor", ex);
                 }
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine("Exception:" + e.Message);
-                Console.WriteLine("Error trying to get student id");
             }
 
-            
+            if (args.NewSensor != null)
+            {
+                //log.Debug("Binding new sensor");
+
+                try
+                {
+                    KinectSensor newSensor = args.NewSensor;
+
+                    BindSensor(newSensor);
+
+                    //log.Debug("Completed binding new sensor");
+                }
+                catch (InvalidOperationException ex)
+                {
+                    // KinectSensor might enter an invalid state while enabling/disabling streams or stream features.
+                    // E.g.: sensor might be abruptly unplugged.
+                    //log.Warn("Error binding new sensor", ex);
+                }
+
+            }
         }
 
-        //called to get a list of any challenges that the user has sent that have been completed
-        public static void getChallengesFrom()
+        private static void BindSensor(KinectSensor sensor)
         {
-            var client = new RestClient();
-            client.BaseUrl = baseURL;
-            var request = new RestRequest("challenge/from");
-            request.AddParameter("id", student.id);
+            if (sensor == null)
+                return;
+
+            //log.Debug("BindSensor()");
+            // Sensor
+            sensor.Start();
+
+            sensor.DepthStream.Enable(DepthImageFormat.Resolution640x480Fps30);
+
             try
             {
-                var response = client.Execute<List<Challenge>>(request);
-                if (response.Data == null)
-                {
-                    challengesFrom = null;
-                }
-                else
-                {
-                    challengesFrom = response.Data;
-                    challengesFrom.RemoveAll(delegate(Challenge c) { return c.challenger == null; });
-                }
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine("Exception: " + e.Message);
-                Console.WriteLine("Error trying to get a list of challenges from the user from server");
-            }
-            
+#if DEBUG
+                // near mode for debug
+                sensor.DepthStream.Range = DepthRange.Near;
+#endif
 
+                // NB the skeleton stream is used to track the silhouette of the player on all pages
+                sensor.SkeletonStream.EnableTrackingInNearRange = true;
+                //sensor.SkeletonStream.TrackingMode = SkeletonTrackingMode.Seated;
+                // Turn on the skeleton stream to receive skeleton frames
+                sensor.SkeletonStream.Enable();
+            }
+            catch (InvalidOperationException ex)
+            {
+                // Non Kinect for Windows devices do not support Near mode, so reset back to default mode.
+                sensor.DepthStream.Range = DepthRange.Default;
+                sensor.SkeletonStream.EnableTrackingInNearRange = false;
+                //log.Warn("Error Setting depth range to near mode", ex);
+            }
         }
 
-        //Code to get assemblies when running as a single executable
-        static Assembly ResolveAssembly(object sender, ResolveEventArgs args)
+        private static void UnbindSensor(KinectSensor sensor)
         {
-            Assembly parentAssembly = Assembly.GetExecutingAssembly();
+            if (sensor == null)
+                return;
 
-            var name = args.Name.Substring(0, args.Name.IndexOf(',')) + ".dll";
-            var resourceName = parentAssembly.GetManifestResourceNames()
-                .First(s => s.EndsWith(name));
+            //log.Debug("UnbindSensor()");
 
-            using (Stream stream = parentAssembly.GetManifestResourceStream(resourceName))
+            sensor.DepthStream.Range = DepthRange.Default;
+            sensor.SkeletonStream.EnableTrackingInNearRange = false;
+            sensor.DepthStream.Disable();
+            sensor.SkeletonStream.Disable();
+            sensor.AudioSource.Stop();
+            sensor.Stop();
+        }
+
+        #endregion
+
+        #region " Page switching "
+        private delegate void SwitchPageDelegate(Page newPage);
+        public static void SwitchPage(Page newPage)
+        {
+            Console.WriteLine("Switch page: " + newPage.GetType().ToString());
+
+            if (newPage == null)
             {
-                byte[] block = new byte[stream.Length];
-                stream.Read(block, 0, block.Length);
-                return Assembly.Load(block);
+             //   //log.Error("SwitchPage - Page cannot be null");
+                return;
             }
+
+            if (!_windowInstance.Dispatcher.CheckAccess())
+            {
+                ////log.Debug("Cross threading call required");
+                _windowInstance.Dispatcher.Invoke(new SwitchPageDelegate(SwitchPage), newPage);
+                return;
+            }
+
+            if (newPage.GetType() == typeof(HomePage)
+                || newPage.GetType() == typeof(LoadingPage)
+                || newPage.GetType() == typeof(CommsError))
+            {
+                _windowInstance.menuButton.Visibility = Visibility.Hidden;
+            }
+            else
+            {
+                _windowInstance.menuButton.Visibility = Visibility.Visible;
+            }
+
+        //    //log.Debug("Switching to page " + newPage.GetType().Name);
+            _windowInstance.title.Text = newPage.Title;
+            _windowInstance._mainFrame.NavigationService.Navigate(newPage);
+          ////log.Debug("Switched");
         }
 
 
-        //richarddingwall.name/2009/05/14/wpf-how-to-combine-mutliple-assemblies-into-a-single-exe/
+        #endregion
+
+        private void LoadingThread()
+        {
+            SwitchPage(LoadingPage.Instance);
+
+            GameSession session = GameLogic.NewGame(null);
+
+            if (session.Stage == GameStage.SetupError)
+            {
+                SwitchPage(CommsError.Instance);
+            }
+            //else if (student.First == 1)
+            //{
+            //    _mainFrame.NavigationService.Navigate(new Pages.Instruction());
+            //}
+            else
+            {
+                SwitchPage(HomePage.Instance);
+            }
+        }
+
+        private void exitButtonClick(object sender, RoutedEventArgs e)
+        {
+            if (SensorChooser != null && SensorChooser.Kinect != null)
+                UnbindSensor(SensorChooser.Kinect);
+
+            Environment.Exit(0x00);
+        }
+
+        private void menuButtonClick(object sender, RoutedEventArgs e)
+        {
+            SwitchPage(HomePage.Instance);
+        }
 
     }
 }

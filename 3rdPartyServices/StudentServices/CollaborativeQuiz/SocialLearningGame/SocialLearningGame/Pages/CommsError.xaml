@@ -1,0 +1,82 @@
+﻿<Page x:Class="SocialLearningGame.Pages.CommsError"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:k="http://schemas.microsoft.com/kinect/2013"
+      xmlns:c="clr-namespace:SocialLearningGame.Pages.Components"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      mc:Ignorable="d"
+      Height="600" Width="1000"
+      Title="Communication Error">
+
+    <Page.Resources>
+        <PathGeometry x:Key="ChevronGeometry" x:Shared="False">
+            F1M150.001,146.9932L126.565,169.3822L126.565,153.5962L150.001,130.6182L173.435,153.5962L173.435,169.3822z
+        </PathGeometry>
+
+        <Path x:Key="ChevronLeft" Height="80" Width="80" Stretch="Uniform" Canvas.Top="0" x:Shared="False"
+          Data="{StaticResource ChevronGeometry}"
+          Fill="{Binding FallbackValue=Black, Path=Foreground,RelativeSource={RelativeSource AncestorType={x:Type c:KinectHoverButton}}}">
+            <Path.RenderTransformOrigin>0.5,0.5</Path.RenderTransformOrigin>
+            <Path.RenderTransform>
+                <RotateTransform Angle="270"/>
+            </Path.RenderTransform>
+        </Path>
+
+        <Style x:Key="KinectHoverButtonStyle" TargetType="{x:Type c:KinectHoverButton}">
+            <Setter Property="Background" Value="LightGray"/>
+            <Setter Property="BorderBrush" Value="DarkGray"/>
+            <Setter Property="BorderThickness" Value="0"></Setter>
+            <Setter Property="Foreground" Value="White"></Setter>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type c:KinectHoverButton}">
+                        <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="{TemplateBinding Background}" Width="{TemplateBinding Width}" Height="{TemplateBinding Height}">
+                            <Border BorderThickness="{TemplateBinding BorderThickness}" BorderBrush="{TemplateBinding BorderBrush}">
+                                <ContentPresenter HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Content="{TemplateBinding Content}"></ContentPresenter>
+                            </Border>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsEnabled" Value="False">
+                    <Setter Property="Foreground" Value="LightGray"/>
+                    <Setter Property="BorderBrush" Value="LightGray"/>
+                    <Setter Property="Background" Value="Transparent"></Setter>
+                </Trigger>
+                <Trigger Property="IsHandPointerOver" Value="True">
+                    <Setter Property="Background" Value="#5A5B5B"/>
+                    <Setter Property="Foreground" Value="White"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="KinectHoverButtonScrollLeftStyle" TargetType="{x:Type c:KinectHoverButton}" BasedOn="{StaticResource KinectHoverButtonStyle}">
+            <Setter Property="Content" Value="{StaticResource ChevronLeft}"/>
+        </Style>
+
+    </Page.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="247*" />
+            <RowDefinition Height="353*" />
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0" Name="textBlock1" 
+            Margin="50 50 50 50"
+            Text="There was an error setting up the game, so you can't play right now. 
+
+Our crack team of super geeks has already been informed and they'll fix it as soon as possible" 
+            TextWrapping="Wrap" FontSize="24" TextAlignment="Center" />
+
+        <k:KinectCircleButton
+            HorizontalAlignment="Center"
+            Label="Push to exit"
+            Grid.Row="1" 
+            Click="exitButtonClick" Width="300" />
+
+    </Grid>
+
+</Page>

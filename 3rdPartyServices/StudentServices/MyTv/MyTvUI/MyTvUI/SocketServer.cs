@@ -42,6 +42,22 @@ namespace MyTvUI
             }
         }
 
+        public void stopSocketServer()
+        {
+            listening = false;
+            try{
+                if (client != null)
+                {
+                    client.Close();
+                }
+                server.Stop();
+            }
+            catch(Exception e)
+            {
+                Console.WriteLine(e.ToString());
+            }
+        }
+
         public void listenSocket()
         {
             try
@@ -53,18 +69,21 @@ namespace MyTvUI
             {
                 Console.WriteLine("SOCKET_SERVER: Could not listen on port: " + port);
                 Console.WriteLine(e.ToString());
+                return;
             }
 
 
             try
             {
-                Console.Write("SOCKET_SERVER: Waiting for connection from service client on port: " + port);
+                Console.WriteLine("SOCKET_SERVER: Waiting for connection from service client on port: " + port);
                 client = server.AcceptTcpClient();
             }
             catch (Exception e)
             {
                 Console.WriteLine("SOCKET_SERVER: Accept failed: " + port);
                 Console.WriteLine(e.ToString());
+                server.Stop();
+                return;
             }
 
             Console.WriteLine("SOCKET_SERVER: Connected accepted from service client!");
@@ -98,8 +117,11 @@ namespace MyTvUI
                         }
                         else if (command.Equals(USER_SESSION_ENDED))
                         {
+                            //not used
                             Console.WriteLine("SOCKET_SERVER: "+USER_SESSION_ENDED + "message received");
                             stream.Write(okBytes, 0, okBytes.Length);
+                            //close down
+                            //window.Close();
                         }
                         else
                         {

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:osgi="http://www.springframework.org/schema/osgi"
+	xmlns:osgi-compendium="http://www.springframework.org/schema/osgi-compendium"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+                      http://www.springframework.org/schema/osgi http://www.springframework.org/schema/osgi/spring-osgi.xsd
+                      http://www.springframework.org/schema/context 
+    				http://www.springframework.org/schema/context/spring-context-2.5.xsd
+                      http://www.springframework.org/schema/osgi-compendium 
+                      http://www.springframework.org/schema/osgi-compendium/spring-osgi-compendium-1.2.xsd"
+	xmlns:context="http://www.springframework.org/schema/context">
+
+	
+	<osgi:service ref="disasterDataCollector" interface="org.societies.thirdPartyServices.disasterManagement.disasterDataCollector.IDisasterDataCollector" />
+	<!--
+		<osgi:service-properties>
+			<entry key="TargetPlatform" value="SOCIETIES" />
+			<entry key="ServiceProvider" value="ICT-SOCIETIES" />
+		</osgi:service-properties>
+	</osgi:service>  
+	-->
+	
+	<!-- <bean id="DisasterDataCollectorBean" class="org.societies.thirdPartyServices.disasterManagement.disasterDataCollector.DisasterDataCollector" /> -->
+<!--   
+	<osgi:reference id="externalCtxBroker" interface="org.societies.api.context.broker.ICtxBroker" cardinality="1..1" />
+	<osgi:reference id="commMgr" interface="org.societies.api.comm.xmpp.interfaces.ICommManager" cardinality="1..1" />
+-->	
+</beans>

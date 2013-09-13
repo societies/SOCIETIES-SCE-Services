@@ -10,23 +10,23 @@
 		this file can easily be used for integration testing outside of an OSGi environment -->
 
  
-	<bean id="socialLearning"
+	 <bean id="socialLearning"
 		class="ac.hw.services.socialLearning.app.SocialLearningService"
 		name="socialLearning" init-method="Init">
 	    <property name="commMgr" ref="commManager"></property>
 	    <property name="displayDriverService" ref="displayDriverServiceRef"></property>
 		<property name="evMgr" ref="eventMgmtRef"></property>
 		<property name="ctxBroker" ref="ctxBroker"></property>
-		<property name="commsClient" ref="commsClient"></property>
+		<property name="server" ref="commsClient"></property>
 		<property name="serviceMgmt" ref="serviceMgmt"></property>
 	</bean>
 
 
-	<bean id="commsClient"
+ 	<bean id="commsClient"
 	    class="ac.hw.services.socialLearning.app.comms.CommsClient"
-	    name="commsClient" init-method="Init">
-	   <property name="commMgr" ref="commManager"></property>
-	</bean>
+	    name="commsClient" init-method="InitService">
+	   <property name="commManager" ref="commManager"></property>
+	</bean>  
 	
 	<!-- <context:component-scan base-package="org.societies.personalisation.management.impl"></context:component-scan> -->
 </beans>

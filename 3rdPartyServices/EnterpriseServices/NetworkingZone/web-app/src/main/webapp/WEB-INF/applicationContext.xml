@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright (c) 2011, SOCIETIES 
+	Consortium (WATERFORD INSTITUTE OF TECHNOLOGY (TSSG), HERIOT-WATT UNIVERSITY 
+	(HWU), SOLUTA.NET (SN), GERMAN AEROSPACE CENTRE (Deutsches Zentrum fuer Luft- 
+	und Raumfahrt e.V.) (DLR), Zavod za varnostne tehnologije informacijske družbe 
+	in elektronsko poslovanje (SETCCE), INSTITUTE OF COMMUNICATION AND COMPUTER 
+	SYSTEMS (ICCS), LAKE COMMUNICATIONS (LAKE), INTEL PERFORMANCE LEARNING SOLUTIONS 
+	LTD (INTEL), PORTUGAL TELECOM INOVAÇÃO, SA (PTIN), IBM Corp., INSTITUT TELECOM 
+	(ITSUD), AMITEC DIACHYTI EFYIA PLIROFORIKI KAI EPIKINONIES ETERIA PERIORISMENIS 
+	EFTHINIS (AMITEC), TELECOM ITALIA S.p.a.(TI), TRIALOG (TRIALOG), Stiftelsen 
+	SINTEF (SINTEF), NEC EUROPE LTD (NEC)) All rights reserved. Redistribution 
+	and use in source and binary forms, with or without modification, are permitted 
+	provided that the following conditions are met: 1. Redistributions of source 
+	code must retain the above copyright notice, this list of conditions and 
+	the following disclaimer. 2. Redistributions in binary form must reproduce 
+	the above copyright notice, this list of conditions and the following disclaimer 
+	in the documentation and/or other materials provided with the distribution. 
+	THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
+	AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE 
+	IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE 
+	ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE 
+	LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
+	DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR 
+	SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER 
+	CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, 
+	OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE 
+	USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. -->
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:osgi="http://www.springframework.org/schema/osgi"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:osgi-compendium="http://www.springframework.org/schema/osgi-compendium"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd
+		http://www.springframework.org/schema/osgi http://www.springframework.org/schema/osgi/spring-osgi.xsd
+		http://www.springframework.org/schema/osgi-compendium http://www.springframework.org/schema/osgi-compendium/spring-osgi-compendium-1.2.xsd">
+	
+	<context:property-placeholder properties-ref="networkclientConfig"/> 
+	
+	<osgi:reference id="commManager" interface="org.societies.api.comm.xmpp.interfaces.ICommManager"/> 
+	<osgi:reference id="ctxBroker" interface="org.societies.api.context.broker.ICtxBroker" />
+	
+	<osgi:reference id="cisManager" interface="org.societies.api.cis.management.ICisManager" />
+	<osgi:reference id="cisDirectoryClient" interface="org.societies.api.cis.directory.ICisDirectoryRemote" />
+	
+	<osgi:reference id="cssManager" interface="org.societies.api.internal.css.management.ICSSLocalManager" cardinality="0..1"/>
+	
+	<osgi:reference id="uam" interface="org.societies.api.useragent.monitoring.IUserActionMonitor">
+	</osgi:reference>
+	
+	<osgi:reference id="persoMgr" interface="org.societies.api.personalisation.mgmt.IPersonalisationManager">
+	</osgi:reference>
+	
+	<osgi:reference id="serviceMgmt" interface="org.societies.api.services.IServices">
+	</osgi:reference>
+	
+	<bean id="commsClient" 
+		class="org.societies.thirdpartyservices.networking.client.NetworkingClientComms"
+		 init-method="InitService">
+ 		<constructor-arg value="${networkingserver}"/> 
+		<property name="commManager" ref="commManager" />
+	</bean>
+	
+	<bean id="networkClient" 
+		class="org.societies.thirdpartyservices.networking.client.NetworkClient">
+		<property name="cisManager" ref="cisManager" />
+		<property name="cisDirectoryClient" ref="cisDirectoryClient" />
+		<property name="commsClient" ref="commsClient" /> 
+		<property name="ctxBroker" ref="ctxBroker" />
+		<property name="commManager" ref="commManager" />
+		<property name="cssManager" ref="cssManager" />
+		<property name="uam" ref="uam" />
+		<property name="persoMgr" ref="persoMgr" />
+		<property name="serviceMgmt" ref="serviceMgmt" />
+		
+	</bean>		
+	
+	
+	
+ 
+	<osgi:service ref="networkClient">
+	 <osgi:interfaces>
+	        <value>org.societies.thirdpartyservices.networking.client.NetworkClient</value>
+	        <value>org.societies.api.personalisation.model.IActionConsumer</value>
+	    </osgi:interfaces>
+
+      <osgi:service-properties>
+          <entry key="TargetPlatform" value="SOCIETIES" />
+          <entry key="ServiceProvider" value="ICT-SOCIETIES" />
+          <entry key="ServiceMetaModel" value-ref="serMetamodel" />
+      </osgi:service-properties>
+  	</osgi:service>
+
+
+		
+  <osgi-compendium:cm-properties id="networkclientConfig" persistent-id="networkclient"> 
+       	<prop key="networkingserver">networking.societies.local</prop>
+    </osgi-compendium:cm-properties>
+ 	
+
+ 
+	
+  	
+  	
+	<bean id="serMetamodel" class="org.societies.api.schema.servicelifecycle.model.Service">
+     	<property name="authorSignature" value="mmannion" />
+     	<property name="serviceDescription" value="Networking Zone - WebApp" />
+     	<property name="serviceName" value="NetworkingWebApp" />
+     	<property name="serviceType" value="THIRD_PARTY_CLIENT" />
+     	<property name="serviceCategory" value="media" />
+     	<property name="privacyPolicy" value="privacy-policy.xml" />
+ 	</bean> 		
+	
+	
+</beans>

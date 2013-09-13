@@ -4,11 +4,11 @@
 	<parent>
 		<groupId>org.societies</groupId>
 		<artifactId>spring-osgi-parent</artifactId>
-		<version>0.1</version>
+		<version>RELEASE</version>
 	</parent>
 	<groupId>org.societies.thirdPartyServices.disasterManagement</groupId>
 	<artifactId>AnalyzeThis</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.2</version>
 	<packaging>bundle</packaging>
 	<name>AnalyzeThis</name>
 	<url>http://www.ict-societies.eu/</url>
@@ -17,37 +17,17 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 	<dependencies>
-	
-		<!-- OSGI, Spring, JUnit and Logger-->
+
+		<!-- RESTful -->
 		<dependency>
-			<groupId>org.osgi</groupId>
-			<artifactId>org.osgi.compendium</artifactId>
-			<version>4.1.0</version>
-			<scope>provided</scope>
+			<groupId>com.sun.jersey</groupId>
+			<artifactId>jersey-server</artifactId>
+			<version>1.12</version>
 		</dependency>
 		<dependency>
-			<groupId>org.osgi</groupId>
-			<artifactId>org.osgi.core</artifactId>
-			<version>4.1.0</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.osgi</groupId>
-			<artifactId>org.springframework.osgi.core</artifactId>
-			<version>1.2.1</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>3.8.1</version><!--$NO-MVN-MAN-VER$-->
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-simple</artifactId>
-			<version>${slf4j.version}</version>
-			<scope>provided</scope>
+			<groupId>com.sun.jersey</groupId>
+			<artifactId>jersey-client</artifactId>
+			<version>1.12</version>
 		</dependency>
 		
 		<!-- XML-RPC -->
@@ -67,11 +47,39 @@
 			<version>3.1.3</version>
 		</dependency>
 		
+		<!-- MiGLayout -->
+		<dependency>
+			<groupId>com.miglayout</groupId>
+			<artifactId>miglayout-swing</artifactId>
+			<version>4.2</version>
+		</dependency>
+		<dependency>
+			<groupId>com.miglayout</groupId>
+			<artifactId>miglayout-ideutil</artifactId>
+			<version>4.2</version>
+		</dependency>
+		<dependency>
+			<groupId>com.miglayout</groupId>
+			<artifactId>miglayout-core</artifactId>
+			<version>4.2</version>
+		</dependency>
+		
 		<!-- SOCIETIES PLATFORM -->
 		<dependency>
 			<groupId>org.societies.api.external</groupId>
 			<artifactId>societies-api</artifactId>
 			<version>${release.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.societies</groupId>
+			<artifactId>common-ext-libs</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.societies.thirdPartyServices.disasterManagement</groupId>
+			<artifactId>youRNotAlone</artifactId>
+			<version>0.1</version>
 			<scope>provided</scope>
 		</dependency>
 	</dependencies>
@@ -84,15 +92,20 @@
 				<configuration>
 					<instructions>
 						<Export-Package>org.societies.thirdPartyServices.disasterManagement.analyzeThis</Export-Package>
+						<!-- 
 						<Bundle-Activator>org.societies.thirdPartyServices.disasterManagement.analyzeThis.AnalyzeThis</Bundle-Activator>
+						-->
 						<Bundle-SymbolicName>${project.groupId}.${project.artifactId}</Bundle-SymbolicName>
 						<Bundle-Name>${project.name}</Bundle-Name>
 						<Bundle-Version>${project.version}</Bundle-Version>                        
 						<Embed-Dependency>*;scope=compile|runtime;inline=false</Embed-Dependency>
                         <Embed-Transitive>true</Embed-Transitive>
-                        <Import-Package>
-	!com.sun.jdmk.comm, !org.apache.avalon.framework.logger,
-	!org.apache.log, *</Import-Package>
+						<Import-Package>!com.sun.jdmk.comm,!org.apache.avalon.framework.logger,!org.apache.log,!org.eclipse.jetty.continuation,
+                        !org.jaxen.saxpath,!org.eclipse.jetty.server,!org.eclipse.jetty.server.ssl,!org.eclipse.jetty.server.nio,!org.eclipse.jetty.server.handler,
+                        !org.jaxen.pattern,!org.jaxen.dom4j,!org.relaxng.datatype,!org.eclipse.jetty.io.nio,!com.sun.msv.datatype.xsd,!org.gjt.xpp,!org.jaxen,
+                        !org.eclipse.jetty.io,!org.eclipse.jetty.http,!com.sun.msv.datatype,!org.eclipse.jetty.http.security,
+                        !org.eclipse.jetty.server.session,!com.sun.net.httpserver,!org.apache.tools.ant,
+                        !com.apple.eawt,*</Import-Package>
 					</instructions>
 				</configuration>
 			</plugin>

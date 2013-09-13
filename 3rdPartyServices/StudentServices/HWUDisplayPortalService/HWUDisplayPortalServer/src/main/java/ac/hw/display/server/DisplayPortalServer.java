@@ -47,6 +47,7 @@ import org.societies.api.services.IServices;
 import ac.hw.display.server.api.IDisplayPortalServer;
 import ac.hw.display.server.comm.CommsServer;
 import ac.hw.display.server.gui.ScreenConfigurationDialog;
+import ac.hw.display.server.model.Screen;
 import ac.hw.display.server.model.ScreenConfiguration;
 /**
  * Describe your class here...
@@ -104,11 +105,33 @@ public class DisplayPortalServer implements IDisplayPortalServer{
 	
 	@Override
 	public String requestAccess(String identity, String location) {
+		try{
+		this.LOG.debug("Request from: "+identity+" to use screen in location: "+location);
 		if (this.currentlyUsedScreens.containsKey(location)){
 			return "REFUSED";
 		}else{
-			return this.screenconfig.getScreenBasedOnLocation(location).getIpAddress();
+			Screen screen = this.screenconfig.getScreenBasedOnLocation(location);
+			if (screen==null){
+				this.LOG.debug("There is no screen at location: "+location+"\n. Available locations are: \n"+this.screenconfig.toString());
+				return "REFUSED";
+			}
+			
+			String ipAddress = screen.getIpAddress();
+			
+			if (ipAddress==null){
+				this.LOG.debug("IP address for screen: "+screen.getScreenId()+" is null");
+				return "REFUSED";
+			}
+			
+			return ipAddress;
 		}
+		}
+		catch (Exception e){
+			e.printStackTrace();
+			this.LOG.debug("Unknown Exception occured: "+e.getMessage());
+		}
+		
+		return "REFUSED";
 	}
 
 

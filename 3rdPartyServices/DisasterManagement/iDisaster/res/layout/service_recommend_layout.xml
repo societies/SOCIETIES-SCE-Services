@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout 
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+	android:layout_height="fill_parent" >
+<!-- The button appears on a black bakground. To set a white background: 
+	android:background="@color/white" >
+ -->    
+ 		<TextView android:id="@+id/serviceRecommendLabel" android:layout_width="fill_parent"
+     		android:text="@string/serviceRecommendHeading" 
+     		android:textSize="20dip" android:textStyle="bold"
+     		android:textColor="@color/white" android:background="@color/orange"
+			android:layout_height="wrap_content" 
+			android:paddingLeft="5dip"
+			android:paddingTop="2dip" android:paddingBottom="2dip" />
+ 		
+ 		<Button android:id="@+id/serviceRecommendButton"
+			android:layout_below="@id/serviceRecommendLabel"
+			android:layout_width="wrap_content" android:layout_height="wrap_content"
+			android:text="@string/serviceRecommendButton"
+			android:textColor="@color/black"
+		/>
+ 		
+ 		<ListView android:id="@android:id/list"
+	    	android:layout_below="@id/serviceRecommendButton"
+	    	android:layout_width="fill_parent" android:layout_height="fill_parent"
+			android:background="@color/white" 
+			android:cacheColorHint="@color/white"/>
+	
+		<TextView android:id="@id/android:empty"
+ 	    	android:layout_below="@id/serviceRecommendButton"
+	    	android:layout_width="fill_parent" android:layout_height="fill_parent" 
+	    	android:background="@color/white"
+			android:text="@string/serviceRecommendNoService"/>
+
+ 
+</RelativeLayout>

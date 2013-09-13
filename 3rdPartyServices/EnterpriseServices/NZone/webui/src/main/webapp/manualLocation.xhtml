@@ -1,0 +1,35 @@
+<f:view xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:pm="http://primefaces.org/mobile" contentType="text/html">
+
+	<pm:page title="Networking Zone">
+		<pm:view id="manual">
+			<pm:header title="Manual Checkin - Only for testing" />
+			<pm:content>
+				
+			
+				<h:form id="form">
+					<h:outputText value="Current Location is :"/>
+					<h:outputText value="#{locationBean.zoneName}" id="location" style="font-weight:bold"/>
+					<h:panelGrid columns="2" style="margin-bottom:10px" cellpadding="5">
+
+						<h:outputText value="Go To: " />
+						<p:selectOneRadio id="zoneOptions" value="#{locationBean.zoneNo}">
+							<f:selectItem itemLabel="Main Zone" itemValue="0" rendered="false" />
+							<f:selectItem itemLabel="Zone 1" itemValue="1" />
+							<f:selectItem itemLabel="Zone 2" itemValue="2" />
+							<f:selectItem itemLabel="Zone 3" itemValue="3" />
+						 <f:ajax event="click" render="location"/> 
+						</p:selectOneRadio>
+
+					</h:panelGrid>
+				</h:form>
+
+
+			</pm:content>
+		</pm:view>
+	</pm:page>
+</f:view>

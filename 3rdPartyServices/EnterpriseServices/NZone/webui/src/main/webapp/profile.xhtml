@@ -1,0 +1,74 @@
+<f:view xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:pm="http://primefaces.org/mobile" contentType="text/html">
+
+	<pm:page title="Networking Zone">
+		<pm:view id="viewProfile">
+			
+			<pm:header title="Your Profile" />
+			<pm:content>
+			
+				<h:form id="profileform">
+				
+				 <p:growl id="msg" /> 
+						
+				<br/>
+				Choose what information is available by default to other members
+				<br/>
+				<br/>
+					<p:graphicImage value="#{profileBean.avatar}"  width="50" height="45" /> 
+								
+					<h:outputText value="Name: " style="font-weight:bold" />
+					<h:outputText id="name" value="#{profileBean.name}" />
+				
+				 	<p:separator style="color: black;"/>
+				 	<br/>
+        			<h:outputText value="Share my Personal Details: " style="font-weight:bold" /> <pm:switch value="#{profileBean.sharepersonal}" onLabel="Yes" offLabel="No"  style="width:100%" />  
+        			<br/>
+           			<br/>
+					<h:outputText value="Email: " style="font-weight:bold" />
+					<h:outputText id="email" value="#{profileBean.email}" />
+					<br/>	
+					<br/>
+					<h:outputText value="Gender:" style="font-weight:bold" />
+					<h:outputText id="sex" value="#{profileBean.sex}" />
+					<br/><br/><br/>
+				
+				 	<p:separator style="color: black;"/>
+				 	<br/>
+        			<h:outputText value="Share my Company Details: " style="font-weight:bold" /> <pm:switch value="#{profileBean.sharecompany}" onLabel="Yes" offLabel="No"  style="width:100%" />  
+        			<br/>
+           			<br/>
+					<h:outputText value="Company:" style="font-weight:bold" />
+					<h:outputText id="company" value="#{profileBean.company}" />
+					<br/>	
+					<br/>
+					<h:outputText value="Position:" style="font-weight:bold" />
+					<h:outputText id="position" value="#{profileBean.position}" />
+					
+					
+					<p:separator style="color: black;"/>
+				 	<br/>
+        			<h:outputText value="Share my Interests: " style="font-weight:bold" /> <pm:switch value="#{profileBean.shareinterests}" onLabel="Yes" offLabel="No"  style="width:100%" />  
+        			<br/>
+        			 <p:selectManyCheckbox value="#{profileBean.selectedInterests}">  
+            		   <f:selectItem itemLabel="Cloud Computing" itemValue="cloud" />  
+			           <f:selectItem itemLabel="Internet Of Things" itemValue="internet" />  
+            		   <f:selectItem itemLabel="Future of the Internet" itemValue="future" />
+            		   <f:selectItem itemLabel="Green IT" itemValue="entre" />  
+			        </p:selectManyCheckbox>  
+					<br/><br/><br/>
+					<p:separator style="color: black;"/>
+
+					<p:commandButton icon="back" value="Back to Conference Zone" action="#{profileBean.saveProfile}" />
+				</h:form>
+				
+			</pm:content>
+		</pm:view>
+	</pm:page>
+</f:view>
+
+

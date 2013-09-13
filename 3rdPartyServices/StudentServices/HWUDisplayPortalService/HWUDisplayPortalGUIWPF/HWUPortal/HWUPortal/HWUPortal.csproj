@@ -11,11 +11,13 @@
     <RootNamespace>HWUPortal</RootNamespace>
     <AssemblyName>HWUPortal</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
-    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
+    <TargetFrameworkProfile>
+    </TargetFrameworkProfile>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <WarningLevel>4</WarningLevel>
-    <PublishUrl>publish\</PublishUrl>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <PublishUrl>D:\portal\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
     <UpdateEnabled>false</UpdateEnabled>
@@ -25,10 +27,12 @@
     <UpdatePeriodically>false</UpdatePeriodically>
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
-    <ApplicationRevision>0</ApplicationRevision>
-    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
-    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <WebPage>publish.htm</WebPage>
+    <AutorunEnabled>true</AutorunEnabled>
+    <ApplicationRevision>30</ApplicationRevision>
+    <ApplicationVersion>1.1.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
+    <PublishWizardCompleted>true</PublishWizardCompleted>
     <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
@@ -42,7 +46,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
-    <PlatformTarget>x86</PlatformTarget>
+    <PlatformTarget>x64</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
@@ -53,24 +57,34 @@
   <PropertyGroup>
     <ApplicationIcon>PUMAlogo.ico</ApplicationIcon>
   </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
+  </PropertyGroup>
+  <PropertyGroup>
+    <ManifestCertificateThumbprint>0173F452D72EB336EB555B1DB316235D184871D7</ManifestCertificateThumbprint>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ManifestKeyFile>HWUPortal_TemporaryKey.pfx</ManifestKeyFile>
+  </PropertyGroup>
+  <PropertyGroup>
+    <GenerateManifests>true</GenerateManifests>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignManifests>true</SignManifests>
+  </PropertyGroup>
   <ItemGroup>
-    <Reference Include="ApplicationControl, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\ApplicationControl\ApplicationControl\bin\Release\ApplicationControl.dll</HintPath>
-    </Reference>
-    <Reference Include="Coding4Fun.Kinect.WinForm">
-      <HintPath>References\Coding4Fun.Kinect.WinForm.dll</HintPath>
-    </Reference>
-    <Reference Include="Coding4Fun.Kinect.Wpf">
-      <HintPath>References\Coding4Fun.Kinect.Wpf.dll</HintPath>
+    <Reference Include="log4net">
+      <HintPath>..\lib\log4net.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Expression.Drawing">
-      <HintPath>References\Microsoft.Expression.Drawing.dll</HintPath>
+      <HintPath>..\lib\Microsoft.Expression.Drawing.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.Kinect, Version=1.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
-    <Reference Include="Microsoft.Samples.Kinect.WpfViewers, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>References\Microsoft.Samples.Kinect.WpfViewers.dll</HintPath>
+    <Reference Include="Microsoft.Kinect, Version=1.7.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
+    <Reference Include="Microsoft.Kinect.Toolkit">
+      <HintPath>..\lib\Microsoft.Kinect.Toolkit.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Kinect.Toolkit.Controls">
+      <HintPath>..\lib\Microsoft.Kinect.Toolkit.Controls.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -95,11 +109,16 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="ApplicationControlArgs.cs" />
+    <Compile Include="ApplicationForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ApplicationForm.Designer.cs">
+      <DependentUpon>ApplicationForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="ApplicationWindow.xaml.cs">
       <DependentUpon>ApplicationWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="BinaryDataTransfer.cs" />
-    <Compile Include="ButtonWaitThread.cs" />
     <Compile Include="ImageViewer.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -113,6 +132,7 @@
     <Compile Include="ServiceInformationSocketClient.cs" />
     <Compile Include="ServiceSocketServer.cs" />
     <Compile Include="SocketServer.cs" />
+    <Compile Include="StandaloneAppControl.cs" />
     <Compile Include="TxtNotificationsWindow.xaml.cs">
       <DependentUpon>TxtNotificationsWindow.xaml</DependentUpon>
     </Compile>
@@ -120,7 +140,9 @@
     <Compile Include="KinectTest.xaml.cs">
       <DependentUpon>KinectTest.xaml</DependentUpon>
     </Compile>
-    <Compile Include="WpfApplicationControl.cs" />
+    <Compile Include="ApplicationControlPanel.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Page Include="ApplicationWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -164,6 +186,12 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <EmbeddedResource Include="ApplicationControlPanel.resx">
+      <DependentUpon>ApplicationControlPanel.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ApplicationForm.resx">
+      <DependentUpon>ApplicationForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="ImageViewer.resx">
       <DependentUpon>ImageViewer.cs</DependentUpon>
     </EmbeddedResource>
@@ -172,6 +200,7 @@
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <None Include="app.config" />
+    <None Include="HWUPortal_TemporaryKey.pfx" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -183,9 +212,6 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Images\logo.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <WCFMetadata Include="Service References\" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="PUMAlogo.ico" />
@@ -217,6 +243,20 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Images\hand.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="KinectInteraction170_32.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="KinectInteraction170_64.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\log4net.config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadata Include="Service References\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

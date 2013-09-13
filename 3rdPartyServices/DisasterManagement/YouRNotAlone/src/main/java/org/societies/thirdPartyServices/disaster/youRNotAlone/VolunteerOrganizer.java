@@ -29,12 +29,16 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
-import org.societies.thirdPartyServices.disaster.youRNotAlone.model.Volunteer;
+import org.societies.thirdPartyServices.disaster.youRNotAlone.model.*;
+import org.societies.thirdPartyServices.disaster.youRNotAloneServer.YouRNotAloneDAO;
+
 
 public class VolunteerOrganizer {
 	private HashMap<String,Volunteer> volunteers;
+	
 	public HashMap<String, Volunteer> getVolunteers() {
 		return volunteers;
 	}
@@ -52,6 +56,9 @@ public class VolunteerOrganizer {
 		extractAllLanguagesAndSkills();
 	}
 
+	public void deleteAllVolunteers(){
+		this.volunteers = new HashMap<String,Volunteer>();
+	}
 
 	public void loadVolunteers(HashMap<String,Volunteer> volunteers){
 		this.volunteers = volunteers;
@@ -66,6 +73,13 @@ public class VolunteerOrganizer {
 
 	public void addVolunteer(Volunteer v){
 		this.volunteers.put(v.getID(), v);
+		System.out.println("add new volunteer");
+		ArrayList<String> channels = buildChannelInfo();
+		String[][] Logins = buildUserLoginInfo(channels);
+		ChannelWriter channelwriter = new ChannelWriter();
+		LoginWriter loginwriter = new LoginWriter();
+		boolean succes1 = channelwriter.write("D:/Program Files/wamp/www/chat/lib/data/channels.php", channels);
+		boolean succes2 = loginwriter.write("D:/Program Files/wamp/www/chat/lib/data/users.php", Logins, channels);
 	}
 
 
@@ -143,17 +157,26 @@ public class VolunteerOrganizer {
 
 	public ArrayList<Volunteer> getGroupByProperties(ArrayList<String> properties){
 		ArrayList<Volunteer> group = new ArrayList<Volunteer>();
+		ArrayList<Volunteer> groupBackup = new ArrayList<Volunteer>();
 		Set<String> IDs = this.volunteers.keySet();
 		Iterator<String> iter = IDs.iterator();
 		while (iter.hasNext()) {
 			Volunteer v = this.volunteers.get(iter.next());
 			Boolean ok = true;
-			for(int i=0;i<properties.size();i++)
+			Boolean haveAtLeastOne = false;
+			for(int i=0;i<properties.size();i++){
 				ok = ok && v.findPropertie(properties.get(i));
+				haveAtLeastOne = haveAtLeastOne || v.findPropertie(properties.get(i));
+			}
 			if(ok)
 				group.add(v);
+			if(haveAtLeastOne)
+				groupBackup.add(v);
 		}
+		if((group.size()==0)&&(properties.size()>=2))
+			return groupBackup;
 		return group;
+		
 	}
 	
 	public ArrayList<Volunteer> getTranslator(){
@@ -166,6 +189,58 @@ public class VolunteerOrganizer {
 				group.add(v);
 		}
 		return group;
-		
+	}
+	
+	public String[][] buildUserLoginInfo(ArrayList<String> channels){
+//		user: user1.societies.local@ict-societies.eu
+//		pass: user1user1
+		List<Volunteer> temp_volunteers = new ArrayList<Volunteer>();
+		temp_volunteers.addAll(YouRNotAloneDAO.instance.getVO().getVolunteers().values());
+//		System.out.println(temp_volunteers.size());
+		String[][] logins = new String[temp_volunteers.size()][3];
+		for(int i=0;i<temp_volunteers.size();i++){
+			logins[i][0] = temp_volunteers.get(i).getID();
+			String pwd = temp_volunteers.get(i).getID().split("\\.", 2)[0];
+			logins[i][1] = pwd+pwd;
+			String channelIDs = getChannelIDs(temp_volunteers.get(i), channels);
+			logins[i][2] = channelIDs;
+//			System.out.println(logins[i][0] + " && " +logins[i][1] + " && " + channelIDs);
+		}
+		System.out.println(logins.length);
+		return logins;
+	}
+	
+	public ArrayList<String> buildChannelInfo(){
+//		user: user1.societies.local@ict-societies.eu
+//		pass: user1user1
+		extractAllLanguagesAndSkills();
+		int countL = this.allLanguages.size();
+		int countS = this.allSkills.size();
+		ArrayList<String> channels = new ArrayList<String>();
+		for(int i=0;i<this.allLanguages.size();i++){
+			channels.add(allLanguages.get(i));
+		}
+		for(int i=0;i<this.allSkills.size();i++){
+			channels.add(allSkills.get(i));
+		}
+		System.out.println(channels.size());
+		return channels;
+	}
+	
+	private String getChannelIDs(Volunteer v, ArrayList<String> channels){
+		String channelIDs = "";
+		Iterator<String> iter = v.getSpokenLanguages().keySet().iterator();
+		while (iter.hasNext()) {
+			int tempID = channels.indexOf(iter.next())+1;
+			if(tempID>=1)
+				channelIDs = channelIDs + "," + tempID;
+		}
+		iter = v.getExpertiseSkills().keySet().iterator();
+		while (iter.hasNext()) {
+			int tempID = channels.indexOf(iter.next())+1;
+			if(tempID>=1)
+				channelIDs = channelIDs + "," + tempID;
+		}
+		return channelIDs.substring(1, channelIDs.length());
 	}
 }

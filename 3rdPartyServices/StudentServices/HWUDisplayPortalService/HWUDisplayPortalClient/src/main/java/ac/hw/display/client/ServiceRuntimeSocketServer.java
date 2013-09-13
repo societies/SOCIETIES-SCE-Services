@@ -31,6 +31,9 @@ import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Describe your class here...
  *
@@ -48,72 +51,126 @@ public class ServiceRuntimeSocketServer extends Thread{
 	public static final String started_Service = "STARTED_SERVICE";
 	public static final String stopped_Service = "STOPPED_SERVICE";
 	private static final String logged_Out = "LOGGED_OUT";
-	
+	public static final String START_MSG = "START_MSG";
+	public static final String END_MSG = "END_MSG";
+	private  Logger logging = LoggerFactory.getLogger(this.getClass());
+	private boolean listening = true;
+	private int serverPort;
+	//private int[] ports = new int[]{2121,2122,2123,2124,2125,2126,2127,2128,2129,2130,2131,2132,2133,2134,2135,2136,2137,2138,2139,2140,2141,2142, 2143,2144,2145,2146,2147,2148,2149,2150,2151};
+
 	public ServiceRuntimeSocketServer(DisplayPortalClient displayService){
 		this.displayService = displayService;
+		listening = true;
 
+	}
+
+	public int setListenPort(){
+		try {
+			ServerSocket portLocator = new ServerSocket(0);
+			serverPort = portLocator.getLocalPort();
+			portLocator.close();
+			this.logging.debug("Found available port: "+serverPort);
+			return serverPort;
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return -1;
 	}
 
 	@Override
 	public void run(){
-		this.listenSocket();
-	}
-	public void listenSocket(){
-
-		try{
-			server = new ServerSocket(2121); 
-		} catch (IOException e) {
-			System.out.println("Could not listen on port 2121");
-			
+		while (listening){
+			this.logging.debug("Starting a new serverSocket on: "+this.serverPort);
+			this.listenSocket();
 		}
+	}
+
+
+	public void listenSocket(){
+		try{
+
+			server = new ServerSocket(serverPort); 
+
+		} catch (IOException e) {
+			System.out.println("Could not listen on port "+serverPort);
+
+		}
+
 
 		try{
 			client = server.accept();
 		} catch (IOException e) {
-			System.out.println("Accept failed: 2121");
-			
+			System.out.println("Accept failed: "+serverPort);
+
 		}
 
 		try{
 			in = new BufferedReader(new InputStreamReader(client.getInputStream()));
 			out = new PrintWriter(client.getOutputStream(), true);
 		} catch (IOException e) {
-			System.out.println("Accept failed: 2121");
-			System.exit(-1);
+			System.out.println("Accept failed: "+serverPort);
+			
 		}
 
-		while(true){
-			try{
-				String line = in.readLine();
-				if (line.contains(started_Service)){
-					String serviceName = line.substring(started_Service.length()+1);
-					this.displayService.notifyServiceStarted(serviceName);
-				}else if (line.contains(stopped_Service)){
-					String serviceName = line.substring(stopped_Service.length()+1);
-					this.displayService.notifyServiceStopped(serviceName);
-				}else if (line.contains(logged_Out)){
-					this.displayService.notifyLogOutEvent();
-					this.server.close();
+
+		
+		try{
+			String line = in.readLine();
+			while (line!=null){
+
+
+				this.logging.debug("Received from portal: "+line);
+				if (line!=null){
+					if (line.contains(started_Service)){
+						String serviceName = line.substring(started_Service.length()+1);
+						this.displayService.notifyServiceStarted(serviceName.trim());
+						this.logging.debug("Called serviceStarted method on"+serviceName);
+					}else if (line.contains(stopped_Service)){
+						String serviceName = line.substring(stopped_Service.length()+1);
+						this.displayService.notifyServiceStopped(serviceName.trim());
+						this.logging.debug("Called serviceStopped method on"+serviceName);
+					}else if (line.contains(logged_Out)){
+						this.displayService.notifyLogOutEvent();
+
+						this.logging.debug("Called notifyLogOutEvent");
+					}
+
+
 				}
+				line = in.readLine();
+
 				//Send data back to client
 				//out.println(line);
-			} catch (IOException e) {
-				System.out.println("Read failed");
-				finalize();
-			}
+			} 
+			this.finalize();
+		}catch (IOException e) {
+			this.logging.debug(e.getMessage());
+			e.printStackTrace();
+			finalize();
+			return;
 		}
+
 	}
+
+
+
+
+
+
 
 
 	@Override
 	protected void finalize(){
+
+		this.logging.debug("finalise");
 		//Clean up 
 		try{
 			in.close();
 			out.close();
 			server.close();
+			this.logging.debug("SocketServer closed.");
 		} catch (IOException e) {
-			System.out.println("Could not close.");
+			this.logging.debug("Could not close.");
 		}
 	}
 }

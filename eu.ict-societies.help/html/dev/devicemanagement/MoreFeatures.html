@@ -1,0 +1,21 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+	<title>API Definition</title>
+</head>
+
+<body>
+<h1>More Features</h1>
+
+<p>To be able to track only IDevice in which it is intersted, a 3P service has to use LDAP filters when tracking a service using ServiceTraker.
+<br>To do so, first of all import the two interfaces org.osgi.framework.Constants and org.osgi.framework.Filter
+<br>1.	Create a String LDAP Filter including the OBJECTCLASS property that must be equal to IDevice.class.getName then and to the filter any property defined in the DeviceMgmtConstants class. You can filter by device type, device name, device id, device node id... and so on (see DeviceMgmtConstants class for more information).
+<br>2.	Then use the BundleContext class to create a Filter object
+<br>3.	Finaly use the Filter object created when you instantiate your ServiceTracker
+<br>The following example shows how to track a IDevice service by device_type (A screen in this case):
+</p>
+
+</body>
+</html>

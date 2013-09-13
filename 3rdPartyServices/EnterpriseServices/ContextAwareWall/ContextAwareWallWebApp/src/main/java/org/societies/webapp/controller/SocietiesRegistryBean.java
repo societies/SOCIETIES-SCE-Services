@@ -9,6 +9,7 @@ public class SocietiesRegistryBean implements ISocietiesRegistryBean {
 	private String mockEntity;
 	private boolean mockEntityActive;
 	private String pzQueriesURL;
+	private boolean contextLocationActive;
 	
 	public String getServerURL() {
 		return serverURL;
@@ -34,5 +35,10 @@ public class SocietiesRegistryBean implements ISocietiesRegistryBean {
 	public void setPzQueriesURL(String pzQueriesURL) {
 		this.pzQueriesURL = pzQueriesURL;
 	}
-	
+	public boolean isContextLocationActive() {
+		return contextLocationActive;
+	}
+	public void setContextLocationActive(boolean contextLocationActive) {
+		this.contextLocationActive = contextLocationActive;
+	}
 }

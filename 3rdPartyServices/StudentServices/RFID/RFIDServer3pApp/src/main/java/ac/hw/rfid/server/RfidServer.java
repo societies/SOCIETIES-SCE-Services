@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -69,6 +70,7 @@ import org.springframework.osgi.context.BundleContextAware;
 
 import ac.hw.rfid.client.api.remote.IRfidClient;
 import ac.hw.rfid.server.api.IRfidServer;
+import ac.hw.rfid.server.gui.ServerGUIFrame;
 
 public class RfidServer extends EventListener implements IRfidServer, ServiceTrackerCustomizer, BundleContextAware {
 
@@ -86,7 +88,7 @@ public class RfidServer extends EventListener implements IRfidServer, ServiceTra
 	private IEventMgr eventMgr;
 	
 	//private Hashtable<String, String> dpiToServiceID;
-	Hashtable<String, Timer> tagToTimerTable = new Hashtable<String, Timer>();
+	Hashtable<String, RFIDUpdateTimerTask> tagToTimerTable = new Hashtable<String, RFIDUpdateTimerTask>();
 
 	private IRfidClient rfidClientRemote;
 	
@@ -143,8 +145,16 @@ public class RfidServer extends EventListener implements IRfidServer, ServiceTra
 			this.wUnitToSymlocTable = new Hashtable<String, String>();
 			
 		}
+		this.registerRFIDReaders();
+		
+		frame = new ServerGUIFrame(this);
+	}
+	
+	
+	private void registerRFIDReaders(){
 		String[] options = new String[]{"0.localhost","1.University addresses"};
-		String str = (String) JOptionPane.showInputDialog(null, "Select Configuration", "Configuration", JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
+		//String str = (String) JOptionPane.showInputDialog(null, "Select Configuration", "Configuration", JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
+		String str = options[1];
 		if (str.equalsIgnoreCase(options[0])){
 			
 			if (null != iDevice) {
@@ -184,9 +194,8 @@ public class RfidServer extends EventListener implements IRfidServer, ServiceTra
 			//this.rfidDriver.connect("137.195.27.197");
 			//this.rfidDriver.connect("137.195.27.198");
 		}
-		frame = new ServerGUIFrame(this);
+		
 	}
-	
 	public RfidServer(){
 		UIManager.put("ClassLoader", ClassLoader.getSystemClassLoader());
 		try {
@@ -214,15 +223,60 @@ public class RfidServer extends EventListener implements IRfidServer, ServiceTra
 				"(" + CSSEventConstants.EVENT_NAME + "=" + DeviceMgmtEventConstants.RFID_READER_EVENT + ")" +
 				"(" + CSSEventConstants.EVENT_SOURCE + "=" + deviceId + ")" +
 				")";
+		this.logging.debug("Registering for RFIDEvent: "+eventFilter);
+		
 		this.eventMgr.subscribeInternalEvent(this, new String[]{EventTypes.RFID_UPDATE_EVENT}, eventFilter);
 	}
+	
+	
+	/*
+	 * This method is called by the RFIDUpdateTimerTask every minute to 
+	 * send the symbolic locations to the appropriate user
+	 */
+	public void sendRemoteUpdate(String symLoc, String rfidTagNumber){
+		if (this.tagtoIdentityTable.containsKey(rfidTagNumber)){
+			String jid = this.tagtoIdentityTable.get(rfidTagNumber);
+			//String clientServiceID = this.dpiToServiceID.get(dpi);
+			//this.sendUpdateMessage(dpi, clientServiceID, rfidTagNumber, symLoc);
+			this.rfidClientRemote.sendUpdate(jid, symLoc, rfidTagNumber);
+		}
+			
+	}
+	
+	
 	
 	/*
 	 * Method called when an RFID_UPDATE_EVENT is received
 	 */
 	public void sendUpdate(String wUnit, String rfidTagNumber) {
-	
-		String symLoc = "other";
+		
+		if (this.wUnitToSymlocTable.containsKey(wUnit)){
+			this.logging.debug("wUnit: "+wUnit+" matches symloc: "+wUnitToSymlocTable.get(wUnit));
+			if (this.tagToTimerTable.containsKey(rfidTagNumber)){
+				
+				this.tagToTimerTable.get(rfidTagNumber).setSymLoc(this.wUnitToSymlocTable.get(wUnit));
+				this.logging.debug("setting symloc: "+this.wUnitToSymlocTable.get(wUnit)+" to: "+rfidTagNumber);
+				this.frame.addRow(this.tagtoIdentityTable.get(rfidTagNumber), rfidTagNumber, wUnit, this.wUnitToSymlocTable.get(wUnit));
+			}else{
+				if (this.tagtoIdentityTable.containsKey(rfidTagNumber)){
+					this.logging.debug("tag "+rfidTagNumber+" registered to identity "+tagtoIdentityTable.get(rfidTagNumber));
+					RFIDUpdateTimerTask task = new RFIDUpdateTimerTask(this.rfidClientRemote, rfidTagNumber, this.wUnitToSymlocTable.get(wUnit), this.tagtoIdentityTable.get(rfidTagNumber));
+					this.tagToTimerTable.put(rfidTagNumber, task);
+					Timer timer = new Timer();
+					timer.schedule(task, new Date(), 5000);
+					this.logging.debug("Created timer");
+					this.frame.addRow(this.tagtoIdentityTable.get(rfidTagNumber), rfidTagNumber, wUnit, this.wUnitToSymlocTable.get(wUnit));
+				}
+			}
+			
+		}else{
+			this.logging.debug("wUnit :"+wUnit+" doesn't match any symLoc");
+			this.frame.addRow("Unregistered", rfidTagNumber, wUnit, "Unknown");
+		}
+		
+		
+		//OLD CODE BELOW
+		/*String symLoc = "";
 		if (this.wUnitToSymlocTable.containsKey(wUnit)){
 			symLoc = this.wUnitToSymlocTable.get(wUnit);
 			if (this.tagToTimerTable.containsKey(rfidTagNumber)){
@@ -239,10 +293,10 @@ public class RfidServer extends EventListener implements IRfidServer, ServiceTra
 			}
 			
 		}
-		if (!symLoc.equalsIgnoreCase("other")){
+		if (!symLoc.equalsIgnoreCase("")){
 			Timer timer = new Timer();
 			RFIDUpdateTimerTask task = new RFIDUpdateTimerTask(this, rfidTagNumber);
-			timer.schedule(task, 3000);
+			timer.schedule(task, 1000);
 			this.tagToTimerTable.put(rfidTagNumber, timer);
 		}		
 		if (this.tagtoIdentityTable.containsKey(rfidTagNumber)){
@@ -256,14 +310,14 @@ public class RfidServer extends EventListener implements IRfidServer, ServiceTra
 			//JOptionPane.showMessageDialog(null, "Tag: "+rfidTagNumber+" in location "+symLoc+" not registered to a DPI");
 			logging.debug("Tag: "+rfidTagNumber+" in location "+symLoc+" not registered to a DPI");
 			this.frame.addRow("Unregistered", rfidTagNumber, wUnit, symLoc);
-		}
+		}*/
 		
 		
 	}
 
 	@Override
 	public void registerRFIDTag(String tagNumber, String dpiAsString, String serviceID, String password) {
-		logging.debug("Received request to register RFID tag: "+tagNumber+" from dpi: "+dpiAsString+" and serviceID: "+serviceID);
+		logging.debug("Received request to register RFID tag: "+tagNumber+" from identity: "+dpiAsString+" and serviceID: "+serviceID);
 			if (this.tagToPasswordTable.containsKey(tagNumber)){
 				String myPass = this.tagToPasswordTable.get(tagNumber);
 				logging.debug("Tag exists");
@@ -273,28 +327,25 @@ public class RfidServer extends EventListener implements IRfidServer, ServiceTra
 					
 					this.tagtoIdentityTable.put(tagNumber, dpiAsString);
 					//this.dpiToServiceID.put(dpiAsString, serviceID);
-					//this.sendAcknowledgeMessage(dpiAsString, serviceID, 0);
+					this.rfidClientRemote.acknowledgeRegistration(dpiAsString, 0);
 					this.frame.setNewDPIRegistered(tagNumber, dpiAsString);
-					Timer timer = new Timer();
-					RFIDUpdateTimerTask task = new RFIDUpdateTimerTask(this,  tagNumber);
-					timer.schedule(task, 3000);
-					this.tagToTimerTable.put(tagNumber, timer);
 					logging.debug("Registration successfull. Sent Acknowledgement 0");
-					
-					
+
 				}else{
-					//this.sendAcknowledgeMessage(dpiAsString, serviceID, 1);
+					this.rfidClientRemote.acknowledgeRegistration(dpiAsString, 1);
 					logging.debug("Registration unsuccessfull. Sent Ack 1");
 				}
 			}else{
 				
-				//this.sendAcknowledgeMessage(dpiAsString, serviceID, 2);
+				this.rfidClientRemote.acknowledgeRegistration(dpiAsString, 2);
 				logging.debug("Registration unsuccessfull. Sent Ack 2");
 			}
 		
 
 		
 	}
+
+	
 
 	private void removeOldRegistration( String dpiAsString){
 		if (this.tagtoIdentityTable.contains(dpiAsString)){
@@ -344,21 +395,6 @@ public class RfidServer extends EventListener implements IRfidServer, ServiceTra
 		this.tagtoIdentityTable.remove(tagNumber);
 	}
 	
-	public static void main(String[] args) throws IOException{
-		RfidServer impl = new RfidServer();
-		System.out.println(impl.getPassword());
-		
-		
-		RFIDConfig config = new RFIDConfig();
-		impl.wUnitToSymlocTable = config.getUnitToSymloc();
-		
-		Hashtable<String, Timer> timerTable = new Hashtable<String, Timer>();
-		RFIDUpdateTimerTask task = new RFIDUpdateTimerTask(impl,"0071");
-		Timer timer = new Timer();
-		timer.schedule(task, 5000);
-		timerTable.put("0071", timer);
-		task.cancel();
-	}
 
 
 
@@ -405,9 +441,11 @@ public class RfidServer extends EventListener implements IRfidServer, ServiceTra
 //			this.logging.debug("Received RFIDUpdateEvent: "+rfidEvent.getWakeupUnit()+" - "+rfidEvent.getRFIDTagNumber() );
 //		}
 		
+		
 		HashMap<String, String> payload = (HashMap<String, String>)event.geteventInfo();
-		this.sendUpdate(payload.get("wakeupUnit"), payload.get("tagNumber"));
 		this.logging.debug("Received RFIDUpdateEvent: "+payload.get("wakeupUnit")+" - "+ payload.get("tagNumber"));
+		this.sendUpdate(payload.get("wakeupUnit"), payload.get("tagNumber"));
+		this.logging.debug("Sent rfid update WU:"+payload.get("wakeupUnit")+" tag: "+payload.get("tagNumber"));
 		
 		
 	}

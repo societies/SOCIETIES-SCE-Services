@@ -1,0 +1,105 @@
+<html class="ui-mobile"><head><meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1">
+<title>Networking Zone</title>
+<link type="text/css" rel="stylesheet" href="mobile.css">
+<script type="text/javascript" src="jquery/jquery.js"></script>
+<script type="text/javascript">
+$(document).bind('mobileinit', function(){
+	$.mobile.ajaxEnabled = false;
+	$.mobile.linkBindingEnabled = false;
+	$.mobile.hashListeningEnabled = false;
+	$.mobile.pushStateEnabled = false;
+});
+</script>
+<script type="text/javascript" src="mobile.js"></script>
+<script type="text/javascript" src="primefaces.js"></script>
+<script type="text/javascript" src="primefaces-mobile.js"></script>
+<link type="text/css" rel="stylesheet" href="primefaces.css">
+
+<script type="text/javascript" src="jsf.js"></script>
+</head>
+<body class="ui-mobile-viewport ui-overlay-c">
+<div id="viewFriend" data-role="page" class="ui-page ui-body-c ui-page-active" data-url="viewFriend" tabindex="0" style="min-height: 989px;">
+<div id="j_idt2" data-role="header" data-backbtn="false" class="ui-header ui-bar-a" role="banner"><h1 class="ui-title" role="heading" aria-level="1">Attendee Profile</h1></div>
+<div id="j_idt3" data-role="content" class="ui-content" role="main">
+<div id="friendInfoPanel" data-role="collapsible-set" class="ui-collapsible-set">
+<div data-role="collapsible" data-collapsed="false" class="ui-collapsible">
+<h3 class="ui-collapsible-heading"><a href="#" class="ui-collapsible-heading-toggle ui-btn ui-btn-up-c ui-btn-icon-left ui-corner-top ui-corner-bottom" data-corners="false" data-shadow="false" data-iconshadow="true" data-wrapperels="span" data-icon="plus" data-iconpos="left" data-theme="c"><span class="ui-btn-inner ui-corner-top ui-corner-bottom"><span class="ui-btn-text">Details<span class="ui-collapsible-heading-status"> click to collapse contents</span></span><span class="ui-icon ui-icon-shadow ui-icon-minus">&nbsp;</span></span></a></h3><div class="ui-collapsible-content" aria-hidden="false"><p>
+</p>
+<input type="hidden" name="friendInfoPanel:form" value="friendInfoPanel:form">
+<hr id="friendInfoPanel:form:j_idt6" class="ui-separator ui-state-default ui-corner-all" style="color: black;">
+<img id="friendInfoPanel:form:j_idt7" src="profiles/harry.jpg" alt="" width="50" height="45"><span style="font-weight:bold">Name: </span>
+<span id="friendInfoPanel:form:name">Harry McDonald</span>
+<br>
+<span id="friendInfoPanel:form:friendcompanypref"><hr id="friendInfoPanel:form:j_idt10" class="ui-separator ui-state-default ui-corner-all" style="color: black;">
+<span style="font-weight:bold">Company:</span><span id="friendInfoPanel:form:company">Rainmaker Technologies</span>
+<br>
+<div id="friendInfoPanel:form:j_idt13" data-role="fieldcontain" class="ui-field-contain ui-body ui-br">
+<fieldset data-role="controlgroup" class="ui-corner-all ui-controlgroup ui-controlgroup-vertical">
+<div class="ui-radio">
+<input id="friendInfoPanel:form:j_idt13:0" name="friendInfoPanel:form:j_idt13" type="radio" value="0" >
+<label for="friendInfoPanel:form:j_idt13:0" data-corners="true" data-shadow="false" data-iconshadow="true" data-wrapperels="span" data-icon="radio-off" data-theme="c" class="ui-btn ui-btn-icon-left ui-radio-on ui-corner-top ui-btn-up-c">
+<span class="ui-btn-inner ui-corner-top">
+<span class="ui-btn-text">Not Preferred</span>
+</span></label>
+</div>
+<div class="ui-radio">
+<input id="friendInfoPanel:form:j_idt13:1" name="friendInfoPanel:form:j_idt13" type="radio" value="1" checked="checked">
+<label for="friendInfoPanel:form:j_idt13:1" data-corners="true" data-shadow="false" data-iconshadow="true" data-wrapperels="span" data-icon="radio-off" data-theme="c" class="ui-btn ui-btn-up-c ui-btn-icon-left ui-radio-off ui-corner-bottom ui-controlgroup-last">
+<span class="ui-btn-inner ui-corner-bottom ui-controlgroup-last"><span class="ui-btn-text">Preferred Company</span>
+</span></label>
+</div>
+</fieldset>
+</div></span><hr id="friendInfoPanel:form:j_idt16" class="ui-separator ui-state-default ui-corner-all" style="color: black;">
+
+<br>
+<div id="friendInfoPanel:form:j_idt18"><span style="font-weight:bold">Email:</span>harry@rainmaker.com<br></div>
+<div id="friendInfoPanel:form:j_idt22"><span style="font-weight:bold">Position:</span>Research Scientist<br></div>
+<div id="friendInfoPanel:form:j_idt26"><span style="font-weight:bold">Gender:</span>Male<br></div>
+<span style="font-weight:bold">Interests : </span>
+<div id="friendInfoPanel:form:j_idt31" style="text-align:center">Green IT</div>
+<div id="friendInfoPanel:form:j_idt33" style="text-align:center"></div>
+<div id="friendInfoPanel:form:j_idt35" style="text-align:center"></div>
+<div id="friendInfoPanel:form:j_idt37" style="text-align:center"></div>						
+<br>
+<hr id="friendInfoPanel:form:j_idt40" class="ui-separator ui-state-default ui-corner-all" style="color: black;">
+<br>
+Choose what information to share with Harry McDonald
+<br>
+<br><span id="friendInfoPanel:form:j_idt42">This is the information you have previous choosen to share with Michael Griffen</span>
+<br><span style="font-weight:bold">Personal Details: </span>
+<select id="friendInfoPanel:form:j_idt48" name="friendInfoPanel:form:j_idt48" data-role="slider" class="ui-slider-switch">
+<option value="off">No</option><option value="on" selected="selected">Yes</option>
+</select>
+<br>
+<br><span style="font-weight:bold">Email: </span><span id="friendInfoPanel:form:myemail">steve@rainmaker.com</span>
+<br>
+<br>
+<span style="font-weight:bold">Gender: </span><span id="friendInfoPanel:form:mysex">Male</span>
+<br>
+<br><hr id="friendInfoPanel:form:j_idt54" class="ui-separator ui-state-default ui-corner-all" style="color: black;">
+<br><span style="font-weight:bold">Company Details: </span>
+<select id="friendInfoPanel:form:j_idt57" name="friendInfoPanel:form:j_idt57" data-role="slider" class="ui-slider-switch">
+<option value="off">No</option><option value="on" selected="selected">Yes</option>
+</select>
+<br>
+<br><span style="font-weight:bold">Company: </span><span id="friendInfoPanel:form:mycompany">Rainmaker Technologies</span>
+<br>
+<br><span style="font-weight:bold">Position: </span><span id="friendInfoPanel:form:myposition">Senior Computer Scientist</span><hr id="friendInfoPanel:form:j_idt62" class="ui-separator ui-state-default ui-corner-all" style="color: black;">
+<br><span style="font-weight:bold">My Interests: </span>
+<select id="friendInfoPanel:form:j_idt65" name="friendInfoPanel:form:j_idt65" data-role="slider" class="ui-slider-switch">
+	<option value="off">No</option>
+	<option value="on" selected="selected">Yes</option>
+</select>
+  
+<br>
+<br>
+<br><div id="friendInfoPanel:form:j_idt67" style="text-align:center">Green IT</div>
+<div id="friendInfoPanel:form:j_idt69" style="text-align:center">
+ </div><div id="friendInfoPanel:form:j_idt71" style="text-align:center"> </div>
+ <div id="friendInfoPanel:form:j_idt73" style="text-align:center"> </div>
+<br>
+<hr id="friendInfoPanel:form:j_idt76" class="ui-separator ui-state-default ui-corner-all" style="color: black;">
+<button id="j_idt38" name="j_idt38" type="submit" data-icon="back" data-iconpos="left" onclick="document.location='demo7-Landing.html'">Save</button>
+<button id="j_idt38" name="j_idt38" type="submit" data-icon="back" data-iconpos="left" onclick="document.location='demo7-Landing.html'">Cancel</button>
+</body>
+</html>

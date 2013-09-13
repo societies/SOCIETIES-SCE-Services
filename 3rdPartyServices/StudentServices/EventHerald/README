@@ -1,1 +1,121 @@
-This folder contains some of the subcomponents of the Event Herald.
+Eventherald.
+--------------------
+
+Eventherald is a service comprising of three individual pieces that need to be build and installed seperately.
+
+a. The Eventherald Android client (Cordova based)
+b. The Status.net server (Apache based)
+c. Eventherald backend service. (Virgo based)
+
+
+This folder contains the subcomponents that make up Eventherald.
+
+
+Installation
+----------------------
+
+More detailed instructions for installing them follow.  What follows is the quick start guide.
+
+
+A. Building and installing the client.
+--------------------
+
+1. Install Ant.
+
+2. Modify the "local.properties" build file in the root directory to point to your Android SDK. 
+a. Open "local.properties" and modify the following line appropriately.
+
+sdk.dir=/work/tools/android-sdk-linux
+
+3. Move to root directory.
+
+cd <eh_cordova>
+
+4. Build with the appropriate command.
+
+a.For a debug version
+
+ant clean debug  
+
+b. Or for a release version
+
+ant clean release
+
+5. Install the service on the phone. (Whatever way you want)
+
+
+
+B: Installing the statusnet server.
+--------------------
+
+1. Install Apache2
+
+2. Install Status.net. (Henceforth the root directory is called SN_ROOT)
+
+3. Configure status.net with the database settings, and local setup.  This will require your mysql DB admin password.
+
+
+4. Install the Annotations plugin. (This is a modified version from TSSG)
+a. Source can be found in "statusnet-annotations-plugin" and copy to SN_ROOT/plugins
+
+cp -r statusnet-annotations-plugin/Annotations SN_ROOT/plugins
+
+b. Modify SN_ROOT/config.php to activate the annotations plugin. Add the following lines to the end of the file:
+
+addPlugin('Annotations', array(
+  'demo' => true,
+  'stored_annotations' => array(array(
+     'custom_tssg_event' => array(
+       'event_title' => null,
+       'event_start_time' => null,
+       'event_end_time' => null,
+       'event_date' => null,
+       'event_location' => null,
+       'event_url' => null,
+       'event_description' => null,
+       'event_lat' => null,
+       'event_long' => null)))));
+
+
+5. Verification - Log into status.net to verify apache and statusnet setup.
+
+6. Create an account for "eventherald"
+
+
+C: Installing the eventherald backend.
+--------------------
+
+1. Install Virgo 3.6 container.  The root directory will be called (VIRGO_ROOT)
+
+2. Copy the event herald jars into VIRGO_ROOT/repository/usr
+
+cd VIRGO_ROOT/repository/usr
+unzip eh_backend.zip
+
+3. Start Virgo (sanity check)
+
+dmk.sh start
+
+4. In Status.net allow OAuth connections.
+a. Login to Status.net as "eventherald"
+b. Click on "Settings" menu item
+c. Click on "Connections" menu item
+d. Click on "register an OAuth client" application (on right hand side)
+e. Click on "Register a new application"
+f. Enter the details. Please note, these instructions assume your are installing the eventherald backend on the same node as statusnet.
+
+Callback URL:
+    http://localhost/eventherald/oauth/authorized
+
+g. Allow read and write access. Tick "Allow read and write".
+
+5. Click "Save"
+
+6. Copy the customer key, secret and base URL to the eventherald.properties file
+    
+statusnet.consumerKey=9517fd0bf8faa655xxxxxxxxxxxxxxx
+statusnet.consumerSecret=038b21e13d5xxxxxxxxxxxxxxxxxxxx
+statusnet.baseUrl=http://localhost/statusnet/index.php/api/
+
+7. Restart Virgo.
+

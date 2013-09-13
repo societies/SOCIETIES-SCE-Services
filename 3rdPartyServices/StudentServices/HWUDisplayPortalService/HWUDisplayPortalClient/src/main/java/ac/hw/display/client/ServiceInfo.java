@@ -37,12 +37,15 @@ public class ServiceInfo {
 	private final String exe;
 	private final String serviceName;
 	private final boolean requiresKinect;
+	private final int servicePortNumber;
+	
 	private final IDisplayableService service;
 	
-	public ServiceInfo(IDisplayableService service, String name, String exe, boolean requiresKinect){
+	public ServiceInfo(IDisplayableService service, String name, String exe, int port, boolean requiresKinect){
 		this.service = service;
 		this.serviceName = name;
 		this.exe = exe;
+		this.servicePortNumber = port;
 		this.requiresKinect = requiresKinect;
 		
 	}
@@ -73,5 +76,12 @@ public class ServiceInfo {
 	 */
 	public IDisplayableService getService() {
 		return service;
+	}
+
+	/**
+	 * @return the servicePortNumber
+	 */
+	public int getServicePortNumber() {
+		return servicePortNumber;
 	}
 }

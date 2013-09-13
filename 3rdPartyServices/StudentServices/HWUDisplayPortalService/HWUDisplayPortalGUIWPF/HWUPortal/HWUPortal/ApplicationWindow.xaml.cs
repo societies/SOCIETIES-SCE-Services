@@ -10,9 +10,12 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
-using ApplicationControl;
+
+
 namespace HWUPortal
 {
+
+    //THIS CLASS IS NOT BEING USED IN THE PROJECT
     /// <summary>
     /// Interaction logic for ApplicationWindow.xaml
     /// </summary>
@@ -50,7 +53,7 @@ namespace HWUPortal
         //{
         //    if (!args.GracefullyExited)
         //    {
-        //        Console.WriteLine("Service did not exit gracefully");
+        //                    if (log.IsDebugEnabled)  log.Debug("Service did not exit gracefully");
         //    }
         //    if (!this.currentService.serviceName.Equals(string.Empty))
         //    {

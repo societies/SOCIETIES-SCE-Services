@@ -60,7 +60,7 @@ public class ContextEventListener implements CtxChangeEventListener{
 	private final IIdentity userIdentity;
 
 	private final RequestorService requestor;
-	
+
 	public ContextEventListener(DisplayPortalClient client, ICtxBroker ctxBroker, IIdentity userIdentity, RequestorService requestor){
 		this.client = client;
 		this.ctxBroker = ctxBroker;
@@ -71,23 +71,23 @@ public class ContextEventListener implements CtxChangeEventListener{
 
 	public void registerForLocationEvents(){
 
-	
+
 		try {
 
-			
+
 			Future<CtxEntityIdentifier> futureCtxEntityId = this.ctxBroker.retrieveIndividualEntityId(requestor, userIdentity);
 			CtxEntityIdentifier ctxEntityId =futureCtxEntityId.get();
-			
+
 			//Future<List<CtxIdentifier>> fLookupList = this.ctxBroker.lookup(requestor, userIdentity, CtxModelType.ATTRIBUTE, CtxAttributeTypes.LOCATION_SYMBOLIC);
 			//List<CtxIdentifier> lookupList = fLookupList.get();
-			
-			
+
+
 			//if (lookupList.size()==0){
 			//	this.LOG.debug("Did not find attribute of type : "+CtxAttributeTypes.LOCATION_SYMBOLIC);
 			//	return;
 			//}else{
-				this.ctxBroker.registerForChanges(requestor, this, ctxEntityId, CtxAttributeTypes.LOCATION_SYMBOLIC);
-				this.LOG.debug("Registered for symloc events");
+			this.ctxBroker.registerForChanges(requestor, this, ctxEntityId, CtxAttributeTypes.LOCATION_SYMBOLIC);
+			this.LOG.debug("Registered for symloc events");
 			//}
 		} catch (CtxException e) {
 			// TODO Auto-generated catch block
@@ -100,52 +100,64 @@ public class ContextEventListener implements CtxChangeEventListener{
 			e.printStackTrace();
 		}
 
-		
-		
+
+
 	}
 	@Override
 	public void onCreation(CtxChangeEvent arg0) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
-	public void onModification(CtxChangeEvent event) {
-		CtxIdentifier ctxIdentifier = event.getId();
-		Future<CtxModelObject> futureAttribute;
-		try {
-			futureAttribute = this.ctxBroker.retrieve(requestor,ctxIdentifier);
-			
-			try {
-				CtxAttribute ctxAttribute = (CtxAttribute) futureAttribute.get();
-				this.LOG.debug("Received context event for "+ctxAttribute.getType()+" with value: "+ctxAttribute.getStringValue());
-				this.client.updateUserLocation(ctxAttribute.getStringValue());
-				
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (ExecutionException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		} catch (CtxException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+	public void onModification(final CtxChangeEvent event) {
 
 		
-		
+		this.LOG.debug("Received context event: "+event.getId().toUriString());
+
+		new Thread(){
+			public void run(){
+				CtxIdentifier ctxIdentifier = event.getId();
+				Future<CtxModelObject> futureAttribute;
+				try {
+					Thread.sleep(10);
+					futureAttribute = ctxBroker.retrieve(requestor,ctxIdentifier);
+
+					try {
+						CtxAttribute ctxAttribute = (CtxAttribute) futureAttribute.get();
+						LOG.debug("Received context event for "+ctxAttribute.getType()+" with value: "+ctxAttribute.getStringValue());
+						client.updateUserLocation(ctxAttribute.getStringValue().trim());
+
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (ExecutionException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				} catch (CtxException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
+				LOG.debug("thread of handleInternalEvent method finished executing");
+			}
+		}.start();
+
 	}
 
 	@Override
 	public void onRemoval(CtxChangeEvent arg0) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void onUpdate(CtxChangeEvent arg0) {
 		// TODO Auto-generated method stub
-		
+
 	}
 }

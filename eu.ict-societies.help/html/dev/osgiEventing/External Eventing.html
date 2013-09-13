@@ -1,0 +1,125 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+	<title>Internal Eventing</title>
+</head>
+
+<body>
+<h1>External Eventing</h1>
+<p>The publish-subscribe eventing functionality added to the SOCIETIES platform provides a framework for a variety of use cases ,eg, news feeds, content syndication, extended presence, geolocation, profile management, and any other service that requires event notifications (see Figure 34). This technology uses the classic "publish-subscribe" or "observer" design pattern: a person or application publishes information to a node ("topic"), and an event notification (with or without the actual content) is broadcast to all authorized subscribers. If the content is light, it should be included in the event. However, if it is large the event should simply notify that the content is now available and the service should get it when it is ready (through comms framework). This lowers the load on the PubSubService.
+</p>
+<img src=../../img/image057.png></img>
+<p>Eventing Nodes are owned by an identity and may take a a hierarchical form, i.e. root and sub-nodes:
+<br>	root
+<br>	"Comm Framework"
+<br>	"Sending messages"
+<br>	"Eventing and Pubsub"
+<br>	"Android tutorials"
+<br>    "Client UI"
+<br>	"IPC Services"
+<br>	...
+<p>It is possible to create Pubsub event Nodes ("topics") from clients (CSS Nodes) that will allow other CSS Nodes to subscribe to them. Developers can add their own object types as the payload, but only if you have converted them into XSD Schema objects. This is to support multiple development environments/platforms.
+</p>
+<p>Refer to the TestExternalEventing class in the GIT Code Repository for full technical details.
+</p>
+<p>You do need to configure a dependency injection so you should get a reference to the PubsubClientBundle service by registering in the Bundle-context-osgi.xml and Bundle-context.xml files.
+</p>
+<p>Get a reference to the PubsubClientBundle service by registering in the Bundle-context-osgi.xml file:
+</p>
+<xmp><osgi:reference id="PubsubClient" interface="org.societies.comm.xmpp.pubsub.PubsubClient"/>
+Ensure you set a property to receive a reference to the PubsubClient in the Bundle-context.xml file:
+<bean id="ClientTestPubSub" class="org.societies.examples.testclient.ClientTester"
+      depends-on="PubsubClient">
+    <property name="pubsubClient" ref="PubsubClient"/>
+</bean>
+</xmp>
+<p>The client methods available are divided into Owner, Publisher and Subscriber related functionality (see Sections 3.2.2.1, 3.2.2.2 and 3.2.2.3 respectively). To discover the list of available Event Nodes, you can call the discoItems() method. Leaving the node parameter null will return the listing at the root level. On the other hand, setting the node parameter to a specific topic will return the list of sub topics at that level. The Identity is the owner of this CSS Node obtained by invoking the getThisNetworkNode() method:
+</p>
+<xmp>PubsubClient pubsubClient;//INJECTED DEPENDENCY THROUGH CONSTRUCTOR OR PROPERTY
+Identity pubsubID = idManager.getThisNetworkNode();
+//GET A LIST OF PUBSUB TOPICS (at root level)
+List<String> listTopics = pubsubClient.discoItems(pubsubID, null);
+for (String s: listTopics)
+    System.out.println(s);
+
+</xmp>
+<p>To add your own object types as payload of the events your component will fire/subscribe to, you need to make them compliant to Schema objects first (see Section 3.10). Then simply add the XMPP package names like in the following snippet of code:</p>
+<xmp>List<String> packageList = new ArrayList<String>();
+packageList.add("org.societies.api.schema.calculator");
+packageList.add("org.societies.api.schema.fortunecookie");
+pubsubClient.addJaxbPackages(packageList);
+</xmp>
+
+<h2>Owner</h2>
+<p>The Owner list of APIs allows the creation and administration of a Pubsub node.
+<br>1.	pubsubService the owner identity of the pubsub service
+<br>2.	Node the topic name.
+</p>
+<xmp>/**Creates a pubsub node for this identity using the provided node name ("topic") */
+ public void ownerCreate(Identity pubsubService, String node) throws XMPPError, CommunicationException;
+ /**Deletes the pubsub node for this identity and node name */
+ public void ownerDelete(Identity pubsubService, String node) throws XMPPError, CommunicationException;
+ /**Deletes all the published events for this identity on this node */
+ public void ownerPurgeItems(Identity pubsubService, String node) throws XMPPError, CommunicationException;
+ /**Returns the list of identities of users who are subscribed to this pubsub node */
+ public Map<Identity, SubscriptionState> ownerGetSubscriptions(Identity pubsubService, String node) throws XMPPError, CommunicationException;
+ public Map<Identity, Affiliation> ownerGetAffiliations(Identity pubsubService, String node) throws XMPPError, CommunicationException;
+ public void ownerSetSubscriptions(Identity pubsubService, String node, Map<Identity, SubscriptionState> subscriptions) throws XMPPError, CommunicationException;
+ public void ownerSetAffiliations(Identity pubsubService, String node, Map<Identity, Affiliation> affiliations) throws XMPPError, CommunicationException;
+
+</xmp>
+<h2>Publisher</h2>
+<p>The Publisher list of APIs allows for publishing/removing content on a SOCIETIES node.
+<br>1.	pubsubService the owner/id of the pubsub service Node represents the topic name
+<br>2.	Node - represents the topic name
+<br>3.	ItemID a unique identifier for that event. If you re-publish an event using the same ID you will overwrite the previously published event details
+<br>4.	item an EventBean containing your schema datatype. NOT the datatype directly, but a MessageBean/ResultBean or EventBean containing the datatype
+</p>
+<xmp>/**Publishes an event for this identity, on this node of unique itemID and content of item */
+public String publisherPublish(Identity pubsubService, String node, String itemId, object item) throws XMPPError, CommunicationException;
+/**Remove an event for this node of provided itemID */
+public void publisherDelete(Identity pubsubService, String node, String itemId) throws XMPPError, CommunicationException;
+
+</xmp>
+
+
+<h2>Subscriber</h2>
+<p>The Subscriber list of API's allows the user to subscribe and retrieve info from the pubsub node.</p>
+<xmp>1 /**Subscribe to a pubsub node and provide the subscriber callback object */
+2 public String subscriberSubscribe(Identity pubsubService, String node, Subscriber subscriber) throws XMPPError, CommunicationException;
+3 public void subscriberUnsubscribe(Identity pubsubService, String node, Identity subscriber, String subId) throws XMPPError, CommunicationException;
+4 public List<Element> subscriberRetrieveLast(Identity pubsubService, String node, String subId) throws XMPPError, CommunicationException;
+5 public List<Element> subscriberRetrieveSpecific(Identity pubsubService, String node, String subId, List<String> itemIdList) throws XMPPError, CommunicationException;
+
+</xmp>
+<p>1.	Subscriber is the actual callback object interface you are required to implement to react to  notifications. The only method to implement is pubsubEvent()
+2.	pubsubService is the owner/id of the pubsub service
+3.	node is the topic name
+4.	itemId is a unique identifier for that event. If you re-publish an event using the same ID you will overwrite the previously published event details
+5.	item represents the event details expressed as an XML element object
+1 public interface Subscriber {
+2     public void pubsubEvent(Identity pubsubService, String node, String itemId, Object payload);
+3 }
+
+</p>
+<p>Subscribing to an event requires you to implement the Subscriber interface (refer to the GIT repository for all details):</p>
+<xmp> public class PubsubTest implements Subscriber {
+     //SUBSCRIBE
+     pubSubManager.subscriberSubscribe(pubsubID, "Fortune_Cookies", this);
+ 
+     @Override
+     public void pubsubEvent(Identity pubsubService, String node, String itemId, Object payload) {
+         if (item.getClass().equals(FortuneCookieBeanResult.class)) {
+         FortuneCookieBeanResult info = (FortuneCookieBeanResult)item;
+         Cookie cookie = info.getCookie();
+         LOG.info("### Wisdom: " + cookie.getValue());
+     }
+}
+
+</xmp>
+
+
+</body>
+</html>

@@ -24,22 +24,48 @@
  */
 package ac.hw.rfid.server;
 
+import java.util.Date;
 import java.util.TimerTask;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import ac.hw.rfid.client.api.remote.IRfidClient;
 
 public class RFIDUpdateTimerTask extends TimerTask{
 
 
 	private String tagNumber;
-	private RfidServer rfidImpl;
+	private IRfidClient rfidClient;
+	private String symLoc;
+	private String userJid;
+	private boolean readyToSend = true;
+	private Logger logging = LoggerFactory.getLogger(this.getClass());
+	private Date timeStamp;
+	private long updateInterval = 5000;
 	
-	public RFIDUpdateTimerTask(RfidServer impl, String tagNumber){
-		rfidImpl = impl;
+	public RFIDUpdateTimerTask(IRfidClient client, String tagNumber, String symLoc, String userID){
+		this.rfidClient = client;
 		this.tagNumber = tagNumber;
+		this.symLoc = symLoc;
+		this.userJid = userID;
+		this.timeStamp = new Date();
 	}
 	
 	@Override
 	public void run() {
-		getRfidImpl().sendUpdate("Unknown", this.tagNumber);
+		this.logging.debug("trexo trexo !!! "+this.tagNumber);
+		Date currentTimeStamp = new Date();
+		//if current time is more than 5s after the last update timestamp 
+		if ((currentTimeStamp.getTime()-updateInterval)>this.timeStamp.getTime()){
+			this.logging.debug("Location updates no longer sent");
+			return;
+		}
+		
+		
+			this.rfidClient.sendUpdate(this.userJid, this.symLoc.trim(), this.tagNumber);	
+			this.logging.debug("Sent remote Symbolic Location update message [value:"+this.symLoc+"]");
+	
 		
 	}
 
@@ -50,12 +76,22 @@ public class RFIDUpdateTimerTask extends TimerTask{
 		return tagNumber;
 	}
 
-	public void setRfidImpl(RfidServer rfidImpl) {
-		this.rfidImpl = rfidImpl;
+	public String getSymLoc() {
+		return symLoc;
 	}
 
-	public RfidServer getRfidImpl() {
-		return rfidImpl;
+	public void setSymLoc(String newLocation) {
+		this.logging.debug("setting new symloc: "+newLocation+" for: "+this.tagNumber);
+		this.timeStamp = new Date();
+		this.symLoc = newLocation;
+	}
+
+	public String getUserJid() {
+		return userJid;
+	}
+
+	public void setUserJid(String userJid) {
+		this.userJid = userJid;
 	}
 
 }

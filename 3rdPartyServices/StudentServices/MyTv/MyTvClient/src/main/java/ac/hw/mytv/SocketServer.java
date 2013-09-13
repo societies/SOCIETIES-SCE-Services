@@ -32,6 +32,9 @@ import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import ac.hw.mytv.MyTvClient.CommandHandler;
 
 public class SocketServer extends Thread{
@@ -40,23 +43,39 @@ public class SocketServer extends Thread{
 	private Socket client;
 	private PrintWriter out;
 	private BufferedReader in;
-	private int port = 4321;
+	private int port;
 	private boolean listening = true;
 
 	private static final String GUI_STARTED = "GUI_STARTED";
 	private static final String GUI_STOPPED = "GUI_STOPPED";
 	private static final String USER_ACTION = "USER_ACTION";
-	private static final String CHANNEL_REQUEST = "CHANNEL_REQUEST";
-	private static final String MUTED_REQUEST = "MUTED_REQUEST";
+	private static final String CHANNEL_PREFERENCE_REQUEST = "CHANNEL_PREFERENCE_REQUEST";
+	private static final String MUTED_PREFERENCE_REQUEST = "MUTED_PREFERENCE_REQUEST";
+	private static final String CHANNEL_INTENT_REQUEST = "CHANNEL_INTENT_REQUEST";
+	private static final String MUTED_INTENT_REQUEST = "MUTED_INTENT_REQUEST";
 	private static final String RECEIVED = "RECEIVED";
 	private static final String FAILED = "FAILED";
 	private static final String START_MSG = "START_MSG";
 	private static final String END_MSG = "END_MSG";
 
 	private CommandHandler commandHandler;
+	private Logger LOG = LoggerFactory.getLogger(SocketServer.class);
 
 	public SocketServer(CommandHandler commandHandler){
 		this.commandHandler = commandHandler;
+	}
+	
+	public int setListenPort(){
+		try {
+			ServerSocket portLocator = new ServerSocket(0);
+			port = portLocator.getLocalPort();
+			portLocator.close();
+			LOG.debug("Found available port: "+port);
+			return port;
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return -1;
 	}
 
 	@Override
@@ -67,87 +86,116 @@ public class SocketServer extends Thread{
 	}
 
 	public void listenSocket(){
+		
 		try {
 			server = new ServerSocket(port);
 		} catch (IOException e) {
-			System.out.println("Could not listen on port "+port);
+			LOG.debug("ServerSocket creation failed: "+port);
 			e.printStackTrace();
+			return;
 		}
-
+		
 		try {
-			System.out.println("Waiting for connection from GUI on port: "+port);
+			LOG.debug("Waiting for connection from GUI on port: "+port);
 			client = server.accept();
 		} catch (IOException e) {
-			System.out.println("Accept failed: "+port);
+			LOG.debug("Accept failed: "+port);
 			e.printStackTrace();
+			return;
 		}
 
-		System.out.println("Connection accepted from GUI!");
+		LOG.debug("Connection accepted from GUI!");
 
 		try {
 			out = new PrintWriter(client.getOutputStream(), true);
 			in = new BufferedReader(new InputStreamReader(client.getInputStream()));
 		} catch (IOException e) {
-			System.out.println("Accept failed: "+port);
+			LOG.debug("Accept failed: "+port);
 			e.printStackTrace();
+			return;
 		}
 
 		try{
 			String start = in.readLine();
-			System.out.println("Got new input: "+start);
+			LOG.debug("Got new input: "+start);
 			if(start.equalsIgnoreCase(START_MSG)){
-				System.out.println("Processing new message...");
+				LOG.debug("Processing new message...");
 
 				//loop to get rest of message
 				String message = "";
 				boolean reading = true;
 				while(reading){
+					LOG.debug("running through while again...");
 					String next = in.readLine();
-					System.out.println("next = "+next);
+					LOG.debug("next = "+next);
 					if(!next.equalsIgnoreCase(END_MSG)){
+						LOG.debug("Inside if");
 						message = message+next+"\n";
 					}else{
+						LOG.debug("Inside else");
 						reading  = false;
 					}
 				}
-				System.out.println("message = "+message);
+				LOG.debug("message = "+message);
 
 				//handle message
 				String[] splitData = message.split("\n");
-				System.out.println("splitData length = "+splitData.length);
+				LOG.debug("splitData length = "+splitData.length);
 				String command = splitData[0];
 				if (command.equalsIgnoreCase(GUI_STARTED)){
-					System.out.println(GUI_STARTED+" message received");
+					LOG.debug(GUI_STARTED+" message received");
+					out.println(RECEIVED);
+					finalize();
 					String gui_ip = splitData[1];
 					commandHandler.connectToGUI(gui_ip);
-					out.println(RECEIVED);
 					
 				}else if (command.equalsIgnoreCase(USER_ACTION)){
-					System.out.println(USER_ACTION+" message received");
+					LOG.debug(USER_ACTION+" message received");
+					out.println(RECEIVED);
+					finalize();
 					String parameterName = splitData[1];
 					String value = splitData[2];
 					commandHandler.processUserAction(parameterName, value);
-					out.println(RECEIVED);
 					
-				}else if(command.equalsIgnoreCase(CHANNEL_REQUEST)){
-					System.out.println(CHANNEL_REQUEST+" message received");
+				}else if(command.equalsIgnoreCase(CHANNEL_PREFERENCE_REQUEST)){
+					LOG.debug(CHANNEL_PREFERENCE_REQUEST+" message received");
 					String response = commandHandler.getChannelPreference();
 					out.println(response);
+					finalize();
 
-				}else if(command.equalsIgnoreCase(MUTED_REQUEST)){
-					System.out.println(MUTED_REQUEST+" message received");
+				}else if(command.equalsIgnoreCase(MUTED_PREFERENCE_REQUEST)){
+					LOG.debug(MUTED_PREFERENCE_REQUEST+" message received");
 					String response = commandHandler.getMutedPreference();
 					out.println(response);
+					finalize();
+					
+				}else if(command.equalsIgnoreCase(CHANNEL_INTENT_REQUEST)){
+					LOG.debug(CHANNEL_INTENT_REQUEST+" message received");
+					String response = commandHandler.getChannelIntent();
+					out.println(response);
+					finalize();
+					
+				}else if(command.equalsIgnoreCase(MUTED_INTENT_REQUEST)){
+					LOG.debug(MUTED_INTENT_REQUEST+" message received");
+					String response = commandHandler.getMutedIntent();
+					out.println(response);
+					finalize();
 
 				}else if (command.equalsIgnoreCase(GUI_STOPPED)){
-					System.out.println(GUI_STOPPED+" message received");
-					commandHandler.disconnectFromGUI();
+					LOG.debug(GUI_STOPPED+" message received");
 					out.println(RECEIVED);
+					finalize();
+					commandHandler.disconnectFromGUI();
 				}
-				finalize();
+				
+				else{
+					LOG.debug("Unknown command received from MyTvUI: "+command);
+					out.println(FAILED);
+					finalize();
+				}
 			}
 		} catch (IOException e) {
-			System.out.println("Read failed");
+			LOG.debug("Read failed");
 			out.println(FAILED);
 			finalize();
 		}
@@ -162,7 +210,7 @@ public class SocketServer extends Thread{
 			out.close();
 			server.close();
 		} catch (IOException e) {
-			System.out.println("Could not close.");
+			LOG.debug("Could not close.");
 		}
 	}
 }

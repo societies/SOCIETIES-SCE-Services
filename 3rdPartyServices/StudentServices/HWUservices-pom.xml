@@ -1,0 +1,39 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>org.societies</groupId>
+	<artifactId>servicesbuilder</artifactId>
+	<version>${release.version}</version>
+	<name>HWU services builder</name>
+	<packaging>pom</packaging>
+
+	<developers>
+		<developer>
+			<name>Elizabeth Papadopoulou</name>
+			<email>E.Papadopoulou@hw.ac.uk</email>
+			<organization>HWU</organization>
+			<organizationUrl>http://www.hw.ac.uk/</organizationUrl>
+			<roles>
+				<role>Senior Developer</role>
+			</roles>
+			<timezone>+0</timezone>
+		</developer>
+	</developers>
+	
+	<!-- All builder projects should inherit from version-parent -->
+	<parent>
+		<groupId>org.societies</groupId>
+		<artifactId>version-parent</artifactId>
+		<version>RELEASE</version>
+	</parent>
+	
+	<modules>
+	    <module>..\api</module>
+		<module>HWUDisplayPortalService\HWUDisplayPortalServer</module>
+		<module>HWUDisplayPortalService\HWUDisplayPortalClient</module>
+		<module>RFID\RFIDServer3pApp</module>
+		<module>RFID\RFIDClient3pApp</module>
+		<module>MyTv\MyTvClient</module>
+		
+	</modules>
+</project>

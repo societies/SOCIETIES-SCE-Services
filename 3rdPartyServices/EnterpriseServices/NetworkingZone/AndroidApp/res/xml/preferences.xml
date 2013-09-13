@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+	<PreferenceScreen
+	    android:key="cssConnectionProperties"
+        android:title="Networking Zone Configuration">
+		    <EditTextPreference 
+   		    	android:title="Server" 
+   		    	android:key="webserver" 
+   		    	android:defaultValue="54.228.222.47" 
+   		    	android:summary="Machine name of webserver"/>
+    		<EditTextPreference 
+   		    	android:title="Port" 
+   		    	android:key="webserverPort" 
+   		    	android:defaultValue="28181" 
+   		    	android:summary="Apache port number"/>
+    		<EditTextPreference 
+   		    	android:title="Application Path" 
+   		    	android:key="appPath" 
+   		    	android:defaultValue="/nzone-web" 
+   		    	android:summary="path to web app"/>       
+	</PreferenceScreen>
+</PreferenceScreen>

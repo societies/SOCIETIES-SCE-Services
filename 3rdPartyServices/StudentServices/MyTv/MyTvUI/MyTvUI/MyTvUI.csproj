@@ -60,6 +60,9 @@
       <HintPath>dll\Coding4Fun.Kinect.Wpf.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="CoreAudioApi">
+      <HintPath>dll\CoreAudioApi.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.Expression.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>dll\Microsoft.Expression.Drawing.dll</HintPath>
@@ -68,6 +71,12 @@
     <Reference Include="Microsoft.Kinect, Version=1.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\..\..\..\..\..\..\Program Files\Microsoft SDKs\Kinect\v1.5\Assemblies\Microsoft.Kinect.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Kinect.Toolkit">
+      <HintPath>C:\Program Files\Microsoft SDKs\Kinect\Developer Toolkit v1.7.0\Assemblies\Microsoft.Kinect.Toolkit.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Kinect.Toolkit.Controls">
+      <HintPath>C:\Program Files\Microsoft SDKs\Kinect\Developer Toolkit v1.7.0\Assemblies\Microsoft.Kinect.Toolkit.Controls.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Samples.Kinect.WpfViewers, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -138,14 +147,6 @@
     <AppDesigner Include="Properties\" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Images\channel_background.png" />
-    <Resource Include="Images\close_button.png" />
-    <Resource Include="Images\me.JPG" />
-    <Resource Include="Images\speech-bubble.png" />
-    <Resource Include="Images\volume_down.png" />
-    <Resource Include="Images\volume_up.png" />
-  </ItemGroup>
-  <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.0,Profile=Client">
       <Visible>False</Visible>
       <ProductName>Microsoft .NET Framework 4 Client Profile %28x86 and x64%29</ProductName>
@@ -168,10 +169,6 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Images\off_button.jpg" />
-    <Resource Include="Images\pointer.png" />
-  </ItemGroup>
-  <ItemGroup>
     <EmbeddedResource Include="dll\Microsoft.Samples.Kinect.WpfViewers.dll" />
   </ItemGroup>
   <ItemGroup>
@@ -179,6 +176,48 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="dll\Microsoft.Expression.Drawing.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\channel_background.png" />
+    <Resource Include="Images\close_button.png" />
+    <Resource Include="Images\pointer.png" />
+    <Resource Include="Images\logo.png" />
+    <Resource Include="Images\speech-bubble.png" />
+    <Resource Include="Images\volume_down.png" />
+    <Resource Include="Images\volume_up.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\off_button.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\grey.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\mytv.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\my_updates.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\group_background.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\my_schedule.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="dll\CoreAudioApi.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\channel_background_selected.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\volume_down_selected.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\volume_up_selected.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\off_button_selected.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

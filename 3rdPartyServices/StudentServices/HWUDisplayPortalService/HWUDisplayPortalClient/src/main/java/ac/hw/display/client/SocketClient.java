@@ -130,13 +130,23 @@ public class SocketClient {
 
 	public void startSession(UserSession userSession){
 		String message = "LOGIN\n" +
-				userSession.getUserIdentity()+"\n";
+				"USER:"+userSession.getUserIdentity()+"\n"+
+				"PORTAL_PORT:"+userSession.getServiceRuntimeSocketPort()+"\n"+
+				"NUM_SERVICES:"+userSession.getServices().size()+"\n"+
+				"START_SERVICES\n";
 		
+		int count = 0;
 		for (ServiceInfo sInfo : userSession.getServices()){
-			String serviceMsg = sInfo.getServiceName()+"\n"+
-				sInfo.getExe()+"\n"+
-					"RequiresKinect="+sInfo.isKinectRequired()+"\n"; 
+			
+			String serviceMsg = 
+					"START_SERVICE_INFO:"+count+"\n"+
+					"SERVICE_NAME_"+count+":"+sInfo.getServiceName()+"\n"+
+					"SERVICE_EXE_"+count+":"+sInfo.getExe()+"\n"+
+					"SERVICE_PORT_"+count+":"+sInfo.getServicePortNumber()+"\n"+
+					"RequiresKinect_"+count+":"+sInfo.isKinectRequired()+"\n"+
+					"END_SERVICE_INFO:"+count+"\n";
 			message = message.concat(serviceMsg);
+			count++;
 		}
 		
 		message = message.concat("END_SERVICES\n");
@@ -151,7 +161,7 @@ public class SocketClient {
 	}
 	
 	public void startService(UserSession userSession, String serviceName){
-		String message = "START SERVICE\n"+
+		String message = "START_SERVICE\n"+
 				userSession.getUserIdentity()+"\n"+
 				serviceName+"\n";
 		this.sendMessage(message);
@@ -174,6 +184,17 @@ public class SocketClient {
 		this.sendMessage(message);	
 		
 	}
+	
+	public void logOut(UserSession userSession){
+		String message = "LOGOUT\n"+userSession.getUserIdentity()+"\n";
+		this.sendMessage(message);
+		this.logging.debug("Sent LOGOUT message");
+	}
+	
+	public void startService(ServiceInfo sInfo){
+		String message = "START_SERVICE\n "+sInfo.getServiceName()+"\n";
+		this.sendMessage(message);
+	}
 	private static int countLines(String str){
 		   String[] lines = str.split("\r\n|\r|\n");
 		   return  lines.length;
@@ -192,17 +213,26 @@ public class SocketClient {
 		
 		SocketClient c = new SocketClient("127.0.0.1");
 		
-		UserSession userSession = new UserSession("eliza@societies.local");
-		ServiceInfo sInfo = new ServiceInfo(null, "Social Learning", "http://www.macs.hw.ac.uk/~ceeep1/societies/services/SocialLearningGame.exe", true);
+		UserSession userSession = new UserSession("emma.societies.local.macs.hw.ac.uk", 10001);
 		
-		ServiceInfo sInfo2 = new ServiceInfo (null, "PolicyEditor", "http://www.macs.hw.ac.uk/~ceeep1/societies/services/POLICY~1.JAR", false);
-		ServiceInfo sInfo3 = new ServiceInfo(null, "Youtube", "http://www.youtube.com/watch?v=3OnnDqH6Wj8", false);
-		ServiceInfo sInfo4 = new ServiceInfo(null, "MyTV", "http://www.macs.hw.ac.uk/~ceesmm1/societies/mytv/MyTvUI.exe", true);
-		userSession.addService(sInfo4);
-		userSession.addService(sInfo);
-		//userSession.addService(sInfo2);
-		//userSession.addService(sInfo3);
+		//c.sendText("Eliza's service", userSession, "<strong>Hello Emma!!! </strong>");
+		/*ServiceInfo sInfo = new ServiceInfo(null, "Social Learning", "http://www.macs.hw.ac.uk/~ceeep1/societies/services/SocialLearningGame.exe", 0 , true);
+		
+		ServiceInfo sInfo2 = new ServiceInfo (null, "PolicyEditor", "http://www.macs.hw.ac.uk/~ceeep1/societies/services/POLICY~1.JAR", 0, false);
+		ServiceInfo sInfo3 = new ServiceInfo(null, "Youtube", "http://www.youtube.com/watch?v=3OnnDqH6Wj8", 0, false);*/
+/*		ServiceInfo sInfo4 = new ServiceInfo(null, "MyTV", "http://www.macs.hw.ac.uk/~ceesmm1/societies/mytv/MyTvUI.exe", 0, true);*/
+		ServiceInfo policyEditor = new ServiceInfo (null, "MyTV", "http://www.macs.hw.ac.uk/~ceesmm1/societies/mytv/MyTvUI.exe", 4984, true);
+		
+		userSession.addService(policyEditor);
+		
 		c.startSession(userSession);
+		try {
+			Thread.sleep(5000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}	
+		c.startService(userSession, policyEditor.getServiceName());
 		try {
 			Thread.sleep(5000);
 		} catch (InterruptedException e) {
@@ -210,7 +240,24 @@ public class SocketClient {
 			e.printStackTrace();
 		}
 		
-		//c.startService(userSession, sInfo.getServiceName());
+		c.logOut(userSession);
+		
+		//userSession.addService(sInfo2);
+		//userSession.addService(sInfo);
+	//	userSession.addService(sInfo4);
+		//userSession.addService(sInfo2);
+		//userSession.addService(sInfo2);
+		//userSession.addService(sInfo3);
+/*		c.startSession(userSession);
+		try {
+			Thread.sleep(5000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		*/
+		
+		//c.startService(userSession, sInfo2.getServiceName());
 		/*
 		URL url;
 		try {
@@ -279,14 +326,14 @@ public class SocketClient {
 				"MockService2\n";
 		c.sendMessage(message);
 		*/
-		try {
+/*		try {
 			Thread.sleep(8000);
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		String message = "LOGOUT\n" +
-				"eliza@societies.local\n";
+				"eliza@societies.local\n";*/
 		//c.sendMessage(message);
 
 	}

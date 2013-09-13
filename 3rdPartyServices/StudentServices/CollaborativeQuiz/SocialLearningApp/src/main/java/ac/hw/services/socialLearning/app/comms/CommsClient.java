@@ -37,12 +37,14 @@ import org.societies.api.comm.xmpp.exceptions.CommunicationException;
 import org.societies.api.comm.xmpp.exceptions.XMPPError;
 import org.societies.api.comm.xmpp.interfaces.ICommCallback;
 import org.societies.api.comm.xmpp.interfaces.ICommManager;
-import org.societies.api.ext3p.schema.sociallearningbean.SociallearningBean;
-import org.societies.api.ext3p.schema.sociallearningbean.SociallearningMethodType;
-import org.societies.api.ext3p.schema.sociallearningbean.SociallearningResultBean;
 import org.societies.api.identity.IIdentity;
 import org.societies.api.identity.IIdentityManager;
 import org.societies.api.schema.servicelifecycle.model.ServiceResourceIdentifier;
+import org.societies.api.schema.css.devicemgmt.display.displayportalserverbean.DisplayPortalServerBean;
+import org.societies.api.schema.css.devicemgmt.display.displayportalserverbean.DisplayPortalServerMethodType;
+import org.societies.api.sociallearning.schema.serverbean.SocialLearningMethodType;
+import org.societies.api.sociallearning.schema.serverbean.SocialLearningServerBean;
+
 
 
 
@@ -56,18 +58,19 @@ public class CommsClient implements ISocialLearningServer, ICommCallback{
 
 
 	private static final List<String> NAMESPACES = Collections.unmodifiableList(
-			  Arrays.asList("http://societies.org/api/ext3p/schema/sociallearningbean",
-					  "http://societies.org/api/schema/servicelifecycle/model"));
+			Arrays.asList("http://societies.org/api/sociallearning/schema/serverbean"));
 	private static final List<String> PACKAGES = Collections.unmodifiableList(
-		  Arrays.asList("org.societies.api.ext3p.schema.sociallearningbean",
-				  "org.societies.api.schema.servicelifecycle.model"));
+			Arrays.asList("org.societies.api.sociallearning.schema.serverbean"));
 				  
 	private ICommManager commManager;
 	private static Logger logging = LoggerFactory.getLogger(CommsClient.class);
 	private IIdentityManager idMgr;
+	
+	private String[] addressPort = new String[2];
+	
 
 	
-	private Hashtable<SociallearningMethodType, SociallearningResultBean> serviceIDResults;
+	private Hashtable<SocialLearningMethodType, SocialLearningServerBean> serviceIDResults;
 	/**
 	 * @return the commManager
 	 */
@@ -85,17 +88,19 @@ public class CommsClient implements ISocialLearningServer, ICommCallback{
 
 	public CommsClient() 
 	{	
-		this.serviceIDResults = new Hashtable<SociallearningMethodType, SociallearningResultBean>();
+	//	this.serviceIDResults = new Hashtable<SociallearningMethodType, SociallearningResultBean>();
 		
 	}
 
 	public void InitService() {
+		this.serviceIDResults = new Hashtable<SocialLearningMethodType, SocialLearningServerBean>();
 		//REGISTER OUR ServiceManager WITH THE XMPP Communication Manager
 		try {
 			getCommManager().register(this); 
 		} catch (CommunicationException e) {
 			e.printStackTrace();
 		}
+		logging.debug("Registered with comms manager!");
 	}
 	
 	
@@ -137,7 +142,25 @@ public class CommsClient implements ISocialLearningServer, ICommCallback{
 
 	@Override
 	public void receiveResult(Stanza stanza, Object result) {
-		this.logging.debug("Received resultBean");
+		this.logging.debug("Recieved Result");
+		if(result instanceof SocialLearningServerBean)
+		{
+			SocialLearningServerBean bean = (SocialLearningServerBean) result;
+			if(bean.getMethod().equals(SocialLearningMethodType.SERVER_SOCKET_INFO))
+			{
+				this.serviceIDResults.put(SocialLearningMethodType.SERVER_SOCKET_INFO, (SocialLearningServerBean) result);
+				synchronized (this.serviceIDResults){
+					this.serviceIDResults.notifyAll();
+				}
+				//addressPort[0]=bean.getAddress();
+				//addressPort[1]=String.valueOf(bean.getPort());
+				//synchronized (this.addressPort){
+				//	this.addressPort.notifyAll();
+				//}
+				
+			}
+		}
+		/*this.logging.debug("Received resultBean");
 		if (result instanceof SociallearningResultBean)
 		{
 			this.serviceIDResults.put(SociallearningMethodType.GET_SERVER_SERVICE_ID, (SociallearningResultBean) result);
@@ -145,12 +168,12 @@ public class CommsClient implements ISocialLearningServer, ICommCallback{
 				this.serviceIDResults.notifyAll();
 			}
 				
-		}
+		}*/
 
 	}
 
 
-	@Override
+	/*@Override
 	public ServiceResourceIdentifier getServerServiceId(IIdentity serverIdentity) {
 		SociallearningBean bean = new SociallearningBean();
 		bean.setMethod(SociallearningMethodType.GET_SERVER_SERVICE_ID);
@@ -184,6 +207,53 @@ public class CommsClient implements ISocialLearningServer, ICommCallback{
 
 		return null;
 		
+		
+	}*/
+
+	@Override
+	public String[] getServerPortAddress(IIdentity serverIdentity) {
+		logging.debug("SENDING MESSAGE TO: " + serverIdentity +"!");
+		
+		Stanza stanza = new Stanza(serverIdentity);
+		SocialLearningServerBean bean = new SocialLearningServerBean();
+		bean.setMethod(SocialLearningMethodType.SERVER_SOCKET_INFO_REQUEST);
+		logging.debug(bean.toString());
+		try {
+
+			//this.commManager.sendMessage(stanza, bean);
+			//this.commManager.sendIQGet(stanza, bean, this);//, this);
+			getCommManager().sendIQGet(stanza, bean, this);
+		} catch (CommunicationException e) {
+			logging.debug("FAILED SENDING MESSAGE!");
+			logging.debug(e.toString());
+			StackTraceElement[] x = e.getStackTrace();
+			logging.debug(e.toString());
+			for(int i=0;i < x.length; i++)
+			{
+			logging.debug(x[i].toString());	
+			}
+		}
+
+
+		
+		//WAIT FOR RESULTS
+		
+		while (!this.serviceIDResults.containsKey(SocialLearningMethodType.SERVER_SOCKET_INFO)){
+			try {
+				this.logging.debug("waiting for results");
+				synchronized(this.serviceIDResults){
+					this.serviceIDResults.wait();
+				}
+			} catch (InterruptedException e) {
+	
+				e.printStackTrace();
+
+
+			}
+		}
+		addressPort[0] = serviceIDResults.get(SocialLearningMethodType.SERVER_SOCKET_INFO).getAddress();
+		addressPort[1] = String.valueOf(serviceIDResults.get(SocialLearningMethodType.SERVER_SOCKET_INFO).getPort());
+		return addressPort;		
 		
 	}
 

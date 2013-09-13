@@ -7,7 +7,7 @@
 		<artifactId>spring-osgi-parent</artifactId>
 		<version>RELEASE</version>
 	</parent>
-	<groupId>org.societies.thirdpartyservices.networking</groupId>
+	<groupId>org.societies.ext3p.networking</groupId>
 	<packaging>bundle</packaging>
 	<version>${release.version}</version>
 
@@ -54,20 +54,15 @@
 		</dependency>
 
 		<dependency>
-		    <groupId>org.societies.api.ext3p</groupId>
-		    <artifactId>societies-api-ext3p</artifactId>
-		    <version>${release.version}</version>
-		    <scope>provided</scope>
-		</dependency>
-		
-		<!-- Communication Manager -->
-		<dependency>
-			<groupId>org.societies.comm.xmpp</groupId>
-			<artifactId>CommunicationFrameworkCommons</artifactId>
-			<version>${version.comm}</version>
+			<groupId>org.societies.ext3p.networking</groupId>
+			<artifactId>networking-api</artifactId>
+			<version>${release.version}</version>
 			<scope>provided</scope>
 		</dependency>
+		
 
+
+	
 	</dependencies>
 
 	<build>
@@ -78,11 +73,18 @@
 				<extensions>true</extensions>
 				<configuration>
 					<instructions>
-						<Export-Package>org.societies.thirdpartyservices.networking
-						</Export-Package>
+						<Embed-Dependency>*;scope=compile|runtime</Embed-Dependency>
+						<Embed-Transitive>false</Embed-Transitive>
+						<Import-Package>
+						org.societies.api.services;resolution:=optional,
+						org.hibernate.proxy;resolution:=optional,
+						*;resolution:=optional</Import-Package>
+						<!-- <scope>compile</scope> TODO: Fox up again when comms bug #1561 is fixed-->
+					<!--	<Export-Package>org.societies.api.ext3p.networking</Export-Package> -->
 					</instructions>
 				</configuration>
 			</plugin>
+			
 			<plugin>
 				<artifactId>maven-assembly-plugin</artifactId>
 				<configuration>

@@ -36,6 +36,7 @@ namespace MyTvUI
         Socket echoSocket;
         String userID;
         String endPoint;
+        int port;
         Boolean connected;
 
         public SocketClient()
@@ -46,7 +47,7 @@ namespace MyTvUI
 
         public Boolean connect()
         {
-            IPEndPoint ip = new IPEndPoint(IPAddress.Parse(endPoint), 4321);
+            IPEndPoint ip = new IPEndPoint(IPAddress.Parse(endPoint), port);
             echoSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             try
             {
@@ -56,7 +57,7 @@ namespace MyTvUI
             }
             catch (SocketException e)
             {
-                Console.WriteLine("SOCKET_CLIENT: Unable to connect to service client on node: "+endPoint);
+                Console.WriteLine("SOCKET_CLIENT: Unable to connect to service client on node: "+endPoint+" on port: "+port);
                 Console.WriteLine(e.ToString());
             }
             return false;
@@ -75,8 +76,9 @@ namespace MyTvUI
 
 
 
-        public Boolean sendMessage(String message)
+        public String sendMessage(String message)
         {
+            String response = "";
             if (connected)
             {
                 Console.WriteLine("SOCKET_CLIENT: Sending message to service client:");
@@ -85,88 +87,79 @@ namespace MyTvUI
                 echoSocket.Send(Encoding.ASCII.GetBytes(message));
                 byte[] data = new byte[1024];
                 int receivedDataLength = echoSocket.Receive(data);
-                String response = Encoding.ASCII.GetString(data, 0, receivedDataLength);
+                response = Encoding.ASCII.GetString(data, 0, receivedDataLength);
                 disconnect();
                 Console.WriteLine("SOCKET_CLIENT: received -> " + response);
-                if (response.Contains("RECEIVED"))
-                {
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
             }
             else
             {
                 if (connect())
                 {
-                    sendMessage(message);
-                    return true;
-                }
-            }
-            return false;
-        }
-
-
-        public String getChannelPreference()
-        {
-            String response = "";
-            if (connected)
-            {
-                Console.WriteLine("SOCKET_CLIENT: Getting channel preference from service client");
-
-                String request = "START_MSG\n" +
-                    "CHANNEL_REQUEST\n" +
-                    "END_MSG";
-                echoSocket.Send(Encoding.ASCII.GetBytes(request));
-                byte[] data = new byte[1024];
-                int receivedDataLength = echoSocket.Receive(data);
-                response = Encoding.ASCII.GetString(data, 0, receivedDataLength);
-                disconnect();
-            }
-            else
-            {
-                if (connect())
-                {
-                    response = getChannelPreference();
+                    response = sendMessage(message);
                 }
             }
             return response;
         }
 
 
-        public String getMutedPreference()
-        {
-            String response = "";
-            if (connected)
-            {
-                Console.WriteLine("SOCKET_CLIENT: Getting muted preference from service client");
+        //public String getChannelPreference()
+        //{
+        //    String response = "";
+        //    if (connected)
+        //    {
+        //        Console.WriteLine("SOCKET_CLIENT: Getting channel preference from service client");
 
-                String request = "START_MSG\n" +
-                    "MUTED_REQUEST\n" +
-                    "END_MSG";
-                echoSocket.Send(Encoding.ASCII.GetBytes(request));
-                byte[] data = new byte[1024];
-                int receivedDataLength = echoSocket.Receive(data);
-                response = Encoding.ASCII.GetString(data, 0, receivedDataLength);
-                disconnect();
-            }
-            else
-            {
-                if (connect())
-                {
-                    response = getMutedPreference();
-                }
-            }
-            return response;
-        }
+        //        String request = "START_MSG\n" +
+        //            "CHANNEL_REQUEST\n" +
+        //            "END_MSG\n";
+        //        echoSocket.Send(Encoding.ASCII.GetBytes(request));
+        //        byte[] data = new byte[1024];
+        //        int receivedDataLength = echoSocket.Receive(data);
+        //        response = Encoding.ASCII.GetString(data, 0, receivedDataLength);
+        //        disconnect();
+        //    }
+        //    else
+        //    {
+        //        if (connect())
+        //        {
+        //            response = getChannelPreference();
+        //        }
+        //    }
+        //    return response;
+        //}
+
+
+        //public String getMutedPreference()
+        //{
+        //    String response = "";
+        //    if (connected)
+        //    {
+        //        Console.WriteLine("SOCKET_CLIENT: Getting muted preference from service client");
+
+        //        String request = "START_MSG\n" +
+        //            "MUTED_REQUEST\n" +
+        //            "END_MSG\n";
+        //        echoSocket.Send(Encoding.ASCII.GetBytes(request));
+        //        byte[] data = new byte[1024];
+        //        int receivedDataLength = echoSocket.Receive(data);
+        //        response = Encoding.ASCII.GetString(data, 0, receivedDataLength);
+        //        disconnect();
+        //    }
+        //    else
+        //    {
+        //        if (connect())
+        //        {
+        //            response = getMutedPreference();
+        //        }
+        //    }
+        //    return response;
+        //}
 
 
         #region connection parameters
         public Boolean getSessionParameters()
         {
-            if (retrieveUserID() && retrieveEndPoint())
+            if (retrieveUserID() && retrieveEndPoint() && retrievePort())
             {
                 return true;
             }
@@ -199,6 +192,7 @@ namespace MyTvUI
             receivedDataLength = server.Receive(data);
             if (receivedDataLength < 1)
             {
+                server.Close();
                 return false;
             }
             userID = Encoding.ASCII.GetString(data, 0, receivedDataLength);
@@ -230,6 +224,7 @@ namespace MyTvUI
             receivedDataLength = server.Receive(data);
             if (receivedDataLength < 1)
             {
+                server.Close();
                 return false;
             }
             endPoint = data[0] + "." + data[1] + "." + data[2] + "." + data[3];
@@ -238,6 +233,51 @@ namespace MyTvUI
             server.Close();
             return true;
         }
+
+        private Boolean retrievePort()
+        {
+            IPEndPoint ip = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 2114);
+            Socket server = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            try
+            {
+                server.Connect(ip);
+            }
+            catch (SocketException e)
+            {
+                Console.WriteLine("SOCKET_CLIENT: Unable to connect to server.");
+                Console.WriteLine(e.ToString());
+                return false;
+            }
+
+            //get service client listen port
+            Console.WriteLine("SOCKET_CLIENT: Retrieving listen port of service client");
+            server.Send(Encoding.ASCII.GetBytes("SERVICE_PORT->MyTv"));
+            byte[] data = new byte[1024];
+            int receivedDataLength = 0;
+            receivedDataLength = server.Receive(data);
+            if (receivedDataLength < 1)
+            {
+                server.Close();
+                return false;
+            }
+
+            try
+            {
+                port = BitConverter.ToInt32(data, 0);
+                Console.WriteLine("SOCKET_CLIENT: Received listen port of service client: " + port.ToString());
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Error converting bytes to port");
+                Console.WriteLine(e.ToString());
+                server.Close();
+                return false;
+            }
+       
+            server.Close();
+            return true;
+        }
+
         #endregion connection parameters
 
         public String getUserID()

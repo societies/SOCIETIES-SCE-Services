@@ -1,0 +1,81 @@
+<f:view xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:pm="http://primefaces.org/mobile" contentType="text/html">
+
+	
+	<pm:page title="Networking Zone">
+		<pm:view id="viewZone">
+		
+			<f:event listener="#{peopleBean.initialisepeoplelist}" type="preRenderView" />
+			
+			<pm:header title="#{mainBean.zoneName}" />
+			<pm:content>
+				<p:accordionPanel>
+
+					<p:tab title="Suggested Contacts">
+
+						<h:form id="form">
+
+							<p:dataTable id="zoneMembers" value="#{peopleBean.suggestions}"
+								var="person">
+
+							
+								<p:column style="width:10%">
+								<p:commandLink action="gotofriend" >
+								<f:setPropertyActionListener value="#{person.userid}"
+											target="#{friendBean.friendid}" />
+								<p:graphicImage value="#{person.imageSrc}"  width="30" height="27" />
+									</p:commandLink> 
+								</p:column>
+								
+								<p:column headerText="Name" style="width:30%">
+									<h:outputText value="#{person.displayName}" />
+								</p:column>
+
+								<p:column headerText="Company" style="width:20%">
+									<h:outputText value="#{person.company}" />
+								</p:column>
+
+								<p:column headerText="Relevance">
+									<p:graphicImage value="/images/company.png"  width="25" height="25" rendered="#{peopleBean.isperftagged(person)}"/>
+									<p:graphicImage value="/images/interest.png"  width="25" height="25" rendered="#{peopleBean.isinteresttagged(person)}"/>
+									<p:graphicImage value="/images/facebook-col.png"  width="25" height="25" rendered="#{peopleBean.isfacebooktagged(person)}"/>		
+									<p:graphicImage value="/images/linkedin-col.png"  width="25" height="25" rendered="#{peopleBean.islinkedtagged(person)}"/>		
+								</p:column>
+								
+							</p:dataTable>
+
+							<h:outputText value="#{friendBean.friendid}" id="friendsid"
+								style="font-weight:bold" rendered="false" />
+							
+						</h:form>
+						<br/><br/><br/>
+						<p:fieldset legend="Relevance Icon Legend">  
+    						<h:panelGrid columns="2" cellpadding="2"> 
+    							<p:graphicImage value="/images/company.png" width="25" height="25"/>
+		            			<h:outputText value="Works for a preferred company"/>  
+		            			<p:graphicImage value="/images/interest.png" width="25" height="25"/>
+		            			<h:outputText value="Shares your interests"/>  
+    						   	<p:graphicImage value="/images/linkedin-col.png" width="25" height="25"/>
+		            			<h:outputText value="An existing LinkedIn connection"/>
+		            		</h:panelGrid>  
+						</p:fieldset>  
+
+					</p:tab>
+
+				</p:accordionPanel>
+
+				<h:form id="form3">
+					<p:commandButton icon="back" value="Back to Main Zone"
+						action="gotomain" />
+				</h:form>
+			</pm:content>
+		</pm:view>
+
+	</pm:page>
+</f:view>
+
+

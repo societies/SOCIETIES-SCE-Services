@@ -1,0 +1,217 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>org.societies.ext3p.networking</groupId>
+	<artifactId>networking-api</artifactId>
+	<version>${release.version}</version>
+	<name>SOCIETIES 3p Networking Zone API</name>
+	<packaging>bundle</packaging>
+
+	
+	<developers>
+		<developer>
+			<name>Maria Mannion </name>
+			<organization>Intel</organization>
+		</developer>
+	</developers>
+	
+	<parent>
+		<groupId>org.societies</groupId>
+		<artifactId>version-parent</artifactId>
+		<version>RELEASE</version>
+	</parent>
+	<dependencies>
+		<dependency>
+			<groupId>com.sun.xml.bind</groupId>
+			<artifactId>jaxb-impl</artifactId>
+			<version>2.1.8</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.simpleframework</groupId>
+			<artifactId>simple-xml</artifactId>
+			<version>2.6.4</version>
+			<scope>provided</scope>
+			<exclusions>
+			    <!-- StAX is not available on Android -->
+			    <exclusion>
+			        <artifactId>stax</artifactId>
+			        <groupId>stax</groupId>
+			    </exclusion>
+			    <exclusion>
+			        <artifactId>stax-api</artifactId>
+			        <groupId>stax</groupId>
+			    </exclusion>
+			    <!-- Provided by Android -->
+			    <exclusion>
+			        <artifactId>xpp3</artifactId>
+			        <groupId>xpp3</groupId>
+			    </exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+		    <groupId>org.societies.maven.converters</groupId>
+		    <artifactId>SimpleXMLConverters</artifactId>
+		    <version>${release.version}</version>
+		    <scope>provided</scope>
+		</dependency>			
+	</dependencies>
+
+	<build>
+	
+		<sourceDirectory>src/main/resources</sourceDirectory>
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<excludes>
+					<exclude>*.xjb</exclude>
+					<!-- <exclude>*.xsd</exclude> -->
+				</excludes>
+				<filtering>true</filtering>
+			</resource>
+		</resources>
+		<plugins>
+		  <!-- 1) generate-sources jaxb2:generate
+			 	 2) process-sources  jaxb2simple:convert
+				 3) compile 		 maven-compiler-plugin 
+			-->
+			<plugin>
+				<groupId>org.jvnet.jaxb2.maven2</groupId>
+				<artifactId>maven-jaxb2-plugin</artifactId>
+				<version>0.8.0</version>
+				<executions>
+					<execution>
+						<id>global-generate</id>
+						<goals>
+							<goal>generate</goal>
+						</goals>
+						<configuration>
+							<schemaExcludes>
+								<exclude>dataforms.xsd</exclude>
+								<exclude>pubsub.xsd</exclude>
+								<exclude>pubsub#errors.xsd</exclude>
+								<exclude>pubsub#owner.xsd</exclude>
+								<exclude>pubsub#event.xsd</exclude>
+							</schemaExcludes>
+							<args>
+								<arg>-Xcollection-setter-injector</arg>
+							</args>
+						</configuration>
+					</execution>
+				</executions>
+				<configuration>
+					<strict>true</strict>
+					<verbose>false</verbose>
+					<extension>true</extension>
+					<readOnly>yes</readOnly>
+					<removeOldOutput>true</removeOldOutput>
+				</configuration>
+				<dependencies>
+					<dependency>
+						<groupId>net.java.dev.vcc.thirdparty</groupId>
+						<artifactId>collection-setter-injector</artifactId>
+						<version>0.5.0-1</version>
+					</dependency>
+				</dependencies>
+			</plugin>
+			<plugin>
+				<groupId>org.societies.maven</groupId>
+				<artifactId>jaxb2simple-maven-plugin</artifactId>
+				<version>1.0</version>
+				<executions>
+					<execution>
+						<phase>process-sources</phase>
+						<goals>
+							<goal>convert</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+			 	 <!-- <folderInputDirectory>${project.build.directory}/generated-sources/</folderInputDirectory> -->
+				</configuration>
+			</plugin>			
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<version>2.3.1</version>
+				<configuration>
+					<includes>
+						<include>org/societies/api/ext3p/**</include>
+					</includes>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>2.0.2</version>
+				<configuration>
+					<source>1.6</source>
+					<target>1.6</target>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<skipTests>true</skipTests>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-resources-plugin</artifactId>
+				<version>2.5</version>
+				<configuration>
+					<encoding>UTF-8</encoding>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-site-plugin</artifactId>
+				<version>3.0</version>
+				<configuration>
+					<reportPlugins>
+						<plugin>
+							<groupId>org.apache.maven.plugins</groupId>
+							<artifactId>maven-javadoc-plugin</artifactId>
+							<version>2.8</version>
+						</plugin>
+					</reportPlugins>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<extensions>true</extensions>
+				<configuration>
+					<instructions>
+						<!-- the API will export all interfaces packages for the rest of modules. 
+							The exclusion of internal package can be avoided as the plugin excludes automatically 
+							'internal' and 'impl' package names org.societies.api.** -->
+ 						<_exportcontents> 
+ 						org.societies.api.ext3p.networking,
+ 						</_exportcontents> 
+						<Embed-Dependency>*;scope=compile|runtime</Embed-Dependency>
+						<Embed-Transitive>true</Embed-Transitive>
+					</instructions>
+				</configuration>
+			</plugin>
+				
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<configuration>
+					<artifactItems>
+						<artifactItem>
+							<groupId>${project.groupId}</groupId>
+							<artifactId>${project.artifactId}</artifactId>
+							<version>${release.version}</version>
+							<type>bundle</type>
+							<overWrite>true</overWrite>
+							<outputDirectory>${spring.osgi.deploy.dir}</outputDirectory>
+						</artifactItem>
+					</artifactItems>
+				</configuration>
+			</plugin>		
+		</plugins>
+	</build>
+</project>

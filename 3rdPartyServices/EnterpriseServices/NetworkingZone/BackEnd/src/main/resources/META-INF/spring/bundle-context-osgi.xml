@@ -11,9 +11,29 @@
        keeping these definitions separate is to facilitate integration
        testing of the bundle outside of an OSGi container -->
 	
+	 
+	<bean id="NetworkingServiceData" class="org.societies.api.services.PlaceholderService">
+  	</bean>
+  	
+	<osgi:service ref="NetworkingServiceData" interface="org.societies.api.services.PlaceholderService">
+      <osgi:service-properties>
+          <entry key="TargetPlatform" value="SOCIETIES" />
+          <entry key="ServiceProvider" value="ICT-SOCIETIES" />
+          <entry key="ServiceMetaModel" value-ref="serMetamodel" />
+      </osgi:service-properties>
+  	</osgi:service>
+  	
+	<bean id="serMetamodel" class="org.societies.api.schema.servicelifecycle.model.Service">
+     	<property name="authorSignature" value="mmannion" />
+     	<property name="serviceDescription" value="Networking Zone - Backend" />
+     	<property name="serviceName" value="NetworkingBackEnd" />
+     	<property name="serviceType" value="THIRD_PARTY_CLIENT" />
+     	<property name="serviceCategory" value="media" />
+     	<property name="privacyPolicy" value="privacy-policy.xml" />
+ 	</bean>
+ 	
 	<osgi:reference id="dataSource" interface="javax.sql.DataSource" />
-	<osgi:reference id="cisManager" interface="org.societies.api.cis.management.ICisManager" />
 	<osgi:reference id="commManager" interface="org.societies.api.comm.xmpp.interfaces.ICommManager"/>
-	
+	<osgi:reference id="cisManager" interface="org.societies.api.cis.management.ICisManager" />
 
 </beans>

@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Windows.Controls;
-using Coding4Fun.Kinect.Wpf.Controls;
 using System.Net;
+using Microsoft.Kinect.Toolkit.Controls;
 
 namespace HWUPortal
 {
@@ -18,7 +15,8 @@ namespace HWUPortal
         //item3: local drive location (set after downloading the file)
         private List<ServiceInfo> services;
         private IPAddress userIPAddress;
-
+        private int port;
+        protected static log4net.ILog log = log4net.LogManager.GetLogger(typeof(UserSession));
         public UserSession()
         {
             this.userIdentity = string.Empty;
@@ -66,7 +64,7 @@ namespace HWUPortal
                 }
             }
         }
-        public void setButton(String serviceName, HoverButton button)
+        public void setButton(String serviceName, KinectCircleButton button)
         {
             foreach (ServiceInfo s in services)
             {
@@ -103,6 +101,24 @@ namespace HWUPortal
         public void setIPAddress(IPAddress userIPAddr)
         {
             this.userIPAddress = userIPAddr;
+        }
+
+        internal int getPort()
+        {
+            return this.port;
+        }
+
+        public void setPort(int port)
+        {
+            this.port = port;
+        }
+
+        public String ToString()
+        {
+            String str = "UserSession with : " + this.getUserIdentity();
+            str = str + "\nIPAddress: " + this.getIPAddress() + ":" + this.getPort();
+            str = str + "\nNumber of services loaded:" + this.getServices().Count;
+            return str;
         }
     }
 }

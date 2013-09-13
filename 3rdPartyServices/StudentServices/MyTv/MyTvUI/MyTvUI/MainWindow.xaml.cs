@@ -22,6 +22,7 @@ using System.Net;
 using Microsoft.Kinect;
 using System.Collections;
 using System.Net.Sockets;
+using CoreAudioApi;
 
 namespace MyTvUI
 {
@@ -33,13 +34,31 @@ namespace MyTvUI
         #region variables
         //user variables
         String userID;
+        int currentChannel = 0;
+        Boolean currentlyMuted = true;
 
         //socket variables
         SocketClient socketClient;
         SocketServer socketServer;
+        Boolean commsInitialised = false;
 
         //window variables
         bool closing = false;
+
+        //button variables
+        ImageBrush channelBg_deselected;
+        ImageBrush channelBg_selected;
+        ImageBrush offBg_deselected;
+        ImageBrush offBg_selected;
+        ImageBrush muteBg_deselected;
+        ImageBrush muteBg_selected;
+        ImageBrush unmuteBg_deselected;
+        ImageBrush unmuteBg_selected;
+
+        //console variables
+        FileStream ostrm;
+        StreamWriter writer;
+        TextWriter oldOut = Console.Out;
 
         //variables used to detect hand over hover button area
         private static double _topBoundary;
@@ -68,9 +87,30 @@ namespace MyTvUI
         #region window
         public MainWindow()
         {
+            //redirect console output
+            try
+            {
+                String userProfile = System.Environment.GetEnvironmentVariable("USERPROFILE");
+                String directory = userProfile + @"\societies\myTvLogs.txt";
+                ostrm = new FileStream(directory, FileMode.Create, FileAccess.Write);
+                writer = new StreamWriter(ostrm);
+                writer.AutoFlush = true;
+                Console.SetOut(writer);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Cannot open logs.txt for writing");
+                Console.WriteLine(e.Message);
+                //return;
+            }
+
             try
             {
                 //initialise GUI
+                //using (StreamWriter writer = new StreamWriter("logs.txt", true))
+                //{
+                //    writer.WriteLine("Initialising GUI");
+                //}
                 Console.WriteLine("Initialising GUI");
                 InitializeComponent();
                 channel1HoverRegion.Click += new RoutedEventHandler(channel1HoverRegion_Click);
@@ -83,17 +123,43 @@ namespace MyTvUI
                 exitHoverRegion.Click += new RoutedEventHandler(exitHoverRegion_Click);
                 tvBrowser.Navigated += new NavigatedEventHandler(tvBrowser_Navigated);
 
+                //load button images
+                channelBg_deselected = new ImageBrush(getImageSourceFromResource("MyTvUI", "Images/channel_background.png"));
+                channelBg_selected = new ImageBrush(getImageSourceFromResource("MyTvUI", "Images/channel_background_selected.png"));
+                offBg_deselected = new ImageBrush(getImageSourceFromResource("MyTvUI", "Images/off_button.png")); 
+                offBg_selected = new ImageBrush(getImageSourceFromResource("MyTvUI", "Images/off_button_selected.png"));
+                muteBg_deselected = new ImageBrush(getImageSourceFromResource("MyTvUI", "Images/volume_down.png"));
+                muteBg_selected = new ImageBrush(getImageSourceFromResource("MyTvUI", "Images/volume_down_selected.png"));
+                unmuteBg_deselected = new ImageBrush(getImageSourceFromResource("MyTvUI", "Images/volume_up.png"));
+                unmuteBg_selected = new ImageBrush(getImageSourceFromResource("MyTvUI", "Images/volume_up_selected.png"));
+
+                //initialise GUI settings
+                //channel = 0
+                offButton.Fill = offBg_selected;
+                //mute = true
+                volumeDown.Fill = muteBg_selected;
+
                 //initialise socket server to listen for service client connections
-                Console.WriteLine("Initialising SocketServer");
-                initialiseSocketServer();
-
-                //Connect to service client - on user cloud node
-                Console.WriteLine("Initialising SocketClient");
-                initialiseSocketClient();
-
-                //get preferences
-                Console.WriteLine("Initialising preferences");
-                initialisePreferences();
+                Console.WriteLine("Initialising SocketServer and SocketClient");
+                if(initialiseSocketServer() && initialiseSocketClient())
+                {
+                    commsInitialised = true;
+                    //get preferences
+                    Console.WriteLine("Initialising personalisable parameters");
+                    this.userID = socketClient.getUserID();
+                    //if EMMA -> getPreferences
+                    //if ARTHUR -> getUserIntent
+                    //if(this.userID.Equals("emma.societies.local.macs.hw.ac.uk"))
+                    //{
+                        Console.WriteLine("Getting preferences for user: "+userID);
+                        initialisePreferences();
+                    //}else if(this.userID.Equals("arthur.societies.local.macs.hw.ac.uk"))
+                    //{
+                      //  Console.WriteLine("Getting intent for user: "+userID);
+                      //  initialiseIntent();
+                    //}
+                    
+                }
 
                 //initialise activity feeds
                 ArrayList activities = new ArrayList();
@@ -116,71 +182,462 @@ namespace MyTvUI
         //close window
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
+            Console.WriteLine("Window closing called");
+
+            if (commsInitialised)
+            {
+                Console.WriteLine("Send GUI closing message to service client");
+                String response = socketClient.sendMessage(
+                           "START_MSG\n" +
+                           "GUI_STOPPED\n" +
+                           "END_MSG\n");
+                if (response.Contains("RECEIVED"))
+                {
+                    Console.WriteLine("Service client received shutdown message");
+                }
+            }
+
+            Console.WriteLine("Stopping kinect");
             closing = true;
             StopKinect(kinectSensorChooser1.Kinect);
+
+            Console.WriteLine("Stopping sockets");
+            //stop sockets
+            if (commsInitialised)
+            {
+                socketClient.disconnect();
+                socketServer.stopSocketServer();
+            }
+
+            Console.WriteLine("Flushing logs");
+            if (writer != null)
+            {
+                Console.SetOut(oldOut);
+                writer.Close();
+                ostrm.Close();
+            }
         }
         #endregion window
 
-        #region preference updates
-        public int setChannel(int channel)
+        #region serviceactions
+        private Boolean setChannel1()
         {
-            int result;
-            switch (channel)
+            Console.WriteLine("Setting channel to 1");
+            tvBrowser.Navigate(channel1);
+            channel1Button.Fill = channelBg_selected;
+            channel2Button.Fill = channelBg_deselected;
+            channel3Button.Fill = channelBg_deselected;
+            channel4Button.Fill = channelBg_deselected;
+            offButton.Fill = offBg_deselected;
+            if (commsInitialised)
             {
-                case 0: 
-                    tvBrowser.Navigate(channel0);
-                    result = 0;
-                    break;
-                case 1: 
-                    tvBrowser.Navigate(channel1);
-                    result = 1;
-                    break;
-                case 2: 
-                    tvBrowser.Navigate(channel2);
-                    result = 2;
-                    break;
-                case 3: 
-                    tvBrowser.Navigate(channel3);
-                    result = 3;
-                    break;
-                case 4: 
-                    tvBrowser.Navigate(channel4);
-                    result = 4;
-                    break;
-                default:
-                    tvBrowser.Navigate(channel0);
-                    result = 0;
-                    break;
+                Console.WriteLine("Sending channel 1 action to UAM");
+                String response = socketClient.sendMessage(
+                "START_MSG\n" +
+                "USER_ACTION\n" +
+                "channel\n" +
+                "1\n" +
+                "END_MSG\n");
+                if (response.Contains("RECEIVED"))
+                {
+                    Console.WriteLine("UAM received channel 1 action");
+                    //set channel button backgrounds
+                    currentChannel = 1;
+                }
             }
-            return result;
+            return true;
+        }       
+
+        private Boolean setChannel2()
+        {
+            Console.WriteLine("Setting channel to 2");
+            tvBrowser.Navigate(channel2);
+            channel1Button.Fill = channelBg_deselected;
+            channel2Button.Fill = channelBg_selected;
+            channel3Button.Fill = channelBg_deselected;
+            channel4Button.Fill = channelBg_deselected;
+            offButton.Fill = offBg_deselected;
+            if (commsInitialised)
+            {
+                Console.WriteLine("Sending channel 2 action to UAM");
+                String response = socketClient.sendMessage(
+                "START_MSG\n" +
+                "USER_ACTION\n" +
+                "channel\n" +
+                "2\n" +
+                "END_MSG\n");
+                if (response.Contains("RECEIVED"))
+                {
+                    Console.WriteLine("UAM received channel 2 action");
+                    //set channel button backgrounds
+                    currentChannel = 2;
+                }
+            }
+            return true;
         }
 
-        public Boolean setMuted(Boolean muted)
+        private Boolean setChannel3()
         {
-            Boolean result;
-            if (muted)
+            Console.WriteLine("Setting channel to 3");
+            tvBrowser.Navigate(channel3);
+            channel1Button.Fill = channelBg_deselected;
+            channel2Button.Fill = channelBg_deselected;
+            channel3Button.Fill = channelBg_selected;
+            channel4Button.Fill = channelBg_deselected;
+            offButton.Fill = offBg_deselected;
+            if (commsInitialised)
             {
-                //mute volume
-                result = true;
+                Console.WriteLine("Sending channel 3 action to UAM");
+                String response = socketClient.sendMessage(
+                "START_MSG\n" +
+                "USER_ACTION\n" +
+                "channel\n" +
+                "3\n" +
+                "END_MSG\n");
+                if (response.Contains("RECEIVED"))
+                {
+                    Console.WriteLine("UAM received channel 3 action");
+                    //set channel button backgrounds
+                    currentChannel = 3;
+                }
             }
-            else
-            {
-                //unmute volume
-                result = false;
-            }
-            return result;
+            return true;
         }
+
+        private Boolean setChannel4()
+        {
+            Console.WriteLine("Setting channel to 4");
+            tvBrowser.Navigate(channel4);
+            channel1Button.Fill = channelBg_deselected;
+            channel2Button.Fill = channelBg_deselected;
+            channel3Button.Fill = channelBg_deselected;
+            channel4Button.Fill = channelBg_selected;
+            offButton.Fill = offBg_deselected;
+            if (commsInitialised)
+            {
+                Console.WriteLine("Sending channel 4 action to UAM");
+                String response = socketClient.sendMessage(
+               "START_MSG\n" +
+               "USER_ACTION\n" +
+               "channel\n" +
+               "4\n" +
+               "END_MSG\n");
+                if (response.Contains("RECEIVED"))
+                {
+                    Console.WriteLine("UAM received channel 4 action");
+                    //set channel button backgrounds
+                    currentChannel = 4;
+                }
+            }
+            return true;
+        }
+
+        private Boolean setChannel0()
+        {
+            Console.WriteLine("Setting channel to 0");
+            tvBrowser.Navigate(channel0);
+            channel1Button.Fill = channelBg_deselected;
+            channel2Button.Fill = channelBg_deselected;
+            channel3Button.Fill = channelBg_deselected;
+            channel4Button.Fill = channelBg_deselected;
+            offButton.Fill = offBg_selected;
+            if (commsInitialised)
+            {
+                Console.WriteLine("Sending channel 0 action to UAM");
+                String response = socketClient.sendMessage(
+                "START_MSG\n" +
+                "USER_ACTION\n" +
+                "channel\n" +
+                "0\n" +
+                "END_MSG\n");
+                if (response.Contains("RECEIVED"))
+                {
+                    Console.WriteLine("UAM received channel 0 action");
+                    //set channel button backgrounds
+                    currentChannel = 0;
+                }
+            }
+            return true;
+        }
+
+        private Boolean setDefaultChannel()
+        {
+            Console.WriteLine("Setting channel to default - 0");
+            tvBrowser.Navigate(channel0);
+            channel1Button.Fill = channelBg_deselected;
+            channel2Button.Fill = channelBg_deselected;
+            channel3Button.Fill = channelBg_deselected;
+            channel4Button.Fill = channelBg_deselected;
+            offButton.Fill = offBg_selected;
+            currentChannel = 0;
+            return true;
+        }
+
+        private Boolean setDefaultVolume()
+        {
+            Console.WriteLine("Setting muted to default - true");
+            MMDeviceEnumerator devEnum = new MMDeviceEnumerator();
+            MMDevice defaultDevice = devEnum.GetDefaultAudioEndpoint(EDataFlow.eRender, ERole.eMultimedia);
+            defaultDevice.AudioEndpointVolume.Mute = true;
+            volumeDown.Fill = muteBg_selected;
+            volumeUp.Fill = unmuteBg_deselected;
+            currentlyMuted = true;
+            return true;
+        }
+
+        private Boolean setMute()
+        {
+            Console.WriteLine("Setting muted");
+            //mute volume
+            MMDeviceEnumerator devEnum = new MMDeviceEnumerator();
+            MMDevice defaultDevice = devEnum.GetDefaultAudioEndpoint(EDataFlow.eRender, ERole.eMultimedia);
+            defaultDevice.AudioEndpointVolume.Mute = true;
+
+            volumeDown.Fill = muteBg_selected;
+            volumeUp.Fill = unmuteBg_deselected;
+
+            if (commsInitialised)
+            {
+                Console.WriteLine("Sending muted action to UAM");
+                String response = socketClient.sendMessage(
+               "START_MSG\n" +
+               "USER_ACTION\n" +
+               "muted\n" +
+               "true\n" +
+               "END_MSG\n");
+                if (response.Contains("RECEIVED"))
+                {
+                    Console.WriteLine("UAM received muted action");
+                    //set mute button backgrounds
+                    currentlyMuted = true;
+                }
+            }
+            return true;
+        }
+
+        private Boolean setUnMute()
+        {
+            Console.WriteLine("Setting unmuted");
+            //unmute volume
+            MMDeviceEnumerator devEnum = new MMDeviceEnumerator();
+            MMDevice defaultDevice = devEnum.GetDefaultAudioEndpoint(EDataFlow.eRender, ERole.eMultimedia);
+            defaultDevice.AudioEndpointVolume.Mute = false;
+
+            volumeDown.Fill = muteBg_deselected;
+            volumeUp.Fill = unmuteBg_selected;
+
+            if (commsInitialised)
+            {
+                Console.WriteLine("Sending unmuted action to UAM");
+                String response = socketClient.sendMessage(
+                "START_MSG\n" +
+                "USER_ACTION\n" +
+                "muted\n" +
+                "false\n" +
+                "END_MSG\n");
+                if (response.Contains("RECEIVED"))
+                {
+                    Console.WriteLine("UAM received unmuted action");
+                    //set mute button backgrounds
+                    currentlyMuted = false;
+                }
+            }
+            return true;
+        }
+
+        private void initialisePreferences()
+        {
+            //set channel
+            Console.WriteLine("Requesting channel preference");
+            String prefRequest = "START_MSG\n" +
+                    "CHANNEL_PREFERENCE_REQUEST\n" +
+                    "END_MSG\n";
+
+            String channelPref = socketClient.sendMessage(prefRequest).Trim();
+            Console.WriteLine("Got channel preference: [" + channelPref +"]");
+            if (channelPref.Equals("1"))
+            {
+                Console.WriteLine("Personalising to channel 1");
+                setChannel1();
+            }
+            else if (channelPref.Equals("2"))
+            {
+                Console.WriteLine("Personalising to channel 2");
+                setChannel2();
+            }
+            else if (channelPref.Equals("3"))
+            {
+                Console.WriteLine("Personalising to channel 3");
+                setChannel3();
+            }
+            else if (channelPref.Equals("4"))
+            {
+                Console.WriteLine("Personalising to channel 4");
+                setChannel4();
+            }
+            else if (channelPref.Equals("0"))
+            {
+                Console.WriteLine("Personalising to channel 0");
+                setChannel0();
+            }
+            else  //default channel is 0
+            {
+                setDefaultChannel();
+            }
+            //MessageBox.Show("Got channel preference");
+
+            //set muted
+            Console.WriteLine("Requesting mute preference");
+            String muteRequest = "START_MSG\n" +
+                    "MUTED_PREFERENCE_REQUEST\n" +
+                    "END_MSG\n";
+
+            String mutedPref = socketClient.sendMessage(muteRequest).Trim();
+            Console.WriteLine("Got mute preference: [" + mutedPref+"]");
+            if (mutedPref.Equals("false"))
+            {
+                //unmute tv
+                Console.WriteLine("Personalising volume to unmuted");
+                setUnMute();
+            }
+            else if (mutedPref.Equals("true"))
+            {
+                Console.WriteLine("Personalising volume to muted");
+                setMute();
+            }
+            else  //default state is muted
+            {
+                setDefaultVolume();
+            }
+            //MessageBox.Show("Got muted preference");
+        }
+
+        private void initialiseIntent()
+        {
+            //set channel
+            Console.WriteLine("Requesting channel intent");
+            String intentRequest = "START_MSG\n" +
+                    "CHANNEL_INTENT_REQUEST\n" +
+                    "END_MSG\n";
+
+            String channelIntent = socketClient.sendMessage(intentRequest);
+            Console.WriteLine("Got channel intent :"+channelIntent);
+            if (channelIntent.Equals("1"))
+            {
+                setChannel1();
+            }
+            else if (channelIntent.Equals("2"))
+            {
+                setChannel2();
+            }
+            else if (channelIntent.Equals("3"))
+            {
+                setChannel3();
+            }
+            else if (channelIntent.Equals("4"))
+            {
+                setChannel4();
+            }
+            else  //default channel is 0
+            {
+                setChannel0();
+            }
+
+            //set muted
+            Console.WriteLine("Requesting mute preference");
+            String muteRequest = "START_MSG\n" +
+                    "MUTED_INTENT_REQUEST\n" +
+                    "END_MSG\n";
+
+            String mutedIntent = socketClient.sendMessage(muteRequest);
+            Console.WriteLine("Got muted intent: " + mutedIntent);
+            if (mutedIntent.Equals("false"))
+            {
+                //unmute tv
+                setUnMute();
+            }
+            else  //default state is muted
+            {
+                //mute tv
+                setMute();
+            }
+        }
+
+        #endregion serviceactions
+
+        /*
+         * Perhaps won't be used if dynamic personalisation not applied
+         */
+        #region preference updates
+        //public int setChannelParameter(int channel)
+        //{
+        //    int result;
+        //    switch (channel)
+        //    {
+        //        case 0: 
+        //            tvBrowser.Navigate(channel0);
+        //            result = 0;
+        //            break;
+        //        case 1: 
+        //            tvBrowser.Navigate(channel1);
+        //            result = 1;
+        //            break;
+        //        case 2: 
+        //            tvBrowser.Navigate(channel2);
+        //            result = 2;
+        //            break;
+        //        case 3: 
+        //            tvBrowser.Navigate(channel3);
+        //            result = 3;
+        //            break;
+        //        case 4: 
+        //            tvBrowser.Navigate(channel4);
+        //            result = 4;
+        //            break;
+        //        default:
+        //            tvBrowser.Navigate(channel0);
+        //            result = 0;
+        //            break;
+        //    }
+        //    return result;
+        //}
+
+        //public Boolean setMutedParameter(Boolean muted)
+        //{
+        //    Boolean result;
+        //    if (muted)
+        //    {
+        //        //mute volume
+        //        result = true;
+        //    }
+        //    else
+        //    {
+        //        //unmute volume
+        //        result = false;
+        //    }
+        //    return result;
+        //}
         #endregion preference updates
 
         #region sockets
-        private void initialiseSocketServer()
+        private Boolean initialiseSocketServer()
         {
-            socketServer = new SocketServer(this);
-            Thread serverThread = new Thread(new ThreadStart(socketServer.run));
-            serverThread.Start();
+            try
+            {
+                socketServer = new SocketServer(this);
+                Thread serverThread = new Thread(new ThreadStart(socketServer.run));
+                serverThread.Start();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Error initialising SocketServer");
+                Console.WriteLine(e.ToString());
+                return false;
+            }
+            return true;
         }
 
-        private void initialiseSocketClient()
+        private Boolean initialiseSocketClient()
         {
             socketClient = new SocketClient();
             if (socketClient.getSessionParameters())
@@ -196,13 +653,15 @@ namespace MyTvUI
                         Console.WriteLine("Sending service client my local IP address: " + myIP);
                         if(socketClient.connect())
                         {
-                            if (socketClient.sendMessage(
+                            String response = socketClient.sendMessage(
                             "START_MSG\n" +
                             "GUI_STARTED\n" +
                             myIP+"\n" +
-                            "END_MSG\n"))
+                            "END_MSG\n");
+                            if(response.Contains("RECEIVED"))
                             {
                                 Console.WriteLine("Handshake complete");
+                                return true;
                             }
                             else
                             {
@@ -220,50 +679,12 @@ namespace MyTvUI
                 }
             else
             {
-                Console.WriteLine("Error - could not get session parameters - userID and endpoint");
+               Console.WriteLine("Error - could not get session parameters - userID, endpoint IP and port");
             }
+            return false;
         }
         #endregion sockets
-
-
-        private void initialisePreferences()
-        {
-            //set channel
-            String channelPref = socketClient.getChannelPreference();
-            if(channelPref.Equals("1"))
-            {
-                tvBrowser.Navigate(channel1);
-            }
-            else if (channelPref.Equals("2"))
-            {
-                tvBrowser.Navigate(channel2);
-            }
-            else if (channelPref.Equals("3"))
-            {
-                tvBrowser.Navigate(channel3);
-            }
-            else if (channelPref.Equals("4"))
-            {
-                tvBrowser.Navigate(channel4);
-            }
-            else  //default channel is 0
-            {
-                tvBrowser.Navigate(channel0);
-            }
-
-            //set muted
-            String mutedPref = socketClient.getMutedPreference();
-            if (mutedPref.Equals("false"))
-            {
-                //unmute tv
-            }
-            else  //default state is muted
-            {
-                //mute tv
-            }
-        }
-
-
+        
         #region kinect
         //listener for kinect sensor change events
         void kinectSensorChooser1_KinectSensorChanged(object sender, DependencyPropertyChangedEventArgs e)
@@ -315,18 +736,38 @@ namespace MyTvUI
             //ScalePosition(leftEllipse, first.Joints[JointType.HandLeft]);
             ScalePosition(rightEllipse, first.Joints[JointType.HandRight]);
 
-            CheckHoverButton(channel1HoverRegion, rightEllipse);
-            CheckHoverButton(channel2HoverRegion, rightEllipse);
-            CheckHoverButton(channel3HoverRegion, rightEllipse);
-            CheckHoverButton(channel4HoverRegion, rightEllipse);
-            CheckHoverButton(offHoverRegion, rightEllipse);
-            CheckHoverButton(volumeUpHoverRegion, rightEllipse);
-            CheckHoverButton(volumeDownHoverRegion, rightEllipse);
+            if (currentChannel != 1)
+            {
+                CheckHoverButton(channel1HoverRegion, rightEllipse);
+            }
+            if (currentChannel != 2)
+            {
+                CheckHoverButton(channel2HoverRegion, rightEllipse);
+            }
+            if (currentChannel != 3)
+            {
+                CheckHoverButton(channel3HoverRegion, rightEllipse);
+            }
+            if (currentChannel != 4)
+            {
+                CheckHoverButton(channel4HoverRegion, rightEllipse);
+            }
+            if (currentChannel != 0)
+            {
+                CheckHoverButton(offHoverRegion, rightEllipse);
+            }
+            if (currentlyMuted)
+            {
+                CheckHoverButton(volumeUpHoverRegion, rightEllipse);
+            }
+            if (!currentlyMuted)
+            {
+                CheckHoverButton(volumeDownHoverRegion, rightEllipse);
+            }
             CheckHoverButton(exitHoverRegion, rightEllipse);
         }
         #endregion kinect
-
-
+        
         #region skeleton
         private Skeleton GetFirstSkeleton(AllFramesReadyEventArgs e)
         {
@@ -372,7 +813,7 @@ namespace MyTvUI
 
         private void ScalePosition(FrameworkElement element, Joint joint)
         {
-            Joint scaledJoint = joint.ScaleTo(1000, 600, .3f, .3f);
+            Joint scaledJoint = joint.ScaleTo(1340, 700, .3f, .3f);
 
             Canvas.SetLeft(element, scaledJoint.Position.X);
             Canvas.SetTop(element, scaledJoint.Position.Y);
@@ -436,126 +877,64 @@ namespace MyTvUI
         //listener for channel1 hover button click events
         void channel1HoverRegion_Click(object sender, RoutedEventArgs e)
         {
-            tvBrowser.Navigate(channel1);
-            socketClient.sendMessage(
-                "START_MSG\n" +
-                "USER_ACTION\n" +
-                "channel\n" +
-                "1\n" +
-                "END_MSG");
+            setChannel1();
         }
 
         //listener for channel2 hover button click events
         void channel2HoverRegion_Click(object sender, RoutedEventArgs e)
         {
-            tvBrowser.Navigate(channel2);
-            socketClient.sendMessage(
-                "START_MSG\n" +
-                "USER_ACTION\n" +
-                "channel\n" +
-                "2\n" +
-                "END_MSG");
+            setChannel2();
         }
 
         //listener for channel3 hover button click events
         void channel3HoverRegion_Click(object sender, RoutedEventArgs e)
         {
-            tvBrowser.Navigate(channel3);
-            socketClient.sendMessage(
-                "START_MSG\n" +
-                "USER_ACTION\n" +
-                "channel\n" +
-                "3\n" +
-                "END_MSG");
+            setChannel3();   
         }
 
         void channel4HoverRegion_Click(object sender, RoutedEventArgs e)
         {
-            tvBrowser.Navigate(channel4);
-            socketClient.sendMessage(
-                "START_MSG\n" +
-                "USER_ACTION\n" +
-                "channel\n" +
-                "4\n" +
-                "END_MSG");
+            setChannel4();
         }
 
         void offHoverRegion_Click(object sender, RoutedEventArgs e)
         {
-            tvBrowser.Navigate(channel0);
-            socketClient.sendMessage(
-                "START_MSG\n" +
-                "USER_ACTION\n" +
-                "channel\n" +
-                "0\n" +
-                "END_MSG");
+            setChannel0();
         }
 
         void volumeDownHoverRegion_Click(object sender, RoutedEventArgs e)
         {
-            //change volume
-
-            socketClient.sendMessage(
-                "START_MSG\n" +
-                "USER_ACTION\n" +
-                "muted\n" +
-                "true\n" +
-                "END_MSG");
+            setMute();
         }
 
         void volumeUpHoverRegion_Click(object sender, RoutedEventArgs e)
         {
-            //change volume
-
-            socketClient.sendMessage(
-                "START_MSG\n" +
-                "USER_ACTION\n" +
-                "muted\n" +
-                "false\n" +
-                "END_MSG");
+            setUnMute();
         }
 
         void exitHoverRegion_Click(object sender, RoutedEventArgs e)
         {
-            closing = true;
-            StopKinect(kinectSensorChooser1.Kinect);
-            try
-            {
-                //if the application was opened by another window close the current window not the other application
-                if (Application.Current.Windows.Count > 1)
-                {
-                    for (int i = 0; i < Application.Current.Windows.Count; i++)
-                    {
-                        if (Application.Current.Windows[i].GetType().ToString().Equals("MyTvUI.MainWindow"))
-                            Application.Current.Windows[i].Close();
-                    }
-                }
-                //otherwise close the main window
-                else
-                    Application.Current.MainWindow.Close();
-            }
-            catch (InvalidOperationException e2)
-            {
-                Console.WriteLine("Exception: " + e2);
-            }
+            mytvWindow.Close();
+        }
+
+        static internal ImageSource getImageSourceFromResource(string psAssemblyName, string psResourceName)
+        {
+            Uri oUri = new Uri("pack://application:,,,/" + psAssemblyName + ";component/" + psResourceName, UriKind.RelativeOrAbsolute);
+            return BitmapFrame.Create(oUri);
         }
 
         #endregion hoverbutton
-
-
+        
         #region additional
         private void tvBrowser_WindowLoaded(object sender, RoutedEventArgs e)
         {
-            tvBrowser.Navigate("http://www.macs.hw.ac.uk/~ceesmm1/societies/mytv/channels/splashScreen.html");
+            //tvBrowser.Navigate("http://www.macs.hw.ac.uk/~ceesmm1/societies/mytv/channels/splashScreen.html");
         }
 
         void tvBrowser_Navigated(object sender, NavigationEventArgs e)
         {
             SetSilent(tvBrowser, true);
         }
-        #endregion additional
-
-
 
         //Code to supress Java Script errors in web browser
         public static void SetSilent(WebBrowser browser, bool silent)
@@ -584,8 +963,8 @@ namespace MyTvUI
         {
             [PreserveSig]
             int QueryService([In] ref Guid guidService, [In] ref Guid riid, [MarshalAs(UnmanagedType.IDispatch)] out object ppvObject);
-        }  
-      
+        }
+
         private String getLocalIPAddress()
         {
             string localIP = null;
@@ -600,5 +979,12 @@ namespace MyTvUI
             }
             return localIP;
         }
+
+        private void mytvWindow_Closed(object sender, EventArgs e)
+        {
+            Console.WriteLine("Window closed called");
+        }
     }
+
+        #endregion additional
 }

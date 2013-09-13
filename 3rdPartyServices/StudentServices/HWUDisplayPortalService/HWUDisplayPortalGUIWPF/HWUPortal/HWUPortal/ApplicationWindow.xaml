@@ -5,6 +5,7 @@
         xmlns:hwu="clr-namespace:HWUPortal"
         SizeToContent="WidthAndHeight" mc:Ignorable="d" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" d:DesignHeight="539" d:DesignWidth="870" Height="730" MaxWidth="1360" MaxHeight="730" Width="1360" ResizeMode="NoResize" MinWidth="1360" MinHeight="730"  >
         <!--xmlns:WindowsFormsIntegration="clr-namespace:System.Windows.Forms.Integration;assembly=WindowsFormsIntegration" Closing="Window_Closing" --> 
+    <!-- This page is not being used -->
     <Canvas Name="ContentCanvas">
         <!--<WindowsFormsHost Name="wfhDate" 
                     HorizontalAlignment="Center" 

@@ -1,0 +1,26 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Personalisation</title>
+
+</head>
+<body>
+<p>User preferences and user intents are not static but they depend heavily on the current context of the user. As the context of the user changes, so do the user preferences and intents that must be applied in the system to keep it customised to the user's wishes. The SOCIETIES platform provides a mechanism for third party services to be informed of the changes in the preferences and intents that should be applied to them. Hence, for a third party service to be proactively personalised it must implement the interface IActionConsumer and expose it as an interface through the spring configuration:</p>
+
+<xmp>org.societies.api.personalisation.model.IActionConsumer</xmp>
+
+<p>The third party service developer must make sure that the following methods return a valid serviceId and serviceType respectively in order for the SOCIETIES platform to be able to locate the appropriate service when it needs to:</p>
+
+
+
+
+<xmp>ServiceResourceIdentifier org.societies.api.personalisation.model.IActionConsumer.getServiceIdentifier()
+String org.societies.api.personalisation.model.IActionConsumer.getServiceType()
+</xmp>
+<p>When new preference or intent information has to be sent to a third party service to personalise it, these two methods are called to locate the service. Then, when the system has acquired the service, it calls the method:</p>
+<xmp>boolean org.societies.api.personalisation.model.IActionConsumer.setIAction(IIdentity userId, IAction action)
+where the userId is the identity of the user for whom the personalisation has to be performed and the action is the object that specifies what should be personalised and how.
+</xmp>
+</body>
+</html>

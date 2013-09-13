@@ -1,0 +1,132 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Service Consumption</title>
+</head>
+<body>
+<p>Android Services can be consumed in two ways; locally and remotely.</p>
+<h2>Local Client</h2>
+<p>There are three main actions required in order to locally bind to a service:
+<br>1.	Create and send a service intent.
+<br>2.	Register a BroadcastReceiver and relevant intents in order to receive return values.
+<br>3.	Provide a Service Connection class to detect when a service has been connected to and when it has disconnected.
+</p>
+
+<h2>Service Intent</h2>
+<xmp>        Intent cssManagerintent = new Intent(this.ctx.getContext(), LocalCSSManagerService.class);
+        this.ctx.getContext().bindService(cssManagerintent, ccsManagerConnection, Context.BIND_AUTO_CREATE);
+</xmp>
+<p>Points to note:
+<br>1.	Create the intent, supplying the app context and the class of the service, i.e. local service wrapper.
+<br>2.	Invoke the bindSevice method supplying the intent, Service Connection class and a service flag
+</p>
+
+<h2>Broadcast Receiver</h2>
+<p>There are two actions required when provisioning this component. A Broadcast Receiver class is required which reacts to subscribed to intents and the subscription process which registers the set of intents to be listened to.</p>
+<xmp>    /**
+     * Broadcast receiver to receive intent return values from service method calls
+     */
+    private class bReceiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.d(LOG_TAG, "Received action: " + intent.getAction());
+
+            if (intent.getAction().equals(IAndroidCSSManager.LOGIN_CSS)) {
+                        }
+                        .
+                        .
+</xmp>
+<xmp># The intents associated with a service's interface should be declared in the interface to allow both the service and its clients to refer to them.
+        //register broadcast receiver to receive CSSManager return values
+        IntentFilter intentFilter = new IntentFilter() ;
+        intentFilter.addAction(IAndroidCSSManager.LOGIN_CSS);
+        intentFilter.addAction(IAndroidCSSManager.LOGOUT_CSS);
+        intentFilter.addAction(IAndroidCSSManager.REGISTER_XMPP_SERVER);
+        intentFilter.addAction(IAndroidCSSManager.LOGIN_XMPP_SERVER);
+        intentFilter.addAction(IAndroidCSSManager.LOGOUT_XMPP_SERVER);
+        intentFilter.addAction(IAndroidCSSManager.MODIFY_ANDROID_CSS_RECORD);
+        intentFilter.addAction(IAndroidCSSManager.SUGGESTED_FRIENDS);
+        intentFilter.addAction(IAndroidCSSManager.GET_CSS_FRIENDS);
+        intentFilter.addAction(IAndroidCSSManager.GET_FRIEND_REQUESTS);
+        intentFilter.addAction(IAndroidCSSManager.READ_PROFILE_REMOTE);
+
+        intentFilter.addAction(IAndroidCssDirectory.FIND_ALL_CSS_ADVERTISEMENT_RECORDS);
+        intentFilter.addAction(IAndroidCssDirectory.FIND_FOR_ALL_CSS);
+
+        this.ctx.getContext().registerReceiver(new bReceiver(), intentFilter);
+</xmp>
+<p>Points to note:
+<br>1.	The registering of the broadcast receiver should take place as soon as possible. No registration, no received intents.
+<br>2.	There is no restriction to the number of intents that can be listened for
+<br>3.	The above intents are custom ones for a particular service. Android also has standard intents (cf. http://developer.android.com/reference/android/content/Intent.html)
+</p>
+
+<h2>Service Connection Class</h2>
+<p>This class is a callback mechanism for the service to notify its clients of key state changes.</p>
+<xmp>    private ServiceConnection ccsManagerConnection = new ServiceConnection() {
+
+        public void onServiceDisconnected(ComponentName name) {
+            connectedtoCSSManager = false;
+        }
+
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            //get a local binder
+            LocalCSSManagerBinder binder = (LocalCSSManagerBinder) service;
+        //obtain the service's API
+        localCSSManager = (IAndroidCSSManager) binder.getService();
+        connectedtoCSSManager = true;
+       }
+    };
+</xmp>
+<p>Points to note:
+<br>1.	There are two methods, onServiceDisconnected and onServiceConnected, which are self-explanatory
+<br>2.	The boolean connectedtoCSSManager is set accordingly and no interaction should take place with the service without consulting this variable
+<br>3.	The cast for the Binder object should be the Binder object used in the local service wrapper. This should have a unique name in case your client is accessing more than one service concurrently.
+<br>4.	The cast of the service object returned from the Binder object is the interface used in the service wrapper's Binder class.
+</p>
+
+<h2>Remote Client</h2>
+<p>Remotely binding to an Android Service is slightly more complicated that the above local binding example and involves creating a Bundle object to convey the remote method invocation parameters.</p>
+
+<h2>Android IPC Mechanisms</h2>
+<p>The Messenger IPC mechanism that is recommended over the AIDL approach for the following reasons:
+<br>1.	The service code that handles the remote invocations does not have to be threadsafe as the requests from all possible clients are queued and dealt with sequentially. If your service is required to be concurrent AIDL is the approach to take but writing and testing the code will be more difficult.
+<br>2.	The Messenger mechanism does not require interfaces to be specified in AIDL although Android uses AIDL behind the scenes.
+The downside with the Messenger mechanism is that it is a fragile approach in that remotely invoked methods are specified with an integer value and that value must be agreed upon by the client and service in order to invoke the correct method. In order to make the process less error-prone and allow for interface modifications, the classes RemoteServiceHandler (https://github.com/societies/SOCIETIES-Platform/blob/development/api/android/external/src/main/java/org/societies/android/api/utilities) and (https://github.com/societies/SOCIETIES-Platform/blob/development/api/android/external/src/main/java/org/societies/android/api/utilities/ServiceMethodTranslator.java) were written to make the specification and invocation of a remote method more natural.
+</p>
+
+<h2>The Android Service simply has to specify its Messenger object as:</h2>
+<xmp>        this.inMessenger = new Messenger(new RemoteServiceHandler(serviceBase.getClass(), serviceBase, IAndroidSocietiesEvents.methodsArray));</xmp>
+<p>and export it in the onBind method:<p
+<xmp>    public IBinder onBind(Intent arg0) {
+        return inMessenger.getBinder();
+    }
+</xmp>
+
+<h2>Client Implementation</h2>
+<p>From the client perspective, the invocation of the remote method will have the following format:</p>
+<xmp>                String targetMethod = XMPPAgent.methodsArray[0];
+                Message outMessage = Message.obtain(null, ServiceMethodTranslator.getMethodIndex(XMPPAgent.methodsArray, targetMethod), 0, 0);
+                Bundle outBundle = new Bundle();
+                /*
+                 * By passing the client package name to the service, the service can modify its broadcast intent so that
+                 * only the client can receive it.
+                 */
+                outBundle.putString(ServiceMethodTranslator.getMethodParameterName(targetMethod, 0), this.client);
+
+                outBundle.putStringArray(ServiceMethodTranslator.getMethodParameterName(targetMethod, 1), elementNames);
+
+                outBundle.putStringArray(ServiceMethodTranslator.getMethodParameterName(targetMethod, 1), nameSpaces);
+
+                outBundle.putParcelable(ServiceMethodTranslator.getMethodParameterName(targetMethod, 1), (Parcelable) (new TestCallback()));
+
+                outMessage.setData(outBundle);
+</xmp>
+<p>and as in the local version, a broadcast receiver with suitable filters will be required in order to receive the intents from the remote methods conveying the return value.
+<br>It is possible to convey the return values of remotely invoked methods via the Messenger IPC mechanism but it entails creating an interface on the client side for the remote service to call. In the event that a client is using more than one remote service, it can be seen that the amount of boilerplate code soon increases, in comparison to simpler broadcast receivers.
+</p>
+
+</body>
+</html>

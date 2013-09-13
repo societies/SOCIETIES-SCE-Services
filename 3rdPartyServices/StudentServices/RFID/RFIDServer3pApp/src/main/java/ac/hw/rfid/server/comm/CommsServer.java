@@ -52,11 +52,9 @@ import ac.hw.rfid.server.api.IRfidServer;
 public class CommsServer implements IFeatureServer {
 
 	private static final List<String> NAMESPACES = Collections.unmodifiableList(
-			  Arrays.asList("http://societies.org/api/ext3p/schema/rfidclientbean", 
-				  		"http://societies.org/api/ext3p/schema/rfidserverbean"));
+			  Arrays.asList("http://societies.org/api/ext3p/schema/rfidserverbean"));
 private static final List<String> PACKAGES = Collections.unmodifiableList(
-		  Arrays.asList("org.societies.api.ext3p.schema.rfidserverbean",
-				  "org.societies.api.ext3p.schema.rfidclientbean"));
+		  Arrays.asList("org.societies.api.ext3p.schema.rfidserverbean"));
 	private IRfidServer rfidServer;
 	
 	//PRIVATE VARIABLES
@@ -105,9 +103,12 @@ private static final List<String> PACKAGES = Collections.unmodifiableList(
 	/* Put your functionality here if there is NO return object, ie, VOID  */
 	@Override
 	public void receiveMessage(Stanza stanza, Object payload) {
+		this.LOG.debug("Received message ");
 		if (payload instanceof RfidServerBean){
 			RfidServerBean rfidServerBean = (RfidServerBean) payload;
+			this.LOG.debug("Received RfidServerBean: tag: "+rfidServerBean.getTagNumber()+" from:"+rfidServerBean.getIdentity());
 			this.rfidServer.registerRFIDTag(rfidServerBean.getTagNumber(), rfidServerBean.getIdentity(), rfidServerBean.getServiceID(), rfidServerBean.getPassword());
+			
 		}
 		else{
 			this.LOG.debug("Payload object not of type: "+RfidServerBean.class.getName()+ ". Ignoring message from: "+stanza.getFrom().getJid());

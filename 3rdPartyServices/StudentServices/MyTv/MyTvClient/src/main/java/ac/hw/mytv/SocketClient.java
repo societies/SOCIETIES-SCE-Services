@@ -87,10 +87,10 @@ public class SocketClient {
 			try{
 				out.println(message);
 				out.flush();
-				System.out.println("Sent message: "+message);
+				LOG.debug("Sent message: "+message);
 				String input = in.readLine();
 				disconnect();
-				System.out.println("received: "+input);
+				LOG.debug("received: "+input);
 				if (input.contains("RECEIVED")){
 					return true;
 				}else{

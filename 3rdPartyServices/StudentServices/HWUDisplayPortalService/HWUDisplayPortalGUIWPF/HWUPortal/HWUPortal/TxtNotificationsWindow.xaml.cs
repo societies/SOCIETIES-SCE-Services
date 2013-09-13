@@ -19,6 +19,8 @@ namespace HWUPortal
     /// </summary>
     public partial class TxtNotificationsWindow : UserControl
     {
+        protected static log4net.ILog log = log4net.LogManager.GetLogger(typeof(TxtNotificationsWindow));
+        
         public TxtNotificationsWindow()
         {
             InitializeComponent();
@@ -46,12 +48,12 @@ namespace HWUPortal
                 int counter = activityPanel.Children.Count;
                 if (counter == 5)
                 {
-                    Console.WriteLine("Removing older panel");
+                                if (log.IsDebugEnabled)  log.Debug("Removing older panel");
                     activityPanel.Children.RemoveAt(0);
                 }
                 else //make room!
                 {
-                    Console.WriteLine("height of notification panel is " + panel.Height);
+                                if (log.IsDebugEnabled)  log.Debug("height of notification panel is " + panel.Height);
 
                     //this.Height = this.Height + 170;
 
@@ -61,10 +63,10 @@ namespace HWUPortal
                     }
                 }
 
-                Console.WriteLine("Height of text notification window is " + this.ActualHeight);
+                            if (log.IsDebugEnabled)  log.Debug("Height of text notification window is " + this.ActualHeight);
                 activityPanel.Children.Add(panel);
                 this.UpdateLayout();
-                Console.WriteLine("Number of notification panels: " + activityPanel.Children.Count);
+                            if (log.IsDebugEnabled)  log.Debug("Number of notification panels: " + activityPanel.Children.Count);
             }
             else
             {
@@ -79,7 +81,7 @@ namespace HWUPortal
             //    int counter = activityPanel.Controls.Count;
             //    if (counter == 5)
             //    {
-            //        Console.WriteLine("Removing older panel");
+            //                    if (log.IsDebugEnabled)  log.Debug("Removing older panel");
             //        activityPanel.Controls.RemoveAt(0);
             //    }
             //    NotificationPanel panel = new NotificationPanel(serviceName, text);

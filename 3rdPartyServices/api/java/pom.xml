@@ -84,7 +84,7 @@
  						<_exportcontents> 
  						!org.societies.api.schema,
  							*
- 						</_exportcontents> 	
+ 						</_exportcontents> 
 						<Embed-Dependency>*;scope=compile|runtime</Embed-Dependency>
 						<Embed-Transitive>true</Embed-Transitive>
 					</instructions>

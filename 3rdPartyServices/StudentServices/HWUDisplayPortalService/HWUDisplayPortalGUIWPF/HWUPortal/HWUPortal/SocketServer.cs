@@ -5,11 +5,16 @@ using System.Text;
 using System.Net.Sockets;
 using System.Net;
 using System.ComponentModel;
+using System.IO;
+using System.Collections;
+
 
 namespace HWUPortal
 {
     class SocketServer
     {
+        protected static log4net.ILog log = log4net.LogManager.GetLogger(typeof(SocketServer));
+
         MainWindow gui;
         UserSession userSession;
         private volatile TcpListener server;
@@ -52,12 +57,12 @@ namespace HWUPortal
                 //Enter the listening loop
                 while (acceptingConnections)
                 {
-                    Console.Write("Waiting for a connection... ");
+                    if (log.IsDebugEnabled) log.Debug("Waiting for a connection... ");
 
                     // Perform a blocking call to accept requests.
                     // You could also user server.AcceptSocket() here.
                     client = server.AcceptTcpClient();
-                    Console.WriteLine("Connected!");
+                    if (log.IsDebugEnabled) log.Debug("Connected!");
 
                     // Get a stream object for reading and writing
                     stream = client.GetStream();
@@ -71,7 +76,7 @@ namespace HWUPortal
                     {
                         // Translate data bytes to a ASCII string.
                         data = System.Text.Encoding.ASCII.GetString(bytes, 0, i);
-                        Console.WriteLine(String.Format("Received: {0}", data));
+                        if (log.IsDebugEnabled) log.Debug(String.Format("Received: {0}", data));
                         if (this.gui.isLoggedIn())
                         {
 
@@ -82,7 +87,7 @@ namespace HWUPortal
                             {
                                 receivingText = true;
 
-                                Console.WriteLine("Processing text");
+                                if (log.IsDebugEnabled) log.Debug("Processing text");
 
                                 while (receivingText)
                                 {
@@ -96,43 +101,43 @@ namespace HWUPortal
                                         else */
                                         if (data.StartsWith("SHOW_TEXT"))
                                         {
-                                            Console.WriteLine("Processing SHOW_TEXT");
+                                            if (log.IsDebugEnabled) log.Debug("Processing SHOW_TEXT");
                                             String[] splitData = data.Split('\n');
                                             String userId = splitData[1];
                                             serviceName = splitData[2];
-                                            Console.WriteLine("userId : " + userId);
+                                            if (log.IsDebugEnabled) log.Debug("userId : " + userId);
                                             if (userId.IndexOf(this.userSession.getUserIdentity()) > -1)
                                             {
-                                                Console.WriteLine("Starting to show text\n\n");
+                                                if (log.IsDebugEnabled) log.Debug("Starting to show text\n\n");
                                                 for (int n = 3; n < splitData.Length; n++)
                                                 {
                                                     if (splitData[n].IndexOf("END_TEXT") > -1)
                                                     {
                                                         break;
                                                     }
-                                                    Console.WriteLine("concatenating text line: " + n);
+                                                    if (log.IsDebugEnabled) log.Debug("concatenating text line: " + n);
                                                     text = string.Concat(text, splitData[n]);
                                                     //this.gui.appendText(splitData[n]);
 
-                                                    Console.WriteLine(String.Format("Concatenating text line: \n{0}", splitData[n]));
+                                                    if (log.IsDebugEnabled) log.Debug(String.Format("Concatenating text line: \n{0}", splitData[n]));
                                                 }
                                             }
 
                                         }
                                         else
                                         {
-                                            Console.WriteLine("processing another 1024 bytes");
+                                            if (log.IsDebugEnabled) log.Debug("processing another 1024 bytes");
 
 
 
-                                            Console.WriteLine(String.Format("Adding to txtBox: {0}", data));
+                                            if (log.IsDebugEnabled) log.Debug(String.Format("Adding to txtBox: {0}", data));
                                             text = string.Concat(text, data);
                                             //this.gui.appendText(data);
                                         }
 
 
 
-                                        Console.WriteLine("\nText for notification panel:\n" + text + "\nEnds text\n");
+                                        if (log.IsDebugEnabled) log.Debug("\nText for notification panel:\n" + text + "\nEnds text\n");
                                         if (data.IndexOf("END_TEXT") > -1)
                                         {
                                             receivingText = false;
@@ -140,7 +145,7 @@ namespace HWUPortal
                                         }
                                         else
                                         {
-                                            Console.WriteLine("reading from stream");
+                                            if (log.IsDebugEnabled) log.Debug("reading from stream");
                                             i = stream.Read(bytes, 0, bytes.Length);
                                             data = System.Text.Encoding.ASCII.GetString(bytes, 0, i);
                                         }
@@ -161,8 +166,8 @@ namespace HWUPortal
                             {
                                 stream.Write(notOKBytes, 0, notOKBytes.Length);
                             }
-                            
-                            
+
+
                         }
 
                         // Process the data sent by the client.
@@ -172,7 +177,7 @@ namespace HWUPortal
 
                         // Send back a response.
                         //stream.Write(msg, 0, msg.Length);
-                        //Console.WriteLine(String.Format("Sent: {0}", data));
+                        //            if (log.IsDebugEnabled)  log.Debug(String.Format("Sent: {0}", data));
 
                         i = stream.Read(bytes, 0, bytes.Length);
 
@@ -182,20 +187,36 @@ namespace HWUPortal
                     client.Close();
                 }
             }
-            catch (SocketException e)
-            {
-                Console.WriteLine(e.ToString());
-                client.Close();
-                server.Stop();
-            }
             catch (Exception e)
             {
-                Console.WriteLine(e.ToString());
-                client.Close();
-                server.Stop();
+                log.Error("", e);
+
+                if (client != null)
+                {
+                    try
+                    {
+                        client.Close();
+                    }
+                    catch (Exception ex2)
+                    {
+                        log.Error("Error closing client", ex2);
+                    }
+                }
+
+                if (server != null)
+                {
+                    try
+                    {
+                        server.Stop();
+                    }
+                    catch (Exception ex2)
+                    {
+                        log.Error("Error stopping server", ex2);
+                    }
+                }
             }
-            
-           
+
+
         }
 
         private void processingText(String input)
@@ -203,7 +224,7 @@ namespace HWUPortal
 
         }
 
-        
+
         //this is called by the gui when the logout is performed manually and not through the socket
         public void helperLogoutMethod()
         {
@@ -215,13 +236,13 @@ namespace HWUPortal
         {
             String[] lines = (input.Split('\n'));
             String text = string.Empty;
-            if (lines.Length > 1)
+            if (lines.Length > 0)
             {
                 if (lines[0].IndexOf("LOGOUT") > -1)
                 {
                     if (lines[1].Trim().IndexOf(this.userSession.getUserIdentity()) > -1)
                     {
-
+                        if (log.IsDebugEnabled) log.Debug("Logout method called on gui");
                         this.gui.logOut();
                         this.stream.Write(okBytes, 0, okBytes.Length);
                         //this is now set in the GUI
@@ -230,15 +251,15 @@ namespace HWUPortal
                     }
                     else
                     {
-                        Console.WriteLine("Request to logout but identity provided is not current user identity");
+                        if (log.IsDebugEnabled) log.Debug("Request to logout but identity provided is not current user identity");
                     }
 
                 }
-                else if (lines[0].IndexOf("START SERVICE") > -1)
+                else if (lines[0].IndexOf("START_SERVICE") > -1)
                 {
                     String userId = lines[1];
                     String serviceName = lines[2];
-
+                    if (log.IsDebugEnabled) log.Debug("Starting service: " + serviceName);
                     this.gui.startService(serviceName);
                     this.stream.Write(okBytes, 0, okBytes.Length);
                 }
@@ -259,61 +280,143 @@ namespace HWUPortal
             String[] lines = input.Split('\n');
             if (lines.Length > 0)
             {
-                if (lines[0].IndexOf("LOGIN") > -1)
+                if ((lines[0].IndexOf("LOGIN") > -1) && (lines[1].IndexOf("USER") > -1))
                 {
-                    if (lines.Length < 4)
+
+
+                    userSession.setUserIdentity(lines[1].Trim());
+
+
+
+                    userSession.setUserIdentity(lines[1].Trim().Remove(0, "USER:".Length));
+
+                    if (lines[2].IndexOf("PORTAL_PORT") > -1)
                     {
-                        Console.WriteLine("message not in correct format");
-                        return false;
+                        int portalPort = Int32.Parse(lines[2].Trim().Remove(0, "PORTAL_PORT:".Length));
+                        if (log.IsDebugEnabled) log.Debug("Parsed portal port: " + portalPort);
+                        userSession.setPort(portalPort);
+
                     }
 
-                    int lineStart = 2;
-                    int lineEnd = 0;
-                    for (int i = 0; i < lines.Length; i++)
+                    int servicesToFollow = 0;
+                    if (lines[3].IndexOf("NUM_SERVICES") > -1)
                     {
-                        Console.WriteLine("Line: " + i + " " + lines[i]);
-                        if (lines[i].IndexOf("END_SERVICES") > -1)
+                        servicesToFollow = Int32.Parse(lines[3].Trim().Remove(0, "NUM_SERVICES:".Length));
+                        if (log.IsDebugEnabled) log.Debug("Parsed number of services: " + servicesToFollow);
+                    }
+
+                    if (servicesToFollow == 0)
+                    {
+                        if (log.IsDebugEnabled) log.Debug(userSession.ToString());
+                        this.gui.Login(userSession);
+                        this.stream.Write(okBytes, 0, okBytes.Length);
+                        return true;
+                    }
+
+
+                    if (lines[4].IndexOf("START_SERVICES") > -1)
+                    {
+                        if (log.IsDebugEnabled) log.Debug("Reading services ");
+                        int pointer = 5;
+                        String line = lines[pointer];
+                        while (line.IndexOf("END_SERVICES") == -1)
                         {
-                            lineEnd = i;
+                            if (log.IsDebugEnabled) log.Debug("step 1, processing line: " + line);
+                            if (line.IndexOf("START_SERVICE_INFO:") > -1)
+                            {
+
+                                int readingServiceNumber = Int32.Parse((line.Remove(0, "START_SERVICE_INFO:".Length)));
+                                if (log.IsDebugEnabled) log.Debug("Reading service: " + readingServiceNumber);
+                                ServiceInfo sInfo = new ServiceInfo();
+                                line = lines[pointer++];
+                                while (line.IndexOf("END_SERVICE_INFO:" + readingServiceNumber) == -1)
+                                {
+                                    if (line.IndexOf("SERVICE_NAME_" + readingServiceNumber + ":") > -1)
+                                    {
+                                        sInfo.serviceName = line.Remove(0, ("SERVICE_NAME_" + readingServiceNumber + ":").Length);
+                                    }
+                                    else if (line.IndexOf("SERVICE_EXE_" + readingServiceNumber + ":") > -1)
+                                    {
+                                        sInfo.serviceURL = line.Remove(0, ("SERVICE_EXE_" + readingServiceNumber + ":").Length);
+                                    }
+                                    else if (line.IndexOf("SERVICE_PORT_" + readingServiceNumber + ":") > -1)
+                                    {
+                                        sInfo.servicePortNumber = Int32.Parse(line.Remove(0, ("SERVICE_PORT_" + readingServiceNumber + ":").Length));
+                                    }
+                                    else if (line.IndexOf("RequiresKinect_" + readingServiceNumber + ":") > -1)
+                                    {
+                                        String value = line.Remove(0, ("RequiresKinect_" + readingServiceNumber + ":").Length);
+                                        if (value.IndexOf("true") > -1)
+                                        {
+                                            sInfo.requiresKinect = true;
+                                        }
+                                        else
+                                        {
+                                            sInfo.requiresKinect = false;
+                                        }
+                                    }
+
+
+                                    line = lines[pointer++];
+                                }
+
+                                if (log.IsDebugEnabled) log.Debug("Read service info " + readingServiceNumber);
+
+                                this.numOfServices++;
+                                this.downloadFile(sInfo);
+                            }
+                            line = lines[pointer++];
                         }
 
+                        if (log.IsDebugEnabled) log.Debug("read all services");
                     }
 
-                    if (lines[0].IndexOf("LOGIN") > -1)
-                    {
-                        userSession.setUserIdentity(lines[1].Trim());
-                    }
+                    //int startServicesLineNumber = 0;
+                    //int endServicesLineNumber = 0;
+
+                    //for (int i = 4; i < lines.Length; i++)
+                    //{
+                    //                if (log.IsDebugEnabled)  log.Debug("Line: " + i + " " + lines[i]);
+                    //    if (lines[i].IndexOf("END_SERVICES") > -1)
+                    //    {
+                    //        endServicesLineNumber = i;
+                    //    }else if (lines[i].IndexOf("START_SERVICES") > -1)
+                    //    {
+                    //        startServicesLineNumber = i;
+                    //    }
+
+                    //}
 
 
-                    for (int i = lineStart; i < lineEnd; i += 3)
-                    {
-                        ServiceInfo sInfo = new ServiceInfo();
-                        sInfo.serviceName = lines[i];
-                        sInfo.serviceURL = lines[i + 1];
-                        string requiresKinect = lines[i + 2];
-                        string command = "RequiresKinect=";
-                        if (requiresKinect.IndexOf(command) > -1)
-                        {
+                    //for (int i = lineStart; i < lineEnd; i += 6)
+                    //{
+                    //    ServiceInfo sInfo = new ServiceInfo();
+                    //    sInfo.serviceName = lines[i]; 
+                    //    sInfo.serviceURL = lines[i + 1]; 
+                    //    string requiresKinect = lines[i + 2];
+                    //    string command = "RequiresKinect:";
+                    //    if (requiresKinect.IndexOf(command) > -1)
+                    //    {
 
-                            //requiresKinect = requiresKinect.Remove(0, command.Count());
-                            if (requiresKinect.IndexOf("true") > -1)
-                            {
-                                sInfo.requiresKinect = true;
-                            }
-                            else
-                            {
-                                sInfo.requiresKinect = false;
-                            }
-                        }
-                        this.numOfServices++;
-                        this.downloadFile(sInfo);
-                    }
-                    Console.WriteLine(userSession.ToString());
+                    //        //requiresKinect = requiresKinect.Remove(0, command.Count());
+                    //        if (requiresKinect.IndexOf("true") > -1)
+                    //        {
+                    //            sInfo.requiresKinect = true;
+                    //        }
+                    //        else
+                    //        {
+                    //            sInfo.requiresKinect = false;
+                    //        }
+                    //    }
+                    //    this.numOfServices++;
+                    //    this.downloadFile(sInfo);
+                    //}
+                    if (log.IsDebugEnabled) log.Debug(userSession.ToString());
                     return true;
                 }
                 else
                 {
-                    Console.WriteLine("Ignoring received data");
+                    if (log.IsDebugEnabled) log.Debug("Ignoring received data");
                     return false;
                 }
             }
@@ -327,6 +430,11 @@ namespace HWUPortal
             String userProfile = System.Environment.GetEnvironmentVariable("USERPROFILE");
             String directory = userProfile + @"\Downloads\";
             String fileName = this.extractFilename(sInfo.serviceURL);
+
+            if (!Directory.Exists(directory))
+            {
+                Directory.CreateDirectory(directory);
+            }
 
             String pathToExe = directory + fileName;
             sInfo.serviceExe = pathToExe;
@@ -359,12 +467,12 @@ namespace HWUPortal
             else
             {
                 sInfo.serviceType = ServiceType.WEB;
-                this.Completed(this, new AsyncCompletedEventArgs(null,false, sInfo));
+                this.Completed(this, new AsyncCompletedEventArgs(null, false, sInfo));
                 //this.gui.Login(this.userSession);
-                
-                
+
+
             }
-            Console.WriteLine(sInfo.ToString());
+            if (log.IsDebugEnabled) log.Debug(sInfo.ToString());
         }
 
         private string extractFilename(string path)
@@ -384,15 +492,17 @@ namespace HWUPortal
             ServiceInfo sInfo = (ServiceInfo)e.UserState;
             this.userSession.addService(sInfo);
             this.downloadedServices++;
-            Console.WriteLine("Downloaded services: " + downloadedServices);
-            Console.WriteLine("Number of services: " + numOfServices);
+            if (log.IsDebugEnabled) log.Debug("Downloaded services: " + downloadedServices);
+            if (log.IsDebugEnabled) log.Debug("Number of services: " + numOfServices);
             if (this.numOfServices > this.downloadedServices)
             {
-                Console.WriteLine("Waiting for download to finish");
+                if (log.IsDebugEnabled) log.Debug("Waiting for download to finish");
             }
             else
             {
+                if (log.IsDebugEnabled) log.Debug("Starting user login");
                 this.gui.Login(userSession);
+                if (log.IsDebugEnabled) log.Debug("User logged in. Sending OK to societies platform");
                 stream.Write(okBytes, 0, okBytes.Length);
 
             }
@@ -407,7 +517,7 @@ namespace HWUPortal
             {
                 this.client.Close();
             }
-            
+
             this.server.Stop();
         }
 

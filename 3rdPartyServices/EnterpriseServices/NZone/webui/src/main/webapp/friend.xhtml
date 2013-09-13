@@ -1,0 +1,155 @@
+<f:view xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:pm="http://primefaces.org/mobile" contentType="text/html">
+
+	<pm:page title="Networking Zone">
+		<pm:view id="viewFriend">
+			<pm:header title="Friends Profile" />
+			<pm:content>
+				<p:accordionPanel id="friendInfoPanel">
+				This is your friends profile
+				<p:tab title="Details">
+						<h:form id="form">
+
+							<p:separator style="color: black;" />
+							<p:graphicImage value="#{friendBean.avator}" width="50"
+								height="45" />
+							<h:outputText value="Name: " style="font-weight:bold" />
+							<h:outputText id="name" value="#{friendBean.name}" />
+							<br />
+							<h:panelGroup id="friendcompanypref" rendered="#{friendBean.company.isEmpty() == false}" >
+							<p:separator style="color: black;" />
+							<h:outputText value="Company:" style="font-weight:bold" rendered="#{friendBean.company.isEmpty() == false}" />
+							<h:outputText id="company" value="#{friendBean.company}" rendered="#{friendBean.company.isEmpty() == false}"  />
+							<br />
+							<p:selectOneRadio value="#{friendBean.preferredcompany}" rendered="#{friendBean.company.isEmpty() == false}" >
+								<f:selectItem
+									itemLabel="#{friendBean.company} is Not a Preferred Company"
+									itemValue="0" />
+								<f:selectItem
+									itemLabel="#{friendBean.company} is a Preferred Company"
+									itemValue="1" />
+								<f:ajax update="company"/> 	
+							</p:selectOneRadio>
+							</h:panelGroup>
+							
+							<p:separator style="color: black;" />
+					
+							<br />
+							<p:outputPanel layout="block" rendered="#{friendBean.email.isEmpty() == false}">
+							<h:outputText value="Email:" style="font-weight:bold" rendered="#{friendBean.email.isEmpty() == false}" />
+							<h:outputText value="#{friendBean.email}" rendered="#{friendBean.email.isEmpty() == false}" />
+							<br />
+							</p:outputPanel>
+							
+							<p:outputPanel layout="block" rendered="#{friendBean.position.isEmpty() == false}">
+							<h:outputText value="Position:" style="font-weight:bold" rendered="#{friendBean.position.isEmpty() == false}" />
+							<h:outputText value="#{friendBean.position}" rendered="#{friendBean.position.isEmpty() == false}" />
+							<br />
+							</p:outputPanel>
+							<p:outputPanel layout="block" rendered="#{friendBean.sex.isEmpty() == false}">
+							<h:outputText value="Gender:" style="font-weight:bold" rendered="#{friendBean.sex.isEmpty() == false}" />
+							<h:outputText value="#{friendBean.sex}" rendered="#{friendBean.sex.isEmpty() == false}" />		
+							<br />
+							</p:outputPanel>
+							
+							<h:outputText value="Interests : " style="font-weight:bold" />
+							
+							 <p:outputPanel layout="block" style="text-align:center" rendered="#{friendBean.getInterestString(0).isEmpty()==false}">
+							 	#{friendBean.getInterestString(0)}
+							 </p:outputPanel>
+							  <p:outputPanel layout="block" style="text-align:center" rendered="#{friendBean.getInterestString(1).isEmpty()==false}">
+                        		#{friendBean.getInterestString(1)}
+                        	  </p:outputPanel>
+							  <p:outputPanel layout="block" style="text-align:center" rendered="#{friendBean.getInterestString(2).isEmpty()==false}">	
+                        		#{friendBean.getInterestString(2)}
+                    		</p:outputPanel>
+                    		<p:outputPanel layout="block" style="text-align:center" rendered="#{friendBean.getInterestString(3).isEmpty()==false}">	
+                        		#{friendBean.getInterestString(3)}
+                    		</p:outputPanel>						
+							<br />
+						<p:separator style="color: black;" />
+						<br/>
+						Choose what information to share with #{friendBean.name}
+					<br />
+					<br />
+						
+						<p:outputPanel rendered="#{friendBean.getShareinfoMessageType().isEmpty()}">
+						#{friendBean.shareinfoMessage}
+						</p:outputPanel>
+						
+						<p:outputPanel style="color : red; background-color : yellow" rendered="#{friendBean.getShareinfoMessageType().isEmpty() == false}">
+						#{friendBean.shareinfoMessage}
+						</p:outputPanel>
+					<br />	
+					<h:outputText value="Share my Personal Details: "
+								style="font-weight:bold" />
+							<pm:switch value="#{friendBean.sharepersonal}" onLabel="Yes"
+								offLabel="No" style="width:100%" />
+							<br />
+							<br />
+							<h:outputText value="Email: " style="font-weight:bold" />
+							<h:outputText id="myemail" value="#{profileBean.email}" />
+							<br />
+							<br />
+							<h:outputText value="Gender: " style="font-weight:bold" />
+							<h:outputText id="mysex" value="#{profileBean.sex}" />
+							<br />
+							<br />
+							<br />
+
+							<p:separator style="color: black;" />
+							<br />
+							<h:outputText value="Share my Company Details: "
+								style="font-weight:bold" />
+							<pm:switch value="#{friendBean.sharecompany}" onLabel="Yes"
+								offLabel="No" style="width:100%" />
+							<br />
+							<br />
+							<h:outputText value="Company: " style="font-weight:bold" />
+							<h:outputText id="mycompany" value="#{profileBean.company}" />
+							<br />
+							<br />
+							<h:outputText value="Position: " style="font-weight:bold" />
+							<h:outputText id="myposition" value="#{profileBean.position}" />
+							<p:separator style="color: black;"/>
+				 			<br/>
+        					<h:outputText value="Share my Interests: " style="font-weight:bold" /> <pm:switch value="#{friendBean.shareinterests}" onLabel="Yes" offLabel="No"  style="width:100%" />  
+        					<br/>
+        					<br/>
+        					<br/>
+        					
+        					<p:outputPanel layout="block" style="text-align:center" rendered="#{profileBean.getInterestString(0).isEmpty()==false}">
+                        		<h:outputText value="#{profileBean.getInterestString(0)}" rendered="#{profileBean.getInterestString(0).isEmpty()==false}"/>
+                        	</p:outputPanel>
+                        	<p:outputPanel layout="block" style="text-align:center" rendered="#{profileBean.getInterestString(1).isEmpty()==false}">
+                        		<h:outputText value="#{profileBean.getInterestString(1)}" rendered="#{profileBean.getInterestString(1).isEmpty()==false}"/>
+                        	</p:outputPanel>
+                        	<p:outputPanel layout="block" style="text-align:center" rendered="#{profileBean.getInterestString(2).isEmpty()==false}">
+                        		<h:outputText value="#{profileBean.getInterestString(2)}" rendered="#{profileBean.getInterestString(2).isEmpty()==false}"/>
+                    		</p:outputPanel>
+                    		<p:outputPanel layout="block" style="text-align:center" rendered="#{profileBean.getInterestString(3).isEmpty()==false}">
+                        		<h:outputText value="#{profileBean.getInterestString(3)}" rendered="#{profileBean.getInterestString(3).isEmpty()==false}"/>
+                    		</p:outputPanel>
+							<br/><br/><br/>
+							<p:separator style="color: black;" />
+
+							<p:commandButton icon="back" value="Save and go to Zone"
+								action="#{friendBean.saveShareInfo}" />
+							<p:commandButton icon="back" value="Ignore and go to Zone"
+								action="gotozone" />
+
+						</h:form>
+
+					</p:tab>
+				</p:accordionPanel>
+
+			</pm:content>
+		</pm:view>
+	</pm:page>
+</f:view>
+
+

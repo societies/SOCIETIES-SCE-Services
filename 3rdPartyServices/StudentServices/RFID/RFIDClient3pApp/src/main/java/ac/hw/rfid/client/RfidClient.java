@@ -24,26 +24,41 @@
  */
 package ac.hw.rfid.client;
 
-import java.util.ArrayList;
-import java.util.Collection;
+import java.util.Date;
+import java.util.List;
+import java.util.Timer;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
-import javax.swing.JOptionPane;
 import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.societies.api.comm.xmpp.interfaces.ICommManager;
-import org.societies.api.context.broker.ICtxBroker;
+import org.societies.api.context.CtxException;
+import org.societies.api.context.model.CtxAttribute;
+import org.societies.api.context.model.CtxAttributeIdentifier;
 import org.societies.api.context.model.CtxAttributeTypes;
+import org.societies.api.context.model.CtxEntity;
+import org.societies.api.context.model.CtxIdentifier;
+import org.societies.api.context.model.CtxModelType;
+import org.societies.api.context.model.IndividualCtxEntity;
+import org.societies.api.context.source.CtxSourceNames;
 import org.societies.api.context.source.ICtxSourceMgr;
 import org.societies.api.identity.IIdentity;
 import org.societies.api.identity.IIdentityManager;
-import org.societies.api.identity.InvalidFormatException;
-import org.societies.api.internal.servicelifecycle.ServiceModelUtils;
+import org.societies.api.identity.RequestorService;
+import org.societies.api.internal.context.broker.ICtxBroker;
+import org.societies.api.osgi.event.CSSEvent;
+import org.societies.api.osgi.event.CSSEventConstants;
+import org.societies.api.osgi.event.EventListener;
+import org.societies.api.osgi.event.EventTypes;
+import org.societies.api.osgi.event.IEventMgr;
+import org.societies.api.osgi.event.InternalEvent;
 import org.societies.api.schema.servicelifecycle.model.ServiceResourceIdentifier;
+import org.societies.api.services.IServices;
+import org.societies.api.services.ServiceMgmtEvent;
+import org.societies.api.services.ServiceMgmtEventType;
 
 import ac.hw.rfid.client.api.IRfidClient;
 import ac.hw.rfid.server.api.remote.IRfidServer;
@@ -56,16 +71,16 @@ import ac.hw.rfid.server.api.remote.IRfidServer;
  * @created December, 2010
  */
 
-public class RfidClient implements IRfidClient {
+public class RfidClient extends EventListener implements IRfidClient {
 
 	private ICommManager commManager;
 	private Logger logging = LoggerFactory.getLogger(this.getClass());
 	private ICtxSourceMgr ctxSourceMgr;
 	private IIdentityManager idm;
+
 	/* 
 	 * serviceID of RfidClient
 	 */
-	private ServiceResourceIdentifier	clientID;
 
 
 
@@ -80,13 +95,18 @@ public class RfidClient implements IRfidClient {
 	private IRfidServer rfidServerRemote;
 	private String myCtxSourceId;
 	private ICtxBroker ctxBroker;
+	private IEventMgr evMgr;
+	private IServices services;
+	private RequestorService requestor;
+	private RFIDNoInputUpdater timerTask;
+	private Timer timer;
+	private String currentSymLoc = "";
 
-
-	
-
+	private UpdateOtherTimerTask updateOtherTimerTask;
+	private Timer updateOtherTimer;
 
 	public RfidClient() {
-		UIManager.put("ClassLoader", ClassLoader.getSystemClassLoader());
+
 	}
 
 
@@ -99,71 +119,37 @@ public class RfidClient implements IRfidClient {
 
 
 	public void initialiseRFIDClient() {
-		this.idm = this.commManager.getIdManager();
-		this.userIdentity = this.idm.getThisNetworkNode();
-		try {
-			this.serverIdentity = this.idm.fromJid("xcmanager.societies.local");
-		} catch (InvalidFormatException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-		JOptionPane.showMessageDialog(null, "Your identity is: "+this.userIdentity.getJid());
-		String id = (String) JOptionPane.showInputDialog(null, "Please enter the JID of the CSS that runs the RFIDServer service", "Configuration needed", JOptionPane.QUESTION_MESSAGE, null, null, null);
-		boolean haveId = false;
-		
-		while(!haveId){
-			try {
-				this.serverIdentity = this.idm.fromJid(id);
-				haveId = true;
-			} catch (InvalidFormatException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-				JOptionPane.showMessageDialog(null, "Invalid JID entered", "Error", JOptionPane.ERROR_MESSAGE, null);
-				id = (String) JOptionPane.showInputDialog(null, "Please enter the JID of the CSS that runs the RFIDServer service", "Configuration needed", JOptionPane.QUESTION_MESSAGE, null, null, null);
-			}
-		}
-		
-		boolean registered = this.register();
-		if (registered){
-			try {
-				UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-			} catch (ClassNotFoundException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (InstantiationException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IllegalAccessException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (UnsupportedLookAndFeelException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			try{
-				this.clientID = ServiceModelUtils.generateServiceResourceIdentifier(serverIdentity, IRfidClient.class);
-			}catch(Exception e){
-				this.logging.debug("Unable to retrieve my serviceID. Exception is:\n"+e.getMessage());
-			}
-			if (this.clientID ==null){
-				JOptionPane.showMessageDialog(null, "My serviceId is null. Contact Sancho! ");
-			}else{
-				JOptionPane.showMessageDialog(null, "My serviceId is: "+this.clientID.getIdentifier());
-			}
-			clientGUI = new ClientGUIFrame(this.rfidServerRemote, this.getCtxBroker(), this.userIdentity, this.serverIdentity, clientID);
-		}else{
-			JOptionPane.showMessageDialog(null, "RfidClient is unable to register as a context source with the ICtxSourceMgr at this point. " +
-					"Please contact the SOCIETIES development team to resolve this issue. RFIDClient application is now exiting");
-		}
-
-		
+		this.registerForSLMEvents();
 	}
 
+	private void registerForSLMEvents() {
+		String eventFilter = "(&" + 
+				"(" + CSSEventConstants.EVENT_NAME + "="+ServiceMgmtEventType.NEW_SERVICE+")" +
+				"(" + CSSEventConstants.EVENT_SOURCE + "=org/societies/servicelifecycle)" +
+				")";
+		this.getEvMgr().subscribeInternalEvent(this, new String[]{EventTypes.SERVICE_LIFECYCLE_EVENT}, eventFilter);
+		this.logging.debug("Subscribed to "+EventTypes.SERVICE_LIFECYCLE_EVENT+" events");
+
+	}
+
+	private void unRegisterFromSLMEvents()
+	{
+		String eventFilter = "(&" + 
+				"(" + CSSEventConstants.EVENT_NAME + "="+ServiceMgmtEventType.NEW_SERVICE+")" +
+				"(" + CSSEventConstants.EVENT_SOURCE + "=org/societies/servicelifecycle)" +
+				")";
+
+		this.evMgr.unSubscribeInternalEvent(this, new String[]{EventTypes.SERVICE_LIFECYCLE_EVENT}, eventFilter);
+		//this.evMgr.subscribeInternalEvent(this, new String[]{EventTypes.SERVICE_LIFECYCLE_EVENT}, eventFilter);
+		this.logging.debug("Unsubscribed from "+EventTypes.SERVICE_LIFECYCLE_EVENT+" events");
+	}
 
 	private boolean register(){
 		try {
-			Future<String> fID = this.ctxSourceMgr.register("RFID", CtxAttributeTypes.LOCATION_SYMBOLIC);
-			myCtxSourceId = fID.get();
+			myCtxSourceId = this.ctxSourceMgr.register(CtxSourceNames.RFID, CtxAttributeTypes.LOCATION_SYMBOLIC).get();
+			 
+			this.logging.debug("Successfully registered to ctxSourceMgr. Got my source ID: "+myCtxSourceId);
+			timerTask = new RFIDNoInputUpdater(this.ctxSourceMgr, this.myCtxSourceId);
 			return true;
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
@@ -178,26 +164,115 @@ public class RfidClient implements IRfidClient {
 
 	@Override
 	public void sendUpdate(String symLoc, String tagNumber) {
+
+/*		if (this.timerTask!=null){
+			if (this.timer!=null){
+				try{
+					
+					this.timer.cancel();
+				}catch(Exception e){
+					this.logging.debug("Error canceling timer. Timer already cancelled.");
+					e.printStackTrace();
+				}
+				try{
+					
+					this.timerTask.cancel();
+				}catch(Exception e){
+					this.logging.debug("Error canceling timerTask. TimerTask already cancelled.");
+					e.printStackTrace();
+				}
+			}
+		}*/
 		this.clientGUI.sendSymLocUpdate(tagNumber, symLoc);
-		this.clientGUI.tfTagNumber.setText(tagNumber);
-		
-		if (this.myCtxSourceId==null){
-			boolean registered = this.register();
-			if (registered){
-				this.ctxSourceMgr.sendUpdate(this.myCtxSourceId, symLoc);
+		this.logging.debug("updated gui");
+
+
+		if (!this.currentSymLoc.equalsIgnoreCase(symLoc)){
+			this.logging.debug("New value for symbolic location received: "+symLoc);
+			this.clientGUI.tfTagNumber.setText(tagNumber);
+
+			if (this.myCtxSourceId==null){
+
+				boolean registered = this.register();
+				if (registered){
+					this.logging.debug("RFID is registered with ctx source mgr. Updating context db with: "+symLoc);
+					//this.ctxSourceMgr.sendUpdate(this.myCtxSourceId, symLoc);
+					this.updateContextDirectly(symLoc);
+					this.logging.debug("Sent new RFID information");
+				}else{
+					this.logging.error("Received symloc update: "+symLoc+" but unable to register as a context source with the ICtxSourceMgr.");
+				}
 			}else{
-				JOptionPane.showMessageDialog(null, "RfidClient is unable to register as a context source with the ICtxSourceMgr at this point. " +
-						"Please contact the SOCIETIES development team to resolve this issue");
+				//this.ctxSourceMgr.sendUpdate(this.myCtxSourceId, symLoc);		
+				this.logging.debug("Updating context database with: "+symLoc);
+
+				//this.ctxSourceMgr.sendUpdate(myCtxSourceId, symLoc, null, false, 1.0, 1d/5);
+				this.updateContextDirectly(symLoc);
+				this.logging.debug("Sent new RFID information");
 			}
 		}else{
-			this.ctxSourceMgr.sendUpdate(this.myCtxSourceId, symLoc);		}
-		
+			this.logging.debug("Same symloc received. "+symLoc+"Not updating context.");
+		}
+		this.currentSymLoc = symLoc;
+		//this.timer = new Timer();
+
+		//Date futureDate = new Date(new Date().getTime()+10000);
+
+		//timer.schedule(timerTask, futureDate);
+
+
+
 	}
 
+	private void updateContextDirectly(String value){
+		
+		try {
+			Future<IndividualCtxEntity> retrieveIndividualEntity = this.ctxBroker.retrieveIndividualEntity(userIdentity);
+			CtxEntity person = retrieveIndividualEntity.get();
+			if (person!=null){
+				Future<List<CtxIdentifier>> lookup = this.ctxBroker.lookup(person.getId(), CtxModelType.ATTRIBUTE, CtxAttributeTypes.LOCATION_SYMBOLIC);
+				List<CtxIdentifier> attributes = lookup.get();
+
+				if (attributes.size()==0){
+					this.logging.debug("no symbolic location attributes found");
+				}else{
+					for (int i=0; i<attributes.size(); i++){
+						CtxAttribute attr = this.ctxBroker.updateAttribute((CtxAttributeIdentifier) attributes.get(i), value).get();
+						this.logging.debug("Updating attribute: "+attr.getId().toUriString()+" with value: "+attr.getStringValue());
+					}
+				}
+			}else{
+				this.logging.debug("Entity Person is null");
+			}
+
+		} catch (CtxException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ExecutionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (Exception e){
+			e.printStackTrace();
+			this.logging.error(e.getMessage());
+		}
+	}
 	@Override
 	public void acknowledgeRegistration(Integer rStatus) {
+
+		while (this.clientGUI==null){
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 		this.clientGUI.acknowledgeRegistration(rStatus);
-		
+		this.logging.debug("Received acknowledgement for registration");
+
 	}
 
 	/**
@@ -212,6 +287,8 @@ public class RfidClient implements IRfidClient {
 	 */
 	public void setCommManager(ICommManager commManager) {
 		this.commManager = commManager;
+		this.idm = this.commManager.getIdManager();
+		this.userIdentity = this.idm.getThisNetworkNode();
 	}
 
 
@@ -276,6 +353,92 @@ public class RfidClient implements IRfidClient {
 
 
 
+
+	@Override
+	public void handleInternalEvent(InternalEvent event) {
+		ServiceMgmtEvent slmEvent = (ServiceMgmtEvent) event.geteventInfo();
+
+		if (slmEvent.getBundleSymbolName().equalsIgnoreCase("ac.hw.rfid.RFIDClientApp")){
+			this.logging.debug("Received SLM event for my bundle");
+
+			if (slmEvent.getEventType().equals(ServiceMgmtEventType.NEW_SERVICE)){
+				ServiceResourceIdentifier myClientServiceID = slmEvent.getServiceId();
+				this.serverIdentity = this.services.getServer(myClientServiceID);
+				this.logging.debug("Retrieved my server's identity: "+this.serverIdentity.getJid());
+				//this.requestServerIdentityFromUser();
+				//ServiceResourceIdentifier serviceId = this.portalServerRemote.getServerServiceId(serverIdentity);
+
+				//UIManager.put("ClassLoader", ClassLoader.getSystemClassLoader());
+
+				ServiceResourceIdentifier serviceId = this.getServices().getServerServiceIdentifier(myClientServiceID);
+				this.logging.debug("Retrieved my server's serviceID: "+serviceId.getIdentifier());
+				this.requestor = new RequestorService(serverIdentity, serviceId);
+
+				boolean registered = this.register();
+				if (registered){
+					UIManager.put("ClassLoader", ClassLoader.getSystemClassLoader());
+					clientGUI = new ClientGUIFrame(this.rfidServerRemote, this.getCtxBroker(), this.userIdentity, this.serverIdentity, serviceId);
+					this.logging.debug("Started client");
+				}else{
+					this.logging.debug("unable to register as a context source with the ICtxSourceMgr");
+				}
+
+				this.unRegisterFromSLMEvents();
+
+			}
+		}else{
+			this.logging.debug("Received SLM event but it wasn't related to my bundle");
+		}
+
+	}
+
+
+
+
+	@Override
+	public void handleExternalEvent(CSSEvent event) {
+		// TODO Auto-generated method stub
+
+	}
+
+
+
+
+	public IEventMgr getEvMgr() {
+		return evMgr;
+	}
+
+
+
+
+	public void setEvMgr(IEventMgr evMgr) {
+		this.evMgr = evMgr;
+	}
+
+
+
+
+	public IServices getServices() {
+		return services;
+	}
+
+
+
+
+	public void setServices(IServices services) {
+		this.services = services;
+	}
+
+
+
+	public static void main(String[] args){
+
+		
+		
+		
+		
+
+	}
 
 
 
