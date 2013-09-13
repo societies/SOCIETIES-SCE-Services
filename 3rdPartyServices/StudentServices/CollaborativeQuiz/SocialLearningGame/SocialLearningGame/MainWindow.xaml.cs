@@ -272,7 +272,7 @@ namespace SocialLearningGame
         {
             SwitchPage(LoadingPage.Instance);
 
-            GameSession session = GameLogic.NewGame();
+            GameSession session = GameLogic.NewGame(null);
 
             if (session.Stage == GameStage.SetupError)
             {

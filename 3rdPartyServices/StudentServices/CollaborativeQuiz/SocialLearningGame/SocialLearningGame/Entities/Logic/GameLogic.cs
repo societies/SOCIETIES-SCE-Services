@@ -63,6 +63,9 @@ namespace SocialLearningGame.Logic
         public static List<UserScore> allUsers;
         private static List<Question> answeredQuestions = new List<Question>();
         private static List<UserAnsweredQ> roundAnsweredQ;
+        private static List<Question> availableQuestions = new List<Question>();
+        private static List<Category> allCats;
+        private static List<String> userInterests;
 
 
         private static void InitComms()
@@ -78,9 +81,10 @@ namespace SocialLearningGame.Logic
             roundAnsweredQ.Add(answered);
         }
 
-        public static GameSession NewGame()
+        public static GameSession NewGame(Category userCategory)
         {
            //log. log.Debug("Starting new game");
+            RequestedCategory = userCategory;
             roundAnsweredQ = new List<UserAnsweredQ>();
             _clientComms = new ClientComms();
             _clientComms.getSessionParameters();
@@ -92,6 +96,7 @@ namespace SocialLearningGame.Logic
             clientPort = Convert.ToInt32(add[1]);
             Console.WriteLine("User: " + thisUser + ". Speaking to client on: " + client_address_port);
             String server_address_port = _clientComms.speakToClient(add[0], Convert.ToInt32(add[1]));
+            Console.WriteLine("AddL" + server_address_port);
             add = server_address_port.Split(':');
            serverIP = add[0];
            serverPort = Convert.ToInt32(add[1]);
@@ -120,7 +125,7 @@ namespace SocialLearningGame.Logic
 
             Console.WriteLine("Now gettings questions & categories");
             Category[] categories = _clientComms.getCategories(serverIP, serverPort);
-          
+         
             if (categories == null)
             {
                //log. log.Warn("Server returned null list of categories, cannot continue game");
@@ -157,15 +162,18 @@ namespace SocialLearningGame.Logic
             _gameSession.AllQuestions.AddRange(availQ);
 
 
-
+            allCats = categories.ToList();
             foreach (Category category in categories)
             {
                 List<Question> categoryQuestions = (from q in questions
-                                                    where q.categoryID == category.ID
+                                                    where q.categoryID == category.categoryID
                                                     select q).ToList();
 
                 _gameSession.CategoryQuestionMap.Add(category, categoryQuestions);
             }
+
+            //GET USERS INTERESTS
+            userInterests = _clientComms.getUserInterests(clientIP, clientPort);
 
             //log. Current user
             _gameSession.MainUser = getUser();
@@ -174,7 +182,9 @@ namespace SocialLearningGame.Logic
             //log. TODO: Initialize challenges
 
           //log.  QuestionsInGame = 6;
-            QuestionsInGame = availQ.Count();
+            //SORT AVAIL Q'S
+            sortAvailQs(userCategory, QuestionDifficulty.Any);
+            QuestionsInGame = availableQuestions.Count();
             _gameSession.Stage = GameStage.ReadyToStart;
             
            
@@ -236,6 +246,18 @@ namespace SocialLearningGame.Logic
             return _gameSession; 
         }
 
+        public static List<Category> getCategories()
+        {
+            return allCats;
+        }
+
+        public static void removeAvailQ(Question q)
+        {
+            Console.WriteLine("Size before removed..." + availableQuestions.Count());
+            availableQuestions.Remove(q);
+            Console.WriteLine("Size after removed..." + availableQuestions.Count());
+
+        }
   
 
         public static QuestionRound NextQuestion()
@@ -265,6 +287,46 @@ namespace SocialLearningGame.Logic
            
         }
 
+        private static void sortAvailQs(Category category, QuestionDifficulty difficulty)
+        {
+                        if (category == null)
+                category = Category.All;
+
+            //log. get a list of questions matching our difficulty
+            availableQuestions = new List<Question>(_gameSession.AllQuestions);
+            foreach (Question q in availableQuestions)
+            {
+                Console.WriteLine(q.questionText + " " + q.categoryID);
+            }
+
+            //log. remove questions based on difficulty
+            if (difficulty != QuestionDifficulty.Any)
+            {
+                availableQuestions.RemoveAll(q => q.difficulty != difficulty);
+            }
+
+            Console.WriteLine(category.Name + " " + category.categoryID);
+            //log. remove questions not in our category
+            if (category != Category.All)
+            {
+                availableQuestions.RemoveAll(q => q.categoryID != category.categoryID);
+            }
+        }
+
+
+            //log. now remove any questions already asked
+          //log.  availableQuestions.RemoveAll(question => _gameSession.QuestionHistory.Select(round => round.Question).Contains(question));
+          //log.  availableQuestions.RemoveAll(question => answeredQuestions.Contains(question));
+           //log. List<String> list1;
+        //log.    List<String> list2;
+           //log. list1.RemoveAll(c => list2.Any(c2 => c2.Length == c.Length));//log. && c2.City == c.City));
+           //log. availableQuestions = availableQuestions.RemoveAll(q => availableQuestions.All(q1 => (q.questionID.Equals(q1.questionID)));//log..questionID==q1.questionID));
+            //log.(q1 => q.questionID.Equals(q1.questionID)));//log..Equals().ToList();
+
+
+
+            //log. no questions left in any category and any difficulty?
+            
 
    
 
@@ -302,59 +364,7 @@ namespace SocialLearningGame.Logic
 
         private static Question PickRandomQuestion(Category category, QuestionDifficulty difficulty)
         {
-            if (category == null)
-                category = Category.All;
-
-            //log. get a list of questions matching our difficulty
-            List<Question> availableQuestions = new List<Question>(_gameSession.AllQuestions);
-
-            //log. remove questions based on difficulty
-            if (difficulty != QuestionDifficulty.Any)
-            {
-                availableQuestions.RemoveAll(q => q.difficulty != difficulty);
-            }
-
-            //log. remove questions not in our category
-            if (category != Category.All)
-            {
-                availableQuestions.RemoveAll(q => q.categoryID != category.ID);
-            }
-            foreach (Question q in availableQuestions)
-            {
-                Console.WriteLine(q.questionText);
-            }
-
-            Console.WriteLine("All Questions...");
-            foreach (Question q in availableQuestions)
-            {
-                Console.WriteLine(q.questionID);
-            }
-            Console.WriteLine("Answered Questions...");
-            foreach (Question q in answeredQuestions)
-            {
-                Console.WriteLine(q.questionID);
-            }
-            Console.WriteLine(answeredQuestions);
-
-            //log. now remove any questions already asked
-          //log.  availableQuestions.RemoveAll(question => _gameSession.QuestionHistory.Select(round => round.Question).Contains(question));
-          //log.  availableQuestions.RemoveAll(question => answeredQuestions.Contains(question));
-           //log. List<String> list1;
-        //log.    List<String> list2;
-           //log. list1.RemoveAll(c => list2.Any(c2 => c2.Length == c.Length));//log. && c2.City == c.City));
-           //log. availableQuestions = availableQuestions.RemoveAll(q => availableQuestions.All(q1 => (q.questionID.Equals(q1.questionID)));//log..questionID==q1.questionID));
-            //log.(q1 => q.questionID.Equals(q1.questionID)));//log..Equals().ToList();
-           
-            
-            Console.WriteLine("All Questions Now...");
-            foreach (Question q in availableQuestions)
-            {
-                Console.WriteLine(q.questionID);
-   
-            }
-
-
-            //log. no questions left in any category and any difficulty?
+            //sortAvailQs(category, difficulty);
             if (availableQuestions.Count == 0 && category == Category.All && difficulty == QuestionDifficulty.Any)
             {
              //log.   log.Debug("No more questions");
@@ -380,9 +390,18 @@ namespace SocialLearningGame.Logic
             //log. no questions left in any category? try on any difficulty
             if (availableQuestions.Count == 0 && category == Category.All && difficulty == QuestionDifficulty.Medium)
                 return PickRandomQuestion(Category.All, QuestionDifficulty.Any);
+        
 
             //log. there's questions available? return a random one
-            return availableQuestions[random.Next(availableQuestions.Count)];
+            Console.WriteLine("AVIL: " + availableQuestions.Count);
+            if (availableQuestions.Count > 0)
+            {
+                return availableQuestions[random.Next(availableQuestions.Count)];
+            }
+            else
+            {
+                return null;
+            }
         }
 
         public static Boolean updateUserScore(int score)
@@ -471,6 +490,11 @@ namespace SocialLearningGame.Logic
         public static QuestionRound CurrentRound
         {
             get { return _gameSession.CurrentRound; }
+        }
+
+        public static List<String> getUserInterests()
+        {
+            return userInterests;
         }
 
     }

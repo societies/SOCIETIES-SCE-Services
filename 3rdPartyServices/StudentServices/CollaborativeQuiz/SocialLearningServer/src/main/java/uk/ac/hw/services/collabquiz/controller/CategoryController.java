@@ -88,6 +88,36 @@ public class CategoryController extends BasePageController {
 	public Category getNewCategory() {
 		return newCategory;
 	}
+	
+	//method to include or exclude supers
+	public Category[] filterSuper(int method) {
+		List<Category> filterC = new ArrayList<Category>();
+			for ( Category c : categories)
+			{
+				if(method==0)
+				{
+				if(c.getSuperCatID()==0)
+				{
+					filterC.add(c);
+				}
+				}
+				else
+				{
+					if(c.getSuperCatID()>0)
+					{
+						filterC.add(c);
+					}
+				}
+			}
+			Category[] cats = new Category[filterC.size()];
+			int i =0;
+			for (Category c : filterC)
+			{
+				cats[i]=c;
+				i++;
+			}
+			return cats;
+	}
 
 	public void addCategory() {
 		log.debug("Inserting new category with name: " + newCategory.getName());

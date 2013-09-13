@@ -79,7 +79,7 @@
                     <h:outputText value="Category: " />
                     <p:selectOneMenu value="#{questionController.newQuestion.categoryID}"> <!--This is the value of a single selected item. -->
                         <f:selectItem itemLabel="Select One" itemValue="" />
-                        <f:selectItems value="#{categoryController.categories}" var="cat" itemLabel="#{cat.name}" itemValue="#{cat.categoryID}"/>
+                        <f:selectItems value="#{categoryController.filterSuper(1)}" var="cat" itemLabel="#{cat.name}" itemValue="#{cat.categoryID}"/>
                     </p:selectOneMenu>
 
                     <h:outputText value="Question Text :"></h:outputText>

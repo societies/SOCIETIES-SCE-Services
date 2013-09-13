@@ -322,7 +322,8 @@ namespace SocialLearningGame.Comms
             //get current user
             server.Send(Encoding.ASCII.GetBytes(REQUEST_SERVERIP));
             Console.WriteLine("SENT TO CLIENT: " + REQUEST_SERVERIP);
-            byte[] data = new byte[1024];
+            String reply = recieveMessage(server);
+           /* byte[] data = new byte[1024];
             int receivedDataLength = 0;
             receivedDataLength = server.Receive(data);
             if (receivedDataLength < 1)
@@ -332,7 +333,7 @@ namespace SocialLearningGame.Comms
                 return null;
             }
             Console.WriteLine("GOT A REPLY");
-            String reply = Encoding.ASCII.GetString(data, 0, receivedDataLength).Trim();
+            String reply = Encoding.ASCII.GetString(data, 0, receivedDataLength).Trim(); */
             Console.WriteLine("Reply:" + reply + "!");
           /*  if (!reply.Equals(NULL_REPLY))
             {
@@ -373,7 +374,8 @@ namespace SocialLearningGame.Comms
             server.Send(Encoding.ASCII.GetBytes(user+"\n"));
 
             Console.WriteLine("SENT TO SERVER: " + REQUEST_SERVERIP);
-            byte[] data = new byte[1024];
+            String reply = recieveMessage(server);
+          /*  byte[] data = new byte[1024];
             int receivedDataLength = 0;
             receivedDataLength = server.Receive(data);
             if (receivedDataLength < 1)
@@ -383,7 +385,7 @@ namespace SocialLearningGame.Comms
                 return null;
             }
             Console.WriteLine("GOT A REPLY");
-            String reply = Encoding.ASCII.GetString(data, 0, receivedDataLength).Trim();
+            String reply = Encoding.ASCII.GetString(data, 0, receivedDataLength).Trim();*/
             Console.WriteLine("Reply:" + reply + "!");
             //NOW CHANGE THE USERS INTO A LIST OF USER OBJECTS
             Console.WriteLine("Converting JSON to USER Objects!!!");
@@ -441,7 +443,7 @@ namespace SocialLearningGame.Comms
             //  server.Send(Encoding.ASCII.GetBytes("bla\n"));
             server.Send(Encoding.ASCII.GetBytes("RETRIEVE_CATEGORIES\n"));
             Console.WriteLine("SENT TO SERVER: " + "RETRIEVE_CATEGORIES\n");
-            byte[] data = new byte[1024];
+         /*   byte[] data = new byte[1024];
             int receivedDataLength = 0;
             receivedDataLength = server.Receive(data);
             if (receivedDataLength < 1)
@@ -451,7 +453,8 @@ namespace SocialLearningGame.Comms
                 return null;
             }
             Console.WriteLine("GOT A REPLY");
-            String reply = Encoding.ASCII.GetString(data, 0, receivedDataLength).Trim();
+            String reply = Encoding.ASCII.GetString(data, 0, receivedDataLength).Trim();*/
+            String reply = recieveMessage(server);
             Console.WriteLine("Reply:" + reply + "!");
             if (!reply.Equals(NULL_REPLY))
             {
@@ -490,9 +493,10 @@ namespace SocialLearningGame.Comms
           //  server.Send(Encoding.ASCII.GetBytes("bla\n"));
             server.Send(Encoding.ASCII.GetBytes("RETRIEVE_QUESTIONS\n"));
             Console.WriteLine("SENT TO SERVER: " + RETRIEVE_QUESTIONS);
-            byte[] data = new byte[1024];
-            int receivedDataLength = 0;
-            receivedDataLength = server.Receive(data);
+           // byte[] data = new byte[1024];
+         //   int receivedDataLength = 0;
+            String reply = recieveMessage(server);
+         /*   receivedDataLength = server.Receive(data);
             if (receivedDataLength < 1)
             {
                 Console.WriteLine("DIDNT GET A REPLY");
@@ -501,7 +505,7 @@ namespace SocialLearningGame.Comms
             }
             Console.WriteLine("GOT A REPLY");
             String reply = Encoding.ASCII.GetString(data, 0, receivedDataLength).Trim();
-            Console.WriteLine("Reply:" + reply + "!");
+            Console.WriteLine("Reply:" + reply + "!");*/
             if (!reply.Equals(NULL_REPLY))
             {
                 Console.WriteLine("Question List: " + reply);
@@ -542,10 +546,10 @@ namespace SocialLearningGame.Comms
             Console.WriteLine("SENT TO SERVER: " + "RETRIEVE_USER_HISTORY");
             server.Send(Encoding.ASCII.GetBytes(userID+"\n"));
             Console.WriteLine("SENT TO SERVER: " + userID);
-            byte[] data = new byte[1024];
-            int receivedDataLength = 0;
-            String reply ="";
-            while (receivedDataLength < 1025)
+           // byte[] data = new byte[1024];
+           // int receivedDataLength = 0;
+            String reply =recieveMessage(server);
+         /*   while (receivedDataLength < 1025)
             {
                 receivedDataLength = server.Receive(data);
                 if (receivedDataLength < 1)
@@ -562,7 +566,7 @@ namespace SocialLearningGame.Comms
                         break;
                     }
                 }
-            }
+            }*/
             Console.WriteLine("GOT A REPLY");
             
             Console.WriteLine("Reply:" + reply + "!");
@@ -589,6 +593,56 @@ namespace SocialLearningGame.Comms
                 Console.WriteLine("Q: " + q[0].ToString());
             }
             return q;
+        }
+
+        public List<String> getUserInterests(String address, int port)
+        {
+            Console.WriteLine("TRYING TO CLIENT TO Server ON " + address + " " + port.ToString());
+            IPEndPoint ip = new IPEndPoint(IPAddress.Parse(address), port);
+            Socket server = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            try
+            {
+                server.Connect(ip);
+            }
+            catch (SocketException e)
+            {
+                Console.WriteLine("SOCKET_CLIENT: Unable to connect to server.");
+                Console.WriteLine(e.ToString());
+                return null;
+            }
+
+            //get current user
+            //  server.Send(Encoding.ASCII.GetBytes("bla\n"));
+            server.Send(Encoding.ASCII.GetBytes("REQUEST_USER_INTERESTS\n"));
+            Console.WriteLine("SENT TO SERVER: " + "REQUEST_USER_INTERESTS\n");
+            /*   byte[] data = new byte[1024];
+               int receivedDataLength = 0;
+               receivedDataLength = server.Receive(data);
+               if (receivedDataLength < 1)
+               {
+                   Console.WriteLine("DIDNT GET A REPLY");
+                   server.Close();
+                   return null;
+               }
+               Console.WriteLine("GOT A REPLY");
+               String reply = Encoding.ASCII.GetString(data, 0, receivedDataLength).Trim();*/
+            String reply = recieveMessage(server);
+            Console.WriteLine("Reply:" + reply + "!");
+            if (!reply.Equals(NULL_REPLY))
+            {
+                Console.WriteLine("Category List: " + reply);
+            }
+            else
+            {
+                Console.WriteLine("SERVER DOESNT HAVE CATEGORIES TO SEND");
+                return null;
+            }
+
+            server.Close();
+
+            List<String> userInterests = JsonConvert.DeserializeObject<List<String>>(reply);
+
+            return userInterests;
         }
 
         //CHANGE TO RECEIVE ACK, SEND QUESTIONS USER HAS ANSWERED
@@ -650,5 +704,33 @@ namespace SocialLearningGame.Comms
             //return q;
         }
 
+        private String recieveMessage(Socket server)
+        {
+            byte[] data = new byte[1024];
+            int receivedDataLength = 0;
+            String reply = "";
+            while (receivedDataLength < 1025)
+            {
+                receivedDataLength = server.Receive(data);
+                if (receivedDataLength < 1)
+                {
+                    Console.WriteLine("DIDNT GET A REPLY");
+                    server.Close();
+                    return null;
+                }
+                else
+                {
+                    reply = reply + Encoding.ASCII.GetString(data, 0, receivedDataLength).Trim();
+                    if (receivedDataLength < 1024)
+                    {
+                        break;
+                    }
+                }
+            }
+            return reply;
+        }
+
     }
+
+ 
 }

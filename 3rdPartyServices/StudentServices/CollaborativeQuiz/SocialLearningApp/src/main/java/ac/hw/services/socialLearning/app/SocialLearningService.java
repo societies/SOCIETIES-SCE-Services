@@ -24,8 +24,19 @@
  */
 package ac.hw.services.socialLearning.app;
 
+import org.societies.api.context.CtxException;
+import org.societies.api.context.model.CtxIdentifier;
+
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,12 +44,19 @@ import org.societies.api.cis.management.ICisManager;
 import org.societies.api.comm.xmpp.interfaces.ICommManager;
 import org.societies.api.context.broker.ICtxBroker;
 import org.societies.api.context.model.CtxAttribute;
+import org.societies.api.context.model.CtxAttributeTypes;
+import org.societies.api.context.model.CtxEntity;
+import org.societies.api.context.model.CtxEntityTypes;
+import org.societies.api.context.model.CtxModelType;
+import org.societies.api.context.model.util.SerialisationHelper;
+import org.societies.api.css.ICSSManager;
 import org.societies.api.css.devicemgmt.display.DisplayEvent;
 import org.societies.api.css.devicemgmt.display.DisplayEventConstants;
 import org.societies.api.css.devicemgmt.display.IDisplayDriver;
 import org.societies.api.css.devicemgmt.display.IDisplayableService;
 import org.societies.api.identity.IIdentity;
 import org.societies.api.identity.IIdentityManager;
+import org.societies.api.identity.Requestor;
 import org.societies.api.identity.RequestorService;
 import org.societies.api.osgi.event.CSSEvent;
 import org.societies.api.osgi.event.CSSEventConstants;
@@ -70,36 +88,38 @@ public class SocialLearningService extends EventListener implements ISocialLearn
 	private ICommManager commMgr;
 	private IIdentityManager idMgr;
 
-	
+
 	private IIdentity userIdentity;
 	private String myServiceName;
 	private URL myServiceExeURL;
 	private boolean deviceAvailable = false;
 	private ICtxBroker ctxBroker;
 	private RequestorService requestor;
-	
+
 	private String gameUserName = "";
 	private IIdentity serverIdentity;
 	private ISocialLearningServer server;
 	private ServiceResourceIdentifier serverServiceId;
 	private CtxAttribute gameUserCtxAttribute;
 	private IServices serviceMgmt;
-	
+
 	private Thread serverThread;
 	private CommsServerListener commsServerListener;
-	
+
 	private int listenerPort;
 	private String listernAddress;
-	
+
 	private String serverIPPort;
-	
-	
+
+	private List<String> interests;
+
+
 	public void Init(){
 		//FIRST REGISTER FOR SERVICE EVENTS
 		this.registerForServiceEvents();
 		//THEN REGISTER WITH IDISPLAYPORTAL
 		this.registerForDisplayEvents();
-		
+
 		//SET UP SOCKET TO LISTEN FROM GUI (C#)
 		this.commsServerListener = new CommsServerListener(this);
 		//GET PORT & ADDRESS
@@ -108,87 +128,102 @@ public class SocialLearningService extends EventListener implements ISocialLearn
 		//START LISTENING
 		this.serverThread = new Thread(commsServerListener);
 		this.serverThread.start();
-		
-		
 
-		
-		//this.registerForDisplayEvents();
-		
-		try {
-			
-			this.myServiceExeURL = new URL("http://www2.macs.hw.ac.uk/~sww2/societies/SocialLearningGame.exe");
-			this.myServiceName = "SocialLearning";
-			this.displayDriverService.registerDisplayableService(this, myServiceName, myServiceExeURL, listenerPort, false);
-			logging.debug("Registered as a displayable service");
-		} catch (MalformedURLException e) {
+		//SET UP NEW USER INTERESTS LIST
+		interests = new ArrayList<String>();
+		try{
+			getContext();
+		} catch (ClassNotFoundException e1) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			e1.printStackTrace();
+		} catch (InterruptedException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (ExecutionException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (CtxException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
 		}
+		try {
 
-	}
-	
-
-	
-	/*
-	 * Register for events from SLM so I can get my service parameters and finish initialising
-	 */
-	private void registerForServiceEvents(){
-		String eventFilter = "(&" + 
-				"(" + CSSEventConstants.EVENT_NAME + "="+ServiceMgmtEventType.SERVICE_STARTED+")" +
-				"(" + CSSEventConstants.EVENT_SOURCE + "=org/societies/servicelifecycle)" +
-				")";
-		this.evMgr.subscribeInternalEvent(this, new String[]{EventTypes.SERVICE_LIFECYCLE_EVENT}, eventFilter);
-		this.logging.debug("Subscribed to "+EventTypes.SERVICE_LIFECYCLE_EVENT+" events");
+		this.myServiceExeURL = new URL("http://www2.macs.hw.ac.uk/~sww2/societies/SocialLearningGame.exe");
+		this.myServiceName = "SocialLearning";
+		this.displayDriverService.registerDisplayableService(this, myServiceName, myServiceExeURL, listenerPort, false);
+		logging.debug("Registered as a displayable service");
+	} catch (MalformedURLException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
 	}
 
-	private void unregisterForServiceEvents()
-	{
-		String eventFilter = "(&" + 
-				"(" + CSSEventConstants.EVENT_NAME + "="+ServiceMgmtEventType.NEW_SERVICE+")" +
-				"(" + CSSEventConstants.EVENT_SOURCE + "=org/societies/servicelifecycle)" +
-				")";
+}
 
-		this.evMgr.unSubscribeInternalEvent(this, new String[]{EventTypes.SERVICE_LIFECYCLE_EVENT}, eventFilter);
-		//this.evMgr.subscribeInternalEvent(this, new String[]{EventTypes.SERVICE_LIFECYCLE_EVENT}, eventFilter);
-		this.logging.debug("Unsubscribed from "+EventTypes.SERVICE_LIFECYCLE_EVENT+" events");
-	}
-	
-	/*
-	 * Register for display events
-	 */
-	private void registerForDisplayEvents() {
-		String eventFilter = "(&" + 
-				"(" + CSSEventConstants.EVENT_NAME + "=displayUpdate)" +
-				"(" + CSSEventConstants.EVENT_SOURCE + "=org/societies/css/device)" +
-				")";
-		this.evMgr.subscribeInternalEvent(this, new String[]{EventTypes.DISPLAY_EVENT}, eventFilter);
-		this.logging.debug("Subscribed to "+EventTypes.DISPLAY_EVENT+" events");
 
-	}
-	
-	@Override
-	public void handleInternalEvent(InternalEvent event) {
-		logging.debug("Received internal event: "+event.geteventName());
+
+/*
+ * Register for events from SLM so I can get my service parameters and finish initialising
+ */
+private void registerForServiceEvents(){
+	String eventFilter = "(&" + 
+			"(" + CSSEventConstants.EVENT_NAME + "="+ServiceMgmtEventType.SERVICE_STARTED+")" +
+			"(" + CSSEventConstants.EVENT_SOURCE + "=org/societies/servicelifecycle)" +
+			")";
+	this.evMgr.subscribeInternalEvent(this, new String[]{EventTypes.SERVICE_LIFECYCLE_EVENT}, eventFilter);
+	this.logging.debug("Subscribed to "+EventTypes.SERVICE_LIFECYCLE_EVENT+" events");
+}
+
+private void unregisterForServiceEvents()
+{
+	String eventFilter = "(&" + 
+			"(" + CSSEventConstants.EVENT_NAME + "="+ServiceMgmtEventType.NEW_SERVICE+")" +
+			"(" + CSSEventConstants.EVENT_SOURCE + "=org/societies/servicelifecycle)" +
+			")";
+
+	this.evMgr.unSubscribeInternalEvent(this, new String[]{EventTypes.SERVICE_LIFECYCLE_EVENT}, eventFilter);
+	//this.evMgr.subscribeInternalEvent(this, new String[]{EventTypes.SERVICE_LIFECYCLE_EVENT}, eventFilter);
+	this.logging.debug("Unsubscribed from "+EventTypes.SERVICE_LIFECYCLE_EVENT+" events");
+}
+
+/*
+ * Register for display events
+ */
+private void registerForDisplayEvents() {
+	String eventFilter = "(&" + 
+			"(" + CSSEventConstants.EVENT_NAME + "=displayUpdate)" +
+			"(" + CSSEventConstants.EVENT_SOURCE + "=org/societies/css/device)" +
+			")";
+	this.evMgr.subscribeInternalEvent(this, new String[]{EventTypes.DISPLAY_EVENT}, eventFilter);
+	this.logging.debug("Subscribed to "+EventTypes.DISPLAY_EVENT+" events");
+
+}
+
+@Override
+public void handleInternalEvent(InternalEvent event) {
+	logging.debug("Received internal event: "+event.geteventName());
 
 	//	if(event.geteventName().equalsIgnoreCase("NEW_SERVICE")){
-			//logging.debug("Received SLM event");
-			ServiceMgmtEvent slmEvent = (ServiceMgmtEvent) event.geteventInfo();
-			logging.debug("EventBundle: " + slmEvent.getBundleSymbolName());
-			if (slmEvent.getBundleSymbolName().equalsIgnoreCase("ac.hw.services.SocialLearningApp")){
-				this.logging.debug("Received SLM event for my bundle");
-				if (slmEvent.getEventType().equals(ServiceMgmtEventType.SERVICE_STARTED)){
-					
-					//GET ID OF SERVICE FOR XMPP COMMUNICATION
-					this.serverIdentity = serviceMgmt.getServer(slmEvent.getServiceId());
-					logging.debug("Got my servers Identity: " + serverIdentity);
-	
-					//GET ADDRESS & PORT OF REMOTE SERVER
-					String addressPort[] = this.server.getServerPortAddress(serverIdentity);
-					this.serverIPPort=addressPort[0]+":"+addressPort[1];
-					logging.debug("Remote Address: " + addressPort[0]+":"+addressPort[1]);
-					
-					//SEND MESSAGE TO GET REMOTE SOCKET LISTENER INFO
-					/*SocialLearningServerBean serverBean = new SocialLearningServerBean();
+	//logging.debug("Received SLM event");
+	ServiceMgmtEvent slmEvent = (ServiceMgmtEvent) event.geteventInfo();
+	logging.debug("EventBundle: " + slmEvent.getBundleSymbolName());
+	if (slmEvent.getBundleSymbolName().equalsIgnoreCase("ac.hw.services.SocialLearningApp")){
+		this.logging.debug("Received SLM event for my bundle");
+		if (slmEvent.getEventType().equals(ServiceMgmtEventType.SERVICE_STARTED)){
+
+			//GET ID OF SERVICE FOR XMPP COMMUNICATION
+			this.serverIdentity = serviceMgmt.getServer(slmEvent.getServiceId());
+			logging.debug("Got my servers Identity: " + serverIdentity);
+
+			//GET ADDRESS & PORT OF REMOTE SERVER
+			String addressPort[] = this.server.getServerPortAddress(serverIdentity);
+			this.serverIPPort=addressPort[0]+":"+addressPort[1];
+			logging.debug("Remote Address: " + addressPort[0]+":"+addressPort[1]);
+
+			//SEND MESSAGE TO GET REMOTE SOCKET LISTENER INFO
+			/*SocialLearningServerBean serverBean = new SocialLearningServerBean();
 					logging.debug("BEAN INIT!");
 					serverBean.setMethod(SocialLearningMethodType.SERVER_SOCKET_INFO_REQUEST);
 					logging.debug("BEAN METHOD CHANGED");
@@ -207,35 +242,56 @@ public class SocialLearningService extends EventListener implements ISocialLearn
 						// TODO Auto-generated catch block
 						//logging.debug(e.getStackTrace());
 					}*/
-					
-					
-			
-				}
-			
-		}else if(event.geteventName().equalsIgnoreCase("displayUpdate")){
-			logging.debug("Received DisplayPortal event");
+
+
+
+		}
+
+	}else if(event.geteventName().equalsIgnoreCase("displayUpdate")){
+		logging.debug("Received DisplayPortal event");
+	}else{
+		logging.debug("Received unknown event with name: "+event.geteventName());
+	}
+
+	if (event.geteventInfo() instanceof DisplayEvent){
+		DisplayEvent eventObj  = (DisplayEvent) event.geteventInfo();
+		if (eventObj.getDisplayStatus().equals(DisplayEventConstants.DEVICE_AVAILABLE)){
+			this.deviceAvailable = true;
+			//	this.getDataFromContext();
 		}else{
-			logging.debug("Received unknown event with name: "+event.geteventName());
+			this.deviceAvailable  = false;
 		}
-		
-			if (event.geteventInfo() instanceof DisplayEvent){
-				DisplayEvent eventObj  = (DisplayEvent) event.geteventInfo();
-				if (eventObj.getDisplayStatus().equals(DisplayEventConstants.DEVICE_AVAILABLE)){
-					this.deviceAvailable = true;
-				//	this.getDataFromContext();
-				}else{
-					this.deviceAvailable  = false;
-				}
-			}
-			// TODO Auto-generated method stub
-			//this.displayDriverService.sendNotification(myServiceName, "Hello, I am an example service and I wanted to notify you that I can send you notifications!");
+	}
+	// TODO Auto-generated method stub
+	//this.displayDriverService.sendNotification(myServiceName, "Hello, I am an example service and I wanted to notify you that I can send you notifications!");
+}
+
+private void getContext() throws InterruptedException, ExecutionException, CtxException, ClassNotFoundException, IOException
+{
+	this.interests.clear();
+	IIdentity myID = commMgr.getIdManager().getThisNetworkNode();
+	Requestor r = new Requestor(myID);
+	List<CtxIdentifier> list = ctxBroker.lookup(r, myID, CtxModelType.ENTITY, CtxEntityTypes.PERSON).get();
+	if (list.size()>0){
+		logging.debug("First list over size 0");
+		CtxIdentifier ctxEntityId = list.get(0);
+		CtxEntity ctxEntity = (CtxEntity) ctxBroker.retrieve(r, ctxEntityId).get();
+		Set<CtxAttribute> interestAttributes = ctxEntity.getAttributes(CtxAttributeTypes.INTERESTS);
+
+		for (CtxAttribute ctx : interestAttributes)
+		{		this.interests.add(ctx.getStringValue());
+		logging.debug("FOUND ONE: " + ctx.getStringValue());
 		}
-			
-	
-	
-	
-	/*private void getDataFromContext() {
-		
+	}
+
+
+}
+
+
+
+
+/*private void getDataFromContext() {
+
 		if (this.requestor==null){
 			//TODO: replace this with method to service registry when it becomes available
 			this.requestServerIdentity();
@@ -244,11 +300,11 @@ public class SocialLearningService extends EventListener implements ISocialLearn
 			this.requestor = new RequestorService(serverIdentity, serverServiceId);
 		}
 		try {
-			
-			
+
+
 			Future<List<CtxIdentifier>> futureUserNames = this.ctxBroker.lookup(requestor, userIdentity, CtxModelType.ATTRIBUTE, gameUserName);
 			List<CtxIdentifier> usernames = futureUserNames.get();
-			
+
 			if (usernames.size()==0){
 				String username = "";
 				while (username==""){
@@ -262,8 +318,8 @@ public class SocialLearningService extends EventListener implements ISocialLearn
 				gameUserCtxAttribute.setStringValue(username);
 				gameUserCtxAttribute.setValueType(CtxAttributeValueType.STRING);
 				ctxBroker.update(requestor, gameUserCtxAttribute);
-				
-				
+
+
 			}else{
 				gameUserCtxAttribute = (CtxAttribute) this.ctxBroker.retrieve(requestor, usernames.get(0)).get();
 			}
@@ -277,131 +333,135 @@ public class SocialLearningService extends EventListener implements ISocialLearn
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+
 	}*/
-	@Override
-	public String getServerIPPort()
-	{
-		return this.serverIPPort;
-	}
+@Override
+public String getServerIPPort()
+{
+	return this.serverIPPort;
+}
 
-
-	
-
-	
-	@Override
-	public void handleExternalEvent(CSSEvent arg0) {
-		// TODO Auto-generated method stub
-		
-	}
+@Override
+public List<String> getUserInterests()
+{
+	return this.interests;
+}
 
 
 
-	
-	/**
-	 * @return the displayDriverService
-	 */
-	public IDisplayDriver getDisplayDriverService() {
-		return displayDriverService;
-	}
+@Override
+public void handleExternalEvent(CSSEvent arg0) {
+	// TODO Auto-generated method stub
 
-	/**
-	 * @param displayDriverService the displayDriverService to set
-	 */
-	public void setDisplayDriverService(IDisplayDriver displayDriverService) {
-		this.displayDriverService = displayDriverService;
-	}
+}
 
 
-	/**
-	 * @return the evMgr
-	 */
-	public IEventMgr getEvMgr() {
-		return evMgr;
-	}
 
 
-	/**
-	 * @param evMgr the evMgr to set
-	 */
-	public void setEvMgr(IEventMgr evMgr) {
-		this.evMgr = evMgr;
-	}
+/**
+ * @return the displayDriverService
+ */
+public IDisplayDriver getDisplayDriverService() {
+	return displayDriverService;
+}
+
+/**
+ * @param displayDriverService the displayDriverService to set
+ */
+public void setDisplayDriverService(IDisplayDriver displayDriverService) {
+	this.displayDriverService = displayDriverService;
+}
 
 
-	/**
-	 * @return the commMgr
-	 */
-	public ICommManager getCommMgr() {
-		return commMgr;
-	}
+/**
+ * @return the evMgr
+ */
+public IEventMgr getEvMgr() {
+	return evMgr;
+}
 
 
-	/**
-	 * @param commMgr the commMgr to set
-	 */
-	public void setCommMgr(ICommManager commMgr) {
-		this.commMgr = commMgr;
-		this.idMgr = commMgr.getIdManager();
-		this.userIdentity = this.idMgr.getThisNetworkNode();
-	}
+/**
+ * @param evMgr the evMgr to set
+ */
+public void setEvMgr(IEventMgr evMgr) {
+	this.evMgr = evMgr;
+}
 
-	@Override
-	public void serviceStarted(String ipAddr) {
-		// TODO Auto-generated method stub
-		
-	}
 
-	@Override
-	public void serviceStopped(String ipAddr) {
-		// TODO Auto-generated method stub
-		
-	}
+/**
+ * @return the commMgr
+ */
+public ICommManager getCommMgr() {
+	return commMgr;
+}
 
-	/**
-	 * @return the ctxBroker
-	 */
-	public ICtxBroker getCtxBroker() {
-		return ctxBroker;
-	}
 
-	/**
-	 * @param ctxBroker the ctxBroker to set
-	 */
-	public void setCtxBroker(ICtxBroker ctxBroker) {
-		this.ctxBroker = ctxBroker;
-	}
+/**
+ * @param commMgr the commMgr to set
+ */
+public void setCommMgr(ICommManager commMgr) {
+	this.commMgr = commMgr;
+	this.idMgr = commMgr.getIdManager();
+	this.userIdentity = this.idMgr.getThisNetworkNode();
+}
 
-	/**
-	 * @return the server
-	 */
-	public ISocialLearningServer getServer() {
-		return server;
-	}
+@Override
+public void serviceStarted(String ipAddr) {
+	// TODO Auto-generated method stub
 
-	/**
-	 * @param server the server to set
-	 */
-	public void setServer(ISocialLearningServer server) {
-		this.server = server;
-	}
-	
+}
 
-	/**
-	 * @return the serviceMgmt
-	 */
-	public IServices getServiceMgmt() {
-		return serviceMgmt;
-	}
+@Override
+public void serviceStopped(String ipAddr) {
+	// TODO Auto-generated method stub
 
-	/**
-	 * @param serviceMgmt the serviceMgmt to set
-	 */
-	public void setServiceMgmt(IServices serviceMgmt) {
-		this.serviceMgmt = serviceMgmt;
-	}
+}
 
-	
+/**
+ * @return the ctxBroker
+ */
+public ICtxBroker getCtxBroker() {
+	return ctxBroker;
+}
+
+/**
+ * @param ctxBroker the ctxBroker to set
+ */
+public void setCtxBroker(ICtxBroker ctxBroker) {
+	this.ctxBroker = ctxBroker;
+}
+
+/**
+ * @return the server
+ */
+public ISocialLearningServer getServer() {
+	return server;
+}
+
+/**
+ * @param server the server to set
+ */
+public void setServer(ISocialLearningServer server) {
+	this.server = server;
+}
+
+
+/**
+ * @return the serviceMgmt
+ */
+public IServices getServiceMgmt() {
+	return serviceMgmt;
+}
+
+/**
+ * @param serviceMgmt the serviceMgmt to set
+ */
+public void setServiceMgmt(IServices serviceMgmt) {
+	this.serviceMgmt = serviceMgmt;
+}
+
+
 
 
 

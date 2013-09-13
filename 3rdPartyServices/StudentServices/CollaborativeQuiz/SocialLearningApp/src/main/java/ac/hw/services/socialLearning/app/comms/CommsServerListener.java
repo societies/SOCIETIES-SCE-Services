@@ -12,6 +12,8 @@ import java.net.Socket;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.gson.Gson;
+
 import ac.hw.services.socialLearning.api.ISocialLearningService;
 
 
@@ -48,6 +50,7 @@ public class CommsServerListener implements Runnable {
 		}
 	}
 	
+	//TODO issue new thread for each acception
 	public void listen() {
 		try {
 			
@@ -84,6 +87,11 @@ public class CommsServerListener implements Runnable {
 								out.println("NULL");
 							}
 						}
+						else if(result.matches("REQUEST_USER_INTERESTS"))
+						{
+							String reply = objectToJSON(socialApp.getUserInterests());
+							out.println(reply);
+						}
 					}
 					
 					
@@ -101,6 +109,21 @@ public class CommsServerListener implements Runnable {
 			log.debug("IO Exception - Socket is closed");
 			return;
 		}
+	}
+	
+	public String objectToJSON(Object data)
+	{
+		log.debug("Converting Object to JSON!");
+		String jsonData = new Gson().toJson(data);
+		if(jsonData!=null)
+		{
+			return jsonData;
+		}
+		else
+		{
+			return "NULL";
+		}
+
 	}
 	
 	public int getSocket(){

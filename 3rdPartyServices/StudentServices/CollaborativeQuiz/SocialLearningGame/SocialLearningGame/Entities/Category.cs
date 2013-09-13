@@ -27,10 +27,11 @@ namespace SocialLearningGame.Entities
 {
     public class Category
     {
-        public static readonly Category All = new Category() { ID = -1, Name = "All" };
+        public static readonly Category All = new Category() { categoryID = -1, Name = "All" };
 
-        public int ID { get; set; }
+        public int categoryID { get; set; }
         public string Name { get; set; }
+        public int superCatID { get; set; }
 
     }
 }

@@ -12,6 +12,8 @@
         </id>
 
         <property name="name" column="name"/>
+        
+        <property name="superCatID" column="superCatID"/>
 
     </class>
 </hibernate-mapping>

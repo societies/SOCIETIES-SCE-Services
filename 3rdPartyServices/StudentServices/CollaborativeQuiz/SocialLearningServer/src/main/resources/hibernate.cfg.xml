@@ -12,10 +12,6 @@
         <property name="connection.pool_size">1</property>
         <property name="show_sql">true</property>
         <property name="hbm2ddl.auto">update</property>
-      <!--   <mapping class="uk.ac.hw.services.collabquiz.entities.Category" />
-        <mapping class="uk.ac.hw.services.collabquiz.entities.Question" />
-        <mapping class="uk.ac.hw.services.collabquiz.entities.UserAnsweredQ" />
-        <mapping class="uk.ac.hw.services.collabquiz.entities.UserScore" /> -->
         <mapping resource="hibernate/Category.hbm.xml"></mapping>
         <mapping resource="hibernate/Question.hbm.xml"></mapping>
          <mapping resource="hibernate/UserAnsweredQ.hbm.xml"></mapping>

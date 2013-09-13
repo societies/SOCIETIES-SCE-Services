@@ -49,9 +49,13 @@
                 <h:outputText value="Category Name :"></h:outputText>
                 <p:inputText value="#{categoryController.newCategory.name}"
                              required="true" requiredMessage="Please Enter a Category Name!" />
+                                                 <p:selectOneMenu value="#{categoryController.newCategory.superCatID}"> <!--This is the value of a single selected item. -->
+                                                 <f:selectItem itemLabel="Leave for supercategory" itemValue="0"/>   
+                                                 <f:selectItems value="#{categoryController.filterSuper(0)}" var="cat" itemLabel="#{cat.name}" itemValue="#{cat.categoryID}"/>
+                    </p:selectOneMenu>
 
                 <f:facet name="footer">
-                    <p:commandButton value="Submit" update=":form:categoryTable"
+                    <p:commandButton value="Submit" update=":form"
                                      oncomplete="newCategoryDialog.hide();"
                                      actionListener="#{categoryController.addCategory}">
 

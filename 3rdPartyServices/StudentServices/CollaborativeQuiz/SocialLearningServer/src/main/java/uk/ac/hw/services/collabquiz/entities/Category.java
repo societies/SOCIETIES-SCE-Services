@@ -39,6 +39,8 @@ public class Category {
 	private int categoryID;
 	@Column(name = "name")
 	private String name;
+	
+	private int superCatID;
 
 
 	public Category() {
@@ -57,6 +59,14 @@ public class Category {
 
 	public void setCategoryID(int categoryID) {
 		this.categoryID = categoryID;
+	}
+	
+	public int getSuperCatID() {
+		return superCatID;
+	}
+
+	public void setSuperCatID(int superCatID) {
+		this.superCatID = superCatID;
 	}
 
 

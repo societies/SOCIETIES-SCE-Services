@@ -48,12 +48,13 @@ namespace SocialLearningGame.Pages
         //protected static log4net.ILog log = log4net.LogManager.GetLogger(typeof(PlayPage));
 
         public static readonly double SpeechConfidenceThreshold = 0.55;
+        private static Category choosenCategory;
 
-        public PlayPage()
+        public PlayPage(Category category)
         {
-            Console.WriteLine("Play page starting...");
+            
             InitializeComponent();
-
+            choosenCategory = category;
             // setup speech
             MainWindow.Instance.SensorChooser.KinectChanged += new EventHandler<Microsoft.Kinect.Toolkit.KinectChangedEventArgs>(SensorChooser_KinectChanged);
 
@@ -63,6 +64,7 @@ namespace SocialLearningGame.Pages
                 EnableSpeechEngine(kinect);
                 EnableSkeletonTracking(kinect);
             }
+           // this.Visibility = Visibility.Hidden;
             //NewGame();
         }
 
@@ -118,6 +120,11 @@ namespace SocialLearningGame.Pages
                 }
 
             }
+        }
+
+        private void makeVisible()
+        {
+            this.Visibility = Visibility.Visible;
         }
 
         #endregion
@@ -716,6 +723,7 @@ namespace SocialLearningGame.Pages
 
         private void answerButton_Click(object sender, RoutedEventArgs e)
         {
+            Console.WriteLine("ANSER BUTTON CLICKED!!!");
             if (GameLogic.CurrentRound.AnswerMethod != AnswerMethod.Guesture)
                 return;
 
@@ -738,7 +746,7 @@ namespace SocialLearningGame.Pages
         {
             Console.WriteLine("Now starting new game...");
             // Start the game
-            GameLogic.NewGame();
+            GameLogic.NewGame(choosenCategory);
             // Show users name
             playerNameBox.Text = GameLogic.getUser().name;
             //InitQuestion
@@ -794,7 +802,10 @@ namespace SocialLearningGame.Pages
 
             else
             {
-
+                if (answerBox1.Visibility == Visibility.Hidden)
+                {
+                    this.Visibility = Visibility.Visible;
+                }
 
                 /*  //THIS NEEDS TO GO SOMEWHERE ELSE
                   if (GameLogic.CurrentRound != null &&
@@ -892,6 +903,7 @@ namespace SocialLearningGame.Pages
 
         private void SelectAnswer(int answerIndex)
         {
+            Console.WriteLine("IN SELECT ANSWER!");
             if (GameLogic.CurrentRound.AnswerMethod == AnswerMethod.BodyPoseAndSpeech)
             {
                 lock (poseLockObject)
@@ -907,7 +919,7 @@ namespace SocialLearningGame.Pages
             if (answerIndex != 4) answerBox4.Text = "";
 
             bool result = GameLogic.UserAnsweredQuestion(answerIndex);
-
+            Console.WriteLine("Result...." + result);
             // TODO: Display result
             String answer;
             switch (answerIndex)
@@ -944,7 +956,11 @@ namespace SocialLearningGame.Pages
             answerQ.answeredCorrect = correct;
             answerQ.question = GameLogic.CurrentRound.Question;
             answerQ.userJid = GameLogic.getUser().userJid;
+            //ADD THE Q TO ANSWERED
             GameLogic.addAnsweredQ(answerQ);
+            //REMVOE FROM LIST...
+            GameLogic.removeAvailQ(answerQ.question);
+           
             // next round
             NextQuestion();
         }

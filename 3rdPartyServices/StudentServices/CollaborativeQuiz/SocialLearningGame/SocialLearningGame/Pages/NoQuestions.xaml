@@ -6,7 +6,6 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:localcomponents="clr-namespace:SocialLearningGame.Pages.Components"
       mc:Ignorable="d"
-      Title="Loading..."
       Background="{x:Null}">
 
     <Grid x:Name="kinectRegionGrid" Margin="10,20,10,20">
