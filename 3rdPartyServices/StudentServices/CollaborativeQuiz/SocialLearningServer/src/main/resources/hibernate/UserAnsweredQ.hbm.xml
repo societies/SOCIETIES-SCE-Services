@@ -4,7 +4,7 @@
         "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
 
 <hibernate-mapping>
-	<class name="uk.ac.hw.services.collabquiz.entities.UserAnsweredQ"
+	<class name="ac.hw.services.collabquiz.entities.UserAnsweredQ"
 		table="UserAnsweredQ">
 
 		<id name="id" type="int" column="id">
@@ -14,7 +14,7 @@
 		<property name="userJid" type="string" column="userJid" />
 
 		<many-to-one name="question"
-			class="uk.ac.hw.services.collabquiz.entities.Question" />
+			class="ac.hw.services.collabquiz.entities.Question" />
 
 		<property name="answeredCorrect" column="answeredCorrect" />
 

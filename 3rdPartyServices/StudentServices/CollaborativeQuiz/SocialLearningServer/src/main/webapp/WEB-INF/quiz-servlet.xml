@@ -38,7 +38,7 @@
 
 
     <!-- Scans the classpath for annotated components that will be auto-registered as Spring beans. -->
-    <ctx:component-scan base-package="uk.ac.hw.services.collabquiz"/>
+    <ctx:component-scan base-package="ac.hw.services.collabquiz"/>
 
 
     <bean class="org.springframework.web.servlet.view.ContentNegotiatingViewResolver">

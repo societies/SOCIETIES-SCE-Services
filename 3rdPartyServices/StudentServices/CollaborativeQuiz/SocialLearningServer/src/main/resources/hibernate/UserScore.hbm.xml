@@ -4,7 +4,7 @@
         "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
 
 <hibernate-mapping>
-    <class name="uk.ac.hw.services.collabquiz.entities.UserScore"
+    <class name="ac.hw.services.collabquiz.entities.UserScore"
            table="UserScore">
 
         <id name="userJid" type="string" column="userJid" />

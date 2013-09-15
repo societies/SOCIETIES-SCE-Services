@@ -6,7 +6,7 @@
 	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
 	http://www.springframework.org/schema/osgi http://www.springframework.org/schema/osgi/spring-osgi.xsd">
 
-	<bean id="quizRestServer" class="uk.ac.hw.services.collabquiz.CollabQuizServer"
+	<bean id="quizRestServer" class="ac.hw.services.collabquiz.CollabQuizServer"
 		init-method="init" name="quizRestServer" >
 		<property name="commsManager" ref="commsManager" />
 		<property name="services" ref="services" />
@@ -16,12 +16,11 @@
 	<osgi:reference id="services" interface="org.societies.api.services.IServices"/>
 	
 	 <osgi:service ref="quizRestServer"
-		interface="uk.ac.hw.services.collabquiz.ICollabQuizServer">
+		interface="ac.hw.services.collabquiz.ICollabQuizServer">
 		<osgi:service-properties>
 			<entry key="TargetPlatform" value="SOCIETIES" />
 			<entry key="ServiceProvider" value="ICT-SOCIETIES" />
 			<entry key="ServiceMetaModel" value-ref="serMetamodel" />
-		 	<entry key="ServiceClient" value="http://www2.macs.hw.ac.uk/~sww2/societies/SocialLearningApp-1.2.jar" /> 
 		</osgi:service-properties>
 	</osgi:service>
 
@@ -35,7 +34,7 @@
 		<property name="serviceCategory" value="socialLearning" />
 	</bean> 
 	
-<bean id="collabQuizCommsServer" name="collabQuizCommsServer" class="uk.ac.hw.services.collabquiz.comms.CommsServer" init-method="init">
+<bean id="collabQuizCommsServer" name="collabQuizCommsServer" class="ac.hw.services.collabquiz.comms.CommsServer" init-method="init">
 		<property name="collabQuizServer" ref="quizRestServer" />
 		<property name="commsManager" ref="commsManager" />
 		</bean>
