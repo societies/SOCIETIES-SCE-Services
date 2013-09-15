@@ -41,7 +41,7 @@ public class Server {
 
 	/** The address. */
 	public static String address = 
-			"http://societies.local.macs.hw.ac.uk:8780/nearme/";
+			"http://192.168.1.11:50001/nearme/";
 	//"http://192.168.8.207:8080/nearme/";
 	//"http://societies.local.macs.hw.ac.uk:18080/nearme/";
 	// public static String address = "http://192.168.191.1/asocom.php";

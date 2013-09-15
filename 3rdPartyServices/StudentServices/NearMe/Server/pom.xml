@@ -61,50 +61,39 @@
 			<scope>provided</scope>
 		</dependency>
 
-<!-- 	    <dependency>
+	    <dependency>
 			<groupId>org.societies</groupId>
 			<artifactId>common-ext-libs</artifactId>
 			<scope>provided</scope>
-		</dependency>-->
+		</dependency>
 		
- 		<dependency>
+<!-- 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>org.springframework.spring-library</artifactId>
 			<type>libd</type>
 			<scope>provided</scope>
 		</dependency>
-<!-- 		<dependency> -->
-<!-- 			<groupId>org.aspectj</groupId> -->
-<!-- 			<artifactId>org.aspectj-library</artifactId> -->
-<!-- 			<type>libd</type> -->
-<!-- 			<version>1.6.2.RELEASE</version> -->
-<!-- 			<scope>provided</scope> -->
-<!-- 		</dependency> -->
+		<dependency>
+			<groupId>org.aspectj</groupId>
+			<artifactId>org.aspectj-library</artifactId>
+			<type>libd</type>
+			<version>1.6.2.RELEASE</version>
+			<scope>provided</scope>
+		</dependency>
 
-
-       <!-- <dependency>
-            <groupId>org.societies.cis</groupId>
-            <artifactId>CisDirectoryClient</artifactId>
-            <version>${release.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.societies</groupId>
-            <artifactId>activityfeedservice</artifactId>
-            <version>${version.cis}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.societies</groupId>
-            <artifactId>common-ext-libs</artifactId>
-            <scope>provided</scope>
-        </dependency-->
-
+-->
 		<dependency>
 	      <groupId>mysql</groupId>
 	       <artifactId>mysql-connector-java</artifactId>
 	      <version>5.1.6</version>
 	      <scope>provided</scope>
         </dependency>
+		
+	 <dependency>
+        <groupId>javassist</groupId>
+        <artifactId>javassist</artifactId>
+        <version>3.4.GA</version>
+      </dependency>
 		
 		<dependency>
 			<groupId>javax.servlet</groupId>
@@ -131,11 +120,11 @@
 			<scope>provided</scope>
 		</dependency> -->
 		
-<!--  		<dependency>
+		<dependency>
            <groupId>org.societies</groupId>
            <artifactId>hibernate_classes</artifactId>
            <scope>provided</scope>
-        </dependency>-->
+        </dependency>
 		
 	<!--  <dependency> 
 		    <groupId>org.hibernate</groupId> 

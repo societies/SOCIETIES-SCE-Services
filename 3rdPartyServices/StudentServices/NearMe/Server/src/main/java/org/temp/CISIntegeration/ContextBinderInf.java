@@ -11,4 +11,10 @@ public interface ContextBinderInf{
 	public ICommManager getComMgt();
 	public IServices getServices();
 	public DataSource getDataSource();
+	
+	public void setCisMgm(ICisManager ics);
+	public void setCtxBrk(ICtxBroker cbk);
+	public void setComMgt(ICommManager icm);
+	public void setServices(IServices isc);
+	public void setDataSource(DataSource ds);
 }

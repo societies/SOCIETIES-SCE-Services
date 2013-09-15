@@ -8,20 +8,10 @@ import javax.sql.DataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class ContextBinder implements ContextBinderInf {
-
-	@Autowired
 	private ICisManager cisMgm;
-	
-	@Autowired
 	private ICtxBroker ctxBrk;
-	
-	@Autowired
 	private ICommManager comMgt;
-	
-	@Autowired
 	private IServices services;
-	
-	@Autowired
 	private DataSource dataSource;
 
 	public static ContextBinder instance;
@@ -49,5 +39,19 @@ public class ContextBinder implements ContextBinderInf {
 	public DataSource getDataSource() {
 		return dataSource;
 	}
-
+	public void setCisMgm(ICisManager ics){
+		this.cisMgm=ics;
+	}
+	public void setCtxBrk(ICtxBroker cbk){
+		this.ctxBrk=cbk;
+	}
+	public void setComMgt(ICommManager icm){
+		this.comMgt=icm;
+	}
+	public void setServices(IServices isc){
+		this.services=isc;
+	}
+	public void setDataSource(DataSource ds){
+		this.dataSource=ds;
+	}
 }
