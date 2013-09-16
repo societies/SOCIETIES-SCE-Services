@@ -63,6 +63,7 @@ public class Admin extends HttpServlet {
 		//JavaMail.sendJavaMail(SENDER, "simon.juresa@setcce.si", "hoj", "navaden text", "HTML text", getBody());
 		//sendMeetingRequest1();
 		//sendMeetingRequest2();
+        convertTasks();
         convertEvents();
 		long diff = System.currentTimeMillis() - startTime;
 		response.getWriter().write("time: " + diff);
@@ -71,23 +72,23 @@ public class Admin extends HttpServlet {
     private void convertTasks() {
         Query<Task> q = ofy().load().type(Task.class);
         for (Task task: q) {
-/*
-            switch (task.getStatus()) {
-                case "open":
-                    task.setTaskStatus(TaskStatus.OPEN);
-                    break;
-                case "inprogress":
-                    task.setTaskStatus(TaskStatus.IN_PROGRESS);
-                    break;
-                case "finished":
-                    task.setTaskStatus(TaskStatus.FINISHED);
-                    break;
+            if (task.getStatus() != null) {
+                switch (task.getStatus()) {
+                    case "open":
+                        task.setTaskStatus(TaskStatus.OPEN);
+                        break;
+                    case "inprogress":
+                        task.setTaskStatus(TaskStatus.IN_PROGRESS);
+                        break;
+                    case "finished":
+                        task.setTaskStatus(TaskStatus.FINISHED);
+                        break;
+                }
             }
-*/
             List<String> communityJids = task.getCommunityJids();
             List<Ref<Community>> communityJidRefs = new ArrayList<>();
             if (communityJids != null) {
-                for (String jid:communityJids) {
+                for (String jid : communityJids) {
                     communityJidRefs.add(Ref.create(Key.create(Community.class, jid)));
                 }
                 task.setCommunityJidRefs(communityJidRefs);
@@ -105,9 +106,12 @@ public class Admin extends HttpServlet {
 
     private void convertEvents() {
         Query<Event> q = ofy().load().type(Event.class);
+        int i=1;
         for (Event event: q) {
+            System.out.println(i+":"+event.getId());
             event.convertEventText();
             ofy().save().entity(event);
+            i++;
         }
     }
 

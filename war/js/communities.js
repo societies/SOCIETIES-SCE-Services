@@ -87,7 +87,7 @@ var Community = function() {
         if (isSocietiesUser()) {
             console.log("societies user");
             if (isTestHost()) {
-                societiesCommunities =[{"description":"Open community. Join us.","jid":"cis-2ea7bb44-31cc-466b-a0e8-3015a2ce852d.research.setcce.si", "name":"community 1","memberStatus":"You are the owner.","member":false,"owner":true,"pending":false}];
+                societiesCommunities =[{"description":"Open community. Join us.","jid":"cis-2ea7bb44-31cc-466b-a0e8-3015a2ce852d.research.setcce.si", "name":"community 1","memberStatus":"You are the owner.","member":false,"owner":true,"pending":false, "spaces":[{"id":30,"name":"space2","urlMapping":"space2","symbolicLocation":"space2"}]}];
             }
             else {
                 societiesCommunities = JSON.parse(window.android.getSocietiesCommunities());
@@ -153,8 +153,10 @@ var Community = function() {
           success: function(response) {
               if (isSocietiesUser()) {
                   //var community = jQuery.parseJSON(response);
-                  window.android.setCommunitySpaces(response);
-                  societiesCommunities = JSON.parse(window.android.getSocietiesCommunities());
+                  if (!isTestHost()) {
+                      window.android.setCommunitySpaces(response);
+                      societiesCommunities = JSON.parse(window.android.getSocietiesCommunities());
+                  }
               }
               successFn();
           },
@@ -228,7 +230,7 @@ var Community = function() {
 
     var viewCommunity = function() {
     	var list;
-        var community = getSelectedCommunity(community);
+        var community = getSelectedCommunity();
         $('#name').text(community.name);
     	$('#description').text(community.description);
     	$('#memberStatus').text(community.memberStatus);
@@ -237,6 +239,8 @@ var Community = function() {
             console.log("user can add CS: "+community.canAddCS);
         	$('#addCSButton').show();
         	$('#spaceDetails').show();
+        	$('#cancelCSButton').show();
+        	$('#saveCSButton').show();
         }
     	if (!community.owner) {
         	$('#editCommunityButton').hide();
@@ -341,7 +345,7 @@ var Community = function() {
             getSpaces(fillSpacesCombo);
             return;
     	}
-        var community = getSelectedCommunity(community);
+        var community = getSelectedCommunity();
 //        var community = communities[currentIndex];
         $('#name').val(community.name);
         $('#description').text(community.description);
@@ -461,7 +465,8 @@ var Community = function() {
         
         editSpace: function(index) {
         	if (index !== undefined) {
-	        	var space = communities[currentIndex].spaces[index];
+                var community = getSelectedCommunity(community);
+                var space = community.spaces[index];
 	        	$('#spaceId').val(space.id);
 	        	$('#spaceName').val(space.name);
 	        	$('#urlMapping').val(space.urlMapping);

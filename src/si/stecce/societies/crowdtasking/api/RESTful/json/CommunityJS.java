@@ -73,7 +73,7 @@ public class CommunityJS {
 	
 	public CommunityJS(Community community, CTUser user) {
         Long loggedInUserId = user.getId();
-		setBasicParameters(community);
+        setBasicParameters(community);
         try {
             owner = community.getOwner().getId().longValue() == loggedInUserId.longValue();
         } catch (NullPointerException e) {

@@ -167,7 +167,12 @@ public class TasksAPI implements ITasksAPI {
     }
 
     private String getTasksInCommunities(CTUser user, List<Ref<Community>> communityRefs) {
-        List<Task> tasks = TaskDao.getTasksInCommunities(communityRefs).list();
+        List<Task> tasks;
+        if (communityRefs.isEmpty()) {
+            tasks = new ArrayList<>();
+        } else {
+            tasks = TaskDao.getTasksInCommunities(communityRefs).list();
+        }
         return tasksInJson(user, tasks);
     }
 

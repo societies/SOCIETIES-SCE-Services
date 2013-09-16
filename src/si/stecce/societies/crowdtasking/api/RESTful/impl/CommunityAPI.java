@@ -96,6 +96,7 @@ public class CommunityAPI implements ICommunityAPI {
 			CommunityJS communityJS = new CommunityJS(community, user);
 			list.add(communityJS);
 		}
+        System.out.println(gson.toJson(list));
         return gson.toJson(list);
     }
 

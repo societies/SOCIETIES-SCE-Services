@@ -430,7 +430,7 @@ var CrowdTaskingApp = function() {
             if (task.communityJids !== undefined) {
                 // get Societies communities from android
                 if (isSocietiesUser()) {
-                    communities = getCISes(task.communityJids)
+                    communities = getAllCIS4User(task.communityJids)
                 }
             }
             if (communities != null && communities.length > 0) {
@@ -512,11 +512,11 @@ var CrowdTaskingApp = function() {
     };
 
     var getCISes = function(jids) {
-        if (window.location.hostname === 'TEST_HOST') { // TODO for testing
-            communities =[{"description":"Open community. Join us.","jid":"cis-2ea7bb44-31cc-466b-a0e8-3015a2ce852d.research.setcce.si", "name":"community 1","memberStatus":"You are the owner.","member":false,"owner":true,"pending":false}];
+        if (window.location.hostname === TEST_HOST) { // TODO for testing
+            communities =[{"description":"Open community. Join us.","jid":"cis-2ea7bb44-31cc-466b-a0e8-3015a2ce852d.research.setcce.si", "name":"community 1","memberStatus":"You are the owner.","member":false,"owner":true,"pending":false, "spaces":[{"id":30,"name":"space2","urlMapping":"space2","symbolicLocation":"space2"}]}];
         }
         else {
-            communities = JSON.parse(window.android.getSocietiesCommunitiesByJids(jids));
+            communities = JSON.parse(window.android.getSocietiesCommunities()); // todo: check this
         }
         return communities;
     }
