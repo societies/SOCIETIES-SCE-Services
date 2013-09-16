@@ -28,14 +28,14 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>uk.ac.hw.services.collabquiz</groupId>
+	<groupId>ac.hw.services.collabquiz</groupId>
 	<artifactId>CollabQuizServer</artifactId>
 	<packaging>war</packaging>
 	<version>1.2</version>
 	<name>Collaborative Quiz Server (University CSS)</name>
 
 	<properties>
-		<deploy.dir>E:\virgo-tomcat-server-3.0.3.RELEASE\repository\usr\</deploy.dir>
+		<deploy.dir>${env.VIRGO_HOME}\repository\usr\</deploy.dir>
 	</properties>
 
 	<developers>
@@ -121,9 +121,9 @@
 			<groupId>org.societies.api.external</groupId>
 			<artifactId>societies-api</artifactId>
 			<version>1.2</version>
-			<scope>compile</scope>
+			<scope>provided</scope>
 		</dependency>
-	<!-- 	<dependency>
+		<!-- <dependency>
 			<groupId>org.societies.api.sociallearning</groupId>
 			<artifactId>societies-api-sociallearning</artifactId>
 			<version>1.2</version>
@@ -537,7 +537,7 @@
 							*;scope=compile|runtime;resolution:=optional
 						</Import-Package>
 						<Bundle-ClassPath>WEB-INF/classes,.,
-						WEB-INF/lib/societies-sociallearning-schema-1.2.jar</Bundle-ClassPath>
+							WEB-INF/lib/societies-sociallearning-schema-1.2.jar</Bundle-ClassPath>
 						<Webapp-Context>collabquiz</Webapp-Context>
 						<Web-ContextPath>collabquiz</Web-ContextPath>
 					</instructions>
@@ -553,11 +553,23 @@
 					<archive>
 						<manifestFile>${project.build.directory}/META-INF/MANIFEST.MF</manifestFile>
 					</archive>
-					<webappDirectory>src/main/webapp</webappDirectory>
-					<!-- Make a skinny WAR
-					<packagingExcludes>%regex[WEB-INF/lib/(?!societies-sociallearning-schema-1.2).*.jar]</packagingExcludes> -->
+					<!-- Make a skinny WAR -->
+					<packagingIncludes>WEB-INF/lib/societies-sociallearning-schema-1.2.jar,
+					societies-client/*.jar,
+						**/*.xml,**/*.properties,**/*.class,**/*.png,**/*.css,**/*.js,**/*.jsp,**/*.xhtml,.</packagingIncludes>
 				</configuration>
 			</plugin>
+			
+			
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>1.6</source>
+					<target>1.6</target>
+				</configuration>
+			</plugin>
+
 
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -565,44 +577,43 @@
 				<executions>
 					<execution>
 						<id>copy</id>
-						<phase>package</phase>
+						<phase>compile</phase>
 						<goals>
 							<goal>copy</goal>
 						</goals>
 						<configuration>
-							<outputDirectory>${deploy.dir}</outputDirectory>
-
+							<artifactItems>
+								<artifactItem>
+									<groupId>ac.hw.services</groupId>
+									<artifactId>SocialLearningApp</artifactId>
+									<version>1.2</version>
+									<outputDirectory>${project.build.directory}/${project.artifactId}-${project.version}/societies-client</outputDirectory>
+								</artifactItem>
+							</artifactItems>
+						</configuration>
+					</execution>
+					<execution>
+						<id>copy-installed</id>
+						<phase>install</phase>
+						<goals>
+							<goal>copy</goal>
+						</goals>
+						<configuration>
 							<artifactItems>
 								<artifactItem>
 									<groupId>${project.groupId}</groupId>
 									<artifactId>${project.artifactId}</artifactId>
 									<version>${project.version}</version>
-									<type>${project.packaging}</type>
+									<type>war</type>
 									<overWrite>true</overWrite>
-									<outputDirectory>${deploy.dir}</outputDirectory>
+									<outputDirectory>${spring.osgi.deploy.dir}</outputDirectory>
 								</artifactItem>
 							</artifactItems>
 						</configuration>
 					</execution>
 				</executions>
-
 			</plugin>
 
-			<plugin>
-				<artifactId>maven-clean-plugin</artifactId>
-				<version>2.5</version>
-				<configuration>
-					<filesets>
-						<fileset>
-							<directory>${deploy.dir}</directory>
-							<includes>
-								<include>${project.build.finalName}.*</include>
-							</includes>
-							<followSymlinks>false</followSymlinks>
-						</fileset>
-					</filesets>
-				</configuration>
-			</plugin>
 		</plugins>
 	</build>
 
