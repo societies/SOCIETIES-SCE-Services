@@ -1,12 +1,8 @@
-﻿using System.Collections.Generic;
-using System.Configuration;
-using System.Data;
-using System.Linq;
-using System.Windows;
-using System.Windows.Threading;
-using System.Reflection;
-using System;
+﻿using System;
 using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Windows;
 
 namespace MyTvUI
 {
@@ -15,9 +11,13 @@ namespace MyTvUI
     /// </summary>
     public partial class App : Application
     {
+        private static readonly log4net.ILog log = log4net.LogManager.GetLogger(typeof(App));
+
         public App()
         {
-            Console.WriteLine("My TV onStartup");
+            log4net.Config.XmlConfigurator.Configure(new FileInfo("./Resources/log4net.config.xml"));
+
+            log.Info("My TV onStartup");
             AppDomain.CurrentDomain.AssemblyResolve +=
                 new ResolveEventHandler(ResolveAssembly);
 
@@ -30,11 +30,11 @@ namespace MyTvUI
 
             var name = args.Name.Substring(0, args.Name.IndexOf(',')) + ".dll";
 
-            Console.WriteLine("Searching for dependency: " + name.ToString() + " in ->");
+            log.Info("Searching for dependency: " + name.ToString() + " in ->");
             string[] resourceList = parentAssembly.GetManifestResourceNames();
             for (int i = 0; i < resourceList.Length; i++)
             {
-                Console.WriteLine(resourceList[i]);
+                log.Info(resourceList[i]);
             }
 
             var resourceName = parentAssembly.GetManifestResourceNames()
@@ -50,7 +50,7 @@ namespace MyTvUI
 
         private void Application_Exit(object sender, ExitEventArgs e)
         {
-            Console.WriteLine("Application exit event recieved");
+            log.Info("Application exit event recieved");
         }
     }
 }

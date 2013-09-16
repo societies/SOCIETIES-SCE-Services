@@ -22,6 +22,8 @@ namespace MyTvUI
     /// </summary>
     public partial class MainWindow : Window
     {
+        private static readonly log4net.ILog log = log4net.LogManager.GetLogger(typeof(MainWindow));
+
         #region variables
         //user variables
         private String userID;
@@ -46,10 +48,6 @@ namespace MyTvUI
         private ImageBrush unmuteBg_deselected;
         private ImageBrush unmuteBg_selected;
 
-        //console variables
-        private FileStream ostrm;
-        private StreamWriter writer;
-        private TextWriter oldOut = Console.Out;
 
         //Channel constants
         private static readonly String channel0 = "http://www.macs.hw.ac.uk/~ceesmm1/societies/mytv/channels/splashScreen.html";
@@ -70,31 +68,11 @@ namespace MyTvUI
         #region window
         public MainWindow()
         {
-            //redirect console output
-            try
-            {
-                String userProfile = System.Environment.GetEnvironmentVariable("USERPROFILE");
-                String directory = userProfile + @"\societies\myTvLogs.txt";
-                ostrm = new FileStream(directory, FileMode.Create, FileAccess.Write);
-                writer = new StreamWriter(ostrm);
-                writer.AutoFlush = true;
-                Console.SetOut(writer);
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine("Cannot open logs.txt for writing");
-                Console.WriteLine(e.Message);
-                //return;
-            }
 
             try
             {
                 //initialise GUI
-                //using (StreamWriter writer = new StreamWriter("logs.txt", true))
-                //{
-                //    writer.WriteLine("Initialising GUI");
-                //}
-                Console.WriteLine("Initialising GUI");
+                log.Info("Initialising GUI");
                 InitializeComponent();
                 tvBrowser.Navigated += new NavigatedEventHandler(tvBrowser_Navigated);
 
@@ -115,22 +93,22 @@ namespace MyTvUI
                 //volumeDown.Fill = muteBg_selected;
 
                 //initialise socket server to listen for service client connections
-                Console.WriteLine("Initialising SocketServer and SocketClient");
+                log.Info("Initialising SocketServer and SocketClient");
                 if (initialiseSocketServer() && initialiseSocketClient())
                 {
                     commsInitialised = true;
                     //get preferences
-                    Console.WriteLine("Initialising personalisable parameters");
+                    log.Info("Initialising personalisable parameters");
                     this.userID = socketClient.getUserID();
                     //if EMMA -> getPreferences
                     //if ARTHUR -> getUserIntent
                     //if(this.userID.Equals("emma.societies.local.macs.hw.ac.uk"))
                     //{
-                    Console.WriteLine("Getting preferences for user: " + userID);
+                    log.Info("Getting preferences for user: " + userID);
                     initialisePreferences();
                     //}else if(this.userID.Equals("arthur.societies.local.macs.hw.ac.uk"))
                     //{
-                    //  Console.WriteLine("Getting intent for user: "+userID);
+                    //  log.Info("Getting intent for user: "+userID);
                     //  initialiseIntent();
                     //}
 
@@ -143,7 +121,7 @@ namespace MyTvUI
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.ToString());
+                log.Info(e.ToString());
             }
 
             this.sensorChooser = new KinectSensorChooser();
@@ -161,33 +139,33 @@ namespace MyTvUI
         //close window
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            Console.WriteLine("Window closing called");
+            log.Info("Window closing called");
 
             if (commsInitialised)
             {
-                Console.WriteLine("Send GUI closing message to service client");
+                log.Info("Send GUI closing message to service client");
                 String response = socketClient.sendMessage(
                            "START_MSG\n" +
                            "GUI_STOPPED\n" +
                            "END_MSG\n");
                 if (response.Contains("RECEIVED"))
                 {
-                    Console.WriteLine("Service client received shutdown message");
+                    log.Info("Service client received shutdown message");
                 }
             }
 
-            Console.WriteLine("Stopping kinect");
+            log.Info("Stopping kinect");
             closing = true;
 
             if (this.sensorChooser != null)
             {
-                // //log.Debug("Stopping Kinect");
+                // log.Debug("Stopping Kinect");
                 this.sensorChooser.Stop();
 
                 if (this.sensorChooser.Kinect != null)
                     UnbindSensor(this.sensorChooser.Kinect);
             }
-            Console.WriteLine("Stopping sockets");
+            log.Info("Stopping sockets");
             //stop sockets
             if (commsInitialised)
             {
@@ -195,20 +173,13 @@ namespace MyTvUI
                 socketServer.stopSocketServer();
             }
 
-            Console.WriteLine("Flushing logs");
-            if (writer != null)
-            {
-                Console.SetOut(oldOut);
-                writer.Close();
-                ostrm.Close();
-            }
         }
         #endregion window
 
         #region serviceactions
         private Boolean setChannel(int channel)
         {
-            Console.WriteLine("Setting channel to " + channel);
+            log.Info("Setting channel to " + channel);
             tvBrowser.Navigate(channel1);
             //channel1Button.Fill = channelBg_selected;
             //channel2Button.Fill = channelBg_deselected;
@@ -217,7 +188,7 @@ namespace MyTvUI
             //offButton.Fill = offBg_deselected;
             if (commsInitialised)
             {
-                Console.WriteLine("Sending channel " + channel + " action to UAM");
+                log.Info("Sending channel " + channel + " action to UAM");
                 String response = socketClient.sendMessage(
                 "START_MSG\n" +
                 "USER_ACTION\n" +
@@ -226,7 +197,7 @@ namespace MyTvUI
                 "END_MSG\n");
                 if (response.Contains("RECEIVED"))
                 {
-                    Console.WriteLine("UAM received channel " + channel + " action");
+                    log.Info("UAM received channel " + channel + " action");
                     //set channel button backgrounds
                     currentChannel = channel;
                 }
@@ -241,7 +212,7 @@ namespace MyTvUI
 
         private Boolean setDefaultVolume()
         {
-            Console.WriteLine("Setting muted to default - true");
+            log.Info("Setting muted to default - true");
             MMDeviceEnumerator devEnum = new MMDeviceEnumerator();
             MMDevice defaultDevice = devEnum.GetDefaultAudioEndpoint(EDataFlow.eRender, ERole.eMultimedia);
             defaultDevice.AudioEndpointVolume.Mute = true;
@@ -253,7 +224,7 @@ namespace MyTvUI
 
         private Boolean setMute()
         {
-            Console.WriteLine("Setting muted");
+            log.Info("Setting muted");
             //mute volume
             MMDeviceEnumerator devEnum = new MMDeviceEnumerator();
             MMDevice defaultDevice = devEnum.GetDefaultAudioEndpoint(EDataFlow.eRender, ERole.eMultimedia);
@@ -264,7 +235,7 @@ namespace MyTvUI
 
             if (commsInitialised)
             {
-                Console.WriteLine("Sending muted action to UAM");
+                log.Info("Sending muted action to UAM");
                 String response = socketClient.sendMessage(
                "START_MSG\n" +
                "USER_ACTION\n" +
@@ -273,7 +244,7 @@ namespace MyTvUI
                "END_MSG\n");
                 if (response.Contains("RECEIVED"))
                 {
-                    Console.WriteLine("UAM received muted action");
+                    log.Info("UAM received muted action");
                     //set mute button backgrounds
                     currentlyMuted = true;
                 }
@@ -283,7 +254,7 @@ namespace MyTvUI
 
         private Boolean setUnMute()
         {
-            Console.WriteLine("Setting unmuted");
+            log.Info("Setting unmuted");
             //unmute volume
             MMDeviceEnumerator devEnum = new MMDeviceEnumerator();
             MMDevice defaultDevice = devEnum.GetDefaultAudioEndpoint(EDataFlow.eRender, ERole.eMultimedia);
@@ -294,7 +265,7 @@ namespace MyTvUI
 
             if (commsInitialised)
             {
-                Console.WriteLine("Sending unmuted action to UAM");
+                log.Info("Sending unmuted action to UAM");
                 String response = socketClient.sendMessage(
                 "START_MSG\n" +
                 "USER_ACTION\n" +
@@ -303,7 +274,7 @@ namespace MyTvUI
                 "END_MSG\n");
                 if (response.Contains("RECEIVED"))
                 {
-                    Console.WriteLine("UAM received unmuted action");
+                    log.Info("UAM received unmuted action");
                     //set mute button backgrounds
                     currentlyMuted = false;
                 }
@@ -314,36 +285,36 @@ namespace MyTvUI
         private void initialisePreferences()
         {
             //set channel
-            Console.WriteLine("Requesting channel preference");
+            log.Info("Requesting channel preference");
             String prefRequest = "START_MSG\n" +
                     "CHANNEL_PREFERENCE_REQUEST\n" +
                     "END_MSG\n";
 
             String channelPref = socketClient.sendMessage(prefRequest).Trim();
-            Console.WriteLine("Got channel preference: [" + channelPref + "]");
+            log.Info("Got channel preference: [" + channelPref + "]");
             if (channelPref.Equals("1"))
             {
-                Console.WriteLine("Personalising to channel 1");
+                log.Info("Personalising to channel 1");
                 setChannel(1);
             }
             else if (channelPref.Equals("2"))
             {
-                Console.WriteLine("Personalising to channel 2");
+                log.Info("Personalising to channel 2");
                 setChannel(2);
             }
             else if (channelPref.Equals("3"))
             {
-                Console.WriteLine("Personalising to channel 3");
+                log.Info("Personalising to channel 3");
                 setChannel(3);
             }
             else if (channelPref.Equals("4"))
             {
-                Console.WriteLine("Personalising to channel 4");
+                log.Info("Personalising to channel 4");
                 setChannel(4);
             }
             else if (channelPref.Equals("0"))
             {
-                Console.WriteLine("Personalising to channel 0");
+                log.Info("Personalising to channel 0");
                 setChannel(0);
             }
             else  //default channel is 0
@@ -353,22 +324,22 @@ namespace MyTvUI
             //MessageBox.Show("Got channel preference");
 
             //set muted
-            Console.WriteLine("Requesting mute preference");
+            log.Info("Requesting mute preference");
             String muteRequest = "START_MSG\n" +
                     "MUTED_PREFERENCE_REQUEST\n" +
                     "END_MSG\n";
 
             String mutedPref = socketClient.sendMessage(muteRequest).Trim();
-            Console.WriteLine("Got mute preference: [" + mutedPref + "]");
+            log.Info("Got mute preference: [" + mutedPref + "]");
             if (mutedPref.Equals("false"))
             {
                 //unmute tv
-                Console.WriteLine("Personalising volume to unmuted");
+                log.Info("Personalising volume to unmuted");
                 setUnMute();
             }
             else if (mutedPref.Equals("true"))
             {
-                Console.WriteLine("Personalising volume to muted");
+                log.Info("Personalising volume to muted");
                 setMute();
             }
             else  //default state is muted
@@ -381,13 +352,13 @@ namespace MyTvUI
         private void initialiseIntent()
         {
             //set channel
-            Console.WriteLine("Requesting channel intent");
+            log.Info("Requesting channel intent");
             String intentRequest = "START_MSG\n" +
                     "CHANNEL_INTENT_REQUEST\n" +
                     "END_MSG\n";
 
             String channelIntent = socketClient.sendMessage(intentRequest);
-            Console.WriteLine("Got channel intent :" + channelIntent);
+            log.Info("Got channel intent :" + channelIntent);
             if (channelIntent.Equals("1"))
             {
                 setChannel(1);
@@ -410,13 +381,13 @@ namespace MyTvUI
             }
 
             //set muted
-            Console.WriteLine("Requesting mute preference");
+            log.Info("Requesting mute preference");
             String muteRequest = "START_MSG\n" +
                     "MUTED_INTENT_REQUEST\n" +
                     "END_MSG\n";
 
             String mutedIntent = socketClient.sendMessage(muteRequest);
-            Console.WriteLine("Got muted intent: " + mutedIntent);
+            log.Info("Got muted intent: " + mutedIntent);
             if (mutedIntent.Equals("false"))
             {
                 //unmute tv
@@ -496,8 +467,8 @@ namespace MyTvUI
             }
             catch (Exception e)
             {
-                Console.WriteLine("Error initialising SocketServer");
-                Console.WriteLine(e.ToString());
+                log.Info("Error initialising SocketServer");
+                log.Info(e.ToString());
                 return false;
             }
             return true;
@@ -509,14 +480,14 @@ namespace MyTvUI
             if (socketClient.getSessionParameters())
             {
                 userID = socketClient.getUserID();
-                Console.WriteLine("Received user identity: " + userID);
+                log.Info("Received user identity: " + userID);
 
                 //send handshake message with GUI IP address
                 String myIP = this.getLocalIPAddress();
                 if (myIP != null)
                 {
-                    Console.WriteLine("Starting handshake");
-                    Console.WriteLine("Sending service client my local IP address: " + myIP);
+                    log.Info("Starting handshake");
+                    log.Info("Sending service client my local IP address: " + myIP);
                     if (socketClient.connect())
                     {
                         String response = socketClient.sendMessage(
@@ -526,27 +497,27 @@ namespace MyTvUI
                         "END_MSG\n");
                         if (response.Contains("RECEIVED"))
                         {
-                            Console.WriteLine("Handshake complete");
+                            log.Info("Handshake complete");
                             return true;
                         }
                         else
                         {
-                            Console.WriteLine("Handshake failed");
+                            log.Info("Handshake failed");
                         }
                     }
                     else
                     {
-                        Console.WriteLine("Could not connect to service client");
+                        log.Info("Could not connect to service client");
                     }
                 }
                 else
                 {
-                    Console.WriteLine("Error - could not get IP address of local machine");
+                    log.Info("Error - could not get IP address of local machine");
                 }
             }
             else
             {
-                Console.WriteLine("Error - could not get session parameters - userID, endpoint IP and port");
+                log.Info("Error - could not get session parameters - userID, endpoint IP and port");
             }
             return false;
         }
@@ -561,11 +532,11 @@ namespace MyTvUI
         /// <param name="args">event arguments</param>
         private void SensorChooserOnKinectChanged(object sender, KinectChangedEventArgs args)
         {
-            //log.Debug("Kinect sensor changed");
+            log.Debug("Kinect sensor changed");
 
             if (args.OldSensor != null)
             {
-                //log.Debug("Unbinding old sensor");
+                log.Debug("Unbinding old sensor");
 
                 try
                 {
@@ -573,19 +544,19 @@ namespace MyTvUI
 
                     UnbindSensor(oldSensor);
 
-                    //log.Debug("Completed unbinding old sensor");
+                    log.Debug("Completed unbinding old sensor");
                 }
                 catch (InvalidOperationException ex)
                 {
                     // KinectSensor might enter an invalid state while enabling/disabling streams or stream features.
                     // E.g.: sensor might be abruptly unplugged.
-                    //log.Warn("Error unbinding old sensor", ex);
+                    log.Warn("Error unbinding old sensor", ex);
                 }
             }
 
             if (args.NewSensor != null)
             {
-                //log.Debug("Binding new sensor");
+                log.Debug("Binding new sensor");
 
                 try
                 {
@@ -593,13 +564,13 @@ namespace MyTvUI
 
                     BindSensor(newSensor);
 
-                    //log.Debug("Completed binding new sensor");
+                    log.Debug("Completed binding new sensor");
                 }
                 catch (InvalidOperationException ex)
                 {
                     // KinectSensor might enter an invalid state while enabling/disabling streams or stream features.
                     // E.g.: sensor might be abruptly unplugged.
-                    //log.Warn("Error binding new sensor", ex);
+                    log.Warn("Error binding new sensor", ex);
                 }
 
             }
@@ -610,7 +581,7 @@ namespace MyTvUI
             if (sensor == null)
                 return;
 
-            //log.Debug("BindSensor()");
+            log.Debug("BindSensor()");
             // Sensor
             sensor.Start();
 
@@ -634,7 +605,7 @@ namespace MyTvUI
                 // Non Kinect for Windows devices do not support Near mode, so reset back to default mode.
                 sensor.DepthStream.Range = DepthRange.Default;
                 sensor.SkeletonStream.EnableTrackingInNearRange = false;
-                //log.Warn("Error Setting depth range to near mode", ex);
+                log.Warn("Error Setting depth range to near mode", ex);
             }
         }
 
@@ -643,7 +614,7 @@ namespace MyTvUI
             if (sensor == null)
                 return;
 
-            //log.Debug("UnbindSensor()");
+            log.Debug("UnbindSensor()");
 
             sensor.DepthStream.Range = DepthRange.Default;
             sensor.SkeletonStream.EnableTrackingInNearRange = false;
@@ -755,7 +726,7 @@ namespace MyTvUI
 
         private void mytvWindow_Closed(object sender, EventArgs e)
         {
-            Console.WriteLine("Window closed called");
+            log.Info("Window closed called");
         }
 
         #endregion additional

@@ -48,7 +48,7 @@
       </configuration>
     </facet>
   </component>
-  <component name="NewModuleRootManager" inherit-compiler-output="false">
+  <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_1_6" inherit-compiler-output="false">
     <output url="file://$MODULE_DIR$/target/classes" />
     <output-test url="file://$MODULE_DIR$/target/test-classes" />
     <content url="file://$MODULE_DIR$">
@@ -60,14 +60,17 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" name="Maven: org.societies.api.external:societies-api:1.0" level="project" />
-    <orderEntry type="library" name="Maven: org.simpleframework:simple-xml:2.6.9" level="project" />
-    <orderEntry type="library" name="Maven: org.societies.api.schema:societies-api-schema:1.0" level="project" />
-    <orderEntry type="library" name="Maven: org.societies.simple.converters:SimpleXMLConvertersBasic:1.0" level="project" />
-    <orderEntry type="library" name="Maven: org.societies.utilities:societies-annotations:1.0" level="project" />
-    <orderEntry type="library" name="Maven: org.societies.maven.converters:SimpleXMLConverters:1.0" level="project" />
-    <orderEntry type="module" module-name="societies-api-ext3p" />
-    <orderEntry type="module" module-name="societies-api-ext3p-schema" />
+    <orderEntry type="library" name="Maven: org.restlet.jee:org.restlet.ext.servlet:2.1.2" level="project" />
+    <orderEntry type="library" name="Maven: org.restlet.jee:org.restlet:2.1.2" level="project" />
+    <orderEntry type="library" name="Maven: org.restlet.jee:org.restlet.ext.xml:2.1.2" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: org.societies.api.external:societies-api:1.2" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: org.simpleframework:simple-xml:2.6.9" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: org.societies.api.schema:societies-api-schema:1.2" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: org.societies.simple.converters:SimpleXMLConvertersBasic:1.2" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: org.societies.utilities:societies-annotations:1.2" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: org.societies.maven.converters:SimpleXMLConverters:1.2" level="project" />
+    <orderEntry type="library" name="Maven: org.societies.api.sociallearning:societies-api-sociallearning:1.2" level="project" />
+    <orderEntry type="library" name="Maven: com.google.code.gson:gson:2.2.4" level="project" />
     <orderEntry type="library" name="Maven: org.springframework:org.springframework.aop:3.0.5.RELEASE" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: org.springframework:org.springframework.asm:3.0.5.RELEASE" level="project" />
     <orderEntry type="library" name="Maven: org.springframework:org.springframework.beans:3.0.5.RELEASE" level="project" />
@@ -94,6 +97,19 @@
     <orderEntry type="library" name="Maven: org.apache.commons:com.springsource.org.apache.commons.logging:1.1.1" level="project" />
     <orderEntry type="library" name="Maven: org.springframework.osgi:org.springframework.osgi.core:1.2.1" level="project" />
     <orderEntry type="library" name="Maven: org.springframework.osgi:org.springframework.osgi.io:1.2.1" level="project" />
+    <orderEntry type="library" name="Maven: org.hibernate:com.springsource.org.hibernate:3.3.2.GA" level="project" />
+    <orderEntry type="library" name="Maven: net.sourceforge.cglib:com.springsource.net.sf.cglib:2.2.0" level="project" />
+    <orderEntry type="library" name="Maven: org.antlr:com.springsource.antlr:2.7.6" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.commons:com.springsource.org.apache.commons.collections:3.2.1" level="project" />
+    <orderEntry type="library" name="Maven: org.dom4j:com.springsource.org.dom4j:1.6.1" level="project" />
+    <orderEntry type="library" name="Maven: org.jboss.javassist:com.springsource.javassist:3.9.0.GA" level="project" />
+    <orderEntry type="library" name="Maven: org.objectweb.asm:com.springsource.org.objectweb.asm:1.5.3" level="project" />
+    <orderEntry type="library" name="Maven: org.slf4j:com.springsource.slf4j.api:1.5.6" level="project" />
+    <orderEntry type="library" name="Maven: org.hibernate:com.springsource.org.hibernate.annotations:3.4.0.GA-A" level="project" />
+    <orderEntry type="library" name="Maven: org.hibernate:com.springsource.org.hibernate.annotations.common:3.3.0.ga" level="project" />
+    <orderEntry type="library" name="Maven: org.hibernate.javax.persistence:hibernate-jpa-2.0-api:1.0.1.Final" level="project" />
+    <orderEntry type="library" name="Maven: javax.transaction:com.springsource.javax.transaction:1.1.0" level="project" />
+    <orderEntry type="library" name="Maven: mysql:mysql-connector-java:5.1.25" level="project" />
     <orderEntry type="library" name="Maven: org.primefaces:primefaces:3.5" level="project" />
     <orderEntry type="library" name="Maven: com.sun.faces:jsf-api:2.1.17" level="project" />
     <orderEntry type="library" name="Maven: com.sun.faces:jsf-impl:2.1.17" level="project" />
@@ -115,9 +131,6 @@
     <orderEntry type="library" name="Maven: org.glassfish.web:el-impl:2.2" level="project" />
     <orderEntry type="library" name="Maven: javax.el:el-api:2.2" level="project" />
     <orderEntry type="library" name="Maven: javax.ws.rs:com.springsource.javax.ws.rs:1.0.0" level="project" />
-    <orderEntry type="library" name="Maven: org.restlet.jee:org.restlet.ext.servlet:2.1.2" level="project" />
-    <orderEntry type="library" name="Maven: org.restlet.jee:org.restlet:2.1.2" level="project" />
-    <orderEntry type="library" name="Maven: org.restlet.jee:org.restlet.ext.xml:2.1.2" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: org.slf4j:slf4j-api:1.6.1" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: org.slf4j:slf4j-log4j12:1.7.2" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: log4j:log4j:1.2.16" level="project" />
