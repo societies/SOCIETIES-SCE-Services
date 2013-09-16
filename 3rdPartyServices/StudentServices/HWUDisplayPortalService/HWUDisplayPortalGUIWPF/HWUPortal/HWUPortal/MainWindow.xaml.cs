@@ -517,7 +517,7 @@ namespace HWUPortal
         #region " Service button handlers "
         private void serviceButton_Click(object sender, RoutedEventArgs e)
         {
-            this.startService(e, (ServiceInfo)((KinectCircleButton)serviceButton1).Tag);
+            this.startService(e, (ServiceInfo)((KinectCircleButton)sender).Tag);
         }
         #endregion
 
