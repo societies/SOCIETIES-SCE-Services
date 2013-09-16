@@ -124,11 +124,6 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.societies.api.sociallearning</groupId>
-			<artifactId>societies-api-sociallearning</artifactId>
-			<version>1.2</version>
-		</dependency>
-		<dependency>
 			<groupId>com.google.code.gson</groupId>
 			<artifactId>gson</artifactId>
 			<version>2.2.4</version>
@@ -317,7 +312,10 @@
 						<Embed-Dependency>*;scope=compile|runtime</Embed-Dependency>
 						<Embed-Transitive>false</Embed-Transitive>
 						<Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
+<<<<<<< HEAD
 						<Export-Package>org.societies.api.sociallearning.schema.*</Export-Package>
+=======
+>>>>>>> refs/heads/stuart_Dev
 						<Import-Package>
 							com.sun.faces.application,
 							com.sun.faces.application.view,
@@ -354,7 +352,7 @@
 							org.societies.api.comm.xmpp.exceptions,
 							org.societies.api.comm.xmpp.datatypes,
 							org.societies.api.schema.servicelifecycle.model,
-							<!-- org.societies.api.sociallearning.schema.serverbean, -->
+							org.societies.api.sociallearning.schema.serverbean,
 
 
 							<!-- Hibernate -->
