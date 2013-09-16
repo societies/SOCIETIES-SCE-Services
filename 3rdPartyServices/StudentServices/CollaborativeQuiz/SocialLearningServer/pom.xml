@@ -123,12 +123,12 @@
 			<version>1.2</version>
 			<scope>compile</scope>
 		</dependency>
-		<dependency>
+	<!-- 	<dependency>
 			<groupId>org.societies.api.sociallearning</groupId>
 			<artifactId>societies-api-sociallearning</artifactId>
 			<version>1.2</version>
 			<scope>compile</scope>
-		</dependency>
+		</dependency> -->
 		<dependency>
 			<groupId>com.google.code.gson</groupId>
 			<artifactId>gson</artifactId>
@@ -354,7 +354,7 @@
 							org.societies.api.comm.xmpp.exceptions,
 							org.societies.api.comm.xmpp.datatypes,
 							org.societies.api.schema.servicelifecycle.model,
-							<!-- org.societies.api.sociallearning.schema.serverbean, -->
+							org.societies.api.sociallearning.schema.serverbean,
 
 
 							<!-- Hibernate -->
@@ -554,8 +554,8 @@
 						<manifestFile>${project.build.directory}/META-INF/MANIFEST.MF</manifestFile>
 					</archive>
 					<webappDirectory>src/main/webapp</webappDirectory>
-					<!-- Make a skinny WAR -->
-					<packagingExcludes>%regex[WEB-INF/lib/(?!societies-sociallearning-schema-1.2).*.jar]</packagingExcludes>
+					<!-- Make a skinny WAR
+					<packagingExcludes>%regex[WEB-INF/lib/(?!societies-sociallearning-schema-1.2).*.jar]</packagingExcludes> -->
 				</configuration>
 			</plugin>
 
