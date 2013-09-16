@@ -13,14 +13,24 @@
             <div data-role="header" id="header" data-position="fixed" data-theme="b">
                 <a id='backButton' data-icon="back" data-rel="back" data-direction="reverse">Back</a>
                 <h3 id='formTitle'>View task</h3>
-                <a class="rightHeaderButton ui-btn-right" data-icon="check" href="/task/execute" data-transition="slide" style="display:none">Execute</a>
-                <a class="rightHeaderButton ui-btn-right" id="finalizeButton" data-icon="check" data-transition="slide" style="display:none">Finalize</a>
+                <!--<a class="rightHeaderButton ui-btn-right" data-icon="check" href="/task/execute" data-transition="slide" style="display:none">Execute</a>-->
+                <a class="rightHeaderButton ui-btn-right" id="finalizeButton" data-icon="check" data-transition="slide">Finalize</a>
 				<a class="rightHeaderButton ui-btn-right" id="likeButton" data-theme="c">Like</a>
 				<a class="rightHeaderButton ui-btn-right" id="likedButton" data-theme="b">Liked</a>
             </div>
-			<div style="margin:0 auto; margin-left:auto; margin-right:auto; align:center; text-align:center;">
-				<!--a id="watchButton" data-role="button" data-inline="true" data-theme="a">Watch</a-->
-			</div>
+            <div data-role="popup" id="finalizeDialog" data-overlay-theme="a" data-theme="c" data-dismissible="false" style="max-width:400px;" class="ui-corner-all">
+                <div data-role="header" data-theme="a" class="ui-corner-top">
+                    <h1>Finalize</h1>
+                </div>
+                <div data-role="content" data-theme="d" class="ui-corner-bottom ui-content">
+                    <h3 class="ui-title">Finalize task?</h3>
+                    <a id="finalizeTaskSaveButton" data-role="button" data-mini="true" data-inline="true" data-transition="flow" data-theme="b">Yes</a>
+                    <a data-role="button" data-mini="true" data-inline="true" data-rel="back" data-theme="c">No</a>
+                </div>
+            </div>
+			<!--<div style="margin:0 auto; margin-left:auto; margin-right:auto; align:center; text-align:center;">-->
+				<!--&lt;!&ndash;a id="watchButton" data-role="button" data-inline="true" data-theme="a">Watch</a&ndash;&gt;-->
+			<!--</div>-->
             <div data-role="content" data-theme="c">
                	<div data-role="collapsible" data-collapsed="false" data-theme="b">
 					<h3>Task details</h3>
@@ -36,10 +46,6 @@
 	                		<tr>
 	                			<td>Created:</td>
 	                			<td id="taskCreated"></td>
-	                		</tr>
-	                		<tr>
-	                			<td>Due date:</td>
-	                			<td id="taskDate"></td>
 	                		</tr>
 	                		<tr>
 	                			<td>Communities:</td>

@@ -22,28 +22,14 @@
  * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package si.stecce.societies.crowdtasking.api.RESTful;
-
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-
-import com.google.gson.Gson;
+package si.stecce.societies.crowdtasking.model;
 
 /**
- * Describe your class here...
- *
  * @author Simon Jureša
  *
  */
-@Path("/noaccess")
-public class NoAccess {
-	@GET
-	@Produces({MediaType.APPLICATION_JSON })
-	public String noAccess() {
-		Gson gson = new Gson();
-		return gson.toJson("Not authorized!");
-	}
-
+public enum TaskStatus {
+	OPEN,
+	IN_PROGRESS,
+	FINISHED
 }

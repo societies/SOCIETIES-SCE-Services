@@ -28,9 +28,9 @@ import java.util.Date;
 import java.util.List;
 
 import si.stecce.societies.crowdtasking.Util;
-import si.stecce.societies.crowdtasking.api.RESTful.CommentAPI;
-import si.stecce.societies.crowdtasking.api.RESTful.SpaceAPI;
-import si.stecce.societies.crowdtasking.api.RESTful.UsersAPI;
+import si.stecce.societies.crowdtasking.api.RESTful.impl.CommentAPI;
+import si.stecce.societies.crowdtasking.api.RESTful.impl.SpaceAPI;
+import si.stecce.societies.crowdtasking.api.RESTful.impl.UsersAPI;
 import si.stecce.societies.crowdtasking.model.dao.CommunityDAO;
 import si.stecce.societies.crowdtasking.model.dao.MeetingDAO;
 import si.stecce.societies.crowdtasking.model.dao.TaskDao;
@@ -90,8 +90,8 @@ public class Event {
         if (taskRef != null) {
             task = TaskDao.loadTask(taskRef);
         }
-		setEventText();
-	}
+        setEventText();
+    }
 
 	public Long getId() {
 		return id;
@@ -136,82 +136,84 @@ public class Event {
 	private void setEventText() {
 		String commentOwner;
 		
-		String userName = user.getUserName();
-
-		switch (type) {
-            case ACCOUNT_CREATED:
-                eventText = userName + " created the Crowd Tasking account " + when(eventDate);
-                eventTextHTML = eventText;
-                break;
-            case COMMUNITY_CREATED:
-                eventText = userName + " created the community " + community.getName() + when(eventDate);
-                eventTextHTML = userName + " created the community " + Util.communityHTMLLink(community) + when(eventDate);
-                break;
-            case CREATE_TASK:
-                eventText = userName + " created the new task " + task.getTitle()  + when(eventDate);
-                eventTextHTML = userName + " created the new task " + Util.taskHTMLLink(task)  + when(eventDate);
-                break;
-            case TASK_COMMENT:
-                eventText = userName + " commented on " + task.getTitle() + when(eventDate);
-                eventTextHTML = userName + " commented on " + Util.taskHTMLLink(task) + when(eventDate);
-                break;
-            case EXECUTE_TASK:
-                eventText = userName + " started task execution of " + task.getTitle() + when(eventDate);
-                eventTextHTML = userName + " started task execution of " + Util.taskHTMLLink(task) + when(eventDate);
-                break;
-            case FINALIZE_TASK:
-                eventText = userName + " finalized " + task.getTitle() + when(eventDate);
-                eventTextHTML = userName + " finalized " + Util.taskHTMLLink(task) + when(eventDate);
-                break;
-            case ENTER_COLLABORATIVE_SPACE:
-                eventText = userName + " entered '" + SpaceAPI.load(collaborativeSpaceRef).getName() + "'" + when(eventDate);
-                eventTextHTML = eventText;
-                break;
-            case LEAVE_COLLABORATIVE_SPACE:
-                eventText = userName + " left '" + SpaceAPI.load(collaborativeSpaceRef).getName() + "'" + when(eventDate);
-                eventTextHTML = eventText;
-                break;
-            case LIKE_TASK:
-                eventText = userName + " liked the task " + task.getTitle() + when(eventDate);
-                eventTextHTML = userName + " liked the task " + Util.taskHTMLLink(task) + when(eventDate);
-                break;
-            case UNLIKE_TASK:
-                eventText = userName + " unliked the task " + task.getTitle() + when(eventDate);
-                eventTextHTML = userName + " unliked the task " + Util.taskHTMLLink(task) + when(eventDate);
-                break;
-            case LIKE_COMMENT:
-                commentOwner = CommentAPI.getCommentById(getCommentId()).getOwner().getUserName();
-                eventText = userName + " liked " + commentOwner + "'s comment on the task " + task.getTitle() + when(eventDate);
-                eventTextHTML = userName + " liked " + commentOwner + "'s comment on the task " + Util.taskHTMLLink(task) + when(eventDate);
-                break;
-            case UNLIKE_COMMENT:
-                commentOwner = CommentAPI.getCommentById(getCommentId()).getOwner().getUserName();
-                eventText = userName + " unliked " + commentOwner + "'s comment on the task " + task.getTitle() + when(eventDate);
-                eventTextHTML = userName + " unliked " + commentOwner + "'s comment on the task " + Util.taskHTMLLink(task) + when(eventDate);
-                break;
-            case NEW_MEETING:
-                eventText = userName + " created the new meeting "+meeting.getSubject()+" in "+meeting.getCollaborativeSpace().getName()+when(eventDate);
-                eventTextHTML = userName + " created new meeting "+Util.taskHTMLLink(meeting, task)+" in "+meeting.getCollaborativeSpace().getName()+when(eventDate);
-                break;
-            case SHOW_TASK_ON_PD:
-                eventText = userName + " showed the task " + task.getTitle() + " on public display" + when(eventDate);
-                eventTextHTML = userName + " showed task " + Util.taskHTMLLink(task) + " on public display" + when(eventDate);
-                break;
-            case PICK_TASK_FROM_PD:
-                eventText = userName + " picked the task " + task.getTitle() + " from public display" + when(eventDate);
-                eventTextHTML = userName + " picked task " + Util.taskHTMLLink(task) + " from public display" + when(eventDate);
-                break;
-            case REQUEST_TO_JOIN_COMMUNITY:
-                eventText = userName + " requested to join the community " + community.getName() + when(eventDate);
-                eventTextHTML = userName + " requested to join the community " + Util.communityHTMLLink(community) + when(eventDate);
-                break;
-            case JOINED_COMMUNITY:
-                eventText = userName + " joined the community " + community.getName() + when(eventDate);
-                eventTextHTML = userName + " joined the community " + Util.communityHTMLLink(community) + when(eventDate);
-                break;
-            default:
-                break;
-		}		
+        try {
+            String userName = user.getUserName();
+            switch (type) {
+                case ACCOUNT_CREATED:
+                    eventText = userName + " created the Crowd Tasking account " + when(eventDate);
+                    eventTextHTML = eventText;
+                    break;
+                case COMMUNITY_CREATED:
+                    eventText = userName + " created the community " + community.getName() + when(eventDate);
+                    eventTextHTML = userName + " created the community " + Util.communityHTMLLinkRelative(community) + when(eventDate);
+                    break;
+                case CREATE_TASK:
+                    eventText = userName + " created the new task " + task.getTitle()  + when(eventDate);
+                    eventTextHTML = userName + " created the new task " + Util.taskHTMLLinkRelative(task)  + when(eventDate);
+                    break;
+                case TASK_COMMENT:
+                    eventText = userName + " commented on " + task.getTitle() + when(eventDate);
+                    eventTextHTML = userName + " commented on " + Util.taskHTMLLinkRelative(task) + when(eventDate);
+                    break;
+                case EXECUTE_TASK:
+                    eventText = userName + " started task execution of " + task.getTitle() + when(eventDate);
+                    eventTextHTML = userName + " started task execution of " + Util.taskHTMLLinkRelative(task) + when(eventDate);
+                    break;
+                case FINALIZE_TASK:
+                    eventText = userName + " finalized " + task.getTitle() + when(eventDate);
+                    eventTextHTML = userName + " finalized " + Util.taskHTMLLinkRelative(task) + when(eventDate);
+                    break;
+                case ENTER_COLLABORATIVE_SPACE:
+                    eventText = userName + " entered '" + SpaceAPI.load(collaborativeSpaceRef).getName() + "'" + when(eventDate);
+                    eventTextHTML = eventText;
+                    break;
+                case LEAVE_COLLABORATIVE_SPACE:
+                    eventText = userName + " left '" + SpaceAPI.load(collaborativeSpaceRef).getName() + "'" + when(eventDate);
+                    eventTextHTML = eventText;
+                    break;
+                case LIKE_TASK:
+                    eventText = userName + " liked the task " + task.getTitle() + when(eventDate);
+                    eventTextHTML = userName + " liked the task " + Util.taskHTMLLinkRelative(task) + when(eventDate);
+                    break;
+                case UNLIKE_TASK:
+                    eventText = userName + " unliked the task " + task.getTitle() + when(eventDate);
+                    eventTextHTML = userName + " unliked the task " + Util.taskHTMLLinkRelative(task) + when(eventDate);
+                    break;
+                case LIKE_COMMENT:
+                    commentOwner = CommentAPI.getCommentById(getCommentId()).getOwner().getUserName();
+                    eventText = userName + " liked " + commentOwner + "'s comment on the task " + task.getTitle() + when(eventDate);
+                    eventTextHTML = userName + " liked " + commentOwner + "'s comment on the task " + Util.taskHTMLLinkRelative(task) + when(eventDate);
+                    break;
+                case UNLIKE_COMMENT:
+                    commentOwner = CommentAPI.getCommentById(getCommentId()).getOwner().getUserName();
+                    eventText = userName + " unliked " + commentOwner + "'s comment on the task " + task.getTitle() + when(eventDate);
+                    eventTextHTML = userName + " unliked " + commentOwner + "'s comment on the task " + Util.taskHTMLLinkRelative(task) + when(eventDate);
+                    break;
+                case NEW_MEETING:
+                    eventText = userName + " created the new meeting "+meeting.getSubject()+" in "+meeting.getCollaborativeSpace().getName()+when(eventDate);
+                    eventTextHTML = userName + " created new meeting "+Util.taskHTMLLink(meeting, task)+" in "+meeting.getCollaborativeSpace().getName()+when(eventDate);
+                    break;
+                case SHOW_TASK_ON_PD:
+                    eventText = userName + " showed the task " + task.getTitle() + " on public display" + when(eventDate);
+                    eventTextHTML = userName + " showed task " + Util.taskHTMLLinkRelative(task) + " on public display" + when(eventDate);
+                    break;
+                case PICK_TASK_FROM_PD:
+                    eventText = userName + " picked the task " + task.getTitle() + " from public display" + when(eventDate);
+                    eventTextHTML = userName + " picked task " + Util.taskHTMLLinkRelative(task) + " from public display" + when(eventDate);
+                    break;
+                case REQUEST_TO_JOIN_COMMUNITY:
+                    eventText = userName + " requested to join the community " + community.getName() + when(eventDate);
+                    eventTextHTML = userName + " requested to join the community " + Util.communityHTMLLinkRelative(community) + when(eventDate);
+                    break;
+                case JOINED_COMMUNITY:
+                    eventText = userName + " joined the community " + community.getName() + when(eventDate);
+                    eventTextHTML = userName + " joined the community " + Util.communityHTMLLinkRelative(community) + when(eventDate);
+                    break;
+                default:
+                    break;
+            }
+        } catch (NullPointerException e) {
+        }
 	}
 
     public void convertEventText() {

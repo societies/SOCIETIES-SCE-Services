@@ -26,7 +26,7 @@ package si.stecce.societies.crowdtasking.api.RESTful.json; /**
 import java.util.ArrayList;
 import java.util.List;
 
-import si.stecce.societies.crowdtasking.api.RESTful.UsersAPI;
+import si.stecce.societies.crowdtasking.api.RESTful.impl.UsersAPI;
 import si.stecce.societies.crowdtasking.model.CTUser;
 import si.stecce.societies.crowdtasking.model.CollaborativeSpace;
 import si.stecce.societies.crowdtasking.model.Community;
@@ -49,9 +49,10 @@ public class CommunityJS {
 	private List<UserJS> members;
 	private List<UserJS> requests;
 	private boolean owner;
-	private boolean member = false;
-	private boolean pending = false;
-	private String memberStatus;
+	private boolean canAddCS;
+	private boolean member;
+	private boolean pending;
+	private String memberStatus="";
 
 	public CommunityJS(Community community) {
 		setBasicParameters(community);
@@ -59,6 +60,7 @@ public class CommunityJS {
 
 	private void setBasicParameters(Community community) {
 		id = community.getId();
+		jid = community.getJid();
 		name = community.getName();
 		description = community.getDescription();
 		if (community.getCollaborativeSpaces() != null) {
@@ -69,16 +71,20 @@ public class CommunityJS {
 		}
 	}
 	
-	public CommunityJS(Community community, Long loggedInUserId) {
-		setBasicParameters(community);
-		owner = community.getOwner().getId().longValue() == loggedInUserId.longValue(); 
-				//loggedInUserId.longValue() == 92001L;
+	public CommunityJS(Community community, CTUser user) {
+        Long loggedInUserId = user.getId();
+        setBasicParameters(community);
+        try {
+            owner = community.getOwner().getId().longValue() == loggedInUserId.longValue();
+        } catch (NullPointerException e) {
+        }
+		canAddCS = user.isAdmin();
 		if (community.getMembers() != null) {
 			members = new ArrayList<UserJS>();
-			for (Ref<CTUser> userRef:community.getMembers()) {
-				CTUser user = UsersAPI.getUser(userRef);
-				members.add(new UserJS(user, loggedInUserId));
-				if (user.getId().longValue() == loggedInUserId.longValue()) {
+			for (Ref<CTUser> memberRef:community.getMembers()) {
+				CTUser memberUser = UsersAPI.getUser(memberRef);
+				members.add(new UserJS(memberUser, loggedInUserId));
+				if (memberUser.getId().longValue() == loggedInUserId.longValue()) {
 					member = true;
 				}
 			}
@@ -86,9 +92,9 @@ public class CommunityJS {
 		if (community.getRequests() != null) {
 			requests = new ArrayList<UserJS>();
 			for (Ref<CTUser> userRef:community.getRequests()) {
-				CTUser user = UsersAPI.getUser(userRef);
-				requests.add(new UserJS(user, loggedInUserId));
-				if (user.getId().longValue() == loggedInUserId.longValue()) {
+				CTUser memberUser = UsersAPI.getUser(userRef);
+				requests.add(new UserJS(memberUser, loggedInUserId));
+				if (memberUser.getId().longValue() == loggedInUserId.longValue()) {
 					pending = true;
 				}
 			}

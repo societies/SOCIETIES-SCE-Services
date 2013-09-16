@@ -28,7 +28,6 @@ import java.util.Date;
 import java.util.Random;
 
 import si.stecce.societies.crowdtasking.Util;
-import si.stecce.societies.crowdtasking.api.RESTful.UsersAPI;
 import si.stecce.societies.crowdtasking.model.CTUser;
 import si.stecce.societies.crowdtasking.model.Comment;
 

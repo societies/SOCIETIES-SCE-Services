@@ -5,8 +5,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import si.stecce.societies.crowdtasking.api.RESTful.TagAPI;
-import si.stecce.societies.crowdtasking.api.RESTful.UsersAPI;
+import si.stecce.societies.crowdtasking.api.RESTful.impl.TagAPI;
+import si.stecce.societies.crowdtasking.api.RESTful.impl.UsersAPI;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;

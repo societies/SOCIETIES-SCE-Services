@@ -22,7 +22,7 @@
  * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package si.stecce.societies.crowdtasking.api.RESTful;
+package si.stecce.societies.crowdtasking.api.RESTful.impl;
 
 
 import static si.stecce.societies.crowdtasking.model.dao.OfyService.ofy;
@@ -48,6 +48,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import si.stecce.societies.crowdtasking.api.RESTful.ISpaceAPI;
 import si.stecce.societies.crowdtasking.model.CollaborativeSpace;
 import si.stecce.societies.crowdtasking.model.Community;
 import si.stecce.societies.crowdtasking.model.dao.CollaborativeSpaceDAO;
@@ -66,16 +67,17 @@ import com.googlecode.objectify.cmd.Query;
  *
  */
 @Path("/space")
-public class SpaceAPI {
+public class SpaceAPI implements ISpaceAPI {
     static {
 		ObjectifyService.register(CollaborativeSpace.class);
     }
 
-	@GET
+	@Override
+    @GET
 	@Produces({MediaType.APPLICATION_JSON })
 	public String getSpace(@DefaultValue("0") @QueryParam("id") Long id,
-			@DefaultValue("0") @QueryParam("userId") Long userId,
-			@Context HttpServletRequest request) {
+                           @DefaultValue("0") @QueryParam("userId") Long userId,
+                           @Context HttpServletRequest request) {
 		Gson gson = new Gson();
 		if (id != 0) {
 			return gson.toJson(getCollaborativeSpace(id));
@@ -102,11 +104,6 @@ public class SpaceAPI {
 		return ofy().load().type(CollaborativeSpace.class).filter("urlMapping", urlMapping).first().get();
 	}
 
-	public static CollaborativeSpace putSpace(CollaborativeSpace collaborativeSpace) {
-		ofy().save().entity(collaborativeSpace);
-		return collaborativeSpace;
-	}
-
 	public static List<CollaborativeSpace> getCollaborativeSpaces() {
 		Query<CollaborativeSpace> q = ofy().load().type(CollaborativeSpace.class);
 		ArrayList<CollaborativeSpace> list = new ArrayList<CollaborativeSpace>();
@@ -125,43 +122,36 @@ public class SpaceAPI {
 		return spacesMap;
 	}
 	
-	@POST
+	@Override
+    @POST
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-	public Response newSpace(@FormParam("communityId") Long communityId, 
-			@FormParam("spaceId") Long spaceId,
-			@FormParam("spaceName") String name,
-			@FormParam("urlMapping") String urlMapping,
-			@FormParam("symbolicLocation") String symbolicLocation) throws IOException, URISyntaxException {
+	public Response newSpace(@FormParam("communityId") Long communityId,
+                             @FormParam("spaceId") Long spaceId,
+                             @FormParam("spaceName") String name,
+//                             @FormParam("urlMapping") String urlMapping,
+                             @FormParam("symbolicLocation") String symbolicLocation) throws IOException, URISyntaxException {
 		
-		if ("".equals(communityId)) {
-			return Response.status(Status.BAD_REQUEST).entity("Unknown error.").type("text/plain").build();
-		}
-		
+
 		if ("".equals(name)) {
 			return Response.status(Status.BAD_REQUEST).entity("Name is required.").type("text/plain").build();
 		}
 		if (spaceId.longValue() == 0L) {
-			Community community = CommunityDAO.loadCommunity(communityId);
-			if (community == null) {
-				return Response.status(Status.BAD_REQUEST).entity("Can't get the community.").type("text/plain").build();
+			if (ofy().load().type(CollaborativeSpace.class).filter("name", name).count() != 0){
+				return Response.status(Status.BAD_REQUEST).entity("Collaborative space "+name+" already exist.").type("text/plain").build();
 			}
-			if (ofy().load().type(CollaborativeSpace.class).filter("urlMapping", urlMapping).count() != 0){
-				return Response.status(Status.BAD_REQUEST).entity("URL mapping already exist.").type("text/plain").build();
-			}
-			community.addCollaborativeSpace(name, urlMapping, symbolicLocation);
-			CommunityDAO.saveCommunity(community);
+            CollaborativeSpace collaborativeSpace = new CollaborativeSpace(name, symbolicLocation);
+            CollaborativeSpaceDAO.save(collaborativeSpace);
 		}
 		else {
 			CollaborativeSpace space = getCollaborativeSpace(spaceId);
-			space.setName(name);
-			if (!space.getUrlMapping().equalsIgnoreCase(urlMapping)) {
-				if (ofy().load().type(CollaborativeSpace.class).filter("urlMapping", urlMapping).count() != 0){
-					return Response.status(Status.BAD_REQUEST).entity("URL mapping already exist.").type("text/plain").build();
-				}
-			}
-			space.setUrlMapping(urlMapping);
+            if (!space.getName().equalsIgnoreCase(name)) {
+                if (ofy().load().type(CollaborativeSpace.class).filter("name", name).count() != 0){
+                    return Response.status(Status.BAD_REQUEST).entity("Collaborative space \"+name+\" already exist.").type("text/plain").build();
+                }
+            }
+            space.setName(name);
 			space.setSymbolicLocation(symbolicLocation);
-			putSpace(space);
+            CollaborativeSpaceDAO.save(space);
 		}
 		
 		return Response.ok().build();

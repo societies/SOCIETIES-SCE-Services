@@ -22,7 +22,7 @@
  * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package si.stecce.societies.crowdtasking.api.RESTful;
+package si.stecce.societies.crowdtasking.api.RESTful.impl;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -39,10 +39,15 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 
+import com.googlecode.objectify.Key;
+import com.googlecode.objectify.Ref;
+import si.stecce.societies.crowdtasking.api.RESTful.ITasksAPI;
 import si.stecce.societies.crowdtasking.api.RESTful.json.TaskJS;
 import si.stecce.societies.crowdtasking.model.CTUser;
+import si.stecce.societies.crowdtasking.model.Community;
 import si.stecce.societies.crowdtasking.model.Task;
 import si.stecce.societies.crowdtasking.model.TaskInterestScoreComparator;
+import si.stecce.societies.crowdtasking.model.dao.CommunityDAO;
 import si.stecce.societies.crowdtasking.model.dao.TaskDao;
 
 import com.google.gson.Gson;
@@ -61,15 +66,18 @@ import com.googlecode.objectify.cmd.Query;
  *
  */
 @Path("/tasks/{querytype}")
-public class TasksAPI {
+public class TasksAPI implements ITasksAPI {
 	private static final int HIGHEST_RATED_NUM = 5;
 
-	@GET
+	@Override
+    @GET
 	@Produces({MediaType.APPLICATION_JSON})
-	public String getTasks(@PathParam("querytype") String querytype, 
-			@QueryParam("searchString") String searchString,
-			@QueryParam("communityId") Long communityId,
-			@Context HttpServletRequest request) {
+	public String getTasks(@PathParam("querytype") String querytype,
+                           @QueryParam("searchString") String searchString,
+                           @QueryParam("communityId") Long communityId,
+                           @QueryParam("communityJids") String communityJidsJson,
+                           @QueryParam("societiesUser") boolean societiesUser,
+                           @Context HttpServletRequest request) {
 		CTUser user = UsersAPI.getLoggedInUser(request.getSession());
 		if ("my".equalsIgnoreCase(querytype)) {
 			return getMyTasks(user);
@@ -78,7 +86,10 @@ public class TasksAPI {
 			return getFollowedTasks();
 		}
 		if ("interesting".equalsIgnoreCase(querytype)) {
-			return getInerestingTasks(user);
+			return getInterestingTasks(user);
+		}
+		if ("inmycommunities".equalsIgnoreCase(querytype)) {
+			return getTasksInMyCommunities(user, communityJidsJson);
 		}
 		if ("search".equalsIgnoreCase(querytype)) {
 			return getSearchedTasks(searchString);
@@ -132,7 +143,79 @@ public class TasksAPI {
 		return searchString;
 	}
 
-	private String getInerestingTasks(CTUser user) {
+    private String getTasksInMyCommunities(CTUser user, String communityJidsJson) {
+        List<Ref<Community>> communityRefs = new ArrayList<>();
+        List<String> communityJids=null;
+        if (!"".equalsIgnoreCase(communityJidsJson)) {
+            Gson gson = new Gson();
+            communityJids = gson.fromJson(communityJidsJson, List.class);
+        }
+        if (communityJids != null && !communityJids.isEmpty()) {
+            for (String jid:communityJids) {
+                communityRefs.add(Ref.create(Key.create(Community.class, jid)));
+            }
+            return getTasksInSocietiesCommunitiesJids(user, communityJids);
+//            return getTasksInSocietiesCommunities(user, communityRefs);
+        }
+        else {
+            List<Community> communities = CommunityDAO.loadCommunities4User(user);
+            for (Community community:communities) {
+                communityRefs.add(Ref.create(Key.create(Community.class, community.getId())));
+            }
+            return getTasksInCommunities(user, communityRefs);
+        }
+    }
+
+    private String getTasksInCommunities(CTUser user, List<Ref<Community>> communityRefs) {
+        List<Task> tasks;
+        if (communityRefs.isEmpty()) {
+            tasks = new ArrayList<>();
+        } else {
+            tasks = TaskDao.getTasksInCommunities(communityRefs).list();
+        }
+        return tasksInJson(user, tasks);
+    }
+
+    private String getTasksInSocietiesCommunities(CTUser user, List<Ref<Community>> communityRefs) {
+        List<Task> tasks = TaskDao.getTasksInSocietiesCommunities(communityRefs).list();
+        return tasksInJson(user, tasks);
+    }
+
+    private String getTasksInSocietiesCommunitiesJids(CTUser user, List<String> communityJids) {
+        List<Task> tasks = TaskDao.getTasksInSocietiesCommunitiesJids(communityJids).list();
+        return tasksInJson(user, tasks);
+/*
+        List<Task> tasks = TaskDao.findSocietiesTasks().list();
+        List<Task> tasksInCISes = new ArrayList<>();
+        for (Task task:tasks) {
+            List<String> taskJids = task.getCommunityJids();
+            boolean found = false;
+            for (String taskJid:taskJids) {
+                for (String userJid:communityJids) {
+                    if (taskJid.equalsIgnoreCase(userJid)) {
+                        tasksInCISes.add(task);
+                        found = true;
+                        break;
+                    }
+                }
+                if (found) break;
+            }
+        }
+        return tasksInJson(user, tasksInCISes);
+*/
+    }
+
+    private String tasksInJson(CTUser user, List<Task> tasks) {
+        Gson gson = new Gson();
+        ArrayList<TaskJS> tasksJS = new ArrayList<>();
+        for (Task task:tasks) {
+            TaskDao.setTransientTaskParams(user, task);
+            tasksJS.add(new TaskJS(task, user));
+        }
+        return gson.toJson(tasksJS);
+    }
+
+	private String getInterestingTasks(CTUser user) {
 		// get tasks
 		Gson gson = new Gson();
 		Collection<Task> tasksByInterest = TaskDao.getTasksByInterests(user);

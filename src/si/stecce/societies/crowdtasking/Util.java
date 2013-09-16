@@ -25,12 +25,12 @@ public final class Util {
 		return formatter.format(date);
 	}
 
-	public static String taskHTMLLink(Task task) {
-		return "<a href=\""+Util.taskLink(task.getId())+"\">'"+task.getTitle()+"'</a>";
+	public static String taskHTMLLinkRelative(Task task) {
+		return "<a href=\""+Util.taskLinkRelative(task.getId())+"\">'"+task.getTitle()+"'</a>";
 	}
 
-	public static String communityHTMLLink(Community community) {
-		return "<a href=\""+Util.communityLink(community.getId())+"\">'"+community.getName()+"'</a>";
+	public static String communityHTMLLinkRelative(Community community) {
+		return "<a href=\""+Util.communityLinkRelative(community.getId())+"\">'"+community.getName()+"'</a>";
 	}
 
 	public static String taskHTMLLink(Meeting meeting, Task task) {
@@ -38,7 +38,6 @@ public final class Util {
 	}
 	
 	
-	//task/view?id=X
 	public static String taskLink(Long taskId) {
 		if (taskId == null) {
 			return "";
@@ -47,14 +46,28 @@ public final class Util {
 		//return "/task/view?id="+taskId;
 	}
 
-	//task/view?id=X
+	public static String taskLinkRelative(Long taskId) {
+		if (taskId == null) {
+			return "";
+		}
+		return "/task/view?id="+taskId;
+	}
+
 	public static String communityLink(Long communityId) {
 		if (communityId == null) {
 			return "";
 		}
 		return domain+"/community/view?id="+communityId;
 	}
-/*	
+
+	public static String communityLinkRelative(Long communityId) {
+		if (communityId == null) {
+			return "";
+		}
+		return "/community/view?id="+communityId;
+	}
+
+/*
 	public static String getServer() {
 		if (SystemProperty.environment.value() ==
 			    SystemProperty.Environment.Value.Production) {

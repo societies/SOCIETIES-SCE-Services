@@ -22,7 +22,7 @@
  * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package si.stecce.societies.crowdtasking.api.RESTful;
+package si.stecce.societies.crowdtasking.api.RESTful.impl;
 import static si.stecce.societies.crowdtasking.model.dao.OfyService.ofy;
 
 import java.util.Date;
@@ -43,6 +43,7 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 
 import si.stecce.societies.crowdtasking.NotificationsSender;
+import si.stecce.societies.crowdtasking.api.RESTful.ILikeAPI;
 import si.stecce.societies.crowdtasking.model.CTUser;
 import si.stecce.societies.crowdtasking.model.Comment;
 import si.stecce.societies.crowdtasking.model.Like;
@@ -58,13 +59,14 @@ import com.google.gson.Gson;
  *
  */
 @Path("/like/{querytype}")
-public class LikeAPI {
-	@GET
+public class LikeAPI implements ILikeAPI {
+	@Override
+    @GET
 	@Produces({MediaType.APPLICATION_JSON })
-	public String getLike(@PathParam("querytype") String querytype, 
-			@QueryParam("vwTaskId") Long taskId,
-			@QueryParam("commentId") Long commentId,
-			@Context HttpServletRequest request) {
+	public String getLike(@PathParam("querytype") String querytype,
+                          @QueryParam("vwTaskId") Long taskId,
+                          @QueryParam("commentId") Long commentId,
+                          @Context HttpServletRequest request) {
 
 		CTUser user = UsersAPI.getLoggedInUser(request.getSession());
 		Like like = null;
@@ -82,12 +84,13 @@ public class LikeAPI {
 		return gson.toJson(false);
 	}
 
-	@POST
+	@Override
+    @POST
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 	public Response setLike(@PathParam("querytype") String querytype,
-			@FormParam("vwTaskId") Long taskId,
-			MultivaluedMap<String, String> formParams,
-			@Context HttpServletRequest request) {
+                            @FormParam("vwTaskId") Long taskId,
+                            MultivaluedMap<String, String> formParams,
+                            @Context HttpServletRequest request) {
 
 		CTUser user = UsersAPI.getLoggedInUser(request.getSession());
 		if ("comment".equalsIgnoreCase(querytype)) {

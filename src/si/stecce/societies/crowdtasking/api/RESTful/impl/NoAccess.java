@@ -22,63 +22,28 @@
  * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package si.stecce.societies.crowdtasking.model;
+package si.stecce.societies.crowdtasking.api.RESTful.impl;
 
-import com.googlecode.objectify.annotation.Entity;
-import com.googlecode.objectify.annotation.Id;
-import com.googlecode.objectify.annotation.Index;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
+
+import com.google.gson.Gson;
 
 /**
+ * Describe your class here...
  *
  * @author Simon Jureša
  *
  */
-@Entity
-public class CollaborativeSpace {
-	@Id private Long id = null;
-	private String name;
-	@Index private String urlMapping; // na primer urlMapping = settcelab => crowdtasking.appspot.com/cs/settcelab
-    @Index String symbolicLocation;
-	
-	public CollaborativeSpace() {
-		
+@Path("/noaccess")
+public class NoAccess {
+	@GET
+	@Produces({MediaType.APPLICATION_JSON })
+	public String noAccess() {
+		Gson gson = new Gson();
+		return gson.toJson("Not authorized!");
 	}
 
-	public CollaborativeSpace(String name, String symbolicLocation) {
-		setName(name);
-		this.symbolicLocation = symbolicLocation;
-	}
-
-    private String createUrlMapping(String name) {
-        return name.replaceAll("\\P{Alnum}", "");
-    }
-
-    public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-        this.urlMapping = createUrlMapping(name);
-	}
-
-	public Long getId() {
-		return id;
-	}
-
-	public String getUrlMapping() {
-		return urlMapping;
-	}
-
-	public void setUrlMapping(String urlMapping) {
-		this.urlMapping = urlMapping;
-	}
-
-	public String getSymbolicLocation() {
-		return symbolicLocation;
-	}
-
-	public void setSymbolicLocation(String symbolicLocation) {
-		this.symbolicLocation = symbolicLocation;
-	}
 }

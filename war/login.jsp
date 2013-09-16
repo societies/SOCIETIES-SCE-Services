@@ -1,6 +1,6 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@page import="java.util.Date"%>
-<%@page import="si.stecce.societies.crowdtasking.api.RESTful.UsersAPI"%>
+<%@page import="si.stecce.societies.crowdtasking.api.RESTful.impl.UsersAPI"%>
 <%@page import="si.stecce.societies.crowdtasking.model.CTUser"%>
 <%@page import="si.stecce.societies.crowdtasking.model.AuthenticationPrvider"%>
 <%@page import="si.stecce.societies.crowdtasking.model.AuthenticatedUser"%>

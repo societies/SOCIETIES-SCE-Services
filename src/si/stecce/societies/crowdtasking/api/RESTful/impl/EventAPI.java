@@ -22,7 +22,7 @@
  * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package si.stecce.societies.crowdtasking.api.RESTful;
+package si.stecce.societies.crowdtasking.api.RESTful.impl;
 
 import static si.stecce.societies.crowdtasking.model.dao.OfyService.ofy;
 
@@ -45,6 +45,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import si.stecce.societies.crowdtasking.EventsForUserFilter;
+import si.stecce.societies.crowdtasking.api.RESTful.IEventAPI;
 import si.stecce.societies.crowdtasking.api.RESTful.json.EventJS;
 import si.stecce.societies.crowdtasking.model.CTUser;
 import si.stecce.societies.crowdtasking.model.CollaborativeSpace;
@@ -73,15 +74,16 @@ import com.googlecode.objectify.cmd.Query;
  */
 
 @Path("/event")
-public class EventAPI {
+public class EventAPI implements IEventAPI {
 	private static final int MAX_NUM_EVENTS = 100;
 	private static final int DEFAULT_NUM_EVENTS = 10;
- 	@GET
+ 	@Override
+    @GET
 	@Produces({MediaType.APPLICATION_JSON })
 	public String getEvents(@QueryParam("communityId") Long communityId,
-			@QueryParam("spaceId") Long spaceId,
-			@DefaultValue("8") @QueryParam("limit") int limit,
-			@Context HttpServletRequest request) {
+                            @QueryParam("spaceId") Long spaceId,
+                            @DefaultValue("8") @QueryParam("limit") int limit,
+                            @Context HttpServletRequest request) {
 
  		if (communityId != null) {
 			List<Event> events = getEventsForCommunity(communityId, limit);
@@ -102,10 +104,12 @@ public class EventAPI {
 		}
 	}
 
-	@POST
+	@Override
+    @POST
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-	public Response newComment(@DefaultValue("-1") @FormParam("taskId") Long taskId,
-			@Context HttpServletRequest request) {
+	public Response logTaskPickedFromPD(@FormParam("eventType") String eventType,
+                                        @DefaultValue("-1") @FormParam("taskId") Long taskId,
+                                        @Context HttpServletRequest request) {
 		
 		CTUser user = UsersAPI.getLoggedInUser(request.getSession());
 		logPickTaskFromPd(taskId, user);

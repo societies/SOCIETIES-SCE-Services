@@ -53,52 +53,86 @@ public class Community {
 	private String description;
 	@Load private Ref<CTUser> ownerRef;
 	@Ignore private CTUser owner;
+	@Index private String ownerJid;
 	@Index @Load private List<Ref<CollaborativeSpace>> collaborativeSpaceRefs;
 	@Ignore private List<CollaborativeSpace> collaborativeSpaces;
-	private List<Ref<Community>> subCommunities;
+//	private List<Ref<Community>> subCommunities;
 	@Load @Index private Set<Ref<CTUser>> members;
 	@Load @Index private Set<Ref<CTUser>> requests;
+    @Index @Load private List<Ref<Task>> taskRefs;  // todo: Mike's idea to have list of tasks here, finnish it or ...
 
 	public Community() {
 	}
-	
-	public Community(String name, String description, CTUser owner, String csName, String urlMapping, String symbolicLocation, List<Long> members) {
+
+    public Community(String jid, String name, String description, List<Long> csIds, String ownerJid) {
+        this.jid = jid;
+        this.name = name;
+        this.description = description;
+        setCollaborativeSpaces(csIds);
+        this.ownerJid = ownerJid;
+    }
+
+    public Community(String name, String description, CTUser owner, List<Long> csIds, List<Long> members) {
 		super();
+//        this.jid = jid;
 		this.name = name;
 		this.description = description;
 		this.ownerRef = Ref.create(Key.create(CTUser.class, owner.getId()));
-		if (csName != null) {
-			addCollaborativeSpace(csName, urlMapping, symbolicLocation);
-		}
+        setCollaborativeSpaces(csIds);
 		addMember(owner);
-		for (Long userId:members) {
-			addMember(userId);
-		}
+        addMembers(members);
 	}
 	
-	public void addCollaborativeSpace(String name, String urlMapping, String symbolicLocation) {
-		CollaborativeSpace collaborativeSpace = new CollaborativeSpace(name, urlMapping, symbolicLocation);
-		Key<CollaborativeSpace> key = CollaborativeSpaceDAO.save(collaborativeSpace);
+	public void setCollaborativeSpaces(List<Long> csIds) {
+        if (csIds != null) {
+            collaborativeSpaceRefs = new ArrayList<>();
+            for (Long csId:csIds){
+                collaborativeSpaceRefs.add(Ref.create(Key.create(CollaborativeSpace.class, csId)));
+            }
+        }
+    }
+
+	public void addCollaborativeSpace(Long csId) {
 		if (collaborativeSpaceRefs == null) {
-			collaborativeSpaceRefs = new ArrayList<Ref<CollaborativeSpace>>();
+			collaborativeSpaceRefs = new ArrayList<>();
 		}
-		collaborativeSpaceRefs.add(Ref.create(key));
+		collaborativeSpaceRefs.add(Ref.create(Key.create(CollaborativeSpace.class, csId)));
 	}
 	
+/*
 	public void addCommunity(Community community) {
 		if (subCommunities == null) {
 			subCommunities = new ArrayList<Ref<Community>>();
 		}
 		subCommunities.add(Ref.create(Key.create(Community.class, community.getId())));
 	}
-	
-	public void addRequest(CTUser user) {
+*/
+
+    public void addTask(Task task) {
+        if (taskRefs == null) {
+            taskRefs = new ArrayList<>();
+        }
+        taskRefs.add(Ref.create(Key.create(Task.class, task.getId())));
+    }
+
+    public List<Task> getTasks() {
+        if (taskRefs == null) {
+            return null;
+        }
+        List<Task> tasks = new ArrayList<>();
+        for (Ref<Task> communitiesRef:taskRefs) {
+            tasks.add(communitiesRef.get());
+        }
+        return tasks;
+    }
+
+    public void addRequest(CTUser user) {
 		addRequest(user.getId());
 	}
 	
 	public void addRequest(Long userId) {
 		if (requests == null) {
-			requests  = new HashSet<Ref<CTUser>>();
+			requests  = new HashSet<>();
 		}
 		requests.add(Ref.create(Key.create(CTUser.class, userId)));
 	}
@@ -131,13 +165,16 @@ public class Community {
 	
 	public void addMember(Long userId) {
 		if (members == null) {
-			members = new HashSet<Ref<CTUser>>();
+			members = new HashSet<>();
 		}
 		members.add(Ref.create(Key.create(CTUser.class, userId)));
 	}
 	
 	public void addMembers(List<Long> memberIDs) {
-		members = new HashSet<Ref<CTUser>>();
+        if (memberIDs == null){
+            return;
+        }
+		members = new HashSet<>();
 		members.add(ownerRef);
 		for (Long userId:memberIDs) {
 			addMember(userId);
@@ -154,7 +191,8 @@ public class Community {
 	
 	public List<CollaborativeSpace> getCollaborativeSpaces() {
 		if (collaborativeSpaces == null && collaborativeSpaceRefs != null) {
-			collaborativeSpaces = new ArrayList<CollaborativeSpace>();
+			collaborativeSpaces = new ArrayList<>();
+            try {
 			for (Ref<CollaborativeSpace> collaborativeSpaceRef:collaborativeSpaceRefs) {
 				try {
 					CollaborativeSpace cs = collaborativeSpaceRef.get();
@@ -177,10 +215,16 @@ public class Community {
 		    		}
 				}
 			}
+            } catch (Exception e) {
+                // TODO developing...
+//                collaborativeSpaceRefs = null;
+//                CommunityDAO.saveCommunity(this);
+            }
 		}
 		return collaborativeSpaces;
 	}
 
+/*
 	public List<Ref<Community>> getSubCommunities() {
 		return subCommunities;
 	}
@@ -188,7 +232,8 @@ public class Community {
 	public void setSubCommunities(List<Ref<Community>> subCommunities) {
 		this.subCommunities = subCommunities;
 	}
-	
+*/
+
 	public Set<Ref<CTUser>> getMembers() {
 		return members;
 	}
@@ -218,4 +263,12 @@ public class Community {
 		}
 		return owner;
 	}
+
+    public String getJid() {
+        return jid;
+    }
+
+    public void setJid(String jid) {
+        this.jid = jid;
+    }
 }

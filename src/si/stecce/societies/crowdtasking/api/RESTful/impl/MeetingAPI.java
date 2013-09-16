@@ -22,7 +22,7 @@
  * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package si.stecce.societies.crowdtasking.api.RESTful;
+package si.stecce.societies.crowdtasking.api.RESTful.impl;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -45,6 +45,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import si.stecce.societies.crowdtasking.NotificationsSender;
+import si.stecce.societies.crowdtasking.api.RESTful.IMeetingAPI;
 import si.stecce.societies.crowdtasking.api.RESTful.json.MeetingJS;
 import si.stecce.societies.crowdtasking.api.RESTful.json.TaskJS;
 import si.stecce.societies.crowdtasking.model.CTUser;
@@ -57,14 +58,15 @@ import com.google.gson.Gson;
 import com.googlecode.objectify.Key;
 
 @Path("/meeting/{querytype}")
-public class MeetingAPI {
+public class MeetingAPI implements IMeetingAPI {
 	private static final int MEETINGS_ON_PD = 10;
 
-	@GET
+	@Override
+    @GET
 	@Produces({MediaType.APPLICATION_JSON })
 	public String getMeeting(@PathParam("querytype") String querytype,
-			@QueryParam("id") Long meetingId,
-			@QueryParam("csId") Long csId) {
+                             @QueryParam("id") Long meetingId,
+                             @QueryParam("csId") Long csId) {
 		if ("".equalsIgnoreCase(querytype)) {
 			if (meetingId == null) {
 				return "Missing id.";
@@ -90,16 +92,17 @@ public class MeetingAPI {
 		return gson.toJson(meetingsJS);
 	}
 
-	@POST
+	@Override
+    @POST
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 	public Response newMeeting(@PathParam("querytype") String querytype,
-			@FormParam("taskId") Long taskId,
-			@FormParam("meetingSubject") String meetingSubject,
-			@FormParam("meetingDescription") String meetingDescription,
-			@FormParam("meetingCS") Long csId,
-			@FormParam("taskStart") String taskStart,
-			@FormParam("taskEnd") String taskEnd,
-			@Context HttpServletRequest request) {
+                               @FormParam("taskId") Long taskId,
+                               @FormParam("meetingSubject") String meetingSubject,
+                               @FormParam("meetingDescription") String meetingDescription,
+                               @FormParam("meetingCS") Long csId,
+                               @FormParam("taskStart") String taskStart,
+                               @FormParam("taskEnd") String taskEnd,
+                               @Context HttpServletRequest request) {
 		CTUser user = UsersAPI.getLoggedInUser(request.getSession());
 		if ("".equals(meetingSubject)) {
 			return Response.status(Status.BAD_REQUEST).entity("Subject is required.").type("text/plain").build();

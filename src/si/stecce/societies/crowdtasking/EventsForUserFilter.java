@@ -29,7 +29,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import si.stecce.societies.crowdtasking.api.RESTful.CommentAPI;
+import si.stecce.societies.crowdtasking.api.RESTful.impl.CommentAPI;
 import si.stecce.societies.crowdtasking.model.*;
 import si.stecce.societies.crowdtasking.model.dao.CommunityDAO;
 import si.stecce.societies.crowdtasking.model.dao.TaskDao;
@@ -89,7 +89,7 @@ public class EventsForUserFilter {
 		}
 
     	communityIds = new HashSet<>();
-    	Query<Community> communities = CommunityDAO.loadCommunities4User(user);
+    	List<Community> communities = CommunityDAO.loadCommunities4User(user);
 		for (Community community:communities) {
 			communityIds.add(community.getId());
 		}

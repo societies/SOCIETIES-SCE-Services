@@ -1,5 +1,6 @@
 package si.stecce.societies.crowdtasking.model;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -19,14 +20,14 @@ public class Task {
 	private String title;
     @Index private boolean societiesTask;
 	private String description;
-	private Date dueDate;
-	private Date created;
+    private Date created;
 	@Index private Long ownerId;
 	private String postedBy;	// userNickName
 	private List<String> tagList;
 	@Ignore private boolean myTask;
 	@Ignore private String tags;
-	private String status; // open (new), inprogress, finished, closed?
+    @Deprecated private String status; // open (new), inprogress, finished, closed?
+	@Index private TaskStatus taskStatus;
 	private List<Long> involvedUsers;
 	private List<String> informChannels;
 	private String executeMessage;
@@ -35,6 +36,7 @@ public class Task {
 	@Load private List<Ref<Meeting>> meetingsRefs;
 	@Index @Load private List<Ref<Community>> communityRefs;
 	@Index private List<String> communityJids;
+    @Index private List<Ref<Community>> communityJidRefs;
 	@Ignore private Set<CollaborativeSpace> spaces;
 
 	public Task() {
@@ -44,18 +46,16 @@ public class Task {
 		return id;
 	}
 
-	public Task(String title, String description, Date dueDate,
-			Long ownerId, String postedBy, List<Long> communityIds, List<String> tagList, List<String> communityJids) {
+	public Task(String title, String description, Long ownerId, String postedBy, List<Long> communityIds, List<String> tagList, List<String> communityJids) {
 		super();
 		this.id = null;
 		this.title = title;
 		this.description = description;
-		this.dueDate = dueDate;
 		this.created = new Date();
 		this.ownerId = ownerId;
 		this.postedBy = postedBy;
 		this.tagList = tagList;
-		this.status = "open";
+		this.taskStatus = TaskStatus.OPEN;
 		if (communityIds != null) {
 			communityRefs = new ArrayList<Ref<Community>>();
 			for (Long communityId:communityIds) {
@@ -83,13 +83,6 @@ public class Task {
 
 	public void setDescription(String description) {
 		this.description = description;
-	}
-	public Date getDueDate() {
-		return dueDate;
-	}
-
-	public void setDueDate(Date dueDate) {
-		this.dueDate = dueDate;
 	}
 
 	public void setTags() {
@@ -133,10 +126,12 @@ public class Task {
 		return postedBy;
 	}
 
+    @Deprecated
 	public String getStatus() {
 		return status;
 	}
 
+    @Deprecated
 	public void setStatus(String status) {
 		this.status = status;
 	}
@@ -244,4 +239,20 @@ public class Task {
 	public List<Ref<Community>> getCommunitiesRefs() {
 		return communityRefs;
 	}
+
+    public TaskStatus getTaskStatus() {
+        return taskStatus;
+    }
+
+    public void setTaskStatus(TaskStatus taskStatus) {
+        this.taskStatus = taskStatus;
+    }
+
+    public List<Ref<Community>> getCommunityJidRefs() {
+        return communityJidRefs;
+    }
+
+    public void setCommunityJidRefs(List<Ref<Community>> communityJidRefs) {
+        this.communityJidRefs = communityJidRefs;
+    }
 }

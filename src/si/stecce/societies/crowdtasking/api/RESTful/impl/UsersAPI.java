@@ -1,4 +1,4 @@
-package si.stecce.societies.crowdtasking.api.RESTful;
+package si.stecce.societies.crowdtasking.api.RESTful.impl;
 
 import static si.stecce.societies.crowdtasking.model.dao.OfyService.ofy;
 
@@ -23,6 +23,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import si.stecce.societies.crowdtasking.api.RESTful.IUsersAPI;
 import si.stecce.societies.crowdtasking.api.RESTful.json.UserJS;
 import si.stecce.societies.crowdtasking.model.ApplicationSettings;
 import si.stecce.societies.crowdtasking.model.AuthenticatedUser;
@@ -36,7 +37,7 @@ import com.google.gson.Gson;
 import com.googlecode.objectify.Ref;
 
 @Path("/users/{querytype}")
-public class UsersAPI {
+public class UsersAPI implements IUsersAPI {
     public static CTUser getUserById(Long userId) {
     	return ofy().load().type(CTUser.class).id(userId).get();
     }
@@ -84,6 +85,13 @@ public class UsersAPI {
     public static CTUser getLoggedInUser(HttpSession session) {
     	Long userId = (Long)session.getAttribute("CTUserId");
 		if (userId != null) {
+/*
+            CTUser user = getUserById(userId);
+            if (user.getId().longValue() == 21L) {
+                user.setAdmin(true);
+                UsersAPI.saveUser(user);
+            }
+*/
 	    	return getUserById(userId);
 		}
 
@@ -99,11 +107,12 @@ public class UsersAPI {
     	return ofy().load().type(CTUser.class).ids(ids);
     }
 
-	@GET
+	@Override
+    @GET
 	@Produces({MediaType.APPLICATION_JSON })
 	public String getUser(@PathParam("querytype") String querytype,
-			@DefaultValue("0") @QueryParam("limit") int limit,
-			@Context HttpServletRequest request) {
+                          @DefaultValue("0") @QueryParam("limit") int limit,
+                          @Context HttpServletRequest request) {
 
 		Gson gson = new Gson();
 		CTUser user = getLoggedInUser(request.getSession());
@@ -148,25 +157,26 @@ public class UsersAPI {
     	return ofy().load().type(CTUser.class).list();
 	}
 
-	@POST
+	@Override
+    @POST
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 	public Response setUser(@PathParam("querytype") String querytype,
-			@FormParam("action") String action,
-			@FormParam("fname") String fname,
-			@FormParam("lname") String lname,
-			@FormParam("email") String email,
-			@FormParam("interests") String interests,
-			@FormParam("executeTask") String executeTask,
-			@FormParam("finalizeTask") String finalizeTask,
-			@FormParam("likeTask") String likeTask,
-			@FormParam("likeComment") String likeComment,
-			@FormParam("newTaskInCommunity") String newTaskInCommunity,
-			@FormParam("joinCommunityRequest") String joinCommunityRequest,
-			@FormParam("newComment") String newComment,
-			@FormParam("picUrl") String picUrl,
-			@FormParam("timeout") long timeout,
-			@FormParam("trustRelationships") String trustRelationshipsJSON,
-			@Context HttpServletRequest request) {
+                            @FormParam("action") String action,
+                            @FormParam("fname") String fname,
+                            @FormParam("lname") String lname,
+                            @FormParam("email") String email,
+                            @FormParam("interests") String interests,
+                            @FormParam("executeTask") String executeTask,
+                            @FormParam("finalizeTask") String finalizeTask,
+                            @FormParam("likeTask") String likeTask,
+                            @FormParam("likeComment") String likeComment,
+                            @FormParam("newTaskInCommunity") String newTaskInCommunity,
+                            @FormParam("joinCommunityRequest") String joinCommunityRequest,
+                            @FormParam("newComment") String newComment,
+                            @FormParam("picUrl") String picUrl,
+                            @FormParam("timeout") long timeout,
+                            @FormParam("trustRelationships") String trustRelationshipsJSON,
+                            @Context HttpServletRequest request) {
 		CTUser user = getLoggedInUser(request.getSession());
 		if (user == null) {
 			/*AuthenticatedUser authenticatedUser = getAuthenticatedUser();

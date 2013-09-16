@@ -37,12 +37,13 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import si.stecce.societies.crowdtasking.api.RESTful.EventAPI;
-import si.stecce.societies.crowdtasking.api.RESTful.SpaceAPI;
-import si.stecce.societies.crowdtasking.api.RESTful.UsersAPI;
+import si.stecce.societies.crowdtasking.api.RESTful.impl.EventAPI;
+import si.stecce.societies.crowdtasking.api.RESTful.impl.SpaceAPI;
+import si.stecce.societies.crowdtasking.api.RESTful.impl.UsersAPI;
 import si.stecce.societies.crowdtasking.model.CTUser;
 import si.stecce.societies.crowdtasking.model.CollaborativeSpace;
 import si.stecce.societies.crowdtasking.model.Community;
+import si.stecce.societies.crowdtasking.model.dao.CollaborativeSpaceDAO;
 import si.stecce.societies.crowdtasking.model.dao.CommunityDAO;
 
 import com.google.appengine.api.channel.ChannelMessage;
@@ -164,6 +165,6 @@ public class CSController extends HttpServlet {
 	private void mapSpaceToUrl(Long spaceId, String url) {
 		CollaborativeSpace space = SpaceAPI.getCollaborativeSpace(spaceId);
 		space.setUrlMapping(url);
-		SpaceAPI.putSpace(space);
+        CollaborativeSpaceDAO.save(space);
 	}
 }
