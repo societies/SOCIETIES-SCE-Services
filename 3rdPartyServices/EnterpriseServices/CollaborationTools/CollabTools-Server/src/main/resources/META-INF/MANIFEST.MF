@@ -6,8 +6,8 @@ Export-Package: org.societies.enterprise.collabtools;uses:="org.societ
  n="0.1.0",org.societies.enterprise.collabtools.api;uses:="org.societi
  es.enterprise.collabtools.acquisition,org.societies.enterprise.collab
  tools.runtime";version="0.1.0",org.societies.enterprise.collabtools.a
- cquisition;uses:="org.societies.enterprise.collabtools.runtime,org.sl
- f4j,org.societies.enterprise.collabtools,org.societies.enterprise.col
+ cquisition;uses:="org.societies.enterprise.collabtools.runtime,org.so
+ cieties.enterprise.collabtools,org.slf4j,org.societies.enterprise.col
  labtools.api,org.osgi.framework,org.societies.context.externalBrokerC
  onnector";version="0.1.0",org.societies.enterprise.collabtools.runtim
  e;uses:="org.societies.enterprise.collabtools.api,org.societies.enter
@@ -26,7 +26,7 @@ Bundle-Name: Collaboration Tools
 Created-By: Apache Maven Bundle Plugin
 Build-Jdk: 1.7.0_03
 Bundle-Version: 0.1.0
-Bnd-LastModified: 1377717704553
+Bnd-LastModified: 1379598112014
 Embed-Transitive: true
 Bundle-ManifestVersion: 2
 Bundle-Activator: org.societies.enterprise.collabtools.Activator
