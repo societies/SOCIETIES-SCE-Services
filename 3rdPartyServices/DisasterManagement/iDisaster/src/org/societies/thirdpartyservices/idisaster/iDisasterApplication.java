@@ -81,6 +81,10 @@ public class iDisasterApplication extends Application {
 
 	static final Boolean testDataUsed = false;		// When set to true do not used SocialProvider
 
+	public String SelectedAccountType = "p2p";		// Selection of a synchronization mechanism - default is Wi-Fi Direct (P2)
+													// Re-compilation is needed when changing account
+													// See commented code in onCreate below
+	
 	Me me = new Me();										// Store user identity - not persistent data (can be retrieved from SocialProvider)
 	SelectedTeam selectedTeam = new SelectedTeam ();		// Store team selected by the user - not persistent data (can be retrieved from SocialProvider)
 	
@@ -186,10 +190,11 @@ public class iDisasterApplication extends Application {
 //	    editor.putString ("pref.dummy", "");
 //	    editor.commit ();
 
-// Test code - to be used only for test when SocialProvider is not avaibale
+// Test code - to be used only for test when SocialProvider is not available
 	    if (testDataUsed) {   
 	    	setTestData ();	    	
 	    }
+	    
 	    
 // The following code was used for testing purpose while waiting update for SocialProvider
 //	    if (!servicesUpdated) {
@@ -228,15 +233,15 @@ public class iDisasterApplication extends Application {
 //			SocialContract.Me.GLOBAL_ID,		Not needed is set to PENDING
 			SocialContract.Me.NAME,
 			SocialContract.Me.DISPLAY_NAME,
-			SocialContract.Me.USER_NAME			
+			SocialContract.Me.USER_NAME,
+			SocialContract.Me.ACCOUNT_NAME
 		};
 
 		String selection = SocialContract.Me.ACCOUNT_TYPE + "= ?"; // Use the first user identity with Account in box.com
-		String[] selectionArgs = new String[] {SupportedAccountTypes.COM_BOX};
 
-//  Alternative query - does not work with new version of SocialProvider
-//		String selection = SocialContract.Me.ACCOUNT_TYPE + " = " + SupportedAccountTypes.COM_BOX; // Use the first user identity with Account in box.com
-//		String[] selectionArgs = null;
+//	 	Remove comment for selecting box.com for synchronization 
+//	    SelectedAccountType = SupportedAccountTypes.COM_BOX;
+		String[] selectionArgs = new String[] {iDisasterApplication.getInstance().SelectedAccountType};
 
 		String sortOrder = null;
 	
@@ -310,6 +315,8 @@ public class iDisasterApplication extends Application {
 				}
 				me.userName = cursor.getString(cursor
 						.getColumnIndex(SocialContract.Me.USER_NAME));
+				me.accountName = cursor.getString(cursor
+						.getColumnIndex(SocialContract.Me.ACCOUNT_NAME));
 
 				return QUERY_SUCCESS;		// The only case where true is returned				
 			} else

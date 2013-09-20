@@ -42,5 +42,5 @@ public class Me {
 		public String name;				// name of the user
 		public String displayName;		// nickname - if not available "name" is used for display
 		public String userName;			// login user name
-
+		public String accountName;		// user account name - used to sync - the use may have several accounts in the back-end
 }

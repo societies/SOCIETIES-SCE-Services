@@ -340,8 +340,9 @@ public class ServiceRecommendActivity extends ListActivity implements OnClickLis
 				sharingValues.put(SocialContract.Sharing.DESCRIPTION, "");
 
 // Fields for synchronization with box.com
-				sharingValues.put(SocialContract.Sharing.ACCOUNT_NAME, iDisasterApplication.getInstance().me.userName);
-				sharingValues.put(SocialContract.Sharing.ACCOUNT_TYPE, SupportedAccountTypes.COM_BOX);
+				sharingValues.put(SocialContract.Sharing.ACCOUNT_NAME, iDisasterApplication.getInstance().me.accountName);
+//				sharingValues.put(SocialContract.Sharing.ACCOUNT_TYPE, SupportedAccountTypes.COM_BOX);
+				sharingValues.put(SocialContract.Sharing.ACCOUNT_TYPE, iDisasterApplication.getInstance().SelectedAccountType);
 				sharingValues.put(SocialContract.Sharing.DIRTY, 1);
 				
 				try {
@@ -362,7 +363,7 @@ public class ServiceRecommendActivity extends ListActivity implements OnClickLis
 		if (recommendedFlag) {			// New recommended services: add an activity to the feed
 			
 			SocialActivity socialActivity = 
-					new SocialActivity (iDisasterApplication.getInstance().me.userName); // account for synchronization
+					new SocialActivity (iDisasterApplication.getInstance().me.accountName); // account for synchronization
 			ContentResolver activityResolver = getContentResolver();
 			
 // The return code from addActivity is not exploited here		
@@ -370,7 +371,7 @@ public class ServiceRecommendActivity extends ListActivity implements OnClickLis
 // TODO: what should be set here? local or global id?
 					iDisasterApplication.getInstance().selectedTeam.id,		// Feed of the the selected team
 //TODO: what should be set here? global or local id? - local id seems to not work		
-					iDisasterApplication.getInstance().me.userName,			// Me
+					iDisasterApplication.getInstance().me.accountName,		// My account for sync
 					iDisasterApplication.getInstance().VERB_TEXT,			// Activity intent: Simple text
 					recommendedServices,									// List of new recommended services
 					iDisasterApplication.getInstance().TARGET_ALL);			// Recipient for Activity

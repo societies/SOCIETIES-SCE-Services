@@ -617,7 +617,7 @@ public class ThirdPartyService {
 /**
  * shareService add a new entry in SocialProvider Sharing table
  */
-	public String shareService (Context cxt, ContentResolver resolver, long meId, String meUserName, long teamId) {
+	public String shareService (Context cxt, ContentResolver resolver, long meId, String syncAccountName, long teamId) {
 	
 //		testSharing (cxt, resolver);
 
@@ -632,8 +632,10 @@ public class ThirdPartyService {
 		sharingValues.put(SocialContract.Sharing.DESCRIPTION, "");
 
 //Fields for synchronization with box.com
-		sharingValues.put(SocialContract.Sharing.ACCOUNT_NAME, meUserName);
-		sharingValues.put(SocialContract.Sharing.ACCOUNT_TYPE, SupportedAccountTypes.COM_BOX);
+		sharingValues.put(SocialContract.Sharing.ACCOUNT_NAME, syncAccountName);
+//		sharingValues.put(SocialContract.Sharing.ACCOUNT_TYPE, SupportedAccountTypes.COM_BOX);
+		sharingValues.put(SocialContract.Sharing.ACCOUNT_TYPE, iDisasterApplication.getInstance().SelectedAccountType);
+
 		sharingValues.put(SocialContract.Sharing.DIRTY, 1);
 
 		

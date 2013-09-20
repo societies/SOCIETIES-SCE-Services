@@ -312,8 +312,9 @@ public class MemberAddActivity extends ListActivity implements OnClickListener {
 				membershipValues.put(SocialContract.Membership.TYPE, "member");	// Application-provided
 
 				// Fields for synchronization with box.com
-				membershipValues.put(SocialContract.CommunityActivity.ACCOUNT_NAME, iDisasterApplication.getInstance().me.userName);
-				membershipValues.put(SocialContract.CommunityActivity.ACCOUNT_TYPE, SupportedAccountTypes.COM_BOX);
+				membershipValues.put(SocialContract.CommunityActivity.ACCOUNT_NAME, iDisasterApplication.getInstance().me.accountName);
+//				membershipValues.put(SocialContract.CommunityActivity.ACCOUNT_TYPE, SupportedAccountTypes.COM_BOX);
+				membershipValues.put(SocialContract.CommunityActivity.ACCOUNT_TYPE, iDisasterApplication.getInstance().SelectedAccountType);
 				membershipValues.put(SocialContract.CommunityActivity.DIRTY, 1);
 
 				try {
@@ -335,7 +336,7 @@ public class MemberAddActivity extends ListActivity implements OnClickListener {
 		if (selectedFlag) {			// New selecte member: sdd an activity to the feed
 					
 			SocialActivity socialActivity = 
-					new SocialActivity (iDisasterApplication.getInstance().me.userName); // account for synchronization
+					new SocialActivity (iDisasterApplication.getInstance().me.accountName); // account for synchronization
 			ContentResolver activityResolver = getContentResolver();
 			
 // The return code from addActivity is not exploited here		
@@ -343,7 +344,7 @@ public class MemberAddActivity extends ListActivity implements OnClickListener {
 // TODO: what should be set here? local or global id?
 					iDisasterApplication.getInstance().selectedTeam.id,		// Feed of the the selected team
 //TODO: what should be set here? global or local id? - local id seems to not work		
-					iDisasterApplication.getInstance().me.userName,	// Me
+					iDisasterApplication.getInstance().me.accountName,		// My account for sync
 					iDisasterApplication.getInstance().VERB_TEXT,			// Activity intent: Simple text
 					selectedMembers,										// Activity intent: list of new members
 					iDisasterApplication.getInstance().TARGET_ALL);			// Recipient for Activity

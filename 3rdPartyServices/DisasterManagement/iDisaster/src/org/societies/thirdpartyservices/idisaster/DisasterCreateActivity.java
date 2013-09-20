@@ -146,8 +146,9 @@ public class DisasterCreateActivity extends Activity implements OnClickListener 
 		teamValues.put(SocialContract.Communities.TYPE, iDisasterApplication.getInstance().COMMUNITY_TYPE);
 
 		// Fields for synchronization with box.com
-		teamValues.put(SocialContract.Communities.ACCOUNT_NAME, iDisasterApplication.getInstance().me.userName);
-		teamValues.put(SocialContract.Communities.ACCOUNT_TYPE, SupportedAccountTypes.COM_BOX);
+		teamValues.put(SocialContract.Communities.ACCOUNT_NAME, iDisasterApplication.getInstance().me.accountName);
+//		teamValues.put(SocialContract.Communities.ACCOUNT_TYPE, SupportedAccountTypes.COM_BOX);
+		teamValues.put(SocialContract.Communities.ACCOUNT_TYPE, iDisasterApplication.getInstance().SelectedAccountType);		
 		teamValues.put(SocialContract.Communities.DIRTY, 1);
 		
 		try {

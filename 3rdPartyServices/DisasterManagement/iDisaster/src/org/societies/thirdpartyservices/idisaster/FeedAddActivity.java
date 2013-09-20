@@ -100,7 +100,7 @@ public class FeedAddActivity extends Activity implements OnClickListener {
         	    finish ();							// Terminates and go back to previous activity
     		} else {
     			SocialActivity socialActivity = 
-    					new SocialActivity (iDisasterApplication.getInstance().me.userName); // account for synchronization
+    					new SocialActivity (iDisasterApplication.getInstance().me.accountName); // account for synchronization
     			ContentResolver activityResolver = getContentResolver();
     			
     			if ((socialActivity.addActivity (activityResolver,				// Insert activity to the activity feed

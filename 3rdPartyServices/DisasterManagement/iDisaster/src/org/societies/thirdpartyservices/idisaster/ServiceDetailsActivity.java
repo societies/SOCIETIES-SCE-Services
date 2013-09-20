@@ -275,7 +275,7 @@ public class ServiceDetailsActivity extends Activity implements OnClickListener 
     		if (serviceAction2.equals (iDisasterApplication.getInstance().SERVICE_SHARE)) {					// Request to share a service
     			
     			if (thirdPartyService.shareService (this, getContentResolver(), iDisasterApplication.getInstance().me.peopleId,
-    												iDisasterApplication.getInstance().me.userName,
+    												iDisasterApplication.getInstance().me.accountName,
     												iDisasterApplication.getInstance().selectedTeam.id)
     					.equals (iDisasterApplication.getInstance().INSERT_EXCEPTION)) {			// Update information in SocialProvider 
     				showQueryExceptionDialog (); 			/// SocialProvider exception: Display dialog and terminates activity
@@ -283,7 +283,7 @@ public class ServiceDetailsActivity extends Activity implements OnClickListener 
     			} else {	// Add an activity to the feed
     				
     				SocialActivity socialActivity = 
-    						new SocialActivity (iDisasterApplication.getInstance().me.userName); // account for synchronization
+    						new SocialActivity (iDisasterApplication.getInstance().me.accountName); // account for synchronization
     				ContentResolver activityResolver = getContentResolver();
     				
     	// The return code from addActivity is not exploited here		
@@ -291,7 +291,7 @@ public class ServiceDetailsActivity extends Activity implements OnClickListener 
     	// TODO: what should be set here? local or global id?
     						iDisasterApplication.getInstance().selectedTeam.id,		// Feed of the the selected team
     	//TODO: what should be set here? global or local id? - local id seems to not work		
-    						iDisasterApplication.getInstance().me.userName,			// Me
+    						iDisasterApplication.getInstance().me.accountName,		// My account for sync
     						iDisasterApplication.getInstance().VERB_TEXT,			// Activity intent: Simple text
     						"New shared service: " + thirdPartyService.serviceName,	// Shared service
     						iDisasterApplication.getInstance().TARGET_ALL);			// Recipient for Activity
@@ -308,7 +308,7 @@ public class ServiceDetailsActivity extends Activity implements OnClickListener 
     				
     				// Add an activity to the feed    				
     				SocialActivity socialActivity = 
-    						new SocialActivity (iDisasterApplication.getInstance().me.userName); // account for synchronization
+    						new SocialActivity (iDisasterApplication.getInstance().me.accountName); // account for synchronization
     				ContentResolver activityResolver = getContentResolver();
     				
     	// The return code from addActivity is not exploited here		
@@ -316,7 +316,7 @@ public class ServiceDetailsActivity extends Activity implements OnClickListener 
     	// TODO: what should be set here? local or global id?
     						iDisasterApplication.getInstance().selectedTeam.id,		// Feed of the the selected team
     	//TODO: what should be set here? global or local id? - local id seems to not work		
-    						iDisasterApplication.getInstance().me.userName,			// Me
+    						iDisasterApplication.getInstance().me.accountName,		// My account for sync
     						iDisasterApplication.getInstance().VERB_TEXT,			// Activity intent: Simple text
     						"Service no longer shared: " + thirdPartyService.serviceName,	// Shared service
     						iDisasterApplication.getInstance().TARGET_ALL);			// Recipient for Activity
