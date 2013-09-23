@@ -25,6 +25,7 @@
 package si.setcce.societies.android.rest;
 
 import org.apache.http.HttpResponse;
+import org.apache.http.StatusLine;
 import org.apache.http.client.CookieStore;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpUriRequest;
@@ -42,13 +43,15 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.util.Log;
 
+import java.io.ByteArrayOutputStream;
+
 /**
  * Describe your class here...
  * 
  * @author Simon Jureša
  * 
  */
-public class RestTask extends AsyncTask<HttpUriRequest, Void, String> {
+public class RestTask extends AsyncTask<HttpUriRequest, Void, String[]> {
 
 	public static final String HTTP_RESPONSE = "httpResponse";
 
@@ -68,10 +71,11 @@ public class RestTask extends AsyncTask<HttpUriRequest, Void, String> {
 	}
 
 	@Override
-	protected String doInBackground(HttpUriRequest... params) {
+	protected String[] doInBackground(HttpUriRequest... params) {
+        String[] response = new String[2];
 		try {
 			HttpUriRequest request = params[0];
-			Log.i("SCT RestTask(70)", request.getURI().toString());
+			Log.i("RestTask url: ", request.getURI().toString());
 			HttpContext localContext = new BasicHttpContext();
 			localContext.setAttribute(ClientContext.COOKIE_STORE, cookieStore);
 			if (cookie != null && !cookie.equals("")) {
@@ -90,26 +94,29 @@ public class RestTask extends AsyncTask<HttpUriRequest, Void, String> {
 			HttpResponse serverResponse = client
 					.execute(request, localContext);
 
-			BasicResponseHandler handler = new BasicResponseHandler();
-			String response = handler.handleResponse(serverResponse);
-
-			return response;
+            response[0] = serverResponse.getStatusLine().toString();
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            serverResponse.getEntity().writeTo(out);
+            out.close();
+            response[1] = out.toString();
+            System.out.println(response);
+            return response;
 		} catch (Exception e) {
 			e.printStackTrace();
-			String msg = e.getMessage();
-			Log.e("SCT RestTask exception message: ", msg);
-			return msg;
+            response[0] = e.getMessage();
+			Log.e("SCT RestTask exception message: ", e.getMessage());
+			return response;
 		}
 	}
 
 	@Override
-	protected void onPostExecute(String result) {
+	protected void onPostExecute(String[] result) {
 		Intent intent = new Intent(action);
 		intent.putExtra(HTTP_RESPONSE, result);
-		// Broadcast the completion
+//		intent.putExtra(HTTP_RESPONSE, result[1]);
         if (action.equalsIgnoreCase("si.setcce.societies.android.rest.LOGIN_USER")) {
             for (Cookie kuki:cookieStore.getCookies()) {
-                if (kuki.getDomain().equalsIgnoreCase("crowdtasking.appspot.com")) {
+                if (kuki.getDomain().equalsIgnoreCase(domain)) {
                     intent.putExtra("cookie", kuki.toString());
                 }
             }

@@ -5,7 +5,7 @@
     <string name="home">Home</string>
     <string name="logout">Logout</string>
     <string name="title_activity_main">Crowd tasking</string>
-	<string name="result_failed">No barcode found</string>
+	<string name="result_failed">No QR code found</string>
 	<string name="result_failed_why">"The user gave up and pressed Back"</string>
     <string name="result_succeeded">Found QR code</string>
     <string name="title_activity_remote_control">Remote control</string>

@@ -4,9 +4,11 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningServiceInfo;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
@@ -42,6 +44,7 @@ import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.message.BasicNameValuePair;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.societies.android.api.cis.directory.ICisDirectory;
@@ -79,27 +82,29 @@ public class MainActivity extends Activity implements SensorEventListener {
 	private static final String LOG_EVENT = "si.setcce.societies.android.rest.LOG_EVENT";
 	private static final String LOGIN_USER = "si.setcce.societies.android.rest.LOGIN_USER";
 	private static final String C4CSS_INTENT = "si.setcce.societies.android.rest.C4CSS";
-	private static final String GET_MEETING_ACTION = "si.setcce.societies.android.rest.meeting";
+	private static final String GET_MEETING_ACTION = "si.setcce.societies.android.rest.MEETING";
+	private static final String TAKE_CONTROL = "si.setcce.societies.android.rest.remote.TAKE_CONTROL";
     private static final String SCHEME ="http";
-    private static final String DOMAIN = "crowdtaskingtest.appspot.com";
-//    private static final String DOMAIN = "13-09-2013.crowdtasking.appspot.com";
-//   	private static final String DOMAIN = "192.168.1.102";
+//    private static final String DOMAIN = "crowdtaskingtest.appspot.com";
+//    private static final String DOMAIN = "crowdtasking.appspot.com";
+   	private static final String DOMAIN = "192.168.1.102";
 //   	private static final String DOMAIN = "192.168.1.66";
 //   	private static final String DOMAIN = "192.168.1.78";
-    private static final String PORT = "";
+//    private static final String PORT = "";
 //    private static final String PORT = ":80";
-//    private static final String PORT = ":8888";
+    private static final String PORT = ":8888";
     private static final String APPLICATION_URL = SCHEME +"://" + DOMAIN + PORT;
     private static final String LOGIN_URL = APPLICATION_URL + "/login";
     private static final String MEETING_URL = APPLICATION_URL + "/android/meeting/";
-    private static final String GET_USER_REST_API_URL = APPLICATION_URL + "/rest/users/me";
-	private static final String MEETING_REST_API_URL = APPLICATION_URL + "/rest/meeting";
-	private static final String SCAN_QR_URL = APPLICATION_URL + "/android/scanQR";
-	private static final String PICK_TASK_URL = APPLICATION_URL + "/task/view?id=";
-	private static final String EVENT_API_URL = APPLICATION_URL + "/rest/event";
-	private static final String SHARE_CS_URL = APPLICATION_URL + "/android/shareCsUrl";
-    private static final String SERVICE_CONNECTED = "org.societies.integration.service.CONNECTED";
     private static final String C4CSS_API_URL = APPLICATION_URL + "/rest/community/4CSS";
+    private static final String PD_TAKE_CONTROL = APPLICATION_URL + "/rest/remote/takeControl";
+    //    private static final String GET_USER_REST_API_URL = APPLICATION_URL + "/rest/users/me";
+	private static final String MEETING_REST_API_URL = APPLICATION_URL + "/rest/meeting";
+    private static final String SCAN_QR_URL = APPLICATION_URL + "/android/scanQR";
+    private static final String PICK_TASK_URL = APPLICATION_URL + "/task/view?id=";
+    private static final String EVENT_API_URL = APPLICATION_URL + "/rest/event";
+    private static final String SHARE_CS_URL = APPLICATION_URL + "/android/shareCsUrl";
+    private static final String SERVICE_CONNECTED = "org.societies.integration.service.CONNECTED";
     private String startUrl;
 	public String nfcUrl=null;
 	private WebView webView;
@@ -117,7 +122,8 @@ public class MainActivity extends Activity implements SensorEventListener {
     private SocietiesUser societiesUser = null;
     private final static String LOG_TAG = "Crowd Tasking";
 
-
+    int checkedItem = 0;
+    JSONArray communitiesForPublicDisplay;
     public MainActivity() {
 	}
 
@@ -298,14 +304,15 @@ public class MainActivity extends Activity implements SensorEventListener {
         registerReceiver(receiver, new IntentFilter(CHECK_IN_OUT));
         registerReceiver(receiver, new IntentFilter(GET_USER));
         registerReceiver(receiver, new IntentFilter(LOGIN_USER));
+        registerReceiver(receiver, new IntentFilter(TAKE_CONTROL));
         registerReceiver(receiver, new IntentFilter("android.nfc.action.NDEF_DISCOVERED"));
         registerReceiver(receiver, new IntentFilter(SERVICE_CONNECTED));
         sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
 
     	if (getIntent().getAction().equalsIgnoreCase(CHECK_IN_OUT)) {
-    		String response = getIntent().getStringExtra(RestTask.HTTP_RESPONSE);
-    		System.out.println(response);
-			Toast toast = Toast.makeText(getApplicationContext(), response, Toast.LENGTH_SHORT);
+    		String[] response = getIntent().getStringArrayExtra(RestTask.HTTP_RESPONSE);
+    		System.out.println(response[1]);
+			Toast toast = Toast.makeText(getApplicationContext(), response[1], Toast.LENGTH_SHORT);
 			toast.show();
     	}
 /*
@@ -398,7 +405,6 @@ public class MainActivity extends Activity implements SensorEventListener {
     }
 	
 	private void checkInOut(String url) {
-		HttpGet searchRequest;
 		try {
 			RestTask task = new RestTask(getApplicationContext(), CHECK_IN_OUT, CookieManager.getInstance().getCookie(DOMAIN), DOMAIN);
 			task.execute(new HttpGet(new URI(url)));
@@ -407,7 +413,6 @@ public class MainActivity extends Activity implements SensorEventListener {
 			Toast toast = Toast.makeText(getApplicationContext(), "Error: "+e.getMessage(), Toast.LENGTH_LONG);
 			toast.show();
 		}
-
 	}
 
     private void loginUser() {
@@ -448,6 +453,8 @@ public class MainActivity extends Activity implements SensorEventListener {
       if (result != null) {
         String contents = result.getContents();
         if (contents != null) {
+            // TODO: leave this?
+            Toast.makeText(getApplicationContext(), R.string.result_succeeded, Toast.LENGTH_SHORT).show();
         	if (contents.startsWith("http")) {
             	if (contents.startsWith(PICK_TASK_URL)) {
             		HttpPost eventRequest;
@@ -470,8 +477,17 @@ public class MainActivity extends Activity implements SensorEventListener {
 	    	if (contents.startsWith("cs:")) {
 	    		checkInOut(contents.replaceFirst("cs", "http"));
 	    	}
-	    	// TODO: leave this?
-        	Toast.makeText(getApplicationContext(), R.string.result_succeeded, Toast.LENGTH_SHORT).show();
+	    	if (contents.startsWith("channel:")) {
+                try {
+                    RestTask task = new RestTask(getApplicationContext(), TAKE_CONTROL, CookieManager.getInstance().getCookie(DOMAIN), DOMAIN);
+                    String url = PD_TAKE_CONTROL+"?channelId="+contents.substring("channel:".length());
+                    task.execute(new HttpGet(new URI(url)));
+                } catch (URISyntaxException e) {
+                    e.printStackTrace();
+                    Toast toast = Toast.makeText(getApplicationContext(), "Error: "+e.getMessage(), Toast.LENGTH_LONG);
+                    toast.show();
+                }
+	    	}
         } else {
         	Toast.makeText(getApplicationContext(), R.string.result_failed, Toast.LENGTH_SHORT).show();
         	Toast.makeText(getApplicationContext(), getString(R.string.result_failed_why), Toast.LENGTH_LONG).show();
@@ -573,30 +589,95 @@ public class MainActivity extends Activity implements SensorEventListener {
                 System.out.println(response);
             }
             if (intent.getAction().equalsIgnoreCase(C4CSS_INTENT)) {
-                String response = intent.getStringExtra(RestTask.HTTP_RESPONSE);
-                ((CrowdTasking)getApplication()).setSpaces(response);
+                String[] response = intent.getStringArrayExtra(RestTask.HTTP_RESPONSE);
+                ((CrowdTasking)getApplication()).setSpaces(response[1]);
             }
             if (intent.getAction().equalsIgnoreCase(GET_MEETING_ACTION)) {
-                String response = intent.getStringExtra(RestTask.HTTP_RESPONSE);
-                sendMeetingEvent(response);
+                String[] response = intent.getStringArrayExtra(RestTask.HTTP_RESPONSE);
+                sendMeetingEvent(response[1]);
             }
         	if (intent.getAction().equalsIgnoreCase(CHECK_IN_OUT)) {
-        		String response = intent.getStringExtra(RestTask.HTTP_RESPONSE);
-        		if (!response.startsWith("Check") && !response.startsWith("You are")) {
-        			response = "Please sign in first.";
+                String[] response = intent.getStringArrayExtra(RestTask.HTTP_RESPONSE);
+        		if (!response[1].startsWith("Check") && !response[1].startsWith("You are")) {
+                    response[1] = "Please sign in first.";
         		}
         		System.out.println(response);
-				Toast toast = Toast.makeText(getApplicationContext(), response, Toast.LENGTH_SHORT);
-				toast.show();
+                Toast.makeText(getApplicationContext(), response[1], Toast.LENGTH_SHORT).show();
+        	}
+        	if (intent.getAction().equalsIgnoreCase(TAKE_CONTROL)) {
+//        		String response = intent.getStringExtra(RestTask.HTTP_RESPONSE);
+        		String[] response = intent.getStringArrayExtra(RestTask.HTTP_RESPONSE);
+                if ("HTTP/1.1 409 Conflict".equalsIgnoreCase(response[0])) {
+                    selectCommunityForPD(response);
+                } else {
+                    Toast.makeText(getApplicationContext(), response[1], Toast.LENGTH_LONG).show();
+                }
         	}
         	if (intent.getAction().equalsIgnoreCase(LOG_EVENT)) {
-        		String response = intent.getStringExtra(RestTask.HTTP_RESPONSE);
+                String[] response = intent.getStringArrayExtra(RestTask.HTTP_RESPONSE);
         		System.out.println(response);
-				Toast toast = Toast.makeText(getApplicationContext(), response, Toast.LENGTH_SHORT);
-				toast.show();
+				Toast.makeText(getApplicationContext(), response[1], Toast.LENGTH_SHORT).show();
         	}
         }
     };
+
+    private void selectCommunityForPD(String[] response) {
+        try {
+            final String[] channelId = { "" };
+            JSONArray responseJSON = new JSONArray(response[1]);
+            communitiesForPublicDisplay = responseJSON.getJSONArray(0);
+            channelId[0] = responseJSON.getString(1);
+            String[] communityNames = new String[communitiesForPublicDisplay.length()];
+
+            for (int i = 0; i < communitiesForPublicDisplay.length(); i++) {
+                communityNames[i] = communitiesForPublicDisplay.getJSONObject(i).getString("name");
+            }
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            // Set the dialog title
+            builder.setTitle("Select community")
+                    // Specify the list array, the items to be selected by default (null for none),
+                    // and the listener through which to receive callbacks when items are selected
+                    .setSingleChoiceItems(communityNames, checkedItem,
+                            new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    checkedItem = which;
+                                }
+                            })
+                            // Set the action buttons
+                    .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int id) {
+                            showCommunity(channelId[0]);
+                        }
+                    });
+
+            builder.show();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void showCommunity(String channelId) {
+        try {
+            Long id = communitiesForPublicDisplay.getJSONObject(checkedItem).getLong("id");
+            String name = communitiesForPublicDisplay.getJSONObject(checkedItem).getString("name");
+//            Toast.makeText(getApplicationContext(), checkedItem+". community selected. Id="+id+", name="+name, Toast.LENGTH_LONG).show();
+            String url = PD_TAKE_CONTROL+"?channelId="+channelId+"&communityId="+communitiesForPublicDisplay.getJSONObject(checkedItem).getString("id");
+            try {
+                RestTask task = new RestTask(getApplicationContext(), TAKE_CONTROL, CookieManager.getInstance().getCookie(DOMAIN), DOMAIN);
+                task.execute(new HttpGet(new URI(url)));
+            } catch (URISyntaxException e) {
+                e.printStackTrace();
+                Toast toast = Toast.makeText(getApplicationContext(), "Error: "+e.getMessage(), Toast.LENGTH_LONG);
+                toast.show();
+            }
+        } catch (JSONException e) {
+            Toast.makeText(getApplicationContext(), "Exception: "+e.getMessage(), Toast.LENGTH_LONG).show();
+            e.printStackTrace();
+        }
+    }
 
     private void sendMeetingEvent(String meetingJSON) {
         //String JSON_STRING = "{ \"id\":212001,\"subject\":\"nujen sestanek\",\"description\":\"Urgent!!!\",\"cs\":{\"id\":179001,\"name\":\"test\",\"urlMapping\":\"test\"},\"startTime\":\"Jan 31, 2013 12:00:02 PM\",\"endTime\":\"Jan 31, 2013 2:00:03 PM\",\"organizer\":\"Setcce Research\"}";
