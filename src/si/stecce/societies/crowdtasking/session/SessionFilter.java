@@ -80,13 +80,16 @@ public class SessionFilter implements Filter {
 		if (!url.startsWith("/_ah") && 
 				!url.equalsIgnoreCase("/admin") &&
 				!url.equalsIgnoreCase("/rest/noaccess") &&
+//				!url.startsWith("/rest/remote") &&
 				!url.startsWith(loginUrl) &&
 				!url.equalsIgnoreCase(logoutUrl) &&
+				!url.startsWith("/pd") &&
 				!url.startsWith("/apk") &&
 				!urlList.contains(url)) { // restricted access
 			
 			// logged in?
 			if (session.getAttribute("loggedIn") == null) {
+                log.info("url:"+url);
                 log.info("loggedIn attribute is not yet set");
 				AuthenticatedUser authenticatedUser = UsersAPI.getAuthenticatedUser(session);
 				if (authenticatedUser != null) {

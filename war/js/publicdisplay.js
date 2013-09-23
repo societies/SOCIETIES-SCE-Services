@@ -1,25 +1,6 @@
+var MAX_EVENTS = 8;
+
 $(document).ready(function() {
-    $('#task_list').dataTable({
-        "bJQueryUI": true,
-        "bPaginate": false,
-        "bLengthChange": false,
-        "bFilter": false,
-        "bSort": false,
-        "bInfo": false,
-        "bAutoWidth": false
-    });
-    $('#eventsTable').dataTable();
-    
-    oTable = $('#top_users').dataTable({
-        "bJQueryUI": true,
-        "bPaginate": false,
-        "bLengthChange": false,
-        "bFilter": false,
-        "bSort": false,
-        "bInfo": false,
-        "bAutoWidth": false
-    });
-    
     myModule.showEvents();
     myModule.initChannel();
 });
@@ -46,8 +27,8 @@ function task_template(row, task) {
 	}
 	
 	row.find('.task_meetings').text(meetings);
-	//row.find('.task_qrcode').append('<img src="http://chart.apis.google.com/chart?cht=qr&chs=100x100&chl=http://'+location.host+'/mobile.html?id='+task.id+'"/>');
-	row.find('.task_qrcode').append('<a href="http://'+location.host+'/task/view?id='+task.id+'"><img src="http://chart.apis.google.com/chart?cht=qr&chs=100x100&chl=http://'+location.host+'/task/view?id='+task.id+'"/></a>');
+	//row.find('.task_qrcode').append('<a data-ajax="false" href="http://'+location.host+'/task/view?id='+task.id+'"><img src="http://chart.apis.google.com/chart?cht=qr&chs=100x100&chl=http://'+location.host+'/task/view?id='+task.id+'"/></a>');
+	row.find('.task_qrcode').append('<a href="javascript:showTask('+task.id+')"><img src="http://chart.apis.google.com/chart?cht=qr&chs=100x100&chl=http://'+location.host+'/task/view?id='+task.id+'"/></a>');
 	return row;
 }
 
@@ -63,31 +44,14 @@ function showTasks(communityId) {
 		url: '/rest/tasks/cs',
 		data: { 'communityId': communityId },
 		success: function(tasks) {
-			$("#task_list").find("tr:gt(2)").remove();
+			$("#task_list").find("tr:gt(1)").remove();
 			for (var i = 0; i < tasks.length; i++) {
 				var newRow = $('#task_list .template').clone().removeClass('template');
 				task_template(newRow, tasks[i])
 				.appendTo('#task_list')
 				.fadeIn();
 			}
-		}
-	});
-}
-
-function showTasks2(communityId) {
-	$.ajax({
-		type: 'GET',
-		url: '/rest/tasks/publicdisplay',
-		data: { 'spaceId': communityId },
-		success: function(tasks) {
-			$("#task_list").find("tr:gt(2)").remove();
-			for (var i = 0; i < tasks.length; i++) {
-				var newRow = $('#task_list .template').clone().removeClass('template');
-				task_template(newRow, tasks[i])
-				.appendTo('#task_list')
-				.fadeIn();
-			}
-			$("#task_list").trigger("create");
+			//$("#task_list").trigger("create");
 		}
 	});
 }
@@ -96,9 +60,9 @@ function showTopUsers() {
 	$.ajax({
 		type: 'GET',
 		url: '/rest/users/top',
-		data: { 'limit': 7 },
+		data: { 'limit': 4 },
 		success: function(users) {
-			$("#top_users").find("tr:gt(2)").remove();
+			$("#top_users").find("tr:gt(1)").remove();
 			for (var i = 0; i < users.length; i++) {
 				var newRow = $('#top_users .topuser_template').clone().removeClass('topuser_template');
 				user_template(newRow, users[i])
@@ -131,15 +95,24 @@ function getEvents(communityId, spaceId) {
 function showEvents(events) {
 	$('#event_list tr').remove();
 	var eventsTable = $('#event_list');
-	for (var i = 0; i < events.length; i++) {
-		var newRow = $('<tr>');
+	var stage = $('#tabContent');
+	stage.empty();
+	for (var i = 0; i < events.length && i <MAX_EVENTS; i++) {
+		/*var newRow = $('<tr>');
 		newRow.append(events[i].eventTextHTML);
-		eventsTable.append(newRow);
+		eventsTable.append(newRow);*/
+		var $event = $('<div style="display: none;">'+events[i].eventTextHTML+'</div>');
+		stage.append($event);
+		$event.show('slow');
 	}
 }
 
 function addEvent(event) {
-	document.getElementById("event_list").insertRow(0).innerHTML = '<td>'+event+'</td>';
+	$('#tabContent div:nth-child('+MAX_EVENTS+')').remove();
+	var $newEvent = $('<div style="display: none;">'+event+'</div>');
+	$('#tabContent').prepend($newEvent);
+	$newEvent.show('slow');
+	//document.getElementById("event_list").insertRow(0).innerHTML = '<td>'+event+'</td>';
 	
 /*	if ($("#event_list > tbody > tr").length > 7)
 		$('#event_list tr:first').remove();
@@ -152,4 +125,13 @@ function formatDate(dateString) {
 	var date = new Date(dateString);
 	var min = date.getMinutes();
     return ''+date.getDate()+'.'+(date.getMonth()+1)+'.'+date.getFullYear()+' '+date.getHours()+':'+(min<=9?'0'+min:min);
+}
+
+function showTask(id) {
+	CrowdTaskingApp.showTask(id);
+	$("#taskPanel").panel("open");
+}
+
+function hideTask() {
+	$("#taskPanel").panel("close");
 }

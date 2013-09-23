@@ -80,82 +80,118 @@ public class CSController extends HttpServlet {
 		    }
 		    else {
 		    	if (path.length > 1) {
-		    		CTUser user = UsersAPI.getLoggedInUser(request.getSession());
-		    		CollaborativeSpace space = SpaceAPI.getCollaborativeSpace(path[1]);
-		    		if (space == null) {
-		    			return;
-		    		}
-		    		Long spaceId = space.getId();
-		    		Query<Community> communities = CommunityDAO.findCommunity(space);
-		    		if (communities == null || communities.count() == 0) {
-		    			return;
-		    		}
-		    		Community community = communities.first().get();
-		    		if (!isMemeber(user, community)) {
-		    		    response.setContentType("text/html");
-		    		    response.getWriter().write("You are not a member of this community!");
-		    			return;
-		    		}
+                    if ("pd".equalsIgnoreCase(path[1])) {
+                        sendFirstScreen(response);
+                        return;
+                    }
+                    CTUser user = UsersAPI.getLoggedInUser(request.getSession());
+                    CollaborativeSpace space = SpaceAPI.getCollaborativeSpace(path[1]);
+                    System.out.println("CollaborativeSpace:" + space.getName());
+                    if (space == null) {
+                        return;
+                    }
+                    Long spaceId = space.getId();
+                    Query<Community> communities = CommunityDAO.findCommunities(space);
+                    if (communities == null || communities.count() == 0) {
+                        return;
+                    }
+                    boolean member = false;
+                    for (Community community : communities) {
+                        if (isMemeber(user, community)) {
+                            member = true;
+                        }
+                        System.out.println("community:" + community.getName());
+                        System.out.println("community members:" + community.getMembers());
+                        System.out.println("community member:" + member);
+                    }
+                    if (!member) {
+                        response.setContentType("text/html");
+                        response.getWriter().write("You are not a member of this community!");
+                        return;
+                    }
 
-                    List<Ref<Community>> communitiesRefs = new ArrayList<Ref<Community>>();
-                    for (Community comm:communities) {
+                    // todo just a temporary fix
+                    Community community = communities.first().get();
+                    List<Ref<Community>> communitiesRefs = new ArrayList<>();
+                    for (Community comm : communities) {
                         communitiesRefs.add(Ref.create(Key.create(Community.class, comm.getId())));
                     }
 
                     if (path.length > 2) {
-                        if ("enter".equalsIgnoreCase(path[2])) {	// .../sc/spaceUrl/enter
+                        if ("enter".equalsIgnoreCase(path[2])) {    // .../sc/spaceUrl/enter
                             EventAPI.logEnterCollaborativeSpace(spaceId, new Date(), user, communitiesRefs);
                             response.getWriter().write("Check-in successful");
-                            System.out.println(user.getUserName()+ " checked in to "+space.getName());
+                            System.out.println(user.getUserName() + " checked in to " + space.getName());
                             return;
                         }
-                        if ("leave".equalsIgnoreCase(path[2])) {	// .../sc/spaceUrl/leave
+                        if ("leave".equalsIgnoreCase(path[2])) {    // .../sc/spaceUrl/leave
                             EventAPI.logLeaveCollaborativeSpace(spaceId, new Date(), user, communitiesRefs);
                             response.getWriter().write("Check-out successful");
-                            System.out.println(user.getUserName()+ " checked out from "+space.getName());
+                            System.out.println(user.getUserName() + " checked out from " + space.getName());
                             return;
                         }
-                        if ("showTask".equalsIgnoreCase(path[2])) {	// .../sc/spaceUrl/showTask?id=x
-                            sendMessage(spaceId, "showTask:"+request.getParameter("id"));
+                        if ("showTask".equalsIgnoreCase(path[2])) {    // .../sc/spaceUrl/showTask?id=x
+                            sendMessage(spaceId, "showTask:" + request.getParameter("id"));
                             return;
                         }
-                        if ("change".equalsIgnoreCase(path[2])) {	// .../sc/spaceUrl/change?p=x
-                            sendMessage(spaceId, "changeTo:/cs/"+path[1]+"?p="+page);
+                        if ("change".equalsIgnoreCase(path[2])) {    // .../sc/spaceUrl/change?p=x
+                            sendMessage(spaceId, "changeTo:/cs/" + path[1] + "?p=" + page);
                             return;
                         }
                     }
                     ChannelService channelService = ChannelServiceFactory.getChannelService();
                     String token = channelService.createChannel(spaceId.toString());
-                    System.out.println("Channel created with id: "+spaceId.toString());
-                    log.info("token created:"+token);
+                    System.out.println("Channel created with id: " + spaceId.toString());
+                    log.info("token created:" + token);
 
-	    			FileReader reader = new FileReader("WEB-INF/html/publicDisplay"+page+".html");
-	    		    CharBuffer buffer = CharBuffer.allocate(16384);
-	    		    reader.read(buffer);
+                    FileReader reader = new FileReader("WEB-INF/html/publicDisplay" + page + ".html");
+                    CharBuffer buffer = CharBuffer.allocate(16384);
+                    reader.read(buffer);
 
-	    		    String index = new String(buffer.array());
-	    		    index = index.replaceAll("\\{\\{ pdHeader \\}\\}", community.getName()+" - "+space.getName());
-	    		    index = index.replaceAll("\\{\\{ token \\}\\}", token);
-	    		    index = index.replaceAll("\\{\\{ communityId \\}\\}", community.getId().toString());
-	    		    index = index.replaceAll("\\{\\{ spaceId \\}\\}", spaceId.toString());
+                    String index = new String(buffer.array());
+                    index = index.replaceAll("\\{\\{ pdHeader \\}\\}", community.getName() + " - " + space.getName());
+                    index = index.replaceAll("\\{\\{ token \\}\\}", token);
+                    index = index.replaceAll("\\{\\{ communityId \\}\\}", community.getId().toString());
+                    index = index.replaceAll("\\{\\{ spaceId \\}\\}", spaceId.toString());
 
-	    		    response.setContentType("text/html");
-	    		    response.getWriter().write(index);
-	    		    reader.close();
-		    	}
-		    }
+                    response.setContentType("text/html");
+                    response.getWriter().write(index);
+                    reader.close();
+                }
+            }
 
 	    }
 	}
 
-	private boolean isMemeber(CTUser user, Community community) {
-		for (Ref<CTUser> member:community.getMembers()) {
-			if (member.equals(Ref.create(Key.create(CTUser.class, user.getId())))) {
-				return true;
-			}
-		}
-		return false;
-	}
+    private void sendFirstScreen(HttpServletResponse response) throws IOException {
+        String channelId = "123456789012";
+        ChannelService channelService = ChannelServiceFactory.getChannelService();
+        String token = channelService.createChannel(channelId);
+        log.info("token created:" + token);
+
+        FileReader reader = new FileReader("WEB-INF/html/getDisplay.html");
+        CharBuffer buffer = CharBuffer.allocate(16384);
+        reader.read(buffer);
+
+        String index = new String(buffer.array());
+        index = index.replaceAll("\\{\\{ token \\}\\}", token);
+
+        response.setContentType("text/html");
+        response.getWriter().write(index);
+        reader.close();
+    }
+
+    private boolean isMemeber(CTUser user, Community community) {
+        if (community.getMembers() == null) {
+            return false;
+        }
+        for (Ref<CTUser> member : community.getMembers()) {
+            if (member.equals(Ref.create(Key.create(CTUser.class, user.getId())))) {
+                return true;
+            }
+        }
+        return false;
+    }
 
 	private void sendMessage(Long spaceId, String message) {
 		ChannelService channelService = ChannelServiceFactory.getChannelService();

@@ -116,13 +116,21 @@
 		<servlet-name>CommunityController</servlet-name>
 		<url-pattern>/community/*</url-pattern>
 	</servlet-mapping>
-		<servlet>
+	<servlet>
 		<servlet-name>CSController</servlet-name>
 		<servlet-class>si.stecce.societies.crowdtasking.controller.CSController</servlet-class>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>CSController</servlet-name>
 		<url-pattern>/cs/*</url-pattern>
+	</servlet-mapping>
+	<servlet>
+		<servlet-name>PublicDisplayController</servlet-name>
+		<servlet-class>si.stecce.societies.crowdtasking.controller.PublicDisplayController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>PublicDisplayController</servlet-name>
+		<url-pattern>/publicDisplay/*</url-pattern>
 	</servlet-mapping>
 	<servlet>
 		<servlet-name>Admin</servlet-name>

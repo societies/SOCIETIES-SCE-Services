@@ -26,10 +26,7 @@ package si.stecce.societies.crowdtasking.api.RESTful.impl;
 
 import static si.stecce.societies.crowdtasking.model.dao.OfyService.ofy;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
@@ -90,8 +87,10 @@ public class EventAPI implements IEventAPI {
 			if (spaceId != null) {
 				List<Event> events4Space = getEventsForCollaborativeSpace(spaceId, limit);
 				events.addAll(events4Space);
-				Collections.sort(events, new EventComparator());
 			}
+            Set<Event> eventsSet = new HashSet<>(events);
+            events = new ArrayList<>(eventsSet);
+            Collections.sort(events, new EventComparator());
 			Gson gson = new Gson();
             ArrayList<EventJS> list = new ArrayList<>();
             for (Event event: events) {

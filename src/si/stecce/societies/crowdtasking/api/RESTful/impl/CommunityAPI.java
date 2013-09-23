@@ -89,15 +89,19 @@ public class CommunityAPI implements ICommunityAPI {
         return toJson(CommunityDAO.loadCommunities4User(loggedInUser), loggedInUser);
 	}
 
-    private String toJson(Collection<Community> communities, CTUser user) {
-        ArrayList<CommunityJS> list = new ArrayList<CommunityJS>();
+    public static String toJson(Collection<Community> communities, CTUser user) {
         Gson gson = new Gson();
+        ArrayList<CommunityJS> list = getCommunityJSes(communities, user);
+        return gson.toJson(list);
+    }
+
+    public static ArrayList<CommunityJS> getCommunityJSes(Collection<Community> communities, CTUser user) {
+        ArrayList<CommunityJS> list = new ArrayList<CommunityJS>();
         for (Community community:communities) {
 			CommunityJS communityJS = new CommunityJS(community, user);
 			list.add(communityJS);
 		}
-        System.out.println(gson.toJson(list));
-        return gson.toJson(list);
+        return list;
     }
 
     @Override

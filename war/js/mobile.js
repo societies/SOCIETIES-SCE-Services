@@ -27,7 +27,7 @@ var CrowdTaskingApp = function() {
     var mode = 'new';
     var currentUser = null;
     var communities = [];
-    var TEST_HOST = "localhost";
+    var TEST_HOST = "localhost1";
 
     var getTaskById = function(id) {
     	$.ajax({
@@ -49,7 +49,9 @@ var CrowdTaskingApp = function() {
 
     var isSocietiesUser = function() {
         if (typeof(android) !== "undefined") {
-            return (window.android.isSocietiesUser);
+            var isSocUser = window.android.isSocietiesUser();
+            console.log("isSocUser:"+isSocUser);
+            return isSocUser;
         }
         if (window.location.hostname === TEST_HOST) return true;
 

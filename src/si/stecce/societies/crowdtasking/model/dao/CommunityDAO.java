@@ -102,11 +102,11 @@ public final class CommunityDAO {
 		return members;
 	}
 	
-	public static Query<Community> findCommunity(CollaborativeSpace space) {
-		return findCommunity(space.getId());
+	public static Query<Community> findCommunities(CollaborativeSpace space) {
+		return findCommunities(space.getId());
 	}
 	
-	public static Query<Community> findCommunity(Long spaceId) {
+	public static Query<Community> findCommunities(Long spaceId) {
 		return ofy().load().type(Community.class).filter("collaborativeSpaceRefs", Ref.create(Key.create(CollaborativeSpace.class, spaceId)));
 	}
 	

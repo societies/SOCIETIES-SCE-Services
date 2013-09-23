@@ -42,6 +42,7 @@ import si.stecce.societies.crowdtasking.model.Community;
 import si.stecce.societies.crowdtasking.model.Event;
 import si.stecce.societies.crowdtasking.model.Task;
 import si.stecce.societies.crowdtasking.model.TaskStatus;
+import si.stecce.societies.crowdtasking.model.dao.CommunityDAO;
 
 import static si.stecce.societies.crowdtasking.model.dao.OfyService.ofy;
 
@@ -63,11 +64,19 @@ public class Admin extends HttpServlet {
 		//JavaMail.sendJavaMail(SENDER, "simon.juresa@setcce.si", "hoj", "navaden text", "HTML text", getBody());
 		//sendMeetingRequest1();
 		//sendMeetingRequest2();
-        convertTasks();
-        convertEvents();
+        response.getWriter().write("refreshCommunities (4th)...");
+//        refreshCommunities();
+        //convertTasks();
+        //convertEvents();
 		long diff = System.currentTimeMillis() - startTime;
 		response.getWriter().write("time: " + diff);
 	}
+
+    private void refreshCommunities() {
+        for (Community community : ofy().load().type(Community.class).list()) {
+            CommunityDAO.saveCommunity(community);
+        }
+    }
 
     private void convertTasks() {
         Query<Task> q = ofy().load().type(Task.class);

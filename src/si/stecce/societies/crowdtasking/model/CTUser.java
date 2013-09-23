@@ -139,7 +139,7 @@ public class CTUser {
 	@Ignore private NotificationSettings notifications;
 	private String picUrl;
 	private Date checkIn;
-	private Long spaceId;	// kar String?
+	private Long spaceId;
 	private boolean admin=false;
 	@Ignore private ApplicationSettings applicationSettings;
 

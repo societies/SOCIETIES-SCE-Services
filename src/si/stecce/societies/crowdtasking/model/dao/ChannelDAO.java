@@ -24,11 +24,14 @@
  */
 package si.stecce.societies.crowdtasking.model.dao;
 
-import si.stecce.societies.crowdtasking.model.*;
+import com.googlecode.objectify.Key;
+import com.googlecode.objectify.NotFoundException;
+import com.googlecode.objectify.Ref;
+import si.stecce.societies.crowdtasking.model.Channel;
 
-import com.googlecode.objectify.Objectify;
-import com.googlecode.objectify.ObjectifyFactory;
-import com.googlecode.objectify.ObjectifyService;
+import java.util.List;
+
+import static si.stecce.societies.crowdtasking.model.dao.OfyService.ofy;
 
 /**
  * Describe your class here...
@@ -36,31 +39,42 @@ import com.googlecode.objectify.ObjectifyService;
  * @author Simon Jureša
  *
  */
-public final class OfyService {
-	private OfyService() {}
+public final class ChannelDAO {
+	private ChannelDAO() {}
 	
-    static {
-        factory().register(ApplicationSettings.class);
-        factory().register(Channel.class);
-        factory().register(CollaborativeSpace.class);
-        factory().register(Comment.class);
-        factory().register(Community.class);
-        factory().register(CTUser.class);
-        factory().register(Event.class);
-        factory().register(Like.class);
-        factory().register(Meeting.class);
-        factory().register(NotificationSettings.class);
-        factory().register(Tag.class);
-        factory().register(TagTask.class);
-        factory().register(Task.class);
+    public static Channel load(Long id) {
+    	Channel cs = null;
+		try {
+			Object obj = ofy().load().type(Channel.class).id(id).get();
+			if (obj instanceof Channel) {
+				cs = (Channel)obj;
+			}
+			else {
+				ofy().clear();
+				cs = ofy().load().type(Channel.class).id(id).get();			}
+		} 
+		catch (NotFoundException e) {}
+		return cs;
+	}
+    
+    public static Channel load(Ref<Channel> csRef) {
+    	return ofy().load().ref(csRef).get();
+    }
+	
+    public static void delete(Long id) {
+    	ofy().delete().type(Channel.class).id(id).now();
     }
 
-    public static Objectify ofy() {
-        return ObjectifyService.ofy();
+    public static List<Channel> loadChannels() {
+    	return ofy().load().type(Channel.class).list();
     }
 
-    public static ObjectifyFactory factory() {
-        return ObjectifyService.factory();
+    public static List<Channel> loadChannels(int limit) {
+    	return ofy().load().type(Channel.class).limit(limit).list();
+    }
+    
+    public static Key<Channel> save(Channel cs) {
+    	return ofy().save().entity(cs).now();
     }
 
 }

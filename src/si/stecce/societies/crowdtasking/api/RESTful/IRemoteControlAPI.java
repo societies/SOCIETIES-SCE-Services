@@ -15,5 +15,7 @@ public interface IRemoteControlAPI {
     Response get(@PathParam("querytype") String querytype,
                  @DefaultValue("") @QueryParam("page") String page,
                  @DefaultValue("") @QueryParam("taskId") String taskId,
+                 @DefaultValue("") @QueryParam("channelId") String channelId,
+                 @DefaultValue("") @QueryParam("communityId") String communityId,
                  @Context HttpServletRequest request);
 }
