@@ -39,8 +39,8 @@ public class IJacketClient extends Activity implements OnItemSelectedListener {
     long my_cssID = 0; 
     long CSS_sharing_jacket = 0;
     
-    String accountNameSync = "";
-    String accountTypeSync = SupportedAccountTypes.COM_BOX;
+    String accountNameSync = "p2p";
+    String accountTypeSync = "p2p";
     
     /**
      * Called when the activity is first created.
@@ -69,7 +69,7 @@ public class IJacketClient extends Activity implements OnItemSelectedListener {
         	CSS_sharing_jacket = cssJid;
 
         } 
-        fillUpAccNameAndType();
+        //fillUpAccNameAndType();
         
 
     	Log.d(LOG_TAG, "going to retrieve service and CSS id");
@@ -114,7 +114,8 @@ public class IJacketClient extends Activity implements OnItemSelectedListener {
    		    	c.moveToNext();
    		    	String user = c.getString(i);
    		    	Log.d(LOG_TAG, "user is " + user);
-   			    accountNameSync = user;
+   		    	if(accountTypeSync.equalsIgnoreCase("p2p") == false)
+   		    		accountNameSync = user; 
        		}
        	}
 
@@ -147,6 +148,7 @@ public class IJacketClient extends Activity implements OnItemSelectedListener {
         	mNewValues.put(SocialContract.CommunityActivity.OBJECT, editText.getText().toString());
         	mNewValues.put(SocialContract.CommunityActivity.VERB, verb);
         	mNewValues.put(SocialContract.CommunityActivity.DIRTY, 1);
+        	mNewValues.put(SocialContract.CommunityActivity.GLOBAL_ID,SocialContract.GLOBAL_ID_PENDING);
         	mNewValues.put(SocialContract.CommunityActivity.TARGET, org.societies.thirdpartyservices.ijacketlib.IJacketDefines.AccountData.IJACKET_SERVICE_NAME);
         	mNewValues.put(SocialContract.CommunityActivity._ID_FEED_OWNER, communityLocalID);
         	Log.d(LOG_TAG, "going to inseet: " + user_name + " posted " + editText.getText().toString() + " at " +communityName);
@@ -292,8 +294,10 @@ public class IJacketClient extends Activity implements OnItemSelectedListener {
     	        Log.d(LOG_TAG, "query is " + mSelectionClause + " and arg 0 is " + mSelectionArgs[0]);
     	        if(mSelectionArgs.length>1) Log.d(LOG_TAG, " and arg1 is " + mSelectionArgs[1]);
             	
-            	 
-            	Cursor cursorOfSharedCommunities = cr.query(COMUNITIES_URI,null,mSelectionClause,mSelectionArgs,null);
+    	        // TEMP
+    	        Cursor cur = cr.query(COMUNITIES_URI,null,mSelectionClause,mSelectionArgs,null);
+    	        int idIndex;
+ /*TEMP           	Cursor cursorOfSharedCommunities = cr.query(COMUNITIES_URI,null,mSelectionClause,mSelectionArgs,null);
     	        
             	if(null != cursorOfSharedCommunities && cursorOfSharedCommunities.getCount()>0){
             		
@@ -315,7 +319,7 @@ public class IJacketClient extends Activity implements OnItemSelectedListener {
     	        	// done building in clause
     	        	Uri MEMBERSHIP_URI = Uri.parse(SocialContract.AUTHORITY_STRING + SocialContract.UriPathIndex.MEMBERSHIP);
     	        	Cursor cur = cr.query(MEMBERSHIP_URI,null,mSelectionClause,selectArgInMembershipQuery,null);
-            		
+*/            		
 
                 	// Ill add the id of all those communities now on a selection args in order to get
                 	// theirs name
@@ -366,8 +370,8 @@ public class IJacketClient extends Activity implements OnItemSelectedListener {
 	        		   		Log.d(LOG_TAG, "exception in the create");
 	        		   		e.printStackTrace();
 	        		   	}
-    	        	}
-    	        	else{
+	            		 /*TEMP     	        	}
+  	        	else{
                 		Log.d(LOG_TAG, "IJacket is shared in some communities, but in none that Im part of");
                 		//show popup
                 		Context context = getApplicationContext();
@@ -376,7 +380,7 @@ public class IJacketClient extends Activity implements OnItemSelectedListener {
                 		Toast toast = Toast.makeText(context, text, duration);
                 		toast.show();
     	        		
-    	        	}
+    	        	}*/
             	}
             	else{
             		Log.d(LOG_TAG, "IJacket is not shared in any community");

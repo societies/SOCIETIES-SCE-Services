@@ -8,7 +8,7 @@
     <TextView
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:text="@string/hello" />
+        android:text="@string/firstMessage" />
 
     <Spinner
         android:id="@+id/spinner1"
@@ -20,7 +20,7 @@
     <TextView
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:text="@string/hello" />
+        android:text="@string/secondMessage" />
 
     <Spinner
         android:id="@+id/spinner2"
