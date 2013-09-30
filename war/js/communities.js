@@ -144,20 +144,20 @@ var Community = function() {
         var form_data = $('#editCommunityForm').serialize();
         console.log("form data:"+form_data);
         $.ajax({
-          type: "POST",
-          url: "/rest/community/create",
-          data: form_data,
-  		  error: function(error) {
-  			toast(error.responseText);
-          },
-          success: function(response) {
-              if (isSocietiesUser()) {
-                  //var community = jQuery.parseJSON(response);
-                  if (!isTestHost()) {
-                      window.android.setCommunitySpaces(response);
-                      societiesCommunities = JSON.parse(window.android.getSocietiesCommunities());
-                  }
-              }
+            type: "POST",
+            url: "/rest/community/create",
+            data: form_data,
+            error: function(error) {
+                toast(error.responseText);
+            },
+            success: function(response) {
+                if (isSocietiesUser()) {
+                    //var community = jQuery.parseJSON(response);
+                    if (!isTestHost()) {
+                        window.android.setCommunitySpaces(response);
+                        societiesCommunities = JSON.parse(window.android.getSocietiesCommunities());
+                    }
+                }
               successFn();
           },
           complete: function() {

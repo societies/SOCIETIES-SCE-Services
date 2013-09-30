@@ -501,14 +501,18 @@ var CrowdTaskingApp = function() {
         if (isSocietiesUser()) {
             $('#ctCommunities').hide();
             $taskCommunity = $('#taskCommunityJids');
+            $taskCommunity.empty();
+            for (var i = 0; i < communities.length; i++) {
+                $taskCommunity.append('<option value=' + communities[i].jid + '>' + communities[i].name + '</option>');
+            }
         }
         else {
             $('#societiesCommunities').hide();
             $taskCommunity = $('#taskCommunity');
-        }
-        $taskCommunity.empty();
-        for (var i = 0; i < communities.length; i++) {
-            $taskCommunity.append('<option value=' + communities[i].jid + '>' + communities[i].name + '</option>');
+            $taskCommunity.empty();
+            for (var i = 0; i < communities.length; i++) {
+                $taskCommunity.append('<option value=' + communities[i].id + '>' + communities[i].name + '</option>');
+            }
         }
         $taskCommunity.selectmenu('refresh');
     };
