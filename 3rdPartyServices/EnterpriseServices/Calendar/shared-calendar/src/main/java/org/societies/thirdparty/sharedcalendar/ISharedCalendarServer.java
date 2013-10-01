@@ -54,19 +54,11 @@ public interface ISharedCalendarServer {
 	public static final String VERB_CSS_CALENDAR_EVENT_DELETED = "CSS Calendar Event Deleted";
 	public static final String VERB_CALENDAR_EVENT_SUBSCRIPTION = "Calendar Event Subscription";
 	public static final String VERB_CALENDAR_EVENT_UNSUBSCRIPTION = "Calendar Event Unsubscription";
-	
-	public static final int RECOMMEND_THRESHOLD = 10;
-	public static final int CREATOR_POINTS = 15;
-	public static final int CREATOR_FRIEND = 10;
-	public static final int FRIEND_POINTS = 5;
-	public static final int LOCATION_POINTS = 10;
-	public static final int CIS_POINTS = 15;
-	public static final int INTEREST_POINTS = 10;
-	
-	
+
+
 	public boolean subscribeToEvent(String eventId, IIdentity node, IIdentity subscriberId);
 
-	public boolean unsubscribeFromEvent(String eventId, IIdentity subscriberId);
+	public boolean unsubscribeFromEvent(String eventId, IIdentity node, IIdentity subscriberId);
 	
 	public Calendar retrieveCalendar(IIdentity node, IIdentity requestor);
 

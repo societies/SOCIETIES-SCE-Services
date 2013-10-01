@@ -22,18 +22,10 @@
  * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.societies.thirdparty.sharedcalendar.web;
-
-import java.util.List;
-
-import javax.faces.component.UIComponent;
-import javax.faces.context.FacesContext;
-import javax.faces.convert.Converter;
-import javax.faces.convert.FacesConverter;
+package org.societies.thirdparty.sharedcalendar;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.societies.thirdparty.sharedcalendar.api.schema.Event;
 
 /**
  * Describe your class here...
@@ -41,63 +33,12 @@ import org.societies.thirdparty.sharedcalendar.api.schema.Event;
  * @author <a href="mailto:sanchocsa@gmail.com">Sancho Rêgo</a> (PTIN)
  *
  */
-@FacesConverter(value = "eventConverter")
-public class EventConverter implements Converter {
+public class CalendarAutoEvents {
 
-	static final Logger log = LoggerFactory.getLogger(EventConverter.class);
-	private CalendarController parent;
+	static final Logger log = LoggerFactory.getLogger(CalendarAutoEvents.class);
 	
-	public EventConverter(CalendarController parent) {		
-		this.parent = parent;
-		
-	}
-
-	/* (non-Javadoc)
-	 * @see javax.faces.convert.Converter#getAsObject(javax.faces.context.FacesContext, javax.faces.component.UIComponent, java.lang.String)
-	 */
-	@Override
-	public Object getAsObject(FacesContext context, UIComponent component, String value) {
-
-		CalendarEvent event = null;
-		List<CalendarEvent> currEvents = parent.getCurrentEvents();
-		for(CalendarEvent curEvent: currEvents){
-			if(curEvent.getEventId().equals(value)){
-				event = curEvent;
-				break;
-			}
-		}
-		if(event == null){
-			List<CalendarEvent> recommendedEvents = parent.getRecommendedEvents();
-			for(CalendarEvent recEvent: recommendedEvents){
-				if(recEvent.getEventId().equals(value)){
-					event = recEvent;
-					break;
-				}
-			}
-		} 
-		
-		if(event == null){
-			List<CalendarEvent> searchEvents = parent.getSearchResults();
-			for(CalendarEvent searchEvent: searchEvents){
-				if(searchEvent.getEventId().equals(value)){
-					event = searchEvent;
-					break;
-				}
-			}
-		}
-		
-		
-		return event;
-	}
-
-	/* (non-Javadoc)
-	 * @see javax.faces.convert.Converter#getAsString(javax.faces.context.FacesContext, javax.faces.component.UIComponent, java.lang.Object)
-	 */
-	@Override
-	public String getAsString(FacesContext context, UIComponent component, Object value) {
-		String asString = ((CalendarEvent) value).getEventId();
-
-		return asString;
+	public CalendarAutoEvents() {
+		log.debug("Event");
 	}
 
 }

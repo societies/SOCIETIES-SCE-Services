@@ -116,8 +116,9 @@ public class SharedCalendarCallBack implements ICommCallback{
 	@Override
 	public void receiveError(Stanza stanza, XMPPError error) {
 		// TODO Auto-generated method stub
-		log.debug("Receive Error");
-		
+		log.debug("Receive Error {} : {}",stanza,error);
+		ICalendarResultCallback calendarClient = getRequestingClient(stanza.getId());
+		calendarClient.receiveResult(null);	
 	}
 
 	@Override

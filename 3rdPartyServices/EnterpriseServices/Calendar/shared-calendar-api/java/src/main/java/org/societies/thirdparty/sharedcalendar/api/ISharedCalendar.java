@@ -113,7 +113,7 @@ public interface ISharedCalendar {
 	 * @param subscriberId
 	 * @return true if the unsubscription is performed correctly, false otherwise
 	 */
-	public void unsubscribeFromEvent(ICalendarResultCallback calendarResultCallback, String eventId, String subscriberId);
+	public void unsubscribeFromEvent(ICalendarResultCallback calendarResultCallback, String eventId, String nodeId, String subscriberId);
 
 	/**
 	 * Gets the events that are recommended for the subscriber

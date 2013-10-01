@@ -2,9 +2,9 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<artifactId>spring-osgi-parent</artifactId>
 		<groupId>org.societies</groupId>
-		<version>0.1</version>
+		<artifactId>version-parent</artifactId>
+		<version>RELEASE</version>
 	</parent>
 	<groupId>org.societies.enterprise</groupId>
 	<artifactId>CollabTools</artifactId>
@@ -128,10 +128,10 @@
 						<artifactItem>
 							<groupId>${project.groupId}</groupId>
 							<artifactId>${project.artifactId}</artifactId>
-							<version>0.1.0</version>
+							<version>${project.version}</version>
 							<type>jar</type>
 							<overWrite>true</overWrite>
-							<outputDirectory>${env.VIRGO_HOME}/repository/usr</outputDirectory>
+							<outputDirectory>${spring.osgi.deploy.dir}</outputDirectory>
 						</artifactItem>
 					</artifactItems>
 				</configuration>

@@ -8,7 +8,6 @@
 		<groupId>org.societies</groupId>
 		<artifactId>spring-osgi-parent</artifactId>
 		<version>RELEASE</version>
-		<relativePath>../../parent/spring-osgi.xml</relativePath>
 	</parent>
 
 	<!-- groupId is set in parent pom -->
@@ -111,7 +110,7 @@
 						<artifactItem>
 							<groupId>${project.groupId}</groupId>
 							<artifactId>${project.artifactId}</artifactId>
-							<version>0.1.0</version>
+							<version>${project.version}</version>
 							<type>jar</type>
 							<overWrite>true</overWrite>
 							<outputDirectory>${spring.osgi.deploy.dir}</outputDirectory>

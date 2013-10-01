@@ -168,8 +168,7 @@ public class CalendarGoogleUtil {
 		calendar.setSummary(calendarSummary);
 		calendar.setDescription(nodeId);
 		
-		if(log.isDebugEnabled())
-			log.debug("Creating calendar : " + calendar.getSummary() + " : " + calendar.getDescription() );
+		log.debug("Creating calendar : {} : {}", calendar.getSummary(), calendar.getDescription() );
 		try {
 			com.google.api.services.calendar.model.Calendar createdCalendar = service.calendars().insert(calendar).execute();
 			result = createdCalendar.getId();
@@ -233,12 +232,12 @@ public class CalendarGoogleUtil {
         event.setExtendedProperties(extendedProperties);
         
         if(log.isDebugEnabled()){
-        	log.debug("Event title: " + eventTitle);
-        	log.debug("Event description: " + description);
-        	log.debug("Event creatorId: " + creatorId);
-        	log.debug("Event calendarId: " + calendarId);
-        	log.debug("Event nodeId: " + nodeId);
-        	log.debug("Event location: " + location);
+        	log.debug("Event title: {}",eventTitle);
+        	log.debug("Event description: {}",description);
+        	log.debug("Event creatorId: {}",creatorId);
+        	log.debug("Event calendarId: {}",calendarId);
+        	log.debug("Event nodeId: {}",nodeId);
+        	log.debug("Event location: {}",location);
         }
         
       //  List<EventAttendee> attendeesList = new ArrayList<EventAttendee>();
@@ -250,15 +249,14 @@ public class CalendarGoogleUtil {
 					.execute();
 			result = createdEvent.getId();
 		} catch (IOException e) {
-			log.error("Unable to create event", e);
+			log.error("Unable to create event: {}", e);
 		}
 		
 		return result;
 	}
 	
 	public org.societies.thirdparty.sharedcalendar.api.schema.Event getEvent(String eventId, String calendarId){
-		if(log.isDebugEnabled())
-			log.debug("Get event from Google!");
+		log.debug("Get event {} from Google!", eventId);
 		org.societies.thirdparty.sharedcalendar.api.schema.Event returnedEvent = null;
 		
 		try{
@@ -274,13 +272,11 @@ public class CalendarGoogleUtil {
 	
 	public void deleteEvent(String calendarId, String eventId) throws IOException{
 		try {
-			if(log.isDebugEnabled())
-				log.debug("Delete Event " + eventId + " from Calendar "+ calendarId);
-			
+			log.debug("Delete Event {} from Calendar {}", eventId, calendarId);			
 			service.events().delete(calendarId, eventId).execute();
 		} catch (IOException e) {
-			log.error("Unable to delete event with id '"+eventId+"' from calendar with id '"+calendarId+"'", e);
-		throw e;
+			log.error("Unable to delete event with id '{}' from calendar with id '{}': " + e.getMessage(), eventId, calendarId);
+			throw e;
 		}
 	}
 	
@@ -290,8 +286,7 @@ public class CalendarGoogleUtil {
 	 */
 	public org.societies.thirdparty.sharedcalendar.api.schema.Event updateEvent(org.societies.thirdparty.sharedcalendar.api.schema.Event eventToUpdate) throws IOException{
 		
-		if(log.isDebugEnabled())
-			log.debug("Update Event " + eventToUpdate.getEventId() + " from Calendar "+ eventToUpdate.getCalendarId());
+		log.debug("Update Event {} from Calendar {}", eventToUpdate.getEventId(), eventToUpdate.getCalendarId());
 		
 		Event googleEvent = findEventUsingId(eventToUpdate.getCalendarId(), eventToUpdate.getEventId());
 		
@@ -299,11 +294,11 @@ public class CalendarGoogleUtil {
 		googleEvent.setSummary(eventToUpdate.getName());
 		googleEvent.setLocation(eventToUpdate.getLocation());
 		
-		Date startDate = CalendarConverter.asDate(eventToUpdate.getStartDate());
+		Date startDate = eventToUpdate.getStartDate();
 		DateTime start = new DateTime(startDate,TimeZone.getDefault());
 		googleEvent.setStart(new EventDateTime().setDateTime(start));
 
-		Date endDate = CalendarConverter.asDate(eventToUpdate.getEndDate());
+		Date endDate = eventToUpdate.getEndDate();
 		DateTime end = new DateTime(endDate, TimeZone.getDefault());
 		googleEvent.setEnd(new EventDateTime().setDateTime(end));
 		
@@ -331,17 +326,13 @@ public class CalendarGoogleUtil {
 	
 	public boolean subscribeEvent(String calendarId, String eventId, IIdentity subscriber){
 		
-		if(log.isDebugEnabled())
-			log.debug("Subscribing to an event...");
+		log.debug("Subscribing to an event. {}", eventId);
 		
-		try{
-			if(log.isDebugEnabled())
-				log.debug("Finding event!");
-			
+		try{			
 			Event event = findEventUsingId(calendarId, eventId);
 			
-			if(log.isDebugEnabled())
-				log.debug("Creating event Attendee");
+			log.debug("Creating event Attendee for {}",subscriber);
+			
 			EventAttendee eventAttendee = createEventAttendee(subscriber);
 			
 			if (event.getAttendees() != null) {
@@ -364,14 +355,12 @@ public class CalendarGoogleUtil {
 	
 	public boolean unsubscribeEvent(String calendarId, String eventId, IIdentity subscriber){
 		
-		if(log.isDebugEnabled())
-			log.debug("UnSubscribing to an event...");
+		log.debug("UnSubscribing to an event {}", eventId);
+		
 		boolean unsubscriptionOk = false;
 		
 		try{
-			if(log.isDebugEnabled())
-				log.debug("Finding event!");
-			
+
 			Event event = findEventUsingId(calendarId, eventId);
 
 			List<EventAttendee> tmpAttendeeList = event.getAttendees();
@@ -391,17 +380,15 @@ public class CalendarGoogleUtil {
 				event.setAttendees(tmpAttendeeList);
 				updateEvent(calendarId, event);
 				
-				if(log.isDebugEnabled())
-					log.debug("Removed subscription to event!");
+				log.debug("Removed subscription to event {}!",event.getSummary());
 				
 				unsubscriptionOk = true;
 			} else{
-				if(log.isDebugEnabled())
-					log.debug("Removing subscription to event failed!");
+				log.debug("Removing subscription to event {} failed!",event.getSummary());
 			}
 
 		} catch(IOException ex){
-			log.error("Exception while subscribing!");
+			log.error("Exception while unsubscribing!");
 			ex.printStackTrace();
 		}
 		
@@ -417,9 +404,6 @@ public class CalendarGoogleUtil {
 			throws IOException {
 		
 		List<Event> returnedList = retrieveAllEventsForCalendar(calendarId);
-		if(log.isDebugEnabled())
-			log.debug("Found " + returnedList.size() + " events in calendar!");
-		
 		return eventListFromGoogleEventList(returnedList,calendarId);
 		
 	}
@@ -428,8 +412,7 @@ public class CalendarGoogleUtil {
 	 * This methods cleans all events in a calendar
 	 */
 	public void cleanCalendar(String calendarId) throws Exception{
-		if(log.isDebugEnabled())
-			log.debug("Cleaning a calendar of all Events! : " + calendarId);
+		log.debug("Cleaning a calendar of all Events! : " + calendarId);
 		
 		List<Event> allEvents = retrieveAllEventsForCalendar(calendarId);
 		
@@ -439,9 +422,8 @@ public class CalendarGoogleUtil {
 	}
 	
 	public List<org.societies.thirdparty.sharedcalendar.api.schema.Event> searchForEvent(String calendarId, org.societies.thirdparty.sharedcalendar.api.schema.Event searchEvent){
-		
-		if(log.isDebugEnabled())
-			log.debug("Searching for events in Google, for calendar: "+ calendarId);
+	
+		log.debug("Searching for events in Google, for calendar: {}", calendarId);
 		
 		List<Event> eventList = new ArrayList<Event>();
 		Events events = null;
@@ -451,24 +433,20 @@ public class CalendarGoogleUtil {
 			SimpleDateFormat formatTime=new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
 
 			if(searchEvent.getStartDate() != null){
-				if(log.isDebugEnabled())
-					log.debug("We have a starting date: " + searchEvent.getStartDate());
-				String fromTime =formatTime.format(CalendarConverter.asDate(searchEvent.getStartDate()));
+
+				String fromTime =formatTime.format(searchEvent.getStartDate());
 				log.debug("We have a starting date: {}",fromTime);
 				question.setTimeMin(fromTime);
 			}
 			
 			if(searchEvent.getEndDate() != null){
-				if(log.isDebugEnabled())
-					log.debug("We have a stopping date: " + searchEvent.getEndDate());
-				String endTime =formatTime.format(CalendarConverter.asDate(searchEvent.getEndDate()));
+				String endTime =formatTime.format(searchEvent.getEndDate());
 				log.debug("We have a stopping date: {}",endTime);
 				question.setTimeMax(endTime);
 			}
 			
 			if(searchEvent.getName() != null && !searchEvent.getName().isEmpty()){
-				if(log.isDebugEnabled())
-					log.debug("We have a keyword: " + searchEvent.getName());
+				log.debug("We have a keyword: {}",searchEvent.getName());
 				
 				question.setQ(searchEvent.getName());
 			}
@@ -477,23 +455,19 @@ public class CalendarGoogleUtil {
 			while (true) {
 				List<Event> eventsList = events.getItems();
 				if (eventsList == null){
-					log.error("Empty Events List");
+					log.warn("Empty Events List");
 					break;
 				}
 				for (Event event : eventsList) {
 					boolean fulfillsCriteria = true;
 					if(searchEvent.getCreatorId() != null && !searchEvent.getCreatorId().isEmpty()){
 						if(!event.getExtendedProperties().get("creatorId").equals(searchEvent.getCreatorId())){
-							if(log.isDebugEnabled())
-								log.debug("Failed Creator ID!");
 							fulfillsCriteria = false;
 						}
 					}
 
 					if(searchEvent.getLocation() != null && !searchEvent.getLocation().isEmpty()){
 						if(event.getLocation() != null && !event.getLocation().equals(searchEvent.getLocation())){
-							if(log.isDebugEnabled())
-								log.debug("Failed Location");
 							fulfillsCriteria = false;
 						}
 						
@@ -521,10 +495,7 @@ public class CalendarGoogleUtil {
 		} catch (Exception e) {
 			log.error("Unable to query calendar with id "+calendarId, e);
 		}	
-		
-		if(log.isDebugEnabled() && eventList != null)
-			log.debug("Found " + eventList.size() + " that match search parameters!");
-		
+				
 		return eventListFromGoogleEventList(eventList,calendarId);
 		
 	}
@@ -700,20 +671,11 @@ public class CalendarGoogleUtil {
 			throws IOException {
 		Event event = null;
 		
-		if(log.isDebugEnabled()){
-			log.debug("eventId: " + eventId);
-			log.debug("calendarId: " + calendarId);
-		}
-		
 		try {
 			Get request = service.events().get(calendarId, eventId);
-			if(log.isDebugEnabled()){
-				log.debug("eventId: " + request.getEventId());
-				log.debug("calendarId: " + request.getCalendarId());
-			}
-				request.setCalendarId(calendarId);
-				request.setEventId(eventId);
-				event = request.execute();
+			request.setCalendarId(calendarId);
+			request.setEventId(eventId);
+			event = request.execute();
 			///event = service.events().get(calendarId, eventId).execute();
 		} catch (IOException e) {
 			log.error("Unable to find event '"+eventId+"' in calendar with id '"+calendarId+"'", e);
@@ -788,12 +750,10 @@ public class CalendarGoogleUtil {
 		
 		org.societies.thirdparty.sharedcalendar.api.schema.Event tmpEvent = new org.societies.thirdparty.sharedcalendar.api.schema.Event();
 			       
-		tmpEvent.setEndDate(CalendarConverter
-				.asXMLGregorianCalendar(new Date(googleEvent.getEnd()
-						.getDateTime().getValue())));
-		tmpEvent.setStartDate(CalendarConverter
-				.asXMLGregorianCalendar(new Date(googleEvent.getStart()
-						.getDateTime().getValue())));
+		tmpEvent.setEndDate(new Date(googleEvent.getEnd()
+						.getDateTime().getValue()));
+		tmpEvent.setStartDate(new Date(googleEvent.getStart()
+						.getDateTime().getValue()));
 		tmpEvent.setEventId(googleEvent.getId());
 		tmpEvent.setName(googleEvent.getSummary());
 		
@@ -852,6 +812,7 @@ public class CalendarGoogleUtil {
 			log.debug("Got the calendar service: " + service.getApplicationName() + " : " + service.getBaseUrl());
 			
 		} catch (Exception e) {
+			e.printStackTrace();
 			log.error("Unable to initialize remote Calendar Service", e);
 		}
 

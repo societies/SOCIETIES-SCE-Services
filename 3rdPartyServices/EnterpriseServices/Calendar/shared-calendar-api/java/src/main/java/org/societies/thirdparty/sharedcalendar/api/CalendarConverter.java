@@ -24,7 +24,9 @@
  */
 package org.societies.thirdparty.sharedcalendar.api;
 
+import java.text.SimpleDateFormat;
 import java.util.GregorianCalendar;
+import java.util.regex.Pattern;
 
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
@@ -40,6 +42,9 @@ public class CalendarConverter {
      * Needed to create XMLGregorianCalendar instances
      */
     private static DatatypeFactory df = null;
+    private static SimpleDateFormat formatTime =new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
+    private static final Pattern TZ_REGEX = Pattern.compile("([+-][0-9][0-9]):?([0-9][0-9])$");
+    
     static {
         try {
             df = DatatypeFactory.newInstance();
@@ -84,4 +89,16 @@ public class CalendarConverter {
         }
     }
     
+    public static java.util.Date toDate(String date){
+    	try{
+    		return formatTime.parse(date);
+    	}catch(Exception ex){
+    		return null;
+    	}
+    	
+    }
+    
+    public String fromDate(java.util.Date date){
+    	return formatTime.format(date);
+    }
 }

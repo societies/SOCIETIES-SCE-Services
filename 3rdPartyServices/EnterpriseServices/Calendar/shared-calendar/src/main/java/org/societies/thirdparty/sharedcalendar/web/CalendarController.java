@@ -4,7 +4,10 @@ import java.util.Date;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.Future;
 
 
@@ -14,15 +17,18 @@ import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.RequestScoped;
 import javax.faces.bean.SessionScoped;
+import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.faces.event.ActionEvent;
 
 
+import org.primefaces.component.schedule.Schedule;
 import org.primefaces.event.ScheduleEntryMoveEvent;
 import org.primefaces.event.ScheduleEntryResizeEvent;
 import org.primefaces.event.SelectEvent;
 import org.primefaces.model.DefaultScheduleEvent;
 import org.primefaces.model.DefaultScheduleModel;
+import org.primefaces.model.LazyScheduleModel;
 import org.primefaces.model.ScheduleEvent;
 import org.primefaces.model.ScheduleModel;
 import org.slf4j.Logger;
@@ -38,6 +44,7 @@ import org.societies.api.schema.servicelifecycle.model.ServiceResourceIdentifier
 import org.societies.api.services.IServices;
 import org.societies.api.useragent.monitoring.IUserActionMonitor;
 import org.societies.thirdparty.sharedcalendar.CalendarContextUtils;
+import org.societies.thirdparty.sharedcalendar.CalendarPreferenceManager;
 import org.societies.thirdparty.sharedcalendar.api.CalendarPreference;
 import org.societies.thirdparty.sharedcalendar.api.ISharedCalendar;
 import org.societies.thirdparty.sharedcalendar.api.CalendarConverter;
@@ -88,7 +95,7 @@ public class CalendarController {
 		return mySRI;
 	}
 	
-	private HashMap<String, CalendarEvent> currentEvents;
+	protected HashMap<String, CalendarEvent> currentEvents;
 
 	public List<CalendarEvent> getCurrentEvents() {
 		return new ArrayList<CalendarEvent>(currentEvents.values());
@@ -120,32 +127,6 @@ public class CalendarController {
 	public void setCommManager(ICommManager commManager) {
 		this.commManager = commManager;
 	}
-	
-	@ManagedProperty(value = "#{userActionMonitor}")
-	private IUserActionMonitor userActionMonitor;
-	
-    @SuppressWarnings("UnusedDeclaration")
-	public IUserActionMonitor getUserActionMonitor() {
-		return userActionMonitor;
-	}
-
-    @SuppressWarnings("UnusedDeclaration")
-	public void setUserActionMonitor(IUserActionMonitor userActionMonitor) {
-		this.userActionMonitor = userActionMonitor;
-	}
-    
-	@ManagedProperty(value = "#{personalisationManager}")
-	private IPersonalisationManager personalisationManager;
-	
-    @SuppressWarnings("UnusedDeclaration")
-	public IPersonalisationManager getPersonalisationManager() {
-		return personalisationManager;
-	}
-
-    @SuppressWarnings("UnusedDeclaration")
-	public void setPersonalisationManager(IPersonalisationManager personalisationManager) {
-		this.personalisationManager = personalisationManager;
-	}
     
 	@ManagedProperty(value = "#{serviceMgmt}")
 	private IServices serviceMgmt;
@@ -160,18 +141,35 @@ public class CalendarController {
 		this.serviceMgmt = serviceMgmt;
 	}
     
-    @ManagedProperty(value = "#{ctxBroker}")
-    private ICtxBroker ctxBroker;
+    
+    @ManagedProperty(value = "#{calendarContext}")
+    private CalendarContextUtils calendarContext;
     
     @SuppressWarnings("UnusedDeclaration")
-	public ICtxBroker getCtxBroker() {
-		return ctxBroker;
+	public CalendarContextUtils getCalendarContext() {
+		return calendarContext;
 	}
 
     @SuppressWarnings("UnusedDeclaration")
-	public void setCtxBroker(ICtxBroker ctxBroker) {
-		this.ctxBroker = ctxBroker;
+	public void setCalendarContext(CalendarContextUtils calendarContext) {
+		this.calendarContext = calendarContext;
 	}
+    
+    
+    @ManagedProperty(value = "#{calendarPreferences}")
+    private CalendarPreferenceManager preferences;
+    
+    @SuppressWarnings("UnusedDeclaration")
+	public CalendarPreferenceManager getPreferences() {
+		return preferences;
+	}
+
+    @SuppressWarnings("UnusedDeclaration")
+	public void setPreferences(CalendarPreferenceManager preferences) {
+    	log.debug("Set Preferences!");
+		this.preferences = preferences;
+	}
+    
     
 	// PROPERTIES that the Webpage will access
 	private String selectedNode;
@@ -207,6 +205,16 @@ public class CalendarController {
 	}
 
 	
+	private boolean searchLocationToggle;
+	
+	public boolean isSearchLocationToggle() {
+		return searchLocationToggle;
+	}
+
+	public void setSearchLocationToggle(boolean locationToggle) {
+		this.searchLocationToggle = locationToggle;
+	}
+	
 	private boolean locationToggle;
 	
 	public boolean isLocationToggle() {
@@ -218,20 +226,34 @@ public class CalendarController {
 	}
 	
 	public String getMyLocation(){
-		String myLocation = mycontext.getMyLocation();
+		String myLocation = getCalendarContext().getMyLocation();
 		if(myLocation != null)
 			return myLocation;
 		else
 			return "Not Available";
 	}
 	
-	private ScheduleModel eventModel;
+	private CalendarSchedule eventModel;
 	
-    public ScheduleModel getEventModel() {  
+    public LazyScheduleModel getEventModel() {
         return eventModel;  
     }  
     
     
+	/**
+	 * @return the scheduleHelper
+	 */
+	public ScheduleHelper getScheduleHelper() {
+		return scheduleHelper;
+	}
+
+	/**
+	 * @param scheduleHelper the scheduleHelper to set
+	 */
+	public void setScheduleHelper(ScheduleHelper scheduleHelper) {
+		this.scheduleHelper = scheduleHelper;
+	}
+
 	private ScheduleEvent event = new DefaultScheduleEvent();
 	
     public ScheduleEvent getEvent() {  
@@ -261,24 +283,14 @@ public class CalendarController {
 	}
 	
 	public List<CalendarEvent> getRecommendedEvents(){
+		if(recommendedEvents.isEmpty())
+			recommendedEvents.add(new CalendarEvent(defaultRecommendedEvent,this));
 		return recommendedEvents;
-	}
-	
-	private String viewOption;
-	
-	
-	public String getViewOption() {
-		return viewOption;
-	}
-
-	public void setViewOption(String viewOption) {
-		this.viewOption = viewOption;
 	}
 
 	private CalendarEvent recommendedEvent;
 	
 	public void setRecommendedEvent(CalendarEvent recommendedEvent){
-		log.debug("Set recommendedEvent: " + recommendedEvent);
 		this.recommendedEvent = recommendedEvent;
 	}
 	
@@ -286,17 +298,22 @@ public class CalendarController {
 		return recommendedEvent;
 	}
 	
-	private List<String> eventAttendees;
-	
-	public void setEventAttendees(List<String> eventAttendees){
-		this.eventAttendees=eventAttendees;
-	}
-	
 	public List<String> getEventAttendees(){
-		List<String> event = new ArrayList<String>();
-		event.add("Coisas");
-		event.add("Coisas2");
-		return event;
+		List<String> eventAttendees = new ArrayList<String>();
+		if(societiesEvent == null || societiesEvent.getAttendees() == null || societiesEvent.getAttendees().isEmpty()){
+			eventAttendees.add("No attendees...");
+		} else{
+			for(String attendeeId: societiesEvent.getAttendees()){
+				try{
+					eventAttendees.add(getCommManager().getIdManager().fromJid(attendeeId).getIdentifier());
+				} catch(Exception ex){
+					log.warn("Couldn't change {} to an Id...",attendeeId);
+				}
+			}
+			
+		}
+		
+		return eventAttendees;
 	}
     
 	
@@ -384,10 +401,10 @@ public class CalendarController {
 		return isMultipleEvents;
 	}
 	
-	EventConverter eventConverter;
-	private String serviceType;
-	private RequestorService requestor;
-	private CalendarContextUtils mycontext;
+	private EventConverter eventConverter;
+	private Event defaultRecommendedEvent;
+	private Event defaultSearchEvent;
+	private ScheduleHelper scheduleHelper;
 	
 	public void setEventConverter(EventConverter eventConverter){
 		this.eventConverter = eventConverter;
@@ -401,27 +418,69 @@ public class CalendarController {
 		if(log.isDebugEnabled())
 			log.debug("CalendarController");
 		
-		eventModel = new DefaultScheduleModel();
+		eventModel = new CalendarSchedule(this);
 		eventConverter = new EventConverter(this);
 		
-		viewOption = "schedule";
 		myId = null;
 		recommendedEvent = null;
+		searchEvent = null;
 		recommendedEvents = new ArrayList<CalendarEvent>();
 		searchResults = new ArrayList<CalendarEvent>();
 		allEvents = false;
 		agendaToggle = false;
 		locationToggle = false;
+		setScheduleHelper(new ScheduleHelper(this));
+		defaultRecommendedEvent = new Event();
+		defaultSearchEvent = new Event();
 		
-		Event testEvent = new Event();
-		testEvent.setCalendarId("teste");
-		testEvent.setName("teste");
-		testEvent.setLocation("teste");
-		testEvent.setDescription("teste");
-		recommendedEvents.add(new CalendarEvent(testEvent,this));
+		defaultRecommendedEvent.setEventId("recEvent");
+		defaultRecommendedEvent.setName("No Recommended Events");
+		defaultSearchEvent.setEventId("searchEvent");
+		defaultSearchEvent.setName("No Search Results");
 		
+		societiesEvent = new CalendarEvent(this);
+		societiesEvent.setDescription(" ");
+		societiesEvent.setLocation("");
+		societiesEvent.setAttendees(new ArrayList<String>());
+		
+		
+		setSelectedEvent(getSearchResults().get(0));
+		setRecommendedEvent(getRecommendedEvents().get(0));
 	}
 
+	public String getDateSelect(){
+		return getScheduleHelper().getDate();
+	}
+	
+	public void setDateSelect(String date){
+		log.debug("DateSelect {}",date);
+		getScheduleHelper().setDate(date);
+	}
+	
+	public void changeCalendarDate(String date){
+		log.debug("changeCalendarDate");
+		setDateSelect(date);
+		getScheduleHelper().changeDate();
+	}
+	
+	public void previousDate(ActionEvent actionEvent){
+		getScheduleHelper().setDate("previous");
+		getScheduleHelper().changeDate();
+	}
+	
+	public void nextDate(ActionEvent actionEvent){
+		getScheduleHelper().setDate("next");
+		getScheduleHelper().changeDate();
+	}
+	
+	public void currentDate(ActionEvent actionEvent){
+		getScheduleHelper().setDate("today");
+		getScheduleHelper().changeDate();
+	}
+	
+	public void selectView(){
+		getScheduleHelper().selectView();
+	}
 	
 	public void preRender(){
 		if(log.isDebugEnabled())
@@ -429,15 +488,14 @@ public class CalendarController {
 		
 		try{
 			myId = getId();
+			getScheduleHelper().selectView();
+			
 			if(selectedNode == null){
-				
-				requestor = new RequestorService(myId, getSRI());
-				mycontext = new CalendarContextUtils(getCtxBroker(), myId, commManager);
-				serviceType = getServiceMgmt().getMyCategory(getSRI());
 				
 				getCalendars();
 				
-				selectedNode = getPreference(CalendarPreference.VIEW_CALENDAR);
+				selectedNode = getPreferences().getPreference(CalendarPreference.VIEW_CALENDAR);
+				log.debug("selectedNode: {}",selectedNode);
 				
 				if(selectedNode == null)
 					selectedNode = myId.getBareJid();
@@ -461,7 +519,6 @@ public class CalendarController {
 	public void updateWebApp(){
 		log.debug("Updating Web App Stuff!");
 		getCalendars();
-		log.debug("Preference: {}", getPreference(CalendarPreference.VIEW_CALENDAR));
 		
 		viewCalendar(selectedNode);
 			
@@ -475,7 +532,7 @@ public class CalendarController {
 		
 		if(selectedNode != null){
 			
-			setPreference(CalendarPreference.VIEW_CALENDAR,selectedNode);
+			preferences.setPreference(CalendarPreference.VIEW_CALENDAR,selectedNode);
 			viewCalendar(selectedNode);
 		} else{
 			selectedNode = getId().getBareJid();
@@ -510,37 +567,64 @@ public class CalendarController {
 	}
 	
 	private void viewCalendar(String nodeId){
-		if(log.isDebugEnabled())
-			log.debug("We need to update the Calendar we are viewing!");
-		
-		if(log.isDebugEnabled())
-			log.debug("Getting the events for this calendar!");
+	
+		log.debug("We need to update the Calendar we are viewing, for node {}", nodeId);
 		
 		CalendarResultCallback callback = new CalendarResultCallback();
-
-		if(!nodeId.equals("mysubscribedevents"))
+		CalendarResultCallback secondCallback = null;
+		
+		if(!nodeId.equals("mysubscribedevents")){
 			getSharedCalendar().retrieveEvents(callback, nodeId);
+			if(allEvents){
+				secondCallback = new CalendarResultCallback();
+				getSharedCalendar().getSubscribedEvents(callback, getId().getBareJid());
+			}
+		}
 		else
 			getSharedCalendar().getSubscribedEvents(callback, getId().getBareJid());
 		
 		SharedCalendarResult result = callback.getResult();
 		List<Event> calendarEvents = result.getEventList();
 		
-		if(log.isDebugEnabled())
-			log.debug("Got the events for the calendar: " + calendarEvents.size());
-		
 		currentEvents = new HashMap<String,CalendarEvent>();
+		Schedule mySchedule = (Schedule) FacesContext.getCurrentInstance().getViewRoot().findComponent("form:schedule");
+		String view = mySchedule.getView();
+		log.debug("My view is: {}",view);
+		log.debug("My initial date is: {}", mySchedule.getInitialDate() );
 		eventModel.clear();
 		
 		for(Event event: calendarEvents){
 			log.debug("Adding event: {}", event.getName());
 			
-			Date startDate = CalendarConverter.asDate(event.getStartDate());
-			Date endDate = CalendarConverter.asDate(event.getEndDate());
-			ScheduleEvent newEvent = new DefaultScheduleEvent(event.getName(),startDate,endDate);
+			ScheduleEvent newEvent = new DefaultScheduleEvent(event.getName(),event.getStartDate(),event.getEndDate());
 			eventModel.addEvent(newEvent);
 			currentEvents.put(newEvent.getId(),new CalendarEvent(event,getCalendarName(event.getNodeId()),this));
+		}
+		
+		if(secondCallback != null){
+			result = callback.getResult();
+			List<Event> subscribedEvents = result.getEventList();
 			
+			for(Event event: subscribedEvents){
+				log.debug("Adding subs event: {}", event.getName());
+				// First we check if the current event is there...
+				CalendarEvent ourEvent = new CalendarEvent(event,getCalendarName(event.getNodeId()),this);
+				Set<Entry<String, CalendarEvent>> eventSet = currentEvents.entrySet();
+				if(currentEvents.containsValue(ourEvent)){
+					Iterator<Entry<String, CalendarEvent>> myIt = eventSet.iterator();
+					while(myIt.hasNext()){
+						Entry<String, CalendarEvent> calendarEntry = myIt.next();
+						if(calendarEntry.getValue().equals(ourEvent)){
+							eventModel.deleteEvent(eventModel.getEvent(calendarEntry.getKey()));
+							myIt.remove();
+						}
+					}
+				} 
+				
+				ScheduleEvent newEvent = new DefaultScheduleEvent(event.getName(),event.getStartDate(),event.getEndDate());
+				eventModel.addEvent(newEvent);
+				currentEvents.put(newEvent.getId(),new CalendarEvent(event,getCalendarName(event.getNodeId()),this));
+			}
 		}
 		
 	}
@@ -565,27 +649,10 @@ public class CalendarController {
 		if(log.isDebugEnabled())
 			log.debug("Returned " + recommendedEvents.size() + " recommended Events!");
 		
-		
-		if(recommendedEvents.size() < 1 && currentEvents != null){
-			for(CalendarEvent curEvent : currentEvents.values()){
-				log.info("curEvent: " + curEvent.getTitle());
-				recommendedEvents.add(curEvent);
-			}
-		}
-		
-		if(recommendedEvents.size() < 1){
-			log.debug("No events?! No way!");
-			Event testEvent = new Event();
-			testEvent.setCalendarId("teste");
-			testEvent.setName("No recommended Events");
-			testEvent.setLocation("teste");
-			testEvent.setDescription("teste");
-			recommendedEvents.add(new CalendarEvent(testEvent,this));
-		}
-		
 		if(log.isDebugEnabled())
 			log.debug("Final " + recommendedEvents.size() + " recommended Events!");
 		
+		setRecommendedEvent(getRecommendedEvents().get(0));
 		//addMessage("Updated Events!",recommendedEvents.size() + "events!");
 	}
 	
@@ -602,6 +669,7 @@ public class CalendarController {
 		
 		event = selectedEvent; 
 		societiesEvent = currentEvents.get(selectedEvent.getId());
+		setLocationToggle(false);
 		
 	}
 	
@@ -622,10 +690,13 @@ public class CalendarController {
 			societiesEvent.setNodeId(myId.getBareJid());
 			societiesEvent.setCalendarName(getCalendarName(myId.getBareJid()));
 		}
-		if(log.isDebugEnabled()){
-			log.debug("Date selected: " + (Date) selectEvent.getObject());
+		
+		if(isLocationToggle())
+			updateLocation();
+		
+		log.debug("Date selected: {}", (Date) selectEvent.getObject());
 			
-		}
+		
 	}
 	
 	public void onEventMove(ScheduleEntryMoveEvent event) {
@@ -633,7 +704,7 @@ public class CalendarController {
 		if(log.isDebugEnabled())
 			log.debug("Event was moved!: " + event.getScheduleEvent().getId());
 
-		addMessage("Event moved","New start date: " + event.getScheduleEvent().getStartDate() +", New end date: " + event.getScheduleEvent().getEndDate());  
+		//addMessage("Event moved","New start date: " + event.getScheduleEvent().getStartDate() +", New end date: " + event.getScheduleEvent().getEndDate());  
 
         updateEvent(event.getScheduleEvent());
 
@@ -643,7 +714,7 @@ public class CalendarController {
 		if(log.isDebugEnabled())
 			log.debug("Event was resized!");
 
-		addMessage("Event resized","New start date: " + event.getScheduleEvent().getStartDate() +", New end date: " + event.getScheduleEvent().getEndDate());  
+		//addMessage("Event resized","New start date: " + event.getScheduleEvent().getStartDate() +", New end date: " + event.getScheduleEvent().getEndDate());  
 
         updateEvent(event.getScheduleEvent());
 
@@ -651,10 +722,24 @@ public class CalendarController {
 	
 	private void updateEvent(ScheduleEvent scheduleEvent){
 		
-		Event updatedEvent = currentEvents.get(scheduleEvent.getId()).getSocietiesEvent();
-				
-		Date originalStart = CalendarConverter.asDate(updatedEvent.getStartDate());
-		Date originalEnd = CalendarConverter.asDate(updatedEvent.getEndDate());
+		CalendarEvent changedEvent = currentEvents.get(scheduleEvent.getId());
+		Event updatedEvent = changedEvent.getSocietiesEvent();
+		
+		Date originalStart = updatedEvent.getStartDate();
+		Date originalEnd = updatedEvent.getEndDate();
+		
+		if(!changedEvent.isMyEvent()){
+			log.debug("Trying to change an event we don't own?! We can't do that!");
+			ScheduleEvent revertedEvent = new DefaultScheduleEvent(scheduleEvent.getTitle(),originalStart,originalEnd,scheduleEvent.getStyleClass());
+			revertedEvent.setId(scheduleEvent.getId());
+		
+			eventModel.updateEvent(revertedEvent);
+			
+			addMessage("Event Not Updated!", updatedEvent.getName() + " couldn't be changed, as we don't own it!");
+
+			return;
+		}
+
 		
 		if(log.isDebugEnabled()){
 			log.debug("Original Start Time: " + originalStart);
@@ -663,8 +748,8 @@ public class CalendarController {
 			log.debug("New end time: " + scheduleEvent.getEndDate());
 		}
 		
-		updatedEvent.setStartDate(CalendarConverter.asXMLGregorianCalendar(scheduleEvent.getStartDate()));
-		updatedEvent.setEndDate(CalendarConverter.asXMLGregorianCalendar(scheduleEvent.getEndDate()));
+		updatedEvent.setStartDate(scheduleEvent.getStartDate());
+		updatedEvent.setEndDate(scheduleEvent.getEndDate());
 		
 		ICalendarResultCallback callback = new CalendarResultCallback();
 		getSharedCalendar().updateEvent(callback , updatedEvent);
@@ -794,12 +879,10 @@ public class CalendarController {
     	SharedCalendarResult result = callback.getResult();
     	
     	if(result.isSubscribingResult()){
-    		if(log.isDebugEnabled())
-    			log.debug("Joined event!");
+    		societiesEvent.setSocietiesEvent(result.getEvent());
+    		currentEvents.put(event.getId(), societiesEvent);
     		addMessage("Join Completed","Joined the event " + societiesEvent.getTitle());
     	} else{
-    		if(log.isDebugEnabled())
-    			log.debug("Couldn't subscribe!");
     		addMessage("Join failed!","Couldn't join the event " + societiesEvent.getTitle());
     	}
     		
@@ -813,16 +896,14 @@ public class CalendarController {
     		return;
     	
 		CalendarResultCallback callback = new CalendarResultCallback();
-    	getSharedCalendar().unsubscribeFromEvent(callback, societiesEvent.getEventId(), getId().getBareJid());
+    	getSharedCalendar().unsubscribeFromEvent(callback, societiesEvent.getEventId(), societiesEvent.getNodeId(),getId().getBareJid());
     	SharedCalendarResult result = callback.getResult();
     	
     	if(result.isSubscribingResult()){
-    		if(log.isDebugEnabled())
-    			log.debug("Left event!");
+    		societiesEvent.setSocietiesEvent(result.getEvent());
+    		currentEvents.put(event.getId(), societiesEvent);
     		addMessage("Leave Completed","Left the event " + societiesEvent.getTitle());
     	} else{
-    		if(log.isDebugEnabled())
-    			log.debug("Couldn't leave!");
     		addMessage("Join failed!","Couldn't leave the event " + societiesEvent.getTitle());
     	}
     		
@@ -838,6 +919,7 @@ public class CalendarController {
 			societiesEvent = recommendedEvent;
 			event = new DefaultScheduleEvent(recommendedEvent.getTitle(),recommendedEvent.getStartDate(),recommendedEvent.getEndDate());
 			event.setId("recommendedEvent");
+			setLocationToggle(false);
 			
 		} else{
 			if(log.isDebugEnabled())
@@ -868,7 +950,7 @@ public class CalendarController {
 		
 	}
 	
-	private String getCalendarName(String nodeId){
+	protected String getCalendarName(String nodeId){
 
 		for(Calendar calendar: calendars){
 			if(calendar.getNodeId().equals(nodeId))
@@ -877,53 +959,16 @@ public class CalendarController {
 		return null;
 	}
 	
-	
-	private String getPreference(CalendarPreference preference){
-		if(log.isDebugEnabled())
-			log.debug("Getting Preference: " + preference);
-		
-		String result = null;
-		
-		try{
-		
-			Future<IAction> actionAsync = getPersonalisationManager().getPreference(requestor, myId, serviceType, mySRI, preference.toString());
-			IAction action =actionAsync.get();
-			
-			if(action != null){
-				if(log.isDebugEnabled())
-					log.debug("Preference retrieved: " + action.getparameterName() + " =>  " + action.getvalue());
-				
-				result = action.getvalue();
-			} else {
-				if(log.isDebugEnabled())
-					log.debug("Preference was not retrieved");
-			}
-		} catch(Exception ex){
-			log.error("There was an exception getting a Preference from the Personalisation Manager :" + ex);
-			ex.printStackTrace();
-		}
-		
-		return result;
-	}
-	
-	private void setPreference(CalendarPreference preferenceName, String preferenceValue){
-		if(log.isDebugEnabled())
-			log.debug("Set a Preference ("+preferenceName+','+preferenceValue+')');
-		
-		//IAction myAction = new Action(getSRI(), serviceType, preferenceName, preferenceValue, false, true, false);
-		IAction myAction = new Action(getSRI(), serviceType, preferenceName.toString(), preferenceValue);
-		getUserActionMonitor().monitor(getId(), myAction);
-	}
-	
+
 	// SEARCH STUFF
 	
 	private CalendarEvent searchEvent;
 	private List<CalendarEvent> searchResults;
 	
 	public List<CalendarEvent> getSearchResults() {
-		if(searchResults == null)
-			searchResults = new ArrayList<CalendarEvent>();
-			
+		if(searchResults.isEmpty())
+			searchResults.add(new CalendarEvent(defaultSearchEvent,this));
+		
 		return searchResults;
 	}
 
@@ -937,11 +982,11 @@ public class CalendarController {
 	
 	public CalendarEvent getSearchEvent(){
 		if(searchEvent == null){
-			log.debug("Search Event == null");
+			log.debug("Search Event was null");
 			Event event = new Event();
 			event.setEventId("searchEvent");
 			
-			if(selectedNode.equals("mysubscribedevents")){
+			if("mysubscribedevents".equals(selectedNode)){
 				searchEvent = new CalendarEvent(event,"All Calendars",this);
 				searchEvent.setNodeId("allCalendars");
 				searchCalendarNode = "allCalendars";
@@ -958,7 +1003,7 @@ public class CalendarController {
 		if(log.isDebugEnabled())
 			log.debug("We need to prepare the dialog for the event searching stuff");
 		
-		log.debug("Selected Node is: " + selectedNode);
+		log.debug("Selected Node is: {}", selectedNode);
 		
 		Event event = new Event();
 		event.setEventId("searchEvent");
@@ -974,19 +1019,26 @@ public class CalendarController {
 		}
 
 
-		String searchCreator = getPreference(CalendarPreference.SEARCH_CREATOR);
+		String searchCreator = preferences.getPreference(CalendarPreference.SEARCH_CREATOR);
 		if(searchCreator != null)
 			searchEvent.setCreatorId(searchCreator);
 		
-		String searchLocation = getPreference(CalendarPreference.SEARCH_LOCATION);
-		if(searchLocation != null)
+		String searchLocation = preferences.getPreference(CalendarPreference.SEARCH_LOCATION);
+		if(searchLocation != null){
+			setSearchLocationToggle(false);
 			searchEvent.setLocation(searchLocation);
+		}
+		else{
+			if(isSearchLocationToggle()){
+				updateLocation();
+			}
+		}
 		
-		String searchKeyword = getPreference(CalendarPreference.SEARCH_KEYWORD);
+		String searchKeyword = preferences.getPreference(CalendarPreference.SEARCH_KEYWORD);
 		if(searchKeyword != null)
 			searchEvent.setTitle(searchKeyword);
 		
-		String searchCalendar = getPreference(CalendarPreference.SEARCH_CALENDAR);
+		String searchCalendar = preferences.getPreference(CalendarPreference.SEARCH_CALENDAR);
 		if(searchCalendar != null){
 			searchEvent.setNodeId(searchCalendar);
 			searchCalendarNode = searchCalendar;
@@ -1011,13 +1063,13 @@ public class CalendarController {
 		searchEvent.setNodeId(searchCalendarNode);
 		
 		if(searchEvent.getTitle() != null)
-			setPreference(CalendarPreference.SEARCH_KEYWORD,searchEvent.getTitle());
+			preferences.setPreference(CalendarPreference.SEARCH_KEYWORD,searchEvent.getTitle());
 		if(searchEvent.getLocation() != null)
-			setPreference(CalendarPreference.SEARCH_LOCATION,searchEvent.getLocation());
+			preferences.setPreference(CalendarPreference.SEARCH_LOCATION,searchEvent.getLocation());
 		if(searchEvent.getCreatorId() != null)
-			setPreference(CalendarPreference.SEARCH_CREATOR,searchEvent.getCreatorId());
+			preferences.setPreference(CalendarPreference.SEARCH_CREATOR,searchEvent.getCreatorId());
 		if(searchEvent.getNodeId() != null)
-			setPreference(CalendarPreference.SEARCH_CALENDAR,searchEvent.getNodeId());
+			preferences.setPreference(CalendarPreference.SEARCH_CALENDAR,searchEvent.getNodeId());
 		
 		ICalendarResultCallback calendarResultCallback = new CalendarResultCallback();
 
@@ -1046,14 +1098,7 @@ public class CalendarController {
 			searchResults.add(new CalendarEvent(foundEvent,getCalendarName(foundEvent.getNodeId()),this));
 		}
 		
-		if(searchResults.isEmpty()){
-			CalendarEvent placeholderEvent = new CalendarEvent(this);
-			placeholderEvent.setCalendarName("");
-			placeholderEvent.setTitle("No search results...");
-			searchResults.add(placeholderEvent);
-		}
-		
-		setSelectedEvent(searchResults.get(0));
+		setSelectedEvent(getSearchResults().get(0));
 		
 	}
 	
@@ -1067,7 +1112,7 @@ public class CalendarController {
 	public CalendarEvent getSelectedEvent(){
 		return selectedEvent;
 	}
-	
+
 	public void viewSearchEvent(){
 		if(log.isDebugEnabled())
 			log.debug("View searched event!");
@@ -1078,6 +1123,7 @@ public class CalendarController {
 			societiesEvent = selectedEvent;
 			event = new DefaultScheduleEvent(societiesEvent.getTitle(),societiesEvent.getStartDate(),societiesEvent.getEndDate());
 			event.setId("searchResultEvent");
+			setLocationToggle(false);
 			
 		} else{
 			if(log.isDebugEnabled())
@@ -1109,31 +1155,34 @@ public class CalendarController {
 	public String getSocietiesEventNode() {
 		if(societiesEvent != null && societiesEvent.getNodeId() != null)
 			societiesEventNode = societiesEvent.getNodeId();
-		log.debug("getSocietiesEventNode: " + societiesEventNode);
 
 		return societiesEventNode;
 	}
 
 	public void setSocietiesEventNode(String societiesEventNode) {
-		log.debug("setSocietiesEventNode: " + societiesEventNode);
+		log.debug("setSocietiesEventNode: {}", societiesEventNode);
 		this.societiesEventNode = societiesEventNode;
 		if(societiesEvent != null)
 			societiesEvent.setNodeId(societiesEventNode);
 	}
 	
 	public void updateLocation(){
-		if(log.isDebugEnabled())
-			log.debug("Updating location for: " + event);
+		String myLocation = getCalendarContext().getMyLocation();
+		log.debug("Setting location to: {}", myLocation);
 		
-		if(true){
-			String myLocation = mycontext.getMyLocation();
-			if(myLocation != null){
-				if(log.isDebugEnabled())
-					log.debug("Setting location to: " + myLocation);
+		if(myLocation != null){
+					
+			if(searchEvent != null)
 				searchEvent.setLocation(myLocation);
-			} else{
+
+			if(societiesEvent != null)
+				societiesEvent.setLocation(myLocation);
+
+		} else{
+			if(searchEvent != null)
 				searchEvent.setLocation("Not Available");
-			}
+			if(societiesEvent != null)
+				societiesEvent.setLocation("Not Available");
 		}
 	}
 }

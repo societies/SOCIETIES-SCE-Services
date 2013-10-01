@@ -45,18 +45,21 @@ public class CalendarEvent {
 	private Event societiesEvent;
 	private String	calendarName;
 	private CalendarController parent;
+	private String creatorName;
 	
 	public CalendarEvent(Event societiesEvent,CalendarController parent ) {
 
 		this.societiesEvent = societiesEvent;
 		this.calendarName = null;
 		this.parent = parent;
+		this.creatorName = null;
 	}
 	
 	public CalendarEvent(CalendarController parent ){
 		this.societiesEvent = new Event();
 		this.calendarName = null;
 		this.parent = parent;
+		this.creatorName = null;
 	}
 	
 	public CalendarEvent(Event societiesEvent, String calendarName, CalendarController parent ) {
@@ -64,6 +67,7 @@ public class CalendarEvent {
 		this.societiesEvent = societiesEvent;
 		this.calendarName = calendarName;
 		this.parent = parent;
+		this.creatorName = null;
 	}
 	
 	/**
@@ -90,7 +94,7 @@ public class CalendarEvent {
 	}
 
 
-	public void setAttendess(List<String> attendees){
+	public void setAttendees(List<String> attendees){
 		this.societiesEvent.setAttendees(attendees);
 	}
 	public List<String> getAttendees(){
@@ -124,6 +128,23 @@ public class CalendarEvent {
 	public void setCreatorId(String creatorId){
 		this.societiesEvent.setCreatorId(creatorId);
 	}
+	
+	public String getCreatorName(){
+		
+		if(creatorName == null){
+			if(this.societiesEvent != null && societiesEvent.getCreatorId() != null && !societiesEvent.getCreatorId().isEmpty()){
+				try{
+					creatorName = parent.getCommManager().getIdManager().fromJid(societiesEvent.getCreatorId()).getIdentifier();
+				} catch(Exception ex){
+					creatorName = societiesEvent.getCreatorId();
+				}
+			} else{
+				creatorName = parent.getId().getIdentifier();
+			}
+		}
+		
+		return creatorName;
+	}
 
 	public void setCalendarId(String calendarId){
 		this.societiesEvent.setCalendarId(calendarId);
@@ -147,17 +168,17 @@ public class CalendarEvent {
 	}
 	
 	public void setStartDate(Date startDate){
-		this.societiesEvent.setStartDate(CalendarConverter.asXMLGregorianCalendar(startDate));
+		this.societiesEvent.setStartDate(startDate);
 	}
 	public Date getStartDate(){
-		return CalendarConverter.asDate(societiesEvent.getStartDate());
+		return societiesEvent.getStartDate();
 	}
 	
 	public void setEndDate(Date endDate){
-		this.societiesEvent.setEndDate(CalendarConverter.asXMLGregorianCalendar(endDate));
+		this.societiesEvent.setEndDate(endDate);
 	}
 	public Date getEndDate(){
-		return CalendarConverter.asDate(societiesEvent.getEndDate());
+		return societiesEvent.getEndDate();
 	}
 	
 	public String getDateText(){

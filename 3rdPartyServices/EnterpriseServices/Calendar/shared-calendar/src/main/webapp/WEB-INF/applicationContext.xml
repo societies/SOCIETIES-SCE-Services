@@ -91,19 +91,36 @@
 
 	<bean id="sharedCalendar"
 		class="org.societies.thirdparty.sharedcalendar.SharedCalendar"
-		 init-method="init">
+		 init-method="init" destroy-method="destroy">
 		<property name="googleUtil" ref="googleCalendarUtil" />
 		<property name="sessionFactory" ref="sessionFactory" />
 		<property name="evtMgr" ref="eventManager" />
 		<property name="serviceMgmt" ref="serviceMgmt" />
 		<property name="cisManager" ref="CisManagementBundle" />
 		<property name="commManager" ref="commManager" />
-		<property name="ctxBroker" ref="ctxBroker" />
 		<property name="personalisation" ref="personalisationManager" />
 		<property name="userAction" ref="userActionMonitor" />
 		<property name="pubSub" ref="PubsubClient" />
+		<property name="preferences" ref="calendarPreferences" />
+		<property name="context" ref="calendarContext" />
 	</bean>
-
+	
+	<bean id="calendarPreferences" 
+		class="org.societies.thirdparty.sharedcalendar.CalendarPreferenceManager" >
+		<property name="personalisation" ref="personalisationManager" />
+		<property name="userAction" ref="userActionMonitor" />
+		<property name="commManager" ref="commManager" />
+		<property name="serviceMgmt" ref="serviceMgmt" />
+	</bean>
+	
+	<bean id="calendarContext"
+		class="org.societies.thirdparty.sharedcalendar.CalendarContextUtils" 
+		destroy-method="destroy">
+		<property name="commManager" ref="commManager" />
+		<property name="serviceMgmt" ref="serviceMgmt" />
+		<property name="ctxBroker" ref="ctxBroker" />
+	</bean>
+	
 	<bean id="sharedCalendarClient"
 		class="org.societies.thirdparty.sharedcalendar.SharedCalendarClient"
 		init-method="init" >
@@ -129,8 +146,9 @@
 		<property name="serviceName" value="Shared Calendar" />
 		<property name="serviceType" value="THIRD_PARTY_SERVER" />
 		<property name="serviceCategory" value="calendar" />
+		<property name="serviceEndpoint" value="sharedCal" />
 	</bean>
 
-	<osgi:service ref="sharedCalendar" interface="org.societies.api.personalisation.model.IActionConsumer" />
+	<osgi:service ref="calendarPreferences" interface="org.societies.api.personalisation.model.IActionConsumer" />
 
 </beans>
