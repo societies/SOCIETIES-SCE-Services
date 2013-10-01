@@ -49,6 +49,7 @@ import org.societies.api.identity.IIdentityManager;
 import org.societies.api.identity.InvalidFormatException;
 import org.societies.api.identity.RequestorService;
 import org.societies.api.schema.servicelifecycle.model.ServiceResourceIdentifier;
+import org.societies.api.services.IServices;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -65,21 +66,21 @@ public class ContextAware3pService implements IContextAware3pService  {
 	private Logger LOG = LoggerFactory.getLogger(this.getClass());
 
 	//services
+	private ICtxBroker ctxBroker;
 	private ICommManager commsMgr;
 	private IIdentityManager idMgr;
-	private ICtxBroker ctxBroker;
+	private IServices serviceMgmt;
 
 	// identities
 	private RequestorService requestorService;
 	private IIdentity userIdentity;
-	private IIdentity serviceIdentity;
 	private ServiceResourceIdentifier myServiceID;
 
 	private CtxChangeEventListener myCtxChangeEventListener;
 
 
 	@Autowired(required=true)
-	public ContextAware3pService(ICtxBroker ctxBroker, ICommManager commsMgr){
+	public ContextAware3pService(ICtxBroker ctxBroker, ICommManager commsMgr, IServices serviceMgmt){
 
 		LOG.info("*** ContextAware3pService started");
 
@@ -87,6 +88,7 @@ public class ContextAware3pService implements IContextAware3pService  {
 		this.ctxBroker = ctxBroker;
 		this.commsMgr = commsMgr;
 		this.idMgr = commsMgr.getIdManager();
+		this.serviceMgmt = serviceMgmt;
 
 		LOG.info("ctxBroker: "+this.ctxBroker);
 		LOG.info("commsMgr : "+this.commsMgr );
@@ -94,23 +96,27 @@ public class ContextAware3pService implements IContextAware3pService  {
 
 		//identities
 		this.userIdentity = this.idMgr.getThisNetworkNode();
-		try {
-			this.serviceIdentity = this.idMgr.fromJid("cviana@societies.org");
-		} catch (InvalidFormatException e) {
-			e.printStackTrace();
-		}
-
-		myServiceID = new ServiceResourceIdentifier();
-		myServiceID.setServiceInstanceIdentifier("css://cviana@societies.org/Context3pServiceConnector");
-		try {
-			myServiceID.setIdentifier(new URI("css://cviana@societies.org/Context3pServiceConnector"));
-		} catch (URISyntaxException e) {
-			e.printStackTrace();
-		}
-		requestorService = new RequestorService(serviceIdentity, myServiceID);
-
-		LOG.info("userIdentity : "+ userIdentity.getBareJid());
-		LOG.info("requestor service : "+requestorService);
+		myServiceID = this.serviceMgmt.getMyServiceId(getClass()); 
+		requestorService = new RequestorService(userIdentity, myServiceID);
+		
+//		this.userIdentity = this.idMgr.getThisNetworkNode();
+//		try {
+//			this.serviceIdentity = this.idMgr.fromJid("cviana@societies.org");
+//		} catch (InvalidFormatException e) {
+//			e.printStackTrace();
+//		}
+//
+//		myServiceID = new ServiceResourceIdentifier();
+//		myServiceID.setServiceInstanceIdentifier("css://cviana@societies.org/Context3pServiceConnector");
+//		try {
+//			myServiceID.setIdentifier(new URI("css://cviana@societies.org/Context3pServiceConnector"));
+//		} catch (URISyntaxException e) {
+//			e.printStackTrace();
+//		}
+//		requestorService = new RequestorService(serviceIdentity, myServiceID);
+//
+//		LOG.info("userIdentity : "+ userIdentity.getBareJid());
+//		LOG.info("requestor service : "+requestorService);
 	}
 
 
