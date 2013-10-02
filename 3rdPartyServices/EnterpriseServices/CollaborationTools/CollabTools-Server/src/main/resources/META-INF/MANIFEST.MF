@@ -6,8 +6,8 @@ Export-Package: org.societies.enterprise.collabtools;uses:="org.societ
  n="0.1.0",org.societies.enterprise.collabtools.api;uses:="org.societi
  es.enterprise.collabtools.acquisition,org.societies.enterprise.collab
  tools.runtime";version="0.1.0",org.societies.enterprise.collabtools.a
- cquisition;uses:="org.societies.enterprise.collabtools.runtime,org.so
- cieties.enterprise.collabtools,org.slf4j,org.societies.enterprise.col
+ cquisition;uses:="org.societies.enterprise.collabtools.runtime,org.sl
+ f4j,org.societies.enterprise.collabtools,org.societies.enterprise.col
  labtools.api,org.osgi.framework,org.societies.context.externalBrokerC
  onnector";version="0.1.0",org.societies.enterprise.collabtools.runtim
  e;uses:="org.societies.enterprise.collabtools.api,org.societies.enter
@@ -26,7 +26,7 @@ Bundle-Name: Collaboration Tools
 Created-By: Apache Maven Bundle Plugin
 Build-Jdk: 1.7.0_03
 Bundle-Version: 0.1.0
-Bnd-LastModified: 1379598112014
+Bnd-LastModified: 1380723968489
 Embed-Transitive: true
 Bundle-ManifestVersion: 2
 Bundle-Activator: org.societies.enterprise.collabtools.Activator
@@ -53,13 +53,14 @@ Import-Package: com.sun.source.tree;resolution:=optional,com.sun.sourc
  olution:=optional,org.societies.api.context.event;resolution:=optiona
  l,org.societies.api.context.model;resolution:=optional,org.societies.
  api.identity;resolution:=optional,org.societies.api.schema.servicelif
- ecycle.model;resolution:=optional,org.societies.context.externalBroke
- rConnector;version="[0.1,1)",org.societies.enterprise.collabtools.api
- ;resolution:=optional;version="[0.1,1)",org.springframework.beans.fac
- tory.annotation;resolution:=optional,org.springframework.stereotype;r
- esolution:=optional,org.w3c.dom;resolution:=optional,org.xml.sax;reso
- lution:=optional,org.xml.sax.ext;resolution:=optional,org.xml.sax.hel
- pers;resolution:=optional,sun.misc;resolution:=optional
+ ecycle.model;resolution:=optional,org.societies.api.services;resoluti
+ on:=optional,org.societies.context.externalBrokerConnector;version="[
+ 0.1,1)",org.societies.enterprise.collabtools.api;resolution:=optional
+ ;version="[0.1,1)",org.springframework.beans.factory.annotation;resol
+ ution:=optional,org.springframework.stereotype;resolution:=optional,o
+ rg.w3c.dom;resolution:=optional,org.xml.sax;resolution:=optional,org.
+ xml.sax.ext;resolution:=optional,org.xml.sax.helpers;resolution:=opti
+ onal,sun.misc;resolution:=optional
 Embed-Dependency: *;scope=compile|runtime
 Originally-Created-By: Apache Maven Bundle Plugin
 
