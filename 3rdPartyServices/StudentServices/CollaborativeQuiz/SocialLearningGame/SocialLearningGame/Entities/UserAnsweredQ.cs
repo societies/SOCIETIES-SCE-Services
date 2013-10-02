@@ -9,7 +9,7 @@ namespace SocialLearningGame.Entities
     {
         public int id { get; set; }
         public String userJid { get; set; }
-        public Question question { get; set; }
+        public int questionID { get; set; }
         public Boolean answeredCorrect { get; set; }
     }
 }

@@ -38,6 +38,7 @@
             <RowDefinition Height="30*" />
             <RowDefinition Height="30*" />
             <RowDefinition Height="30*" />
+            <RowDefinition Height="30*" />
             <RowDefinition Height="70*" />
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
@@ -49,10 +50,10 @@
                    Style="{StaticResource headerStyle}"
                    Grid.Row="0" Grid.ColumnSpan="2"/>
 
-        <TextBlock Text="You scored" 
+        <TextBlock Text="Score this round" 
                    Style="{StaticResource labelStyle}"
                    Grid.Row="1" />
-        <TextBlock Text="[0]" Name="scoreBox"
+        <TextBlock Text="[0]" Name="roundScoreBox"
                    Style="{StaticResource valueStyle}"
                    Grid.Row="1" Grid.Column="1" />
 
@@ -69,6 +70,12 @@
         <TextBlock Text="[0]" Name="wrongBox"
                    Style="{StaticResource valueStyle}"
                    Grid.Row="3" Grid.Column="1" />
+        <TextBlock Text="Your total score" 
+                   Style="{StaticResource labelStyle}"
+                   Grid.Row="4" />
+        <TextBlock Text="[0]" Name="totalScoreBox"
+                   Style="{StaticResource valueStyle}"
+                   Grid.Row="4" Grid.Column="1" />
 
 
     </Grid>

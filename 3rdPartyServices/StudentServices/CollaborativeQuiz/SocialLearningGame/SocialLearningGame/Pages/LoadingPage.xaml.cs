@@ -24,6 +24,7 @@
  */
 
 using System.Windows.Controls;
+using System.Threading;
 
 namespace SocialLearningGame.Pages
 {
@@ -40,8 +41,6 @@ namespace SocialLearningGame.Pages
             this.InitializeComponent();
 
         }
-
-
 
 
     }

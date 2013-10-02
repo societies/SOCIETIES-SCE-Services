@@ -5,21 +5,12 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       mc:Ignorable="d" 
       Height="600" Width="1000"
-	  Title="NotRegistered">
+	  Title="Registration Error">
 
     <Canvas>
 
-        <!-- Right hand -->
-        <Ellipse Height="80" Width="80" Name="RightHand" Canvas.Left="305" Canvas.Top="0" >
-            <Ellipse.Fill>
-                <ImageBrush ImageSource="/SocialLearningGame;component/Resources/hand.png" />
-            </Ellipse.Fill>
-        </Ellipse>
 
-        <TextBlock Canvas.Left="217" Canvas.Top="203" Height="232" Name="textBlock1" Text="You Have Not Registered yet. Please register using the Social Learning Game running on your CSS" Width="633" FontSize="40" TextWrapping="Wrap" TextAlignment="Center" />
+        <TextBlock Canvas.Left="217" Canvas.Top="203" Height="232" Text="You have not registered to play the Collaborative Quiz! Please register by installing the Collaborative Quiz from the appropriate CIS." Width="633" FontSize="40" TextWrapping="Wrap" TextAlignment="Center" />
     </Canvas>
 
-    <Page.Background>
-        <ImageBrush ImageSource="/SocialLearningGame;component/Resources/background.jpg" />
-    </Page.Background>
 </Page>

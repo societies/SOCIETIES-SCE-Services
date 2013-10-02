@@ -49,10 +49,10 @@ namespace SocialLearningGame.Pages
 
         public static readonly double SpeechConfidenceThreshold = 0.55;
         private static Category choosenCategory;
+        private static int totalQuestions;
 
         public PlayPage(Category category)
         {
-            
             InitializeComponent();
             choosenCategory = category;
             // setup speech
@@ -64,15 +64,14 @@ namespace SocialLearningGame.Pages
                 EnableSpeechEngine(kinect);
                 EnableSkeletonTracking(kinect);
             }
-           // this.Visibility = Visibility.Hidden;
-            //NewGame();
+            
         }
 
-        private void Window_Loaded(object sender, RoutedEventArgs e)
+        private void window_Loaded(object sender, RoutedEventArgs e)
         {
-            Console.WriteLine("Loaded");
             NewGame();
         }
+
 
 
         #region " Kinect events "
@@ -173,8 +172,8 @@ namespace SocialLearningGame.Pages
 
         private void sensor_SensorSkeletonFrameReady(object sender, SkeletonFrameReadyEventArgs e)
         {
-            if (GameLogic.CurrentRound == null
-                || GameLogic.CurrentRound.RequiredPose == null)
+            if (GameLogic._userSession.questionRound == null
+                || GameLogic._userSession.questionRound.RequiredPose == null)
                 return;
 
             //Get a skeleton
@@ -193,7 +192,7 @@ namespace SocialLearningGame.Pages
                 return;
             }
 
-            GameLogic.CurrentRound.RequiredPose.SetCurrentJoints(
+            GameLogic._userSession.questionRound.RequiredPose.SetCurrentJoints(
                 firstSkeleton.Joints[JointType.Head],
                 firstSkeleton.Joints[JointType.HandLeft],
                 firstSkeleton.Joints[JointType.HandRight],
@@ -213,13 +212,13 @@ namespace SocialLearningGame.Pages
             lock (poseLockObject)
             {
 
-                if (GameLogic.CurrentRound.AnswerMethod != AnswerMethod.BodyPoseAndSpeech)
+                if (GameLogic._userSession.questionRound.AnswerMethod != AnswerMethod.BodyPoseAndSpeech)
                 {
                     userInCorrectPose = false;
                 }
                 else
                 {
-                    bool nowInCorrectPose = GameLogic.CurrentRound.RequiredPose.IsPoseValid();
+                    bool nowInCorrectPose = GameLogic._userSession.questionRound.RequiredPose.IsPoseValid();
 
                     if (userInCorrectPose && !nowInCorrectPose)
                     {
@@ -234,19 +233,6 @@ namespace SocialLearningGame.Pages
 
                 }
             }
-
-#if DEBUG
-            using (DrawingContext dc = this.drawingGroup.Open())
-            {
-                // Draw a transparent background to set the render size
-                dc.DrawRectangle(Brushes.Transparent, null, new Rect(0.0, 0.0, RenderWidth, RenderHeight));
-
-                RenderSkeleton(dc, firstSkeleton, GameLogic.CurrentRound.RequiredPose);
-
-                // prevent drawing outside of our render area
-                this.drawingGroup.ClipGeometry = new RectangleGeometry(new Rect(0.0, 0.0, RenderWidth, RenderHeight));
-            }
-#endif
         }
 
         private void UpdatePoseIconBorder()
@@ -671,12 +657,12 @@ namespace SocialLearningGame.Pages
             //}
 
             // if the current mode doesn't require speech, don't do any of this
-            if (GameLogic.CurrentRound.AnswerMethod != AnswerMethod.Speech
-                && GameLogic.CurrentRound.AnswerMethod != AnswerMethod.BodyPoseAndSpeech)
+            if (GameLogic._userSession.questionRound.AnswerMethod != AnswerMethod.Speech
+                && GameLogic._userSession.questionRound.AnswerMethod != AnswerMethod.BodyPoseAndSpeech)
                 return;
 
             // if the current mode is pose and speech, don't process speech unless the pose is correct
-            if (GameLogic.CurrentRound.AnswerMethod == AnswerMethod.BodyPoseAndSpeech)
+            if (GameLogic._userSession.questionRound.AnswerMethod == AnswerMethod.BodyPoseAndSpeech)
             {
                 lock (poseLockObject)
                 {
@@ -686,7 +672,7 @@ namespace SocialLearningGame.Pages
             }
 
 
-            if (GameLogic.CurrentRound.RequiredGrammar == Logic.Grammar.Color)
+            if (GameLogic._userSession.questionRound.RequiredGrammar == Logic.Grammar.Color)
             {
                 if (spokenText.Equals("GREEN"))
                     SelectAnswer(1);
@@ -697,7 +683,7 @@ namespace SocialLearningGame.Pages
                 else if (spokenText.Equals("BLUE"))
                     SelectAnswer(4);
             }
-            else if (GameLogic.CurrentRound.RequiredGrammar == Logic.Grammar.Number)
+            else if (GameLogic._userSession.questionRound.RequiredGrammar == Logic.Grammar.Number)
             {
                 if (spokenText.Equals("ONE"))
                     SelectAnswer(1);
@@ -724,7 +710,7 @@ namespace SocialLearningGame.Pages
         private void answerButton_Click(object sender, RoutedEventArgs e)
         {
             Console.WriteLine("ANSER BUTTON CLICKED!!!");
-            if (GameLogic.CurrentRound.AnswerMethod != AnswerMethod.Guesture)
+            if (GameLogic._userSession.questionRound.AnswerMethod != AnswerMethod.Guesture)
                 return;
 
             if (sender == answerButton1)
@@ -741,17 +727,33 @@ namespace SocialLearningGame.Pages
 
         #region " Game Flow Control "
 
-        //Start a new game
+        //START A NEW GAME
         public void NewGame()
         {
             Console.WriteLine("Now starting new game...");
-            // Start the game
+            // PREPARE QUESTIONS, GET USER SESSION
             GameLogic.NewGame(choosenCategory);
-            // Show users name
-            playerNameBox.Text = GameLogic.getUser().name;
-            //InitQuestion
-           // GameInit()
-            // Get the next question
+            
+            //SHOW PLAYERS NAME
+            if (GameLogic._userSession.player == GameStage.USER)
+            {
+                playerNameBox.Text = GameLogic._userSession.currentUser.name;
+                //CHECK AMOUNT OF QUESTIONS AVAILABLE (MAX 10)
+                totalQuestions = GameLogic._userSession.availableUserQuestions.Count();
+            }
+            else if (GameLogic._userSession.player == GameStage.GROUP)
+            {
+                playerNameBox.Text = GameLogic._userSession.currentGroup.groupName;
+                //CHECK AMOUNT OF QUESTIONS AVAILABLE (MAX 10)
+                totalQuestions = GameLogic._userSession.availableGroupQuestions.Count();
+            }
+
+            
+            if (totalQuestions > 10)
+            {
+                totalQuestions = 10;
+            }
+
             NextQuestion();
         }
 
@@ -765,41 +767,23 @@ namespace SocialLearningGame.Pages
         {
             userInCorrectPose = false;
             UpdatePoseIconBorder();
-            //playerNameBox.Text = GameLogic.CurrentRound.
-           // playerNameBox.Text = "Paddy"; // TODO: actual player name
 
-            //Get the next round
-            QuestionRound round = GameLogic.NextQuestion();
+            GameLogic.NextQuestion();
 
-            //If the next round is null, could either mean no questions to begin with,
-            //or user has answered them all.
-            if (round.Question == null && GameLogic.CurrentRound.RoundNumber == 1)
+            //IF QUESTION IS NULL AND IS FIRST ROUND, USER HAS ANSWERED ALL QUESTIONS PREVIOUSLY| OR NO EXIST
+            if (GameLogic._userSession.questionRound.Question == null && GameLogic._userSession.questionRound.RoundNumber == 1)
             {
                 Console.WriteLine("Ending game because there are no questions for the user...");
-                GameLogic.EndGame();
                 Console.WriteLine("Switching to new NoQuestionsPage ...");
-                if (!this.IsLoaded)
-                {
-                    Console.WriteLine("Not loaded yet...");
-              
-                }
-                MainWindow.SwitchPage(new NoQuestions());
-                
+                MainWindow.SwitchPage(new NoQuestions());        
             }
-            else if (round.Question == null && GameLogic.CurrentRound.RoundNumber > 1)
+            //IF NO QUESTION, AND ROUND NUMBER IS OVER 1, ALL QUESTIONS IN ROUND HAVE BEEN ANSWERED
+            else if (GameLogic._userSession.questionRound.Question == null && GameLogic._userSession.questionRound.RoundNumber > 1)
             {
                 Console.WriteLine("Ending game because user has answered all the questions...");
-                EndGame();
-                MainWindow.SwitchPage(new GameOver());
-
-            }
-                //CHECK THAT THE ROUND ISN'T OVER THE CURRENT
-            else if (GameLogic.CurrentRound.RoundNumber > GameLogic.QuestionsInGame)
-            {
-                EndGame();
                 MainWindow.SwitchPage(new GameOver());
             }
-
+            //ELSE QUESTIONS ARE AVAILABLE
             else
             {
                 if (answerBox1.Visibility == Visibility.Hidden)
@@ -807,71 +791,36 @@ namespace SocialLearningGame.Pages
                     this.Visibility = Visibility.Visible;
                 }
 
-                /*  //THIS NEEDS TO GO SOMEWHERE ELSE
-                  if (GameLogic.CurrentRound != null &&
-                      GameLogic.CurrentRound.RoundNumber == GameLogic.QuestionsInGame)
-                  {
-                      EndGame();
-                      return;
-                  }
+                //SHOW QUESTION TEXT
+                questionBox.Text = GameLogic._userSession.questionRound.Question.questionText;
 
-                  if (round.Question == null)
-                  {
-                      EndGame();
-                      return;
-                      // we've run out of questions
-                      // TODO: Do something sensible
-                  }*/
+                questionNumberBox.Text = GameLogic._userSession.questionRound.RoundNumber + "/" + totalQuestions;
 
-
-#if DEBUG
-                // TODO: Remove me after testing
-                //round.AnswerMethod = AnswerMethod.BodyPoseAndSpeech;
-                ////log.Warn("Testing mode: AnswerMethod = " + round.AnswerMethod);
-                // TODO: Remove until here
-
-                // quick hack to skip kinect actions if in debugging mode
-                if (_speechEngine == null)
-                {
-                    //log.Warn("Speech engine is null, reverting to AnswerMethod.Guesture");
-                    round.AnswerMethod = AnswerMethod.Guesture;
-                }
-                //else if (_speechEngine.AudioState == AudioState.Stopped)
-                //{
-                //    //log.Warn("Speech engine is offline, reverting to AnswerMethod.Guesture");
-                //    round.AnswerMethod = AnswerMethod.Guesture;
-                //}
-#endif
-
-                questionBox.Text = round.Question.questionText;
-                questionNumberBox.Text = GameLogic.CurrentRoundNumber + "/" + GameLogic.QuestionsInGame;
-
-                ////set the answers in the answer boxes
-                ////get answers 1-4 from corresponding question
-                answerBox1.Text = round.Question.answer1;
-                answerBox2.Text = round.Question.answer2;
-                answerBox3.Text = round.Question.answer3;
-                answerBox4.Text = round.Question.answer4;
+                //SHOW ANSWERS
+                answerBox1.Text = GameLogic._userSession.questionRound.Question.answer1;
+                answerBox2.Text = GameLogic._userSession.questionRound.Question.answer2;
+                answerBox3.Text = GameLogic._userSession.questionRound.Question.answer3;
+                answerBox4.Text = GameLogic._userSession.questionRound.Question.answer4;
 
                 //set the status bar for the current answer format
                 handIcon.Visibility = System.Windows.Visibility.Hidden;
                 micIcon.Visibility = System.Windows.Visibility.Hidden;
                 poseIcon.Visibility = System.Windows.Visibility.Hidden;
 
-                switch (round.AnswerMethod)
+                switch (GameLogic._userSession.questionRound.AnswerMethod)
                 {
                     case AnswerMethod.BodyPoseAndSpeech:
                         micIcon.Visibility = System.Windows.Visibility.Visible;
                         poseIcon.Visibility = System.Windows.Visibility.Visible;
-                        poseIconImage.Source = new BitmapImage(round.RequiredPose.ImageUri);
+                        poseIconImage.Source = new BitmapImage(GameLogic._userSession.questionRound.RequiredPose.ImageUri);
 
-                        statusBarText.Text = "Pose: " + round.RequiredPose.Name + " and ";
+                        statusBarText.Text = "Pose: " + GameLogic._userSession.questionRound.RequiredPose.Name + " and ";
 
-                        if (round.RequiredGrammar == Logic.Grammar.Color)
+                        if (GameLogic._userSession.questionRound.RequiredGrammar == Logic.Grammar.Color)
                         {
                             statusBarText.Text += "say \"GREEN\",\"RED\",\"YELLOW\", or \"BLUE\"";
                         }
-                        else if (round.RequiredGrammar == Logic.Grammar.Number)
+                        else if (GameLogic._userSession.questionRound.RequiredGrammar == Logic.Grammar.Number)
                         {
                             statusBarText.Text += "say \"ONE\",\"TWO\",\"THREE\", or \"FOUR\"";
                         }
@@ -879,11 +828,11 @@ namespace SocialLearningGame.Pages
                         break;
                     case AnswerMethod.Speech:
                         micIcon.Visibility = System.Windows.Visibility.Visible;
-                        if (round.RequiredGrammar == Logic.Grammar.Color)
+                        if (GameLogic._userSession.questionRound.RequiredGrammar == Logic.Grammar.Color)
                         {
                             statusBarText.Text = "Say \"GREEN\",\"RED\",\"YELLOW\", or \"BLUE\"";
                         }
-                        else if (round.RequiredGrammar == Logic.Grammar.Number)
+                        else if (GameLogic._userSession.questionRound.RequiredGrammar == Logic.Grammar.Number)
                         {
                             statusBarText.Text = "Say \"ONE\",\"TWO\",\"THREE\", or \"FOUR\"";
                         }
@@ -896,15 +845,14 @@ namespace SocialLearningGame.Pages
                 }
 
                 //Update Scoreboard Text
-                scoreBox.Text = GameLogic.Score.ToString();
+                scoreBox.Text = GameLogic._userSession.questionRound.roundScore.ToString();
             }
 
         }
 
         private void SelectAnswer(int answerIndex)
         {
-            Console.WriteLine("IN SELECT ANSWER!");
-            if (GameLogic.CurrentRound.AnswerMethod == AnswerMethod.BodyPoseAndSpeech)
+            if (GameLogic._userSession.questionRound.AnswerMethod == AnswerMethod.BodyPoseAndSpeech)
             {
                 lock (poseLockObject)
                 {
@@ -918,57 +866,95 @@ namespace SocialLearningGame.Pages
             if (answerIndex != 3) answerBox3.Text = "";
             if (answerIndex != 4) answerBox4.Text = "";
 
-            bool result = GameLogic.UserAnsweredQuestion(answerIndex);
-            Console.WriteLine("Result...." + result);
-            // TODO: Display result
             String answer;
             switch (answerIndex)
             {
                 case 1:
-                    answer = GameLogic.CurrentRound.Question.answer1;
+                    answer = GameLogic._userSession.questionRound.Question.answer1;
                     break;
                 case 2:
-                    answer = GameLogic.CurrentRound.Question.answer2;
+                    answer = GameLogic._userSession.questionRound.Question.answer2;
                     break;
                 case 3:
-                    answer = GameLogic.CurrentRound.Question.answer3;
+                    answer = GameLogic._userSession.questionRound.Question.answer3;
                     break;
                 case 4:
-                    answer = GameLogic.CurrentRound.Question.answer4;
+                    answer = GameLogic._userSession.questionRound.Question.answer4;
                     break;
                 default:
                     answer = "Unknown answer";
                     break;
             }
 
-            bool correct = (answerIndex == GameLogic.CurrentRound.Question.correctAnswer);
+            bool correct = (answerIndex == GameLogic._userSession.questionRound.Question.correctAnswer);
 
             var selectionDisplay = new AnswerDisplay(answer, correct);
             Grid.SetRowSpan(selectionDisplay, 6);
             Grid.SetColumnSpan(selectionDisplay, 5);
             this.grid.Children.Add(selectionDisplay);
+            //UPDATE USER SCORE
             if (correct)
             {
-                GameLogic.updateUserScore(GameLogic.CurrentRound.Question.pointsIfCorrect);
+                if (GameLogic._userSession.player == GameStage.USER)
+                {
+                    GameLogic._userSession.currentUser.score += GameLogic._userSession.questionRound.Question.pointsIfCorrect;
+                }
+                else if (GameLogic._userSession.player == GameStage.GROUP)
+                {
+                    GameLogic._userSession.currentGroup.score += GameLogic._userSession.questionRound.Question.pointsIfCorrect;
+                }
+                GameLogic._userSession.questionRound.roundScore += GameLogic._userSession.questionRound.Question.pointsIfCorrect;
+                GameLogic._userSession.questionRound.correctAnswerCount++;
+            }
+            else
+            {
+                GameLogic._userSession.questionRound.incorrectAnswerCount++;
             }
             //ADD THIS QUESTION TO QUESTION WHICH HAS BEEN ASKED
-            UserAnsweredQ answerQ = new UserAnsweredQ();
-            answerQ.answeredCorrect = correct;
-            answerQ.question = GameLogic.CurrentRound.Question;
-            answerQ.userJid = GameLogic.getUser().userJid;
-            //ADD THE Q TO ANSWERED
-            GameLogic.addAnsweredQ(answerQ);
-            //REMVOE FROM LIST...
-            GameLogic.removeAvailQ(answerQ.question);
-           
-            // next round
-            NextQuestion();
+            UserAnsweredQ answeredQuestion = new UserAnsweredQ();
+            
+            if (GameLogic._userSession.player == GameStage.USER)
+            {
+                answeredQuestion.questionID = GameLogic._userSession.questionRound.Question.questionID;
+                answeredQuestion.userJid = GameLogic._userSession.currentUser.userJid;
+                answeredQuestion.answeredCorrect = correct;
+
+                //ADD TO ANSWERED QUESTION LIST
+                GameLogic._userSession.userAnsweredQuestions.Add(answeredQuestion);
+
+                //REMOVE QUESTION FROM AVAILABLE QUESTIONS
+                GameLogic._userSession.availableUserQuestions.Remove(GameLogic._userSession.questionRound.Question);
+            }
+            else if(GameLogic._userSession.player == GameStage.GROUP)
+            {
+                answeredQuestion.questionID = GameLogic._userSession.questionRound.Question.questionID;
+                answeredQuestion.userJid = GameLogic._userSession.currentGroup.groupName;
+                answeredQuestion.answeredCorrect = correct;
+
+                //ADD TO ANSWERED QUESTIONS LIST
+                GameLogic._userSession.groupAnsweredQuestions.Add(answeredQuestion);
+
+                //REMOVE QUESTION FROM AVAILABLE QUESTIONS
+                GameLogic._userSession.availableGroupQuestions.Remove(GameLogic._userSession.questionRound.Question);
+            }
+            GameLogic._userSession.answeredQuestion = answeredQuestion;
+            //UPLOAD QUESTION & SCORE
+            GameLogic.postRemoteData(DataType.POST_PROGRESS, null);
+
+            if (GameLogic._userSession.questionRound.RoundNumber < 10)
+            {
+                NextQuestion();
+            }
+            else
+            {
+                EndGame();
+            }
         }
 
         private void EndGame()
         {
             Console.WriteLine("ENDING GAME");
-            GameLogic.EndGame();
+           // GameLogic.EndGame();
             MainWindow.SwitchPage(new GameOver());
         }
 

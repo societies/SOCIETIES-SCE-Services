@@ -41,13 +41,38 @@ namespace SocialLearningGame.Pages
     public partial class CategoriesPage : Page
     {
 
-        private static Dictionary<KinectCircleButton, Category> buttonToCat;
+        private static Dictionary<KinectCircleButton, Category> buttonToCat = new Dictionary<KinectCircleButton, Category>();
+        private static List<Category> categoriesToAdd = new List<Category>();
+        private static List<Category> categories = new List<Category>();
+        private static List<Category> superCategories = new List<Category>();
+        private static List<String> userInterests = new List<String>();
+        private static List<String> keywords = new List<String>();
+        private static List<UIElement> childNodes = new List<UIElement>();
+        private static int index;
+        private static int maxCount;
+        private int general = 0;
+        private int personal = 0;
 
         public CategoriesPage()
         {
             InitializeComponent();
-            addButtons();
+            categories = new List<Category>(GameLogic._userSession.allCategories);
+            Console.WriteLine("GOT CATEGORIES" + categories.ToString());
+            superCategories = new List<Category>();
+            userInterests = new List<String>(GameLogic._userSession.userInterests);
+            keywords = getKeywords(userInterests);
 
+            sortCategories();
+
+            index = 0;
+            maxCount = categories.Count();
+
+            if (maxCount > 6)
+            {
+                nextButton.Visibility = Visibility.Visible;
+            }
+
+            addButtons();
         }
 
         private List<String> getKeywords(List<String> userInterests)
@@ -65,17 +90,8 @@ namespace SocialLearningGame.Pages
             return keywords;
         }
 
-        private void addButtons()
-        {
-            Console.WriteLine("In add buttons");
-            buttonToCat = new Dictionary<KinectCircleButton, Category>();
-            List<Category> categories = GameLogic.getCategories();
-            List<Category> superCategories = new List<Category>();
-            List<String> userInterests = GameLogic.getUserInterests();
-            List<String> keywords = getKeywords(userInterests);
- 
-            int general = 0;
-            int personal = 0;
+        private void sortCategories() 
+        {           
             foreach (Category c in categories.ToList())
             {
                 Console.WriteLine(c.Name);
@@ -94,33 +110,53 @@ namespace SocialLearningGame.Pages
                     }
                 }
             }
-            int xCount = 0;
-            int yCount = 1;
-            foreach (Category c in categories)
+            
+        }
+
+ 
+        private void addButtons()
+        {
+            foreach (UIElement u in childNodes)
             {
-                if (xCount == 3)
+                catGrid.Children.Remove(u);
+            }
+            buttonToCat.Clear();
+            Console.WriteLine("In add buttons");
+
+            int xCount = 0;
+            int yCount = 0;
+            int x;
+            Category c;
+            Console.WriteLine("INDEX: " + index + ", MAX:" + maxCount + ", SIZE: " + categories.Count());
+            for(x = index; x < index + 6; x++)
+            {
+                if (x < categories.Count())
                 {
-                    yCount+=3;
-                    xCount = 0;
-                }
-                if (c.superCatID == general)
-                {
-                    Console.WriteLine("General Q found, Add Button");
-                    createButton(c, xCount, yCount);
-                    xCount++;
-                }
-                if (c.superCatID == personal)
-                {
-                    if (keywords.Contains(c.Name) || userInterests.Contains(c.Name))
+                    c = categories[x];
+                    if (xCount == 3)
                     {
-                        Console.WriteLine("Keywords match, creating a button");
+                        yCount += 3;
+                        xCount = 0;
+                    }
+                    if (c.superCatID == general)
+                    {
+                        Console.WriteLine("General Q found, Add Button");
                         createButton(c, xCount, yCount);
                         xCount++;
                     }
-                    else
+                    if (c.superCatID == personal)
                     {
-                        Console.WriteLine("Keywords don't match, not creating a button for...");
-                        Console.WriteLine(c.Name);
+                        if (keywords.Contains(c.Name) || userInterests.Contains(c.Name))
+                        {
+                            Console.WriteLine("Keywords match, creating a button");
+                            createButton(c, xCount, yCount);
+                            xCount++;
+                        }
+                        else
+                        {
+                            Console.WriteLine("Keywords don't match, not creating a button for...");
+                            Console.WriteLine(c.Name);
+                        }
                     }
                 }
             }
@@ -135,6 +171,7 @@ namespace SocialLearningGame.Pages
                 Grid.SetColumn(tb, xCount);
                 Grid.SetRow(tb, yCount);
                 catGrid.Children.Add(tb);
+                childNodes.Add(tb);
               //  yCount++;
 
 
@@ -149,6 +186,7 @@ namespace SocialLearningGame.Pages
                 Grid.SetColumn(button, xCount);
                 Grid.SetRow(button, yCount+1);
                 catGrid.Children.Add(button);
+                childNodes.Add(button);
                // CategoryPage.Children.Add(button);
                 
               //  Canvas.SetLeft(button, 55 + (150 * xCount));
@@ -173,6 +211,37 @@ namespace SocialLearningGame.Pages
                 }
             }*/
             MainWindow.SwitchPage(new PlayPage(c));
+        }
+
+        private void backButton_Click(object sender, System.Windows.RoutedEventArgs e)
+        {
+            index = index - 6;
+            if (index == 0)
+            {
+                backButton.Visibility = Visibility.Hidden;
+                nextButton.Visibility = Visibility.Visible;
+            }
+            else if (index < maxCount - 6)
+            {
+                nextButton.Visibility = Visibility.Visible;
+            }
+            addButtons();
+        }
+
+        private void nextButton_Click(object sender, System.Windows.RoutedEventArgs e)
+        {
+            index = index + 6;
+            if (index + 6 >= maxCount)
+            {
+                backButton.Visibility = Visibility.Visible;
+                nextButton.Visibility = Visibility.Hidden;
+            }
+            if (index > 0)
+            {
+                backButton.Visibility = Visibility.Visible;
+            }
+            addButtons();
+    
         }
     }
 }

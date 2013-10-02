@@ -6,7 +6,7 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       mc:Ignorable="d" 
       d:DesignHeight="600" d:DesignWidth="990"
-      Title="HomePage" Height="600" Width="1000">
+      Title="Categories" Height="600" Width="1000">
 
     <Page.Resources>
         <Style x:Key="labelStyle" TargetType="TextBlock">
@@ -33,70 +33,31 @@
 
         <Grid Name="catGrid">
             <Grid.RowDefinitions>
-                <RowDefinition Height="30*" />
                 <RowDefinition Height="10*" />
                 <RowDefinition Height="20*" />
+                <RowDefinition Height="10*" />
             <RowDefinition Height="10*" />
-            <RowDefinition Height="10*" />
-                <RowDefinition Height="20*" />
+            <RowDefinition Height="20*" />
+                <RowDefinition Height="10*" />
         </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="33*" />
                 <ColumnDefinition Width="33*" />
                 <ColumnDefinition Width="33*" />
         </Grid.ColumnDefinitions>
-            <Canvas Name="CategoryPage" Background="Transparent" Height="590" VerticalAlignment="Top" Grid.ColumnSpan="2" Margin="0,0,0.4,0" Grid.RowSpan="6">
-            <TextBlock Height="76" HorizontalAlignment="Left" Margin="353,44,0,0" Name="textBlock1" Text="Categories" VerticalAlignment="Top" Width="304" TextAlignment="Center" FontSize="48" Canvas.Left="-4" Canvas.Top="-4" />
 
-            <!-- Category pictures -->
-          <!--  <k:KinectCircleButton x:Name="MathCategory" 
-                              Click="mathCategory_Click"  
-                              Style="{StaticResource buttonStyle}"
-                              Grid.Row="1" Grid.Column="1">
-                <Ellipse Style="{StaticResource iconStyle}">
-                    <Ellipse.Fill>
-                        <ImageBrush ImageSource="/SocialLearningGame;component/Resources/GeneralKnowledge.png" />
-                    </Ellipse.Fill>
-                </Ellipse>
-            </k:KinectCircleButton>
-            <Image Name="GKPic" Source="/SocialLearningGame;component/Resources/GeneralKnowledge.png" Canvas.Left="107" Canvas.Top="160" Height="163" Width="188" />
-            <Image Name="CRPic" Source="/SocialLearningGame;component/Resources/CourseRelated.png" Canvas.Left="302" Canvas.Top="160" Height="163" Width="188" />
-            <Image Name="MusPic" Source="/SocialLearningGame;component/Resources/Music.png" Canvas.Left="495" Canvas.Top="160" Height="163" Width="188" />
-            <Image Name="VGPic" Source="/SocialLearningGame;component/Resources/VideoGames.png" Canvas.Left="688" Canvas.Top="160" Height="163" Width="188" />
-            <Image Name="SpPic" Source="/SocialLearningGame;component/Resources/Sports.png" Canvas.Left="107" Canvas.Top="328" Width="188" Height="163" />
-            <Image Name="SciPic" Source="/SocialLearningGame;component/Resources/Science.png" Canvas.Left="495" Canvas.Top="328" Height="163" Width="188" />
-            <Image Name="TechPic" Source="/SocialLearningGame;component/Resources/Technology.png" Canvas.Left="688" Canvas.Top="328" Height="163" Width="188" />
-            <Image Name="HistPic" Source="/SocialLearningGame;component/Resources/History.png" Canvas.Left="302" Canvas.Top="328" Height="163" Width="188" />
--->
-            <!-- Right hand -->
-            <Ellipse Height="80" Width="80" Name="RightHand" Canvas.Left="177" Canvas.Top="6" >
-                <Ellipse.Fill>
-                    <ImageBrush ImageSource="/SocialLearningGame;component/Resources/hand.png" />
-                </Ellipse.Fill>
-            </Ellipse>
-            <!-- Hover Button controls for the different categories -->
-            <!--<Controls:HoverButton x:Name="generalKnowledgeButton" ImageSize="100" TimeInterval="1500" Height="73" Width="79" Canvas.Left="160" Canvas.Top="200" /> -->
-            <!--<Controls:HoverButton x:Name="courseRelatedButton" ImageSize="100" TimeInterval="1500" Height="73" Width="79" Canvas.Left="349" Canvas.Top="200" />-->
-            <!--<Controls:HoverButton x:Name="musicButton" ImageSize="100" TimeInterval="1500" Height="73" Width="79" Canvas.Left="537" Canvas.Top="200" />-->
-            <!--<Controls:HoverButton x:Name="videoGamesButton" ImageSize="100" TimeInterval="1500" Height="73" Width="79" Canvas.Left="739" Canvas.Top="200" />-->
-            <!--<Controls:HoverButton x:Name="sportsButton" ImageSize="100" TimeInterval="1500" Height="73" Width="79" Canvas.Left="160" Canvas.Top="376" />-->
-            <!--<Controls:HoverButton x:Name="historyButton" ImageSize="100" TimeInterval="1500" Height="73" Width="79" Canvas.Left="349" Canvas.Top="376" />-->
-            <!--<Controls:HoverButton x:Name="scienceButton" ImageSize="100" TimeInterval="1500" Height="73" Width="79" Canvas.Left="537" Canvas.Top="376" />-->
-            <!--<Controls:HoverButton x:Name="technologyButton" ImageSize="100" TimeInterval="1500" Height="73" Width="79" Canvas.Left="739" Canvas.Top="376" />-->
-        </Canvas>
+        <k:KinectCircleButton x:Name="backButton" 
+                              Click="backButton_Click"
+                              Grid.Row="5" Grid.Column="2" Label="Back" LabelPosition="Right"  HorizontalAlignment="Right" Height="Auto" Margin="0,0.2,10,3" Width="118" Visibility="Hidden" >
+        </k:KinectCircleButton>
+        <!--<Controls:HoverButton x:Name="backButton" ImageSize="100" TimeInterval="1500" Height="56" Width="100" Canvas.Left="740" Canvas.Top="483" />-->
+
+        <k:KinectCircleButton x:Name="nextButton" 
+                              Click="nextButton_Click"
+                              Label="Next"
+                              Grid.Row="5" Grid.Column="2" LabelPosition="Right" Height="70" HorizontalAlignment="Left" Visibility="Hidden" >
+        </k:KinectCircleButton>
     </Grid>
-    <Page.Background>
-        <ImageBrush ImageSource="/SocialLearningGame;component/Resources/background.jpg" />
-    </Page.Background>
 </Page>
 
-    
-    <!--Categories:
-    General Knowledge, Course-related
-    Music
-    Video Games
-    Sports
-    Literature
-    Science 
-    Technology
-    History-->
+   

@@ -7,13 +7,20 @@
         WindowStyle="None">
 
     <k:KinectRegion Grid.Row="1" x:Name="kinectRegion" Grid.ColumnSpan="3">
+        
+        
         <Canvas>
+            
+            
 
             <Canvas.Background>
                 <ImageBrush ImageSource="/MyTvUI;component/Images/grey.jpg" />
             </Canvas.Background>
 
             <k:KinectSensorChooserUI HorizontalAlignment="Center" VerticalAlignment="Top" Name="sensorChooserUi" Canvas.Left="624" Canvas.Top="10" />
+
+         
+
 
             <Ellipse Height="80" Name="rightEllipse" Width="80" Panel.ZIndex="1" Canvas.Left="1226" Canvas.Top="568">
                 <Ellipse.Fill>
@@ -25,6 +32,7 @@
                 <DockPanel.Background>
                     <ImageBrush ImageSource="/MyTvUI;component/Images/group_background.png" />
                 </DockPanel.Background>
+
                 <ListBox Height="503" Name="listBox1" Width="237" DockPanel.Dock="Bottom"  DataContext="{Binding}" FontSize="12" FontWeight="Bold" Foreground="Black" Background="{x:Null}" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Hidden" BorderBrush="{x:Null}">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
@@ -48,7 +56,7 @@
             </DockPanel>
 
             <!-- Hover button regions -->
-            <k:KinectCircleButton Name="exitButton" Height="60" Width="60" Click="exitButtonClick"
+            <k:KinectCircleButton Foreground="Transparent" Name="exitButton" Height="60" Width="60" Click="exitButtonClick"
                               Canvas.ZIndex="1" Canvas.Left="1258" Canvas.Top="0"/>
 
             <!-- Hover button rectangles -->
@@ -71,12 +79,12 @@
             </DockPanel>
 
             <Canvas Canvas.Left="12" Canvas.Top="57" Height="453" Name="canvas1" Width="1020">
-                <WebBrowser Canvas.Left="70" Canvas.Top="18" Height="418" Name="tvBrowser" Width="737" Loaded="tvBrowser_WindowLoaded" Navigated="tvBrowser_Navigated" Cursor="None" DataContext="{Binding}" />
+                <WebBrowser Canvas.Left="71" Canvas.Top="10" Height="418" Name="tvBrowser" Width="737" Loaded="tvBrowser_WindowLoaded" Navigated="tvBrowser_Navigated" Cursor="None" DataContext="{Binding}" />
 
-                <k:KinectCircleButton Name="volumeUpButton" Height="60" Width="60" Click="volumeUpButtonClick"
+                <k:KinectCircleButton Foreground="Transparent" Name="volumeUpButton" Height="60" Width="60" Click="volumeUpButtonClick"
                                       Canvas.ZIndex="1" Canvas.Left="925" Canvas.Top="343" />
 
-                <k:KinectCircleButton Name="volumeDownButton" Height="60" Width="60" Click="volumeDownButtonClick"
+                <k:KinectCircleButton Foreground="Transparent" Name="volumeDownButton" Height="60" Width="60" Click="volumeDownButtonClick"
                                       Canvas.ZIndex="1" Canvas.Left="835" Canvas.Top="343" />
 
                 <Rectangle Height="60" Width="60" Name="volumeUp" Canvas.Left="925" Canvas.Top="343">
@@ -113,23 +121,23 @@
 
 
 
-                <k:KinectCircleButton Name="channel2Button" Height="60" Width="60" Click="channelButtonClick"
+                <k:KinectCircleButton Foreground="Transparent" Name="channel2Button" Height="60" Width="60" Click="channelButtonClick"
                                       Canvas.ZIndex="1" Canvas.Left="835" Canvas.Top="60" />
                 <Label Canvas.Left="835" Canvas.Top="60" Content="SPORT" FontSize="16" Height="60" HorizontalContentAlignment="Center" Name="label2" VerticalContentAlignment="Center" Width="60" Foreground="Black"/>
 
-                <k:KinectCircleButton Name="channel1Button" Height="60" Width="60" Click="channelButtonClick"
+                <k:KinectCircleButton Foreground="Transparent" Name="channel1Button" Height="60" Width="60" Click="channelButtonClick"
                                       Canvas.ZIndex="1" Canvas.Left="925" Canvas.Top="60" />
                 <Label Canvas.Left="925" Canvas.Top="60" Content="NEWS" Height="60" Name="label1" Width="60" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontSize="16" Foreground="Black" />
 
-                <k:KinectCircleButton Name="channel4Button" Height="60" Width="60" Click="channelButtonClick"
+                <k:KinectCircleButton Foreground="Transparent" Name="channel4Button" Height="60" Width="60" Click="channelButtonClick"
                                       Canvas.ZIndex="1" Canvas.Left="835" Canvas.Top="143" />
                 <Label Canvas.Left="835" Canvas.Top="143" Content="MUSIC" FontSize="16" Height="60" HorizontalContentAlignment="Center" Name="label4" VerticalContentAlignment="Center" Width="60" Foreground="Black" />
 
-                <k:KinectCircleButton Name="channel3Button" Height="60" Width="60" Click="channelButtonClick"
+                <k:KinectCircleButton Foreground="Transparent" Name="channel3Button" Height="60" Width="60" Click="channelButtonClick"
                                       Canvas.ZIndex="1" Canvas.Left="925" Canvas.Top="143" />
                 <Label Canvas.Left="925" Canvas.Top="143" Content="CARTOONS" FontSize="9" Height="60" HorizontalContentAlignment="Center" Name="label3" VerticalContentAlignment="Center" Width="60" Foreground="Black" />
 
-                <k:KinectCircleButton Name="offButton" Height="70" Width="70" Click="offButtonClick"
+                <k:KinectCircleButton Foreground="Transparent" Name="offButton" Height="70" Width="70" Click="offButtonClick"
                                       Canvas.ZIndex="1" Canvas.Left="877" Canvas.Top="238" />
                 <Rectangle Canvas.Left="877" Canvas.Top="238" Height="70" Name="offRectangle" Width="70">
                     <Rectangle.Fill>
@@ -161,6 +169,7 @@
                     <ImageBrush ImageSource="/MyTvUI;component/Images/my_schedule.png" />
                 </Rectangle.Fill>
             </Rectangle>
+
         </Canvas>
     </k:KinectRegion>
 

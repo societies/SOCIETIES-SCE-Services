@@ -4,6 +4,7 @@
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:gif="http://wpfanimatedgif.codeplex.com"
       xmlns:localcomponents="clr-namespace:SocialLearningGame.Pages.Components"
       mc:Ignorable="d"
       Title="Loading..."
@@ -16,10 +17,10 @@
             <RowDefinition Height="250" />
         </Grid.RowDefinitions>
 
-        <TextBlock Name="title" Text="Loading..." FontSize="36" Grid.Row="0" HorizontalAlignment="Center" />
+        
 
-        <TextBlock Name="textBlock1" Text="Just setting everything up
-Nearly there... kinda... hold on a minute..." 
-                   TextWrapping="NoWrap" FontSize="24" TextAlignment="Center" Grid.Row="1" />
+        <TextBlock Name="textBlock1" Text="Please wait." 
+                   TextWrapping="NoWrap" FontSize="28" TextAlignment="Center" Grid.Row="0" />
+
     </Grid>
 </Page>

@@ -39,7 +39,7 @@ namespace SocialLearningGame.Logic
         public Dictionary<Category, List<Question>> CategoryQuestionMap { get; private set; }
 
         // Game specific vars
-        public UserScore MainUser { get; set; }
+        public System.Object MainUser { get; set; }
         public List<UserScore> AdditionalUsers { get; private set; }
         public Dictionary<UserScore, int> UserScoreMap { get; private set; }
      //   public List<UserAnsweredQ> answeredQ { get; private set; }
@@ -49,6 +49,7 @@ namespace SocialLearningGame.Logic
         public Queue<QuestionRound> QuestionHistory { get; private set; }
 
         public QuestionRound CurrentRound { get; set; }
+        public int questionCount { private set;  get; }
 
         public GameSession()
         {
@@ -60,6 +61,7 @@ namespace SocialLearningGame.Logic
             AllQuestions = new List<Question>();
             CategoryQuestionMap = new Dictionary<Category, List<Question>>();
             QuestionHistory = new Queue<QuestionRound>();
+            questionCount = 0;
         }
 
     }

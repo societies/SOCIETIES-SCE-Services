@@ -7,11 +7,11 @@ import javax.persistence.*;
 @Entity
 @Table(name="UserAnsweredQ")
 public class UserAnsweredQ {
+
+
 	private int id;
-
 	private String userJid;
-
-	private Question question;
+	private int questionID;
 	private boolean answeredCorrect;
 	
 	public UserAnsweredQ() {
@@ -34,12 +34,12 @@ public class UserAnsweredQ {
 	public void setUserJid(String userJid) {
 		this.userJid = userJid;
 	}
-	public Question getQuestion() {
-		return question;
+	public int getQuestionID() {
+		return questionID;
 	}
 
-	public void setQuestion(Question question) {
-		this.question = question;
+	public void setQuestionID(int questionID) {
+		this.questionID = questionID;
 	}
 
 	public boolean isAnsweredCorrect() {

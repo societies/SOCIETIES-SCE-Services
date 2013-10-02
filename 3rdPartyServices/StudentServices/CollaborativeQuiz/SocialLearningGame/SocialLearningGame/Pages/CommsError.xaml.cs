@@ -34,10 +34,8 @@ namespace SocialLearningGame.Pages
     /// </summary>
     public partial class CommsError : Page
     {
-        private static CommsError _instance = new CommsError();
-        public static CommsError Instance { get { return _instance; } }
 
-        private CommsError()
+        public CommsError()
         {
             InitializeComponent();
         }
