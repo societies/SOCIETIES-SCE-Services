@@ -24,13 +24,44 @@
  */
 package org.societies.enterprise.collabtools.api;
 
+import java.util.Hashtable;
+import java.util.List;
+import java.util.Observable;
+
 /**
- * Describe your class here...
+ * Interface for subscribe context information
  *
  * @author cviana
  *
  */
 public interface IContextSubscriber {
 	//Societies integration.... miner
+	
+	/**
+	 * 
+	 * @param cisID community ID
+	 */
+	public void initialCtx(Object cisID);
+	
+	/**
+	 * 
+	 * @param cisID community ID
+	 */
+	public void stopCtx(Object cisID);
+	
+	/**
+	 * 
+	 * @param sessionName name of the session
+	 * @return the language chosen for the session
+	 */
+	public String getSessionLanguage(String sessionName);
+	
+	/**
+	 * 
+	 * @return current sessions
+	 */
+	public Hashtable<String,List<String>> getSessions();
+	
+	public void update(Observable o, Object arg);	
 
 }

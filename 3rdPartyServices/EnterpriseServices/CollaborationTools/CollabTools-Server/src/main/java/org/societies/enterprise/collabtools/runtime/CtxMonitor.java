@@ -24,93 +24,92 @@
  */
 package org.societies.enterprise.collabtools.runtime;
 
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.List;
+import java.util.Observable;
+import java.util.Observer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.societies.enterprise.collabtools.acquisition.LongTermCtxTypes;
 import org.societies.enterprise.collabtools.acquisition.Person;
 import org.societies.enterprise.collabtools.acquisition.PersonRepository;
-import org.societies.enterprise.collabtools.interpretation.Rules;
+import org.societies.enterprise.collabtools.acquisition.ShortTermCtxTypes;
+import org.societies.enterprise.collabtools.interpretation.ContextAnalyzer;
 
 
 /**
- * Describe your class here...
+ * Context monitor analyze the users information to check if the rules matches
  *
  * @author cviana
  *
  */
-public class CtxMonitor extends Thread{
+public class CtxMonitor extends Observable implements Runnable, Observer {
 
-	private Rules conditions;
+	public Engine engine;
 	private SessionRepository sessionRepository;
 	private static final Logger logger  = LoggerFactory.getLogger(CtxMonitor.class);
-	private static final long SECONDS = 5 * 1000;
+	ContextAnalyzer ctxAnalyzer;
 
 	public CtxMonitor (PersonRepository personRepository, SessionRepository sessionRepository) {
-		conditions = new Rules(personRepository, sessionRepository);
+		engine = new Engine(personRepository, sessionRepository);
 		this.sessionRepository = sessionRepository;
+
+		ctxAnalyzer = new ContextAnalyzer(personRepository);
+
+		//Default rules when the FW starts, location and interests
+		Rule r01 = new Rule("r01",Operators.SAME, ShortTermCtxTypes.LOCATION, "--", 1, 0.5 ,ShortTermCtxTypes.class.getSimpleName());
+		Rule r02 = new Rule("r02",Operators.SIMILAR, LongTermCtxTypes.INTERESTS, "--", 2, 0.4 ,LongTermCtxTypes.class.getSimpleName());
+		//		Rule r03 = new Rule("r03",Operators.EQUAL, ShortTermCtxTypes.STATUS, "Available", 3, 0.1 ,ShortTermCtxTypes.class.getSimpleName()); //Check status of the user e.g busy, on phone, driving...
+		List<Rule> rules = Arrays.asList(r01, r02);
+		engine.setRules(rules);
 	}
 
 	public synchronized void run(){
-		try {
-			while (true) {
+		logger.info("Checking if people context match");
 
-				logger.info("Checking if people context match");
+		//First rule: location Mandatory
+		Hashtable<String, HashSet<Person>> personsSameLocation = engine.evaluateRule("r01");
 
+		if (!personsSameLocation.isEmpty()) {
+			Enumeration<String> iterator = personsSameLocation.keys();
+			//For each different location, apply the following rules...
+			while(iterator.hasMoreElements()) {
+				//Session name = actual location
+				String sessionName = iterator.nextElement();
+				HashSet<Person> possibleMembers = engine.getMatchingResultsByPriority().get(sessionName);
+				//Check conflict if actual users in the session
+				if (!(possibleMembers).isEmpty()) {
+					if (!this.sessionRepository.containSession(sessionName)) {
+						logger.info("Starting a new session..");
+						logger.info("Inviting people..");
+						System.out.println("New Engine: "+possibleMembers.toString());
+						this.sessionRepository.createSession(sessionName);
+					}
+					String[] membersIncluded = this.sessionRepository.addMembers(sessionName, possibleMembers);
 
-				//First rule: location
-				Hashtable<String, HashSet<Person>> personsSameLocation = conditions.getPersonsSameLocation();
+					//System.out.println("New Engine: "+possibleMembers.toString());
 
-				if (!personsSameLocation.isEmpty()) {
-					Enumeration<String> iterator = personsSameLocation.keys();
-					//For each different location, apply the follow rules...
-					while(iterator.hasMoreElements()) {
-						//Session name = actual location
-						String sessionName = iterator.nextElement();
-						logger.info("First rule: Location "+personsSameLocation.toString());
-						
-//						//Second rule: Company
-//						//Check company
-//						Hashtable<String, HashSet<Person>> personsWithSameCompany = conditions.getPersonsWithMatchingLongTermCtx(LongTermCtxTypes.COMPANY, personsSameLocation.get(sessionName));
-//						logger.info("Second rule: Company "+personsWithSameCompany.toString());
-						
-//						//Third rule: Interest
-//						//Check similar interest
-						Hashtable<String, HashSet<Person>> personsWithSameInterests = conditions.getPersonsByWeight(sessionName, personsSameLocation.get(sessionName));
-						logger.info("Third rule: Interests "+personsWithSameInterests.toString());
-//						
-//						//Fourth rule: Status
-//						//Check status of the user e.g busy, on phone, driving...
-//						Hashtable<String, HashSet<Person>> personsWithSameStatus = conditions.getPersonsWithMatchingShortTermCtx(ShortTermCtxTypes.STATUS, personsWithSameInterests.get(sessionName));
-//						logger.info("Fourth rule: Status "+personsWithSameStatus.toString());
-						
-
-						if (!sessionRepository.containSession(sessionName) && !personsWithSameInterests.isEmpty()) {
-							logger.info("Starting a new session..");
-							logger.info("Inviting people..");
-							sessionRepository.inviteMembers(sessionName, personsWithSameInterests.get(sessionName));
-						} //Check conflict if actual users in the session
-						else if (sessionRepository.differenceBetweenSessionMembers(personsWithSameInterests.get(sessionName), sessionName)){
-							if (!personsWithSameInterests.get(sessionName).isEmpty()) {
-								//Compare persons in same context with members in this session
-								sessionRepository.inviteMembers(sessionName, personsWithSameInterests.get(sessionName));
-								logger.info("Checking if users are in a session..");
-							}
-
-						}
+					// Notify observers of change
+					if (membersIncluded.length>0){
+						Hashtable<String, String[]> response = new Hashtable<String, String[]>();
+						response.put(sessionName, membersIncluded);
+						setChanged();
+						notifyObservers(response);
 					}
 				}
-				//Sleep in seconds
-				Thread.sleep(SECONDS);
-
 			}
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
 	}
 
-
+	/* (non-Javadoc)
+	 * @see java.util.Observer#update(java.util.Observable, java.lang.Object)
+	 */
+	@Override
+	public void update(Observable o, Object arg) {
+		this.run();
+	}
 }

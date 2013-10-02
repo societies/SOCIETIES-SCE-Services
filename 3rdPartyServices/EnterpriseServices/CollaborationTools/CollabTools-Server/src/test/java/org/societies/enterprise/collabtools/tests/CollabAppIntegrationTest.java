@@ -22,44 +22,31 @@
  * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.societies.enterprise.collabtools.runtime;
+package org.societies.enterprise.collabtools.tests;
 
-import java.util.HashSet;
-import java.util.Hashtable;
+import static org.junit.Assert.*;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.societies.enterprise.collabtools.acquisition.ShortTermContextUpdates;
-import org.societies.enterprise.collabtools.acquisition.Person;
-import org.societies.enterprise.collabtools.acquisition.PersonRepository;
+import java.util.HashMap;
+
+import org.junit.Test;
+import org.societies.enterprise.collabtools.ChatAppIntegrator;
+import org.societies.enterprise.collabtools.runtime.CollabApps;
 
 /**
- * Describe your class here...
+ * CollabAppIntegrationTest
  *
- * @author cviana
+ * @author Christopher Viana Lima
  *
  */
-public final class ContextActivity {
-	
-	private static final Logger logger  = LoggerFactory.getLogger(ContextActivity.class);
-	
-	//Get context changes often
-	public static HashSet<ShortTermContextUpdates> getLastContextUpdates(PersonRepository personRepository) {
-		HashSet<ShortTermContextUpdates> ctxHashSet = new HashSet<ShortTermContextUpdates>();
-		for (Person person : personRepository.getAllPersons() ) {
-			ctxHashSet.add(person.getLastStatus());
-		}
-		return ctxHashSet;
+public class CollabAppIntegrationTest {
+
+	@Test
+	public void test() {
+		ChatAppIntegrator chat = new ChatAppIntegrator("chat", "snoopy.av.it.pt");
+		chat.join("person#0", "teste", "french");
+		
+//	    HashMap<String, String> collabAppsConfig = new HashMap<String, String>();
+//		CollabApps ca = new CollabApps("chat", "snoopy.av.it.pt");
 	}
-	
-	//Get context which change a few times
-	public Hashtable<String, String[]> getPersonPropertiesContext(PersonRepository personRepository, final String ctxAttribute) {
-		Hashtable<String, String[]> hashTable = new Hashtable<String, String[]>();
-		for (Person person : personRepository.getAllPersons() ) {
-			String[] interests = person.getInterests();
-			String personName = person.getName();
-			hashTable.put(personName, interests);
-		}
-		return hashTable;
-	}
+
 }

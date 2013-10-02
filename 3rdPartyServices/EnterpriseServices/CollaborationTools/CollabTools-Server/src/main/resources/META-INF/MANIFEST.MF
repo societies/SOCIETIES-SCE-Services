@@ -1,25 +1,33 @@
 Manifest-Version: 1.0
-Export-Package: org.societies.enterprise.collabtools.acquisition;uses:
- ="javax.xml.xpath,javax.xml.parsers,org.slf4j,org.xml.sax,org.osgi.fr
- amework,org.societies.context.externalBrokerConnector";version="0.1.0
- "
+Export-Package: org.societies.enterprise.collabtools;uses:="org.societ
+ ies.enterprise.collabtools.runtime,org.slf4j,org.societies.enterprise
+ .collabtools.acquisition,org.osgi.framework,org.societies.enterprise.
+ collabtools.api,javax.xml.xpath,javax.xml.parsers,org.xml.sax";versio
+ n="0.1.0",org.societies.enterprise.collabtools.api;uses:="org.societi
+ es.enterprise.collabtools.acquisition,org.societies.enterprise.collab
+ tools.runtime";version="0.1.0",org.societies.enterprise.collabtools.a
+ cquisition;uses:="org.societies.enterprise.collabtools.runtime,org.so
+ cieties.enterprise.collabtools,org.slf4j,org.societies.enterprise.col
+ labtools.api,org.osgi.framework,org.societies.context.externalBrokerC
+ onnector";version="0.1.0",org.societies.enterprise.collabtools.runtim
+ e;uses:="org.societies.enterprise.collabtools.api,org.societies.enter
+ prise.collabtools.acquisition,org.slf4j";version="0.1.0"
 Ignore-Package: ch.qos.logback.classic,ch.qos.logback.core,ch.qos.logb
  ack.core.joran.spi,ch.qos.logback.classic.joran
 Bundle-ClassPath: .,neo4j-kernel-1.8.M04.jar,classes,neo4j-graph-algo-
  1.8.M04.jar,neo4j-lucene-index-1.8.M04.jar,geronimo-jta_1.1_spec-1.1.
- 1.jar,neo4j-udc-1.8.M04.jar,neo4j-1.8.M04.jar,commons-cli-1.2.jar,neo
- 4j-jmx-1.8.M04.jar,neo4j-cypher-1.8.M04.jar,neo4j-graph-matching-1.8.
- M04.jar,lucene-core-3.5.0.jar,scala-library-2.9.1-1.jar
+ 1.jar,smackx-3.1.0.jar,neo4j-udc-1.8.M04.jar,smack-3.1.0.jar,neo4j-1.
+ 8.M04.jar,commons-cli-1.2.jar,neo4j-jmx-1.8.M04.jar,neo4j-cypher-1.8.
+ M04.jar,neo4j-graph-matching-1.8.M04.jar,lucene-core-3.5.0.jar,scala-
+ library-2.9.1-1.jar
 Built-By: cviana
 Tool: Bnd-1.43.0
 Bundle-Name: Collaboration Tools
 Created-By: Apache Maven Bundle Plugin
-Import-Bundle: org.societies.context-management.context-3pbroker-conne
- ctor;version="0.1.0"
 Build-Jdk: 1.7.0_03
 Bundle-Version: 0.1.0
+Bnd-LastModified: 1379598112014
 Embed-Transitive: true
-Bnd-LastModified: 1352391617528
 Bundle-ManifestVersion: 2
 Bundle-Activator: org.societies.enterprise.collabtools.Activator
 Bundle-SymbolicName: org.societies.enterprise.CollabTools
@@ -31,24 +39,27 @@ Import-Package: com.sun.source.tree;resolution:=optional,com.sun.sourc
  ng.model;resolution:=optional,javax.lang.model.element;resolution:=op
  tional,javax.lang.model.type;resolution:=optional,javax.lang.model.ut
  il;resolution:=optional,javax.management;resolution:=optional,javax.m
- anagement.remote;resolution:=optional,javax.tools;resolution:=optiona
- l,javax.xml.namespace;resolution:=optional,javax.xml.parsers;resoluti
- on:=optional,javax.xml.xpath;resolution:=optional,org.osgi.framework;
- version="[1.6,2)",org.slf4j;resolution:=optional;version="[1.6,2)",or
- g.slf4j.impl;resolution:=optional;version="[1.6,2)",org.societies.api
- .cis.management;resolution:=optional,org.societies.api.comm.xmpp.inte
- rfaces;resolution:=optional,org.societies.api.context;resolution:=opt
- ional,org.societies.api.context.broker;resolution:=optional,org.socie
- ties.api.context.event;resolution:=optional,org.societies.api.context
- .model;resolution:=optional,org.societies.api.identity;resolution:=op
- tional,org.societies.api.internal.context.broker;resolution:=optional
- ,org.societies.api.schema.servicelifecycle.model;resolution:=optional
- ,org.societies.context.externalBrokerConnector;resolution:=optional;v
- ersion="[0.1,1)",org.springframework.beans.factory.annotation;resolut
- ion:=optional,org.springframework.stereotype;resolution:=optional,org
- .w3c.dom;resolution:=optional,org.xml.sax;resolution:=optional,org.xm
- l.sax.ext;resolution:=optional,org.xml.sax.helpers;resolution:=option
- al,sun.misc;resolution:=optional
+ anagement.remote;resolution:=optional,javax.naming.directory;resoluti
+ on:=optional,javax.net;resolution:=optional,javax.net.ssl;resolution:
+ =optional,javax.security.auth.callback;resolution:=optional,javax.sec
+ urity.sasl;resolution:=optional,javax.swing;resolution:=optional,java
+ x.tools;resolution:=optional,javax.xml.namespace;resolution:=optional
+ ,javax.xml.parsers;resolution:=optional,javax.xml.xpath;resolution:=o
+ ptional,org.osgi.framework;version="[1.6,2)",org.slf4j;resolution:=op
+ tional;version="[1.6,2)",org.slf4j.impl;resolution:=optional;version=
+ "[1.6,2)",org.societies.api.cis.management;resolution:=optional,org.s
+ ocieties.api.comm.xmpp.interfaces;resolution:=optional,org.societies.
+ api.context;resolution:=optional,org.societies.api.context.broker;res
+ olution:=optional,org.societies.api.context.event;resolution:=optiona
+ l,org.societies.api.context.model;resolution:=optional,org.societies.
+ api.identity;resolution:=optional,org.societies.api.schema.servicelif
+ ecycle.model;resolution:=optional,org.societies.context.externalBroke
+ rConnector;version="[0.1,1)",org.societies.enterprise.collabtools.api
+ ;resolution:=optional;version="[0.1,1)",org.springframework.beans.fac
+ tory.annotation;resolution:=optional,org.springframework.stereotype;r
+ esolution:=optional,org.w3c.dom;resolution:=optional,org.xml.sax;reso
+ lution:=optional,org.xml.sax.ext;resolution:=optional,org.xml.sax.hel
+ pers;resolution:=optional,sun.misc;resolution:=optional
 Embed-Dependency: *;scope=compile|runtime
 Originally-Created-By: Apache Maven Bundle Plugin
 

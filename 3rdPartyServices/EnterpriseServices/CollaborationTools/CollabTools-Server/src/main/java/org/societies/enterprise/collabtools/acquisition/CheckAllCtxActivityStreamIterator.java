@@ -32,11 +32,12 @@ import java.util.NoSuchElementException;
 
 import org.neo4j.helpers.collection.PositionedIterator;
 
+@Deprecated
 class CheckAllCtxActivityStreamIterator implements Iterator<ShortTermContextUpdates> {
     private ArrayList<PositionedIterator<ShortTermContextUpdates>> ctxUpdates = new ArrayList<PositionedIterator<ShortTermContextUpdates>>();
     private StatusUpdateComparator comparator = new StatusUpdateComparator();
 
-    public CheckAllCtxActivityStreamIterator( Person person )
+    public CheckAllCtxActivityStreamIterator(Person person)
     {
         for ( Person friend : person.getFriends() )
         {
@@ -56,7 +57,7 @@ class CheckAllCtxActivityStreamIterator implements Iterator<ShortTermContextUpda
 
     public ShortTermContextUpdates next()
     {
-        if ( ctxUpdates.size() == 0 )
+        if (ctxUpdates.size() == 0)
         {
             throw new NoSuchElementException();
         }
@@ -64,7 +65,7 @@ class CheckAllCtxActivityStreamIterator implements Iterator<ShortTermContextUpda
         PositionedIterator<ShortTermContextUpdates> first = ctxUpdates.get(0);
         ShortTermContextUpdates returnVal = first.current();
 
-        if ( !first.hasNext() )
+        if (!first.hasNext())
         {
             ctxUpdates.remove( 0 );
         }
@@ -80,12 +81,12 @@ class CheckAllCtxActivityStreamIterator implements Iterator<ShortTermContextUpda
 
     private void sort()
     {
-        Collections.sort( ctxUpdates, comparator );
+        Collections.sort(ctxUpdates, comparator);
     }
 
     public void remove()
     {
-        throw new UnsupportedOperationException( "Not supported yet..." );
+        throw new UnsupportedOperationException("Not supported yet...");
     }
 
     private class StatusUpdateComparator implements Comparator<PositionedIterator<ShortTermContextUpdates>> {

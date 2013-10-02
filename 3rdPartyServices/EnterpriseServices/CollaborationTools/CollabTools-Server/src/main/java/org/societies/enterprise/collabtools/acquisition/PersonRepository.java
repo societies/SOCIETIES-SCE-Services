@@ -38,15 +38,9 @@ import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.index.Index;
-import org.neo4j.graphdb.index.IndexHits;
-import org.neo4j.graphdb.index.IndexManager;
 import org.neo4j.helpers.collection.IterableWrapper;
-import org.neo4j.helpers.collection.MapUtil;
-import org.neo4j.index.lucene.QueryContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.societies.enterprise.collabtools.Activator;
-import org.societies.enterprise.collabtools.runtime.SessionRepository;
 
 import scala.actors.threadpool.Arrays;
 
@@ -55,7 +49,6 @@ public class PersonRepository
     private final GraphDatabaseService graphDb;
     private final Index<Node> index;
     private final Node personRefNode;
-	private SessionRepository sessionRep;
 	
 	private static final Logger logger  = LoggerFactory.getLogger(PersonRepository.class);
 
@@ -101,18 +94,18 @@ public class PersonRepository
         try
         {
             Node newPersonNode = graphDb.createNode();
-            personRefNode.createRelationshipTo( newPersonNode, A_PERSON );
+            personRefNode.createRelationshipTo(newPersonNode, A_PERSON);
             // lock now taken, we can check if  already exist in index
-            Node alreadyExist = index.get( Person.NAME, name ).getSingle();
-            if ( alreadyExist != null )
+            Node alreadyExist = index.get(LongTermCtxTypes.NAME, name).getSingle();
+            if (alreadyExist != null)
             {
                 tx.failure();
-                throw new Exception( "Person with this name already exists " );
+                throw new Exception("Person with this name already exists ");
             }
-            newPersonNode.setProperty( Person.NAME, name );
-            index.add( newPersonNode, Person.NAME, name );
+            newPersonNode.setProperty(LongTermCtxTypes.NAME, name);
+            index.add(newPersonNode, LongTermCtxTypes.NAME, name);
             tx.success();
-            Person person = new Person( newPersonNode );
+            Person person = new Person(newPersonNode);
             //TODO:VERIFIY OBSERVER
             logger.info("Person added: "+name);
             return person;
@@ -124,35 +117,35 @@ public class PersonRepository
 
     }
 
-    public Person getPersonByName( String name )
+    public Person getPersonByName(String name)
     {
-        Node personNode = index.get( Person.NAME, name ).getSingle();
+        Node personNode = index.get(LongTermCtxTypes.NAME, name).getSingle();
         if ( personNode == null )
         {
             throw new IllegalArgumentException( "Person[" + name
                     + "] not found" );
         }
-        return new Person( personNode );
+        return new Person(personNode);
     }
     
     public boolean hasPerson(String name)
     {
-        Node personNode = index.get( Person.NAME, name ).getSingle();
+        Node personNode = index.get(LongTermCtxTypes.NAME, name).getSingle();
         if (personNode == null)
         	return false;
         return true;
     }
     
-    public Map<Person, Integer> getPersonWithSimilarInterests(Person self)
+    public Map<Person, Integer> getPersonWithSimilarCtx(Person self, String property)
     {
     	Map<Person,Integer> persons = new HashMap<Person, Integer>();
-    	for ( Person person : getAllPersons() )
+    	for (Person person : getAllPersons())
     	{
         	int counter = 0;
     		if (!self.equals(person)) {
-    			List<String> personInterest = Arrays.asList(person.getInterests());
-    			for (String match : self.getInterests()) {    			
-    				if (personInterest.contains(match)) {
+    			List<String> personCtx = Arrays.asList(person.getArrayLongTermCtx(property));
+    			for (String match : self.getArrayLongTermCtx(property)) {    			
+    				if (personCtx.contains(match)) {
     					counter++;
     					persons.put(person, counter);
     				}
@@ -167,7 +160,7 @@ public class PersonRepository
     {
     	List<Person> persons = new ArrayList<Person>();
     	//E.g. LongTermCtxTypes.COMPANY
-    	for ( Node personNode : index.query(property, value) )
+    	for (Node personNode : index.query(property, value))
     	{
     		Person person = new Person(personNode);
     		persons.add(person);
@@ -175,7 +168,7 @@ public class PersonRepository
 //        IndexManager indexManager =  graphDb.index();
 //        Index<Node> index = indexManager.forNodes("company",MapUtil.stringMap(IndexManager.PROVIDER, "lucene", "type", "fulltext"));
 //        IndexHits<Node> hits = index.query("company", new QueryContext("*"));
-//        Node personNode = index.get( Person.NAME, name ).getSingle();
+//        Node personNode = index.get( LongTermCtxTypes.NAME, name ).getSingle();
 //        if ( personNode == null )
 //        {
 //            throw new IllegalArgumentException( "Property from Person[" + name
@@ -183,7 +176,7 @@ public class PersonRepository
 //        }
 //        Person person = new Person( personNode );
 //        return person.getInterest(property);
-		return (Person[]) persons.toArray();
+		return persons.toArray(new Person[persons.size()]);
     }
 
     public void deletePerson(Person person)
@@ -192,17 +185,17 @@ public class PersonRepository
         try
         {
             Node personNode = person.getUnderlyingNode();
-            index.remove( personNode, Person.NAME, person.getName() );
-            for ( Person friend : person.getFriends() )
+            index.remove( personNode, LongTermCtxTypes.NAME, person.getName() );
+            for (Person friend : person.getFriends())
             {
-                person.removeFriend( friend );
+                person.removeFriend(friend);
             }
-            personNode.getSingleRelationship( A_PERSON, Direction.INCOMING ).delete();
+            personNode.getSingleRelationship(A_PERSON, Direction.INCOMING).delete();
 
-            for ( ShortTermContextUpdates status : person.getStatus() )
+            for (ShortTermContextUpdates status : person.getStatus())
             {
                 Node statusNode = status.getUnderlyingNode();
-                for ( Relationship r : statusNode.getRelationships() )
+                for (Relationship r : statusNode.getRelationships())
                 {
                     r.delete();
                 }
@@ -221,10 +214,10 @@ public class PersonRepository
     public Iterable<Person> getAllPersons()
     {
         return new IterableWrapper<Person, Relationship>(
-                personRefNode.getRelationships( A_PERSON ) )
+                personRefNode.getRelationships(A_PERSON) )
         {
             @Override
-            protected Person underlyingObjectToObject( Relationship personRel )
+            protected Person underlyingObjectToObject(Relationship personRel)
             {
                 return new Person( personRel.getEndNode() );
             }

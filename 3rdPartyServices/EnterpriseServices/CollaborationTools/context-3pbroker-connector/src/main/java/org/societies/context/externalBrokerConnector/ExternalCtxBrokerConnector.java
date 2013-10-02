@@ -32,8 +32,6 @@ import java.util.concurrent.ExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.societies.api.cis.management.ICisManager;
-import org.societies.api.cis.management.ICisOwned;
-import org.societies.api.comm.xmpp.interfaces.ICommManager;
 import org.societies.api.context.CtxException;
 import org.societies.api.context.broker.ICtxBroker;
 import org.societies.api.context.event.CtxChangeEvent;
@@ -41,10 +39,8 @@ import org.societies.api.context.event.CtxChangeEventListener;
 import org.societies.api.context.model.CtxAttribute;
 import org.societies.api.context.model.CtxAttributeTypes;
 import org.societies.api.context.model.CtxEntity;
-import org.societies.api.identity.IIdentity;
-import org.societies.api.identity.INetworkNode;
 import org.societies.api.identity.InvalidFormatException;
-import org.societies.api.identity.Requestor;
+import org.societies.api.identity.RequestorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -59,48 +55,19 @@ public class ExternalCtxBrokerConnector extends Observable {
 
 
 	/** The 3P Context Broker service reference. */
-	private ICtxBroker externalCtxBroker;
-	private ICommManager commMgrService;
-	private org.societies.api.internal.context.broker.ICtxBroker internalCtxBroker;
-	private IIdentity cssOwnerId;
-	private INetworkNode cssNodeId;
-	private ICisOwned cisOwned  = null;
-//	private IIdentity cisID;
-	private Requestor requestor = null;
-
+	private ICtxBroker ctxBroker;
 	private IContextAware3pService ca3pService;
-
+	private RequestorService requestorService;
 
 	@Autowired(required=true)
-	public ExternalCtxBrokerConnector(ICtxBroker externalCtxBroker,org.societies.api.internal.context.broker.ICtxBroker internalCtxBroker , ICommManager commMgr,ICisManager cisManager, IContextAware3pService ca3pService) throws Exception {
+	public ExternalCtxBrokerConnector(ICtxBroker externalCtxBroker, ICisManager cisManager, IContextAware3pService ca3pService) throws Exception {
 
-		LOG.info("*** " + this.getClass() + " instantiated");
+		LOG.info("*** ca3pService : " + ca3pService + " instantiated");
 
-		LOG.info("*** ca3pService : " + this.ca3pService + " instantiated");
-
-		this.externalCtxBroker = externalCtxBroker;
-		this.internalCtxBroker = internalCtxBroker;
-		this.commMgrService = commMgr;
+		this.ctxBroker = externalCtxBroker;
 		this.ca3pService = ca3pService;
+		this.requestorService = ca3pService.getRequestor();
 		this.ca3pService.setListener(new MyCtxChangeEventListener());
-
-
-		//		this.cssNodeId = commMgr.getIdManager().getThisNetworkNode();
-		//		LOG.info("*** cssNodeId = " + this.cssNodeId);
-		//
-		//		final String cssOwnerStr = this.cssNodeId.getBareJid();
-		//		this.cssOwnerId = commMgr.getIdManager().fromJid(cssOwnerStr);
-		//		LOG.info("*** cssOwnerId = " + this.cssOwnerId);
-		//
-		//		this.requestor = new Requestor(this.cssOwnerId);
-		//		LOG.info("*** requestor = " + this.requestor);
-		//
-		//	
-		//		LOG.info("*** cisOwned " +cisOwned);
-		//		LOG.info("*** cisOwned.getCisId() " +cisOwned.getCisId());
-		//		String cisIDString  = cisOwned.getCisId();
-		//
-		//		this.cisID = commMgr.getIdManager().fromJid(cisIDString);
 
 	}
 
@@ -112,10 +79,23 @@ public class ExternalCtxBrokerConnector extends Observable {
 		try {
 			return this.ca3pService.retrieveLookupMembersCtxAttributes(cisID);
 		} catch (InvalidFormatException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		//TODO: FIX THIS!
+		return null;
+	}
+	
+	/**
+	 * @return retrieveLookupMembersCtxAttributes
+	 * @throws InvalidFormatException 
+	 */
+	public HashMap<String, String> retrieveCommunityCtxAttributes(Object cisID) {
+		try {
+			return this.ca3pService.retrieveCommunityCtxAttributes(cisID);
+		} catch (InvalidFormatException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		return null;
 	}
 
@@ -131,7 +111,19 @@ public class ExternalCtxBrokerConnector extends Observable {
 		}
 	}
 	
-	
+	/**
+	 * @param String cisID
+	 */
+	public void unregisterContextChanges(Object cisID) {
+		//registerForContextChanges()
+		try {
+			this.ca3pService.unregisterContextChanges(cisID);
+		} catch (InvalidFormatException e) {
+			e.printStackTrace();
+		}
+	}
+
+
 	private class MyCtxChangeEventListener implements CtxChangeEventListener {
 
 		/* (non-Javadoc)
@@ -172,23 +164,20 @@ public class ExternalCtxBrokerConnector extends Observable {
 			String person = null;
 			try {
 
-				ctxAttr = (CtxAttribute) internalCtxBroker.retrieve(event.getId()).get();
+				ctxAttr = (CtxAttribute) ctxBroker.retrieve(requestorService, event.getId()).get();
 				LOG.info("ctxValue getScope: "+ctxAttr.getScope());
-				CtxEntity retrievedCtxEntity = (CtxEntity) internalCtxBroker.retrieve(ctxAttr.getScope()).get();
+				CtxEntity retrievedCtxEntity = (CtxEntity) ctxBroker.retrieve(requestorService, ctxAttr.getScope()).get();
 				ctxEntity= retrievedCtxEntity.getAttributes(CtxAttributeTypes.NAME);
 
 				for(CtxAttribute name : ctxEntity) {
 					person = name.getStringValue();
 				}
-				LOG.info("name.getStringValue() "+person);
+
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (ExecutionException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (CtxException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			String [] response = new String [] {ctxAttr.getType(), ctxAttr.getStringValue(), person};
@@ -199,7 +188,7 @@ public class ExternalCtxBrokerConnector extends Observable {
 
 			// Notify observers of change
 			setChanged();
-		    notifyObservers(response);
+			notifyObservers(response);
 		}
 	}
 

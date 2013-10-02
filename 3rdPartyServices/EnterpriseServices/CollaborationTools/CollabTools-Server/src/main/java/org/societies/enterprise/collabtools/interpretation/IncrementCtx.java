@@ -23,11 +23,16 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 package org.societies.enterprise.collabtools.interpretation;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -37,17 +42,23 @@ import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
+import org.societies.enterprise.collabtools.api.IIncrementCtx;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-public class AlchemyAPISimple {
-
+/**
+ * Implementation of interface for increment context information using external NPL analysis
+ *
+ * @author Chris Lima
+ *
+ */
+public class IncrementCtx implements IIncrementCtx {
 	private String _apiKey;
 	private static final String _requestUri = "http://access.alchemyapi.com/calls/";
 
-	public static AlchemyAPISimple GetInstanceFromString(String apiKey) {
-		AlchemyAPISimple api = new AlchemyAPISimple();
+	public static IIncrementCtx GetInstanceFromString(String apiKey) {
+		IncrementCtx api = new IncrementCtx();
 		api.SetAPIKey(apiKey);
 
 		return api;
@@ -60,17 +71,65 @@ public class AlchemyAPISimple {
 			throw new IllegalArgumentException("Too short API key.");		
 	}
 
-	public Document TextGetRankedConcepts(String text) throws IOException, SAXException, ParserConfigurationException, XPathExpressionException {
+	/* (non-Javadoc)
+	 * @see org.societies.enterprise.collabtools.api.IIncrementCtx#incrementString(java.lang.String)
+	 */
+	@Override
+	public String[] incrementString(String text, EnrichmentTypes type) {
+		Document doc = null;
+		List<String> stringCollection = new ArrayList<String>();
+		try {
+			if (type.equals(EnrichmentTypes.CATEGORY)) {
+				doc = this.TextGetCategory(text);
+			}
+			if (type.equals(EnrichmentTypes.CONCEPT)) {
+				doc = this.TextGetRankedConcepts(text);
+			}
+		} catch (XPathExpressionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (SAXException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ParserConfigurationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		if (doc != null) {
+			NodeList nodeResults = doc.getElementsByTagName("text");
+			for (int i = 0; i < nodeResults.getLength(); i++) {
+				stringCollection.add(nodeResults.item(i).getTextContent().toLowerCase());
+			}
+		}
+		return stringCollection.toArray(new String[stringCollection.size()]);
+	}
+
+	private Document TextGetRankedConcepts(String text) throws IOException, SAXException, ParserConfigurationException, XPathExpressionException {
 		return TextGetRankedConcepts(text, new AlchemyAPIConceptParams());
 
 	}
 
-	private Document TextGetRankedConcepts(String text,
-			AlchemyAPIConceptParams params) throws IOException, SAXException,
-			ParserConfigurationException, XPathExpressionException {		
-		CheckText(text);		
+	private Document TextGetRankedConcepts(String text,	AlchemyAPIConceptParams params) throws IOException, SAXException,
+	ParserConfigurationException, XPathExpressionException {		
+		CheckText(text);
 		params.setText(text);		
 		return POST("TextGetRankedConcepts", "text", params);
+	}
+
+	private Document TextGetCategory(String text) throws IOException, SAXException, ParserConfigurationException, XPathExpressionException
+	{
+		return TextGetCategory(text, new AlchemyAPICategoryParams());
+	}
+
+	private Document TextGetCategory(String text, AlchemyAPICategoryParams params) throws IOException, SAXException,
+	ParserConfigurationException, XPathExpressionException
+	{
+		CheckText(text);
+		params.setText(text);
+		return POST("TextGetCategory", "text", params);
 	}
 
 	private Document POST(String callName, String callPrefix, AlchemyAPIParams params)
@@ -114,7 +173,7 @@ public class AlchemyAPISimple {
 				String statusInfoStr = getNodeValue(factory, doc, "/results/statusInfo/text()");
 				if (null != statusInfoStr && statusInfoStr.length() > 0) {
 					return null;
-//					throw new IOException("Error making API call: " + statusInfoStr + '.');
+					//					throw new IOException("Error making API call: " + statusInfoStr + '.');
 				}
 
 				throw new IOException("Error making API call: " + statusStr + '.');
@@ -149,9 +208,96 @@ public class AlchemyAPISimple {
 			}
 
 
-	private void CheckText(String text) {
-		if (null == text || text.length() < 5)
-			throw new IllegalArgumentException("Enter some text to analyze. The text must have at least 5 words");		
+	private final void CheckText(String text) {
+		if (null == text || text.length() < 5) {
+			throw new IllegalArgumentException("Enter some text to analyze. The text must have at least 5 words");
+		}
 	}
 
+	private class AlchemyAPIParams {
+		private static final String OUTPUT_XML = "xml";
+		private static final String OUTPUT_RDF = "rdf";
+
+//		private String url;
+//		private String html;
+		private String text;
+		private String outputMode = OUTPUT_XML;
+//		private String customParameters;
+
+
+		public void setText(String text) {
+			this.text = text;
+		}
+		public String getOutputMode() {
+			return outputMode;
+		}
+
+		public String getParameterString(){
+			String retString = "";
+			try{
+//				if(url!=null) retString+="&url="+URLEncoder.encode(url,"UTF-8");
+//				if(html!=null) retString+="&html="+URLEncoder.encode(html,"UTF-8");
+				if(text!=null) retString+="&text="+URLEncoder.encode(text,"UTF-8");
+//				if(customParameters!=null) retString+=customParameters;
+				if(outputMode!=null) retString+="&outputMode="+outputMode;
+			}
+			catch(UnsupportedEncodingException e ){
+				retString = "";
+			}
+			return retString;
+		}
+	}
+
+	private class AlchemyAPICategoryParams extends AlchemyAPIParams{
+
+		private Integer maxRetrieve;
+		private String sourceText;
+		private Boolean showSourceText;
+		private String cQuery;
+		private String xPath;
+		private Boolean linkedData;
+
+
+		public String getParameterString(){
+			String retString = super.getParameterString();
+			try{
+				if(sourceText!=null) retString+="&sourceText="+sourceText;
+				if(showSourceText!=null) retString+="&showSourceText="+(showSourceText?"1":"0");
+				if(cQuery!=null) retString+="&cquery="+URLEncoder.encode(cQuery,"UTF-8");
+				if(xPath!=null) retString+="&xpath="+URLEncoder.encode(xPath,"UTF-8");
+				if(maxRetrieve!=null) retString+="&maxRetrieve="+maxRetrieve.toString();
+				if(linkedData!=null) retString+="&linkedData="+(linkedData?"1":"0");
+			}
+			catch(UnsupportedEncodingException e ){
+				retString = "";
+			}
+			return retString;
+		}		
+	}
+
+	private class AlchemyAPIConceptParams extends AlchemyAPIParams{
+
+		private Integer maxRetrieve;
+		private String sourceText;
+		private Boolean showSourceText;
+		private String cQuery;
+		private String xPath;
+		private Boolean linkedData;		
+
+		public String getParameterString(){
+			String retString = super.getParameterString();
+			try{
+				if(sourceText!=null) retString+="&sourceText="+sourceText;
+				if(showSourceText!=null) retString+="&showSourceText="+(showSourceText?"1":"0");
+				if(cQuery!=null) retString+="&cquery="+URLEncoder.encode(cQuery,"UTF-8");
+				if(xPath!=null) retString+="&xpath="+URLEncoder.encode(xPath,"UTF-8");
+				if(maxRetrieve!=null) retString+="&maxRetrieve="+maxRetrieve.toString();
+				if(linkedData!=null) retString+="&linkedData="+(linkedData?"1":"0");
+			}
+			catch(UnsupportedEncodingException e ){
+				retString = "";
+			}
+			return retString;
+		}		
+	}
 }

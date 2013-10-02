@@ -35,18 +35,18 @@ import org.societies.context.externalBrokerConnector.ExternalCtxBrokerConnector;
 import org.societies.enterprise.collabtools.api.IContextConnector;
 
 /**
- * Describe your class here...
+ * Connector for Context Broker
  *
  * @author cviana
  *
  */
 public class InternalContextConnector implements IContextConnector {
 
-//	private Logger logger = LoggerFactory.getLogger(this.getClass());
+	private Logger logger = LoggerFactory.getLogger(this.getClass());
 	
 	BundleContext bundleContext = FrameworkUtil.getBundle(this.getClass()).getBundleContext();
-	ServiceReference connectorServiceReference= bundleContext.getServiceReference(ExternalCtxBrokerConnector.class.getName());
-	ExternalCtxBrokerConnector connector =(ExternalCtxBrokerConnector)bundleContext.getService(connectorServiceReference);
+	ServiceReference<?> connectorServiceReference= bundleContext.getServiceReference(ExternalCtxBrokerConnector.class.getName());
+	ExternalCtxBrokerConnector ctxConnector =(ExternalCtxBrokerConnector)bundleContext.getService(connectorServiceReference);
 	private ContextSubscriber contextSubscriber;
 	
 	
@@ -55,22 +55,39 @@ public class InternalContextConnector implements IContextConnector {
 	 */
 	public InternalContextConnector(ContextSubscriber contextSubscriber) {
 		this.contextSubscriber = contextSubscriber;
-		this.connector.addObserver(this.contextSubscriber);
-//		this.connector.testEvent();
+		this.ctxConnector.addObserver(this.contextSubscriber);
 	}
 
 	/**
 	 * @return persons and context attributes
 	 */
 	public HashMap<String, HashMap<String, String[]>> getInitialContext(Object cisID) {
-		HashMap<String, HashMap<String, String[]>> persons = connector.retrieveLookupMembersCtxAttributes(cisID);
+		HashMap<String, HashMap<String, String[]>> persons = ctxConnector.retrieveLookupMembersCtxAttributes(cisID);
 		if (persons.isEmpty())
-			throw new IllegalArgumentException("HashMap pf persons cannot be null! ");
+			throw new NullPointerException("Community list persons cannot be null! ");
 		return persons;
 	}
 	
-	public void shortTermCtxUpdates(Object parameter) {
-		connector.registerForContextChanges(parameter);
+	/* (non-Javadoc)
+	 * @see org.societies.enterprise.collabtools.api.IContextConnector#registerForshortTermCtxUpdates(java.lang.Object)
+	 */
+	@Override
+	public void registerForshortTermCtxUpdates(Object parameter) {
+		ctxConnector.registerForContextChanges(parameter);
+	}
+
+
+	/* (non-Javadoc)
+	 * @see org.societies.enterprise.collabtools.api.IContextConnector#unregisterForshortTermCtxUpdates(java.lang.Object)
+	 */
+	@Override
+	public void unregisterForshortTermCtxUpdates(Object parameter) {
+		ctxConnector.unregisterContextChanges(parameter);		
+	}
+	
+	public HashMap<String, String> getCommunityCtx(Object parameter) {
+		return ctxConnector.retrieveCommunityCtxAttributes(parameter);
+		
 	}
 
 	

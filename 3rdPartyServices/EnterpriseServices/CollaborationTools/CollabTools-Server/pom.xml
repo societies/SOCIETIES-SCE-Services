@@ -3,9 +3,28 @@
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>org.societies</groupId>
+<<<<<<< HEAD
 		<artifactId>version-parent</artifactId>
 		<version>RELEASE</version>
+=======
+		<version>RELEASE</version>
+		<relativePath>../../parent/spring-osgi.xml</relativePath>
+>>>>>>> dba9c056904addab9f82bc85a78ab90d0398d9f9
 	</parent>
+	
+	<developers>
+	    <developer>
+			<id>ChristopherLima</id>
+			<name>Christopher Viana Lima</name>
+			<email></email>
+			<organization>PTIN</organization>
+			<organizationUrl>http://www.ptinovacao.pt/</organizationUrl>
+			<roles>
+				<role>developer</role>
+			</roles>
+		</developer>
+	</developers>
+			    	
 	<groupId>org.societies.enterprise</groupId>
 	<artifactId>CollabTools</artifactId>
 	<packaging>bundle</packaging>
@@ -19,6 +38,13 @@
 			<version>2.3.7</version>
 			<type>maven-plugin</type>
 			<scope>provided</scope>
+		</dependency>
+		
+		<!-- Virgo -->
+		<dependency>
+			<groupId>jivesoftware</groupId>
+			<artifactId>smackx</artifactId>
+			<version>3.1.0</version>
 		</dependency>
 		
 		<!-- Virgo -->
@@ -61,6 +87,7 @@
 			<version>4.3.0</version>
 			<scope>provided</scope>
 		</dependency>
+		<!-- SOCIETIES -->
 		<dependency>
 			<groupId>org.societies.context-management</groupId>
 			<artifactId>context-3pbroker-connector</artifactId>
@@ -82,12 +109,11 @@
 <!-- 							javax.lang.model.element,javax.lang.model.type,javax.lang.model.util, -->
 <!-- 							javax.management,javax.management.remote,javax.tools,javax.xml.parsers, -->
 <!-- 							org.osgi.framework,org.xml.sax,org.xml.sax.ext,org.xml.sax.helpers -->
-						  org.osgi.framework, !ch.qos.logback.*, *;resolution:=optional</Import-Package> 
- 				          <Export-Package>org.societies.enterprise.collabtools.acquisition</Export-Package> 
+						  org.osgi.framework, org.societies.context.externalBrokerConnector, !ch.qos.logback.*, *;resolution:=optional</Import-Package> 
+ 				          <Export-Package>org.societies.enterprise.collabtools, org.societies.enterprise.collabtools.api, org.societies.enterprise.collabtools.acquisition, org.societies.enterprise.collabtools.runtime</Export-Package> 
 <!-- 				      <Private-Package>no privates either</Private-Package> -->
 				      <Embed-Transitive>true</Embed-Transitive>
 		           	  <Embed-Dependency>*;scope=compile|runtime</Embed-Dependency>
-		           	  <Import-Bundle>org.societies.context-management.context-3pbroker-connector;version="0.1.0"</Import-Bundle>
 				      <Bundle-Activator>org.societies.enterprise.collabtools.Activator</Bundle-Activator>
 				    </instructions> 
 				</configuration>

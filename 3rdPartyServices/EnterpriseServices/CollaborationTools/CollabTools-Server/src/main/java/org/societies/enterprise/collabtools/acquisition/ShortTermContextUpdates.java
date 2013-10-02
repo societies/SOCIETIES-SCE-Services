@@ -47,7 +47,7 @@ public class ShortTermContextUpdates extends Observable
     static final String DATE = "date";
 	static final String DATE_FORMAT = "HH:mm:ss dd-MM-yyyy";
 
-    public ShortTermContextUpdates( Node underlyingNode )
+    public ShortTermContextUpdates(Node underlyingNode)
     {
 
         this.underlyingNode = underlyingNode;
@@ -60,20 +60,20 @@ public class ShortTermContextUpdates extends Observable
 
     public Person getPerson()
     {
-        return new Person( getPersonNode() );
+        return new Person(getPersonNode());
     }
 
     private Node getPersonNode()
     {
         TraversalDescription traversalDescription = Traversal.description().
                 depthFirst().
-                relationships( NEXT, Direction.INCOMING ).
-                relationships( STATUS, Direction.INCOMING ).
+                relationships(NEXT, Direction.INCOMING).
+                relationships(STATUS, Direction.INCOMING).
                 evaluator(Evaluators.includeWhereLastRelationshipTypeIs(STATUS));
 
         Traverser traverser = traversalDescription.traverse( getUnderlyingNode() );
 
-        return IteratorUtil.singleOrNull( traverser.iterator() ).endNode();
+        return IteratorUtil.singleOrNull(traverser.iterator()).endNode();
     }
 
     public String getShortTermCtx(final String property)
@@ -84,7 +84,7 @@ public class ShortTermContextUpdates extends Observable
     
     public Date getDate()
     {
-        String strdate = (String)underlyingNode.getProperty( DATE );
+        String strdate = (String)underlyingNode.getProperty(DATE);
         SimpleDateFormat formatter = new SimpleDateFormat(DATE_FORMAT);
         Date date = null;
 		try {

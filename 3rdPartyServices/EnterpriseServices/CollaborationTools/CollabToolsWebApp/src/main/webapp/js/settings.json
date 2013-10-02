@@ -1,0 +1,6 @@
+{
+  "items" : [
+    { "label" : "Location",                      "icon" : "",   "moveTo": "dummy",  "selected": "true"      },
+    { "label" : "Interests",                        "icon" : "",  "moveTo": "dummy"                            }
+  ]
+}

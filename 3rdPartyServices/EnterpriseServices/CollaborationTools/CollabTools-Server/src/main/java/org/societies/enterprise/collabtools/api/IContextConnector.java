@@ -27,7 +27,7 @@ package org.societies.enterprise.collabtools.api;
 import java.util.HashMap;
 
 /**
- * Describe your class here...
+ * Interface for context Broker connector
  *
  * @author cviana
  *
@@ -36,6 +36,8 @@ public interface IContextConnector {
 	
 	public HashMap<String, HashMap<String, String[]>> getInitialContext(Object parameter);
 	
-	public void shortTermCtxUpdates(Object parameter);
+	public void registerForshortTermCtxUpdates(Object parameter);
+	
+	public void unregisterForshortTermCtxUpdates(Object parameter);
 
 }

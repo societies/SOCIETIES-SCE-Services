@@ -25,13 +25,51 @@
 package org.societies.enterprise.collabtools.api;
 
 /**
- * Describe your class here...
+ * Interface for Collaborative Applications Manager
  *
- * @author cviana
+ * @author Chris Lima
  *
  */
-public interface ISeekLongTermCtx {
-	
+public interface ICollabApps {
 
+	/**
+	 * @return Collaborative applications integrated
+	 */
+	public abstract ICollabAppConnector[] getCollabAppConnectors();
+
+	/**
+	 * Send invitation to members of a session
+	 * @param member Individual to invite
+	 * @param collabApps Collaborative applications to send the action
+	 * @param sessionName Collaborative session name
+	 * @param string
+	 */
+	public abstract void sendInvite(String member, String[] collabApps, String sessionName, String string);
+
+	/**
+	 * Remove member from a session	  
+	 * @param member Individual to kick
+	 * @param collabApps Collaborative applications to send the action
+	 * @param sessionName Collaborative session name
+	 */
+	public abstract void sendKick(String member, String[] collabApps, String sessionName);
+
+	/**
+	 * Join event to trigger some action
+	 * 
+	 * @param member Participant
+	 * @param collabApps Collaborative applications to send the action
+	 * @param sessionName Collaborative session name
+	 */
+	public abstract void joinEvent(String member, String[] collabApps, String sessionName);
+	
+	/**
+	 * Leave event to trigger some action
+	 * 
+	 * @param member Participant 
+	 * @param collabApps Collaborative applications to send the action
+	 * @param sessionName Collaborative session name
+	 */
+	public abstract void leaveEvent(String member, String[] collabApps, String sessionName);
 
 }

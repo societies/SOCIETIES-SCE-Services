@@ -22,14 +22,38 @@
  * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.societies.enterprise.collabtools.api;
+package org.societies.webapp.model;
 
-/**
- * Describe your class here...
- *
- * @author cviana
- *
- */
-public interface ISessionApp {
+public class MessageForm {
 
+	private String userId;
+	private String cisBox;
+	private String style;
+	private String msg;
+	
+	
+	public String getUserId() {
+		return userId;
+	}
+	public void setUserId(String userId) {
+		this.userId = userId;
+	}
+	public String getStyle() {
+		return style;
+	}
+	public void setStyle(String style) {
+		this.style = style;
+	}
+	public String getMsg() {
+		return msg;
+	}
+	public void setMsg(String msg) {
+		this.msg = msg;
+	}
+	public String getCisBox() {
+		return cisBox;
+	}
+	public void setCisBox(String cisBox) {
+		this.cisBox = cisBox;
+	}
 }

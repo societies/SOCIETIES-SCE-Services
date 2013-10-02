@@ -24,24 +24,29 @@
  */
 package org.societies.enterprise.collabtools;
 
-import java.util.ArrayList;
+import java.io.File;
+import java.io.FileInputStream;
+import java.util.Properties;
 
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
-import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 import org.neo4j.graphdb.index.Index;
 import org.neo4j.index.impl.lucene.LuceneIndex;
+import org.neo4j.kernel.impl.util.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.societies.enterprise.collabtools.acquisition.Person;
+import org.societies.enterprise.collabtools.acquisition.ContextSubscriber;
+import org.societies.enterprise.collabtools.acquisition.LongTermCtxTypes;
 import org.societies.enterprise.collabtools.acquisition.PersonRepository;
-import org.societies.enterprise.collabtools.acquisition.RelTypes;
-import org.societies.enterprise.collabtools.interpretation.ContextAnalyzer;
-import org.societies.enterprise.collabtools.runtime.CtxMonitor;
+import org.societies.enterprise.collabtools.api.ICollabAppConnector;
+import org.societies.enterprise.collabtools.runtime.CollabApps;
 import org.societies.enterprise.collabtools.runtime.SessionRepository;
 
 /**
+ * 
+ * Main class to test without OSGi bundle compliment
+ * 
  * @author cviana
  *
  */
@@ -49,59 +54,72 @@ public class MainTest {
 
 	private static final Logger logger  = LoggerFactory.getLogger(MainTest.class);
 
-	private static GraphDatabaseService graphDb;
+	private static GraphDatabaseService personGraphDb;
+	private static GraphDatabaseService sessionGraphDb;
 	private static PersonRepository personRepository;
-	private static SessionRepository sessionRepository = new SessionRepository(); 
-	private static Index<Node> indexPerson;
-	private static Index<Node> indexShortTermCtx;
-
+	private static SessionRepository sessionRepository; 
+	private static Index<Node> indexPerson, indexSession, indexShortTermCtx;
+	
+	private static Properties prop = new Properties();
+	
 	/**
 	 * @param args
 	 * @throws Exception 
 	 */
 	public static void main(String[] args) throws Exception {
 
+		prop.load(new FileInputStream("src/main/resources/config.properties"));
+
+	    FileUtils.deleteRecursively(new File(prop.getProperty("personspath")));
+	    FileUtils.deleteRecursively(new File(prop.getProperty("sessionspath")));
 		
 		//Database setup
 		logger.info("Database setup");
 		GraphDatabaseFactory gdbf = new GraphDatabaseFactory();
-		graphDb = gdbf.newEmbeddedDatabase( "target/PersonsGraphDb" );
-		indexPerson = graphDb.index().forNodes( "PersonNodes" );
-		indexShortTermCtx = graphDb.index().forNodes( "CtxNodes" );
-		personRepository = new PersonRepository( graphDb, indexPerson);
+	    personGraphDb = gdbf.newEmbeddedDatabase(prop.getProperty("personspath"));
+	    sessionGraphDb = gdbf.newEmbeddedDatabase(prop.getProperty("sessionspath"));
+	    indexPerson = personGraphDb.index().forNodes("PersonNodes");
+	    indexSession = sessionGraphDb.index().forNodes("SessionNodes");
+	    indexShortTermCtx = personGraphDb.index().forNodes("CtxNodes");
+	    
+	    //Synchronous integration
+	    ICollabAppConnector chat = new ChatAppIntegrator(prop.getProperty("applications"), prop.getProperty("server"));
+	    ICollabAppConnector[] connectorsApp = {chat};
+	    CollabApps collabApps = new CollabApps(connectorsApp);
+
+	    personRepository = new PersonRepository(personGraphDb, indexPerson);
+	    sessionRepository = new SessionRepository(sessionGraphDb, indexSession, collabApps);
 		registerShutdownHook();
 
 		//Caching last recently used for Location
-		( (LuceneIndex<Node>) indexShortTermCtx ).setCacheCapacity( "name", 3000 );
+		((LuceneIndex<Node>) indexShortTermCtx).setCacheCapacity("name", 3000);
 
 		TestUtils test = new TestUtils(personRepository, sessionRepository);
 		//Clean graph DB
 		test.deleteSocialGraph();
 		
 //		test.menu();
-		test.createPersons(5); //5 people by default
+		test.createPersons(4); //5 people by default
 		
 //		Creating some updates
 		test.createMockLongTermCtx();
 		test.createMockShortTermCtx();
-		test.enrichedCtx();
-		test.setupFriendsBetweenPeople();
+		test.enrichedCtx(LongTermCtxTypes.INTERESTS);
+		test.setupWeightAmongPeople(LongTermCtxTypes.INTERESTS);
 
 		
 //		YouMightKnow ymn = new YouMightKnow(personRepository.getPersonByName("person#"+3), new String[] {"project planning"}, 5);
 //		ymn.printMightKnow(ymn.findYouMightKnow(personRepository.getPersonByName("person#"+3)) , new String[] {"project planning"} );
 
-		System.out.println("TestUtils completed" );
+		System.out.println("TestUtils completed");
 
-		//Find people to create dynamic relationship
+//		ContextSubscriber ctxSub = new ContextSubscriber(null, personRepository, sessionRepository);
 
-		System.out.println("Starting Context Monitor..." );
-		CtxMonitor thread = new CtxMonitor(personRepository, sessionRepository);
-		thread.start();
-
-//		//Creating more updates
+		
+		//Creating more updates
 		while (true) {
-			Thread.sleep(3 * 1000);
+			// 5 sec
+			Thread.sleep(5 * 1000);
 			test.createMockShortTermCtx();
 		}
 
@@ -120,7 +138,8 @@ public class MainTest {
 			@Override
 			public void run()
 			{
-				graphDb.shutdown();
+				personGraphDb.shutdown();
+				sessionGraphDb.shutdown();
 			}
 		} );
 	}

@@ -22,24 +22,55 @@
  * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.societies.enterprise.collabtools.api;
+package org.societies.enterprise.collabtools;
 
-import java.io.IOException;
+import java.util.Arrays;
+import java.util.Hashtable;
+import java.util.Map.Entry;
+import java.util.Observable;
 
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.xpath.XPathExpressionException;
-
-import org.xml.sax.SAXException;
-
+import org.societies.enterprise.collabtools.api.IAsyncCollabAppConnector;
 
 /**
- * Describe your class here...
+ * Calendar Test
  *
- * @author cviana
+ * @author Christopher Lima
  *
  */
-public interface IContextReasoning {
+public class AsyncCollabAppConnector implements IAsyncCollabAppConnector {
 	
-	public void incrementInterests() throws XPathExpressionException, IOException, SAXException, ParserConfigurationException;
+	private String app_name;
+
+
+	/* (non-Javadoc)
+	 * @see java.util.Observer#update(java.util.Observable, java.lang.Object)
+	 */
+	@Override
+	public void update(Observable o, Object arg) {
+		// TODO Auto-generated method stub
+		Hashtable<String, String[]> ht = new Hashtable<String, String[]>();
+		ht = (Hashtable<String, String[]>) arg;
+		for (Entry<String, String[]> entry : ht.entrySet()) {
+		    System.out.println("Location: "+entry.getKey()+ " people: "+Arrays.toString(entry.getValue()));
+		}
+	}
+
+	/* (non-Javadoc)
+	 * @see org.societies.enterprise.collabtools.api.IAsyncCollabAppConnector#getAppName()
+	 */
+	@Override
+	public String getAppName() {
+		// TODO Auto-generated method stub
+		return this.app_name;
+	}
+
+
+	/* (non-Javadoc)
+	 * @see org.societies.enterprise.collabtools.api.IAsyncCollabAppConnector#setAppName(java.lang.String)
+	 */
+	@Override
+	public void setAppName(String app_name) {
+		this.app_name = app_name;
+	}
 
 }
