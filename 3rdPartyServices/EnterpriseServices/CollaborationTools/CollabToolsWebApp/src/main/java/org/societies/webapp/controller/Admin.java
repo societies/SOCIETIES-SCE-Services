@@ -67,7 +67,7 @@ public class Admin {
 
 	private static final Logger logger = LoggerFactory.getLogger(Admin.class);
 	
-	AsyncCollabAppConnector app = new AsyncCollabAppConnector();
+//	AsyncCollabAppConnector app = new AsyncCollabAppConnector();
 
 	@Autowired
 	private ICisManager cisManager;
@@ -314,16 +314,16 @@ public class Admin {
 		model.put("log", readLogFile());
 		
 		//TODO: Example with async application here!!***************************
-		this.app.setAppName("APP_NAME");
-		
-		List<String[]> resultsAsync = new ArrayList<String[]>();
-		for (Entry<String, String[]> entry : this.app.getHashTableResults().entrySet()) {
-			String[] elements = {"Location: "+entry.getKey()+ " people: "+Arrays.toString(entry.getValue())};
-			resultsAsync.add(elements);
-		}		
-
-		model.put("app_name", this.app.getAppName());
-		model.put("resultsAsync", resultsAsync);
+//		this.app.setAppName("APP_NAME");
+//		
+//		List<String[]> resultsAsync = new ArrayList<String[]>();
+//		for (Entry<String, String[]> entry : this.app.getHashTableResults().entrySet()) {
+//			String[] elements = {"Location: "+entry.getKey()+ " people: "+Arrays.toString(entry.getValue())};
+//			resultsAsync.add(elements);
+//		}		
+//
+//		model.put("app_name", this.app.getAppName());
+//		model.put("resultsAsync", resultsAsync);
 		
 		//Until here*******************************
 
