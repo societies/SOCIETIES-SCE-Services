@@ -163,14 +163,12 @@
 			<artifactId>CollabTools</artifactId>
 			<version>0.1.0</version>
 			<type>bundle</type>
-			<scope>runtime</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.societies.context-management</groupId>
 			<artifactId>context-3pbroker-connector</artifactId>
 			<version>0.1.0</version>
 			<type>bundle</type>
-			<scope>runtime</scope>
 		</dependency>
 	</dependencies>
 	
@@ -275,8 +273,13 @@
 					<archive>
 						<manifestFile>${project.build.directory}/META-INF/MANIFEST.MF</manifestFile>
 					</archive>
+					<archive>
+            			<manifest>
+              				<addClasspath>true</addClasspath>
+            			</manifest>
+          			</archive>
 					<!-- Make a skinny WAR -->
-					<packagingExcludes>WEB-INF/lib/*.jar</packagingExcludes>
+ 					<packagingExcludes>WEB-INF/lib/*.jar</packagingExcludes> 
 				</configuration>
 			</plugin>
 			<plugin>
