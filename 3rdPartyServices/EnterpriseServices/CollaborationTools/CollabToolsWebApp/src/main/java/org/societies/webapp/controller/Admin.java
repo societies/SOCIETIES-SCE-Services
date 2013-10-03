@@ -189,7 +189,7 @@ public class Admin {
 		model.put("ctxForm", new ContextForm());
 
 		List<String> values1 = getTypesList(org.societies.api.context.model.CtxAttributeTypes.class);
-		values1.addAll(getTypesList(org.societies.api.internal.context.model.CtxAttributeTypes.class));
+		values1.addAll(getTypesList(org.societies.api.context.model.CtxAttributeTypes.class));
 		model.put("attributeTypes", values1);
 
 		List<String[]> results = new ArrayList<String[]>();

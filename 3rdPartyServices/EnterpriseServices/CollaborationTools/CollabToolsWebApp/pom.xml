@@ -115,11 +115,6 @@
 			<artifactId>societies-api</artifactId>
 			<scope>provided</scope>
 		</dependency>
-		<dependency>
-			<groupId>org.societies.api.internal</groupId>
-			<artifactId>societies-api-internal</artifactId>
-			<scope>provided</scope>
-		</dependency>
 		
 		<dependency>
 			<groupId>org.societies.platform</groupId>
