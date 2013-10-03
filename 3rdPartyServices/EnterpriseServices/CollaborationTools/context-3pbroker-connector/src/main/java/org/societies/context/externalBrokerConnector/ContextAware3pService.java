@@ -24,8 +24,6 @@
  */
 
 package org.societies.context.externalBrokerConnector;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;

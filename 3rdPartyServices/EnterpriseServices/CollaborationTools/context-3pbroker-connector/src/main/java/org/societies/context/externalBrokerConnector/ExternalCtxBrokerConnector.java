@@ -40,7 +40,6 @@ import org.societies.api.context.model.CtxAttribute;
 import org.societies.api.context.model.CtxAttributeTypes;
 import org.societies.api.context.model.CtxEntity;
 import org.societies.api.identity.InvalidFormatException;
-import org.societies.api.identity.RequestorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -57,7 +56,6 @@ public class ExternalCtxBrokerConnector extends Observable {
 	/** The 3P Context Broker service reference. */
 	private ICtxBroker ctxBroker;
 	private IContextAware3pService ca3pService;
-	private RequestorService requestorService;
 
 	@Autowired(required=true)
 	public ExternalCtxBrokerConnector(ICtxBroker externalCtxBroker, ICisManager cisManager, IContextAware3pService ca3pService) throws Exception {
@@ -66,7 +64,6 @@ public class ExternalCtxBrokerConnector extends Observable {
 
 		this.ctxBroker = externalCtxBroker;
 		this.ca3pService = ca3pService;
-		this.requestorService = ca3pService.getRequestor();
 		this.ca3pService.setListener(new MyCtxChangeEventListener());
 
 	}
@@ -164,9 +161,9 @@ public class ExternalCtxBrokerConnector extends Observable {
 			String person = null;
 			try {
 
-				ctxAttr = (CtxAttribute) ctxBroker.retrieve(requestorService, event.getId()).get();
+				ctxAttr = (CtxAttribute) ctxBroker.retrieve(ca3pService.getRequestor(), event.getId()).get();
 				LOG.info("ctxValue getScope: "+ctxAttr.getScope());
-				CtxEntity retrievedCtxEntity = (CtxEntity) ctxBroker.retrieve(requestorService, ctxAttr.getScope()).get();
+				CtxEntity retrievedCtxEntity = (CtxEntity) ctxBroker.retrieve(ca3pService.getRequestor(), ctxAttr.getScope()).get();
 				ctxEntity= retrievedCtxEntity.getAttributes(CtxAttributeTypes.NAME);
 
 				for(CtxAttribute name : ctxEntity) {
