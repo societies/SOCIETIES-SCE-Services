@@ -31,11 +31,11 @@
 	</osgi:service>
 
 	<bean id="serMetamodel" class="org.societies.api.schema.servicelifecycle.model.Service">
-		<property name="authorSignature" value="ChrisLima" />
-		<property name="serviceDescription" value="Collabtools Connector" />
+		<property name="authorSignature" value="Chris Lima" />
+		<property name="serviceDescription" value="Collabtools Service" />
 		<property name="serviceName" value="Collabtools" />
 		<property name="serviceType" value="THIRD_PARTY_SERVER" />
 		<property name="serviceCategory" value="enterprise service" />
-		<property name="serviceEndpoint" value="collabtoolswebapp" />
+		<property name="serviceEndpoint" value="collabtools" />
 	</bean>
 </beans>
