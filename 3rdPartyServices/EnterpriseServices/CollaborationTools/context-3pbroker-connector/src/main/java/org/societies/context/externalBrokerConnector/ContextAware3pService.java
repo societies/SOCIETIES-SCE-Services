@@ -298,7 +298,8 @@ public class ContextAware3pService implements IContextAware3pService  {
 			this.userIdentity = this.idMgr.getThisNetworkNode();
 			this.myServiceID = this.serviceMgmt.getMyServiceId(getClass()); 
 			this.requestorService = new RequestorService(userIdentity, myServiceID);
-			LOG.info("requestor service : "+requestorService);
+			LOG.info("Requestor service : "+requestorService);
+			LOG.info("ServiceID : "+myServiceID);
 		}
 		return this.requestorService;
 	}
