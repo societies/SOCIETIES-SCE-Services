@@ -64,7 +64,7 @@ public class InternalContextConnector implements IContextConnector {
 	public HashMap<String, HashMap<String, String[]>> getInitialContext(Object cisID) {
 		HashMap<String, HashMap<String, String[]>> persons = ctxConnector.retrieveLookupMembersCtxAttributes(cisID);
 		if (persons.isEmpty())
-			throw new NullPointerException("Community list persons cannot be null! ");
+			throw new NullPointerException("Community member list cannot be null! ");
 		return persons;
 	}
 	
