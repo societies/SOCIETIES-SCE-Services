@@ -1,35 +1,33 @@
 Manifest-Version: 1.0
-Export-Package: org.societies.enterprise.collabtools;uses:="org.societ
- ies.enterprise.collabtools.runtime,org.slf4j,org.societies.enterprise
- .collabtools.acquisition,org.osgi.framework,org.societies.enterprise.
- collabtools.api,javax.xml.xpath,javax.xml.parsers,org.xml.sax";versio
- n="0.1.0",org.societies.enterprise.collabtools.api;uses:="org.societi
- es.enterprise.collabtools.acquisition,org.societies.enterprise.collab
- tools.runtime";version="0.1.0",org.societies.enterprise.collabtools.a
- cquisition;uses:="org.societies.enterprise.collabtools.runtime,org.sl
- f4j,org.societies.enterprise.collabtools,org.societies.enterprise.col
- labtools.api,org.osgi.framework,org.societies.context.externalBrokerC
- onnector";version="0.1.0",org.societies.enterprise.collabtools.runtim
- e;uses:="org.societies.enterprise.collabtools.api,org.societies.enter
- prise.collabtools.acquisition,org.slf4j";version="0.1.0"
+Export-Package: org.societies.collabtools;uses:="org.societies.collabt
+ ools.api,org.societies.collabtools.acquisition,org.slf4j,org.osgi.fra
+ mework,org.societies.collabtools.runtime,javax.xml.xpath,javax.xml.pa
+ rsers,org.xml.sax";version="0.1.0",org.societies.collabtools.api;uses
+ :="org.societies.collabtools.acquisition,org.societies.collabtools.ru
+ ntime";version="0.1.0",org.societies.collabtools.acquisition;uses:="o
+ rg.societies.collabtools.api,org.societies.collabtools,org.societies.
+ collabtools.runtime,org.slf4j,org.societies.collabtools.context,org.o
+ sgi.framework";version="0.1.0",org.societies.collabtools.runtime;uses
+ :="org.societies.collabtools.api,org.societies.collabtools.acquisitio
+ n,org.slf4j";version="0.1.0"
 Ignore-Package: ch.qos.logback.classic,ch.qos.logback.core,ch.qos.logb
  ack.core.joran.spi,ch.qos.logback.classic.joran
-Bundle-ClassPath: .,neo4j-kernel-1.8.M04.jar,classes,neo4j-graph-algo-
- 1.8.M04.jar,neo4j-lucene-index-1.8.M04.jar,geronimo-jta_1.1_spec-1.1.
- 1.jar,smackx-3.1.0.jar,neo4j-udc-1.8.M04.jar,smack-3.1.0.jar,neo4j-1.
- 8.M04.jar,commons-cli-1.2.jar,neo4j-jmx-1.8.M04.jar,neo4j-cypher-1.8.
- M04.jar,neo4j-graph-matching-1.8.M04.jar,lucene-core-3.5.0.jar,scala-
- library-2.9.1-1.jar
-Built-By: cviana
+Bundle-ClassPath: .,neo4j-kernel-1.8.M04.jar,context-3pbroker-connecto
+ r-0.1.0.jar,neo4j-graph-algo-1.8.M04.jar,neo4j-lucene-index-1.8.M04.j
+ ar,geronimo-jta_1.1_spec-1.1.1.jar,smackx-3.1.0.jar,neo4j-udc-1.8.M04
+ .jar,smack-3.1.0.jar,neo4j-1.8.M04.jar,commons-cli-1.2.jar,neo4j-jmx-
+ 1.8.M04.jar,neo4j-cypher-1.8.M04.jar,neo4j-graph-matching-1.8.M04.jar
+ ,lucene-core-3.5.0.jar,scala-library-2.9.1-1.jar
+Built-By: 10036469
 Tool: Bnd-1.43.0
 Bundle-Name: Collaboration Tools
 Created-By: Apache Maven Bundle Plugin
-Build-Jdk: 1.7.0_03
+Build-Jdk: 1.6.0_35
 Bundle-Version: 0.1.0
-Bnd-LastModified: 1381153328731
+Bnd-LastModified: 1381329608300
 Embed-Transitive: true
 Bundle-ManifestVersion: 2
-Bundle-Activator: org.societies.enterprise.collabtools.Activator
+Bundle-Activator: org.societies.collabtools.Activator
 Bundle-SymbolicName: org.societies.enterprise.CollabTools
 Import-Package: com.sun.source.tree;resolution:=optional,com.sun.sourc
  e.util;resolution:=optional,com.sun.tools.javac.model;resolution:=opt
@@ -54,13 +52,13 @@ Import-Package: com.sun.source.tree;resolution:=optional,com.sun.sourc
  l,org.societies.api.context.model;resolution:=optional,org.societies.
  api.identity;resolution:=optional,org.societies.api.schema.servicelif
  ecycle.model;resolution:=optional,org.societies.api.services;resoluti
- on:=optional,org.societies.context.externalBrokerConnector;version="[
- 0.1,1)",org.societies.enterprise.collabtools.api;resolution:=optional
- ;version="[0.1,1)",org.springframework.beans.factory.annotation;resol
- ution:=optional,org.springframework.stereotype;resolution:=optional,o
- rg.w3c.dom;resolution:=optional,org.xml.sax;resolution:=optional,org.
- xml.sax.ext;resolution:=optional,org.xml.sax.helpers;resolution:=opti
- onal,sun.misc;resolution:=optional
+ on:=optional,org.societies.collabtools.api;resolution:=optional;versi
+ on="[0.1,1)",org.societies.collabtools.context;version="[0.1,1)",org.
+ springframework.beans.factory.annotation;resolution:=optional,org.spr
+ ingframework.stereotype;resolution:=optional,org.w3c.dom;resolution:=
+ optional,org.xml.sax;resolution:=optional,org.xml.sax.ext;resolution:
+ =optional,org.xml.sax.helpers;resolution:=optional,sun.misc;resolutio
+ n:=optional
 Embed-Dependency: *;scope=compile|runtime
 Originally-Created-By: Apache Maven Bundle Plugin
 

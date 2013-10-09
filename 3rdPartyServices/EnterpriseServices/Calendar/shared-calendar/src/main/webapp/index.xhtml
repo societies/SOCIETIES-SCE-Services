@@ -11,6 +11,7 @@
 
     <h:head id="head">
         <title>SOCIETIES Personal Calendar</title>
+        <h:outputStylesheet library="css" name="calendar.css"/>
     </h:head>
 
 	<h:body id="body">
@@ -108,7 +109,9 @@
         </p:selectOneMenu>
         <br></br>
         <h:outputText value="Show all my events: " />  
-        <p:selectBooleanCheckbox value="#{calendarController.allEvents}" /> 
+        <p:selectBooleanCheckbox value="#{calendarController.allEvents}" >
+        	<p:ajax update="form:schedule" listener="#{calendarController.selectCalendar}" process="@this"/> 
+        </p:selectBooleanCheckbox> 
         
          <p:commandButton id="startSearchButton" value="Find Events" actionListener="#{calendarController.prepareEventSearch}" 
               oncomplete="searchDialog.show();" update="form:searchDetails" icon="ui-icon-search" style="width:150px" process="@this"/>            	

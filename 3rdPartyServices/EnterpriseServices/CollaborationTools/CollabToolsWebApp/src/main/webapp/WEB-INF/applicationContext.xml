@@ -37,8 +37,8 @@
 	<osgi:reference id="ServiceDiscoveryBundle" interface="org.societies.api.internal.servicelifecycle.IServiceDiscovery" cardinality="0..1"/>
 -->
 
-<!-- 	<osgi:service ref="collabtools" interface="org.societies.enterprise.collabtools.Activator" />    -->
-<!--     <osgi:reference id="collabtools"  interface="org.societies.enterprise.collabtools.Activator" cardinality="1..1"/> -->
+<!-- 	<osgi:service ref="collabtools" interface="org.societies.collabtools.Activator" />    -->
+<!--     <osgi:reference id="collabtools"  interface="org.societies.collabtools.Activator" cardinality="1..1"/> -->
 	
 	<osgi:reference id="CisManagementBundle" interface="org.societies.api.cis.management.ICisManager" cardinality="0..1"/>
 <!-- 	<osgi:reference id="internalCtxBroker" interface="org.societies.api.internal.context.broker.ICtxBroker" cardinality="0..1" /> -->
