@@ -24,8 +24,28 @@
  */
 package ac.hw.askfree;
 
+import java.net.Socket;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Set;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.societies.api.comm.xmpp.interfaces.ICommManager;
+import org.societies.api.context.broker.ICtxBroker;
+import org.societies.api.context.model.CtxAttribute;
+import org.societies.api.context.model.CtxAttributeTypes;
+import org.societies.api.context.model.CtxEntity;
+import org.societies.api.context.model.CtxEntityIdentifier;
+import org.societies.api.context.model.CtxEntityTypes;
+import org.societies.api.context.model.CtxIdentifier;
+import org.societies.api.context.model.CtxModelType;
+import org.societies.api.identity.IIdentity;
+import org.societies.api.identity.IIdentityManager;
+import org.societies.api.identity.InvalidFormatException;
+import org.societies.api.identity.Requestor;
+import org.societies.api.identity.RequestorService;
 import org.societies.api.osgi.event.CSSEvent;
 import org.societies.api.osgi.event.CSSEventConstants;
 import org.societies.api.osgi.event.EventListener;
@@ -37,7 +57,10 @@ import org.societies.api.services.IServices;
 import org.societies.api.services.ServiceMgmtEvent;
 import org.societies.api.services.ServiceMgmtEventType;
 
+import ac.hw.askfree.tools.ClientHandler;
+import ac.hw.askfree.tools.ContextEventListener;
 import ac.hw.askfree.tools.SocketServer;
+
 
 /**
  * Describe your class here...
@@ -51,10 +74,32 @@ public class AskFree extends EventListener implements IAskFree{
 	private IEventMgr eventMgr;
 	Logger logging = LoggerFactory.getLogger(this.getClass());
 	private ServiceResourceIdentifier myServiceID;
+	private IIdentity serverIdentity;
+	private IIdentity userIdentity;
+	private ICtxBroker ctxBroker;
+	private HashMap<String, String> userToLocation;
+
+	private Requestor requestor;
+
+	private ClientHandler cHandler;
+
+
+	//private IIdentity userIdentity;
+
+	private ICommManager commManager;
+
+	private IIdentityManager idMgr;
+	private ContextEventListener contextEventListener;
+	
+	private String symbolicLocation;
 
 	public void init(){
+		//SET UP NEW MAP FOR USER -> LOCATION
+		userToLocation = new HashMap<String, String>();
 
 		this.registerForServiceEvents();
+
+		//contextEventListener = new ContextEventListener(this, getCtxBroker(), getRequestor());		
 	}
 
 	/*
@@ -100,14 +145,31 @@ public class AskFree extends EventListener implements IAskFree{
 				this.logging.debug("Received SLM event for my bundle");
 				if (slmEvent.getEventType().equals(ServiceMgmtEventType.NEW_SERVICE)){
 
-					//I SET MY SERVICE ID SO IT CAN BE RETRIEVED FROM ANDROID CLIENT 
 					setMyServiceID(slmEvent.getServiceId());
+					this.logging.debug("1.Service id:" + slmEvent.getServiceId().toString());
 
+					//GET ID OF SERVER
+					this.setServerIdentity(this.idMgr.getThisNetworkNode());
+					//this.setServerIdentity(serviceMgmt.getServer(slmEvent.getServiceId()));
+					logging.debug("2.Servers Identity: " + getServerIdentity());
 
-					this.unregisterForServiceEvents();
+					//SocketServer server = new SocketServer(getMyServiceID(), getServerIdentity());
+					SocketServer server = new SocketServer(this);
+					new Thread(server).start();
+					/////////////////////////////////////////////////////////////////////////////
+					this.requestor = new RequestorService(serverIdentity, myServiceID);
+
+					contextEventListener = new ContextEventListener(this, getCtxBroker(), getRequestor());
+
+					//					this.logging.debug("Setting RequestorId");
+					//					requestor.setRequestorId(serverId);
+					//					this.logging.debug("Setting RequestorServiceId");
+					//					requestor.setRequestorServiceId(getMyServiceID());
+
+					//this.unregisterForServiceEvents();
 				}
 			}
-		}		
+		}
 	}
 
 	/* (non-Javadoc)
@@ -117,6 +179,17 @@ public class AskFree extends EventListener implements IAskFree{
 	public void handleExternalEvent(CSSEvent arg0) {
 		// TODO Auto-generated method stub
 
+	}
+
+	//public void updateUserLocation(String userIdentity, Socket userSocket, String location){
+	public void updateUserLocation(String userIdentity, ClientHandler cHandler, String location){
+		//this.logging.debug("location of user: "+userIdentity+" is: "+location + "user socket: " + userSocket);
+		this.logging.debug("location of user: "+userIdentity+" is: "+location + " cHandler: " + cHandler);
+		
+		this.setSymbolicLocation(userIdentity, location);
+		
+		//send the location of the user to the appropriate android client (based on userIdentity)
+		cHandler.sendMessage(this.getSymbolicLocation(userIdentity));
 	}
 
 	/**
@@ -151,7 +224,7 @@ public class AskFree extends EventListener implements IAskFree{
 	 * @return the myServiceID
 	 */
 	public ServiceResourceIdentifier getMyServiceID() {
-		this.logging.debug("Get MyServiceId");
+		this.logging.debug("Get MyServiceId:" +myServiceID.toString());
 		return myServiceID;
 	}
 
@@ -161,5 +234,119 @@ public class AskFree extends EventListener implements IAskFree{
 	public void setMyServiceID(ServiceResourceIdentifier myServiceID) {
 		this.myServiceID = myServiceID;
 		this.logging.debug("MyServiceId is set");
-	}	
+	}
+
+	/**
+	 * @return the serverIdentity
+	 */
+	public IIdentity getServerIdentity() {
+		this.logging.debug("Get ServerId:" +serverIdentity.toString());
+		return serverIdentity;
+	}
+
+	/**
+	 * @param serverIdentity the serverIdentity to set
+	 */
+	public void setServerIdentity(IIdentity serverIdentity) {
+		this.logging.debug("ServerId is set");
+		this.serverIdentity = serverIdentity;
+	}
+
+	/**
+	 * @return the ctxBroker
+	 */
+	public ICtxBroker getCtxBroker() {
+		this.logging.debug("get ContextBroker");
+		return ctxBroker;
+	}
+
+	/**
+	 * @param ctxBroker the ctxBroker to set
+	 */
+	public void setCtxBroker(ICtxBroker ctxBroker) {
+		this.ctxBroker = ctxBroker;
+	}
+
+	/**
+	 * @return the requestor
+	 */
+	public Requestor getRequestor() {
+		this.logging.debug("get Requestor");
+		return requestor;
+	}
+
+	/**
+	 * @param requestor the requestor to set
+	 */
+	public void setRequestor(Requestor requestor) {
+		this.requestor = requestor;
+	}
+
+
+	/**
+	 * @param userIdentity the userIdentity to set
+	 */
+	//public void registerUser(String userId, Socket socket, ClientHandler cHandler) {
+	public void registerUser(String userId, ClientHandler cHandler) {
+		this.logging.debug("Registering User:" + userId);
+		//IIdentity userIdentity;
+		//this.cHandler = cHandler;
+
+		try {
+			setUserIdentity(this.idMgr.fromFullJid(userId));
+			this.logging.debug("userIdentity: " + getUserIdentity());
+
+
+			//this.contextEventListener.registerForLocationEvents(getUserIdentity(), socket);
+			this.contextEventListener.registerForLocationEvents(getUserIdentity(), cHandler);
+		} catch (InvalidFormatException e) {
+			this.logging.debug("REGISTERING USER FAILED");
+		}		
+	}
+
+	/**
+	 * @return the commManager
+	 */
+	public ICommManager getCommManager() {
+		return commManager;
+	}
+
+	/**
+	 * @param commManager the commManager to set
+	 */
+	public void setCommManager(ICommManager commManager) {
+		this.commManager = commManager;
+		this.idMgr = this.commManager.getIdManager();
+	}
+
+	/**
+	 * @return the userIdentity
+	 */
+	public IIdentity getUserIdentity() {
+		return userIdentity;
+	}
+
+	/**
+	 * @param userIdentity the userIdentity to set
+	 */
+	public void setUserIdentity(IIdentity userIdentity) {
+		this.userIdentity = userIdentity;
+	}
+
+	/**
+	 * @return the symbolicLocation
+	 */
+	public String getSymbolicLocation(String userIdentity) {
+		this.logging.debug("Get symbolic location: "+symbolicLocation+" for user: " + userIdentity);
+		return userToLocation.get(userIdentity);
+	}
+
+	/**
+	 * @param symbolicLocation the symbolicLocation to set
+	 */
+	public void setSymbolicLocation(String userIdentity, String symbolicLocation) {
+		userToLocation.put(userIdentity, symbolicLocation);
+		this.logging.debug("Set symbolic location: "+symbolicLocation+" for user: " + userIdentity);
+		//this.symbolicLocation = symbolicLocation;
+	}
 }

@@ -16,6 +16,8 @@
 		init-method="init">
 		<property name="serviceMgmt" ref="serviceMgmt"/>
 		<property name="eventMgr" ref="eventMgr"/>	
+		<property name="ctxBroker" ref="ctxBroker"></property>
+		<property name="commManager" ref="commManager"></property>
 	</bean>	
 	
 
