@@ -60,7 +60,7 @@ public class ExternalCtxBrokerConnector extends Observable {
 	@Autowired(required=true)
 	public ExternalCtxBrokerConnector(ICtxBroker externalCtxBroker, ICisManager cisManager, IContextAware3pService ca3pService) throws Exception {
 
-		LOG.info("*** ca3pService : " + ca3pService + " instantiated");
+		LOG.info("*** ca3pService : {} instantiated", ca3pService);
 
 		this.ctxBroker = externalCtxBroker;
 		this.ca3pService = ca3pService;

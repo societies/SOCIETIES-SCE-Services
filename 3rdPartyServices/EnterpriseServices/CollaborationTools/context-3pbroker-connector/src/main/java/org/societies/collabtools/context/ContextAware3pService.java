@@ -24,13 +24,10 @@
  */
 
 package org.societies.collabtools.context;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,9 +40,6 @@ import org.societies.api.context.model.CtxAttribute;
 import org.societies.api.context.model.CtxAttributeTypes;
 import org.societies.api.context.model.CtxEntity;
 import org.societies.api.context.model.CtxEntityIdentifier;
-import org.societies.api.context.model.CtxIdentifier;
-import org.societies.api.context.model.CtxModelObject;
-import org.societies.api.context.model.CtxModelType;
 import org.societies.api.identity.IIdentity;
 import org.societies.api.identity.IIdentityManager;
 import org.societies.api.identity.InvalidFormatException;
@@ -306,15 +300,15 @@ public class ContextAware3pService implements IContextAware3pService  {
 	public Requestor getRequestor() {
 		
 		this.userIdentity = this.idMgr.getThisNetworkNode();
-		return  new Requestor(userIdentity);
-		/*if (this.requestorService == null) {
+		//return  new Requestor(userIdentity);
+		if (this.requestorService == null) {
 			this.userIdentity = this.idMgr.getThisNetworkNode();
 			this.myServiceID = this.serviceMgmt.getMyServiceId(getClass()); 
 			this.requestorService = new RequestorService(userIdentity, myServiceID);
-			LOG.info("Requestor service : "+requestorService);
-			LOG.info("ServiceID : "+myServiceID);
+			LOG.debug("Requestor service : {}", requestorService);
+			LOG.debug("ServiceID : {}", myServiceID);
 		}
-		return this.requestorService;*/
+		return this.requestorService;
 	}
 
 
@@ -325,19 +319,19 @@ public class ContextAware3pService implements IContextAware3pService  {
 	public HashMap<String, String> retrieveCommunityCtxAttributes(Object communityId) throws InvalidFormatException {
 		//Cast IIdentity for the societies platform
 		IIdentity cisID = idMgr.fromJid(communityId.toString());
-		LOG.info("cisID retrieved for ctx attributes: "+ cisID);
+		LOG.info("cisID retrieved for ctx attributes: {}", cisID);
 		HashMap<String, String> results = new HashMap<String, String>();
 
 		try {
 			CtxEntityIdentifier ctxCommunityEntityIdentifier = this.ctxBroker.retrieveCommunityEntityId(getRequestor(), cisID).get();
-			LOG.info("communityEntityIdentifier retrieved: " +ctxCommunityEntityIdentifier.toString()+ " based on cisID: "+ cisID);
+			LOG.info("communityEntityIdentifier retrieved: {} based on cisID", ctxCommunityEntityIdentifier.toString(), cisID);
 			CommunityCtxEntity communityEntity = (CommunityCtxEntity) this.ctxBroker.retrieve(getRequestor(), ctxCommunityEntityIdentifier).get();
 
 			Set<CtxAttribute> communityLanguages = communityEntity.getAttributes(CtxAttributeTypes.LANGUAGES);
 			Iterator<CtxAttribute> languagesIterator = communityLanguages.iterator();
 			while(languagesIterator.hasNext()){
 				String ctx = languagesIterator.next().getStringValue();
-				LOG.info("*** Community Languages:"+ctx);
+				LOG.info("*** Community Languages: {}", ctx);
 				results.put(CtxAttributeTypes.LANGUAGES, ctx);
 			}
 
