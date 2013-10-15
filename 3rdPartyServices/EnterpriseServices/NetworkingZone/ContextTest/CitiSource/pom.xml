@@ -3,20 +3,48 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.societies.citi.source</groupId>
 	<artifactId>CitiSource</artifactId>
-	<version>${release.version}</version>
+	<!-- <version>${release.version}</version> -->
+	<version>0.1</version>
 	<packaging>bundle</packaging>
-	
+
+	<developers>
+        <developer>
+            <id>Richantdav</id>
+            <name>Richard Davies</name>
+            <email>RichardX.Davies@intel.com</email>
+            <organization>intel</organization>
+            <roles>
+            <role>owner</role>
+            <role>developer</role>
+            </roles>
+        </developer>
+    </developers>
+
 	<parent>
 		<groupId>org.societies</groupId>
 		<artifactId>version-parent</artifactId>
 		<version>RELEASE</version>
 	</parent>
+
+
+	<properties>
+		<slf4j.version>1.6.1</slf4j.version>
+	</properties>
+	
 	<dependencies>
-		<dependency>
-			<groupId>org.societies.api.external</groupId>
-			<artifactId>societies-api</artifactId>
+    	<dependency>
+            <groupId>org.societies.api.external</groupId>
+            <artifactId>societies-api</artifactId>
+            <version>1.0</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-simple</artifactId>
+			<version>${slf4j.version}</version>
 			<scope>provided</scope>
-		</dependency>	
+		</dependency>
+
 	</dependencies>
 
 	<build>
@@ -75,5 +103,15 @@
 			</plugin>
 		</plugins>
 	</build>
-	<artifactId>NetworkingBackEnd</artifactId>
+	
+    <repositories>
+        <!-- Societies Maven repository -->
+        <repository>
+            <id>societies</id>
+            <name>Societies Maven Repository</name>
+            <url>http://maven.ict-societies.eu/nexus/content/repositories/thirdparty/</url>
+        </repository>
+    </repositories>
+
+	<!-- <artifactId>NetworkingBackEnd</artifactId> -->
 </project>

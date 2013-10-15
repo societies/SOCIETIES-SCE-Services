@@ -75,5 +75,5 @@
 			</plugin>
 		</plugins>
 	</build>
-	<artifactId>NetworkingBackEnd</artifactId>
+	<!-- <artifactId>NetworkingBackEnd</artifactId> -->
 </project>
