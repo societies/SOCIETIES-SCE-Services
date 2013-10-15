@@ -102,7 +102,7 @@ public class CalendarSchedule extends LazyScheduleModel {
 		}
 		
 		if(secondCallback != null){
-			result = callback.getResult();
+			result = secondCallback.getResult();
 			List<Event> subscribedEvents = result.getEventList();
 			
 			for(Event event: subscribedEvents){
@@ -121,7 +121,7 @@ public class CalendarSchedule extends LazyScheduleModel {
 					}
 				} 
 				
-				ScheduleEvent newEvent = new DefaultScheduleEvent(event.getName(),event.getStartDate(),event.getEndDate());
+				ScheduleEvent newEvent = new DefaultScheduleEvent(event.getName(),event.getStartDate(),event.getEndDate(),"my-event");
 				this.addEvent(newEvent);
 				parent.currentEvents.put(newEvent.getId(),new CalendarEvent(event,parent.getCalendarName(event.getNodeId()),parent));
 			}

@@ -27,7 +27,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>org.societies.enterprise.collabtools</groupId>
+	<groupId>org.societies.collabtools</groupId>
 	<artifactId>CollabToolsWebApp</artifactId>
 	<packaging>war</packaging>
 	<version>0.1.0</version>
@@ -104,24 +104,24 @@
 			<artifactId>org.springframework.osgi.web</artifactId>
 			<version>1.2.1</version>
 		</dependency>
-		<dependency>
+		<!-- <dependency>
 			<groupId>org.societies.comm.xmpp</groupId>
 			<artifactId>XCCommunicationMgr</artifactId>
 			<version>${release.version}</version>
 			<scope>provided</scope>
-		</dependency>
+		</dependency>-->
 		<dependency>
 			<groupId>org.societies.api.external</groupId>
 			<artifactId>societies-api</artifactId>
 			<scope>provided</scope>
 		</dependency>
 		
-		<dependency>
+		<!--<dependency>
 			<groupId>org.societies.platform</groupId>
 	        <artifactId>socialdata</artifactId>
 	         <version>${release.version}</version>
 			<scope>provided</scope>
-		</dependency>
+		</dependency>-->
 		
 		<dependency>
 			<groupId>org.apache.shindig</groupId>
@@ -195,7 +195,7 @@
 						<Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
 						<Export-Package>!*</Export-Package>
 						<Import-Package>
-						 	org.societies.enterprise.collabtools;version="[0.1.0,1.0.0)",
+						 	org.societies.collabtools;version="[0.1.0,1.0.0)",
 <!-- 							org.json;version="1.0.0", -->
 <!-- 							org.apache.http*;version="4.2",  -->
 							javax.servlet.jsp.jstl.core;version="[1.2.0,2.0.0)",

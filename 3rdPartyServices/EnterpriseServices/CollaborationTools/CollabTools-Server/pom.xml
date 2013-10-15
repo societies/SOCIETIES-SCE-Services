@@ -104,12 +104,12 @@
 <!-- 							javax.lang.model.element,javax.lang.model.type,javax.lang.model.util, -->
 <!-- 							javax.management,javax.management.remote,javax.tools,javax.xml.parsers, -->
 <!-- 							org.osgi.framework,org.xml.sax,org.xml.sax.ext,org.xml.sax.helpers -->
-						  org.osgi.framework, org.societies.context.externalBrokerConnector, !ch.qos.logback.*, *;resolution:=optional</Import-Package> 
- 				          <Export-Package>org.societies.enterprise.collabtools, org.societies.enterprise.collabtools.api, org.societies.enterprise.collabtools.acquisition, org.societies.enterprise.collabtools.runtime</Export-Package> 
+						  org.osgi.framework, org.societies.collabtools.context, !ch.qos.logback.*, *;resolution:=optional</Import-Package> 
+ 				          <Export-Package>org.societies.collabtools, org.societies.collabtools.api, org.societies.collabtools.acquisition, org.societies.collabtools.runtime</Export-Package> 
 <!-- 				      <Private-Package>no privates either</Private-Package> -->
 				      <Embed-Transitive>true</Embed-Transitive>
 		           	  <Embed-Dependency>*;scope=compile|runtime</Embed-Dependency>
-				      <Bundle-Activator>org.societies.enterprise.collabtools.Activator</Bundle-Activator>
+				      <Bundle-Activator>org.societies.collabtools.Activator</Bundle-Activator>
 				    </instructions> 
 				</configuration>
 			</plugin>

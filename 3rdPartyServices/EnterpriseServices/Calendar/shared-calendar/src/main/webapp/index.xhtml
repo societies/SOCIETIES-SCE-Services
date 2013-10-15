@@ -10,7 +10,8 @@
 	xmlns:p="http://primefaces.org/ui">
 
     <h:head id="head">
-        <title>SOCIETIES Personal Calendar</title>
+     	<title>SOCIETIES Personal Calendar</title>
+        <h:outputStylesheet library="css" name="calendar.css"/>
     </h:head>
 
 	<h:body id="body">
@@ -93,10 +94,10 @@
       		update="form:messages,form:calendarMenu,form:recEventList,form:schedule"
       		oncomplete="myschedule.update()" process="@this" />
             
-        <h:outputText value="SOCIETIES CALENDAR" />  
       	<p:growl id="messages" showDetail="true" life="5000" for="bigrowl"  />
       	
 	<p:layoutUnit id="top" position="north" size="50">
+	<img src="images/societies_logo.png" alt="Logo"/><h2><h:outputText value="CALENDAR" /></h2>
 	</p:layoutUnit>
 
 	<p:layoutUnit id="left" position="west" size="180" resizable="false" closable="false" collapsible="false" header="Options" minSize="180">
@@ -108,7 +109,9 @@
         </p:selectOneMenu>
         <br></br>
         <h:outputText value="Show all my events: " />  
-        <p:selectBooleanCheckbox value="#{calendarController.allEvents}" /> 
+        <p:selectBooleanCheckbox value="#{calendarController.allEvents}" >
+        	<p:ajax update="form:schedule" listener="#{calendarController.selectCalendar}" process="@this"/> 
+        </p:selectBooleanCheckbox> 
         
          <p:commandButton id="startSearchButton" value="Find Events" actionListener="#{calendarController.prepareEventSearch}" 
               oncomplete="searchDialog.show();" update="form:searchDetails" icon="ui-icon-search" style="width:150px" process="@this"/>            	
@@ -149,8 +152,8 @@
    		</h:panelGrid>
    
         <p:schedule id="schedule" value="#{calendarController.eventModel}" 
-        rightHeaderTemplate="none" centerHeaderTemplate="none" leftHeaderTemplate="none"
-        widgetVar="myschedule" >  
+        	rightHeaderTemplate="none" centerHeaderTemplate="none"
+        	leftHeaderTemplate="none" widgetVar="myschedule" >  
       
             <p:ajax event="dateSelect" listener="#{calendarController.onDateSelect}" update="eventDetails,attendTest" oncomplete="eventDialog.show()" process="@this"/>  
             <p:ajax event="eventSelect" listener="#{calendarController.onEventSelect}" update="eventDetails,attendTest" oncomplete="eventDialog.show()" process="@this" />  
@@ -253,7 +256,7 @@
     			resizable="true" closable="false" collapsible="false" style="text-align:center;height:60%">
             	<p:selectOneListbox id="recEventList" value="#{calendarController.recommendedEvent}"
             		converter="#{calendarController.eventConverter}"
-            		var="se" style="width:94%;height:98%"> 
+            		var="se" style="width:98%;height:98%"> 
             		<f:selectItems value="#{calendarController.recommendedEvents}" var="event"
             			itemLabel="#{event.title}" itemValue="#{event}" />
 			            <p:column>  
@@ -267,7 +270,7 @@
                               style="text-align:center;height:40%" >
 				<p:selectOneListbox id="searchEventList" value="#{calendarController.selectedEvent}"
 					converter="#{calendarController.eventConverter}" var="se"
-			 		converterMessage="Problem converting" style="width:94%;height:98%" >  
+			 		converterMessage="Problem converting" style="width:98%;height:98%" >  
             		<f:selectItems value="#{calendarController.searchResults}" var="searcheventresult"
             			itemLabel="#{searcheventresult.title}" itemValue="#{searcheventresult}" />
             			<p:column>  
