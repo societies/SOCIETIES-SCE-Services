@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:osgi="http://www.springframework.org/schema/osgi"
+       xmlns:osgi-compendium="http://www.springframework.org/schema/osgi-compendium"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+http://www.springframework.org/schema/osgi http://www.springframework.org/schema/osgi/spring-osgi.xsd
+http://www.springframework.org/schema/context
+http://www.springframework.org/schema/context/spring-context-2.5.xsd
+http://www.springframework.org/schema/osgi-compendium
+http://www.springframework.org/schema/osgi-compendium/spring-osgi-compendium-1.2.xsd"
+       xmlns:context="http://www.springframework.org/schema/context">
+
+  <!-- definitions using elements of the osgi namespace can be included
+       in this file. There is no requirement to keep these definitions
+       in a separate file if you do not want to. The rationale for 
+       keeping these definitions separate is to facilitate integration
+       testing of the bundle outside of an OSGi container -->
+	
+	<!-- Service References -->
+    <osgi:reference id="cxtBrokerRef" interface="org.societies.api.context.broker.ICtxBroker" />
+	<osgi:reference id="PubsubClient" interface="org.societies.api.comm.xmpp.pubsub.PubsubClient"/>
+	<osgi:reference id="CommManager" interface="org.societies.api.comm.xmpp.interfaces.ICommManager"/>
+	<osgi:reference id="eventMgmtRef" interface="org.societies.api.osgi.event.IEventMgr" />                    
+                    
+    
+    <!-- Provided Services -->
+    <osgi:service ref="sourceTest"
+        interface="org.societies.thirdpartyservices.city.sourceapp.ISourceTest">
+        <osgi:service-properties>
+            <entry key="TargetPlatform" value="SOCIETIES" />
+            <entry key="ServiceProvider" value="ICT-SOCIETIES" />
+            <entry key="ServiceMetaModel" value-ref="serMetamodel" />
+            <entry key="ServiceClient" value="http://societies.local/client.jar" />
+        </osgi:service-properties>
+    </osgi:service>
+
+    <bean id="serMetamodel" class="org.societies.api.schema.servicelifecycle.model.Service">
+        <property name="authorSignature" value="Richard Davies" />
+        <property name="serviceDescription" value="Some description" />
+        <property name="serviceName" value="My Exmaple Service" />
+        <property name="serviceType" value="THIRD_PARTY_SERVER" />
+        <property name="serviceCategory" value="example" />
+        <property name="privacyPolicy" value="privacy-policy.xml" />
+    </bean>
+
+</beans>
