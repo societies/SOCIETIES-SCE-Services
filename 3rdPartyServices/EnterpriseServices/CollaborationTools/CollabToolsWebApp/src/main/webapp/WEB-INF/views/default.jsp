@@ -44,13 +44,14 @@
 	<jsp:include page="leftbar.jsp" />
 	<!-- END LEFTBAR -->
 <!-- .................PLACE YOUR CONTENT HERE ................ -->
+<div class="query">
 <h1>Welcome to CollabTools Admin</h1>
 ${message}
 <br>
 Choose a CIS to start CollabTools
 <br>
 
-	<input type="text" id='cisID' size="55" name='msg'>
+	<input type="text" id='cisID' size="65" name='msg'>
 	<input type="button" id="start" onclick="doAjax(document.getElementById('cisID').value, 'start')" value="Run CollabTools"/>
 	<input type="button" id="stop" onclick="doAjax(document.getElementById('cisID').value, 'stop')" value="Stop CollabTools"/>
 
@@ -58,6 +59,8 @@ Choose a CIS to start CollabTools
 	<div id="checkcis">
 	
 	</div>
+</div>
+	
 
 
 

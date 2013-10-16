@@ -31,13 +31,11 @@ import java.io.IOException;
 import java.io.Reader;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
@@ -66,19 +64,24 @@ import org.springframework.web.servlet.ModelAndView;
 public class Admin {
 
 	private static final Logger logger = LoggerFactory.getLogger(Admin.class);
-	
-//	AsyncCollabAppConnector app = new AsyncCollabAppConnector();
+
+	//	AsyncCollabAppConnector app = new AsyncCollabAppConnector();
 
 	@Autowired
 	private ICisManager cisManager;
 
 	private String cisName = "";
 
-	/**
-	 * This method get called when user request for login page by using
-	 * url http://localhost:8080/societies/login.html
-	 * @return login jsp page and model object
-	 */
+	@RequestMapping(value = "/index.html", method = RequestMethod.GET)
+	public String index() {
+		return "index";
+	}
+	
+	@RequestMapping(value = "/download.html", method = RequestMethod.GET)
+	public String download() {
+		return "download";
+	}
+
 	@RequestMapping(value="/default.html",method = RequestMethod.GET)
 	public ModelAndView DefaultPage() {
 		//model is nothing but a standard Map object
@@ -309,22 +312,22 @@ public class Admin {
 			String[] elements = {sessionName, sessionHashtable.get(sessionName).toString(), getCtxSubscriber().getSessionLanguage(sessionName)}; 
 			results.add(elements);
 		}
-		
+
 		model.put("results", results);
 		model.put("log", readLogFile());
-		
+
 		//TODO: Example with async application here!!***************************
-//		this.app.setAppName("APP_NAME");
-//		
-//		List<String[]> resultsAsync = new ArrayList<String[]>();
-//		for (Entry<String, String[]> entry : this.app.getHashTableResults().entrySet()) {
-//			String[] elements = {"Location: "+entry.getKey()+ " people: "+Arrays.toString(entry.getValue())};
-//			resultsAsync.add(elements);
-//		}		
-//
-//		model.put("app_name", this.app.getAppName());
-//		model.put("resultsAsync", resultsAsync);
-		
+		//		this.app.setAppName("APP_NAME");
+		//		
+		//		List<String[]> resultsAsync = new ArrayList<String[]>();
+		//		for (Entry<String, String[]> entry : this.app.getHashTableResults().entrySet()) {
+		//			String[] elements = {"Location: "+entry.getKey()+ " people: "+Arrays.toString(entry.getValue())};
+		//			resultsAsync.add(elements);
+		//		}		
+		//
+		//		model.put("app_name", this.app.getAppName());
+		//		model.put("resultsAsync", resultsAsync);
+
 		//Until here*******************************
 
 		return new ModelAndView("notification", model) ;

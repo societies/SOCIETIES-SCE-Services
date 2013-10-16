@@ -1,4 +1,5 @@
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1" pageEncoding="ISO-8859-1"%>
+<%@ taglib prefix="form" uri="http://www.springframework.org/tags/form"%>
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="xc"%>
 <!DOCTYPE html>
 <html>
@@ -25,23 +26,24 @@
 <body style="visibility:hidden;">
 	<div id="group1" data-dojo-type="dojox.mobile.View" data-dojo-props='keepScrollPos:false'><!-- keepScrollPos=false is to improve performance -->
 		<ul data-dojo-type="dojox.mobile.TabBar" data-dojo-props='barType:"segmentedControl", fixed:"top", syncWithViews:true'>
-			<li data-dojo-type="dojox.mobile.TabBarButton" data-dojo-props='moveTo:"#home", selected:true'>Home</li>
+			<li data-dojo-type="dojox.mobile.TabBarButton" data-dojo-props='moveTo:"#communities", selected:true'>Communities</li>
 			<li data-dojo-type="dojox.mobile.TabBarButton" data-dojo-props='moveTo:"#rules"'>Rules</li>
 			<li data-dojo-type="dojox.mobile.TabBarButton" data-dojo-props='moveTo:"#applications"'>Applications</li>
-			<li data-dojo-type="dojox.mobile.TabBarButton" data-dojo-props='moveTo:"#cislist"'>CIS List</li>
+			<li data-dojo-type="dojox.mobile.TabBarButton" data-dojo-props='moveTo:"#notification"'>Sessions</li>
 		</ul>
 			
-		<div id="home" data-dojo-type="dojox.mobile.View" data-dojo-props="selected: true">
-			<h1 data-dojo-type="dojox.mobile.Heading">Home</h1>
+		<div id="communities" data-dojo-type="dojox.mobile.View" data-dojo-props="selected: true">
+			<h1 data-dojo-type="dojox.mobile.Heading">Communities</h1>
 			<h2 data-dojo-type="dojox.mobile.RoundRectCategory">There are ${size} CIS </h2>
 			<ul id="list1" data-dojo-type="dojox.mobile.RoundRectList">
 					<xc:forEach var="name" items="${cisname}">
-						<li data-dojo-type="dojox.mobile.ListItem" data-dojo-props='clickable:true,noArrow:false,rightIcon:"mblDomButtonCheckboxOn"'>
+						<li data-dojo-type="dojox.mobile.ListItem">
 							${name}
 						</li>
 					</xc:forEach>
 			</ul>
-			<button id="btn1" data-dojo-type="dojox.mobile.Button" class="mblBlueButton">More...</button>
+			<button data-dojo-type="dojox.mobile.Button" data-dojo-props='label:"Start CollabTools", onClick:function(e){ alert("button clicked");return true; }'></button>
+
 
 		</div>
 		
@@ -80,7 +82,7 @@
 			</ul>
 		</div>
 		
-		<div id="cislist" data-dojo-type="dojox.mobile.ScrollableView">
+		<div id="notification" data-dojo-type="dojox.mobile.ScrollableView">
 			<h1 data-dojo-type="dojox.mobile.Heading" data-dojo-props="back:'Home', moveTo:'home'">CIS List</h1>
 				<h2 data-dojo-type="dojox.mobile.RoundRectCategory">CIS List</h2>
 				<ul data-dojo-type="dojox.mobile.RoundRectList" data-dojo-props='select:"single"'>

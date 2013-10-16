@@ -70,8 +70,7 @@
 <!-- .................PLACE YOUR CONTENT HERE ................ -->
 			<div class="query">
 
-			<label> Rule: </label> 
-
+			<h1>Rules</h1>
 				<table id="ruleTable">
 					<tbody>
 					<tr id="ruleFistRow"><td>Name</td><td>Attribute</td><td>Operator</td><td>Type</td><td>Priority</td><td>Value</td></tr>

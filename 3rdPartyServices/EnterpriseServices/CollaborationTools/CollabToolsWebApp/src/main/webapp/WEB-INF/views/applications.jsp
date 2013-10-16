@@ -7,6 +7,8 @@
   <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
   <title>CollabTools - Applications</title>
   
+<link rel="stylesheet" href="css/style.css" type="text/css"/>
+
 <link href="css/context.css" rel="stylesheet" type="text/css"
 	media="screen" />
 <link href="css/ctx-table-style.css" rel="stylesheet"
@@ -47,17 +49,19 @@
 	<!-- END LEFTBAR -->
 <!-- .................PLACE YOUR CONTENT HERE ................ -->
 
+<div class="query">
+
 <h1>Collaborative Applications Available</h1>
 
 	<form name="checkboxform"  method="get">
 					<xc:forEach var="serverName" items="${appserver}" varStatus="loop">
-						<input type="checkbox" id="${serverName}" name="appnames" onClick="setText('${serverName}')" value="${serverName}">${appnames[loop.index]} ${serverName}<br>
+						<input type="checkbox" id="${serverName}" name="appnames" onClick="setText('${serverName}')" value="${serverName}">${appnames[loop.index]} - ${serverName}<br>
 					</xc:forEach>
 	</form>
 
 <br>
 <br>
-Change application server URL:
+Choose an application to configure a different server URL:
 <br>
 
 		<input type="text" id="server" size="55" name="msg">
@@ -67,6 +71,13 @@ Change application server URL:
 
 </div>
 <br>
+		Download <strong><a href="download.html">here</a></strong> the collaborative application client
+
+
+</div>
+
+
+
 <!-- 	<div id="application"> -->
 
 <!-- 		<div class="query">	 -->

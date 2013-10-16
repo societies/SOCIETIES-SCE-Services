@@ -42,10 +42,10 @@
 	<jsp:include page="leftbar.jsp" />
 	<!-- END LEFTBAR -->
 <!-- .................PLACE YOUR CONTENT HERE ................ -->
-			<h1>Notifications</h1>
 			
-					<!-- Table markup-->
+		<!-- Table markup-->
 		<div class="query">
+		<h1>Notifications</h1>
 		<label>Current Sessions: </label>
 		</div>
 		<table id="newspaper-a">
