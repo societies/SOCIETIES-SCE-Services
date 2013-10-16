@@ -56,17 +56,15 @@
                 <h:outputLabel for="searchkeyword" value="Keyword:" />  
                 <p:inputText id="searchkeyword" value="#{calendarController.searchEvent.title}" />  
       
-                <h:outputLabel for="searchfrom" value="From:" />  
-                <p:inputMask id="searchfrom" value="#{calendarController.searchEvent.startDate}"
-                	mask="99/99/9999 99:99" >  
-                    <f:convertDateTime pattern="dd/MM/yyyy HH:mm" />  
-                </p:inputMask>  
+                <h:outputLabel for="searchfrom" value="From:" />
+				<p:calendar id="searchfrom"
+                	value="#{calendarController.searchEvent.startDate}"
+                	pattern="dd/MM/yyyy HH:mm" />
       
                 <h:outputLabel for="searchto" value="To:" />  
-                <p:inputMask id="searchto" value="#{calendarController.searchEvent.endDate}"
-                	mask="99/99/9999 99:99">  
-                    <f:convertDateTime pattern="dd/MM/yyyy HH:mm" /> 
-                </p:inputMask>  
+				<p:calendar id="searchto"
+                	value="#{calendarController.searchEvent.endDate}"
+                	pattern="dd/MM/yyyy HH:mm" />
 
                 <h:outputLabel for="searchlocation" value="Location:" />  
                 <p:inputText id="searchlocation" value="#{calendarController.searchEvent.location}"
@@ -96,13 +94,13 @@
             
       	<p:growl id="messages" showDetail="true" life="5000" for="bigrowl"  />
       	
-	<p:layoutUnit id="top" position="north" size="50">
-	<img src="images/societies_logo.png" alt="Logo"/><h2><h:outputText value="CALENDAR" /></h2>
+	<p:layoutUnit id="top" position="north" size="70" style="background:#120d0d;">
+	<h2><img src="images/societies_logo.png" alt="Logo"/><h:outputText value="  CALENDAR" /></h2>
 	</p:layoutUnit>
 
 	<p:layoutUnit id="left" position="west" size="180" resizable="false" closable="false" collapsible="false" header="Options" minSize="180">
 		
-		<p:selectOneMenu id="calendarMenu" value="#{calendarController.selectedNode}" effect="fade">
+		<p:selectOneMenu id="calendarMenu" value="#{calendarController.selectedNode}" effect="fade" style="width:80%;margin-left:5%;margin-right:5%;">
             <f:selectItems value="#{calendarController.calendarList}" var="calendar" itemLabel="#{calendar.name}" itemValue="#{calendar.nodeId}"/>
             <f:selectItem itemLabel="All My Events" itemValue="mysubscribedevents" />
             <p:ajax update="form:schedule" listener="#{calendarController.selectCalendar}" process="@this"/>
@@ -113,26 +111,38 @@
         	<p:ajax update="form:schedule" listener="#{calendarController.selectCalendar}" process="@this"/> 
         </p:selectBooleanCheckbox> 
         
-         <p:commandButton id="startSearchButton" value="Find Events" actionListener="#{calendarController.prepareEventSearch}" 
-              oncomplete="searchDialog.show();" update="form:searchDetails" icon="ui-icon-search" style="width:150px" process="@this"/>            	
+         <p:commandButton id="startSearchButton" value="Find Events" 
+			actionListener="#{calendarController.prepareEventSearch}" 
+			oncomplete="searchDialog.show();" update="form:searchDetails"
+			icon="ui-icon-search" style="width:70%;margin-left:10%;margin-right:10%;"
+			process="@this"/>            	
  
 	</p:layoutUnit>
       
 	<p:layoutUnit id="center" position="center">
-    	<h:panelGrid id="scheduleButtons" columns="3" cellpadding="0" style="width:100%">
+		<p:layout>
+    		<p:layoutUnit id="center_top" position="north" size="55"
+    			resizable="false" closable="false"
+     	 		collapsible="false">
+    	
+    		<h:panelGrid id="scheduleButtons" columns="3" cellpadding="0" style="width:100%" columnClasses="col1,col2,col3">
     		
     		<h:column style="width:20%">
 	      		<p:commandButton actionListener="#{calendarController.previousDate}"   
 	      		id="previousDate" icon="ui-icon-circle-triangle-w" update="form:schedule,scheduleButtons" 
+	      		style="margin-right:0px;margin-top:auto;margin-bottom:auto;"
 	      		process="@this" />
 	      			<!-- <f:setPropertyActionListener target="#{calendarController.dateSelect}" value="previous" />-->
 	     		
 	     		<p:commandButton actionListener="#{calendarController.nextDate}" 
 	     		 id="nextDate" icon="ui-icon-circle-triangle-e" update="form:schedule,scheduleButtons"
+	     		 style="margin-left:0px;margin-top:auto;margin-bottom:auto;"
 	     		 process="@this" />
 	     		 
 	     		<p:commandButton value="Today" actionListener="#{calendarController.currentDate}"
-	     		id="currentDate" update="form:schedule,scheduleButtons" disabled="#{calendarController.scheduleHelper.today}"
+	     			id="currentDate" update="form:schedule,scheduleButtons"
+	     			disabled="#{calendarController.scheduleHelper.today}"
+	     		 	style="width:30%;margin-left:2%;margin-top:auto;margin-bottom:auto;"
 	     		process="@this" />                          
      		</h:column>
      		
@@ -141,7 +151,7 @@
       		</h:column>
       		
       		<h:column style="width:20%">
-				<p:selectOneButton value="#{calendarController.scheduleHelper.view}" >  
+				<p:selectOneButton value="#{calendarController.scheduleHelper.view}" styleClass="datemenustyle" >  
 	            	<f:selectItem itemLabel="Month" itemValue="month" />  
 	            	<f:selectItem itemLabel="Week" itemValue="agendaWeek" />  
 	            	<f:selectItem itemLabel="Day" itemValue="agendaDay" />
@@ -150,7 +160,8 @@
       		</h:column>
       		
    		</h:panelGrid>
-   
+   		</p:layoutUnit>
+   		<p:layoutUnit id="center_center" position="center">
         <p:schedule id="schedule" value="#{calendarController.eventModel}" 
         	rightHeaderTemplate="none" centerHeaderTemplate="none"
         	leftHeaderTemplate="none" widgetVar="myschedule" >  
@@ -246,7 +257,8 @@
 				</p:dataList>
 			</h:panelGrid> 	          
 		</p:dialog>  
-            	
+            	</p:layoutUnit>
+            	</p:layout>
 	</p:layoutUnit>
 	
 	<p:layoutUnit id="right" position="east" size="230" resizable="true" closable="false"
@@ -256,7 +268,7 @@
     			resizable="true" closable="false" collapsible="false" style="text-align:center;height:60%">
             	<p:selectOneListbox id="recEventList" value="#{calendarController.recommendedEvent}"
             		converter="#{calendarController.eventConverter}"
-            		var="se" style="width:98%;height:98%"> 
+            		var="se" style="width:95%;height:98%"> 
             		<f:selectItems value="#{calendarController.recommendedEvents}" var="event"
             			itemLabel="#{event.title}" itemValue="#{event}" />
 			            <p:column>  
@@ -267,10 +279,10 @@
         		</p:selectOneListbox>	        	                
        		</p:layoutUnit>
             <p:layoutUnit id="inner_south" position="south" size="230" header="Search Results" resizable="true" closable="false" collapsible="false"
-                              style="text-align:center;height:40%" >
+                              style="text-align:center;height:38%" >
 				<p:selectOneListbox id="searchEventList" value="#{calendarController.selectedEvent}"
 					converter="#{calendarController.eventConverter}" var="se"
-			 		converterMessage="Problem converting" style="width:98%;height:98%" >  
+			 		converterMessage="Problem converting" style="width:95%;height:98%" >  
             		<f:selectItems value="#{calendarController.searchResults}" var="searcheventresult"
             			itemLabel="#{searcheventresult.title}" itemValue="#{searcheventresult}" />
             			<p:column>  

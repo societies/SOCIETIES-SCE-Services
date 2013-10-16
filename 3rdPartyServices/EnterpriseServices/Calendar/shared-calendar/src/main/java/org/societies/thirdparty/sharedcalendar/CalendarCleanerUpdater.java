@@ -85,11 +85,11 @@ public class CalendarCleanerUpdater implements Runnable {
 			checkForRemoteCis();
 			
 			if(parent.getContext().isContextChange()){
-				log.debug("Context has changed since last check, so we update the recommended events...");
+				log.info("Context has changed since last check, so we update the recommended events...");
 				refreshRecommendedEvents();
 				parent.getContext().setContextChange(false);
 			} else{
-				log.debug("No need to recheck the recommended events, our context hasn't changed!");
+				log.info("No need to recheck the recommended events, our context hasn't changed!");
 			}
 			
 			if(parent.getRecentEvents().size() > 80){
@@ -115,7 +115,9 @@ public class CalendarCleanerUpdater implements Runnable {
 	 * 
 	 */
 	private void checkLocalCis() {
-		log.debug("Checking our local, existing CIS...");
+		if(log.isDebugEnabled())
+			log.debug("Checking our local, existing CIS...");
+		
 		List<ICisOwned> ourCisList = parent.getCisManager().getListOfOwnedCis();
 		for(ICisOwned ourCis : ourCisList ){
 			log.debug("Checking {} for a Calendar",ourCis.getName());
@@ -123,7 +125,7 @@ public class CalendarCleanerUpdater implements Runnable {
 				IIdentity cisId = parent.getIIdentityFromJid(ourCis.getCisId());
 				Calendar cisCalendar = parent.retrieveCalendar(cisId,parent.getMyId());
 				if(cisCalendar == null){
-					log.debug(ourCis.getName() + " doesn't have a Calendar, creating.");
+					log.debug("{} doesn't have a Calendar, creating.", ourCis.getName());
 					
 					String calendarId = parent.createCalendar(ourCis.getName(),cisId);
 					if(calendarId != null)

@@ -296,6 +296,7 @@ public class SharedCalendar extends EventListener implements ISharedCalendarServ
 		List<String> classList = new ArrayList<String>();
 		classList.add("org.societies.thirdparty.sharedcalendar.api.schema.CalendarMessage");
 		getPubSub().addSimpleClasses(classList);
+		
 		// Now checks if we have an internal CSS calendar, if not, creates it
 		if(log.isDebugEnabled())
 			log.debug("Checking for internal CSS");
@@ -318,7 +319,21 @@ public class SharedCalendar extends EventListener implements ISharedCalendarServ
 		recentCalendars.put(myId.getBareJid(), myCalendar);
 		
 		// Now checks the CIS list and creates CIS 
-	
+		List<CalendarDAO> myCalendars = database.getAllCalendars();
+		for(CalendarDAO myCal: myCalendars){
+			log.debug("Checking if {} still has a calendar...",myCal.getCalendarName());
+			
+			if(myCal.getNodeId().equals(myId.getBareJid()))
+				continue;
+			
+			ICisOwned calCis = getCisManager().getOwnedCis(myCal.getNodeId());
+			if(calCis == null){
+				log.debug("We have calendar {} but the CIS no longer exists. Deleting!",myCal.getCalendarName());
+				database.deleteEventsForCalendarId(myCal.getCalendarId());
+				database.deleteCalendar(myCal.getCalendarId());
+				googleUtil.deleteCalendar(myCal.getCalendarId());
+			}
+		}
 		// TODO Now we clean up calendars for CIS that no longer exist...
 		
 		// Next we register for CIS events
@@ -358,9 +373,9 @@ public class SharedCalendar extends EventListener implements ISharedCalendarServ
 					calendarResult = database.createCalendar(node.getBareJid(),calendarId, calendarSummary);
 				
 				if(calendarResult){
-					if(log.isDebugEnabled())
-						log.debug("Created a new Calendar: " + calendarId);
-					
+					log.debug("Created a new Calendar: {}", calendarId);
+					Calendar myCalendar = getMyCalendarFromNodeId(node.getBareJid());
+					recentCalendars.put(node.getBareJid(), myCalendar);
 				} else{
 					if(log.isDebugEnabled())
 						log.debug("There was a problem creating the calendar!");
@@ -382,8 +397,10 @@ public class SharedCalendar extends EventListener implements ISharedCalendarServ
 						calendarResult = database.createCalendar(node.getBareJid(),calendarId, calendarSummary);
 						
 					if(calendarResult){
-						if(log.isDebugEnabled())
-							log.debug("Created a new Calendar: " + calendarId + " now creating the pubsub node");
+						Calendar myCalendar = getMyCalendarFromNodeId(node.getBareJid());
+						recentCalendars.put(node.getBareJid(), myCalendar);
+						
+						log.debug("Created a new Calendar: {} now creating the pubsub node",calendarId);
 						
 						getPubSub().ownerCreate(node, calendarId.replace('@', '-'));
 						getPubSub().subscriberSubscribe(node, calendarId.replace('@', '-'), this);
@@ -407,7 +424,7 @@ public class SharedCalendar extends EventListener implements ISharedCalendarServ
 			ex.printStackTrace();
 			log.error("Exception while creating calendar: " + ex);
 		}
-			
+		
 		return calendarId;
 		
 	}
@@ -959,7 +976,7 @@ public class SharedCalendar extends EventListener implements ISharedCalendarServ
 					if(returnedEventId != null){
 						log.debug("Event {} was correctly created in remote node, so now we need to register it in the database!",newEvent.getName());
 						
-						newEvent = callback.getResult().getEvent();
+						newEvent = beanResult.getEvent();
 						boolean subscribeOk;
 						
 						if(requestor.equals(myId))
@@ -969,6 +986,7 @@ public class SharedCalendar extends EventListener implements ISharedCalendarServ
 						
 						if(subscribeOk){
 							recentEvents.put(returnedEventId, newEvent);
+							log.debug("Event {} registered in the database, everything ok, so we continue...",newEvent.getName());
 						} else{
 							if(log.isDebugEnabled())
 								log.debug("Problem with the database, we warn that the event will be deleted!");
@@ -998,8 +1016,7 @@ public class SharedCalendar extends EventListener implements ISharedCalendarServ
 	public boolean deleteEvent(String eventId, IIdentity node, IIdentity requestor) {
 		boolean deletionOk=false;
 		
-		if(log.isDebugEnabled())
-			log.debug("Deleting event " + eventId + " on calendar; need to check what type of node it is.");
+		log.debug("Deleting event {} on calendar; need to check what type of node it is.",eventId);
 			
 		try{
 			
@@ -1226,8 +1243,7 @@ public class SharedCalendar extends EventListener implements ISharedCalendarServ
 		boolean subscriptionOk = false;
 		Event theEvent = null;
 		
-		if(log.isDebugEnabled())
-			log.debug("Trying to subscribe to an event: " + eventId );
+		log.debug("{} trying to subscribe to an event: {}", node.getBareJid(), eventId );
 		
 		try{
 			
@@ -1264,7 +1280,7 @@ public class SharedCalendar extends EventListener implements ISharedCalendarServ
 
 				if(cisOwned != null){
 					if(log.isDebugEnabled())
-						log.debug("It's our own CIS, so we'll do the subscription for " + subscriber.getJid());
+						log.debug("It's our own CIS, so we'll do the subscription for {} ", subscriber.getJid());
 					
 					subscriptionOk = getGoogleUtil().subscribeEvent(calendarId, eventId, subscriber);
 
@@ -1341,11 +1357,11 @@ public class SharedCalendar extends EventListener implements ISharedCalendarServ
 							subscriptionOk = requestResult.isSubscribingResult();
 						
 						if(log.isDebugEnabled())
-							log.debug("Received result: " + subscriptionOk);
+							log.debug("Received result: {}", subscriptionOk);
 						
 						if(subscriptionOk){
 							if(log.isDebugEnabled())
-								log.debug("Subscribed event: " + eventId);
+								log.debug("Subscribed event: {}", eventId);
 							theEvent = requestResult.getEvent();
 							recentEvents.put(eventId, theEvent);
 							
@@ -1547,7 +1563,11 @@ public class SharedCalendar extends EventListener implements ISharedCalendarServ
 			if(log.isDebugEnabled())
 				log.debug("Processing event: " + eventDAO.getEventId());
 			Event subscribedEvent = eventFromDatabaseEvent(eventDAO);
-			finalEventList.add(subscribedEvent);
+			if(subscribedEvent != null)
+				finalEventList.add(subscribedEvent);
+			else{
+				log.debug("Couldn't find event {}!", eventDAO.getEventId());
+			}
 		}
 		
 		return finalEventList;
@@ -2232,8 +2252,7 @@ public class SharedCalendar extends EventListener implements ISharedCalendarServ
 		
 		protected boolean deleteCalendar(String calendarId) {
 			
-			if(log.isDebugEnabled())
-				log.debug("Database: Deleting a calendar with calendarId: " + calendarId);
+			log.debug("Database: Deleting a calendar with calendarId: {}", calendarId);
 			
 			Transaction t = null;
 			Session session = null;
@@ -2362,7 +2381,7 @@ public class SharedCalendar extends EventListener implements ISharedCalendarServ
 		protected String getCalendarIdFromNodeId(String nodeId){
 			
 			if(log.isDebugEnabled())
-				log.debug("Getting CalendarId from NodeId");
+				log.debug("Getting CalendarId from NodeId {}",nodeId);
 			
 			String result = null;
 			Transaction t = null;
@@ -2389,7 +2408,8 @@ public class SharedCalendar extends EventListener implements ISharedCalendarServ
 				if (session != null) {
 					session.close();
 				}
-			}	
+			}
+			log.debug("Calendar id {} for node Id{}",result,nodeId);
 			return result;
 		}
 		
@@ -2426,6 +2446,31 @@ public class SharedCalendar extends EventListener implements ISharedCalendarServ
 			}	
 			return result;
 		}
+		
+		protected List<CalendarDAO> getAllCalendars(){
+
+			
+			List<CalendarDAO> results = null;
+			Transaction t = null;
+			Session session = null;
+			try {
+				session = sessionFactory.openSession();
+
+				results = (List<CalendarDAO>) session
+						.createCriteria(CalendarDAO.class).list();
+				
+				if(log.isDebugEnabled())
+					log.debug("Found " + results.size() + " ");
+			} catch (HibernateException he) {
+				log.error("Hibernate Exception: {}",he.getMessage());
+
+			} finally {
+				if (session != null) {
+					session.close();
+				}
+			}	
+			return results;
+		}
 	}
 
 
@@ -2437,14 +2482,13 @@ public class SharedCalendar extends EventListener implements ISharedCalendarServ
 		
 		if(item.getClass().equals(CalendarMessage.class)){
 			CalendarMessage calendarMessage = (CalendarMessage) item;
-			if(log.isDebugEnabled())
-				log.debug("Message was: " + calendarMessage.getMessage());
+			
+			log.debug("Message was: {}", calendarMessage.getMessage());
 			
 			if(calendarMessage.getMessage().equals(Message.NEW_EVENT)){
 				Event newEvent = calendarMessage.getEvent();
 		
-				if(log.isDebugEnabled())
-					log.debug("A new event arrived: " + newEvent.getName());
+				log.debug("A new event arrived: {}", newEvent.getName());
 				
 				processNewEvent(newEvent);
 			}
@@ -2786,8 +2830,10 @@ public class SharedCalendar extends EventListener implements ISharedCalendarServ
 		
 		// Create the result List
 		List<UserWarning> result = new ArrayList<UserWarning>(userWarnings);
+		log.debug("There are {} user warnings!",result.size());
 		// Clears the current warnings
 		userWarnings.clear();
+		log.debug("There are {} user warnings!",result.size());
 		// Returns result
 		return result;
 	}

@@ -147,7 +147,7 @@ public class CalendarGoogleUtil {
 			}
 			
 		} catch (Exception e) {
-			log.error("Couldn't get the calendar!");
+			log.error("Couldn't get the calendar! {}",e);
 			e.printStackTrace();
 			return null;
 		}
@@ -511,8 +511,9 @@ public class CalendarGoogleUtil {
 		
 		try {
 			calendarEntry = service.calendarList().get(calendarId).execute();
-		} catch (IOException e1) {
-			log.error("Unable to list calendars", e1);
+		} catch (Exception e1) {
+			log.error("Unable to list calendars {}", e1);
+			e1.printStackTrace();
 			return null;
 		}
 		
@@ -811,6 +812,7 @@ public class CalendarGoogleUtil {
 			
 			log.debug("Got the calendar service: " + service.getApplicationName() + " : " + service.getBaseUrl());
 			
+			//cleanAll();
 		} catch (Exception e) {
 			e.printStackTrace();
 			log.error("Unable to initialize remote Calendar Service", e);
@@ -913,5 +915,23 @@ public class CalendarGoogleUtil {
 					}
 	}}
 	
-	
+	private void cleanAll(){
+		try {
+			List<CalendarListEntry> allCalendars = retrieveAllCalendars();
+			for(CalendarListEntry allCalendar : allCalendars){
+				cleanCalendar(allCalendar.getId());
+				if(!allCalendar.getId().equalsIgnoreCase("societiescs@gmail.com")){
+					log.debug("Deleting calendar: {} : {} ", allCalendar.getId(), allCalendar.getSummary());
+					deleteCalendar(allCalendar.getId());
+				}
+			}
+			List<CalendarListEntry> allCalendarsAfter = retrieveAllCalendars();
+			for(CalendarListEntry allCalendar : allCalendarsAfter){
+				log.debug("Calendar is {} : {}",allCalendar.getId(), allCalendar.getSummary());
+			}
+		} catch (Exception e) {
+			log.warn("Error while cleaning {}",e);
+			e.printStackTrace();
+		}
+	}
 }

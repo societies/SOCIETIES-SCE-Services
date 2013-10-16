@@ -52,7 +52,7 @@ public class DateValidator implements Validator {
     public void validate(FacesContext context, UIComponent component, Object value) throws ValidatorException {
     	
     	if(log.isDebugEnabled())
-    		log.debug("Validation called: " + value);
+    		log.debug("Validation called: {}", value);
     	
         if (value == null) {
             return; // Let required="true" handle.

@@ -260,17 +260,123 @@ img.right {
 }
 
 
+.col1 { 
+	width: 25%;
+	text-align:left;
+	margin-left: 3%;
+    margin-right: auto;
+    margin-top: 0;
+    margin-bottom: 0;
+	}
+	
+.col2 { 
+	width: 50%;
+	text-align:center;
+	margin-left: auto;
+    margin-right: auto; 
+    margin-top: 0;
+    margin-bottom: 0; 
+	}
+	
+.col3 { 
+	width: 25%;
+	text-align:center;
+	margin-left: auto;
+    margin-right: 3%;
+    margin-top: 0;
+    margin-bottom: 0;
+	 }
 
 .my-event, .my-event .fc-event-skin, .my-event a{
-    background-color: red;
+    background-color: orange;
     color: black;
-    border-color: red;
+    border-color: white;
 }
 
+/* Button */
+.ui-button{
+	display:inline-block;
+	position:relative;
+	padding:0;
+	margin-right:.1em;
+	text-decoration:none !important;
+	cursor:pointer;
+	text-align:center;
+	zoom:1;
+	overflow:visible;/* the overflow property removes extra width in IE */
+}
+
+.ui-button-icon-only{
+	width:2.4em;
+}
+/*button text element */
+.ui-button .ui-button-text{display:block;line-height:1.4;}
+.ui-button-text-only .ui-button-text{padding:.3em 1em;}
+.ui-button-icon-only .ui-button-text{padding:.3em;text-indent:-9999999px;}
+.ui-button-text-icon-left .ui-button-text{padding:.3em 1em .3em 2.1em;}
+.ui-button-text-icon-right .ui-button-text{padding:.3em 2.1em .3em 1em;}
+/*button icon element(s) */
+.ui-button-icon-only .ui-icon, .ui-button-text-icon-left .ui-icon, .ui-button-text-icon-right .ui-icon{
+	position:absolute;top:50%;margin-top:-8px;}
+.ui-button-icon-only .ui-icon{left:50%;margin-left:-8px;}
+.ui-button-icon-left{left:.5em;}
+.ui-button-icon-right{right:.5em;}
+/*button sets*/
+.ui-buttonset{margin-right:7px;}
+.ui-buttonset .ui-button{margin-left:0;margin-left:0}
+/* workarounds */button.ui-button::-moz-focus-inner{border:0;padding:0;/* reset extra padding in Firefox */}
+
+/* SelectOneButton */.ui-selectonebutton{display:inline-block; padding:1px;}
+.ui-selectonebutton.ui-state-error{padding:0px;}
+
+.datemenustyle .ui-button {
+	display:inline-block;
+	padding:0px;
+	margin-left:0;
+    margin-right:0;
+    margin-top:auto;
+    margin-bottom:auto;
+    width:30%
+	}
+	
+.datemenustyle .ui-state-active{
+
+	/*
+	border:1px solid #7096ab;
+	box-shadow:inset 0px 1px 0px 0px #ffffff;
+	background:#85b2cb linear-gradient(top, rgba(255,255,255,0), rgba(255,255,255,0.4));
+	background:#85b2cb -webkit-gradient(linear, left top, left bottom, from(rgba(255,255,255,0)), to(rgba(255,255,255,0.4)));
+	background:#85b2cb -moz-linear-gradient(top, rgba(255,255,255,0), rgba(255,255,255,0.4));
+	*/
+	border:1px solid #666666;
+	background:#aaaaaa;
+	background:#aaaaaa linear-gradient(top, rgba(0,0,0,0.25), rgba(0,0,0,0));
+	background:#aaaaaa -webkit-gradient(linear, left top, left bottom, from(rgba(0,0,0,0.25)), to(rgba(0,0,0,0)));
+	background:#aaaaaa -moz-linear-gradient(top, rgba(0,0,0,0.25), rgba(0,0,0,0));
+	/*    filter:progid:DXImageTransform.Microsoft.gradient(startColorstr=#33000000, endColorstr=#00000000);-ms-filter:"progid:DXImageTransform.Microsoft.gradient(startColorstr=#33000000, endColorstr=#00000000)";*/
+	color:#ffffff;text-shadow:1px 1px 1px #333333;}
+}
 
 /* * * PrimeFaces Aristo Theme* http://wijmo.com/*
  * Based on the Aristo theme concept created by 280 North and Pinvoke (https://github.com/280north/aristo).* */
 
 /* THE END */
 
+.ui-state-active, .ui-widget-content .ui-state-active, .ui-widget-header .ui-state-active{
+	border:1px solid #7096ab;
+	box-shadow:inset 0px 1px 0px 0px #ffffff;
+	background:#85b2cb linear-gradient(top, rgba(255,255,255,0), rgba(255,255,255,0.4));
+	background:#85b2cb -webkit-gradient(linear, left top, left bottom, from(rgba(255,255,255,0)), to(rgba(255,255,255,0.4)));
+	background:#85b2cb -moz-linear-gradient(top, rgba(255,255,255,0), rgba(255,255,255,0.4));
+}
 
+.ui-datepicker .ui-datepicker-prev, .ui-datepicker .ui-datepicker-next{cursor:pointer;}
+.ui-datepicker table{background:#ffffff; table-layout:fixed;}
+/*.ui-datepicker .ui-datepicker-calendar .ui-state-default{background:none;border:none;color:#5F83B9;}
+.ui-datepicker .ui-datepicker-calendar .ui-state-hover{color:#1C4257;-moz-box-shadow:none;-webkit-box-shadow:none;box-shadow:none;}
+.ui-datepicker .ui-datepicker-current-day .ui-state-highlight, .ui-datepicker .ui-datepicker-current-day .ui-state-default{background:#5F83B9;color:#FFFFFF !important;font-weight:bold;text-shadow:0 1px 1px #234386;-moz-box-shadow:none;-webkit-box-shadow:none;box-shadow:none;}.ui-datepicker .ui-datepicker-header{background:#e3e3e3;background:#e3e3e3 linear-gradient(top, rgba(255,255,255,0.8), rgba(255,255,255,0));background:#e3e3e3 -webkit-gradient(linear, left top, left bottom, from(rgba(255,255,255,0.8)), to(rgba(255,255,255,0)));background:#e3e3e3 -moz-linear-gradient(top, rgba(255,255,255,0.8), rgba(255,255,255,0));border-right:none;border-left:none;border-top:none;-moz-border-radius:0;-webkit-border-radius:0;border-radius:0;}
+*/.ui-datepicker .ui-datepicker-next-hover, .ui-datepicker .ui-datepicker-prev-hover{background:none;border:solid 1px transparent;-moz-box-shadow:none;}
+
+.ui-timepicker-div {background:#ffffff;}
+
+.ui-datepicker-div{background:#ffffff;}

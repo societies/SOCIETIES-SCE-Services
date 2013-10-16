@@ -209,7 +209,7 @@ public class CalendarPreferenceManager implements IActionConsumer {
 
 	@Override
 	public boolean setIAction(IIdentity id, IAction action) {
-		log.debug("Personalisation Manager setting preference for {} : {}",action.getparameterName(),action.getvalue());
+		log.info("Personalisation Manager setting preference for {} : {}",action.getparameterName(),action.getvalue());
 		log.debug("CalendarPreference.valueOf: {}",CalendarPreference.valueOf(action.getparameterName()));
 		calendarPreferences.put(CalendarPreference.valueOf(action.getparameterName()), action.getvalue());
 		return true;
