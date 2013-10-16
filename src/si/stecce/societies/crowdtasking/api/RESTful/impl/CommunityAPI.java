@@ -184,7 +184,7 @@ public class CommunityAPI implements ICommunityAPI {
 			community.setName(name);
 			community.setDescription(description);
 			community.setCollaborativeSpaces(csIds);
-			community.addMembers(members);
+			//community.addMembers(members);
 		}
 		CommunityDAO.saveCommunity(community);
         if ("".equalsIgnoreCase(communityId)) {

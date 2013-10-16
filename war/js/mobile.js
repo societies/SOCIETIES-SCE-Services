@@ -287,8 +287,8 @@ var CrowdTaskingApp = function() {
     };
 
     var showMeetings = function(task) {
-    	if (task.status != 'IN_PROGRESS' || task.meetings.length === 0) return;
-    	
+    	if (task.status != 'IN_PROGRESS') return;
+
     	$('#meetingDiv').show();
     	$meetingList = $('#meetingList'); 
     	if (task.meetings == null || task.meetings.length == 0) {
@@ -575,6 +575,12 @@ var CrowdTaskingApp = function() {
         },
         
         addTask: function () {
+            if ($('#status').val() === 'editing') {
+                return;
+            }
+            else {
+                $('#status').val("editing");
+            }
         	console.log("addTask function");
             currentTaskIndex = -1;
             //clearNewTaskForm();

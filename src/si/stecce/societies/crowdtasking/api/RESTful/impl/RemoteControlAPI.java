@@ -103,7 +103,7 @@ public class RemoteControlAPI implements IRemoteControlAPI {
                 return Response.ok().entity("You took control of the public display.").build();
             }
 
-            Query<Community> comms = CommunityDAO.findCommunities(spaceId);
+            Query<Community> comms = CommunityDAO.findCommunities(spaceId, user);
             String tc = "";
             if (comms.count() == 0) {
                 message = "You are not a member of any community with this collaborative space.";

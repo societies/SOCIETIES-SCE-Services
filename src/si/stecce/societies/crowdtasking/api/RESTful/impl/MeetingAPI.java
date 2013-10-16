@@ -67,7 +67,7 @@ public class MeetingAPI implements IMeetingAPI {
 	public String getMeeting(@PathParam("querytype") String querytype,
                              @QueryParam("id") Long meetingId,
                              @QueryParam("csId") Long csId) {
-		if ("".equalsIgnoreCase(querytype)) {
+		if ("data".equalsIgnoreCase(querytype)) {
 			if (meetingId == null) {
 				return "Missing id.";
 			}

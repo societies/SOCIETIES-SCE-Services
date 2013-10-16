@@ -337,6 +337,12 @@ var Community = function() {
 
     var editCommunity = function() {
     	if (_mode == 'new') {
+            if ($('#status').val() === 'editing') {
+                return;
+            }
+            else {
+                $('#status').val("editing");
+            }
     		currentIndex = -1;
             $('#communityId').val('');
             $('#name').val('');

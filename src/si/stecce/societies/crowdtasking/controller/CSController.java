@@ -91,7 +91,7 @@ public class CSController extends HttpServlet {
                         return;
                     }
                     Long spaceId = space.getId();
-                    Query<Community> communities = CommunityDAO.findCommunities(space);
+                    Query<Community> communities = CommunityDAO.findCommunities(space, user);
                     if (communities == null || communities.count() == 0) {
                         return;
                     }

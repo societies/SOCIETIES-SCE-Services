@@ -115,12 +115,14 @@ public class CommentAPI implements ICommentAPI {
 	}
 
 	private Set<Long> getInvolvedUsersOnTaskThatWasCommented(Comment comment) {
-		Query<Comment> comments = getExecutionComments(comment.getTask().getId());
+//        ni več execution faze
+//		Query<Comment> comments = getExecutionComments(comment.getTask().getId());
+
 		Set<Long> users = new HashSet<Long>();
-		for (Comment c:comments) {
-			users.add(c.getOwner().getId());
+		for (Long userId:comment.getTask().getInvolvedUsers()) {
+			users.add(userId);
 		}
-		 // remove last comments author - inform the others
+		 // remove author of the last comment - inform the others
 		users.remove(comment.getOwner().getId());
 		return users;
 	}

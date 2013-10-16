@@ -102,12 +102,13 @@ public final class CommunityDAO {
 		return members;
 	}
 	
-	public static Query<Community> findCommunities(CollaborativeSpace space) {
-		return findCommunities(space.getId());
+	public static Query<Community> findCommunities(CollaborativeSpace space, CTUser user) {
+		return findCommunities(space.getId(), user);
 	}
 	
-	public static Query<Community> findCommunities(Long spaceId) {
-		return ofy().load().type(Community.class).filter("collaborativeSpaceRefs", Ref.create(Key.create(CollaborativeSpace.class, spaceId)));
+	public static Query<Community> findCommunities(Long spaceId, CTUser user) {
+		return ofy().load().type(Community.class).filter("collaborativeSpaceRefs", Ref.create(Key.create(CollaborativeSpace.class, spaceId)))
+                .filter("members", Ref.create(Key.create(CTUser.class, user.getId())));
 	}
 	
 	public static Key<Community> saveCommunity(Community community) {
