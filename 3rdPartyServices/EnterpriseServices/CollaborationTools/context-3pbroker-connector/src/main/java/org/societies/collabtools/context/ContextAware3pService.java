@@ -25,7 +25,9 @@
 
 package org.societies.collabtools.context;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
@@ -35,11 +37,16 @@ import org.societies.api.comm.xmpp.interfaces.ICommManager;
 import org.societies.api.context.CtxException;
 import org.societies.api.context.broker.ICtxBroker;
 import org.societies.api.context.event.CtxChangeEventListener;
-import org.societies.api.context.model.CommunityCtxEntity;
+import org.societies.api.context.model.CtxAssociation;
+import org.societies.api.context.model.CtxAssociationTypes;
 import org.societies.api.context.model.CtxAttribute;
+import org.societies.api.context.model.CtxAttributeComplexValue;
 import org.societies.api.context.model.CtxAttributeTypes;
+import org.societies.api.context.model.CtxAttributeValueType;
 import org.societies.api.context.model.CtxEntity;
 import org.societies.api.context.model.CtxEntityIdentifier;
+import org.societies.api.context.model.CtxIdentifier;
+import org.societies.api.context.model.CtxModelType;
 import org.societies.api.identity.IIdentity;
 import org.societies.api.identity.IIdentityManager;
 import org.societies.api.identity.InvalidFormatException;
@@ -125,11 +132,7 @@ public class ContextAware3pService implements IContextAware3pService  {
 		LOG.info("cisID retrieved: "+ cisID);
 
 		try {
-			CtxEntityIdentifier ctxCommunityEntityIdentifier = this.ctxBroker.retrieveCommunityEntityId(getRequestor(), cisID).get();
-			LOG.info("communityEntityIdentifier retrieved: " +ctxCommunityEntityIdentifier.toString()+ " based on cisID: "+ cisID);
-			CommunityCtxEntity communityEntity = (CommunityCtxEntity) this.ctxBroker.retrieve(getRequestor(), ctxCommunityEntityIdentifier).get();
-
-			Set<CtxEntityIdentifier> ctxMembersIDs = communityEntity.getMembers();
+			Set<CtxEntityIdentifier> ctxMembersIDs = this.getCommunityMembers(cisID);
 			Iterator<CtxEntityIdentifier> members = ctxMembersIDs.iterator();
 
 			while(members.hasNext()){
@@ -142,12 +145,11 @@ public class ContextAware3pService implements IContextAware3pService  {
 				//				this.ctxBroker.registerForChanges(getRequestor(), this.myCtxChangeEventListener, member, CtxAttributeTypes.OCCUPATION);
 				//				this.ctxBroker.registerForChanges(getRequestor(), this.myCtxChangeEventListener, member, CtxAttributeTypes.ADDRESS_WORK_CITY);
 				//				this.ctxBroker.registerForChanges(getRequestor(), this.myCtxChangeEventListener, member, CtxAttributeTypes.ADDRESS_WORK_COUNTRY);
+				
+				//Trying to unregister for long term context
+				this.ctxBroker.registerForChanges(getRequestor(), this.myCtxChangeEventListener, member, CtxAttributeTypes.INTERESTS);
 
 			}
-		} catch (InterruptedException e1) {
-			e1.printStackTrace();
-		} catch (ExecutionException e1) {
-			e1.printStackTrace();
 		} catch (CtxException e1) {
 			e1.printStackTrace();
 		}
@@ -166,11 +168,8 @@ public class ContextAware3pService implements IContextAware3pService  {
 		LOG.info("cisID retrieved: "+ cisID);
 
 		try {
-			CtxEntityIdentifier ctxCommunityEntityIdentifier = this.ctxBroker.retrieveCommunityEntityId(getRequestor(), cisID).get();
-			LOG.info("communityEntityIdentifier retrieved: " +ctxCommunityEntityIdentifier.toString()+ " based on cisID: "+ cisID);
-			CommunityCtxEntity communityEntity = (CommunityCtxEntity) this.ctxBroker.retrieve(getRequestor(), ctxCommunityEntityIdentifier).get();
 
-			Set<CtxEntityIdentifier> ctxMembersIDs = communityEntity.getMembers();
+			Set<CtxEntityIdentifier> ctxMembersIDs = this.getCommunityMembers(cisID);
 			Iterator<CtxEntityIdentifier> members = ctxMembersIDs.iterator();
 
 			while(members.hasNext()){
@@ -183,11 +182,10 @@ public class ContextAware3pService implements IContextAware3pService  {
 				//				this.ctxBroker.unregisterFromChanges(getRequestor(), this.myCtxChangeEventListener, member, CtxAttributeTypes.OCCUPATION);
 				//				this.ctxBroker.unregisterFromChanges(getRequestor(), this.myCtxChangeEventListener, member, CtxAttributeTypes.ADDRESS_WORK_CITY);
 				//				this.ctxBroker.unregisterFromChanges(getRequestor(), this.myCtxChangeEventListener, member, CtxAttributeTypes.ADDRESS_WORK_COUNTRY);
+				
+				//Trying to unregister for long term context
+				this.ctxBroker.unregisterFromChanges(getRequestor(), this.myCtxChangeEventListener, member, CtxAttributeTypes.INTERESTS);
 			}
-		} catch (InterruptedException e1) {
-			e1.printStackTrace();
-		} catch (ExecutionException e1) {
-			e1.printStackTrace();
 		} catch (CtxException e1) {
 			e1.printStackTrace();
 		}
@@ -201,20 +199,26 @@ public class ContextAware3pService implements IContextAware3pService  {
 		//Cast IIdentity for the societies platform
 		IIdentity cisID = idMgr.fromJid(communityId.toString());
 		LOG.info("cisID retrieved: "+ cisID);
-		CtxEntityIdentifier ctxCommunityEntityIdentifier;
+
 		//Hashmap with format: person, context attributes
 		HashMap<String, HashMap<String, String[]>> persons = new HashMap<String, HashMap<String, String[]>>();
 
-		try {
-			ctxCommunityEntityIdentifier = this.ctxBroker.retrieveCommunityEntityId(getRequestor(), cisID).get();
-			if (ctxCommunityEntityIdentifier == null)
-				throw new IllegalArgumentException("Community not created, ctxCommunityEntityIdentifier is null"); 
-			LOG.debug("communityEntityIdentifier retrieved: {}", ctxCommunityEntityIdentifier.toString());
+		try {			
 
-			CommunityCtxEntity communityEntity = (CommunityCtxEntity) this.ctxBroker.retrieve(getRequestor(), ctxCommunityEntityIdentifier).get();
+			Set<CtxEntityIdentifier> ctxMembersIDs = this.getCommunityMembers(cisID);
 
-			Set<CtxEntityIdentifier> ctxMembersIDs = communityEntity.getMembers();
-			LOG.debug("Community Members size: {}", communityEntity.getMembers().size());
+			//			Old method...
+
+			//			ctxCommunityEntityIdentifier = this.ctxBroker.retrieveCommunityEntityId(getRequestor(), cisID).get();
+			//			if (ctxCommunityEntityIdentifier == null)
+			//				throw new IllegalArgumentException("Community not created, ctxCommunityEntityIdentifier is null"); 
+			//			LOG.debug("communityEntityIdentifier retrieved: {}", ctxCommunityEntityIdentifier.toString());
+			//
+			//			CommunityCtxEntity communityEntity = (CommunityCtxEntity) this.ctxBroker.retrieve(getRequestor(), ctxCommunityEntityIdentifier).get();
+			//
+			//			Set<CtxEntityIdentifier> ctxMembersIDs = communityEntity.getMembers();
+
+			LOG.debug("Community Members size: {}", ctxMembersIDs.size());
 
 			for(CtxEntityIdentifier member : ctxMembersIDs){
 				//Hashmap representing the context attributes
@@ -222,7 +226,7 @@ public class ContextAware3pService implements IContextAware3pService  {
 
 				CtxEntity retrievedCtxEntity = (CtxEntity) this.ctxBroker.retrieve(getRequestor(), member).get();
 				LOG.debug("Retrieved member entity: {}", retrievedCtxEntity.getId());
-				
+
 				//Job Position
 				Set<CtxAttribute> attribute = retrievedCtxEntity.getAttributes(CtxAttributeTypes.OCCUPATION);
 				for(CtxAttribute occupation : attribute)
@@ -251,7 +255,7 @@ public class ContextAware3pService implements IContextAware3pService  {
 				attribute = retrievedCtxEntity.getAttributes(CtxAttributeTypes.NAME);
 				for(CtxAttribute name : attribute)
 					othersCtx.put("name", new String[]{name.getStringValue()});
-				
+
 				//Name or ID
 				//TODO: Name FIXED!!
 				/*
@@ -267,10 +271,9 @@ public class ContextAware3pService implements IContextAware3pService  {
 						persons.put(getOnlyNameSubstring[0], othersCtx);
 					}
 				}
-				*/
+				 */
 				LOG.debug("Adding context info for {}",member.getOwnerId());
 				persons.put(idMgr.fromJid(member.getOwnerId()).getIdentifier(), othersCtx);
-
 			}
 
 		} catch (InterruptedException e) {
@@ -283,6 +286,49 @@ public class ContextAware3pService implements IContextAware3pService  {
 		return persons;
 
 	}
+
+	/**
+	 * Retrieve community members
+	 * 
+	 * @return a set of CtxEntityIdentifier of the members
+	 */
+	private Set<CtxEntityIdentifier> getCommunityMembers(IIdentity cisID) {
+
+		Set<CtxEntityIdentifier> ctxMembersIDs = new HashSet<CtxEntityIdentifier>();;
+		try {
+			CtxEntityIdentifier ctxCommunityEntityIdentifier = this.ctxBroker.retrieveCommunityEntityId(getRequestor(), cisID).get();
+			if (ctxCommunityEntityIdentifier == null)
+				throw new RuntimeException("Community not created, ctxCommunityEntityIdentifier is null"); 
+			LOG.debug("communityEntityIdentifier retrieved: {}", ctxCommunityEntityIdentifier.toString());
+			// null check for communityEntId
+
+			final List<CtxIdentifier> hasMembersIds = ctxBroker.lookup(getRequestor(), ctxCommunityEntityIdentifier, CtxModelType.ASSOCIATION, CtxAssociationTypes.HAS_MEMBERS).get();
+			if (hasMembersIds.isEmpty())
+				throw new RuntimeException("Community has no members, hasMembersIds is null"); 
+			// check hasMembersIds.isEmpty() - should never happen but to be safe
+
+			for (final CtxIdentifier foundHasMembersId : hasMembersIds) {
+				final CtxAssociation foundHasMembers = (CtxAssociation) ctxBroker.retrieve(getRequestor(), foundHasMembersId).get();
+				if (foundHasMembers != null && ctxCommunityEntityIdentifier.equals(foundHasMembers.getParentEntity())) {
+					for (final CtxEntityIdentifier memberEntId : foundHasMembers.getChildEntities()) {
+						ctxMembersIDs.add(memberEntId); // Hooray!
+					}
+					break;
+				}
+			}
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ExecutionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (CtxException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return ctxMembersIDs;
+	}
+
 
 	/* (non-Javadoc)
 	 * @see org.societies.collabtools.context.IContextAware3pService#setListener(org.societies.api.context.event.CtxChangeEventListener)
@@ -298,7 +344,7 @@ public class ContextAware3pService implements IContextAware3pService  {
 	 */
 	@Override
 	public Requestor getRequestor() {
-		
+
 		this.userIdentity = this.idMgr.getThisNetworkNode();
 		//return  new Requestor(userIdentity);
 		if (this.requestorService == null) {
@@ -316,7 +362,7 @@ public class ContextAware3pService implements IContextAware3pService  {
 	 * @see org.societies.collabtools.context.IContextAware3pService#retrieveCommunityCtxAttributes(java.lang.Object)
 	 */
 	@Override
-	public HashMap<String, String> retrieveCommunityCtxAttributes(Object communityId) throws InvalidFormatException {
+	public HashMap<String, String> retrieveCommunityCtxAttributes(Object communityId, final String ctxAttr) throws InvalidFormatException {
 		//Cast IIdentity for the societies platform
 		IIdentity cisID = idMgr.fromJid(communityId.toString());
 		LOG.info("cisID retrieved for ctx attributes: {}", cisID);
@@ -324,16 +370,34 @@ public class ContextAware3pService implements IContextAware3pService  {
 
 		try {
 			CtxEntityIdentifier ctxCommunityEntityIdentifier = this.ctxBroker.retrieveCommunityEntityId(getRequestor(), cisID).get();
-			LOG.info("communityEntityIdentifier retrieved: {} based on cisID", ctxCommunityEntityIdentifier.toString(), cisID);
-			CommunityCtxEntity communityEntity = (CommunityCtxEntity) this.ctxBroker.retrieve(getRequestor(), ctxCommunityEntityIdentifier).get();
+			// null check for communityEntId
+			if (ctxCommunityEntityIdentifier == null)
+				throw new RuntimeException("Community not created, ctxCommunityEntityIdentifier is null"); 
+			LOG.info("communityEntityIdentifier retrieved: {} based on cisID", ctxCommunityEntityIdentifier.toString(), cisID);			
 
-			Set<CtxAttribute> communityLanguages = communityEntity.getAttributes(CtxAttributeTypes.LANGUAGES);
-			Iterator<CtxAttribute> languagesIterator = communityLanguages.iterator();
-			while(languagesIterator.hasNext()){
-				String ctx = languagesIterator.next().getStringValue();
-				LOG.info("*** Community Languages: {}", ctx);
-				results.put(CtxAttributeTypes.LANGUAGES, ctx);
+			final List<CtxIdentifier> communityLanguageIds = ctxBroker.lookup(getRequestor(), ctxCommunityEntityIdentifier, CtxModelType.ATTRIBUTE, ctxAttr).get();
+			if (!communityLanguageIds.isEmpty()) {
+				CtxAttribute communityLanguages = (CtxAttribute) ctxBroker.retrieve(getRequestor(), communityLanguageIds.get(0)).get();
+				// if community context attribute value is expressed as a string 
+				if (CtxAttributeValueType.STRING == communityLanguages.getValueType()) {
+					String communityLanguagesStringValue = communityLanguages.getStringValue();
+					results.put(ctxAttr, communityLanguagesStringValue);
+					// if community context attribute value is expressed as a complex value
+				} else if (CtxAttributeValueType.COMPLEX == communityLanguages.getValueType()) {
+					CtxAttributeComplexValue communityLanguagesComplexValue = communityLanguages.getComplexValue();
+					results.put(ctxAttr, communityLanguagesComplexValue.toString());
+				}
 			}
+			//			Old method...
+			//			CommunityCtxEntity communityEntity = (CommunityCtxEntity) this.ctxBroker.retrieve(getRequestor(), ctxCommunityEntityIdentifier).get();
+			//
+			//			Set<CtxAttribute> communityLanguages = communityEntity.getAttributes(ctxAttr);
+			//			Iterator<CtxAttribute> languagesIterator = communityLanguages.iterator();
+			//			while(languagesIterator.hasNext()){
+			//				String ctx = languagesIterator.next().getStringValue();
+			//				LOG.info("*** Community Languages: {}", ctx);
+			//				results.put(ctxAttr, ctx);
+			//			}
 
 		} catch (InterruptedException e1) {
 			e1.printStackTrace();
@@ -342,7 +406,6 @@ public class ContextAware3pService implements IContextAware3pService  {
 		} catch (CtxException e1) {
 			e1.printStackTrace();
 		}
-
 		return results;
 	}
 

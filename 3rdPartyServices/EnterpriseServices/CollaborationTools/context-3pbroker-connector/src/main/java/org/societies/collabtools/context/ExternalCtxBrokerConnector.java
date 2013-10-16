@@ -65,7 +65,6 @@ public class ExternalCtxBrokerConnector extends Observable {
 		this.ctxBroker = externalCtxBroker;
 		this.ca3pService = ca3pService;
 		this.ca3pService.setListener(new MyCtxChangeEventListener());
-
 	}
 
 	/**
@@ -88,7 +87,8 @@ public class ExternalCtxBrokerConnector extends Observable {
 	 */
 	public HashMap<String, String> retrieveCommunityCtxAttributes(Object cisID) {
 		try {
-			return this.ca3pService.retrieveCommunityCtxAttributes(cisID);
+			//TODO: Can retrieve any ctx, for now only language
+			return this.ca3pService.retrieveCommunityCtxAttributes(cisID, CtxAttributeTypes.LANGUAGES);
 		} catch (InvalidFormatException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
