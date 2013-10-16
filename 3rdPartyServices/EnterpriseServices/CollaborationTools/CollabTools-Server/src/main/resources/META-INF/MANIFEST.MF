@@ -12,19 +12,19 @@ Export-Package: org.societies.collabtools;uses:="org.societies.collabt
  n,org.slf4j";version="0.1.0"
 Ignore-Package: ch.qos.logback.classic,ch.qos.logback.core,ch.qos.logb
  ack.core.joran.spi,ch.qos.logback.classic.joran
-Bundle-ClassPath: .,neo4j-kernel-1.8.M04.jar,context-3pbroker-connecto
- r-0.1.0.jar,neo4j-graph-algo-1.8.M04.jar,neo4j-lucene-index-1.8.M04.j
- ar,geronimo-jta_1.1_spec-1.1.1.jar,smackx-3.1.0.jar,neo4j-udc-1.8.M04
- .jar,smack-3.1.0.jar,neo4j-1.8.M04.jar,commons-cli-1.2.jar,neo4j-jmx-
- 1.8.M04.jar,neo4j-cypher-1.8.M04.jar,neo4j-graph-matching-1.8.M04.jar
- ,lucene-core-3.5.0.jar,scala-library-2.9.1-1.jar
-Built-By: 10036469
+Bundle-ClassPath: .,neo4j-kernel-1.8.M04.jar,classes,neo4j-graph-algo-
+ 1.8.M04.jar,neo4j-lucene-index-1.8.M04.jar,geronimo-jta_1.1_spec-1.1.
+ 1.jar,smackx-3.1.0.jar,neo4j-udc-1.8.M04.jar,smack-3.1.0.jar,neo4j-1.
+ 8.M04.jar,commons-cli-1.2.jar,neo4j-jmx-1.8.M04.jar,neo4j-cypher-1.8.
+ M04.jar,neo4j-graph-matching-1.8.M04.jar,lucene-core-3.5.0.jar,scala-
+ library-2.9.1-1.jar
+Built-By: cviana
 Tool: Bnd-1.43.0
 Bundle-Name: Collaboration Tools
 Created-By: Apache Maven Bundle Plugin
-Build-Jdk: 1.6.0_35
+Build-Jdk: 1.7.0_03
 Bundle-Version: 0.1.0
-Bnd-LastModified: 1381329608300
+Bnd-LastModified: 1381939651859
 Embed-Transitive: true
 Bundle-ManifestVersion: 2
 Bundle-Activator: org.societies.collabtools.Activator
