@@ -36,7 +36,6 @@ import org.neo4j.index.impl.lucene.LuceneIndex;
 import org.neo4j.kernel.impl.util.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.societies.collabtools.acquisition.ContextSubscriber;
 import org.societies.collabtools.acquisition.LongTermCtxTypes;
 import org.societies.collabtools.acquisition.PersonRepository;
 import org.societies.collabtools.api.ICollabAppConnector;
@@ -89,7 +88,7 @@ public class MainTest {
 
 	    personRepository = new PersonRepository(personGraphDb, indexPerson);
 	    sessionRepository = new SessionRepository(sessionGraphDb, indexSession, collabApps);
-		registerShutdownHook();
+//		registerShutdownHook();
 
 		//Caching last recently used for Location
 		((LuceneIndex<Node>) indexShortTermCtx).setCacheCapacity("name", 3000);
@@ -121,7 +120,9 @@ public class MainTest {
 			// 5 sec
 			Thread.sleep(5 * 1000);
 			test.createMockShortTermCtx();
+//			test.insertNewPerson();
 		}
+		
 
 		//        logger.info("Shutting down graphDb" );
 		//        registerShutdownHook();

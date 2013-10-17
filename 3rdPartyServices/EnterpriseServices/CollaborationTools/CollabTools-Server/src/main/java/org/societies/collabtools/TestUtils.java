@@ -66,7 +66,7 @@ public class TestUtils {
 		TestUtils.nrOfPersons = nrOfPersons;
         for ( int i = 0; i < nrOfPersons; i++ )
         {    	
-            Person person = personRepository.createPerson( "person#" + i);
+            Person person = personRepository.createPerson("person#" + i);
             //Set long term context
             person.setLongTermCtx(LongTermCtxTypes.NAME, "person#" + i);
             person.setLongTermCtx(LongTermCtxTypes.COLLAB_APPS, new String[] { "chat" });
@@ -74,7 +74,39 @@ public class TestUtils {
         }
     }
 	
-    public void deleteSocialGraph()
+    /**
+     * @throws Exception 
+	 * 
+	 */
+	public void insertNewPerson() throws Exception  {
+		int i = nrOfPersons++;
+        Person person = personRepository.createPerson( "person#" + i);
+        //Set long term context
+        person.setLongTermCtx(LongTermCtxTypes.NAME, "person#" + i);
+        person.setLongTermCtx(LongTermCtxTypes.COLLAB_APPS, new String[] { "chat" });
+        System.out.println("Person#" +i+" created");
+        
+        //Set ShortTerm Ctx
+		String [] response = new String [] {ShortTermCtxTypes.STATUS, getRandomStatus(), person.getName()};
+		ctxSub.update(null, response);
+		response = new String [] {ShortTermCtxTypes.LOCATION, getRandomLocation(), person.getName()};
+		ctxSub.update(null, response);
+		
+        //Set LongTerm Ctx
+		person.setLongTermCtx(LongTermCtxTypes.OCCUPATION, getRandomOccupation());
+		person.setLongTermCtx(LongTermCtxTypes.INTERESTS, getRandomInterests());
+		person.setLongTermCtx(LongTermCtxTypes.COMPANY, getRandomCompanies());
+		
+    	Map<Person, Integer> persons = personRepository.getPersonWithSimilarCtx(person, LongTermCtxTypes.INTERESTS);
+		for (Map.Entry<Person, Integer> entry : persons.entrySet()) {
+			//Similarity Formula is: (similar ctx/ personA + similar ctx/personB) / 2
+			float weight = ContextAnalyzer.personCtxSimilarity(entry.getValue(), LongTermCtxTypes.INTERESTS, entry.getKey(), person);
+    		person.addSimilarityRelationship(entry.getKey(), weight, LongTermCtxTypes.INTERESTS);
+		}
+		
+	}
+
+	public void deleteSocialGraph()
     {
 //    	clearDirectory( new File("target/PersonsGraphDb"));
         for (Person person : personRepository.getAllPersons())
