@@ -1,8 +1,12 @@
 package org.societies.thirdpartyservices.ijacket;
 
+import org.societies.android.api.cis.SocialContract;
 import org.societies.thirdpartyservices.ijacket.com.BluetoothConnection;
 
 import android.app.Application;
+import android.content.ContentResolver;
+import android.database.Cursor;
+import android.net.Uri;
 
 public class IJacketApp extends Application {
 	
@@ -105,7 +109,6 @@ public class IJacketApp extends Application {
 		this.speakersPin = speakersPin;
 	}*/
 	
-	
-	
+
 
 }

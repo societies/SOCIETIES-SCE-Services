@@ -20,9 +20,11 @@ import android.view.View;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.SimpleCursorAdapter;
 import android.widget.Spinner;
+import android.widget.SpinnerAdapter;
 import android.widget.Toast;
 import android.widget.AdapterView.OnItemSelectedListener;
 
@@ -38,6 +40,9 @@ public class IJacketClient extends Activity implements OnItemSelectedListener {
     long defaultCISID = 0;
     long my_cssID = 0; 
     long CSS_sharing_jacket = 0;
+    
+    // set both accountNameSync and accountTypeSync to "p2p" if using wifidirect
+    // or set accountTypeSync to box and leave accountNameSync empty if using box
     
     String accountNameSync = "p2p";
     String accountTypeSync = "p2p";
@@ -79,17 +84,26 @@ public class IJacketClient extends Activity implements OnItemSelectedListener {
 		setContentView(R.layout.main);
 		Log.d(LOG_TAG, "items added on Spinnet");
 		addItemsOnCISSpinner();
-		populateVerbSpinner();
-		
-		
-		 
-		// should add ITEM on CIS spinner be after?
-		
-
 		
 		
        
     }
+    
+    @Override
+    protected void onStart() {
+        super.onStart();
+        // The activity is about to become visible.
+        Intent intent = getIntent();
+        if(null != intent){
+	        long cisJid = intent.getLongExtra(org.societies.thirdpartyservices.ijacketlib.IJacketDefines.IjacketIntentExtras.CIS_ID, 0);// TODO: set the intent extra
+	        if(0 != cisJid){
+	        	// TODO: add as the defaul
+	        	defaultCISID = cisJid;
+	
+	        }
+        }
+    }
+    
         
     
     public void fillUpAccNameAndType(){
@@ -127,12 +141,23 @@ public class IJacketClient extends Activity implements OnItemSelectedListener {
     public void sendMessage(View view) {
     	ContentResolver cr = this.getApplication().getContentResolver();
 		
-		Log.d(LOG_TAG, "send button pressed");
+		Log.d(LOG_TAG, "button pressed");
+		
+		Button b = (Button)view;
+	    String buttonText = b.getText().toString();
+		
+	    String vibrateText = getResources().getString(R.string.vibrateButton);
+	    String ringText = getResources().getString(R.string.ringButton);
+	    String verb ="";
+		if(buttonText.equals(vibrateText))
+			verb = org.societies.thirdpartyservices.ijacketlib.IJacketDefines.Verbs.VIBRATE;
+		if(buttonText.equals(ringText))
+			verb = org.societies.thirdpartyservices.ijacketlib.IJacketDefines.Verbs.RING;
 		
         Uri FEED_URI = Uri.parse(SocialContract.AUTHORITY_STRING + SocialContract.UriPathIndex.COMMUNITY_ACTIVITIY);
         try{
         	ContentValues mNewValues = new ContentValues();
-        	EditText editText = (EditText) findViewById(R.id.edit_message);
+        	EditText editText = (EditText) findViewById(R.id.editText1);
         	
         	/*
         	 * Sets the values of each column and inserts the word. The arguments to the "put"
@@ -140,8 +165,7 @@ public class IJacketClient extends Activity implements OnItemSelectedListener {
         	 */
         	//mNewValues.put(SocialContract.CommunityActivity.GLOBAL_ID, randomStr());
         	
-        	Spinner spinnerVerbs = (Spinner) findViewById( R.id.spinner2 );
-        	String verb = spinnerVerbs.getSelectedItem().toString();
+
         	mNewValues.put(SocialContract.CommunityActivity.ACTOR, user_name);
         	mNewValues.put(SocialContract.CommunityActivity.ACCOUNT_TYPE, accountTypeSync);
         	mNewValues.put(SocialContract.CommunityActivity.ACCOUNT_NAME, accountNameSync);
@@ -178,7 +202,11 @@ public class IJacketClient extends Activity implements OnItemSelectedListener {
         try{
         	//String[] mProjection ={SocialContract.Me.GLOBAL_ID};
         	String mSelectionClause = SocialContract.Me.ACCOUNT_TYPE + " = ?";
-        	String[] mSelectionArgs = {SupportedAccountTypes.COM_BOX};
+        	String[] mSelectionArgs = new String[1];
+        	if(accountTypeSync.equalsIgnoreCase("p2p"))
+        		mSelectionArgs[0] = "p2p";
+        	else
+        		mSelectionArgs[0] = SupportedAccountTypes.COM_BOX;
         	cr = this.getApplication().getContentResolver();
 	       	 Cursor cursor = cr.query(CSS_URI,null,mSelectionClause,mSelectionArgs,null);
 	       	if (null == cursor || cursor.getCount() < 1){
@@ -239,6 +267,10 @@ public class IJacketClient extends Activity implements OnItemSelectedListener {
     
     private int getPostiton(long dbId, Cursor c){
         int i;
+        
+        if (null == c || c.getCount()<1)
+        	return 0;
+        
         c.moveToFirst(); 
         for(i=0;i< c.getCount()-1;i++)  {  
             c.moveToNext();  
@@ -250,17 +282,24 @@ public class IJacketClient extends Activity implements OnItemSelectedListener {
     }
     
     
-    private void populateVerbSpinner(){
-    	Spinner spinnerVerbs = (Spinner) findViewById( R.id.spinner2 );
-    	if(null == spinnerVerbs) Log.d(LOG_TAG, "verb spinner is null...");
-    	ArrayList<String> spinnerArray = new ArrayList<String>();
-    	spinnerArray.add( org.societies.thirdpartyservices.ijacketlib.IJacketDefines.Verbs.DISPLAY);
-    	spinnerArray.add(org.societies.thirdpartyservices.ijacketlib.IJacketDefines.Verbs.RING);
-    	spinnerArray.add(org.societies.thirdpartyservices.ijacketlib.IJacketDefines.Verbs.VIBRATE);
-    	// Create an ArrayAdapter using the string array and a default spinner layout
-    	ArrayAdapter<String> adapter = new ArrayAdapter<String> (this,android.R.layout.simple_spinner_dropdown_item, spinnerArray);
-    	spinnerVerbs.setAdapter(adapter);
-    	return;
+
+    private void setDefaultOnCISSpinner(){
+    	
+    	Spinner spinnerCIS = (Spinner) findViewById( R.id.spinner1 );
+    	if(null == spinnerCIS) return;
+    	SimpleCursorAdapter ad = (SimpleCursorAdapter) spinnerCIS.getAdapter();
+    	if(null == ad) return;
+        if(0 != defaultCISID){
+        	int defaultCISidInSpinner = getPostiton(defaultCISID,ad.getCursor()); 
+        	if(0 != defaultCISidInSpinner )
+        		spinnerCIS.setSelection(defaultCISidInSpinner);
+        	else
+        		Log.d(LOG_TAG, "defaultCISIS is not on spinner!");
+        }
+        else{
+        	Log.d(LOG_TAG, "no default CISID");
+        }
+        
     }
     
         
@@ -294,10 +333,8 @@ public class IJacketClient extends Activity implements OnItemSelectedListener {
     	        Log.d(LOG_TAG, "query is " + mSelectionClause + " and arg 0 is " + mSelectionArgs[0]);
     	        if(mSelectionArgs.length>1) Log.d(LOG_TAG, " and arg1 is " + mSelectionArgs[1]);
             	
-    	        // TEMP
-    	        Cursor cur = cr.query(COMUNITIES_URI,null,mSelectionClause,mSelectionArgs,null);
-    	        int idIndex;
- /*TEMP           	Cursor cursorOfSharedCommunities = cr.query(COMUNITIES_URI,null,mSelectionClause,mSelectionArgs,null);
+
+           	 	Cursor cursorOfSharedCommunities = cr.query(COMUNITIES_URI,null,mSelectionClause,mSelectionArgs,null);
     	        
             	if(null != cursorOfSharedCommunities && cursorOfSharedCommunities.getCount()>0){
             		
@@ -319,7 +356,7 @@ public class IJacketClient extends Activity implements OnItemSelectedListener {
     	        	// done building in clause
     	        	Uri MEMBERSHIP_URI = Uri.parse(SocialContract.AUTHORITY_STRING + SocialContract.UriPathIndex.MEMBERSHIP);
     	        	Cursor cur = cr.query(MEMBERSHIP_URI,null,mSelectionClause,selectArgInMembershipQuery,null);
-*/            		
+           		
 
                 	// Ill add the id of all those communities now on a selection args in order to get
                 	// theirs name
@@ -353,16 +390,7 @@ public class IJacketClient extends Activity implements OnItemSelectedListener {
 	    	    	        Log.d(LOG_TAG, "spiner filled up");
 	    	    	   		
 	    	    	        // setting default position of spinner
-	    	    	        if(0 != defaultCISID){
-	    	    	        	int defaultCISidInSpinner = getPostiton(defaultCISID,ad.getCursor()); 
-	    	    	        	if(0 != defaultCISidInSpinner )
-	    	    	        		spinnerCIS.setSelection(defaultCISidInSpinner);
-	    	    	        	else
-	    	    	        		Log.d(LOG_TAG, "defaultCISIS is not on spinner!");
-	    	    	        }
-	    	    	        else{
-	    	    	        	Log.d(LOG_TAG, "no default CISID");
-	    	    	        }
+	    	    	        setDefaultOnCISSpinner();
 	    	    	        
 	    	    	   		//if(null != cursor) cursor.close();
 	        		   	}catch (Exception e) {
@@ -370,7 +398,7 @@ public class IJacketClient extends Activity implements OnItemSelectedListener {
 	        		   		Log.d(LOG_TAG, "exception in the create");
 	        		   		e.printStackTrace();
 	        		   	}
-	            		 /*TEMP     	        	}
+    	        }
   	        	else{
                 		Log.d(LOG_TAG, "IJacket is shared in some communities, but in none that Im part of");
                 		//show popup
@@ -380,7 +408,7 @@ public class IJacketClient extends Activity implements OnItemSelectedListener {
                 		Toast toast = Toast.makeText(context, text, duration);
                 		toast.show();
     	        		
-    	        	}*/
+    	        	}
             	}
             	else{
             		Log.d(LOG_TAG, "IJacket is not shared in any community");

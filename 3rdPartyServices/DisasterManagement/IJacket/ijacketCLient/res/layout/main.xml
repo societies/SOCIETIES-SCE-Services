@@ -4,41 +4,55 @@
     android:layout_height="fill_parent"
     android:baselineAligned="false"
     android:orientation="vertical" >
-
+ 
     <TextView
-        android:layout_width="fill_parent"
+        android:id="@+id/textView1"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/firstMessage" />
+        android:text="@string/firstMessage"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
 
     <Spinner
         android:id="@+id/spinner1"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:layout_height="59dp"
         android:layout_alignParentTop="true" >
+
     </Spinner>
 
     <TextView
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/secondMessage" />
-
-    <Spinner
-        android:id="@+id/spinner2"
-        android:layout_width="280dp"
-        android:layout_height="55dp" />
-
-    <EditText
-        android:id="@+id/edit_message"
-        android:layout_width="245dp"
-        android:layout_height="204dp"
-        android:ems="10"
-        android:hint="@string/edit_message" />
-
-    <Button
-        android:id="@+id/button_send"
+        android:id="@+id/textView2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:text="@string/secondMessage"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    <EditText
+        android:id="@+id/editText1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ems="20" />
+
+    <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal"
+                >
+    
+    <Button
+        android:id="@+id/button_ring"
+        android:layout_width="109dp"
+        android:layout_height="wrap_content"
         android:onClick="sendMessage"
-        android:text="@string/button_send" />
+        android:text="@string/ringButton" />
+
+    <Button
+        android:id="@+id/button_vibrate"
+        android:layout_width="109dp"
+        android:layout_height="wrap_content"
+        android:onClick="sendMessage"
+        android:text="@string/vibrateButton" />
+    
+    </LinearLayout>
 
 </LinearLayout>
