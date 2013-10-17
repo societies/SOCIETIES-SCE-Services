@@ -86,10 +86,11 @@ public class CSController extends HttpServlet {
                     }
                     CTUser user = UsersAPI.getLoggedInUser(request.getSession());
                     CollaborativeSpace space = SpaceAPI.getCollaborativeSpace(path[1]);
-                    System.out.println("CollaborativeSpace:" + space.getName());
                     if (space == null) {
+                        notMemeber(response);
                         return;
                     }
+                    System.out.println("CollaborativeSpace:" + space.getName());
                     Long spaceId = space.getId();
                     Query<Community> communities = CommunityDAO.findCommunities(space, user);
                     if (communities == null || communities.count() == 0) {
@@ -105,8 +106,7 @@ public class CSController extends HttpServlet {
                         System.out.println("community member:" + member);
                     }
                     if (!member) {
-                        response.setContentType("text/html");
-                        response.getWriter().write("You are not a member of this community!");
+                        notMemeber(response);
                         return;
                     }
 
@@ -162,6 +162,12 @@ public class CSController extends HttpServlet {
 
 	    }
 	}
+
+    private void notMemeber(HttpServletResponse response) throws IOException {
+        response.setContentType("text/html");
+        response.getWriter().write("You are not a member of this community!");
+        return;
+    }
 
     private void sendFirstScreen(HttpServletResponse response) throws IOException {
         String channelId = "123456789012";
