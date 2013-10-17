@@ -646,14 +646,9 @@ public class CalendarController {
 			recommendedEvents.add(new CalendarEvent(recEvent,getCalendarName(recEvent.getNodeId()),this));
 		}
 		
-		if(log.isDebugEnabled())
-			log.debug("Returned " + recommendedEvents.size() + " recommended Events!");
-		
-		if(log.isDebugEnabled())
-			log.debug("Final " + recommendedEvents.size() + " recommended Events!");
+		log.debug("Returned {} recommended Events!", recommendedEvents.size());
 		
 		setRecommendedEvent(getRecommendedEvents().get(0));
-		//addMessage("Updated Events!",recommendedEvents.size() + "events!");
 	}
 	
 	
@@ -664,11 +659,20 @@ public class CalendarController {
 		// We need to get all the event information!
 		ScheduleEvent selectedEvent = (ScheduleEvent) selectEvent.getObject();
 		
-		if(log.isDebugEnabled())
-			log.debug("Selected Primefaces Event: " + selectedEvent.getTitle() + " : " + selectedEvent.getId());
+		log.debug("Selected Primefaces Event: {} : {}", selectedEvent.getTitle(), selectedEvent.getId());
 		
 		event = selectedEvent; 
 		societiesEvent = currentEvents.get(selectedEvent.getId());
+		
+		ICalendarResultCallback callback = new CalendarResultCallback();
+		getSharedCalendar().viewEvent(callback , societiesEvent.getEventId(), societiesEvent.getNodeId());
+		Event ourEvent = callback.getResult().getEvent();
+		if(ourEvent != null){
+			societiesEvent.setSocietiesEvent(ourEvent);
+			currentEvents.put(selectedEvent.getId(), societiesEvent);
+		} else{
+			log.warn("Couldn't find {} on the backend?!",societiesEvent.getTitle());
+		}
 		setLocationToggle(false);
 		
 	}
@@ -882,6 +886,7 @@ public class CalendarController {
     		societiesEvent.setSocietiesEvent(result.getEvent());
     		currentEvents.put(event.getId(), societiesEvent);
     		addMessage("Join Completed","Joined the event " + societiesEvent.getTitle());
+    		recommendedEvents.remove(societiesEvent);
     	} else{
     		addMessage("Join failed!","Couldn't join the event " + societiesEvent.getTitle());
     	}
@@ -914,8 +919,18 @@ public class CalendarController {
 			log.debug("View recommended event!");
 		
 		if(recommendedEvent != null){
-			if(log.isDebugEnabled())
-				log.debug("User picked Event: " + recommendedEvent.getTitle());
+			
+			log.debug("User picked Event: {}", recommendedEvent.getTitle());
+			
+			ICalendarResultCallback callback = new CalendarResultCallback();
+			getSharedCalendar().viewEvent(callback , recommendedEvent.getEventId(), recommendedEvent.getNodeId());
+			Event ourEvent = callback.getResult().getEvent();
+			if(ourEvent != null){
+				recommendedEvent.setSocietiesEvent(ourEvent);
+			} else{
+				log.warn("Couldn't find {} on the backend?!",recommendedEvent.getTitle());
+			}
+			
 			societiesEvent = recommendedEvent;
 			event = new DefaultScheduleEvent(recommendedEvent.getTitle(),recommendedEvent.getStartDate(),recommendedEvent.getEndDate());
 			event.setId("recommendedEvent");
@@ -1082,7 +1097,7 @@ public class CalendarController {
 			getSharedCalendar().findEventsAll(calendarResultCallback, searchEvent.getSocietiesEvent());
 		} else{
 			if(log.isDebugEnabled())
-				log.debug("Searching in a specific Calendar, for node: " + searchEvent.getNodeId());
+				log.debug("Searching in a specific Calendar, for node: {}", searchEvent.getNodeId());
 			
 			getSharedCalendar().findEventsInCalendar(calendarResultCallback, searchEvent.getNodeId(), searchEvent.getSocietiesEvent());
 		}
@@ -1091,7 +1106,7 @@ public class CalendarController {
 		List<Event> foundEvents = myResult.getEventList();
 		
 		if(log.isDebugEnabled())
-			log.debug("Found " + foundEvents.size() + " events!");
+			log.debug("Found {} events!",foundEvents.size());
 		searchResults = new ArrayList<CalendarEvent>(foundEvents.size());
 		
 		for(Event foundEvent : foundEvents){
@@ -1105,7 +1120,7 @@ public class CalendarController {
 	private CalendarEvent selectedEvent;
 	
 	public void setSelectedEvent(CalendarEvent selectedEvent){
-		log.debug("Set selectedEvent: " + selectedEvent);
+		log.debug("Set selectedEvent: {} ", selectedEvent);
 		this.selectedEvent = selectedEvent;
 	}
 	
@@ -1118,8 +1133,18 @@ public class CalendarController {
 			log.debug("View searched event!");
 		
 		if(selectedEvent != null){
-			if(log.isDebugEnabled())
-				log.debug("User picked Event: " + selectedEvent.getTitle());
+			
+			log.debug("User picked Event: {}", selectedEvent.getTitle());
+			
+			ICalendarResultCallback callback = new CalendarResultCallback();
+			getSharedCalendar().viewEvent(callback , selectedEvent.getEventId(), selectedEvent.getNodeId());
+			Event ourEvent = callback.getResult().getEvent();
+			if(ourEvent != null){
+				selectedEvent.setSocietiesEvent(ourEvent);
+			} else{
+				log.warn("Couldn't find {} on the backend?!",selectedEvent.getTitle());
+			}
+			
 			societiesEvent = selectedEvent;
 			event = new DefaultScheduleEvent(societiesEvent.getTitle(),societiesEvent.getStartDate(),societiesEvent.getEndDate());
 			event.setId("searchResultEvent");

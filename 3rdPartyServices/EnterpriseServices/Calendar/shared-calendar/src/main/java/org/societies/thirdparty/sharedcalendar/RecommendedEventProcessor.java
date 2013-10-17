@@ -48,14 +48,14 @@ public class RecommendedEventProcessor implements Runnable {
 		CALENDAR,
 	}
 	
-	private static final int RECOMMEND_THRESHOLD = 10;
+	private static final int RECOMMEND_THRESHOLD = 30;
 	private static final int CREATOR_POINTS = 15;
 	private static final int CREATOR_FRIEND = 10;
 	private static final int FRIEND_POINTS = 5;
 	private static final int LOCATION_POINTS = 10;
 	private static final int CIS_POINTS = 15;
 	private static final int INTEREST_POINTS = 10;
-	private static final int EVENTS_IN_CALENDAR_POINTS = 2;
+	private static final int EVENTS_IN_CALENDAR_POINTS = 1;
 	
 	static final Logger log=LoggerFactory.getLogger(RecommendedEventProcessor.class);
 	

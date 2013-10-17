@@ -44,7 +44,6 @@ public class CalendarDAO {
 	private String nodeId;
 	private String calendarId;
 	private String calendarName;
-	private String calendarDescription;
 	
 	/**
 	 * 

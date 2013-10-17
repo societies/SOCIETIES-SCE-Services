@@ -83,17 +83,45 @@ public class SourceTestImpl implements ISourceTest {
 
 		// create a context entity
 		String ownerId = "cityWatch";
-		String type = "Community Garden";
-		Long objectNumber = (long) 1;
-		CtxEntityIdentifier ceId = new CtxEntityIdentifier(ownerId, type, objectNumber);
-		
-		CtxEntity entity = new CtxEntity(ceId);
 		
 		
+		String type1 = "Community Garden 1";
+		Long objectNumber1 = (long) 1;
+		CtxEntityIdentifier ceId1 = new CtxEntityIdentifier(ownerId, type1, objectNumber1);
+		CtxEntity entity1 = new CtxEntity(ceId1);
+		
+		String type2 = "Community Garden 2";
+		Long objectNumber2 = (long) 2;
+		CtxEntityIdentifier ceId2 = new CtxEntityIdentifier(ownerId, type2, objectNumber2);
+		CtxEntity entity2 = new CtxEntity(ceId2);		
+		
+		String type3 = "City User 1";
+		Long objectNumber3 = (long) 3;
+		CtxEntityIdentifier ceId3 = new CtxEntityIdentifier(ownerId, type3, objectNumber3);
+		CtxEntity entity3 = new CtxEntity(ceId3);			
+		
+		String type4 = "City User Name";
+		Long objectNumber4 = (long) 4;
+		CtxEntityIdentifier ceId4 = new CtxEntityIdentifier(ownerId, type4, objectNumber4);
+		CtxAttributeIdentifier ctxAttributeIdentifier = new CtxAttributeIdentifier(ceId4, type4, objectNumber4);
+		CtxAttribute nameAttribute = new CtxAttribute(ctxAttributeIdentifier);
+		nameAttribute.setStringValue("Bob");
+		nameAttribute.setValueType(CtxAttributeValueType.STRING);
+		
+		entity3.addAttribute(nameAttribute);
 		
 		
-		
-		
+		IIdentity requestorId = null;
+		Requestor requestor = new Requestor(requestorId);
+		IIdentity arg1 = null;
+		String arg2 = null;
+		try {
+			IIdentity identity = null;
+			this.externalCtxBroker.createEntity(requestor, identity, CtxEntityTypes.PERSON);
+		} catch (CtxException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
 		
 		
