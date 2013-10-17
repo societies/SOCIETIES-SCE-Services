@@ -34,6 +34,7 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.PopupMenu;
 import android.widget.Toast;
 
 import com.google.zxing.integration.android.IntentIntegrator;
@@ -57,6 +58,7 @@ import org.societies.integration.service.CisDirectoryClient;
 import org.societies.integration.service.CommunityManagementClient;
 import org.societies.integration.service.ContextClient;
 import org.societies.integration.service.SocietiesEventsClient;
+import org.societies.thirdpartyservices.crowdtasking.tools.SocketClient;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
@@ -70,6 +72,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import si.setcce.societies.android.rest.RestTask;
 import si.setcce.societies.crowdtasking.api.RESTful.json.CommunityJS;
@@ -99,12 +103,13 @@ public class MainActivity extends Activity implements SensorEventListener {
     private static final String C4CSS_API_URL = APPLICATION_URL + "/rest/community/4CSS";
     private static final String PD_TAKE_CONTROL = APPLICATION_URL + "/rest/remote/takeControl";
     //    private static final String GET_USER_REST_API_URL = APPLICATION_URL + "/rest/users/me";
-	private static final String MEETING_REST_API_URL = APPLICATION_URL + "/rest/meeting";
+	private static final String MEETING_REST_API_URL = APPLICATION_URL + "/rest/meeting/data";
     private static final String SCAN_QR_URL = APPLICATION_URL + "/android/scanQR";
     private static final String PICK_TASK_URL = APPLICATION_URL + "/task/view?id=";
     private static final String EVENT_API_URL = APPLICATION_URL + "/rest/event";
     private static final String SHARE_CS_URL = APPLICATION_URL + "/android/shareCsUrl";
     private static final String SERVICE_CONNECTED = "org.societies.integration.service.CONNECTED";
+    public String SERVICE_ID;
     private String startUrl;
 	public String nfcUrl=null;
 	private WebView webView;
@@ -127,7 +132,7 @@ public class MainActivity extends Activity implements SensorEventListener {
     public MainActivity() {
 	}
 
-	@Override
+    @Override
 	public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         
@@ -146,7 +151,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 	        String actype = ac.type;
 	        Log.d("accountInfo", acname + ":" + actype);
         }*/
-        
+
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_main);
         webViewSetup();
@@ -159,6 +164,9 @@ public class MainActivity extends Activity implements SensorEventListener {
             societiesServicesRunning = true;
             communityManagementClient = new CommunityManagementClient(this, communityClientReceiver);
             communityManagementClient.setUpService();
+            if (!getServiceId()) {
+                SERVICE_ID = societiesUser.getUserId();
+            }
             checkLocation();
 //            contextClient = new ContextClient(this);
 //            contextClient.setUpService();
@@ -169,12 +177,34 @@ public class MainActivity extends Activity implements SensorEventListener {
         }
         else {
             System.out.println("Societies services are not running?");
-            Toast.makeText(getApplicationContext(), "SOCIETIES services are not running", Toast.LENGTH_LONG).show();
+//            Toast.makeText(getApplicationContext(), "SOCIETIES services are not running", Toast.LENGTH_LONG).show();
         }
         loginUser();
         checkIntent(getIntent());
         CheckUpdateTask checkUpdateTask = new CheckUpdateTask(this);
         checkUpdateTask.execute();
+    }
+
+    private boolean getServiceId() {
+        final CountDownLatch latch = new CountDownLatch(1);
+        // TODO make socketClient as AsyncTask?
+        SocketClient socketClient = new SocketClient(this);
+        Log.i(LOG_TAG, "Socket client created");
+        new Thread(socketClient).start();
+        Log.i(LOG_TAG, "Thread started");
+
+        try {
+            latch.await(10000, TimeUnit.MILLISECONDS);
+            do {
+                if (SERVICE_ID != null) {
+                    Log.i(LOG_TAG, "SERVICE_ID != null");
+                    return true;
+                }
+            } while (true);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
     private void checkLocation() {
@@ -262,9 +292,9 @@ public class MainActivity extends Activity implements SensorEventListener {
         webView.addJavascriptInterface(new JSInterface(webView), "android");
         webView.setWebChromeClient(new WebChromeClient() {
 			public boolean onConsoleMessage(ConsoleMessage cm) {
-				Log.i(LOG_TAG, cm.message() +
-						" -- From the line " + cm.lineNumber()
-						+ " of " + cm.sourceId());
+				Log.d(LOG_TAG, "From the line " + cm.lineNumber()
+						+ " of " + cm.sourceId()+":");
+				Log.i(LOG_TAG, cm.message());
 				return true;
 			}
 
@@ -355,14 +385,17 @@ public class MainActivity extends Activity implements SensorEventListener {
         		super.onBackPressed();
         		return;
         	}
-        	if (historyUrl.equalsIgnoreCase(APPLICATION_URL+"/task/new") ||
-        			historyUrl.startsWith(APPLICATION_URL+"/community/edit")) {
+        	if (historyUrl.equalsIgnoreCase(APPLICATION_URL+"/task/new")) {
+                //CrowdTaskingApp.cancelTask();
+                webView.loadUrl("javascript:CrowdTaskingApp.cancelTask()");
+                return;
+        	}
+        	if (historyUrl.startsWith(APPLICATION_URL+"/community/edit")) {
     			Toast toast = Toast.makeText(getApplicationContext(), "Use Save or Cancel button.", Toast.LENGTH_SHORT);
     			toast.show();
+                return;
         	}
-        	else {
-            	webView.goBack();
-        	}
+           	webView.goBack();
         }
         else {
             super.onBackPressed();
@@ -736,7 +769,7 @@ public class MainActivity extends Activity implements SensorEventListener {
     }
 
 	private Date parseDateString(String dateString) {
-		DateFormat formatter = new SimpleDateFormat("MMM d, yyyy HH:mm:ss a");
+		DateFormat formatter = new SimpleDateFormat("MMM d, yyyy h:mm:ss a");
 		Date datum;
 		try {
 			datum = formatter.parse(dateString);
@@ -770,7 +803,7 @@ public class MainActivity extends Activity implements SensorEventListener {
             e.printStackTrace();
             return null;
         }
-        isSocietiesUser = societiesServicesRunning;
+        isSocietiesUser = true;
         return societiesUser;
     }
 
@@ -936,7 +969,12 @@ public class MainActivity extends Activity implements SensorEventListener {
         		return true;
         	}
         	if (url.startsWith(MEETING_URL)) {
-        		addMeetingToCalendar(url);
+                PopupMenu popupMenu = new PopupMenu(getApplicationContext(), findViewById(R.id.anchor));
+                popupMenu.getMenu().add("Start meeting");
+                popupMenu.getMenu().add("Join meeting");
+                popupMenu.getMenu().add("...");
+                popupMenu.show();
+                //addMeetingToCalendar(url);
         		return true;
         	}
             view.loadUrl(url);

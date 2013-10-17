@@ -1,6 +1,7 @@
 package org.societies.integration.service;
 
 import org.societies.api.schema.identity.RequestorBean;
+import org.societies.thirdpartyservices.crowdtasking.MainActivity;
 
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -26,6 +27,8 @@ public abstract class ServiceClientBase {
 
 	public ServiceClientBase(Context context) {
 		this.context = context;
+        requestor = new RequestorBean();
+        requestor.setRequestorId(((MainActivity)context).SERVICE_ID);
 	}
 
 	abstract protected Intent getServiceIntent();
@@ -118,5 +121,9 @@ public abstract class ServiceClientBase {
         } catch (RemoteException e) {
             Log.e(LOG_TAG, "Could not send remote method invocation", e);
         }
+    }
+
+    public RequestorBean getRequestor() {
+        return requestor;
     }
 }

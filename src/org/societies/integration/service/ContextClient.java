@@ -153,21 +153,18 @@ public class ContextClient extends ServiceClientBase {
     }
 
     public void getSymbolicLocation(String cssId) {
-//        RequestorBean requestor = null; // todo poglej kako je na testu
-        final RequestorBean requestor = new RequestorBean();
-        requestor.setRequestorId(cssId);
-        retrieveIndividualEntityId(requestor, cssId);
+        retrieveIndividualEntityId(cssId);
     }
 
 
     //Step 1 get Entity
-	private void retrieveIndividualEntityId(RequestorBean requestor, String cssId) {
-		if (requestor == null)
-			throw new NullPointerException("requestor can't be null");
+	private void retrieveIndividualEntityId(String cssId) {
+//		if (requestor == null)
+//			throw new NullPointerException("requestor can't be null");
 		if (cssId == null) 
 			throw new NullPointerException("cssId can't be null");
 
-		this.requestor = requestor;
+//		this.requestor = requestor;
 		if (this.connectedToContextClient) {
 			android.os.Message outMessage = android.os.Message.obtain(null, 8, 0, 0);
 			Bundle outBundle = new Bundle();
