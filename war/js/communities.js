@@ -337,12 +337,6 @@ var Community = function() {
 
     var editCommunity = function() {
     	if (_mode == 'new') {
-            if ($('#status').val() === 'editing') {
-                return;
-            }
-            else {
-                $('#status').val("editing");
-            }
     		currentIndex = -1;
             $('#communityId').val('');
             $('#name').val('');
@@ -351,6 +345,12 @@ var Community = function() {
             getSpaces(fillSpacesCombo);
             return;
     	}
+        if ($('#status').val() === 'editing') {
+            return;
+        }
+        else {
+            $('#status').val("editing");
+        }
         var community = getSelectedCommunity();
 //        var community = communities[currentIndex];
         $('#name').val(community.name);

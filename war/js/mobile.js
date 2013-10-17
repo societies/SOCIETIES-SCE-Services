@@ -468,17 +468,17 @@ var CrowdTaskingApp = function() {
     };
 
     var isNewTaskFormDirty = function() {
-        if ($('#taskName').val() != "") return true;
-        if ($('#taskDescription').val() != "") return true;
-        if ($('#taskDate').val() != "") return true;
+        if ($('#taskName').val() !== "") return true;
+        if ($('#taskDescription').val() !== "") return true;
+        if ($('#taskDate').val() !== undefined ) return true;
         var tc = $('#taskCommunity');
-        if (tc.length == 1) {
+        if (tc.length === 1) {
         	if (tc.val() != null) {
         		return true;
         	}
         }
-        if ($('#newTag').val() != "") return true;
-        if ($('#taskTagsDiv a').length != 0) return true;
+        if ($('#newTag').val() !== "") return true;
+        if ($('#taskTagsDiv a').length !== 0) return true;
     	return false;
     }
     
@@ -662,9 +662,10 @@ var CrowdTaskingApp = function() {
         cancelTask: function() {
         	if (isNewTaskFormDirty()) {
         		$("#cancelDialog").popup("open");
-        		return false;
         	}
-        	return true;
+            else {
+                history.go(-1);
+            }
         },
         
         clearNewTaskForm: function(){
@@ -982,13 +983,11 @@ $(document).on('pageshow', '#indexPage', function(event, data){
 
 
 $(document).on('pageinit', '#mobilePage', function(event, data){       
-//$('#mobilePage').live('pageinit', function() {
 	refreshFunction = CrowdTaskingApp.init;
 	CrowdTaskingApp.init();
 });
 
 $(document).on('pageshow', '#myTasksPage', function(event, data){
-//$('#myTasksPage').live('pageinit', function() {
 	refreshFunction = CrowdTaskingApp.myTasks;
 	CrowdTaskingApp.myTasks();
 	
@@ -999,19 +998,15 @@ $(document).on('pageshow', '#myTasksPage', function(event, data){
 });
 
 $(document).on('pageinit', '#newsFeed', function(event, data){       
-//$('#newsFeed').live('pageinit', function() {
 	refreshFunction = showNewsFeed;
 	showNewsFeed();
 });
 
 $(document).on('pageinit', '#formPage', function(event, data){       
-//$('#formPage').live('pageinit', function() {
 	refreshFunction = null;
     $('#cancelButton').bind('tap', function(event, data) {
         event.preventDefault();
-        if (CrowdTaskingApp.cancelTask()) {
-        	history.back();
-        }
+        CrowdTaskingApp.cancelTask();
     });
     $('#cancelTaskSaveButton').bind('tap', function(event, data) {
         event.preventDefault();
@@ -1027,7 +1022,7 @@ $(document).on('pageinit', '#formPage', function(event, data){
 			window.android.goBack();
 		}
 		else {
-	       	history.back();
+	       	history.go(-1);
 		}
        	CrowdTaskingApp.myTasks();
     });
@@ -1061,19 +1056,15 @@ $(document).on('pageinit', '#formPage', function(event, data){
 });
 
 $(document).on('pagebeforeshow', '#formPage', function(event, data){       
-//$('#formPage').live('pagebeforeshow', function () {
-	//console.log("formPage:pagebeforeshow");
 	CrowdTaskingApp.addTask();
 });
 
 $(document).on('pageshow', '#viewTask', function(event, data){       
-//$('#viewTask').live('pageshow', function () {
-	refreshFunction = CrowdTaskingApp.refreshViewTask; 
+	refreshFunction = CrowdTaskingApp.refreshViewTask;
     CrowdTaskingApp.displayTask('view');
 });
 
 $(document).on('pageinit', '#viewTask', function(event, data){       
-//$('#viewTask').live('pageinit', function() {
     $('#likeButton').hide();
     $('#likedButton').hide();
 
@@ -1134,13 +1125,11 @@ $(document).on('pageinit', '#viewTask', function(event, data){
 });
 
 $(document).on('pageshow', '#executeTask', function(event, data){       
-//$('#executeTask').live('pageshow', function () {
     CrowdTaskingApp.displayTask('execute');
 });
 
 $(document).on('pageinit', '#executeTask', function(event, data){       
-//$('#executeTask').live('pageinit', function() {
-	refreshFunction = null; 
+	refreshFunction = null;
     $('#executeButton').bind('tap', function(event, data) {
         event.preventDefault();
         $('#executeButton').hide();
@@ -1149,7 +1138,6 @@ $(document).on('pageinit', '#executeTask', function(event, data){
 });
 
 $(document).on('pageinit', '#settingsPage', function(event, data){       
-//$('#settingsPage').live('pageinit', function () {
 	refreshFunction = null;
 	getSettings();
 	
@@ -1161,8 +1149,7 @@ $(document).on('pageinit', '#settingsPage', function(event, data){
 });
 
 $(document).on('pageinit', '#communitiesPage', function(event, data){       
-//$('#communitiesPage').live('pageinit', function() {
-	refreshFunction = Community.loadCommunities; 
+	refreshFunction = Community.loadCommunities;
     $('#addCommunityButton').bind('tap', function(event, data) {
         event.preventDefault();
         Community.setMode('new');
@@ -1172,28 +1159,42 @@ $(document).on('pageinit', '#communitiesPage', function(event, data){
 });
 
 $(document).on('pageinit', '#editCommunityPage', function(event, data){       
-//$('#editCommunityPage').live('pageinit', function() {
 	refreshFunction = null;
 	$('#saveButton').bind('tap', function(event, data) {
 	    event.preventDefault();
         $('#saveButton').unbind('tap');
 	    Community.createCommunity();
 	});
-	//Community.view();
 });
 
-$(document).on('pagechange', '#editCommunityPage', function(event, data){       
-//$('#editCommunityPage').live('pagechange', function() {
-	Community.view();
-});
-
-$(document).on('pageshow', '#editCommunityPage', function(event, data){       
-//$('#editCommunityPage').live('pageshow', function() {
+$(document).on('pageshow', '#editCommunityPage', function(event, data){
 	Community.edit();
+    console.log('pageshow');
 });
 
-$(document).on('pageinit', '#viewCommunity', function(event, data){       
-//$('#viewCommunity').live('pageinit', function() {
+/*
+$(document).on('pageload', '#editCommunityPage', function(event, data){
+	console.log('pageload');
+});
+
+$(document).on('pageloadfailed', '#editCommunityPage', function(event, data){
+	console.log('pageloadfailed');
+});
+
+$(document).on('pagechange', '#editCommunityPage', function(event, data){
+	console.log('pagechange');
+});
+
+$(document).on('pagecreate', '#editCommunityPage', function(event, data){
+	console.log('pagecreate');
+});
+
+$(document).on('pagebeforeshow', '#editCommunityPage', function(event, data){
+	console.log('pagebeforeshow');
+});
+*/
+
+$(document).on('pageinit', '#viewCommunity', function(event, data){
 	refreshFunction = Community.view;
 	$('#editCommunityButton').bind('tap', function(event, data) {
 	    event.preventDefault();
@@ -1233,6 +1234,5 @@ $(document).on('pageinit', '#viewCommunity', function(event, data){
 });
 
 $(document).on('pageshow', '#viewCommunity', function(event, data){       
-//$('#viewCommunity').live('pageshow', function () {
 	Community.view();
 });
