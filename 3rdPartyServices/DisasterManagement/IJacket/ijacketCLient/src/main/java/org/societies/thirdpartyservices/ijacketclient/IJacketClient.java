@@ -183,6 +183,8 @@ public class IJacketClient extends Activity implements OnItemSelectedListener {
 	        	this.runOnUiThread(new Runnable() {
 	                public void run() {
 	                    Toast.makeText(IJacketClient.this, "activity published", Toast.LENGTH_SHORT).show();
+	                    EditText editText = (EditText) findViewById(R.id.editText1);
+	                    editText.setText("");
 	                }
 	            });
         	}
