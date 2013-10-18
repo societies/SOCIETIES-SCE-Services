@@ -51,7 +51,7 @@ public class MainActivityCursorLoader extends ListFragment implements
         super.onActivityCreated(savedInstanceState);
 
         Log.d(LOG_TAG, "on activity created on the list fragment");
-		setEmptyText("loading communities");
+		setEmptyText("");
 		// We have a menu item to show in action bar.
 		setHasOptionsMenu(true);
 		
@@ -61,12 +61,19 @@ public class MainActivityCursorLoader extends ListFragment implements
         // first we get the list of communities where IJacket is shared
         
         // get communities where I am shared
-        Uri sharing_uri = Uri.parse(SocialContract.AUTHORITY_STRING + SocialContract.UriPathIndex.SHARING);
+        /*Uri sharing_uri = Uri.parse(SocialContract.AUTHORITY_STRING + SocialContract.UriPathIndex.SHARING);
     	String mSelectionClause = SocialContract.Sharing._ID_SERVICE + " = ?";
     	String[] mSelectionArgs = {serviceId+ ""};
     	ContentResolver cr = getActivity().getContentResolver();
+    	
     	Cursor cursorOfSharedCommunities = cr.query(sharing_uri,null,mSelectionClause,mSelectionArgs,null);
+    	CHANGED INTO AN UTIL	*/
+        ContentResolver cr = getActivity().getContentResolver();
+        IJacketApp appState = (IJacketApp) (getActivity().getApplication());
+        long my_css_id = appState.getUserId();
+        Cursor cursorOfSharedCommunities = utilCursor.getMyCommunitiesWhereServiceShared(serviceId+"", cr,my_css_id);
 
+    	
     	// Ill add the id of all those communities now on a selection args in order to get
     	// theirs name
     	if(null != cursorOfSharedCommunities && cursorOfSharedCommunities.getCount()>0){
@@ -100,8 +107,8 @@ public class MainActivityCursorLoader extends ListFragment implements
         setListAdapter(mAdapter);
     }
     
-    
-    @Override public void onListItemClick(ListView l, View v, int position, long id) {
+    // click has been removed
+/*    @Override public void onListItemClick(ListView l, View v, int position, long id) {
         // Insert desired behavior here.
         Log.d("FragmentComplexList", "Item clicked: " + id);
         Cursor c = ((SimpleCursorAdapter)l.getAdapter()).getCursor();
@@ -120,7 +127,7 @@ public class MainActivityCursorLoader extends ListFragment implements
 
 	        
         
-    }
+    }*/
     
 
 	@Override

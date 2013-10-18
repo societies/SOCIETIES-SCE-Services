@@ -1,8 +1,12 @@
 package org.societies.thirdpartyservices.ijacket;
 
+import org.societies.android.api.cis.SocialContract;
 import org.societies.thirdpartyservices.ijacket.com.BluetoothConnection;
 
 import android.app.Application;
+import android.content.ContentResolver;
+import android.database.Cursor;
+import android.net.Uri;
 
 public class IJacketApp extends Application {
 	
@@ -18,6 +22,16 @@ public class IJacketApp extends Application {
 	
 	String selectCommunityJid = "";*/
 	
+    
+	
+	
+	// set both accountNameSync and accountTypeSync to "p2p" if using wifidirect
+    // or set accountTypeSync to box and leave accountNameSync empty if using box
+    
+	public static final String accountNameSync = "p2p";
+	public static final String accountTypeSync = "p2p";
+	
+	
 	long iJacketSevId = -1;
 	
 	boolean testMode = false; // if true means that there is no jacket
@@ -28,7 +42,7 @@ public class IJacketApp extends Application {
 	
 	
 	
-	
+	long userId = -1; // id of the user on the ME table
 
 	
 	
@@ -48,6 +62,14 @@ public class IJacketApp extends Application {
 	public void setSelectCommunityJid(String selectCommunityJid) {
 		this.selectCommunityJid = selectCommunityJid;
 	}*/
+
+	public long getUserId() {
+		return userId;
+	}
+
+	public void setUserId(long userId) {
+		this.userId = userId;
+	}
 
 	public long getiJacketSevId() {
 		return iJacketSevId;
@@ -105,7 +127,6 @@ public class IJacketApp extends Application {
 		this.speakersPin = speakersPin;
 	}*/
 	
-	
-	
+
 
 }
