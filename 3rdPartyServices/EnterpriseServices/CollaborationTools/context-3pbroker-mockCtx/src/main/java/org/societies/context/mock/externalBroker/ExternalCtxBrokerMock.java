@@ -155,15 +155,9 @@ public class ExternalCtxBrokerMock 	{
 		this.personIndiEnt = this.ctxBroker.retrieveIndividualEntityId(this.requestor, this.cssID).get();
 		final IndividualCtxEntity operatorCtxEnt = (IndividualCtxEntity) this.ctxBroker.retrieve(this.requestor,personIndiEnt).get();
 		
-		CtxAttribute interestsAttr1 = (CtxAttribute)this.ctxBroker.createAttribute(this.requestor, this.personIndiEnt, "interests").get();
+		CtxAttribute interestsAttr = (CtxAttribute)this.ctxBroker.createAttribute(this.requestor, this.personIndiEnt, "interests").get();
 		String[] interests = getRandomInterests();
-		interestsAttr1.setStringValue(interests[0]);
-
-		CtxAttribute interestsAttr2 = this.ctxBroker.createAttribute(requestor, personIndiEnt , CtxAttributeTypes.INTERESTS).get();
-		interestsAttr2.setStringValue(interests[1]);
-
-		CtxAttribute interestsAttr3 = this.ctxBroker.createAttribute(requestor, personIndiEnt , CtxAttributeTypes.INTERESTS).get();
-		interestsAttr3.setStringValue(interests[2]);
+		interestsAttr.setStringValue(interests[0] +","+ interests[1] +","+interests[2]);
 		
 		namePerson = cssID.toString().split("\\.");
 		
@@ -176,9 +170,7 @@ public class ExternalCtxBrokerMock 	{
 		
 		CtxAttribute statusAttr = addAttribute(getRandomStatus(), operatorCtxEnt, CtxAttributeTypes.STATUS);
 
-		this.ctxBroker.update(this.requestor, interestsAttr1);
-		this.ctxBroker.update(this.requestor, interestsAttr2);
-		this.ctxBroker.update(this.requestor, interestsAttr3);
+		this.ctxBroker.update(this.requestor, interestsAttr);
 		this.ctxBroker.update(this.requestor, nameAttr);
 		this.ctxBroker.update(this.requestor, occupationAttr);
 		this.ctxBroker.update(this.requestor, locationAttr);
@@ -186,7 +178,7 @@ public class ExternalCtxBrokerMock 	{
 
 		LOG.info("Creating fake ctxt info for person : "+namePerson[0]);	
 		LOG.info("Creating person name: "+nameAttr.getStringValue());
-		LOG.info("*** with Interests: "+interestsAttr1.getStringValue()+", "+interestsAttr2.getStringValue()+", "+interestsAttr3.getStringValue());
+		LOG.info("*** with Interests: "+interestsAttr.getStringValue());
 		LOG.info("*** with Job Position: "+occupationAttr.getStringValue());
 		LOG.info("*** with Location: "+locationAttr.getStringValue());
 		LOG.info("*** with Status: "+statusAttr.getStringValue());
