@@ -40,11 +40,18 @@ import android.widget.Toast;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
+import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.HttpResponseException;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.BasicResponseHandler;
+import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.protocol.HTTP;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -60,6 +67,7 @@ import org.societies.integration.service.ContextClient;
 import org.societies.integration.service.SocietiesEventsClient;
 import org.societies.thirdpartyservices.crowdtasking.tools.SocketClient;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -89,14 +97,15 @@ public class MainActivity extends Activity implements SensorEventListener {
 	private static final String GET_MEETING_ACTION = "si.setcce.societies.android.rest.MEETING";
 	private static final String TAKE_CONTROL = "si.setcce.societies.android.rest.remote.TAKE_CONTROL";
     private static final String SCHEME ="http";
-//    private static final String DOMAIN = "crowdtaskingtest.appspot.com";
+    private static final String SCOPE ="SETCCE_SOCIETIES";
+    private static final String DOMAIN = "crowdtasking.appspot.com";
 //    private static final String DOMAIN = "crowdtasking.appspot.com";
-   	private static final String DOMAIN = "192.168.1.102";
+//   	private static final String DOMAIN = "192.168.1.71";
 //   	private static final String DOMAIN = "192.168.1.66";
 //   	private static final String DOMAIN = "192.168.1.78";
-//    private static final String PORT = "";
+    private static final String PORT = "";
 //    private static final String PORT = ":80";
-    private static final String PORT = ":8888";
+//    private static final String PORT = ":8888";
     private static final String APPLICATION_URL = SCHEME +"://" + DOMAIN + PORT;
     private static final String LOGIN_URL = APPLICATION_URL + "/login";
     private static final String MEETING_URL = APPLICATION_URL + "/android/meeting/";
@@ -449,34 +458,46 @@ public class MainActivity extends Activity implements SensorEventListener {
 	}
 
     private void loginUser() {
-//        HttpPost eventRequest;
-//        try {
-//            eventRequest = new HttpPost(new URI(LOGIN_URL));
+ /*       // TODO check internet connection
+
+        //        HttpPost eventRequest;
+        //        try {
+        //            eventRequest = new HttpPost(new URI(LOGIN_URL));
         if (societiesServicesRunning) {
             SocietiesUser user = getSocietiesUserData();
             if (user != null) {
-/*
                 List<NameValuePair> parameters = new ArrayList<NameValuePair>();
-                parameters.add(new BasicNameValuePair("federatedIdentity","SOCIETIES"));
+                parameters.add(new BasicNameValuePair("federatedIdentity", "SOCIETIES"));
                 parameters.add(new BasicNameValuePair("userId", user.getUserId()));
                 parameters.add(new BasicNameValuePair("name", user.getName()));
                 parameters.add(new BasicNameValuePair("foreName", user.getForeName()));
                 parameters.add(new BasicNameValuePair("email", user.getEmail()));
+                parameters.add(new BasicNameValuePair("scope", SCOPE));
                 parameters.add(new BasicNameValuePair("continue", "/"));
-*/
                 // TODO: fix this!!
-                startUrl = LOGIN_URL+"?continue=/&federatedIdentity=SOCIETIES&userId="+user.getUserId()+
-                        "&name="+user.getName()+"&foreName="+user.getForeName()+"&email="+user.getEmail();
+                //                startUrl = LOGIN_URL+"?continue=/&federatedIdentity=SOCIETIES&userId="+user.getUserId()+
+                //                        "&name="+user.getName()+"&foreName="+user.getForeName()+"&email="+user.getEmail();
+
+                HttpClient httpclient = new DefaultHttpClient();
+                HttpPost httppost = new HttpPost(LOGIN_URL);
+                try {
+                    httppost.setEntity(new UrlEncodedFormEntity(parameters, HTTP.UTF_8));
+                    HttpResponse response = httpclient.execute(httppost);
+                    String data = new BasicResponseHandler().handleResponse(response);
+                    webView.loadDataWithBaseURL(httppost.getURI().toString(), data, "text/html", HTTP.UTF_8, null);
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                } catch (HttpResponseException e) {
+                    e.printStackTrace();
+                } catch (ClientProtocolException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
-        }
-//            eventRequest.setEntity(new UrlEncodedFormEntity(parameters));
-//            RestTask task = new RestTask(getApplicationContext(), LOGIN_USER, null);
-//            task.execute(eventRequest);
-//        } catch (URISyntaxException e) {
-//            e.printStackTrace();
-//        } catch (UnsupportedEncodingException e) {
-//            e.printStackTrace();
-//        }
+        } else {
+            webView.loadUrl(startUrl);
+        }*/
         webView.loadUrl(startUrl);
     }
 
@@ -623,7 +644,13 @@ public class MainActivity extends Activity implements SensorEventListener {
             }
             if (intent.getAction().equalsIgnoreCase(C4CSS_INTENT)) {
                 String[] response = intent.getStringArrayExtra(RestTask.HTTP_RESPONSE);
-                ((CrowdTasking)getApplication()).setSpaces(response[1]);
+                if ("\"Not authorized!\"".equalsIgnoreCase(response[1])) {  // user is not logged in yet, try again
+                    getCommunitiesForUserFromGAE();
+                    return;
+                }
+                if (isResponseOk(response[0])) {
+                    ((CrowdTasking)getApplication()).setSpaces(response[1]);
+                }
             }
             if (intent.getAction().equalsIgnoreCase(GET_MEETING_ACTION)) {
                 String[] response = intent.getStringArrayExtra(RestTask.HTTP_RESPONSE);
@@ -653,6 +680,14 @@ public class MainActivity extends Activity implements SensorEventListener {
         	}
         }
     };
+
+    private boolean isResponseOk(String response) {
+        if ("HTTP/1.1 200 OK".equalsIgnoreCase(response)) {
+            return true;
+        }
+        Toast.makeText(getApplicationContext(), response, Toast.LENGTH_LONG).show();
+        return false;
+    }
 
     private void selectCommunityForPD(String[] response) {
         try {
@@ -703,8 +738,7 @@ public class MainActivity extends Activity implements SensorEventListener {
                 task.execute(new HttpGet(new URI(url)));
             } catch (URISyntaxException e) {
                 e.printStackTrace();
-                Toast toast = Toast.makeText(getApplicationContext(), "Error: "+e.getMessage(), Toast.LENGTH_LONG);
-                toast.show();
+                Toast.makeText(getApplicationContext(), "Error: "+e.getMessage(), Toast.LENGTH_LONG).show();
             }
         } catch (JSONException e) {
             Toast.makeText(getApplicationContext(), "Exception: "+e.getMessage(), Toast.LENGTH_LONG).show();
@@ -847,6 +881,7 @@ public class MainActivity extends Activity implements SensorEventListener {
                 societiesUserJSON.put("name", societiesUser.getName());
                 societiesUserJSON.put("foreName", societiesUser.getForeName());
                 societiesUserJSON.put("email", societiesUser.getEmail());
+                societiesUserJSON.put("scope", SCOPE);
             } catch (JSONException e) {
                 e.printStackTrace();
                 return null;

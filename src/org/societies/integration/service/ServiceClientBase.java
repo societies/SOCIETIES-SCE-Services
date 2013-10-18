@@ -47,7 +47,12 @@ public abstract class ServiceClientBase {
 		Log.d(LOG_TAG, "tearDownService");
 		if (this.connectedToContextClient) {
 			this.teardownBroadcastReceiver();
-			context.unbindService(this.clientConnection);
+            try {
+                context.unbindService(this.clientConnection);
+            }
+            catch (IllegalArgumentException e) {
+
+            }
 			Log.d(LOG_TAG, "tearDownService completed");
 		}
 		return false;
