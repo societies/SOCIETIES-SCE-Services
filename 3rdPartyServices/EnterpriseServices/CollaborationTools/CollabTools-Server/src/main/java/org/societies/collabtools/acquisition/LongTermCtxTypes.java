@@ -34,7 +34,7 @@ public final class LongTermCtxTypes {
 	public static final String NAME = "name";
 	public static final String COLLAB_APPS = "collab_apps";
     public static final String OCCUPATION = "occupation";
-    public static final String COMPANY = "company";
+    public static final String WORK_POSITION = "workPosition";
     public static final String INTERESTS = "interests";
 	public static final String HAS_SESSION = "has_session";
 }

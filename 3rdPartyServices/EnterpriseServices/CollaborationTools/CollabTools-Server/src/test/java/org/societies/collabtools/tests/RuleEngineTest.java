@@ -97,7 +97,7 @@ public class RuleEngineTest {
 	@Test
 	public void testDeleteRule() {
 		Rule r01 = new Rule("r01",Operators.SAME, ShortTermCtxTypes.LOCATION, "--", 1, 0.5 ,ShortTermCtxTypes.class.getSimpleName());
-		Rule r02 = new Rule("r02",Operators.SAME, LongTermCtxTypes.COMPANY, "--", 2, 0.1 ,LongTermCtxTypes.class.getSimpleName());
+		Rule r02 = new Rule("r02",Operators.SAME, LongTermCtxTypes.WORK_POSITION, "--", 2, 0.1 ,LongTermCtxTypes.class.getSimpleName());
 		Rule r03 = new Rule("r03",Operators.SIMILAR, LongTermCtxTypes.INTERESTS, "--", 3, 0.4 ,LongTermCtxTypes.class.getSimpleName());
 		Rule r04 = new Rule("r04",Operators.SAME, ShortTermCtxTypes.STATUS, "--", 4, 0.1 ,ShortTermCtxTypes.class.getSimpleName());
 		List<Rule> rules = Arrays.asList(r01, r02, r03, r04);
@@ -116,7 +116,7 @@ public class RuleEngineTest {
 	@Test
 	public void testSetRules() {
 		Rule r01 = new Rule("r01",Operators.SAME, ShortTermCtxTypes.LOCATION, "--", 1, 0.5 ,ShortTermCtxTypes.class.getSimpleName());
-		Rule r02 = new Rule("r02",Operators.SAME, LongTermCtxTypes.COMPANY, "--", 2, 0.1 ,LongTermCtxTypes.class.getSimpleName());
+		Rule r02 = new Rule("r02",Operators.SAME, LongTermCtxTypes.WORK_POSITION, "--", 2, 0.1 ,LongTermCtxTypes.class.getSimpleName());
 		Rule r03 = new Rule("r03",Operators.SIMILAR, LongTermCtxTypes.INTERESTS, "--", 3, 0.4 ,LongTermCtxTypes.class.getSimpleName());
 		Rule r04 = new Rule("r04",Operators.SAME, ShortTermCtxTypes.STATUS, "--", 4, 0.1 ,ShortTermCtxTypes.class.getSimpleName());
 		List<Rule> rules = Arrays.asList(r01, r02, r03, r04);
@@ -152,7 +152,7 @@ public class RuleEngineTest {
 		Assert.assertEquals(0, rules.size());
 		
 		Rule r01 = new Rule("r01",Operators.SAME, ShortTermCtxTypes.LOCATION, "--", 1, 0.5 ,ShortTermCtxTypes.class.getSimpleName());
-		Rule r02 = new Rule("r02",Operators.SAME, LongTermCtxTypes.COMPANY, "--", 2, 0.1 ,LongTermCtxTypes.class.getSimpleName());
+		Rule r02 = new Rule("r02",Operators.SAME, LongTermCtxTypes.WORK_POSITION, "--", 2, 0.1 ,LongTermCtxTypes.class.getSimpleName());
 
 		rules = Arrays.asList(r01, r02);
 		engine.setRules(rules);
@@ -189,7 +189,7 @@ public class RuleEngineTest {
 	@Test
 	public void testEvaluateRule() {
 		Rule r01 = new Rule("r01",Operators.SAME, ShortTermCtxTypes.LOCATION, "--", 1, 0.5 ,ShortTermCtxTypes.class.getSimpleName());
-		Rule r02 = new Rule("r02",Operators.EQUAL, LongTermCtxTypes.COMPANY, "Intel", 2, 0.1 ,LongTermCtxTypes.class.getSimpleName());
+		Rule r02 = new Rule("r02",Operators.EQUAL, LongTermCtxTypes.WORK_POSITION, "Manager", 2, 0.1 ,LongTermCtxTypes.class.getSimpleName());
 		Rule r03 = new Rule("r03",Operators.SIMILAR, LongTermCtxTypes.INTERESTS, "--", 3, 0.4 ,LongTermCtxTypes.class.getSimpleName());
 		Rule r04 = new Rule("r04",Operators.NOT_EQUAL, ShortTermCtxTypes.STATUS, "busy", 4, 0.1 ,ShortTermCtxTypes.class.getSimpleName());
 		Rule r05 = new Rule("r05",Operators.DIFFERENT, LongTermCtxTypes.OCCUPATION, "manager", 4, 0.1 ,ShortTermCtxTypes.class.getSimpleName());
@@ -282,7 +282,7 @@ public class RuleEngineTest {
 	        person.setLongTermCtx(LongTermCtxTypes.COLLAB_APPS, new String[] { "chat" });
 	        person.setLongTermCtx(LongTermCtxTypes.OCCUPATION, getRandomOccupation());
 	        person.setLongTermCtx(LongTermCtxTypes.INTERESTS, getRandomInterests());
-	        person.setLongTermCtx(LongTermCtxTypes.COMPANY, getRandomCompanies());
+	        person.setLongTermCtx(LongTermCtxTypes.WORK_POSITION, getRandomWorkPosition());
 	        person.setLongTermCtx("age", "20");
 	        
 	        //Set short term context
@@ -340,9 +340,9 @@ public class RuleEngineTest {
 	/**
 	 * @return
 	 */
-	private static String getRandomCompanies() {
-		final String[] companies={"PTIn","TI","Intel"};
-		return companies[r.nextInt(3)];
+	private static String getRandomWorkPosition() {
+		final String[] workPosition={"Manager","Marketing","Programmer"};
+		return workPosition[r.nextInt(3)];
 	}
 	
 	/**

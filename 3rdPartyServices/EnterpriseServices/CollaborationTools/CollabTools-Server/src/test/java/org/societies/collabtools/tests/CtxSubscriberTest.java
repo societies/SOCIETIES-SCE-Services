@@ -113,7 +113,7 @@ public class CtxSubscriberTest {
         person.setLongTermCtx(LongTermCtxTypes.COLLAB_APPS, new String[] { "chat" });
         person.setLongTermCtx(LongTermCtxTypes.OCCUPATION, getRandomOccupation());
         person.setLongTermCtx(LongTermCtxTypes.INTERESTS, getRandomInterests());
-        person.setLongTermCtx(LongTermCtxTypes.COMPANY, getRandomCompanies());
+        person.setLongTermCtx(LongTermCtxTypes.WORK_POSITION, getRandomWorkPosition());
         System.out.println("Person#" +i+" created");
         
         //Set ShortTerm Ctx
@@ -192,7 +192,7 @@ public class CtxSubscriberTest {
 	        person.setLongTermCtx(LongTermCtxTypes.COLLAB_APPS, new String[] { "chat" });
 	        person.setLongTermCtx(LongTermCtxTypes.OCCUPATION, getRandomOccupation());
 	        person.setLongTermCtx(LongTermCtxTypes.INTERESTS, getRandomInterests());
-	        person.setLongTermCtx(LongTermCtxTypes.COMPANY, getRandomCompanies());
+	        person.setLongTermCtx(LongTermCtxTypes.WORK_POSITION, getRandomWorkPosition());
 	        person.setLongTermCtx("age", "20");
 	        
 	        //Set short term context
@@ -250,9 +250,9 @@ public class CtxSubscriberTest {
 	/**
 	 * @return
 	 */
-	private static String getRandomCompanies() {
-		final String[] companies={"PTIn","TI","Intel"};
-		return companies[r.nextInt(3)];
+	private static String getRandomWorkPosition() {
+		final String[] workPosition={"Manager","Marketing","Programmer"};
+		return workPosition[r.nextInt(3)];
 	}
 	
 	/**

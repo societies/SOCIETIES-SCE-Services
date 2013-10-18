@@ -198,8 +198,8 @@ public class ContextSubscriber implements IContextSubscriber, Observer
 			individual.setLongTermCtx(LongTermCtxTypes.INTERESTS, context);
 		} else if (type.equals(LongTermCtxTypes.OCCUPATION)) {
 			individual.setLongTermCtx(LongTermCtxTypes.OCCUPATION, context[0]);
-		} else if (type.equals(LongTermCtxTypes.COMPANY)) {
-			individual.setLongTermCtx(LongTermCtxTypes.COMPANY, context[0]);
+		} else if (type.equals(LongTermCtxTypes.WORK_POSITION)) {
+			individual.setLongTermCtx(LongTermCtxTypes.WORK_POSITION, context[0]);
 		} else if (type.equals(ShortTermCtxTypes.LOCATION)) {
 			//			shortTermCtx.put(individual.getLastStatus() == null ? "" : individual.getLastStatus().getShortTermCtx(ShortTermCtxTypes.STATUS), context[0]);
 			shortTermCtx.put(ShortTermCtxTypes.LOCATION,context[0]);
