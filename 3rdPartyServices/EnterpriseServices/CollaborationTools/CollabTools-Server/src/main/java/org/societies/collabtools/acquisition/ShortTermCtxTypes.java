@@ -32,5 +32,5 @@ package org.societies.collabtools.acquisition;
  */
 public final class ShortTermCtxTypes {
     public static final String STATUS = "status";
-    public static final String LOCATION = "location";
+    public static final String LOCATION = "locationSymbolic";
 }
