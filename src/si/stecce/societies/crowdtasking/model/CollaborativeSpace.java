@@ -39,14 +39,16 @@ public class CollaborativeSpace {
 	private String name;
 	@Index private String urlMapping; // na primer urlMapping = settcelab => crowdtasking.appspot.com/cs/settcelab
     @Index String symbolicLocation;
-	
+    @Index String scope;
+
 	public CollaborativeSpace() {
 		
 	}
 
-	public CollaborativeSpace(String name, String symbolicLocation) {
+	public CollaborativeSpace(String name, String symbolicLocation, String scope) {
 		setName(name);
 		this.symbolicLocation = symbolicLocation;
+		this.scope = scope;
 	}
 
     private String createUrlMapping(String name) {
@@ -81,4 +83,12 @@ public class CollaborativeSpace {
 	public void setSymbolicLocation(String symbolicLocation) {
 		this.symbolicLocation = symbolicLocation;
 	}
+
+    public String getScope() {
+        return scope;
+    }
+
+    public void setScope(String scope) {
+        this.scope = scope;
+    }
 }

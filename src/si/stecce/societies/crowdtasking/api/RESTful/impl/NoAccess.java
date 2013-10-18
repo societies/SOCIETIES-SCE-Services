@@ -28,6 +28,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 import com.google.gson.Gson;
 
@@ -41,9 +42,10 @@ import com.google.gson.Gson;
 public class NoAccess {
 	@GET
 	@Produces({MediaType.APPLICATION_JSON })
-	public String noAccess() {
+	public Response noAccess() {
 		Gson gson = new Gson();
-		return gson.toJson("Not authorized!");
+		//return gson.toJson("Not authorized!");    zakaj je json??
+        return Response.status(Response.Status.UNAUTHORIZED).entity(gson.toJson("Not authorized!")).type("text/plain").build();
 	}
 
 }

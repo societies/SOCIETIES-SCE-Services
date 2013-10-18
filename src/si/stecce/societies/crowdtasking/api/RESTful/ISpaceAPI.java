@@ -1,6 +1,7 @@
 package si.stecce.societies.crowdtasking.api.RESTful;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
@@ -23,6 +24,6 @@ public interface ISpaceAPI {
     Response newSpace(@FormParam("communityId") Long communityId,
                       @FormParam("spaceId") Long spaceId,
                       @FormParam("spaceName") String name,
-//                      @FormParam("urlMapping") String urlMapping,
-                      @FormParam("symbolicLocation") String symbolicLocation) throws IOException, URISyntaxException;
+                      @FormParam("symbolicLocation") String symbolicLocation,
+                      @Context HttpServletRequest request) throws IOException, URISyntaxException;
 }

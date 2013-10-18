@@ -92,6 +92,7 @@ public class CommunityAPI implements ICommunityAPI {
     public static String toJson(Collection<Community> communities, CTUser user) {
         Gson gson = new Gson();
         ArrayList<CommunityJS> list = getCommunityJSes(communities, user);
+        System.out.println("returning "+list.size()+" elements");
         return gson.toJson(list);
     }
 
@@ -212,6 +213,7 @@ public class CommunityAPI implements ICommunityAPI {
 	}
 
 	private String getCommunities(CTUser user) {
+        System.out.println("getCommunities for "+user.getUserName());
         return toJson(CommunityDAO.loadCommunities(), user);
 	}
 }

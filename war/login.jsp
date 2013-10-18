@@ -21,7 +21,8 @@ if ("SOCIETIES".equalsIgnoreCase(federatedIdentity)) {
 	authenticatedUser.setEmail(request.getParameter("email"));
 	authenticatedUser.setFirstName(request.getParameter("foreName"));
 	authenticatedUser.setLastName(request.getParameter("name"));
-	
+	authenticatedUser.setScope(request.getParameter("scope"));
+
 	session.setAttribute("loggedIn", "true");
 	session.setAttribute("authenticatedUser", authenticatedUser);
 
@@ -68,34 +69,47 @@ if ("SOCIETIES".equalsIgnoreCase(federatedIdentity)) {
 		<input type="hidden" name="name"  id="name"/>
 		<input type="hidden" name="foreName"  id="foreName"/>
 		<input type="hidden" name="email" id="email"/>
+		<input type="hidden" name="scope" id="scope"/>
 		<input type="hidden" name="continue" value="<%= suffix %>"/>
 	</form>
 	</div>
 
 <script type='text/javascript'>
-	$(document).on('pageinit', '#loginPage', function(event, data){       
+    function loginSocietiesUser() {
+        var result = window.android.getSocietiesUser();
+        if (result) {
+            var user = JSON.parse(result);
+            $("#userId").val(user.userId);
+            if (user.name != "undefined") {
+                $("#name").val(user.name);
+            }
+            if (user.foreName != "undefined") {
+                $("#foreName").val(user.foreName);
+            }
+            if (user.email != "undefined") {
+                $("#email").val(user.email);
+            }
+            if (user.scope != "undefined") {
+                $("#email").val(user.scope);
+            }
+            $('#loginForm').submit();
+        }
+        else {
+            toast("Error connecting to Societies Android Client. Are you sure that SOCIETIES Android client app is installed?");
+        }
+    }
+
+	$(document).on('pageinit', '#loginPage', function(event, data){
 		if (typeof(android) !== "undefined") {
+            if (window.android.isSocietiesUser()) {
+                loginSocietiesUser();
+            }
+/*
 			$('#societiesButton').removeClass('ui-disabled');
 			$('#societiesButton').bind('tap', function(event, data) {
-				var result = window.android.getSocietiesUser();
-				if (result) {
-					var user = JSON.parse(result);
-					$("#userId").val(user.userId);
-					if (user.name != "undefined") {
-						$("#name").val(user.name);
-					}
-					if (user.foreName != "undefined") {
-						$("#foreName").val(user.foreName);
-					}
-					if (user.email != "undefined") {
-						$("#email").val(user.email);
-					}
-					$('#loginForm').submit();
-				}
-				else {
-					toast("Error connecting to Societies Android Client. Are you sure that SOCIETIES Android client app is installed?");
-				}
+                loginSocietiesUser();
 			});
+*/
 		}
 		else {
 			console.log("android is undefined");

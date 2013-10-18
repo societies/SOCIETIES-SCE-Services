@@ -12,6 +12,7 @@ public class AuthenticatedUser implements Serializable {
 	private String nickName;
 	private String email;
 	private String firstName, lastName;
+    private String scope;
 
 	public AuthenticatedUser() {	
 	}
@@ -71,4 +72,12 @@ public class AuthenticatedUser implements Serializable {
 	public void setLastName(String lastName) {
 		this.lastName = lastName;
 	}
+
+    public String getScope() {
+        return scope;
+    }
+
+    public void setScope(String scope) {
+        this.scope = scope;
+    }
 }

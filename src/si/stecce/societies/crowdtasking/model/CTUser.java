@@ -130,6 +130,7 @@ public class CTUser {
 	private String firstName, lastName;
 	private String nickname;
 	private String email;
+	private String scope;
 	private List<String> interests;
 	@Index private Long karma = 1L;
 	private List<ConnectedAccount> connectedAccounts;
@@ -151,6 +152,7 @@ public class CTUser {
 		this.nickname = authenticatedUser.getNickName();
 		this.firstName = authenticatedUser.getFirstName();
 		this.lastName = authenticatedUser.getLastName();
+		this.scope = authenticatedUser.getScope();
 		connectAccount(authenticatedUser);
 	}
 
@@ -403,4 +405,12 @@ public class CTUser {
 		}
 		return "";
 	}
+
+    public String getScope() {
+        return scope;
+    }
+
+    public void setScope(String scope) {
+        this.scope = scope;
+    }
 }

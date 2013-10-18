@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.FormParam;
@@ -49,6 +50,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import si.stecce.societies.crowdtasking.api.RESTful.ISpaceAPI;
+import si.stecce.societies.crowdtasking.model.CTUser;
 import si.stecce.societies.crowdtasking.model.CollaborativeSpace;
 import si.stecce.societies.crowdtasking.model.Community;
 import si.stecce.societies.crowdtasking.model.dao.CollaborativeSpaceDAO;
@@ -128,18 +130,19 @@ public class SpaceAPI implements ISpaceAPI {
 	public Response newSpace(@FormParam("communityId") Long communityId,
                              @FormParam("spaceId") Long spaceId,
                              @FormParam("spaceName") String name,
-//                             @FormParam("urlMapping") String urlMapping,
-                             @FormParam("symbolicLocation") String symbolicLocation) throws IOException, URISyntaxException {
+                             @FormParam("symbolicLocation") String symbolicLocation,
+                             @Context HttpServletRequest request) throws IOException, URISyntaxException {
 		
 
 		if ("".equals(name)) {
 			return Response.status(Status.BAD_REQUEST).entity("Name is required.").type("text/plain").build();
 		}
+        CTUser user = UsersAPI.getLoggedInUser(request.getSession());
 		if (spaceId.longValue() == 0L) {
 			if (ofy().load().type(CollaborativeSpace.class).filter("name", name).count() != 0){
 				return Response.status(Status.BAD_REQUEST).entity("Collaborative space "+name+" already exist.").type("text/plain").build();
 			}
-            CollaborativeSpace collaborativeSpace = new CollaborativeSpace(name, symbolicLocation);
+            CollaborativeSpace collaborativeSpace = new CollaborativeSpace(name, symbolicLocation, user.getScope());
             CollaborativeSpaceDAO.save(collaborativeSpace);
 		}
 		else {
