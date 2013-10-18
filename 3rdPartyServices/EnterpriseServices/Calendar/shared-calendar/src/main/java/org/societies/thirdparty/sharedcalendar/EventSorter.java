@@ -51,12 +51,13 @@ public class EventSorter implements Comparator<Event> {
 	@Override
 	public int compare(Event event, Event otherEvent) {
 		
-		int compareResult = event.getStartDate().compare(otherEvent.getStartDate());
-		switch(compareResult){
-			case DatatypeConstants.LESSER: return -1;
-			case DatatypeConstants.EQUAL : return 0;
-			case DatatypeConstants.GREATER: return 1;
-		}
+		int compareResult = event.getStartDate().compareTo(otherEvent.getStartDate());
+		if(compareResult == 0)
+			return 0;
+		if(compareResult > 0)
+			return 1;
+		if(compareResult < 0)
+			return -1;
 		return 0;
 	}
 

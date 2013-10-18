@@ -178,14 +178,14 @@ public class SharedCalendarCommServer implements IFeatureServer{
 				resultBean.setEventList(foundEvents);
 				break;
 			case UNSUBSCRIBE_FROM_EVENT:
-				resultBean.setSubscribingResult(this.sharedCalendarService.unsubscribeFromEvent(bean.getEventId(), subscriber));
+				resultBean.setSubscribingResult(this.sharedCalendarService.unsubscribeFromEvent(bean.getEventId(), node, subscriber));
 				resultBean.setEventId(bean.getEventId());
 				resultBean.setEvent(this.sharedCalendarService.retrieveEvent(bean.getEventId(), node, requestor));
 				break;
 			case UPDATE_EVENT:
 				resultBean.setLastOperationSuccessful(this.sharedCalendarService.updateEvent(bean.getEvent(), requestor));
 				if(resultBean.isLastOperationSuccessful()){
-					Event newEvent = this.sharedCalendarService.retrieveEvent(bean.getEventId(), node, requestor);
+					Event newEvent = this.sharedCalendarService.retrieveEvent(bean.getEvent().getEventId(), node, requestor);
 					resultBean.setEvent(newEvent);
 				}
 				break;

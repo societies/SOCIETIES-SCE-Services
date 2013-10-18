@@ -52,7 +52,8 @@ public interface ISharedCalendar {
 	
 	/**
 	 * 
-	 * @param calendarId
+	 * @param eventId The id of the event
+	 * @param nodeId the node of the calendar
 	 * @return the list of events inside a CIS Calendar
 	 */
 	public void viewEvent(ICalendarResultCallback calendarResultCallback, String eventId, String nodeId);
@@ -113,7 +114,7 @@ public interface ISharedCalendar {
 	 * @param subscriberId
 	 * @return true if the unsubscription is performed correctly, false otherwise
 	 */
-	public void unsubscribeFromEvent(ICalendarResultCallback calendarResultCallback, String eventId, String subscriberId);
+	public void unsubscribeFromEvent(ICalendarResultCallback calendarResultCallback, String eventId, String nodeId, String subscriberId);
 
 	/**
 	 * Gets the events that are recommended for the subscriber

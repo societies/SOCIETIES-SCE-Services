@@ -25,6 +25,8 @@
 package org.societies.thirdparty.sharedcalendar;
 
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -60,6 +62,7 @@ public class SharedCalendarClient implements ISharedCalendar {
 	private IIdentity myId;
 	private IServices serviceMgmt;
 	private ICssDirectory cssDirectory;
+	private static Comparator<Event> eventSorter = new EventSorter();
 	
 	public IServices getServiceMgmt() {
 		return serviceMgmt;
@@ -109,8 +112,7 @@ public class SharedCalendarClient implements ISharedCalendar {
 		
 		String myJid = getCommManager().getIdManager().getThisNetworkNode().getJid();
 		
-		if(log.isDebugEnabled())
-			log.debug("Shared Calendar Client is running on JID: " + myJid);
+		log.debug("Shared Calendar Client is running on JID: {}", myJid);
 		
 		try {
 			myId = getCommManager().getIdManager().fromJid(myJid);
@@ -124,8 +126,7 @@ public class SharedCalendarClient implements ISharedCalendar {
 	@Override
 	public void retrieveCalendar(ICalendarResultCallback calendarResultCallback, String nodeId) {
 
-		if(log.isDebugEnabled())
-			log.debug("Retrieving Calendars for node: " + nodeId);
+		log.info("Retrieving Calendars for node: {}",nodeId);
 		
 		try{
 			IIdentity node = getCommManager().getIdManager().fromJid(nodeId);
@@ -135,8 +136,7 @@ public class SharedCalendarClient implements ISharedCalendar {
 			SharedCalendarResult result = new SharedCalendarResult();
 			result.setCalendar(myCalendar);
 			
-			if(log.isDebugEnabled())
-				log.debug("Sending the result back: " + result.getCalendar());
+			log.debug("Sending the result back: {}", result.getCalendar());
 			
 			calendarResultCallback.receiveResult(result);
 
@@ -150,16 +150,15 @@ public class SharedCalendarClient implements ISharedCalendar {
 	@Override
 	public void retrieveEvents(ICalendarResultCallback calendarResultCallback, String nodeId) {
 		
-		if(log.isDebugEnabled())
-			log.debug("Retrieving Events for a node: " + nodeId);
+		log.debug("Retrieving Events for a node: {}", nodeId);
+		
 		try{
 			
 			IIdentity node = getCommManager().getIdManager().fromJid(nodeId);
 
 			List<Event> eventList = getSharedCalendar().retrieveEvents(node, myId);
 		
-			if(log.isDebugEnabled())
-				log.debug("Got event list: " + eventList.size());
+			log.debug("Got event list: {}", eventList.size());
 		
 			SharedCalendarResult result = new SharedCalendarResult();
 			result.setEventList(eventList);
@@ -204,9 +203,7 @@ public class SharedCalendarClient implements ISharedCalendar {
 	@Override
 	public void subscribeToEvent(ICalendarResultCallback calendarResultCallback, String eventId, String nodeId, String subscriberId) {
 
-		
-		if(log.isDebugEnabled())
-			log.debug("subscribing to an event...");
+		log.info("{} Subscribing to an event {}",subscriberId,nodeId);
 		
 		try{
 			
@@ -214,10 +211,14 @@ public class SharedCalendarClient implements ISharedCalendar {
 			IIdentity subscriber = getCommManager().getIdManager().fromJid(subscriberId);
 			
 			Boolean subscribeOk = getSharedCalendar().subscribeToEvent(eventId, node, subscriber);
-			
+
 			SharedCalendarResult finalResult = new SharedCalendarResult();
 			finalResult.setSubscribingResult(subscribeOk);
 			finalResult.setLastOperationSuccessful(subscribeOk);
+			if(subscribeOk){
+				Event event = getSharedCalendar().retrieveEvent(eventId, node, myId);
+				finalResult.setEvent(event);
+			}
 			calendarResultCallback.receiveResult(finalResult);
 			
 		} catch(Exception ex){
@@ -230,20 +231,23 @@ public class SharedCalendarClient implements ISharedCalendar {
 	@Async
 	@Override
 	public void unsubscribeFromEvent(
-			ICalendarResultCallback calendarResultCallback, String eventId, String subscriberId) {
+			ICalendarResultCallback calendarResultCallback, String eventId, String nodeId, String subscriberId) {
 
-		if(log.isDebugEnabled())
-			log.debug("unsubscribing to an event...");
+		log.info("{} unsubscribing from an event: {}",subscriberId,eventId);
 		
 		try{
-			
+			IIdentity node = getCommManager().getIdManager().fromJid(nodeId);
 			IIdentity subscriber = getCommManager().getIdManager().fromJid(subscriberId);
 			
-			Boolean subscribeOk = getSharedCalendar().unsubscribeFromEvent(eventId, subscriber);
+			Boolean subscribeOk = getSharedCalendar().unsubscribeFromEvent(eventId, node,subscriber);
 			
 			SharedCalendarResult finalResult = new SharedCalendarResult();
 			finalResult.setSubscribingResult(subscribeOk);
 			finalResult.setLastOperationSuccessful(subscribeOk);
+			if(subscribeOk){
+				Event event = getSharedCalendar().retrieveEvent(eventId, node, myId);
+				finalResult.setEvent(event);
+			}
 			calendarResultCallback.receiveResult(finalResult);		
 			
 		} catch(Exception ex){
@@ -261,8 +265,8 @@ public class SharedCalendarClient implements ISharedCalendar {
 	public void viewEvent(ICalendarResultCallback calendarResultCallback,
 			String eventId, String nodeId) {
 		
-		if(log.isDebugEnabled())
-			log.debug("View Event: " + eventId);
+		log.info("View Event: {}",eventId);
+		
 		try{
 		IIdentity node = getIIdentityFromJid(nodeId);
 		
@@ -287,15 +291,13 @@ public class SharedCalendarClient implements ISharedCalendar {
 	public void createEvent(ICalendarResultCallback calendarResultCallback,
 			Event newEvent, String nodeId) {
 		
-		if(log.isDebugEnabled())
-			log.debug("Creating event on Calendar!");
+		log.info("Creating event on Calendar!");
 		
 		try{
 			IIdentity node = getCommManager().getIdManager().fromJid(nodeId);
 			String eventId = getSharedCalendar().createEvent(newEvent, node, myId);
 			
-			if(log.isDebugEnabled())
-				log.debug("EventId: " + eventId);
+			log.debug("EventId: {}", eventId);
 			
 			SharedCalendarResult finalResult = new SharedCalendarResult();
 			finalResult.setEventId(eventId);
@@ -321,13 +323,12 @@ public class SharedCalendarClient implements ISharedCalendar {
 	public void updateEvent(ICalendarResultCallback calendarResultCallback,
 			Event updatedEvent) {
 		
-		if(log.isDebugEnabled())
-			log.debug("Updating Event!");
+		log.info("Updating Event {}", updatedEvent.getName());
+		
 		SharedCalendarResult finalResult = new SharedCalendarResult();
 		try{
 			Boolean updateResult = getSharedCalendar().updateEvent(updatedEvent, myId);
 			
-	
 			finalResult.setLastOperationSuccessful(updateResult);
 		
 			if(updateResult){
@@ -349,8 +350,8 @@ public class SharedCalendarClient implements ISharedCalendar {
 	public void findEventsInCalendar(
 			ICalendarResultCallback calendarResultCallback, String nodeId,
 			Event searchEvent) {
-		if(log.isDebugEnabled())
-			log.debug("Searching for events in a specific calendar!");
+		
+		log.info("Searching for events in a specific calendar!");
 		
 		try{
 			
@@ -360,7 +361,7 @@ public class SharedCalendarClient implements ISharedCalendar {
 		
 			if(log.isDebugEnabled())
 				log.debug("Got event list: " + eventList.size());
-		
+			Collections.sort(eventList,eventSorter);
 			SharedCalendarResult result = new SharedCalendarResult();
 			result.setEventList(eventList);
 			
@@ -377,10 +378,10 @@ public class SharedCalendarClient implements ISharedCalendar {
 	public void findEventsAll(ICalendarResultCallback calendarResultCallback,
 			Event searchEvent) {
 		
-		if(log.isDebugEnabled())
-			log.debug("Searching for events in all calendars!");
+		log.info("Searching for events in all calendars!");
 		
 		List<Event> foundEvents = getSharedCalendar().findEventsAll(searchEvent, myId);
+		Collections.sort(foundEvents,eventSorter);
 		
 		SharedCalendarResult result = new SharedCalendarResult();
 		result.setEventList(foundEvents);
@@ -393,13 +394,15 @@ public class SharedCalendarClient implements ISharedCalendar {
 	@Async
 	public void getRecommendedEvents(ICalendarResultCallback calendarResultCallback, String subscriberId) {
 
-		if(log.isDebugEnabled())
-			log.debug("Getting Recommended Events!");
+		log.info("Getting Recommended Events!");
 		
 		List<Event> recommendedEvents = getSharedCalendar().getMyRecommendedEvents();
 
+		Collections.sort(recommendedEvents,eventSorter);
+		
 		SharedCalendarResult result = new SharedCalendarResult();
 		result.setEventList(recommendedEvents);
+		
 		
 		if(log.isDebugEnabled())
 			log.debug("Now returning the list of recommended events.");
@@ -457,8 +460,8 @@ public class SharedCalendarClient implements ISharedCalendar {
 	public void getSubscribedEvents(
 			ICalendarResultCallback calendarResultCallback, String subscriberId) {
 
-		if(log.isDebugEnabled())
-			log.debug("Retrieving Events for a subscriber: " + subscriberId);
+		log.info("Retrieving Events for a subscriber: {}", subscriberId);
+			
 		try{
 			
 			IIdentity subscriber = getCommManager().getIdManager().fromJid(subscriberId);
@@ -468,6 +471,7 @@ public class SharedCalendarClient implements ISharedCalendar {
 			if(log.isDebugEnabled())
 				log.debug("Got event list: " + eventList.size());
 		
+			Collections.sort(eventList,eventSorter);
 			SharedCalendarResult result = new SharedCalendarResult();
 			result.setEventList(eventList);
 			

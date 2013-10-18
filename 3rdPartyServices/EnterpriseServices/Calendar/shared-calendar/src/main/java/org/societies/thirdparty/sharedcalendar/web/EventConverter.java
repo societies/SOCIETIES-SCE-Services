@@ -47,10 +47,7 @@ public class EventConverter implements Converter {
 	static final Logger log = LoggerFactory.getLogger(EventConverter.class);
 	private CalendarController parent;
 	
-	public EventConverter(CalendarController parent) {
-		if(log.isDebugEnabled())
-			log.debug("Event Converter!");
-		
+	public EventConverter(CalendarController parent) {		
 		this.parent = parent;
 		
 	}
@@ -60,16 +57,12 @@ public class EventConverter implements Converter {
 	 */
 	@Override
 	public Object getAsObject(FacesContext context, UIComponent component, String value) {
-		if(log.isDebugEnabled())
-			log.debug("Event Converter: getAsObject: " + component.getId());
 
 		CalendarEvent event = null;
 		List<CalendarEvent> currEvents = parent.getCurrentEvents();
 		for(CalendarEvent curEvent: currEvents){
 			if(curEvent.getEventId().equals(value)){
 				event = curEvent;
-				if(log.isDebugEnabled())
-					log.debug("Event Converter: getAsObject: found event in Current events: " + event.getTitle() );
 				break;
 			}
 		}
@@ -78,8 +71,6 @@ public class EventConverter implements Converter {
 			for(CalendarEvent recEvent: recommendedEvents){
 				if(recEvent.getEventId().equals(value)){
 					event = recEvent;
-					if(log.isDebugEnabled())
-						log.debug("Event Converter: getAsObject: found event in recommended events: " + event.getTitle() );
 					break;
 				}
 			}
@@ -90,8 +81,6 @@ public class EventConverter implements Converter {
 			for(CalendarEvent searchEvent: searchEvents){
 				if(searchEvent.getEventId().equals(value)){
 					event = searchEvent;
-					if(log.isDebugEnabled())
-						log.debug("Event Converter: getAsObject: found event in Search events: " + event.getTitle() );
 					break;
 				}
 			}
@@ -106,10 +95,6 @@ public class EventConverter implements Converter {
 	 */
 	@Override
 	public String getAsString(FacesContext context, UIComponent component, Object value) {
-		if(log.isDebugEnabled()){
-			log.debug("Event Converter: getAsString : " + component.getId());
-			log.debug("Event Converter: getAsString : " + ((CalendarEvent) value).getEventId());
-		}
 		String asString = ((CalendarEvent) value).getEventId();
 
 		return asString;

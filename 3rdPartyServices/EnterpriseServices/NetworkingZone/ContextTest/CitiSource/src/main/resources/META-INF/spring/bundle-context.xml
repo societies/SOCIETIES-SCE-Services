@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc-3.0.xsd
+http://www.springframework.org/schema/osgi-compendium http://www.springframework.org/schema/osgi-compendium/spring-osgi-compendium.xsd
+http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd"
+    xmlns:task="http://www.springframework.org/schema/task" xmlns:tx="http://www.springframework.org/schema/tx"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:osgi-compendium="http://www.springframework.org/schema/osgi-compendium"
+    xmlns:ctx="http://www.springframework.org/schema/context">
+
+
+ 	<bean id="sourceTest" class="org.societies.thirdpartyservices.city.sourceapp.SourceTestImpl"
+ 		depends-on="PubsubClient, cxtBrokerRef, eventMgmtRef, CommManager"
+ 		init-method="RunInit">
+        <!-- a reference to a required service. 'name' should be the same as member
+             variable in your impl class and the 'ref' should be the same as the osgi:service
+             ref in the bundle-context-osgi.xml file -->
+        <property name="cxtBrokerService" ref="cxtBrokerRef" />
+    </bean>
+
+</beans>

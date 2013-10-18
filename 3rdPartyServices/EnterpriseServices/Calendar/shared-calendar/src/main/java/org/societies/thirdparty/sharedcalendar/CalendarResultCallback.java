@@ -55,11 +55,16 @@ public class CalendarResultCallback implements ICalendarResultCallback {
 
 	@Override
 	public void receiveResult(SharedCalendarResult returnValue) {
-		if(logger.isDebugEnabled())
-			logger.debug("receivedResult: " + returnValue);
+		logger.debug("receivedResult: {}", returnValue);
 		
 		try {
-			resultList.put(returnValue);
+			if(returnValue != null)
+				resultList.put(returnValue);
+			else{
+				SharedCalendarResult testCal = new SharedCalendarResult();
+				testCal.setCalendarId("n/a");
+				resultList.put(testCal);
+			}
 		} catch (InterruptedException e) {
 			logger.error("Error putting result in List");
 			e.printStackTrace();
@@ -70,7 +75,11 @@ public class CalendarResultCallback implements ICalendarResultCallback {
 	@Override
 	public SharedCalendarResult getResult(){
 		try {
-			return resultList.poll(TIMEOUT, TimeUnit.SECONDS);
+			SharedCalendarResult myResult = resultList.poll(TIMEOUT, TimeUnit.SECONDS);
+			if(myResult != null && !(myResult.getCalendarId() != null && myResult.getCalendarId().equals("n/a")))
+				return myResult;
+			else
+				return null;
 		} catch (InterruptedException e) {
 			logger.error("Error getting result in List");
 			e.printStackTrace();

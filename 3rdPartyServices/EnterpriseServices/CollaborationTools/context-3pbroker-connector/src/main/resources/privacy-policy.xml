@@ -1,36 +1,15 @@
 <RequestPolicy>
 <Target>
 <Resource>
-	<Attribute AttributeId="contextType"
+	<Attribute AttributeId="cis"
 			DataType="http://www.w3.org/2001/XMLSchema#string">
-		<AttributeValue>device</AttributeValue>
+		<AttributeValue>cis-member-list</AttributeValue>
 	</Attribute>
 </Resource>
 <Action>
 	<Attribute AttributeId="urn:oasis:names:tc:xacml:1.0:action:action-id" 
-			DataType="org.societies.api.internal.privacytrust.privacyprotection.model.privacypolicy.constants.ActionConstants">
+			DataType="org.societies.api.schema.privacytrust.privacy.model.privacypolicy.ActionConstants">
 		<AttributeValue>READ</AttributeValue>
-	</Attribute>
-<optional>false</optional>
-</Action>
-<Action>
-	<Attribute AttributeId="urn:oasis:names:tc:xacml:1.0:action:action-id" 
-			DataType="org.societies.api.internal.privacytrust.privacyprotection.model.privacypolicy.constants.ActionConstants">
-		<AttributeValue>WRITE</AttributeValue>
-	</Attribute>
-<optional>false</optional>
-</Action>
-<Action>
-	<Attribute AttributeId="urn:oasis:names:tc:xacml:1.0:action:action-id" 
-			DataType="org.societies.api.internal.privacytrust.privacyprotection.model.privacypolicy.constants.ActionConstants">
-		<AttributeValue>CREATE</AttributeValue>
-	</Attribute>
-<optional>false</optional>
-</Action>
-<Action>
-	<Attribute AttributeId="urn:oasis:names:tc:xacml:1.0:action:action-id" 
-			DataType="org.societies.api.internal.privacytrust.privacyprotection.model.privacypolicy.constants.ActionConstants">
-		<AttributeValue>DELETE</AttributeValue>
 	</Attribute>
 <optional>false</optional>
 </Action>
@@ -38,36 +17,15 @@
 </Target>
 <Target>
 <Resource>
-	<Attribute AttributeId="contextType"
+	<Attribute AttributeId="cis"
 			DataType="http://www.w3.org/2001/XMLSchema#string">
-		<AttributeValue>locationSymbolic</AttributeValue>
+		<AttributeValue>cis-list</AttributeValue>
 	</Attribute>
 </Resource>
 <Action>
 	<Attribute AttributeId="urn:oasis:names:tc:xacml:1.0:action:action-id" 
-			DataType="org.societies.api.internal.privacytrust.privacyprotection.model.privacypolicy.constants.ActionConstants">
+			DataType="org.societies.api.schema.privacytrust.privacy.model.privacypolicy.ActionConstants">
 		<AttributeValue>READ</AttributeValue>
-	</Attribute>
-<optional>false</optional>
-</Action>
-<Action>
-	<Attribute AttributeId="urn:oasis:names:tc:xacml:1.0:action:action-id" 
-			DataType="org.societies.api.internal.privacytrust.privacyprotection.model.privacypolicy.constants.ActionConstants">
-		<AttributeValue>WRITE</AttributeValue>
-	</Attribute>
-<optional>false</optional>
-</Action>
-<Action>
-	<Attribute AttributeId="urn:oasis:names:tc:xacml:1.0:action:action-id" 
-			DataType="org.societies.api.internal.privacytrust.privacyprotection.model.privacypolicy.constants.ActionConstants">
-		<AttributeValue>CREATE</AttributeValue>
-	</Attribute>
-<optional>false</optional>
-</Action>
-<Action>
-	<Attribute AttributeId="urn:oasis:names:tc:xacml:1.0:action:action-id" 
-			DataType="org.societies.api.internal.privacytrust.privacyprotection.model.privacypolicy.constants.ActionConstants">
-		<AttributeValue>DELETE</AttributeValue>
 	</Attribute>
 <optional>false</optional>
 </Action>
@@ -75,36 +33,63 @@
 </Target>
 <Target>
 <Resource>
-	<Attribute AttributeId="contextType"
+	<Attribute AttributeId="context"
 			DataType="http://www.w3.org/2001/XMLSchema#string">
-		<AttributeValue>weight</AttributeValue>
+		<AttributeValue>ADDRESS_WORK_CITY</AttributeValue>
 	</Attribute>
 </Resource>
 <Action>
 	<Attribute AttributeId="urn:oasis:names:tc:xacml:1.0:action:action-id" 
-			DataType="org.societies.api.internal.privacytrust.privacyprotection.model.privacypolicy.constants.ActionConstants">
+			DataType="org.societies.api.schema.privacytrust.privacy.model.privacypolicy.ActionConstants">
 		<AttributeValue>READ</AttributeValue>
 	</Attribute>
 <optional>false</optional>
 </Action>
+<optional>false</optional>
+</Target>
+<Target>
+<Resource>
+	<Attribute AttributeId="context"
+			DataType="http://www.w3.org/2001/XMLSchema#string">
+		<AttributeValue>INTERESTS</AttributeValue>
+	</Attribute>
+</Resource>
 <Action>
 	<Attribute AttributeId="urn:oasis:names:tc:xacml:1.0:action:action-id" 
-			DataType="org.societies.api.internal.privacytrust.privacyprotection.model.privacypolicy.constants.ActionConstants">
-		<AttributeValue>WRITE</AttributeValue>
+			DataType="org.societies.api.schema.privacytrust.privacy.model.privacypolicy.ActionConstants">
+		<AttributeValue>READ</AttributeValue>
 	</Attribute>
 <optional>false</optional>
 </Action>
+<optional>false</optional>
+</Target>
+<Target>
+<Resource>
+	<Attribute AttributeId="context"
+			DataType="http://www.w3.org/2001/XMLSchema#string">
+		<AttributeValue>OCCUPATION</AttributeValue>
+	</Attribute>
+</Resource>
 <Action>
 	<Attribute AttributeId="urn:oasis:names:tc:xacml:1.0:action:action-id" 
-			DataType="org.societies.api.internal.privacytrust.privacyprotection.model.privacypolicy.constants.ActionConstants">
-		<AttributeValue>CREATE</AttributeValue>
+			DataType="org.societies.api.schema.privacytrust.privacy.model.privacypolicy.ActionConstants">
+		<AttributeValue>READ</AttributeValue>
 	</Attribute>
 <optional>false</optional>
 </Action>
+<optional>false</optional>
+</Target>
+<Target>
+<Resource>
+	<Attribute AttributeId="context"
+			DataType="http://www.w3.org/2001/XMLSchema#string">
+		<AttributeValue>STATUS</AttributeValue>
+	</Attribute>
+</Resource>
 <Action>
 	<Attribute AttributeId="urn:oasis:names:tc:xacml:1.0:action:action-id" 
-			DataType="org.societies.api.internal.privacytrust.privacyprotection.model.privacypolicy.constants.ActionConstants">
-		<AttributeValue>DELETE</AttributeValue>
+			DataType="org.societies.api.schema.privacytrust.privacy.model.privacypolicy.ActionConstants">
+		<AttributeValue>READ</AttributeValue>
 	</Attribute>
 <optional>false</optional>
 </Action>

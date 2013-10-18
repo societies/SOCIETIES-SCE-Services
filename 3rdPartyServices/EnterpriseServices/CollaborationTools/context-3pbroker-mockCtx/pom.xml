@@ -3,12 +3,11 @@
 
 	<modelVersion>4.0.0</modelVersion>
 
-	<!-- All projects should inherit from persist-parent -->
+	<!-- All projects should inherit from societies-parent -->
 	<parent>
 		<groupId>org.societies</groupId>
 		<artifactId>spring-osgi-parent</artifactId>
 		<version>RELEASE</version>
-		<relativePath>../../parent/spring-osgi.xml</relativePath>
 	</parent>
 
 	<!-- groupId is set in parent pom -->
@@ -18,6 +17,16 @@
 	<packaging>bundle</packaging>
 
 	<developers>
+	    <developer>
+			<id>ChristopherLima</id>
+			<name>Christopher Viana Lima</name>
+			<email></email>
+			<organization>PTIN</organization>
+			<organizationUrl>http://www.ptinovacao.pt/</organizationUrl>
+			<roles>
+				<role>developer</role>
+			</roles>
+		</developer>
 		<developer>
 			<name>Nikos Kalatzis</name>
 			<email>nikosk@cn.ntua.gr</email>
@@ -47,11 +56,6 @@
 		<dependency>
 			<groupId>org.societies.api.external</groupId>
 			<artifactId>societies-api</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.societies.api.internal</groupId>
-			<artifactId>societies-api-internal</artifactId>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
@@ -101,7 +105,7 @@
 						<artifactItem>
 							<groupId>${project.groupId}</groupId>
 							<artifactId>${project.artifactId}</artifactId>
-							<version>${version.cm}</version>
+							<version>0.1.0</version>
 							<type>jar</type>
 							<overWrite>true</overWrite>
 							<outputDirectory>${spring.osgi.deploy.dir}</outputDirectory>

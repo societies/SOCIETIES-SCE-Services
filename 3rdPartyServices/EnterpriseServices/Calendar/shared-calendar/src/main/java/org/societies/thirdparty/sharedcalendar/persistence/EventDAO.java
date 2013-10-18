@@ -91,6 +91,7 @@ public class EventDAO {
 		this.eventId = eventId;
 	}
 	
+	
 	@Column(name = "subscriberId")
 	public String getSubscriberId(){
 		return subscriberId;
