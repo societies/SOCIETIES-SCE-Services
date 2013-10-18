@@ -383,38 +383,34 @@ public class JacketMenuActivity extends Activity {
 		    	 
 		    	 //if(row>lastActivityIndex){ // test so we are sure we dont print old activities. This test and the lastActivityIndex variable form a hack due to the syncing problems 
 		    	//	lastActivityIndex = row; 
-	         		SharedPreferences mypref = getSharedPreferences(IJacketApp.PREF_FILE_NAME, MODE_PRIVATE);
-	     			long jid = mypref.getLong(IJacketApp.CIS_JID_PREFERENCE_TAG, -1);
-	     			if(jid == -1){
-	     				Log.d("LOG_TAG", "no community on obersever..." );
-	     				return;
-	     			}
-			    	 
-			    	 
-			    	 String mSelectionClause = SocialContract.CommunityActivity._ID + " = ? and " + SocialContract.CommunityActivity._ID_FEED_OWNER + " = ? and " + SocialContract.CommunityActivity.TARGET + " = ?" ;
-			    	 String[] mSelectionArgs = {Long.toString(row),jid +"",org.societies.thirdpartyservices.ijacketlib.IJacketDefines.AccountData.IJACKET_SERVICE_NAME};
-			    	 ContentResolver cr = getContentResolver();
-			    	 Uri otherUri =  Uri.parse(SocialContract.AUTHORITY_STRING + SocialContract.UriPathIndex.COMMUNITY_ACTIVITIY);
-			    	 Log.d("LOG_TAG", "test " +  uri.getAuthority() + uri.getPath());
-			    	 Cursor cursor = cr.query(otherUri,null,mSelectionClause,mSelectionArgs,null);
+	
+		    	 	// before we were doing the equivalent of getActivityCursorFromRowIfMatchesCISonSharedPref
+	       			IJacketApp appState = (IJacketApp) (getApplication());
+	       			String serviceId = appState.getiJacketSevId() +"";
+		    	 	Cursor cursor = utilCursor.getActivityCursorFromRowIfMatchesMyCIS(serviceId, row, getContentResolver());
+		    	 
 					if (cursor != null && cursor.getCount() >0) {
 					    while (cursor.moveToNext()) {
 					    	String actor = cursor.getString(cursor.getColumnIndex(SocialContract.CommunityActivity.ACTOR));
 					    	String verb  = cursor.getString(cursor.getColumnIndex(SocialContract.CommunityActivity.VERB));
 					    	String obj = cursor.getString(cursor.getColumnIndex(SocialContract.CommunityActivity.OBJECT));
 					        Log.d("LOG_TAG", "found activity " + actor);
-					        IJacketApp appState = (IJacketApp) (getApplication());
+					        appState = (IJacketApp) (getApplication());
 					        if( appState.isTestMode()){
 					        	// if it is on test mode, I just launch a toast when something is observed
 					        	h.post(new MyRunnable(actor + " " + verb + " " +obj) );
 					        	
 					        	
 					        }else{
-					        	if (verb.equals(IJacketDefines.Verbs.DISPLAY))
+					        	//if (verb.equals(IJacketDefines.Verbs.DISPLAY)) WE CHANGED THE APPLICATION TO 
+					        	// DISPLAY always and either RING or Vibrate
+					        		
+					        	if (verb.equals(IJacketDefines.Verbs.RING)){
 					        		con.print(obj, false);
-					        	if (verb.equals(IJacketDefines.Verbs.RING))
 					        		con.data(new byte[]{100, 75, 52, 15}, false);
+					        	}
 					        	if (verb.equals(IJacketDefines.Verbs.VIBRATE)){
+					        		con.print(obj, false);
 				             		//Vibrate mobile
 				             		Vibrator vib = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
 				             		vib.vibrate(2000);

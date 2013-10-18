@@ -74,7 +74,8 @@ public class IJacketScanActiv extends Activity{// implements OnItemSelectedListe
         Log.d(LOG_TAG, "IJacketScanActiv onCreate");
         
         
-        Intent intent = getIntent();
+/*      WE ARE NOW LISTENING TO ALL COMMUNTIES  
+ 		Intent intent = getIntent();
         long cisId = intent.getLongExtra(org.societies.thirdpartyservices.ijacketlib.IJacketDefines.IjacketIntentExtras.CIS_ID,-1);// TODO: set the intent extra
         if(-1 != cisId){
             SharedPreferences mypref = getSharedPreferences(IJacketApp.PREF_FILE_NAME, Context.MODE_PRIVATE);
@@ -84,7 +85,7 @@ public class IJacketScanActiv extends Activity{// implements OnItemSelectedListe
 
         }else{
         	Log.d(LOG_TAG, "IJacketScanActiv has not received intent argument on startup");
-        } 
+        } */
 
         getAppInfoFromProvider();
         Log.d(LOG_TAG, "got app info from provider");
@@ -104,13 +105,14 @@ public class IJacketScanActiv extends Activity{// implements OnItemSelectedListe
 	            public void onClick(View view) {
 	            	try{
 	            		
+	            		/* it was decided that it wont be needed to choose a team
 	            		SharedPreferences mypref = getSharedPreferences(IJacketApp.PREF_FILE_NAME, MODE_PRIVATE);
 	        			long comId = mypref.getLong(IJacketApp.CIS_JID_PREFERENCE_TAG, -1);
 	        			if(-1 == comId){
 	        				quickToastMessage("Please first select a team");
 	        				Log.d("LOG_TAG", "no community selected" );
 	        				return;
-	        			}
+	        			}*/
 	            		
 	            		
 		                Intent intent = new Intent("com.google.zxing.client.android.SCAN");
@@ -131,13 +133,14 @@ public class IJacketScanActiv extends Activity{// implements OnItemSelectedListe
 	            public void onClick(View view) {
 	            	try{
 	            		
+	            		/* it was decided that it wont be needed to choose a team
 	            		SharedPreferences mypref = getSharedPreferences(IJacketApp.PREF_FILE_NAME, MODE_PRIVATE);
 	        			long comId = mypref.getLong(IJacketApp.CIS_JID_PREFERENCE_TAG, -1);
 	        			if(-1 == comId){
 	        				quickToastMessage("Please first select a team");
 	        				Log.d("LOG_TAG", "no community selected" );
 	        				return;
-	        			}
+	        			}*/
 	        			IJacketApp appState = (IJacketApp) (getApplication());
 	        			appState.setTestMode(true);
 	        			// now we trigger the Menu Activity
@@ -269,7 +272,7 @@ public class IJacketScanActiv extends Activity{// implements OnItemSelectedListe
 		 		 }
             	 
             	 TextView text0 = new TextView(IJacketScanActiv.this);
-            	 text0.setText("Please configure the team to connect your jacket to.");
+            	 text0.setText("You are listening to the teams:");
             	 text0.setTextSize(24);
             	 layout.addView(text0);
             	 
@@ -329,12 +332,15 @@ public class IJacketScanActiv extends Activity{// implements OnItemSelectedListe
     private void getAppInfoFromProvider(){
 
     	Log.d(LOG_TAG, "going to retrieve our service ID");
+    	ContentResolver cr = this.getApplication().getContentResolver();
+		IJacketApp appState = (IJacketApp) (getApplication());
+    	
     	Uri uri = Uri.parse(SocialContract.AUTHORITY_STRING + SocialContract.UriPathIndex.SERVICES);
         try{
         	//String[] mProjection ={SocialContract.Me.GLOBAL_ID};
         	String mSelectionClause = SocialContract.Services.GLOBAL_ID + " = ?";
         	String[] mSelectionArgs = {org.societies.thirdpartyservices.ijacketlib.IJacketDefines.AccountData.IJACKET_SERVICE_NAME};
-        	ContentResolver cr = this.getApplication().getContentResolver();
+
 	       	 Cursor cursor = cr.query(uri,null,mSelectionClause,mSelectionArgs,null);
 	       	if (null == cursor || cursor.getCount() < 1){
 	       		Log.d(LOG_TAG, "could not find the service id");
@@ -344,7 +350,6 @@ public class IJacketScanActiv extends Activity{// implements OnItemSelectedListe
        			int i  = cursor.getColumnIndex(SocialContract.Services._ID);
        			cursor.moveToNext();
        			long ServiceID = cursor.getLong(i);
-       			IJacketApp appState = (IJacketApp) (getApplication());
        			appState.setiJacketSevId(ServiceID);
    		    	Log.d(LOG_TAG, "serviceID is " + ServiceID);
 	       	}
@@ -354,22 +359,17 @@ public class IJacketScanActiv extends Activity{// implements OnItemSelectedListe
 	   		e.printStackTrace();
 	   		return ;
 	   	}
-        return ;
+    
 
 
 
     	
     	// get my credential
-	   /*	 String mSelectionClause = SocialContract.Me.ACCOUNT_TYPE +  " = ?";
-	   	 String[] mSelectionArgs = {"BOX"};
-	   	 ContentResolver cr = getContentResolver();
-	   	 Uri otherUri =  Uri.parse(SocialContract.AUTHORITY_STRING + SocialContract.UriPathIndex.ME);
-	   	 Cursor cursor = cr.query(otherUri,null,mSelectionClause,mSelectionArgs,null);
-			if (cursor != null && cursor.getCount() >0) {
-				// ADD CODE
-			}
-		*/
-    	
+        long cisId = utilCursor.retrieveUserID(cr);
+        appState.setUserId(cisId);
+        
+        return ;
+        
     }
 
 

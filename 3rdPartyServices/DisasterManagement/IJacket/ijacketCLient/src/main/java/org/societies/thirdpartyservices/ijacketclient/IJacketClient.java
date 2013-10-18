@@ -82,8 +82,6 @@ public class IJacketClient extends Activity implements OnItemSelectedListener {
 		retrieveIJacketServiceID();
 		
 		setContentView(R.layout.main);
-		Log.d(LOG_TAG, "items added on Spinnet");
-		addItemsOnCISSpinner();
 		
 		
        
@@ -95,13 +93,21 @@ public class IJacketClient extends Activity implements OnItemSelectedListener {
         // The activity is about to become visible.
         Intent intent = getIntent();
         if(null != intent){
-	        long cisJid = intent.getLongExtra(org.societies.thirdpartyservices.ijacketlib.IJacketDefines.IjacketIntentExtras.CIS_ID, 0);// TODO: set the intent extra
-	        if(0 != cisJid){
-	        	// TODO: add as the defaul
-	        	defaultCISID = cisJid;
-	
-	        }
+        	Bundle extras = intent.getExtras();
+        	Log.d(LOG_TAG, "got intent on the onStart");
+        	if(null != extras){
+		        long cisJid = extras.getLong(org.societies.thirdpartyservices.ijacketlib.IJacketDefines.IjacketIntentExtras.CIS_ID, 0);// TODO: set the intent extra
+		        Log.d(LOG_TAG, "got extras");
+		        if(0 != cisJid){
+		        	// TODO: add as the defaul
+		        	defaultCISID = cisJid;
+		        	Log.d(LOG_TAG, "set cisID on the onstart");
+		        }
+        	}
         }
+		Log.d(LOG_TAG, "items added on Spinnet");
+		addItemsOnCISSpinner();
+
     }
     
         
@@ -182,9 +188,10 @@ public class IJacketClient extends Activity implements OnItemSelectedListener {
         	if(null != mNewUri){
 	        	this.runOnUiThread(new Runnable() {
 	                public void run() {
-	                    Toast.makeText(IJacketClient.this, "activity published", Toast.LENGTH_SHORT).show();
 	                    EditText editText = (EditText) findViewById(R.id.editText1);
 	                    editText.setText("");
+	                    Toast.makeText(IJacketClient.this, "activity published", Toast.LENGTH_SHORT).show();
+
 	                }
 	            });
         	}
@@ -417,7 +424,7 @@ public class IJacketClient extends Activity implements OnItemSelectedListener {
             		//show popup
             		Context context = getApplicationContext();
             		CharSequence text = "Ijacket app is not shared in any community, please make sure to share it before using!";
-            		int duration = Toast.LENGTH_SHORT;
+            		int duration = Toast.LENGTH_LONG;
             		Toast toast = Toast.makeText(context, text, duration);
             		toast.show();
             	}
