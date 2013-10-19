@@ -24,6 +24,7 @@
  */
 
 package org.societies.collabtools.context;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -46,6 +47,7 @@ import org.societies.api.context.model.CtxAttributeValueType;
 import org.societies.api.context.model.CtxEntity;
 import org.societies.api.context.model.CtxEntityIdentifier;
 import org.societies.api.context.model.CtxIdentifier;
+import org.societies.api.context.model.CtxModelObject;
 import org.societies.api.context.model.CtxModelType;
 import org.societies.api.identity.IIdentity;
 import org.societies.api.identity.IIdentityManager;
@@ -219,11 +221,40 @@ public class ContextAware3pService implements IContextAware3pService  {
 			//			Set<CtxEntityIdentifier> ctxMembersIDs = communityEntity.getMembers();
 
 			LOG.debug("Community Members size: {}", ctxMembersIDs.size());
+			
+//		    List<String> attrTypes = new ArrayList<String>(); 
+//			
+//		    attrTypes.add(CtxAttributeTypes.OCCUPATION); 
+//		    attrTypes.add(CtxAttributeTypes.WORK_POSITION); 
+//		    attrTypes.add(CtxAttributeTypes.LOCATION_SYMBOLIC); 
+//		    attrTypes.add(CtxAttributeTypes.STATUS); 
+//		    attrTypes.add(CtxAttributeTypes.INTERESTS); 
+//		    attrTypes.add(CtxAttributeTypes.NAME); 
 
 			for(CtxEntityIdentifier member : ctxMembersIDs){
 				//Hashmap representing the context attributes
 				HashMap<String, String[]> othersCtx = new HashMap<String, String[]>();
-
+				
+//				final List<CtxIdentifier> attrIdList = new ArrayList<CtxIdentifier>(); 
+//			    for (final String attrType : attrTypes) { 
+//			        final List<CtxIdentifier> attrIds = this.ctxBroker.lookup(getRequestor(), member, CtxModelType.ATTRIBUTE, attrType).get(); 
+//			        attrIdList.addAll(attrIds); 
+//			    } 
+//
+//			    final List<CtxModelObject> ctxModelObjs = this.ctxBroker.retrieve(getRequestor(), attrIdList).get();
+//			    
+//			    for (final CtxModelObject modelObj : ctxModelObjs) { 
+//			       final CtxAttribute attr = (CtxAttribute) modelObj; 
+//			       if (attr != null) {
+//			    	   //Interests needs to be splitted first
+//			    	   if (attr.getId().getType().contains(CtxAttributeTypes.INTERESTS)){
+//							String[] interests = attr.getStringValue().split(",");
+//						       othersCtx.put(attr.getId().getType(), interests); 
+//			    	   }
+//				       othersCtx.put(attr.getId().getType(), new String[]{attr.getStringValue()}); 
+//			       } 
+//			    } 
+			    
 				CtxEntity retrievedCtxEntity = (CtxEntity) this.ctxBroker.retrieve(getRequestor(), member).get();
 				LOG.debug("Retrieved member entity: {}", retrievedCtxEntity.getId());
 
@@ -232,18 +263,17 @@ public class ContextAware3pService implements IContextAware3pService  {
 				for(CtxAttribute occupation : attribute)
 					othersCtx.put("occupation", new String[]{occupation.getStringValue()});
 				//Company
-				attribute = retrievedCtxEntity.getAttributes(CtxAttributeTypes.ADDRESS_WORK_CITY);
+				attribute = retrievedCtxEntity.getAttributes(CtxAttributeTypes.WORK_POSITION);
 				for(CtxAttribute company : attribute)
-					othersCtx.put("company", new String[]{company.getStringValue()});
-				//Location
-				attribute = retrievedCtxEntity.getAttributes(CtxAttributeTypes.LOCATION_SYMBOLIC);
-				for(CtxAttribute location : attribute)
-					othersCtx.put("location", new String[]{location.getStringValue()});
+					othersCtx.put("workPosition", new String[]{company.getStringValue()});
 				//Status
 				attribute = retrievedCtxEntity.getAttributes(CtxAttributeTypes.STATUS);
 				for(CtxAttribute status : attribute)
 					othersCtx.put("status", new String[]{status.getStringValue()});
-
+				//Location
+				attribute = retrievedCtxEntity.getAttributes(CtxAttributeTypes.LOCATION_SYMBOLIC);
+				for(CtxAttribute location : attribute)
+					othersCtx.put("locationSymbolic", new String[]{location.getStringValue()});
 				//Interests
 				attribute = retrievedCtxEntity.getAttributes(CtxAttributeTypes.INTERESTS);		
 
@@ -384,8 +414,9 @@ public class ContextAware3pService implements IContextAware3pService  {
 					results.put(ctxAttr, communityLanguagesStringValue);
 					// if community context attribute value is expressed as a complex value
 				} else if (CtxAttributeValueType.COMPLEX == communityLanguages.getValueType()) {
+					//TODO: complex values not working, english by default
 					CtxAttributeComplexValue communityLanguagesComplexValue = communityLanguages.getComplexValue();
-					results.put(ctxAttr, communityLanguagesComplexValue.toString());
+					results.put(ctxAttr, "English");
 				}
 			}
 			//			Old method...
