@@ -26,6 +26,8 @@ package org.societies.collabtools.tests;
 
 import static org.junit.Assert.fail;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
@@ -59,7 +61,7 @@ import org.societies.collabtools.runtime.SessionRepository;
 public class CtxSubscriberTest {
 	
 	/** The logging facility. */
-	private static final Logger LOG = LoggerFactory.getLogger(RuleEngineTest.class);
+	private static final Logger LOG = LoggerFactory.getLogger(CtxSubscriberTest.class);
 	
 	private static final Random r = new Random( System.currentTimeMillis() );
 	private static GraphDatabaseService personGraphDb, sessionGraphDb;
@@ -117,12 +119,16 @@ public class CtxSubscriberTest {
         System.out.println("Person#" +i+" created");
         
         //Set ShortTerm Ctx
-		String [] response = new String [] {ShortTermCtxTypes.STATUS, getRandomStatus(), person.getName()};
+        String [] response = new String [] {ShortTermCtxTypes.LOCATION, getRandomLocation(), person.getName()};
 		ctxSub.update(null, response);
-		response = new String [] {ShortTermCtxTypes.LOCATION, getRandomLocation(), person.getName()};
+		response = new String [] {ShortTermCtxTypes.STATUS, getRandomStatus(), person.getName()};
 		ctxSub.update(null, response);
 		
+		LOG.info(person.getLastShortTermUpdate().getShortTermCtx(ShortTermCtxTypes.LOCATION));
+		LOG.info(person.getLastShortTermUpdate().getShortTermCtx(ShortTermCtxTypes.STATUS));
+		
 		person.setLongTermCtx(LongTermCtxTypes.INTERESTS, new String[] {"AB","BC","CD","AE"});
+		LOG.info(person.getLongTermCtx(LongTermCtxTypes.INTERESTS));
 	}
 
 	/**
@@ -147,6 +153,24 @@ public class CtxSubscriberTest {
 	@Test
 	public void testGetMonitor() {
 		Assert.assertNotNull(ctxSub.getMonitor());
+	}
+	
+	@Test
+	public void testSetCtx() throws Exception {	
+		Class[] methodParameters = new Class[]{String.class, String[].class, String.class};
+		Method method = ContextSubscriber.class.getDeclaredMethod("setContext", methodParameters );
+		String [] ctxType= {ShortTermCtxTypes.LOCATION};
+		Object[] params = new Object[]{new String("Home"),ctxType,new String("person#0") };
+
+		createPersons(1);
+		Person individual = personRepository.getPersonByName("person#0");
+		String response = individual.getLastShortTermUpdate().getShortTermCtx(ShortTermCtxTypes.LOCATION);
+		LOG.info(response);
+		method.setAccessible(true);
+		method.invoke(ctxSub, params);
+		response = individual.getLastShortTermUpdate().getShortTermCtx(ShortTermCtxTypes.LOCATION);
+		LOG.info(response);
+		Assert.assertEquals("Home", response);
 	}
 	
 	@BeforeClass
