@@ -183,7 +183,7 @@ public class ContextSubscriber implements IContextSubscriber, Observer
 	
 
 	private void setContext(String type, String[] context, String person) throws Exception {
-		logger.info("******************************* Adding long term context for: " + person + ", " + type + ", " + context[0].toString());
+		logger.info("******************************* Adding context info for: " + person + ", " + type + ", " + context[0].toString());
 
 		//Otherwise will be the first element, name : if (type == "name")
 		if (!this.personRepository.hasPerson(person)) {
