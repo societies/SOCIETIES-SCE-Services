@@ -25,8 +25,8 @@ namespace MyTvUI
 
         public void addActivities()
         {
-            handleNewActivity("James has shared his PersonalCalendar service");
-            handleNewActivity("Laura has joined the HWU Tennis CIS");
+            handleNewActivity("My Updates coming soon!");
+           // handleNewActivity("Laura has joined the HWU Tennis CIS");
         }
     }
 }

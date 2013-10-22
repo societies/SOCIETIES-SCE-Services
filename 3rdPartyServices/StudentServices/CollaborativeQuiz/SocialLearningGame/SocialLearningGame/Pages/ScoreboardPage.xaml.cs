@@ -57,6 +57,7 @@ namespace SocialLearningGame.Pages
             if (GameLogic._userSession.player == GameStage.USER)
             {
                 playerGroup.Text = "Player";
+                GameLogic.getRemoteData(DataType.ALL_USERS);
                 allUsers = GameLogic._userSession.allUsers.OrderByDescending(o => o.score).ToList();
                 maxCount = allUsers.Count();
                 if (maxCount > 5)
@@ -68,6 +69,7 @@ namespace SocialLearningGame.Pages
             else if (GameLogic._userSession.player == GameStage.GROUP)
             {
                 playerGroup.Text = "Group";
+                GameLogic.getRemoteData(DataType.ALL_GROUPS);
                 allGroups = GameLogic._userSession.allGroups.OrderByDescending(o => o.score).ToList();
                 maxCount = allGroups.Count();
                 if (maxCount > 5)

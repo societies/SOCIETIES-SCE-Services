@@ -10,7 +10,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>MyTvUI</RootNamespace>
     <AssemblyName>MyTvUI</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <TargetFrameworkProfile>
     </TargetFrameworkProfile>
     <FileAlignment>512</FileAlignment>
@@ -203,6 +203,8 @@
     <Resource Include="Images\off_button_selected.png" />
   </ItemGroup>
   <ItemGroup>
+    <Resource Include="Images\heriotwatt.png" />
+    <Resource Include="Images\societies.png" />
     <Content Include="KinectInteraction170_32.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

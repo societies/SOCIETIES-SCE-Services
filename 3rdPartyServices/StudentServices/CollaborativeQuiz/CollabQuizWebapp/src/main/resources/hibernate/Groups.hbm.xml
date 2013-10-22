@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+        "-//Hibernate/Hibernate Mapping DTD//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping>
+    <class name="ac.hw.services.collabquiz.entities.Groups"
+           table="groups">
+
+        <id name="groupID" type="int" column="group_id">
+            <generator class="native"/>
+        </id>
+
+        <property name="groupName" column="group_name"/>
+        
+        <property name="score" column="score"/>
+        
+        <property name="admin" column="admin"/>
+        
+
+    </class>
+</hibernate-mapping>

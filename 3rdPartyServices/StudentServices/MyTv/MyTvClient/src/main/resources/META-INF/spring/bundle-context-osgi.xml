@@ -19,7 +19,7 @@
   	</osgi:service>
   	
 	<bean id="serMetamodel" class="org.societies.api.schema.servicelifecycle.model.Service">
-     	<property name="authorSignature" value="sgallacher" />
+     	<property name="authorSignature" value="Heriot-Watt University" />
      	<property name="serviceDescription" value="MyTv personalised display service" />
      	<property name="serviceName" value="MyTv" />
      	<property name="serviceType" value="THIRD_PARTY_CLIENT" />
@@ -42,6 +42,7 @@
 	
 	<osgi:reference id="commsMgr" interface="org.societies.api.comm.xmpp.interfaces.ICommManager">
 	</osgi:reference>
+
 	
 	<osgi:reference id="displayDriver" interface="org.societies.api.css.devicemgmt.display.IDisplayDriver">
 	</osgi:reference>

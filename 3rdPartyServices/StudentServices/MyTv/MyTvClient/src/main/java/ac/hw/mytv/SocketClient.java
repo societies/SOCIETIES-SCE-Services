@@ -59,11 +59,11 @@ public class SocketClient {
 			connected = true;
 			return  true;
 		} catch (UnknownHostException e) {
-			LOG.debug("Don't know about host: "+guiIpAddress);
+			if(LOG.isDebugEnabled()) LOG.debug("Don't know about host: "+guiIpAddress);
 		} catch (IOException e) {
 			System.err.println("Couldn't get I/O for "
 					+ "the connection to: "+guiIpAddress);
-			LOG.debug("Couldn't get I/O for "
+			if(LOG.isDebugEnabled()) LOG.debug("Couldn't get I/O for "
 					+ "the connection to: "+guiIpAddress);
 		} 
 		return false;
@@ -87,10 +87,10 @@ public class SocketClient {
 			try{
 				out.println(message);
 				out.flush();
-				LOG.debug("Sent message: "+message);
+				if(LOG.isDebugEnabled()) LOG.debug("Sent message: "+message);
 				String input = in.readLine();
 				disconnect();
-				LOG.debug("received: "+input);
+				if(LOG.isDebugEnabled()) LOG.debug("received: "+input);
 				if (input.contains("RECEIVED")){
 					return true;
 				}else{

@@ -189,7 +189,7 @@ namespace HWUPortal
 
                         if (!p.HasExited)
                         {
-                            if (!p.WaitForExit(5000))
+                            if (!p.WaitForExit(10000))
                             {
                                 if (log.IsDebugEnabled) log.Debug("Closing down process");
                                 p.Close();

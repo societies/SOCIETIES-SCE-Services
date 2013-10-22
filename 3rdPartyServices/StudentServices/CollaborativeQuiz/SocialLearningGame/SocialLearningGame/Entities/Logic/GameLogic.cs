@@ -42,7 +42,7 @@ namespace SocialLearningGame.Logic
                                                                    new Pose3(), new Pose4(), 
                                                                    new Pose5(), new Pose6(), 
                                                                    new Pose7(), new Pose8(), 
-                                                                   new Pose9(), new Pose10() 
+                                                                   new Pose9()
                                                                };
 
 
@@ -151,18 +151,21 @@ namespace SocialLearningGame.Logic
                 case DataType.CREATE_GROUP:
                     if (!_clientComms.createGroup(_userSession.currentUser.userJid))
                     {
+                        getRemoteData(DataType.ALL_GROUPS);
                         MainWindow.SwitchPage(new CommsError());
                     }
                     break;
                 case DataType.DELETE_GROUP:
                     if (!_clientComms.deleteGroup(_userSession.currentGroup.groupID.ToString()))
                     {
+                        getRemoteData(DataType.ALL_GROUPS);
                         MainWindow.SwitchPage(new CommsError());
                     }
                     break;
                 case DataType.LEAVE_GROUP:
                     if (!_clientComms.removeUserFromGroup(_userSession.currentUser.userJid))
                     {
+                        getRemoteData(DataType.ALL_GROUPS);
                         MainWindow.SwitchPage(new CommsError());
                     }
                     break;

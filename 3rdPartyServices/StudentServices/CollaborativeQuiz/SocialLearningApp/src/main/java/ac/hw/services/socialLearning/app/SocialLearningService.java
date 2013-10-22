@@ -24,6 +24,7 @@
  */
 package ac.hw.services.socialLearning.app;
 
+import org.eclipse.jetty.util.log.Log;
 import org.societies.api.context.CtxException;
 import org.societies.api.context.model.CtxIdentifier;
 
@@ -428,12 +429,20 @@ public void setCommMgr(ICommManager commMgr) {
 @Override
 public void serviceStarted(String ipAddr) {
 	// TODO Auto-generated method stub
+	if(this.userIdentity!=null)
+	{
+		logging.info("CollabQuiz Started From: " + this.userIdentity.getBareJid());
+	}
 
 }
 
 @Override
 public void serviceStopped(String ipAddr) {
 	// TODO Auto-generated method stub
+	if(this.userIdentity!=null)
+	{
+		logging.info("CollabQuiz Stopped From: " + this.userIdentity.getBareJid());
+	}
 
 }
 

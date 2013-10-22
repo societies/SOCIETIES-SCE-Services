@@ -9,7 +9,7 @@
     <k:KinectRegion Grid.Row="1" x:Name="kinectRegion" Grid.ColumnSpan="3">
         
         
-        <Canvas>
+        <Canvas Margin="10,10,-9.4,-10.4">
             
             
 
@@ -70,33 +70,33 @@
                 <DockPanel.Background>
                     <ImageBrush ImageSource="/MyTvUI;component/Images/group_background.png" />
                 </DockPanel.Background>
-            </DockPanel>
+            </DockPanel> 
 
             <DockPanel Canvas.Left="12" Canvas.Top="550" Height="97" Name="dockPanel3" Width="458">
                 <DockPanel.Background>
                     <ImageBrush ImageSource="/MyTvUI;component/Images/group_background.png" />
                 </DockPanel.Background>
-            </DockPanel>
+            </DockPanel> 
 
             <Canvas Canvas.Left="12" Canvas.Top="57" Height="453" Name="canvas1" Width="1020">
                 <WebBrowser Canvas.Left="71" Canvas.Top="10" Height="418" Name="tvBrowser" Width="737" Loaded="tvBrowser_WindowLoaded" Navigated="tvBrowser_Navigated" Cursor="None" DataContext="{Binding}" />
 
-                <k:KinectCircleButton Foreground="Transparent" Name="volumeUpButton" Height="60" Width="60" Click="volumeUpButtonClick"
-                                      Canvas.ZIndex="1" Canvas.Left="925" Canvas.Top="343" />
+               <!-- <k:KinectCircleButton Foreground="Transparent" Name="volumeUpButton" Height="60" Width="60" Click="volumeUpButtonClick"
+                                      Canvas.ZIndex="1" Canvas.Left="925" Canvas.Top="343" /> -->
 
-                <k:KinectCircleButton Foreground="Transparent" Name="volumeDownButton" Height="60" Width="60" Click="volumeDownButtonClick"
-                                      Canvas.ZIndex="1" Canvas.Left="835" Canvas.Top="343" />
+                <!--<k:KinectCircleButton Foreground="Transparent" Name="volumeDownButton" Height="60" Width="60" Click="volumeDownButtonClick"
+                                      Canvas.ZIndex="1" Canvas.Left="835" Canvas.Top="343" /> -->
 
-                <Rectangle Height="60" Width="60" Name="volumeUp" Canvas.Left="925" Canvas.Top="343">
+               <!-- <Rectangle Height="60" Width="60" Name="volumeUp" Canvas.Left="925" Canvas.Top="343">
                     <Rectangle.Fill>
                         <ImageBrush ImageSource="Images/volume_up.png"/>
                     </Rectangle.Fill>
-                </Rectangle>
-                <Rectangle Height="60" Width="60" Name="volumeDown" Canvas.Left="835" Canvas.Top="343">
+                </Rectangle> -->
+                <!--<Rectangle Height="60" Width="60" Name="volumeDown" Canvas.Left="835" Canvas.Top="343">
                     <Rectangle.Fill>
                         <ImageBrush ImageSource="Images/volume_down.png"/>
                     </Rectangle.Fill>
-                </Rectangle>
+                </Rectangle> -->
                 <Rectangle Canvas.Left="835" Canvas.Top="143" Height="60" Name="channel4Rectangle" Width="60">
                     <Rectangle.Fill>
                         <ImageBrush ImageSource="Images/channel_background.png" />
@@ -123,19 +123,19 @@
 
                 <k:KinectCircleButton Foreground="Transparent" Name="channel2Button" Height="60" Width="60" Click="channelButtonClick"
                                       Canvas.ZIndex="1" Canvas.Left="835" Canvas.Top="60" />
-                <Label Canvas.Left="835" Canvas.Top="60" Content="SPORT" FontSize="16" Height="60" HorizontalContentAlignment="Center" Name="label2" VerticalContentAlignment="Center" Width="60" Foreground="Black"/>
+                <Label Canvas.Left="835" Canvas.Top="60" Content="General" FontSize="14" Height="60" HorizontalContentAlignment="Center" Name="label2" VerticalContentAlignment="Center" Width="60" Foreground="Black"/>
 
                 <k:KinectCircleButton Foreground="Transparent" Name="channel1Button" Height="60" Width="60" Click="channelButtonClick"
                                       Canvas.ZIndex="1" Canvas.Left="925" Canvas.Top="60" />
-                <Label Canvas.Left="925" Canvas.Top="60" Content="NEWS" Height="60" Name="label1" Width="60" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontSize="16" Foreground="Black" />
+                <Label Canvas.Left="925" Canvas.Top="60" Content="News" Height="60" Name="label1" Width="60" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontSize="14" Foreground="Black" />
 
                 <k:KinectCircleButton Foreground="Transparent" Name="channel4Button" Height="60" Width="60" Click="channelButtonClick"
                                       Canvas.ZIndex="1" Canvas.Left="835" Canvas.Top="143" />
-                <Label Canvas.Left="835" Canvas.Top="143" Content="MUSIC" FontSize="16" Height="60" HorizontalContentAlignment="Center" Name="label4" VerticalContentAlignment="Center" Width="60" Foreground="Black" />
+                <Label Canvas.Left="835" Canvas.Top="143" Content="Music" FontSize="14" Height="60" HorizontalContentAlignment="Center" Name="label4" VerticalContentAlignment="Center" Width="60" Foreground="Black" />
 
                 <k:KinectCircleButton Foreground="Transparent" Name="channel3Button" Height="60" Width="60" Click="channelButtonClick"
                                       Canvas.ZIndex="1" Canvas.Left="925" Canvas.Top="143" />
-                <Label Canvas.Left="925" Canvas.Top="143" Content="CARTOONS" FontSize="9" Height="60" HorizontalContentAlignment="Center" Name="label3" VerticalContentAlignment="Center" Width="60" Foreground="Black" />
+                <Label Canvas.Left="925" Canvas.Top="143" Content="Games" FontSize="14" Height="60" HorizontalContentAlignment="Center" Name="label3" VerticalContentAlignment="Center" Width="60" Foreground="Black" />
 
                 <k:KinectCircleButton Foreground="Transparent" Name="offButton" Height="70" Width="70" Click="offButtonClick"
                                       Canvas.ZIndex="1" Canvas.Left="877" Canvas.Top="238" />
@@ -164,9 +164,14 @@
                     <ImageBrush ImageSource="/MyTvUI;component/Images/logo.png" />
                 </Rectangle.Fill>
             </Rectangle>
-            <Rectangle Canvas.Left="542" Canvas.Top="525" Height="35" Name="rectangle4" Width="200">
+            <Rectangle Canvas.Top="553" Height="96" Name="rectangle4" Width="292" Canvas.Left="624">
                 <Rectangle.Fill>
-                    <ImageBrush ImageSource="/MyTvUI;component/Images/my_schedule.png" />
+                    <ImageBrush ImageSource="/MyTvUI;component/Images/societies.png" />
+                </Rectangle.Fill>
+            </Rectangle>
+            <Rectangle Canvas.Top="550" Height="97" Name="rectangle5" Width="117" Canvas.Left="180">
+                <Rectangle.Fill>
+                    <ImageBrush ImageSource="/MyTvUI;component/Images/heriotwatt.png" />
                 </Rectangle.Fill>
             </Rectangle>
 

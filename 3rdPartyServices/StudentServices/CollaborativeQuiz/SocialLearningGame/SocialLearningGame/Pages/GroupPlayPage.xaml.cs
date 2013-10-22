@@ -250,12 +250,14 @@ namespace SocialLearningGame.Pages
         private void createGroup()
         {
             GameLogic.postRemoteData(DataType.CREATE_GROUP, null);
+            GameLogic.getRemoteData(DataType.ALL_GROUPS);
             loadPage();
         }
 
         private void deleteGroup()
         {
             GameLogic.postRemoteData(DataType.DELETE_GROUP, null);
+            GameLogic.getGroupInformation();
             loadPage();
         }
 

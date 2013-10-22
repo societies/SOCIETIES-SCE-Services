@@ -104,7 +104,7 @@ namespace HWUPortal
             // Bind the sensor chooser's current sensor to the KinectRegion
             Binding regionSensorBinding = new Binding("Kinect") { Source = this.SensorChooser };
             BindingOperations.SetBinding(this.kinectRegion, KinectRegion.KinectSensorProperty, regionSensorBinding);
-            Console.WriteLine("Kinect initialized");
+            Console.WriteLine("Kinect initialized"); 
 
             iViewer = new ImageViewer();
             Console.WriteLine("ImageViewer initialized");
@@ -389,7 +389,7 @@ namespace HWUPortal
                 this.setApplicationVisible(true);
                 if (log.IsDebugEnabled)
                     Console.WriteLine("User: " + userSession.getUserIdentity() + " logging in and loading " + userSession.getServices().Count + " services");
-
+                welcomeText.Text = "Welcome, " + userSession.getUserIdentity();
                 if (!this.loggedIn)
                 {
                     this.serviceSocketServer.setUserSession(userSession, this);
@@ -409,6 +409,7 @@ namespace HWUPortal
                         {
                             ServiceInfo sInfo = services.ElementAt(i);
                             KinectCircleButton button = serviceButtons.ElementAt(i);
+                            
                             this.enableThisButton(button, true);
                             sInfo.button = button;
                             this.setServiceInfo(button, sInfo);

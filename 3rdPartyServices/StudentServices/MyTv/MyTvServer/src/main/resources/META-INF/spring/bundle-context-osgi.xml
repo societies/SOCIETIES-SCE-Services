@@ -19,7 +19,7 @@
   	</osgi:service>
   	
 	<bean id="serMetamodel" class="org.societies.api.schema.servicelifecycle.model.Service">
-     	<property name="authorSignature" value="eliza" />
+     	<property name="authorSignature" value="Heriot-Watt University" />
      	<property name="serviceDescription" value="MyTv personalised display service" />
      	<property name="serviceName" value="MyTvServer" />
      	<property name="serviceType" value="THIRD_PARTY_SERVER" />

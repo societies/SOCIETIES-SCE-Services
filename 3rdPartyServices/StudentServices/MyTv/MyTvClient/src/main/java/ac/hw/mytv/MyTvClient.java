@@ -34,7 +34,9 @@ import java.util.concurrent.Future;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.societies.api.activity.IActivityFeedManager;
 import org.societies.api.comm.xmpp.interfaces.ICommManager;
+import org.societies.api.css.ICSSManager;
 import org.societies.api.css.devicemgmt.display.IDisplayDriver;
 import org.societies.api.css.devicemgmt.display.IDisplayableService;
 import org.societies.api.identity.IIdentity;
@@ -73,6 +75,7 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 	String myServiceType;
 	URL myUIExeLocation;
 	List<String> myServiceTypes;
+	Thread activityFeedThread;
 	Logger LOG = LoggerFactory.getLogger(MyTvClient.class);
 
 	//personalisable parameters
@@ -111,14 +114,14 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 					myUIExeLocation, 
 					listenPort,
 					true);
-			LOG.debug("Registered as DisplayableService with the following info:");
-			LOG.debug("************************************************************");
-			LOG.debug("IDisplayableService = "+this);
-			LOG.debug("Service name = "+myServiceName);
-			LOG.debug("Exe location = "+myUIExeLocation.toString());
-			LOG.debug("SocketServer listen port = "+listenPort);
-			LOG.debug("Needs kinect = true");
-			LOG.debug("************************************************************");
+			if(LOG.isDebugEnabled()) LOG.debug("Registered as DisplayableService with the following info:");
+			if(LOG.isDebugEnabled()) LOG.debug("************************************************************");
+			if(LOG.isDebugEnabled()) LOG.debug("IDisplayableService = "+this);
+			if(LOG.isDebugEnabled()) LOG.debug("Service name = "+myServiceName);
+			if(LOG.isDebugEnabled()) LOG.debug("Exe location = "+myUIExeLocation.toString());
+			if(LOG.isDebugEnabled()) LOG.debug("SocketServer listen port = "+listenPort);
+			if(LOG.isDebugEnabled()) LOG.debug("Needs kinect = true");
+			if(LOG.isDebugEnabled()) LOG.debug("************************************************************");
 		} catch (MalformedURLException e) {
 			LOG.error("Could not register as displayable service with display driver");
 			e.printStackTrace();
@@ -146,7 +149,7 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 				"(" + CSSEventConstants.EVENT_SOURCE + "=org/societies/servicelifecycle)" +
 				")";
 		this.eventMgr.subscribeInternalEvent(this, new String[]{EventTypes.SERVICE_LIFECYCLE_EVENT}, eventFilter);
-		this.LOG.debug("Subscribed to "+EventTypes.SERVICE_LIFECYCLE_EVENT+" events");
+		if(LOG.isDebugEnabled()) LOG.debug("Subscribed to "+EventTypes.SERVICE_LIFECYCLE_EVENT+" events");
 	}
 
 	private void unregisterForServiceEvents()
@@ -158,7 +161,7 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 
 		this.eventMgr.unSubscribeInternalEvent(this, new String[]{EventTypes.SERVICE_LIFECYCLE_EVENT}, eventFilter);
 		//this.evMgr.subscribeInternalEvent(this, new String[]{EventTypes.SERVICE_LIFECYCLE_EVENT}, eventFilter);
-		this.LOG.debug("Unsubscribed from "+EventTypes.SERVICE_LIFECYCLE_EVENT+" events");
+		if(LOG.isDebugEnabled()) LOG.debug("Unsubscribed from "+EventTypes.SERVICE_LIFECYCLE_EVENT+" events");
 	}
 
 	/*
@@ -177,7 +180,7 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 				"(" + CSSEventConstants.EVENT_SOURCE + "=org/societies/css/device)" +
 				")";
 		this.eventMgr.subscribeInternalEvent(this, new String[]{EventTypes.DISPLAY_EVENT}, eventFilter);
-		LOG.debug("Subscribed to "+EventTypes.DISPLAY_EVENT+" events");
+		if(LOG.isDebugEnabled()) LOG.debug("Subscribed to "+EventTypes.DISPLAY_EVENT+" events");
 	}
 
 	/*
@@ -185,32 +188,32 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 	 */
 	@Override
 	public void handleExternalEvent(CSSEvent event) {
-		LOG.debug("Received external event: "+event.geteventName());
+		if(LOG.isDebugEnabled()) LOG.debug("Received external event: "+event.geteventName());
 	}
 
 	@Override
 	public void handleInternalEvent(InternalEvent event) {
-		LOG.debug("Received internal event: "+event.geteventName());
+		if(LOG.isDebugEnabled()) LOG.debug("Received internal event: "+event.geteventName());
 
 		if(event.geteventName().equalsIgnoreCase("NEW_SERVICE")){
-			LOG.debug("Received SLM event");
+			if(LOG.isDebugEnabled()) LOG.debug("Received SLM event");
 			ServiceMgmtEvent slmEvent = (ServiceMgmtEvent) event.geteventInfo();
 			if (slmEvent.getBundleSymbolName().equalsIgnoreCase("ac.hw.mytv.MyTVClient")){
-				this.LOG.debug("Received SLM event for my bundle");
+				if(LOG.isDebugEnabled()) LOG.debug("Received SLM event for my bundle");
 				if (slmEvent.getEventType().equals(ServiceMgmtEventType.NEW_SERVICE)){
 
 					//get service ID
 					if(myServiceID == null){
 						myServiceID = slmEvent.getServiceId();
-						LOG.debug("client serviceID = "+myServiceID.toString());
+						if(LOG.isDebugEnabled()) LOG.debug("client serviceID = "+myServiceID.toString());
 					}
 
 					//get user ID
 					if(userID == null){
 						userID = commsMgr.getIdManager().getThisNetworkNode();
-						LOG.debug("userID = "+userID.toString());
+						if(LOG.isDebugEnabled()) LOG.debug("userID = "+userID.toString());
 					}
-					
+
 					this.serverJid = this.serviceMgmt.getServer(myServiceID);
 					serverServiceIdentifier = this.serviceMgmt.getServerServiceIdentifier(myServiceID);
 					this.requestor = new RequestorService(serverJid, serverServiceIdentifier);
@@ -219,9 +222,9 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 				}
 			}
 		}else if(event.geteventName().equalsIgnoreCase("displayUpdate")){
-			LOG.debug("Received DisplayPortal event");
+			if(LOG.isDebugEnabled()) LOG.debug("Received DisplayPortal event");
 		}else{
-			LOG.debug("Received unknown event with name: "+event.geteventName());
+			if(LOG.isDebugEnabled()) LOG.debug("Received unknown event with name: "+event.geteventName());
 		}
 	}
 
@@ -232,12 +235,30 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 	 */
 	@Override
 	public void serviceStarted(String guiIpAddress){
-		LOG.debug("Received serviceStarted call from Portal");
+		if(LOG.isDebugEnabled()) LOG.debug("Received serviceStarted call from Portal");
+		if(userID!=null)
+		{
+			LOG.info("MyTV Service Started From: " + this.userID.getBareJid());
+		}
+		else
+		{
+			LOG.info("MyTV Service Started From Unknown User!");
+		}
+		//START THREAD FOR ACTIVITY FEEDS
 	}
 
 	@Override
 	public void serviceStopped(String guiIpAddress){
-		LOG.debug("Received serviceStopped call from Portal");
+		if(LOG.isDebugEnabled()) LOG.debug("Received serviceStopped call from Portal");
+		if(userID!=null)
+		{
+			LOG.info("MyTV Service Stoped From: " + this.userID.getBareJid());
+		}
+		else
+		{
+			LOG.info("MyTV Service Stoped From Unknown User!");
+		}
+		//END THREAD FOR ACTIVITY FEEDS
 	}
 
 
@@ -279,6 +300,7 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 		this.uam = uam;
 	}
 
+
 	public void setPersoMgr(IPersonalisationManager persoMgr){
 		this.persoMgr = persoMgr;
 	}
@@ -310,10 +332,10 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 	 * Handle commands from GUI
 	 */
 	public class CommandHandler{
-		
+
 
 		public void connectToGUI(String gui_ip){
-			LOG.debug("Connecting to service GUI on IP address: "+gui_ip);
+			if(LOG.isDebugEnabled()) LOG.debug("Connecting to service GUI on IP address: "+gui_ip);
 			//disconnect any existing connections
 			if(socketClient != null){
 				if(socketClient.isConnected()){
@@ -327,7 +349,7 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 						"START_MSG\n" +
 								"USER_SESSION_STARTED\n" +
 						"END_MSG")){
-					LOG.debug("Handshake complete:  ServiceClient -> GUI");
+					if(LOG.isDebugEnabled()) LOG.debug("Handshake complete:  ServiceClient -> GUI");
 				}else{
 					LOG.error("Handshake failed: ServiceClient -> GUI");
 				}
@@ -341,7 +363,7 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 		}
 
 		public void processUserAction(String parameterName, String value){
-			LOG.debug("Processing user action: "+parameterName+" = "+value);
+			if(LOG.isDebugEnabled()) LOG.debug("Processing user action: "+parameterName+" = "+value);
 
 			if(parameterName.equalsIgnoreCase("channel")){
 				currentChannel = new Integer(value).intValue();
@@ -351,94 +373,94 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 
 			//create action object and send to uam
 			IAction action = new Action(myServiceID, myServiceType, parameterName, value);
-			LOG.debug("Sending action to UAM: "+action.toString());
+			if(LOG.isDebugEnabled()) LOG.debug("Sending action to UAM: "+action.toString());
 			uam.monitor(userID, action);
 		}
 
 		public String getChannelPreference(){
-			LOG.debug("Getting channel preference from personalisation manager");
+			if(LOG.isDebugEnabled()) LOG.debug("Getting channel preference from personalisation manager");
 			String result = "PREFERENCE-ERROR";
 			try {
 				Future<IAction> futureOutcome = persoMgr.getPreference(requestor, userID, myServiceType, myServiceID, "channel");
-				LOG.debug("Requested preference from personalisationManager");
+				if(LOG.isDebugEnabled()) LOG.debug("Requested preference from personalisationManager");
 				IAction outcome = futureOutcome.get();
-				LOG.debug("Called .get()");
+				if(LOG.isDebugEnabled()) LOG.debug("Called .get()");
 				if(outcome!=null){
-					LOG.debug("Successfully retrieved channel preference outcome: "+outcome.getvalue());
+					if(LOG.isDebugEnabled()) LOG.debug("Successfully retrieved channel preference outcome: "+outcome.getvalue());
 					result = outcome.getvalue();
 				}else{
-					LOG.debug("No channel preference was found");
+					if(LOG.isDebugEnabled()) LOG.debug("No channel preference was found");
 				}
 			} catch (Exception e){
-				LOG.debug("Error retrieving preference");
+				if(LOG.isDebugEnabled()) LOG.debug("Error retrieving preference");
 				e.printStackTrace();
 			}
-			LOG.debug("Preference request result = "+result);
+			if(LOG.isDebugEnabled()) LOG.debug("Preference request result = "+result);
 			return result;
 		}
 
 		public String getMutedPreference(){
-			LOG.debug("Getting mute preference from personalisation manager");
+			if(LOG.isDebugEnabled()) LOG.debug("Getting mute preference from personalisation manager");
 			String result = "PREFERENCE-ERROR";
 			try {
 				Future<IAction> futureOutcome = persoMgr.getPreference(requestor, userID, myServiceType, myServiceID, "muted");
-				LOG.debug("Requested preference from personalisationManager");
+				if(LOG.isDebugEnabled()) LOG.debug("Requested preference from personalisationManager");
 				IAction outcome = futureOutcome.get();
-				LOG.debug("Called .get()");
+				if(LOG.isDebugEnabled()) LOG.debug("Called .get()");
 				if(outcome!=null){
-					LOG.debug("Successfully retrieved mute preference outcome: "+outcome.getvalue());
+					if(LOG.isDebugEnabled()) LOG.debug("Successfully retrieved mute preference outcome: "+outcome.getvalue());
 					result = outcome.getvalue();
 				}else{
-					LOG.debug("No mute preference was found");
+					if(LOG.isDebugEnabled()) LOG.debug("No mute preference was found");
 				}
 			} catch (Exception e) {
-				LOG.debug("Error retrieving mute preference");
+				if(LOG.isDebugEnabled()) LOG.debug("Error retrieving mute preference");
 				e.printStackTrace();
 			} 
-			LOG.debug("Preference request result = "+result);
+			if(LOG.isDebugEnabled()) LOG.debug("Preference request result = "+result);
 			return result;
 		}
-		
+
 		public String getChannelIntent(){
-			LOG.debug("Getting channel intent from Personalisation manager");
+			if(LOG.isDebugEnabled()) LOG.debug("Getting channel intent from Personalisation manager");
 			String result = "INTENT-ERROR";
 			try {
-				
+
 				Future<IAction> futureOutcome = persoMgr.getIntentAction(requestor, userID, myServiceID, "channel");
-				LOG.debug("Requested intent from personalisationManager");
+				if(LOG.isDebugEnabled()) LOG.debug("Requested intent from personalisationManager");
 				IAction outcome = futureOutcome.get();
-				LOG.debug("Called .get()");
+				if(LOG.isDebugEnabled()) LOG.debug("Called .get()");
 				if(outcome!=null){
-					LOG.debug("Successfully retrieved channel intent outcome: "+outcome.getvalue());
+					if(LOG.isDebugEnabled()) LOG.debug("Successfully retrieved channel intent outcome: "+outcome.getvalue());
 					result = outcome.getvalue();
 				}else{
-					LOG.debug("No channel intent was found");
+					if(LOG.isDebugEnabled()) LOG.debug("No channel intent was found");
 				}
 			} catch (Exception e){
-				LOG.debug("Error retrieving intent");
+				if(LOG.isDebugEnabled()) LOG.debug("Error retrieving intent");
 			}
-			LOG.debug("Intent request result = "+result);
+			if(LOG.isDebugEnabled()) LOG.debug("Intent request result = "+result);
 			return result;
 		}
-		
+
 		public String getMutedIntent(){
-			LOG.debug("Getting muted intent from personalisation manager");
+			if(LOG.isDebugEnabled()) LOG.debug("Getting muted intent from personalisation manager");
 			String result = "INTENT_ERROR";
 			try {
 				Future<IAction> futureOutcome = persoMgr.getIntentAction(requestor, userID, myServiceID, "muted");
-				LOG.debug("Requested intent from personalisationManager");
+				if(LOG.isDebugEnabled()) LOG.debug("Requested intent from personalisationManager");
 				IAction outcome = futureOutcome.get();
-				LOG.debug("Called .get()");
+				if(LOG.isDebugEnabled()) LOG.debug("Called .get()");
 				if(outcome!=null){
-					LOG.debug("Successfully retrieved muted intent outcome: "+outcome.getvalue());
+					if(LOG.isDebugEnabled()) LOG.debug("Successfully retrieved muted intent outcome: "+outcome.getvalue());
 					result = outcome.getvalue();
 				}else{
-					LOG.debug("No muted intent was found");
+					if(LOG.isDebugEnabled()) LOG.debug("No muted intent was found");
 				}
 			} catch (Exception e){
-				LOG.debug("Error retrieving intent");
+				if(LOG.isDebugEnabled()) LOG.debug("Error retrieving intent");
 			}
-			LOG.debug("Intent request result = "+result);
+			if(LOG.isDebugEnabled()) LOG.debug("Intent request result = "+result);
 			return result;
 		}
 	}
