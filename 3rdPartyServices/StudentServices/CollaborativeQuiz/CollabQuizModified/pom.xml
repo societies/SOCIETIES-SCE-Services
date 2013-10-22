@@ -31,7 +31,7 @@
 	<groupId>ac.hw.services.collabquiz</groupId>
 	<artifactId>CollabQuizServer2</artifactId>
 	<packaging>bundle</packaging>
-	<version>1.2</version>
+	<version>${release.version}</version>
 	<name>Collaborative Quiz Server (University CSS)</name>
 
 	<developers>
@@ -140,9 +140,9 @@
 						<configuration>
 							<artifactItems>
 								<artifactItem>
-									<groupId>ac.hw.services.collabquiz</groupId>
-									<artifactId>CollabQuizServer2</artifactId>
-									<version>1.2</version>
+									<groupId>ac.hw.services</groupId>
+									<artifactId>SocialLearningApp</artifactId>
+									<version>${release.version}</version>
 									<outputDirectory>${project.build.directory}/societies-client</outputDirectory>
 								</artifactItem>
 							</artifactItems>
