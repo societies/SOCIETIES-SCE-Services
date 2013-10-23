@@ -85,6 +85,7 @@ public class SessionFilter implements Filter {
 				!url.equalsIgnoreCase(logoutUrl) &&
 				!url.startsWith("/pd") &&
 				!url.startsWith("/apk") &&
+				!url.startsWith("/send") &&
 				!urlList.contains(url)) { // restricted access
 			
 			// logged in?

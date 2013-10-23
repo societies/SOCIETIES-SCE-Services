@@ -14,6 +14,7 @@
           <element id="library" level="project" name="objectify-appengine-4.0b1" />
           <element id="library" level="application" name="AppEngineAPI" />
           <element id="library" level="application" name="AppEngineDev" />
+          <element id="library" level="project" name="json-simple-1.1.1" />
         </element>
       </element>
     </root>

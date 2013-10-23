@@ -143,6 +143,7 @@ public class CTUser {
 	private Long spaceId;
 	private boolean admin=false;
 	@Ignore private ApplicationSettings applicationSettings;
+    @Index private String gcmRegistrationId;
 
 	public CTUser() {
 	}
@@ -412,5 +413,13 @@ public class CTUser {
 
     public void setScope(String scope) {
         this.scope = scope;
+    }
+
+    public String getGcmRegistrationId() {
+        return gcmRegistrationId;
+    }
+
+    public void setGcmRegistrationId(String gcmRegistrationId) {
+        this.gcmRegistrationId = gcmRegistrationId;
     }
 }

@@ -37,6 +37,7 @@ import com.googlecode.objectify.annotation.Id;
 public class ApplicationSettings {
 	@Id private Long id;
 	private long chekInTimeOut = 60*60*1000;	// 1 hour
+    private String apiKey;
 
 	public long getChekInTimeOut() {
 		return chekInTimeOut;
@@ -47,4 +48,12 @@ public class ApplicationSettings {
 	public Long getId() {
 		return id;
 	}
+
+    public String getApiKey() {
+        return apiKey;
+    }
+
+    public void setApiKey(String apiKey) {
+        this.apiKey = apiKey;
+    }
 }

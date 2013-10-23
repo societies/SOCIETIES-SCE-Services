@@ -25,12 +25,19 @@
 package si.stecce.societies.crowdtasking;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
+import com.google.appengine.api.taskqueue.Queue;
+import com.google.appengine.api.taskqueue.QueueFactory;
+import com.google.appengine.api.taskqueue.TaskOptions;
+import com.google.appengine.api.taskqueue.TaskOptions.Method;
 import si.stecce.societies.crowdtasking.api.RESTful.impl.UsersAPI;
+import si.stecce.societies.crowdtasking.gcm.Datastore;
+import si.stecce.societies.crowdtasking.gcm.SendMessageServlet;
 import si.stecce.societies.crowdtasking.model.CTUser;
 import si.stecce.societies.crowdtasking.model.Comment;
 import si.stecce.societies.crowdtasking.model.Community;
@@ -48,8 +55,8 @@ import com.google.appengine.api.mail.MailServiceFactory;
  *
  */
 public final class NotificationsSender {
-	private static final Logger log = Logger.getLogger(NotificationsSender.class.getName());
-	private static final String SENDER = "Crowd Tasking. No Reply <setcce.research@gmail.com>";
+    private static final Logger logger = Logger.getLogger(NotificationsSender.class.getName());
+    private static final String SENDER = "Crowd Tasking. No Reply <setcce.research@gmail.com>";
 	private static SimpleDateFormat iCalendarDateFormat = new SimpleDateFormat  ("yyyyMMdd'T'HHmmss'Z'");
 
 	private NotificationsSender() {}
@@ -143,21 +150,50 @@ public final class NotificationsSender {
 		}
 	}
 	
-	public static void commentOnTaskIParticipate(Task task, Set<Long> involvedUsers) {
+	public static void commentOnTaskIParticipate(Task task, Set<Long> involvedUsers, Long lastCommenterId) {
 		Map<Long, CTUser> usersMap = UsersAPI.getUsersMap(involvedUsers.toArray(new Long[0]));
-		for (Long userId:involvedUsers) {
-			CTUser user = usersMap.get(userId);
-			if (user.getNotifications().isNewComment()) {
-				sendMail(user.getEmail(), "New comment on task '" + task.getTitle()+ "'.",
-						"Hello!\n\rLet as inform you that there is a new comment on task '"+task.getTitle()+"'.\n\r"+
-						"Here is a direct link to the task: "+Util.taskLink(task.getId())+
-						"\n\n\nHave a nice day", "", null);
-			}
-		}
-		
-	}
+        List<String> partialDevices = new ArrayList();
 
-	public static void requestToJoinCommunity(Community community, CTUser user) {
+        String message = "A new comment on the task '" + task.getTitle() + "'.";
+
+        for (Long userId:involvedUsers) {
+            if (userId.longValue() == lastCommenterId.longValue()) {
+                continue;
+            }
+            CTUser user = usersMap.get(userId);
+            if (user.getNotifications().isNewComment()) {
+                sendMail(user.getEmail(), "New comment on the task '" + task.getTitle() + "'.",
+                        "Hello!\n\rLet as inform you that there is a new comment on task '" + task.getTitle() + "'.\n\r" +
+                                "Here is a direct link to the task: " + Util.taskLink(task.getId()) +
+                                "\n\n\nHave a nice day", "", null);
+            }
+            if (user.getGcmRegistrationId() != null) {
+                partialDevices.add(user.getGcmRegistrationId());
+                if (partialDevices.size() == Datastore.MULTICAST_SIZE) {
+                    sendGCMMessage(partialDevices, message);
+                    partialDevices.clear();
+                }
+            }
+        }
+        if (!partialDevices.isEmpty()) {
+            sendGCMMessage(partialDevices, message);
+        }
+    }
+
+    private static void sendGCMMessage(List<String> partialDevices, String message) {
+        String multicastKey = Datastore.createMulticast(partialDevices);
+        logger.info("Queuing " + partialDevices.size() + " devices on multicast " +
+                multicastKey);
+        TaskOptions taskOptions = TaskOptions.Builder
+                .withUrl("/send")
+                .param(SendMessageServlet.PARAMETER_MULTICAST, multicastKey)
+                .param(SendMessageServlet.PARAMETER_MESSAGE, message)
+                .method(Method.POST);
+        Queue queue = QueueFactory.getQueue("gcm");
+        queue.add(taskOptions);
+    }
+
+    public static void requestToJoinCommunity(Community community, CTUser user) {
 		if (user.getNotifications().isJoinCommunityRequest()) {
 			sendMail(community.getOwner().getEmail(), "New request to join your community '" + community.getName()+ "'.",
 					"Hello!\n\rLet as inform you that user "+user.getUserName()+" wants to join '"+community.getName()+"'.\n\r"+
@@ -189,10 +225,10 @@ public final class NotificationsSender {
 		}
 		try {
 			mailService.send(mail);
-			log.info("Mail sent to "+recipient+" with subject: "+subject);
+            logger.info("Mail sent to "+recipient+" with subject: "+subject);
 		}
 		catch (Exception e) {
-			log.warning("Error in sendMail() in NotificationsSender class: "+e.getMessage());
+            logger.warning("Error in sendMail() in NotificationsSender class: "+e.getMessage());
 		}
 	}
 }

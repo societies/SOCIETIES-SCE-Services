@@ -30,6 +30,7 @@
     <orderEntry type="library" name="asm-3.1" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="AppEngineAPI" level="application" />
     <orderEntry type="library" scope="PROVIDED" name="AppEngineDev" level="application" />
+    <orderEntry type="library" name="json-simple-1.1.1" level="project" />
   </component>
 </module>
 

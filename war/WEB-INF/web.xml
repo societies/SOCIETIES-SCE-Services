@@ -179,5 +179,18 @@
 		<servlet-name>CSAdmin</servlet-name>
         <url-pattern>/cs/admin</url-pattern>
 	</servlet-mapping>
-		
+
+    <servlet>
+        <servlet-name>SendMessageServlet</servlet-name>
+        <servlet-class>
+            si.stecce.societies.crowdtasking.gcm.SendMessageServlet
+        </servlet-class>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>SendMessageServlet</servlet-name>
+        <url-pattern>/send</url-pattern>
+    </servlet-mapping>
+
 </web-app>

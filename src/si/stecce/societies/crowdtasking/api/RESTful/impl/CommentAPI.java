@@ -109,8 +109,8 @@ public class CommentAPI implements ICommentAPI {
         TaskDao.save(task);
 		
 		EventAPI.logTaskComment(taskId, commentId, comment.getPosted(), user);
-		NotificationsSender.commentOnTaskIParticipate(comment.getTask(), getInvolvedUsersOnTaskThatWasCommented(comment));
-		
+        Map<Long, CTUser> usersMap = UsersAPI.getUsersMap(involvedUsers.toArray(new Long[0]));
+		NotificationsSender.commentOnTaskIParticipate(comment.getTask(), getInvolvedUsersOnTaskThatWasCommented(comment), user.getId());
 		return Response.ok().build();
 	}
 

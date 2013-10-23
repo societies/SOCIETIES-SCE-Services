@@ -61,15 +61,26 @@ public class Admin extends HttpServlet {
 			throws ServletException, IOException {
 		
 		long startTime = System.currentTimeMillis();
+        String action = request.getParameter("action");
+        if (action == null) {
+            response.sendRedirect("/admin.html");
+            return;
+        }
+        if ("count".equalsIgnoreCase(action)) {
+            int count = ofy().load().type(Event.class).count();
+            response.getWriter().write("count: " + count);
+        }
+
+        //System.out.println("kind: "+kind);
 		//JavaMail.sendJavaMail(SENDER, "simon.juresa@setcce.si", "hoj", "navaden text", "HTML text", getBody());
 		//sendMeetingRequest1();
 		//sendMeetingRequest2();
-        response.getWriter().write("refreshCommunities (4th)...");
+//        response.getWriter().write("refreshCommunities (4th)...");
 //        refreshCommunities();
         //convertTasks();
         //convertEvents();
 		long diff = System.currentTimeMillis() - startTime;
-		response.getWriter().write("time: " + diff);
+		response.getWriter().write("\ntime: " + diff);
 	}
 
     private void refreshCommunities() {
