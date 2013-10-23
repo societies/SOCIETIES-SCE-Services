@@ -11,11 +11,19 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.nfc.NdefMessage;
+import android.nfc.NdefRecord;
+import android.nfc.NfcAdapter;
+import android.nfc.NfcEvent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Parcelable;
@@ -37,21 +45,20 @@ import android.webkit.WebViewClient;
 import android.widget.PopupMenu;
 import android.widget.Toast;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesUtil;
+import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.HttpResponseException;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.protocol.HTTP;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -71,6 +78,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.Charset;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -87,7 +95,7 @@ import si.setcce.societies.android.rest.RestTask;
 import si.setcce.societies.crowdtasking.api.RESTful.json.CommunityJS;
 
 @SuppressLint("SimpleDateFormat")
-public class MainActivity extends Activity implements SensorEventListener {
+public class MainActivity extends Activity implements SensorEventListener, NfcAdapter.CreateNdefMessageCallback {
 	//private static final String TEST_ACTION = "si.setcce.societies.android.rest.TEST";
     private static final String CHECK_IN_OUT = "si.setcce.societies.android.rest.CHECK_IN_OUT";
     private static final String GET_USER = "si.setcce.societies.android.rest.GET_USER";
@@ -96,21 +104,23 @@ public class MainActivity extends Activity implements SensorEventListener {
 	private static final String C4CSS_INTENT = "si.setcce.societies.android.rest.C4CSS";
 	private static final String GET_MEETING_ACTION = "si.setcce.societies.android.rest.MEETING";
 	private static final String TAKE_CONTROL = "si.setcce.societies.android.rest.remote.TAKE_CONTROL";
+	private static final String GCM_REGISTER = "si.setcce.societies.android.rest.GCM";
     private static final String SCHEME ="http";
     private static final String SCOPE ="SETCCE_SOCIETIES";
-    private static final String DOMAIN = "crowdtasking.appspot.com";
 //    private static final String DOMAIN = "crowdtasking.appspot.com";
-//   	private static final String DOMAIN = "192.168.1.71";
+//    private static final String DOMAIN = "crowdtasking.appspot.com";
+   	private static final String DOMAIN = "192.168.1.102";
 //   	private static final String DOMAIN = "192.168.1.66";
 //   	private static final String DOMAIN = "192.168.1.78";
-    private static final String PORT = "";
+//    private static final String PORT = "";
 //    private static final String PORT = ":80";
-//    private static final String PORT = ":8888";
+    private static final String PORT = ":8888";
     private static final String APPLICATION_URL = SCHEME +"://" + DOMAIN + PORT;
     private static final String LOGIN_URL = APPLICATION_URL + "/login";
     private static final String MEETING_URL = APPLICATION_URL + "/android/meeting/";
     private static final String C4CSS_API_URL = APPLICATION_URL + "/rest/community/4CSS";
     private static final String PD_TAKE_CONTROL = APPLICATION_URL + "/rest/remote/takeControl";
+    private static final String GCM_REGISTER_URL = APPLICATION_URL + "/rest/gcm";
     //    private static final String GET_USER_REST_API_URL = APPLICATION_URL + "/rest/users/me";
 	private static final String MEETING_REST_API_URL = APPLICATION_URL + "/rest/meeting/data";
     private static final String SCAN_QR_URL = APPLICATION_URL + "/android/scanQR";
@@ -135,16 +145,200 @@ public class MainActivity extends Activity implements SensorEventListener {
     private boolean isSocietiesUser=false, societiesServicesRunning, contextClientRunning, communityManagementClientConnected, cisDirectoryClientConnected, societiesEventsClientConnected;
     private SocietiesUser societiesUser = null;
     private final static String LOG_TAG = "Crowd Tasking";
+    public static final String EXTRA_MESSAGE = "message";
+    public static final String PROPERTY_REG_ID = "registration_id";
+    private static final String PROPERTY_APP_VERSION = "appVersion";
+    private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
+    /**
+     * This is the project number from the API Console
+     */
+    String SENDER_ID = "689198099949";
 
+    GoogleCloudMessaging gcm;
+    String regid;
     int checkedItem = 0;
     JSONArray communitiesForPublicDisplay;
     public MainActivity() {
 	}
 
+    /**
+     * Check the device to make sure it has the Google Play Services APK. If
+     * it doesn't, display a dialog that allows users to download the APK from
+     * the Google Play Store or enable it in the device's system settings.
+     */
+    private boolean checkPlayServices() {
+        int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
+        if (resultCode != ConnectionResult.SUCCESS) {
+            if (GooglePlayServicesUtil.isUserRecoverableError(resultCode)) {
+                GooglePlayServicesUtil.getErrorDialog(resultCode, this,
+                        PLAY_SERVICES_RESOLUTION_REQUEST).show();
+            } else {
+                Log.i(LOG_TAG, "This device is not supported.");
+                finish();
+            }
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Gets the current registration ID for application on GCM service, if there is one.
+     * <p>
+     * If result is empty, the app needs to register.
+     *
+     * @return registration ID, or empty string if there is no existing
+     *         registration ID.
+     */
+    private String getRegistrationId(Context context) {
+        final SharedPreferences prefs = getGcmPreferences(context);
+        String registrationId = prefs.getString(PROPERTY_REG_ID, "");
+        if (registrationId.isEmpty()) {
+            Log.i(LOG_TAG, "Registration not found.");
+            return "";
+        }
+        // Check if app was updated; if so, it must clear the registration ID
+        // since the existing regID is not guaranteed to work with the new
+        // app version.
+        int registeredVersion = prefs.getInt(PROPERTY_APP_VERSION, Integer.MIN_VALUE);
+        int currentVersion = getAppVersion(context);
+        if (registeredVersion != currentVersion) {
+            Log.i(LOG_TAG, "App version changed.");
+            return "";
+        }
+        return registrationId;
+    }
+
+    /**
+     * @return Application's version code from the {@code PackageManager}.
+     */
+    private static int getAppVersion(Context context) {
+        try {
+            PackageInfo packageInfo = context.getPackageManager()
+                    .getPackageInfo(context.getPackageName(), 0);
+            return packageInfo.versionCode;
+        } catch (PackageManager.NameNotFoundException e) {
+            // should never happen
+            throw new RuntimeException("Could not get package name: " + e);
+        }
+    }
+
+    /**
+     * @return Application's {@code SharedPreferences}.
+     */
+    private SharedPreferences getGcmPreferences(Context context) {
+        // This sample app persists the registration ID in shared preferences, but
+        // how you store the regID in your app is up to you.
+        return getSharedPreferences(MainActivity.class.getSimpleName(),
+                Context.MODE_PRIVATE);
+    }
+
+    /**
+     * Stores the registration ID and the app versionCode in the application's
+     * {@code SharedPreferences}.
+     *
+     * @param context application's context.
+     * @param regId registration ID
+     */
+    private void storeRegistrationId(Context context, String regId) {
+        final SharedPreferences prefs = getGcmPreferences(context);
+        int appVersion = getAppVersion(context);
+        Log.i(LOG_TAG, "Saving regId on app version " + appVersion);
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putString(PROPERTY_REG_ID, regId);
+        editor.putInt(PROPERTY_APP_VERSION, appVersion);
+        editor.commit();
+    }
+
+
+    /**
+     * Registers the application with GCM servers asynchronously.
+     * <p>
+     * Stores the registration ID and the app versionCode in the application's
+     * shared preferences.
+     */
+    private void registerInBackground() {
+        new AsyncTask<Void, Void, String>() {
+            @Override
+            protected String doInBackground(Void... params) {
+                String msg = "";
+                // Check device for Play Services APK. If check succeeds, proceed with GCM registration.
+                if (!checkPlayServices()) {
+                    return "No valid Google Play Services APK found.";
+                }
+
+                try {
+                    if (gcm == null) {
+                        gcm = GoogleCloudMessaging.getInstance(getApplicationContext());
+                    }
+                    regid = gcm.register(SENDER_ID);
+                    msg = "Device registered, registration ID=" + regid;
+                    sendRegistrationIdToBackend(regid);
+                } catch (IOException ex) {
+                    msg = "Error :" + ex.getMessage();
+                    // If there is an error, don't just keep trying to register.
+                    // Require the user to click a button again, or perform
+                    // exponential back-off.
+                }
+                return msg;
+            }
+
+            @Override
+            protected void onPostExecute(String msg) {
+                Log.i(LOG_TAG, msg);
+            }
+        }.execute(null, null, null);
+    }
+
+    private void sendRegistrationIdToBackend(String regId) {
+        RestTask task = new RestTask(getApplicationContext(), GCM_REGISTER, CookieManager.getInstance().getCookie(DOMAIN), DOMAIN);
+        String url = GCM_REGISTER_URL+"?registrationId="+regId;
+        try {
+            task.execute(new HttpGet(new URI(url)));
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
+    }
+
+    NfcAdapter mNfcAdapter;
+
+    @Override
+    public NdefMessage createNdefMessage(NfcEvent event) {
+        String text = ("cs:Beam me up, Android!\n\n" +
+                "Beam Time: " + System.currentTimeMillis());
+        NdefMessage msg = new NdefMessage(
+                new NdefRecord[] { createMimeRecord(
+                        "application/vnd.com.example.android.beam", text.getBytes())
+                        /**
+                         * The Android Application Record (AAR) is commented out. When a device
+                         * receives a push with an AAR in it, the application specified in the AAR
+                         * is guaranteed to run. The AAR overrides the tag dispatch system.
+                         * You can add it back in to guarantee that this
+                         * activity starts when receiving a beamed message. For now, this code
+                         * uses the tag dispatch system.
+                         */
+                        //,NdefRecord.createApplicationRecord("com.example.android.beam")
+                });
+        return msg;
+    }
+
+    public NdefRecord createMimeRecord(String mimeType, byte[] payload) {
+        byte[] mimeBytes = mimeType.getBytes(Charset.forName("UTF-8"));
+        NdefRecord mimeRecord = new NdefRecord(
+        NdefRecord.TNF_MIME_MEDIA, mimeBytes, new byte[0], payload);
+        return mimeRecord;
+    }
+
     @Override
 	public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        
+        mNfcAdapter = NfcAdapter.getDefaultAdapter(this);
+        if (mNfcAdapter == null) {
+            Toast.makeText(this, "NFC is not available", Toast.LENGTH_LONG).show();
+        } else {
+            // Register callback
+            mNfcAdapter.setNdefPushMessageCallback(this, this);
+        }
+
         sensorManager = (SensorManager)getSystemService(SENSOR_SERVICE);
 		accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
 	    mAccel = 0.00f;
@@ -344,15 +538,28 @@ public class MainActivity extends Activity implements SensorEventListener {
         registerReceiver(receiver, new IntentFilter(GET_USER));
         registerReceiver(receiver, new IntentFilter(LOGIN_USER));
         registerReceiver(receiver, new IntentFilter(TAKE_CONTROL));
+        registerReceiver(receiver, new IntentFilter(GCM_REGISTER));
         registerReceiver(receiver, new IntentFilter("android.nfc.action.NDEF_DISCOVERED"));
         registerReceiver(receiver, new IntentFilter(SERVICE_CONNECTED));
         sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
 
+        if (getIntent() == null) {
+            return;
+        }
+        if (getIntent().getAction() == null) {
+            return;
+        }
+/*
+    	if (getIntent().getAction().equalsIgnoreCase("GCM")) {
+    		String response = getIntent().getStringExtra("GCM_TEXT");
+    		System.out.println(response);
+			Toast.makeText(getApplicationContext(), response, Toast.LENGTH_SHORT).show();
+    	}
+*/
     	if (getIntent().getAction().equalsIgnoreCase(CHECK_IN_OUT)) {
     		String[] response = getIntent().getStringArrayExtra(RestTask.HTTP_RESPONSE);
     		System.out.println(response[1]);
-			Toast toast = Toast.makeText(getApplicationContext(), response[1], Toast.LENGTH_SHORT);
-			toast.show();
+			Toast.makeText(getApplicationContext(), response[1], Toast.LENGTH_SHORT).show();
     	}
 /*
         SocietiesUser societiesUser = getSocietiesUserData();
@@ -400,8 +607,7 @@ public class MainActivity extends Activity implements SensorEventListener {
                 return;
         	}
         	if (historyUrl.startsWith(APPLICATION_URL+"/community/edit")) {
-    			Toast toast = Toast.makeText(getApplicationContext(), "Use Save or Cancel button.", Toast.LENGTH_SHORT);
-    			toast.show();
+    			Toast.makeText(getApplicationContext(), "Use Save or Cancel button.", Toast.LENGTH_SHORT).show();
                 return;
         	}
            	webView.goBack();
@@ -452,8 +658,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 			task.execute(new HttpGet(new URI(url)));
 		} catch (URISyntaxException e) {
 			e.printStackTrace();
-			Toast toast = Toast.makeText(getApplicationContext(), "Error: "+e.getMessage(), Toast.LENGTH_LONG);
-			toast.show();
+			Toast.makeText(getApplicationContext(), "Error: "+e.getMessage(), Toast.LENGTH_LONG).show();
 		}
 	}
 
@@ -538,8 +743,7 @@ public class MainActivity extends Activity implements SensorEventListener {
                     task.execute(new HttpGet(new URI(url)));
                 } catch (URISyntaxException e) {
                     e.printStackTrace();
-                    Toast toast = Toast.makeText(getApplicationContext(), "Error: "+e.getMessage(), Toast.LENGTH_LONG);
-                    toast.show();
+                    Toast.makeText(getApplicationContext(), "Error: "+e.getMessage(), Toast.LENGTH_LONG).show();
                 }
 	    	}
         } else {
@@ -665,12 +869,18 @@ public class MainActivity extends Activity implements SensorEventListener {
                 Toast.makeText(getApplicationContext(), response[1], Toast.LENGTH_SHORT).show();
         	}
         	if (intent.getAction().equalsIgnoreCase(TAKE_CONTROL)) {
-//        		String response = intent.getStringExtra(RestTask.HTTP_RESPONSE);
         		String[] response = intent.getStringArrayExtra(RestTask.HTTP_RESPONSE);
                 if ("HTTP/1.1 409 Conflict".equalsIgnoreCase(response[0])) {
                     selectCommunityForPD(response);
                 } else {
                     Toast.makeText(getApplicationContext(), response[1], Toast.LENGTH_LONG).show();
+                }
+        	}
+        	if (intent.getAction().equalsIgnoreCase(GCM_REGISTER)) {
+        		String[] response = intent.getStringArrayExtra(RestTask.HTTP_RESPONSE);
+                if (isResponseOk(response[0])) {
+                    // Persist the regID - no need to register again.
+                    storeRegistrationId(getApplicationContext(), regid);
                 }
         	}
         	if (intent.getAction().equalsIgnoreCase(LOG_EVENT)) {
@@ -993,7 +1203,13 @@ public class MainActivity extends Activity implements SensorEventListener {
 		
     	@Override
         public boolean shouldOverrideUrlLoading(WebView view, String url) {
-        	if (url.equalsIgnoreCase(SCAN_QR_URL)) {
+        	if (url.equalsIgnoreCase(APPLICATION_URL+"/")) {
+                regid = getRegistrationId(getApplicationContext());
+                if (regid.isEmpty()) {
+                    registerInBackground();
+                }
+            }
+            if (url.equalsIgnoreCase(SCAN_QR_URL)) {
                 IntentIntegrator integrator = new IntentIntegrator(MainActivity.this);
                 integrator.initiateScan(IntentIntegrator.QR_CODE_TYPES);
         		return true;

@@ -9,6 +9,7 @@
         <option name="SOURCE_GEN_TASK_NAME" value="TODO" />
         <option name="ALLOW_USER_CONFIGURATION" value="false" />
         <option name="RES_FOLDERS_RELATIVE_PATH" value="file://$MODULE_DIR$/res" />
+        <option name="APK_PATH" value="/build/apk/crowdtaskingandroid-debug-unaligned.apk" />
       </configuration>
     </facet>
     <facet type="android-gradle" name="Android-Gradle">
@@ -71,6 +72,9 @@
     <orderEntry type="library" exported="" name="SocietiesAndroidRemoteHelpers" level="project" />
     <orderEntry type="library" exported="" name="societies-api-schema-1.2" level="project" />
     <orderEntry type="library" exported="" name="DBC-1.0" level="project" />
+    <orderEntry type="library" name="gcm" level="project" />
+    <orderEntry type="library" name="google-play-services" level="project" />
+    <orderEntry type="library" name="android-support-v4" level="project" />
   </component>
 </module>
 
