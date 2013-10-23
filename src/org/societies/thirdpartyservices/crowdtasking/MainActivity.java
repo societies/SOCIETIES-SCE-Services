@@ -155,7 +155,7 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
     /**
      * This is the project number from the API Console
      */
-    String SENDER_ID = "689198099949";
+    String SENDER_ID = "567873389890";
 
     GoogleCloudMessaging gcm;
     String regid;
