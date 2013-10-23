@@ -53,7 +53,7 @@ public class SendMessageServlet extends BaseServlet {
     protected Sender newSender(ServletConfig config) {
         ApplicationSettings appSettings = UsersAPI.getApplicationSettings();
         if (appSettings.getApiKey() == null) {
-            appSettings.setApiKey("AIzaSyCUt-EyXAWe7C5QaXfN0pXGb476osaSYeA");
+            appSettings.setApiKey("AIzaSyDMXKCe9sX8e4thtUaQwBABitdVdabz-Pw");
             ofy().save().entity(appSettings).now();
         }
         String key = appSettings.getApiKey();
