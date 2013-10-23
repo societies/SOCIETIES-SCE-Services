@@ -15,6 +15,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -26,6 +27,7 @@ import android.nfc.NfcEvent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Message;
 import android.os.Parcelable;
 import android.provider.CalendarContract.Events;
 import android.util.Log;
@@ -107,14 +109,14 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
 	private static final String GCM_REGISTER = "si.setcce.societies.android.rest.GCM";
     private static final String SCHEME ="http";
     private static final String SCOPE ="SETCCE_SOCIETIES";
-//    private static final String DOMAIN = "crowdtasking.appspot.com";
-//    private static final String DOMAIN = "crowdtasking.appspot.com";
-   	private static final String DOMAIN = "192.168.1.102";
+    private static final String DOMAIN = "crowdtasking.appspot.com";
+//    private static final String DOMAIN = "crowdtaskingtest.appspot.com";
+//   	private static final String DOMAIN = "192.168.1.102";
 //   	private static final String DOMAIN = "192.168.1.66";
 //   	private static final String DOMAIN = "192.168.1.78";
-//    private static final String PORT = "";
+    private static final String PORT = "";
 //    private static final String PORT = ":80";
-    private static final String PORT = ":8888";
+//    private static final String PORT = ":8888";
     private static final String APPLICATION_URL = SCHEME +"://" + DOMAIN + PORT;
     private static final String LOGIN_URL = APPLICATION_URL + "/login";
     private static final String MEETING_URL = APPLICATION_URL + "/android/meeting/";
@@ -149,6 +151,7 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
     public static final String PROPERTY_REG_ID = "registration_id";
     private static final String PROPERTY_APP_VERSION = "appVersion";
     private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
+    private boolean firstTimeOnMenuPage = true;
     /**
      * This is the project number from the API Console
      */
@@ -1164,7 +1167,7 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
         float delta = mAccelCurrent - mAccelLast;
         mAccel = mAccel * 0.9f + delta; // perform low-cut filter
         if (mAccel > 5) {
-            Toast.makeText(getApplicationContext(), "shake detected ("+mAccel+")", Toast.LENGTH_SHORT).show();
+//            Toast.makeText(getApplicationContext(), "shake detected ("+mAccel+")", Toast.LENGTH_SHORT).show();
         	mAccel = 0;
         	refreshData();
         }
@@ -1200,15 +1203,9 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
     			e.printStackTrace();
     		}
 		}
-		
-    	@Override
+
+        @Override
         public boolean shouldOverrideUrlLoading(WebView view, String url) {
-        	if (url.equalsIgnoreCase(APPLICATION_URL+"/")) {
-                regid = getRegistrationId(getApplicationContext());
-                if (regid.isEmpty()) {
-                    registerInBackground();
-                }
-            }
             if (url.equalsIgnoreCase(SCAN_QR_URL)) {
                 IntentIntegrator integrator = new IntentIntegrator(MainActivity.this);
                 integrator.initiateScan(IntentIntegrator.QR_CODE_TYPES);
@@ -1236,12 +1233,13 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
         	if (url.contains("enter") || url.contains("leave")) {
         		webView.goBack();
         	}
-/*
-    		if (!startUrl.equalsIgnoreCase(APPLICATION_URL+"/menu")) {
-            	webView.loadUrl(startUrl);
-            	startUrl = APPLICATION_URL+"/menu";
-    		}
-*/
+            if (url.equalsIgnoreCase(APPLICATION_URL+"/menu")) {
+                if (firstTimeOnMenuPage) {
+                    regid = getRegistrationId(getApplicationContext());
+                    registerInBackground();
+                    firstTimeOnMenuPage = false;
+                }
+            }
        }
     }
 
