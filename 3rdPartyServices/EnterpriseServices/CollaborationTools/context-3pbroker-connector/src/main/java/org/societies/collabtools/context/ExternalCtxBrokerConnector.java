@@ -163,11 +163,13 @@ public class ExternalCtxBrokerConnector extends Observable {
 
 				ctxAttr = (CtxAttribute) ctxBroker.retrieve(ca3pService.getRequestor(), event.getId()).get();
 				LOG.info("ctxValue getScope: "+ctxAttr.getScope());
+				LOG.info("ctxValue getScope: "+ctxAttr.getOwnerId());
 				CtxEntity retrievedCtxEntity = (CtxEntity) ctxBroker.retrieve(ca3pService.getRequestor(), ctxAttr.getScope()).get();
-				ctxEntity= retrievedCtxEntity.getAttributes(CtxAttributeTypes.NAME);
+				ctxEntity= retrievedCtxEntity.getAttributes(CtxAttributeTypes.ID);
 
 				for(CtxAttribute name : ctxEntity) {
-					person = name.getStringValue();
+					String getOnlyNameSubstring[] = name.getStringValue().split("\\.");
+					person = getOnlyNameSubstring[0];
 				}
 
 			} catch (InterruptedException e) {

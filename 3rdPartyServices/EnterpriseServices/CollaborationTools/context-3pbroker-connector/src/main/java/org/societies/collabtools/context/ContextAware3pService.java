@@ -24,6 +24,8 @@
  */
 
 package org.societies.collabtools.context;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -38,7 +40,9 @@ import org.societies.api.comm.xmpp.interfaces.ICommManager;
 import org.societies.api.context.CtxException;
 import org.societies.api.context.broker.ICtxBroker;
 import org.societies.api.context.event.CtxChangeEventListener;
+import org.societies.api.context.model.CommunityCtxEntity;
 import org.societies.api.context.model.CtxAssociation;
+import org.societies.api.context.model.CtxAssociationIdentifier;
 import org.societies.api.context.model.CtxAssociationTypes;
 import org.societies.api.context.model.CtxAttribute;
 import org.societies.api.context.model.CtxAttributeComplexValue;
@@ -101,6 +105,14 @@ public class ContextAware3pService implements IContextAware3pService  {
 		LOG.info("idMgr : "+this.idMgr );
 		LOG.info("serviceMgmt : "+this.serviceMgmt );
 
+		File logFile = new File("databases/collabToolsLogFile.log");
+		try {
+			logFile.createNewFile();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
 
 		//		this.userIdentity = this.idMgr.getThisNetworkNode();
 		//		try {
@@ -147,13 +159,47 @@ public class ContextAware3pService implements IContextAware3pService  {
 				//				this.ctxBroker.registerForChanges(getRequestor(), this.myCtxChangeEventListener, member, CtxAttributeTypes.OCCUPATION);
 				//				this.ctxBroker.registerForChanges(getRequestor(), this.myCtxChangeEventListener, member, CtxAttributeTypes.ADDRESS_WORK_CITY);
 				//				this.ctxBroker.registerForChanges(getRequestor(), this.myCtxChangeEventListener, member, CtxAttributeTypes.ADDRESS_WORK_COUNTRY);
-				
-				//Trying to unregister for long term context
-				this.ctxBroker.registerForChanges(getRequestor(), this.myCtxChangeEventListener, member, CtxAttributeTypes.INTERESTS);
 
+				//Trying to register for long term context
+				this.ctxBroker.registerForChanges(getRequestor(), this.myCtxChangeEventListener, member, CtxAttributeTypes.INTERESTS);
 			}
+
 		} catch (CtxException e1) {
 			e1.printStackTrace();
+		}
+
+		//Registering for new members in the community
+		try {
+			CtxEntityIdentifier ctxCommunityEntityIdentifier = this.ctxBroker.retrieveCommunityEntityId(getRequestor(), cisID).get();
+			if (ctxCommunityEntityIdentifier == null)
+				throw new RuntimeException("Community not created, ctxCommunityEntityIdentifier is null"); 
+//
+//
+//			final CommunityCtxEntity communityEnt = (CommunityCtxEntity) ctxBroker.retrieve(getRequestor(), ctxCommunityEntityIdentifier).get();
+//			CtxAssociationIdentifier hasMembersId = null;
+//			for (final CtxAssociationIdentifier foundHasMembersId : communityEnt.getAssociations(CtxAssociationTypes.HAS_MEMBERS)) {
+//				final CtxAssociation foundHasMembers = (CtxAssociation) ctxBroker.retrieve(getRequestor(), foundHasMembersId).get();
+//				if (foundHasMembers != null && ctxCommunityEntityIdentifier.equals(foundHasMembers.getParentEntity())) {
+//					hasMembersId = foundHasMembersId;
+//				}
+//				break;
+//			}
+//			if (hasMembersId == null) {
+//				LOG.error("Failed to register for membership changes of CIS '" + ctxCommunityEntityIdentifier.getOwnerId() + "': HAS_MEMBERS association not found");
+//			}		
+//
+//			LOG.debug("CtxAssociationIdentifier retrieved for update: {}", hasMembersId.toString());
+//			this.ctxBroker.registerForChanges(getRequestor(), this.myCtxChangeEventListener, hasMembersId);
+			this.ctxBroker.registerForChanges(getRequestor(), this.myCtxChangeEventListener, ctxCommunityEntityIdentifier, CtxAssociationTypes.HAS_MEMBERS);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ExecutionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (CtxException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 
 		LOG.info("*** registerForContextChanges success");
@@ -184,13 +230,47 @@ public class ContextAware3pService implements IContextAware3pService  {
 				//				this.ctxBroker.unregisterFromChanges(getRequestor(), this.myCtxChangeEventListener, member, CtxAttributeTypes.OCCUPATION);
 				//				this.ctxBroker.unregisterFromChanges(getRequestor(), this.myCtxChangeEventListener, member, CtxAttributeTypes.ADDRESS_WORK_CITY);
 				//				this.ctxBroker.unregisterFromChanges(getRequestor(), this.myCtxChangeEventListener, member, CtxAttributeTypes.ADDRESS_WORK_COUNTRY);
-				
+
 				//Trying to unregister for long term context
 				this.ctxBroker.unregisterFromChanges(getRequestor(), this.myCtxChangeEventListener, member, CtxAttributeTypes.INTERESTS);
 			}
 		} catch (CtxException e1) {
 			e1.printStackTrace();
 		}
+
+		//Unregistering members in the community
+				try {
+					CtxEntityIdentifier ctxCommunityEntityIdentifier = this.ctxBroker.retrieveCommunityEntityId(getRequestor(), cisID).get();
+					if (ctxCommunityEntityIdentifier == null)
+						throw new RuntimeException("Community not created, ctxCommunityEntityIdentifier is null"); 
+//
+//
+//					final CommunityCtxEntity communityEnt = (CommunityCtxEntity) ctxBroker.retrieve(getRequestor(), ctxCommunityEntityIdentifier).get();
+//					CtxAssociationIdentifier hasMembersId = null;
+//					for (final CtxAssociationIdentifier foundHasMembersId : communityEnt.getAssociations(CtxAssociationTypes.HAS_MEMBERS)) {
+//						final CtxAssociation foundHasMembers = (CtxAssociation) ctxBroker.retrieve(getRequestor(), foundHasMembersId).get();
+//						if (foundHasMembers != null && ctxCommunityEntityIdentifier.equals(foundHasMembers.getParentEntity())) {
+//							hasMembersId = foundHasMembersId;
+//						}
+//						break;
+//					}
+//					if (hasMembersId == null) {
+//						LOG.error("Failed to register for membership changes of CIS '" + ctxCommunityEntityIdentifier.getOwnerId() + "': HAS_MEMBERS association not found");
+//					}		
+//
+//					LOG.debug("CtxAssociationIdentifier retrieved for update: {}", hasMembersId.toString());
+//					this.ctxBroker.unregisterFromChanges(getRequestor(), this.myCtxChangeEventListener, hasMembersId);
+					this.ctxBroker.unregisterFromChanges(getRequestor(), this.myCtxChangeEventListener, ctxCommunityEntityIdentifier, CtxAssociationTypes.HAS_MEMBERS);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (ExecutionException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (CtxException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 
 		LOG.info("*** unregisterContextChanges success");
 	}
@@ -221,70 +301,70 @@ public class ContextAware3pService implements IContextAware3pService  {
 			//			Set<CtxEntityIdentifier> ctxMembersIDs = communityEntity.getMembers();
 
 			LOG.debug("Community Members size: {}", ctxMembersIDs.size());
-			
-//		    List<String> attrTypes = new ArrayList<String>(); 
-//			
-//		    attrTypes.add(CtxAttributeTypes.OCCUPATION); 
-//		    attrTypes.add(CtxAttributeTypes.WORK_POSITION); 
-//		    attrTypes.add(CtxAttributeTypes.LOCATION_SYMBOLIC); 
-//		    attrTypes.add(CtxAttributeTypes.STATUS); 
-//		    attrTypes.add(CtxAttributeTypes.INTERESTS); 
-//		    attrTypes.add(CtxAttributeTypes.NAME); 
+
+			List<String> attrTypes = new ArrayList<String>(); 
+
+			attrTypes.add(CtxAttributeTypes.OCCUPATION); 
+			attrTypes.add(CtxAttributeTypes.WORK_POSITION); 
+			attrTypes.add(CtxAttributeTypes.LOCATION_SYMBOLIC); 
+			attrTypes.add(CtxAttributeTypes.STATUS); 
+			attrTypes.add(CtxAttributeTypes.INTERESTS); 
+			attrTypes.add(CtxAttributeTypes.ID); 
 
 			for(CtxEntityIdentifier member : ctxMembersIDs){
 				//Hashmap representing the context attributes
 				HashMap<String, String[]> othersCtx = new HashMap<String, String[]>();
-				
-//				final List<CtxIdentifier> attrIdList = new ArrayList<CtxIdentifier>(); 
-//			    for (final String attrType : attrTypes) { 
-//			        final List<CtxIdentifier> attrIds = this.ctxBroker.lookup(getRequestor(), member, CtxModelType.ATTRIBUTE, attrType).get(); 
-//			        attrIdList.addAll(attrIds); 
-//			    } 
-//
-//			    final List<CtxModelObject> ctxModelObjs = this.ctxBroker.retrieve(getRequestor(), attrIdList).get();
-//			    
-//			    for (final CtxModelObject modelObj : ctxModelObjs) { 
-//			       final CtxAttribute attr = (CtxAttribute) modelObj; 
-//			       if (attr != null) {
-//			    	   //Interests needs to be splitted first
-//			    	   if (attr.getId().getType().contains(CtxAttributeTypes.INTERESTS)){
-//							String[] interests = attr.getStringValue().split(",");
-//						       othersCtx.put(attr.getId().getType(), interests); 
-//			    	   }
-//				       othersCtx.put(attr.getId().getType(), new String[]{attr.getStringValue()}); 
-//			       } 
-//			    } 
-			    
-				CtxEntity retrievedCtxEntity = (CtxEntity) this.ctxBroker.retrieve(getRequestor(), member).get();
-				LOG.debug("Retrieved member entity: {}", retrievedCtxEntity.getId());
 
-				//Job Position
-				Set<CtxAttribute> attribute = retrievedCtxEntity.getAttributes(CtxAttributeTypes.OCCUPATION);
-				for(CtxAttribute occupation : attribute)
-					othersCtx.put("occupation", new String[]{occupation.getStringValue()});
-				//Company
-				attribute = retrievedCtxEntity.getAttributes(CtxAttributeTypes.WORK_POSITION);
-				for(CtxAttribute company : attribute)
-					othersCtx.put("workPosition", new String[]{company.getStringValue()});
-				//Status
-				attribute = retrievedCtxEntity.getAttributes(CtxAttributeTypes.STATUS);
-				for(CtxAttribute status : attribute)
-					othersCtx.put("status", new String[]{status.getStringValue()});
-				//Location
-				attribute = retrievedCtxEntity.getAttributes(CtxAttributeTypes.LOCATION_SYMBOLIC);
-				for(CtxAttribute location : attribute)
-					othersCtx.put("locationSymbolic", new String[]{location.getStringValue()});
-				//Interests
-				attribute = retrievedCtxEntity.getAttributes(CtxAttributeTypes.INTERESTS);		
+				final List<CtxIdentifier> attrIdList = new ArrayList<CtxIdentifier>(); 
+				for (final String attrType : attrTypes) { 
+					final List<CtxIdentifier> attrIds = this.ctxBroker.lookup(getRequestor(), member, CtxModelType.ATTRIBUTE, attrType).get(); 
+					attrIdList.addAll(attrIds); 
+				} 
 
-				for(CtxAttribute interest : attribute) {
-					String[] interests = interest.getStringValue().split(",");					
-					othersCtx.put("interests", interests);
-				}
+				final List<CtxModelObject> ctxModelObjs = this.ctxBroker.retrieve(getRequestor(), attrIdList).get();
 
-				attribute = retrievedCtxEntity.getAttributes(CtxAttributeTypes.NAME);
-				for(CtxAttribute name : attribute)
-					othersCtx.put("name", new String[]{name.getStringValue()});
+				for (final CtxModelObject modelObj : ctxModelObjs) { 
+					final CtxAttribute attr = (CtxAttribute) modelObj; 
+					if (attr != null) {
+						//Interests needs to be split first
+						if (attr.getId().getType().contains(CtxAttributeTypes.INTERESTS)){
+							String[] interests = attr.getStringValue().split(",");
+							othersCtx.put(attr.getId().getType(), interests); 
+						}
+						othersCtx.put(attr.getId().getType(), new String[]{attr.getStringValue()}); 
+					} 
+				} 
+				//			    
+				//				CtxEntity retrievedCtxEntity = (CtxEntity) this.ctxBroker.retrieve(getRequestor(), member).get();
+				//				LOG.debug("Retrieved member entity: {}", retrievedCtxEntity.getId());
+				//
+				//				//Job Position
+				//				Set<CtxAttribute> attribute = retrievedCtxEntity.getAttributes(CtxAttributeTypes.OCCUPATION);
+				//				for(CtxAttribute occupation : attribute)
+				//					othersCtx.put("occupation", new String[]{occupation.getStringValue()});
+				//				//Company
+				//				attribute = retrievedCtxEntity.getAttributes(CtxAttributeTypes.WORK_POSITION);
+				//				for(CtxAttribute company : attribute)
+				//					othersCtx.put("workPosition", new String[]{company.getStringValue()});
+				//				//Status
+				//				attribute = retrievedCtxEntity.getAttributes(CtxAttributeTypes.STATUS);
+				//				for(CtxAttribute status : attribute)
+				//					othersCtx.put("status", new String[]{status.getStringValue()});
+				//				//Location
+				//				attribute = retrievedCtxEntity.getAttributes(CtxAttributeTypes.LOCATION_SYMBOLIC);
+				//				for(CtxAttribute location : attribute)
+				//					othersCtx.put("locationSymbolic", new String[]{location.getStringValue()});
+				//				//Interests
+				//				attribute = retrievedCtxEntity.getAttributes(CtxAttributeTypes.INTERESTS);		
+				//
+				//				for(CtxAttribute interest : attribute) {
+				//					String[] interests = interest.getStringValue().split(",");					
+				//					othersCtx.put("interests", interests);
+				//				}
+				//
+				//				attribute = retrievedCtxEntity.getAttributes(CtxAttributeTypes.NAME);
+				//				for(CtxAttribute name : attribute)
+				//					othersCtx.put("name", new String[]{name.getStringValue()});
 
 				//Name or ID
 				//TODO: Name FIXED!!
@@ -327,15 +407,16 @@ public class ContextAware3pService implements IContextAware3pService  {
 		Set<CtxEntityIdentifier> ctxMembersIDs = new HashSet<CtxEntityIdentifier>();;
 		try {
 			CtxEntityIdentifier ctxCommunityEntityIdentifier = this.ctxBroker.retrieveCommunityEntityId(getRequestor(), cisID).get();
+
+			// null check for communityEntId
 			if (ctxCommunityEntityIdentifier == null)
 				throw new RuntimeException("Community not created, ctxCommunityEntityIdentifier is null"); 
 			LOG.debug("communityEntityIdentifier retrieved: {}", ctxCommunityEntityIdentifier.toString());
-			// null check for communityEntId
 
 			final List<CtxIdentifier> hasMembersIds = ctxBroker.lookup(getRequestor(), ctxCommunityEntityIdentifier, CtxModelType.ASSOCIATION, CtxAssociationTypes.HAS_MEMBERS).get();
+			// check hasMembersIds.isEmpty() - should never happen but to be safe
 			if (hasMembersIds.isEmpty())
 				throw new RuntimeException("Community has no members, hasMembersIds is null"); 
-			// check hasMembersIds.isEmpty() - should never happen but to be safe
 
 			for (final CtxIdentifier foundHasMembersId : hasMembersIds) {
 				final CtxAssociation foundHasMembers = (CtxAssociation) ctxBroker.retrieve(getRequestor(), foundHasMembersId).get();
