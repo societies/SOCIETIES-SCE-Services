@@ -68,8 +68,8 @@ public class SocketServer implements Runnable{
 
 	public void openSocket(){
 		try{
-			this.log.debug("Opening port 2005");
-			this.providerSocket = new ServerSocket(2005);
+			this.log.debug("Opening port 38580");
+			this.providerSocket = new ServerSocket(38580);
 			this.log.debug("Waiting for connection : " + providerSocket.getInetAddress().getHostAddress());
 
 		}catch(IOException ioEx){
