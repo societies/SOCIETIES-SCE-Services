@@ -50,8 +50,8 @@
 			<br>3 - Fill your account credentials.  
 			<p><em>* The XMPP Server name is the same required to authenticate in the SOCIETIES platform.</em></p>
 		</p>
-		<img src="/images/jitsi1.png" alt="Configuration step" />
-		<img src="/images/jitsi2.png" alt="Configuration step" />
+		<img src="/collabtools/images/jitsi1.png" alt="Configuration step" />
+		<img src="/collabtools/images/jitsi2.png" alt="Configuration step" />
 		<p>
 			For Xabber (Android) follow:
 			<br />
@@ -61,8 +61,8 @@
 			<br>2 - In account type choose XMMP.
 			<br>3 - Fill your account credentials. 
 			<p><em>* The XMPP Server name is the same required to authenticate in SOCIETIES platform.</em></p>
-		<img src="/images/xabber1.png" alt="Configuration step" />
-		<img src="/images/xabber2.png" alt="Configuration step" />
+		<img src="/collabtools/images/xabber1.png" alt="Configuration step" />
+		<img src="/collabtools/images/xabber2.png" alt="Configuration step" />
 		
 	</div>	
 </div>
