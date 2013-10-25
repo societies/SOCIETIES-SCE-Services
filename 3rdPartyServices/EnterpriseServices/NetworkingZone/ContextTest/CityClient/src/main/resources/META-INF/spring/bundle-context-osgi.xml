@@ -19,9 +19,10 @@ http://www.springframework.org/schema/osgi-compendium/spring-osgi-compendium-1.2
 	
 	<!-- Service References -->
     <osgi:reference id="cxtBrokerRef" interface="org.societies.api.context.broker.ICtxBroker" />
-	<osgi:reference id="PubsubClient" interface="org.societies.api.comm.xmpp.pubsub.PubsubClient"/>
-	<osgi:reference id="CommManager" interface="org.societies.api.comm.xmpp.interfaces.ICommManager"/>
-	<osgi:reference id="eventMgmtRef" interface="org.societies.api.osgi.event.IEventMgr" />                    
+    <osgi:reference id="CommManager" interface="org.societies.api.comm.xmpp.interfaces.ICommManager"/>
+    
+    <osgi:reference id="eventMgmtRef" interface="org.societies.api.osgi.event.IEventMgr" /> 
+	<osgi:reference id="PubsubClient" interface="org.societies.api.comm.xmpp.pubsub.PubsubClient"/>                
                     
     
     <!-- Provided Services -->

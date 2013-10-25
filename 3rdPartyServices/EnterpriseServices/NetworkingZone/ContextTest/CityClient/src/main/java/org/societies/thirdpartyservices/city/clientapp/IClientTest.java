@@ -25,7 +25,7 @@
 package org.societies.thirdpartyservices.city.clientapp;
 
 /**
- * Describe your class here...
+ * Interface for the ClientTestImpl class
  *
  * @author rdaviesX
  *

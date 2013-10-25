@@ -20,6 +20,7 @@ http://www.springframework.org/schema/tx http://www.springframework.org/schema/t
              variable in your impl class and the 'ref' should be the same as the osgi:service
              ref in the bundle-context-osgi.xml file -->
         <property name="cxtBrokerService" ref="cxtBrokerRef" />
+        <property name="CommManagerService" ref="CommManager" />
     </bean>
 
 </beans>
