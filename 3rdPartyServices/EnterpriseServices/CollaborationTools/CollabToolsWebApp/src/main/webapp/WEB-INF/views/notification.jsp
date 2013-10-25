@@ -28,7 +28,7 @@
 <script type="text/javascript">
 //     var intervalId = 0;
 //     intervalId = window.setInterval(getNotification, 1000);
-		setTimeout(function(){location.reload();}, 1000);
+		setTimeout(function(){location.reload();}, 3000);
 </script>
 
 </head>

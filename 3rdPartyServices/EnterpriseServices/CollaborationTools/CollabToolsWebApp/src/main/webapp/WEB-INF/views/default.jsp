@@ -21,6 +21,7 @@
         data: ({name : input, check : input2}),
         success: function(data) {
           $('#checkcis').html(data);
+  		  setTimeout(function(){location.reload();}, 2000);
         }
       });
     }
