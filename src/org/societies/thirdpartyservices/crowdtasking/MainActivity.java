@@ -99,7 +99,7 @@ import si.setcce.societies.crowdtasking.api.RESTful.json.CommunityJS;
 @SuppressLint("SimpleDateFormat")
 public class MainActivity extends Activity implements SensorEventListener, NfcAdapter.CreateNdefMessageCallback {
 	//private static final String TEST_ACTION = "si.setcce.societies.android.rest.TEST";
-    private static final String CHECK_IN_OUT = "si.setcce.societies.android.rest.CHECK_IN_OUT";
+    public static final String CHECK_IN_OUT = "si.setcce.societies.android.rest.CHECK_IN_OUT";
     private static final String GET_USER = "si.setcce.societies.android.rest.GET_USER";
 	private static final String LOG_EVENT = "si.setcce.societies.android.rest.LOG_EVENT";
 	private static final String LOGIN_USER = "si.setcce.societies.android.rest.LOGIN_USER";
@@ -109,15 +109,15 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
 	private static final String GCM_REGISTER = "si.setcce.societies.android.rest.GCM";
     private static final String SCHEME ="http";
     private static final String SCOPE ="SETCCE_SOCIETIES";
-    private static final String DOMAIN = "crowdtasking.appspot.com";
+//    private static final String DOMAIN = "crowdtasking.appspot.com";
 //    private static final String DOMAIN = "crowdtaskingtest.appspot.com";
+   	public static final String DOMAIN = "192.168.1.71";
 //   	private static final String DOMAIN = "192.168.1.102";
 //   	private static final String DOMAIN = "192.168.1.66";
 //   	private static final String DOMAIN = "192.168.1.78";
-    private static final String PORT = "";
-//    private static final String PORT = ":80";
-//    private static final String PORT = ":8888";
-    private static final String APPLICATION_URL = SCHEME +"://" + DOMAIN + PORT;
+//    private static final String PORT = "";
+    private static final String PORT = ":8888";
+    public static final String APPLICATION_URL = SCHEME +"://" + DOMAIN + PORT;
     private static final String LOGIN_URL = APPLICATION_URL + "/login";
     private static final String MEETING_URL = APPLICATION_URL + "/android/meeting/";
     private static final String C4CSS_API_URL = APPLICATION_URL + "/rest/community/4CSS";
@@ -130,7 +130,7 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
     private static final String EVENT_API_URL = APPLICATION_URL + "/rest/event";
     private static final String SHARE_CS_URL = APPLICATION_URL + "/android/shareCsUrl";
     private static final String SERVICE_CONNECTED = "org.societies.integration.service.CONNECTED";
-    public String SERVICE_ID;
+    public static String SERVICE_ID;
     private String startUrl;
 	public String nfcUrl=null;
 	private WebView webView;
@@ -334,6 +334,7 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
     @Override
 	public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+/*
         mNfcAdapter = NfcAdapter.getDefaultAdapter(this);
         if (mNfcAdapter == null) {
             Toast.makeText(this, "NFC is not available", Toast.LENGTH_LONG).show();
@@ -341,6 +342,7 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
             // Register callback
             mNfcAdapter.setNdefPushMessageCallback(this, this);
         }
+*/
 
         sensorManager = (SensorManager)getSystemService(SENSOR_SERVICE);
 		accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
@@ -362,17 +364,16 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
         setContentView(R.layout.activity_main);
         webViewSetup();
         if (isSocietiesServiceRunning()) {
-            System.out.println("Societies services are running?");
-            Toast.makeText(getApplicationContext(), "SOCIETIES services are running", Toast.LENGTH_LONG).show();
+//            System.out.println("Societies services are running?");
+//            Toast.makeText(getApplicationContext(), "SOCIETIES services are running", Toast.LENGTH_LONG).show();
+            getServiceId();
+            System.out.println("SERVICE_ID:" + SERVICE_ID);
             societiesUser = getSocietiesUserData();
             TrustTask task = new TrustTask(this, DOMAIN, APPLICATION_URL);
     		task.execute(societiesUser.getUserId());
             societiesServicesRunning = true;
             communityManagementClient = new CommunityManagementClient(this, communityClientReceiver);
             communityManagementClient.setUpService();
-            if (!getServiceId()) {
-                SERVICE_ID = societiesUser.getUserId();
-            }
             checkLocation();
 //            contextClient = new ContextClient(this);
 //            contextClient.setUpService();
@@ -409,6 +410,7 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
             } while (true);
         } catch (InterruptedException e) {
             e.printStackTrace();
+            Log.i(LOG_TAG, "InterruptedException "+e.getMessage());
             return false;
         }
     }
@@ -429,13 +431,13 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
                                 contextClient.setUpService();
                             }
                         } catch (Exception e) {
-                            // TODO Auto-generated catch block
+                            e.printStackTrace();
                         }
                     }
                 });
             }
         };
-        timer.schedule(doAsynchronousTask, 0, 10000); //execute in every 10000 ms
+        timer.schedule(doAsynchronousTask, 0, 15000); //execute in every 10000 ms
     }
 
 /*
@@ -459,7 +461,7 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
 	    ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
         System.out.println("Are Societies services running?");
 	    for (RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
-	    	//System.out.println(service.service.getClassName());
+	    	System.out.println(service.service.getClassName());
             if ("org.societies.android.privacytrust.trust.TrustClientRemote".equals(service.service.getClassName())) {
                 System.out.println("Trust client service is running");
                 trust = true;
@@ -644,9 +646,7 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
                 return true;
 
             case R.id.logout:
-            	CookieSyncManager.createInstance(this);
-            	CookieManager cookieManager = CookieManager.getInstance();
-            	cookieManager.removeAllCookie();
+                clearCookies();
             	webView.loadUrl(APPLICATION_URL);
                 return true;
 
@@ -654,8 +654,14 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
                 return super.onOptionsItemSelected(item);
         }
     }
-	
-	private void checkInOut(String url) {
+
+    private void clearCookies() {
+        CookieSyncManager.createInstance(this);
+        CookieManager cookieManager = CookieManager.getInstance();
+        cookieManager.removeAllCookie();
+    }
+
+    private void checkInOut(String url) {
 		try {
 			RestTask task = new RestTask(getApplicationContext(), CHECK_IN_OUT, CookieManager.getInstance().getCookie(DOMAIN), DOMAIN);
 			task.execute(new HttpGet(new URI(url)));
@@ -666,46 +672,7 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
 	}
 
     private void loginUser() {
- /*       // TODO check internet connection
-
-        //        HttpPost eventRequest;
-        //        try {
-        //            eventRequest = new HttpPost(new URI(LOGIN_URL));
-        if (societiesServicesRunning) {
-            SocietiesUser user = getSocietiesUserData();
-            if (user != null) {
-                List<NameValuePair> parameters = new ArrayList<NameValuePair>();
-                parameters.add(new BasicNameValuePair("federatedIdentity", "SOCIETIES"));
-                parameters.add(new BasicNameValuePair("userId", user.getUserId()));
-                parameters.add(new BasicNameValuePair("name", user.getName()));
-                parameters.add(new BasicNameValuePair("foreName", user.getForeName()));
-                parameters.add(new BasicNameValuePair("email", user.getEmail()));
-                parameters.add(new BasicNameValuePair("scope", SCOPE));
-                parameters.add(new BasicNameValuePair("continue", "/"));
-                // TODO: fix this!!
-                //                startUrl = LOGIN_URL+"?continue=/&federatedIdentity=SOCIETIES&userId="+user.getUserId()+
-                //                        "&name="+user.getName()+"&foreName="+user.getForeName()+"&email="+user.getEmail();
-
-                HttpClient httpclient = new DefaultHttpClient();
-                HttpPost httppost = new HttpPost(LOGIN_URL);
-                try {
-                    httppost.setEntity(new UrlEncodedFormEntity(parameters, HTTP.UTF_8));
-                    HttpResponse response = httpclient.execute(httppost);
-                    String data = new BasicResponseHandler().handleResponse(response);
-                    webView.loadDataWithBaseURL(httppost.getURI().toString(), data, "text/html", HTTP.UTF_8, null);
-                } catch (UnsupportedEncodingException e) {
-                    e.printStackTrace();
-                } catch (HttpResponseException e) {
-                    e.printStackTrace();
-                } catch (ClientProtocolException e) {
-                    e.printStackTrace();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        } else {
-            webView.loadUrl(startUrl);
-        }*/
+        // TODO check internet connection
         webView.loadUrl(startUrl);
     }
 
@@ -1246,6 +1213,10 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
     @Override
     protected void onStop() {
         super.onStop();
+        if (isSocietiesUser) {
+            clearCookies();
+            Log.i(LOG_TAG, "cookies cleared");
+        }
         if (communityManagementClientConnected) {
             communityManagementClient.tearDownService();
         }

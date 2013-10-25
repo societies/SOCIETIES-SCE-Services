@@ -26,6 +26,7 @@ import org.societies.thirdpartyservices.crowdtasking.CrowdTasking;
 import org.societies.thirdpartyservices.crowdtasking.MainActivity;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -131,13 +132,16 @@ public class ContextClient extends ServiceClientBase {
                     if (!oldLocation.equalsIgnoreCase(location)) {
                         Toast.makeText(context, "Location changed to: " + location, Toast.LENGTH_LONG).show();
                         ((CrowdTasking) context).symbolicLocation = location;
-                        // TODO: get from central location
-/*
-                        String CHECK_IN_OUT = "si.setcce.societies.android.rest.CHECK_IN_OUT";
-                        String DOMAIN = "crowdtaskingtest.appspot.com";
-                        RestTask task = new RestTask(context, CHECK_IN_OUT, CookieManager.getInstance().getCookie(DOMAIN), DOMAIN);
-                        task.execute(new HttpGet(new URI(url)));
-*/
+                        // TODO: dokončaj
+//                        String CHECK_IN_OUT = "si.setcce.societies.android.rest.CHECK_IN_OUT";
+                        String DOMAIN = ((MainActivity)context).DOMAIN;
+                        String url = ((MainActivity)context).APPLICATION_URL+"/cs/"+location+"/enter";
+                        RestTask checkin = new RestTask(context, ((MainActivity)context).CHECK_IN_OUT, CookieManager.getInstance().getCookie(DOMAIN), DOMAIN);
+                        try {
+                            checkin.execute(new HttpGet(new URI(url)));
+                        } catch (URISyntaxException e) {
+                            e.printStackTrace();
+                        }
 
                     } else {
 //                        Toast.makeText(context, "Location is still the same", Toast.LENGTH_LONG).show();

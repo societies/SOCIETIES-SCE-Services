@@ -33,7 +33,7 @@ import android.webkit.CookieManager;
 public class TrustTask extends
 		AsyncTask<String, Void, Set<TrustRelationshipBean>> {
 	private static String TRUST_API_URL;
-	private static final String TRUST_RELATIONSHIP_POST = "si.setcce.societies.android.rest.LOG_EVENT";
+	private static final String TRUST_RELATIONSHIP_POST = "si.setcce.societies.android.rest.TRUST";
 	private Context context;
 	private Set<TrustRelationshipBean> trustRelationships = null;
     private final String DOMAIN;
@@ -47,7 +47,7 @@ public class TrustTask extends
 	@Override
 	protected Set<TrustRelationshipBean> doInBackground(String... params) {
 		final RequestorBean requestor = new RequestorBean();
-        requestor.setRequestorId(params[0]);    // TODO: get requestorID from Virgo
+        requestor.setRequestorId(MainActivity.SERVICE_ID);
         final TrustedEntityIdBean trustorId = new TrustedEntityIdBean();
         trustorId.setEntityId(params[0]);
         trustorId.setEntityType(TrustedEntityTypeBean.CSS);
@@ -116,8 +116,7 @@ public class TrustTask extends
 					trustRelationshipsJSON.toString()));
 			eventRequest.setEntity(new UrlEncodedFormEntity(parameters));
 			RestTask task = new RestTask(context, TRUST_RELATIONSHIP_POST,
-					CookieManager.getInstance().getCookie(
-                            DOMAIN), DOMAIN);
+					CookieManager.getInstance().getCookie(DOMAIN), DOMAIN);
 			task.execute(eventRequest);
 		} catch (URISyntaxException e) {
 			Log.e("CT4A", e.getMessage());

@@ -28,7 +28,7 @@ public abstract class ServiceClientBase {
 	public ServiceClientBase(Context context) {
 		this.context = context;
         requestor = new RequestorBean();
-        requestor.setRequestorId(((MainActivity)context).SERVICE_ID);
+        requestor.setRequestorId(MainActivity.SERVICE_ID);
 	}
 
 	abstract protected Intent getServiceIntent();

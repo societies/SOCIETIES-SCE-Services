@@ -20,8 +20,8 @@ public class SocketClient implements Runnable {
     private final static String LOG_TAG = "SocketClient";
     private Socket requestSocket;
     static final int SERVERPORT = 38980;
-//    static final String SERVER_IP = "192.168.1.71";
-    static final String SERVER_IP = "137.195.27.87";
+    static final String SERVER_IP = "192.168.1.71";
+//    static final String SERVER_IP = "137.195.27.87";
     private boolean connected = true;
     private ObjectInputStream in = null;
     private ObjectOutputStream out =null;
