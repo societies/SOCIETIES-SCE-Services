@@ -99,32 +99,13 @@ public class CommentAPI implements ICommentAPI {
 //		comment.setExecution(execution);
 		Long commentId = saveComment(comment);
         Task task = TaskDao.getTaskById(taskId);
-        List<Long> involvedUsers = task.getInvolvedUsers();
-        if (involvedUsers == null) {
-            involvedUsers = new ArrayList<>();
-            task.setTaskStatus(TaskStatus.IN_PROGRESS);
-        }
-        involvedUsers.add(user.getId());
-        task.setInvolvedUsers(involvedUsers);
+        task.addInvolvedUser(user.getId());
         TaskDao.save(task);
 		
 		EventAPI.logTaskComment(taskId, commentId, comment.getPosted(), user);
-        Map<Long, CTUser> usersMap = UsersAPI.getUsersMap(involvedUsers.toArray(new Long[0]));
-		NotificationsSender.commentOnTaskIParticipate(comment.getTask(), getInvolvedUsersOnTaskThatWasCommented(comment), user.getId());
+        Map<Long, CTUser> usersMap = UsersAPI.getUsersMap(task.getInvolvedUsers().toArray(new Long[0]));
+		NotificationsSender.commentOnTaskIParticipate(comment.getTask(), user.getId());
 		return Response.ok().build();
-	}
-
-	private Set<Long> getInvolvedUsersOnTaskThatWasCommented(Comment comment) {
-//        ni več execution faze
-//		Query<Comment> comments = getExecutionComments(comment.getTask().getId());
-
-		Set<Long> users = new HashSet<Long>();
-		for (Long userId:comment.getTask().getInvolvedUsers()) {
-			users.add(userId);
-		}
-		 // remove author of the last comment - inform the others
-		users.remove(comment.getOwner().getId());
-		return users;
 	}
 
 	public static Long saveComment(Comment comment) {

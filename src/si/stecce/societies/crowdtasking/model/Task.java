@@ -1,10 +1,7 @@
 package si.stecce.societies.crowdtasking.model;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.Ref;
@@ -28,7 +25,7 @@ public class Task {
 	@Ignore private String tags;
     @Deprecated private String status; // open (new), inprogress, finished, closed?
 	@Index private TaskStatus taskStatus;
-	private List<Long> involvedUsers;
+	private Set<Long> involvedUsers;
 	private List<String> informChannels;
 	private String executeMessage;
 	@Index private Long score;
@@ -136,12 +133,16 @@ public class Task {
 		this.status = status;
 	}
 
-	public List<Long> getInvolvedUsers() {
+	public Set<Long> getInvolvedUsers() {
 		return involvedUsers;
 	}
 
-	public void setInvolvedUsers(List<Long> involvedUsers) {
-		this.involvedUsers = involvedUsers;
+	public void addInvolvedUser(Long userId) {
+        if (involvedUsers == null) {
+            involvedUsers = new HashSet<>();
+            setTaskStatus(TaskStatus.IN_PROGRESS);
+        }
+		this.involvedUsers.add(userId);
 	}
 
 	public List<String> getInformChannels() {

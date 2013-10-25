@@ -289,12 +289,14 @@ var Community = function() {
 
     	var spaces = "";
     	if (community.spaces !== undefined && community.spaces != null && community.spaces.length > 0) {
-    		//spaces = community.spaces[0].name;
-    		spaces = community.owner ? getCSEditLink(community.spaces[0], 0) : community.spaces[0].name;
+    		spaces = community.spaces[0].name;
+            // SCT-32 Remove link from CS
+    		// spaces = community.owner ? getCSEditLink(community.spaces[0], 0) : community.spaces[0].name;
     		for (var i=1; i<community.spaces.length; i++) {
-    			//spaces += ", " + community.spaces[i].name;
-    			spaces += ", ";
-    			spaces += community.owner ? getCSEditLink(community.spaces[i], i) : community.spaces[i].name;
+    			spaces += ", " + community.spaces[i].name;
+                // SCT-32 Remove link from CS
+//    			spaces += ", ";
+//    			spaces += community.owner ? getCSEditLink(community.spaces[i], i) : community.spaces[i].name;
     		}
     	}
     	$('#csNames').html(spaces);

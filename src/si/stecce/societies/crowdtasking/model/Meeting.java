@@ -27,6 +27,7 @@ package si.stecce.societies.crowdtasking.model;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 import si.stecce.societies.crowdtasking.api.RESTful.impl.UsersAPI;
 import si.stecce.societies.crowdtasking.model.dao.CollaborativeSpaceDAO;
@@ -65,8 +66,7 @@ public class Meeting {
 	}
 
 	public Meeting(String subject, String description,
-			Long csId, Date startTime, Date endTime, CTUser organizer, List<Long> userIds) {
-		super();
+			Long csId, Date startTime, Date endTime, CTUser organizer, Set<Long> userIds) {
 		this.subject = subject;
 		this.description = description;
 		if (csId != null) {
@@ -76,7 +76,7 @@ public class Meeting {
 		this.startTime = startTime;
 		this.endTime = endTime;
 		this.created = new Date();
-		this.users = new ArrayList<Ref<CTUser>>();
+		this.users = new ArrayList<>();
 		for (Long userId:userIds) {
 			users.add(Ref.create(Key.create(CTUser.class, userId)));
 		}

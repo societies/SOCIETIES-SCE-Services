@@ -57,7 +57,7 @@ if ("SOCIETIES".equalsIgnoreCase(federatedIdentity)) {
 			<h2>Crowd tasking</h2>
 		</div>
 		<div class="main" data-role="content">
-			<!--a href="" id="societiesButton" data-ajax="false" data-role="button" class="ui-disabled">Sign in with Societies!</a-->
+			<a href="" id="societiesButton" data-ajax="false" data-role="button" class="ui-disabled">Sign in with Societies!</a>
 			<a href='<%=UserServiceFactory.getUserService().createLoginURL(suffix, null, "https://www.google.com/accounts/o8/id", null) %>' data-ajax="false" data-role="button">Sign in with Google</a>
 			<a href='<%=UserServiceFactory.getUserService().createLoginURL(suffix, null, "yahoo.com", null) %>' data-ajax="false" data-role="button">Sign in with Yahoo</a>
 			<a href='<%=UserServiceFactory.getUserService().createLoginURL(suffix, null, "myopenid.com", null) %>' data-ajax="false" data-role="button">Sign in with MyOpenId.com</a>

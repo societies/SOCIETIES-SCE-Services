@@ -160,42 +160,11 @@ public class TaskAPI implements ITaskAPI {
 			}
 			return newTask(title, description, communities, tagsString, user, communityJids);
 		}
-		if ("execute".equalsIgnoreCase(action)) {
-			if (activeComments == null || activeComments.isEmpty()) {
-				return Response.status(Status.NOT_ACCEPTABLE).entity("Select at least one relevant comment.").type("text/plain").build();
-			}
-			return startTaskExecution(taskId, activeComments, informChannels, message, user);
-		}
 		if ("finalize".equalsIgnoreCase(action)) {
 			return finalizeTask(taskId, user);
 		}
 		
 		return Response.ok().build();
-	}
-	
-	private Response startTaskExecution(String taskId, List<Long> activeComments, List<String> informChannels, String message, CTUser user) {
-		startExecution(taskId, activeComments, informChannels, message);
-		EventAPI.logExecuteTask(new Long(taskId), new Date(), user);
-		return Response.ok().build();
-	}
-	
-	private void startExecution(String taskId, List<Long> activeComments, List<String> informChannels, String message) {
-		List<Comment> comments = CommentAPI.getComments(activeComments);
-		Set<Long> involvedUsers = new HashSet<Long>();
-		for (Comment comment:comments) {
-			involvedUsers.add(comment.getOwner().getId());
-			comment.setExecution(true);
-		}
-		Task task = TaskDao.getTaskById(new Long(taskId));
-		task.setInvolvedUsers(new ArrayList<Long>(involvedUsers));
-		task.setInformChannels(informChannels);
-		task.setExecuteMessage(message);
-		task.setTaskStatus(TaskStatus.IN_PROGRESS);
-		TaskDao.save(task);
-		CommentAPI.saveComments(comments);
-		// inform involved users
-		involvedUsers.add(task.getOwnerId());
-		NotificationsSender.executionStarted(task, involvedUsers);
 	}
 	
 	private Response finalizeTask(String taskId, CTUser user) {

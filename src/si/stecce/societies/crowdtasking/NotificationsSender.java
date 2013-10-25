@@ -62,7 +62,7 @@ public final class NotificationsSender {
 	private NotificationsSender() {}
 	
 	public static void newMeeting(Meeting meeting, Task task) {
-		List<Long> involvedUsers = task.getInvolvedUsers();
+		Set<Long> involvedUsers = task.getInvolvedUsers();
 		Map<Long, CTUser> usersMap = UsersAPI.getUsersMap(involvedUsers.toArray(new Long[0]));
 		for (Long userId:involvedUsers) {
 			CTUser user = usersMap.get(userId);
@@ -150,13 +150,13 @@ public final class NotificationsSender {
 		}
 	}
 	
-	public static void commentOnTaskIParticipate(Task task, Set<Long> involvedUsers, Long lastCommenterId) {
-		Map<Long, CTUser> usersMap = UsersAPI.getUsersMap(involvedUsers.toArray(new Long[0]));
+	public static void commentOnTaskIParticipate(Task task, Long lastCommenterId) {
+		Map<Long, CTUser> usersMap = UsersAPI.getUsersMap(task.getInvolvedUsers().toArray(new Long[0]));
         List<String> partialDevices = new ArrayList();
 
         String message = "A new comment on the task '" + task.getTitle() + "'.";
 
-        for (Long userId:involvedUsers) {
+        for (Long userId:task.getInvolvedUsers()) {
             if (userId.longValue() == lastCommenterId.longValue()) {
                 continue;
             }

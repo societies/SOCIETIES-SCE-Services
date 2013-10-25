@@ -51,7 +51,7 @@ public class TaskJS {
 	private boolean myTask;
 	private String tags;
 	private TaskStatus status;
-	private List<Long> involvedUsers;
+	private Set<Long> involvedUsers;
 	private List<String> informChannels;
 	private String executeMessage;
 	private Long score;
