@@ -15,7 +15,6 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
-import android.graphics.Bitmap;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -27,7 +26,6 @@ import android.nfc.NfcEvent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Message;
 import android.os.Parcelable;
 import android.provider.CalendarContract.Events;
 import android.util.Log;
@@ -53,13 +51,10 @@ import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
-import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -88,6 +83,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.CountDownLatch;
@@ -111,10 +107,10 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
     private static final String SCOPE ="SETCCE_SOCIETIES";
 //    private static final String DOMAIN = "crowdtasking.appspot.com";
 //    private static final String DOMAIN = "crowdtaskingtest.appspot.com";
-   	public static final String DOMAIN = "192.168.1.71";
-//   	private static final String DOMAIN = "192.168.1.102";
-//   	private static final String DOMAIN = "192.168.1.66";
-//   	private static final String DOMAIN = "192.168.1.78";
+//   	public static final String DOMAIN = "192.168.1.71";
+   	public static final String DOMAIN = "192.168.1.102";
+//   	public static final String DOMAIN = "192.168.1.67";
+//   	public static final String DOMAIN = "192.168.1.78";
 //    private static final String PORT = "";
     private static final String PORT = ":8888";
     public static final String APPLICATION_URL = SCHEME +"://" + DOMAIN + PORT;
@@ -152,7 +148,9 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
     private static final String PROPERTY_APP_VERSION = "appVersion";
     private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
     private boolean firstTimeOnMenuPage = true;
-    /**
+	Timer locationTimer = new Timer();
+
+	/**
      * This is the project number from the API Console
      */
     String SENDER_ID = "567873389890";
@@ -374,11 +372,12 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
             societiesServicesRunning = true;
             communityManagementClient = new CommunityManagementClient(this, communityClientReceiver);
             communityManagementClient.setUpService();
-            checkLocation();
-//            contextClient = new ContextClient(this);
-//            contextClient.setUpService();
-//            societiesEventsClient = new SocietiesEventsClient(this, eventsClientReceiver);
-//            societiesEventsClient.setUpService();
+            //checkLocation();
+	        contextClient = new ContextClient(getApplicationContext());
+	        contextClient.setUpService();
+
+            societiesEventsClient = new SocietiesEventsClient(this, eventsClientReceiver);
+            societiesEventsClient.setUpService();
 //            cisDirectoryClient = new CisDirectoryClient(this, cisDirectoryClientReceiver);
 //            cisDirectoryClient.setUpService();
         }
@@ -417,7 +416,6 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
 
     private void checkLocation() {
         final Handler handler = new Handler();
-        Timer timer = new Timer();
         TimerTask doAsynchronousTask = new TimerTask() {
             @Override
             public void run() {
@@ -437,7 +435,7 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
                 });
             }
         };
-        timer.schedule(doAsynchronousTask, 0, 15000); //execute in every 10000 ms
+        locationTimer.schedule(doAsynchronousTask, 0, 15000); //execute in every 15000 ms
     }
 
 /*
@@ -461,19 +459,21 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
 	    ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
         System.out.println("Are Societies services running?");
 	    for (RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
-	    	System.out.println(service.service.getClassName());
-            if ("org.societies.android.privacytrust.trust.TrustClientRemote".equals(service.service.getClassName())) {
-                System.out.println("Trust client service is running");
-                trust = true;
-            }
-            if ("org.societies.android.platform.context.ServiceContextBrokerRemote".equals(service.service.getClassName())) {
-                System.out.println("Context client service is running");
-                context = true;
-            }
-            if ("org.societies.android.platform.cis.CisManagerRemote".equals(service.service.getClassName())) {
-                System.out.println("CisManager client service is running");
-                cis = true;
-            }
+		    if (service.service.getClassName().startsWith("org.societies")) {
+			    System.out.println(service.service.getClassName());
+		    }
+		    if ("org.societies.android.privacytrust.trust.TrustClientRemote".equals(service.service.getClassName())) {
+			    System.out.println("Trust client service is running");
+			    trust = true;
+		    }
+		    if ("org.societies.android.platform.context.ServiceContextBrokerRemote".equals(service.service.getClassName())) {
+			    System.out.println("Context client service is running");
+			    context = true;
+		    }
+		    if ("org.societies.android.platform.cis.CisManagerRemote".equals(service.service.getClassName())) {
+			    System.out.println("CisManager client service is running");
+			    cis = true;
+		    }
 	    }
 	    return trust && context && cis;
 	}
@@ -641,8 +641,12 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
             	//refreshData();
             	/*Intent startIntent=new Intent(this.getApplicationContext(),RemoteControlActivity.class);
             	startActivity(startIntent);*/
-                CheckUpdateTask checkUpdateTask = new CheckUpdateTask(this, true);
-                checkUpdateTask.execute();
+//                CheckUpdateTask checkUpdateTask = new CheckUpdateTask(this, true);
+//                checkUpdateTask.execute();
+	            Random rand = new Random();
+
+	            int  n = rand.nextInt(500);
+	            contextClient.setSymbolicLocation("location"+n);
                 return true;
 
             case R.id.logout:
@@ -804,7 +808,7 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
                 }
                 if (response.equalsIgnoreCase("ContextClient")) {
                     contextClientRunning = true;
-                    contextClient.getSymbolicLocation(societiesUser.getUserId()); // todo: dokončaj
+                    contextClient.getSymbolicLocation(societiesUser.getUserId());
                 }
                 if (response.equalsIgnoreCase("CisDirectoryClient")) {
                     cisDirectoryClientConnected = true;
@@ -812,7 +816,7 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
                 }
                 if (response.equalsIgnoreCase("SocietiesEventsClient")) {
                     societiesEventsClientConnected = true;
-                    societiesEventsClient.subcribeToAllEvents();
+                    societiesEventsClient.subcribeToLocationChangedEvent();
                 }
                 System.out.println(response);
             }
@@ -1212,7 +1216,9 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
 
     @Override
     protected void onStop() {
-        super.onStop();
+	    locationTimer.cancel();
+
+	    super.onStop();
         if (isSocietiesUser) {
             clearCookies();
             Log.i(LOG_TAG, "cookies cleared");

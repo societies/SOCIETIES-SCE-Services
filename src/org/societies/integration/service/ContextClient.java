@@ -34,6 +34,7 @@ import si.setcce.societies.android.rest.RestTask;
 
 public class ContextClient extends ServiceClientBase {
 	private final static String LOG_TAG = "ContextClient";
+	CtxAttributeBean locationBean;
 
 	public ContextClient(Context context) {
 		super(context);
@@ -122,12 +123,16 @@ public class ContextClient extends ServiceClientBase {
 				final Parcelable pModelObject = (Parcelable) intent.getParcelableExtra(ICtxClient.INTENT_RETURN_VALUE_KEY);	
 				if (pModelObject instanceof CtxModelObjectBean) {
 					modelObject = (CtxModelObjectBean) pModelObject;
+					locationBean = (CtxAttributeBean) modelObject;
                     String location = ((CtxAttributeBean) modelObject).getStringValue();
-                    String oldLocation = ((CrowdTasking)context).symbolicLocation;
+					if (location == null) {
+						location = "";
+					}
+					Toast.makeText(context, "User location: " + location, Toast.LENGTH_LONG).show();
+					String oldLocation = ((CrowdTasking)context).symbolicLocation;
                     if ("".equalsIgnoreCase(oldLocation)) {
                         ((CrowdTasking) context).symbolicLocation = location;
                         oldLocation = location;
-                        Toast.makeText(context, "User location: " + location, Toast.LENGTH_LONG).show();
                     }
                     if (!oldLocation.equalsIgnoreCase(location)) {
                         Toast.makeText(context, "Location changed to: " + location, Toast.LENGTH_LONG).show();
@@ -158,6 +163,10 @@ public class ContextClient extends ServiceClientBase {
 
     public void getSymbolicLocation(String cssId) {
         retrieveIndividualEntityId(cssId);
+    }
+
+    public void setSymbolicLocation(String newLocation) {
+        update(newLocation);
     }
 
 
@@ -242,5 +251,17 @@ public class ContextClient extends ServiceClientBase {
 		}
 
 		return null;
+	}
+
+	private void update(String newLocation) {
+		if (this.connectedToContextClient) {
+			locationBean.setStringValue(newLocation);
+			Bundle outBundle = getBundle();
+			outBundle.putParcelable("requestor", requestor);
+			outBundle.putParcelable("object", locationBean);
+			callMethod(10, outBundle);
+		} else {
+			Log.e(LOG_TAG, "Note connected to Context Client service");
+		}
 	}
 }

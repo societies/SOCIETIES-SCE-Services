@@ -14,6 +14,8 @@ import org.societies.android.api.services.ICoreSocietiesServices;
 public class SocietiesEventsClient extends ServiceClientBase {
 	private final static String LOG_TAG = "SocietiesEventsClient";
     private BroadcastReceiver receiver;
+	String CONTEXT_MODIFIED_LOCATION_SYMBOLIC_INTENT = "org.societies.android.context.MODIFIED.locationSymbolic";
+	String CONTEXT_MODIFIED_LOCATION_SYMBOLIC_EVENT = "org/societies/context/change/event/MODIFIED/locationSymbolic";
 
 	public SocietiesEventsClient(Context context, BroadcastReceiver receiver) {
 		super(context);
@@ -40,6 +42,9 @@ public class SocietiesEventsClient extends ServiceClientBase {
         intentFilter.addAction(IAndroidSocietiesEvents.NUM_EVENT_LISTENERS);
         intentFilter.addAction(IServiceManager.INTENT_SERVICE_STOPPED_STATUS);
         intentFilter.addAction(IServiceManager.INTENT_SERVICE_STARTED_STATUS);
+        intentFilter.addAction(CONTEXT_MODIFIED_LOCATION_SYMBOLIC_INTENT);
+        intentFilter.addAction(CONTEXT_MODIFIED_LOCATION_SYMBOLIC_EVENT);
+		//org.societies.android.platform.context.UPDATE
         return intentFilter;
 	}
 
@@ -48,29 +53,18 @@ public class SocietiesEventsClient extends ServiceClientBase {
 		return receiver;
 	}
 
-	public void findAllCisAdvertismentRecords() {
-		if (this.connectedToContextClient) {
-            callMethod(1, getBundle());
-		}
-	}
+    public void subcribeToLocationChangedEvent() {
 
-	public void findAllCis(String filter) {
-		if (this.connectedToContextClient) {
-            Bundle outBundle = getBundle();
-            outBundle.putString("filter", filter);
-            callMethod(1, outBundle);
-		}
-	}
+	    Bundle outBundle = getBundle();
+	    outBundle.putString("societiesIntent", CONTEXT_MODIFIED_LOCATION_SYMBOLIC_INTENT);
+        callMethod(0, outBundle);
+    }
 
-	public void searchByID(String cis_id) {
-		if (this.connectedToContextClient) {
-            Bundle outBundle = getBundle();
-            outBundle.putString("cis_id", cis_id);
-            callMethod(2, outBundle);
-		}
-	}
+    public void test() {
+//	    final String CONTEXT_MODIFIED_LOCATION_SYMBOLIC_EVENT = "org/societies/context/change/event/MODIFIED/locationSymbolic";
 
-    public void subcribeToAllEvents() {
-        callMethod(2, getBundle());
+	    Bundle outBundle = getBundle();
+	    outBundle.putString("intent", IAndroidSocietiesEvents.CSS_MANAGER_ADD_CSS_NODE_INTENT);
+        callMethod(0, outBundle);
     }
 }
