@@ -18,6 +18,7 @@
 		<property name="eventMgr" ref="eventMgr"/>	
 		<property name="ctxBroker" ref="ctxBroker"></property>
 		<property name="commManager" ref="commManager"></property>
+		<property name="displayDriverService" ref="displayDriverService"></property>		
 	</bean>	
 	
 

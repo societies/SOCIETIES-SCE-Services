@@ -24,7 +24,9 @@
  */
 package ac.hw.askfree;
 
+import java.net.MalformedURLException;
 import java.net.Socket;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -41,6 +43,8 @@ import org.societies.api.context.model.CtxEntityIdentifier;
 import org.societies.api.context.model.CtxEntityTypes;
 import org.societies.api.context.model.CtxIdentifier;
 import org.societies.api.context.model.CtxModelType;
+import org.societies.api.css.devicemgmt.display.IDisplayDriver;
+import org.societies.api.css.devicemgmt.display.IDisplayableService;
 import org.societies.api.identity.IIdentity;
 import org.societies.api.identity.IIdentityManager;
 import org.societies.api.identity.InvalidFormatException;
@@ -68,8 +72,9 @@ import ac.hw.askfree.tools.SocketServer;
  * @author Ioannis Mimtsoudis
  *
  */
-public class AskFree extends EventListener implements IAskFree{
+public class AskFree extends EventListener implements IAskFree,IDisplayableService{
 
+	private IDisplayDriver displayDriverService;
 	private IServices serviceMgmt;
 	private IEventMgr eventMgr;
 	Logger logging = LoggerFactory.getLogger(this.getClass());
@@ -90,7 +95,7 @@ public class AskFree extends EventListener implements IAskFree{
 
 	private IIdentityManager idMgr;
 	private ContextEventListener contextEventListener;
-	
+
 	private String symbolicLocation;
 
 	public void init(){
@@ -99,7 +104,20 @@ public class AskFree extends EventListener implements IAskFree{
 
 		this.registerForServiceEvents();
 
-		//contextEventListener = new ContextEventListener(this, getCtxBroker(), getRequestor());		
+		//REGISTER AS A DISPLAYABLE SERVICE
+		URL askFreeURL = null;
+		try {
+			askFreeURL = new URL("http://54.218.113.176/AF-S/screen.php");
+		} catch (MalformedURLException e) {
+			logging.error("Error making URL", e);
+		}
+
+		if(askFreeURL!=null)
+		{
+			this.displayDriverService.registerDisplayableService(this, "AskFree", askFreeURL, false);
+		}
+
+				
 	}
 
 	/*
@@ -107,7 +125,7 @@ public class AskFree extends EventListener implements IAskFree{
 	 */
 	private void registerForServiceEvents(){
 		String eventFilter = "(&" + 
-				"(" + CSSEventConstants.EVENT_NAME + "="+ServiceMgmtEventType.NEW_SERVICE+")" +
+				"(" + CSSEventConstants.EVENT_NAME + "="+ServiceMgmtEventType.SERVICE_STARTED+")" +
 				"(" + CSSEventConstants.EVENT_SOURCE + "=org/societies/servicelifecycle)" +
 				")";
 		this.eventMgr.subscribeInternalEvent(this, new String[]{EventTypes.SERVICE_LIFECYCLE_EVENT}, eventFilter);
@@ -118,7 +136,7 @@ public class AskFree extends EventListener implements IAskFree{
 	private void unregisterForServiceEvents()
 	{
 		String eventFilter = "(&" + 
-				"(" + CSSEventConstants.EVENT_NAME + "="+ServiceMgmtEventType.NEW_SERVICE+")" +
+				"(" + CSSEventConstants.EVENT_NAME + "="+ServiceMgmtEventType.SERVICE_STARTED+")" +
 				"(" + CSSEventConstants.EVENT_SOURCE + "=org/societies/servicelifecycle)" +
 				")";
 
@@ -137,13 +155,13 @@ public class AskFree extends EventListener implements IAskFree{
 
 		logging.debug("Received internal event: "+event.geteventName());
 
-		if(event.geteventName().equalsIgnoreCase("NEW_SERVICE")){
+	//	if(event.geteventName().equalsIgnoreCase(EventTypes.)){
 			logging.debug("Received SLM event");
 			ServiceMgmtEvent slmEvent = (ServiceMgmtEvent) event.geteventInfo();
 			this.logging.debug("SLM event Bundle Symbol Name" + slmEvent.getBundleSymbolName());
 			if (slmEvent.getBundleSymbolName().equalsIgnoreCase("ac.hw.askfree.AskFreeClient")){
 				this.logging.debug("Received SLM event for my bundle");
-				if (slmEvent.getEventType().equals(ServiceMgmtEventType.NEW_SERVICE)){
+				if (slmEvent.getEventType().equals(ServiceMgmtEventType.SERVICE_STARTED)){
 
 					setMyServiceID(slmEvent.getServiceId());
 					this.logging.debug("1.Service id:" + slmEvent.getServiceId().toString());
@@ -169,7 +187,7 @@ public class AskFree extends EventListener implements IAskFree{
 					//this.unregisterForServiceEvents();
 				}
 			}
-		}
+	//	}
 	}
 
 	/* (non-Javadoc)
@@ -185,9 +203,9 @@ public class AskFree extends EventListener implements IAskFree{
 	public void updateUserLocation(String userIdentity, ClientHandler cHandler, String location){
 		//this.logging.debug("location of user: "+userIdentity+" is: "+location + "user socket: " + userSocket);
 		this.logging.debug("location of user: "+userIdentity+" is: "+location + " cHandler: " + cHandler);
-		
+
 		this.setSymbolicLocation(userIdentity, location);
-		
+
 		//send the location of the user to the appropriate android client (based on userIdentity)
 		cHandler.sendMessage(this.getSymbolicLocation(userIdentity));
 	}
@@ -348,5 +366,37 @@ public class AskFree extends EventListener implements IAskFree{
 		userToLocation.put(userIdentity, symbolicLocation);
 		this.logging.debug("Set symbolic location: "+symbolicLocation+" for user: " + userIdentity);
 		//this.symbolicLocation = symbolicLocation;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.societies.api.css.devicemgmt.display.IDisplayableService#serviceStarted(java.lang.String)
+	 */
+	@Override
+	public void serviceStarted(String arg0) {
+		logging.info("service askfree started");		
+	}
+
+	/* (non-Javadoc)
+	 * @see org.societies.api.css.devicemgmt.display.IDisplayableService#serviceStopped(java.lang.String)
+	 */
+	@Override
+	public void serviceStopped(String arg0) {
+		// TODO Auto-generated method stub
+		logging.info("service askfree stopped");	
+
+	}
+
+	/**
+	 * @return the displayDriverService
+	 */
+	public IDisplayDriver getDisplayDriverService() {
+		return displayDriverService;
+	}
+
+	/**
+	 * @param displayDriverService the displayDriverService to set
+	 */
+	public void setDisplayDriverService(IDisplayDriver displayDriverService) {
+		this.displayDriverService = displayDriverService;
 	}
 }

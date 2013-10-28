@@ -45,4 +45,8 @@
 	
 	<osgi:reference id="ctxBroker" interface="org.societies.api.context.broker.ICtxBroker">
 	</osgi:reference>
+	
+	<osgi:reference id="displayDriverService" interface="org.societies.api.css.devicemgmt.display.IDisplayDriver">
+	</osgi:reference>	
+	
 </beans>
