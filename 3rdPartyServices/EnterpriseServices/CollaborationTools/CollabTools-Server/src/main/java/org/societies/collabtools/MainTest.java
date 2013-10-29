@@ -104,7 +104,7 @@ public class MainTest {
 		test.createMockLongTermCtx();
 		test.createMockShortTermCtx();
 		test.enrichedCtx(LongTermCtxTypes.INTERESTS);
-		test.setupWeightAmongPeople(LongTermCtxTypes.INTERESTS);
+//		test.setupWeightAmongPeople(LongTermCtxTypes.INTERESTS);
 
 		
 //		YouMightKnow ymn = new YouMightKnow(personRepository.getPersonByName("person#"+3), new String[] {"project planning"}, 5);
