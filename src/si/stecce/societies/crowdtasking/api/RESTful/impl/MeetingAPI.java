@@ -24,6 +24,8 @@
  */
 package si.stecce.societies.crowdtasking.api.RESTful.impl;
 
+import static si.stecce.societies.crowdtasking.model.dao.OfyService.ofy;
+
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -46,9 +48,11 @@ import javax.ws.rs.core.Response.Status;
 
 import si.stecce.societies.crowdtasking.NotificationsSender;
 import si.stecce.societies.crowdtasking.api.RESTful.IMeetingAPI;
+import si.stecce.societies.crowdtasking.api.RESTful.json.MeetingDetails4CSignJS;
 import si.stecce.societies.crowdtasking.api.RESTful.json.MeetingJS;
 import si.stecce.societies.crowdtasking.api.RESTful.json.TaskJS;
 import si.stecce.societies.crowdtasking.model.CTUser;
+import si.stecce.societies.crowdtasking.model.CollaborativeSign;
 import si.stecce.societies.crowdtasking.model.Meeting;
 import si.stecce.societies.crowdtasking.model.Task;
 import si.stecce.societies.crowdtasking.model.dao.MeetingDAO;
@@ -77,6 +81,14 @@ public class MeetingAPI implements IMeetingAPI {
 			meeting = MeetingDAO.loadMeeting(meetingId);
 			return gson.toJson(new MeetingJS(meeting));
 		}
+		if ("communitysign".equalsIgnoreCase(querytype)) {
+            CollaborativeSign collaborativeSign = getCollaborativeSign();
+            if (collaborativeSign.getMeetingId() != null) {
+                Meeting meeting = MeetingDAO.loadMeeting(collaborativeSign.getMeetingId());
+                Gson gson = new Gson();
+                return gson.toJson(new MeetingDetails4CSignJS(meeting));
+            }
+		}
 		if ("cs".equalsIgnoreCase(querytype)) {
 			return getMeetingsForCS(csId);
 		}
@@ -102,42 +114,72 @@ public class MeetingAPI implements IMeetingAPI {
                                @FormParam("meetingCS") Long csId,
                                @FormParam("taskStart") String taskStart,
                                @FormParam("taskEnd") String taskEnd,
+                               @FormParam("meetingId4CommSign") Long meetingId4CommSign,
+                               @FormParam("downloadUrl") String downloadUrl,
                                @Context HttpServletRequest request) {
-		CTUser user = UsersAPI.getLoggedInUser(request.getSession());
-		if ("".equals(meetingSubject)) {
-			return Response.status(Status.BAD_REQUEST).entity("Subject is required.").type("text/plain").build();
-		}
-		Task task = TaskDao.getTaskById(taskId);
-		DateFormat formatter = new SimpleDateFormat("dd.MM.yyyy HH:mm");
-		Date startTime=null;
-		try {
-			startTime = formatter.parse(taskStart);
-		} catch (ParseException e) {
-			return Response.status(Status.BAD_REQUEST).entity("Start time error.").type("text/plain").build();
-		}
-		if (startTime.before(new Date())) {
-			return Response.status(Status.BAD_REQUEST).entity("Strat time is in the past.").type("text/plain").build();
-		}
-		Date endTime=null;
-		try {
-			endTime = formatter.parse(taskEnd);
-		} catch (ParseException e) {
-			return Response.status(Status.BAD_REQUEST).entity("End time error.").type("text/plain").build();
-		}
-		if (startTime.after(endTime)) {
-			return Response.status(Status.BAD_REQUEST).entity("Strat time is after end time.").type("text/plain").build();
-		}
-		
-		Meeting meeting = new Meeting(meetingSubject, meetingDescription, csId, startTime, endTime, user, task.getInvolvedUsers());
-		Key<Meeting> meetingKey = MeetingDAO.saveMeeting(meeting);
-		task.addMeeting(meetingKey);
-		TaskDao.save(task);
-		NotificationsSender.newMeeting(meeting, task);
-		TaskDao.setTransientTaskParams(user, task);
-		EventAPI.logNewMeeting(task, meeting, new Date(), user);
-		// because of Ref<?> value has not been initialized
-		task = TaskDao.getTaskById(task.getId());
-		Gson gson = new Gson();
-		return Response.ok().entity(gson.toJson(new TaskJS(task, user))).build();
+
+        CTUser user = UsersAPI.getLoggedInUser(request.getSession());
+        if ("".equals(meetingSubject)) {
+            return Response.status(Status.BAD_REQUEST).entity("Subject is required.").type("text/plain").build();
+        }
+        if ("create".equalsIgnoreCase(querytype)) {
+            Task task = TaskDao.getTaskById(taskId);
+            DateFormat formatter = new SimpleDateFormat("dd.MM.yyyy HH:mm");
+            Date startTime=null;
+            try {
+                startTime = formatter.parse(taskStart);
+            } catch (ParseException e) {
+                return Response.status(Status.BAD_REQUEST).entity("Start time error.").type("text/plain").build();
+            }
+            if (startTime.before(new Date())) {
+                return Response.status(Status.BAD_REQUEST).entity("Strat time is in the past.").type("text/plain").build();
+            }
+            Date endTime=null;
+            try {
+                endTime = formatter.parse(taskEnd);
+            } catch (ParseException e) {
+                return Response.status(Status.BAD_REQUEST).entity("End time error.").type("text/plain").build();
+            }
+            if (startTime.after(endTime)) {
+                return Response.status(Status.BAD_REQUEST).entity("Strat time is after end time.").type("text/plain").build();
+            }
+
+            Meeting meeting = new Meeting(meetingSubject, meetingDescription, csId, startTime, endTime, user, task.getInvolvedUsers());
+            Key<Meeting> meetingKey = MeetingDAO.saveMeeting(meeting);
+            task.addMeeting(meetingKey);
+            TaskDao.save(task);
+            NotificationsSender.newMeeting(meeting, task);
+            TaskDao.setTransientTaskParams(user, task);
+            EventAPI.logNewMeeting(task, meeting, new Date(), user);
+            // because of Ref<?> value has not been initialized
+            task = TaskDao.getTaskById(task.getId());
+            Gson gson = new Gson();
+            return Response.ok().entity(gson.toJson(new TaskJS(task, user))).build();
+        }
+        if ("communitysign".equalsIgnoreCase(querytype)) {
+            CollaborativeSign collaborativeSign = getCollaborativeSign();
+            collaborativeSign.setMeetingId(meetingId4CommSign);
+            setCollaborativeSign(collaborativeSign);
+            if (downloadUrl == null || "".equalsIgnoreCase(downloadUrl)) {
+                return Response.ok().entity("Meeting is set.").build();
+            }
+            NotificationsSender.meetingIsReadyToSign(MeetingDAO.loadMeeting(meetingId4CommSign));
+            return Response.ok().entity("Meeting is finished.").build();
+
+        }
+        return Response.status(Status.BAD_REQUEST).entity("Wrong URL.").type("text/plain").build();
 	}
+
+    public static CollaborativeSign getCollaborativeSign() {
+        CollaborativeSign collaborativeSign = ofy().load().type(CollaborativeSign.class).first().get();
+        if (collaborativeSign == null) {
+            collaborativeSign = new CollaborativeSign();
+        }
+        return collaborativeSign;
+    }
+
+    public static Key<CollaborativeSign> setCollaborativeSign(CollaborativeSign collaborativeSign) {
+        return ofy().save().entity(collaborativeSign).now();
+    }
+
 }

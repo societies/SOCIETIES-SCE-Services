@@ -35,6 +35,7 @@ import com.google.appengine.api.taskqueue.Queue;
 import com.google.appengine.api.taskqueue.QueueFactory;
 import com.google.appengine.api.taskqueue.TaskOptions;
 import com.google.appengine.api.taskqueue.TaskOptions.Method;
+import com.googlecode.objectify.Ref;
 import si.stecce.societies.crowdtasking.api.RESTful.impl.UsersAPI;
 import si.stecce.societies.crowdtasking.gcm.Datastore;
 import si.stecce.societies.crowdtasking.gcm.SendMessageServlet;
@@ -167,6 +168,24 @@ public final class NotificationsSender {
                                 "Here is a direct link to the task: " + Util.taskLink(task.getId()) +
                                 "\n\n\nHave a nice day", "", null);
             }
+            if (user.getGcmRegistrationId() != null) {
+                partialDevices.add(user.getGcmRegistrationId());
+                if (partialDevices.size() == Datastore.MULTICAST_SIZE) {
+                    sendGCMMessage(partialDevices, message);
+                    partialDevices.clear();
+                }
+            }
+        }
+        if (!partialDevices.isEmpty()) {
+            sendGCMMessage(partialDevices, message);
+        }
+    }
+
+    public static void meetingIsReadyToSign(Meeting meeting) {
+        String message = "The meeting minutes are ready to sign.";
+        List<String> partialDevices = new ArrayList();
+        for (Ref<CTUser> ctUserRef : meeting.getUsers()) {
+            CTUser user = UsersAPI.getUser(ctUserRef);
             if (user.getGcmRegistrationId() != null) {
                 partialDevices.add(user.getGcmRegistrationId());
                 if (partialDevices.size() == Datastore.MULTICAST_SIZE) {

@@ -1095,17 +1095,11 @@ $(document).on('pageinit', '#viewTask', function(event, data){
     });
     $('#showOnPdButton').bind('tap', function(event, data) {
         event.preventDefault();
-        showTaskOnPd(function() {
-            $('#showOnPdButton').hide();
-            $('#hideOnPdButton').show();
-        });
+        showTaskOnPd();
     });
     $('#hideOnPdButton').bind('tap', function(event, data) {
         event.preventDefault();
-        hideTaskOnPd(function() {
-            $('#hideOnPdButton').hide();
-            $('#showOnPdButton').show();
-        });
+        hideTaskOnPd();
     });
     $('#newMeetingButton').bind('tap', function(event, data) {
         event.preventDefault();

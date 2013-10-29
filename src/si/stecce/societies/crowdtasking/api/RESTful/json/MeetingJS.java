@@ -24,8 +24,12 @@
  */
 package si.stecce.societies.crowdtasking.api.RESTful.json;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
+import com.googlecode.objectify.Ref;
+import si.stecce.societies.crowdtasking.model.CTUser;
 import si.stecce.societies.crowdtasking.model.CollaborativeSpace;
 import si.stecce.societies.crowdtasking.model.Meeting;
 
@@ -53,5 +57,5 @@ public class MeetingJS {
 		this.endTime = meeting.getEndTime();
 		this.created = meeting.getCreated();
 		this.organizer = meeting.getOrganizer() == null ? "" : meeting.getOrganizer().getUserName();
-	}
+    }
 }

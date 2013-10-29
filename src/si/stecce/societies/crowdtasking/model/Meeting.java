@@ -45,12 +45,6 @@ import com.googlecode.objectify.annotation.Load;
  * @author Simon Jureša
  *
  */
-/**
- * Describe your class here...
- *
- * @author Simon Jureša
- *
- */
 @Entity
 public class Meeting {
 	@Id private Long id;

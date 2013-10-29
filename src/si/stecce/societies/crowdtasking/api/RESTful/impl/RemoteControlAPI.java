@@ -63,6 +63,7 @@ import si.stecce.societies.crowdtasking.model.dao.CommunityDAO;
  */
 @Path("/remote/{querytype}")
 public class RemoteControlAPI implements IRemoteControlAPI {
+    final static String notCheckedInMessage = "You have to be in the proper collaborative space.";
 
 	@Override
     @GET
@@ -83,14 +84,14 @@ public class RemoteControlAPI implements IRemoteControlAPI {
         Long spaceId = user.getSpaceId();
 		Date checkedInDate = user.getCheckIn();
 		if (spaceId == null || checkedInDate == null) {
-			return Response.status(Status.UNAUTHORIZED).entity("You have to check-in first.").type("text/plain").build();
+			return Response.status(Status.UNAUTHORIZED).entity(notCheckedInMessage).type("text/plain").build();
 		}
 		Date now = new Date();
 		long timeOut = UsersAPI.getApplicationSettings().getChekInTimeOut();
 		// automatic check-out after set period
 		Date toLate = new Date(checkedInDate.getTime()+timeOut);
 		if (now.after(toLate)) {
-			return Response.status(Status.UNAUTHORIZED).entity("Check-in timed out.").type("text/plain").build();
+			return Response.status(Status.UNAUTHORIZED).entity(notCheckedInMessage).type("text/plain").build();
 		}
 
         if ("takeControl".equalsIgnoreCase(querytype)) {

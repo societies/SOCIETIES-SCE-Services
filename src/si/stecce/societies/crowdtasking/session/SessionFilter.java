@@ -79,6 +79,8 @@ public class SessionFilter implements Filter {
 		}
 		if (!url.startsWith("/_ah") && 
 				!url.equalsIgnoreCase("/admin") &&
+                // special case for collaborative sign
+				!url.equalsIgnoreCase("/rest/meeting/communitySign") &&
 				!url.equalsIgnoreCase("/rest/noaccess") &&
 //				!url.startsWith("/rest/remote") &&
 				!url.startsWith(loginUrl) &&

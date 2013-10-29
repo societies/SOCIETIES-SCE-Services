@@ -64,7 +64,8 @@ function getUserProfile() {
 				// register
 				$('#formTitle').text('Register');
 				$('#backButton').hide();
-				$("#newAccountNotification").popup("open");
+//				$("#newAccountNotification").popup("open");
+                toast("This login is new to Crowd Tasking. Please create a new account.");
 			}
 			else {
 				// update profile

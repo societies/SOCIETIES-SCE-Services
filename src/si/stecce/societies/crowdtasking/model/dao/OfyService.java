@@ -42,6 +42,7 @@ public final class OfyService {
     static {
         factory().register(ApplicationSettings.class);
         factory().register(Channel.class);
+        factory().register(CollaborativeSign.class);
         factory().register(CollaborativeSpace.class);
         factory().register(Comment.class);
         factory().register(Community.class);
