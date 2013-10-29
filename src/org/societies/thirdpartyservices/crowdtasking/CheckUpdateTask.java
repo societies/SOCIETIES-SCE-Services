@@ -65,7 +65,6 @@ public class CheckUpdateTask extends AsyncTask<String, Void, Boolean> {
             .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
                             Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://crowdtasking.appspot.com/apk/index.html"));
-                            //intent.setClassName("com.android.browser", "com.android.browser.BrowserActivity");
                             context.startActivity(intent);
                     }
             })

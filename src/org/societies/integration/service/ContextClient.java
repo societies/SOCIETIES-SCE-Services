@@ -128,29 +128,25 @@ public class ContextClient extends ServiceClientBase {
 					if (location == null) {
 						location = "";
 					}
-					Toast.makeText(context, "User location: " + location, Toast.LENGTH_LONG).show();
+//					Toast.makeText(context, "User location: " + location, Toast.LENGTH_LONG).show();
 					String oldLocation = ((CrowdTasking)context).symbolicLocation;
+/*
                     if ("".equalsIgnoreCase(oldLocation)) {
                         ((CrowdTasking) context).symbolicLocation = location;
                         oldLocation = location;
                     }
+*/
                     if (!oldLocation.equalsIgnoreCase(location)) {
-                        Toast.makeText(context, "Location changed to: " + location, Toast.LENGTH_LONG).show();
+                        Toast.makeText(context, "Location: " + location, Toast.LENGTH_LONG).show();
                         ((CrowdTasking) context).symbolicLocation = location;
                         // TODO: dokončaj
-//                        String CHECK_IN_OUT = "si.setcce.societies.android.rest.CHECK_IN_OUT";
-                        String DOMAIN = ((MainActivity)context).DOMAIN;
-                        String url = ((MainActivity)context).APPLICATION_URL+"/cs/"+location+"/enter";
-                        RestTask checkin = new RestTask(context, ((MainActivity)context).CHECK_IN_OUT, CookieManager.getInstance().getCookie(DOMAIN), DOMAIN);
-                        try {
-                            checkin.execute(new HttpGet(new URI(url)));
-                        } catch (URISyntaxException e) {
-                            e.printStackTrace();
-                        }
-
+                        checkin(context, location);
                     } else {
 //                        Toast.makeText(context, "Location is still the same", Toast.LENGTH_LONG).show();
                     }
+//                    Intent newIntent = new Intent(MainActivity.SET_FOCUS);
+//                    context.sendBroadcast(newIntent);
+                    //context.startActivity(newIntent);
                     System.out.println("location:"+location);
 				} else { 
 					Log.e(LOG_TAG, "Unexpected return value type: "+ ((pModelObject != null) ? pModelObject.getClass() : "null"));
@@ -159,6 +155,17 @@ public class ContextClient extends ServiceClientBase {
 				//((TextView)((Activity)context).findViewById(R.id.location)).setText(((CtxAttributeBean) modelObject).getStringValue());
 			}
 		}
+    }
+
+    private void checkin(Context context, String location) {
+        String DOMAIN = MainActivity.DOMAIN;
+        String url = MainActivity.APPLICATION_URL+"/cs/"+location+"/enter";
+        RestTask checkin = new RestTask(context, MainActivity.CHECK_IN_OUT, CookieManager.getInstance().getCookie(DOMAIN), DOMAIN);
+        try {
+            checkin.execute(new HttpGet(new URI(url)));
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
     }
 
     public void getSymbolicLocation(String cssId) {

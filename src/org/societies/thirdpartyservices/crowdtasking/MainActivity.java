@@ -101,14 +101,17 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
 	private static final String LOGIN_USER = "si.setcce.societies.android.rest.LOGIN_USER";
 	private static final String C4CSS_INTENT = "si.setcce.societies.android.rest.C4CSS";
 	private static final String GET_MEETING_ACTION = "si.setcce.societies.android.rest.MEETING";
+	private static final String SET_MEETING_ACTION = "si.setcce.societies.android.rest.SET_MEETING_ID";
 	private static final String TAKE_CONTROL = "si.setcce.societies.android.rest.remote.TAKE_CONTROL";
 	private static final String GCM_REGISTER = "si.setcce.societies.android.rest.GCM";
+	public static final String SET_FOCUS = "si.setcce.societies.android.activity.FOCUS";
+
     private static final String SCHEME ="http";
     private static final String SCOPE ="SETCCE_SOCIETIES";
 //    private static final String DOMAIN = "crowdtasking.appspot.com";
 //    private static final String DOMAIN = "crowdtaskingtest.appspot.com";
-//   	public static final String DOMAIN = "192.168.1.71";
-   	public static final String DOMAIN = "192.168.1.102";
+   	public static final String DOMAIN = "192.168.1.71";
+//   	public static final String DOMAIN = "192.168.1.102";
 //   	public static final String DOMAIN = "192.168.1.67";
 //   	public static final String DOMAIN = "192.168.1.78";
 //    private static final String PORT = "";
@@ -121,6 +124,7 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
     private static final String GCM_REGISTER_URL = APPLICATION_URL + "/rest/gcm";
     //    private static final String GET_USER_REST_API_URL = APPLICATION_URL + "/rest/users/me";
 	private static final String MEETING_REST_API_URL = APPLICATION_URL + "/rest/meeting/data";
+	private static final String SET_MEETING_ID_REST_API_URL = APPLICATION_URL + "/rest/meeting/communitySign";
     private static final String SCAN_QR_URL = APPLICATION_URL + "/android/scanQR";
     private static final String PICK_TASK_URL = APPLICATION_URL + "/task/view?id=";
     private static final String EVENT_API_URL = APPLICATION_URL + "/rest/event";
@@ -539,11 +543,13 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
         super.onResume();
         registerReceiver(receiver, new IntentFilter(C4CSS_INTENT));
         registerReceiver(receiver, new IntentFilter(GET_MEETING_ACTION));
+        registerReceiver(receiver, new IntentFilter(SET_MEETING_ACTION));
         registerReceiver(receiver, new IntentFilter(CHECK_IN_OUT));
         registerReceiver(receiver, new IntentFilter(GET_USER));
         registerReceiver(receiver, new IntentFilter(LOGIN_USER));
         registerReceiver(receiver, new IntentFilter(TAKE_CONTROL));
         registerReceiver(receiver, new IntentFilter(GCM_REGISTER));
+        registerReceiver(receiver, new IntentFilter(SET_FOCUS));
         registerReceiver(receiver, new IntentFilter("android.nfc.action.NDEF_DISCOVERED"));
         registerReceiver(receiver, new IntentFilter(SERVICE_CONNECTED));
         sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
@@ -601,7 +607,7 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
         	WebBackForwardList webBackForwardList = webView.copyBackForwardList();
         	//int i = webBackForwardList.getCurrentIndex();
         	String historyUrl = webBackForwardList.getItemAtIndex(webBackForwardList.getCurrentIndex()).getUrl();
-        	if (historyUrl.equalsIgnoreCase(APPLICATION_URL+"/menu") ||
+        	if (historyUrl.startsWith(APPLICATION_URL + "/menu") ||
         			historyUrl.startsWith(APPLICATION_URL+"/login")) {
         		super.onBackPressed();
         		return;
@@ -782,6 +788,7 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
 			if (progress != null) {
 				progress.dismiss();
 			}
+            System.out.println("onReceive action: "+intent.getAction());
 /*
             if (intent.getAction().equalsIgnoreCase(GET_USER)) {
                 String response = intent.getStringExtra(RestTask.HTTP_RESPONSE);
@@ -834,6 +841,10 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
                 String[] response = intent.getStringArrayExtra(RestTask.HTTP_RESPONSE);
                 sendMeetingEvent(response[1]);
             }
+            if (intent.getAction().equalsIgnoreCase(SET_MEETING_ACTION)) {
+                String[] response = intent.getStringArrayExtra(RestTask.HTTP_RESPONSE);
+                Toast.makeText(getApplicationContext(), response[1], Toast.LENGTH_SHORT).show();
+            }
         	if (intent.getAction().equalsIgnoreCase(CHECK_IN_OUT)) {
                 String[] response = intent.getStringArrayExtra(RestTask.HTTP_RESPONSE);
         		if (!response[1].startsWith("Check") && !response[1].startsWith("You are")) {
@@ -861,6 +872,12 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
                 String[] response = intent.getStringArrayExtra(RestTask.HTTP_RESPONSE);
         		System.out.println(response);
 				Toast.makeText(getApplicationContext(), response[1], Toast.LENGTH_SHORT).show();
+        	}
+        	if (intent.getAction().equalsIgnoreCase(SET_FOCUS)) {
+                Intent i = new Intent(getApplicationContext(), MainActivity.class);
+                i.setAction(Intent.ACTION_MAIN);
+                i.addCategory(Intent.CATEGORY_LAUNCHER);
+                startActivity(i);
         	}
         }
     };
@@ -1188,12 +1205,38 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
         		return true;
         	}
         	if (url.startsWith(MEETING_URL)) {
+/*
                 PopupMenu popupMenu = new PopupMenu(getApplicationContext(), findViewById(R.id.anchor));
                 popupMenu.getMenu().add("Start meeting");
                 popupMenu.getMenu().add("Join meeting");
                 popupMenu.getMenu().add("...");
                 popupMenu.show();
                 //addMeetingToCalendar(url);
+*/
+                HttpPost meetingRequest;
+                try {
+                    String meetingID = url.substring(MEETING_URL.length());
+                    meetingRequest = new HttpPost(new URI(SET_MEETING_ID_REST_API_URL));
+                    List<NameValuePair> parameters = new ArrayList<NameValuePair>();
+                    parameters.add(new BasicNameValuePair("meetingId4CommSign",meetingID));
+                    meetingRequest.setEntity(new UrlEncodedFormEntity(parameters));
+                    RestTask task = new RestTask(getApplicationContext(), SET_MEETING_ACTION, CookieManager.getInstance().getCookie(DOMAIN), DOMAIN);
+                    task.execute(meetingRequest);
+                } catch (URISyntaxException e) {
+                    Log.e(LOG_TAG, "Can't log event: "+e.getMessage());
+                } catch (UnsupportedEncodingException e) {
+                    Log.e(LOG_TAG, "Can't log event: "+e.getMessage());
+                }
+
+/*
+                RestTask task = new RestTask(getApplicationContext(), SET_MEETING_ACTION, CookieManager.getInstance().getCookie(DOMAIN), DOMAIN);
+                try {
+                    task.execute(new HttpGet(new URI(SET_MEETING_ID_REST_API_URL+"?meetingId4CommSign="+meetingID)));
+                } catch (URISyntaxException e) {
+                    e.printStackTrace();
+                }
+*/
+
         		return true;
         	}
             view.loadUrl(url);
