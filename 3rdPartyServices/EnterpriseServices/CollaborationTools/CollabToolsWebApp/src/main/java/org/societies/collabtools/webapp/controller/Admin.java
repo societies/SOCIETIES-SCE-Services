@@ -160,19 +160,37 @@ public class Admin {
 		List<ICis> cisList = new ArrayList<ICis>();
 		cisList = cisManager.getCisList();
 		int size = cisList.size();
-		String cisname = null;
-		String ownerID = null;
-		String cisID = null;
-		for (ICis list : cisList) {   
-			cisname = list.getName();
-			ownerID = list.getOwnerId();
-			cisID = list.getCisId();
+		List<String[]> cisresults = new ArrayList<String[]>();
+		for (ICis list : cisList) {
+			String[] elements = {list.getName(), list.getOwnerId(), list.getCisId()}; 
+			cisresults.add(elements);
 		}
 
-		model.put("cisname", cisname);
-		model.put("ownerID", ownerID);
-		model.put("cisID", cisID);
+		model.put("cisresults", cisresults);
 		model.put("size", size);
+		
+		//Rules
+		List<String> attributeTypes = getTypesList(org.societies.api.context.model.CtxAttributeTypes.class);
+		attributeTypes.addAll(getTypesList(org.societies.api.context.model.CtxAttributeTypes.class));
+		model.put("attributeTypes", attributeTypes);
+		
+		List<String[]> rulesresults = new ArrayList<String[]>();
+		for (Rule rule : getEngine().getRules()) {
+			String[] elements = {rule.getName(), rule.getCtxAttribute(), rule.getOperator().toString(), rule.getCtxType(), Integer.toString(rule.getPriority()), rule.getValue()}; 
+			rulesresults.add(elements);
+		}
+		model.put("rulesresults", rulesresults);
+		
+		//Applications
+		ICollabAppConnector[] collabAppsConnectors = getCollabAppsConnectors().getCollabAppConnectors();
+		List<String> appnames = new ArrayList<String>();
+		List<String> appserver = new ArrayList<String>();
+		for (ICollabAppConnector apps : collabAppsConnectors){
+			appnames.add(apps.getAppName());
+			appserver.add(apps.getAppServerName());
+		}
+		model.put("appnames", appnames);
+		model.put("appserver", appserver);
 
 		return new ModelAndView("iphone", model) ;
 	}
@@ -195,13 +213,13 @@ public class Admin {
 		values1.addAll(getTypesList(org.societies.api.context.model.CtxAttributeTypes.class));
 		model.put("attributeTypes", values1);
 
-		List<String[]> results = new ArrayList<String[]>();
+		List<String[]> rulesresults = new ArrayList<String[]>();
 		for (Rule rule : getEngine().getRules()) {
 			String[] elements = {rule.getName(), rule.getCtxAttribute(), rule.getOperator().toString(), rule.getCtxType(), Integer.toString(rule.getPriority()), rule.getValue()}; 
-			results.add(elements);
+			rulesresults.add(elements);
 		}
 
-		model.put("results1", results);
+		model.put("rulesresults", rulesresults);
 		model.put("attribute_label", CtxModelType.ATTRIBUTE.name().toString());
 
 		return new ModelAndView("rules", model) ;
