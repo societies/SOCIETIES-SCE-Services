@@ -28,7 +28,9 @@ import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.Random;
+import java.util.Set;
 
 import org.junit.BeforeClass;
 import org.junit.Ignore;
@@ -167,8 +169,20 @@ public class ContextAnalyzerTest {
 	 */
 	@Test
 	public void testGetPersonsBySimilarity() {
+		try {
+			createPersons(2);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		HashSet<Person> personHashSet = new HashSet<Person>();
-		ctxRsn.getPersonsBySimilarity("session", personHashSet, LongTermCtxTypes.INTERESTS);
+		personHashSet.add(personRepository.getPersonByName("person#0"));
+		personHashSet.add(personRepository.getPersonByName("person#1"));
+		ctxRsn.incrementCtx(LongTermCtxTypes.INTERESTS, EnrichmentTypes.CONCEPT, null);
+		ctxRsn.setupWeightAmongPeople(LongTermCtxTypes.INTERESTS);
+		Hashtable<String, HashSet<Person>> matchingRules = new Hashtable<String, HashSet<Person>>(10,10);
+		matchingRules = ctxRsn.getPersonsBySimilarity("session", personHashSet, LongTermCtxTypes.INTERESTS);
+		LOG.info(matchingRules.values().toString());
 	}
 
 	/**
@@ -178,5 +192,78 @@ public class ContextAnalyzerTest {
 	public void testSetupWeightAmongPeople() {
 		ctxRsn.setupWeightAmongPeople(LongTermCtxTypes.INTERESTS);
 	}
+	
+	private void createPersons(int nrOfPersons) throws Exception
+	{
+		for (int i = 0; i < nrOfPersons; i++)
+		{
+			Person person = personRepository.createPerson("person#" + i);
+	        //Set long term context
+	        person.setLongTermCtx(LongTermCtxTypes.NAME, "person#" + i);
+	        person.setLongTermCtx(LongTermCtxTypes.COLLAB_APPS, new String[] { "chat" });
+	        person.setLongTermCtx(LongTermCtxTypes.OCCUPATION, getRandomOccupation());
+	        person.setLongTermCtx(LongTermCtxTypes.INTERESTS, getRandomInterests());
+	        person.setLongTermCtx(LongTermCtxTypes.WORK_POSITION, getRandomWorkPosition());
+	        person.setLongTermCtx("age", "20");
+	        
+	        //Set short term context
+//			String [] response = new String [] {ShortTermCtxTypes.STATUS, getRandomStatus(), person.getName()};
+//			ctxSub.update(null, response);
+//			
+//			response = new String [] {ShortTermCtxTypes.LOCATION, getRandomLocation(), person.getName()};
+//			ctxSub.update(null, response);
+		}
+	}
+	
+	/**
+	 * @return
+	 */
+	private static String getRandomLocation() {
+		final String[] location={"Work","Home","Gym"};
+		return location[r.nextInt(3)];
+	}	
+
+	/**
+	 * @return
+	 */
+	private static String[] getRandomInterests() {
+		final String[] interests={"bioinformatics", "web development", "semantic web", "requirements analysis", "system modeling", 
+				"project planning", "project management", "software engineering", "software development", "technical writing"};
+		Set<String> finalInterests = new HashSet<String>();
+		for(int i=0; i<3; i++){
+			String temp = interests[r.nextInt(interests.length)];
+			//Check if duplicated
+			if (!finalInterests.contains(temp))
+				finalInterests.add(temp);
+			else
+				i--;
+		}
+		return finalInterests.toArray(new String[0]);
+	}
+	
+	/**
+	 * @return
+	 */
+	private static String getRandomStatus() {
+		final String[] status={"Online","Busy","Away"};
+		return status[r.nextInt(3)];
+	}
+	
+	/**
+	 * @return
+	 */
+	private static String getRandomWorkPosition() {
+		final String[] workPosition={"Manager","Marketing","Programmer"};
+		return workPosition[r.nextInt(3)];
+	}
+	
+	/**
+	 * @return
+	 */
+	private static String getRandomOccupation() {
+		final String[] work={"Manager","Developer","Beta Tester"};
+		return work[r.nextInt(3)];
+	}	
+
 
 }
