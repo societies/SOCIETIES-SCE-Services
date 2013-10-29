@@ -114,7 +114,7 @@ public class MeetingAPI implements IMeetingAPI {
                                @FormParam("meetingCS") Long csId,
                                @FormParam("taskStart") String taskStart,
                                @FormParam("taskEnd") String taskEnd,
-                               @FormParam("meetingId4CommSign") Long meetingId4CommSign,
+                               @FormParam("meetingIdToSign") Long meetingIdToSign,
                                @FormParam("downloadUrl") String downloadUrl,
                                @Context HttpServletRequest request) {
 
@@ -157,14 +157,21 @@ public class MeetingAPI implements IMeetingAPI {
             return Response.ok().entity(gson.toJson(new TaskJS(task, user))).build();
         }
         if ("communitysign".equalsIgnoreCase(querytype)) {
+            Meeting meeting = null;
+            try {
+                meeting = MeetingDAO.loadMeeting(meetingIdToSign);
+            } catch (Exception e) {
+                return Response.status(Status.BAD_REQUEST).entity("Wrong meeting id.").type("text/plain").build();
+            }
             CollaborativeSign collaborativeSign = getCollaborativeSign();
-            collaborativeSign.setMeetingId(meetingId4CommSign);
+            collaborativeSign.setMeetingId(meetingIdToSign);
             setCollaborativeSign(collaborativeSign);
             if (downloadUrl == null || "".equalsIgnoreCase(downloadUrl)) {
-                return Response.ok().entity("Meeting is set.").build();
+                return Response.ok().entity("The meeting is set.").build();
             }
-            NotificationsSender.meetingIsReadyToSign(MeetingDAO.loadMeeting(meetingId4CommSign));
-            return Response.ok().entity("Meeting is finished.").build();
+            meeting.setDownloadUrl(downloadUrl);
+            NotificationsSender.meetingIsReadyToBeSigned(meeting);
+            return Response.ok().entity("The meeting minutes are ready to be signed.").build();
 
         }
         return Response.status(Status.BAD_REQUEST).entity("Wrong URL.").type("text/plain").build();

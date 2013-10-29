@@ -15,7 +15,6 @@ public class CollaborativeSign {
     @Id
     private Long collaborativeSignId;
     Long meetingId;
-    String downloadUrl;
 
     public CollaborativeSign() {}
 
@@ -25,13 +24,5 @@ public class CollaborativeSign {
 
     public void setMeetingId(Long meetingId) {
         this.meetingId = meetingId;
-    }
-
-    public String getDownloadUrl() {
-        return downloadUrl;
-    }
-
-    public void setDownloadUrl(String downloadUrl) {
-        this.downloadUrl = downloadUrl;
     }
 }

@@ -55,6 +55,7 @@ public class Meeting {
 	private Date endTime, created;
 	private List<Ref<CTUser>> users;
 	@Load private Ref<CTUser> organizerRef;
+    String downloadUrl;
 
 	public Meeting() {
 	}
@@ -178,4 +179,12 @@ public class Meeting {
 		}
 		return user;
 	}
+
+    public String getDownloadUrl() {
+        return downloadUrl;
+    }
+
+    public void setDownloadUrl(String downloadUrl) {
+        this.downloadUrl = downloadUrl;
+    }
 }

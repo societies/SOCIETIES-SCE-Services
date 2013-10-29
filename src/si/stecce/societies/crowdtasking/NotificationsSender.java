@@ -39,11 +39,7 @@ import com.googlecode.objectify.Ref;
 import si.stecce.societies.crowdtasking.api.RESTful.impl.UsersAPI;
 import si.stecce.societies.crowdtasking.gcm.Datastore;
 import si.stecce.societies.crowdtasking.gcm.SendMessageServlet;
-import si.stecce.societies.crowdtasking.model.CTUser;
-import si.stecce.societies.crowdtasking.model.Comment;
-import si.stecce.societies.crowdtasking.model.Community;
-import si.stecce.societies.crowdtasking.model.Meeting;
-import si.stecce.societies.crowdtasking.model.Task;
+import si.stecce.societies.crowdtasking.model.*;
 
 import com.google.appengine.api.mail.MailService;
 import com.google.appengine.api.mail.MailService.Message;
@@ -181,8 +177,8 @@ public final class NotificationsSender {
         }
     }
 
-    public static void meetingIsReadyToSign(Meeting meeting) {
-        String message = "The meeting minutes are ready to sign.";
+    public static void meetingIsReadyToBeSigned(Meeting meeting) {
+        String message = "The meeting minutes are ready to be signed. DL URL: "+meeting.getDownloadUrl();
         List<String> partialDevices = new ArrayList();
         for (Ref<CTUser> ctUserRef : meeting.getUsers()) {
             CTUser user = UsersAPI.getUser(ctUserRef);
