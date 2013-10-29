@@ -38,6 +38,7 @@ import org.societies.api.identity.IIdentity;
 import org.societies.api.identity.InvalidFormatException;
 import org.societies.api.services.IServices;
 import org.societies.api.useragent.monitoring.IUserActionMonitor;
+import org.societies.thirdparty.sharedcalendar.api.CalendarPreference;
 import org.societies.thirdparty.sharedcalendar.api.ICalendarResultCallback;
 import org.societies.thirdparty.sharedcalendar.api.ISharedCalendar;
 import org.societies.thirdparty.sharedcalendar.api.UserWarning;
@@ -62,8 +63,23 @@ public class SharedCalendarClient implements ISharedCalendar {
 	private IIdentity myId;
 	private IServices serviceMgmt;
 	private ICssDirectory cssDirectory;
+	private CalendarPreferenceManager preferences;
 	private static Comparator<Event> eventSorter = new EventSorter();
 	
+	/**
+	 * @return the preferences
+	 */
+	public CalendarPreferenceManager getPreferences() {
+		return preferences;
+	}
+
+	/**
+	 * @param preferences the preferences to set
+	 */
+	public void setPreferences(CalendarPreferenceManager preferences) {
+		this.preferences = preferences;
+	}
+
 	public IServices getServiceMgmt() {
 		return serviceMgmt;
 	}
@@ -176,8 +192,7 @@ public class SharedCalendarClient implements ISharedCalendar {
 	public void deleteEvent(
 			ICalendarResultCallback calendarResultCallback, String eventId, String nodeId) {
 
-		if(log.isDebugEnabled())
-			log.debug("Deleting event on calendar!");
+		log.info("Deleting event {} on calendar: {}",eventId,nodeId);
 		
 		try{
 			
@@ -185,8 +200,10 @@ public class SharedCalendarClient implements ISharedCalendar {
 	
 			Boolean deleteOk = getSharedCalendar().deleteEvent(eventId, node, myId);
 			
-			if(log.isDebugEnabled())
-				log.debug("Deleted an event with Id: " + deleteOk);
+			log.debug("Deleted an event with Id: {}",deleteOk);
+			
+			if(deleteOk)
+				getPreferences().setPreference(CalendarPreference.CALENDAR_ACTION, "deleteEvent");
 			
 			SharedCalendarResult result = new SharedCalendarResult();
 			result.setLastOperationSuccessful(deleteOk);
@@ -216,7 +233,16 @@ public class SharedCalendarClient implements ISharedCalendar {
 			finalResult.setSubscribingResult(subscribeOk);
 			finalResult.setLastOperationSuccessful(subscribeOk);
 			if(subscribeOk){
+				getPreferences().setPreference(CalendarPreference.CALENDAR_ACTION, "joinEvent");
 				Event event = getSharedCalendar().retrieveEvent(eventId, node, myId);
+				
+				log.debug("We correctly subscribed to the event, so we should register the preferences.");
+
+				preferences.setPreference(CalendarPreference.SUB_CREATOR,event.getCreatorId());
+				preferences.setPreference(CalendarPreference.SUB_CALENDAR,event.getNodeId());
+				if(event.getLocation() != null && !event.getLocation().isEmpty() )
+					preferences.setPreference(CalendarPreference.SUB_LOCATION,event.getLocation());
+	
 				finalResult.setEvent(event);
 			}
 			calendarResultCallback.receiveResult(finalResult);
@@ -245,6 +271,7 @@ public class SharedCalendarClient implements ISharedCalendar {
 			finalResult.setSubscribingResult(subscribeOk);
 			finalResult.setLastOperationSuccessful(subscribeOk);
 			if(subscribeOk){
+				getPreferences().setPreference(CalendarPreference.CALENDAR_ACTION, "leaveEvent");
 				Event event = getSharedCalendar().retrieveEvent(eventId, node, myId);
 				finalResult.setEvent(event);
 			}
@@ -272,6 +299,9 @@ public class SharedCalendarClient implements ISharedCalendar {
 		
 		Event receivedEvent = getSharedCalendar().retrieveEvent(eventId, node, myId);
 		
+		if(receivedEvent != null)
+			getPreferences().setPreference(CalendarPreference.CALENDAR_ACTION, "viewEvent");
+		
 		SharedCalendarResult returnResult = new SharedCalendarResult();
 		returnResult.setEvent(receivedEvent);
 		calendarResultCallback.receiveResult(returnResult);
@@ -291,7 +321,7 @@ public class SharedCalendarClient implements ISharedCalendar {
 	public void createEvent(ICalendarResultCallback calendarResultCallback,
 			Event newEvent, String nodeId) {
 		
-		log.info("Creating event on Calendar!");
+		log.info("Creating event {} on Calendar!",newEvent);
 		
 		try{
 			IIdentity node = getCommManager().getIdManager().fromJid(nodeId);
@@ -303,6 +333,13 @@ public class SharedCalendarClient implements ISharedCalendar {
 			finalResult.setEventId(eventId);
 
 			if(eventId != null){
+	            getPreferences().setPreference(CalendarPreference.CREATE_CALENDAR, newEvent.getNodeId());
+	            getPreferences().setPreference(CalendarPreference.CREATE_TITLE, newEvent.getName());
+	            if(newEvent.getLocation() != null && !newEvent.getLocation().isEmpty())
+	            	getPreferences().setPreference(CalendarPreference.CREATE_LOCATION,newEvent.getLocation());
+				
+	            getPreferences().setPreference(CalendarPreference.CALENDAR_ACTION, "createEvent");
+	             
 				Event theEvent = getSharedCalendar().retrieveEvent(eventId, node, myId);
 				finalResult.setEvent(theEvent);
 				finalResult.setLastOperationSuccessful(true);
@@ -313,7 +350,7 @@ public class SharedCalendarClient implements ISharedCalendar {
 			calendarResultCallback.receiveResult(finalResult);	
 			
 		} catch(Exception ex){
-			log.error("Exception occured!: " + ex);
+			log.error("Exception occured!: {}", ex);
 			ex.printStackTrace();		}
 		
 	}
@@ -332,12 +369,13 @@ public class SharedCalendarClient implements ISharedCalendar {
 			finalResult.setLastOperationSuccessful(updateResult);
 		
 			if(updateResult){
+				getPreferences().setPreference(CalendarPreference.CALENDAR_ACTION, "updateEvent");
 				IIdentity node = getCommManager().getIdManager().fromJid(updatedEvent.getNodeId());
 				Event theEvent = getSharedCalendar().retrieveEvent(updatedEvent.getEventId(), node, myId);
 				finalResult.setEvent(theEvent);
 			} 
 		} catch(Exception ex){
-			log.error("Exception while updating event: " + updatedEvent.getEventId());
+			log.error("Exception while updating event: {} : {}", updatedEvent.getEventId(), ex);
 			finalResult.setLastOperationSuccessful(false);
 			ex.printStackTrace();
 		}
@@ -351,7 +389,7 @@ public class SharedCalendarClient implements ISharedCalendar {
 			ICalendarResultCallback calendarResultCallback, String nodeId,
 			Event searchEvent) {
 		
-		log.info("Searching for events in a specific calendar!");
+		log.info("Searching for events in a specific calendar {}!",nodeId);
 		
 		try{
 			
@@ -359,8 +397,7 @@ public class SharedCalendarClient implements ISharedCalendar {
 
 			List<Event> eventList = getSharedCalendar().findEventsInCalendar(node, searchEvent, myId);
 		
-			if(log.isDebugEnabled())
-				log.debug("Got event list: " + eventList.size());
+			log.debug("Got event list: {}", eventList.size());
 			Collections.sort(eventList,eventSorter);
 			SharedCalendarResult result = new SharedCalendarResult();
 			result.setEventList(eventList);

@@ -216,6 +216,7 @@
                 readonly="#{!calendarController.editable or calendarController.locationToggle}"
                 disabled="#{calendarController.locationToggle}"/>  
                 
+                <h:outputLabel for="eventToggleLocation" value="My Location:" rendered="#{calendarController.editable}" />
 				<p:selectBooleanCheckbox id="eventToggleLocation" value="#{calendarController.locationToggle}"
 				rendered="#{calendarController.editable}" >
 					<p:ajax update="eventDetails" listener="#{calendarController.updateLocation}" process="@this,eventDetails" />

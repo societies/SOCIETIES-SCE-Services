@@ -239,11 +239,11 @@ public class RecommendedEventProcessor implements Runnable {
 		// INTERESTS
 		for(String interest: myInterests){
 			log.debug("{}: Checking event for interest: {}",newEvent.getName(), interest);
-			if(newEvent.getName().regionMatches(true, 0, interest, 0, interest.length())){
+			if(newEvent.getName().toLowerCase().contains(interest.toLowerCase())){
 				log.debug("{}: Found interest {} in event.", newEvent.getName(), interest );
 				recommendPoints+=INTEREST_POINTS;
 			} else{
-				if(newEvent.getDescription() != null && newEvent.getDescription().regionMatches(true, 0, interest, 0, interest.length())){
+				if(newEvent.getDescription() != null && newEvent.getDescription().toLowerCase().contains(interest.toLowerCase())){
 					log.debug("{}: Found interest {} in event.", newEvent.getName(), interest );
 					recommendPoints+=INTEREST_POINTS;
 				}
@@ -268,6 +268,7 @@ public class RecommendedEventProcessor implements Runnable {
 		recommendPoints+=subEvent*EVENTS_IN_CALENDAR_POINTS;
 		
 		// Now we get the keyword we most
+		log.debug("{}: We are {} to the threshold!",newEvent.getName(),RECOMMEND_THRESHOLD-recommendPoints);
 		if(recommendPoints >= RECOMMEND_THRESHOLD){
 			
 			log.debug("{}: We're going to recommend this event.", newEvent.getName());

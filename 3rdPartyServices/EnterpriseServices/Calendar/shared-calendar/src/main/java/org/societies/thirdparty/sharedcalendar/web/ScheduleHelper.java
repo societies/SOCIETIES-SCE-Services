@@ -35,6 +35,7 @@ import org.primefaces.component.schedule.Schedule;
 import org.primefaces.model.ScheduleModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.societies.thirdparty.sharedcalendar.api.CalendarPreference;
 
 /**
  * Describe your class here...
@@ -157,14 +158,23 @@ public class ScheduleHelper implements Serializable {
 	}
 	
 	public String getView(){
+		view = parent.getPreferences().getPreference(CalendarPreference.CALENDAR_VIEW);
+		if(view == null)
+			view = schedule.getView();
+		
 		return this.view;
 	}
 	
 	public void setView(String view){
 		this.view = view;
+		parent.getPreferences().setPreference(CalendarPreference.CALENDAR_VIEW, view);
 	}
 	
 	public void selectView(){
+		String prefView = parent.getPreferences().getPreference(CalendarPreference.CALENDAR_VIEW);
+		if(prefView != null)
+			view = prefView;
+		
 		getSchedule().setView(view);
 		
 	}

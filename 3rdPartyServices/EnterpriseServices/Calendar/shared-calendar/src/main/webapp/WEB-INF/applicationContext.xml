@@ -126,6 +126,7 @@
 		init-method="init" >
 		<property name="sharedCalendar" ref="sharedCalendar" />
 		<property name="commManager" ref="commManager" />
+		<property name="preferences" ref="calendarPreferences" />
 	</bean>
 	
 	<!-- Provided Services -->

@@ -681,7 +681,11 @@ public class CalendarController {
 		if(selectedNode == null)
 			selectedNode = getId().getBareJid();
 		
-		event = new DefaultScheduleEvent("", (Date) selectEvent.getObject(), (Date) selectEvent.getObject());
+		String eventTitle = preferences.getPreference(CalendarPreference.CREATE_TITLE);
+		if(eventTitle == null)
+			eventTitle = "";
+		event = new DefaultScheduleEvent(eventTitle, (Date) selectEvent.getObject(), (Date) selectEvent.getObject());
+		
 		societiesEvent = new CalendarEvent(this);
 		societiesEvent.setStartDate((Date) selectEvent.getObject());
 		societiesEvent.setEndDate((Date) selectEvent.getObject());
@@ -691,12 +695,20 @@ public class CalendarController {
 			societiesEvent.setNodeId(selectedNode);
 			societiesEvent.setCalendarName(getCalendarName(selectedNode));
 		} else{
-			societiesEvent.setNodeId(myId.getBareJid());
-			societiesEvent.setCalendarName(getCalendarName(myId.getBareJid()));
+			String calendarId = preferences.getPreference(CalendarPreference.CREATE_CALENDAR);
+			if(calendarId == null || getCalendarName(calendarId) == null)
+				calendarId = myId.getBareJid();
+			societiesEvent.setNodeId(calendarId);
+			societiesEvent.setCalendarName(getCalendarName(calendarId));
 		}
 		
 		if(isLocationToggle())
 			updateLocation();
+		else{
+			String prefLocation = preferences.getPreference(CalendarPreference.CREATE_LOCATION);
+			if(prefLocation != null)
+				societiesEvent.setLocation(prefLocation);
+		}
 		
 		log.debug("Date selected: {}", (Date) selectEvent.getObject());
 			
@@ -784,8 +796,8 @@ public class CalendarController {
     public void saveEvent(ActionEvent actionEvent) {
     	
     	if(log.isDebugEnabled()){
-    		log.debug("Save event received, event is " + event.getId());
-    		log.debug("event title" + event.getTitle());
+    		log.debug("Save event received, event is {}",event.getId());
+    		log.debug("event title {}", event.getTitle());
     	}
     	
     	societiesEvent.setTitle(event.getTitle());
@@ -797,8 +809,7 @@ public class CalendarController {
 
         if(event.getId() == null) {
         	
-            if(log.isDebugEnabled())
-            	log.debug("Adding event to Calendar!");
+            log.debug("Adding event {} to Calendar!",societiesEvent.getTitle());
             
     		getSharedCalendar().createEvent(callback, societiesEvent.getSocietiesEvent(), societiesEvent.getNodeId());
     		                        
@@ -1077,13 +1088,13 @@ public class CalendarController {
 			log.debug("Now doing the learning stuff");
 		searchEvent.setNodeId(searchCalendarNode);
 		
-		if(searchEvent.getTitle() != null)
+		if(searchEvent.getTitle() != null && !searchEvent.getTitle().isEmpty())
 			preferences.setPreference(CalendarPreference.SEARCH_KEYWORD,searchEvent.getTitle());
-		if(searchEvent.getLocation() != null)
+		if(searchEvent.getLocation() != null && !searchEvent.getLocation().isEmpty())
 			preferences.setPreference(CalendarPreference.SEARCH_LOCATION,searchEvent.getLocation());
-		if(searchEvent.getCreatorId() != null)
+		if(searchEvent.getCreatorId() != null && !searchEvent.getCreatorId().isEmpty())
 			preferences.setPreference(CalendarPreference.SEARCH_CREATOR,searchEvent.getCreatorId());
-		if(searchEvent.getNodeId() != null)
+		if(searchEvent.getNodeId() != null && !searchEvent.getNodeId().isEmpty())
 			preferences.setPreference(CalendarPreference.SEARCH_CALENDAR,searchEvent.getNodeId());
 		
 		ICalendarResultCallback calendarResultCallback = new CalendarResultCallback();
@@ -1096,8 +1107,7 @@ public class CalendarController {
 			
 			getSharedCalendar().findEventsAll(calendarResultCallback, searchEvent.getSocietiesEvent());
 		} else{
-			if(log.isDebugEnabled())
-				log.debug("Searching in a specific Calendar, for node: {}", searchEvent.getNodeId());
+			log.debug("Searching in a specific Calendar, for node: {}", searchEvent.getNodeId());
 			
 			getSharedCalendar().findEventsInCalendar(calendarResultCallback, searchEvent.getNodeId(), searchEvent.getSocietiesEvent());
 		}
@@ -1105,8 +1115,7 @@ public class CalendarController {
 		SharedCalendarResult myResult = calendarResultCallback.getResult();
 		List<Event> foundEvents = myResult.getEventList();
 		
-		if(log.isDebugEnabled())
-			log.debug("Found {} events!",foundEvents.size());
+		log.debug("Found {} events!",foundEvents.size());
 		searchResults = new ArrayList<CalendarEvent>(foundEvents.size());
 		
 		for(Event foundEvent : foundEvents){
@@ -1114,7 +1123,8 @@ public class CalendarController {
 		}
 		
 		setSelectedEvent(getSearchResults().get(0));
-		
+		getPreferences().setPreference(CalendarPreference.CALENDAR_ACTION, "searchEvent");
+
 	}
 	
 	private CalendarEvent selectedEvent;

@@ -114,12 +114,13 @@ public class CalendarPreferenceManager implements IActionConsumer {
 		IAction myAction = new Action(getServiceIdentifier(), getServiceType(), preferenceName.toString(), preferenceValue);
 		getUserAction().monitor(getMyId(), myAction);
 		
-		if(!calendarPreferences.containsKey(preferenceName))
-			calendarPreferences.put(preferenceName, preferenceValue);
+		//if(!calendarPreferences.containsKey(preferenceName))
+		calendarPreferences.put(preferenceName, preferenceValue);
 	}
 	
 	public String getPreference(CalendarPreference preference){
 		log.debug("Getting Preference: {} : {} ", preference,calendarPreferences.get(preference));
+		//calendarPreferences.put(preference,getPreferenceManual(preference));
 		return calendarPreferences.get(preference);
 		
 	}	

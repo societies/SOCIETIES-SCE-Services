@@ -1379,18 +1379,6 @@ public class SharedCalendar extends EventListener implements ISharedCalendarServ
 				
 			}
 		
-			if(subscriptionOk && theEvent != null){
-				if(log.isDebugEnabled())
-					log.debug("We correctly subscribed to the event, so we should register the preferences.");
-				
-				preferences.setPreference(CalendarPreference.SUB_CREATOR,theEvent.getCreatorId());
-				preferences.setPreference(CalendarPreference.SUB_CALENDAR,theEvent.getNodeId());
-				if(theEvent.getLocation() != null && !theEvent.getLocation().isEmpty() )
-					preferences.setPreference(CalendarPreference.SUB_LOCATION,theEvent.getLocation());
-				//if(theEvent.getAttendees() != null)
-				//	preferences.setPreference(CalendarPreference.SUB_ATTENDEENUMBER,""+theEvent.getAttendees().size());
-				
-			}
 			
 		} catch(Exception ex){
 			ex.printStackTrace();
