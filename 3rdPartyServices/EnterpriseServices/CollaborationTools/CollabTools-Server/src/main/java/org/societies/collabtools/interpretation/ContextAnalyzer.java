@@ -44,6 +44,7 @@ import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.Relationship;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.societies.collabtools.acquisition.LongTermCtxTypes;
 import org.societies.collabtools.acquisition.Person;
 import org.societies.collabtools.acquisition.PersonRepository;
 import org.societies.collabtools.acquisition.ShortTermContextUpdates;
@@ -62,7 +63,7 @@ import org.societies.collabtools.runtime.Operators;
 public class ContextAnalyzer implements IContextAnalyzer {
 
 	private static final Logger log = LoggerFactory.getLogger(ContextAnalyzer.class);
-	private PersonRepository personRepository;
+	private final PersonRepository personRepository;
 	private Hashtable<String, HashSet<Person>> hashCtxList = new Hashtable<String, HashSet<Person>>(10,10);
 	
 	//TODO: api key hardcoded....Change to config.propreties
@@ -339,10 +340,13 @@ public class ContextAnalyzer implements IContextAnalyzer {
 		for (Person person : personRepository.getAllPersons())
 		{
 			Map<Person, Integer> persons = personRepository.getPersonWithSimilarCtx(person, CtxAttribute);
+			log.info("{} CtxAttribute {}", person.getName(), Arrays.toString(person.getArrayLongTermCtx(CtxAttribute)));
+			log.info(persons.toString());
 			for (Map.Entry<Person, Integer> entry : persons.entrySet()) {
 				//Similarity Formula is: (similar ctx/ personA + similar ctx/personB) / 2
 				float weight = ContextAnalyzer.personCtxSimilarity(entry.getValue(), CtxAttribute, entry.getKey(), person);
-				person.addSimilarityRelationship(entry.getKey(), weight, CtxAttribute);  
+				person.addSimilarityRelationship(entry.getKey(), weight, CtxAttribute);
+				log.debug("Weight {} assigned for person {}", weight, entry.getKey());
 			}
 		}
 		log.debug("*****Weight assigned in {} ms*****\r\n",(System.currentTimeMillis()-start));
