@@ -42,7 +42,6 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.widget.PopupMenu;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -108,9 +107,9 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
 
     private static final String SCHEME ="http";
     private static final String SCOPE ="SETCCE_SOCIETIES";
-//    private static final String DOMAIN = "crowdtasking.appspot.com";
-//    private static final String DOMAIN = "crowdtaskingtest.appspot.com";
-   	public static final String DOMAIN = "192.168.1.71";
+    //    public static final String DOMAIN = "crowdtasking.appspot.com";
+    //    public static final String DOMAIN = "crowdtaskingtest.appspot.com";
+    public static final String DOMAIN = "192.168.1.71";
 //   	public static final String DOMAIN = "192.168.1.102";
 //   	public static final String DOMAIN = "192.168.1.67";
 //   	public static final String DOMAIN = "192.168.1.78";
@@ -560,13 +559,11 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
         if (getIntent().getAction() == null) {
             return;
         }
-/*
     	if (getIntent().getAction().equalsIgnoreCase("GCM")) {
     		String response = getIntent().getStringExtra("GCM_TEXT");
     		System.out.println(response);
 			Toast.makeText(getApplicationContext(), response, Toast.LENGTH_SHORT).show();
     	}
-*/
     	if (getIntent().getAction().equalsIgnoreCase(CHECK_IN_OUT)) {
     		String[] response = getIntent().getStringArrayExtra(RestTask.HTTP_RESPONSE);
     		System.out.println(response[1]);
@@ -1218,7 +1215,7 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
                     String meetingID = url.substring(MEETING_URL.length());
                     meetingRequest = new HttpPost(new URI(SET_MEETING_ID_REST_API_URL));
                     List<NameValuePair> parameters = new ArrayList<NameValuePair>();
-                    parameters.add(new BasicNameValuePair("meetingId4CommSign",meetingID));
+                    parameters.add(new BasicNameValuePair("meetingIdToSign", meetingID));
                     meetingRequest.setEntity(new UrlEncodedFormEntity(parameters));
                     RestTask task = new RestTask(getApplicationContext(), SET_MEETING_ACTION, CookieManager.getInstance().getCookie(DOMAIN), DOMAIN);
                     task.execute(meetingRequest);
