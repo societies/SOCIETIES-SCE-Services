@@ -24,28 +24,8 @@
  */
 package si.stecce.societies.crowdtasking.api.RESTful.impl;
 
-import static si.stecce.societies.crowdtasking.model.dao.OfyService.ofy;
-
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.FormParam;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
-
+import com.google.gson.Gson;
+import com.googlecode.objectify.Key;
 import si.stecce.societies.crowdtasking.NotificationsSender;
 import si.stecce.societies.crowdtasking.api.RESTful.IMeetingAPI;
 import si.stecce.societies.crowdtasking.api.RESTful.json.MeetingDetails4CSignJS;
@@ -58,74 +38,91 @@ import si.stecce.societies.crowdtasking.model.Task;
 import si.stecce.societies.crowdtasking.model.dao.MeetingDAO;
 import si.stecce.societies.crowdtasking.model.dao.TaskDao;
 
-import com.google.gson.Gson;
-import com.googlecode.objectify.Key;
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+
+import static si.stecce.societies.crowdtasking.model.dao.OfyService.ofy;
 
 @Path("/meeting/{querytype}")
 public class MeetingAPI implements IMeetingAPI {
-	private static final int MEETINGS_ON_PD = 10;
+    private static final int MEETINGS_ON_PD = 10;
 
-	@Override
+    @Override
     @GET
-	@Produces({MediaType.APPLICATION_JSON })
-	public String getMeeting(@PathParam("querytype") String querytype,
+    @Produces({MediaType.APPLICATION_JSON})
+    public String getMeeting(@PathParam("querytype") String querytype,
                              @QueryParam("id") Long meetingId,
                              @QueryParam("csId") Long csId) {
-		if ("data".equalsIgnoreCase(querytype)) {
-			if (meetingId == null) {
-				return "Missing id.";
-			}
-			Gson gson = new Gson();
-			// get meeting
-			Meeting meeting = null;
-			meeting = MeetingDAO.loadMeeting(meetingId);
-			return gson.toJson(new MeetingJS(meeting));
-		}
-		if ("communitysign".equalsIgnoreCase(querytype)) {
+        if ("data".equalsIgnoreCase(querytype)) {
+            if (meetingId == null) {
+                return "Missing id.";
+            }
+            Gson gson = new Gson();
+            // get meeting
+            Meeting meeting = null;
+            meeting = MeetingDAO.loadMeeting(meetingId);
+            return gson.toJson(new MeetingJS(meeting));
+        }
+        if ("communitysign".equalsIgnoreCase(querytype)) {
             CollaborativeSign collaborativeSign = getCollaborativeSign();
             if (collaborativeSign.getMeetingId() != null) {
                 Meeting meeting = MeetingDAO.loadMeeting(collaborativeSign.getMeetingId());
                 Gson gson = new Gson();
                 return gson.toJson(new MeetingDetails4CSignJS(meeting));
             }
-		}
-		if ("cs".equalsIgnoreCase(querytype)) {
-			return getMeetingsForCS(csId);
-		}
-		return null;
-	}
+        }
+        if ("cs".equalsIgnoreCase(querytype)) {
+            return getMeetingsForCS(csId);
+        }
+        return Response.status(Status.BAD_REQUEST).entity("Request not understood.").type("text/plain").build().toString();
+    }
 
-	private String getMeetingsForCS(Long csId) {
-		Gson gson = new Gson();
-		ArrayList<MeetingJS> meetingsJS = new ArrayList<MeetingJS>();
-		for (Meeting meeting:MeetingDAO.getMeetingsForCS(csId, MEETINGS_ON_PD)) {
-			meetingsJS.add(new MeetingJS(meeting));
-		}
-		return gson.toJson(meetingsJS);
-	}
+    private String getMeetingsForCS(Long csId) {
+        Gson gson = new Gson();
+        ArrayList<MeetingJS> meetingsJS = new ArrayList<MeetingJS>();
+        for (Meeting meeting : MeetingDAO.getMeetingsForCS(csId, MEETINGS_ON_PD)) {
+            meetingsJS.add(new MeetingJS(meeting));
+        }
+        return gson.toJson(meetingsJS);
+    }
 
-	@Override
+    @Override
     @POST
-	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-	public Response newMeeting(@PathParam("querytype") String querytype,
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    public Response newMeeting(@PathParam("querytype") String querytype,
                                @FormParam("taskId") Long taskId,
                                @FormParam("meetingSubject") String meetingSubject,
                                @FormParam("meetingDescription") String meetingDescription,
                                @FormParam("meetingCS") Long csId,
                                @FormParam("taskStart") String taskStart,
                                @FormParam("taskEnd") String taskEnd,
-                               @FormParam("meetingIdToSign") Long meetingIdToSign,
+                               @FormParam("meetingIdToSign") String meetingIdToSignStr,
                                @FormParam("downloadUrl") String downloadUrl,
                                @Context HttpServletRequest request) {
 
+        Long meetingIdToSign;
         CTUser user = UsersAPI.getLoggedInUser(request.getSession());
+        try {
+            meetingIdToSign = Long.parseLong(meetingIdToSignStr);
+        } catch (Exception e) {
+            meetingIdToSign = null;
+        }
         if ("".equals(meetingSubject)) {
             return Response.status(Status.BAD_REQUEST).entity("Subject is required.").type("text/plain").build();
         }
         if ("create".equalsIgnoreCase(querytype)) {
             Task task = TaskDao.getTaskById(taskId);
             DateFormat formatter = new SimpleDateFormat("dd.MM.yyyy HH:mm");
-            Date startTime=null;
+            Date startTime = null;
             try {
                 startTime = formatter.parse(taskStart);
             } catch (ParseException e) {
@@ -134,7 +131,7 @@ public class MeetingAPI implements IMeetingAPI {
             if (startTime.before(new Date())) {
                 return Response.status(Status.BAD_REQUEST).entity("Strat time is in the past.").type("text/plain").build();
             }
-            Date endTime=null;
+            Date endTime = null;
             try {
                 endTime = formatter.parse(taskEnd);
             } catch (ParseException e) {
@@ -174,8 +171,8 @@ public class MeetingAPI implements IMeetingAPI {
             return Response.ok().entity("The meeting minutes are ready to be signed.").build();
 
         }
-        return Response.status(Status.BAD_REQUEST).entity("Wrong URL.").type("text/plain").build();
-	}
+        return Response.status(Status.BAD_REQUEST).entity("Request not understood.").type("text/plain").build();
+    }
 
     public static CollaborativeSign getCollaborativeSign() {
         CollaborativeSign collaborativeSign = ofy().load().type(CollaborativeSign.class).first().get();

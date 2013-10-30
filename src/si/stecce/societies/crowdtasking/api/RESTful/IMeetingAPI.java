@@ -11,7 +11,7 @@ import javax.ws.rs.core.Response;
  */
 public interface IMeetingAPI {
     @GET
-    @Produces({MediaType.APPLICATION_JSON })
+    @Produces({MediaType.APPLICATION_JSON})
     String getMeeting(@PathParam("querytype") String querytype,
                       @QueryParam("id") Long meetingId,
                       @QueryParam("csId") Long csId);
@@ -25,7 +25,7 @@ public interface IMeetingAPI {
                         @FormParam("meetingCS") Long csId,
                         @FormParam("taskStart") String taskStart,
                         @FormParam("taskEnd") String taskEnd,
-                        @FormParam("meetingId4CommSign") Long meetingId4CommSign,
+                        @FormParam("meetingIdToSign") String meetingIdToSignStr,
                         @FormParam("downloadUrl") String downloadUrl,
                         @Context HttpServletRequest request);
 }

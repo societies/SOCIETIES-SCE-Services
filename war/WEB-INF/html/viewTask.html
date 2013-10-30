@@ -1,118 +1,130 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<meta charset="utf-8" />
-	<meta name="apple-mobile-web-app-capable" content="yes">
+    <meta charset="utf-8"/>
+    <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no">
-	<title>Welcome to Crowd tasking!</title>
-	{{ head }}
-	<script src="/js/remoteControl.js" type="text/javascript" charset="utf-8"></script>
+    <title>Welcome to Crowd tasking!</title>
+    {{ head }}
+    <script src="/js/remoteControl.js" type="text/javascript" charset="utf-8"></script>
 </head>
 <body>
-        <div data-role="page" id="viewTask" data-theme="c">
-            <div data-role="header" id="header" data-position="fixed" data-theme="b">
-                <a id='backButton' data-icon="back" data-rel="back">Back</a>
-                <h3 id='formTitle'>View task</h3>
-                <!--<a class="rightHeaderButton ui-btn-right" data-icon="check" href="/task/execute" data-transition="slide" style="display:none">Execute</a>-->
-                <a class="rightHeaderButton ui-btn-right" id="finalizeButton" data-icon="check" data-transition="slide">Finalize</a>
-				<a class="rightHeaderButton ui-btn-right" id="likeButton" data-theme="c">Like</a>
-				<a class="rightHeaderButton ui-btn-right" id="likedButton" data-theme="b">Liked</a>
-            </div>
-            <div data-role="popup" id="finalizeDialog" data-overlay-theme="a" data-theme="c" data-dismissible="false" style="max-width:400px;" class="ui-corner-all">
-                <div data-role="header" data-theme="a" class="ui-corner-top">
-                    <h1>Finalize</h1>
-                </div>
-                <div data-role="content" data-theme="d" class="ui-corner-bottom ui-content">
-                    <h3 class="ui-title">Finalize task?</h3>
-                    <a id="finalizeTaskSaveButton" data-role="button" data-mini="true" data-inline="true" data-transition="flow" data-theme="b">Yes</a>
-                    <a data-role="button" data-mini="true" data-inline="true" data-rel="back" data-theme="c">No</a>
-                </div>
-            </div>
-			<!--<div style="margin:0 auto; margin-left:auto; margin-right:auto; align:center; text-align:center;">-->
-				<!--&lt;!&ndash;a id="watchButton" data-role="button" data-inline="true" data-theme="a">Watch</a&ndash;&gt;-->
-			<!--</div>-->
-            <div data-role="content" data-theme="c">
-               	<div data-role="collapsible" data-collapsed="false" data-theme="b">
-					<h3>Task details</h3>
-	                	<table>
-	                		<tr>
-	                			<td>Task title:</td>
-	                			<td id="taskName"></td>
-	                		</tr>
-	                		<tr>
-	                			<td>Description:</td>
-	                			<td id="taskDescription"></td>
-	                		</tr>
-	                		<tr>
-	                			<td>Created:</td>
-	                			<td id="taskCreated"></td>
-	                		</tr>
-	                		<tr>
-	                			<td>Communities:</td>
-	                			<td id="taskCommunities"></td>
-	                		</tr>
-	                		<tr>
-	                			<td>Tags:</td>
-	                			<td id="taskTags"></td>
-	                		</tr>
-	                	</table>
-				</div>
-				<div>
-					<a href="" id='showOnPdButton' data-role="button" data-inline="true" data-theme="b">Show task on public display</a>
-					<a href="" id='hideOnPdButton' data-role="button" data-inline="true" data-theme="b" style="display:none">Hide task on public display</a>
-				</div>
-				<div id="meetingDiv" data-role="collapsible" data-collapsed="false" data-theme="b" style="display:none">
-					<h3>Meetings</h3>
-					<form action="" id="meetingForm">
-	                	<input type="hidden" name="taskId" id="taskId" value="">
-		                <ul data-role="listview" id="meetingList" data-theme="c" data-inset="true" style='white-space:normal;'>
-		                </ul>
-	                    <ul data-role="listview" id="newMeetingList" data-theme="c" style="display:none">
-	                        <li data-role="fieldcontain">
-	                            <label for="meetingSubject">Subject</label>
-	                            <input type="text" name="meetingSubject" id="meetingSubject" value="">
-	                        </li>
-	                        <li data-role="fieldcontain">
-	                            <label for="meetingDescription">Description</label>
-	                            <textarea name="meetingDescription"
-	                                id="meetingDescription"></textarea>
-	                        </li>
-	                        <li data-role="fieldcontain">
-	                            <label for="meetingCS">Collaboration space</label>
-								<select name="meetingCS" id="meetingCS" data-native-menu="false">
-									<option>Choose Collaboration space</option>
-								</select>
-	                        </li>
-	                        <li data-role="fieldcontain">
-	                            <label for="taskStart">Start time</label>
-	                            <input id="taskStart" name="taskStart" />
-	                        </li>
-	                        <li data-role="fieldcontain">
-	                            <label for="taskEnd">End time</label>
-	                            <input id="taskEnd" name="taskEnd" />
-	                        </li><br>
-	                    </ul>
-		                <a href="" id='newMeetingButton' data-role="button" data-inline="true" data-theme="b">New meeting</a>
-		                <a href="" id='saveNewMeetingButton' data-role="button" data-inline="true" data-theme="b" style="display:none">Save</a>
-		                <a href="" id='cancelNewMeetingButton' data-role="button" data-inline="true" data-theme="b" style="display:none">Cancel</a>
-	                </form>
-				</div>
-				<form action="" id="commentsForm">
-                <ul data-role="listview" id="commentList" data-theme="c" data-inset="true" style='white-space:normal;'>
-                	<li></li>
-                </ul>
-                </form>
-                <!--a href="javascript:refreshOnShake()">refresh</a>-->
-                <form id="viewTaskForm">
-                	<input type=hidden name=action value="finalize"/>
-                	<input type="hidden" name="vwTaskId" id="vwTaskId" value="">
-                    <div data-role="fieldcontain" id="vwReply" style='display:none'>
-						<input type=hidden id="commentForExecution" name=execution value="false">
-						<TEXTAREA NAME="commentText" id="vwComment"></TEXTAREA>
-						<a data-role="button" id="commentButton" data-theme="b">Post comment</a>
-					</div>
-                </form>
-            </div>
+<div data-role="page" id="viewTask" data-theme="c">
+    <div data-role="header" id="header" data-position="fixed" data-theme="b">
+        <a id='backButton' data-icon="back" data-rel="back">Back</a>
+
+        <h3 id='formTitle'>View task</h3>
+        <!--<a class="rightHeaderButton ui-btn-right" data-icon="check" href="/task/execute" data-transition="slide" style="display:none">Execute</a>-->
+        <a class="rightHeaderButton ui-btn-right" id="finalizeButton" data-icon="check"
+           data-transition="slide">Finalize</a>
+        <a class="rightHeaderButton ui-btn-right" id="likeButton" data-theme="c">Like</a>
+        <a class="rightHeaderButton ui-btn-right" id="likedButton" data-theme="b">Liked</a>
+    </div>
+    <div data-role="popup" id="finalizeDialog" data-overlay-theme="a" data-theme="c" data-dismissible="false"
+         style="max-width:400px;" class="ui-corner-all">
+        <div data-role="header" data-theme="a" class="ui-corner-top">
+            <h1>Finalize</h1>
         </div>
+        <div data-role="content" data-theme="d" class="ui-corner-bottom ui-content">
+            <h3 class="ui-title">Finalize task?</h3>
+            <a id="finalizeTaskSaveButton" data-role="button" data-mini="true" data-inline="true" data-transition="flow"
+               data-theme="b">Yes</a>
+            <a data-role="button" data-mini="true" data-inline="true" data-rel="back" data-theme="c">No</a>
+        </div>
+    </div>
+    <!--<div style="margin:0 auto; margin-left:auto; margin-right:auto; align:center; text-align:center;">-->
+    <!--&lt;!&ndash;a id="watchButton" data-role="button" data-inline="true" data-theme="a">Watch</a&ndash;&gt;-->
+    <!--</div>-->
+    <div data-role="content" data-theme="c">
+        <div data-role="collapsible" data-collapsed="false" data-theme="b">
+            <h3>Task details</h3>
+            <table>
+                <tr>
+                    <td>Task title:</td>
+                    <td id="taskName"></td>
+                </tr>
+                <tr>
+                    <td>Description:</td>
+                    <td id="taskDescription"></td>
+                </tr>
+                <tr>
+                    <td>Created:</td>
+                    <td id="taskCreated"></td>
+                </tr>
+                <tr>
+                    <td>Communities:</td>
+                    <td id="taskCommunities"></td>
+                </tr>
+                <tr>
+                    <td>Tags:</td>
+                    <td id="taskTags"></td>
+                </tr>
+            </table>
+        </div>
+        <div>
+            <a href="" id='showOnPdButton' data-role="button" data-inline="true" data-theme="b">Show task on public
+                display</a>
+            <a href="" id='hideOnPdButton' data-role="button" data-inline="true" data-theme="b" style="display:none">Hide
+                task on public display</a>
+        </div>
+        <div id="meetingDiv" data-role="collapsible" data-collapsed="false" data-theme="b" style="display:none">
+            <h3>Meetings</h3>
+
+            <form action="" id="meetingForm">
+                <input type="hidden" name="status" id="status">
+                <input type="hidden" name="taskId" id="taskId" value="">
+                <ul data-role="listview" id="meetingList" data-theme="c" data-inset="true" style='white-space:normal;'>
+                </ul>
+                <ul data-role="listview" id="newMeetingList" data-theme="c" style="display:none">
+                    <li data-role="fieldcontain">
+                        <label for="meetingSubject">Subject</label>
+                        <input type="text" name="meetingSubject" id="meetingSubject" value="">
+                    </li>
+                    <li data-role="fieldcontain">
+                        <label for="meetingDescription">Description</label>
+                        <textarea name="meetingDescription"
+                                  id="meetingDescription"></textarea>
+                    </li>
+                    <li data-role="fieldcontain">
+                        <label for="meetingCS">Collaboration space</label>
+                        <select name="meetingCS" id="meetingCS" data-native-menu="false">
+                            <option>Choose Collaboration space</option>
+                        </select>
+                    </li>
+                    <li data-role="fieldcontain">
+                        <label for="taskStart">Start time</label>
+                        <input id="taskStart" name="taskStart"/>
+                    </li>
+                    <li data-role="fieldcontain">
+                        <label for="taskEnd">End time</label>
+                        <input id="taskEnd" name="taskEnd"/>
+                    </li>
+                    <br>
+                </ul>
+                <a href="" id='newMeetingButton' data-role="button" data-inline="true" data-theme="b">New meeting</a>
+                <a href="" id='saveNewMeetingButton' data-role="button" data-inline="true" data-theme="b"
+                   style="display:none">Save</a>
+                <a href="" id='cancelNewMeetingButton' data-role="button" data-inline="true" data-theme="b"
+                   style="display:none">Cancel</a>
+            </form>
+        </div>
+        <form action="" id="commentsForm">
+            <ul data-role="listview" id="commentList" data-theme="c" data-inset="true" style='white-space:normal;'>
+                <li></li>
+            </ul>
+        </form>
+        <!--a href="javascript:refreshOnShake()">refresh</a>-->
+        <form id="viewTaskForm">
+            <input type=hidden name=action value="finalize"/>
+            <input type="hidden" name="vwTaskId" id="vwTaskId" value="">
+
+            <div data-role="fieldcontain" id="vwReply" style='display:none'>
+                <input type=hidden id="commentForExecution" name=execution value="false">
+                <TEXTAREA NAME="commentText" id="vwComment"></TEXTAREA>
+                <a data-role="button" id="commentButton" data-theme="b">Post comment</a>
+            </div>
+        </form>
+    </div>
+</div>
 </body>
 </html>
