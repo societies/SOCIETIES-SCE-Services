@@ -18,6 +18,9 @@ import com.google.android.gms.gcm.GoogleCloudMessaging;
 import org.societies.thirdpartyservices.crowdtasking.MainActivity;
 import org.societies.thirdpartyservices.crowdtasking.R;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Created by juresas on 21.10.2013.
  */
@@ -50,22 +53,26 @@ public class GcmIntentService extends IntentService {
         String messageType = gcm.getMessageType(intent);
 
         if (!extras.isEmpty()) {  // has effect of unparcelling Bundle
+	        Map<String, String> parameters = new HashMap<String, String>();
             /*
              * Filter messages based on message type. Since it is likely that GCM will be
              * extended in the future with new message types, just ignore any message types you're
              * not interested in, or that you don't recognize.
              */
             if (GoogleCloudMessaging.MESSAGE_TYPE_SEND_ERROR.equals(messageType)) {
-                sendNotification("Send error: " + extras.toString(), null, null);
+	            parameters.put(PARAMETER_MESSAGE, "Send error: " + extras.toString());
+	            sendNotification(parameters);
             } else if (GoogleCloudMessaging.MESSAGE_TYPE_DELETED.equals(messageType)) {
-                sendNotification("Deleted messages on server: " + extras.toString(), null, null);
+	            parameters.put(PARAMETER_MESSAGE, "Deleted messages on server: " + extras.toString());
+	            sendNotification(parameters);
                 // If it's a regular GCM message, do some work.
             } else if (GoogleCloudMessaging.MESSAGE_TYPE_MESSAGE.equals(messageType)) {
                 Log.i(TAG, "Completed work @ " + SystemClock.elapsedRealtime());
                 // Post notification of received message.
-                sendNotification(extras.getString(PARAMETER_MESSAGE),
-                        extras.getString(PARAMETER_URL),
-                        extras.getString(PARAMETER_MEETING_ID));
+	            parameters.put(PARAMETER_MESSAGE, extras.getString(PARAMETER_MESSAGE));
+	            parameters.put(PARAMETER_URL, extras.getString(PARAMETER_URL));
+	            parameters.put(PARAMETER_MEETING_ID, extras.getString(PARAMETER_MEETING_ID));
+                sendNotification(parameters);
                 Log.i(TAG, "Received: " + extras.toString());
             }
         }
@@ -76,15 +83,17 @@ public class GcmIntentService extends IntentService {
     // Put the message into a notification and post it.
     // This is just one simple example of what you might choose to do with
     // a GCM message.
-    private void sendNotification(String msg, String url, String meetingId) {
+    private void sendNotification(Map<String, String> parameters) {
         mNotificationManager = (NotificationManager)
                 this.getSystemService(Context.NOTIFICATION_SERVICE);
 
+	    String msg = parameters.get(PARAMETER_MESSAGE);
+	    String url = parameters.get(PARAMETER_URL);
         Intent intent = new Intent(this, MainActivity.class);
         intent.setAction("GCM");
         intent.putExtra(PARAMETER_MESSAGE, msg);
         intent.putExtra(PARAMETER_URL, url);
-        intent.putExtra(PARAMETER_MEETING_ID, meetingId);
+        intent.putExtra(PARAMETER_MEETING_ID, parameters.get(PARAMETER_MEETING_ID));
         intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
         PendingIntent contentIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
 

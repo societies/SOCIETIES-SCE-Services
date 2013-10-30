@@ -152,7 +152,6 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
     private boolean isSocietiesUser=false, societiesServicesRunning, contextClientRunning, communityManagementClientConnected, cisDirectoryClientConnected, societiesEventsClientConnected;
     private SocietiesUser societiesUser = null;
     private final static String LOG_TAG = "Crowd Tasking";
-    public static final String EXTRA_MESSAGE = "message";
     public static final String PROPERTY_REG_ID = "registration_id";
     private static final String PROPERTY_APP_VERSION = "appVersion";
     private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
@@ -183,8 +182,12 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
         int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
         if (resultCode != ConnectionResult.SUCCESS) {
             if (GooglePlayServicesUtil.isUserRecoverableError(resultCode)) {
-                GooglePlayServicesUtil.getErrorDialog(resultCode, this,
-                        PLAY_SERVICES_RESOLUTION_REQUEST).show();
+	            try {
+		            GooglePlayServicesUtil.getErrorDialog(resultCode, this, PLAY_SERVICES_RESOLUTION_REQUEST).show();
+	            } catch (Exception e) {
+		            e.printStackTrace();
+		            return false;
+	            }
             } else {
                 Log.i(LOG_TAG, "This device is not supported.");
 //                finish();
@@ -203,7 +206,7 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
      *         registration ID.
      */
     private String getRegistrationId(Context context) {
-        final SharedPreferences prefs = getGcmPreferences(context);
+        final SharedPreferences prefs = getGcmPreferences();
         String registrationId = prefs.getString(PROPERTY_REG_ID, "");
         if (registrationId.isEmpty()) {
             Log.i(LOG_TAG, "Registration not found.");
@@ -226,8 +229,7 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
      */
     private static int getAppVersion(Context context) {
         try {
-            PackageInfo packageInfo = context.getPackageManager()
-                    .getPackageInfo(context.getPackageName(), 0);
+            PackageInfo packageInfo = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
             return packageInfo.versionCode;
         } catch (PackageManager.NameNotFoundException e) {
             // should never happen
@@ -238,11 +240,8 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
     /**
      * @return Application's {@code SharedPreferences}.
      */
-    private SharedPreferences getGcmPreferences(Context context) {
-        // This sample app persists the registration ID in shared preferences, but
-        // how you store the regID in your app is up to you.
-        return getSharedPreferences(MainActivity.class.getSimpleName(),
-                Context.MODE_PRIVATE);
+    private SharedPreferences getGcmPreferences() {
+        return getSharedPreferences(DOMAIN, Context.MODE_PRIVATE);
     }
 
     /**
@@ -253,7 +252,7 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
      * @param regId registration ID
      */
     private void storeRegistrationId(Context context, String regId) {
-        final SharedPreferences prefs = getGcmPreferences(context);
+        final SharedPreferences prefs = getGcmPreferences();
         int appVersion = getAppVersion(context);
         Log.i(LOG_TAG, "Saving regId on app version " + appVersion);
         SharedPreferences.Editor editor = prefs.edit();
@@ -653,8 +652,8 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
         idsToSign.add(meetingId);
         i.putStringArrayListExtra(Sign.Params.IDS_TO_SIGN, idsToSign);
 
-        Log.i(LOG_TAG, "downloadUrl: "+downloadUrl);
-        Log.i(LOG_TAG, "idsToSign: "+idsToSign);
+        Log.i(LOG_TAG, "downloadUrl: " + downloadUrl);
+        Log.i(LOG_TAG, "idsToSign: " + idsToSign);
         startActivityForResult(i, SIGN);
 //        Toast.makeText(getApplicationContext(), response, Toast.LENGTH_SHORT).show();
     }
@@ -1352,9 +1351,10 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
         	}
             if (url.equalsIgnoreCase(APPLICATION_URL+"/menu")) {
                 if (firstTimeOnMenuPage) {
-                    regid = getRegistrationId(getApplicationContext());
-                    registerInBackground();
-                    firstTimeOnMenuPage = false;
+	                if ("".equalsIgnoreCase(getRegistrationId(getApplicationContext()))) {
+		                registerInBackground();
+	                }
+	                firstTimeOnMenuPage = false;
                 }
             }
        }
