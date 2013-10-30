@@ -19,6 +19,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.net.Uri;
 import android.nfc.NdefMessage;
 import android.nfc.NdefRecord;
 import android.nfc.NfcAdapter;
@@ -68,9 +69,11 @@ import org.societies.integration.service.CisDirectoryClient;
 import org.societies.integration.service.CommunityManagementClient;
 import org.societies.integration.service.ContextClient;
 import org.societies.integration.service.SocietiesEventsClient;
+import org.societies.security.digsig.api.Sign;
 import org.societies.thirdpartyservices.crowdtasking.tools.SocketClient;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -90,6 +93,7 @@ import java.util.concurrent.TimeUnit;
 
 import si.setcce.societies.android.rest.RestTask;
 import si.setcce.societies.crowdtasking.api.RESTful.json.CommunityJS;
+import si.setcce.societies.gcm.GcmIntentService;
 
 @SuppressLint("SimpleDateFormat")
 public class MainActivity extends Activity implements SensorEventListener, NfcAdapter.CreateNdefMessageCallback {
@@ -107,14 +111,15 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
 
     private static final String SCHEME ="http";
     private static final String SCOPE ="SETCCE_SOCIETIES";
-    //    public static final String DOMAIN = "crowdtasking.appspot.com";
+        public static final String DOMAIN = "crowdtasking.appspot.com";
     //    public static final String DOMAIN = "crowdtaskingtest.appspot.com";
-    public static final String DOMAIN = "192.168.1.71";
+//    public static final String DOMAIN = "simonix";
+//    public static final String DOMAIN = "192.168.1.71";
 //   	public static final String DOMAIN = "192.168.1.102";
 //   	public static final String DOMAIN = "192.168.1.67";
 //   	public static final String DOMAIN = "192.168.1.78";
-//    private static final String PORT = "";
-    private static final String PORT = ":8888";
+    private static final String PORT = "";
+//    private static final String PORT = ":8888";
     public static final String APPLICATION_URL = SCHEME +"://" + DOMAIN + PORT;
     private static final String LOGIN_URL = APPLICATION_URL + "/login";
     private static final String MEETING_URL = APPLICATION_URL + "/android/meeting/";
@@ -129,6 +134,7 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
     private static final String EVENT_API_URL = APPLICATION_URL + "/rest/event";
     private static final String SHARE_CS_URL = APPLICATION_URL + "/android/shareCsUrl";
     private static final String SERVICE_CONNECTED = "org.societies.integration.service.CONNECTED";
+    private static final int SIGN = 51;
     public static String SERVICE_ID;
     private String startUrl;
 	public String nfcUrl=null;
@@ -152,6 +158,9 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
     private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
     private boolean firstTimeOnMenuPage = true;
 	Timer locationTimer = new Timer();
+    private ProgressDialog progressDialog;
+    private String signedUrl;
+    private int sessionId;
 
 	/**
      * This is the project number from the API Console
@@ -178,7 +187,7 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
                         PLAY_SERVICES_RESOLUTION_REQUEST).show();
             } else {
                 Log.i(LOG_TAG, "This device is not supported.");
-                finish();
+//                finish();
             }
             return false;
         }
@@ -332,9 +341,54 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
         return mimeRecord;
     }
 
+    private void showProgressBar() {
+        progressDialog = new ProgressDialog(MainActivity.this);
+        progressDialog.setTitle("Crowd tasking");
+        progressDialog.setMessage("Connecting to the server...");
+//        progressDialog.setProgressStyle(progressDialog.STYLE_HORIZONTAL);
+        progressDialog.setIndeterminate(true);
+//        progressDialog.setProgress(0);
+//        progressDialog.setMax(20);
+        progressDialog.show();
+
+    }
+
+    private void updateProgressBar() {
+/*        final Handler updateBarHandler = new Handler();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    while (progressDialog.getProgress() < progressDialog.getMax()) {
+                        try {
+                            Thread.sleep(100);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                        updateBarHandler.post(new Runnable() {
+                            public void run() {
+                                progressDialog.incrementProgressBy(1);
+                            }
+                        });
+
+                        if (progressDialog.getProgress() == progressDialog.getMax()) {
+                            progressDialog.dismiss();
+                        }
+                    }
+                    progressDialog.dismiss();
+                } catch (Exception e) {
+                }
+            }
+        }).start();*/
+        progressDialog.dismiss();
+    }
+
     @Override
 	public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
+        setContentView(R.layout.activity_main);
+        showProgressBar();
 /*
         mNfcAdapter = NfcAdapter.getDefaultAdapter(this);
         if (mNfcAdapter == null) {
@@ -361,8 +415,6 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
 	        Log.d("accountInfo", acname + ":" + actype);
         }*/
 
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
-        setContentView(R.layout.activity_main);
         webViewSetup();
         if (isSocietiesServiceRunning()) {
 //            System.out.println("Societies services are running?");
@@ -534,6 +586,11 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
 	
     @Override
 	protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+//        setIntent(intent);
+        if (intent.getAction().equalsIgnoreCase("GCM")) {
+            handleGcmIntent(intent);
+        }
     	checkIntent(intent);
 	}
 
@@ -551,6 +608,7 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
         registerReceiver(receiver, new IntentFilter(SET_FOCUS));
         registerReceiver(receiver, new IntentFilter("android.nfc.action.NDEF_DISCOVERED"));
         registerReceiver(receiver, new IntentFilter(SERVICE_CONNECTED));
+        registerReceiver(receiver, new IntentFilter(Sign.ACTION_FINISHED));
         sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
 
         if (getIntent() == null) {
@@ -560,9 +618,7 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
             return;
         }
     	if (getIntent().getAction().equalsIgnoreCase("GCM")) {
-    		String response = getIntent().getStringExtra("GCM_TEXT");
-    		System.out.println(response);
-			Toast.makeText(getApplicationContext(), response, Toast.LENGTH_SHORT).show();
+            handleGcmIntent(getIntent());
     	}
     	if (getIntent().getAction().equalsIgnoreCase(CHECK_IN_OUT)) {
     		String[] response = getIntent().getStringArrayExtra(RestTask.HTTP_RESPONSE);
@@ -582,6 +638,25 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
             return;
         }
 */
+    }
+
+    private void handleGcmIntent(Intent intent) {
+        String response = intent.getStringExtra(GcmIntentService.PARAMETER_MESSAGE);
+        String downloadUrl = intent.getStringExtra(GcmIntentService.PARAMETER_URL);
+        String meetingId = intent.getStringExtra(GcmIntentService.PARAMETER_MEETING_ID);
+
+
+        Intent i = new Intent(Sign.ACTION);
+        i.putExtra(Sign.Params.DOC_TO_SIGN_URL, downloadUrl);
+
+        ArrayList<String> idsToSign = new ArrayList<String>();
+        idsToSign.add(meetingId);
+        i.putStringArrayListExtra(Sign.Params.IDS_TO_SIGN, idsToSign);
+
+        Log.i(LOG_TAG, "downloadUrl: "+downloadUrl);
+        Log.i(LOG_TAG, "idsToSign: "+idsToSign);
+        startActivityForResult(i, SIGN);
+//        Toast.makeText(getApplicationContext(), response, Toast.LENGTH_SHORT).show();
     }
     
     @Override
@@ -685,49 +760,56 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent intent) {
-      IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, intent);
-      if (result != null) {
-        String contents = result.getContents();
-        if (contents != null) {
-            // TODO: leave this?
-            Toast.makeText(getApplicationContext(), R.string.result_succeeded, Toast.LENGTH_SHORT).show();
-        	if (contents.startsWith("http")) {
-            	if (contents.startsWith(PICK_TASK_URL)) {
-            		HttpPost eventRequest;
-					try {
-						String taskId = contents.substring(PICK_TASK_URL.length());
-						eventRequest = new HttpPost(new URI(EVENT_API_URL));
-						List<NameValuePair> parameters = new ArrayList<NameValuePair>();
-						parameters.add(new BasicNameValuePair("taskId",taskId));
-						eventRequest.setEntity(new UrlEncodedFormEntity(parameters));
-	        			RestTask task = new RestTask(getApplicationContext(), LOG_EVENT, CookieManager.getInstance().getCookie(DOMAIN), DOMAIN);
-	        			task.execute(eventRequest);
-					} catch (URISyntaxException e) {
-						Log.e(LOG_TAG, "Can't log event: "+e.getMessage());
-					} catch (UnsupportedEncodingException e) {
-						Log.e(LOG_TAG, "Can't log event: "+e.getMessage());
-					}
-            	}
-        		webView.loadUrl(contents);
-	    	}
-	    	if (contents.startsWith("cs:")) {
-	    		checkInOut(contents.replaceFirst("cs", "http"));
-	    	}
-	    	if (contents.startsWith("channel:")) {
-                try {
-                    RestTask task = new RestTask(getApplicationContext(), TAKE_CONTROL, CookieManager.getInstance().getCookie(DOMAIN), DOMAIN);
-                    String url = PD_TAKE_CONTROL+"?channelId="+contents.substring("channel:".length());
-                    task.execute(new HttpGet(new URI(url)));
-                } catch (URISyntaxException e) {
-                    e.printStackTrace();
-                    Toast.makeText(getApplicationContext(), "Error: "+e.getMessage(), Toast.LENGTH_LONG).show();
-                }
-	    	}
-        } else {
-        	Toast.makeText(getApplicationContext(), R.string.result_failed, Toast.LENGTH_SHORT).show();
-        	Toast.makeText(getApplicationContext(), getString(R.string.result_failed_why), Toast.LENGTH_LONG).show();
+        super.onActivityResult(requestCode, resultCode, intent);
+        if (requestCode == SIGN && resultCode==RESULT_OK) {
+            signedUrl = intent.getStringExtra(Sign.Params.SIGNED_DOC_URL);
+            sessionId = intent.getIntExtra(Sign.Params.SESSION_ID, -1);
+            Toast.makeText(getApplicationContext(), "Document was successfully signed. SIGNED_DOC_URL: "+signedUrl
+                    +", \nsessionId: "+sessionId, Toast.LENGTH_LONG).show();
         }
-      }
+        IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, intent);
+        if (result != null) {
+            String contents = result.getContents();
+            if (contents != null) {
+                // TODO: leave this?
+                Toast.makeText(getApplicationContext(), R.string.result_succeeded, Toast.LENGTH_SHORT).show();
+                if (contents.startsWith("http")) {
+                    if (contents.startsWith(PICK_TASK_URL)) {
+                        HttpPost eventRequest;
+                        try {
+                            String taskId = contents.substring(PICK_TASK_URL.length());
+                            eventRequest = new HttpPost(new URI(EVENT_API_URL));
+                            List<NameValuePair> parameters = new ArrayList<NameValuePair>();
+                            parameters.add(new BasicNameValuePair("taskId", taskId));
+                            eventRequest.setEntity(new UrlEncodedFormEntity(parameters));
+                            RestTask task = new RestTask(getApplicationContext(), LOG_EVENT, CookieManager.getInstance().getCookie(DOMAIN), DOMAIN);
+                            task.execute(eventRequest);
+                        } catch (URISyntaxException e) {
+                            Log.e(LOG_TAG, "Can't log event: " + e.getMessage());
+                        } catch (UnsupportedEncodingException e) {
+                            Log.e(LOG_TAG, "Can't log event: " + e.getMessage());
+                        }
+                    }
+                    webView.loadUrl(contents);
+                }
+                if (contents.startsWith("cs:")) {
+                    checkInOut(contents.replaceFirst("cs", "http"));
+                }
+                if (contents.startsWith("channel:")) {
+                    try {
+                        RestTask task = new RestTask(getApplicationContext(), TAKE_CONTROL, CookieManager.getInstance().getCookie(DOMAIN), DOMAIN);
+                        String url = PD_TAKE_CONTROL + "?channelId=" + contents.substring("channel:".length());
+                        task.execute(new HttpGet(new URI(url)));
+                    } catch (URISyntaxException e) {
+                        e.printStackTrace();
+                        Toast.makeText(getApplicationContext(), "Error: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                    }
+                }
+            } else {
+                Toast.makeText(getApplicationContext(), R.string.result_failed, Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), getString(R.string.result_failed_why), Toast.LENGTH_LONG).show();
+            }
+        }
     }
 
     private BroadcastReceiver cisDirectoryClientReceiver = new BroadcastReceiver() {
@@ -870,6 +952,27 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
         		System.out.println(response);
 				Toast.makeText(getApplicationContext(), response[1], Toast.LENGTH_SHORT).show();
         	}
+            if (intent.getAction().equalsIgnoreCase(Sign.ACTION_FINISHED)) {
+                boolean success = intent.getBooleanExtra(Sign.Params.SUCCESS, false);
+                int sid = intent.getIntExtra(Sign.Params.SESSION_ID, -1);
+
+                if (success && sid == MainActivity.this.sessionId) {
+                    try {
+                        InputStream is = getContentResolver().openInputStream(Uri.parse(signedUrl));
+                        // Now you can read the file directly
+                        is.close();
+                        // Delete the file when it is not needed anymore
+                        getContentResolver().delete(Uri.parse(signedUrl), null, null);
+                    } catch(Exception e) {
+                        e.printStackTrace();
+                        Log.w(LOG_TAG, e);
+                    }
+                    Toast.makeText(getApplicationContext(), "File signed successfully. Output is in signed.xml on SD card!", Toast.LENGTH_SHORT).show();
+                }
+                else {
+                    // Ignore non-relevant notifications, react to failure...
+                }
+            }
         	if (intent.getAction().equalsIgnoreCase(SET_FOCUS)) {
                 Intent i = new Intent(getApplicationContext(), MainActivity.class);
                 i.setAction(Intent.ACTION_MAIN);
@@ -1241,6 +1344,9 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
         }
         
         public void onPageFinished(WebView view, String url) {
+            if (firstTimeOnMenuPage) {
+                updateProgressBar();
+            }
         	if (url.contains("enter") || url.contains("leave")) {
         		webView.goBack();
         	}

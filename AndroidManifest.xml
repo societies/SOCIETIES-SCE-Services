@@ -19,6 +19,7 @@
     <!--<uses-permission android:name="android.permission.GET_ACCOUNTS" />-->
     <!--<uses-permission android:name="android.permission.USE_CREDENTIALS" />-->
     <uses-permission android:name="android.permission.NFC" />
+    <uses-permission android:name="org.societies.security.digsig.provider.permission.SIGN" />
 
     <application
         android:name="org.societies.thirdpartyservices.crowdtasking.CrowdTasking"

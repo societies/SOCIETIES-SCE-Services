@@ -32,6 +32,9 @@ public class GcmIntentService extends IntentService {
     public static final int NOTIFICATION_ID = 1;
     private NotificationManager mNotificationManager;
     NotificationCompat.Builder builder;
+    static public final String PARAMETER_MESSAGE = "message";
+    static public final String PARAMETER_URL = "downloadUrl";
+    static public final String PARAMETER_MEETING_ID = "meetingId";
 
     public GcmIntentService() {
         super("GcmIntentService");
@@ -53,14 +56,16 @@ public class GcmIntentService extends IntentService {
              * not interested in, or that you don't recognize.
              */
             if (GoogleCloudMessaging.MESSAGE_TYPE_SEND_ERROR.equals(messageType)) {
-                sendNotification("Send error: " + extras.toString());
+                sendNotification("Send error: " + extras.toString(), null, null);
             } else if (GoogleCloudMessaging.MESSAGE_TYPE_DELETED.equals(messageType)) {
-                sendNotification("Deleted messages on server: " + extras.toString());
+                sendNotification("Deleted messages on server: " + extras.toString(), null, null);
                 // If it's a regular GCM message, do some work.
             } else if (GoogleCloudMessaging.MESSAGE_TYPE_MESSAGE.equals(messageType)) {
                 Log.i(TAG, "Completed work @ " + SystemClock.elapsedRealtime());
                 // Post notification of received message.
-                sendNotification(extras.getString("text"));
+                sendNotification(extras.getString(PARAMETER_MESSAGE),
+                        extras.getString(PARAMETER_URL),
+                        extras.getString(PARAMETER_MEETING_ID));
                 Log.i(TAG, "Received: " + extras.toString());
             }
         }
@@ -71,21 +76,24 @@ public class GcmIntentService extends IntentService {
     // Put the message into a notification and post it.
     // This is just one simple example of what you might choose to do with
     // a GCM message.
-    private void sendNotification(String msg) {
+    private void sendNotification(String msg, String url, String meetingId) {
         mNotificationManager = (NotificationManager)
                 this.getSystemService(Context.NOTIFICATION_SERVICE);
 
         Intent intent = new Intent(this, MainActivity.class);
         intent.setAction("GCM");
-        intent.putExtra("GCM_TEXT", msg);
-        PendingIntent contentIntent = PendingIntent.getActivity(this, 0, intent, 0);
+        intent.putExtra(PARAMETER_MESSAGE, msg);
+        intent.putExtra(PARAMETER_URL, url);
+        intent.putExtra(PARAMETER_MEETING_ID, meetingId);
+        intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        PendingIntent contentIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
 
         NotificationCompat.Builder mBuilder =
                 new NotificationCompat.Builder(this)
                         .setSmallIcon(R.drawable.ic_notification)
                         .setContentTitle("SCT Notification")
                         .setStyle(new NotificationCompat.BigTextStyle()
-                                .bigText(msg))
+                                .bigText(msg+" DownloadUrl="+url))
                         .setContentText(msg)
                         .setAutoCancel(true);
 
