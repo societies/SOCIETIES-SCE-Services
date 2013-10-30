@@ -37,6 +37,8 @@ public class SendMessageServlet extends BaseServlet {
 
     static public final String PARAMETER_DEVICE = "device";
     static public final String PARAMETER_MESSAGE = "message";
+    static public final String PARAMETER_URL = "downloadUrl";
+    static public final String PARAMETER_MEETING_ID = "meetingId";
     static public final String PARAMETER_MULTICAST = "multicastKey";
 
     private Sender sender;
@@ -100,13 +102,15 @@ public class SendMessageServlet extends BaseServlet {
         }
         String regId = req.getParameter(PARAMETER_DEVICE);
         String message = req.getParameter(PARAMETER_MESSAGE);
+        String url = req.getParameter(PARAMETER_URL);
+        String meetingId = req.getParameter(PARAMETER_MEETING_ID);
         if (regId != null) {
-            sendSingleMessage(regId, message, resp);
+            sendSingleMessage(regId, message, url, meetingId, resp);
             return;
         }
         String multicastKey = req.getParameter(PARAMETER_MULTICAST);
         if (multicastKey != null) {
-            sendMulticastMessage(multicastKey, message, resp);
+            sendMulticastMessage(multicastKey, message, url, meetingId, resp);
             return;
         }
         logger.severe("Invalid request!");
@@ -114,14 +118,17 @@ public class SendMessageServlet extends BaseServlet {
         return;
     }
 
-    private Message createMessage(String text) {
-        Message message = new Message.Builder().addData("text", text).build();
+    private Message createMessage(String text, String url, String meetingId) {
+//        Message message = new Message.Builder().addData(PARAMETER_MESSAGE, text).build();
+        Message message = new Message.Builder().addData(PARAMETER_MESSAGE, text)
+                .addData(PARAMETER_URL, url)
+                .addData(PARAMETER_MEETING_ID, meetingId).build();
         return message;
     }
 
-    private void sendSingleMessage(String regId, String messageText, HttpServletResponse resp) {
+    private void sendSingleMessage(String regId, String messageText, String url, String meetingId, HttpServletResponse resp) {
         logger.info("Sending message to device " + regId);
-        Message message = createMessage(messageText);
+        Message message = createMessage(messageText, url, meetingId);
         Result result;
         try {
             result = sender.sendNoRetry(message, regId);
@@ -154,11 +161,10 @@ public class SendMessageServlet extends BaseServlet {
         }
     }
 
-    private void sendMulticastMessage(String multicastKey, String messageText,
-                                      HttpServletResponse resp) {
+    private void sendMulticastMessage(String multicastKey, String messageText, String url, String meetingId, HttpServletResponse resp) {
         // Recover registration ids from datastore
         List<String> regIds = Datastore.getMulticast(multicastKey);
-        Message message = createMessage(messageText);
+        Message message = createMessage(messageText, url, meetingId);
         MulticastResult multicastResult;
         try {
             multicastResult = sender.sendNoRetry(message, regIds);

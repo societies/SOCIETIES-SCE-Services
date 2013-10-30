@@ -167,18 +167,18 @@ public final class NotificationsSender {
             if (user.getGcmRegistrationId() != null) {
                 partialDevices.add(user.getGcmRegistrationId());
                 if (partialDevices.size() == Datastore.MULTICAST_SIZE) {
-                    sendGCMMessage(partialDevices, message);
+                    sendGCMMessage(partialDevices, message, null, null);
                     partialDevices.clear();
                 }
             }
         }
         if (!partialDevices.isEmpty()) {
-            sendGCMMessage(partialDevices, message);
+            sendGCMMessage(partialDevices, message, null, null);
         }
     }
 
     public static void meetingIsReadyToBeSigned(Meeting meeting) {
-        String message = "The meeting minutes are ready to be signed. DL URL: " + meeting.getDownloadUrl();
+        String message = "The meeting minutes are ready to be signed.";
         List<String> partialDevices = new ArrayList();
         CTUser organizer = meeting.getOrganizer();
         Set<Ref<CTUser>> users = meeting.getUsers();
@@ -188,17 +188,17 @@ public final class NotificationsSender {
             if (user.getGcmRegistrationId() != null) {
                 partialDevices.add(user.getGcmRegistrationId());
                 if (partialDevices.size() == Datastore.MULTICAST_SIZE) {
-                    sendGCMMessage(partialDevices, message);
+                    sendGCMMessage(partialDevices, message, meeting.getDownloadUrl(), meeting.getId().toString());
                     partialDevices.clear();
                 }
             }
         }
         if (!partialDevices.isEmpty()) {
-            sendGCMMessage(partialDevices, message);
+            sendGCMMessage(partialDevices, message, meeting.getDownloadUrl(), meeting.getId().toString());
         }
     }
 
-    private static void sendGCMMessage(List<String> partialDevices, String message) {
+    private static void sendGCMMessage(List<String> partialDevices, String message, String downloadUrl, String meetingId) {
         String multicastKey = Datastore.createMulticast(partialDevices);
         logger.info("Queuing " + partialDevices.size() + " devices on multicast " +
                 multicastKey);
@@ -206,6 +206,8 @@ public final class NotificationsSender {
                 .withUrl("/send")
                 .param(SendMessageServlet.PARAMETER_MULTICAST, multicastKey)
                 .param(SendMessageServlet.PARAMETER_MESSAGE, message)
+                .param(SendMessageServlet.PARAMETER_URL, downloadUrl)
+                .param(SendMessageServlet.PARAMETER_MEETING_ID, meetingId)
                 .method(Method.POST);
         Queue queue = QueueFactory.getQueue("gcm");
         queue.add(taskOptions);

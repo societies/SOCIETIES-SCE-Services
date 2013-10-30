@@ -168,6 +168,7 @@ public class MeetingAPI implements IMeetingAPI {
             }
             meeting.setDownloadUrl(downloadUrl);
             NotificationsSender.meetingIsReadyToBeSigned(meeting);
+            MeetingDAO.saveMeeting(meeting);
             return Response.ok().entity("The meeting minutes are ready to be signed.").build();
 
         }
