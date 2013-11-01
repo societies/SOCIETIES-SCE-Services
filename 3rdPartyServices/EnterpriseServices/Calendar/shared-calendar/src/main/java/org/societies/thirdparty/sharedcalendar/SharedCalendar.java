@@ -448,11 +448,21 @@ public class SharedCalendar extends EventListener implements ISharedCalendarServ
 			}
 			
 			log.debug("Removing events from this calendar from recommended and recents");
-			List<Event> events = retrieveEvents(node,myId);
+			/*List<Event> events = retrieveEvents(node,myId);
 			for(Event oldEvent : events){
 				recentEvents.remove(oldEvent.getEventId());
 				recommendedEvents.remove(oldEvent.getEventId());
+			}*/
+			for(Event oldEvent: recentEvents.values()){
+				if(oldEvent.getNodeId().equals(node.getBareJid()))
+					recentEvents.remove(oldEvent);
 			}
+			
+			for(Event oldEvent: recommendedEvents.values()){
+				if(oldEvent.getNodeId().equals(node.getBareJid()))
+					recommendedEvents.remove(oldEvent);
+			}
+			
 			
 			recentCalendars.remove(node.getBareJid());
 			
@@ -500,7 +510,7 @@ public class SharedCalendar extends EventListener implements ISharedCalendarServ
 						
 						CalendarMessage message = new CalendarMessage();
 						message.setMessage(Message.CALENDAR_DELETED);
-						message.setCalendarId(calendarId);
+						message.setCalendarId(node.getBareJid());
 						String messageId = message.getMessage()+"_"+ message.getCalendarId();
 						getPubSub().subscriberUnsubscribe(node, calendarId.replace('@', '-'), this);
 						
@@ -1527,7 +1537,7 @@ public class SharedCalendar extends EventListener implements ISharedCalendarServ
 			
 		} catch(Exception ex){
 			ex.printStackTrace();
-			log.error("Exception while unsubscribing from calendar: " + ex);
+			log.error("Exception while unsubscribing from calendar: {}", ex);
 		}
 		
 		return subscriptionOk;
@@ -1548,8 +1558,9 @@ public class SharedCalendar extends EventListener implements ISharedCalendarServ
 		List<EventDAO> eventsDAO = database.getEventsForSubscriberId(subscriber.getBareJid());
 		
 		for(EventDAO eventDAO : eventsDAO){
-			if(log.isDebugEnabled())
-				log.debug("Processing event: " + eventDAO.getEventId());
+
+			log.debug("Processing event: {}", eventDAO.getEventId());
+			
 			Event subscribedEvent = eventFromDatabaseEvent(eventDAO);
 			if(subscribedEvent != null)
 				finalEventList.add(subscribedEvent);
@@ -2465,8 +2476,8 @@ public class SharedCalendar extends EventListener implements ISharedCalendarServ
 	@Override
 	public void pubsubEvent(IIdentity node, String calendarId,
 			String itemId, Object item) {
-		if(log.isDebugEnabled())
-			log.debug("Received a Pub-Sub event, from node " + node.getJid() + " for calendar: " + calendarId);
+		
+		log.debug("Received a Pub-Sub event, from node {} for calendar: {}", node.getJid(), calendarId);
 		
 		if(item.getClass().equals(CalendarMessage.class)){
 			CalendarMessage calendarMessage = (CalendarMessage) item;
@@ -2628,6 +2639,13 @@ public class SharedCalendar extends EventListener implements ISharedCalendarServ
 					e.printStackTrace();
 				}
 			}
+			
+			if(calendarMessage.getMessage().equals(Message.CALENDAR_DELETED)){
+				
+				log.debug("Remote Calendar was deleted {}",calendarMessage.getCalendarId());
+				this.deleteCalendar(node);
+			}
+			
 
 		}
 		

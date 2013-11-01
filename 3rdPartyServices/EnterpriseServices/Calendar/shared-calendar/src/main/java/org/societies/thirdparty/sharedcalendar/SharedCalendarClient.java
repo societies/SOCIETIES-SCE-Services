@@ -202,8 +202,8 @@ public class SharedCalendarClient implements ISharedCalendar {
 			
 			log.debug("Deleted an event with Id: {}",deleteOk);
 			
-			if(deleteOk)
-				getPreferences().setPreference(CalendarPreference.CALENDAR_ACTION, "deleteEvent");
+			//if(deleteOk)
+			//	getPreferences().setPreference(CalendarPreference.CALENDAR_ACTION, "deleteEvent");
 			
 			SharedCalendarResult result = new SharedCalendarResult();
 			result.setLastOperationSuccessful(deleteOk);
@@ -233,7 +233,7 @@ public class SharedCalendarClient implements ISharedCalendar {
 			finalResult.setSubscribingResult(subscribeOk);
 			finalResult.setLastOperationSuccessful(subscribeOk);
 			if(subscribeOk){
-				getPreferences().setPreference(CalendarPreference.CALENDAR_ACTION, "joinEvent");
+				//getPreferences().setPreference(CalendarPreference.CALENDAR_ACTION, "joinEvent");
 				Event event = getSharedCalendar().retrieveEvent(eventId, node, myId);
 				
 				log.debug("We correctly subscribed to the event, so we should register the preferences.");
@@ -271,7 +271,7 @@ public class SharedCalendarClient implements ISharedCalendar {
 			finalResult.setSubscribingResult(subscribeOk);
 			finalResult.setLastOperationSuccessful(subscribeOk);
 			if(subscribeOk){
-				getPreferences().setPreference(CalendarPreference.CALENDAR_ACTION, "leaveEvent");
+				//getPreferences().setPreference(CalendarPreference.CALENDAR_ACTION, "leaveEvent");
 				Event event = getSharedCalendar().retrieveEvent(eventId, node, myId);
 				finalResult.setEvent(event);
 			}
@@ -299,8 +299,8 @@ public class SharedCalendarClient implements ISharedCalendar {
 		
 		Event receivedEvent = getSharedCalendar().retrieveEvent(eventId, node, myId);
 		
-		if(receivedEvent != null)
-			getPreferences().setPreference(CalendarPreference.CALENDAR_ACTION, "viewEvent");
+		//if(receivedEvent != null)
+		//	getPreferences().setPreference(CalendarPreference.CALENDAR_ACTION, "viewEvent");
 		
 		SharedCalendarResult returnResult = new SharedCalendarResult();
 		returnResult.setEvent(receivedEvent);
@@ -338,7 +338,7 @@ public class SharedCalendarClient implements ISharedCalendar {
 	            if(newEvent.getLocation() != null && !newEvent.getLocation().isEmpty())
 	            	getPreferences().setPreference(CalendarPreference.CREATE_LOCATION,newEvent.getLocation());
 				
-	            getPreferences().setPreference(CalendarPreference.CALENDAR_ACTION, "createEvent");
+	           // getPreferences().setPreference(CalendarPreference.CALENDAR_ACTION, "createEvent");
 	             
 				Event theEvent = getSharedCalendar().retrieveEvent(eventId, node, myId);
 				finalResult.setEvent(theEvent);
@@ -369,7 +369,7 @@ public class SharedCalendarClient implements ISharedCalendar {
 			finalResult.setLastOperationSuccessful(updateResult);
 		
 			if(updateResult){
-				getPreferences().setPreference(CalendarPreference.CALENDAR_ACTION, "updateEvent");
+				//getPreferences().setPreference(CalendarPreference.CALENDAR_ACTION, "updateEvent");
 				IIdentity node = getCommManager().getIdManager().fromJid(updatedEvent.getNodeId());
 				Event theEvent = getSharedCalendar().retrieveEvent(updatedEvent.getEventId(), node, myId);
 				finalResult.setEvent(theEvent);

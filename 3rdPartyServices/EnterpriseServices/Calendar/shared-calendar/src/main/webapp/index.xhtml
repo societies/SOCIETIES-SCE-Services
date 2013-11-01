@@ -10,7 +10,7 @@
 	xmlns:p="http://primefaces.org/ui">
 
     <h:head id="head">
-     	<title>SOCIETIES Personal Calendar</title>
+     	<title>SOCIETIES Calendar</title>
         <h:outputStylesheet library="css" name="calendar.css"/>
     </h:head>
 
@@ -33,7 +33,7 @@
 				actionListener="#{calendarController.deleteEvent}"
 				onclick="blockUI.show()"
 				oncomplete="myschedule.update();deleteDialog.hide();eventDialog.hide();blockUI.hide()" 
-				update="form:messages,form:eventDetails,form:schedule" process="@this"/>
+				update="form:messages,form:eventDetails,form:schedule,form:scheduleButtons,form:searchEventList" process="@this"/>
 				         
 			<p:commandButton id="cancelDeleteButton" value="Cancel"
 				onclick="deleteDialog.hide()" />
@@ -89,7 +89,7 @@
 	<p:layout fullPage="true" id="mylayout" >
  	                   
       	<p:poll interval="120" listener="#{calendarController.updateWebApp}" 
-      		update="form:messages,form:calendarMenu,form:recEventList,form:schedule"
+      		update="form:messages,form:calendarMenu,form:recEventList,form:schedule,form:scheduleButtons,form:searchEventList"
       		oncomplete="myschedule.update()" process="@this" />
             
       	<p:growl id="messages" showDetail="true" life="5000" for="bigrowl"  />
@@ -103,7 +103,7 @@
 		<p:selectOneMenu id="calendarMenu" value="#{calendarController.selectedNode}" effect="fade" style="width:80%;margin-left:5%;margin-right:5%;">
             <f:selectItems value="#{calendarController.calendarList}" var="calendar" itemLabel="#{calendar.name}" itemValue="#{calendar.nodeId}"/>
             <f:selectItem itemLabel="All My Events" itemValue="mysubscribedevents" />
-            <p:ajax update="form:schedule" listener="#{calendarController.selectCalendar}" process="@this"/>
+            <p:ajax update="form:schedule,form:scheduleButtons" listener="#{calendarController.selectCalendar}" process="@this"/>
         </p:selectOneMenu>
         <br></br>
         <h:outputText value="Show all my events: " />  

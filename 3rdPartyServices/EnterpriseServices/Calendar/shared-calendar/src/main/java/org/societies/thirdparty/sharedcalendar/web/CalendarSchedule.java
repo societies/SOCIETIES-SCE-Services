@@ -72,6 +72,7 @@ public class CalendarSchedule extends LazyScheduleModel {
 		
 		String nodeId = parent.getSelectedNode();
 		
+		log.debug("loadEvents is for node: {} : {}",parent.getCalendarName(nodeId),nodeId);
 		CalendarResultCallback callback = new CalendarResultCallback();
 		CalendarResultCallback secondCallback = null;
 		Event searchEvent = new Event();
@@ -127,7 +128,7 @@ public class CalendarSchedule extends LazyScheduleModel {
 			}
 		}
 		
-		
+		parent.selectView();
 		
 	}
 	

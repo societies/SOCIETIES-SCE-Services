@@ -158,7 +158,8 @@ public class ScheduleHelper implements Serializable {
 	}
 	
 	public String getView(){
-		view = parent.getPreferences().getPreference(CalendarPreference.CALENDAR_VIEW);
+	//	view = parent.getPreferences().getPreference(CalendarPreference.CALENDAR_VIEW);
+		log.debug("getView: {}",view);
 		if(view == null)
 			view = schedule.getView();
 		
@@ -171,9 +172,10 @@ public class ScheduleHelper implements Serializable {
 	}
 	
 	public void selectView(){
+		log.debug("selectView");
 		String prefView = parent.getPreferences().getPreference(CalendarPreference.CALENDAR_VIEW);
 		if(prefView != null)
-			view = prefView;
+			this.view = prefView;
 		
 		getSchedule().setView(view);
 		
