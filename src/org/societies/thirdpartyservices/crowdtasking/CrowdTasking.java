@@ -25,19 +25,29 @@
 package org.societies.thirdpartyservices.crowdtasking;
 
 import android.app.Application;
+import android.util.Log;
+import android.webkit.CookieManager;
 
 import com.google.gson.Gson;
 
+import org.apache.http.NameValuePair;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.societies.api.schema.cis.community.Community;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import si.setcce.societies.android.rest.RestTask;
 import si.setcce.societies.crowdtasking.api.RESTful.json.CommunityJS;
 
 /**
@@ -53,6 +63,7 @@ public class CrowdTasking extends Application {
     private String societiesCommunitiesJSON;
     Gson gson = new Gson();
     public String symbolicLocation="";
+	private final static String LOG_TAG = "Crowd Tasking";
 
 	@Override
 	public void onCreate() {
@@ -76,7 +87,71 @@ public class CrowdTasking extends Application {
         return gson.toJson(selectedCommunities);
     }
 
-    public void setSpaces(String response) {
+	public void synchronizeCommunities(String response) {
+		try {
+			JSONArray sctComms = new JSONArray(response);
+			Map<String, JSONObject> commMap = new HashMap<String, JSONObject>();
+			for (int i = 0; i < sctComms.length(); i++) {
+				commMap.put(sctComms.getJSONObject(i).getString("jid"), sctComms.getJSONObject(i));
+			}
+			for (CommunityJS cis:societiesCommunities) {
+				JSONObject communitiyJSON = commMap.get(cis.jid);
+				if (communitiyJSON == null) {
+					addCisToGae(cis);
+				} else {
+					updateCis(cis, communitiyJSON);
+				}
+			}
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}	}
+
+	private void addCisToGae(CommunityJS cis) {
+		// POST cis to /rest/community/create
+		HttpPost postCommunity;
+		try {
+			postCommunity = new HttpPost(new URI(MainActivity.CREATE_COMMUNITY_API_URL));
+			List<NameValuePair> parameters = new ArrayList<NameValuePair>();
+			// communityJid, ownerJid, name, description
+			parameters.add(new BasicNameValuePair("communityJid", cis.jid));
+			parameters.add(new BasicNameValuePair("communityId", ""));
+			parameters.add(new BasicNameValuePair("ownerJid", cis.ownerJid));
+			parameters.add(new BasicNameValuePair("name", cis.name));
+			parameters.add(new BasicNameValuePair("description", cis.description));
+			postCommunity.setEntity(new UrlEncodedFormEntity(parameters));
+			RestTask task = new RestTask(getApplicationContext(), "", CookieManager.getInstance()
+					.getCookie(MainActivity.DOMAIN), MainActivity.DOMAIN);
+			task.execute(postCommunity);
+		} catch (URISyntaxException e) {
+			Log.e(LOG_TAG, "Can't log event: " + e.getMessage());
+		} catch (UnsupportedEncodingException e) {
+			Log.e(LOG_TAG, "Can't log event: "+e.getMessage());
+		}
+
+	}
+
+	private void updateCis(CommunityJS cis, JSONObject communityJSON) {
+		// update CIS data
+		String jid = null;
+		try {
+			jid = communityJSON.getString("jid");
+			CommunityJS communityJS = cisMap.get(jid);
+			if (communityJS != null) {
+				// todo: test this
+				communityJS.id = communityJSON.getLong("id");
+				JSONArray spaces = new JSONArray(communityJSON.getString("spaces"));
+				communityJS.setSpaces(spaces);
+				cisMap.put(jid, communityJS);
+				//comms.add(communityJS);
+			}
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+
+	}
+
+/*
+	public void setSpaces(String response) {
         //List<CommunityJS> comms = new ArrayList<CommunityJS>();
         try {
             JSONArray sctComms = new JSONArray(response);
@@ -85,6 +160,7 @@ public class CrowdTasking extends Application {
                     String jid = sctComms.getJSONObject(i).getString("jid");
                     CommunityJS communityJS = cisMap.get(jid);
                     if (communityJS != null) {
+	                    communityJS.id = sctComms.getJSONObject(i).getLong("id");
                         JSONArray spaces = new JSONArray(sctComms.getJSONObject(i).getString("spaces"));
                         communityJS.setSpaces(spaces);
                         cisMap.put(jid, communityJS);
@@ -97,6 +173,7 @@ public class CrowdTasking extends Application {
             e.printStackTrace();
         }
     }
+*/
 
     public void setCommunitySpaces(String communityJSON) {
         // todo implement this

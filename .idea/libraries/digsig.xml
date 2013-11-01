@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="digsig">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/libs/digsig.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

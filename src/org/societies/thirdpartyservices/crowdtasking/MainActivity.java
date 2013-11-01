@@ -99,6 +99,7 @@ import si.setcce.societies.gcm.GcmIntentService;
 public class MainActivity extends Activity implements SensorEventListener, NfcAdapter.CreateNdefMessageCallback {
 	//private static final String TEST_ACTION = "si.setcce.societies.android.rest.TEST";
     public static final String CHECK_IN_OUT = "si.setcce.societies.android.rest.CHECK_IN_OUT";
+    public static final String GET_LOCATION_ACTION = "si.setcce.societies.android.rest.GET_LOCATION";
     private static final String GET_USER = "si.setcce.societies.android.rest.GET_USER";
 	private static final String LOG_EVENT = "si.setcce.societies.android.rest.LOG_EVENT";
 	private static final String LOGIN_USER = "si.setcce.societies.android.rest.LOGIN_USER";
@@ -110,18 +111,18 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
 	public static final String SET_FOCUS = "si.setcce.societies.android.activity.FOCUS";
 
     private static final String SCHEME ="http";
-    private static final String SCOPE ="SETCCE_SOCIETIES";
+    private static final String SCOPE ="HWU";
         public static final String DOMAIN = "crowdtasking.appspot.com";
     //    public static final String DOMAIN = "crowdtaskingtest.appspot.com";
 //    public static final String DOMAIN = "simonix";
 //    public static final String DOMAIN = "192.168.1.71";
 //   	public static final String DOMAIN = "192.168.1.102";
 //   	public static final String DOMAIN = "192.168.1.67";
-//   	public static final String DOMAIN = "192.168.1.78";
+//   	public static final String DOMAIN = "192.168.64.102";
     private static final String PORT = "";
 //    private static final String PORT = ":8888";
     public static final String APPLICATION_URL = SCHEME +"://" + DOMAIN + PORT;
-    private static final String LOGIN_URL = APPLICATION_URL + "/login";
+    private static final String HOME_URL = APPLICATION_URL + "/menu";
     private static final String MEETING_URL = APPLICATION_URL + "/android/meeting/";
     private static final String C4CSS_API_URL = APPLICATION_URL + "/rest/community/4CSS";
     private static final String PD_TAKE_CONTROL = APPLICATION_URL + "/rest/remote/takeControl";
@@ -132,6 +133,8 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
     private static final String SCAN_QR_URL = APPLICATION_URL + "/android/scanQR";
     private static final String PICK_TASK_URL = APPLICATION_URL + "/task/view?id=";
     private static final String EVENT_API_URL = APPLICATION_URL + "/rest/event";
+    public static final String CREATE_COMMUNITY_API_URL = APPLICATION_URL +
+			"/rest/community/create";
     private static final String SHARE_CS_URL = APPLICATION_URL + "/android/shareCsUrl";
     private static final String SERVICE_CONNECTED = "org.societies.integration.service.CONNECTED";
     private static final int SIGN = 51;
@@ -149,9 +152,9 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
     private CisDirectoryClient cisDirectoryClient;
     private ContextClient contextClient;
     private SocietiesEventsClient societiesEventsClient;
-    private boolean isSocietiesUser=false, societiesServicesRunning, contextClientRunning, communityManagementClientConnected, cisDirectoryClientConnected, societiesEventsClientConnected;
+    private boolean isSocietiesUser=false, contextClientRunning, communityManagementClientConnected, cisDirectoryClientConnected, societiesEventsClientConnected;
     private SocietiesUser societiesUser = null;
-    private final static String LOG_TAG = "Crowd Tasking";
+    private final static String LOG_TAG = "Crowd Tasking Main";
     public static final String PROPERTY_REG_ID = "registration_id";
     private static final String PROPERTY_APP_VERSION = "appVersion";
     private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
@@ -160,6 +163,7 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
     private ProgressDialog progressDialog;
     private String signedUrl;
     private int sessionId;
+	public static String cookies;
 
 	/**
      * This is the project number from the API Console
@@ -352,7 +356,9 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
 
     }
 
-    private void updateProgressBar() {
+    private void updateProgressBar(String message) {
+	    System.out.println("updateProgressBar: "+message);
+	    progressDialog.setMessage(message);
 /*        final Handler updateBarHandler = new Handler();
         new Thread(new Runnable() {
             @Override
@@ -379,7 +385,7 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
                 }
             }
         }).start();*/
-        progressDialog.dismiss();
+//        progressDialog.dismiss();
     }
 
     @Override
@@ -387,7 +393,13 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_main);
+	    sensorManager = (SensorManager)getSystemService(SENSOR_SERVICE);
+	    accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+	    mAccel = 0.00f;
+	    mAccelCurrent = SensorManager.GRAVITY_EARTH;
+	    mAccelLast = SensorManager.GRAVITY_EARTH;
         showProgressBar();
+	    setup();
 /*
         mNfcAdapter = NfcAdapter.getDefaultAdapter(this);
         if (mNfcAdapter == null) {
@@ -397,14 +409,6 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
             mNfcAdapter.setNdefPushMessageCallback(this, this);
         }
 */
-
-        sensorManager = (SensorManager)getSystemService(SENSOR_SERVICE);
-		accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-	    mAccel = 0.00f;
-	    mAccelCurrent = SensorManager.GRAVITY_EARTH;
-	    mAccelLast = SensorManager.GRAVITY_EARTH;
-
-	    startUrl = APPLICATION_URL+"/menu";
         /*AccountManager am = AccountManager.get(this);
         Account[] accounts = am.getAccounts();
         for(Account ac: accounts)
@@ -414,39 +418,57 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
 	        Log.d("accountInfo", acname + ":" + actype);
         }*/
 
-        webViewSetup();
-        if (isSocietiesServiceRunning()) {
-//            System.out.println("Societies services are running?");
-//            Toast.makeText(getApplicationContext(), "SOCIETIES services are running", Toast.LENGTH_LONG).show();
-            getServiceId();
-            System.out.println("SERVICE_ID:" + SERVICE_ID);
-            societiesUser = getSocietiesUserData();
-            TrustTask task = new TrustTask(this, DOMAIN, APPLICATION_URL);
-    		task.execute(societiesUser.getUserId());
-            societiesServicesRunning = true;
-            communityManagementClient = new CommunityManagementClient(this, communityClientReceiver);
-            communityManagementClient.setUpService();
-            //checkLocation();
-	        contextClient = new ContextClient(getApplicationContext());
-	        contextClient.setUpService();
-
-            societiesEventsClient = new SocietiesEventsClient(this, eventsClientReceiver);
-            societiesEventsClient.setUpService();
-//            cisDirectoryClient = new CisDirectoryClient(this, cisDirectoryClientReceiver);
-//            cisDirectoryClient.setUpService();
-        }
-        else {
-            System.out.println("Societies services are not running?");
-//            Toast.makeText(getApplicationContext(), "SOCIETIES services are not running", Toast.LENGTH_LONG).show();
-        }
-        loginUser();
+//        loginUser();
         checkIntent(getIntent());
-        CheckUpdateTask checkUpdateTask = new CheckUpdateTask(this);
-        checkUpdateTask.execute();
     }
 
-    private boolean getServiceId() {
-        final CountDownLatch latch = new CountDownLatch(1);
+	private void setup() {
+		new AsyncTask<Void, Void, Boolean>() {
+			@Override
+			protected Boolean doInBackground(Void... params) {
+				boolean societiesServices = isSocietiesServiceRunning();
+				if (societiesServices) {
+					connectToSocieties();
+				}
+				CheckUpdateTask checkUpdateTask = new CheckUpdateTask(getApplicationContext());
+				checkUpdateTask.execute();
+				return societiesServices;
+			}
+
+			@Override
+			protected void onPostExecute(Boolean societiesServices) {
+				webViewSetup();
+				loginUser(societiesServices);
+			}
+		}.execute(null, null, null);
+	}
+
+
+	public void connectToSocieties() {
+		getServiceId();
+		System.out.println("SERVICE_ID:" + SERVICE_ID);
+		societiesUser = getSocietiesUserData();
+		TrustTask task = new TrustTask(this, DOMAIN, APPLICATION_URL);
+		task.execute(societiesUser.getUserId());
+		communityManagementClient = new CommunityManagementClient(this, communityClientReceiver);
+		communityManagementClient.setUpService();
+//		checkLocation();
+		contextClient = new ContextClient(getApplicationContext());
+		contextClient.setUpService();
+
+		societiesEventsClient = new SocietiesEventsClient(this, eventsClientReceiver);
+		societiesEventsClient.setUpService();
+//            cisDirectoryClient = new CisDirectoryClient(this, cisDirectoryClientReceiver);
+//            cisDirectoryClient.setUpService();
+	}
+
+	private boolean getServiceId() {
+		SharedPreferences preferences  = getSharedPreferences("SOCIETIES", Context.MODE_PRIVATE);
+		SERVICE_ID = preferences.getString("SERVICE_ID", "");
+		if (!SERVICE_ID.equalsIgnoreCase("")) {
+			return true;
+		}
+		final CountDownLatch latch = new CountDownLatch(1);
         // TODO make socketClient as AsyncTask?
         SocketClient socketClient = new SocketClient(this);
         Log.i(LOG_TAG, "Socket client created");
@@ -458,6 +480,9 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
             do {
                 if (SERVICE_ID != null) {
                     Log.i(LOG_TAG, "SERVICE_ID != null");
+	                SharedPreferences.Editor editor = preferences.edit();
+	                editor.putString("SERVICE_ID", SERVICE_ID);
+	                editor.commit();
                     return true;
                 }
             } while (true);
@@ -600,6 +625,7 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
         registerReceiver(receiver, new IntentFilter(GET_MEETING_ACTION));
         registerReceiver(receiver, new IntentFilter(SET_MEETING_ACTION));
         registerReceiver(receiver, new IntentFilter(CHECK_IN_OUT));
+        registerReceiver(receiver, new IntentFilter(GET_LOCATION_ACTION));
         registerReceiver(receiver, new IntentFilter(GET_USER));
         registerReceiver(receiver, new IntentFilter(LOGIN_USER));
         registerReceiver(receiver, new IntentFilter(TAKE_CONTROL));
@@ -640,25 +666,30 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
     }
 
     private void handleGcmIntent(Intent intent) {
-        String response = intent.getStringExtra(GcmIntentService.PARAMETER_MESSAGE);
+        String message = intent.getStringExtra(GcmIntentService.PARAMETER_MESSAGE);
         String downloadUrl = intent.getStringExtra(GcmIntentService.PARAMETER_URL);
         String meetingId = intent.getStringExtra(GcmIntentService.PARAMETER_MEETING_ID);
 
-
-        Intent i = new Intent(Sign.ACTION);
-        i.putExtra(Sign.Params.DOC_TO_SIGN_URL, downloadUrl);
-
-        ArrayList<String> idsToSign = new ArrayList<String>();
-        idsToSign.add(meetingId);
-        i.putStringArrayListExtra(Sign.Params.IDS_TO_SIGN, idsToSign);
-
-        Log.i(LOG_TAG, "downloadUrl: " + downloadUrl);
-        Log.i(LOG_TAG, "idsToSign: " + idsToSign);
-        startActivityForResult(i, SIGN);
+	    if (!"".equalsIgnoreCase(downloadUrl)) {
+		    signDocument(downloadUrl, meetingId);
+	    }
 //        Toast.makeText(getApplicationContext(), response, Toast.LENGTH_SHORT).show();
     }
-    
-    @Override
+
+	private void signDocument(String downloadUrl, String meetingId) {
+		Intent i = new Intent(Sign.ACTION);
+		i.putExtra(Sign.Params.DOC_TO_SIGN_URL, downloadUrl);
+
+		ArrayList<String> idsToSign = new ArrayList<String>();
+		idsToSign.add(meetingId);
+		i.putStringArrayListExtra(Sign.Params.IDS_TO_SIGN, idsToSign);
+
+		Log.i(LOG_TAG, "downloadUrl: " + downloadUrl);
+		Log.i(LOG_TAG, "idsToSign: " + idsToSign);
+		startActivityForResult(i, SIGN);
+	}
+
+	@Override
     public void onPause() {
         super.onPause();
     	unregisterReceiver(receiver);
@@ -678,7 +709,7 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
         	WebBackForwardList webBackForwardList = webView.copyBackForwardList();
         	//int i = webBackForwardList.getCurrentIndex();
         	String historyUrl = webBackForwardList.getItemAtIndex(webBackForwardList.getCurrentIndex()).getUrl();
-        	if (historyUrl.startsWith(APPLICATION_URL + "/menu") ||
+        	if (historyUrl.startsWith(HOME_URL) ||
         			historyUrl.startsWith(APPLICATION_URL+"/login")) {
         		super.onBackPressed();
         		return;
@@ -697,19 +728,22 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
         else {
             super.onBackPressed();
         }
-    }    
+    }
 
 	@Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle item selection
         switch (item.getItemId()) {
-            case R.id.scanQRcode:
-                IntentIntegrator integrator = new IntentIntegrator(MainActivity.this);
-                integrator.initiateScan(IntentIntegrator.QR_CODE_TYPES);
-                return true;
+            case R.id.getLocation:
+	            if (contextClientRunning) {
+		            contextClient.getSymbolicLocation(societiesUser.getUserId());
+	            } else {
+		            Toast.makeText(getApplicationContext(), "Context service is not running.", Toast.LENGTH_SHORT).show();
+	            }
+	            return true;
 
             case R.id.home:
-            	webView.loadUrl(APPLICATION_URL);
+            	webView.loadUrl(HOME_URL);
             	// reload
             	//webView.loadUrl(webView.getUrl());
             	return true;
@@ -718,17 +752,23 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
             	//refreshData();
             	/*Intent startIntent=new Intent(this.getApplicationContext(),RemoteControlActivity.class);
             	startActivity(startIntent);*/
-//                CheckUpdateTask checkUpdateTask = new CheckUpdateTask(this, true);
-//                checkUpdateTask.execute();
-	            Random rand = new Random();
+                CheckUpdateTask checkUpdateTask = new CheckUpdateTask(this, true);
+                checkUpdateTask.execute();
 
+/*
+				// set location
+	            Random rand = new Random();
 	            int  n = rand.nextInt(500);
-	            contextClient.setSymbolicLocation("location"+n);
+	            contextClient.setSymbolicLocation("screen1");
+*/
                 return true;
 
             case R.id.logout:
-                clearCookies();
-            	webView.loadUrl(APPLICATION_URL);
+	            if (isSocietiesUser) {
+		            super.onBackPressed();
+	            }
+	            clearCookies();
+            	webView.loadUrl(HOME_URL);
                 return true;
 
             default:
@@ -752,9 +792,15 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
 		}
 	}
 
-    private void loginUser() {
-        // TODO check internet connection
-        webView.loadUrl(startUrl);
+    private void loginUser(boolean societiesUser) {
+	    // TODO check internet connection
+	    if (societiesUser) {
+		    startUrl = APPLICATION_URL + "/loginSocietiesUser.html";
+	    } else {
+		    startUrl = HOME_URL;
+	    }
+
+	    webView.loadUrl(startUrl);
     }
 
     @Override
@@ -796,7 +842,11 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
                 }
                 if (contents.startsWith("channel:")) {
                     try {
-                        RestTask task = new RestTask(getApplicationContext(), TAKE_CONTROL, CookieManager.getInstance().getCookie(DOMAIN), DOMAIN);
+	                    String kukiji = CookieManager.getInstance().getCookie(DOMAIN);
+	                    if (kukiji == null) {
+		                    kukiji = cookies;
+	                    }
+	                    RestTask task = new RestTask(getApplicationContext(), TAKE_CONTROL, kukiji, DOMAIN);
                         String url = PD_TAKE_CONTROL + "?channelId=" + contents.substring("channel:".length());
                         task.execute(new HttpGet(new URI(url)));
                     } catch (URISyntaxException e) {
@@ -888,18 +938,22 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
             if (intent.getAction().equalsIgnoreCase(SERVICE_CONNECTED)) {
                 String response = intent.getStringExtra("serviceName");
                 if (response.equalsIgnoreCase("CommunityManagement")) {
+	                updateProgressBar("CommunityManagementClient started");
                     communityManagementClientConnected = true;
                     communityManagementClient.listCommunities();
                 }
                 if (response.equalsIgnoreCase("ContextClient")) {
+	                updateProgressBar("ContextClient started");
                     contextClientRunning = true;
                     contextClient.getSymbolicLocation(societiesUser.getUserId());
                 }
                 if (response.equalsIgnoreCase("CisDirectoryClient")) {
+	                updateProgressBar("CisDirectoryClient started");
                     cisDirectoryClientConnected = true;
                     cisDirectoryClient.findAllCisAdvertismentRecords();
                 }
                 if (response.equalsIgnoreCase("SocietiesEventsClient")) {
+	                updateProgressBar("SocietiesEventsClient started");
                     societiesEventsClientConnected = true;
                     societiesEventsClient.subcribeToLocationChangedEvent();
                 }
@@ -912,7 +966,7 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
                     return;
                 }
                 if (isResponseOk(response[0])) {
-                    ((CrowdTasking)getApplication()).setSpaces(response[1]);
+                    ((CrowdTasking)getApplication()).synchronizeCommunities(response[1]);
                 }
             }
             if (intent.getAction().equalsIgnoreCase(GET_MEETING_ACTION)) {
@@ -922,6 +976,9 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
             if (intent.getAction().equalsIgnoreCase(SET_MEETING_ACTION)) {
                 String[] response = intent.getStringArrayExtra(RestTask.HTTP_RESPONSE);
                 Toast.makeText(getApplicationContext(), response[1], Toast.LENGTH_SHORT).show();
+            }
+            if (intent.getAction().equalsIgnoreCase(GET_LOCATION_ACTION)) {
+	            checkInOut(intent.getStringExtra(ContextClient.CHECK_IN_URL));
             }
         	if (intent.getAction().equalsIgnoreCase(CHECK_IN_OUT)) {
                 String[] response = intent.getStringArrayExtra(RestTask.HTTP_RESPONSE);
@@ -1161,6 +1218,11 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
 		}
 
         @JavascriptInterface
+        public String getScope() {
+            return SCOPE;
+        }
+
+        @JavascriptInterface
         public boolean isSocietiesUser() {
             Log.i("isSocietiesUser()", "isSocietiesUser: " + isSocietiesUser);
             return isSocietiesUser;
@@ -1343,17 +1405,19 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
         }
         
         public void onPageFinished(WebView view, String url) {
+
             if (firstTimeOnMenuPage) {
-                updateProgressBar();
+	            progressDialog.dismiss();
             }
         	if (url.contains("enter") || url.contains("leave")) {
         		webView.goBack();
         	}
-            if (url.equalsIgnoreCase(APPLICATION_URL+"/menu")) {
+            if (url.equalsIgnoreCase(HOME_URL)) {
                 if (firstTimeOnMenuPage) {
 	                if ("".equalsIgnoreCase(getRegistrationId(getApplicationContext()))) {
 		                registerInBackground();
 	                }
+	                cookies = CookieManager.getInstance().getCookie(url);
 	                firstTimeOnMenuPage = false;
                 }
             }
@@ -1361,8 +1425,8 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
     }
 
     @Override
-    protected void onStop() {
-	    locationTimer.cancel();
+    protected void onDestroy() {
+//	    locationTimer.cancel();
 
 	    super.onStop();
         if (isSocietiesUser) {

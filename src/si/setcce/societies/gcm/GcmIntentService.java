@@ -102,7 +102,7 @@ public class GcmIntentService extends IntentService {
                         .setSmallIcon(R.drawable.ic_notification)
                         .setContentTitle("SCT Notification")
                         .setStyle(new NotificationCompat.BigTextStyle()
-                                .bigText(msg+" DownloadUrl="+url))
+                                .bigText(msg))
                         .setContentText(msg)
                         .setAutoCancel(true);
 

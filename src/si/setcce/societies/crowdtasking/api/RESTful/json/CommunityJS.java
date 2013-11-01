@@ -18,8 +18,9 @@ import java.util.List;
 public class CommunityJS {
     public Long id;
     public String jid;
-    private String name = "";
-    private String description = "";
+    public String ownerJid;
+    public String name = "";
+    public String description = "";
     private List<CollaborativeSpaceJS> spaces;
 //    private List<UserJS> members;
 //    private List<UserJS> requests;
@@ -45,6 +46,7 @@ public class CommunityJS {
     public CommunityJS(Community community, SocietiesUser societiesUser) {
         setBasicParameters(community);
         owner = community.getOwnerJid().equalsIgnoreCase(societiesUser.getUserId());
+	    ownerJid = community.getOwnerJid();
 /*
         if (community.getMembers() != null) {
             members = new ArrayList<UserJS>();

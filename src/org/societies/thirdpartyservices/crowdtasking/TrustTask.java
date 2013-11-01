@@ -30,8 +30,7 @@ import android.os.AsyncTask;
 import android.util.Log;
 import android.webkit.CookieManager;
 
-public class TrustTask extends
-		AsyncTask<String, Void, Set<TrustRelationshipBean>> {
+public class TrustTask extends AsyncTask<String, Void, Set<TrustRelationshipBean>> {
 	private static String TRUST_API_URL;
 	private static final String TRUST_RELATIONSHIP_POST = "si.setcce.societies.android.rest.TRUST";
 	private Context context;
@@ -116,7 +115,7 @@ public class TrustTask extends
 					trustRelationshipsJSON.toString()));
 			eventRequest.setEntity(new UrlEncodedFormEntity(parameters));
 			RestTask task = new RestTask(context, TRUST_RELATIONSHIP_POST,
-					CookieManager.getInstance().getCookie(DOMAIN), DOMAIN);
+					MainActivity.cookies, DOMAIN);
 			task.execute(eventRequest);
 		} catch (URISyntaxException e) {
 			Log.e("CT4A", e.getMessage());

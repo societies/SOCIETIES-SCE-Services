@@ -35,6 +35,7 @@ import si.setcce.societies.android.rest.RestTask;
 public class ContextClient extends ServiceClientBase {
 	private final static String LOG_TAG = "ContextClient";
 	CtxAttributeBean locationBean;
+	public static final String CHECK_IN_URL = "URL";
 
 	public ContextClient(Context context) {
 		super(context);
@@ -69,7 +70,7 @@ public class ContextClient extends ServiceClientBase {
 	private class ClientReceiver extends BroadcastReceiver {
 		
 		@Override
-		public void onReceive(Context context, Intent intent) {
+		public void onReceive(Context contextX, Intent intent) {
 			Log.i(LOG_TAG, "Received action: " + intent.getAction());
 			if (intent.getAction().equals(ICtxClient.RETRIEVE_INDIVIDUAL_ENTITY_ID)) {
 				final String exceptionMessage = intent.getStringExtra(ICtxClient.INTENT_EXCEPTION_VALUE_KEY);
@@ -136,6 +137,16 @@ public class ContextClient extends ServiceClientBase {
                         oldLocation = location;
                     }
 */
+					// trenutno je checkin pri vsakem branju lokacije,
+					// dokler ne bo delal locatioon modified event
+					checkin(location);
+
+/*
+					Intent checkinIntent = new Intent(MainActivity.GET_LOCATION_ACTION);
+					checkinIntent.putExtra(CHECK_IN_URL, MainActivity.APPLICATION_URL+"/cs/"+location+"/enter");
+					context.sendBroadcast(checkinIntent);
+*/
+/*
                     if (!oldLocation.equalsIgnoreCase(location)) {
                         Toast.makeText(context, "Location: " + location, Toast.LENGTH_LONG).show();
                         ((CrowdTasking) context).symbolicLocation = location;
@@ -144,6 +155,7 @@ public class ContextClient extends ServiceClientBase {
                     } else {
 //                        Toast.makeText(context, "Location is still the same", Toast.LENGTH_LONG).show();
                     }
+*/
 //                    Intent newIntent = new Intent(MainActivity.SET_FOCUS);
 //                    context.sendBroadcast(newIntent);
                     //context.startActivity(newIntent);
@@ -157,11 +169,11 @@ public class ContextClient extends ServiceClientBase {
 		}
     }
 
-    private void checkin(Context context, String location) {
+    private void checkin(String location) {
         String DOMAIN = MainActivity.DOMAIN;
         String url = MainActivity.APPLICATION_URL+"/cs/"+location+"/enter";
         RestTask checkin = new RestTask(context, MainActivity.CHECK_IN_OUT, CookieManager.getInstance().getCookie(DOMAIN), DOMAIN);
-        try {
+	    try {
             checkin.execute(new HttpGet(new URI(url)));
         } catch (URISyntaxException e) {
             e.printStackTrace();

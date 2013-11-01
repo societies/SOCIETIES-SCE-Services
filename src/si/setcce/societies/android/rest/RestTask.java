@@ -111,16 +111,11 @@ public class RestTask extends AsyncTask<HttpUriRequest, Void, String[]> {
 
 	@Override
 	protected void onPostExecute(String[] result) {
+		if ("".equalsIgnoreCase(action)) {
+			return;
+		}
 		Intent intent = new Intent(action);
 		intent.putExtra(HTTP_RESPONSE, result);
-//		intent.putExtra(HTTP_RESPONSE, result[1]);
-        if (action.equalsIgnoreCase("si.setcce.societies.android.rest.LOGIN_USER")) {
-            for (Cookie kuki:cookieStore.getCookies()) {
-                if (kuki.getDomain().equalsIgnoreCase(domain)) {
-                    intent.putExtra("cookie", kuki.toString());
-                }
-            }
-        }
 		context.sendBroadcast(intent);
 	}
 
