@@ -90,24 +90,31 @@ public class CSController extends HttpServlet {
                         notMemeber(response);
                         return;
                     }
-                    System.out.println("CollaborativeSpace:" + space.getName());
+                    log.info("User:" + user.getUserName());
+                    log.info("CollaborativeSpace:" + space.getName());
                     Long spaceId = space.getId();
-                    Query<Community> communities = CommunityDAO.findCommunities(space, user);
-                    if (communities == null || communities.count() == 0) {
-                        return;
-                    }
-                    boolean member = false;
-                    for (Community community : communities) {
-                        if (isMemeber(user, community)) {
-                            member = true;
+
+                    Query<Community> communities;
+                    if (user.getSocietiesEntityId() != null) {
+                        communities = CommunityDAO.findCommunities(spaceId);
+                    } else {
+                        communities = CommunityDAO.findCommunities(space, user);
+                        if (communities == null || communities.count() == 0) {
+                            return;
                         }
-                        System.out.println("community:" + community.getName());
-                        System.out.println("community members:" + community.getMembers());
-                        System.out.println("community member:" + member);
-                    }
-                    if (!member) {
-                        notMemeber(response);
-                        return;
+                        boolean member = false;
+                        for (Community community : communities) {
+                            if (isMemeber(user, community)) {
+                                member = true;
+                            }
+                            log.info("community:" + community.getName());
+                            log.info("community members:" + community.getMembers());
+                            log.info("community member:" + member);
+                        }
+                        if (!member) {
+                            notMemeber(response);
+                            return;
+                        }
                     }
 
                     // todo just a temporary fix
@@ -121,13 +128,13 @@ public class CSController extends HttpServlet {
                         if ("enter".equalsIgnoreCase(path[2])) {    // .../sc/spaceUrl/enter
                             EventAPI.logEnterCollaborativeSpace(spaceId, new Date(), user, communitiesRefs);
                             response.getWriter().write("Check-in successful");
-                            System.out.println(user.getUserName() + " checked in to " + space.getName());
+                            log.info(user.getUserName() + " checked in to " + space.getName());
                             return;
                         }
                         if ("leave".equalsIgnoreCase(path[2])) {    // .../sc/spaceUrl/leave
                             EventAPI.logLeaveCollaborativeSpace(spaceId, new Date(), user, communitiesRefs);
                             response.getWriter().write("Check-out successful");
-                            System.out.println(user.getUserName() + " checked out from " + space.getName());
+                            log.info(user.getUserName() + " checked out from " + space.getName());
                             return;
                         }
                         if ("showTask".equalsIgnoreCase(path[2])) {    // .../sc/spaceUrl/showTask?id=x
@@ -141,7 +148,7 @@ public class CSController extends HttpServlet {
                     }
                     ChannelService channelService = ChannelServiceFactory.getChannelService();
                     String token = channelService.createChannel(spaceId.toString());
-                    System.out.println("Channel created with id: " + spaceId.toString());
+                    log.info("Channel created with id: " + spaceId.toString());
                     log.info("token created:" + token);
 
                     FileReader reader = new FileReader("WEB-INF/html/publicDisplay" + page + ".html");
@@ -164,6 +171,7 @@ public class CSController extends HttpServlet {
 	}
 
     private void notMemeber(HttpServletResponse response) throws IOException {
+        log.warning("You are not a member of this community!");
         response.setContentType("text/html");
         response.getWriter().write("You are not a member of this community!");
         return;

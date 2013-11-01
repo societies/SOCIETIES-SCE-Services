@@ -55,6 +55,16 @@ var Community = function() {
         }
     };
 
+    var getScope = function() {
+        if (typeof(android) !== "undefined") {
+            return window.android.getScope();
+        }
+        if (isTestHost()) {
+            console.log("on "+TEST_HOST);
+            return "HWU";
+        }
+        return null;
+    }
 
     var isSocietiesUser = function() {
         if (typeof(android) !== "undefined") {
@@ -202,9 +212,11 @@ var Community = function() {
     };
 
     var getSpaces = function(completeFn, communitySpaces) {
+        var scope = getScope();
         $.ajax({
             type: "GET",
             url: "/rest/space",
+            data: { 'scope': scope },
             error: function(error) {
         	    toast(error.responseText);
             },
@@ -289,14 +301,14 @@ var Community = function() {
 
     	var spaces = "";
     	if (community.spaces !== undefined && community.spaces != null && community.spaces.length > 0) {
-    		spaces = community.spaces[0].name;
-            // SCT-32 Remove link from CS
-    		// spaces = community.owner ? getCSEditLink(community.spaces[0], 0) : community.spaces[0].name;
+//    		spaces = community.spaces[0].name;
+            // SCT-32 Remove link from CS, leave for admin
+    		spaces = community.canAddCS ? getCSEditLink(community.spaces[0], 0) : community.spaces[0].name;
     		for (var i=1; i<community.spaces.length; i++) {
-    			spaces += ", " + community.spaces[i].name;
+//    			spaces += ", " + community.spaces[i].name;
                 // SCT-32 Remove link from CS
-//    			spaces += ", ";
-//    			spaces += community.owner ? getCSEditLink(community.spaces[i], i) : community.spaces[i].name;
+                spaces += ", ";
+    			spaces += community.canAddCS ? getCSEditLink(community.spaces[i], i) : community.spaces[i].name;
     		}
     	}
     	$('#csNames').html(spaces);

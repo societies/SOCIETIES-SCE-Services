@@ -44,6 +44,8 @@ import javax.servlet.http.HttpSession;
 import si.stecce.societies.crowdtasking.api.RESTful.impl.UsersAPI;
 import si.stecce.societies.crowdtasking.model.AuthenticatedUser;
 import si.stecce.societies.crowdtasking.model.CTUser;
+import si.stecce.societies.crowdtasking.model.Channel;
+import si.stecce.societies.crowdtasking.model.dao.ChannelDAO;
 
 /**
  * Describe your class here...
@@ -78,7 +80,9 @@ public class SessionFilter implements Filter {
 			url+="?"+parameters;
 		}
 		if (!url.startsWith("/_ah") && 
+				!url.equalsIgnoreCase("/loginSocietiesUser.html") &&
 				!url.equalsIgnoreCase("/admin") &&
+				!url.equalsIgnoreCase("/publicDisplay") &&
                 // special case for collaborative sign
 				!url.startsWith("/rest/meeting/communitysign") &&
 				!url.equalsIgnoreCase("/rest/noaccess") &&
@@ -89,42 +93,53 @@ public class SessionFilter implements Filter {
 				!url.startsWith("/apk") &&
 				!url.startsWith("/send") &&
 				!urlList.contains(url)) { // restricted access
-			
-			// logged in?
-			if (session.getAttribute("loggedIn") == null) {
-                log.info("url:"+url);
+
+            if (url.startsWith("/publicDisplay")) {
+                if (request.getParameter("id") != null) {
+                    log.info("public display channel id:" + request.getParameter("id"));
+                    Channel channel = ChannelDAO.load(new Long(request.getParameter("id")));
+                    if (channel != null) {
+                        CTUser user = UsersAPI.getUserById(channel.getUserId());
+                        if (user != null) {
+                            session.setAttribute("loggedIn", "true");
+                            session.setAttribute("CTUserId", user.getId());
+                        }
+                    }
+                }
+            }
+            // logged in?
+            if (session.getAttribute("loggedIn") == null) {
+                log.info("url:" + url);
                 log.info("loggedIn attribute is not yet set");
-				AuthenticatedUser authenticatedUser = UsersAPI.getAuthenticatedUser(session);
-				if (authenticatedUser != null) {
-					session.setAttribute("loggedIn", "true");
-					session.setAttribute("authenticatedUser", authenticatedUser);
-					CTUser user = UsersAPI.getUserByFederatedId(authenticatedUser);
-					if (user != null) {
-						user.setLastLogin(new Date());
-						if (user.getId() != null) {
-							session.setAttribute("CTUserId", user.getId());
-						}
-						UsersAPI.saveUser(user);
-					}
-				}
-				else {
+                AuthenticatedUser authenticatedUser = UsersAPI.getAuthenticatedUser(session);
+                if (authenticatedUser != null) {
+                    session.setAttribute("loggedIn", "true");
+                    session.setAttribute("authenticatedUser", authenticatedUser);
+                    CTUser user = UsersAPI.getUserByFederatedId(authenticatedUser);
+                    if (user != null) {
+                        user.setLastLogin(new Date());
+                        if (user.getId() != null) {
+                            session.setAttribute("CTUserId", user.getId());
+                        }
+                        UsersAPI.saveUser(user);
+                    }
+                } else {
                     log.info("user is not authenticated");
-					if (!url.startsWith("/rest")) {
-						response.sendRedirect(loginUrl+"?continue="+url);
-					}
-					else {
-						response.sendRedirect("/rest/noaccess");
-					}
-					return;
-				}
-			}
-			// registered?
-			if (session.getAttribute("CTUserId") == null && !registerUrl.equalsIgnoreCase(url) && !url.startsWith("/rest/user")) {
-				response.sendRedirect(registerUrl);
-				return;
-			}
-		}
-		if (url.equalsIgnoreCase("/apk")) {
+                    if (!url.startsWith("/rest")) {
+                        response.sendRedirect(loginUrl + "?continue=" + url);
+                    } else {
+                        response.sendRedirect("/rest/noaccess");
+                    }
+                    return;
+                }
+            }
+            // registered?
+            if (session.getAttribute("CTUserId") == null && !registerUrl.equalsIgnoreCase(url) && !url.startsWith("/rest/user")) {
+                response.sendRedirect(registerUrl);
+                return;
+            }
+        }
+        if (url.equalsIgnoreCase("/apk")) {
 			response.sendRedirect("/apk/index.html");
 			return;
 		}

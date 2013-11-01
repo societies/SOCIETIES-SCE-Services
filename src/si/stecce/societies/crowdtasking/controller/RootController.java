@@ -69,11 +69,12 @@ public class RootController extends HttpServlet {
 	    		template = template.substring(1);
 	    	}
 	    }
-	    template = Util.readFile(template);
-	    if (template == null) {
-	    	response.sendRedirect("/menu");
-	    	return;
-	    }
+        System.out.println("template:"+template);
+        template = Util.readFile(template);
+        if (template == null) {
+            response.sendRedirect("/menu");
+            return;
+        }
 	    response.setContentType("text/html");
 	    response.getWriter().write(template);
 	}

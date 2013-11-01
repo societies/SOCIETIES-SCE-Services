@@ -22,7 +22,7 @@ var remoteControl = function(channel, params, callback) {
 			toast(error.responseText);
 		},
 		success: function(result) {
-			toast(result);
+			//toast(result);
 			if (callback !== undefined) {
 				callback();
 			}

@@ -505,6 +505,7 @@ var CrowdTaskingApp = function () {
 
     function fillCommunityComboBox() {
         var $taskCommunity;
+/*
         if (isSocietiesUser()) {
             $('#ctCommunities').hide();
             $taskCommunity = $('#taskCommunityJids');
@@ -514,13 +515,14 @@ var CrowdTaskingApp = function () {
             }
         }
         else {
+*/
             $('#societiesCommunities').hide();
             $taskCommunity = $('#taskCommunity');
             $taskCommunity.empty();
             for (var i = 0; i < communities.length; i++) {
                 $taskCommunity.append('<option value=' + communities[i].id + '>' + communities[i].name + '</option>');
             }
-        }
+//        }
         $taskCommunity.selectmenu('refresh');
     };
 
@@ -1104,13 +1106,19 @@ $(document).on('pageinit', '#viewTask', function (event, data) {
         unlike();
         postLike();
     });
-    $('#showOnPdButton').bind('tap', function (event, data) {
+    $('#showOnPdButton').bind('tap', function(event, data) {
         event.preventDefault();
-        showTaskOnPd();
+        showTaskOnPd(function() {
+            $('#showOnPdButton').hide();
+            $('#hideOnPdButton').show();
+        });
     });
-    $('#hideOnPdButton').bind('tap', function (event, data) {
+    $('#hideOnPdButton').bind('tap', function(event, data) {
         event.preventDefault();
-        hideTaskOnPd();
+        hideTaskOnPd(function() {
+            $('#hideOnPdButton').hide();
+            $('#showOnPdButton').show();
+        });
     });
     $('#newMeetingButton').bind('tap', function (event, data) {
         event.preventDefault();

@@ -81,11 +81,11 @@ public class TaskAPI implements ITaskAPI {
 	}
 	
 	private Response newTask(String title, String description,
-			List<Long> communities, String tagsString, CTUser user, List<String> communityJids) throws IOException, URISyntaxException {
+			List<Long> communities, String tagsString, CTUser user) throws IOException, URISyntaxException {
 
-		DateFormat formatter = new SimpleDateFormat("dd.MM.yyyy");
+//		DateFormat formatter = new SimpleDateFormat("dd.MM.yyyy");
 
-        System.out.println("communityJids:"+communityJids);
+//        System.out.println("communityJids:"+communityJids);
 		Gson gson = new Gson();
 		String[] tags;
         try {
@@ -104,7 +104,8 @@ public class TaskAPI implements ITaskAPI {
 			tag.setTagFrequency(tag.getTagFrequency()+1);
 		}
 		
-	    Task task = new Task(title, description, user.getId(), user.getFirstName()+" "+user.getLastName(), communities, Arrays.asList(tags), communityJids);
+	    Task task = new Task(title, description, user.getId(), user.getUserName(), communities, Arrays.asList(tags));
+        task.addInvolvedUser(user.getId());
 	    task.setScore(user.getKarma());
 	    TaskDao.save(task);
 		TagAPI.updateTags(tagList);
@@ -152,13 +153,13 @@ public class TaskAPI implements ITaskAPI {
             @FormParam("taskTags") String tagsString,
             @Context HttpServletRequest request)  throws IOException, URISyntaxException {
 			
-        System.out.println("Create a new task. taskCommunityJids:"+communityJids);
+//        System.out.println("Create a new task. taskCommunityJids:"+communityJids);
 		CTUser user = UsersAPI.getLoggedInUser(request.getSession());
 		if ("create".equalsIgnoreCase(action)) {
 			if (title == null || "".equalsIgnoreCase(title)) {
 				return Response.status(Status.NOT_ACCEPTABLE).entity("Title is required.").type("text/plain").build();
 			}
-			return newTask(title, description, communities, tagsString, user, communityJids);
+			return newTask(title, description, communities, tagsString, user);
 		}
 		if ("finalize".equalsIgnoreCase(action)) {
 			return finalizeTask(taskId, user);

@@ -167,13 +167,13 @@ public final class NotificationsSender {
             if (user.getGcmRegistrationId() != null) {
                 partialDevices.add(user.getGcmRegistrationId());
                 if (partialDevices.size() == Datastore.MULTICAST_SIZE) {
-                    sendGCMMessage(partialDevices, message, null, null);
+                    sendGCMMessage(partialDevices, message, "", "");
                     partialDevices.clear();
                 }
             }
         }
         if (!partialDevices.isEmpty()) {
-            sendGCMMessage(partialDevices, message, null, null);
+            sendGCMMessage(partialDevices, message, "", "");
         }
     }
 

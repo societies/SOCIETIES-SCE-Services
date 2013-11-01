@@ -79,18 +79,22 @@ public class SpaceAPI implements ISpaceAPI {
 	@Produces({MediaType.APPLICATION_JSON })
 	public String getSpace(@DefaultValue("0") @QueryParam("id") Long id,
                            @DefaultValue("0") @QueryParam("userId") Long userId,
+                           @QueryParam("scope") String scope,
                            @Context HttpServletRequest request) {
-		Gson gson = new Gson();
-		if (id != 0) {
-			return gson.toJson(getCollaborativeSpace(id));
-		}
-		if (userId != 0) {
-			return gson.toJson(CollaborativeSpaceDAO.getCollaborativeSpaces4User(UsersAPI.getLoggedInUser(request.getSession())));
-		}
-		return gson.toJson(getCollaborativeSpaces());
-	}
-	
-	public static CollaborativeSpace getCollaborativeSpace(Long id) {
+        if ("".equalsIgnoreCase(scope)) {
+            scope = null;
+        }
+        Gson gson = new Gson();
+        if (id != 0) {
+            return gson.toJson(getCollaborativeSpace(id));
+        }
+        if (userId != 0) {
+            return gson.toJson(CollaborativeSpaceDAO.getCollaborativeSpaces4User(UsersAPI.getLoggedInUser(request.getSession())));
+        }
+        return gson.toJson(getCollaborativeSpaces(scope));
+    }
+
+    public static CollaborativeSpace getCollaborativeSpace(Long id) {
 		CollaborativeSpace collaborativeSpace = null;
 		try {
 			collaborativeSpace = ofy().load().type(CollaborativeSpace.class).id(id).get();
@@ -102,12 +106,17 @@ public class SpaceAPI implements ISpaceAPI {
 		return ofy().load().ref(collaborativeSpaceRef).get();
 	}
 
-	public static CollaborativeSpace getCollaborativeSpace(String urlMapping) {
-		return ofy().load().type(CollaborativeSpace.class).filter("urlMapping", urlMapping).first().get();
+	public static CollaborativeSpace getCollaborativeSpace(String symbolicLocation) {
+		return ofy().load().type(CollaborativeSpace.class).filter("symbolicLocation", symbolicLocation).first().get();
 	}
 
-	public static List<CollaborativeSpace> getCollaborativeSpaces() {
-		Query<CollaborativeSpace> q = ofy().load().type(CollaborativeSpace.class);
+	public static List<CollaborativeSpace> getCollaborativeSpaces(String scope) {
+		Query<CollaborativeSpace> q;
+        if (scope == null) {
+            q = ofy().load().type(CollaborativeSpace.class);
+        } else {
+            q = ofy().load().type(CollaborativeSpace.class).filter("scope", scope);
+        }
 		ArrayList<CollaborativeSpace> list = new ArrayList<CollaborativeSpace>();
 		for (CollaborativeSpace collaborativeSpace: q) {
 			list.add(collaborativeSpace);
@@ -130,6 +139,7 @@ public class SpaceAPI implements ISpaceAPI {
 	public Response newSpace(@FormParam("communityId") Long communityId,
                              @FormParam("spaceId") Long spaceId,
                              @FormParam("spaceName") String name,
+                             @FormParam("scope") String scope,
                              @FormParam("symbolicLocation") String symbolicLocation,
                              @Context HttpServletRequest request) throws IOException, URISyntaxException {
 		
@@ -137,12 +147,15 @@ public class SpaceAPI implements ISpaceAPI {
 		if ("".equals(name)) {
 			return Response.status(Status.BAD_REQUEST).entity("Name is required.").type("text/plain").build();
 		}
+        if ("".equalsIgnoreCase(scope)) {
+            scope = null;
+        }
         CTUser user = UsersAPI.getLoggedInUser(request.getSession());
 		if (spaceId.longValue() == 0L) {
 			if (ofy().load().type(CollaborativeSpace.class).filter("name", name).count() != 0){
 				return Response.status(Status.BAD_REQUEST).entity("Collaborative space "+name+" already exist.").type("text/plain").build();
 			}
-            CollaborativeSpace collaborativeSpace = new CollaborativeSpace(name, symbolicLocation, user.getScope());
+            CollaborativeSpace collaborativeSpace = new CollaborativeSpace(name, symbolicLocation, scope);
             CollaborativeSpaceDAO.save(collaborativeSpace);
 		}
 		else {
@@ -154,6 +167,7 @@ public class SpaceAPI implements ISpaceAPI {
             }
             space.setName(name);
 			space.setSymbolicLocation(symbolicLocation);
+			space.setScope(scope);
             CollaborativeSpaceDAO.save(space);
 		}
 		

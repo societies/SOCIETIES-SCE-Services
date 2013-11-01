@@ -34,5 +34,7 @@ public interface IUsersAPI {
                      @FormParam("picUrl") String picUrl,
                      @FormParam("timeout") long timeout,
                      @FormParam("trustRelationships") String trustRelationshipsJSON,
+                     @FormParam("symbolicLocation") String symbolicLocation,
+                     @FormParam("userId") String userId,
                      @Context HttpServletRequest request);
 }

@@ -25,11 +25,7 @@ import javax.ws.rs.core.Response.Status;
 
 import si.stecce.societies.crowdtasking.api.RESTful.IUsersAPI;
 import si.stecce.societies.crowdtasking.api.RESTful.json.UserJS;
-import si.stecce.societies.crowdtasking.model.ApplicationSettings;
-import si.stecce.societies.crowdtasking.model.AuthenticatedUser;
-import si.stecce.societies.crowdtasking.model.AuthenticationPrvider;
-import si.stecce.societies.crowdtasking.model.CTUser;
-import si.stecce.societies.crowdtasking.model.NotificationSettings;
+import si.stecce.societies.crowdtasking.model.*;
 
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
@@ -86,8 +82,8 @@ public class UsersAPI implements IUsersAPI {
     	Long userId = (Long)session.getAttribute("CTUserId");
 		if (userId != null) {
 /*
-            CTUser user = getUserById(userId);
-            if (user.getId().longValue() == 5629499534213120L) {
+            if (userId.longValue() == 4785074604081152L) {
+                CTUser user = getUserById(userId);
                 user.setAdmin(true);
                 UsersAPI.saveUser(user);
             }
@@ -176,9 +172,23 @@ public class UsersAPI implements IUsersAPI {
                             @FormParam("picUrl") String picUrl,
                             @FormParam("timeout") long timeout,
                             @FormParam("trustRelationships") String trustRelationshipsJSON,
+                            @FormParam("symbolicLocation") String symbolicLocation,
+                            @FormParam("userId") String userId,
                             @Context HttpServletRequest request) {
+
 		CTUser user = getLoggedInUser(request.getSession());
 		if (user == null) {
+/*
+            if ("checkin".equalsIgnoreCase(querytype)) {
+                user = UsersAPI.getUserById(new Long(userId));
+                CollaborativeSpace space = SpaceAPI.getCollaborativeSpace(symbolicLocation);
+                Query<Community> communities = CommunityDAO.findCommunities(space, user);
+                if (communities == null || communities.count() == 0) {
+                    return null;
+                }
+
+            }
+*/
 			/*AuthenticatedUser authenticatedUser = getAuthenticatedUser();
 			if (authenticatedUser == null) {*/
 				return Response.status(Status.UNAUTHORIZED).entity("Not authorized.").type("text/plain").build();	

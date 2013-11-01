@@ -64,12 +64,13 @@ public class Community {
 	public Community() {
 	}
 
-    public Community(String jid, String name, String description, List<Long> csIds, String ownerJid) {
+    public Community(String jid, String name, String description, List<Long> csIds, String ownerJid, Long userId) {
         this.jid = jid;
         this.name = name;
         this.description = description;
         setCollaborativeSpaces(csIds);
         this.ownerJid = ownerJid;
+        addMember(userId);
     }
 
     public Community(String name, String description, CTUser owner, List<Long> csIds, List<Long> members) {

@@ -43,7 +43,7 @@ public class Task {
 		return id;
 	}
 
-	public Task(String title, String description, Long ownerId, String postedBy, List<Long> communityIds, List<String> tagList, List<String> communityJids) {
+	public Task(String title, String description, Long ownerId, String postedBy, List<Long> communityIds, List<String> tagList) {
 		super();
 		this.id = null;
 		this.title = title;

@@ -27,6 +27,7 @@ package si.stecce.societies.crowdtasking.api.RESTful.impl;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.DefaultValue;
@@ -59,68 +60,73 @@ import si.stecce.societies.crowdtasking.model.dao.CommunityDAO;
  * Remote control public display
  *
  * @author Simon Jureša
- *
  */
 @Path("/remote/{querytype}")
 public class RemoteControlAPI implements IRemoteControlAPI {
-    final static String notCheckedInMessage = "You have to be in the proper collaborative space.";
+    private static final String notCheckedInMessage = "You have to be in the proper collaborative space.";
+    private static final Logger log = Logger.getLogger(RemoteControlAPI.class.getName());
 
-	@Override
+    @Override
     @GET
-	@Produces({MediaType.TEXT_PLAIN })
-	public Response get(@PathParam("querytype") String querytype,
+    @Produces({MediaType.TEXT_PLAIN})
+    public Response get(@PathParam("querytype") String querytype,
                         @DefaultValue("") @QueryParam("page") String page,
                         @DefaultValue("") @QueryParam("taskId") String taskId,
                         @DefaultValue("") @QueryParam("channelId") String channelId,
                         @DefaultValue("") @QueryParam("communityId") String communityId,
-                        @Context HttpServletRequest request)
-	{
-		CTUser user = UsersAPI.getLoggedInUser(request.getSession());
-		if (user == null) {
-			return Response.status(Status.UNAUTHORIZED).entity("Not authorized.").type("text/plain").build();
-		}
+                        @Context HttpServletRequest request) {
+        CTUser user = UsersAPI.getLoggedInUser(request.getSession());
+        if (user == null) {
+            return Response.status(Status.UNAUTHORIZED).entity("Not authorized.").type("text/plain").build();
+        }
 
-        String message=null;
+        log.info("querytype: "+querytype);
+
+        log.info("channelId: "+channelId);
+        log.info("communityId: "+communityId);
+        log.info("user: "+user.getUserName());
+        log.info("checkin date: "+user.getCheckIn());
+        log.info("checkin space id: "+user.getSpaceId());
+        String message = null;
         Long spaceId = user.getSpaceId();
-		Date checkedInDate = user.getCheckIn();
-		if (spaceId == null || checkedInDate == null) {
-			return Response.status(Status.UNAUTHORIZED).entity(notCheckedInMessage).type("text/plain").build();
-		}
-		Date now = new Date();
-		long timeOut = UsersAPI.getApplicationSettings().getChekInTimeOut();
-		// automatic check-out after set period
-		Date toLate = new Date(checkedInDate.getTime()+timeOut);
-		if (now.after(toLate)) {
-			return Response.status(Status.UNAUTHORIZED).entity(notCheckedInMessage).type("text/plain").build();
-		}
+        Date checkedInDate = user.getCheckIn();
+        if (spaceId == null || checkedInDate == null) {
+            return Response.status(Status.UNAUTHORIZED).entity(notCheckedInMessage).type("text/plain").build();
+        }
+        Date now = new Date();
+        long timeOut = UsersAPI.getApplicationSettings().getChekInTimeOut();
+        log.info("timeout:"+timeOut);
+        // automatic check-out after set period
+        Date toLate = new Date(checkedInDate.getTime() + timeOut);
+        if (now.after(toLate)) {
+            return Response.status(Status.GONE).entity("Last known location too old.").type("text/plain").build();
+        }
 
         if ("takeControl".equalsIgnoreCase(querytype)) {
             if (!"".equalsIgnoreCase(channelId) && !"".equalsIgnoreCase(communityId)) {
                 // TODO preveri comunityID ga shrani in pošlji PDju naj se reloada
                 Channel channel = new Channel(new Long(channelId), user.getId(), new Long(communityId), user.getSpaceId(), new Date());
                 ChannelDAO.save(channel);
-                sendMessage(channelId, "takeControl:"+channelId);
+                sendMessage(channelId, "takeControl:" + channelId);
                 message = "You took control of the public display.";
-                return Response.ok().entity("You took control of the public display.").build();
+                return Response.ok().entity(message).build();
             }
 
             Query<Community> comms = CommunityDAO.findCommunities(spaceId, user);
             String tc = "";
             if (comms.count() == 0) {
                 message = "You are not a member of any community with this collaborative space.";
-            }
-            else if (comms.count() == 1) {
+            } else if (comms.count() == 1) {
                 Community comm = comms.first().get();
                 tc = comms.first().get().getName();
-                Channel channel = new Channel(new Long(channelId), user.getId(), new Long(communityId), user.getSpaceId(), new Date());
+                Channel channel = new Channel(new Long(channelId), user.getId(), comm.getId(), user.getSpaceId(), new Date());
                 ChannelDAO.save(channel);
-                sendMessage(channelId, "takeControl:"+channelId);
+                sendMessage(channelId, "takeControl:" + channelId);
                 message = "You took control of the public display.";
-            }
-            else if (comms.count() > 1) {
+            } else if (comms.count() > 1) {
                 Community comm = comms.first().get();
                 ArrayList<Community> communities = new ArrayList<>();
-                for (Community community:comms) {
+                for (Community community : comms) {
                     communities.add(community);
                 }
                 ArrayList response = new ArrayList();
@@ -134,25 +140,25 @@ public class RemoteControlAPI implements IRemoteControlAPI {
         }
 
         if ("changeChannel".equalsIgnoreCase(querytype)) {
-    		message = "changeTo:/cs/"+SpaceAPI.getCollaborativeSpace(user.getSpaceId()).getUrlMapping()+"?p="+page;
-		}
-		if ("showTask".equalsIgnoreCase(querytype)) {
-    		message = "showTask:"+taskId;
-    		EventAPI.logShowTaskOnPd(new Long(taskId), user);
-		}
-		if ("hideTask".equalsIgnoreCase(querytype)) {
-    		message = "hideTask";
-		}
-		sendMessage(spaceId, message);
-		return Response.ok().entity("Request sent.").build();
-	}	
+            message = "changeTo:/cs/" + SpaceAPI.getCollaborativeSpace(user.getSpaceId()).getUrlMapping() + "?p=" + page;
+        }
+        if ("showTask".equalsIgnoreCase(querytype)) {
+            message = "showTask:" + taskId;
+            EventAPI.logShowTaskOnPd(new Long(taskId), user);
+        }
+        if ("hideTask".equalsIgnoreCase(querytype)) {
+            message = "hideTask";
+        }
+        sendMessage(spaceId, message);
+        return Response.ok().entity("Request sent.").build();
+    }
 
-	private void sendMessage(Long spaceId, String message) {
+    private void sendMessage(Long spaceId, String message) {
         sendMessage(Long.toString(spaceId), message);
-	}
+    }
 
-	private void sendMessage(String channelId, String message) {
-		ChannelService channelService = ChannelServiceFactory.getChannelService();
-		channelService.sendMessage(new ChannelMessage(channelId, message));
-	}
+    private void sendMessage(String channelId, String message) {
+        ChannelService channelService = ChannelServiceFactory.getChannelService();
+        channelService.sendMessage(new ChannelMessage(channelId, message));
+    }
 }

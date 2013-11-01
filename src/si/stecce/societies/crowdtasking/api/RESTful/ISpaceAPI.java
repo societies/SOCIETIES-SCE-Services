@@ -17,6 +17,7 @@ public interface ISpaceAPI {
     @Produces({MediaType.APPLICATION_JSON })
     String getSpace(@DefaultValue("0") @QueryParam("id") Long id,
                     @DefaultValue("0") @QueryParam("userId") Long userId,
+                    @QueryParam("scope") String scope,
                     @Context HttpServletRequest request);
 
     @POST
@@ -24,6 +25,7 @@ public interface ISpaceAPI {
     Response newSpace(@FormParam("communityId") Long communityId,
                       @FormParam("spaceId") Long spaceId,
                       @FormParam("spaceName") String name,
+                      @FormParam("scope") String scope,
                       @FormParam("symbolicLocation") String symbolicLocation,
                       @Context HttpServletRequest request) throws IOException, URISyntaxException;
 }

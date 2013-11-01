@@ -137,7 +137,7 @@ public class CommunityAPI implements ICommunityAPI {
                 }
                 createOrUpdateCommunity(communityId, name, description, csIds, members, user);
             } else {
-                community = createOrUpdateCIS(communityJid, name, description, csIds, ownerJid);
+                community = createOrUpdateCIS(communityJid, name, description, csIds, ownerJid, user.getId());
                 Gson gson = new Gson();
                 return Response.ok().entity(gson.toJson(new CommunityJS(community, user))).build();
             }
@@ -193,10 +193,10 @@ public class CommunityAPI implements ICommunityAPI {
         }
 	}
 
-	private Community createOrUpdateCIS(String communityJid, String name, String description, List<Long> csIds, String ownerJid) {
+	private Community createOrUpdateCIS(String communityJid, String name, String description, List<Long> csIds, String ownerJid, Long userId) {
 		Community community = CommunityDAO.loadCommunity(communityJid);
 		if (community == null) {
-			community = new Community(communityJid, name, description, csIds, ownerJid);
+			community = new Community(communityJid, name, description, csIds, ownerJid, userId);
 		}
 		else {
 			community.setCollaborativeSpaces(csIds);

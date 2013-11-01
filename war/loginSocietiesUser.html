@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Welcome to Crowd tasking!</title>
+    <script src="/js/jquery-2.0.0.min.js" type="text/javascript" charset="utf-8"></script>
+</head>
+<body>
+<form data-ajax="false" action="/login?continue=/menu" id="loginForm" method="post">
+    <input type="hidden" name="federatedIdentity" id="federatedIdentity" value="SOCIETIES"/>
+    <input type="hidden" name="userId" id="userId" value="admin.societies.local"/>
+    <input type="hidden" name="name"  id="name"/>
+    <input type="hidden" name="foreName"  id="foreName"/>
+    <input type="hidden" name="email" id="email"/>
+    <input type="hidden" name="scope" id="scope"/>
+    <input type="hidden" name="continue" value="<%= suffix %>"/>
+</form>
+<script type='text/javascript'>
+    function loginSocietiesUser() {
+        var result = window.android.getSocietiesUser();
+        if (result) {
+            var user = JSON.parse(result);
+            $("#userId").val(user.userId);
+            if (user.name != "undefined") {
+                $("#name").val(user.name);
+            }
+            if (user.foreName != "undefined") {
+                $("#foreName").val(user.foreName);
+            }
+            if (user.email != "undefined") {
+                $("#email").val(user.email);
+            }
+            if (user.scope != "undefined") {
+                $("#scope").val(user.scope);
+            }
+            $('#loginForm').submit();
+        }
+        else {
+            toast("Error connecting to Societies Android Client. Are you sure that SOCIETIES Android client app is installed?");
+        }
+    }
+
+    $(document).ready(function() {
+        if (typeof(android) !== "undefined") {
+            if (window.android.isSocietiesUser()) {
+                loginSocietiesUser();
+            }
+        }
+        else {
+            console.log("android is undefined");
+        }
+    });
+</script>
+</body>
