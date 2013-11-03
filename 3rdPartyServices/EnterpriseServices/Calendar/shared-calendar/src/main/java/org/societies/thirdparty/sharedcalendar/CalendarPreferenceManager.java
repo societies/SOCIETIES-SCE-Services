@@ -299,7 +299,7 @@ public class CalendarPreferenceManager implements IActionConsumer {
 			case SUB_CREATOR: 
 			case SUB_LOCATION:
 			case SUB_ATTENDEENUMBER: 
-				proactive = false; implementable = false; break;
+				proactive = false; implementable = true; break;
 			
 			case VIEW_CALENDAR: proactive = true; implementable = true; break;
 			case CALENDAR_VIEW: proactive = true; implementable = true; break;
@@ -318,7 +318,7 @@ public class CalendarPreferenceManager implements IActionConsumer {
 				proactive = true; implementable = true; break;
 			case SEARCH_CREATOR:
 			case SEARCH_CALENDAR:
-				proactive = false; implementable = false; break;
+				proactive = false; implementable = true; break;
 			case CALENDAR_ACTION:
 					implementable = false; proactive = false;
 				break;
