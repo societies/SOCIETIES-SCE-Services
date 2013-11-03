@@ -111,7 +111,7 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
 	public static final String SET_FOCUS = "si.setcce.societies.android.activity.FOCUS";
 
     private static final String SCHEME ="http";
-    private static final String SCOPE ="HWU";
+    private static String SCOPE="HWU";
         public static final String DOMAIN = "crowdtasking.appspot.com";
     //    public static final String DOMAIN = "crowdtaskingtest.appspot.com";
 //    public static final String DOMAIN = "simonix";
@@ -390,6 +390,7 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
 
     @Override
 	public void onCreate(Bundle savedInstanceState) {
+	    setScope();
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_main);
@@ -421,6 +422,18 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
 //        loginUser();
         checkIntent(getIntent());
     }
+
+	private void setScope() {
+		SharedPreferences preferences  = getSharedPreferences("SOCIETIES", Context.MODE_PRIVATE);
+		if (SCOPE != null) {
+			SharedPreferences.Editor editor = preferences.edit();
+			editor.putString("SCOPE", SCOPE);
+			editor.commit();
+
+		} else {
+			SCOPE = preferences.getString("SCOPE", "");
+		}
+	}
 
 	private void setup() {
 		new AsyncTask<Void, Void, Boolean>() {
