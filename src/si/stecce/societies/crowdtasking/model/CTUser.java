@@ -342,8 +342,11 @@ public class CTUser {
                 name = getEmail();
             }
         }
-        return name;
-    }
+        if ("".equalsIgnoreCase(name) || name == null) {
+            name = connectedAccounts.get(0).getFederatedIdentity();
+        }
+            return name;
+        }
 
     public Date getCheckIn() {
         return checkIn;

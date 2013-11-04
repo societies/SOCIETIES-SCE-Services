@@ -30,5 +30,7 @@ public interface ICommunityAPI {
             @FormParam("spaces") List<Long> csIds,
             @FormParam("members") List<Long> members,
             @FormParam("memberId") Long memberId,
+            @FormParam("owner") String owner,
+            @FormParam("action") String action,
             @Context HttpServletRequest request);
 }

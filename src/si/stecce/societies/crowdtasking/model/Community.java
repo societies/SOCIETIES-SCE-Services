@@ -24,11 +24,9 @@
  */
 package si.stecce.societies.crowdtasking.model;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
+import si.stecce.societies.crowdtasking.api.RESTful.impl.UsersAPI;
 import si.stecce.societies.crowdtasking.model.dao.CollaborativeSpaceDAO;
 
 import com.googlecode.objectify.Key;
@@ -59,18 +57,20 @@ public class Community {
 //	private List<Ref<Community>> subCommunities;
 	@Load @Index private Set<Ref<CTUser>> members;
 	@Load @Index private Set<Ref<CTUser>> requests;
-    @Index @Load private List<Ref<Task>> taskRefs;  // todo: Mike's idea to have list of tasks here, finnish it or ...
+//    @Index @Load private List<Ref<Task>> taskRefs;  // todo: Mike's idea to have list of tasks here, finnish it or ...
+    Date created, modified;
 
 	public Community() {
 	}
 
-    public Community(String jid, String name, String description, List<Long> csIds, String ownerJid, Long userId) {
+    public Community(String jid, String name, String description, List<Long> csIds, String ownerJid, Long userId, CTUser owner) {
         this.jid = jid;
         this.name = name;
         this.description = description;
         setCollaborativeSpaces(csIds);
         this.ownerJid = ownerJid;
         addMember(userId);
+        created = new Date();
     }
 
     public Community(String name, String description, CTUser owner, List<Long> csIds, List<Long> members) {
@@ -78,10 +78,11 @@ public class Community {
 //        this.jid = jid;
 		this.name = name;
 		this.description = description;
-		this.ownerRef = Ref.create(Key.create(CTUser.class, owner.getId()));
+        setOwnerRef(owner.getId());
         setCollaborativeSpaces(csIds);
 		addMember(owner);
         addMembers(members);
+        created = new Date();
 	}
 	
 	public void setCollaborativeSpaces(List<Long> csIds) {
@@ -109,6 +110,7 @@ public class Community {
 	}
 */
 
+/*
     public void addTask(Task task) {
         if (taskRefs == null) {
             taskRefs = new ArrayList<>();
@@ -126,6 +128,7 @@ public class Community {
         }
         return tasks;
     }
+*/
 
     public void addRequest(CTUser user) {
 		addRequest(user.getId());
@@ -260,7 +263,7 @@ public class Community {
 			return owner;
 		}
 		if (ownerRef != null) {
-			owner = ownerRef.get();
+			owner = UsersAPI.getUser(ownerRef);
 		}
 		return owner;
 	}
@@ -271,5 +274,33 @@ public class Community {
 
     public void setJid(String jid) {
         this.jid = jid;
+    }
+
+    public Date getCreated() {
+        return created;
+    }
+
+    public void setCreated(Date created) {
+        this.created = created;
+    }
+
+    public Date getModified() {
+        return modified;
+    }
+
+    public void setModified(Date modified) {
+        this.modified = modified;
+    }
+
+    public Ref<CTUser> getOwnerRef() {
+        return ownerRef;
+    }
+
+    public void setOwnerRef(Ref<CTUser> ownerRef) {
+        this.ownerRef = ownerRef;
+    }
+
+    public void setOwnerRef(Long userId) {
+        this.ownerRef = Ref.create(Key.create(CTUser.class, userId));
     }
 }

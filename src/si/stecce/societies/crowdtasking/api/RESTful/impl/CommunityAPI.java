@@ -40,10 +40,14 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
+import java.util.logging.Logger;
 
 @Path("/community/{querytype}")
 public class CommunityAPI implements ICommunityAPI {
+    private static final Logger log = Logger.getLogger(CommunityAPI.class.getName());
+
     @Override
     @GET
     @Produces({MediaType.APPLICATION_JSON})
@@ -108,6 +112,8 @@ public class CommunityAPI implements ICommunityAPI {
             @FormParam("spacesCombo") List<Long> csIds,
             @FormParam("members") List<Long> members,
             @FormParam("memberId") Long memberId,
+            @FormParam("owner") String isOwner,
+            @FormParam("action") String action,
             @Context HttpServletRequest request) {
         CTUser user = UsersAPI.getLoggedInUser(request.getSession());
         if (user == null) {
@@ -119,15 +125,26 @@ public class CommunityAPI implements ICommunityAPI {
 
         Community community;
         if ("create".equalsIgnoreCase(querytype)) {
-            System.out.println("ownerJid:" + ownerJid);
-            System.out.println("csIds:" + csIds);
             if ("".equalsIgnoreCase(communityJid)) {
                 if (name == null || "".equalsIgnoreCase(name)) {
                     return Response.status(Status.NOT_ACCEPTABLE).entity("Name is required.").type("text/plain").build();
                 }
                 createOrUpdateCommunity(communityId, name, description, csIds, members, user);
             } else {
-                community = createOrUpdateCIS(communityJid, name, description, csIds, ownerJid, user.getId());
+                CTUser owner = null;
+                if ("true".equalsIgnoreCase(isOwner)) {
+                    owner = user;
+                }
+                log.info("ownerJid:" + ownerJid);
+                log.info("csIds:" + csIds);
+                log.info("name:" + name);
+                log.info("description:" + description);
+                log.info("action:" + action);
+                log.info("user.getId():" + user.getId());
+                if (owner != null) {
+                    log.info("owner:" + owner.getUserName());
+                }
+                community = createOrUpdateCIS(communityJid, name, description, csIds, ownerJid, user.getId(), owner, action);
                 Gson gson = new Gson();
                 return Response.ok().entity(gson.toJson(new CommunityJS(community, user))).build();
             }
@@ -174,6 +191,7 @@ public class CommunityAPI implements ICommunityAPI {
             community.setName(name);
             community.setDescription(description);
             community.setCollaborativeSpaces(csIds);
+            community.setModified(new Date());
             //community.addMembers(members);
         }
         CommunityDAO.saveCommunity(community);
@@ -182,13 +200,19 @@ public class CommunityAPI implements ICommunityAPI {
         }
     }
 
-    private Community createOrUpdateCIS(String communityJid, String name, String description, List<Long> csIds, String ownerJid, Long userId) {
+    private Community createOrUpdateCIS(String communityJid, String name, String description, List<Long> csIds, String ownerJid, Long userId, CTUser owner, String action) {
         Community community = CommunityDAO.loadCommunity(communityJid);
         if (community == null) {
-            community = new Community(communityJid, name, description, csIds, ownerJid, userId);
+            community = new Community(communityJid, name, description, csIds, ownerJid, userId, owner);
         } else {
-            community.setCollaborativeSpaces(csIds);
+            if (!"synchronize".equalsIgnoreCase(action)) {
+                community.setCollaborativeSpaces(csIds);
+            }
             community.addMember(userId);
+            if (community.getOwner() == null && owner != null) {
+                community.setOwnerRef(owner.getId());
+            }
+            community.setModified(new Date());
         }
         CommunityDAO.saveCommunity(community);
         return community;

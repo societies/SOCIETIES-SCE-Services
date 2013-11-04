@@ -29,6 +29,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -38,10 +39,8 @@ import javax.servlet.http.HttpServletResponse;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.Ref;
 import com.googlecode.objectify.cmd.Query;
-import si.stecce.societies.crowdtasking.model.Community;
-import si.stecce.societies.crowdtasking.model.Event;
-import si.stecce.societies.crowdtasking.model.Task;
-import si.stecce.societies.crowdtasking.model.TaskStatus;
+import si.stecce.societies.crowdtasking.api.RESTful.impl.UsersAPI;
+import si.stecce.societies.crowdtasking.model.*;
 import si.stecce.societies.crowdtasking.model.dao.CommunityDAO;
 
 import static si.stecce.societies.crowdtasking.model.dao.OfyService.ofy;
@@ -61,8 +60,10 @@ public class Admin extends HttpServlet {
 			throws ServletException, IOException {
 		
 		long startTime = System.currentTimeMillis();
+        response.getWriter().write("<html><body>");
+
         String action = request.getParameter("action");
-        if (action == null) {
+        if ("admin".equalsIgnoreCase(action)) {
             response.sendRedirect("/admin.html");
             return;
         }
@@ -70,6 +71,55 @@ public class Admin extends HttpServlet {
             int count = ofy().load().type(Event.class).count();
             response.getWriter().write("count: " + count);
         }
+        if ("clean".equalsIgnoreCase(action)) {
+            List<Community> communities = ofy().load().type(Community.class).list();
+            for (Community community : communities) {
+                Set<Ref<CTUser>> membersRefs = community.getMembers();
+                if (membersRefs != null) {
+                    List<CTUser> removeUsers=new ArrayList();
+                    for (Ref<CTUser> userRef : membersRefs) {
+                        CTUser user= UsersAPI.getUser(userRef);
+                        if (!"".equalsIgnoreCase(user.getSocietiesEntityId())) {
+                            removeUsers.add(user);
+                        }
+                    }
+                    if (removeUsers.size() > 0) {
+                        for (CTUser user : removeUsers) {
+                            membersRefs.remove(Ref.create(Key.create(CTUser.class, user.getId())));
+                        }
+                        community.setMembers(membersRefs);
+                        community.setModified(new Date());
+                        CommunityDAO.saveCommunity(community);
+                    }
+                }
+            }
+        }
+        if ("loadCommunities4User".equalsIgnoreCase(action)) {
+            Long userId = new Long(request.getParameter("user"));
+            CTUser user = UsersAPI.getUserById(userId);
+            List<Community> communities = CommunityDAO.loadCommunities4User(user);
+            List<Ref<Community>> communityRefs = new ArrayList<>();
+            for (Community community:communities) {
+                communityRefs.add(Ref.create(Key.create(Community.class, community.getId())));
+            }
+            response.getWriter().write("communities: " + communities.size());
+            response.getWriter().write("<br>communityRefs: " + communityRefs.size());
+            communityRefs = new ArrayList<>();
+            for (Community community:communities) {
+                response.getWriter().write("<br>Community: " + community.getName());
+                if (community.getMembers().contains(Ref.create(Key.create(CTUser.class, user.getId())))) {
+                    communityRefs.add(Ref.create(Key.create(Community.class, community.getId())));
+                }
+                for (Ref<CTUser> userRef : community.getMembers()) {
+                    response.getWriter().write("<br>User: " + UsersAPI.getUser(userRef).getId());
+                    if (UsersAPI.getUser(userRef).getId().longValue() == user.getId().longValue()) {
+                        response.getWriter().write(" <-- naš user");
+                    }
+                }
+            }
+            response.getWriter().write("<br>communityRefs2: " + communityRefs.size());
+        }
+
 
         //System.out.println("kind: "+kind);
 		//JavaMail.sendJavaMail(SENDER, "simon.juresa@setcce.si", "hoj", "navaden text", "HTML text", getBody());
@@ -80,7 +130,9 @@ public class Admin extends HttpServlet {
         //convertTasks();
         //convertEvents();
 		long diff = System.currentTimeMillis() - startTime;
-		response.getWriter().write("\ntime: " + diff);
+		response.getWriter().write("<br><br>time: " + diff);
+        response.getWriter().write("<br><br><a href='/admin.html'>admin</a>");
+        response.getWriter().write("</body></html>");
 	}
 
     private void refreshCommunities() {

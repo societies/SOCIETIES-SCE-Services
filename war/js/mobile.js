@@ -27,7 +27,7 @@ var CrowdTaskingApp = function () {
     var mode = 'new';
     var currentUser = null;
     var communities = [];
-    var TEST_HOST = "localhost1";
+    var TEST_HOST = "localhost";
 
     var getTaskById = function (id) {
         $.ajax({
