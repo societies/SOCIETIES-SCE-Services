@@ -553,6 +553,7 @@ var CrowdTaskingApp = function () {
     }
 
     var getCommunities4User = function (successFn) {
+/*
         if (isSocietiesUser()) {
             communities = getAllCIS4User();
             if (successFn !== undefined) {
@@ -560,6 +561,7 @@ var CrowdTaskingApp = function () {
             }
         }
         else {
+*/
             $.ajax({
                 type: 'GET',
                 url: '/rest/community/4user',
@@ -572,7 +574,7 @@ var CrowdTaskingApp = function () {
 //                    fillCommunityComboBox(communities);
                 }
             });
-        }
+//        }
     };
 
     var setAddTaskButton = function () {
@@ -649,8 +651,8 @@ var CrowdTaskingApp = function () {
 
         saveTask: function () {
             var ctCommunities = $("#ctCommunities option:selected");
-            var societiesCommunities = $("#societiesCommunities option:selected");
-            if (ctCommunities.val() === undefined && societiesCommunities.val() === undefined) {
+//            var societiesCommunities = $("#societiesCommunities option:selected");
+            if (ctCommunities.val() === undefined) {
                 toast("At least one community has to be selected.");
                 $('#saveButton').show();
                 return true;

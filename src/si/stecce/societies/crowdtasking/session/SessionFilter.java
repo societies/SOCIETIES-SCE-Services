@@ -25,10 +25,7 @@
 package si.stecce.societies.crowdtasking.session;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.StringTokenizer;
+import java.util.*;
 import java.util.logging.Logger;
 
 import javax.servlet.Filter;
@@ -94,6 +91,20 @@ public class SessionFilter implements Filter {
 				!url.startsWith("/send") &&
 				!urlList.contains(url)) { // restricted access
 
+            if (url.startsWith("/rest/task")) {
+                Map params = request.getParameterMap();
+                Iterator i = params.keySet().iterator();
+
+                log.info("parametri za create task");
+                while ( i.hasNext() )
+                {
+                    String key = (String) i.next();
+                    String value = ((String[]) params.get( key ))[ 0 ];
+                    log.info(key+"="+value);
+                }
+            }
+
+
             if (url.startsWith("/publicDisplay")) {
                 if (request.getParameter("id") != null) {
                     log.info("public display channel id:" + request.getParameter("id"));
@@ -141,6 +152,10 @@ public class SessionFilter implements Filter {
         }
         if (url.equalsIgnoreCase("/apk")) {
 			response.sendRedirect("/apk/index.html");
+			return;
+		}
+        if (url.equalsIgnoreCase("/checkUser")) {
+			response.sendRedirect("/menu");
 			return;
 		}
         chain.doFilter(req, res);

@@ -29,6 +29,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
@@ -68,8 +69,9 @@ import com.googlecode.objectify.cmd.Query;
 @Path("/tasks/{querytype}")
 public class TasksAPI implements ITasksAPI {
 	private static final int HIGHEST_RATED_NUM = 5;
+    private static final Logger log = Logger.getLogger(TasksAPI.class.getName());
 
-	@Override
+    @Override
     @GET
 	@Produces({MediaType.APPLICATION_JSON})
 	public String getTasks(@PathParam("querytype") String querytype,
@@ -85,11 +87,13 @@ public class TasksAPI implements ITasksAPI {
 		if ("followed".equalsIgnoreCase(querytype)) {
 			return getFollowedTasks();
 		}
+/*
 		if ("interesting".equalsIgnoreCase(querytype)) {
 			return getInterestingTasks(user);
 		}
+*/
 		if ("inmycommunities".equalsIgnoreCase(querytype)) {
-			return getTasksInMyCommunities(user, communityJidsJson);
+			return getTasksInMyCommunities(user);
 		}
 		if ("search".equalsIgnoreCase(querytype)) {
 			return getSearchedTasks(searchString);
@@ -143,8 +147,9 @@ public class TasksAPI implements ITasksAPI {
 		return searchString;
 	}
 
-    private String getTasksInMyCommunities(CTUser user, String communityJidsJson) {
+    private String getTasksInMyCommunities(CTUser user) {
         List<Ref<Community>> communityRefs = new ArrayList<>();
+/*
         List<String> communityJids=null;
         if (!"".equalsIgnoreCase(communityJidsJson)) {
             Gson gson = new Gson();
@@ -158,12 +163,15 @@ public class TasksAPI implements ITasksAPI {
 //            return getTasksInSocietiesCommunities(user, communityRefs);
         }
         else {
-            List<Community> communities = CommunityDAO.loadCommunities4User(user);
-            for (Community community:communities) {
-                communityRefs.add(Ref.create(Key.create(Community.class, community.getId())));
-            }
-            return getTasksInCommunities(user, communityRefs);
+*/
+        log.info("Task in my communites for user: "+user.getUserName());
+        List<Community> communities = CommunityDAO.loadCommunities4User(user);
+        for (Community community:communities) {
+            communityRefs.add(Ref.create(Key.create(Community.class, community.getId())));
         }
+        log.info(communityRefs.size()+" communities");
+        return getTasksInCommunities(user, communityRefs);
+//        }
     }
 
     private String getTasksInCommunities(CTUser user, List<Ref<Community>> communityRefs) {
@@ -173,6 +181,7 @@ public class TasksAPI implements ITasksAPI {
         } else {
             tasks = TaskDao.getTasksInCommunities(communityRefs).list();
         }
+        log.info("got "+tasks.size()+" tasks");
         return tasksInJson(user, tasks);
     }
 
