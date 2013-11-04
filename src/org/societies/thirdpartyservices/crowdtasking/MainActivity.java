@@ -111,8 +111,8 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
 
     private static final String SCHEME ="http";
     private static String SCOPE="HWU";
-        public static final String DOMAIN = "crowdtasking.appspot.com";
-    //    public static final String DOMAIN = "crowdtaskingtest.appspot.com";
+    public static final String DOMAIN = "crowdtasking.appspot.com";
+//    public static final String DOMAIN = "crowdtaskingtest.appspot.com";
 //    public static final String DOMAIN = "simonix";
 //    public static final String DOMAIN = "192.168.1.71";
 //   	public static final String DOMAIN = "192.168.1.102";
@@ -122,6 +122,7 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
 //    private static final String PORT = ":8888";
     public static final String APPLICATION_URL = SCHEME +"://" + DOMAIN + PORT;
     private static final String HOME_URL = APPLICATION_URL + "/menu";
+    private static final String HOME_URL_AFTER_REGISTER = APPLICATION_URL + "/register#/menu";
     private static final String MEETING_URL = APPLICATION_URL + "/android/meeting/";
     private static final String C4CSS_API_URL = APPLICATION_URL + "/rest/community/4CSS";
     private static final String PD_TAKE_CONTROL = APPLICATION_URL + "/rest/remote/takeControl";
@@ -461,8 +462,6 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
 		getServiceId();
 		System.out.println("SERVICE_ID:" + SERVICE_ID);
 		societiesUser = getSocietiesUserData();
-		TrustTask task = new TrustTask(this, DOMAIN, APPLICATION_URL);
-		task.execute(societiesUser.getUserId());
 		communityManagementClient = new CommunityManagementClient(this, communityClientReceiver);
 		communityManagementClient.setUpService();
 //		checkLocation();
@@ -974,12 +973,12 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
                 if (response.equalsIgnoreCase("CommunityManagement")) {
 	                updateProgressBar("CommunityManagementClient started");
                     communityManagementClientConnected = true;
-                    communityManagementClient.listCommunities();
+//                    communityManagementClient.listCommunities();
                 }
                 if (response.equalsIgnoreCase("ContextClient")) {
 	                updateProgressBar("ContextClient started");
                     contextClientRunning = true;
-                    contextClient.getSymbolicLocation(societiesUser.getUserId());
+                    //contextClient.getSymbolicLocation(societiesUser.getUserId());
                 }
                 if (response.equalsIgnoreCase("CisDirectoryClient")) {
 	                updateProgressBar("CisDirectoryClient started");
@@ -1448,13 +1447,21 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
         	if (url.contains("enter") || url.contains("leave")) {
         		webView.goBack();
         	}
-            if (url.equalsIgnoreCase(HOME_URL)) {
+            if (url.equalsIgnoreCase(HOME_URL) || url.equalsIgnoreCase(HOME_URL_AFTER_REGISTER)) {
                 if (firstTimeOnMenuPage) {
-	                if ("".equalsIgnoreCase(getRegistrationId(getApplicationContext()))) {
-		                registerInBackground();
-	                }
-	                cookies = CookieManager.getInstance().getCookie(url);
-	                firstTimeOnMenuPage = false;
+                    if (contextClientRunning) {
+                        contextClient.getSymbolicLocation(societiesUser.getUserId());
+                    }
+                    if (communityManagementClientConnected) {
+                        communityManagementClient.listCommunities();
+                    }
+                    TrustTask task = new TrustTask(getApplicationContext(), DOMAIN, APPLICATION_URL);
+                    task.execute(societiesUser.getUserId());
+                    if ("".equalsIgnoreCase(getRegistrationId(getApplicationContext()))) {
+                        registerInBackground();
+                    }
+                    cookies = CookieManager.getInstance().getCookie(url);
+                    firstTimeOnMenuPage = false;
                 }
             }
        }
