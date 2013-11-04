@@ -24,37 +24,27 @@
  */
 package si.stecce.societies.crowdtasking.api.RESTful.impl;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.logging.Logger;
+import com.google.appengine.api.channel.ChannelMessage;
+import com.google.appengine.api.channel.ChannelService;
+import com.google.appengine.api.channel.ChannelServiceFactory;
+import com.google.gson.Gson;
+import com.googlecode.objectify.cmd.Query;
+import si.stecce.societies.crowdtasking.api.RESTful.IRemoteControlAPI;
+import si.stecce.societies.crowdtasking.model.CTUser;
+import si.stecce.societies.crowdtasking.model.Channel;
+import si.stecce.societies.crowdtasking.model.Community;
+import si.stecce.societies.crowdtasking.model.dao.ChannelDAO;
+import si.stecce.societies.crowdtasking.model.dao.CommunityDAO;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
-
-import com.google.gson.Gson;
-import com.googlecode.objectify.cmd.Query;
-import si.stecce.societies.crowdtasking.api.RESTful.IRemoteControlAPI;
-import si.stecce.societies.crowdtasking.api.RESTful.json.CommunityJS;
-import si.stecce.societies.crowdtasking.model.CTUser;
-
-import com.google.appengine.api.channel.ChannelMessage;
-import com.google.appengine.api.channel.ChannelService;
-import com.google.appengine.api.channel.ChannelServiceFactory;
-import si.stecce.societies.crowdtasking.model.Channel;
-import si.stecce.societies.crowdtasking.model.CollaborativeSpace;
-import si.stecce.societies.crowdtasking.model.Community;
-import si.stecce.societies.crowdtasking.model.dao.ChannelDAO;
-import si.stecce.societies.crowdtasking.model.dao.CommunityDAO;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.logging.Logger;
 
 /**
  * Remote control public display
@@ -63,7 +53,7 @@ import si.stecce.societies.crowdtasking.model.dao.CommunityDAO;
  */
 @Path("/remote/{querytype}")
 public class RemoteControlAPI implements IRemoteControlAPI {
-    private static final String notCheckedInMessage = "You have to be in the proper collaborative space.";
+    private static final String notCheckedInMessage = "You are not a member of any community with this collaborative space.";
     private static final Logger log = Logger.getLogger(RemoteControlAPI.class.getName());
 
     @Override
@@ -80,13 +70,13 @@ public class RemoteControlAPI implements IRemoteControlAPI {
             return Response.status(Status.UNAUTHORIZED).entity("Not authorized.").type("text/plain").build();
         }
 
-        log.info("querytype: "+querytype);
+        log.info("querytype: " + querytype);
 
-        log.info("channelId: "+channelId);
-        log.info("communityId: "+communityId);
-        log.info("user: "+user.getUserName());
-        log.info("checkin date: "+user.getCheckIn());
-        log.info("checkin space id: "+user.getSpaceId());
+        log.info("channelId: " + channelId);
+        log.info("communityId: " + communityId);
+        log.info("user: " + user.getUserName());
+        log.info("checkin date: " + user.getCheckIn());
+        log.info("checkin space id: " + user.getSpaceId());
         String message = null;
         Long spaceId = user.getSpaceId();
         Date checkedInDate = user.getCheckIn();
@@ -95,7 +85,7 @@ public class RemoteControlAPI implements IRemoteControlAPI {
         }
         Date now = new Date();
         long timeOut = UsersAPI.getApplicationSettings().getChekInTimeOut();
-        log.info("timeout:"+timeOut);
+        log.info("timeout:" + timeOut);
         // automatic check-out after set period
         Date toLate = new Date(checkedInDate.getTime() + timeOut);
         if (now.after(toLate)) {
