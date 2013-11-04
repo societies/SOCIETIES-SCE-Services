@@ -9,9 +9,11 @@ import android.os.Parcelable;
 import android.os.RemoteException;
 import android.util.Log;
 import android.webkit.CookieManager;
-import android.widget.Toast;
 
-import org.apache.http.client.methods.HttpGet;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.message.BasicNameValuePair;
 import org.societies.android.api.context.CtxException;
 import org.societies.android.api.context.ICtxClient;
 import org.societies.android.api.context.model.CtxAttributeTypes;
@@ -25,6 +27,7 @@ import org.societies.api.schema.identity.RequestorBean;
 import org.societies.thirdpartyservices.crowdtasking.CrowdTasking;
 import org.societies.thirdpartyservices.crowdtasking.MainActivity;
 
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -137,28 +140,22 @@ public class ContextClient extends ServiceClientBase {
                         oldLocation = location;
                     }
 */
-					// trenutno je checkin pri vsakem branju lokacije,
-					// dokler ne bo delal locatioon modified event
-					checkin(location);
-
-/*
-					Intent checkinIntent = new Intent(MainActivity.GET_LOCATION_ACTION);
-					checkinIntent.putExtra(CHECK_IN_URL, MainActivity.APPLICATION_URL+"/cs/"+location+"/enter");
-					context.sendBroadcast(checkinIntent);
-*/
+                    // trenutno je sendLocationToServer pri vsakem branju lokacije,
+                    // dokler ne bo delal locatioon modified event
+                    sendLocationToServer(location);
+                    Intent bringToFront = new Intent(context, MainActivity.class);
+                    bringToFront.setFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT | Intent.FLAG_ACTIVITY_NEW_TASK);
+                    context.startActivity(bringToFront);
 /*
                     if (!oldLocation.equalsIgnoreCase(location)) {
                         Toast.makeText(context, "Location: " + location, Toast.LENGTH_LONG).show();
                         ((CrowdTasking) context).symbolicLocation = location;
                         // TODO: dokončaj
-                        checkin(context, location);
+                        sendLocationToServer(context, location);
                     } else {
 //                        Toast.makeText(context, "Location is still the same", Toast.LENGTH_LONG).show();
                     }
 */
-//                    Intent newIntent = new Intent(MainActivity.SET_FOCUS);
-//                    context.sendBroadcast(newIntent);
-                    //context.startActivity(newIntent);
                     System.out.println("location:"+location);
 				} else { 
 					Log.e(LOG_TAG, "Unexpected return value type: "+ ((pModelObject != null) ? pModelObject.getClass() : "null"));
@@ -169,13 +166,20 @@ public class ContextClient extends ServiceClientBase {
 		}
     }
 
-    private void checkin(String location) {
+    private void sendLocationToServer(String location) {
         String DOMAIN = MainActivity.DOMAIN;
-        String url = MainActivity.APPLICATION_URL+"/cs/"+location+"/enter";
-        RestTask checkin = new RestTask(context, MainActivity.CHECK_IN_OUT, CookieManager.getInstance().getCookie(DOMAIN), DOMAIN);
-	    try {
-            checkin.execute(new HttpGet(new URI(url)));
+        String url = MainActivity.SET_LOCATION_URL;
+        HttpPost setLocationRequest;
+        try {
+            setLocationRequest = new HttpPost(new URI(url));
+            List<NameValuePair> parameters = new ArrayList<NameValuePair>();
+            parameters.add(new BasicNameValuePair("symbolicLocation", location));
+            setLocationRequest.setEntity(new UrlEncodedFormEntity(parameters));
+            RestTask task = new RestTask(context, MainActivity.CHECK_IN_OUT, CookieManager.getInstance().getCookie(DOMAIN), DOMAIN);
+            task.execute(setLocationRequest);
         } catch (URISyntaxException e) {
+            e.printStackTrace();
+        } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
     }

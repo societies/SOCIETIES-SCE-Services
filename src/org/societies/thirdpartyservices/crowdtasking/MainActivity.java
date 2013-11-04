@@ -85,7 +85,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.CountDownLatch;
@@ -127,6 +126,7 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
     private static final String C4CSS_API_URL = APPLICATION_URL + "/rest/community/4CSS";
     private static final String PD_TAKE_CONTROL = APPLICATION_URL + "/rest/remote/takeControl";
     private static final String GCM_REGISTER_URL = APPLICATION_URL + "/rest/gcm";
+    public static final String SET_LOCATION_URL = APPLICATION_URL + "/rest/users/location";
     //    private static final String GET_USER_REST_API_URL = APPLICATION_URL + "/rest/users/me";
 	private static final String MEETING_REST_API_URL = APPLICATION_URL + "/rest/meeting/data";
 	private static final String SET_MEETING_ID_REST_API_URL = APPLICATION_URL + "/rest/meeting/communitySign";
@@ -608,7 +608,17 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
 	}
 
 	private void checkIntent(Intent intent) {
+        if (intent == null) {
+            return;
+        }
+        if (intent.getAction() == null) {
+            return;
+        }
         String action = intent.getAction();
+        if ("GCM".equals(action)) {
+            handleGcmIntent(getIntent());
+            return;
+        }
         if (Intent.ACTION_VIEW.equals(action)) {
         	startUrl = intent.getData().toString();
         }
@@ -619,17 +629,25 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
     		checkInOut(nfcUrl.replaceFirst("cs", "http"));
 			nfcUrl = null;
     	}
-	}
-	
+
+        if (intent.getAction().equalsIgnoreCase(CHECK_IN_OUT)) {
+            String[] response = getIntent().getStringArrayExtra(RestTask.HTTP_RESPONSE);
+            System.out.println(response[1]);
+            Toast.makeText(getApplicationContext(), response[1], Toast.LENGTH_SHORT).show();
+        }
+
+    }
+
     @Override
 	protected void onNewIntent(Intent intent) {
+/*
         super.onNewIntent(intent);
-//        setIntent(intent);
         if (intent.getAction().equalsIgnoreCase("GCM")) {
             handleGcmIntent(intent);
         }
-    	checkIntent(intent);
-	}
+*/
+        checkIntent(intent);
+    }
 
 	@Override
     public void onResume() {
@@ -649,6 +667,8 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
         registerReceiver(receiver, new IntentFilter(Sign.ACTION_FINISHED));
         sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
 
+        checkIntent(getIntent());
+/*
         if (getIntent() == null) {
             return;
         }
@@ -663,6 +683,7 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
     		System.out.println(response[1]);
 			Toast.makeText(getApplicationContext(), response[1], Toast.LENGTH_SHORT).show();
     	}
+*/
 /*
         SocietiesUser societiesUser = getSocietiesUserData();
         JSONObject societiesUserJSON = new JSONObject();
@@ -995,10 +1016,12 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
             }
         	if (intent.getAction().equalsIgnoreCase(CHECK_IN_OUT)) {
                 String[] response = intent.getStringArrayExtra(RestTask.HTTP_RESPONSE);
-        		if (!response[1].startsWith("Check") && !response[1].startsWith("You are")) {
+/*
+                if (!response[1].startsWith("Check") && !response[1].startsWith("You are")) {
                     response[1] = "Please sign in first.";
         		}
-        		System.out.println(response);
+*/
+                System.out.println(response);
                 Toast.makeText(getApplicationContext(), response[1], Toast.LENGTH_SHORT).show();
         	}
         	if (intent.getAction().equalsIgnoreCase(TAKE_CONTROL)) {
