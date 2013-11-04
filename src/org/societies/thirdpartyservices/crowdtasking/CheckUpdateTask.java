@@ -48,6 +48,7 @@ public class CheckUpdateTask extends AsyncTask<String, Void, Boolean> {
         	Log.i("checkUpdate", "curVersion: "+curVersion);
             newVersion = Integer.valueOf(new String(baf.toByteArray()));
         	Log.i("checkUpdate", "newVersion: "+newVersion);
+	        MainActivity.version = curVersion;
             
         } catch (Exception e) {
         	Log.e("checkUpdate", "error in check update");

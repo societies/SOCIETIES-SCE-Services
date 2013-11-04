@@ -24,7 +24,7 @@ public class CommunityJS {
     private List<CollaborativeSpaceJS> spaces;
 //    private List<UserJS> members;
 //    private List<UserJS> requests;
-    private boolean owner;
+    public boolean owner;
     private boolean member = false;
     private boolean pending = false;
     private String memberStatus;
@@ -47,6 +47,11 @@ public class CommunityJS {
         setBasicParameters(community);
         owner = community.getOwnerJid().equalsIgnoreCase(societiesUser.getUserId());
 	    ownerJid = community.getOwnerJid();
+	    if (societiesUser.getUserId().equalsIgnoreCase(ownerJid)) {
+		    owner = true;
+	    } else {
+		    member = true;
+	    }
 /*
         if (community.getMembers() != null) {
             members = new ArrayList<UserJS>();

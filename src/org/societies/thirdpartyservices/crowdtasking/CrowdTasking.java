@@ -116,8 +116,10 @@ public class CrowdTasking extends Application {
 			parameters.add(new BasicNameValuePair("communityJid", cis.jid));
 			parameters.add(new BasicNameValuePair("communityId", ""));
 			parameters.add(new BasicNameValuePair("ownerJid", cis.ownerJid));
+			parameters.add(new BasicNameValuePair("owner", cis.owner == true ? "true":"no"));
 			parameters.add(new BasicNameValuePair("name", cis.name));
 			parameters.add(new BasicNameValuePair("description", cis.description));
+			parameters.add(new BasicNameValuePair("action", "synchronize"));
 			postCommunity.setEntity(new UrlEncodedFormEntity(parameters));
 			RestTask task = new RestTask(getApplicationContext(), "", CookieManager.getInstance()
 					.getCookie(MainActivity.DOMAIN), MainActivity.DOMAIN);

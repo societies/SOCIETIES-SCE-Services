@@ -124,7 +124,7 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
     private static final String HOME_URL = APPLICATION_URL + "/menu";
     private static final String HOME_URL_AFTER_REGISTER = APPLICATION_URL + "/register#/menu";
     private static final String MEETING_URL = APPLICATION_URL + "/android/meeting/";
-    private static final String C4CSS_API_URL = APPLICATION_URL + "/rest/community/4CSS";
+    private static final String C4CSS_API_URL = APPLICATION_URL + "/rest/community/4user";
     private static final String PD_TAKE_CONTROL = APPLICATION_URL + "/rest/remote/takeControl";
     private static final String GCM_REGISTER_URL = APPLICATION_URL + "/rest/gcm";
     public static final String SET_LOCATION_URL = APPLICATION_URL + "/rest/users/location";
@@ -165,6 +165,8 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
     private String signedUrl;
     private int sessionId;
 	public static String cookies;
+	public static int version;
+	private boolean societiesServices;
 
 	/**
      * This is the project number from the API Console
@@ -308,7 +310,7 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
 
     private void sendRegistrationIdToBackend(String regId) {
         RestTask task = new RestTask(getApplicationContext(), GCM_REGISTER, CookieManager.getInstance().getCookie(DOMAIN), DOMAIN);
-        String url = GCM_REGISTER_URL+"?registrationId="+regId;
+        String url = GCM_REGISTER_URL+"?registrationId="+regId+"&version="+version;
         try {
             task.execute(new HttpGet(new URI(url)));
         } catch (URISyntaxException e) {
@@ -401,7 +403,7 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
 	    mAccelCurrent = SensorManager.GRAVITY_EARTH;
 	    mAccelLast = SensorManager.GRAVITY_EARTH;
         showProgressBar();
-	    setup();
+	    setup(this);
 /*
         mNfcAdapter = NfcAdapter.getDefaultAdapter(this);
         if (mNfcAdapter == null) {
@@ -436,15 +438,15 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
 		}
 	}
 
-	private void setup() {
+	private void setup(final Context appContext) {
 		new AsyncTask<Void, Void, Boolean>() {
 			@Override
 			protected Boolean doInBackground(Void... params) {
-				boolean societiesServices = isSocietiesServiceRunning();
+				societiesServices = isSocietiesServiceRunning();
 				if (societiesServices) {
 					connectToSocieties();
 				}
-				CheckUpdateTask checkUpdateTask = new CheckUpdateTask(getApplicationContext());
+				CheckUpdateTask checkUpdateTask = new CheckUpdateTask(appContext);
 				checkUpdateTask.execute();
 				return societiesServices;
 			}
@@ -937,7 +939,7 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
     private void getCommunitiesForUserFromGAE() {
         try {
             RestTask task = new RestTask(getApplicationContext(), C4CSS_INTENT, CookieManager.getInstance().getCookie(DOMAIN), DOMAIN);
-            task.execute(new HttpGet(new URI(C4CSS_API_URL)));
+            task.execute(new HttpGet(new URI(C4CSS_API_URL+"?version="+version)));
         } catch (URISyntaxException e) {
             e.printStackTrace();
         }
@@ -1221,6 +1223,7 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
             cursor.moveToFirst();
 
             societiesUser.setUserId(cursor.getString(cursor.getColumnIndex(CSSContentProvider.CssRecord.CSS_RECORD_CSS_IDENTITY)));
+//            societiesUser.setUserId("eliza.societies.local2.macs.hw.ac.uk");
             societiesUser.setName(cursor.getString(cursor.getColumnIndex(CSSContentProvider.CssRecord.CSS_RECORD_NAME)));
             societiesUser.setForeName(cursor.getString(cursor.getColumnIndex(CSSContentProvider.CssRecord.CSS_RECORD_FORENAME)));
             societiesUser.setEmail(cursor.getString(cursor.getColumnIndex(CSSContentProvider.CssRecord.CSS_RECORD_EMAILID)));
@@ -1455,8 +1458,10 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
                     if (communityManagementClientConnected) {
                         communityManagementClient.listCommunities();
                     }
-                    TrustTask task = new TrustTask(getApplicationContext(), DOMAIN, APPLICATION_URL);
-                    task.execute(societiesUser.getUserId());
+	                if (societiesServices) {
+		                TrustTask task = new TrustTask(getApplicationContext(), DOMAIN, APPLICATION_URL);
+		                task.execute(societiesUser.getUserId());
+	                }
                     if ("".equalsIgnoreCase(getRegistrationId(getApplicationContext()))) {
                         registerInBackground();
                     }
