@@ -10,7 +10,7 @@
 		is to facilitate integration testing of the bundle outside of an OSGi container -->
 
 
-	<osgi:service ref="askFree" interface="ac.hw.askfree.IAskFree">
+	<osgi:service ref="askFree" interface="ac.hw.askfree.IAskFreeClient">
       <osgi:service-properties>
           <entry key="TargetPlatform" value="SOCIETIES" />
           <entry key="ServiceProvider" value="ICT-SOCIETIES" />
@@ -22,10 +22,9 @@
      	<property name="authorSignature" value="Heriot-Watt University" />
      	<property name="serviceDescription" value="AskFree Student Service" />
      	<property name="serviceName" value="AskFree" />
-     	<property name="serviceType" value="THIRD_PARTY_SERVER" />
+     	<property name="serviceType" value="THIRD_PARTY_CLIENT" />
      	<property name="serviceCategory" value="education" />
  	</bean>
-
 	<!-- Import External services -->
 	<!-- uam -->
 <!-- 	<osgi:reference id="uam" interface="org.societies.api.useragent.monitoring.IUserActionMonitor">
@@ -34,19 +33,17 @@
 	<osgi:reference id="persoMgr" interface="org.societies.api.personalisation.mgmt.IPersonalisationManager">
 	</osgi:reference>
 	 -->
-	 
-	 
 	<osgi:reference id="serviceMgmt" interface="org.societies.api.services.IServices">
-	</osgi:reference>
-	
-	<osgi:reference id="eventMgr" interface="org.societies.api.osgi.event.IEventMgr">
-	</osgi:reference>
-	
-	<osgi:reference id="commManager" interface="org.societies.api.comm.xmpp.interfaces.ICommManager">
 	</osgi:reference>
 	
 	<osgi:reference id="ctxBroker" interface="org.societies.api.context.broker.ICtxBroker">
 	</osgi:reference>
 	
-	
+	<osgi:reference id="eventMgr" interface="org.societies.api.osgi.event.IEventMgr">
+	</osgi:reference>
+
+	<osgi:reference id="displayDriverService" interface="org.societies.api.css.devicemgmt.display.IDisplayDriver">
+	</osgi:reference>	
+		<osgi:reference id="commManager" interface="org.societies.api.comm.xmpp.interfaces.ICommManager">
+	</osgi:reference>
 </beans>

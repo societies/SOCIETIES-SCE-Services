@@ -43,6 +43,8 @@ import org.societies.api.context.model.CtxEntityIdentifier;
 import org.societies.api.context.model.CtxEntityTypes;
 import org.societies.api.context.model.CtxIdentifier;
 import org.societies.api.context.model.CtxModelType;
+import org.societies.api.css.devicemgmt.display.IDisplayDriver;
+import org.societies.api.css.devicemgmt.display.IDisplayableService;
 import org.societies.api.identity.IIdentity;
 import org.societies.api.identity.IIdentityManager;
 import org.societies.api.identity.InvalidFormatException;
@@ -59,9 +61,6 @@ import org.societies.api.services.IServices;
 import org.societies.api.services.ServiceMgmtEvent;
 import org.societies.api.services.ServiceMgmtEventType;
 
-import ac.hw.askfree.tools.ClientHandler;
-//import ac.hw.askfree.tools.ContextEventListener;
-import ac.hw.askfree.tools.SocketServer;
 
 
 /**
@@ -70,32 +69,94 @@ import ac.hw.askfree.tools.SocketServer;
  * @author Ioannis Mimtsoudis
  *
  */
-public class AskFree extends EventListener implements IAskFree{
+public class AskFree extends EventListener implements IAskFreeClient, IDisplayableService{
 
+	private IDisplayDriver displayDriverService;
 	private IServices serviceMgmt;
 	private IEventMgr eventMgr;
+	
+	private IAskFreeServerRemote askFreeCommsClient;
 	Logger logging = LoggerFactory.getLogger(this.getClass());
-	private ServiceResourceIdentifier myServiceID;
 	private IIdentity serverIdentity;
 	private IIdentity userIdentity;
 	private ICtxBroker ctxBroker;
-	private HashMap<String, String> userToLocation;
-	private HashMap<String, ClientHandler> userToHandler;
+
+
+	/**
+	 * @return the ctxBroker
+	 */
+	public ICtxBroker getCtxBroker() {
+		return ctxBroker;
+	}
+
+	/**
+	 * @param ctxBroker the ctxBroker to set
+	 */
+	public void setCtxBroker(ICtxBroker ctxBroker) {
+		this.ctxBroker = ctxBroker;
+	}
+
 	private Requestor requestor;
+
+
+
+	//private IIdentity userIdentity;
+
 	private ICommManager commManager;
-	private IIdentityManager idMgr;
-	//private ContextEventListener contextEventListener;
-	private String symbolicLocation;
+
+	
+	/**
+	 * @return the eventMgr
+	 */
+	public IEventMgr getEventMgr() {
+		return eventMgr;
+	}
+
+	/**
+	 * @param eventMgr the eventMgr to set
+	 */
+	public void setEventMgr(IEventMgr eventMgr) {
+		this.eventMgr = eventMgr;
+	}
+
+
+
+	//private String symbolicLocation;
 
 	public void init(){
-		//SET UP NEW MAP FOR USER -> LOCATION
-		userToLocation = new HashMap<String, String>();
-
-		//SET UP NEW MAP FOR USER -> HANDLER
-		userToHandler = new HashMap<String, ClientHandler>();
 
 		this.registerForServiceEvents();
 
+		//REGISTER AS A DISPLAYABLE SERVICE
+		URL askFreeURL = null;
+		try {
+			askFreeURL = new URL("http://54.218.113.176/AF-S/screen.php");
+		} catch (MalformedURLException e) {
+			logging.error("Error making URL", e);
+		}
+
+		if(askFreeURL!=null)
+		{
+			this.displayDriverService.registerDisplayableService(this, "AskFree", askFreeURL, false);
+		}
+		
+		//REGISTER FOR SYMLOC CHANGES
+		ContextEventListener listener = new ContextEventListener(this, this.commManager.getIdManager().getThisNetworkNode(), this.ctxBroker);
+		listener.registerForSymLocChanges();
+	}
+	
+	//THIS IS NEW 
+	public void updateUserLocation(String location)
+	{
+		//SEND MESSAGE TO SERVER
+		if(this.serverIdentity!=null)
+		{
+		askFreeCommsClient.sendLocation(this.serverIdentity, location);
+		}
+		else
+		{
+			if(logging.isDebugEnabled()) logging.debug("Opps! Something went wrong, serverID is not set!!!");
+		}
 	}
 
 	/*
@@ -119,6 +180,7 @@ public class AskFree extends EventListener implements IAskFree{
 				")";
 
 		this.eventMgr.unSubscribeInternalEvent(this, new String[]{EventTypes.SERVICE_LIFECYCLE_EVENT}, eventFilter);
+		//this.evMgr.subscribeInternalEvent(this, new String[]{EventTypes.SERVICE_LIFECYCLE_EVENT}, eventFilter);
 		this.logging.debug("Unsubscribed from "+EventTypes.SERVICE_LIFECYCLE_EVENT+" events");
 	}
 
@@ -136,48 +198,21 @@ public class AskFree extends EventListener implements IAskFree{
 		logging.debug("Received SLM event");
 		ServiceMgmtEvent slmEvent = (ServiceMgmtEvent) event.geteventInfo();
 		this.logging.debug("SLM event Bundle Symbol Name" + slmEvent.getBundleSymbolName());
-		if (slmEvent.getBundleSymbolName().equalsIgnoreCase("ac.hw.askfree.AskFreeServer")){
+		if (slmEvent.getBundleSymbolName().equalsIgnoreCase("ac.hw.askfree.AskFreeClient")){
 			this.logging.debug("Received SLM event for my bundle");
 			if (slmEvent.getEventType().equals(ServiceMgmtEventType.SERVICE_STARTED)){
 
-				setMyServiceID(slmEvent.getServiceId());
-				this.logging.debug("1.Service id:" + slmEvent.getServiceId().toString());
-
-				//GET ID OF SERVER
-				this.setServerIdentity(this.idMgr.getThisNetworkNode());
-				//this.setServerIdentity(serviceMgmt.getServer(slmEvent.getServiceId()));
-				logging.debug("2.Servers Identity: " + getServerIdentity());
-
-				//SocketServer server = new SocketServer(getMyServiceID(), getServerIdentity());
-				SocketServer server = new SocketServer(this);
-				new Thread(server).start();
-				/////////////////////////////////////////////////////////////////////////////
-				this.requestor = new RequestorService(serverIdentity, myServiceID);
-
-				//setContextEventListener(new ContextEventListener(this, getCtxBroker(), getRequestor()));
-
-				//this.unregisterForServiceEvents();
+				this.logging.debug("AskFree User Client Started!!!");
+				this.serverIdentity = this.serviceMgmt.getServer(slmEvent.getServiceId());
+			//	this.askFreeCommsClient.registerAfterRestart(server, this.getCommManager().getIdManager().getThisNetworkNode().getBareJid());
+			//	unregisterForServiceEvents();
 			}
 		}
 		//	}
 	}
 
-	/* (non-Javadoc)
-	 * @see org.societies.api.osgi.event.EventListener#handleExternalEvent(org.societies.api.osgi.event.CSSEvent)
-	 */
-	@Override
-	public void handleExternalEvent(CSSEvent arg0) {
-		// TODO Auto-generated method stub
 
-	}
 
-	public void updateUserLocation(String userIdentity, ClientHandler cHandler, String location){
-		this.logging.debug("location of user: "+userIdentity+" is: "+location + " cHandler: " + cHandler);
-		this.setSymbolicLocation(userIdentity, location);
-
-		//send the location of the user to the appropriate android client (based on userIdentity)
-		cHandler.sendMessage(this.getSymbolicLocation(userIdentity));
-	}
 
 	/**
 	 * @return the serviceMgmt
@@ -193,35 +228,6 @@ public class AskFree extends EventListener implements IAskFree{
 		this.serviceMgmt = serviceMgmt;
 	}
 
-	/**
-	 * @return the eventMgr
-	 */
-	public IEventMgr getEventMgr() {
-		return eventMgr;
-	}
-
-	/**
-	 * @param eventMgr the eventMgr to set
-	 */
-	public void setEventMgr(IEventMgr eventMgr) {
-		this.eventMgr = eventMgr;
-	}
-
-	/**
-	 * @return the myServiceID
-	 */
-	public ServiceResourceIdentifier getMyServiceID() {
-		this.logging.debug("Get MyServiceId:" +myServiceID.toString());
-		return myServiceID;
-	}
-
-	/**
-	 * @param myServiceID the myServiceID to set
-	 */
-	public void setMyServiceID(ServiceResourceIdentifier myServiceID) {
-		this.myServiceID = myServiceID;
-		this.logging.debug("MyServiceId is set");
-	}
 
 	/**
 	 * @return the serverIdentity
@@ -239,20 +245,6 @@ public class AskFree extends EventListener implements IAskFree{
 		this.serverIdentity = serverIdentity;
 	}
 
-	/**
-	 * @return the ctxBroker
-	 */
-	public ICtxBroker getCtxBroker() {
-		this.logging.debug("get ContextBroker");
-		return ctxBroker;
-	}
-
-	/**
-	 * @param ctxBroker the ctxBroker to set
-	 */
-	public void setCtxBroker(ICtxBroker ctxBroker) {
-		this.ctxBroker = ctxBroker;
-	}
 
 	/**
 	 * @return the requestor
@@ -270,40 +262,6 @@ public class AskFree extends EventListener implements IAskFree{
 	}
 
 
-	/**
-	 * @param userIdentity the userIdentity to set
-	 */
-	public void registerUser(String userId, ClientHandler cHandler) {
-		this.logging.debug("Registering User:" + userId);
-		//IIdentity userIdentity;
-		//this.cHandler = cHandler;
-
-		try {
-			IIdentity thisUserID  = this.idMgr.fromFullJid(userId);
-			//	this.logging.debug("userIdentity: " + );
-
-
-			//this.contextEventListener.registerForLocationEvents(getUserIdentity(), socket);
-			//this.getContextEventListener().registerForLocationEvents(thisUserID, cHandler);
-		} catch (InvalidFormatException e) {
-			this.logging.debug("REGISTERING USER FAILED");
-		}		
-	}
-
-	/**
-	 * @return the commManager
-	 */
-	public ICommManager getCommManager() {
-		return commManager;
-	}
-
-	/**
-	 * @param commManager the commManager to set
-	 */
-	public void setCommManager(ICommManager commManager) {
-		this.commManager = commManager;
-		this.idMgr = this.commManager.getIdManager();
-	}
 
 	/**
 	 * @return the userIdentity
@@ -319,79 +277,73 @@ public class AskFree extends EventListener implements IAskFree{
 		this.userIdentity = userIdentity;
 	}
 
-	/**
-	 * @return the symbolicLocation
-	 */
-	public String getSymbolicLocation(String userIdentity) {
-		//this.logging.debug("Get symbolic location: "+symbolicLocation+" for user: " + userIdentity);
-		return userToLocation.get(userIdentity);
-	}
-
-	/**
-	 * @param symbolicLocation the symbolicLocation to set
-	 */
-	public void setSymbolicLocation(String userIdentity, String symbolicLocation) {
-		userToLocation.put(userIdentity, symbolicLocation);
-		this.logging.debug("Set symbolic location: "+symbolicLocation+" for user: " + userIdentity);
-		//this.symbolicLocation = symbolicLocation;
-	}
-
-/*	*//**
-	 * @return the contextEventListener
-	 *//*
-	public ContextEventListener getContextEventListener() {
-		return contextEventListener;
-	}
-
-	*//**
-	 * @param contextEventListener the contextEventListener to set
-	 *//*
-	public void setContextEventListener(ContextEventListener contextEventListener) {
-		this.contextEventListener = contextEventListener;
-	}*/
 
 	/* (non-Javadoc)
-	 * @see ac.hw.askfree.IAskFree#setUserLocation(java.lang.String, java.lang.String)
+	 * @see org.societies.api.css.devicemgmt.display.IDisplayableService#serviceStarted(java.lang.String)
 	 */
 	@Override
-	public void setUserLocation(String userJID, String location) {
-		synchronized (userToLocation)
-		{
-			userToLocation.put(userJID, location);
-		}
-	}
-
-	public void addHandler(String cssID, ClientHandler clientHandler)
-	{
-		this.userToHandler.put(cssID, clientHandler);
+	public void serviceStarted(String arg0) {
+		logging.info("service askfree started");		
 	}
 
 	/* (non-Javadoc)
-	 * @see ac.hw.askfree.IAskFree#pushToAndroid(java.lang.String)
+	 * @see org.societies.api.css.devicemgmt.display.IDisplayableService#serviceStopped(java.lang.String)
 	 */
 	@Override
-	public void pushToAndroid(String userJID) {
-		//need sync blocks here?!
-		ClientHandler handler = this.userToHandler.get(userJID);
-		if(handler!=null)
-		{
-			String location = this.userToLocation.get(userJID);
-			if(location!=null)
-			{
-				//SEND MESSSAGE
-				handler.sendMessage(location);
-			}
-			else
-			{
-				//Perhaps send a error message to Android in future?
-				logging.debug("Opps, location is null! Not sending...");
-			}
-		}
-		else
-		{
-			logging.debug("Opps, handler is null! Cant send message to Android...");
-		}
+	public void serviceStopped(String arg0) {
+		// TODO Auto-generated method stub
+		logging.info("service askfree stopped");	
 
 	}
 
+	/**
+	 * @return the displayDriverService
+	 */
+	public IDisplayDriver getDisplayDriverService() {
+		return displayDriverService;
+	}
+
+	/**
+	 * @param displayDriverService the displayDriverService to set
+	 */
+	public void setDisplayDriverService(IDisplayDriver displayDriverService) {
+		this.displayDriverService = displayDriverService;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.societies.api.osgi.event.EventListener#handleExternalEvent(org.societies.api.osgi.event.CSSEvent)
+	 */
+	@Override
+	public void handleExternalEvent(CSSEvent arg0) {
+		// TODO Auto-generated method stub
+
+	}
+
+	/**
+	 * @return the askFreeCommsClient
+	 */
+	public IAskFreeServerRemote getAskFreeCommsClient() {
+		return askFreeCommsClient;
+	}
+
+	/**
+	 * @param askFreeCommsClient the askFreeCommsClient to set
+	 */
+	public void setAskFreeCommsClient(IAskFreeServerRemote askFreeCommsClient) {
+		this.askFreeCommsClient = askFreeCommsClient;
+	}
+
+	/**
+	 * @return the commManager
+	 */
+	public ICommManager getCommManager() {
+		return commManager;
+	}
+
+	/**
+	 * @param commManager the commManager to set
+	 */
+	public void setCommManager(ICommManager commManager) {
+		this.commManager = commManager;
+	}
 }

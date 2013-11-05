@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<!-- change the artifactid to your project artifactid -->
 	<groupId>ac.hw.askfree</groupId>
-	<artifactId>AskFreeServer</artifactId>
+	<artifactId>AskFreeClient</artifactId>
 	<packaging>bundle</packaging>
 	<version>0.0.1-SNAPSHOT</version>
 
@@ -58,10 +58,6 @@
 						<Bundle-Activator></Bundle-Activator>
 						<Embed-Dependency>*;scope=compile|runtime</Embed-Dependency>
 						<Embed-Transitive>false</Embed-Transitive>
-						<Include-Resource>
-							{maven-resources},
-							societies-client=target/societies-client
-						</Include-Resource>
 					</instructions>
 				</configuration>
 			</plugin>
@@ -73,44 +69,18 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-dependency-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>copy</id>
-						<phase>compile</phase>
-						<goals>
-							<goal>copy</goal>
-						</goals>
-						<configuration>
-							<artifactItems>
-								<artifactItem>
-									<groupId>ac.hw.askfree</groupId>
-									<artifactId>AskFreeClient</artifactId>
-									<version>0.0.1-SNAPSHOT</version>
-									<outputDirectory>${project.build.directory}/societies-client</outputDirectory>
-								</artifactItem>
-							</artifactItems>
-						</configuration>
-					</execution>
-					<execution>
-						<id>copy-installed</id>
-						<phase>install</phase>
-						<goals>
-							<goal>copy</goal>
-						</goals>
-						<configuration>
-							<artifactItems>
-								<artifactItem>
-									<groupId>${project.groupId}</groupId>
-									<artifactId>${project.artifactId}</artifactId>
-									<version>${project.version}</version>
-									<type>jar</type>
-									<overWrite>true</overWrite>
-									<outputDirectory>${spring.osgi.deploy.dir}</outputDirectory>
-								</artifactItem>
-							</artifactItems>
-						</configuration>
-					</execution>
-				</executions>
+				<configuration>
+					<artifactItems>
+						<artifactItem>
+							<groupId>${project.groupId}</groupId>
+							<artifactId>${project.artifactId}</artifactId>
+							<version>0.0.1-SNAPSHOT</version>
+							<type>bundle</type>
+							<overWrite>true</overWrite>
+							<outputDirectory>${spring.osgi.deploy.dir}</outputDirectory>
+						</artifactItem>
+					</artifactItems>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>

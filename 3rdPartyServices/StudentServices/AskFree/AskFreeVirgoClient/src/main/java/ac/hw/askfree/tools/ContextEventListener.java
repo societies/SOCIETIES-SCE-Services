@@ -21,7 +21,7 @@
  * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
  * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
+ *//*
 package ac.hw.askfree.tools;
 
 import java.net.Socket;
@@ -47,12 +47,12 @@ import org.societies.api.identity.Requestor;
 
 import ac.hw.askfree.AskFree;
 
-/**
+*//**
  * Describe your class here...
  *
  * @author Ioannis Mimtsoudis
  *
- */
+ *//*
 public class ContextEventListener implements CtxChangeEventListener{
 
 
@@ -71,36 +71,31 @@ public class ContextEventListener implements CtxChangeEventListener{
 	public ContextEventListener(AskFree client, ICtxBroker ctxBroker, Requestor requestor){
 		this.client = client;
 		this.ctxBroker = ctxBroker;
-		//this.userIdentities = new HashMap<String,Socket>();
 		this.userIdentities = new HashMap<String,ClientHandler>();
 		this.requestor = requestor;
 	}
 
-	/**
-	 * This method is called when the AskFreeClient (Android) starts on a user CSS.
-	 */
-	//public void registerForLocationEvents(IIdentity userIdentity, Socket socket){
-	public void registerForLocationEvents(IIdentity userIdentity, ClientHandler cHandler){
-		this.LOG.debug("Registering for location events");
-
-		String userId = userIdentity.getBareJid();
-
-		if (this.userIdentities.containsKey(userId)){
-			this.LOG.debug("User identity " + userId + "found");
-			if(this.userIdentities.get(userId) != cHandler){
-				this.LOG.debug("User identity " + userId + "has changed cHandler object");
-				this.userIdentities.put(userId,cHandler);
-				this.LOG.debug("User:" + userId+ "Updated");
-			}else{
-				this.LOG.debug("User identity " + userId + "is already registered");
+	public void registerAfterRestart(IIdentity userIdentity){
+		//first uninstall the previous listener(if it exists)
+		if(this.userIdentities.containsKey(userIdentity)){
+			if(this.LOG.isDebugEnabled()) this.LOG.debug("This user has already registered before. Unregstier previous listener!");
+			try {
+				Future<CtxEntityIdentifier> futureCtxEntityId = this.ctxBroker.retrieveIndividualEntityId(requestor, userIdentity);
+				CtxEntityIdentifier ctxEntityId =futureCtxEntityId.get();
+				
+				this.ctxBroker.unregisterFromChanges(requestor, this, ctxEntityId, CtxAttributeTypes.LOCATION_SYMBOLIC);
+			} catch (CtxException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (ExecutionException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
-			return;
+
 		}
-		
-		/*if (this.userIdentities.containsKey(userId)){
-			this.LOG.debug("User identity " + userId + "is already registered");
-			return;
-		}*/
 		
 		try {
 			Future<CtxEntityIdentifier> futureCtxEntityId = this.ctxBroker.retrieveIndividualEntityId(requestor, userIdentity);
@@ -108,8 +103,49 @@ public class ContextEventListener implements CtxChangeEventListener{
 
 			this.ctxBroker.registerForChanges(requestor, this, ctxEntityId, CtxAttributeTypes.LOCATION_SYMBOLIC);
 
+			this.LOG.debug("User:" + userIdentity.getBareJid() + " Registered for symloc events");
+		} catch (CtxException e) {
+			this.LOG.debug("1 " + e.toString());
+		} catch (InterruptedException e) {
+			this.LOG.debug("2 " + e.toString());
+		} catch (ExecutionException e) {
+			this.LOG.debug("3 " + e.toString());
+		}
+		
+	}
+	
+	*//**
+	 * This method is called when the AskFreeClient (Android) starts on a user CSS.
+	 *//*
+	public void registerForLocationEvents(IIdentity userIdentity, ClientHandler cHandler){
+		this.LOG.debug("Registering for location events");
+
+		String userId = userIdentity.getBareJid();
+		
+		this.userIdentities.put(userId, cHandler);
+
+		if (this.userIdentities.containsKey(userId)){
+			this.LOG.debug("User identity " + userId + " found");
+			if(this.userIdentities.get(userId) != cHandler){
+				this.LOG.debug("User identity " + userId + " has changed cHandler object");
+				this.userIdentities.put(userId,cHandler);
+				this.LOG.debug("User:" + userId+ " Updated");
+			}else{
+				this.LOG.debug("User identity " + userId + "is already registered");
+				
+			}
+			return;
+			
+		}
+		
+	
+		try {
+			Future<CtxEntityIdentifier> futureCtxEntityId = this.ctxBroker.retrieveIndividualEntityId(requestor, userIdentity);
+			CtxEntityIdentifier ctxEntityId =futureCtxEntityId.get();
+
+			this.ctxBroker.registerForChanges(requestor, this, ctxEntityId, CtxAttributeTypes.LOCATION_SYMBOLIC);
+
 			//Add user to map
-			//this.userIdentities.put(userId,socket);
 			this.userIdentities.put(userId,cHandler);
 			this.LOG.debug("User:" + userId+ " Registered for symloc events");
 		} catch (CtxException e) {
@@ -119,22 +155,22 @@ public class ContextEventListener implements CtxChangeEventListener{
 		} catch (ExecutionException e) {
 			this.LOG.debug("3 " + e.toString());
 		}
-	}
 
 
 
-	/* (non-Javadoc)
+
+	 (non-Javadoc)
 	 * @see org.societies.api.context.event.CtxChangeEventListener#onCreation(org.societies.api.context.event.CtxChangeEvent)
-	 */
+	 
 	@Override
 	public void onCreation(CtxChangeEvent arg0) {
 		// TODO Auto-generated method stub
 
 	}
 
-	/* (non-Javadoc)
+	 (non-Javadoc)
 	 * @see org.societies.api.context.event.CtxChangeEventListener#onModification(org.societies.api.context.event.CtxChangeEvent)
-	 */
+	 
 	@Override
 	public void onModification(final CtxChangeEvent event) {
 		this.LOG.debug("Received context event: "+event.getId().toUriString());
@@ -144,6 +180,7 @@ public class ContextEventListener implements CtxChangeEventListener{
 				String userIdentity = event.getId().getOwnerId();
 				LOG.debug("User Identity " + userIdentity);
 				CtxIdentifier ctxIdentifier = event.getId();
+				
 				LOG.debug("ctxIdentifier " + ctxIdentifier);
 
 				CtxAttribute ctxAttribute;
@@ -151,14 +188,10 @@ public class ContextEventListener implements CtxChangeEventListener{
 					ctxAttribute = (CtxAttribute) ctxBroker.retrieve(requestor,ctxIdentifier).get();
 					if (ctxAttribute!=null){
 						LOG.debug("futureAttribute " + ctxAttribute.getStringValue());
-
-
 						LOG.debug("Received context event for "+ctxAttribute.getType()+" with value: "+ctxAttribute.getStringValue());
 
-						//Socket userSocket = userIdentities.get(userIdentity);
 						ClientHandler cHandler = userIdentities.get(userIdentity);
 
-						//client.updateUserLocation(userIdentity, userSocket, ctxAttribute.getStringValue());
 						client.updateUserLocation(userIdentity, cHandler, ctxAttribute.getStringValue());
 					}
 					else{
@@ -181,18 +214,18 @@ public class ContextEventListener implements CtxChangeEventListener{
 
 	}
 
-	/* (non-Javadoc)
+	 (non-Javadoc)
 	 * @see org.societies.api.context.event.CtxChangeEventListener#onRemoval(org.societies.api.context.event.CtxChangeEvent)
-	 */
+	 
 	@Override
 	public void onRemoval(CtxChangeEvent arg0) {
 		// TODO Auto-generated method stub
 
 	}
 
-	/* (non-Javadoc)
+	 (non-Javadoc)
 	 * @see org.societies.api.context.event.CtxChangeEventListener#onUpdate(org.societies.api.context.event.CtxChangeEvent)
-	 */
+	 
 	@Override
 	public void onUpdate(CtxChangeEvent arg0) {
 		// TODO Auto-generated method stub
@@ -202,3 +235,4 @@ public class ContextEventListener implements CtxChangeEventListener{
 
 
 }
+*/

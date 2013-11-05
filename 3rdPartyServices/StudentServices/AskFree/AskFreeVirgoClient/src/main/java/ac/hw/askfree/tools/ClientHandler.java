@@ -55,6 +55,7 @@ public class ClientHandler implements Runnable {
 		this.socket = socket;
 		this.askFree = askFree;
 		this.log.debug("Client Handler created");
+		//this.askFree.addClientHandler()
 	}
 
 	public void run(){
@@ -88,14 +89,13 @@ public class ClientHandler implements Runnable {
 				if(x instanceof String){
 					cssId = (String)x;			
 					this.log.debug("received cssId: " + cssId + " from Android");
+					//ADD THIS TO THE MAP (OVERWRITES ANY PREVIOUS)
+					askFree.addHandler(cssId, this);
 					if (askFree.getSymbolicLocation(cssId) != null){
 						this.sendMessage(askFree.getSymbolicLocation(cssId));
 					}
 					//register user to ContextEventListener
-					//askFree.registerUser(cssId,socket,this);
-					askFree.registerUser(cssId,this);
-					//reading = false;
-					//break;
+				//	askFree.registerUser(cssId,this);
 				}
 			}		
 		}catch(ClassNotFoundException e){

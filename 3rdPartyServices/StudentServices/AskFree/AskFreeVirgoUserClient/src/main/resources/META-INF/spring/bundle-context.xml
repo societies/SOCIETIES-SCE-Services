@@ -10,21 +10,20 @@
 		this file can easily be used for integration testing outside of an OSGi environment -->
 
 
-	<bean id="askFree" 
-	    class="ac.hw.askfree.AskFree"
-		name="askFree"  
+	<bean id="askFreeClient" class="ac.hw.askfree.AskFree" name="askFree"
 		init-method="init">
-		<property name="serviceMgmt" ref="serviceMgmt"/>
-		<property name="eventMgr" ref="eventMgr"/>	
-		<property name="ctxBroker" ref="ctxBroker"></property>
+		<property name="serviceMgmt" ref="serviceMgmt" />
+		<property name="ctxBroker" ref="ctxBroker" />
+		<property name="eventMgr" ref="eventMgr" />
+		<property name="displayDriverService" ref="displayDriverService"></property>
+		<property name="askFreeCommsClient" ref="askFreeCommsClient"></property>
 		<property name="commManager" ref="commManager"></property>
-	</bean>	
-	
+				
+	</bean>
 
-	<bean id="AskFreeCommsServer"
-	    class="ac.hw.askfree.comms.CommsServer"
-	    init-method="InitService">
+
+	<bean id="askFreeCommsClient" class="ac.hw.askfree.comms.CommsClient"
+		init-method="InitService">
 		<property name="commManager" ref="commManager"></property>
-		<property name="askFreeServer" ref="askFree"></property>
 	</bean>
 </beans>
