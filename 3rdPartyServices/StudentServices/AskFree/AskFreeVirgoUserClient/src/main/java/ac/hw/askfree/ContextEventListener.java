@@ -55,8 +55,6 @@ import ac.hw.askfree.AskFree;
  */
 public class ContextEventListener implements CtxChangeEventListener{
 
-
-	//private final DisplayPortalClient client;
 	private final IAskFreeClient client;
 	Logger LOG = LoggerFactory.getLogger(this.getClass());
 	private Requestor requestor;

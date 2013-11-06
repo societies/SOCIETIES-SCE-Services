@@ -84,7 +84,6 @@ public class AskFree extends EventListener implements IAskFree{
 	private Requestor requestor;
 	private ICommManager commManager;
 	private IIdentityManager idMgr;
-	//private ContextEventListener contextEventListener;
 	private String symbolicLocation;
 
 	public void init(){
@@ -131,8 +130,6 @@ public class AskFree extends EventListener implements IAskFree{
 		//and we need this to receive the AskFree service identifier (ServiceResourceIdentifier)
 
 		logging.debug("Received internal event: "+event.geteventName());
-
-		//	if(event.geteventName().equalsIgnoreCase(EventTypes.)){
 		logging.debug("Received SLM event");
 		ServiceMgmtEvent slmEvent = (ServiceMgmtEvent) event.geteventInfo();
 		this.logging.debug("SLM event Bundle Symbol Name" + slmEvent.getBundleSymbolName());
@@ -145,21 +142,13 @@ public class AskFree extends EventListener implements IAskFree{
 
 				//GET ID OF SERVER
 				this.setServerIdentity(this.idMgr.getThisNetworkNode());
-				//this.setServerIdentity(serviceMgmt.getServer(slmEvent.getServiceId()));
 				logging.debug("2.Servers Identity: " + getServerIdentity());
 
-				//SocketServer server = new SocketServer(getMyServiceID(), getServerIdentity());
 				SocketServer server = new SocketServer(this);
 				new Thread(server).start();
-				/////////////////////////////////////////////////////////////////////////////
 				this.requestor = new RequestorService(serverIdentity, myServiceID);
-
-				//setContextEventListener(new ContextEventListener(this, getCtxBroker(), getRequestor()));
-
-				//this.unregisterForServiceEvents();
 			}
 		}
-		//	}
 	}
 
 	/* (non-Javadoc)
@@ -271,26 +260,6 @@ public class AskFree extends EventListener implements IAskFree{
 
 
 	/**
-	 * @param userIdentity the userIdentity to set
-	 */
-	public void registerUser(String userId, ClientHandler cHandler) {
-		this.logging.debug("Registering User:" + userId);
-		//IIdentity userIdentity;
-		//this.cHandler = cHandler;
-
-		try {
-			IIdentity thisUserID  = this.idMgr.fromFullJid(userId);
-			//	this.logging.debug("userIdentity: " + );
-
-
-			//this.contextEventListener.registerForLocationEvents(getUserIdentity(), socket);
-			//this.getContextEventListener().registerForLocationEvents(thisUserID, cHandler);
-		} catch (InvalidFormatException e) {
-			this.logging.debug("REGISTERING USER FAILED");
-		}		
-	}
-
-	/**
 	 * @return the commManager
 	 */
 	public ICommManager getCommManager() {
@@ -333,22 +302,7 @@ public class AskFree extends EventListener implements IAskFree{
 	public void setSymbolicLocation(String userIdentity, String symbolicLocation) {
 		userToLocation.put(userIdentity, symbolicLocation);
 		this.logging.debug("Set symbolic location: "+symbolicLocation+" for user: " + userIdentity);
-		//this.symbolicLocation = symbolicLocation;
 	}
-
-/*	*//**
-	 * @return the contextEventListener
-	 *//*
-	public ContextEventListener getContextEventListener() {
-		return contextEventListener;
-	}
-
-	*//**
-	 * @param contextEventListener the contextEventListener to set
-	 *//*
-	public void setContextEventListener(ContextEventListener contextEventListener) {
-		this.contextEventListener = contextEventListener;
-	}*/
 
 	/* (non-Javadoc)
 	 * @see ac.hw.askfree.IAskFree#setUserLocation(java.lang.String, java.lang.String)

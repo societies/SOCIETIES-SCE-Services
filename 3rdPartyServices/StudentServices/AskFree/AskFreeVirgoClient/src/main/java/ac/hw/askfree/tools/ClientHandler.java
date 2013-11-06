@@ -55,7 +55,6 @@ public class ClientHandler implements Runnable {
 		this.socket = socket;
 		this.askFree = askFree;
 		this.log.debug("Client Handler created");
-		//this.askFree.addClientHandler()
 	}
 
 	public void run(){
@@ -63,7 +62,6 @@ public class ClientHandler implements Runnable {
 
 		this.getStreams();
 		this.getClientMessage();
-		//this.sendMessage(message);
 	}
 
 	private void getStreams(){
@@ -94,8 +92,6 @@ public class ClientHandler implements Runnable {
 					if (askFree.getSymbolicLocation(cssId) != null){
 						this.sendMessage(askFree.getSymbolicLocation(cssId));
 					}
-					//register user to ContextEventListener
-				//	askFree.registerUser(cssId,this);
 				}
 			}		
 		}catch(ClassNotFoundException e){

@@ -50,20 +50,18 @@ import ac.hw.askfree.IAskFreeServerRemote;
  */
 public class CommsClient implements ICommCallback, IAskFreeServerRemote{
 
-	
+
 	private static final List<String> NAMESPACES = Collections.unmodifiableList(
 
-            Arrays.asList("http://societies.org/api/schema/askfree/serverbean"));
-			 // Arrays.asList("http://societies.org/api/ext3p/schema/displayportalserverbean",
-				//	  "http://societies.org/api/schema/servicelifecycle/model"));
+			Arrays.asList("http://societies.org/api/schema/askfree/serverbean"));
 	private static final List<String> PACKAGES = Collections.unmodifiableList(
-		  Arrays.asList("org.societies.api.schema.askfree.serverbean"));
-	
+			Arrays.asList("org.societies.api.schema.askfree.serverbean"));
+
 	Logger logging = LoggerFactory.getLogger(this.getClass());
-	
-	
+
+
 	private ICommManager commManager;
-	
+
 	public void InitService() {
 		//REGISTER OUR ServiceManager WITH THE XMPP Communication Manager
 		try {
@@ -73,8 +71,8 @@ public class CommsClient implements ICommCallback, IAskFreeServerRemote{
 			e.printStackTrace();
 		}
 	}
-	
-	
+
+
 	/* (non-Javadoc)
 	 * @see ac.hw.askfree.IAskFreeServerRemote#registerAfterRestart(java.lang.String, java.lang.String)
 	 */
@@ -119,7 +117,7 @@ public class CommsClient implements ICommCallback, IAskFreeServerRemote{
 	@Override
 	public void receiveError(Stanza arg0, XMPPError arg1) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	/* (non-Javadoc)
@@ -128,7 +126,7 @@ public class CommsClient implements ICommCallback, IAskFreeServerRemote{
 	@Override
 	public void receiveInfo(Stanza arg0, String arg1, XMPPInfo arg2) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	/* (non-Javadoc)
@@ -137,7 +135,7 @@ public class CommsClient implements ICommCallback, IAskFreeServerRemote{
 	@Override
 	public void receiveItems(Stanza arg0, String arg1, List<String> arg2) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	/* (non-Javadoc)
@@ -146,7 +144,7 @@ public class CommsClient implements ICommCallback, IAskFreeServerRemote{
 	@Override
 	public void receiveMessage(Stanza arg0, Object arg1) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	/* (non-Javadoc)
@@ -155,7 +153,7 @@ public class CommsClient implements ICommCallback, IAskFreeServerRemote{
 	@Override
 	public void receiveResult(Stanza arg0, Object arg1) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	/**

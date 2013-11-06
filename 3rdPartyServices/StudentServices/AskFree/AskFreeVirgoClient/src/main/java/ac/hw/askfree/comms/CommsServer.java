@@ -52,19 +52,17 @@ public class CommsServer implements IFeatureServer{
 
 	private static final List<String> NAMESPACES = Collections.unmodifiableList(
 
-            Arrays.asList("http://societies.org/api/schema/askfree/serverbean"));
-			 // Arrays.asList("http://societies.org/api/ext3p/schema/displayportalserverbean",
-				//	  "http://societies.org/api/schema/servicelifecycle/model"));
+			Arrays.asList("http://societies.org/api/schema/askfree/serverbean"));
 	private static final List<String> PACKAGES = Collections.unmodifiableList(
-		  Arrays.asList("org.societies.api.schema.askfree.serverbean"));
+			Arrays.asList("org.societies.api.schema.askfree.serverbean"));
 
-	
-	
+
+
 	private ICommManager commManager;
 	private AskFree askFreeServer;
-	
+
 	private static Logger LOG = LoggerFactory.getLogger(CommsServer.class);
-	
+
 	/**
 	 * @return the commManager
 	 */
@@ -83,7 +81,7 @@ public class CommsServer implements IFeatureServer{
 	//METHODS
 	public CommsServer() {
 	}
-	
+
 	public void InitService() {
 		//REGISTER OUR ServiceManager WITH THE XMPP Communication Manager
 		try {
@@ -92,7 +90,7 @@ public class CommsServer implements IFeatureServer{
 			e.printStackTrace();
 		}
 	}
-	
+
 	@Override
 	public List<String> getJavaPackages() {
 		// TODO Auto-generated method stub
@@ -119,7 +117,7 @@ public class CommsServer implements IFeatureServer{
 	public void receiveMessage(Stanza stanza, Object payload) {
 		//this method is used only if the remote call is for a method that returns void
 		if (payload instanceof AskFreeServerBean){
-			
+
 			if (((AskFreeServerBean) payload).getMethod().equals(AskFreeMethodType.UPDATE_USER_LOCATION)){
 				if(LOG.isDebugEnabled()) LOG.debug("getQuery: "+AskFreeMethodType.UPDATE_USER_LOCATION);
 				String location = ((AskFreeServerBean) payload).getUserLocation();
@@ -127,8 +125,8 @@ public class CommsServer implements IFeatureServer{
 				askFreeServer.pushToAndroid(stanza.getFrom().getBareJid());
 
 			}
-				
-			}
+
+		}
 	}
 
 	@Override

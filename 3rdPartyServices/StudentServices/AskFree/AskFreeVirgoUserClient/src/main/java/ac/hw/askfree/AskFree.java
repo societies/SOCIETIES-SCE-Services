@@ -74,7 +74,7 @@ public class AskFree extends EventListener implements IAskFreeClient, IDisplayab
 	private IDisplayDriver displayDriverService;
 	private IServices serviceMgmt;
 	private IEventMgr eventMgr;
-	
+
 	private IAskFreeServerRemote askFreeCommsClient;
 	Logger logging = LoggerFactory.getLogger(this.getClass());
 	private IIdentity serverIdentity;
@@ -104,7 +104,7 @@ public class AskFree extends EventListener implements IAskFreeClient, IDisplayab
 
 	private ICommManager commManager;
 
-	
+
 	/**
 	 * @return the eventMgr
 	 */
@@ -118,10 +118,6 @@ public class AskFree extends EventListener implements IAskFreeClient, IDisplayab
 	public void setEventMgr(IEventMgr eventMgr) {
 		this.eventMgr = eventMgr;
 	}
-
-
-
-	//private String symbolicLocation;
 
 	public void init(){
 
@@ -139,19 +135,19 @@ public class AskFree extends EventListener implements IAskFreeClient, IDisplayab
 		{
 			this.displayDriverService.registerDisplayableService(this, "AskFree", askFreeURL, false);
 		}
-		
+
 		//REGISTER FOR SYMLOC CHANGES
 		ContextEventListener listener = new ContextEventListener(this, this.commManager.getIdManager().getThisNetworkNode(), this.ctxBroker);
 		listener.registerForSymLocChanges();
 	}
-	
+
 	//THIS IS NEW 
 	public void updateUserLocation(String location)
 	{
 		//SEND MESSAGE TO SERVER
 		if(this.serverIdentity!=null)
 		{
-		askFreeCommsClient.sendLocation(this.serverIdentity, location);
+			askFreeCommsClient.sendLocation(this.serverIdentity, location);
 		}
 		else
 		{
@@ -180,7 +176,6 @@ public class AskFree extends EventListener implements IAskFreeClient, IDisplayab
 				")";
 
 		this.eventMgr.unSubscribeInternalEvent(this, new String[]{EventTypes.SERVICE_LIFECYCLE_EVENT}, eventFilter);
-		//this.evMgr.subscribeInternalEvent(this, new String[]{EventTypes.SERVICE_LIFECYCLE_EVENT}, eventFilter);
 		this.logging.debug("Unsubscribed from "+EventTypes.SERVICE_LIFECYCLE_EVENT+" events");
 	}
 
@@ -194,7 +189,6 @@ public class AskFree extends EventListener implements IAskFreeClient, IDisplayab
 
 		logging.debug("Received internal event: "+event.geteventName());
 
-		//	if(event.geteventName().equalsIgnoreCase(EventTypes.)){
 		logging.debug("Received SLM event");
 		ServiceMgmtEvent slmEvent = (ServiceMgmtEvent) event.geteventInfo();
 		this.logging.debug("SLM event Bundle Symbol Name" + slmEvent.getBundleSymbolName());
@@ -204,14 +198,9 @@ public class AskFree extends EventListener implements IAskFreeClient, IDisplayab
 
 				this.logging.debug("AskFree User Client Started!!!");
 				this.serverIdentity = this.serviceMgmt.getServer(slmEvent.getServiceId());
-			//	this.askFreeCommsClient.registerAfterRestart(server, this.getCommManager().getIdManager().getThisNetworkNode().getBareJid());
-			//	unregisterForServiceEvents();
 			}
 		}
-		//	}
 	}
-
-
 
 
 	/**
