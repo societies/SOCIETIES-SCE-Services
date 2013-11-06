@@ -45,7 +45,7 @@ import org.slf4j.LoggerFactory;
 import org.societies.api.cis.management.ICis;
 import org.societies.api.cis.management.ICisManager;
 import org.societies.api.context.model.CtxModelType;
-import org.societies.collabtools.api.ICollabAppConnector;
+import org.societies.collabtools.api.AbstractCollabAppConnector;
 import org.societies.collabtools.api.ICollabApps;
 import org.societies.collabtools.api.IContextSubscriber;
 import org.societies.collabtools.api.IEngine;
@@ -115,10 +115,10 @@ public class Admin {
 
 	@RequestMapping(value = "/applications.html", method = RequestMethod.GET)
 	public ModelAndView collabApps() {
-		ICollabAppConnector[] collabAppsConnectors = getCollabAppsConnectors().getCollabAppConnectors();
+		AbstractCollabAppConnector[] collabAppsConnectors = getCollabAppsConnectors().getCollabAppConnectors();
 		List<String> appnames = new ArrayList<String>();
 		List<String> appserver = new ArrayList<String>();
-		for (ICollabAppConnector apps : collabAppsConnectors){
+		for (AbstractCollabAppConnector apps : collabAppsConnectors){
 			appnames.add(apps.getAppName());
 			appserver.add(apps.getAppServerName());
 		}
@@ -182,10 +182,10 @@ public class Admin {
 		model.put("rulesresults", rulesresults);
 		
 		//Applications
-		ICollabAppConnector[] collabAppsConnectors = getCollabAppsConnectors().getCollabAppConnectors();
+		AbstractCollabAppConnector[] collabAppsConnectors = getCollabAppsConnectors().getCollabAppConnectors();
 		List<String> appnames = new ArrayList<String>();
 		List<String> appserver = new ArrayList<String>();
-		for (ICollabAppConnector apps : collabAppsConnectors){
+		for (AbstractCollabAppConnector apps : collabAppsConnectors){
 			appnames.add(apps.getAppName());
 			appserver.add(apps.getAppServerName());
 		}
@@ -307,8 +307,8 @@ public class Admin {
 
 	@RequestMapping(value = "/setcollabapps.html", method = RequestMethod.GET)
 	public @ResponseBody String setCollabAppsConnectors(@RequestParam String app, String server) {
-		ICollabAppConnector[] collabAppsConnectors = getCollabAppsConnectors().getCollabAppConnectors();
-		for (ICollabAppConnector apps : collabAppsConnectors){
+		AbstractCollabAppConnector[] collabAppsConnectors = getCollabAppsConnectors().getCollabAppConnectors();
+		for (AbstractCollabAppConnector apps : collabAppsConnectors){
 			if (apps.getAppName().equalsIgnoreCase(app)){
 				apps.setAppServerName(server);
 			}
