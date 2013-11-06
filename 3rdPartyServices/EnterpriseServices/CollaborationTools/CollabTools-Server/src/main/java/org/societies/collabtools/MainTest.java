@@ -38,7 +38,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.societies.collabtools.acquisition.LongTermCtxTypes;
 import org.societies.collabtools.acquisition.PersonRepository;
-import org.societies.collabtools.api.ICollabAppConnector;
+import org.societies.collabtools.api.AbstractCollabAppConnector;
 import org.societies.collabtools.runtime.CollabApps;
 import org.societies.collabtools.runtime.SessionRepository;
 
@@ -82,8 +82,8 @@ public class MainTest {
 	    indexShortTermCtx = personGraphDb.index().forNodes("CtxNodes");
 	    
 	    //Synchronous integration
-	    ICollabAppConnector chat = new ChatAppIntegrator(prop.getProperty("applications"), prop.getProperty("server"));
-	    ICollabAppConnector[] connectorsApp = {chat};
+	    AbstractCollabAppConnector chat = new ChatAppIntegrator(prop.getProperty("applications"), prop.getProperty("server"));
+	    AbstractCollabAppConnector[] connectorsApp = {chat};
 	    CollabApps collabApps = new CollabApps(connectorsApp);
 
 	    personRepository = new PersonRepository(personGraphDb, indexPerson);
@@ -98,12 +98,12 @@ public class MainTest {
 		test.deleteSocialGraph();
 		
 //		test.menu();
-		test.createPersons(4); //5 people by default
+		test.createPersons(2); //5 people by default
 		
 //		Creating some updates
 		test.createMockLongTermCtx();
 		test.createMockShortTermCtx();
-		test.enrichedCtx(LongTermCtxTypes.INTERESTS);
+//		test.enrichedCtx(LongTermCtxTypes.INTERESTS);
 //		test.setupWeightAmongPeople(LongTermCtxTypes.INTERESTS);
 
 		

@@ -26,7 +26,7 @@ package org.societies.collabtools.acquisition;
 
 import static org.societies.collabtools.acquisition.RelTypes.NEXT;
 import static org.societies.collabtools.acquisition.RelTypes.SIMILARITY;
-import static org.societies.collabtools.acquisition.RelTypes.STATUS;
+import static org.societies.collabtools.acquisition.RelTypes.REALTIME_STATUS;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -81,23 +81,41 @@ public class Person extends Observable
 	// START SNIPPET: delegate-to-the-node
 	public String getName()
 	{
-		return (String)underlyingNode.getProperty(LongTermCtxTypes.NAME);
+		Object o = underlyingNode.getProperty(LongTermCtxTypes.NAME);
+		if (o instanceof String[]) {			
+			return Arrays.toString((String[]) o);
+		}
+		else {
+			return (String) o;
+		}
 	}
 
 	// END SNIPPET: delegate-to-the-node
 
 	public String getLongTermCtx(String property){
-		return (String) underlyingNode.getProperty(property.toString(), "");
+		Object o = underlyingNode.getProperty(property.toString(), "");
+		if (o instanceof String[]) {			
+			return Arrays.toString((String[]) o);
+		}
+		else {
+			return (String) o;
+		}
 	}
 
 	//Array of ctx
 	public String[] getArrayLongTermCtx(String property){
-		Object o = this.underlyingNode.getProperty(property);
-		if (o instanceof String[]) {
-		      return (String[]) o;
-		   } 
+		Object o = this.underlyingNode.getProperty(property, null);
+		if (o != null){
+			if (o instanceof String[]) {
+				return (String[]) o;
+			} 
+			else {
+				return new String[] {o.toString()};
+			}
+		}
 		else {
-		      return new String[] {o.toString()};
+			//Return empty array if this property not exists
+			return null;
 		}
 	}
 
@@ -275,7 +293,7 @@ public class Person extends Observable
 	public Iterable<ShortTermContextUpdates> getStatus()
 	{
 		Relationship firstStatus = underlyingNode.getSingleRelationship(
-				STATUS, Direction.OUTGOING );
+				REALTIME_STATUS, Direction.OUTGOING );
 		if (firstStatus == null)
 		{
 			return Collections.emptyList();
@@ -303,7 +321,7 @@ public class Person extends Observable
 	public ShortTermContextUpdates getLastShortTermUpdate()
 	{
 		Relationship firstStatus = underlyingNode.getSingleRelationship(
-				STATUS, Direction.OUTGOING);
+				REALTIME_STATUS, Direction.OUTGOING);
 		//Check if status is empty
 		if (firstStatus == null)
 		{
@@ -348,11 +366,11 @@ public class Person extends Observable
 
 			if (oldStatus != null)
 			{
-				underlyingNode.getSingleRelationship(RelTypes.STATUS, Direction.OUTGOING).delete();
+				underlyingNode.getSingleRelationship(RelTypes.REALTIME_STATUS, Direction.OUTGOING).delete();
 				newStatus.createRelationshipTo(oldStatus.getUnderlyingNode(), RelTypes.NEXT);
 			}
 
-			underlyingNode.createRelationshipTo(newStatus, RelTypes.STATUS);  
+			underlyingNode.createRelationshipTo(newStatus, RelTypes.REALTIME_STATUS);  
 			tx.success();
 			//            Node newStatus = createNewCtxNode(shortTermCtx, sessionRep);
 			//            //Verify if oldstatus exist
@@ -382,6 +400,10 @@ public class Person extends Observable
 	private Node createShortTermCtxNode(Map<String, String> shortTermCtx, SessionRepository sessionRep)
 	{
 		Node newCtx = graphDb().createNode();
+		//Including date stamp
+		SimpleDateFormat formatter = new SimpleDateFormat(ShortTermContextUpdates.DATE_FORMAT);
+		newCtx.setProperty(ShortTermContextUpdates.DATE, formatter.format(new Date().getTime()));
+		
 		ShortTermContextUpdates oldStatus = getLastShortTermUpdate();
 		boolean contextChanged = false;
 		if (oldStatus != null) {
@@ -393,18 +415,13 @@ public class Person extends Observable
 			}
 		} 
 		for (Map.Entry<String, String> entry : shortTermCtx.entrySet()) {
-			String key = (String)entry.getKey();
-			if (key.equals(ShortTermCtxTypes.LOCATION)){
-				contextChanged = contextHasChanged((String)entry.getKey(), entry.getValue().toString());
-			} 
-			newCtx.setProperty((String)entry.getKey(), entry.getValue().toString());
+			String shortTermCtxType = entry.getKey().toString();
+			String shortTermValue = entry.getValue().toString();
+			contextChanged = contextHasChanged(shortTermCtxType, shortTermValue);
+			newCtx.setProperty(shortTermCtxType, shortTermValue);
 		}
-		//Including date stamp
-		SimpleDateFormat formatter = new SimpleDateFormat(ShortTermContextUpdates.DATE_FORMAT);
-		newCtx.setProperty(ShortTermContextUpdates.DATE, formatter.format(new Date().getTime()));
 		//Check location changes; First status, second location
 		if (contextChanged){
-			//TODO:Fix the context changes
 			this.addObserver(sessionRep);
 			setChanged();
 			notifyObservers(this);
@@ -418,17 +435,13 @@ public class Person extends Observable
 	 * @return
 	 */
 	private boolean contextHasChanged(final String contextType, String context) {
-		ShortTermContextUpdates ctxStatus= getLastShortTermUpdate();
-		//		if (ctxStatus == null){
-		//			return false;
-		////						throw new IllegalArgumentException("ctxStatus cannot be null!");
-		//		}
-		String propValue= ctxStatus.getShortTermCtx(contextType);
-		//Verify if old context is not empty
-		if (!ctxStatus.getShortTermCtx(contextType).isEmpty()) {
-			//Check old context with new context
-			if (!context.equals(ctxStatus.getShortTermCtx(contextType))) {
-				System.out.println(ctxStatus.getPerson() + " had context: " + propValue + " and now has context: " + context);
+		ShortTermContextUpdates ctxStatus= this.getLastShortTermUpdate();
+		//Verify if previous shortTermctx node exists
+		if (ctxStatus != null && !ctxStatus.getShortTermCtx(contextType).isEmpty()) {
+			//Verify if the new property to compare exists in old shortTermctx node 
+			String propValue= ctxStatus.getShortTermCtx(contextType);
+			if (propValue != null && !context.equals(propValue)) {
+				System.out.println(ctxStatus.getPerson() + " had context: " + contextType+" "+ propValue + " and now has context: " + context);
 				return true;
 			}
 		}

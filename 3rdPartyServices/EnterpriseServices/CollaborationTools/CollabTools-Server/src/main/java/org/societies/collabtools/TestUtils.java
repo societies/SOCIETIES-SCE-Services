@@ -134,19 +134,19 @@ public class TestUtils {
 	 */
 	public void createMockShortTermCtx()
 	{
-//		Map<String, String> shortTermCtx = new HashMap<String, String>();
-		for (Person friend : this.personRepository.getAllPersons()) {
-			String [] response = new String [] {ShortTermCtxTypes.STATUS, getRandomStatus(), friend.getName()};
-			ctxSub.update(null, response);
-//			shortTermCtx.put(ShortTermCtxTypes.STATUS, getRandomStatus());
-//			friend.addContextStatus(shortTermCtx, this.sessionRepository);
-		}
 //		Map<String, String> shortTermCtx1 = new HashMap<String, String>();
 		for (Person friend : this.personRepository.getAllPersons()) {
 			String [] response = new String [] {ShortTermCtxTypes.LOCATION, getRandomLocation(), friend.getName()};
 			ctxSub.update(null, response);
 //			shortTermCtx1.put(ShortTermCtxTypes.LOCATION, getRandomLocation());
 //			friend.addContextStatus(shortTermCtx1, this.sessionRepository);
+		}
+//		Map<String, String> shortTermCtx = new HashMap<String, String>();
+		for (Person friend : this.personRepository.getAllPersons()) {
+			String [] response = new String [] {ShortTermCtxTypes.STATUS, getRandomStatus(), friend.getName()};
+			ctxSub.update(null, response);
+//			shortTermCtx.put(ShortTermCtxTypes.STATUS, getRandomStatus());
+//			friend.addContextStatus(shortTermCtx, this.sessionRepository);
 		}
 	}
 

@@ -85,8 +85,8 @@ public class ContextAnalyzerTest {
 		personRepository = new PersonRepository(personGraphDb, indexPerson);
 //		sessionRepository = new SessionRepository(sessionGraphDb,indexSession, new CollabApps());
 		
-		LOG.info("personGraphDb path: "+"target/persontestdb0"  + random);
-//		LOG.info("sessionGraphDb path: "+"target/sessiontestdb0"  + random);
+		LOG.info("personGraphDb path: "+"target/persontestdb00"  + random);
+//		LOG.info("sessionGraphDb path: "+"target/sessiontestdb00"  + random);
 		
 //        ctxSub = new ContextSubscriber(null,personRepository, sessionRepository);
 		LOG.info("Setup done...");
@@ -178,6 +178,10 @@ public class ContextAnalyzerTest {
 		HashSet<Person> personHashSet = new HashSet<Person>();
 		personHashSet.add(personRepository.getPersonByName("person#0"));
 		personHashSet.add(personRepository.getPersonByName("person#1"));
+		
+		//Twice for test
+		ctxRsn.incrementCtx(LongTermCtxTypes.INTERESTS, EnrichmentTypes.CONCEPT, null);
+		ctxRsn.setupWeightAmongPeople(LongTermCtxTypes.INTERESTS);
 		ctxRsn.incrementCtx(LongTermCtxTypes.INTERESTS, EnrichmentTypes.CONCEPT, null);
 		ctxRsn.setupWeightAmongPeople(LongTermCtxTypes.INTERESTS);
 		Hashtable<String, HashSet<Person>> matchingRules = new Hashtable<String, HashSet<Person>>(10,10);

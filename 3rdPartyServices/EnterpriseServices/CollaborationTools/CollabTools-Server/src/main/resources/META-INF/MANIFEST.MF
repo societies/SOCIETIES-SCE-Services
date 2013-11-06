@@ -8,8 +8,8 @@ Export-Package: org.societies.collabtools;uses:="org.societies.collabt
  rg.societies.collabtools.api,org.societies.collabtools,org.societies.
  collabtools.runtime,org.slf4j,org.societies.collabtools.context,org.o
  sgi.framework";version="0.1.0",org.societies.collabtools.runtime;uses
- :="org.societies.collabtools.api,org.societies.collabtools.acquisitio
- n,org.slf4j";version="0.1.0"
+ :="org.societies.collabtools.api,org.slf4j,org.societies.collabtools.
+ acquisition";version="0.1.0"
 Ignore-Package: ch.qos.logback.classic,ch.qos.logback.core,ch.qos.logb
  ack.core.joran.spi,ch.qos.logback.classic.joran
 Bundle-ClassPath: .,neo4j-kernel-1.8.M04.jar,classes,neo4j-graph-algo-
@@ -24,7 +24,7 @@ Bundle-Name: Collaboration Tools
 Created-By: Apache Maven Bundle Plugin
 Build-Jdk: 1.7.0_03
 Bundle-Version: 0.1.0
-Bnd-LastModified: 1381939651859
+Bnd-LastModified: 1383682439155
 Embed-Transitive: true
 Bundle-ManifestVersion: 2
 Bundle-Activator: org.societies.collabtools.Activator

@@ -39,6 +39,7 @@ import org.societies.collabtools.acquisition.Person;
 import org.societies.collabtools.acquisition.PersonRepository;
 import org.societies.collabtools.acquisition.ShortTermCtxTypes;
 import org.societies.collabtools.api.IEngine;
+import org.societies.collabtools.api.IIncrementCtx.EnrichmentTypes;
 import org.societies.collabtools.interpretation.ContextAnalyzer;
 
 /**
@@ -53,19 +54,16 @@ public class Engine implements IEngine {
 
 	private static Logger log = LoggerFactory.getLogger(Engine.class);
 	public PersonRepository personRepository;
-	public SessionRepository sessionRepository;
 
 	private List<Rule> rules = new ArrayList<Rule>();
 	private ContextAnalyzer ctxRsn;
 
 	/**
 	 * @param sessionRepository 
-	 * @param personRepository 
 	 * 
 	 */
-	public Engine(PersonRepository personRepository, SessionRepository sessionRepository) {
+	public Engine(PersonRepository personRepository) {
 		this.personRepository = personRepository;
-		this.sessionRepository = sessionRepository;
 		this.ctxRsn = new ContextAnalyzer(personRepository);
 	}
 
@@ -104,12 +102,6 @@ public class Engine implements IEngine {
 	 * */
 	public synchronized void setRules(final Collection<Rule> rules){
 		for(Rule r : rules){
-			if (r.getOperator().equals(Operators.SIMILAR)){
-				// context enrichment with Concept and Category
-				ctxRsn.enrichedCtx(r.getCtxAttribute());
-				//Assigning new weights or update the existing one
-				ctxRsn.setupWeightAmongPeople(r.getCtxAttribute());
-			}
 			this.rules.add(r);
 			log.info("added rule: " + r);
 		}
@@ -398,6 +390,10 @@ public class Engine implements IEngine {
 					return tablePersons;
 				}
 				else {
+//					ctxRsn.enrichedCtx(ctxAttribute);
+					//For tests only concept enrichment will be done
+					ctxRsn.incrementCtx(ctxAttribute, EnrichmentTypes.CONCEPT, null);
+					ctxRsn.setupWeightAmongPeople(ctxAttribute);
 					return ctxRsn.getPersonsBySimilarity(ctxAttribute, personHashSet, ctxAttribute);
 				}						
 			}
