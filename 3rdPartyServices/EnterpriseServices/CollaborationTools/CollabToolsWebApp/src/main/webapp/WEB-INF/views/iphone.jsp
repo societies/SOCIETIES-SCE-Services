@@ -22,7 +22,7 @@
 			<li data-dojo-type="dojox.mobile.TabBarButton" data-dojo-props='moveTo:"#communities", selected:true'>Communities</li>
 			<li data-dojo-type="dojox.mobile.TabBarButton" data-dojo-props='moveTo:"#rules"'>Rules</li>
 			<li data-dojo-type="dojox.mobile.TabBarButton" data-dojo-props='moveTo:"#applications"'>Applications</li>
-			<li data-dojo-type="dojox.mobile.TabBarButton" data-dojo-props='moveTo:"#notification"'>Sessions</li>
+			<li data-dojo-type="dojox.mobile.TabBarButton" data-dojo-props='moveTo:"#notification",badge:"1"'>Sessions</li>
 		</ul>
 			
 		<div id="communities" data-dojo-type="dojox.mobile.View" data-dojo-props="selected: true">
