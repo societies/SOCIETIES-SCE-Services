@@ -24,64 +24,77 @@
  */
 package org.societies.collabtools.api;
 
+import java.util.Observable;
+import java.util.Observer;
+
 /**
  * Interface to integrate SYNCHRONOUS collaborative applications. 1..1
  *
  * @author Chris Lima
  *
  */
-public interface ICollabAppConnector {
+public abstract class AbstractCollabAppConnector extends Observable {
 	
 	/**
 	 * Name of integrated application
 	 */
-	public String getAppName();
+	public abstract String getAppName();
 	
 	/**
 	 * Name of integrated application host
 	 */
-	public String getAppServerName();
+	public abstract String getAppServerName();
 	
 	/**
 	 * Set the name of integrated application
 	 */
-	public void setAppName(String app_name);
+	public abstract void setAppName(String app_name);
 	
 	/**
 	 * Set the host of integrated application
 	 */
-	public void setAppServerName(String host);
+	public abstract void setAppServerName(String host);
 	
 	/**
 	 * Setup the initial configuration for the Collaborative application
 	 */
-	public void setup();
+	public abstract void setup();
 	
 	/**
 	 * @param user individual who wants to join the room
 	 * @param room conference room to join
 	 * @param language default language for discussion
 	 */
-	void join(String user, String room, String language);
+	public abstract void join(String user, String room, String language);
 	
 	/**
 	 * @param user individual who wants to leave the room
 	 * @param room conference room 
 	 */
-	void kick(String user, String room);
+	public abstract void kick(String user, String room);
 	
 	/**
 	 * Trigger some event if a user joins the conference
 	 * 
+	 * @param room conference room 
 	 * @param participant individual who wants to leave the room
 	 */
-	void joinEvent(String participant);
+	protected void joinEvent(String room, String participant) {
+		setChanged();
+		String[] response = {"joinEvent", room, getAppName(), participant};
+		notifyObservers(response);
+	}
 	
 	/**
 	 * Trigger some event if a user leaves the conference
 	 * 
+	 * @param room conference room 
 	 * @param participant individual who wants to leave the room
 	 */
-	void leaveEvent(String participant);
+	protected void leaveEvent(String room, String participant) {
+		setChanged();
+		String[] response = {"leaveEvent", room, getAppName(), participant};
+		notifyObservers(response);
+	}
 
 }

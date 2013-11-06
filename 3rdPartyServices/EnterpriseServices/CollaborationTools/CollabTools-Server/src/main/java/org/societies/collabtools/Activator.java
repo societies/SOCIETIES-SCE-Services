@@ -45,7 +45,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.societies.collabtools.acquisition.ContextSubscriber;
 import org.societies.collabtools.acquisition.PersonRepository;
-import org.societies.collabtools.api.ICollabAppConnector;
+import org.societies.collabtools.api.AbstractCollabAppConnector;
 import org.societies.collabtools.api.ICollabApps;
 import org.societies.collabtools.api.IContextSubscriber;
 import org.societies.collabtools.api.IEngine;
@@ -84,8 +84,8 @@ public class Activator implements BundleActivator
 
 		//Apps and server
 		//load a properties file
-		ICollabAppConnector chat = new ChatAppIntegrator(rs.getString("applications"), rs.getString("server"));
-		ICollabAppConnector[] connectorsApp = {chat};
+		AbstractCollabAppConnector chat = new ChatAppIntegrator(rs.getString("applications"), rs.getString("server"));
+		AbstractCollabAppConnector[] connectorsApp = {chat};
 		this.collabApps = new CollabApps(connectorsApp);
 
 		this.setup();

@@ -24,6 +24,8 @@
  */
 package org.societies.collabtools.api;
 
+import java.util.Observer;
+
 /**
  * Interface for Collaborative Applications Manager
  *
@@ -35,7 +37,7 @@ public interface ICollabApps {
 	/**
 	 * @return Collaborative applications integrated
 	 */
-	public abstract ICollabAppConnector[] getCollabAppConnectors();
+	public abstract AbstractCollabAppConnector[] getCollabAppConnectors();
 
 	/**
 	 * Send invitation to members of a session
@@ -61,7 +63,7 @@ public interface ICollabApps {
 	 * @param collabApps Collaborative applications to send the action
 	 * @param sessionName Collaborative session name
 	 */
-	public abstract void joinEvent(String member, String[] collabApps, String sessionName);
+	public abstract void joinEvent(String member, String collabApp, String sessionName);
 	
 	/**
 	 * Leave event to trigger some action
@@ -70,6 +72,6 @@ public interface ICollabApps {
 	 * @param collabApps Collaborative applications to send the action
 	 * @param sessionName Collaborative session name
 	 */
-	public abstract void leaveEvent(String member, String[] collabApps, String sessionName);
+	public abstract void leaveEvent(String member, String collabApps, String sessionName);
 
 }

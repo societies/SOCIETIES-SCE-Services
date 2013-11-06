@@ -134,7 +134,19 @@ public class ContextAnalyzer implements IContextAnalyzer {
 				FutureTask<Boolean> task = new FutureTask<Boolean>(new Callable<Boolean>() {
 					@Override
 					public Boolean call() throws Exception {
-						String[] newContexts = ctxEnrichment(friend.getArrayLongTermCtx(ctxType), ctxType.toString(), enrichmentType);
+						String[] originalCtx;
+						//Check if this ctxTyp was incremented
+						if (friend.getArrayLongTermCtx("ORIGINAL_"+ctxType) == null) {
+							//Keeping the original ctx information
+							originalCtx = friend.getArrayLongTermCtx(ctxType);
+						}
+						else {
+							originalCtx = friend.getArrayLongTermCtx("ORIGINAL_"+ctxType);
+						}
+						//Saving the original ctx in a diferent property
+						friend.setLongTermCtx("ORIGINAL_"+ctxType, originalCtx);
+						//Adding the new ctx info + orignal ctx info
+						String[] newContexts = ctxEnrichment(originalCtx, ctxType.toString(), enrichmentType);
 						friend.setLongTermCtx(ctxType, newContexts);
 						log.debug("{} enrichment done for person {}",enrichmentType,friend.getName());
 						return true;
@@ -157,6 +169,17 @@ public class ContextAnalyzer implements IContextAnalyzer {
 			executor.shutdown();
 		}
 		else {
+			String[] originalCtx;
+			if (person.getArrayLongTermCtx("ORIGINAL_"+ctxType) == null) {
+				//Keeping the original ctx information
+				originalCtx = person.getArrayLongTermCtx(ctxType);
+			}
+			else {
+				originalCtx = person.getArrayLongTermCtx("ORIGINAL_"+ctxType);
+			}
+			//Saving the original ctx in a diferent property
+			person.setLongTermCtx("ORIGINAL_"+ctxType, originalCtx);
+			//Adding the new ctx info + orignal ctx info
 			String[] newContexts = ctxEnrichment(person.getArrayLongTermCtx(ctxType), ctxType.toString(), enrichmentType);
 			person.setLongTermCtx(ctxType, newContexts);
 			log.debug("{} done!",enrichmentType);
@@ -169,7 +192,7 @@ public class ContextAnalyzer implements IContextAnalyzer {
 		//Check if there is no similarity between both
 		if (similarCtx != 0) {
 			float PersonAweight = (float)similarCtx/personA.getArrayLongTermCtx(ctxType).length;
-			float PersonBweight = (float)similarCtx/personB.getArrayLongTermCtx(ctxType).length ;
+			float PersonBweight = (float)similarCtx/personB.getArrayLongTermCtx(ctxType).length;
 			return (PersonAweight + PersonBweight) / 2;
 		}
 		else

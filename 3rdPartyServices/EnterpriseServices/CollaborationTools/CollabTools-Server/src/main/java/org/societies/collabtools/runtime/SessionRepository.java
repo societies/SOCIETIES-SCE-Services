@@ -67,7 +67,7 @@ public class SessionRepository implements Observer {
 		this.graphDb = graphDb;
 		this.indexSession = indexSession;
 		this.collabApps = collabApps;
-
+		this.collabApps.addObserver(this);
 		this.sessionRefNode = getSessionRootNode(graphDb);
 	}
 
@@ -107,29 +107,33 @@ public class SessionRepository implements Observer {
 
 	public void update(Observable o, Object arg)
 	{
-		Person person = (Person)arg;
-		//TODO: Fix for "has_session"
-		//		logger.info(person.getLongTermCtx("has_sessions"));
-		String sessionName = person.getLastShortTermUpdate().getShortTermCtx(ShortTermCtxTypes.LOCATION);
+		//Verify if object class is Person
+		if (o instanceof Person){
+			Person person = (Person)arg;
+			//TODO: Fix for "has_session"
+			//		logger.info(person.getLongTermCtx("has_sessions"));
+			String sessionName = person.getLastShortTermUpdate().getShortTermCtx(ShortTermCtxTypes.LOCATION);
 
-		if (isInSession(person, sessionName))
-		{
-			List<String> personList = new ArrayList<String>();
-			Iterator<Person> it = getSessionByName(sessionName).getMembers();
-			while (it.hasNext()) {
-				personList.add(((Person)it.next()).getName());
+			if (isInSession(person, sessionName))
+			{
+				List<String> personList = new ArrayList<String>();
+				Iterator<Person> it = getSessionByName(sessionName).getMembers();
+				while (it.hasNext()) {
+					personList.add(((Person)it.next()).getName());
+				}
+				logger.debug("{} Session graph before: {}",sessionName, personList.toString());
+
+				getSessionByName(sessionName).removeMember(person);
+
+				it = getSessionByName(sessionName).getMembers();
+				personList.removeAll(personList);
+				while (it.hasNext()) {
+					personList.add(((Person)it.next()).getName());
+				}
+				logger.debug("{} Session graph after: {}", sessionName, personList.toString());
 			}
-			logger.debug("{} Session graph before: {}",sessionName, personList.toString());
-
-			getSessionByName(sessionName).removeMember(person);
-
-			it = getSessionByName(sessionName).getMembers();
-			personList.removeAll(personList);
-			while (it.hasNext()) {
-				personList.add(((Person)it.next()).getName());
-			}
-			logger.debug("{} Session graph after: {}", sessionName, personList.toString());
 		}
+
 	}
 
 	private synchronized boolean isInSession(Person person, String session)
@@ -227,7 +231,7 @@ public class SessionRepository implements Observer {
 		while (personIterator.hasNext()) {
 			//TODO: Implement floor control
 			Person person = (Person)personIterator.next();		
-			getSessionByName(sessionName).addMember(person, Session.LISTENER);
+			getSessionByName(sessionName).addMember(person, Session.VISITOR);
 			sessionChanges = true;
             logger.debug("Inviting new members...");
 		}
@@ -242,7 +246,7 @@ public class SessionRepository implements Observer {
 			HashMap<String, String[]> ctxSessionHistory = new HashMap<String, String[]>();
 			String [] historyPeople = membersList.toArray(new String[0]);
 			logger.debug("members to the session history: ", Arrays.toString(historyPeople));
-			ctxSessionHistory.put(Session.MEMBERS, historyPeople);
+			ctxSessionHistory.put(Session.MEMBERS_INVITED, historyPeople);
 			getSessionByName(sessionName).addSessionHistoryStatus(ctxSessionHistory);
 			//Returning members which were inserted in a existed session
 			return historyPeople;

@@ -31,7 +31,7 @@ public enum RelTypes implements RelationshipType
 	  REF_PERSONS, 
 
 	  A_PERSON, 
-	  STATUS, 
+	  REALTIME_STATUS, 
 	  NEXT, 
 	  SIMILARITY, 
 

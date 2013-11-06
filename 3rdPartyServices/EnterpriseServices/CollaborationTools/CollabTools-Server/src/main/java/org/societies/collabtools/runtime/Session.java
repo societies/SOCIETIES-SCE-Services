@@ -25,7 +25,7 @@
 package org.societies.collabtools.runtime;
 
 import static org.societies.collabtools.acquisition.RelTypes.NEXT;
-import static org.societies.collabtools.acquisition.RelTypes.STATUS;
+import static org.societies.collabtools.acquisition.RelTypes.REALTIME_STATUS;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -68,10 +68,11 @@ public class Session {
 	static final String DATE_FORMAT = "HH:mm:ss dd-MM-yyyy";
 	public static final String SESSION = "session";
 	public static final String ID = "id";
-	public static final String MEMBERS = "members";
+	public static final String MEMBERS_INVITED = "membersInvited";
+	public static final String MEMBERS_PARTICIPATING = "membersParticipating";
 	public static final String ROLE = "role";
 	public static final String CHAIR = "id";
-	public static final String LISTENER = "listener";
+	public static final String VISITOR = "visitor";
 	public static final String LANGUAGE = "language";
 	private final Node underlyingNode;
 	private ICollabApps collabApps;
@@ -223,7 +224,7 @@ public class Session {
 			}
 			HashMap<String, String[]> ctxSessionHistory = new HashMap<String, String[]>();
 			logger.debug("List of members in session history after person leaves: {}",Arrays.toString(membersList.toArray(new String[0])));
-			ctxSessionHistory.put(Session.MEMBERS, membersList.toArray(new String[0]));
+			ctxSessionHistory.put(Session.MEMBERS_INVITED, membersList.toArray(new String[0]));
 			Node sessionHistoryNode = this.addSessionHistoryStatus(ctxSessionHistory);
 
 			//				personNode = index.get(Person.NAME, this.getSessionName()).iterator();
@@ -300,11 +301,11 @@ public class Session {
 			newStatus = createNewSessionHistoryNode(ctxSessionHistory);
 
 			if (oldStatus != null){
-				underlyingNode.getSingleRelationship(RelTypes.STATUS, Direction.OUTGOING).delete();
+				underlyingNode.getSingleRelationship(RelTypes.REALTIME_STATUS, Direction.OUTGOING).delete();
 				newStatus.createRelationshipTo(oldStatus.getUnderlyingNode(), RelTypes.NEXT );
 			}
 
-			underlyingNode.createRelationshipTo(newStatus, RelTypes.STATUS);  
+			underlyingNode.createRelationshipTo(newStatus, RelTypes.REALTIME_STATUS);  
 			tx.success();
 		}
 		finally{
@@ -318,7 +319,7 @@ public class Session {
 	 */
 	 private Iterable<SessionHistory> getHistoryStatus() {
 		Relationship firstStatus = underlyingNode.getSingleRelationship(
-				STATUS, Direction.OUTGOING );
+				REALTIME_STATUS, Direction.OUTGOING );
 		if (firstStatus == null)
 		{
 			return Collections.emptyList();
@@ -358,7 +359,7 @@ public class Session {
 	 public Node getLastSessionHistoryStatus()
 	 {
 		 Relationship firstStatus = underlyingNode.getSingleRelationship(
-				 STATUS, Direction.OUTGOING);
+				 REALTIME_STATUS, Direction.OUTGOING);
 		 //Check status is empty
 		 if (firstStatus == null)
 		 {

@@ -76,7 +76,7 @@ public class RuleEngineTest {
 	
     private static ContextSubscriber ctxSub;
 	
-	private Engine engine = new Engine(personRepository, sessionRepository);
+	private Engine engine = new Engine(personRepository);
 	
 	
 	public RuleEngineTest() {

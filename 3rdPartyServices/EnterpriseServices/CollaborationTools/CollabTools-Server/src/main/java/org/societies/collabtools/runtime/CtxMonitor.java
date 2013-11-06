@@ -38,7 +38,6 @@ import org.societies.collabtools.acquisition.LongTermCtxTypes;
 import org.societies.collabtools.acquisition.Person;
 import org.societies.collabtools.acquisition.PersonRepository;
 import org.societies.collabtools.acquisition.ShortTermCtxTypes;
-import org.societies.collabtools.interpretation.ContextAnalyzer;
 
 
 /**
@@ -52,20 +51,17 @@ public class CtxMonitor extends Observable implements Runnable, Observer {
 	public Engine engine;
 	private SessionRepository sessionRepository;
 	private static final Logger logger  = LoggerFactory.getLogger(CtxMonitor.class);
-	ContextAnalyzer ctxAnalyzer;
 
 	public CtxMonitor (PersonRepository personRepository, SessionRepository sessionRepository) {
-		engine = new Engine(personRepository, sessionRepository);
+		this.engine = new Engine(personRepository);
 		this.sessionRepository = sessionRepository;
-
-		ctxAnalyzer = new ContextAnalyzer(personRepository);
 
 		//Default rules when the FW starts, location and interests
 		Rule r01 = new Rule("r01",Operators.SAME, ShortTermCtxTypes.LOCATION, "--", 1, 0.5 ,ShortTermCtxTypes.class.getSimpleName());
 		Rule r02 = new Rule("r02",Operators.SIMILAR, LongTermCtxTypes.INTERESTS, "--", 2, 0.4 ,LongTermCtxTypes.class.getSimpleName());
 		//		Rule r03 = new Rule("r03",Operators.EQUAL, ShortTermCtxTypes.STATUS, "Available", 3, 0.1 ,ShortTermCtxTypes.class.getSimpleName()); //Check status of the user e.g busy, on phone, driving...
 		List<Rule> rules = Arrays.asList(r01, r02);
-		engine.setRules(rules);
+		this.engine.setRules(rules);
 	}
 
 	public synchronized void run(){
