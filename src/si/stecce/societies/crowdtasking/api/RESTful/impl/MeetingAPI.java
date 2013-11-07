@@ -31,6 +31,7 @@ import si.stecce.societies.crowdtasking.api.RESTful.IMeetingAPI;
 import si.stecce.societies.crowdtasking.api.RESTful.json.MeetingDetails4CSignJS;
 import si.stecce.societies.crowdtasking.api.RESTful.json.MeetingJS;
 import si.stecce.societies.crowdtasking.api.RESTful.json.TaskJS;
+import si.stecce.societies.crowdtasking.api.RESTful.json.UserJS;
 import si.stecce.societies.crowdtasking.model.CTUser;
 import si.stecce.societies.crowdtasking.model.CollaborativeSign;
 import si.stecce.societies.crowdtasking.model.Meeting;
@@ -49,12 +50,14 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.logging.Logger;
 
 import static si.stecce.societies.crowdtasking.model.dao.OfyService.ofy;
 
 @Path("/meeting/{querytype}")
 public class MeetingAPI implements IMeetingAPI {
     private static final int MEETINGS_ON_PD = 10;
+    private static final Logger log = Logger.getLogger(MeetingAPI.class.getName());
 
     @Override
     @GET
@@ -77,7 +80,14 @@ public class MeetingAPI implements IMeetingAPI {
             if (collaborativeSign.getMeetingId() != null) {
                 Meeting meeting = MeetingDAO.loadMeeting(collaborativeSign.getMeetingId());
                 Gson gson = new Gson();
-                return gson.toJson(new MeetingDetails4CSignJS(meeting));
+                log.info("sending meeting details");
+                MeetingDetails4CSignJS meetingDetails = new MeetingDetails4CSignJS(meeting);
+                for (UserJS user : meetingDetails.users) {
+                    log.info("participant: "+user.username);
+                }
+                return gson.toJson(meetingDetails);
+            } else {
+                log.warning("No meeting id in community sign");
             }
         }
         if ("cs".equalsIgnoreCase(querytype)) {
@@ -166,6 +176,7 @@ public class MeetingAPI implements IMeetingAPI {
             if (downloadUrl == null || "".equalsIgnoreCase(downloadUrl)) {
                 return Response.ok().entity("The meeting is set.").build();
             }
+            log.info("downloadUrl: "+downloadUrl);
             meeting.setDownloadUrl(downloadUrl);
             NotificationsSender.meetingIsReadyToBeSigned(meeting);
             MeetingDAO.saveMeeting(meeting);

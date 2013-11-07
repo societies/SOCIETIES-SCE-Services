@@ -5,7 +5,7 @@ var Community = function () {
     var societiesCommunity = false;
     var currentIndex = -1;
     var _mode = 'new';
-    var TEST_HOST = "localhost";
+    var TEST_HOST = "localhost1";
 
     function listCommunities(_communities, tapHandler, list) {
         console.log("listCommunities - _communities.length=" + _communities.length);

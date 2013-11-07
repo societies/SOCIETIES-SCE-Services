@@ -16,7 +16,7 @@ import java.util.List;
  * To change this template use File | Settings | File Templates.
  */
 public class MeetingDetails4CSignJS extends MeetingJS {
-    List<UserJS> users;
+    public List<UserJS> users;
 
     public MeetingDetails4CSignJS(Meeting meeting) {
         super(meeting);

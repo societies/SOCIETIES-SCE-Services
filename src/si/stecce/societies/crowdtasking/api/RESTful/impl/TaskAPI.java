@@ -125,15 +125,17 @@ public class TaskAPI implements ITaskAPI {
 	
 	private List<Tag> getTagListFromStringList(String[] tags) {
 		ArrayList<Tag> tagList = new ArrayList<Tag>();
-		Map<String, Tag> tagMap = TagAPI.getTagsMap();
-		for (int i=0; i<tags.length; i++) {
-			Tag tag = tagMap.get(tags[i].trim());
-			if (tag == null) {
-				tag = new Tag(tags[i].trim());
-			}
-			tag.setTagFrequency(tag.getTagFrequency()+1);
-			tagList.add(tag);
-		}
+        if (tags != null) {
+            Map<String, Tag> tagMap = TagAPI.getTagsMap();
+            for (int i=0; i<tags.length; i++) {
+                Tag tag = tagMap.get(tags[i].trim());
+                if (tag == null) {
+                    tag = new Tag(tags[i].trim());
+                }
+                tag.setTagFrequency(tag.getTagFrequency()+1);
+                tagList.add(tag);
+            }
+        }
 		return tagList;
 	}
 

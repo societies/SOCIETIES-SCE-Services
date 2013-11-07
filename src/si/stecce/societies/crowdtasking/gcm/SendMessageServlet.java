@@ -91,7 +91,7 @@ public class SendMessageServlet extends BaseServlet {
             throw new IOException("Missing header " + HEADER_QUEUE_NAME);
         }
         String retryCountHeader = req.getHeader(HEADER_QUEUE_COUNT);
-        logger.fine("retry count: " + retryCountHeader);
+        logger.info("retry count: " + retryCountHeader);
         if (retryCountHeader != null) {
             int retryCount = Integer.parseInt(retryCountHeader);
             if (retryCount > MAX_RETRY) {
@@ -104,6 +104,10 @@ public class SendMessageServlet extends BaseServlet {
         String message = req.getParameter(PARAMETER_MESSAGE);
         String url = req.getParameter(PARAMETER_URL);
         String meetingId = req.getParameter(PARAMETER_MEETING_ID);
+        logger.info("getting data");
+        logger.info("regId: "+regId);
+        logger.info("downloadUrl: "+url);
+        logger.info("meetingId: "+meetingId);
         if (regId != null) {
             sendSingleMessage(regId, message, url, meetingId, resp);
             return;
@@ -119,6 +123,7 @@ public class SendMessageServlet extends BaseServlet {
     }
 
     private Message createMessage(String text, String url, String meetingId) {
+        logger.info("createMessage("+text+","+url+","+meetingId+")");
 //        Message message = new Message.Builder().addData(PARAMETER_MESSAGE, text).build();
         Message message = new Message.Builder().addData(PARAMETER_MESSAGE, text)
                 .addData(PARAMETER_URL, url)
@@ -128,6 +133,10 @@ public class SendMessageServlet extends BaseServlet {
 
     private void sendSingleMessage(String regId, String messageText, String url, String meetingId, HttpServletResponse resp) {
         logger.info("Sending message to device " + regId);
+        logger.info("message");
+        logger.info("messageText: "+messageText);
+        logger.info("downloadUrl: "+url);
+        logger.info("meetingId: "+meetingId);
         Message message = createMessage(messageText, url, meetingId);
         Result result;
         try {
@@ -163,11 +172,13 @@ public class SendMessageServlet extends BaseServlet {
 
     private void sendMulticastMessage(String multicastKey, String messageText, String url, String meetingId, HttpServletResponse resp) {
         // Recover registration ids from datastore
+        logger.info("sendMulticastMessage");
         List<String> regIds = Datastore.getMulticast(multicastKey);
         Message message = createMessage(messageText, url, meetingId);
         MulticastResult multicastResult;
         try {
             multicastResult = sender.sendNoRetry(message, regIds);
+            logger.info("multicastResult: "+multicastResult);
         } catch (IOException e) {
             logger.log(Level.SEVERE, "Exception posting " + message, e);
             multicastDone(resp, multicastKey);

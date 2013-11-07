@@ -27,7 +27,7 @@ var CrowdTaskingApp = function () {
     var mode = 'new';
     var currentUser = null;
     var communities = [];
-    var TEST_HOST = "localhost";
+    var TEST_HOST = "localhost1";
 
     var getTaskById = function (id) {
         $.ajax({
@@ -336,10 +336,10 @@ var CrowdTaskingApp = function () {
             if (comments.length > 0) {
                 $("#commentList").append('<li data-role="list-divider" role="heading">Comments:</li>');
                 var task = tasks[currentTaskIndex];
-                if (task.status == 'inprogress' && task.myTask == true) {
+                if (task.status == 'IN_PROGRESS' && task.myTask == true) {
                     $("a.rightHeaderButton").hide().eq(1).show();	// show finalize button
                 }
-                if (task.status == 'open' && task.myTask == true) {
+                if (task.status == 'OPEN' && task.myTask == true) {
                     $("a.rightHeaderButton").hide().eq(0).show();	// show execute button
                 }
                 for (var i = 0; i < comments.length; i++) {
@@ -414,13 +414,16 @@ var CrowdTaskingApp = function () {
              $("a.rightHeaderButton").hide();	// hide execute & finalize buttons
              }
              */
-            if (task.status === 'finished') {
-                $("a.rightHeaderButton").hide();
+            if (task.status === 'FINISHED') {
+                $("#finalizeButton").hide();
             }
-            if (task.status !== 'finished') {
+            if (task.status !== 'FINISHED') {
                 $('#vwReply').show();
             }
-            if (task.status === "open") {
+            else {
+                $('#vwReply').hide();
+            }
+            if (task.status === "OPEN") {
                 $('#viewTaskDialog').dialog('option', 'title', 'View task and reply');
                 if (!task.myTask) {
                     getLike();
@@ -451,7 +454,7 @@ var CrowdTaskingApp = function () {
             $('#taskCommunities').text(communitiesText);
             $('#taskTags').text(task.tags);
 
-            $('#commentForExecution').val(task.status == 'inprogress' || task.status == 'finished');
+            //$('#commentForExecution').val(task.status == 'IN_PROGRESS' || task.status == 'FINISHED');
 
             $spaces = $('#meetingCS');
             $spaces.empty();

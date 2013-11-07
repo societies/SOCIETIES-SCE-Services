@@ -38,18 +38,18 @@ import si.stecce.societies.crowdtasking.model.NotificationSettings;
  */
 @SuppressWarnings("unused")
 public class UserJS {
-	private Long id;
-	private String firstName, lastName;
-	private String nickname, username;
-	private String email;
-	private List<String> interests;
-	private Long karma;
-	private NotificationSettings notifications;
-	private String picUrl;
-	private boolean me = false; // logged in user
-	private Date checkIn;
-	private Long spaceId;	// kar String?
-	private boolean admin;
+	public Long id;
+    public String firstName, lastName;
+    public String nickname, username;
+    public String email;
+    public List<String> interests;
+    public Long karma;
+    public NotificationSettings notifications;
+    public String picUrl;
+    public boolean me = false; // logged in user
+    public Date checkIn;
+    public Long spaceId;	// kar String?
+    public boolean admin;
 
 	public UserJS(CTUser user, Long loggedInUserId) {
 		this.id = user.getId();
