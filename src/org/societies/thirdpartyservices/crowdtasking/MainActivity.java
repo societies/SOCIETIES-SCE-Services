@@ -617,7 +617,7 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
         }
         String action = intent.getAction();
         if ("GCM".equals(action)) {
-            handleGcmIntent(getIntent());
+            handleGcmIntent(intent);
             return;
         }
         if (Intent.ACTION_VIEW.equals(action)) {
@@ -705,7 +705,8 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
         String downloadUrl = intent.getStringExtra(GcmIntentService.PARAMETER_URL);
         String meetingId = intent.getStringExtra(GcmIntentService.PARAMETER_MEETING_ID);
 
-	    if (!"".equalsIgnoreCase(downloadUrl)) {
+	    if (!"".equalsIgnoreCase(downloadUrl) && downloadUrl != null) {
+		    Log.i(LOG_TAG, "downloadUrl: "+downloadUrl+", meetingId: "+meetingId);
 		    signDocument(downloadUrl, meetingId);
 	    }
 //        Toast.makeText(getApplicationContext(), response, Toast.LENGTH_SHORT).show();
@@ -1060,7 +1061,8 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
                         e.printStackTrace();
                         Log.w(LOG_TAG, e);
                     }
-                    Toast.makeText(getApplicationContext(), "File signed successfully. Output is in signed.xml on SD card!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(), "File signed successfully. Output is " +
+		                    "in signed.xml on SD card!", Toast.LENGTH_LONG).show();
                 }
                 else {
                     // Ignore non-relevant notifications, react to failure...
@@ -1462,9 +1464,9 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
 		                TrustTask task = new TrustTask(getApplicationContext(), DOMAIN, APPLICATION_URL);
 		                task.execute(societiesUser.getUserId());
 	                }
-                    if ("".equalsIgnoreCase(getRegistrationId(getApplicationContext()))) {
+//                    if ("".equalsIgnoreCase(getRegistrationId(getApplicationContext()))) {
                         registerInBackground();
-                    }
+//                    }
                     cookies = CookieManager.getInstance().getCookie(url);
                     firstTimeOnMenuPage = false;
                 }
