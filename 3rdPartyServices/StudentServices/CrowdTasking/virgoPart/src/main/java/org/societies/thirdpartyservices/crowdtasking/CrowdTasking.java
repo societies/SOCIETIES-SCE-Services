@@ -31,7 +31,9 @@ import org.societies.api.context.broker.ICtxBroker;
 import org.societies.api.identity.IIdentity;
 import org.societies.api.identity.IIdentityManager;
 import org.societies.api.osgi.event.CSSEvent;
+import org.societies.api.osgi.event.CSSEventConstants;
 import org.societies.api.osgi.event.EventListener;
+import org.societies.api.osgi.event.EventTypes;
 import org.societies.api.osgi.event.IEventMgr;
 import org.societies.api.osgi.event.InternalEvent;
 import org.societies.api.schema.servicelifecycle.model.ServiceResourceIdentifier;
@@ -61,9 +63,33 @@ public class CrowdTasking extends EventListener implements ICrowdTasking{
 
 	public void init(){
 		this.logging.info("init CrowdTaskingVirgoPart:");
-		SocketServer server = new SocketServer(this);
-		new Thread(server).start();
+		registerForServiceEvents();
 	}
+	
+	/*
+	 * Register for events from SLM so I can get my service parameters and finish initialising
+	 */
+	private void registerForServiceEvents(){
+		String eventFilter = "(&" + 
+				"(" + CSSEventConstants.EVENT_NAME + "="+ServiceMgmtEventType.SERVICE_STARTED+")" +
+				"(" + CSSEventConstants.EVENT_SOURCE + "=org/societies/servicelifecycle)" +
+				")";
+		this.eventMgr.subscribeInternalEvent(this, new String[]{EventTypes.SERVICE_LIFECYCLE_EVENT}, eventFilter);
+		this.logging.debug("Subscribed to "+EventTypes.SERVICE_LIFECYCLE_EVENT+" events");
+	}
+
+
+	private void unregisterForServiceEvents()
+	{
+		String eventFilter = "(&" + 
+				"(" + CSSEventConstants.EVENT_NAME + "="+ServiceMgmtEventType.SERVICE_STARTED+")" +
+				"(" + CSSEventConstants.EVENT_SOURCE + "=org/societies/servicelifecycle)" +
+				")";
+
+		this.eventMgr.unSubscribeInternalEvent(this, new String[]{EventTypes.SERVICE_LIFECYCLE_EVENT}, eventFilter);
+		this.logging.debug("Unsubscribed from "+EventTypes.SERVICE_LIFECYCLE_EVENT+" events");
+	}
+
 	
 	/* (non-Javadoc)
 	 * @see org.societies.api.osgi.event.EventListener#handleInternalEvent(org.societies.api.osgi.event.InternalEvent)
@@ -75,30 +101,33 @@ public class CrowdTasking extends EventListener implements ICrowdTasking{
 
 		logging.info("Received internal event: "+event.geteventName());
 
-		if(event.geteventName().equalsIgnoreCase("NEW_SERVICE")){
+		//if(event.geteventName().equalsIgnoreCase("NEW_SERVICE")){
 			logging.info("Received SLM event");
 			ServiceMgmtEvent slmEvent = (ServiceMgmtEvent) event.geteventInfo();
-			this.logging.info("SLM event Bundle Symbol Name" + slmEvent.getBundleSymbolName());
-			if (slmEvent.getBundleSymbolName().equalsIgnoreCase("org.societies.thirdpartyservices.crowdtasking.CrowdTasking")){
+			this.logging.info("SLM event Bundle Symbol Name " + slmEvent.getBundleSymbolName());
+			if (slmEvent.getBundleSymbolName().equalsIgnoreCase("org.societies.thirdpartyservices.crowdtasking.CrowdTaskingVirgoPart")){
 				this.logging.info("Received SLM event for my bundle");
-				if (slmEvent.getEventType().equals(ServiceMgmtEventType.NEW_SERVICE)){
+				if (slmEvent.getEventType().equals(ServiceMgmtEventType.SERVICE_STARTED)){
 
+					this.logging.debug("CrowdTasking Virgo Part Started!!!");
+					
 					setMyServiceID(slmEvent.getServiceId());
-					this.logging.info("1.Service id:" + slmEvent.getServiceId().toString());
+					this.logging.info("Service id: " + slmEvent.getServiceId().toString());
 					//GET ID OF SERVER
-					this.setServerIdentity(this.idMgr.getThisNetworkNode());
+					//this.setServerIdentity(this.idMgr.getThisNetworkNode());
 					//this.setServerIdentity(serviceMgmt.getServer(slmEvent.getServiceId()));
-					logging.info("2.Servers Identity: " + getServerIdentity());
+					//logging.info("2.Servers Identity: " + getServerIdentity());
 
 					//SocketServer server = new SocketServer(getMyServiceID(), getServerIdentity());
 					SocketServer server = new SocketServer(this);
 					new Thread(server).start();
-					/////////////////////////////////////////////////////////////////////////////
-					//this.requestor = new RequestorService(serverIdentity, myServiceID);
+				}
+				else if(slmEvent.getEventType().equals(ServiceMgmtEventType.SERVICE_STOPPED)){
+					//stop the socket server
 				}
 			}
 		}
-	}
+	//}
 
 	/* (non-Javadoc)
 	 * @see org.societies.api.osgi.event.EventListener#handleExternalEvent(org.societies.api.osgi.event.CSSEvent)

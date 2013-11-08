@@ -41,5 +41,6 @@
 	</osgi:reference>
 	
 	<osgi:reference id="displayDriverService" interface="org.societies.api.css.devicemgmt.display.IDisplayDriver">
+	</osgi:reference>
 	
 </beans>

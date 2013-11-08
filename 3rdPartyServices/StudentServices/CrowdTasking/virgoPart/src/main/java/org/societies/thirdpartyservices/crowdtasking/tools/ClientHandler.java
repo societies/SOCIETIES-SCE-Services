@@ -62,7 +62,6 @@ public class ClientHandler implements Runnable {
 
 		this.getStreams();
 		this.getClientMessage();
-		//this.sendMessage(message);
 	}
 
 	private void getStreams(){
@@ -94,6 +93,7 @@ public class ClientHandler implements Runnable {
 					else {
 						this.sendMessage("I am a message from the Virgo.");
 					}
+					closeConnection();
 				}
 			}		
 		}catch(ClassNotFoundException e){
@@ -108,14 +108,14 @@ public class ClientHandler implements Runnable {
 	public void sendMessage(String message){
 		this.log.debug("In sendMessage");
 		try{
-			this.log.debug("Attempting to send location: " + message);
+			this.log.debug("Attempting to send ServiceId: " + message);
 			out.writeObject(message);
 			this.log.debug("Message sent to client: " + message);
 			out.flush();
 			out.reset();
 		}
 		catch(IOException ioException){
-			this.log.debug("ERROR WHILE SENDING LOCATION!" + ioException.getStackTrace());
+			this.log.debug("ERROR WHILE SENDING SERVICE!" + ioException.getStackTrace());
 		}
 	}
 
