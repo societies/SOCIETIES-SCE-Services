@@ -54,7 +54,6 @@ public class CrowdTasking extends EventListener implements ICrowdTasking{
 	Logger logging = LoggerFactory.getLogger(this.getClass());
 	private ServiceResourceIdentifier myServiceID;
 	private IIdentity serverIdentity;
-	//private Requestor requestor;
 	private IIdentityManager idMgr;
 	private IServices serviceMgmt;
 	private IEventMgr eventMgr;
@@ -102,14 +101,14 @@ public class CrowdTasking extends EventListener implements ICrowdTasking{
 		logging.info("Received internal event: "+event.geteventName());
 
 		//if(event.geteventName().equalsIgnoreCase("NEW_SERVICE")){
-			logging.info("Received SLM event");
+			logging.debug("Received SLM event");
 			ServiceMgmtEvent slmEvent = (ServiceMgmtEvent) event.geteventInfo();
-			this.logging.info("SLM event Bundle Symbol Name " + slmEvent.getBundleSymbolName());
+			this.logging.debug("SLM event Bundle Symbol Name " + slmEvent.getBundleSymbolName());
 			if (slmEvent.getBundleSymbolName().equalsIgnoreCase("org.societies.thirdpartyservices.crowdtasking.CrowdTaskingVirgoPart")){
-				this.logging.info("Received SLM event for my bundle");
+				this.logging.debug("Received SLM event for my bundle");
 				if (slmEvent.getEventType().equals(ServiceMgmtEventType.SERVICE_STARTED)){
 
-					this.logging.debug("CrowdTasking Virgo Part Started!!!");
+					this.logging.info("CrowdTasking Virgo Part Started!!!");
 					
 					setMyServiceID(slmEvent.getServiceId());
 					this.logging.info("Service id: " + slmEvent.getServiceId().toString());
@@ -121,9 +120,6 @@ public class CrowdTasking extends EventListener implements ICrowdTasking{
 					//SocketServer server = new SocketServer(getMyServiceID(), getServerIdentity());
 					SocketServer server = new SocketServer(this);
 					new Thread(server).start();
-				}
-				else if(slmEvent.getEventType().equals(ServiceMgmtEventType.SERVICE_STOPPED)){
-					//stop the socket server
 				}
 			}
 		}

@@ -86,12 +86,12 @@ public class ClientHandler implements Runnable {
 				x=in.readObject();
 				if(x instanceof String){
 					cssId = (String)x;			
-					this.log.debug("received cssId: " + cssId + " from Android");
+					this.log.info("received cssId: " + cssId + " from Android");
 					if (crowdTasking.getMyServiceID() != null){
 						this.sendMessage(crowdTasking.getMyServiceID().toString());
 					}
 					else {
-						this.sendMessage("I am a message from the Virgo.");
+						this.sendMessage("Service ID is null");
 					}
 					closeConnection();
 				}
@@ -110,7 +110,7 @@ public class ClientHandler implements Runnable {
 		try{
 			this.log.debug("Attempting to send ServiceId: " + message);
 			out.writeObject(message);
-			this.log.debug("Message sent to client: " + message);
+			this.log.info("Service Id sent to client: " + message);
 			out.flush();
 			out.reset();
 		}

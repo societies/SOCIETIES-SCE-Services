@@ -125,7 +125,7 @@ public class CrowdTaskingClient extends EventListener implements ICrowdTaskingCl
 			this.logging.debug("Received SLM event for my bundle");
 			if (slmEvent.getEventType().equals(ServiceMgmtEventType.SERVICE_STARTED)){
 
-				this.logging.debug("CrowdTasking User Client Started!!!");
+				this.logging.info("CrowdTasking User Client Started!!!");
 //				this.serverIdentity = this.serviceMgmt.getServer(slmEvent.getServiceId());
 			}
 		}
