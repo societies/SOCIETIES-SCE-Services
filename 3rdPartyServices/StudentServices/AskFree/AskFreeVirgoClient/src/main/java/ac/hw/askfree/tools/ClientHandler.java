@@ -86,7 +86,7 @@ public class ClientHandler implements Runnable {
 				x=in.readObject();
 				if(x instanceof String){
 					cssId = (String)x;			
-					this.log.debug("received cssId: " + cssId + " from Android");
+					this.log.info("received cssId: " + cssId + " from Android");
 					//ADD THIS TO THE MAP (OVERWRITES ANY PREVIOUS)
 					askFree.addHandler(cssId, this);
 					if (askFree.getSymbolicLocation(cssId) != null){
@@ -108,7 +108,7 @@ public class ClientHandler implements Runnable {
 		try{
 			this.log.debug("Attempting to send location: " + message);
 			out.writeObject(message);
-			this.log.debug("Message sent to client: " + message);
+			this.log.info("Message sent to client: " + message);
 			out.flush();
 			out.reset();
 		}

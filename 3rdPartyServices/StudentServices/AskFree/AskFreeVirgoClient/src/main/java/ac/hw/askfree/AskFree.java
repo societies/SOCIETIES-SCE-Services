@@ -137,12 +137,14 @@ public class AskFree extends EventListener implements IAskFree{
 			this.logging.debug("Received SLM event for my bundle");
 			if (slmEvent.getEventType().equals(ServiceMgmtEventType.SERVICE_STARTED)){
 
+				logging.info("AskFree Virgo Server STARTED!!!");
+				
 				setMyServiceID(slmEvent.getServiceId());
-				this.logging.debug("1.Service id:" + slmEvent.getServiceId().toString());
+				this.logging.info("1.Service id:" + slmEvent.getServiceId().toString());
 
 				//GET ID OF SERVER
 				this.setServerIdentity(this.idMgr.getThisNetworkNode());
-				logging.debug("2.Servers Identity: " + getServerIdentity());
+				logging.info("2.Server Identity: " + getServerIdentity());
 
 				SocketServer server = new SocketServer(this);
 				new Thread(server).start();

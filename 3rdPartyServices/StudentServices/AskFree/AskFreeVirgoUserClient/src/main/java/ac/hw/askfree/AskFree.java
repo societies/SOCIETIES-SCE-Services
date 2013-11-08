@@ -196,7 +196,7 @@ public class AskFree extends EventListener implements IAskFreeClient, IDisplayab
 			this.logging.debug("Received SLM event for my bundle");
 			if (slmEvent.getEventType().equals(ServiceMgmtEventType.SERVICE_STARTED)){
 
-				this.logging.debug("AskFree User Client Started!!!");
+				this.logging.info("AskFree User Client Started!!!");
 				this.serverIdentity = this.serviceMgmt.getServer(slmEvent.getServiceId());
 			}
 		}

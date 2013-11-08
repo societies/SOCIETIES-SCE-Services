@@ -53,15 +53,6 @@ public class SocketServer implements Runnable{
 
 	private AskFree askFree;
 
-	//	private ServiceResourceIdentifier myServiceId;
-	//	private IIdentity serverId;
-	//	private String cssId;
-
-	//	public SocketServer(ServiceResourceIdentifier serviceId, IIdentity serverId){
-	//		this.myServiceId = serviceId;
-	//		this.serverId = serverId;
-	//	}
-
 	public SocketServer(AskFree askFree){
 		this.askFree = askFree;
 	}
@@ -83,7 +74,7 @@ public class SocketServer implements Runnable{
 		while(true){
 			try{
 				connection = providerSocket.accept();        				
-				this.log.debug("client connected: " + connection.getInetAddress().getHostName());
+				this.log.info("client connected: " + connection.getInetAddress().getHostName());
 				(new Thread(new ClientHandler(connection,askFree))).start();
 			}catch(IOException e){
 				this.log.debug("ERROR ACCEPTING CONNECTION" + e.getMessage());
