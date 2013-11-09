@@ -198,8 +198,8 @@ public class ContextSubscriber implements IContextSubscriber, Observer
 
 	public String getSessionLanguage(String sessionName) {
 		Session session =sessionRepository.getSessionByName(sessionName);
-		logger.info("Session language: "+session.getLanguage(null));
-		return session.getLanguage(Session.LANGUAGE);
+		logger.info("Session language: "+session.getLanguage());
+		return session.getLanguage();
 	}
 
 	/**

@@ -68,10 +68,10 @@ public class CtxMonitor extends Observable implements Runnable, Observer {
 		logger.info("Checking if people context match");
 
 		//First rule: location Mandatory
-		Hashtable<String, HashSet<Person>> personsSameLocation = engine.evaluateRule("r01");
+		Hashtable<String, HashSet<Person>> personsfirstRule = engine.evaluateRule("r01");
 
-		if (!personsSameLocation.isEmpty()) {
-			Enumeration<String> iterator = personsSameLocation.keys();
+		if (!personsfirstRule.isEmpty()) {
+			Enumeration<String> iterator = personsfirstRule.keys();
 			//For each different location, apply the following rules...
 			while(iterator.hasMoreElements()) {
 				//Session name = actual location

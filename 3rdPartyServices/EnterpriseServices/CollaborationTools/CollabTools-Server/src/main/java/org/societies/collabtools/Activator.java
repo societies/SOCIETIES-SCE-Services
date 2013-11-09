@@ -33,6 +33,7 @@ import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 import org.neo4j.graphdb.index.Index;
 import org.neo4j.graphdb.index.IndexProvider;
+import org.neo4j.helpers.collection.MapUtil;
 import org.neo4j.index.impl.lucene.LuceneIndex;
 import org.neo4j.index.lucene.LuceneIndexProvider;
 import org.neo4j.kernel.ListIndexIterable;
@@ -145,12 +146,12 @@ public class Activator implements BundleActivator
 		int random = new Random().nextInt(100);
 		personGraphDb = gdbf.newEmbeddedDatabase(rs.getString("personspath") + random );
 		sessionGraphDb = gdbf.newEmbeddedDatabase(rs.getString("sessionspath") + random);
-		indexPerson = personGraphDb.index().forNodes("PersonNodes");
-		indexSession = sessionGraphDb.index().forNodes("SessionNodes");
-		indexShortTermCtx = personGraphDb.index().forNodes("CtxNodes");
+		indexPerson = personGraphDb.index().forNodes("PersonNodes", MapUtil.stringMap( "type", "exact", "to_lower_case", "true" ) );
+		indexSession = sessionGraphDb.index().forNodes("SessionNodes", MapUtil.stringMap( "type", "exact", "to_lower_case", "true" ) );
+		indexShortTermCtx = personGraphDb.index().forNodes("CtxNodes", MapUtil.stringMap( "type", "exact", "to_lower_case", "true" ) );
 		
-		personRepository = new PersonRepository(personGraphDb, indexPerson);
-		sessionRepository = new SessionRepository(sessionGraphDb, indexSession, collabApps);
+		personRepository = new PersonRepository(personGraphDb);
+		sessionRepository = new SessionRepository(sessionGraphDb, collabApps);
 
 		//Caching last recently used for Location
 		((LuceneIndex<Node>) indexShortTermCtx).setCacheCapacity("name", 3000);

@@ -55,6 +55,7 @@ import org.neo4j.graphdb.traversal.TraversalDescription;
 import org.neo4j.graphdb.traversal.Traverser;
 import org.neo4j.helpers.collection.IterableWrapper;
 import org.neo4j.helpers.collection.IteratorUtil;
+import org.neo4j.helpers.collection.MapUtil;
 import org.neo4j.kernel.Traversal;
 import org.neo4j.kernel.Uniqueness;
 import org.societies.collabtools.runtime.SessionRepository;
@@ -65,10 +66,13 @@ public class Person extends Observable
 
 	// START SNIPPET: the-node
 	private final Node underlyingNode;
+	private Index<Node> index;
 
 	public Person(Node personNode)
 	{
 		this.underlyingNode = personNode;
+		this.index = this.underlyingNode.getGraphDatabase().index().forNodes("PersonNodes", MapUtil.stringMap("type", "fulltext", "to_lower_case", "true" ) );
+
 	}
 
 	public Node getUnderlyingNode()
@@ -120,7 +124,6 @@ public class Person extends Observable
 	}
 
 	public void setLongTermCtx(String property, String value){
-		Index<Node> index = underlyingNode.getGraphDatabase().index().forNodes("PersonNodes");
 		Transaction tx = underlyingNode.getGraphDatabase().beginTx();
 		try
 		{
@@ -136,7 +139,6 @@ public class Person extends Observable
 	}
 
 	public void setLongTermCtx(String property, String[] values){
-		Index<Node> index = underlyingNode.getGraphDatabase().index().forNodes("PersonNodes");
 		Transaction tx = underlyingNode.getGraphDatabase().beginTx();
 
 		//Cleaning array from null and blank words 
@@ -399,34 +401,43 @@ public class Person extends Observable
 
 	private Node createShortTermCtxNode(Map<String, String> shortTermCtx, SessionRepository sessionRep)
 	{
-		Node newCtx = graphDb().createNode();
-		//Including date stamp
-		SimpleDateFormat formatter = new SimpleDateFormat(ShortTermContextUpdates.DATE_FORMAT);
-		newCtx.setProperty(ShortTermContextUpdates.DATE, formatter.format(new Date().getTime()));
-		
-		ShortTermContextUpdates oldStatus = getLastShortTermUpdate();
-		boolean contextChanged = false;
-		if (oldStatus != null) {
-			Node lastNodeStatus = oldStatus.getUnderlyingNode();
-			for (String propertyKey : getLastShortTermUpdate().getUnderlyingNode().getPropertyKeys()) {
-				if (!propertyKey.equals(ShortTermContextUpdates.DATE)) {
-					newCtx.setProperty(propertyKey, lastNodeStatus.getProperty(propertyKey) );
+		Transaction tx = underlyingNode.getGraphDatabase().beginTx();
+		try
+		{
+			Node newCtx = graphDb().createNode();
+			//Including date stamp
+			SimpleDateFormat formatter = new SimpleDateFormat(ShortTermContextUpdates.DATE_FORMAT);
+			newCtx.setProperty(ShortTermContextUpdates.DATE, formatter.format(new Date().getTime()));
+
+			ShortTermContextUpdates oldStatus = getLastShortTermUpdate();
+			boolean contextChanged = false;
+			if (oldStatus != null) {
+				Node lastNodeStatus = oldStatus.getUnderlyingNode();
+				for (String propertyKey : getLastShortTermUpdate().getUnderlyingNode().getPropertyKeys()) {
+					if (!propertyKey.equals(ShortTermContextUpdates.DATE)) {
+						newCtx.setProperty(propertyKey, lastNodeStatus.getProperty(propertyKey) );
+					}
 				}
+			} 
+			for (Map.Entry<String, String> entry : shortTermCtx.entrySet()) {
+				String shortTermCtxType = entry.getKey().toString();
+				String shortTermValue = entry.getValue().toString();
+				contextChanged = contextHasChanged(shortTermCtxType, shortTermValue);
+				newCtx.setProperty(shortTermCtxType, shortTermValue);
 			}
-		} 
-		for (Map.Entry<String, String> entry : shortTermCtx.entrySet()) {
-			String shortTermCtxType = entry.getKey().toString();
-			String shortTermValue = entry.getValue().toString();
-			contextChanged = contextHasChanged(shortTermCtxType, shortTermValue);
-			newCtx.setProperty(shortTermCtxType, shortTermValue);
+			//Check location changes; First status, second location
+			if (contextChanged){
+				this.addObserver(sessionRep);
+				setChanged();
+				notifyObservers(this);
+			}
+			tx.success();
+			return newCtx;
 		}
-		//Check location changes; First status, second location
-		if (contextChanged){
-			this.addObserver(sessionRep);
-			setChanged();
-			notifyObservers(this);
+		finally
+		{
+			tx.finish();
 		}
-		return newCtx;
 	}
 
 	/**
@@ -554,7 +565,6 @@ public class Person extends Observable
 
 	public void setCollabApps(String[] collabApps)
 	{
-		Index<Node> index = this.underlyingNode.getGraphDatabase().index().forNodes("PersonNodes");
 		Transaction tx = this.underlyingNode.getGraphDatabase().beginTx();
 		try
 		{

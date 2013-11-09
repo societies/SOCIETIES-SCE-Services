@@ -231,8 +231,8 @@ public class CtxSubscriberTest {
 		sessionGraphDb = new GraphDatabaseFactory().newEmbeddedDatabase("target/sessiontestdb0"  + random);
 	    indexPerson = personGraphDb.index().forNodes("PersonNodes");
 	    indexSession = sessionGraphDb.index().forNodes("SessionNodes");
-		personRepository = new PersonRepository(personGraphDb, indexPerson);
-		sessionRepository = new SessionRepository(sessionGraphDb,indexSession, new CollabApps());
+		personRepository = new PersonRepository(personGraphDb);
+		sessionRepository = new SessionRepository(sessionGraphDb, new CollabApps());
         ctxSub = new ContextSubscriber(null,personRepository, sessionRepository);
         ctxRsn = new ContextAnalyzer(personRepository);
 		LOG.info("personGraphDb path: "+"target/persontestdb0"  + random);
