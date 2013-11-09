@@ -1,34 +1,58 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="utf-8" />
+    <meta charset="utf-8"/>
     <script type="text/javascript" src="/_ah/channel/jsapi"></script>
 
     <style type="text/css">
         <!--
-        html, body, #tbl_wrap { height: 100%; width: 100%; padding: 0; margin: 0; }
-        #td_wrap { vertical-align: middle; text-align: center; }
-        #div_wrap { display: inline-block; text-align: left; border: 0; margin: 0 5em 0 5em;}
+        html, body, #tbl_wrap {
+            height: 100%;
+            width: 100%;
+            padding: 0;
+            margin: 0;
+        }
+
+        #td_wrap {
+            vertical-align: middle;
+            text-align: center;
+        }
+
+        #div_wrap {
+            display: inline-block;
+            text-align: left;
+            border: 0;
+            margin: 0 5em 0 5em;
+        }
+
         -->
     </style>
 </head>
 <body>
-<table id="tbl_wrap"><tbody><tr><td id="td_wrap"><div id="div_wrap">
-    <h1>Scan the QR code to take control of the public display.</h1>
-    <center>
-        <img src="http://chart.apis.google.com/chart?cht=qr&chs=500x500&chl=channel:{{ channelId }}"/>
-    </center>
-</div></td></tr></tbody></table>
+<table id="tbl_wrap">
+    <tbody>
+    <tr>
+        <td id="td_wrap">
+            <div id="div_wrap">
+                <h1>Scan the QR code to take control of the public display.</h1>
+                <center>
+                    <img src="http://chart.apis.google.com/chart?cht=qr&chs=500x500&chl=channel:{{ channelNumber }}"/>
+                </center>
+            </div>
+        </td>
+    </tr>
+    </tbody>
+</table>
 
 <script type='text/javascript'>
     var myModule = Object.create({
-        sendMessage : function(tc) {
-            var path = '/publicDisplay'+'?u='+tc;
+        sendMessage: function (tc) {
+            var path = '/publicDisplay' + '?u=' + tc;
             var xhr = new XMLHttpRequest();
             xhr.open('POST', path, true);
             xhr.send();
         },
-        initChannel : function() {
+        initChannel: function () {
             var channel = new goog.appengine.Channel('{{ token }}');
             var socket = channel.open();
             socket.onopen = channelHandler.onOpened;
@@ -38,10 +62,10 @@
         }});
 
     var channelHandler = Object.create({
-        onOpened : function() {
+        onOpened: function () {
         },
-        onMessage : function(message) {
-            message.data = message.data.replace(/\r\n/g,'');
+        onMessage: function (message) {
+            message.data = message.data.replace(/\r\n/g, '');
             //message = message.replace(/\r\n/g,'');
             var change = "changeTo:";
             var takeControl = "takeControl:";
@@ -52,13 +76,13 @@
             if (message.data.substring(0, takeControl.length) === takeControl) {
                 var tc = message.data.substring(takeControl.length, length);
 //                myModule.sendMessage(tc);
-                window.location.replace("/publicDisplay?id="+message.data.substring(takeControl.length, length));
+                window.location.replace("/publicDisplay?id=" + message.data.substring(takeControl.length, length));
             }
         },
-        onError : function() {
+        onError: function () {
             window.location.reload();
         },
-        onClose : function() {
+        onClose: function () {
         }
     });
 

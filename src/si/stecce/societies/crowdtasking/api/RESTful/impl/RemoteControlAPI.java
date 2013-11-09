@@ -33,8 +33,10 @@ import si.stecce.societies.crowdtasking.api.RESTful.IRemoteControlAPI;
 import si.stecce.societies.crowdtasking.model.CTUser;
 import si.stecce.societies.crowdtasking.model.Channel;
 import si.stecce.societies.crowdtasking.model.Community;
+import si.stecce.societies.crowdtasking.model.Task;
 import si.stecce.societies.crowdtasking.model.dao.ChannelDAO;
 import si.stecce.societies.crowdtasking.model.dao.CommunityDAO;
+import si.stecce.societies.crowdtasking.model.dao.TaskDao;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
@@ -53,8 +55,18 @@ import java.util.logging.Logger;
  */
 @Path("/remote/{querytype}")
 public class RemoteControlAPI implements IRemoteControlAPI {
-    private static final String notCheckedInMessage = "You are not a member of any community with this collaborative space.";
+    private static final String notCheckedInMessage = "To see this on a larger screen, please go to a SOCIETIES public display screen and update your location.";
+    //    private static final String notCheckedInMessage = "You are not a member of any community with this collaborative space.";
     private static final Logger log = Logger.getLogger(RemoteControlAPI.class.getName());
+
+    private boolean isTooLate(Date date) {
+        Date now = new Date();
+        long timeOut = UsersAPI.getApplicationSettings().getChekInTimeOut();
+        log.info("timeout:" + timeOut);
+        // automatic check-out after set period
+        Date toLate = new Date(date.getTime() + timeOut);
+        return (now.after(toLate));
+    }
 
     @Override
     @GET
@@ -62,7 +74,7 @@ public class RemoteControlAPI implements IRemoteControlAPI {
     public Response get(@PathParam("querytype") String querytype,
                         @DefaultValue("") @QueryParam("page") String page,
                         @DefaultValue("") @QueryParam("taskId") String taskId,
-                        @DefaultValue("") @QueryParam("channelId") String channelId,
+                        @DefaultValue("") @QueryParam("channelNumber") String channelNumber,
                         @DefaultValue("") @QueryParam("communityId") String communityId,
                         @Context HttpServletRequest request) {
         CTUser user = UsersAPI.getLoggedInUser(request.getSession());
@@ -72,7 +84,7 @@ public class RemoteControlAPI implements IRemoteControlAPI {
 
         log.info("querytype: " + querytype);
 
-        log.info("channelId: " + channelId);
+        log.info("channelId: " + channelNumber);
         log.info("communityId: " + communityId);
         log.info("user: " + user.getUserName());
         log.info("checkin date: " + user.getCheckIn());
@@ -83,21 +95,16 @@ public class RemoteControlAPI implements IRemoteControlAPI {
         if (spaceId == null || checkedInDate == null) {
             return Response.status(Status.UNAUTHORIZED).entity(notCheckedInMessage).type("text/plain").build();
         }
-        Date now = new Date();
-        long timeOut = UsersAPI.getApplicationSettings().getChekInTimeOut();
-        log.info("timeout:" + timeOut);
-        // automatic check-out after set period
-        Date toLate = new Date(checkedInDate.getTime() + timeOut);
-        if (now.after(toLate)) {
+        if (isTooLate(checkedInDate)) {
             return Response.status(Status.GONE).entity("Last known location too old.").type("text/plain").build();
         }
 
         if ("takeControl".equalsIgnoreCase(querytype)) {
-            if (!"".equalsIgnoreCase(channelId) && !"".equalsIgnoreCase(communityId)) {
+            if (!"".equalsIgnoreCase(channelNumber) && !"".equalsIgnoreCase(communityId)) {
                 // TODO preveri comunityID ga shrani in pošlji PDju naj se reloada
-                Channel channel = new Channel(new Long(channelId), user.getId(), new Long(communityId), user.getSpaceId(), new Date());
+                Channel channel = new Channel(new Long(channelNumber), user.getId(), new Long(communityId), user.getSpaceId(), new Date());
                 ChannelDAO.save(channel);
-                sendMessage(channelId, "takeControl:" + channelId);
+                sendMessage(channelNumber, "takeControl:" + channelNumber);
                 message = "You took control of the public display.";
                 return Response.ok().entity(message).build();
             }
@@ -109,9 +116,11 @@ public class RemoteControlAPI implements IRemoteControlAPI {
             } else if (comms.count() == 1) {
                 Community comm = comms.first().get();
                 tc = comms.first().get().getName();
-                Channel channel = new Channel(new Long(channelId), user.getId(), comm.getId(), user.getSpaceId(), new Date());
-                ChannelDAO.save(channel);
-                sendMessage(channelId, "takeControl:" + channelId);
+                Channel channel = new Channel(new Long(channelNumber), user.getId(), comm.getId(), user.getSpaceId(), new Date());
+                channel = ChannelDAO.save(channel);
+                user.setChannelId(channel.getId());
+                UsersAPI.saveUser(user);
+                sendMessage(channelNumber, "takeControl:" + channelNumber);
                 message = "You took control of the public display.";
             } else if (comms.count() > 1) {
                 Community comm = comms.first().get();
@@ -121,7 +130,7 @@ public class RemoteControlAPI implements IRemoteControlAPI {
                 }
                 ArrayList response = new ArrayList();
                 response.add(CommunityAPI.getCommunityJSes(communities, user));
-                response.add(channelId);
+                response.add(channelNumber);
                 Gson gson = new Gson();
                 return Response.status(Status.CONFLICT).entity(gson.toJson(response)).type("text/plain").build();
             }
@@ -133,6 +142,20 @@ public class RemoteControlAPI implements IRemoteControlAPI {
             message = "changeTo:/cs/" + SpaceAPI.getCollaborativeSpace(user.getSpaceId()).getUrlMapping() + "?p=" + page;
         }
         if ("showTask".equalsIgnoreCase(querytype)) {
+            // check if user took control
+            Channel channel = ChannelDAO.load(user.getChannelId());
+
+            if (channel == null || isTooLate(channel.getCreated())) {
+                return Response.status(Status.GONE).entity("Take control of the public display first.").type("text/plain").build();
+            }
+            // check community
+            Task task = TaskDao.getTaskById4User(new Long(taskId), user);
+            if (task == null) {
+                return Response.status(Status.GONE).entity("Task is not in your community.").type("text/plain").build();
+            }
+            if (!isTaskInCommunity(task, channel.getCommunityId())) {
+                return Response.status(Status.GONE).entity("Task is not in the community shown on the public display.").type("text/plain").build();
+            }
             message = "showTask:" + taskId;
             EventAPI.logShowTaskOnPd(new Long(taskId), user);
         }
@@ -141,6 +164,15 @@ public class RemoteControlAPI implements IRemoteControlAPI {
         }
         sendMessage(spaceId, message);
         return Response.ok().entity("Request sent.").build();
+    }
+
+    private boolean isTaskInCommunity(Task task, Long communityId) {
+        for (Community community : task.getCommunities()) {
+            if (community.getId().longValue() == communityId.longValue()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void sendMessage(Long spaceId, String message) {

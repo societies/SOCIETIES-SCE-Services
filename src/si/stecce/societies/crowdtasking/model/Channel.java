@@ -2,6 +2,7 @@ package si.stecce.societies.crowdtasking.model;
 
 import com.googlecode.objectify.annotation.Entity;
 import com.googlecode.objectify.annotation.Id;
+import com.googlecode.objectify.annotation.Index;
 
 import java.util.Date;
 
@@ -13,27 +14,30 @@ import java.util.Date;
  */
 @Entity
 public class Channel {
-    @Id private Long channelId;
+    @Id
+    private Long id;
+    @Index
+    private Long channelNumber;
     Long userId, communityId, spaceId;
     Date created;
 
     public Channel() {
     }
 
-    public Channel(Long channelId, Long userId, Long communityId, Long spaceId, Date created) {
-        this.channelId = channelId;
+    public Channel(Long channelNumber, Long userId, Long communityId, Long spaceId, Date created) {
+        this.channelNumber = channelNumber;
         this.userId = userId;
         this.communityId = communityId;
         this.spaceId = spaceId;
         this.created = created;
     }
 
-    public Long getChannelId() {
-        return channelId;
+    public Long getChannelNumber() {
+        return channelNumber;
     }
 
-    public void setChannelId(Long channelId) {
-        this.channelId = channelId;
+    public void setChannelNumber(Long channelNumber) {
+        this.channelNumber = channelNumber;
     }
 
     public Long getUserId() {
@@ -66,5 +70,9 @@ public class Channel {
 
     public void setCreated(Date created) {
         this.created = created;
+    }
+
+    public long getId() {
+        return id;
     }
 }

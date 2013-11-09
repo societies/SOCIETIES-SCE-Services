@@ -71,7 +71,7 @@ public class UsersAPI implements IUsersAPI {
         Long userId = (Long) session.getAttribute("CTUserId");
         if (userId != null) {
 /*
-            if (userId.longValue() == 4785074604081152L) {
+            if (userId.longValue() == 5910974510923776L) {
                 CTUser user = getUserById(userId);
                 user.setAdmin(true);
                 UsersAPI.saveUser(user);
@@ -168,7 +168,7 @@ public class UsersAPI implements IUsersAPI {
         CTUser user = getLoggedInUser(request.getSession());
         if (user == null) {
             /*AuthenticatedUser authenticatedUser = getAuthenticatedUser();
-			if (authenticatedUser == null) {*/
+            if (authenticatedUser == null) {*/
             return Response.status(Status.UNAUTHORIZED).entity("Not authorized.").type("text/plain").build();
 			/*}
 			// register

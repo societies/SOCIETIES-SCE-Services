@@ -148,6 +148,7 @@ public class CTUser {
     private ApplicationSettings applicationSettings;
     @Index
     private String gcmRegistrationId;
+    private Long channelId;
 
     public CTUser() {
     }
@@ -345,8 +346,8 @@ public class CTUser {
         if ("".equalsIgnoreCase(name) || name == null) {
             name = connectedAccounts.get(0).getFederatedIdentity();
         }
-            return name;
-        }
+        return name;
+    }
 
     public Date getCheckIn() {
         return checkIn;
@@ -437,5 +438,13 @@ public class CTUser {
 
     public void setGcmRegistrationId(String gcmRegistrationId) {
         this.gcmRegistrationId = gcmRegistrationId;
+    }
+
+    public Long getChannelId() {
+        return channelId;
+    }
+
+    public void setChannelId(Long channelId) {
+        this.channelId = channelId;
     }
 }

@@ -24,83 +24,76 @@
  */
 package si.stecce.societies.crowdtasking.session;
 
-import java.io.IOException;
-import java.util.*;
-import java.util.logging.Logger;
-
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-
 import si.stecce.societies.crowdtasking.api.RESTful.impl.UsersAPI;
 import si.stecce.societies.crowdtasking.model.AuthenticatedUser;
 import si.stecce.societies.crowdtasking.model.CTUser;
 import si.stecce.societies.crowdtasking.model.Channel;
 import si.stecce.societies.crowdtasking.model.dao.ChannelDAO;
 
+import javax.servlet.*;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import java.io.IOException;
+import java.util.*;
+import java.util.logging.Logger;
+
 /**
  * Describe your class here...
  *
  * @author Simon JureĹˇa
- *
  */
 public class SessionFilter implements Filter {
     private static final Logger log = Logger.getLogger(SessionFilter.class.getName());
-	private List<String> urlList;
-	private String loginUrl, logoutUrl, registerUrl;
-	/* (non-Javadoc)
-	 * @see javax.servlet.Filter#destroy()
-	 */
-	@Override
-	public void destroy() {
-	}
+    private List<String> urlList;
+    private String loginUrl, logoutUrl, registerUrl;
 
-	/* (non-Javadoc)
-	 * @see javax.servlet.Filter#doFilter(javax.servlet.ServletRequest, javax.servlet.ServletResponse, javax.servlet.FilterChain)
-	 */
-	@Override
-	public void doFilter(ServletRequest req, ServletResponse res,
-			FilterChain chain) throws IOException, ServletException {
+    /* (non-Javadoc)
+     * @see javax.servlet.Filter#destroy()
+     */
+    @Override
+    public void destroy() {
+    }
 
-		HttpServletRequest request = (HttpServletRequest) req;
-		HttpServletResponse response = (HttpServletResponse) res;
-		HttpSession session = request.getSession();
-		String url = request.getRequestURI();
-		String parameters = request.getQueryString();
-		if (parameters != null) {
-			url+="?"+parameters;
-		}
-		if (!url.startsWith("/_ah") && 
-				!url.equalsIgnoreCase("/loginSocietiesUser.html") &&
-				!url.equalsIgnoreCase("/admin") &&
-				!url.equalsIgnoreCase("/publicDisplay") &&
+    /* (non-Javadoc)
+     * @see javax.servlet.Filter#doFilter(javax.servlet.ServletRequest, javax.servlet.ServletResponse, javax.servlet.FilterChain)
+     */
+    @Override
+    public void doFilter(ServletRequest req, ServletResponse res,
+                         FilterChain chain) throws IOException, ServletException {
+
+        HttpServletRequest request = (HttpServletRequest) req;
+        HttpServletResponse response = (HttpServletResponse) res;
+        HttpSession session = request.getSession();
+        String url = request.getRequestURI();
+        String parameters = request.getQueryString();
+        if (parameters != null) {
+            url += "?" + parameters;
+        }
+        if (!url.startsWith("/_ah") &&
+                !url.equalsIgnoreCase("/loginSocietiesUser.html") &&
+                !url.equalsIgnoreCase("/admin") &&
+                !url.equalsIgnoreCase("/publicDisplay") &&
                 // special case for collaborative sign
-				!url.startsWith("/rest/meeting/communitysign") &&
-				!url.equalsIgnoreCase("/rest/noaccess") &&
+                !url.startsWith("/rest/meeting/communitysign") &&
+                !url.equalsIgnoreCase("/rest/noaccess") &&
 //				!url.startsWith("/rest/remote") &&
-				!url.startsWith(loginUrl) &&
-				!url.equalsIgnoreCase(logoutUrl) &&
-				!url.startsWith("/pd") &&
-				!url.startsWith("/apk") &&
-				!url.startsWith("/send") &&
-				!urlList.contains(url)) { // restricted access
+                !url.startsWith(loginUrl) &&
+                !url.equalsIgnoreCase(logoutUrl) &&
+                !url.startsWith("/pd") &&
+                !url.startsWith("/apk") &&
+                !url.startsWith("/send") &&
+                !urlList.contains(url)) { // restricted access
 
             if (url.startsWith("/rest/task")) {
                 Map params = request.getParameterMap();
                 Iterator i = params.keySet().iterator();
 
                 log.info("parametri za create task");
-                while ( i.hasNext() )
-                {
+                while (i.hasNext()) {
                     String key = (String) i.next();
-                    String value = ((String[]) params.get( key ))[ 0 ];
-                    log.info(key+"="+value);
+                    String value = ((String[]) params.get(key))[0];
+                    log.info(key + "=" + value);
                 }
             }
 
@@ -108,7 +101,7 @@ public class SessionFilter implements Filter {
             if (url.startsWith("/publicDisplay")) {
                 if (request.getParameter("id") != null) {
                     log.info("public display channel id:" + request.getParameter("id"));
-                    Channel channel = ChannelDAO.load(new Long(request.getParameter("id")));
+                    Channel channel = ChannelDAO.loadChannelByNumber(new Long(request.getParameter("id")));
                     if (channel != null) {
                         CTUser user = UsersAPI.getUserById(channel.getUserId());
                         if (user != null) {
@@ -151,30 +144,30 @@ public class SessionFilter implements Filter {
             }
         }
         if (url.equalsIgnoreCase("/apk")) {
-			response.sendRedirect("/apk/index.html");
-			return;
-		}
+            response.sendRedirect("/apk/index.html");
+            return;
+        }
         if (url.equalsIgnoreCase("/checkUser")) {
-			response.sendRedirect("/menu");
-			return;
-		}
+            response.sendRedirect("/menu");
+            return;
+        }
         chain.doFilter(req, res);
-	}
-	
-	/* (non-Javadoc)
-	 * @see javax.servlet.Filter#init(javax.servlet.FilterConfig)
-	 */
-	@Override
-	public void init(FilterConfig config) throws ServletException {
-		loginUrl = config.getInitParameter("loginUrl");
-		logoutUrl = config.getInitParameter("logoutUrl");
-		registerUrl = config.getInitParameter("registerUrl");
-		String urls = config.getInitParameter("unrestricted");
-		StringTokenizer token = new StringTokenizer(urls, ",");
-		urlList = new ArrayList<String>();
-		while (token.hasMoreTokens()) {
-			urlList.add(token.nextToken());
-		}
-	}
+    }
+
+    /* (non-Javadoc)
+     * @see javax.servlet.Filter#init(javax.servlet.FilterConfig)
+     */
+    @Override
+    public void init(FilterConfig config) throws ServletException {
+        loginUrl = config.getInitParameter("loginUrl");
+        logoutUrl = config.getInitParameter("logoutUrl");
+        registerUrl = config.getInitParameter("registerUrl");
+        String urls = config.getInitParameter("unrestricted");
+        StringTokenizer token = new StringTokenizer(urls, ",");
+        urlList = new ArrayList<String>();
+        while (token.hasMoreTokens()) {
+            urlList.add(token.nextToken());
+        }
+    }
 
 }

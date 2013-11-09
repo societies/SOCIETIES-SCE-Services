@@ -42,7 +42,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.CharBuffer;
@@ -53,15 +52,14 @@ import java.util.logging.Logger;
  * Servlet for managing collaborative spaces
  *
  * @author Simon Jureša
- *
  */
 @SuppressWarnings("serial")
 public class PublicDisplayController extends HttpServlet {
-	private static final Logger log = Logger.getLogger(PublicDisplayController.class.getName());
+    private static final Logger log = Logger.getLogger(PublicDisplayController.class.getName());
 
-	@Override
-	protected void doGet(HttpServletRequest request, HttpServletResponse response)
-			throws ServletException, IOException {
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
 
         String channelId = request.getParameter("id");
         if (channelId == null || "".equalsIgnoreCase(channelId)) {
@@ -71,8 +69,8 @@ public class PublicDisplayController extends HttpServlet {
         }
     }
 
-    private void showPublicDisplay(Long channelId, HttpServletRequest request, HttpServletResponse response) throws IOException {
-        Channel channel = ChannelDAO.load(channelId);
+    private void showPublicDisplay(Long channelNumber, HttpServletRequest request, HttpServletResponse response) throws IOException {
+        Channel channel = ChannelDAO.loadChannelByNumber(channelNumber);
         if (channel == null) {
             sendFirstScreen(response);
             return;
@@ -81,10 +79,12 @@ public class PublicDisplayController extends HttpServlet {
         Community community = CommunityDAO.loadCommunity(channel.getCommunityId());
         String spaceId = String.valueOf(space.getId());
 
+/*  Moved to SessionFilter. Why?
         // login user
         request.getSession().setAttribute("loggedIn", "true");
         request.getSession().setAttribute("CTUserId", channel.getUserId());
         System.out.println("user logged in");
+*/
 
         ChannelService channelService = ChannelServiceFactory.getChannelService();
         String token = channelService.createChannel(spaceId);
@@ -105,20 +105,20 @@ public class PublicDisplayController extends HttpServlet {
         response.getWriter().write(index);
         reader.close();
 
-        ChannelDAO.delete(channelId);
+        ChannelDAO.delete(channelNumber);
     }
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String message = req.getParameter("u");
-        System.out.println("message:"+message);
+        System.out.println("message:" + message);
     }
 
     private void sendFirstScreen(HttpServletResponse response) throws IOException {
         Random randomGenerator = new Random();
-        String channelId = Integer.toString(randomGenerator.nextInt(100000));
+        String channelNumber = Integer.toString(randomGenerator.nextInt(100000));
         ChannelService channelService = ChannelServiceFactory.getChannelService();
-        String token = channelService.createChannel(channelId);
+        String token = channelService.createChannel(channelNumber);
         log.info("token created:" + token);
 
         FileReader reader = new FileReader("WEB-INF/html/getDisplay.html");
@@ -126,7 +126,7 @@ public class PublicDisplayController extends HttpServlet {
         reader.read(buffer);
 
         String index = new String(buffer.array());
-        index = index.replaceAll("\\{\\{ channelId \\}\\}", channelId);
+        index = index.replaceAll("\\{\\{ channelNumber \\}\\}", channelNumber);
         index = index.replaceAll("\\{\\{ token \\}\\}", token);
 
         response.setContentType("text/html");
@@ -146,14 +146,14 @@ public class PublicDisplayController extends HttpServlet {
         return false;
     }
 
-	private void sendMessage(Long spaceId, String message) {
-		ChannelService channelService = ChannelServiceFactory.getChannelService();
-		channelService.sendMessage(new ChannelMessage(Long.toString(spaceId), message));
-	}
-	
-	private void mapSpaceToUrl(Long spaceId, String url) {
-		CollaborativeSpace space = SpaceAPI.getCollaborativeSpace(spaceId);
-		space.setUrlMapping(url);
+    private void sendMessage(Long spaceId, String message) {
+        ChannelService channelService = ChannelServiceFactory.getChannelService();
+        channelService.sendMessage(new ChannelMessage(Long.toString(spaceId), message));
+    }
+
+    private void mapSpaceToUrl(Long spaceId, String url) {
+        CollaborativeSpace space = SpaceAPI.getCollaborativeSpace(spaceId);
+        space.setUrlMapping(url);
         CollaborativeSpaceDAO.save(space);
-	}
+    }
 }

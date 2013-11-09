@@ -37,44 +37,48 @@ import static si.stecce.societies.crowdtasking.model.dao.OfyService.ofy;
  * Describe your class here...
  *
  * @author Simon Jureša
- *
  */
 public final class ChannelDAO {
-	private ChannelDAO() {}
-	
-    public static Channel load(Long id) {
-    	Channel cs = null;
-		try {
-			Object obj = ofy().load().type(Channel.class).id(id).get();
-			if (obj instanceof Channel) {
-				cs = (Channel)obj;
-			}
-			else {
-				ofy().clear();
-				cs = ofy().load().type(Channel.class).id(id).get();			}
-		} 
-		catch (NotFoundException e) {}
-		return cs;
-	}
-    
-    public static Channel load(Ref<Channel> csRef) {
-    	return ofy().load().ref(csRef).get();
+    private ChannelDAO() {
     }
-	
+
+    public static Channel load(Long id) {
+        Channel cs = null;
+        try {
+            Object obj = ofy().load().type(Channel.class).id(id).get();
+            if (obj instanceof Channel) {
+                cs = (Channel) obj;
+            } else {
+                ofy().clear();
+                cs = ofy().load().type(Channel.class).id(id).get();
+            }
+        } catch (NotFoundException e) {
+        }
+        return cs;
+    }
+
+    public static Channel loadChannelByNumber(Long channelNumber) {
+        return ofy().load().type(Channel.class).filter("channelNumber", channelNumber).first().get();
+    }
+
+    public static Channel load(Ref<Channel> csRef) {
+        return ofy().load().ref(csRef).get();
+    }
+
     public static void delete(Long id) {
-    	ofy().delete().type(Channel.class).id(id).now();
+        ofy().delete().type(Channel.class).id(id).now();
     }
 
     public static List<Channel> loadChannels() {
-    	return ofy().load().type(Channel.class).list();
+        return ofy().load().type(Channel.class).list();
     }
 
     public static List<Channel> loadChannels(int limit) {
-    	return ofy().load().type(Channel.class).limit(limit).list();
-    }
-    
-    public static Key<Channel> save(Channel cs) {
-    	return ofy().save().entity(cs).now();
+        return ofy().load().type(Channel.class).limit(limit).list();
     }
 
+    public static Channel save(Channel cs) {
+        Key<Channel> key = ofy().save().entity(cs).now();
+        return ofy().load().key(key).get();
+    }
 }
