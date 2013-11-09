@@ -64,7 +64,7 @@ public class Activator implements BundleActivator
 	private SessionRepository sessionRepository;
 	private PersonRepository personRepository;
 
-	private Index<Node> indexPerson, indexSession, indexShortTermCtx;
+	private Index<Node> indexShortTermCtx;
 	@SuppressWarnings("rawtypes")
 	private ServiceRegistration ctxSubServiceRegistration, collabAppsRegistration, engineRegistration/*, serviceRegistration, indexServiceRegistration*/;
 
@@ -146,9 +146,7 @@ public class Activator implements BundleActivator
 		int random = new Random().nextInt(100);
 		personGraphDb = gdbf.newEmbeddedDatabase(rs.getString("personspath") + random );
 		sessionGraphDb = gdbf.newEmbeddedDatabase(rs.getString("sessionspath") + random);
-		indexPerson = personGraphDb.index().forNodes("PersonNodes", MapUtil.stringMap( "type", "exact", "to_lower_case", "true" ) );
-		indexSession = sessionGraphDb.index().forNodes("SessionNodes", MapUtil.stringMap( "type", "exact", "to_lower_case", "true" ) );
-		indexShortTermCtx = personGraphDb.index().forNodes("CtxNodes", MapUtil.stringMap( "type", "exact", "to_lower_case", "true" ) );
+		indexShortTermCtx = personGraphDb.index().forNodes("CtxNodes", MapUtil.stringMap( "type", "fulltext", "to_lower_case", "true" ) );
 		
 		personRepository = new PersonRepository(personGraphDb);
 		sessionRepository = new SessionRepository(sessionGraphDb, collabApps);
