@@ -114,11 +114,11 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
     public static final String DOMAIN = "crowdtasking.appspot.com";
 //    public static final String DOMAIN = "crowdtaskingtest.appspot.com";
 //    public static final String DOMAIN = "simonix";
-//    public static final String DOMAIN = "192.168.1.71";
+//    public static final String DOMAIN = "192.1č68.1.71";
 //   	public static final String DOMAIN = "192.168.1.102";
-//   	public static final String DOMAIN = "192.168.1.67";
-//   	public static final String DOMAIN = "192.168.64.102";
-    private static final String PORT = "";
+//   	public static final String DOMAIN = "192.168.1.236";
+//   	public static final String DOMAIN = "192.168.76.191";
+private static final String PORT = "";
 //    private static final String PORT = ":8888";
     public static final String APPLICATION_URL = SCHEME +"://" + DOMAIN + PORT;
     private static final String HOME_URL = APPLICATION_URL + "/menu";
@@ -883,8 +883,9 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
 		                    kukiji = cookies;
 	                    }
 	                    RestTask task = new RestTask(getApplicationContext(), TAKE_CONTROL, kukiji, DOMAIN);
-                        String url = PD_TAKE_CONTROL + "?channelId=" + contents.substring("channel:".length());
-                        task.execute(new HttpGet(new URI(url)));
+	                    String url = PD_TAKE_CONTROL + "?channelNumber=" + contents.substring
+			                    ("channel:".length());
+	                    task.execute(new HttpGet(new URI(url)));
                     } catch (URISyntaxException e) {
                         e.printStackTrace();
                         Toast.makeText(getApplicationContext(), "Error: " + e.getMessage(), Toast.LENGTH_LONG).show();
@@ -1128,8 +1129,9 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
             Long id = communitiesForPublicDisplay.getJSONObject(checkedItem).getLong("id");
             String name = communitiesForPublicDisplay.getJSONObject(checkedItem).getString("name");
 //            Toast.makeText(getApplicationContext(), checkedItem+". community selected. Id="+id+", name="+name, Toast.LENGTH_LONG).show();
-            String url = PD_TAKE_CONTROL+"?channelId="+channelId+"&communityId="+communitiesForPublicDisplay.getJSONObject(checkedItem).getString("id");
-            try {
+	        String url = PD_TAKE_CONTROL + "?channelNumber=" + channelId + "&communityId" +
+			        "=" + communitiesForPublicDisplay.getJSONObject(checkedItem).getString("id");
+	        try {
                 RestTask task = new RestTask(getApplicationContext(), TAKE_CONTROL, CookieManager.getInstance().getCookie(DOMAIN), DOMAIN);
                 task.execute(new HttpGet(new URI(url)));
             } catch (URISyntaxException e) {
