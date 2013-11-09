@@ -82,7 +82,7 @@ public class ContextAnalyzerTest {
 	    indexPerson = personGraphDb.index().forNodes("PersonNodes");
 	    indexSession = sessionGraphDb.index().forNodes("SessionNodes");
 	    indexShortTermCtx = personGraphDb.index().forNodes("CtxNodes");
-		personRepository = new PersonRepository(personGraphDb, indexPerson);
+		personRepository = new PersonRepository(personGraphDb);
 //		sessionRepository = new SessionRepository(sessionGraphDb,indexSession, new CollabApps());
 		
 		LOG.info("personGraphDb path: "+"target/persontestdb00"  + random);

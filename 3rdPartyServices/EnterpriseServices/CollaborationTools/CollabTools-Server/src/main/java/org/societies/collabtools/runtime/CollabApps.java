@@ -96,6 +96,9 @@ public class CollabApps extends Observable implements ICollabApps, Observer
 	public void joinEvent(String participant, String collabApp, String room) {
 		System.out.println("****Event: Participant "+ participant+" joined room "+ room+" with application "+ collabApp);
 		logger.info("****Event: Participant {} joined room {} ", participant, room);
+		setChanged();
+		String[] response = {"joinEvent", room, participant};
+		notifyObservers(response);
 	}
 
 	/* (non-Javadoc)
@@ -105,6 +108,9 @@ public class CollabApps extends Observable implements ICollabApps, Observer
 	public void leaveEvent(String participant, String collabApp, String room) {
 		System.out.println("****Event: Participant "+ participant+" left room "+ room+" with application "+ collabApp);
 		logger.info("****Event: Participant {} left room {} ", participant, room);
+		setChanged();
+		String[] response = {"leaveEvent", room, participant};
+		notifyObservers(response);
 	}
 
 	/* (non-Javadoc)

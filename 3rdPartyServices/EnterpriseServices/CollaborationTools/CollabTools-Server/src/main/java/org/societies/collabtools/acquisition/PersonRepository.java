@@ -39,6 +39,7 @@ import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.index.Index;
 import org.neo4j.helpers.collection.IterableWrapper;
+import org.neo4j.helpers.collection.MapUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,15 +48,15 @@ import scala.actors.threadpool.Arrays;
 public class PersonRepository
 {
     private final GraphDatabaseService graphDb;
-    private final Index<Node> index;
+    private final Index<Node> indexPerson;
     private final Node personRefNode;
 	
 	private static final Logger logger  = LoggerFactory.getLogger(PersonRepository.class);
 
-    public PersonRepository(GraphDatabaseService graphDb, Index<Node> index)
+    public PersonRepository(GraphDatabaseService graphDb)
     {
         this.graphDb = graphDb;
-        this.index = index;
+        this.indexPerson = this.graphDb.index().forNodes("PersonNodes", MapUtil.stringMap("type", "fulltext", "to_lower_case", "true" ) );
 
         personRefNode = getPersonsRootNode(graphDb);
     }
@@ -96,14 +97,14 @@ public class PersonRepository
             Node newPersonNode = graphDb.createNode();
             personRefNode.createRelationshipTo(newPersonNode, A_PERSON);
             // lock now taken, we can check if  already exist in index
-            Node alreadyExist = index.get(LongTermCtxTypes.NAME, name).getSingle();
+            Node alreadyExist = indexPerson.get(LongTermCtxTypes.NAME, name).getSingle();
             if (alreadyExist != null)
             {
                 tx.failure();
                 throw new Exception("Person with this name already exists ");
             }
             newPersonNode.setProperty(LongTermCtxTypes.NAME, name);
-            index.add(newPersonNode, LongTermCtxTypes.NAME, name);
+            indexPerson.add(newPersonNode, LongTermCtxTypes.NAME, name);
             tx.success();
             Person person = new Person(newPersonNode);
             //TODO:VERIFIY OBSERVER
@@ -119,7 +120,7 @@ public class PersonRepository
 
     public Person getPersonByName(String name)
     {
-        Node personNode = index.get(LongTermCtxTypes.NAME, name).getSingle();
+        Node personNode = indexPerson.get(LongTermCtxTypes.NAME, name).getSingle();
         if ( personNode == null )
         {
             throw new IllegalArgumentException( "Person[" + name
@@ -130,7 +131,7 @@ public class PersonRepository
     
     public boolean hasPerson(String name)
     {
-        Node personNode = index.get(LongTermCtxTypes.NAME, name).getSingle();
+        Node personNode = indexPerson.get(LongTermCtxTypes.NAME, name).getSingle();
         if (personNode == null)
         	return false;
         return true;
@@ -160,7 +161,7 @@ public class PersonRepository
     {
     	List<Person> persons = new ArrayList<Person>();
     	//E.g. LongTermCtxTypes.COMPANY
-    	for (Node personNode : index.query(property, value))
+    	for (Node personNode : indexPerson.query(property, value))
     	{
     		Person person = new Person(personNode);
     		persons.add(person);
@@ -185,7 +186,7 @@ public class PersonRepository
         try
         {
             Node personNode = person.getUnderlyingNode();
-            index.remove( personNode, LongTermCtxTypes.NAME, person.getName() );
+            indexPerson.remove( personNode, LongTermCtxTypes.NAME, person.getName() );
             for (Person friend : person.getFriends())
             {
                 person.removeFriend(friend);

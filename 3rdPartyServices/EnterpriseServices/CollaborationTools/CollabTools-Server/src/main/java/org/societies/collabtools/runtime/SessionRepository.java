@@ -40,6 +40,7 @@ import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.index.Index;
 import org.neo4j.helpers.collection.IterableWrapper;
+import org.neo4j.helpers.collection.MapUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.societies.collabtools.acquisition.LongTermCtxTypes;
@@ -62,10 +63,10 @@ public class SessionRepository implements Observer {
 	private String language = "English";
 	private static final Logger logger = LoggerFactory.getLogger(SessionRepository.class);
 
-	public SessionRepository(GraphDatabaseService graphDb, Index<Node> indexSession, CollabApps collabApps)
+	public SessionRepository(GraphDatabaseService graphDb, CollabApps collabApps)
 	{
 		this.graphDb = graphDb;
-		this.indexSession = indexSession;
+		this.indexSession = this.graphDb.index().forNodes("SessionNodes", MapUtil.stringMap("type", "fulltext", "to_lower_case", "true") );
 		this.collabApps = collabApps;
 		this.collabApps.addObserver(this);
 		this.sessionRefNode = getSessionRootNode(graphDb);
@@ -97,7 +98,8 @@ public class SessionRepository implements Observer {
 
 	public Session getSessionByName(String sessionName)
 	{
-		Node sessionNode = (Node)this.indexSession.get(Session.SESSION, sessionName).getSingle();
+		//Using query for index, not get()
+		Node sessionNode = (Node)this.indexSession.query(Session.SESSION, sessionName).getSingle();
 		if (sessionNode == null)
 		{
 			throw new IllegalArgumentException("Session[" + sessionName + "] not found");
@@ -105,7 +107,7 @@ public class SessionRepository implements Observer {
 		return new Session(sessionNode, this.collabApps);
 	}
 
-	public void update(Observable o, Object arg)
+	public synchronized void update(Observable o, Object arg)
 	{
 		//Verify if object class is Person
 		if (o instanceof Person){
@@ -133,12 +135,52 @@ public class SessionRepository implements Observer {
 				logger.debug("{} Session graph after: {}", sessionName, personList.toString());
 			}
 		}
+		
+		//Updates from join and leave events
+		else  if (o instanceof CollabApps){
+			String[] response = (String[]) arg;
+			String event = response[0];
+			String sessionName = response[1];
+			String newMember = response[2];
+			logger.debug("**********event: {} ",event);
+			logger.debug("**********sessionName: {} ",sessionName);
+			logger.debug("**********newMember: {} ",newMember);
+//			sessionName = Character.toUpperCase(sessionName.charAt(0)) + sessionName.substring(1);
+
+			String[] membersParticipating  = this.getSessionByName(sessionName).getMembersParticipating();
+
+			if (event.equals("joinEvent")) {
+				if (membersParticipating == null || membersParticipating.length==0){
+					membersParticipating = new String[]{newMember};
+				}
+				else {
+					List<String> members = new ArrayList<String>();
+					for (String oldMembers: membersParticipating){
+						members.add(oldMembers);
+					}
+					members.add(newMember);
+					membersParticipating = new String[members.size()];
+					members.toArray(membersParticipating);
+				}
+			} 
+			else if (event.equals("leaveEvent")) {
+				List<String> members = new ArrayList<String>();
+				for (String oldMembers: membersParticipating){
+					members.add(oldMembers);
+				}
+				members.remove(newMember);
+				membersParticipating = new String[members.size()];
+				members.toArray(membersParticipating);
+			}			
+			this.getSessionByName(sessionName).setMembersParticipating(membersParticipating);
+			logger.debug("Final result: {}",Arrays.toString(this.getSessionByName(sessionName).getMembersParticipating()));
+		}
 
 	}
 
 	private synchronized boolean isInSession(Person person, String session)
 	{
-		Iterator<Node> personNode = this.indexSession.get(LongTermCtxTypes.NAME, session).iterator();
+		Iterator<Node> personNode = this.indexSession.query(LongTermCtxTypes.NAME, session).iterator();
 		while (personNode.hasNext()) {
 			Node temp = (Node)personNode.next();
 			if (person.getName().equals(new Person(temp).getName()))
@@ -149,7 +191,7 @@ public class SessionRepository implements Observer {
 
 	public boolean containSession(String sessionName)
 	{
-		Node temp = (Node)this.indexSession.get(Session.SESSION, sessionName).getSingle();
+		Node temp = (Node)this.indexSession.query(Session.SESSION, sessionName).getSingle();
 		if (temp == null) {
 			return false;
 		}
@@ -169,7 +211,7 @@ public class SessionRepository implements Observer {
 			Node newSessionNode = this.graphDb.createNode();
 			this.sessionRefNode.createRelationshipTo(newSessionNode, RelTypes.A_SESSION);
 
-			Node sessionAlreadyExist = (Node)this.indexSession.get(Session.SESSION, sessionName).getSingle();
+			Node sessionAlreadyExist = (Node)this.indexSession.query(Session.SESSION, sessionName).getSingle();
 			if (sessionAlreadyExist != null)
 			{
 				tx.failure();
@@ -182,6 +224,7 @@ public class SessionRepository implements Observer {
 			}
 			//Add session
 			newSessionNode.setProperty(Session.SESSION, sessionName);
+			//keeps the session in lowercase in index
 			this.indexSession.add(newSessionNode, Session.SESSION, sessionName);
 			tx.success();
 			Session session = new Session(newSessionNode, this.collabApps);

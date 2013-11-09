@@ -79,8 +79,8 @@ public class PersonTest
 	    indexPerson = personGraphDb.index().forNodes("PersonNodes");
 	    indexSession = sessionGraphDb.index().forNodes("SessionNodes");
 	    indexShortTermCtx = personGraphDb.index().forNodes("CtxNodes");
-		personRepository = new PersonRepository(personGraphDb, indexPerson);
-		sessionRepository = new SessionRepository(sessionGraphDb,indexSession, new CollabApps());
+		personRepository = new PersonRepository(personGraphDb);
+		sessionRepository = new SessionRepository(sessionGraphDb, new CollabApps());
 		registerShutdownHook();
 
 	}
