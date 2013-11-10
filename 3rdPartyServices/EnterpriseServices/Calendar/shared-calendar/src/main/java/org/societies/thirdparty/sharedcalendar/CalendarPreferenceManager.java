@@ -70,6 +70,8 @@ public class CalendarPreferenceManager implements IActionConsumer {
 
 	private ConcurrentHashMap<CalendarPreference, String> calendarPreferences;
 
+	private ArrayList<IAction> queuedActions;
+
 	public IUserActionMonitor getUserAction() {
 		return userAction;
 	}
@@ -105,21 +107,27 @@ public class CalendarPreferenceManager implements IActionConsumer {
 	public CalendarPreferenceManager() {
 		log.debug("Calendar Preference Manager");
 		calendarPreferences = new ConcurrentHashMap<CalendarPreference,String>(CalendarPreference.values().length,1f,1);
+		queuedActions = new ArrayList<IAction>();
 	}
 
 	public void setPreference(CalendarPreference preferenceName, String preferenceValue){
 		
 		log.debug("Set a Preference ( {}, {} )", preferenceName, preferenceValue );
 		
-		IAction myAction = new Action(getServiceIdentifier(), getServiceType(), preferenceName.toString(), preferenceValue);
+		IAction myAction = getAction( preferenceName, preferenceValue);
 		getUserAction().monitor(getMyId(), myAction);
 		
-		if(!calendarPreferences.containsKey(preferenceName))
-			calendarPreferences.put(preferenceName, preferenceValue);
+		//if(!calendarPreferences.containsKey(preferenceName))
+		calendarPreferences.put(preferenceName, preferenceValue);
 	}
 	
 	public String getPreference(CalendarPreference preference){
 		log.debug("Getting Preference: {} : {} ", preference,calendarPreferences.get(preference));
+		String manualPreference = getPreferenceManual(preference);
+		if(manualPreference != null)
+			calendarPreferences.put(preference,manualPreference);
+		//getPreferenceManual(preference);
+		//getUserIntentManual(preference);
 		return calendarPreferences.get(preference);
 		
 	}	
@@ -145,8 +153,41 @@ public class CalendarPreferenceManager implements IActionConsumer {
 			} else{
 				log.debug("Preference was not retrieved!");
 			}
+			
+			
 		} catch(Exception ex){
 			log.error("There was an exception getting a Preference from the Personalisation Manager : {}", ex);
+			ex.printStackTrace();
+		}
+		
+		return result;
+	}
+	
+	public String getUserIntentManual(CalendarPreference preference){
+		log.debug("Getting UserIntentManually: {}", preference);
+		
+		String result = null;
+		
+		try{
+			
+			if(myrequestor == null){
+				myrequestor = new RequestorService(getMyId(), getServiceIdentifier());
+			}
+			
+			Future<IAction> actionAsync = getPersonalisation().getIntentAction(myrequestor, getMyId(), getServiceIdentifier(), preference.toString());
+			IAction action = actionAsync.get();
+			
+			if(action != null){
+				log.debug("UserIntent retrieved: {} => {}", action.getparameterName(), action.getvalue());
+				result = action.getvalue();
+				
+			} else{
+				log.debug("User Intent was not retrieved!");
+			}
+			
+			
+		} catch(Exception ex){
+			log.error("There was an exception getting a User Intent from the Personalisation Manager : {}", ex);
 			ex.printStackTrace();
 		}
 		
@@ -210,10 +251,93 @@ public class CalendarPreferenceManager implements IActionConsumer {
 	@Override
 	public boolean setIAction(IIdentity id, IAction action) {
 		log.info("Personalisation Manager setting preference for {} : {}",action.getparameterName(),action.getvalue());
-		log.debug("CalendarPreference.valueOf: {}",CalendarPreference.valueOf(action.getparameterName()));
-		calendarPreferences.put(CalendarPreference.valueOf(action.getparameterName()), action.getvalue());
+		CalendarPreference calendarPreference = CalendarPreference.valueOf(action.getparameterName());
+		calendarPreferences.put(calendarPreference, action.getvalue());
+		
+		switch(calendarPreference){
+			case VIEW_CALENDAR:
+			case SEARCH_KEYWORD:
+			case SEARCH_LOCATION:
+			case CALENDAR_VIEW:
+				queuedActions.add(action); break;
+			default: ;
+
+		}
+		
 		return true;
 	}
 
+	private IAction getAction(CalendarPreference preferenceName, String preferenceValue){
+		
+		
+		/**
+		 * 	SUB_CREATOR,
+	SUB_LOCATION,
+	SUB_CALENDAR,
+	SUB_ATTENDEENUMBER,
+	
+	VIEW_CREATOR,
+	VIEW_CALENDAR,
+	VIEW_LOCATION,
+	
+	SEARCH_KEYWORD,
+	SEARCH_LOCATION,
+	SEARCH_CREATOR,
+	SEARCH_CALENDAR,
+	
+	CREATE_TITLE,
+	CREATE_LOCATION,
+	CREATE_CALENDAR,
+	
+	CALENDAR_ACTION,
+	CALENDAR_VIEW
+	
+		 */
+		boolean implementable = true,contextDependent = true,proactive = false;
+		
+		switch(preferenceName){
+			case SUB_CREATOR: 
+			case SUB_LOCATION:
+			case SUB_ATTENDEENUMBER: 
+				proactive = false; implementable = true; break;
+			
+			case VIEW_CALENDAR: proactive = true; implementable = true; break;
+			case CALENDAR_VIEW: proactive = true; implementable = true; break;
+			
+			case CREATE_TITLE:
+			case CREATE_LOCATION:
+			case CREATE_CALENDAR:
+				 proactive = false; implementable = true; break;
+				 
+			case VIEW_CREATOR:
+			case VIEW_LOCATION:
+				proactive = false; break;
+				
+			case SEARCH_KEYWORD:
+			case SEARCH_LOCATION:
+				proactive = true; implementable = true; break;
+			case SEARCH_CREATOR:
+			case SEARCH_CALENDAR:
+				proactive = false; implementable = true; break;
+			case CALENDAR_ACTION:
+					implementable = false; proactive = false;
+				break;
+					
+			default: 
+				implementable = true;
+				proactive = false;
+				contextDependent = true;
+		}
 
+		IAction myAction = new Action(getServiceIdentifier(),getServiceType(),preferenceName.toString(),preferenceValue,implementable,contextDependent,proactive);
+		return myAction;
+	}
+	
+	public List<IAction> getQueuedActions(){
+		
+		log.debug("Getting queuedActions!");
+		List<IAction> actionList = new ArrayList<IAction>(queuedActions);
+		queuedActions.clear();
+		return actionList;
+	}
 }

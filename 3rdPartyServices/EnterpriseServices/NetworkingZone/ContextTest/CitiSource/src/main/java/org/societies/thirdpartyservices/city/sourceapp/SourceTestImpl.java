@@ -24,116 +24,240 @@
  */
 package org.societies.thirdpartyservices.city.sourceapp;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Date;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.societies.api.comm.xmpp.datatypes.Stanza;
+import org.societies.api.comm.xmpp.exceptions.CommunicationException;
+import org.societies.api.comm.xmpp.exceptions.XMPPError;
+import org.societies.api.comm.xmpp.interfaces.ICommManager;
+import org.societies.api.comm.xmpp.interfaces.IFeatureServer;
 import org.societies.api.context.CtxException;
 import org.societies.api.context.broker.ICtxBroker;
 import org.societies.api.context.model.CtxAssociation;
 import org.societies.api.context.model.CtxAssociationTypes;
 import org.societies.api.context.model.CtxAttribute;
-import org.societies.api.context.model.CtxAttributeIdentifier;
 import org.societies.api.context.model.CtxAttributeTypes;
-import org.societies.api.context.model.CtxAttributeValueMetrics;
 import org.societies.api.context.model.CtxAttributeValueType;
 import org.societies.api.context.model.CtxEntity;
 import org.societies.api.context.model.CtxEntityIdentifier;
 import org.societies.api.context.model.CtxEntityTypes;
-import org.societies.api.context.model.CtxHistoryAttribute;
 import org.societies.api.context.model.CtxIdentifier;
-import org.societies.api.context.model.CtxModelObject;
 import org.societies.api.context.model.CtxModelType;
-import org.societies.api.context.model.util.SerialisationHelper;
 import org.societies.api.identity.IIdentity;
 import org.societies.api.identity.Requestor;
 
 /**
- * Describe your class here...
+ * This Class is part of a project to test the suitability of using the Societies framework for potential use on other projects
+ * SourceTestImpl is used to write test data to the DB and for creating associations between the data.
+ * Later it could be used to change the associations between the data and the Client Test class could be used to see if those changes are picked up
  *
  * @author rdaviesX
  *
  */
-public class SourceTestImpl implements ISourceTest {
+public class SourceTestImpl implements ISourceTest, IFeatureServer {
 
+	private static final List<String> NAMESPACES = Collections.unmodifiableList(
+			Arrays.asList("http://societies.org/api/schema/contexttest/monitoring",
+					"http://societies.org/api/schema/contexttest/feedback"));
+	private static final List<String> PACKAGES = Collections.unmodifiableList(
+			Arrays.asList("org.societies.api.schema.contexttest.monitoring",
+					"org.societies.api.schema.contexttest.feedback"));
 	
-	private ICtxBroker externalCtxBroker;
-	private ICtxBroker internalCtxBroker;
-	
+	private static final String USER_DESC = "a cool CSS user";
 	
 	/** The 3P Context Broker service reference. */
 	private ICtxBroker ctxBroker;
 	
-	// The IIdentity of the context data owner, i.e. the target CSS (or CIS)
-	IIdentity targetId;
+	private ICommManager commManagerService;
 	
-	
-
 	private Logger log = LoggerFactory.getLogger(this.getClass());
-	private CtxIdentifier myCtxAttributeStringIdentifier;
-
-
+	
 	public void RunInit() {
-		log.info("RICH: runInit starting v1");
-
-		// create a context entity
-		String ownerId = "cityWatch";
+		log.info("CTXTTEST:Source: runInit starting v1");
 		
-		
-		String type1 = "Community Garden 1";
-		Long objectNumber1 = (long) 1;
-		CtxEntityIdentifier ceId1 = new CtxEntityIdentifier(ownerId, type1, objectNumber1);
-		CtxEntity entity1 = new CtxEntity(ceId1);
-		
-		String type2 = "Community Garden 2";
-		Long objectNumber2 = (long) 2;
-		CtxEntityIdentifier ceId2 = new CtxEntityIdentifier(ownerId, type2, objectNumber2);
-		CtxEntity entity2 = new CtxEntity(ceId2);		
-		
-		String type3 = "City User 1";
-		Long objectNumber3 = (long) 3;
-		CtxEntityIdentifier ceId3 = new CtxEntityIdentifier(ownerId, type3, objectNumber3);
-		CtxEntity entity3 = new CtxEntity(ceId3);			
-		
-		String type4 = "City User Name";
-		Long objectNumber4 = (long) 4;
-		CtxEntityIdentifier ceId4 = new CtxEntityIdentifier(ownerId, type4, objectNumber4);
-		CtxAttributeIdentifier ctxAttributeIdentifier = new CtxAttributeIdentifier(ceId4, type4, objectNumber4);
-		CtxAttribute nameAttribute = new CtxAttribute(ctxAttributeIdentifier);
-		nameAttribute.setStringValue("Bob");
-		nameAttribute.setValueType(CtxAttributeValueType.STRING);
-		
-		entity3.addAttribute(nameAttribute);
-		
-		
-		IIdentity requestorId = null;
-		Requestor requestor = new Requestor(requestorId);
-		IIdentity arg1 = null;
-		String arg2 = null;
 		try {
-			IIdentity identity = null;
-			this.externalCtxBroker.createEntity(requestor, identity, CtxEntityTypes.PERSON);
-		} catch (CtxException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			getCommManagerService().register(this);
+		} catch (CommunicationException e1) {
+			log.info("CTXTTEST:Source: CommunicationException: " + e1);
 		}
 		
+		IIdentity targetId = commManagerService.getIdManager().getThisNetworkNode();
+
+		// The IIdentity of the requestor of context data
+		IIdentity requestorId = commManagerService.getIdManager().getThisNetworkNode();
 		
+		Requestor requestor = new Requestor(requestorId);
+
+		// retrieve the CtxEntityIdentifier of the CSS owner context entity based on IIdentity
+		CtxEntityIdentifier ownerEntityId;
+		try {
+			Future<CtxEntityIdentifier> futureCtxEntId = this.ctxBroker.retrieveIndividualEntityId(requestor, targetId);
+			ownerEntityId = futureCtxEntId.get();
+
+			CtxEntity retrievedOwnerCtxEntity = (CtxEntity) this.ctxBroker.retrieve(requestor, ownerEntityId).get();
+			
+			boolean haveAboutMe = false;
+			for (CtxAttribute ownerAttribute : retrievedOwnerCtxEntity.getAttributes()) {
+				if (ownerAttribute.getType().equalsIgnoreCase(CtxAttributeTypes.ABOUT)) {
+					if (USER_DESC.equals(ownerAttribute.getStringValue())) {
+						if (haveAboutMe == false) {
+							log.info("CTXTTEST:Source: found one user desc");
+							haveAboutMe = true;
+						} else {
+							log.info("CTXTTEST:Source: found another user desc, removing");
+							this.ctxBroker.remove(requestor, ownerAttribute.getId());
+						}
+					}
+				}
+			}
+			
+			if (haveAboutMe == false) {
+				log.info("CTXTTEST:Source: found no user desc, adding");
+				// create a context attribute under the CSS owner context entity	
+				CtxAttribute aboutMeAttr = this.ctxBroker.createAttribute(requestor, ownerEntityId, CtxAttributeTypes.ABOUT).get();
+				// assign a String value to the attribute
+				aboutMeAttr.setStringValue(USER_DESC);
+				aboutMeAttr.setValueType(CtxAttributeValueType.STRING);
+				// update the attribute in the Context DB
+				aboutMeAttr = (CtxAttribute) this.ctxBroker.update(requestor, aboutMeAttr).get();
+			}
+			
+			// create an initial set of context entity data
+			CtxEntity initialDevice = createEntityTypeWithNameAttribute(targetId, requestor, CtxEntityTypes.DEVICE, "device1234");
+			
+			CtxEntity user1 = createEntityTypeWithNameAttribute(targetId, requestor, CtxEntityTypes.PERSON, "Joe Bloggs");
+			CtxEntity user2 = createEntityTypeWithNameAttribute(targetId, requestor, CtxEntityTypes.PERSON, "John Doe");
+			
+			CtxEntity garden1 = createEntityTypeWithNameAttribute(targetId, requestor, CtxEntityTypes.SERVICE, "Community Garden 1");
+			CtxEntity garden2 = createEntityTypeWithNameAttribute(targetId, requestor, CtxEntityTypes.SERVICE, "Community Garden 2");
+			
+			CtxEntity area1 = createEntityTypeWithNameAttribute(targetId, requestor, CtxEntityTypes.DEVICE, "Dublin 1");
+			CtxEntity area2 = createEntityTypeWithNameAttribute(targetId, requestor, CtxEntityTypes.DEVICE, "Dublin 2");
+			CtxEntity area3 = createEntityTypeWithNameAttribute(targetId, requestor, CtxEntityTypes.DEVICE, "Dublin 3");
+			CtxEntity area4 = createEntityTypeWithNameAttribute(targetId, requestor, CtxEntityTypes.DEVICE, "Dublin 4");
+			
+			// create an initial set of context associations
+			CtxAssociation isLocatedInAssoc1 = this.ctxBroker.createAssociation(requestor, targetId, CtxAssociationTypes.HAS_MEMBERS).get();
+			isLocatedInAssoc1.setParentEntity(area1.getId());
+			isLocatedInAssoc1.addChildEntity(user1.getId());
+			
+			CtxAssociation isLocatedInAssoc2 = this.ctxBroker.createAssociation(requestor, targetId, CtxAssociationTypes.HAS_MEMBERS).get();
+			isLocatedInAssoc2.setParentEntity(area2.getId());
+			isLocatedInAssoc2.addChildEntity(user2.getId());
+			
+			CtxAssociation isLocatedInAssoc3 = this.ctxBroker.createAssociation(requestor, targetId, CtxAssociationTypes.HAS_MEMBERS).get();
+			isLocatedInAssoc3.setParentEntity(area3.getId());
+			isLocatedInAssoc3.addChildEntity(garden1.getId());
+			
+			CtxAssociation isLocatedInAssoc4 = this.ctxBroker.createAssociation(requestor, targetId, CtxAssociationTypes.HAS_MEMBERS).get();
+			isLocatedInAssoc4.setParentEntity(area4.getId());
+			isLocatedInAssoc4.addChildEntity(garden2.getId());
+			
+			
+			// The idea here would be to now change those associations, for example to represent a user moving from one Dublin Area to the next, 
+			// and seeing if those changes are picked up by ClientTest
+			
+			
+			// PROBLEM: it looks like the associations that were added here are not being added properly
+			
+			
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+			log.info("CTXTTEST:Source: Exception: " + e);
+		} catch (ExecutionException e) {
+			e.printStackTrace();
+			log.info("CTXTTEST:Source: Exception: " + e);
+		} catch (CtxException e) {
+			e.printStackTrace();
+			log.info("CTXTTEST:Source: Exception: " + e);
+		}
+
+		log.info("CTXTTEST:Source: runInit end");
+	}
+
+
+	/**
+	 * Creates a context Entity with the supplied Name attribute, This method also checks if there is already such an entity, and does not insert a 
+	 * new one if one exists already
+	 * 
+	 * @param targetId
+	 * @param requestor
+	 * @return 
+	 * @throws InterruptedException
+	 * @throws ExecutionException
+	 * @throws CtxException
+	 */
+	private CtxEntity createEntityTypeWithNameAttribute(IIdentity targetId, Requestor requestor, String entityType, String deviceNameString) throws InterruptedException, ExecutionException, CtxException {
 		
+		boolean haveAlready = false;
+		CtxEntity retrievedCtxEntity = null;
 		
+		List<CtxIdentifier> idsEntities = this.ctxBroker.lookup(requestor, targetId, CtxModelType.ENTITY, entityType).get();
 		
+		// first look through the existing context entities for a possible match
+		for(CtxIdentifier ctxIdentifier : idsEntities){
+			CtxEntityIdentifier deviceCtxEntIdentifier = (CtxEntityIdentifier) ctxIdentifier;
+			retrievedCtxEntity = (CtxEntity) this.ctxBroker.retrieve(requestor, deviceCtxEntIdentifier).get();
+			Set<CtxAttribute> ctxAttrSet = retrievedCtxEntity.getAttributes();
+			
+			for(CtxAttribute attrib : ctxAttrSet){
+				if(CtxAttributeTypes.NAME.equals(attrib.getType()) && (attrib.getStringValue() != null) && (attrib.getStringValue().equals(deviceNameString))){
+					if(haveAlready == false){
+						haveAlready = true;
+						log.info("CTXTTEST:Source: Have an entitytype: " + entityType + ", with name " + deviceNameString + " already");
+					} else {
+						// if more than one entity of this type exists, then delete the additional ones
+						log.info("CTXTTEST:Source: Have second entitytype: " + entityType + ", with name " + deviceNameString + " Removing...");
+						this.ctxBroker.remove(requestor, attrib.getId());
+						this.ctxBroker.remove(requestor, retrievedCtxEntity.getId());
+					}
+
+				}
+			}
+		}
+		
+		CtxEntity deviceEntity = null;
+		
+		// only insert a new entity if one does not already exist
+		if(haveAlready == false){
+			log.info("CTXTTEST:Source: Have NO entitytype: " + entityType + ", with name " + deviceNameString + " so far, so adding");
+			
+			// create a context entity that represents a device
+			CtxEntity createdDeviceEntity = this.ctxBroker.createEntity(requestor, targetId, entityType).get();
+			// get the context identifier of the created entity
+			CtxEntityIdentifier deviceEntityId = createdDeviceEntity.getId();
+	
+			// create an attribute to model the name of the device entity
+			CtxAttribute deviceNameAttr = this.ctxBroker.createAttribute(requestor, deviceEntityId, CtxAttributeTypes.NAME).get();
+	
+			// assign a String value to the attribute 
+			deviceNameAttr.setStringValue(deviceNameString);
+			deviceNameAttr.setValueType(CtxAttributeValueType.STRING);
+			// update the attribute in the Context DB
+			deviceNameAttr = (CtxAttribute) this.ctxBroker.update(requestor, deviceNameAttr).get();
+			
+			deviceEntity = createdDeviceEntity;
+		} else {
+			deviceEntity = retrievedCtxEntity;
+		}
+		
+		return deviceEntity;
 	}
 	
 
+	/* 
+	 * method exposed by the interface, not currently being used
+	 * @see org.societies.thirdpartyservices.city.sourceapp.ISourceTest#doSomething()
+	 */
 	public void doSomething() {
-		log.info("RICH: SourceTest doSomething.");
-		
-		//cxtBrokerService.
+		log.info("CTXTTEST:Source: SourceTest doSomething method");
 		
 		String ownerId = "ownerId";
 		String type = "type";
@@ -141,199 +265,11 @@ public class SourceTestImpl implements ISourceTest {
 		CtxEntityIdentifier ceId = new CtxEntityIdentifier(ownerId, type, objectNumber);
 		
 		CtxEntity entity = new CtxEntity(ceId);
-		
 	}
 
-	public void SourceTestImpl() {
-		log.info("RICH: SourceTest bundle instantiated.");
+	public SourceTestImpl() {
+		log.info("CTXTTEST:Source: SourceTest bundle instantiated.");
 	}
-
-	
-	
-	private void createUpdateContextModelObjects(IIdentity requestorId, IIdentity cssOwnerId, CtxModelObject associationUsesService, CtxEntity operator, CtxEntity deviceCtxEntity){
-		 // The IIdentity of the requestor of context data
-		Requestor requestor = new Requestor(requestorId);
-		
-		// retrieve the CtxEntityIdentifier of the CSS owner context entity  based on IIdentity
-		CtxEntityIdentifier ownerEntityId;
-		try {
-			ownerEntityId = this.ctxBroker.retrieveIndividualEntityId(requestor, targetId).get();
-		
-			// create a context attribute under the CSS owner context entity
-			CtxAttribute aboutMeAttr = this.ctxBroker.createAttribute(requestor, ownerEntityId, CtxAttributeTypes.ABOUT).get();
-			// assign a String value to the attribute 
-			aboutMeAttr.setStringValue("a cool CSS user");
-			aboutMeAttr.setValueType(CtxAttributeValueType.STRING);
-			// update the attribute in the Context DB
-			aboutMeAttr = (CtxAttribute) this.ctxBroker.update(requestor, aboutMeAttr).get();
-			
-			// create a context entity that represents a device
-			CtxEntity deviceEntity = this.ctxBroker.createEntity(requestor, targetId, CtxEntityTypes.DEVICE).get();
-			// get the context identifier of the created entity
-			CtxEntityIdentifier deviceEntityId = deviceEntity.getId();
-			
-			// create an attribute to model the name of the device entity
-			CtxAttribute deviceNameAttr = this.ctxBroker.createAttribute(requestor, deviceEntityId, CtxAttributeTypes.NAME).get();
-			// assign a String value to the attribute 
-			deviceNameAttr.setStringValue("device1234");
-			deviceNameAttr.setValueType(CtxAttributeValueType.STRING);
-			// update the attribute in the Context DB
-			deviceNameAttr = (CtxAttribute) this.ctxBroker.update(requestor, deviceNameAttr).get();
-					
-			// create an attribute to model the temperature of the device
-			CtxAttribute deviceTempAttr = this.externalCtxBroker.createAttribute(requestor, deviceCtxEntity.getId(), CtxAttributeTypes.TEMPERATURE).get();
-			// assign a double value and set value type and metric
-			deviceTempAttr.setDoubleValue(25.0);
-			deviceTempAttr.setValueType(CtxAttributeValueType.DOUBLE);
-			deviceTempAttr.setValueMetric(CtxAttributeValueMetrics.CELSIUS);
-			// update the attribute in the Context DB
-			deviceTempAttr = (CtxAttribute) this.externalCtxBroker.update(requestor, deviceTempAttr).get();
-			
-			// create an attribute with a Binary value
-			CtxAttribute deviceBinAttr = this.ctxBroker.createAttribute(requestor, deviceEntityId, "serializableData").get();
-			
-			// this is a mock Serializable class
-			MockBlobClass blob = new MockBlobClass();
-			byte[] blobBytes = null;
-			try {
-				blobBytes = SerialisationHelper.serialise(blob);
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			deviceBinAttr.setBinaryValue(blobBytes);
-			deviceBinAttr.setValueType(CtxAttributeValueType.BINARY);
-			
-			// update the attribute in the Context DB
-			deviceBinAttr = (CtxAttribute) this.ctxBroker.update(requestor, deviceBinAttr).get();
-			
-			//create an Association
-			CtxAssociation usesServiceAssoc = this.externalCtxBroker.createAssociation(requestor, cssOwnerId, CtxAssociationTypes.USES_SERVICES).get();
-			//add child entities 
-			usesServiceAssoc.addChildEntity(operator.getId());
-			usesServiceAssoc.addChildEntity(deviceEntity.getId());
-			//update entities
-			usesServiceAssoc = (CtxAssociation) this.ctxBroker.update(requestor, associationUsesService).get();			
-			
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ExecutionException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (CtxException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-	
-	}
-	
-
-	
-	private void retryLookUpContextInformation(Requestor requestor, IIdentity cssOwnerId, CtxIdentifier weightAttrIdentifier) {
-
-		// if the CtxEntityID or CtxAttributeID is known the retrieval is
-		// performed by using the ctxBroker.retrieve(CtxIdentifier) method
-		// alternatively context identifiers can be retrieved with the help of
-		// lookup mehtods
-		CtxEntityIdentifier deviceCtxEntIdentifier = null;
-		try {
-			List<CtxIdentifier> idsEntities = this.externalCtxBroker.lookup(requestor, cssOwnerId, CtxModelType.ENTITY, CtxEntityTypes.DEVICE).get();
-			if (idsEntities.size() > 0) {
-				deviceCtxEntIdentifier = (CtxEntityIdentifier) idsEntities.get(0);
-			}
-			// the retrieved identifier is used in order to retrieve the context
-			// model object (CtxEntity)
-			CtxEntity retrievedCtxEntity = (CtxEntity) this.externalCtxBroker.retrieve(requestor, deviceCtxEntIdentifier).get();
-
-			// Retrieve CtxAttributes assigned to retrievedCtxEntity
-			Set<CtxAttribute> ctxAttrSet = retrievedCtxEntity.getAttributes(CtxAttributeTypes.ID);
-
-			if (ctxAttrSet.size() > 0) {
-				List<CtxAttribute> ctxAttrList = new ArrayList(ctxAttrSet);
-				CtxAttribute ctxAttr = ctxAttrList.get(0);
-			}
-			// retrieve ctxAttribute with the binary value based on a known
-			// identifier
-			CtxAttribute ctxAttributeWeight = (CtxAttribute) this.externalCtxBroker.retrieve(requestor, weightAttrIdentifier).get();
-
-			// deserialise object
-			try {
-				MockBlobClass retrievedBlob = (MockBlobClass) SerialisationHelper.deserialise(ctxAttributeWeight.getBinaryValue(), this.getClass().getClassLoader());
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (ClassNotFoundException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ExecutionException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (CtxException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
-	 
-	private void removeContextModelObjects(Requestor requestor, CtxIdentifier identifier){
-		try {
-			this.internalCtxBroker.remove(requestor, identifier);
-		} catch (CtxException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
-	
-
-	private void SubscribForAndReactToContextChangeEvents(Requestor requestor, CtxEntityIdentifier myCtxEntityIdentifier) {
-		// The ICtxBroker interface provides methods for registering CtxChangeEventListeners in order to listen for context change events.
-		// There are two ways to subscriber for context change event notification:
-
-		try {
-			// 1a. Register listener by specifying the context attribute identifier
-			this.internalCtxBroker.registerForChanges(requestor, new MyCtxChangeEventListener(), myCtxAttributeStringIdentifier);
-
-			// 1b. Register listener by specifying the context attribute scope and type
-			this.internalCtxBroker.registerForChanges(requestor, new MyCtxChangeEventListener(), myCtxEntityIdentifier, "DeviceID");
-		} catch (CtxException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
-	
-	
-	private List<CtxHistoryAttribute> MaintainHistoryOfContextAttributes(CtxAttribute ctxAttributeString, Requestor requestor, CtxAttributeIdentifier ctxAttributeStringIdentifier, Date startDate, Date endDate){
-		// by setting the history recording flag to true the CtxAttribute values will be stored to Context History Database upon update
-		ctxAttributeString.setHistoryRecorded(true);
-		
-		// Retrieval of Context history data for a specified time period
-		// if null values are used for starting and ending Date the whole set of history data is retrieved
-		
-		List<CtxHistoryAttribute> ctxHistoryData = null; 
-		
-		try {
-			ctxHistoryData =  internalCtxBroker.retrieveHistory(requestor, (CtxAttributeIdentifier) ctxAttributeStringIdentifier, startDate, endDate).get();
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ExecutionException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (CtxException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-		return ctxHistoryData;
-	}
-
-	
-	
 	
 	/**
 	 * @return the cxtBrokerService
@@ -347,6 +283,53 @@ public class SourceTestImpl implements ISourceTest {
 	 */
 	public void setCxtBrokerService(ICtxBroker ictxBroker) {
 		this.ctxBroker = ictxBroker;
+	}
+	
+	/**
+	 * @return the commManagerService
+	 */
+	public ICommManager getCommManagerService() {
+		return commManagerService;
+	}
+
+	/**
+	 * @param commManagerService the commManagerService to set
+	 */
+	public void setCommManagerService(ICommManager commManagerService) {
+		this.commManagerService = commManagerService;
+	}
+
+	/** Put your functionality here if there IS a return object */
+	@Override
+	public Object getQuery(Stanza stanza, Object messageBean) throws XMPPError {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	/**Returns the list of package names of the message beans you'll be passing*/
+	@Override
+	public List<String> getJavaPackages() {
+		return PACKAGES;
+	}
+	
+	/**Returns the list of namespaces for the message beans you'll be passing*/
+	@Override
+	public List<String> getXMLNamespaces() {
+		return NAMESPACES;
+	}
+
+	/** Put your functionality here if there is NO return object, ie, VOID */
+	@Override
+	public void receiveMessage(Stanza arg0, Object arg1) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	/** Put your functionality here if there IS a return object and you are updating also */
+	@Override
+	public Object setQuery(Stanza arg0, Object arg1) throws XMPPError {
+		// TODO Auto-generated method stub
+		return null;
 	}
 	
 }

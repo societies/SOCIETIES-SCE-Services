@@ -126,6 +126,7 @@
 		init-method="init" >
 		<property name="sharedCalendar" ref="sharedCalendar" />
 		<property name="commManager" ref="commManager" />
+		<property name="preferences" ref="calendarPreferences" />
 	</bean>
 	
 	<!-- Provided Services -->
@@ -141,9 +142,9 @@
 	</osgi:service>
 
 	<bean id="serMetamodel" class="org.societies.api.schema.servicelifecycle.model.Service">
-		<property name="authorSignature" value="sancho" />
-		<property name="serviceDescription" value="Shared Calendar" />
-		<property name="serviceName" value="Shared Calendar" />
+		<property name="authorSignature" value="Sancho Rego" />
+		<property name="serviceDescription" value="A SOCIETIES calendar application with community-centric features" />
+		<property name="serviceName" value="SOCIETIES Calendar" />
 		<property name="serviceType" value="THIRD_PARTY_SERVER" />
 		<property name="serviceCategory" value="calendar" />
 		<property name="serviceEndpoint" value="sharedCal" />
