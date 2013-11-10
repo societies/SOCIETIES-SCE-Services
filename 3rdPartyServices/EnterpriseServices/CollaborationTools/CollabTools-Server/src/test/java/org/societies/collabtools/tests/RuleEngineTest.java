@@ -37,6 +37,7 @@ import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
@@ -74,9 +75,18 @@ public class RuleEngineTest {
 	private static int nrOfPersons = 5;
 	
     private static ContextSubscriber ctxSub;
-	private static ContextAnalyzer ctxRsn;
 	
-	private Engine engine = new Engine(personRepository, sessionRepository);
+	private Engine engine = new Engine(personRepository);
+	
+	
+	public RuleEngineTest() {
+		try {
+			createPersons(nrOfPersons);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 	
 	/**
 	 * Test method for {@link org.societies.collabtools.runtime.Engine#insertRule(org.societies.collabtools.runtime.Rule)}.
@@ -211,7 +221,7 @@ public class RuleEngineTest {
 	/**
 	 * Test method for {@link org.societies.collabtools.runtime.Engine#getPersonsWithMatchingShortTermCtx(java.lang.String, java.util.HashSet)}.
 	 */
-	@Test
+	@Ignore
 	public void testGetPersonsWithMatchingShortTermCtx() {
 		fail("Not yet implemented");
 	}
@@ -219,7 +229,7 @@ public class RuleEngineTest {
 	/**
 	 * Test method for {@link org.societies.collabtools.runtime.Engine#getPersonsWithMatchingLongTermCtx(java.lang.String, java.util.HashSet)}.
 	 */
-	@Test
+	@Ignore
 	public void testGetPersonsWithMatchingLongTermCtx() {
 		fail("Not yet implemented");
 	}
@@ -227,7 +237,7 @@ public class RuleEngineTest {
 	/**
 	 * Test method for {@link org.societies.collabtools.runtime.Engine#getAllPersonsWithSameCtx(java.lang.String, java.lang.String)}.
 	 */
-	@Test
+	@Ignore
 	public void testGetAllWithSameCtx() {
 		fail("Not yet implemented");
 	}
@@ -235,7 +245,7 @@ public class RuleEngineTest {
 	/**
 	 * Test method for {@link org.societies.collabtools.runtime.Engine#getPersonsBySimilarity(java.lang.String, java.util.HashSet)}.
 	 */
-	@Test
+	@Ignore
 	public void testGetPersonsByWeight() {
 		fail("Not yet implemented");
 	}
@@ -249,20 +259,10 @@ public class RuleEngineTest {
 	    indexPerson = personGraphDb.index().forNodes("PersonNodes");
 	    indexSession = sessionGraphDb.index().forNodes("SessionNodes");
 	    indexShortTermCtx = personGraphDb.index().forNodes("CtxNodes");
-		personRepository = new PersonRepository(personGraphDb, indexPerson);
-		sessionRepository = new SessionRepository(sessionGraphDb,indexSession, new CollabApps());
+		personRepository = new PersonRepository(personGraphDb);
+		sessionRepository = new SessionRepository(sessionGraphDb, new CollabApps());
         ctxSub = new ContextSubscriber(null,personRepository, sessionRepository);
-        ctxRsn = new ContextAnalyzer(personRepository);
 		LOG.info("Setup done...");
-	}
-
-	@Before
-	public void doBefore() throws Exception
-	{
-		deleteSocialGraph();
-		createPersons(nrOfPersons);
-//		enrichedCtx(LongTermCtxTypes.INTERESTS);
-//		ctxRsn.setupWeightAmongPeople(LongTermCtxTypes.INTERESTS);
 	}
 
 	@AfterClass
@@ -272,7 +272,7 @@ public class RuleEngineTest {
 		sessionGraphDb.shutdown();
 	}
 
-	private static void createPersons(int nrOfPersons) throws Exception
+	private static void createPersons(final int nrOfPersons) throws Exception
 	{
 		for (int i = 0; i < nrOfPersons; i++)
 		{

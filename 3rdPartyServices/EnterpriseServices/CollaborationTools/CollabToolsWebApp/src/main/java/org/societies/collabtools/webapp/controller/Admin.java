@@ -25,6 +25,7 @@
 package org.societies.collabtools.webapp.controller;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
@@ -45,7 +46,7 @@ import org.slf4j.LoggerFactory;
 import org.societies.api.cis.management.ICis;
 import org.societies.api.cis.management.ICisManager;
 import org.societies.api.context.model.CtxModelType;
-import org.societies.collabtools.api.ICollabAppConnector;
+import org.societies.collabtools.api.AbstractCollabAppConnector;
 import org.societies.collabtools.api.ICollabApps;
 import org.societies.collabtools.api.IContextSubscriber;
 import org.societies.collabtools.api.IEngine;
@@ -115,10 +116,10 @@ public class Admin {
 
 	@RequestMapping(value = "/applications.html", method = RequestMethod.GET)
 	public ModelAndView collabApps() {
-		ICollabAppConnector[] collabAppsConnectors = getCollabAppsConnectors().getCollabAppConnectors();
+		AbstractCollabAppConnector[] collabAppsConnectors = getCollabAppsConnectors().getCollabAppConnectors();
 		List<String> appnames = new ArrayList<String>();
 		List<String> appserver = new ArrayList<String>();
-		for (ICollabAppConnector apps : collabAppsConnectors){
+		for (AbstractCollabAppConnector apps : collabAppsConnectors){
 			appnames.add(apps.getAppName());
 			appserver.add(apps.getAppServerName());
 		}
@@ -160,19 +161,37 @@ public class Admin {
 		List<ICis> cisList = new ArrayList<ICis>();
 		cisList = cisManager.getCisList();
 		int size = cisList.size();
-		String cisname = null;
-		String ownerID = null;
-		String cisID = null;
-		for (ICis list : cisList) {   
-			cisname = list.getName();
-			ownerID = list.getOwnerId();
-			cisID = list.getCisId();
+		List<String[]> cisresults = new ArrayList<String[]>();
+		for (ICis list : cisList) {
+			String[] elements = {list.getName(), list.getOwnerId(), list.getCisId()}; 
+			cisresults.add(elements);
 		}
 
-		model.put("cisname", cisname);
-		model.put("ownerID", ownerID);
-		model.put("cisID", cisID);
+		model.put("cisresults", cisresults);
 		model.put("size", size);
+		
+		//Rules
+		List<String> attributeTypes = getTypesList(org.societies.api.context.model.CtxAttributeTypes.class);
+		attributeTypes.addAll(getTypesList(org.societies.api.context.model.CtxAttributeTypes.class));
+		model.put("attributeTypes", attributeTypes);
+		
+		List<String[]> rulesresults = new ArrayList<String[]>();
+		for (Rule rule : getEngine().getRules()) {
+			String[] elements = {rule.getName(), rule.getCtxAttribute(), rule.getOperator().toString(), rule.getCtxType(), Integer.toString(rule.getPriority()), rule.getValue()}; 
+			rulesresults.add(elements);
+		}
+		model.put("rulesresults", rulesresults);
+		
+		//Applications
+		AbstractCollabAppConnector[] collabAppsConnectors = getCollabAppsConnectors().getCollabAppConnectors();
+		List<String> appnames = new ArrayList<String>();
+		List<String> appserver = new ArrayList<String>();
+		for (AbstractCollabAppConnector apps : collabAppsConnectors){
+			appnames.add(apps.getAppName());
+			appserver.add(apps.getAppServerName());
+		}
+		model.put("appnames", appnames);
+		model.put("appserver", appserver);
 
 		return new ModelAndView("iphone", model) ;
 	}
@@ -195,13 +214,13 @@ public class Admin {
 		values1.addAll(getTypesList(org.societies.api.context.model.CtxAttributeTypes.class));
 		model.put("attributeTypes", values1);
 
-		List<String[]> results = new ArrayList<String[]>();
+		List<String[]> rulesresults = new ArrayList<String[]>();
 		for (Rule rule : getEngine().getRules()) {
 			String[] elements = {rule.getName(), rule.getCtxAttribute(), rule.getOperator().toString(), rule.getCtxType(), Integer.toString(rule.getPriority()), rule.getValue()}; 
-			results.add(elements);
+			rulesresults.add(elements);
 		}
 
-		model.put("results1", results);
+		model.put("rulesresults", rulesresults);
 		model.put("attribute_label", CtxModelType.ATTRIBUTE.name().toString());
 
 		return new ModelAndView("rules", model) ;
@@ -289,8 +308,8 @@ public class Admin {
 
 	@RequestMapping(value = "/setcollabapps.html", method = RequestMethod.GET)
 	public @ResponseBody String setCollabAppsConnectors(@RequestParam String app, String server) {
-		ICollabAppConnector[] collabAppsConnectors = getCollabAppsConnectors().getCollabAppConnectors();
-		for (ICollabAppConnector apps : collabAppsConnectors){
+		AbstractCollabAppConnector[] collabAppsConnectors = getCollabAppsConnectors().getCollabAppConnectors();
+		for (AbstractCollabAppConnector apps : collabAppsConnectors){
 			if (apps.getAppName().equalsIgnoreCase(app)){
 				apps.setAppServerName(server);
 			}
@@ -335,9 +354,16 @@ public class Admin {
 
 	private String readLogFile()  {
 		Reader fileReader = null;
+		File file = new File("databases/collabToolsLogFile.log");
 		try {
+			if (!file.exists()) {
+			    file.createNewFile();
+			}
 			fileReader = new FileReader("databases/collabToolsLogFile.log");
 		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}

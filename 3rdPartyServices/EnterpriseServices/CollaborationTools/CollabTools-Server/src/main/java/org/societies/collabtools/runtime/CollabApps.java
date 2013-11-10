@@ -24,7 +24,12 @@
  */
 package org.societies.collabtools.runtime;
 
-import org.societies.collabtools.api.ICollabAppConnector;
+import java.util.Observable;
+import java.util.Observer;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.societies.collabtools.api.AbstractCollabAppConnector;
 import org.societies.collabtools.api.ICollabApps;
 
 /**
@@ -33,12 +38,16 @@ import org.societies.collabtools.api.ICollabApps;
  * @author Chris Lima
  *
  */
-public class CollabApps implements ICollabApps
+public class CollabApps extends Observable implements ICollabApps, Observer
 {
-	private ICollabAppConnector[] collabAppsconnectors;
+	private static final Logger logger  = LoggerFactory.getLogger(CollabApps.class);
+	private AbstractCollabAppConnector[] collabAppsconnectors;
 
-	public CollabApps(ICollabAppConnector... connectors)
+	public CollabApps(AbstractCollabAppConnector... connectors)
 	{
+		for (AbstractCollabAppConnector connector : connectors) {
+			connector.addObserver(this);
+		}
 		this.collabAppsconnectors =  connectors;
 	}
 
@@ -47,7 +56,7 @@ public class CollabApps implements ICollabApps
 	public void sendInvite(String member, String[] collabApps, String sessionName, String language)
 	{
 		for (String app : collabApps){
-			for (ICollabAppConnector connector : collabAppsconnectors) {
+			for (AbstractCollabAppConnector connector : collabAppsconnectors) {
 				if (connector.getAppName().contains(app)){
 					//TODO:Start invitation
 					System.out.println("Send invitation to member: " + member + " using app " + connector.getAppName());
@@ -67,7 +76,7 @@ public class CollabApps implements ICollabApps
 	@Override
 	public void sendKick(String member, String[] collabApps, String sessionName) {
 		for (String app : collabApps){
-			for (ICollabAppConnector connector : collabAppsconnectors) {
+			for (AbstractCollabAppConnector connector : collabAppsconnectors) {
 				if (connector.getAppName().contains(app)){
 					//TODO:Start invitation
 					System.out.println("Kicking member: " + member);
@@ -84,26 +93,51 @@ public class CollabApps implements ICollabApps
 	 * @see org.societies.collabtools.api.ICollabApps#joinEvent(java.lang.String, java.lang.String[], java.lang.String)
 	 */
 	@Override
-	public void joinEvent(String member, String[] collabApps, String sessionName) {
-		// TODO Auto-generated method stub
-
+	public void joinEvent(String participant, String collabApp, String room) {
+		System.out.println("****Event: Participant "+ participant+" joined room "+ room+" with application "+ collabApp);
+		logger.info("****Event: Participant {} joined room {} ", participant, room);
+		setChanged();
+		String[] response = {"joinEvent", room, participant};
+		notifyObservers(response);
 	}
 
 	/* (non-Javadoc)
 	 * @see org.societies.collabtools.api.ICollabApps#leaveEvent(java.lang.String, java.lang.String[], java.lang.String)
 	 */
 	@Override
-	public void leaveEvent(String member, String[] collabApps,
-			String sessionName) {
-		// TODO Auto-generated method stub
-
+	public void leaveEvent(String participant, String collabApp, String room) {
+		System.out.println("****Event: Participant "+ participant+" left room "+ room+" with application "+ collabApp);
+		logger.info("****Event: Participant {} left room {} ", participant, room);
+		setChanged();
+		String[] response = {"leaveEvent", room, participant};
+		notifyObservers(response);
 	}
 
 	/* (non-Javadoc)
 	 * @see org.societies.collabtools.api.ICollabApps#getCollabAppConnectors()
 	 */
 	@Override
-	public ICollabAppConnector[] getCollabAppConnectors() {
+	public AbstractCollabAppConnector[] getCollabAppConnectors() {
 		return collabAppsconnectors;
+	}
+
+	/* (non-Javadoc)
+	 * @see java.util.Observer#update(java.util.Observable, java.lang.Object)
+	 */
+	@Override
+	public void update(Observable o, Object arg) {
+		if (arg instanceof String[]){
+			String[] response = (String[]) arg;
+			String event = response[0]; 
+			String room = response[1]; 
+			String collabApp = response[2];
+			String participant = response[3]; 
+			if (event.equals("joinEvent")){
+				this.joinEvent(participant, collabApp, room);
+			}
+			else if (event.equals("leaveEvent")) {
+				this.leaveEvent(participant, collabApp, room);
+			}
+		}
 	}
 }

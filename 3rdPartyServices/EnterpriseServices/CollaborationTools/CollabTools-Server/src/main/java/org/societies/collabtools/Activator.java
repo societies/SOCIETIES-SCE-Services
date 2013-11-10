@@ -33,6 +33,7 @@ import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 import org.neo4j.graphdb.index.Index;
 import org.neo4j.graphdb.index.IndexProvider;
+import org.neo4j.helpers.collection.MapUtil;
 import org.neo4j.index.impl.lucene.LuceneIndex;
 import org.neo4j.index.lucene.LuceneIndexProvider;
 import org.neo4j.kernel.ListIndexIterable;
@@ -45,7 +46,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.societies.collabtools.acquisition.ContextSubscriber;
 import org.societies.collabtools.acquisition.PersonRepository;
-import org.societies.collabtools.api.ICollabAppConnector;
+import org.societies.collabtools.api.AbstractCollabAppConnector;
 import org.societies.collabtools.api.ICollabApps;
 import org.societies.collabtools.api.IContextSubscriber;
 import org.societies.collabtools.api.IEngine;
@@ -63,7 +64,7 @@ public class Activator implements BundleActivator
 	private SessionRepository sessionRepository;
 	private PersonRepository personRepository;
 
-	private Index<Node> indexPerson, indexSession, indexShortTermCtx;
+	private Index<Node> indexShortTermCtx;
 	@SuppressWarnings("rawtypes")
 	private ServiceRegistration ctxSubServiceRegistration, collabAppsRegistration, engineRegistration/*, serviceRegistration, indexServiceRegistration*/;
 
@@ -84,8 +85,8 @@ public class Activator implements BundleActivator
 
 		//Apps and server
 		//load a properties file
-		ICollabAppConnector chat = new ChatAppIntegrator(rs.getString("applications"), rs.getString("server"));
-		ICollabAppConnector[] connectorsApp = {chat};
+		AbstractCollabAppConnector chat = new ChatAppIntegrator(rs.getString("applications"), rs.getString("server"));
+		AbstractCollabAppConnector[] connectorsApp = {chat};
 		this.collabApps = new CollabApps(connectorsApp);
 
 		this.setup();
@@ -145,12 +146,10 @@ public class Activator implements BundleActivator
 		int random = new Random().nextInt(100);
 		personGraphDb = gdbf.newEmbeddedDatabase(rs.getString("personspath") + random );
 		sessionGraphDb = gdbf.newEmbeddedDatabase(rs.getString("sessionspath") + random);
-		indexPerson = personGraphDb.index().forNodes("PersonNodes");
-		indexSession = sessionGraphDb.index().forNodes("SessionNodes");
-		indexShortTermCtx = personGraphDb.index().forNodes("CtxNodes");
+		indexShortTermCtx = personGraphDb.index().forNodes("CtxNodes", MapUtil.stringMap( "type", "fulltext", "to_lower_case", "true" ) );
 		
-		personRepository = new PersonRepository(personGraphDb, indexPerson);
-		sessionRepository = new SessionRepository(sessionGraphDb, indexSession, collabApps);
+		personRepository = new PersonRepository(personGraphDb);
+		sessionRepository = new SessionRepository(sessionGraphDb, collabApps);
 
 		//Caching last recently used for Location
 		((LuceneIndex<Node>) indexShortTermCtx).setCacheCapacity("name", 3000);

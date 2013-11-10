@@ -25,7 +25,7 @@
 package org.societies.collabtools.runtime;
 
 import static org.societies.collabtools.acquisition.RelTypes.NEXT;
-import static org.societies.collabtools.acquisition.RelTypes.STATUS;
+import static org.societies.collabtools.acquisition.RelTypes.REALTIME_STATUS;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -36,6 +36,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Node;
@@ -46,12 +47,14 @@ import org.neo4j.graphdb.index.Index;
 import org.neo4j.graphdb.traversal.Evaluators;
 import org.neo4j.graphdb.traversal.TraversalDescription;
 import org.neo4j.helpers.collection.IterableWrapper;
+import org.neo4j.helpers.collection.MapUtil;
 import org.neo4j.kernel.Traversal;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.societies.collabtools.acquisition.LongTermCtxTypes;
 import org.societies.collabtools.acquisition.Person;
 import org.societies.collabtools.acquisition.RelTypes;
+import org.societies.collabtools.acquisition.ShortTermContextUpdates;
 import org.societies.collabtools.api.ICollabApps;
 
 /**
@@ -68,18 +71,22 @@ public class Session {
 	static final String DATE_FORMAT = "HH:mm:ss dd-MM-yyyy";
 	public static final String SESSION = "session";
 	public static final String ID = "id";
-	public static final String MEMBERS = "members";
+	public static final String MEMBERS_INVITED = "membersInvited";
+	public static final String MEMBERS_PARTICIPATING = "membersParticipating";
 	public static final String ROLE = "role";
 	public static final String CHAIR = "id";
-	public static final String LISTENER = "listener";
+	public static final String VISITOR = "visitor";
 	public static final String LANGUAGE = "language";
 	private final Node underlyingNode;
 	private ICollabApps collabApps;
+	private Index<Node> index;
 
 	Session(Node sessionNode, CollabApps collabApps)
 	{
 		this.underlyingNode = sessionNode;
 		this.collabApps = collabApps;
+		//Lucene index
+		this.index = this.underlyingNode.getGraphDatabase().index().forNodes("SessionNodes", MapUtil.stringMap("type", "fulltext", "to_lower_case", "true") );
 	}
 
 	/**
@@ -96,9 +103,7 @@ public class Session {
 
 	public Iterator<Person> getMembers()
 	{
-		//Lucene index
-		Index<Node> index = this.underlyingNode.getGraphDatabase().index().forNodes("SessionNodes");
-		Iterator<Node> personNode = index.get(LongTermCtxTypes.NAME, this.getSessionName()).iterator();
+		Iterator<Node> personNode = index.query(LongTermCtxTypes.NAME, this.getSessionName()).iterator();
 		ArrayList<Person> persons = new ArrayList<Person>();
 		while (personNode.hasNext()) {
 			persons.add(new Person(personNode.next()));
@@ -126,11 +131,18 @@ public class Session {
 		member.setCollabApps(collabApps);
 	}
 
+	/**
+	 * Return the name of the session
+	 */
 	public String getSessionName()
 	{
-		return (String)this.underlyingNode.getProperty(SESSION);
+		String sessioName = (String)this.underlyingNode.getProperty(SESSION);
+		return sessioName.toLowerCase();
 	}
 
+	/**
+	 * Set the language of the session
+	 */
 	public void setLanguage(String language)
 	{
 		logger.debug("Language set: {}",language);
@@ -148,14 +160,71 @@ public class Session {
 		}
 	}
 
-	public String getLanguage(String language)
+	/**
+	 * Get the language of the session
+	 */
+	public String getLanguage()
 	{
-		return (String)this.underlyingNode.getProperty(LANGUAGE);
+		Transaction tx = underlyingNode.getGraphDatabase().beginTx();
+		try
+		{
+			String language = (String)this.underlyingNode.getProperty(LANGUAGE);
+			tx.success();
+			return language;
+		}
+		finally
+		{
+			tx.finish();
+		}
+	}
+	
+	/**
+	 * Get members that really accepted the invitation to join a session
+	 */
+	public String[] getMembersParticipating()
+	{
+		Transaction tx = underlyingNode.getGraphDatabase().beginTx();
+		try
+		{
+			String[] membersParticipating  = (String[]) this.getLastSessionHistoryStatus().getProperty(Session.MEMBERS_PARTICIPATING, null);
+			tx.success();
+			return membersParticipating;
+		}
+		finally
+		{
+			tx.finish();
+		}
 	}
 
+	/**
+	 * Include members that really accepted the invitation to join a session
+	 * 
+	 * @param membersParticipating Array of members to include in LastSessionHistoryStatus
+	 */
+	public void setMembersParticipating(String[] membersParticipating)
+	{
+		Map<String, String[]> ctxSessionHistory = new HashMap<String, String[]>();
+		ctxSessionHistory.put(MEMBERS_PARTICIPATING, membersParticipating);
+		this.addSessionHistoryStatus(ctxSessionHistory);
+//		Transaction tx = underlyingNode.getGraphDatabase().beginTx();
+//		try
+//		{
+//			this.getLastSessionHistoryStatus().setProperty(MEMBERS_PARTICIPATING, membersParticipating);
+//			tx.success();
+//		}
+//		finally
+//		{
+//			tx.finish();
+//		}
+	}
+
+	/**
+	 * Add member to join a session
+	 * @param member name of the member
+	 * @param role Role possibles are CHAIR and VISITOR
+	 */
 	public void addMember(Person member, String role)
 	{
-		Index<Node> index = this.underlyingNode.getGraphDatabase().index().forNodes("SessionNodes");
 		Transaction tx = this.underlyingNode.getGraphDatabase().beginTx();
 		try
 		{
@@ -189,13 +258,16 @@ public class Session {
 		}
 	}
 
+	/**
+	 * 
+	 * @param member
+	 */
 	public synchronized void removeMember(Person member)
 	{
-		Index<Node> index = this.underlyingNode.getGraphDatabase().index().forNodes("SessionNodes");
 		Transaction tx = this.underlyingNode.getGraphDatabase().beginTx();
 		try
 		{
-			Iterator<Node> personNode = index.get(LongTermCtxTypes.NAME, this.getSessionName()).iterator();
+			Iterator<Node> personNode = index.query(LongTermCtxTypes.NAME, this.getSessionName()).iterator();
 			Node personNodeToDelete = null;
 			Node temp = null;
 
@@ -223,7 +295,7 @@ public class Session {
 			}
 			HashMap<String, String[]> ctxSessionHistory = new HashMap<String, String[]>();
 			logger.debug("List of members in session history after person leaves: {}",Arrays.toString(membersList.toArray(new String[0])));
-			ctxSessionHistory.put(Session.MEMBERS, membersList.toArray(new String[0]));
+			ctxSessionHistory.put(Session.MEMBERS_INVITED, membersList.toArray(new String[0]));
 			Node sessionHistoryNode = this.addSessionHistoryStatus(ctxSessionHistory);
 
 			//				personNode = index.get(Person.NAME, this.getSessionName()).iterator();
@@ -267,7 +339,7 @@ public class Session {
 	private void inviteMember(Person member)
 	{
 		String[] collabAppsAvailables = member.getArrayLongTermCtx(LongTermCtxTypes.COLLAB_APPS);
-		this.collabApps.sendInvite(member.getName(), collabAppsAvailables, getSessionName(), getLanguage(LANGUAGE));
+		this.collabApps.sendInvite(member.getName(), collabAppsAvailables, getSessionName(), getLanguage());
 	}
 
 	private void kickMember(Person member)
@@ -300,11 +372,11 @@ public class Session {
 			newStatus = createNewSessionHistoryNode(ctxSessionHistory);
 
 			if (oldStatus != null){
-				underlyingNode.getSingleRelationship(RelTypes.STATUS, Direction.OUTGOING).delete();
+				underlyingNode.getSingleRelationship(RelTypes.REALTIME_STATUS, Direction.OUTGOING).delete();
 				newStatus.createRelationshipTo(oldStatus.getUnderlyingNode(), RelTypes.NEXT );
 			}
 
-			underlyingNode.createRelationshipTo(newStatus, RelTypes.STATUS);  
+			underlyingNode.createRelationshipTo(newStatus, RelTypes.REALTIME_STATUS);  
 			tx.success();
 		}
 		finally{
@@ -318,7 +390,7 @@ public class Session {
 	 */
 	 private Iterable<SessionHistory> getHistoryStatus() {
 		Relationship firstStatus = underlyingNode.getSingleRelationship(
-				STATUS, Direction.OUTGOING );
+				REALTIME_STATUS, Direction.OUTGOING );
 		if (firstStatus == null)
 		{
 			return Collections.emptyList();
@@ -344,28 +416,49 @@ public class Session {
 	 }
 
 	 //Session history node model
-	 private Node createNewSessionHistoryNode(Map<String, ?> ctxSessionHistory)
+	 private Node createNewSessionHistoryNode(Map<String, String[]> ctxSessionHistory)
 	 {
-		 Node newCtx = this.underlyingNode.getGraphDatabase().createNode();
-		 for (Map.Entry entry : ctxSessionHistory.entrySet()) {
-			 newCtx.setProperty((String)entry.getKey(), entry.getValue());
+		 Transaction tx = underlyingNode.getGraphDatabase().beginTx();
+		 try
+		 {
+			 Node newCtx = this.underlyingNode.getGraphDatabase().createNode();
+			 //Including date stamp
+			 SimpleDateFormat formatter = new SimpleDateFormat(DATE_FORMAT);
+			 newCtx.setProperty(DATE, formatter.format(new Date().getTime()));
+
+			 Node lastNodeStatus = getLastSessionHistoryStatus();
+			 if (lastNodeStatus != null) {
+				 for (String propertyKey : lastNodeStatus.getPropertyKeys()) {
+					 if (!propertyKey.equals(DATE)) {
+						 newCtx.setProperty(propertyKey, lastNodeStatus.getProperty(propertyKey) );
+					 }
+				 }
+			 } 
+
+			 for (Map.Entry<String, String[]> entry : ctxSessionHistory.entrySet()) {
+				 newCtx.setProperty((String)entry.getKey(), entry.getValue());
+			 }
+			 tx.success();
+			 return newCtx;
 		 }
-		 SimpleDateFormat formatter = new SimpleDateFormat(DATE_FORMAT);
-		 newCtx.setProperty(DATE, formatter.format(new Date().getTime()));
-		 return newCtx;
+		 finally
+		 {
+			 tx.finish();
+		 }
 	 }
 
 	 public Node getLastSessionHistoryStatus()
 	 {
 		 Relationship firstStatus = underlyingNode.getSingleRelationship(
-				 STATUS, Direction.OUTGOING);
+				 REALTIME_STATUS, Direction.OUTGOING);
 		 //Check status is empty
 		 if (firstStatus == null)
 		 {
 			 //	    		Node newStatus = createNewSessionHistoryNode(new HashMap<String, Object>()); 
 			 //	    	    underlyingNode.createRelationshipTo(newStatus, RelTypes.STATUS);
 			 //				return newStatus;
-			 throw new IllegalArgumentException("Status not found!");
+//			 throw new IllegalArgumentException("Status not found!");
+			 return null;
 		 }
 		 return firstStatus.getEndNode();
 	 }

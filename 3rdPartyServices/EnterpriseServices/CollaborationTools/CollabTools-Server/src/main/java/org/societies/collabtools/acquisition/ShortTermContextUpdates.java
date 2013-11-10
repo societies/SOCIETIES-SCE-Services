@@ -26,7 +26,7 @@
 package org.societies.collabtools.acquisition;
 
 import static org.societies.collabtools.acquisition.RelTypes.NEXT;
-import static org.societies.collabtools.acquisition.RelTypes.STATUS;
+import static org.societies.collabtools.acquisition.RelTypes.REALTIME_STATUS;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -68,8 +68,8 @@ public class ShortTermContextUpdates extends Observable
         TraversalDescription traversalDescription = Traversal.description().
                 depthFirst().
                 relationships(NEXT, Direction.INCOMING).
-                relationships(STATUS, Direction.INCOMING).
-                evaluator(Evaluators.includeWhereLastRelationshipTypeIs(STATUS));
+                relationships(REALTIME_STATUS, Direction.INCOMING).
+                evaluator(Evaluators.includeWhereLastRelationshipTypeIs(REALTIME_STATUS));
 
         Traverser traverser = traversalDescription.traverse( getUnderlyingNode() );
 

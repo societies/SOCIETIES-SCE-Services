@@ -28,6 +28,7 @@ package org.societies.collabtools.context;
 import java.util.HashMap;
 
 import org.societies.api.context.event.CtxChangeEventListener;
+import org.societies.api.identity.IIdentityManager;
 import org.societies.api.identity.InvalidFormatException;
 import org.societies.api.identity.Requestor;
 
@@ -46,6 +47,8 @@ public interface IContextAware3pService {
 	public HashMap<String, HashMap<String, String[]>> retrieveLookupMembersCtxAttributes(Object communityId) throws InvalidFormatException;
 
 	public abstract Requestor getRequestor();
+	
+	public IIdentityManager getIdMgr();
 
 	/**
 	 * @param myCtxChangeEventListener

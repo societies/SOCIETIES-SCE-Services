@@ -20,7 +20,7 @@
 		<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no"/>
 		<meta name="apple-mobile-web-app-capable" content="yes" />
 		<title>CollabTools Mobile</title>
-		<link href="//ajax.googleapis.com/ajax/libs/dojo/1.8.3/dojox/mobile/themes/android/android.css" rel="stylesheet"></link>
+		<link href="//ajax.googleapis.com/ajax/libs/dojo/1.9.1/dojox/mobile/themes/android/android.css" rel="stylesheet"></link>
 	</head>
 <body style="visibility:hidden;">
 	<div id="group1" data-dojo-type="dojox.mobile.View" data-dojo-props='keepScrollPos:false'><!-- keepScrollPos=false is to improve performance -->
@@ -98,7 +98,7 @@
 			</div>
 
 		<!-- configure and load dojo -->
-		<script src="//ajax.googleapis.com/ajax/libs/dojo/1.8.3/dojo/dojo.js" data-dojo-config="isDebug:1, async:1"></script>
+		<script src="//ajax.googleapis.com/ajax/libs/dojo/1.9.1/dojo/dojo.js" data-dojo-config="isDebug:1, async:1"></script>
 		<script>
 
 			require(["dojo/_base/connect", "dojox/mobile/parser", "dojox/mobile", "dojox/mobile/deviceTheme", "dojox/mobile/compat", "dojo/domReady!", "dojox/mobile/TabBar", "dojox/mobile/ScrollableView", "dojo/ready",

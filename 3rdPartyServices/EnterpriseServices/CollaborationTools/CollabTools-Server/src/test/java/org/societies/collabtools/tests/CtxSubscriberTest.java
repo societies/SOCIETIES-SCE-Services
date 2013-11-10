@@ -28,7 +28,12 @@ import static org.junit.Assert.fail;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
@@ -109,17 +114,28 @@ public class CtxSubscriberTest {
 	@Test
 	public void testUpdate() throws Exception {
 		int i = nrOfPersons++;
-        Person person = personRepository.createPerson( "person#" + i);
+//        Person person = personRepository.createPerson( "person#" + i);
+		
         //Set long term context
-        person.setLongTermCtx(LongTermCtxTypes.NAME, "person#" + i);
-        person.setLongTermCtx(LongTermCtxTypes.COLLAB_APPS, new String[] { "chat" });
-        person.setLongTermCtx(LongTermCtxTypes.OCCUPATION, getRandomOccupation());
-        person.setLongTermCtx(LongTermCtxTypes.INTERESTS, getRandomInterests());
-        person.setLongTermCtx(LongTermCtxTypes.WORK_POSITION, getRandomWorkPosition());
-        System.out.println("Person#" +i+" created");
+		//Noting that the first insertion will set the name if not available
+		String[] response = new String [] {LongTermCtxTypes.COLLAB_APPS, Arrays.toString(new String[] { "chat" }), "person#" + i};
+		ctxSub.update(null, response);
+		response = new String [] {LongTermCtxTypes.OCCUPATION, getRandomOccupation(), "person#" + i};
+		ctxSub.update(null, response);
+		response = new String [] {LongTermCtxTypes.INTERESTS, Arrays.toString(getRandomInterests()), "person#" + i};
+		ctxSub.update(null, response);
+		response = new String [] {LongTermCtxTypes.WORK_POSITION, getRandomWorkPosition(), "person#" + i};
+		ctxSub.update(null, response);
+		
+//        person.setLongTermCtx(LongTermCtxTypes.COLLAB_APPS, new String[] { "chat" });
+//        person.setLongTermCtx(LongTermCtxTypes.OCCUPATION, getRandomOccupation());
+//        person.setLongTermCtx(LongTermCtxTypes.INTERESTS, getRandomInterests());
+//        person.setLongTermCtx(LongTermCtxTypes.WORK_POSITION, getRandomWorkPosition());
+        System.out.println("Person#" +i+" created and populated");
         
         //Set ShortTerm Ctx
-        String [] response = new String [] {ShortTermCtxTypes.LOCATION, getRandomLocation(), person.getName()};
+        Person person = this.personRepository.getPersonByName("person#" + i);
+        response = new String [] {ShortTermCtxTypes.LOCATION, getRandomLocation(), person.getName()};
 		ctxSub.update(null, response);
 		response = new String [] {ShortTermCtxTypes.STATUS, getRandomStatus(), person.getName()};
 		ctxSub.update(null, response);
@@ -127,8 +143,17 @@ public class CtxSubscriberTest {
 		LOG.info(person.getLastShortTermUpdate().getShortTermCtx(ShortTermCtxTypes.LOCATION));
 		LOG.info(person.getLastShortTermUpdate().getShortTermCtx(ShortTermCtxTypes.STATUS));
 		
-		person.setLongTermCtx(LongTermCtxTypes.INTERESTS, new String[] {"AB","BC","CD","AE"});
+//		LOG.info(person.getLongTermCtx(LongTermCtxTypes.INTERESTS));
+//		person.setLongTermCtx(LongTermCtxTypes.INTERESTS, new String[] {"AB","BC","CD","AE"});
 		LOG.info(person.getLongTermCtx(LongTermCtxTypes.INTERESTS));
+		
+		Assert.assertNotNull(person.getLongTermCtx(LongTermCtxTypes.NAME));
+		Assert.assertNotNull(person.getLongTermCtx(LongTermCtxTypes.COLLAB_APPS));
+		Assert.assertNotNull(person.getLongTermCtx(LongTermCtxTypes.OCCUPATION));
+		Assert.assertNotNull(person.getLongTermCtx(LongTermCtxTypes.INTERESTS));
+		Assert.assertNotNull(person.getLongTermCtx(LongTermCtxTypes.WORK_POSITION));
+		Assert.assertNotNull(person.getLastShortTermUpdate().getShortTermCtx(ShortTermCtxTypes.LOCATION));
+		Assert.assertNotNull(person.getLastShortTermUpdate().getShortTermCtx(ShortTermCtxTypes.STATUS));
 	}
 
 	/**
@@ -159,16 +184,41 @@ public class CtxSubscriberTest {
 	public void testSetCtx() throws Exception {	
 		Class[] methodParameters = new Class[]{String.class, String[].class, String.class};
 		Method method = ContextSubscriber.class.getDeclaredMethod("setContext", methodParameters );
-		String [] ctxType= {ShortTermCtxTypes.LOCATION};
-		Object[] params = new Object[]{new String("Home"),ctxType,new String("person#0") };
+		String [] ctxType= {ShortTermCtxTypes.STATUS};
+		Object[] params = new Object[]{new String("Busy"),ctxType,new String("person#9") };
 
-		createPersons(1);
-		Person individual = personRepository.getPersonByName("person#0");
-		String response = individual.getLastShortTermUpdate().getShortTermCtx(ShortTermCtxTypes.LOCATION);
-		LOG.info(response);
+
 		method.setAccessible(true);
+		//Insert location
 		method.invoke(ctxSub, params);
-		response = individual.getLastShortTermUpdate().getShortTermCtx(ShortTermCtxTypes.LOCATION);
+		
+		//Insert status
+		ctxType[0]= ShortTermCtxTypes.LOCATION;
+		params = new Object[]{new String("Home"),ctxType,new String("person#9") };
+		method.invoke(ctxSub, params);
+		
+		
+//		createPersons(1);
+		Person individual = personRepository.getPersonByName("person#9");
+		Map<String, String> shortTermCtx = new HashMap<String, String>();
+		
+//		shortTermCtx.put(ShortTermCtxTypes.STATUS,new String("Busy"));
+//		individual.addContextStatus(shortTermCtx, this.sessionRepository);
+		
+		if (individual.getLastShortTermUpdate()==null) {
+			shortTermCtx.put(ShortTermCtxTypes.STATUS, "Online");
+			individual.addContextStatus(shortTermCtx, this.sessionRepository);
+		}
+//		shortTermCtx.put(individual.getLastShortTermUpdate() == null ? "" : individual.getLastShortTermUpdate().getShortTermCtx(ShortTermCtxTypes.STATUS), "Home");
+//		if (individual.getLastShortTermUpdate()==null)
+//			LOG.info("null");
+		shortTermCtx.put(ShortTermCtxTypes.LOCATION,new String("Home"));
+		individual.addContextStatus(shortTermCtx, this.sessionRepository);
+		
+//		
+//		String response = individual.getLastShortTermUpdate().getShortTermCtx(ShortTermCtxTypes.STATUS);
+//		LOG.info(response);
+		String response = individual.getLastShortTermUpdate().getShortTermCtx(ShortTermCtxTypes.LOCATION);
 		LOG.info(response);
 		Assert.assertEquals("Home", response);
 	}
@@ -181,8 +231,8 @@ public class CtxSubscriberTest {
 		sessionGraphDb = new GraphDatabaseFactory().newEmbeddedDatabase("target/sessiontestdb0"  + random);
 	    indexPerson = personGraphDb.index().forNodes("PersonNodes");
 	    indexSession = sessionGraphDb.index().forNodes("SessionNodes");
-		personRepository = new PersonRepository(personGraphDb, indexPerson);
-		sessionRepository = new SessionRepository(sessionGraphDb,indexSession, new CollabApps());
+		personRepository = new PersonRepository(personGraphDb);
+		sessionRepository = new SessionRepository(sessionGraphDb, new CollabApps());
         ctxSub = new ContextSubscriber(null,personRepository, sessionRepository);
         ctxRsn = new ContextAnalyzer(personRepository);
 		LOG.info("personGraphDb path: "+"target/persontestdb0"  + random);

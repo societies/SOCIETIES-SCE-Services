@@ -32,13 +32,13 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 import org.neo4j.graphdb.index.Index;
+import org.neo4j.helpers.collection.MapUtil;
 import org.neo4j.index.impl.lucene.LuceneIndex;
 import org.neo4j.kernel.impl.util.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.societies.collabtools.acquisition.LongTermCtxTypes;
 import org.societies.collabtools.acquisition.PersonRepository;
-import org.societies.collabtools.api.ICollabAppConnector;
+import org.societies.collabtools.api.AbstractCollabAppConnector;
 import org.societies.collabtools.runtime.CollabApps;
 import org.societies.collabtools.runtime.SessionRepository;
 
@@ -57,7 +57,7 @@ public class MainTest {
 	private static GraphDatabaseService sessionGraphDb;
 	private static PersonRepository personRepository;
 	private static SessionRepository sessionRepository; 
-	private static Index<Node> indexPerson, indexSession, indexShortTermCtx;
+	private static Index<Node> indexShortTermCtx;
 	
 	private static Properties prop = new Properties();
 	
@@ -77,17 +77,15 @@ public class MainTest {
 		GraphDatabaseFactory gdbf = new GraphDatabaseFactory();
 	    personGraphDb = gdbf.newEmbeddedDatabase(prop.getProperty("personspath"));
 	    sessionGraphDb = gdbf.newEmbeddedDatabase(prop.getProperty("sessionspath"));
-	    indexPerson = personGraphDb.index().forNodes("PersonNodes");
-	    indexSession = sessionGraphDb.index().forNodes("SessionNodes");
-	    indexShortTermCtx = personGraphDb.index().forNodes("CtxNodes");
+	    indexShortTermCtx = personGraphDb.index().forNodes("CtxNodes", MapUtil.stringMap("to_lower_case", "true" ) );
 	    
 	    //Synchronous integration
-	    ICollabAppConnector chat = new ChatAppIntegrator(prop.getProperty("applications"), prop.getProperty("server"));
-	    ICollabAppConnector[] connectorsApp = {chat};
+	    AbstractCollabAppConnector chat = new ChatAppIntegrator(prop.getProperty("applications"), prop.getProperty("server"));
+	    AbstractCollabAppConnector[] connectorsApp = {chat};
 	    CollabApps collabApps = new CollabApps(connectorsApp);
 
-	    personRepository = new PersonRepository(personGraphDb, indexPerson);
-	    sessionRepository = new SessionRepository(sessionGraphDb, indexSession, collabApps);
+	    personRepository = new PersonRepository(personGraphDb);
+	    sessionRepository = new SessionRepository(sessionGraphDb, collabApps);
 //		registerShutdownHook();
 
 		//Caching last recently used for Location
@@ -98,13 +96,13 @@ public class MainTest {
 		test.deleteSocialGraph();
 		
 //		test.menu();
-		test.createPersons(4); //5 people by default
+		test.createPersons(2); //5 people by default
 		
 //		Creating some updates
 		test.createMockLongTermCtx();
 		test.createMockShortTermCtx();
-		test.enrichedCtx(LongTermCtxTypes.INTERESTS);
-		test.setupWeightAmongPeople(LongTermCtxTypes.INTERESTS);
+//		test.enrichedCtx(LongTermCtxTypes.INTERESTS);
+//		test.setupWeightAmongPeople(LongTermCtxTypes.INTERESTS);
 
 		
 //		YouMightKnow ymn = new YouMightKnow(personRepository.getPersonByName("person#"+3), new String[] {"project planning"}, 5);

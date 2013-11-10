@@ -17,7 +17,7 @@
 
 <script type="text/javascript" src="js/jquery.js"></script>
  <script type="text/javascript">
-    function doAjax(input) {
+    function mangeRule(input) {
       $.ajax({
         url: 'rulesmanager.html',
         data:{ "value0":input[0], "value1":input[1], "value2":input[2], "value3":input[3], "value4":input[4], "value5":input[5], "value6":input[6]},
@@ -27,7 +27,7 @@
       });
     }
     
-    function setArray() {
+    function insertRule() {
     	var info = []; 
 		info[0] = document.getElementById('ruleValue').value; 
 		info[1] = document.getElementById('${attribute_label}').value; 
@@ -36,7 +36,7 @@
 		info[4] = document.getElementById('priorityValue').value;
 		info[5] = document.getElementById('ctxValue').value;
 		info[6] = 'insert';
-		doAjax(info);
+		mangeRule(info);
 		setTimeout(function(){location.reload();}, 1000);
       }
     
@@ -49,7 +49,7 @@
 		info[4] = priority;
 		info[5] = value;
 		info[6] = 'delete';
-		doAjax(info);
+		mangeRule(info);
 		setTimeout(function(){location.reload();}, 1000);
     }
     
@@ -112,7 +112,7 @@
 <!-- 						<option value="100">100 %</option> -->
 <!-- 					</select></td> -->
 					<td><input size="8" id="ctxValue"/></td>
-					<td><button type="button" onclick="setArray()" id="addRule">Add Rule</button></td>			
+					<td><button type="button" onclick="insertRule()" id="addRule">Add Rule</button></td>			
 					
 					</tr>
 
@@ -152,7 +152,7 @@
 
 			<!-- Table body -->
 			<tbody>
-				<xc:forEach var="element" items="${results1}">
+				<xc:forEach var="element" items="${rulesresults}">
 					<tr id="${element[0]}">
 						<td  name="RuleName">${element[0]}</td>
 					    <td  name="CtxAttributetype">${element[1]}</td>

@@ -24,9 +24,13 @@
  */
 package org.societies.collabtools.context;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Observable;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.ExecutionException;
 
 import org.slf4j.Logger;
@@ -36,9 +40,15 @@ import org.societies.api.context.CtxException;
 import org.societies.api.context.broker.ICtxBroker;
 import org.societies.api.context.event.CtxChangeEvent;
 import org.societies.api.context.event.CtxChangeEventListener;
+import org.societies.api.context.model.CtxAssociation;
 import org.societies.api.context.model.CtxAttribute;
 import org.societies.api.context.model.CtxAttributeTypes;
 import org.societies.api.context.model.CtxEntity;
+import org.societies.api.context.model.CtxEntityIdentifier;
+import org.societies.api.context.model.CtxIdentifier;
+import org.societies.api.context.model.CtxModelObject;
+import org.societies.api.context.model.CtxModelType;
+import org.societies.api.identity.IIdentity;
 import org.societies.api.identity.InvalidFormatException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -80,7 +90,7 @@ public class ExternalCtxBrokerConnector extends Observable {
 		//TODO: FIX THIS!
 		return null;
 	}
-	
+
 	/**
 	 * @return retrieveLookupMembersCtxAttributes
 	 * @throws InvalidFormatException 
@@ -107,7 +117,7 @@ public class ExternalCtxBrokerConnector extends Observable {
 			e.printStackTrace();
 		}
 	}
-	
+
 	/**
 	 * @param String cisID
 	 */
@@ -122,6 +132,8 @@ public class ExternalCtxBrokerConnector extends Observable {
 
 
 	private class MyCtxChangeEventListener implements CtxChangeEventListener {
+
+		private Set<String> members = new CopyOnWriteArraySet<String>();
 
 		/* (non-Javadoc)
 		 * @see org.societies.api.context.event.CtxChangeEventListener#onCreation(org.societies.api.context.event.CtxChangeEvent)
@@ -139,6 +151,89 @@ public class ExternalCtxBrokerConnector extends Observable {
 		public void onModification(CtxChangeEvent event) {
 
 			LOG.info(event.getId() + ": *** MODIFIED event ***");
+			LOG.info("event.getId is {}", event.getId().getModelType().toString());
+			Set<String> newMember = null;
+			if (event.getId().getModelType().toString().contentEquals("ASSOCIATION")) {
+				try {
+					CtxAssociation hasMembersAssoc = (CtxAssociation) ctxBroker.retrieve(ca3pService.getRequestor(), event.getId()).get();
+					LOG.info("hasMembersAssoc {}", hasMembersAssoc.toString());
+					Set<String> currentMembers = new HashSet<String>();
+					for (CtxEntityIdentifier cisCtxId : hasMembersAssoc.getChildEntities())
+						currentMembers.add(cisCtxId.getOwnerId());
+					LOG.info("Current members {}", currentMembers);
+
+					// find old members
+					Set<String> oldMembers = new HashSet<String>(this.members);
+					oldMembers.removeAll(currentMembers);
+					LOG.info("Old members {}", oldMembers);            
+
+					// find new member
+					newMember = new HashSet<String>(currentMembers);
+					newMember.removeAll(this.members);
+					LOG.info("New member {}", newMember);   
+
+					// update members
+					this.members.clear();
+					this.members.addAll(currentMembers);
+					LOG.info("Members {}", this.members);   
+
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (ExecutionException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (CtxException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
+				//Retrieving context from the new member
+				List<String> attrTypes = new ArrayList<String>(); 
+
+				attrTypes.add(CtxAttributeTypes.OCCUPATION); 
+				attrTypes.add(CtxAttributeTypes.WORK_POSITION); 
+				attrTypes.add(CtxAttributeTypes.LOCATION_SYMBOLIC); 
+				attrTypes.add(CtxAttributeTypes.STATUS); 
+				attrTypes.add(CtxAttributeTypes.INTERESTS); 
+				attrTypes.add(CtxAttributeTypes.ID);
+								
+				final List<CtxIdentifier> attrIdList = new ArrayList<CtxIdentifier>(); 
+				for (final String attrType : attrTypes) { 
+					List<CtxIdentifier> attrIds;
+					try {
+						IIdentity newUserID = ca3pService.getIdMgr().fromJid(newMember.toString());
+						LOG.info("newUserID: {}", newUserID);
+						attrIds = ctxBroker.lookup(ca3pService.getRequestor(), newUserID, CtxModelType.ATTRIBUTE, attrType).get();
+						attrIdList.addAll(attrIds); 
+						final List<CtxModelObject> ctxModelObjs = ctxBroker.retrieve(ca3pService.getRequestor(), attrIdList).get();
+						for (final CtxModelObject modelObj : ctxModelObjs) { 
+							final CtxAttribute attr = (CtxAttribute) modelObj; 
+							if (attr != null) {
+								String [] response;
+								response = new String [] {attr.getId().getType(), attr.getStringValue(), newMember.toString()};
+								LOG.info("newUser");
+								LOG.info("Ctx value type: "+response[0]);
+								LOG.info("Ctx new value: "+response[1]);
+								LOG.info("Ctx person: "+response[2]);
+
+								// Notify observers of change
+								setChanged();
+								notifyObservers(response);
+							} 
+						} 		
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					} catch (ExecutionException e) {
+						e.printStackTrace();
+					} catch (CtxException e) {
+						e.printStackTrace();
+					} catch (InvalidFormatException e) {
+						e.printStackTrace();
+					} 
+
+				} 		
+			}
 		}
 
 		/* (non-Javadoc)
@@ -156,38 +251,38 @@ public class ExternalCtxBrokerConnector extends Observable {
 		@Override
 		public void onUpdate(CtxChangeEvent event) {
 			LOG.info(event.getId() + ": *** UPDATED event ***");
-			CtxAttribute ctxAttr = null;
-			Set<CtxAttribute> ctxEntity = null;
-			String person = null;
-			try {
+			LOG.info("event.getId is {}", event.getId().getModelType().toString());
+			//Different from association
+			if (event.getId().getModelType().toString().contentEquals("ATTRIBUTE")) {
+				CtxAttribute ctxAttr = null;
+				String person = null;
+				try {
 
-				ctxAttr = (CtxAttribute) ctxBroker.retrieve(ca3pService.getRequestor(), event.getId()).get();
-				LOG.info("ctxValue getScope: "+ctxAttr.getScope());
-				LOG.info("ctxValue getScope: "+ctxAttr.getOwnerId());
-				CtxEntity retrievedCtxEntity = (CtxEntity) ctxBroker.retrieve(ca3pService.getRequestor(), ctxAttr.getScope()).get();
-				ctxEntity= retrievedCtxEntity.getAttributes(CtxAttributeTypes.ID);
+					ctxAttr = (CtxAttribute) ctxBroker.retrieve(ca3pService.getRequestor(), event.getId()).get();
+					LOG.debug("ctxValue getScope: "+ctxAttr.getScope());
+					LOG.debug("ctxValue getOwnerId: "+ctxAttr.getOwnerId());
 
-				for(CtxAttribute name : ctxEntity) {
-					String getOnlyNameSubstring[] = name.getStringValue().split("\\.");
+					String getOnlyNameSubstring[] = ctxAttr.getOwnerId().split("\\.");
 					person = getOnlyNameSubstring[0];
+
+
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				} catch (ExecutionException e) {
+					e.printStackTrace();
+				} catch (CtxException e) {
+					e.printStackTrace();
 				}
-
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			} catch (ExecutionException e) {
-				e.printStackTrace();
-			} catch (CtxException e) {
-				e.printStackTrace();
-			}
-			String [] response = new String [] {ctxAttr.getType(), ctxAttr.getStringValue(), person};
-			LOG.info("Ctx value type: "+response[0]);
-			LOG.info("Ctx new value: "+response[1]);
-			LOG.info("Ctx person: "+response[2]);
+				String [] response = new String [] {ctxAttr.getType(), ctxAttr.getStringValue(), person};
+				LOG.info("Ctx value type: "+response[0]);
+				LOG.info("Ctx new value: "+response[1]);
+				LOG.info("Ctx person: "+response[2]);
 
 
-			// Notify observers of change
-			setChanged();
-			notifyObservers(response);
+				// Notify observers of change
+				setChanged();
+				notifyObservers(response);
+			}			
 		}
 	}
 

@@ -44,6 +44,7 @@ import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.Relationship;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.societies.collabtools.acquisition.LongTermCtxTypes;
 import org.societies.collabtools.acquisition.Person;
 import org.societies.collabtools.acquisition.PersonRepository;
 import org.societies.collabtools.acquisition.ShortTermContextUpdates;
@@ -62,7 +63,7 @@ import org.societies.collabtools.runtime.Operators;
 public class ContextAnalyzer implements IContextAnalyzer {
 
 	private static final Logger log = LoggerFactory.getLogger(ContextAnalyzer.class);
-	private PersonRepository personRepository;
+	private final PersonRepository personRepository;
 	private Hashtable<String, HashSet<Person>> hashCtxList = new Hashtable<String, HashSet<Person>>(10,10);
 	
 	//TODO: api key hardcoded....Change to config.propreties
@@ -133,7 +134,19 @@ public class ContextAnalyzer implements IContextAnalyzer {
 				FutureTask<Boolean> task = new FutureTask<Boolean>(new Callable<Boolean>() {
 					@Override
 					public Boolean call() throws Exception {
-						String[] newContexts = ctxEnrichment(friend.getArrayLongTermCtx(ctxType), ctxType.toString(), enrichmentType);
+						String[] originalCtx;
+						//Check if this ctxTyp was incremented
+						if (friend.getArrayLongTermCtx("ORIGINAL_"+ctxType) == null) {
+							//Keeping the original ctx information
+							originalCtx = friend.getArrayLongTermCtx(ctxType);
+						}
+						else {
+							originalCtx = friend.getArrayLongTermCtx("ORIGINAL_"+ctxType);
+						}
+						//Saving the original ctx in a diferent property
+						friend.setLongTermCtx("ORIGINAL_"+ctxType, originalCtx);
+						//Adding the new ctx info + orignal ctx info
+						String[] newContexts = ctxEnrichment(originalCtx, ctxType.toString(), enrichmentType);
 						friend.setLongTermCtx(ctxType, newContexts);
 						log.debug("{} enrichment done for person {}",enrichmentType,friend.getName());
 						return true;
@@ -156,6 +169,17 @@ public class ContextAnalyzer implements IContextAnalyzer {
 			executor.shutdown();
 		}
 		else {
+			String[] originalCtx;
+			if (person.getArrayLongTermCtx("ORIGINAL_"+ctxType) == null) {
+				//Keeping the original ctx information
+				originalCtx = person.getArrayLongTermCtx(ctxType);
+			}
+			else {
+				originalCtx = person.getArrayLongTermCtx("ORIGINAL_"+ctxType);
+			}
+			//Saving the original ctx in a diferent property
+			person.setLongTermCtx("ORIGINAL_"+ctxType, originalCtx);
+			//Adding the new ctx info + orignal ctx info
 			String[] newContexts = ctxEnrichment(person.getArrayLongTermCtx(ctxType), ctxType.toString(), enrichmentType);
 			person.setLongTermCtx(ctxType, newContexts);
 			log.debug("{} done!",enrichmentType);
@@ -168,7 +192,7 @@ public class ContextAnalyzer implements IContextAnalyzer {
 		//Check if there is no similarity between both
 		if (similarCtx != 0) {
 			float PersonAweight = (float)similarCtx/personA.getArrayLongTermCtx(ctxType).length;
-			float PersonBweight = (float)similarCtx/personB.getArrayLongTermCtx(ctxType).length ;
+			float PersonBweight = (float)similarCtx/personB.getArrayLongTermCtx(ctxType).length;
 			return (PersonAweight + PersonBweight) / 2;
 		}
 		else
@@ -339,10 +363,13 @@ public class ContextAnalyzer implements IContextAnalyzer {
 		for (Person person : personRepository.getAllPersons())
 		{
 			Map<Person, Integer> persons = personRepository.getPersonWithSimilarCtx(person, CtxAttribute);
+			log.info("{} CtxAttribute {}", person.getName(), Arrays.toString(person.getArrayLongTermCtx(CtxAttribute)));
+			log.info(persons.toString());
 			for (Map.Entry<Person, Integer> entry : persons.entrySet()) {
 				//Similarity Formula is: (similar ctx/ personA + similar ctx/personB) / 2
 				float weight = ContextAnalyzer.personCtxSimilarity(entry.getValue(), CtxAttribute, entry.getKey(), person);
-				person.addSimilarityRelationship(entry.getKey(), weight, CtxAttribute);  
+				person.addSimilarityRelationship(entry.getKey(), weight, CtxAttribute);
+				log.debug("Weight {} assigned for person {}", weight, entry.getKey());
 			}
 		}
 		log.debug("*****Weight assigned in {} ms*****\r\n",(System.currentTimeMillis()-start));

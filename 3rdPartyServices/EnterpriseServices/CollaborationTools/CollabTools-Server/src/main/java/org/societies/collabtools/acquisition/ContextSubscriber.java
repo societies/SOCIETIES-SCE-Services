@@ -38,8 +38,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.societies.collabtools.Activator;
 import org.societies.collabtools.api.IContextSubscriber;
-import org.societies.collabtools.api.IIncrementCtx.EnrichmentTypes;
-import org.societies.collabtools.interpretation.ContextAnalyzer;
 import org.societies.collabtools.runtime.CtxMonitor;
 import org.societies.collabtools.runtime.Session;
 import org.societies.collabtools.runtime.SessionRepository;
@@ -89,20 +87,16 @@ public class ContextSubscriber implements IContextSubscriber, Observer
 			}  
 		}
 
-		//Enrichment of ctx
-		logger.info("Starting enrichment of context..." );
-		ContextAnalyzer ctxRsn = new ContextAnalyzer(this.personRepository);
-		ctxRsn.incrementCtx(LongTermCtxTypes.INTERESTS, EnrichmentTypes.CONCEPT, null);
-		ctxRsn.incrementCtx(LongTermCtxTypes.INTERESTS, EnrichmentTypes.CATEGORY, null);
-
-		//Applying weight between edges
-		logger.info("Setup weight among participants..." );
-		ctxRsn.setupWeightAmongPeople(LongTermCtxTypes.INTERESTS);
-
+		//		//Enrichment of ctx
+		//		logger.info("Starting enrichment of context..." );
+		//		ContextAnalyzer ctxRsn = new ContextAnalyzer(this.personRepository);
+		//
+		//		ctxRsn.enrichedCtx(LongTermCtxTypes.INTERESTS);
+		//		ctxRsn.setupWeightAmongPeople(LongTermCtxTypes.INTERESTS);
 
 		//Registering for ctx changes
 		ctxConnector.registerForshortTermCtxUpdates(cisID);
-		
+
 		//Setting language
 		HashMap<String, String> ctxAttributes = ctxConnector.getCommunityCtx(cisID);
 		if (ctxAttributes != null) {
@@ -112,10 +106,7 @@ public class ContextSubscriber implements IContextSubscriber, Observer
 		else {
 			sessionRepository.setLanguage("English");
 		}
-		//Starting Context Monitor
-		//        logger.info("Starting Context Monitor..." );
-		//        monitor = new CtxMonitor(personRepository, sessionRepository);
-		//	    monitor.wait();
+		this.monitor.run();
 	}
 
 	/* (non-Javadoc)
@@ -129,6 +120,9 @@ public class ContextSubscriber implements IContextSubscriber, Observer
 		this.activator.setup();
 	}
 
+	/**
+	 * Updates for shortterm ctx
+	 */
 	public void update(Observable o, Object arg)
 	{
 		//Arrays values: [0]model type, [1]string ctx value, [2]person
@@ -137,19 +131,47 @@ public class ContextSubscriber implements IContextSubscriber, Observer
 		logger.info("******************* update event  Ctx type*************** " + msg[0]);
 		logger.info("******************* update event  Ctx value************** " + msg[1]);
 		logger.info("******************* update event  Person***************** " + msg[2]);
-		Map<String, String> shortTermCtx = new HashMap<String, String>();
+
 		String type = msg[0];
 		String context = msg[1];
-		Person individual = this.personRepository.getPersonByName(msg[2]);
+		String personName = msg[2];
+		
+		try {
+			this.setContext(type, new String[]{context}, personName);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
-		if (type.equals("locationSymbolic")) {
-			shortTermCtx.put(ShortTermCtxTypes.LOCATION, context);
-		}
-		else {
-			shortTermCtx.put(type, context);
-		}
-		individual.addContextStatus(shortTermCtx, this.sessionRepository);
-		monitor.run();
+//		//Check if this update is a new user
+//		if (!this.personRepository.hasPerson(personName)){
+//			logger.info("\n");
+//			logger.info("New user to be included..");
+//			try {
+//				//Interests need to be split first
+////				if (type.equals(LongTermCtxTypes.INTERESTS)){
+//				if (context.contains(",")){
+//					String[] interests = context.split(",");
+//					this.setContext(type, interests, personName);
+//				}
+//				else {
+//					this.setContext(type, new String[]{context}, personName);
+//				}
+//			} catch (Exception e) {
+//				e.printStackTrace();
+//			}
+//
+//
+//		}
+//		//Existing user update (shortTerm case)
+//		else {
+//			Map<String, String> shortTermCtx = new HashMap<String, String>();
+//			shortTermCtx.put(type, context);
+//
+//			Person individual = this.personRepository.getPersonByName(personName);
+//			individual.addContextStatus(shortTermCtx, this.sessionRepository);
+//			this.monitor.run();			
+//		}
 	}
 
 	public Hashtable<String,List<String>> getSessions() {
@@ -167,20 +189,20 @@ public class ContextSubscriber implements IContextSubscriber, Observer
 		}
 		return sessionHashtable;		
 	}
-	
+
 	public String getSessionLanguage(String sessionName) {
 		Session session =sessionRepository.getSessionByName(sessionName);
-			logger.info("Session language: "+session.getLanguage(null));
-		return session.getLanguage(Session.LANGUAGE);
+		logger.info("Session language: "+session.getLanguage());
+		return session.getLanguage();
 	}
-	
+
 	/**
 	 * @return the monitor
 	 */
 	public CtxMonitor getMonitor() {
 		return monitor;
 	}
-	
+
 
 	private void setContext(String type, String[] context, String person) throws Exception {
 		logger.info("******************************* Adding context info for: " + person + ", " + type + ", " + context[0].toString());
@@ -189,29 +211,41 @@ public class ContextSubscriber implements IContextSubscriber, Observer
 		if (!this.personRepository.hasPerson(person)) {
 			Person individual = this.personRepository.createPerson(person);
 			individual.setLongTermCtx(LongTermCtxTypes.NAME, person);
+			//TODO: For now chat is default
+			individual.setLongTermCtx(LongTermCtxTypes.COLLAB_APPS, new String[] { "chat" });
 		}
 
 		Person individual = this.personRepository.getPersonByName(person);
 		//shortTermCtx format: context type, ctx value
 		Map<String, String> shortTermCtx = new HashMap<String, String>();
 		if (type.equals(LongTermCtxTypes.INTERESTS)) {
+			//Interests need to be split first
+			if (context[0].contains(",")){
+				context = context[0].split(",");
+			}
 			individual.setLongTermCtx(LongTermCtxTypes.INTERESTS, context);
+		} else if (type.equals(LongTermCtxTypes.COLLAB_APPS)) {
+			individual.setLongTermCtx(LongTermCtxTypes.COLLAB_APPS, context[0]);
 		} else if (type.equals(LongTermCtxTypes.OCCUPATION)) {
 			individual.setLongTermCtx(LongTermCtxTypes.OCCUPATION, context[0]);
 		} else if (type.equals(LongTermCtxTypes.WORK_POSITION)) {
 			individual.setLongTermCtx(LongTermCtxTypes.WORK_POSITION, context[0]);
 		} else if (type.equals(ShortTermCtxTypes.LOCATION)) {
 			//			shortTermCtx.put(individual.getLastStatus() == null ? "" : individual.getLastStatus().getShortTermCtx(ShortTermCtxTypes.STATUS), context[0]);
+			if (individual.getLastShortTermUpdate()==null) {
+				shortTermCtx.put(ShortTermCtxTypes.STATUS, "Online");
+				individual.addContextStatus(shortTermCtx, this.sessionRepository);
+			}
 			shortTermCtx.put(ShortTermCtxTypes.LOCATION,context[0]);
 			individual.addContextStatus(shortTermCtx, this.sessionRepository);
+			this.monitor.run();	
 		}
 		else if (type.equals(ShortTermCtxTypes.STATUS)) {
 			//			shortTermCtx.put(context[0], individual.getLastStatus() == null ? "" : individual.getLastStatus().getShortTermCtx(ShortTermCtxTypes.LOCATION));
 			shortTermCtx.put(ShortTermCtxTypes.STATUS,context[0]);
 			individual.addContextStatus(shortTermCtx, this.sessionRepository);
 		}
-		//TODO: For now chat is default
-		individual.setLongTermCtx(LongTermCtxTypes.COLLAB_APPS, new String[] { "chat" });
+
 	}
 
 }
