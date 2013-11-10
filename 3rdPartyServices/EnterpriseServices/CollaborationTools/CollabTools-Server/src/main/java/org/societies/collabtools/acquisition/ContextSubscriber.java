@@ -137,15 +137,9 @@ public class ContextSubscriber implements IContextSubscriber, Observer
 		String personName = msg[2];
 		
 		try {
-			//Interests need to be split first
-			if (context.contains(",")){
-				String[] interests = context.split(",");
-				this.setContext(type, interests, personName);
-			}
-			else {
-				this.setContext(type, new String[]{context}, personName);
-			}
+			this.setContext(type, new String[]{context}, personName);
 		} catch (Exception e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -225,6 +219,10 @@ public class ContextSubscriber implements IContextSubscriber, Observer
 		//shortTermCtx format: context type, ctx value
 		Map<String, String> shortTermCtx = new HashMap<String, String>();
 		if (type.equals(LongTermCtxTypes.INTERESTS)) {
+			//Interests need to be split first
+			if (context[0].contains(",")){
+				context = context[0].split(",");
+			}
 			individual.setLongTermCtx(LongTermCtxTypes.INTERESTS, context);
 		} else if (type.equals(LongTermCtxTypes.COLLAB_APPS)) {
 			individual.setLongTermCtx(LongTermCtxTypes.COLLAB_APPS, context[0]);

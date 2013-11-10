@@ -97,7 +97,7 @@ public class PersonRepository
             Node newPersonNode = graphDb.createNode();
             personRefNode.createRelationshipTo(newPersonNode, A_PERSON);
             // lock now taken, we can check if  already exist in index
-            Node alreadyExist = indexPerson.get(LongTermCtxTypes.NAME, name).getSingle();
+            Node alreadyExist = indexPerson.query(LongTermCtxTypes.NAME, name).getSingle();
             if (alreadyExist != null)
             {
                 tx.failure();
@@ -120,7 +120,7 @@ public class PersonRepository
 
     public Person getPersonByName(String name)
     {
-        Node personNode = indexPerson.get(LongTermCtxTypes.NAME, name).getSingle();
+        Node personNode = indexPerson.query(LongTermCtxTypes.NAME, name).getSingle();
         if ( personNode == null )
         {
             throw new IllegalArgumentException( "Person[" + name
@@ -131,7 +131,7 @@ public class PersonRepository
     
     public boolean hasPerson(String name)
     {
-        Node personNode = indexPerson.get(LongTermCtxTypes.NAME, name).getSingle();
+        Node personNode = indexPerson.query(LongTermCtxTypes.NAME, name).getSingle();
         if (personNode == null)
         	return false;
         return true;
@@ -142,6 +142,7 @@ public class PersonRepository
     	Map<Person,Integer> persons = new HashMap<Person, Integer>();
     	for (Person person : getAllPersons())
     	{
+    		logger.debug("getPersonWithSimilarCtx: {}" ,person.getName());
         	int counter = 0;
     		if (!self.equals(person)) {
     			List<String> personCtx = Arrays.asList(person.getArrayLongTermCtx(property));
