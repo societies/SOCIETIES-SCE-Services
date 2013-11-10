@@ -172,7 +172,14 @@ public class ContextAware3pService implements IContextAware3pService  {
 		try {
 			CtxEntityIdentifier ctxCommunityEntityIdentifier = this.ctxBroker.retrieveCommunityEntityId(getRequestor(), cisID).get();
 			if (ctxCommunityEntityIdentifier == null)
-				throw new RuntimeException("Community not created, ctxCommunityEntityIdentifier is null"); 
+				throw new RuntimeException("Community not created, ctxCommunityEntityIdentifier is null");
+			
+
+			List<CtxIdentifier> assocList = ctxBroker.lookup(getRequestor(), ctxCommunityEntityIdentifier, CtxModelType.ASSOCIATION, CtxAssociationTypes.HAS_MEMBERS).get(); 
+			if(!assocList.isEmpty()){ 
+				CtxAssociationIdentifier assocID =  (CtxAssociationIdentifier) assocList.get(0);  
+				this.ctxBroker.registerForChanges(getRequestor(), this.myCtxChangeEventListener, assocID); 
+			}
 //
 //
 //			final CommunityCtxEntity communityEnt = (CommunityCtxEntity) ctxBroker.retrieve(getRequestor(), ctxCommunityEntityIdentifier).get();
@@ -190,7 +197,6 @@ public class ContextAware3pService implements IContextAware3pService  {
 //
 //			LOG.debug("CtxAssociationIdentifier retrieved for update: {}", hasMembersId.toString());
 //			this.ctxBroker.registerForChanges(getRequestor(), this.myCtxChangeEventListener, hasMembersId);
-			this.ctxBroker.registerForChanges(getRequestor(), this.myCtxChangeEventListener, ctxCommunityEntityIdentifier, CtxAssociationTypes.HAS_MEMBERS);
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -239,10 +245,16 @@ public class ContextAware3pService implements IContextAware3pService  {
 		}
 
 		//Unregistering members in the community
-				try {
-					CtxEntityIdentifier ctxCommunityEntityIdentifier = this.ctxBroker.retrieveCommunityEntityId(getRequestor(), cisID).get();
-					if (ctxCommunityEntityIdentifier == null)
-						throw new RuntimeException("Community not created, ctxCommunityEntityIdentifier is null"); 
+		try {
+			CtxEntityIdentifier ctxCommunityEntityIdentifier = this.ctxBroker.retrieveCommunityEntityId(getRequestor(), cisID).get();
+			if (ctxCommunityEntityIdentifier == null)
+				throw new RuntimeException("Community not created, ctxCommunityEntityIdentifier is null"); 
+
+			List<CtxIdentifier> assocList = ctxBroker.lookup(getRequestor(), ctxCommunityEntityIdentifier, CtxModelType.ASSOCIATION, CtxAssociationTypes.HAS_MEMBERS).get(); 
+			if(!assocList.isEmpty()){ 
+				CtxAssociationIdentifier assocID =  (CtxAssociationIdentifier) assocList.get(0);  
+				this.ctxBroker.unregisterFromChanges(getRequestor(), this.myCtxChangeEventListener, assocID); 
+			}
 //
 //
 //					final CommunityCtxEntity communityEnt = (CommunityCtxEntity) ctxBroker.retrieve(getRequestor(), ctxCommunityEntityIdentifier).get();
@@ -260,17 +272,16 @@ public class ContextAware3pService implements IContextAware3pService  {
 //
 //					LOG.debug("CtxAssociationIdentifier retrieved for update: {}", hasMembersId.toString());
 //					this.ctxBroker.unregisterFromChanges(getRequestor(), this.myCtxChangeEventListener, hasMembersId);
-					this.ctxBroker.unregisterFromChanges(getRequestor(), this.myCtxChangeEventListener, ctxCommunityEntityIdentifier, CtxAssociationTypes.HAS_MEMBERS);
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (ExecutionException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (CtxException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ExecutionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (CtxException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
 		LOG.info("*** unregisterContextChanges success");
 	}
@@ -466,6 +477,13 @@ public class ContextAware3pService implements IContextAware3pService  {
 			LOG.debug("ServiceID : {}", myServiceID);
 		}
 		return this.requestorService;
+	}
+	
+	/**
+	 * @return the idMgr
+	 */
+	public IIdentityManager getIdMgr() {
+		return idMgr;
 	}
 
 
