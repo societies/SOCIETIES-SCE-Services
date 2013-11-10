@@ -25,6 +25,7 @@
 package org.societies.collabtools.webapp.controller;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
@@ -353,9 +354,16 @@ public class Admin {
 
 	private String readLogFile()  {
 		Reader fileReader = null;
+		File file = new File("databases/collabToolsLogFile.log");
 		try {
+			if (!file.exists()) {
+			    file.createNewFile();
+			}
 			fileReader = new FileReader("databases/collabToolsLogFile.log");
 		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
