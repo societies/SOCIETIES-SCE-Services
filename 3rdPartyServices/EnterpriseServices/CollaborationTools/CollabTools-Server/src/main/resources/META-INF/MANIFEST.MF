@@ -24,7 +24,7 @@ Bundle-Name: Collaboration Tools
 Created-By: Apache Maven Bundle Plugin
 Build-Jdk: 1.7.0_03
 Bundle-Version: 0.1.0
-Bnd-LastModified: 1384025674914
+Bnd-LastModified: 1384037693632
 Embed-Transitive: true
 Bundle-ManifestVersion: 2
 Bundle-Activator: org.societies.collabtools.Activator
