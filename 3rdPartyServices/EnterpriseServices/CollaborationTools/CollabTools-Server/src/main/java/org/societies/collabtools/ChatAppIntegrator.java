@@ -28,15 +28,18 @@ import java.util.Collection;
 import java.util.Iterator;
 
 import org.jivesoftware.smack.ConnectionConfiguration;
+import org.jivesoftware.smack.PacketListener;
 import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
+import org.jivesoftware.smack.packet.Packet;
+import org.jivesoftware.smack.packet.Presence;
 import org.jivesoftware.smackx.Form;
-import org.jivesoftware.smackx.muc.DefaultParticipantStatusListener;
 import org.jivesoftware.smackx.muc.HostedRoom;
 import org.jivesoftware.smackx.muc.MultiUserChat;
+import org.jivesoftware.smackx.packet.MUCUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.societies.collabtools.api.ICollabAppConnector;
+import org.societies.collabtools.api.AbstractCollabAppConnector;
 
 
 /**
@@ -45,7 +48,7 @@ import org.societies.collabtools.api.ICollabAppConnector;
  * @author Chris Lima
  *
  */
-public class ChatAppIntegrator implements ICollabAppConnector {
+public class ChatAppIntegrator extends AbstractCollabAppConnector {
 
 	private static final Logger logger  = LoggerFactory.getLogger(ChatAppIntegrator.class);
 	private String app_name;
@@ -76,7 +79,7 @@ public class ChatAppIntegrator implements ICollabAppConnector {
 	 */
 	@Override
 	public void setup() {
-		logger.debug("Openfire setup with host: {}",this.host);
+		logger.info("Openfire setup with host: {}",this.host);
 		ConnectionConfiguration config = new ConnectionConfiguration(this.host, 5222);
 		config.setDebuggerEnabled(false);
 		XMPPConnection connection = new XMPPConnection(config);
@@ -88,20 +91,55 @@ public class ChatAppIntegrator implements ICollabAppConnector {
 			try {
 				connection.login("admin", "admin");
 			} catch (XMPPException e1) {
-				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
 			throw new IllegalArgumentException("Verify host name and if you can login anonymously in Openfire Server");
 			//			e.printStackTrace();
 		}
 		this.connection = connection;
+
+		//filter to check if user joins or leaves the conference
+		connection.addPacketListener(new PacketListener() { 
+			public void processPacket(Packet packet) {
+				Presence presence = (Presence) packet;
+				MUCUser mucUser = getMUCUserExtension(presence);
+				String room;
+				String participant;
+				if (mucUser.getItem().getAffiliation().equals("none")) {
+					if (presence.getType() == Presence.Type.available) {
+						room = presence.getFrom().split("/")[0];
+						participant = presence.getFrom().split("/")[1];
+						joinEvent(room.split("@")[0], participant.split("@")[0]);
+					}
+					if (presence.getType() == Presence.Type.unavailable) {
+						room = presence.getFrom().split("/")[0];
+						participant = presence.getFrom().split("/")[1];
+						leaveEvent(room.split("@")[0], participant.split("@")[0]);
+					}
+				}
+			}
+
+			/**
+			 * Returns the MUCUser packet extension included in the packet or <tt>null</tt> if none.
+			 *
+			 * @param packet the packet that may include the MUCUser extension.
+			 * @return the MUCUser found in the packet.
+			 */
+			private MUCUser getMUCUserExtension(Packet packet) {
+				if (packet != null) {
+					// Get the MUC User extension
+					return (MUCUser) packet.getExtension("x", "http://jabber.org/protocol/muc#user");
+				}
+				return null;
+			}
+		}, null);
 	}
 
 	/* (non-Javadoc)
 	 * @see org.societies.collabtools.api.ICollabAppIntegrator#join(java.lang.String)
 	 */
 	@Override
-	public void join(String user, String room, String language) {
+	public void join(final String user, final String room, final String language) {
 		muc = new MultiUserChat(this.connection, room+"@conference."+this.host);
 		logger.debug("room: {}",room);
 		Collection<HostedRoom> rooms = null;
@@ -123,45 +161,30 @@ public class ChatAppIntegrator implements ICollabAppConnector {
 		}
 		if (!roomAlreadyExist){
 			try {
-		        muc = new MultiUserChat(connection, room+"@conference."+this.host);
-		        muc.addParticipantStatusListener(new DefaultParticipantStatusListener() 
-		        {       
-		            @Override
-		            public void joined(String participant)
-		            {
-		            	super.joined(participant);
-		            }
-		        
-		            public void kicked(String participant, String actor, String reason)
-		            {
-		            	leaveEvent(participant);
-		            }
-		        
-		            public void left(String participant)
-		            {
-		            	leaveEvent(participant);
-		            }
-		        });
+				//				setListeners(muc);
 				muc.create(room);
-				//Empty form to create instant room 
 				muc.sendConfigurationForm(new Form(Form.TYPE_SUBMIT));
 			} catch (XMPPException e) {
 				e.printStackTrace();
 			}
 		}
 		logger.debug(user+"@"+this.host+ " - CollabTools is inviting you to join "+room+" room");
+
+
 		//TODO: Change message to inform which context information trigger the event
 		logger.debug("Language for chat: {}",language);
 		if (language.equalsIgnoreCase("German")) {
-	        muc.invite(user+"@"+this.host, "SOCIETIES lädt Sie zu "+room+" betreten");
+			muc.invite(user+"@"+host, "SOCIETIES lädt Sie zu "+room+" betreten");
 		}
 		else if (language.equalsIgnoreCase("French")){
-	        muc.invite(user+"@"+this.host, "SOCIETIES vous invite à rejoindre "+room+" chambre");
+			muc.invite(user+"@"+host, "SOCIETIES vous invite à rejoindre "+room+" chambre");
 		}
 		else {
-	        muc.invite(user+"@"+this.host, "SOCIETIES is inviting you to join "+room+" room");
+			muc.invite(user+"@"+host, "SOCIETIES is inviting you to join "+room+" room");
 
 		}
+
+
 	}
 
 	/* (non-Javadoc)
@@ -175,6 +198,10 @@ public class ChatAppIntegrator implements ICollabAppConnector {
 			// TODO Insert context reason!E.g. location changed
 			muc.kickParticipant(user, "Context change");
 			muc.kickParticipant(user+"@"+this.host, "Context change");
+			//Sending kick event to be triggered by leaveEvent
+			Presence leavePresence = new Presence(Presence.Type.unavailable);
+	        leavePresence.setTo(room + "/" + user);
+	        connection.sendPacket(leavePresence);
 		} catch (XMPPException e) {
 			e.printStackTrace();
 		}
@@ -210,23 +237,6 @@ public class ChatAppIntegrator implements ICollabAppConnector {
 	@Override
 	public void setAppServerName(String host) {
 		this.host = host;
-	}
-
-	/* (non-Javadoc)
-	 * @see org.societies.collabtools.api.ICollabAppConnector#joinEvent()
-	 */
-	@Override
-	public void joinEvent(String participant) {
-		logger.debug("Participant joined: {} ",participant);
-		
-	}
-
-	/* (non-Javadoc)
-	 * @see org.societies.collabtools.api.ICollabAppConnector#leaveEvent()
-	 */
-	@Override
-	public void leaveEvent(String participant) {
-		logger.debug("Participant left: {}", participant);
 	}
 
 }
