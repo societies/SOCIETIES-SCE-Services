@@ -27,6 +27,7 @@ package org.societies.collabtools.context;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Observable;
 import java.util.Set;
@@ -133,8 +134,6 @@ public class ExternalCtxBrokerConnector extends Observable {
 
 	private class MyCtxChangeEventListener implements CtxChangeEventListener {
 
-		private Set<String> members = new CopyOnWriteArraySet<String>();
-
 		/* (non-Javadoc)
 		 * @see org.societies.api.context.event.CtxChangeEventListener#onCreation(org.societies.api.context.event.CtxChangeEvent)
 		 */
@@ -152,30 +151,46 @@ public class ExternalCtxBrokerConnector extends Observable {
 
 			LOG.info(event.getId() + ": *** MODIFIED event ***");
 			LOG.info("event.getId is {}", event.getId().getModelType().toString());
-			Set<String> newMember = null;
+
+			Set<CtxEntityIdentifier> newMember = null;
+			Set<CtxEntityIdentifier> oldMembers = new HashSet<CtxEntityIdentifier>();
+			Set<CtxEntityIdentifier> currentMembers = new HashSet<CtxEntityIdentifier>();
 			if (event.getId().getModelType().toString().contentEquals("ASSOCIATION")) {
 				try {
 					CtxAssociation hasMembersAssoc = (CtxAssociation) ctxBroker.retrieve(ca3pService.getRequestor(), event.getId()).get();
 					LOG.info("hasMembersAssoc {}", hasMembersAssoc.toString());
-					Set<String> currentMembers = new HashSet<String>();
-					for (CtxEntityIdentifier cisCtxId : hasMembersAssoc.getChildEntities())
-						currentMembers.add(cisCtxId.getOwnerId());
-					LOG.info("Current members {}", currentMembers);
+					for (CtxEntityIdentifier cisCtxId : hasMembersAssoc.getChildEntities()){
+						currentMembers.add(cisCtxId);
+						LOG.info("Current members {}", cisCtxId.getOwnerId());
+					}
 
-					// find old members
-					Set<String> oldMembers = new HashSet<String>(this.members);
-					oldMembers.removeAll(currentMembers);
-					LOG.info("Old members {}", oldMembers);            
+					// Get old members
+					for (CtxEntityIdentifier cisCtxId : ca3pService.getMembersList()){
+						oldMembers.add(cisCtxId);  
+						LOG.info("Old member {}", cisCtxId.getOwnerId()); 
+					}
 
 					// find new member
-					newMember = new HashSet<String>(currentMembers);
-					newMember.removeAll(this.members);
-					LOG.info("New member {}", newMember);   
-
-					// update members
-					this.members.clear();
-					this.members.addAll(currentMembers);
-					LOG.info("Members {}", this.members);   
+					if (oldMembers.size() < currentMembers.size()) {
+						newMember = new HashSet<CtxEntityIdentifier>(currentMembers);
+						newMember.removeAll(oldMembers);
+						LOG.info("New member {}", newMember.toString());  
+					}
+					//or old member
+					else {
+						Set<CtxEntityIdentifier> symmetricDiff = new HashSet<CtxEntityIdentifier>(currentMembers);
+						symmetricDiff.addAll(oldMembers);
+						Set<CtxEntityIdentifier> tmp = new HashSet<CtxEntityIdentifier>(currentMembers);
+						tmp.retainAll(oldMembers);
+						symmetricDiff.removeAll(tmp);
+						oldMembers = symmetricDiff;
+					}
+ 
+					//
+					//					// update members
+					//					this.members.clear();
+					//					this.members.addAll(currentMembers);
+					//					LOG.info("Members {}", this.members);   
 
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
@@ -187,52 +202,88 @@ public class ExternalCtxBrokerConnector extends Observable {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				
-				//Retrieving context from the new member
-				List<String> attrTypes = new ArrayList<String>(); 
 
-				attrTypes.add(CtxAttributeTypes.OCCUPATION); 
-				attrTypes.add(CtxAttributeTypes.WORK_POSITION); 
-				attrTypes.add(CtxAttributeTypes.LOCATION_SYMBOLIC); 
-				attrTypes.add(CtxAttributeTypes.STATUS); 
-				attrTypes.add(CtxAttributeTypes.INTERESTS); 
-				attrTypes.add(CtxAttributeTypes.ID);
-								
-				final List<CtxIdentifier> attrIdList = new ArrayList<CtxIdentifier>(); 
-				for (final String attrType : attrTypes) { 
-					List<CtxIdentifier> attrIds;
-					try {
-						IIdentity newUserID = ca3pService.getIdMgr().fromJid(newMember.toString());
-						LOG.info("newUserID: {}", newUserID);
-						attrIds = ctxBroker.lookup(ca3pService.getRequestor(), newUserID, CtxModelType.ATTRIBUTE, attrType).get();
-						attrIdList.addAll(attrIds); 
-						final List<CtxModelObject> ctxModelObjs = ctxBroker.retrieve(ca3pService.getRequestor(), attrIdList).get();
-						for (final CtxModelObject modelObj : ctxModelObjs) { 
-							final CtxAttribute attr = (CtxAttribute) modelObj; 
-							if (attr != null) {
-								String [] response;
-								response = new String [] {attr.getId().getType(), attr.getStringValue(), newMember.toString()};
-								LOG.info("newUser");
-								LOG.info("Ctx value type: "+response[0]);
-								LOG.info("Ctx new value: "+response[1]);
-								LOG.info("Ctx person: "+response[2]);
 
-								// Notify observers of change
-								setChanged();
-								notifyObservers(response);
+				if (newMember!=null && !newMember.isEmpty()) {	
+					Iterator<CtxEntityIdentifier> members = newMember.iterator();
+
+					while(members.hasNext()){
+						CtxEntityIdentifier newUserID = members.next();
+						//Retrieving context from the new member
+						List<String> attrTypes = new ArrayList<String>(); 
+
+						attrTypes.add(CtxAttributeTypes.INTERESTS);
+						attrTypes.add(CtxAttributeTypes.OCCUPATION); 
+						attrTypes.add(CtxAttributeTypes.WORK_POSITION); 
+						attrTypes.add(CtxAttributeTypes.STATUS);
+						attrTypes.add(CtxAttributeTypes.ID);
+						attrTypes.add(CtxAttributeTypes.LOCATION_SYMBOLIC); 
+
+						final List<CtxIdentifier> attrIdList = new ArrayList<CtxIdentifier>(); 
+						for (final String attrType : attrTypes) { 
+							List<CtxIdentifier> attrIds;
+							try {
+//								IIdentity newUserID = ca3pService.getIdMgr().fromJid(newMember.toString());
+								LOG.info("newUserID: {}", newUserID.getOwnerId());
+								attrIds = ctxBroker.lookup(ca3pService.getRequestor(), newUserID, CtxModelType.ATTRIBUTE, attrType).get();
+								attrIdList.addAll(attrIds); 
+								final List<CtxModelObject> ctxModelObjs = ctxBroker.retrieve(ca3pService.getRequestor(), attrIdList).get();
+								for (final CtxModelObject modelObj : ctxModelObjs) { 
+									final CtxAttribute attr = (CtxAttribute) modelObj; 
+									if (attr != null) {
+										String [] response;
+										String getOnlyNameSubstring[] = newUserID.getOwnerId().split("\\.");
+										String person = getOnlyNameSubstring[0];
+										response = new String [] {attr.getId().getType(), attr.getStringValue(), person};
+										LOG.info("newUser");
+										LOG.info("Ctx value type: "+response[0]);
+										LOG.info("Ctx new value: "+response[1]);
+										LOG.info("Ctx person: "+response[2]);
+
+										// Notify observers of change
+										setChanged();
+										notifyObservers(response);
+									} 
+								} 		
+							} catch (InterruptedException e) {
+								e.printStackTrace();
+							} catch (ExecutionException e) {
+								e.printStackTrace();
+							} catch (CtxException e) {
+								e.printStackTrace();
 							} 
-						} 		
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					} catch (ExecutionException e) {
-						e.printStackTrace();
-					} catch (CtxException e) {
-						e.printStackTrace();
-					} catch (InvalidFormatException e) {
-						e.printStackTrace();
-					} 
 
-				} 		
+						}
+					}
+
+				}
+				//Member left the community
+				else {
+					Iterator<CtxEntityIdentifier> members = oldMembers.iterator();
+
+					while(members.hasNext()){
+						CtxEntityIdentifier oldMember = members.next();
+						LOG.info("*** Unregistering  context changes for member: "+oldMember.getOwnerId());
+
+						try {
+							//TODO: Include here other ctx updates if necessary. For short term context
+							ctxBroker.unregisterFromChanges(ca3pService.getRequestor(), this, oldMember, CtxAttributeTypes.LOCATION_SYMBOLIC);
+							ctxBroker.unregisterFromChanges(ca3pService.getRequestor(), this, oldMember, CtxAttributeTypes.STATUS);
+							//				this.ctxBroker.unregisterFromChanges(getRequestor(), this.myCtxChangeEventListener, member, CtxAttributeTypes.OCCUPATION);
+							//				this.ctxBroker.unregisterFromChanges(getRequestor(), this.myCtxChangeEventListener, member, CtxAttributeTypes.ADDRESS_WORK_CITY);
+							//				this.ctxBroker.unregisterFromChanges(getRequestor(), this.myCtxChangeEventListener, member, CtxAttributeTypes.ADDRESS_WORK_COUNTRY);
+
+							//Trying to unregister for long term context
+							ctxBroker.unregisterFromChanges(ca3pService.getRequestor(), this, oldMember, CtxAttributeTypes.INTERESTS);
+
+						} catch (CtxException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}
+				}
+				// update members
+				ca3pService.setMembersList(currentMembers);
 			}
 		}
 

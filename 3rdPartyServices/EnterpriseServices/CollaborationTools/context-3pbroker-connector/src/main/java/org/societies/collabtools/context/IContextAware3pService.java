@@ -26,8 +26,10 @@
 package org.societies.collabtools.context;
 
 import java.util.HashMap;
+import java.util.Set;
 
 import org.societies.api.context.event.CtxChangeEventListener;
+import org.societies.api.context.model.CtxEntityIdentifier;
 import org.societies.api.identity.IIdentityManager;
 import org.societies.api.identity.InvalidFormatException;
 import org.societies.api.identity.Requestor;
@@ -63,4 +65,14 @@ public interface IContextAware3pService {
 	 */
 	public HashMap<String, String> retrieveCommunityCtxAttributes(Object communityId, String ctxAttr)
 			throws InvalidFormatException;
+	
+	/**
+	 * @return the membersList
+	 */
+	public Set<CtxEntityIdentifier> getMembersList();
+	
+	/**
+	 * @param membersList the membersList to set
+	 */
+	public void setMembersList(Set<CtxEntityIdentifier> membersList);
 }

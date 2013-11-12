@@ -32,6 +32,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.ExecutionException;
 
 import org.slf4j.Logger;
@@ -40,7 +41,6 @@ import org.societies.api.comm.xmpp.interfaces.ICommManager;
 import org.societies.api.context.CtxException;
 import org.societies.api.context.broker.ICtxBroker;
 import org.societies.api.context.event.CtxChangeEventListener;
-import org.societies.api.context.model.CommunityCtxEntity;
 import org.societies.api.context.model.CtxAssociation;
 import org.societies.api.context.model.CtxAssociationIdentifier;
 import org.societies.api.context.model.CtxAssociationTypes;
@@ -48,7 +48,6 @@ import org.societies.api.context.model.CtxAttribute;
 import org.societies.api.context.model.CtxAttributeComplexValue;
 import org.societies.api.context.model.CtxAttributeTypes;
 import org.societies.api.context.model.CtxAttributeValueType;
-import org.societies.api.context.model.CtxEntity;
 import org.societies.api.context.model.CtxEntityIdentifier;
 import org.societies.api.context.model.CtxIdentifier;
 import org.societies.api.context.model.CtxModelObject;
@@ -88,6 +87,8 @@ public class ContextAware3pService implements IContextAware3pService  {
 
 	private CtxChangeEventListener myCtxChangeEventListener;
 
+	protected Set<CtxEntityIdentifier> membersList;
+
 
 	@Autowired(required=true)
 	public ContextAware3pService(ICtxBroker ctxBroker, ICommManager commsMgr, IServices serviceMgmt){
@@ -99,7 +100,8 @@ public class ContextAware3pService implements IContextAware3pService  {
 		this.commsMgr = commsMgr;
 		this.idMgr = commsMgr.getIdManager();
 		this.serviceMgmt = serviceMgmt;
-
+		this.membersList = new CopyOnWriteArraySet<CtxEntityIdentifier>();
+		
 		LOG.info("ctxBroker: "+this.ctxBroker);
 		LOG.info("commsMgr : "+this.commsMgr );
 		LOG.info("idMgr : "+this.idMgr );
@@ -148,10 +150,11 @@ public class ContextAware3pService implements IContextAware3pService  {
 		try {
 			Set<CtxEntityIdentifier> ctxMembersIDs = this.getCommunityMembers(cisID);
 			Iterator<CtxEntityIdentifier> members = ctxMembersIDs.iterator();
-
+			membersList.clear();
 			while(members.hasNext()){
 				CtxEntityIdentifier member = members.next();
-				LOG.info("*** Registering context changes for member: "+member.toString());
+				membersList.add(member);
+				LOG.info("*** Registering context changes for member: "+member.getOwnerId());
 
 				//TODO: Include here other ctx updates if necessary. For short term context
 				this.ctxBroker.registerForChanges(getRequestor(), this.myCtxChangeEventListener, member, CtxAttributeTypes.LOCATION_SYMBOLIC);
@@ -228,7 +231,7 @@ public class ContextAware3pService implements IContextAware3pService  {
 
 			while(members.hasNext()){
 				CtxEntityIdentifier member = members.next();
-				LOG.info("*** Unregistering  context changes for member: "+member.toString());
+				LOG.info("*** Unregistering  context changes for member: "+member.getOwnerId());
 
 				//TODO: Include here other ctx updates if necessary. For short term context
 				this.ctxBroker.unregisterFromChanges(getRequestor(), this.myCtxChangeEventListener, member, CtxAttributeTypes.LOCATION_SYMBOLIC);
@@ -315,12 +318,12 @@ public class ContextAware3pService implements IContextAware3pService  {
 
 			List<String> attrTypes = new ArrayList<String>(); 
 
+			attrTypes.add(CtxAttributeTypes.INTERESTS); 
 			attrTypes.add(CtxAttributeTypes.OCCUPATION); 
 			attrTypes.add(CtxAttributeTypes.WORK_POSITION); 
-			attrTypes.add(CtxAttributeTypes.LOCATION_SYMBOLIC); 
 			attrTypes.add(CtxAttributeTypes.STATUS); 
-			attrTypes.add(CtxAttributeTypes.INTERESTS); 
 			attrTypes.add(CtxAttributeTypes.ID); 
+			attrTypes.add(CtxAttributeTypes.LOCATION_SYMBOLIC);
 
 			for(CtxEntityIdentifier member : ctxMembersIDs){
 				//Hashmap representing the context attributes
@@ -539,4 +542,19 @@ public class ContextAware3pService implements IContextAware3pService  {
 		return results;
 	}
 
+
+	/**
+	 * @return the membersList
+	 */
+	public Set<CtxEntityIdentifier> getMembersList() {
+		return membersList;
+	}
+
+
+	/**
+	 * @param membersList the membersList to set
+	 */
+	public void setMembersList(Set<CtxEntityIdentifier> membersList) {
+		this.membersList = membersList;
+	}
 }
