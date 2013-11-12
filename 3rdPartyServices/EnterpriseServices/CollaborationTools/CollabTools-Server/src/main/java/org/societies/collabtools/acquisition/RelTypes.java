@@ -30,7 +30,8 @@ public enum RelTypes implements RelationshipType
 {
 	  REF_PERSONS, 
 
-	  A_PERSON, 
+	  A_PERSON,
+	  A_PERSON_REMOVED, 
 	  REALTIME_STATUS, 
 	  NEXT, 
 	  SIMILARITY, 

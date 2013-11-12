@@ -24,7 +24,6 @@
  */
 package org.societies.collabtools.api;
 
-import java.util.Observer;
 
 /**
  * Interface for Collaborative Applications Manager

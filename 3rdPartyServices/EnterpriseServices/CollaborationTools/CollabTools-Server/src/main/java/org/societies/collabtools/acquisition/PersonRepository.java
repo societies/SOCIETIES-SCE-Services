@@ -25,6 +25,7 @@
 package org.societies.collabtools.acquisition;
 
 import static org.societies.collabtools.acquisition.RelTypes.A_PERSON;
+import static org.societies.collabtools.acquisition.RelTypes.A_PERSON_REMOVED;
 import static org.societies.collabtools.acquisition.RelTypes.REF_PERSONS;
 
 import java.util.ArrayList;
@@ -193,18 +194,19 @@ public class PersonRepository
                 person.removeFriend(friend);
             }
             personNode.getSingleRelationship(A_PERSON, Direction.INCOMING).delete();
+            personRefNode.createRelationshipTo(personNode, A_PERSON_REMOVED);
 
-            for (ShortTermContextUpdates status : person.getStatus())
-            {
-                Node statusNode = status.getUnderlyingNode();
-                for (Relationship r : statusNode.getRelationships())
-                {
-                    r.delete();
-                }
-                statusNode.delete();
-            }
-
-            personNode.delete();
+//            for (ShortTermContextUpdates status : person.getStatus())
+//            {
+//                Node statusNode = status.getUnderlyingNode();
+//                for (Relationship r : statusNode.getRelationships())
+//                {
+//                    r.delete();
+//                }
+//                statusNode.delete();
+//            }
+//
+//            personNode.delete();
             tx.success();
         }
         finally

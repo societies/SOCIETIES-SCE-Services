@@ -65,7 +65,7 @@ public class PersonTest
 {
 	private static final Random r = new Random( System.currentTimeMillis() );
 	private static GraphDatabaseService personGraphDb, sessionGraphDb;
-	private static Index<Node> indexPerson, indexSession, indexShortTermCtx;
+	private static Index<Node> indexShortTermCtx;
 	private static PersonRepository personRepository;
 	private static SessionRepository sessionRepository;
 	private static int nrOfPersons = 4;
@@ -76,8 +76,6 @@ public class PersonTest
 		int random = new Random().nextInt(100);
 		personGraphDb = new GraphDatabaseFactory().newEmbeddedDatabase("target/persontestdb"  + random);
 		sessionGraphDb = new GraphDatabaseFactory().newEmbeddedDatabase("target/sessiontestdb"  + random);
-	    indexPerson = personGraphDb.index().forNodes("PersonNodes");
-	    indexSession = sessionGraphDb.index().forNodes("SessionNodes");
 	    indexShortTermCtx = personGraphDb.index().forNodes("CtxNodes");
 		personRepository = new PersonRepository(personGraphDb);
 		sessionRepository = new SessionRepository(sessionGraphDb, new CollabApps());

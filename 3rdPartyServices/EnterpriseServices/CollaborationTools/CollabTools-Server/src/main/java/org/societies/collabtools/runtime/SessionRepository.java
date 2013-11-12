@@ -298,6 +298,26 @@ public class SessionRepository implements Observer {
 		return membersIncluded.toArray(new String[0]);
 	}
 	
+	/**
+	 * Include members in a session previously created
+	 * @param Session name
+	 * @param Members to participate
+	 * @return Members include in the session if necessary
+	 */
+	public synchronized boolean deleteMember(Person person) {
+		for (Session session : this.getAllSessions() ) {
+			Iterator<Person> it = session.getMembers();
+			while (it.hasNext()) {
+				String personToCompare = ((Person)it.next()).getName();
+				if (person.getName().equalsIgnoreCase(personToCompare)){
+					session.removeMember(person);
+				}
+			}
+		}
+		return true;
+		
+	}
+	
     public Iterable<Session> getAllSessions()
     {
         return new IterableWrapper<Session, Relationship>(
