@@ -337,11 +337,13 @@ var CrowdTaskingApp = function () {
                 $("#commentList").append('<li data-role="list-divider" role="heading">Comments:</li>');
                 var task = tasks[currentTaskIndex];
                 if (task.status == 'IN_PROGRESS' && task.myTask == true) {
-                    $("a.rightHeaderButton").hide().eq(1).show();	// show finalize button
+                    $("a.rightHeaderButton").eq(0).show();	// show finalize button
                 }
-                if (task.status == 'OPEN' && task.myTask == true) {
-                    $("a.rightHeaderButton").hide().eq(0).show();	// show execute button
-                }
+                /*
+                 if (task.status == 'OPEN' && task.myTask == true) {
+                 $("a.rightHeaderButton").hide().eq(0).show();	// show execute button
+                 }
+                 */
                 for (var i = 0; i < comments.length; i++) {
                     var comment = comments[i];
                     var newLi = $('<li data-role="fieldcontain">');
@@ -414,6 +416,8 @@ var CrowdTaskingApp = function () {
              $("a.rightHeaderButton").hide();	// hide execute & finalize buttons
              }
              */
+            hideLikeTaskButton();
+            hideLikedTaskButton();
             if (task.status === 'FINISHED') {
                 $("#finalizeButton").hide();
             }
@@ -423,8 +427,9 @@ var CrowdTaskingApp = function () {
             else {
                 $('#vwReply').hide();
             }
-            if (task.status === "OPEN") {
-                $('#viewTaskDialog').dialog('option', 'title', 'View task and reply');
+//            if (task.status === "OPEN") {
+            if (task.status === "IN_PROGRESS") {
+//                $('#viewTaskDialog').dialog('option', 'title', 'View task and reply');
                 if (!task.myTask) {
                     getLike();
                 }
@@ -508,23 +513,23 @@ var CrowdTaskingApp = function () {
 
     function fillCommunityComboBox() {
         var $taskCommunity;
-/*
-        if (isSocietiesUser()) {
-            $('#ctCommunities').hide();
-            $taskCommunity = $('#taskCommunityJids');
-            $taskCommunity.empty();
-            for (var i = 0; i < communities.length; i++) {
-                $taskCommunity.append('<option value=' + communities[i].jid + '>' + communities[i].name + '</option>');
-            }
+        /*
+         if (isSocietiesUser()) {
+         $('#ctCommunities').hide();
+         $taskCommunity = $('#taskCommunityJids');
+         $taskCommunity.empty();
+         for (var i = 0; i < communities.length; i++) {
+         $taskCommunity.append('<option value=' + communities[i].jid + '>' + communities[i].name + '</option>');
+         }
+         }
+         else {
+         */
+        $('#societiesCommunities').hide();
+        $taskCommunity = $('#taskCommunity');
+        $taskCommunity.empty();
+        for (var i = 0; i < communities.length; i++) {
+            $taskCommunity.append('<option value=' + communities[i].id + '>' + communities[i].name + '</option>');
         }
-        else {
-*/
-            $('#societiesCommunities').hide();
-            $taskCommunity = $('#taskCommunity');
-            $taskCommunity.empty();
-            for (var i = 0; i < communities.length; i++) {
-                $taskCommunity.append('<option value=' + communities[i].id + '>' + communities[i].name + '</option>');
-            }
 //        }
         $taskCommunity.selectmenu('refresh');
     };
@@ -556,27 +561,27 @@ var CrowdTaskingApp = function () {
     }
 
     var getCommunities4User = function (successFn) {
-/*
-        if (isSocietiesUser()) {
-            communities = getAllCIS4User();
-            if (successFn !== undefined) {
-                successFn();
-            }
-        }
-        else {
-*/
-            $.ajax({
-                type: 'GET',
-                url: '/rest/community/4user',
-                //data: { 'id': id },
-                success: function (result) {
-                    communities = result;
-                    if (successFn !== undefined) {
-                        successFn();
-                    }
-//                    fillCommunityComboBox(communities);
+        /*
+         if (isSocietiesUser()) {
+         communities = getAllCIS4User();
+         if (successFn !== undefined) {
+         successFn();
+         }
+         }
+         else {
+         */
+        $.ajax({
+            type: 'GET',
+            url: '/rest/community/4user',
+            //data: { 'id': id },
+            success: function (result) {
+                communities = result;
+                if (successFn !== undefined) {
+                    successFn();
                 }
-            });
+//                    fillCommunityComboBox(communities);
+            }
+        });
 //        }
     };
 
@@ -736,6 +741,22 @@ var CrowdTaskingApp = function () {
     };
 }();
 
+var hideLikeTaskButton = function () {
+    $("a.rightHeaderButton").eq(1).hide();
+}
+
+var hideLikedTaskButton = function () {
+    $("a.rightHeaderButton").eq(2).hide();
+}
+
+var showLikeTaskButton = function () {
+    $("a.rightHeaderButton").eq(1).show();
+}
+
+var showLikedTaskButton = function () {
+    $("a.rightHeaderButton").eq(2).show();
+}
+
 
 function addNewTag() {
     var newTag = $('#newTag').val().trim();
@@ -869,13 +890,17 @@ function showNewsFeed() {
 }
 
 function like() {
-    $('#likeButton').hide();
-    $('#likedButton').show();
+//    $('#likeButton').hide();
+    hideLikeTaskButton();
+//    $('#likedButton').show();
+    showLikedTaskButton();
 }
 
 function unlike() {
-    $('#likedButton').hide();
-    $('#likeButton').show();
+//    $('#likedButton').hide();
+//    $('#likeButton').show();
+    hideLikedTaskButton();
+    showLikeTaskButton();
 }
 
 function getSettings() {
@@ -1083,8 +1108,8 @@ $(document).on('pageshow', '#viewTask', function (event, data) {
 });
 
 $(document).on('pageinit', '#viewTask', function (event, data) {
-    $('#likeButton').hide();
-    $('#likedButton').hide();
+//    $('#likeButton').hide();
+//    $('#likedButton').hide();
 
     $('#finalizeTaskSaveButton').bind('tap', function (event, data) {
         event.preventDefault();
@@ -1111,16 +1136,16 @@ $(document).on('pageinit', '#viewTask', function (event, data) {
         unlike();
         postLike();
     });
-    $('#showOnPdButton').bind('tap', function(event, data) {
+    $('#showOnPdButton').bind('tap', function (event, data) {
         event.preventDefault();
-        showTaskOnPd(function() {
+        showTaskOnPd(function () {
             $('#showOnPdButton').hide();
             $('#hideOnPdButton').show();
         });
     });
-    $('#hideOnPdButton').bind('tap', function(event, data) {
+    $('#hideOnPdButton').bind('tap', function (event, data) {
         event.preventDefault();
-        hideTaskOnPd(function() {
+        hideTaskOnPd(function () {
             $('#hideOnPdButton').hide();
             $('#showOnPdButton').show();
         });
