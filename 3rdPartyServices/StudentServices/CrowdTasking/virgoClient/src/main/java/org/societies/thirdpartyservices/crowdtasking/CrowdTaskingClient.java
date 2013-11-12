@@ -127,6 +127,8 @@ public class CrowdTaskingClient extends EventListener implements ICrowdTaskingCl
 
 				this.logging.info("CrowdTasking User Client Started!!!");
 //				this.serverIdentity = this.serviceMgmt.getServer(slmEvent.getServiceId());
+				
+				this.unregisterForServiceEvents();
 			}
 		}
 	}

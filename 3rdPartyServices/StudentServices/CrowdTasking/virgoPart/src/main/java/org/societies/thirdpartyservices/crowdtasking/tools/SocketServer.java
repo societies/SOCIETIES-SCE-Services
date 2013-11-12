@@ -60,7 +60,6 @@ public class SocketServer implements Runnable{
 
 		}catch(IOException ioEx){
 			this.log.debug("ERROR OPENNING PORT" + ioEx.getMessage());
-			System.exit(1);
 		}
 	}
 

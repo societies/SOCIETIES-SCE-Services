@@ -120,6 +120,8 @@ public class CrowdTasking extends EventListener implements ICrowdTasking{
 					//SocketServer server = new SocketServer(getMyServiceID(), getServerIdentity());
 					SocketServer server = new SocketServer(this);
 					new Thread(server).start();
+				
+					this.unregisterForServiceEvents();
 				}
 			}
 		}
