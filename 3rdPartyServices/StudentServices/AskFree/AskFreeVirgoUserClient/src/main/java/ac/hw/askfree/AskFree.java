@@ -198,6 +198,7 @@ public class AskFree extends EventListener implements IAskFreeClient, IDisplayab
 
 				this.logging.info("AskFree User Client Started!!!");
 				this.serverIdentity = this.serviceMgmt.getServer(slmEvent.getServiceId());
+				this.unregisterForServiceEvents();
 			}
 		}
 	}

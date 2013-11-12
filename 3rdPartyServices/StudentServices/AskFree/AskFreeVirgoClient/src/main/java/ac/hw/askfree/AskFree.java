@@ -149,6 +149,7 @@ public class AskFree extends EventListener implements IAskFree{
 				SocketServer server = new SocketServer(this);
 				new Thread(server).start();
 				this.requestor = new RequestorService(serverIdentity, myServiceID);
+				this.unregisterForServiceEvents();
 			}
 		}
 	}
