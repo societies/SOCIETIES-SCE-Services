@@ -48,7 +48,7 @@ public class ClientHandler implements Runnable {
 	private ObjectOutputStream out ;
 	private ObjectInputStream in = null;
 
-	private String cssId;
+	//private String cssId;
 	private CrowdTasking crowdTasking;
 
 	public ClientHandler(Socket socket, CrowdTasking crowdTasking){
@@ -85,14 +85,15 @@ public class ClientHandler implements Runnable {
 			while(reading){
 				x=in.readObject();
 				if(x instanceof String){
-					cssId = (String)x;			
-					this.log.info("received cssId: " + cssId + " from Android");
+					String message = (String)x;			
+					this.log.info("received message: " + message + " from Android");
 					if (crowdTasking.getMyServiceID() != null){
 						this.sendMessage(crowdTasking.getMyServiceID().toString());
 					}
 					else {
 						this.sendMessage("Service ID is null");
 					}
+					reading = false;
 					closeConnection();
 				}
 			}		
