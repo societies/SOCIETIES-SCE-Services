@@ -58,15 +58,15 @@ public class SocketServer extends Thread{
 	private static final String START_MSG = "START_MSG";
 	private static final String END_MSG = "END_MSG";
 
-	
+
 	private Logger LOG = LoggerFactory.getLogger(SocketServer.class);
 	private MyTvClient myTVClient;
 
 	public SocketServer(MyTvClient myTVClient){
 		this.myTVClient = myTVClient;
-		
+
 	}
-	
+
 	public int setListenPort(){
 		try {
 			ServerSocket portLocator = new ServerSocket(0);
@@ -82,13 +82,13 @@ public class SocketServer extends Thread{
 
 	@Override
 	public void run(){
-		while(listening){
+	//	while(listening){
 			listenSocket();
-		}
+		//}
 	}
 
 	public void listenSocket(){
-		
+
 		try {
 			server = new ServerSocket(port);
 		} catch (IOException e) {
@@ -96,11 +96,14 @@ public class SocketServer extends Thread{
 			e.printStackTrace();
 			return;
 		}
-		
+
 		try {
-			if(LOG.isDebugEnabled()) LOG.debug("Waiting for connection from GUI on port: "+port);
-			client = server.accept();
-			new CommsServerAction(client, myTVClient, port);
+			while(listening)
+			{
+				if(LOG.isDebugEnabled()) LOG.debug("Waiting for connection from GUI on port: "+port);
+				client = server.accept();
+				new Thread(new CommsServerAction(client, myTVClient, port));
+			}
 		} catch (IOException e) {
 			if(LOG.isDebugEnabled()) LOG.debug("Accept failed: "+port);
 			e.printStackTrace();
