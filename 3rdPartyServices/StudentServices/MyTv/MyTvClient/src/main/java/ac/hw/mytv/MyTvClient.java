@@ -62,7 +62,6 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 
 	SocketClient socketClient;
 	SocketServer socketServer;
-	CommandHandler commandHandler;
 	IUserActionMonitor uam;
 	IPersonalisationManager persoMgr;
 	IIdentity userID;
@@ -99,8 +98,7 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 		mutedState = true;
 
 		//start server listening for connections from GUI
-		commandHandler = new CommandHandler();
-		socketServer = new SocketServer(commandHandler);
+		socketServer = new SocketServer(this);
 		//find available port
 		int listenPort = socketServer.setListenPort();
 		//start listening
@@ -327,6 +325,9 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 
 
 
+	public CommandHandler getCommandHandler(){
+		return new CommandHandler();
+	}
 
 	/*
 	 * Handle commands from GUI

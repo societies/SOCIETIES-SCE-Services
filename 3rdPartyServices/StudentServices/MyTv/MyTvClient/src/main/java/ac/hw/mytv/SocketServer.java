@@ -58,11 +58,13 @@ public class SocketServer extends Thread{
 	private static final String START_MSG = "START_MSG";
 	private static final String END_MSG = "END_MSG";
 
-	private CommandHandler commandHandler;
+	
 	private Logger LOG = LoggerFactory.getLogger(SocketServer.class);
+	private MyTvClient myTVClient;
 
-	public SocketServer(CommandHandler commandHandler){
-		this.commandHandler = commandHandler;
+	public SocketServer(MyTvClient myTVClient){
+		this.myTVClient = myTVClient;
+		
 	}
 	
 	public int setListenPort(){
@@ -98,107 +100,14 @@ public class SocketServer extends Thread{
 		try {
 			if(LOG.isDebugEnabled()) LOG.debug("Waiting for connection from GUI on port: "+port);
 			client = server.accept();
+			new CommsServerAction(client, myTVClient, port);
 		} catch (IOException e) {
 			if(LOG.isDebugEnabled()) LOG.debug("Accept failed: "+port);
 			e.printStackTrace();
 			return;
 		}
 
-		if(LOG.isDebugEnabled()) LOG.debug("Connection accepted from GUI!");
 
-		try {
-			out = new PrintWriter(client.getOutputStream(), true);
-			in = new BufferedReader(new InputStreamReader(client.getInputStream()));
-		} catch (IOException e) {
-			if(LOG.isDebugEnabled()) LOG.debug("Accept failed: "+port);
-			e.printStackTrace();
-			return;
-		}
-
-		try{
-			String start = in.readLine();
-			if(LOG.isDebugEnabled()) LOG.debug("Got new input: "+start);
-			if(start.equalsIgnoreCase(START_MSG)){
-				if(LOG.isDebugEnabled()) LOG.debug("Processing new message...");
-
-				//loop to get rest of message
-				String message = "";
-				boolean reading = true;
-				while(reading){
-					if(LOG.isDebugEnabled()) LOG.debug("running through while again...");
-					String next = in.readLine();
-					if(LOG.isDebugEnabled()) LOG.debug("next = "+next);
-					if(!next.equalsIgnoreCase(END_MSG)){
-						if(LOG.isDebugEnabled()) LOG.debug("Inside if");
-						message = message+next+"\n";
-					}else{
-						if(LOG.isDebugEnabled()) LOG.debug("Inside else");
-						reading  = false;
-					}
-				}
-				if(LOG.isDebugEnabled()) LOG.debug("message = "+message);
-
-				//handle message
-				String[] splitData = message.split("\n");
-				if(LOG.isDebugEnabled()) LOG.debug("splitData length = "+splitData.length);
-				String command = splitData[0];
-				if (command.equalsIgnoreCase(GUI_STARTED)){
-					if(LOG.isDebugEnabled()) LOG.debug(GUI_STARTED+" message received");
-					out.println(RECEIVED);
-					finalize();
-					String gui_ip = splitData[1];
-					commandHandler.connectToGUI(gui_ip);
-					
-				}else if (command.equalsIgnoreCase(USER_ACTION)){
-					if(LOG.isDebugEnabled()) LOG.debug(USER_ACTION+" message received");
-					out.println(RECEIVED);
-					finalize();
-					String parameterName = splitData[1];
-					String value = splitData[2];
-					commandHandler.processUserAction(parameterName, value);
-					
-				}else if(command.equalsIgnoreCase(CHANNEL_PREFERENCE_REQUEST)){
-					if(LOG.isDebugEnabled()) LOG.debug(CHANNEL_PREFERENCE_REQUEST+" message received");
-					String response = commandHandler.getChannelPreference();
-					out.println(response);
-					finalize();
-
-				}else if(command.equalsIgnoreCase(MUTED_PREFERENCE_REQUEST)){
-					if(LOG.isDebugEnabled()) LOG.debug(MUTED_PREFERENCE_REQUEST+" message received");
-					String response = commandHandler.getMutedPreference();
-					out.println(response);
-					finalize();
-					
-				}else if(command.equalsIgnoreCase(CHANNEL_INTENT_REQUEST)){
-					if(LOG.isDebugEnabled()) LOG.debug(CHANNEL_INTENT_REQUEST+" message received");
-					String response = commandHandler.getChannelIntent();
-					out.println(response);
-					finalize();
-					
-				}else if(command.equalsIgnoreCase(MUTED_INTENT_REQUEST)){
-					if(LOG.isDebugEnabled()) LOG.debug(MUTED_INTENT_REQUEST+" message received");
-					String response = commandHandler.getMutedIntent();
-					out.println(response);
-					finalize();
-
-				}else if (command.equalsIgnoreCase(GUI_STOPPED)){
-					if(LOG.isDebugEnabled()) LOG.debug(GUI_STOPPED+" message received");
-					out.println(RECEIVED);
-					finalize();
-					commandHandler.disconnectFromGUI();
-				}
-				
-				else{
-					if(LOG.isDebugEnabled()) LOG.debug("Unknown command received from MyTvUI: "+command);
-					out.println(FAILED);
-					finalize();
-				}
-			}
-		} catch (IOException e) {
-			if(LOG.isDebugEnabled()) LOG.debug("Read failed");
-			out.println(FAILED);
-			finalize();
-		}
 	}
 
 
