@@ -26,6 +26,7 @@
 using System;
 using System.Windows;
 using System.Windows.Controls;
+using SocialLearningGame.Logic;
 
 namespace SocialLearningGame.Pages
 {
@@ -42,7 +43,22 @@ namespace SocialLearningGame.Pages
 
         private void exitButtonClick(object Sender, RoutedEventArgs e)
         {
-            Environment.Exit(0x00);
+            MainWindow.SwitchPage(LoadingPage.Instance);
+            GameLogic.connectToSocieties();
+            //RETRIEVE ALL INFORMATION
+            UserSession userSession = GameLogic.newUserSession();
+            if (userSession.gameStage == GameStage.SetupError)
+            {
+                MainWindow.SwitchPage(new CommsError());
+            }
+            //else if (student.First == 1)
+            //{
+            //    _mainFrame.NavigationService.Navigate(new Pages.Instruction());
+            //}
+            else
+            {
+                MainWindow.SwitchPage(new HomePage());              
+            }
         }
 
     }

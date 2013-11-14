@@ -12,7 +12,7 @@ namespace MyTvUI
     public partial class App : Application
     {
       //  private static readonly log4net.ILog log = log4net.LogManager.GetLogger(typeof(App));
-
+        protected static StreamWriter writer;
         public App()
         {
             //log4net.Config.XmlConfigurator.Configure(new FileInfo("./Resources/log4net.config.xml"));
@@ -20,6 +20,24 @@ namespace MyTvUI
             //log.Info("My TV onStartup");
             AppDomain.CurrentDomain.AssemblyResolve +=
                 new ResolveEventHandler(ResolveAssembly);
+
+            //set up to redirect console logs to file
+            String userProfile = System.Environment.GetEnvironmentVariable("USERPROFILE");
+            String directory = userProfile + @"\HWUPortalLogs\";
+
+
+            if (!Directory.Exists(directory))
+            {
+                Directory.CreateDirectory(directory);
+            }
+            String logFilename = directory + "mytv_log.log";
+
+            writer = new StreamWriter(logFilename);
+            writer.AutoFlush = true;
+
+
+            Console.SetOut(writer);
+            Console.WriteLine(DateTime.Now + "\t" + "Logs are ready");
 
             // proceed starting app...
         }

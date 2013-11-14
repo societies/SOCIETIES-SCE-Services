@@ -66,14 +66,12 @@
 
         <TextBlock Grid.Row="0" Name="textBlock1" 
             Margin="50 50 50 50"
-            Text="There was an error setting up the game, so you can't play right now. 
-
-Our crack team of super geeks has already been informed and they'll fix it as soon as possible" 
+            Text="Opps! Sorry, there has been an error!" 
             TextWrapping="Wrap" FontSize="24" TextAlignment="Center" />
 
         <k:KinectCircleButton
             HorizontalAlignment="Center"
-            Label="Push to exit"
+            Label="Retry"
             Grid.Row="1" 
             Click="exitButtonClick" Width="300" />
 

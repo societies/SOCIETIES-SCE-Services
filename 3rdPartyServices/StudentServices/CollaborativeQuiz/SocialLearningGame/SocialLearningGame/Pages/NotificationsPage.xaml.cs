@@ -68,7 +68,7 @@ namespace SocialLearningGame.Pages
             //IF ONE WAS JUST DELETED THAT WAS ON ITS ON PAGE
             if (index == maxCount)
             {
-                Console.WriteLine("IT WAS ONE ON THE APGE");
+                Console.WriteLine(DateTime.Now + "\t" +"IT WAS ONE ON THE APGE");
                 index = index - 5;
                 if (index == 0)
                 {
@@ -129,12 +129,12 @@ namespace SocialLearningGame.Pages
 
         void kb_AcceptClick(object sender, RoutedEventArgs e)
         {
-            Console.WriteLine("Accept button clicked");
+            Console.WriteLine(DateTime.Now + "\t" +"Accept button clicked");
             PendingJoins join = acceptDic[(KinectCircleButton)sender];
-            Console.WriteLine("Got join: " + join.fromUser);
+            Console.WriteLine(DateTime.Now + "\t" +"Got join: " + join.fromUser);
             GameLogic.postRemoteData(DataType.ACCEPT_NOTIFICATION, join.groupName);
             GameLogic.postRemoteData(DataType.DELETE_NOTIFICATION, join);
-            Console.WriteLine("Added user to group!!!");
+            Console.WriteLine(DateTime.Now + "\t" +"Added user to group!!!");
             declineDic.Clear();
             acceptDic.Clear();
             GameLogic._userSession.allNotifications.Remove(join);

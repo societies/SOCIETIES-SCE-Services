@@ -61,23 +61,28 @@ namespace SocialLearningGame.Logic
 
         public static Boolean connectToSocieties()
         {
-            //SET UP A NEW USER SESSION
-            _userSession = new UserSession();
-
-            //SPEAK TO DISPLAYPORTAL
-            _clientComms = new ClientComms();
-            if (!_clientComms.getSessionParameters())
+            if (!connectedToSocieties)
             {
-                Console.WriteLine("Setting game error here 1");
-                _userSession.gameStage = GameStage.SetupError;
-                return false;
+                //SET UP A NEW USER SESSION
+                _userSession = new UserSession();
+
+                //SPEAK TO DISPLAYPORTAL
+                _clientComms = new ClientComms();
+                if (!_clientComms.getSessionParameters())
+                {
+                    Console.WriteLine(DateTime.Now + "\t" +"Setting game error here 1");
+                    _userSession.gameStage = GameStage.SetupError;
+                    return false;
+                }
+                userJID = _clientComms.getUserID();
+                //SPEAKING TO CLIENT
+                _clientComms.getSocietiesServer();
+                Console.WriteLine(DateTime.Now + "\t" +"Recieved server IP & Port. Can now start to retrieve data...");
+                connectedToSocieties = true;
+                return true;
             }
-            userJID = _clientComms.getUserID();
-            //SPEAKING TO CLIENT
-            _clientComms.getSocietiesServer();
-            Console.WriteLine("Recieved server IP & Port. Can now start to retrieve data...");
-            connectedToSocieties = true;
             return true;
+
             //NOW HAVE CLIENT AND SERVER IP STORED
         }
 
@@ -208,7 +213,7 @@ namespace SocialLearningGame.Logic
             //CONNECTED TO SOCIETIES, NOW WE CAN CONTINUE
 
             //GET ALL USERS
-            Console.WriteLine("Getting all users");
+            Console.WriteLine(DateTime.Now + "\t" +"Getting all users");
             getRemoteData(DataType.ALL_USERS);
             if (_userSession.allUsers == null)
             {
@@ -224,38 +229,38 @@ namespace SocialLearningGame.Logic
             }
 
             //GET ALL CATEGORIES
-            Console.WriteLine("Getting all categories");
+            Console.WriteLine(DateTime.Now + "\t" +"Getting all categories");
             getRemoteData(DataType.ALL_CATEGORIES);
             if (_userSession.allCategories == null)
             {
-                Console.WriteLine("SET UP ERROR WITH CATEGORIES");
+                Console.WriteLine(DateTime.Now + "\t" +"SET UP ERROR WITH CATEGORIES");
                 _userSession.gameStage = GameStage.SetupError;
             }
 
             //GET ALL QUESTIONS
-            Console.WriteLine("Getting all questions");
+            Console.WriteLine(DateTime.Now + "\t" +"Getting all questions");
             getRemoteData(DataType.ALL_QUESTIONS);
             if (_userSession.allQuestions == null)
             {
-                Console.WriteLine("SET UP ERROR WITH QUESTIONS");
+                Console.WriteLine(DateTime.Now + "\t" +"SET UP ERROR WITH QUESTIONS");
                 _userSession.gameStage = GameStage.SetupError;
             }
 
             //GET ALL GROUPS
-            Console.WriteLine("Getting all groups");
+            Console.WriteLine(DateTime.Now + "\t" +"Getting all groups");
             getRemoteData(DataType.ALL_GROUPS);
             if (_userSession.allGroups == null)
             {
-                Console.WriteLine("SET UP ERROR WITH ALL GROUP");
+                Console.WriteLine(DateTime.Now + "\t" +"SET UP ERROR WITH ALL GROUP");
                 _userSession.gameStage = GameStage.SetupError;
             }
 
             //GET USERS GROUP
-            Console.WriteLine("Getting users group");
+            Console.WriteLine(DateTime.Now + "\t" +"Getting users group");
             getRemoteData(DataType.CURRENT_GROUP);
             if (_userSession.currentGroup == null)
             {
-                Console.WriteLine("SET UP ERROR WITH USERS GROUP");
+                Console.WriteLine(DateTime.Now + "\t" +"SET UP ERROR WITH USERS GROUP");
                 _userSession.gameStage = GameStage.SetupError;
             }
             //EMPTY GROUP IS RETURNED IF NULL
@@ -268,7 +273,7 @@ namespace SocialLearningGame.Logic
             
             //GET PREVIOUS ANSWERS
             //GET USER ANSWERS
-            Console.WriteLine("Getting all user answered questions");
+            Console.WriteLine(DateTime.Now + "\t" +"Getting all user answered questions");
             getRemoteData(DataType.ALL_USER_ANSWERED);
             if (_userSession.userAnsweredQuestions == null)
             {
@@ -277,37 +282,37 @@ namespace SocialLearningGame.Logic
             //IF USER IS IN GROUP, GET GROUP ANSWERS, AND GROUP PLAYERS
             if (_userSession.currentGroup != null)
             {
-                Console.WriteLine("Getting all group answered questions");
+                Console.WriteLine(DateTime.Now + "\t" +"Getting all group answered questions");
                 getRemoteData(DataType.ALL_GROUP_ANSWERED);
                 if (_userSession.groupAnsweredQuestions == null)
                 {
-                    Console.WriteLine("SET UP ERROR WITH GROUP ANSWERS");
+                    Console.WriteLine(DateTime.Now + "\t" +"SET UP ERROR WITH GROUP ANSWERS");
                     _userSession.gameStage = GameStage.SetupError;
                 }
-                Console.WriteLine("Getting all group players");
+                Console.WriteLine(DateTime.Now + "\t" +"Getting all group players");
                 getRemoteData(DataType.ALL_GROUP_PLAYERS);
                 if (_userSession.allGroupPlayers== null)
                 {
-                    Console.WriteLine("SET UP ERROR WITH GROUP PLAYERS");
+                    Console.WriteLine(DateTime.Now + "\t" +"SET UP ERROR WITH GROUP PLAYERS");
                     _userSession.gameStage = GameStage.SetupError;
                 }
             }
 
             //GET NOTIFICATIONS
-            Console.WriteLine("Getting all notifications");
+            Console.WriteLine(DateTime.Now + "\t" +"Getting all notifications");
             getRemoteData(DataType.ALL_NOTIFICATIONS);
             if (_userSession.allNotifications == null)
             {
-                Console.WriteLine("SET UP ERROR WITH NOTIFICATIONS");
+                Console.WriteLine(DateTime.Now + "\t" +"SET UP ERROR WITH NOTIFICATIONS");
                 _userSession.gameStage = GameStage.SetupError;
             }
             
             //GET USER INTERESTS
-            Console.WriteLine("Getting all user interests");
+            Console.WriteLine(DateTime.Now + "\t" +"Getting all user interests");
             getRemoteData(DataType.USER_INTERESTS);
             if (_userSession.userInterests == null)
             {
-                Console.WriteLine("SET UP ERROR WITH USERS INTERESTS");
+                Console.WriteLine(DateTime.Now + "\t" +"SET UP ERROR WITH USERS INTERESTS");
                 _userSession.gameStage = GameStage.SetupError;
             }
 
@@ -440,7 +445,7 @@ namespace SocialLearningGame.Logic
             }
             else if (_userSession.player == GameStage.GROUP)
             {
-                Console.WriteLine("In group questions");
+                Console.WriteLine(DateTime.Now + "\t" +"In group questions");
                 //CHECK IF QUESTIONS ARE AVAILABLE
                 if (_userSession.availableGroupQuestions.Count() == 0)
                 {

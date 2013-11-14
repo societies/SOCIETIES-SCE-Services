@@ -51,7 +51,7 @@ namespace SocialLearningGame
                 }
                 catch (SocketException e)
                 {
-                    Console.WriteLine("Unable to connect to server.");
+                    Console.WriteLine(DateTime.Now + "\t" +"Unable to connect to server.");
                     return "";
                 }
                 //string input = Console.ReadLine();
@@ -61,7 +61,7 @@ namespace SocialLearningGame
                 byte[] data = new byte[1024];
                 int receivedDataLength = server.Receive(data);
                 string stringData = Encoding.ASCII.GetString(data, 0, receivedDataLength);
-                Console.WriteLine("Received user identity from server: " + stringData);
+                Console.WriteLine(DateTime.Now + "\t" +"Received user identity from server: " + stringData);
 
                 server.Send(Encoding.ASCII.GetBytes("VIRGO_ENDPOINT_IPADDRESS"));
                 receivedDataLength = server.Receive(data);
@@ -96,7 +96,7 @@ namespace SocialLearningGame
                 }
                 catch (SocketException e)
                 {
-                    Console.WriteLine("Unable to connect to socket server on virgo ");
+                    Console.WriteLine(DateTime.Now + "\t" +"Unable to connect to socket server on virgo ");
                     return "";
                 }
 
@@ -104,7 +104,7 @@ namespace SocialLearningGame
                 byte[] data = new byte[1024];
                 int receivedDataLength = server.Receive(data);
                 string stringData = Encoding.ASCII.GetString(data, 0, receivedDataLength);
-                Console.WriteLine("Received username from virgo app");
+                Console.WriteLine(DateTime.Now + "\t" +"Received username from virgo app");
 
                 server.Close();
                 this.userName = stringData;

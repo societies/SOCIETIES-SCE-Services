@@ -57,12 +57,12 @@ namespace HWUPortal
                 //Enter the listening loop
                 while (acceptingConnections)
                 {
-                    if (log.IsDebugEnabled) log.Debug("Waiting for a connection... ");
+                     Console.WriteLine(DateTime.Now + "\t" +"Waiting for a connection... ");
 
                     // Perform a blocking call to accept requests.
                     // You could also user server.AcceptSocket() here.
                     client = server.AcceptTcpClient();
-                    if (log.IsDebugEnabled) log.Debug("Connected!");
+                     Console.WriteLine(DateTime.Now + "\t" +"Connected!");
 
                     // Get a stream object for reading and writing
                     stream = client.GetStream();
@@ -76,7 +76,7 @@ namespace HWUPortal
                     {
                         // Translate data bytes to a ASCII string.
                         data = System.Text.Encoding.ASCII.GetString(bytes, 0, i);
-                        if (log.IsDebugEnabled) log.Debug(String.Format("Received: {0}", data));
+                         Console.WriteLine(DateTime.Now + "\t" +String.Format("Received: {0}", data));
                         if (this.gui.isLoggedIn())
                         {
 
@@ -87,7 +87,7 @@ namespace HWUPortal
                             {
                                 receivingText = true;
 
-                                if (log.IsDebugEnabled) log.Debug("Processing text");
+                                 Console.WriteLine(DateTime.Now + "\t" +"Processing text");
 
                                 while (receivingText)
                                 {
@@ -101,43 +101,43 @@ namespace HWUPortal
                                         else */
                                         if (data.StartsWith("SHOW_TEXT"))
                                         {
-                                            if (log.IsDebugEnabled) log.Debug("Processing SHOW_TEXT");
+                                             Console.WriteLine(DateTime.Now + "\t" +"Processing SHOW_TEXT");
                                             String[] splitData = data.Split('\n');
                                             String userId = splitData[1];
                                             serviceName = splitData[2];
-                                            if (log.IsDebugEnabled) log.Debug("userId : " + userId);
+                                             Console.WriteLine(DateTime.Now + "\t" +"userId : " + userId);
                                             if (userId.IndexOf(this.userSession.getUserIdentity()) > -1)
                                             {
-                                                if (log.IsDebugEnabled) log.Debug("Starting to show text\n\n");
+                                                 Console.WriteLine(DateTime.Now + "\t" +"Starting to show text\n\n");
                                                 for (int n = 3; n < splitData.Length; n++)
                                                 {
                                                     if (splitData[n].IndexOf("END_TEXT") > -1)
                                                     {
                                                         break;
                                                     }
-                                                    if (log.IsDebugEnabled) log.Debug("concatenating text line: " + n);
+                                                     Console.WriteLine(DateTime.Now + "\t" +"concatenating text line: " + n);
                                                     text = string.Concat(text, splitData[n]);
                                                     //this.gui.appendText(splitData[n]);
 
-                                                    if (log.IsDebugEnabled) log.Debug(String.Format("Concatenating text line: \n{0}", splitData[n]));
+                                                     Console.WriteLine(DateTime.Now + "\t" +String.Format("Concatenating text line: \n{0}", splitData[n]));
                                                 }
                                             }
 
                                         }
                                         else
                                         {
-                                            if (log.IsDebugEnabled) log.Debug("processing another 1024 bytes");
+                                             Console.WriteLine(DateTime.Now + "\t" +"processing another 1024 bytes");
 
 
 
-                                            if (log.IsDebugEnabled) log.Debug(String.Format("Adding to txtBox: {0}", data));
+                                             Console.WriteLine(DateTime.Now + "\t" +String.Format("Adding to txtBox: {0}", data));
                                             text = string.Concat(text, data);
                                             //this.gui.appendText(data);
                                         }
 
 
 
-                                        if (log.IsDebugEnabled) log.Debug("\nText for notification panel:\n" + text + "\nEnds text\n");
+                                         Console.WriteLine(DateTime.Now + "\t" +"\nText for notification panel:\n" + text + "\nEnds text\n");
                                         if (data.IndexOf("END_TEXT") > -1)
                                         {
                                             receivingText = false;
@@ -145,7 +145,7 @@ namespace HWUPortal
                                         }
                                         else
                                         {
-                                            if (log.IsDebugEnabled) log.Debug("reading from stream");
+                                             Console.WriteLine(DateTime.Now + "\t" +"reading from stream");
                                             i = stream.Read(bytes, 0, bytes.Length);
                                             data = System.Text.Encoding.ASCII.GetString(bytes, 0, i);
                                         }
@@ -177,7 +177,7 @@ namespace HWUPortal
 
                         // Send back a response.
                         //stream.Write(msg, 0, msg.Length);
-                        //            if (log.IsDebugEnabled)  log.Debug(String.Format("Sent: {0}", data));
+                        //            Console.WriteLine(DateTime.Now + "\t" +String.Format("Sent: {0}", data));
 
                         i = stream.Read(bytes, 0, bytes.Length);
 
@@ -242,7 +242,7 @@ namespace HWUPortal
                 {
                     if (lines[1].Trim().IndexOf(this.userSession.getUserIdentity()) > -1)
                     {
-                        if (log.IsDebugEnabled) log.Debug("Logout method called on gui");
+                         Console.WriteLine(DateTime.Now + "\t" +"Logout method called on gui");
                         this.gui.logOut();
                         this.stream.Write(okBytes, 0, okBytes.Length);
                         //this is now set in the GUI
@@ -251,7 +251,7 @@ namespace HWUPortal
                     }
                     else
                     {
-                        if (log.IsDebugEnabled) log.Debug("Request to logout but identity provided is not current user identity");
+                         Console.WriteLine(DateTime.Now + "\t" +"Request to logout but identity provided is not current user identity");
                     }
 
                 }
@@ -259,7 +259,7 @@ namespace HWUPortal
                 {
                     String userId = lines[1];
                     String serviceName = lines[2];
-                    if (log.IsDebugEnabled) log.Debug("Starting service: " + serviceName);
+                     Console.WriteLine(DateTime.Now + "\t" +"Starting service: " + serviceName);
                     this.gui.startService(serviceName);
                     this.stream.Write(okBytes, 0, okBytes.Length);
                 }
@@ -293,7 +293,7 @@ namespace HWUPortal
                     if (lines[2].IndexOf("PORTAL_PORT") > -1)
                     {
                         int portalPort = Int32.Parse(lines[2].Trim().Remove(0, "PORTAL_PORT:".Length));
-                        if (log.IsDebugEnabled) log.Debug("Parsed portal port: " + portalPort);
+                         Console.WriteLine(DateTime.Now + "\t" +"Parsed portal port: " + portalPort);
                         userSession.setPort(portalPort);
 
                     }
@@ -302,12 +302,13 @@ namespace HWUPortal
                     if (lines[3].IndexOf("NUM_SERVICES") > -1)
                     {
                         servicesToFollow = Int32.Parse(lines[3].Trim().Remove(0, "NUM_SERVICES:".Length));
-                        if (log.IsDebugEnabled) log.Debug("Parsed number of services: " + servicesToFollow);
+                         Console.WriteLine(DateTime.Now + "\t" +"Parsed number of services: " + servicesToFollow);
+                         this.numOfServices = servicesToFollow;
                     }
 
                     if (servicesToFollow == 0)
                     {
-                        if (log.IsDebugEnabled) log.Debug(userSession.ToString());
+                         Console.WriteLine(DateTime.Now + "\t" +userSession.ToString());
                         this.gui.Login(userSession);
                         this.stream.Write(okBytes, 0, okBytes.Length);
                         return true;
@@ -316,17 +317,17 @@ namespace HWUPortal
 
                     if (lines[4].IndexOf("START_SERVICES") > -1)
                     {
-                        if (log.IsDebugEnabled) log.Debug("Reading services ");
+                         Console.WriteLine(DateTime.Now + "\t" +"Reading services ");
                         int pointer = 5;
                         String line = lines[pointer];
                         while (line.IndexOf("END_SERVICES") == -1)
                         {
-                            if (log.IsDebugEnabled) log.Debug("step 1, processing line: " + line);
+                             Console.WriteLine(DateTime.Now + "\t" +"step 1, processing line: " + line);
                             if (line.IndexOf("START_SERVICE_INFO:") > -1)
                             {
 
                                 int readingServiceNumber = Int32.Parse((line.Remove(0, "START_SERVICE_INFO:".Length)));
-                                if (log.IsDebugEnabled) log.Debug("Reading service: " + readingServiceNumber);
+                                 Console.WriteLine(DateTime.Now + "\t" +"Reading service: " + readingServiceNumber);
                                 ServiceInfo sInfo = new ServiceInfo();
                                 line = lines[pointer++];
                                 while (line.IndexOf("END_SERVICE_INFO:" + readingServiceNumber) == -1)
@@ -360,15 +361,16 @@ namespace HWUPortal
                                     line = lines[pointer++];
                                 }
 
-                                if (log.IsDebugEnabled) log.Debug("Read service info " + readingServiceNumber);
+                                 Console.WriteLine(DateTime.Now + "\t" +"Read service info " + readingServiceNumber);
 
-                                this.numOfServices++;
+                               // this.numOfServices++;
+                                //HERE IT WILL ONLY BE 1 ....
                                 this.downloadFile(sInfo);
                             }
                             line = lines[pointer++];
                         }
 
-                        if (log.IsDebugEnabled) log.Debug("read all services");
+                         Console.WriteLine(DateTime.Now + "\t" +"read all services");
                     }
 
                     //int startServicesLineNumber = 0;
@@ -376,7 +378,7 @@ namespace HWUPortal
 
                     //for (int i = 4; i < lines.Length; i++)
                     //{
-                    //                if (log.IsDebugEnabled)  log.Debug("Line: " + i + " " + lines[i]);
+                    //                Console.WriteLine(DateTime.Now + "\t" +"Line: " + i + " " + lines[i]);
                     //    if (lines[i].IndexOf("END_SERVICES") > -1)
                     //    {
                     //        endServicesLineNumber = i;
@@ -411,12 +413,12 @@ namespace HWUPortal
                     //    this.numOfServices++;
                     //    this.downloadFile(sInfo);
                     //}
-                    if (log.IsDebugEnabled) log.Debug(userSession.ToString());
+                     Console.WriteLine(DateTime.Now + "\t" +userSession.ToString());
                     return true;
                 }
                 else
                 {
-                    if (log.IsDebugEnabled) log.Debug("Ignoring received data");
+                     Console.WriteLine(DateTime.Now + "\t" +"Ignoring received data");
                     return false;
                 }
             }
@@ -427,6 +429,7 @@ namespace HWUPortal
 
         private void downloadFile(ServiceInfo sInfo)
         {
+            Console.WriteLine(DateTime.Now + "\t" + "\t Started to download exe for " + sInfo.serviceName);
             String userProfile = System.Environment.GetEnvironmentVariable("USERPROFILE");
             String directory = userProfile + @"\Downloads\";
             String fileName = this.extractFilename(sInfo.serviceURL);
@@ -472,7 +475,7 @@ namespace HWUPortal
 
 
             }
-            if (log.IsDebugEnabled) log.Debug(sInfo.ToString());
+             Console.WriteLine(DateTime.Now + "\t" +sInfo.ToString());
         }
 
         private string extractFilename(string path)
@@ -489,20 +492,23 @@ namespace HWUPortal
 
         private void Completed(object sender, AsyncCompletedEventArgs e)
         {
+            
             ServiceInfo sInfo = (ServiceInfo)e.UserState;
             this.userSession.addService(sInfo);
+            Console.WriteLine(DateTime.Now + "\t" + "\t Completed download for " + sInfo.serviceName);
             this.downloadedServices++;
-            if (log.IsDebugEnabled) log.Debug("Downloaded services: " + downloadedServices);
-            if (log.IsDebugEnabled) log.Debug("Number of services: " + numOfServices);
+            ///WRITE CONSOLE.WRITE LINE WE WILL SEE THAT ON THE CONSOLE
+             Console.WriteLine(DateTime.Now + "\t" +"Downloaded services: " + downloadedServices);
+             Console.WriteLine(DateTime.Now + "\t" +"Number of services: " + numOfServices);
             if (this.numOfServices > this.downloadedServices)
             {
-                if (log.IsDebugEnabled) log.Debug("Waiting for download to finish");
+                 Console.WriteLine(DateTime.Now + "\t" +"Waiting for download to finish");
             }
             else
             {
-                if (log.IsDebugEnabled) log.Debug("Starting user login");
+                 Console.WriteLine(DateTime.Now + "\t" +"Starting user login");
                 this.gui.Login(userSession);
-                if (log.IsDebugEnabled) log.Debug("User logged in. Sending OK to societies platform");
+                 Console.WriteLine(DateTime.Now + "\t" +"User logged in. Sending OK to societies platform");
                 stream.Write(okBytes, 0, okBytes.Length);
 
             }

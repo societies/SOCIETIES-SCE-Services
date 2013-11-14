@@ -57,7 +57,7 @@ namespace SocialLearningGame.Pages
         {
             InitializeComponent();
             categories = new List<Category>(GameLogic._userSession.allCategories);
-            Console.WriteLine("GOT CATEGORIES" + categories.ToString());
+            Console.WriteLine(DateTime.Now + "\t" +"GOT CATEGORIES" + categories.ToString());
             superCategories = new List<Category>();
             userInterests = new List<String>(GameLogic._userSession.userInterests);
             keywords = getKeywords(userInterests);
@@ -83,7 +83,7 @@ namespace SocialLearningGame.Pages
                String[] array = s.Split(' ');
                foreach (String s2 in array)
                {
-                   Console.WriteLine("Adding " + s2);
+                   Console.WriteLine(DateTime.Now + "\t" +"Adding " + s2);
                    keywords.Add(s2.Trim());
                }
             }
@@ -94,7 +94,7 @@ namespace SocialLearningGame.Pages
         {           
             foreach (Category c in categories.ToList())
             {
-                Console.WriteLine(c.Name);
+                Console.WriteLine(DateTime.Now + "\t" +c.Name);
                 if (c.superCatID == 0)
                 {
                     superCategories.Add(c);
@@ -102,7 +102,7 @@ namespace SocialLearningGame.Pages
                     if (c.Name.Equals("General"))
                     {
                         general = c.categoryID;
-                        Console.WriteLine("Got general ID");
+                        Console.WriteLine(DateTime.Now + "\t" +"Got general ID");
                     }
                     else if (c.Name.Equals("Personal"))
                     {
@@ -121,13 +121,13 @@ namespace SocialLearningGame.Pages
                 catGrid.Children.Remove(u);
             }
             buttonToCat.Clear();
-            Console.WriteLine("In add buttons");
+            Console.WriteLine(DateTime.Now + "\t" +"In add buttons");
 
             int xCount = 0;
             int yCount = 0;
             int x;
             Category c;
-            Console.WriteLine("INDEX: " + index + ", MAX:" + maxCount + ", SIZE: " + categories.Count());
+            Console.WriteLine(DateTime.Now + "\t" +"INDEX: " + index + ", MAX:" + maxCount + ", SIZE: " + categories.Count());
             for(x = index; x < index + 6; x++)
             {
                 if (x < categories.Count())
@@ -140,7 +140,7 @@ namespace SocialLearningGame.Pages
                     }
                     if (c.superCatID == general)
                     {
-                        Console.WriteLine("General Q found, Add Button");
+                        Console.WriteLine(DateTime.Now + "\t" +"General Q found, Add Button");
                         createButton(c, xCount, yCount);
                         xCount++;
                     }
@@ -148,14 +148,14 @@ namespace SocialLearningGame.Pages
                     {
                         if (keywords.Contains(c.Name) || userInterests.Contains(c.Name))
                         {
-                            Console.WriteLine("Keywords match, creating a button");
+                            Console.WriteLine(DateTime.Now + "\t" +"Keywords match, creating a button");
                             createButton(c, xCount, yCount);
                             xCount++;
                         }
                         else
                         {
-                            Console.WriteLine("Keywords don't match, not creating a button for...");
-                            Console.WriteLine(c.Name);
+                            Console.WriteLine(DateTime.Now + "\t" +"Keywords don't match, not creating a button for...");
+                            Console.WriteLine(DateTime.Now + "\t" +c.Name);
                         }
                     }
                 }
@@ -200,7 +200,7 @@ namespace SocialLearningGame.Pages
         private void buttonClick(object sender, RoutedEventArgs e)
         {
             Category c = buttonToCat[(KinectCircleButton)sender];
-            Console.WriteLine(c.Name);
+            Console.WriteLine(DateTime.Now + "\t" +c.Name);
            /* List<Category> c = GameLogic.getCategories();
             Category cc1 = null;
             foreach (Category f in c)

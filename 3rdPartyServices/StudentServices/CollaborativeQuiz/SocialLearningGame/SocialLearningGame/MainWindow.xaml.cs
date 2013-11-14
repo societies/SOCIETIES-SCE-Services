@@ -49,6 +49,7 @@ namespace SocialLearningGame
 
         private Page r;
         private Page q;
+        Thread loaderThread;
 
       //  private readonly CommsManager commsManager;
 
@@ -59,12 +60,12 @@ namespace SocialLearningGame
          //   log4net.Config.XmlConfigurator.Configure();
           //  //log.Debug("Init components");
             //this.InitializeComponent();
-            Console.WriteLine("Starting...");
+            Console.WriteLine(DateTime.Now + "\t" +"Starting...");
           //  log4net.Config.XmlConfigurator.Configure(new System.IO.FileInfo("./Resources/log4net.config.xml"));
             //log.Info("Logging configured");
            // //log.Debug("Init Kinect sensor");
             // initialize the sensor chooser and UI
-            Console.WriteLine("Getting Kinnect");
+            Console.WriteLine(DateTime.Now + "\t" +"Getting Kinnect");
             this.SensorChooser = new KinectSensorChooser();
             this.SensorChooser.KinectChanged += SensorChooserOnKinectChanged;
             this.sensorChooserUi.KinectSensorChooser = this.SensorChooser;
@@ -80,14 +81,14 @@ namespace SocialLearningGame
             Binding regionSensorBinding = new Binding("Kinect") { Source = this.SensorChooser };
             BindingOperations.SetBinding(this.kinectRegion, KinectRegion.KinectSensorProperty, regionSensorBinding);
        //     //log.Debug("Kinect initialized");
-            Console.WriteLine("Kinect got");
+            Console.WriteLine(DateTime.Now + "\t" +"Kinect got");
             Page p = LoadingPage.Instance; // Hack to get this to init on the right thread;
             q = new CommsError(); // Hack to get this to init on the right thread;
-            Console.WriteLine("Getting new page");
+            Console.WriteLine(DateTime.Now + "\t" +"Getting new page");
             GameLogic._userSession = new UserSession();
             r = new HomePage();
             //r.refre// Hack to get this to init on the right thread;
-            Console.WriteLine("Got new Homepage");
+            Console.WriteLine(DateTime.Now + "\t" +"Got new Homepage");
 
             _windowInstance = this;
 
@@ -99,7 +100,7 @@ namespace SocialLearningGame
             String nodeName = "myNode1";
 
             commsManager.RegisterListener(nodeName);*/
-            Console.WriteLine("Showing window..");
+            Console.WriteLine(DateTime.Now + "\t" +"Showing window..");
             this.Show();
         }
 
@@ -114,15 +115,16 @@ namespace SocialLearningGame
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            Console.WriteLine("I am loaded...");
+            Console.WriteLine(DateTime.Now + "\t" +"I am loaded...");
             // load data (on a different thread)
-            Thread loaderThread = new Thread(new ThreadStart(LoadingThread));
+            loaderThread = new Thread(new ThreadStart(LoadingThread));
             loaderThread.Name = "Data loader thread";
             loaderThread.Start();
         }
 
         private void WindowClosing(object sent, System.ComponentModel.CancelEventArgs e)
         {
+            Console.WriteLine(DateTime.Now + "\t" +"Window now attempting to close!");
             if (this.SensorChooser != null)
             {
                // //log.Debug("Stopping Kinect");
@@ -131,6 +133,11 @@ namespace SocialLearningGame
                 if (this.SensorChooser.Kinect != null)
                     UnbindSensor(this.SensorChooser.Kinect);
             }
+            Console.WriteLine(DateTime.Now + "\t" +"Thread stopping!");
+
+            loaderThread.Abort();
+            Console.WriteLine(DateTime.Now + "\t" +"Loading thread stopped!");
+
         }
 
         #endregion
@@ -242,7 +249,7 @@ namespace SocialLearningGame
         private delegate void SwitchPageDelegate(Page newPage);
         public static void SwitchPage(Page newPage)
         {
-            Console.WriteLine("Switch page: " + newPage.GetType().ToString());
+            Console.WriteLine(DateTime.Now + "\t" +"Switch page: " + newPage.GetType().ToString());
 
             if (newPage == null)
             {
@@ -290,9 +297,9 @@ namespace SocialLearningGame
 
         private void LoadingThread()
         {
-            Console.WriteLine("Showing instance");
+            Console.WriteLine(DateTime.Now + "\t" +"Showing instance");
             SwitchPage(LoadingPage.Instance);
-            Console.WriteLine("Showing instance");
+            Console.WriteLine(DateTime.Now + "\t" +"Showing instance");
             //CONNECT TO SOCIETIES PLATFORM
             GameLogic.connectToSocieties();
             //RETRIEVE ALL INFORMATION

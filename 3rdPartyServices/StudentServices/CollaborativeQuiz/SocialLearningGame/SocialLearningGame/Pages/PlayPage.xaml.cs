@@ -64,7 +64,7 @@ namespace SocialLearningGame.Pages
                 EnableSpeechEngine(kinect);
                 EnableSkeletonTracking(kinect);
             }
-            
+
         }
 
         private void window_Loaded(object sender, RoutedEventArgs e)
@@ -78,23 +78,23 @@ namespace SocialLearningGame.Pages
 
         private void SensorChooser_KinectChanged(object sender, Microsoft.Kinect.Toolkit.KinectChangedEventArgs args)
         {
-       //     //log.Debug("Kinect sensor changed");
+            //     //log.Debug("Kinect sensor changed");
 
             if (args.OldSensor != null)
             {
-             //   //log.Debug("Unbinding old sensor");
+                //   //log.Debug("Unbinding old sensor");
 
                 try
                 {
                     args.OldSensor.AudioSource.Stop();
 
-             //       //log.Debug("Completed unbinding old sensor");
+                    //       //log.Debug("Completed unbinding old sensor");
                 }
                 catch (InvalidOperationException ex)
                 {
                     // KinectSensor might enter an invalid state while enabling/disabling streams or stream features.
                     // E.g.: sensor might be abruptly unplugged.
-            //        //log.Warn("Error unbinding old sensor", ex);
+                    //        //log.Warn("Error unbinding old sensor", ex);
                 }
             }
 
@@ -102,20 +102,20 @@ namespace SocialLearningGame.Pages
             {
                 KinectSensor newSensor = args.NewSensor;
 
-           //     //log.Debug("Binding new sensor");
+                //     //log.Debug("Binding new sensor");
 
                 try
                 {
                     EnableSkeletonTracking(newSensor);
                     EnableSpeechEngine(newSensor);
 
-            //        //log.Debug("Completed binding new sensor");
+                    //        //log.Debug("Completed binding new sensor");
                 }
                 catch (InvalidOperationException ex)
                 {
                     // KinectSensor might enter an invalid state while enabling/disabling streams or stream features.
                     // E.g.: sensor might be abruptly unplugged.
-            //        //log.Warn("Error binding new sensor", ex);
+                    //        //log.Warn("Error binding new sensor", ex);
                 }
 
             }
@@ -564,18 +564,18 @@ namespace SocialLearningGame.Pages
 
         private void EnableSpeechEngine(KinectSensor sensor)
         {
-         //   //log.Debug("Enabling speech engine");
+            //   //log.Debug("Enabling speech engine");
 
             if (_speechEngine != null)
             {
                 try
                 {
-              //      //log.Debug("Stopping old speech engine");
+                    //      //log.Debug("Stopping old speech engine");
                     _speechEngine.RecognizeAsyncStop();
                 }
                 catch (Exception ex)
                 {
-          //          //log.Warn("Error stopping old speech engine", ex);
+                    //          //log.Warn("Error stopping old speech engine", ex);
                 }
             }
 
@@ -601,9 +601,9 @@ namespace SocialLearningGame.Pages
                 grammar.Add("four");
 
                 grammar.Add("quit game");
-                  grammar.Add("exit game");
+                grammar.Add("exit game");
 
-               GrammarBuilder gb = new GrammarBuilder { Culture = _speechEngine.RecognizerInfo.Culture };
+                GrammarBuilder gb = new GrammarBuilder { Culture = _speechEngine.RecognizerInfo.Culture };
                 gb.Append(grammar);
 
                 // Create the actual Grammar instance, and then load it into the speech recognizer.
@@ -638,7 +638,7 @@ namespace SocialLearningGame.Pages
             if (e.Result.Confidence < SpeechConfidenceThreshold)
             {
                 //log.Debug(String.Format("Speech below confidence level of {0}: {1} ({2})",
-                  //  SpeechConfidenceThreshold,
+                //  SpeechConfidenceThreshold,
                 //    e.Result.Text,
                 //    e.Result.Confidence));
                 return;
@@ -709,7 +709,7 @@ namespace SocialLearningGame.Pages
 
         private void answerButton_Click(object sender, RoutedEventArgs e)
         {
-            Console.WriteLine("ANSER BUTTON CLICKED!!!");
+            Console.WriteLine(DateTime.Now + "\t" +"ANSER BUTTON CLICKED!!!");
             if (GameLogic._userSession.questionRound.AnswerMethod != AnswerMethod.Guesture)
                 return;
 
@@ -730,10 +730,10 @@ namespace SocialLearningGame.Pages
         //START A NEW GAME
         public void NewGame()
         {
-            Console.WriteLine("Now starting new game...");
+            Console.WriteLine(DateTime.Now + "\t" +"Now starting new game...");
             // PREPARE QUESTIONS, GET USER SESSION
             GameLogic.NewGame(choosenCategory);
-            
+
             //SHOW PLAYERS NAME
             if (GameLogic._userSession.player == GameStage.USER)
             {
@@ -748,7 +748,7 @@ namespace SocialLearningGame.Pages
                 totalQuestions = GameLogic._userSession.availableGroupQuestions.Count();
             }
 
-            
+
             if (totalQuestions > 10)
             {
                 totalQuestions = 10;
@@ -773,14 +773,14 @@ namespace SocialLearningGame.Pages
             //IF QUESTION IS NULL AND IS FIRST ROUND, USER HAS ANSWERED ALL QUESTIONS PREVIOUSLY| OR NO EXIST
             if (GameLogic._userSession.questionRound.Question == null && GameLogic._userSession.questionRound.RoundNumber == 1)
             {
-                Console.WriteLine("Ending game because there are no questions for the user...");
-                Console.WriteLine("Switching to new NoQuestionsPage ...");
-                MainWindow.SwitchPage(new NoQuestions());        
+                Console.WriteLine(DateTime.Now + "\t" +"Ending game because there are no questions for the user...");
+                Console.WriteLine(DateTime.Now + "\t" +"Switching to new NoQuestionsPage ...");
+                MainWindow.SwitchPage(new NoQuestions());
             }
             //IF NO QUESTION, AND ROUND NUMBER IS OVER 1, ALL QUESTIONS IN ROUND HAVE BEEN ANSWERED
             else if (GameLogic._userSession.questionRound.Question == null && GameLogic._userSession.questionRound.RoundNumber > 1)
             {
-                Console.WriteLine("Ending game because user has answered all the questions...");
+                Console.WriteLine(DateTime.Now + "\t" +"Ending game because user has answered all the questions...");
                 MainWindow.SwitchPage(new GameOver());
             }
             //ELSE QUESTIONS ARE AVAILABLE
@@ -887,8 +887,23 @@ namespace SocialLearningGame.Pages
             }
 
             bool correct = (answerIndex == GameLogic._userSession.questionRound.Question.correctAnswer);
-
-            var selectionDisplay = new AnswerDisplay(answer, correct);
+            String correctAnswer = "";
+            switch(GameLogic._userSession.questionRound.Question.correctAnswer)
+            {
+                case 1:
+                    correctAnswer = GameLogic._userSession.questionRound.Question.answer1;
+                    break;
+                case 2:
+                    correctAnswer = GameLogic._userSession.questionRound.Question.answer1;
+                    break;
+                case 3:
+                    correctAnswer = GameLogic._userSession.questionRound.Question.answer1;
+                    break;
+                case 4:
+                    correctAnswer = GameLogic._userSession.questionRound.Question.answer1;
+                    break;
+            }
+            var selectionDisplay = new AnswerDisplay(correctAnswer, correct);
             Grid.SetRowSpan(selectionDisplay, 6);
             Grid.SetColumnSpan(selectionDisplay, 5);
             this.grid.Children.Add(selectionDisplay);
@@ -953,8 +968,8 @@ namespace SocialLearningGame.Pages
 
         private void EndGame()
         {
-            Console.WriteLine("ENDING GAME");
-           // GameLogic.EndGame();
+            Console.WriteLine(DateTime.Now + "\t" +"ENDING GAME");
+            // GameLogic.EndGame();
             MainWindow.SwitchPage(new GameOver());
         }
 

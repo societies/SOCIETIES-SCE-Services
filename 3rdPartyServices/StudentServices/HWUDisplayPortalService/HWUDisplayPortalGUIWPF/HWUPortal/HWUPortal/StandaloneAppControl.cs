@@ -109,7 +109,7 @@ namespace HWUPortal
         /// <param name="e">Not used</param>
         public void LoadExe(EventArgs e)
         {
-            if (log.IsDebugEnabled) log.Debug("Starting exe" + exeName);
+             Console.WriteLine(DateTime.Now + "\t" +"Starting exe" + exeName);
             // If control needs to be initialized/created
             if (created == false)
             {
@@ -118,7 +118,7 @@ namespace HWUPortal
                 created = true;
 
                 // Initialize handle value to invalid
-                appWin = IntPtr.Zero;
+                this.appWin = IntPtr.Zero;
 
                 // Start the remote application
 
@@ -127,22 +127,26 @@ namespace HWUPortal
                     // Start the process
                     p = System.Diagnostics.Process.Start(this.exeName);
 
-                    p.Exited += new EventHandler(p_Exited);
+                    p.Exited += p_Exited;
                     p.EnableRaisingEvents = true;
                     // Wait for process to be created and enter idle condition
                     p.WaitForInputIdle();
 
                     //BUG fix for windows vista/7
                     System.Threading.Thread.Sleep(50);
-
+                   
                     while (p.MainWindowHandle == IntPtr.Zero)
                     {
                         Thread.Sleep(1000);
-                        if (log.IsDebugEnabled) log.Debug("waiting for main handle");
+                         Console.WriteLine(DateTime.Now + "\t" +"waiting for main handle");
                         p.Refresh();
                     }
                     // Get the main handle
-                    appWin = p.MainWindowHandle;
+                    this.appWin = p.MainWindowHandle;
+                    if (this.appWin == IntPtr.Zero)
+                    {
+                        Console.WriteLine("AppWin is bad!");
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -157,7 +161,7 @@ namespace HWUPortal
 
                 // Move the window to overlay it on this window
                 //MoveWindow(appWin, 0, 0, this.Width, this.Height, true);
-                if (log.IsDebugEnabled) log.Debug("started exe" + exeName);
+                 Console.WriteLine(DateTime.Now + "\t" +"started exe" + exeName);
 
             }
 
@@ -165,54 +169,78 @@ namespace HWUPortal
         }
         private void p_Exited(object sender, EventArgs args)
         {
-            if (log.IsDebugEnabled) log.Debug("Received exit event");
+            Console.WriteLine("Received exit event");
             ApplicationControlArgs cArgs = new ApplicationControlArgs(this.exeName, true);
             appExit(this, cArgs);
 
             this.created = false;
-            appWin = IntPtr.Zero;
+            this.appWin = IntPtr.Zero;
         }
+
+
         public void DestroyExe(EventArgs e)
         {
-            if (log.IsDebugEnabled) log.Debug("Destroying exe");
-            // Stop the application
-            if (appWin != IntPtr.Zero)
+            Console.WriteLine("Destroying exe " + p.ProcessName);
+            if (appWin == IntPtr.Zero)
             {
+                Console.WriteLine("Booo2!");
+            }
+            //REMOVE EVENT HANDLER
+            p.Exited -= p_Exited;
+            // Stop the application
+            if (appWin == IntPtr.Zero)
+            {
+                Console.WriteLine("Booo!");
+            }
+
+                Console.WriteLine("appWin has not been set properly!");
                 if (p != null && !p.HasExited)
                 {
-                    try
+                    if (this.appWin != IntPtr.Zero)
                     {
-                        if (log.IsDebugEnabled) log.Debug("Closing main window" + p.ProcessName);
-
-                        p.CloseMainWindow();
-
-
-                        if (!p.HasExited)
+                        Console.WriteLine("p is null and p has not been started appparently!");
+                        try
                         {
-                            if (!p.WaitForExit(10000))
-                            {
-                                if (log.IsDebugEnabled) log.Debug("Closing down process");
-                                p.Close();
+                            Console.WriteLine("Closing main window" + p.ProcessName);
 
-                                if (!p.HasExited)
-                                {
-                                    if (log.IsDebugEnabled) log.Debug("process has not exited yet");
-                                    if (!p.WaitForExit(5000))
-                                    {
-                                        if (log.IsDebugEnabled) log.Debug("killing process");
-                                        p.Kill();
-                                        if (log.IsDebugEnabled) log.Debug("killed process");
-                                    }
-                                }
+                            p.CloseMainWindow();
+
+                            //Wait 2s to exit.
+                            p.WaitForExit(2000);
+
+                            if (!p.HasExited)
+                            {
+                                Console.WriteLine("Closing down process");
+                                //p.Close();
+
+
+                                Console.WriteLine("process has not exited yet");
+
+                                Console.WriteLine("killing process");
+                                p.Kill();
+                                p.WaitForExit();
+                                Console.WriteLine("killed process");
+
+
+
                             }
+                            else
+                            {
+                                //CLOSE LOCAL RESOURCES HELD
+                                p.Close();
+                            }
+                            Console.WriteLine("Closed");
                         }
-                        if (log.IsDebugEnabled) log.Debug("Closed");
+                        catch (Exception exc)
+                        {
+                            Console.WriteLine("", exc);
+                        }
                     }
-                    catch (Exception exc)
+                    else
                     {
-                        log.Error("", exc);
+                        p.Kill();
+                        p.WaitForExit();
                     }
-                }
                 // Post a close message
                 //PostMessage(appWin, WM_CLOSE, 0, 0);
 
@@ -220,13 +248,13 @@ namespace HWUPortal
                 //System.Threading.Thread.Sleep(1000);
 
                 // Clear internal handle
-                appWin = IntPtr.Zero;
+                this.appWin = IntPtr.Zero;
                 this.created = false;
-                if (log.IsDebugEnabled) log.Debug("Destroyed exe" + this.exeName);
+                 Console.WriteLine(DateTime.Now + "\t" +"Destroyed exe" + this.exeName);
             }
             else
             {
-                            if (log.IsDebugEnabled)  log.Debug("Could not destroy exe" + this.exeName);
+                            Console.WriteLine(DateTime.Now + "\t" +"Could not destroy exe" + this.exeName);
             }
 
 

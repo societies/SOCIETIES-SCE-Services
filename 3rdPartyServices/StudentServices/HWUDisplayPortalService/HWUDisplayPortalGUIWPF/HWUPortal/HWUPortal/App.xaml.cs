@@ -31,23 +31,45 @@ using System.Windows;
 
 namespace HWUPortal
 {
+
     /// <summary>
     /// Interaction logic for App.xaml
     /// </summary>
     public partial class App : Application
     {
         protected static log4net.ILog log = log4net.LogManager.GetLogger(typeof(App));
-
+        protected static StreamWriter writer;
         public App()
             : base()
         {
-            if (log.IsDebugEnabled) log.Debug("Display Portal Starting up");
+             Console.WriteLine(DateTime.Now + "\t" +"Display Portal Starting up");
             AppDomain.CurrentDomain.AssemblyResolve +=
                 new ResolveEventHandler(ResolveAssembly);
 
             // proceed starting app...
             log4net.Config.XmlConfigurator.Configure(new System.IO.FileInfo("./Resources/log4net.config.xml"));
             log.Info("Logging configured");
+
+            //SETTING UP CONSOLE REDIRECTION
+
+            String userProfile = System.Environment.GetEnvironmentVariable("USERPROFILE");
+            String directory = userProfile + @"\HWUPortalLogs\";
+
+
+            if (!Directory.Exists(directory))
+            {
+                Directory.CreateDirectory(directory);
+            }
+            String logFilename = directory + "portal_log.log";
+
+            writer = new StreamWriter(logFilename);
+            writer.AutoFlush = true;
+
+           
+           Console.SetOut(writer);
+           Console.WriteLine(DateTime.Now + "\t" + "Logs are ready");
+            
+
 
         }
 
@@ -57,18 +79,18 @@ namespace HWUPortal
 
             var name = args.Name.Substring(0, args.Name.IndexOf(',')) + ".dll";
 
-            //if (log.IsDebugEnabled) log.Debug("Searching for dependency: " + name.ToString() + " in ->");
+            // Console.WriteLine(DateTime.Now + "\t" +"Searching for dependency: " + name.ToString() + " in ->");
 
             //string[] resourceList = parentAssembly.GetManifestResourceNames();
             //for (int i = 0; i < resourceList.Length; i++)
             //{
-            //    if (log.IsDebugEnabled) log.Debug(resourceList[i]);
+            //     Console.WriteLine(DateTime.Now + "\t" +resourceList[i]);
             //}
 
             var resourceName = parentAssembly.GetManifestResourceNames()
                 .First(s => s.EndsWith(name));
 
-            //if (log.IsDebugEnabled) log.Debug("Found resource " + resourceName);
+            // Console.WriteLine(DateTime.Now + "\t" +"Found resource " + resourceName);
 
             using (Stream stream = parentAssembly.GetManifestResourceStream(resourceName))
             {
@@ -82,7 +104,7 @@ namespace HWUPortal
 
         private void Application_Exit(object sender, ExitEventArgs e)
         {
-            if (log.IsDebugEnabled) log.Debug("Portal exiting");
+             Console.WriteLine(DateTime.Now + "\t" +"Portal exiting");
         }
     }
 }

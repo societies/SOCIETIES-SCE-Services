@@ -50,7 +50,7 @@ namespace SocialLearningGame.Pages
         public void refreshNotifications()
         {
             int notifications = GameLogic._userSession.allNotifications.Count;
-            Console.WriteLine("Number of notifications:" + notifications);
+            Console.WriteLine(DateTime.Now + "\t" +"Number of notifications:" + notifications);
             if (notifications > 0)
             {
                 notificationCircle.Visibility = Visibility.Visible;
@@ -65,7 +65,7 @@ namespace SocialLearningGame.Pages
         private void window_Loaded(object sender, RoutedEventArgs e)
         {
             GameLogic.getGroupInformation();
-            Console.WriteLine("Getting notifications.....");
+            Console.WriteLine(DateTime.Now + "\t" +"Getting notifications.....");
             refreshNotifications();
 
         }

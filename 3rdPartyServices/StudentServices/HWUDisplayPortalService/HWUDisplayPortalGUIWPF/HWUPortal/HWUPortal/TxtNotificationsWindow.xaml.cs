@@ -48,12 +48,12 @@ namespace HWUPortal
                 int counter = activityPanel.Children.Count;
                 if (counter == 5)
                 {
-                                if (log.IsDebugEnabled)  log.Debug("Removing older panel");
+                                Console.WriteLine(DateTime.Now + "\t" +"Removing older panel");
                     activityPanel.Children.RemoveAt(0);
                 }
                 else //make room!
                 {
-                                if (log.IsDebugEnabled)  log.Debug("height of notification panel is " + panel.Height);
+                                Console.WriteLine(DateTime.Now + "\t" +"height of notification panel is " + panel.Height);
 
                     //this.Height = this.Height + 170;
 
@@ -63,10 +63,10 @@ namespace HWUPortal
                     }
                 }
 
-                            if (log.IsDebugEnabled)  log.Debug("Height of text notification window is " + this.ActualHeight);
+                            Console.WriteLine(DateTime.Now + "\t" +"Height of text notification window is " + this.ActualHeight);
                 activityPanel.Children.Add(panel);
                 this.UpdateLayout();
-                            if (log.IsDebugEnabled)  log.Debug("Number of notification panels: " + activityPanel.Children.Count);
+                            Console.WriteLine(DateTime.Now + "\t" +"Number of notification panels: " + activityPanel.Children.Count);
             }
             else
             {
@@ -81,7 +81,7 @@ namespace HWUPortal
             //    int counter = activityPanel.Controls.Count;
             //    if (counter == 5)
             //    {
-            //                    if (log.IsDebugEnabled)  log.Debug("Removing older panel");
+            //                    Console.WriteLine(DateTime.Now + "\t" +"Removing older panel");
             //        activityPanel.Controls.RemoveAt(0);
             //    }
             //    NotificationPanel panel = new NotificationPanel(serviceName, text);

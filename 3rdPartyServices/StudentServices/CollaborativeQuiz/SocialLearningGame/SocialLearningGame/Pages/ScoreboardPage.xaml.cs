@@ -88,7 +88,7 @@ namespace SocialLearningGame.Pages
                 scoreBoardGrid.Children.Remove(oldTB);
             }
             childNodes.Clear();
-            Console.WriteLine("Getting new user score...");  
+            Console.WriteLine(DateTime.Now + "\t" +"Getting new user score...");  
             int row = 1;
             int column = 0;
             int rank = 1;
@@ -151,7 +151,7 @@ namespace SocialLearningGame.Pages
                 scoreBoardGrid.Children.Remove(oldTB);
             }
             childNodes.Clear();
-            Console.WriteLine("Getting new group score...");
+            Console.WriteLine(DateTime.Now + "\t" +"Getting new group score...");
             int row = 1;
             int column = 0;
             int rank = 1;

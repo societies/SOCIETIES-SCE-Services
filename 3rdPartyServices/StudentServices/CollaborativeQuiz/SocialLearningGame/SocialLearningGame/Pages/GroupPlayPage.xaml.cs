@@ -42,7 +42,7 @@ namespace SocialLearningGame.Pages
 
         private void loadPage()
         {
-            Console.WriteLine("Loading page...");
+            Console.WriteLine(DateTime.Now + "\t" +"Loading page...");
             removeChildNodes();
             //CHECK NOTIFICATIONS AND SET APPROPRIATLY
             int notifications = GameLogic._userSession.allNotifications.Count;
@@ -57,7 +57,7 @@ namespace SocialLearningGame.Pages
             }
             //CHECK IF USER IS IN A GROUP
             GameLogic.getGroupInformation();
-            Console.WriteLine("GOT GROUP INFORMATION");
+            Console.WriteLine(DateTime.Now + "\t" +"GOT GROUP INFORMATION");
             group = GameLogic._userSession.currentGroup;
             if (group == null)
             {

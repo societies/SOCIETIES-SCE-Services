@@ -157,7 +157,7 @@ namespace HWUPortal
         /// <param name="e">Not used</param>
         public void LoadExe(EventArgs e)
         {
-            if (log.IsDebugEnabled) log.Debug("Starting exe" + exeName);
+             Console.WriteLine(DateTime.Now + "\t" +"Starting exe" + exeName);
             // If control needs to be initialized/created
             if (created == false)
             {
@@ -178,14 +178,14 @@ namespace HWUPortal
 
                     // Wait for process to be created and enter idle condition
                     bool idle = p.WaitForInputIdle();
-                    if (log.IsDebugEnabled) log.Debug("process entered idle state: " + idle);
+                     Console.WriteLine(DateTime.Now + "\t" +"process entered idle state: " + idle);
                     //BUG fix for windows vista/7
                     System.Threading.Thread.Sleep(50);
                     p.OutputDataReceived += new DataReceivedEventHandler(outputDataReceived);
                     while (p.MainWindowHandle == IntPtr.Zero)
                     {
                         Thread.Sleep(1000);
-                        if (log.IsDebugEnabled) log.Debug("waiting for main handle");
+                         Console.WriteLine(DateTime.Now + "\t" +"waiting for main handle");
                         p.Refresh();
                     }
                     // Get the main handle
@@ -203,7 +203,7 @@ namespace HWUPortal
 
                     MoveWindow(appWin, 0, 0, (int)this.Width, (int)this.Height, true);
 
-                    if (log.IsDebugEnabled) log.Debug("started exe " + exeName);
+                     Console.WriteLine(DateTime.Now + "\t" +"started exe " + exeName);
                     p.Exited += new EventHandler(p_Exited);
                     p.EnableRaisingEvents = true;
 
@@ -220,7 +220,7 @@ namespace HWUPortal
 
 
 
-                            if (log.IsDebugEnabled)  log.Debug("Finished starting exe");
+                            Console.WriteLine(DateTime.Now + "\t" +"Finished starting exe");
             }
 
             //base.OnVisibleChanged(e);
@@ -236,21 +236,21 @@ namespace HWUPortal
 
         private void outputDataReceived(object sender, DataReceivedEventArgs args)
         {
-                        if (log.IsDebugEnabled)  log.Debug("Process: " + args.Data);
+                        Console.WriteLine(DateTime.Now + "\t" +"Process: " + args.Data);
         }
         public void DestroyExe(EventArgs e)
         {
-                        if (log.IsDebugEnabled)  log.Debug("Destroying exe");
+                        Console.WriteLine(DateTime.Now + "\t" +"Destroying exe");
             // Stop the application
             if (appWin != IntPtr.Zero)
             {
-                            if (log.IsDebugEnabled)  log.Debug("closing down: " + appWin);
+                            Console.WriteLine(DateTime.Now + "\t" +"closing down: " + appWin);
                 IntPtr parentWindowHandle = new WindowInteropHelper(Application.Current.MainWindow).Handle;
-                            if (log.IsDebugEnabled)  log.Debug("application pointer: " + parentWindowHandle);
+                            Console.WriteLine(DateTime.Now + "\t" +"application pointer: " + parentWindowHandle);
                 Window win = new Window();
                 IntPtr winHandle = new WindowInteropHelper(win).Handle;
                 SetParent(appWin, winHandle);
-                            if (log.IsDebugEnabled)  log.Debug("equals parent" + (GetParent(winHandle) == parentWindowHandle));
+                            Console.WriteLine(DateTime.Now + "\t" +"equals parent" + (GetParent(winHandle) == parentWindowHandle));
 
                 // Post a close message
                 //PostMessage(p.MainWindowHandle, WM_CLOSE, 0, 0);
@@ -265,11 +265,11 @@ namespace HWUPortal
 
 
                 this.created = false;
-                            if (log.IsDebugEnabled)  log.Debug("Destroyed exe" + this.exeName);
+                            Console.WriteLine(DateTime.Now + "\t" +"Destroyed exe" + this.exeName);
             }
             else
             {
-                            if (log.IsDebugEnabled)  log.Debug("Could not destroy exe" + this.exeName);
+                            Console.WriteLine(DateTime.Now + "\t" +"Could not destroy exe" + this.exeName);
             }
 
             //base.OnHandleDestroyed(e);
@@ -310,7 +310,7 @@ namespace HWUPortal
 
         //    protected override void ParentLayoutInvalidated(UIElement child)
         //    {
-        //                    if (log.IsDebugEnabled)  log.Debug("ParentLayoutInvalidated");
+        //                    Console.WriteLine(DateTime.Now + "\t" +"ParentLayoutInvalidated");
         //        if (this.appWin != IntPtr.Zero)
         //        {
         //            MoveWindow(appWin, 0, 0, (int)this.Width, (int)this.Height, true);
@@ -320,7 +320,7 @@ namespace HWUPortal
 
         //    protected override void OnRender(System.Windows.Media.DrawingContext dc)
         //    {
-        //                    if (log.IsDebugEnabled)  log.Debug("onRender");
+        //                    Console.WriteLine(DateTime.Now + "\t" +"onRender");
         //        if (this.appWin != IntPtr.Zero)
         //        {
         //            MoveWindow(appWin, 0, 0, (int)this.Width, (int)this.Height, true);
