@@ -302,6 +302,7 @@ namespace SocialLearningGame
             Console.WriteLine(DateTime.Now + "\t" +"Showing instance");
             //CONNECT TO SOCIETIES PLATFORM
             GameLogic.connectToSocieties();
+            Console.WriteLine(DateTime.Now + "\t" + "Connected to SOCIETIES Platform. Now attemping to start user session...");
             //RETRIEVE ALL INFORMATION
             UserSession userSession = GameLogic.newUserSession();
             if (userSession.gameStage == GameStage.SetupError)

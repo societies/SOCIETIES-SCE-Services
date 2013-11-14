@@ -206,7 +206,7 @@ private void registerForDisplayEvents() {
 public void handleInternalEvent(InternalEvent event) {
 	logging.debug("Received internal event: "+event.geteventName());
 
-		if(event.geteventName().equalsIgnoreCase("NEW_SERVICE")){
+		if(event.geteventName().equalsIgnoreCase("SERVICE_STARTED")){
 	//logging.debug("Received SLM event");
 	ServiceMgmtEvent slmEvent = (ServiceMgmtEvent) event.geteventInfo();
 	logging.debug("EventBundle: " + slmEvent.getBundleSymbolName());

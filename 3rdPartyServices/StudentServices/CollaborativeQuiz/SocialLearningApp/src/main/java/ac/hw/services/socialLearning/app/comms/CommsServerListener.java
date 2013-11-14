@@ -54,9 +54,11 @@ public class CommsServerListener implements Runnable {
 	public void listen() {
 		try {
 			serverSocket = new ServerSocket(port);
+			log.debug("Socket started on port:" + this.address.toString()+":"+this.port);
 			while(true)
 			{			
 				Socket clientSocket = serverSocket.accept();
+				log.debug("accepted new client");
 				new Thread(new CommsServerAction(socialApp, clientSocket)).start();
 			}
 

@@ -1434,12 +1434,14 @@ namespace SocialLearningGame.Comms
 
         private String recieveMessage()
         {
-                byte[] data = new byte[3072];
+                byte[] data = new byte[12288];
                 int receivedDataLength = 0;
                 StringBuilder sb = new StringBuilder();
                 receivedDataLength = server.Receive(data);
+                Console.WriteLine(DateTime.Now + "\t" + "Size of data recieved" + data.Length);
                 sb.Append(Encoding.ASCII.GetString(data, 0, receivedDataLength).Trim());
-                while (receivedDataLength == 3072)
+                Console.WriteLine(DateTime.Now + "\t" + "Size of string builder..." + sb.Length);
+                while (receivedDataLength == 12288)
                 {
                    // Console.WriteLine(DateTime.Now + "\t" +"Reading next 1024 bytes");
 
