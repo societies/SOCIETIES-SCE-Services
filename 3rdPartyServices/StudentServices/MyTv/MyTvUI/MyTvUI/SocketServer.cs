@@ -54,7 +54,7 @@ namespace MyTvUI
             }
             catch(Exception e)
             {
-                Console.WriteLine(e.ToString());
+                Console.WriteLine(DateTime.Now + "\t" +e.ToString());
             }
         }
 
@@ -67,26 +67,26 @@ namespace MyTvUI
             }
             catch (Exception e)
             {
-                Console.WriteLine("SOCKET_SERVER: Could not listen on port: " + port);
-                Console.WriteLine(e.ToString());
+                Console.WriteLine(DateTime.Now + "\t" +"SOCKET_SERVER: Could not listen on port: " + port);
+                Console.WriteLine(DateTime.Now + "\t" +e.ToString());
                 return;
             }
 
 
             try
             {
-                Console.WriteLine("SOCKET_SERVER: Waiting for connection from service client on port: " + port);
+                Console.WriteLine(DateTime.Now + "\t" +"SOCKET_SERVER: Waiting for connection from service client on port: " + port);
                 client = server.AcceptTcpClient();
             }
             catch (Exception e)
             {
-                Console.WriteLine("SOCKET_SERVER: Accept failed: " + port);
-                Console.WriteLine(e.ToString());
+                Console.WriteLine(DateTime.Now + "\t" +"SOCKET_SERVER: Accept failed: " + port);
+                Console.WriteLine(DateTime.Now + "\t" +e.ToString());
                 server.Stop();
                 return;
             }
 
-            Console.WriteLine("SOCKET_SERVER: Connected accepted from service client!");
+            Console.WriteLine(DateTime.Now + "\t" +"SOCKET_SERVER: Connected accepted from service client!");
 
             // Buffer for reading data
             byte[] bytes = new byte[1024];
@@ -101,31 +101,31 @@ namespace MyTvUI
                 {
                     // Translate data bytes to a ASCII string.
                     data = System.Text.Encoding.ASCII.GetString(bytes, 0, i);
-                    Console.WriteLine(String.Format("SOCKET_SERVER: got new input: {0}", data));
+                    Console.WriteLine(DateTime.Now + "\t" +String.Format("SOCKET_SERVER: got new input: {0}", data));
 
                     if (data.IndexOf("START_MSG") > -1)
                     {
-                        Console.WriteLine("SOCKET_SERVER: Processing new message...");
+                        Console.WriteLine(DateTime.Now + "\t" +"SOCKET_SERVER: Processing new message...");
 
                         String[] splitData = data.Split('\n');
                         String command = splitData[1];
 
                         if (command.Equals(USER_SESSION_STARTED))
                         {
-                            Console.WriteLine("SOCKET_SERVER: "+USER_SESSION_STARTED + " message received");
+                            Console.WriteLine(DateTime.Now + "\t" +"SOCKET_SERVER: "+USER_SESSION_STARTED + " message received");
                             stream.Write(okBytes, 0, okBytes.Length);
                         }
                         else if (command.Equals(USER_SESSION_ENDED))
                         {
                             //not used
-                            Console.WriteLine("SOCKET_SERVER: "+USER_SESSION_ENDED + "message received");
+                            Console.WriteLine(DateTime.Now + "\t" +"SOCKET_SERVER: "+USER_SESSION_ENDED + "message received");
                             stream.Write(okBytes, 0, okBytes.Length);
                             //close down
                             //window.Close();
                         }
                         else
                         {
-                            Console.WriteLine("SOCKET_SERVER: Unknown command received from service client");
+                            Console.WriteLine(DateTime.Now + "\t" +"SOCKET_SERVER: Unknown command received from service client");
                             stream.Write(notOKBytes, 0, notOKBytes.Length);
                         }
                     }
@@ -135,7 +135,7 @@ namespace MyTvUI
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.ToString());
+                Console.WriteLine(DateTime.Now + "\t" +e.ToString());
                 client.Close();
                 server.Stop();
             }
@@ -157,16 +157,16 @@ namespace MyTvUI
         //                            //process command
         //                            if (commandType == "CLIENT_IP")
         //                            {
-        //                                Console.WriteLine("Processing IP of service client");
+        //                                Console.WriteLine(DateTime.Now + "\t" +"Processing IP of service client");
         //                                String clientIp = splitData[2];
-        //                                Console.WriteLine("Client IP is: " + clientIp);
+        //                                Console.WriteLine(DateTime.Now + "\t" +"Client IP is: " + clientIp);
         //                                //socketClient.connectToServiceClient(clientIp);
         //                            }
         //                            else if (commandType == "PREF_OUTCOME")
         //                            {
-        //                                Console.WriteLine("Processing preference outcome");
+        //                                Console.WriteLine(DateTime.Now + "\t" +"Processing preference outcome");
         //                                String outcome = splitData[2];
-        //                                Console.WriteLine("Preference update is: " + outcome);
+        //                                Console.WriteLine(DateTime.Now + "\t" +"Preference update is: " + outcome);
         //                            }
 
         //                            if (data.IndexOf("END_MSG") > -1)
@@ -176,7 +176,7 @@ namespace MyTvUI
         //                            }
         //                            else
         //                            {
-        //                                Console.WriteLine("reading from stream");
+        //                                Console.WriteLine(DateTime.Now + "\t" +"reading from stream");
         //                                i = stream.Read(bytes, 0, bytes.Length);
         //                                data = System.Text.Encoding.ASCII.GetString(bytes, 0, i);
         //                            }
@@ -198,13 +198,13 @@ namespace MyTvUI
         //    }
         //    catch (SocketException e)
         //    {
-        //        Console.WriteLine(e.ToString());
+        //        Console.WriteLine(DateTime.Now + "\t" +e.ToString());
         //        client.Close();
         //        server.Stop();
         //    }
         //    catch (Exception e)
         //    {
-        //        Console.WriteLine(e.ToString());
+        //        Console.WriteLine(DateTime.Now + "\t" +e.ToString());
         //        client.Close();
         //        server.Stop();
         //    }

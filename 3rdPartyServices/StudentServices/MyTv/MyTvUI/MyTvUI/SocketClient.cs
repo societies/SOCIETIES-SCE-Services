@@ -57,8 +57,8 @@ namespace MyTvUI
             }
             catch (SocketException e)
             {
-                Console.WriteLine("SOCKET_CLIENT: Unable to connect to service client on node: "+endPoint+" on port: "+port);
-                Console.WriteLine(e.ToString());
+                Console.WriteLine(DateTime.Now + "\t" +"SOCKET_CLIENT: Unable to connect to service client on node: "+endPoint+" on port: "+port);
+                Console.WriteLine(DateTime.Now + "\t" +e.ToString());
             }
             return false;
         }
@@ -81,15 +81,15 @@ namespace MyTvUI
             String response = "";
             if (connected)
             {
-                Console.WriteLine("SOCKET_CLIENT: Sending message to service client:");
-                Console.WriteLine(message);
+                Console.WriteLine(DateTime.Now + "\t" +"SOCKET_CLIENT: Sending message to service client:");
+                Console.WriteLine(DateTime.Now + "\t" +message);
 
                 echoSocket.Send(Encoding.ASCII.GetBytes(message));
                 byte[] data = new byte[1024];
                 int receivedDataLength = echoSocket.Receive(data);
                 response = Encoding.ASCII.GetString(data, 0, receivedDataLength);
                 disconnect();
-                Console.WriteLine("SOCKET_CLIENT: received -> " + response);
+                Console.WriteLine(DateTime.Now + "\t" +"SOCKET_CLIENT: received -> " + response);
             }
             else
             {
@@ -107,7 +107,7 @@ namespace MyTvUI
         //    String response = "";
         //    if (connected)
         //    {
-        //        Console.WriteLine("SOCKET_CLIENT: Getting channel preference from service client");
+        //        Console.WriteLine(DateTime.Now + "\t" +"SOCKET_CLIENT: Getting channel preference from service client");
 
         //        String request = "START_MSG\n" +
         //            "CHANNEL_REQUEST\n" +
@@ -134,7 +134,7 @@ namespace MyTvUI
         //    String response = "";
         //    if (connected)
         //    {
-        //        Console.WriteLine("SOCKET_CLIENT: Getting muted preference from service client");
+        //        Console.WriteLine(DateTime.Now + "\t" +"SOCKET_CLIENT: Getting muted preference from service client");
 
         //        String request = "START_MSG\n" +
         //            "MUTED_REQUEST\n" +
@@ -179,13 +179,13 @@ namespace MyTvUI
             }
             catch (SocketException e)
             {
-                Console.WriteLine("SOCKET_CLIENT: Unable to connect to server.");
-                Console.WriteLine(e.ToString());
+                Console.WriteLine(DateTime.Now + "\t" +"SOCKET_CLIENT: Unable to connect to server.");
+                Console.WriteLine(DateTime.Now + "\t" +e.ToString());
                 return false;
             }
 
             //get current user
-            Console.WriteLine("SOCKET_CLIENT: Retrieving user ID");
+            Console.WriteLine(DateTime.Now + "\t" +"SOCKET_CLIENT: Retrieving user ID");
             server.Send(Encoding.ASCII.GetBytes("CURRENT_USER"));
             byte[] data = new byte[1024];
             int receivedDataLength = 0;
@@ -196,7 +196,7 @@ namespace MyTvUI
                 return false;
             }
             userID = Encoding.ASCII.GetString(data, 0, receivedDataLength);
-            Console.WriteLine("SOCKET_CLIENT: Received user identity from server: " + userID);
+            Console.WriteLine(DateTime.Now + "\t" +"SOCKET_CLIENT: Received user identity from server: " + userID);
 
             server.Close();
             return true;
@@ -211,13 +211,13 @@ namespace MyTvUI
             }
             catch (SocketException e)
             {
-                Console.WriteLine("SOCKET_CLIENT: Unable to connect to server.");
-                Console.WriteLine(e.ToString());
+                Console.WriteLine(DateTime.Now + "\t" +"SOCKET_CLIENT: Unable to connect to server.");
+                Console.WriteLine(DateTime.Now + "\t" +e.ToString());
                 return false;
             }
 
             //get current end point
-            Console.WriteLine("SOCKET_CLIENT: Retrieving endpoint of service client");
+            Console.WriteLine(DateTime.Now + "\t" +"SOCKET_CLIENT: Retrieving endpoint of service client");
             server.Send(Encoding.ASCII.GetBytes("VIRGO_ENDPOINT_IPADDRESS"));
             byte[] data = new byte[1024];
             int receivedDataLength = 0;
@@ -228,7 +228,7 @@ namespace MyTvUI
                 return false;
             }
             endPoint = data[0] + "." + data[1] + "." + data[2] + "." + data[3];
-            Console.WriteLine("SOCKET_CLIENT: Received end point of service client: " + endPoint);
+            Console.WriteLine(DateTime.Now + "\t" +"SOCKET_CLIENT: Received end point of service client: " + endPoint);
 
             server.Close();
             return true;
@@ -244,13 +244,13 @@ namespace MyTvUI
             }
             catch (SocketException e)
             {
-                Console.WriteLine("SOCKET_CLIENT: Unable to connect to server.");
-                Console.WriteLine(e.ToString());
+                Console.WriteLine(DateTime.Now + "\t" +"SOCKET_CLIENT: Unable to connect to server.");
+                Console.WriteLine(DateTime.Now + "\t" +e.ToString());
                 return false;
             }
 
             //get service client listen port
-            Console.WriteLine("SOCKET_CLIENT: Retrieving listen port of service client");
+            Console.WriteLine(DateTime.Now + "\t" +"SOCKET_CLIENT: Retrieving listen port of service client");
             server.Send(Encoding.ASCII.GetBytes("SERVICE_PORT->MyTv"));
             byte[] data = new byte[1024];
             int receivedDataLength = 0;
@@ -264,12 +264,12 @@ namespace MyTvUI
             try
             {
                 port = BitConverter.ToInt32(data, 0);
-                Console.WriteLine("SOCKET_CLIENT: Received listen port of service client: " + port.ToString());
+                Console.WriteLine(DateTime.Now + "\t" +"SOCKET_CLIENT: Received listen port of service client: " + port.ToString());
             }
             catch (Exception e)
             {
-                Console.WriteLine("Error converting bytes to port");
-                Console.WriteLine(e.ToString());
+                Console.WriteLine(DateTime.Now + "\t" +"Error converting bytes to port");
+                Console.WriteLine(DateTime.Now + "\t" +e.ToString());
                 server.Close();
                 return false;
             }
