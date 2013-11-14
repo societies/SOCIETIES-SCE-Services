@@ -102,7 +102,8 @@ public class SocketServer extends Thread{
 			{
 				if(LOG.isDebugEnabled()) LOG.debug("Waiting for connection from GUI on port: "+port);
 				client = server.accept();
-				new Thread(new CommsServerAction(client, myTVClient, port));
+				if(LOG.isDebugEnabled()) LOG.debug("Accepted incoming connection!");
+				new Thread(new CommsServerAction(client, myTVClient, port)).start();
 			}
 		} catch (IOException e) {
 			if(LOG.isDebugEnabled()) LOG.debug("Accept failed: "+port);

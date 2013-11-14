@@ -290,6 +290,10 @@ namespace HWUPortal
 
                     userSession.setUserIdentity(lines[1].Trim().Remove(0, "USER:".Length));
 
+                    //QUICK BUG FIX FOR SERVICES COUNT TO BE FIXED
+                    this.downloadedServices = 0;
+                    this.numOfServices = 0;
+
                     if (lines[2].IndexOf("PORTAL_PORT") > -1)
                     {
                         int portalPort = Int32.Parse(lines[2].Trim().Remove(0, "PORTAL_PORT:".Length));
@@ -506,7 +510,7 @@ namespace HWUPortal
             }
             else
             {
-                 Console.WriteLine(DateTime.Now + "\t" +"Starting user login");
+                 Console.WriteLine(DateTime.Now + "\t" +"Starting user login: " + userSession.getUserIdentity());
                 this.gui.Login(userSession);
                  Console.WriteLine(DateTime.Now + "\t" +"User logged in. Sending OK to societies platform");
                 stream.Write(okBytes, 0, okBytes.Length);

@@ -114,14 +114,14 @@ public class CommsServerAction implements Runnable{
 				if (command.equalsIgnoreCase(GUI_STARTED)){
 					if(LOG.isDebugEnabled()) LOG.debug(GUI_STARTED+" message received");
 					out.println(RECEIVED);
-					finalize();
+					out.close();
 					String gui_ip = splitData[1];
 					commandHandler.connectToGUI(gui_ip);
 					
 				}else if (command.equalsIgnoreCase(USER_ACTION)){
 					if(LOG.isDebugEnabled()) LOG.debug(USER_ACTION+" message received");
 					out.println(RECEIVED);
-					finalize();
+					out.close();
 					String parameterName = splitData[1];
 					String value = splitData[2];
 					commandHandler.processUserAction(parameterName, value);
@@ -130,42 +130,43 @@ public class CommsServerAction implements Runnable{
 					if(LOG.isDebugEnabled()) LOG.debug(CHANNEL_PREFERENCE_REQUEST+" message received");
 					String response = commandHandler.getChannelPreference();
 					out.println(response);
-					finalize();
+					out.close();
 
 				}else if(command.equalsIgnoreCase(MUTED_PREFERENCE_REQUEST)){
 					if(LOG.isDebugEnabled()) LOG.debug(MUTED_PREFERENCE_REQUEST+" message received");
 					String response = commandHandler.getMutedPreference();
 					out.println(response);
-					finalize();
+					out.close();
 					
 				}else if(command.equalsIgnoreCase(CHANNEL_INTENT_REQUEST)){
 					if(LOG.isDebugEnabled()) LOG.debug(CHANNEL_INTENT_REQUEST+" message received");
 					String response = commandHandler.getChannelIntent();
 					out.println(response);
-					finalize();
+					out.close();
 					
 				}else if(command.equalsIgnoreCase(MUTED_INTENT_REQUEST)){
 					if(LOG.isDebugEnabled()) LOG.debug(MUTED_INTENT_REQUEST+" message received");
 					String response = commandHandler.getMutedIntent();
 					out.println(response);
-					finalize();
+					out.close();
 
 				}else if (command.equalsIgnoreCase(GUI_STOPPED)){
 					if(LOG.isDebugEnabled()) LOG.debug(GUI_STOPPED+" message received");
 					out.println(RECEIVED);
-					finalize();
+					out.close();
 					commandHandler.disconnectFromGUI();
 				}
 				
 				else{
 					if(LOG.isDebugEnabled()) LOG.debug("Unknown command received from MyTvUI: "+command);
 					out.println(FAILED);
-					finalize();
+					out.close();
 				}
 			}
 		} catch (IOException e) {
 			if(LOG.isDebugEnabled()) LOG.debug("Read failed");
 			out.println(FAILED);
+			out.close();
 		} catch (Throwable e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

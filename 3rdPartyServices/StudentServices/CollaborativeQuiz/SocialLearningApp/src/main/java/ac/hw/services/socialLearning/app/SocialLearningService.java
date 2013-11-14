@@ -206,7 +206,7 @@ private void registerForDisplayEvents() {
 public void handleInternalEvent(InternalEvent event) {
 	logging.debug("Received internal event: "+event.geteventName());
 
-	//	if(event.geteventName().equalsIgnoreCase("NEW_SERVICE")){
+		if(event.geteventName().equalsIgnoreCase("NEW_SERVICE")){
 	//logging.debug("Received SLM event");
 	ServiceMgmtEvent slmEvent = (ServiceMgmtEvent) event.geteventInfo();
 	logging.debug("EventBundle: " + slmEvent.getBundleSymbolName());
@@ -247,6 +247,7 @@ public void handleInternalEvent(InternalEvent event) {
 
 
 		}
+	}
 
 	}else if(event.geteventName().equalsIgnoreCase("displayUpdate")){
 		logging.debug("Received DisplayPortal event");
