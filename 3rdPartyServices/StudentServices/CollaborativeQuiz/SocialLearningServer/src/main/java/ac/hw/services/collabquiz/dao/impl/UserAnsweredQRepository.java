@@ -3,6 +3,7 @@ package ac.hw.services.collabquiz.dao.impl;
 import java.util.List;
 
 import org.hibernate.HibernateException;
+import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.slf4j.Logger;
@@ -111,6 +112,25 @@ public class UserAnsweredQRepository extends HibernateRepository implements IUse
 			session.close();
 		}
 	}
+	
+    @Override
+    public void deleteAll(String id)
+    {
+        Session session =getSessionFactory().openSession();
+        Transaction transaction = null;
+        try {
+            transaction = session.beginTransaction();
+            Query query = session.createQuery("delete from UserAnsweredQ where userJid = :id");
+            query.setParameter("id", id);
+            query.executeUpdate();
+            transaction.commit();
+        } catch (HibernateException e) {
+            transaction.rollback();
+            e.printStackTrace();
+        } finally {
+            session.close();
+        }
+    }
 
 	@Override
 	public void physicalDelete(UserAnsweredQ userAnsweredQ) {

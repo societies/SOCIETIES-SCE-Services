@@ -36,7 +36,7 @@ public class MyTvServer extends EventListener implements IMyTVServer
 				"(" + CSSEventConstants.EVENT_SOURCE + "=org/societies/servicelifecycle)" +
 				")";
 		this.evMgr.subscribeInternalEvent(this, new String[]{EventTypes.SERVICE_LIFECYCLE_EVENT}, eventFilter);
-		this.logging.debug("Subscribed to "+EventTypes.SERVICE_LIFECYCLE_EVENT+" events");
+		if(logging.isDebugEnabled()) logging.debug("Subscribed to "+EventTypes.SERVICE_LIFECYCLE_EVENT+" events");
 	}
 
 	private void unregisterForServiceEvents()
@@ -48,7 +48,7 @@ public class MyTvServer extends EventListener implements IMyTVServer
 
 		this.evMgr.unSubscribeInternalEvent(this, new String[]{EventTypes.SERVICE_LIFECYCLE_EVENT}, eventFilter);
 		//this.evMgr.subscribeInternalEvent(this, new String[]{EventTypes.SERVICE_LIFECYCLE_EVENT}, eventFilter);
-		this.logging.debug("Unsubscribed from "+EventTypes.SERVICE_LIFECYCLE_EVENT+" events");
+		if(logging.isDebugEnabled()) logging.debug("Unsubscribed from "+EventTypes.SERVICE_LIFECYCLE_EVENT+" events");
 	}
 	public IServices getServiceMgmt() {
 		return serviceMgmt;
@@ -68,17 +68,17 @@ public class MyTvServer extends EventListener implements IMyTVServer
 
 	@Override
 	public void handleInternalEvent(InternalEvent event) {
-		logging.debug("Received internal event: "+event.geteventName());
+		if(logging.isDebugEnabled()) logging.debug("Received internal event: "+event.geteventName());
 
 	//	if(event.geteventName().equalsIgnoreCase("NEW_SERVICE")){
 			//logging.debug("Received SLM event");
 			ServiceMgmtEvent slmEvent = (ServiceMgmtEvent) event.geteventInfo();
-			logging.debug("EventBundle: " + slmEvent.getBundleSymbolName());
+			if(logging.isDebugEnabled()) logging.debug("EventBundle: " + slmEvent.getBundleSymbolName());
 			if (slmEvent.getBundleSymbolName().equalsIgnoreCase("ac.hw.mytv.MyTVServer")){
-				this.logging.debug("Received SLM event for my bundle");
+				if(logging.isDebugEnabled()) logging.debug("Received SLM event for my bundle");
 				if (slmEvent.getEventType().equals(ServiceMgmtEventType.SERVICE_STARTED)){
 					myServiceId = this.serviceMgmt.getMyServiceId(this.getClass());
-					this.logging.debug("Received my serviceId: "+ServiceUtils.serviceResourceIdentifierToString(myServiceId));
+					if(logging.isDebugEnabled()) logging.debug("Received my serviceId: "+ServiceUtils.serviceResourceIdentifierToString(myServiceId));
 		
 					this.unregisterForServiceEvents();
 				}

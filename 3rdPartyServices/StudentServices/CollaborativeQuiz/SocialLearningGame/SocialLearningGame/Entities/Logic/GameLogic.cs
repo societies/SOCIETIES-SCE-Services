@@ -27,6 +27,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using SocialLearningGame.Comms;
+using SocialLearningGame.Pages;
 using SocialLearningGame.Entities;
 using SocialLearningGame.Logic.Poses;
 
@@ -41,309 +42,375 @@ namespace SocialLearningGame.Logic
                                                                    new Pose3(), new Pose4(), 
                                                                    new Pose5(), new Pose6(), 
                                                                    new Pose7(), new Pose8(), 
-                                                                   new Pose9(), new Pose10() 
+                                                                   new Pose9()
                                                                };
 
 
         //log.random number initialised used to choose next pose, question, etc
         private static readonly Random random = new Random();
 
-        private static ServerComms _comms;
         private static ClientComms _clientComms;
 
-        private static GameSession _gameSession;
         public static Category RequestedCategory { get; set; }
         public static QuestionDifficulty RequestedDifficulty { get; set; }
-        private static string clientIP;
-        private static int clientPort;
-        private static string serverIP;
-        private static int serverPort;
-        private static string thisUser;
-        public static string userName;
-        public static List<UserScore> allUsers;
-        private static List<Question> answeredQuestions = new List<Question>();
-        private static List<UserAnsweredQ> roundAnsweredQ;
-        private static List<Question> availableQuestions = new List<Question>();
-        private static List<Category> allCats;
-        private static List<String> userInterests;
+        public static UserSession _userSession;
+        private static String userJID;
+        private static Boolean connectedToSocieties = false;
 
+        public static int questionCount = 0;
 
-        private static void InitComms()
+        public static Boolean connectToSocieties()
         {
-          //log.  log.Debug("Init comms");
-
-            _comms = new ServerComms();
-            
-        }
-
-        public static void addAnsweredQ(UserAnsweredQ answered)
-        {
-            roundAnsweredQ.Add(answered);
-        }
-
-        public static GameSession NewGame(Category userCategory)
-        {
-           //log. log.Debug("Starting new game");
-            RequestedCategory = userCategory;
-            roundAnsweredQ = new List<UserAnsweredQ>();
-            _clientComms = new ClientComms();
-            _clientComms.getSessionParameters();
-            _gameSession = new GameSession();
-            thisUser = _clientComms.getUserID();
-            String client_address_port = _clientComms.getAddressPort();
-            String[] add = client_address_port.Split(':');
-            clientIP = add[0];
-            clientPort = Convert.ToInt32(add[1]);
-            Console.WriteLine("User: " + thisUser + ". Speaking to client on: " + client_address_port);
-            String server_address_port = _clientComms.speakToClient(add[0], Convert.ToInt32(add[1]));
-            Console.WriteLine("AddL" + server_address_port);
-            add = server_address_port.Split(':');
-           serverIP = add[0];
-           serverPort = Convert.ToInt32(add[1]);
-           //log. serverIP = "127.0.0.1";
-            //log.serverPort = 12474;
-            Console.WriteLine("Recieved server IP & Port. Can now start to retrieve data...");
-
-            Console.WriteLine("Getting users & scores...");
-            allUsers = _clientComms.speakToServer(thisUser, serverIP, serverPort);
-          //log.  UserScore u = new UserScore();
-         //log.   u.userJid="william.societies.local.macs.hw.ac.uk";
-         //log.   u.score=0;
-        //log. //log.   u.name="william";
-        //log.    allUsers.Add(u);
-
-            if (allUsers == null)
+            if (!connectedToSocieties)
             {
-               //log. log.Warn("Server returned null list of users, cannot continue game");
-                _gameSession.Stage = GameStage.SetupError;
-                return _gameSession;
-            }
+                //SET UP A NEW USER SESSION
+                _userSession = new UserSession();
 
-            Console.WriteLine("This user is: " + thisUser.ToString());
-
-            Console.WriteLine("Next we want the users history...");
-
-            Console.WriteLine("Now gettings questions & categories");
-            Category[] categories = _clientComms.getCategories(serverIP, serverPort);
-         
-            if (categories == null)
-            {
-               //log. log.Warn("Server returned null list of categories, cannot continue game");
-                _gameSession.Stage = GameStage.SetupError;
-                return _gameSession;
-            }
-
-            Question[] questions = _clientComms.getQuestions(serverIP, serverPort);
-            if (questions == null)
-            {
-              //log.  log.Warn("Server returned null list of questions, cannot continue game");
-                _gameSession.Stage = GameStage.SetupError;
-                return _gameSession;
-            }
-
-            //log.GET PREVIOUS QUESTIONS
-            List<UserAnsweredQ> answeredQ= _clientComms.getAnsweredQuestions(serverIP, serverPort);
-            if (answeredQ != null)
-            {
-               
-                foreach (UserAnsweredQ ansQ in answeredQ)
+                //SPEAK TO DISPLAYPORTAL
+                _clientComms = new ClientComms();
+                if (!_clientComms.getSessionParameters())
                 {
-                    Console.WriteLine(ansQ.question.questionText);
-                    answeredQuestions.Add(ansQ.question);
+                    Console.WriteLine(DateTime.Now + "\t" +"Setting game error here 1");
+                    _userSession.gameStage = GameStage.SetupError;
+                    return false;
                 }
-                _gameSession.AllAnsweredQuestions.AddRange(answeredQuestions);
-
+                userJID = _clientComms.getUserID();
+                //SPEAKING TO CLIENT
+                _clientComms.getSocietiesServer();
+                Console.WriteLine(DateTime.Now + "\t" +"Recieved server IP & Port. Can now start to retrieve data...");
+                connectedToSocieties = true;
+                return true;
             }
+            return true;
 
-            
-            List<Question> availQ = questions.ToList();
-            availQ.RemoveAll(q1 => answeredQuestions.Any(q2 => q2.questionID == q1.questionID));
-            _gameSession.AllCategories.AddRange(categories);
-            _gameSession.AllQuestions.AddRange(availQ);
+            //NOW HAVE CLIENT AND SERVER IP STORED
+        }
 
-
-            allCats = categories.ToList();
-            foreach (Category category in categories)
+        private static void setUserNames()
+        {
+            int counter = 0;
+            while (counter < _userSession.allUsers.Count())
             {
-                List<Question> categoryQuestions = (from q in questions
-                                                    where q.categoryID == category.categoryID
-                                                    select q).ToList();
+                _userSession.allUsers[counter].name = _userSession.allUsers[counter].userJid.Split(new char[] { '.' }, 2)[0];
+                counter++;
+            }
+        }
 
-                _gameSession.CategoryQuestionMap.Add(category, categoryQuestions);
+        //METHOD TO ACCESS CLIENT COMMS
+        public static void getRemoteData(DataType dataType)
+        {
+            switch (dataType)
+            {
+                case DataType.ALL_USERS :
+                    _userSession.allUsers = _clientComms.getAllUsers();
+                    setUserNames();
+                    break;
+                case DataType.ALL_CATEGORIES :
+                    _userSession.allCategories = _clientComms.getCategories();
+                    break;
+                case DataType.ALL_QUESTIONS:
+                    _userSession.allQuestions = _clientComms.getQuestions();
+                    break;
+                case DataType.ALL_GROUPS :
+                    _userSession.allGroups = _clientComms.getGroups();
+                    break;
+                case DataType.ALL_GROUP_PLAYERS:
+                    _userSession.allGroupPlayers = _clientComms.getGroupPlayers(_userSession.currentGroup.groupID.ToString());
+                    break;
+                case DataType.CURRENT_GROUP:
+                    _userSession.currentGroup = _clientComms.getUsersGroup();
+                    break;
+                case DataType.ALL_USER_ANSWERED:
+                    _userSession.userAnsweredQuestions = _clientComms.getAnsweredQuestions(_userSession.currentUser.userJid);
+                    break;
+                case DataType.ALL_GROUP_ANSWERED:
+                    _userSession.groupAnsweredQuestions = _clientComms.getAnsweredQuestions(_userSession.currentGroup.groupName);
+                    break;
+                case DataType.ALL_NOTIFICATIONS:
+                    _userSession.allNotifications = _clientComms.getGroupNotifications();
+                    break;
+                case DataType.USER_INTERESTS:
+                    _userSession.userInterests = _clientComms.getUserInterests();
+                    break;
+                case DataType.INVITED_USERS:
+                    _userSession.invitedUsers = _clientComms.getInvitedUsers(_userSession.currentGroup.groupName);
+                    break;
+            }
+        }
+
+        //METHOD TO POST DATA
+        public static void postRemoteData(DataType dataType, Object arg)
+        {
+            switch (dataType)
+            {
+                case DataType.POST_PROGRESS :
+                    if (_userSession.player == GameStage.USER)
+                    {
+                        _clientComms.sendProgress(_userSession.currentUser, _userSession.answeredQuestion);
+                    }
+                    else if (_userSession.player == GameStage.GROUP)
+                    {
+                        _clientComms.sendProgress(_userSession.currentGroup, _userSession.answeredQuestion);
+                    }
+                    break;
+                case DataType.CREATE_GROUP:
+                    if (!_clientComms.createGroup(_userSession.currentUser.userJid))
+                    {
+                        getRemoteData(DataType.ALL_GROUPS);
+                        MainWindow.SwitchPage(new CommsError());
+                    }
+                    break;
+                case DataType.DELETE_GROUP:
+                    if (!_clientComms.deleteGroup(_userSession.currentGroup.groupID.ToString()))
+                    {
+                        getRemoteData(DataType.ALL_GROUPS);
+                        MainWindow.SwitchPage(new CommsError());
+                    }
+                    break;
+                case DataType.LEAVE_GROUP:
+                    if (!_clientComms.removeUserFromGroup(_userSession.currentUser.userJid))
+                    {
+                        getRemoteData(DataType.ALL_GROUPS);
+                        MainWindow.SwitchPage(new CommsError());
+                    }
+                    break;
+                case DataType.INVITE_PLAYER:
+                    if (!_clientComms.inviteUserToGroup(_userSession.currentUser.userJid, (String) arg, _userSession.currentGroup.groupName))
+                    {
+                        MainWindow.SwitchPage(new CommsError());
+                    }
+                    break;
+                case DataType.ACCEPT_NOTIFICATION:
+                    if (!_clientComms.addUserToGroup((String) arg, _userSession.currentUser.userJid))
+                    {
+                        MainWindow.SwitchPage(new CommsError());
+                    }
+                    break;
+                case DataType.DELETE_NOTIFICATION:
+                    if (!_clientComms.deleteNotifications((PendingJoins) arg))
+                    {
+                        MainWindow.SwitchPage(new CommsError());
+                    }
+                    break;
+
+                  
+            }
+        }
+
+        public static UserSession newUserSession()
+        {
+            _userSession = new UserSession();
+            _userSession.gameStage = GameStage.InProgress;
+            //CONNECT TO SOCIETIES
+            //IF FAILURE - DO NOT CONTINUE
+            if (!connectedToSocieties)
+            {
+                if (!connectToSocieties())
+                {
+                    return _userSession;
+                }
+            }
+            //CONNECTED TO SOCIETIES, NOW WE CAN CONTINUE
+
+            //GET ALL USERS
+            Console.WriteLine(DateTime.Now + "\t" +"Getting all users");
+            getRemoteData(DataType.ALL_USERS);
+            if (_userSession.allUsers == null)
+            {
+                _userSession.gameStage = GameStage.SetupError;
+            }
+            //SET THIS USER IN USER SESSION
+            foreach (UserScore user in _userSession.allUsers)
+            {
+                if (user.userJid == userJID)
+                {
+                    _userSession.currentUser = user;
+                }
             }
 
-            //GET USERS INTERESTS
-            userInterests = _clientComms.getUserInterests(clientIP, clientPort);
+            //GET ALL CATEGORIES
+            Console.WriteLine(DateTime.Now + "\t" +"Getting all categories");
+            getRemoteData(DataType.ALL_CATEGORIES);
+            if (_userSession.allCategories == null)
+            {
+                Console.WriteLine(DateTime.Now + "\t" +"SET UP ERROR WITH CATEGORIES");
+                _userSession.gameStage = GameStage.SetupError;
+            }
 
-            //log. Current user
-            _gameSession.MainUser = getUser();
+            //GET ALL QUESTIONS
+            Console.WriteLine(DateTime.Now + "\t" +"Getting all questions");
+            getRemoteData(DataType.ALL_QUESTIONS);
+            if (_userSession.allQuestions == null)
+            {
+                Console.WriteLine(DateTime.Now + "\t" +"SET UP ERROR WITH QUESTIONS");
+                _userSession.gameStage = GameStage.SetupError;
+            }
 
-            //log. TODO: Additional users
-            //log. TODO: Initialize challenges
+            //GET ALL GROUPS
+            Console.WriteLine(DateTime.Now + "\t" +"Getting all groups");
+            getRemoteData(DataType.ALL_GROUPS);
+            if (_userSession.allGroups == null)
+            {
+                Console.WriteLine(DateTime.Now + "\t" +"SET UP ERROR WITH ALL GROUP");
+                _userSession.gameStage = GameStage.SetupError;
+            }
 
-          //log.  QuestionsInGame = 6;
-            //SORT AVAIL Q'S
-            sortAvailQs(userCategory, QuestionDifficulty.Any);
-            QuestionsInGame = availableQuestions.Count();
-            _gameSession.Stage = GameStage.ReadyToStart;
+            //GET USERS GROUP
+            Console.WriteLine(DateTime.Now + "\t" +"Getting users group");
+            getRemoteData(DataType.CURRENT_GROUP);
+            if (_userSession.currentGroup == null)
+            {
+                Console.WriteLine(DateTime.Now + "\t" +"SET UP ERROR WITH USERS GROUP");
+                _userSession.gameStage = GameStage.SetupError;
+            }
+            //EMPTY GROUP IS RETURNED IF NULL
+            if (_userSession.currentGroup.groupName == null)
+            {
+                _userSession.currentGroup = null;
+            }
             
            
-
-           /* if (_comms == null)
-                InitComms();
-
-            log.Debug("Downloading game data from university CSS");
-            log.Debug("Downloading game users...");
-            List<User> users = _comms.ListUsers();
-            if (users == null)
+            
+            //GET PREVIOUS ANSWERS
+            //GET USER ANSWERS
+            Console.WriteLine(DateTime.Now + "\t" +"Getting all user answered questions");
+            getRemoteData(DataType.ALL_USER_ANSWERED);
+            if (_userSession.userAnsweredQuestions == null)
             {
-                log.Warn("Server returned null list of users, cannot continue game");
-                _gameSession.Stage = GameStage.SetupError;
-                return _gameSession;
+                _userSession.gameStage = GameStage.SetupError;
+            }
+            //IF USER IS IN GROUP, GET GROUP ANSWERS, AND GROUP PLAYERS
+            if (_userSession.currentGroup != null)
+            {
+                Console.WriteLine(DateTime.Now + "\t" +"Getting all group answered questions");
+                getRemoteData(DataType.ALL_GROUP_ANSWERED);
+                if (_userSession.groupAnsweredQuestions == null)
+                {
+                    Console.WriteLine(DateTime.Now + "\t" +"SET UP ERROR WITH GROUP ANSWERS");
+                    _userSession.gameStage = GameStage.SetupError;
+                }
+                Console.WriteLine(DateTime.Now + "\t" +"Getting all group players");
+                getRemoteData(DataType.ALL_GROUP_PLAYERS);
+                if (_userSession.allGroupPlayers== null)
+                {
+                    Console.WriteLine(DateTime.Now + "\t" +"SET UP ERROR WITH GROUP PLAYERS");
+                    _userSession.gameStage = GameStage.SetupError;
+                }
             }
 
-            log.Debug("Downloading categories...");
-            List<Category> categories = _comms.ListCategories();
-            if (categories == null)
+            //GET NOTIFICATIONS
+            Console.WriteLine(DateTime.Now + "\t" +"Getting all notifications");
+            getRemoteData(DataType.ALL_NOTIFICATIONS);
+            if (_userSession.allNotifications == null)
             {
-                log.Warn("Server returned null list of categories, cannot continue game");
-                _gameSession.Stage = GameStage.SetupError;
-                return _gameSession;
+                Console.WriteLine(DateTime.Now + "\t" +"SET UP ERROR WITH NOTIFICATIONS");
+                _userSession.gameStage = GameStage.SetupError;
+            }
+            
+            //GET USER INTERESTS
+            Console.WriteLine(DateTime.Now + "\t" +"Getting all user interests");
+            getRemoteData(DataType.USER_INTERESTS);
+            if (_userSession.userInterests == null)
+            {
+                Console.WriteLine(DateTime.Now + "\t" +"SET UP ERROR WITH USERS INTERESTS");
+                _userSession.gameStage = GameStage.SetupError;
             }
 
-            log.Debug("Downloading questions...");
-            List<Question> questions = _comms.ListQuestions();
-            if (questions == null)
+            if (_userSession.gameStage == GameStage.InProgress)
             {
-                log.Warn("Server returned null list of questions, cannot continue game");
-                _gameSession.Stage = GameStage.SetupError;
-                return _gameSession;
+                _userSession.gameStage = GameStage.ReadyToStart;
             }
 
-            _gameSession.AllCategories.AddRange(categories);
-            _gameSession.AllQuestions.AddRange(questions);
+            _userSession.player = GameStage.USER;
 
-            foreach (Category category in categories)
-            {
-                List<Question> categoryQuestions = (from q in questions
-                                                    where q.CategoryID == category.ID
-                                                    select q).ToList();
-
-                _gameSession.CategoryQuestionMap.Add(category, categoryQuestions);
-            }
-
-            //log. Current user
-            _gameSession.MainUser = _comms.GetMainUser();
-
-            //log. TODO: Additional users
-            //log. TODO: Initialize challenges
-
-            QuestionsInGame = 6;
-
-            _gameSession.Stage = GameStage.ReadyToStart;
-            */
-           //log. log.Debug("Finished setting up new game");
-            return _gameSession; 
+            return _userSession;
         }
 
-        public static List<Category> getCategories()
+
+
+        public static void NewGame(Category userCategory)
         {
-            return allCats;
+
+            _userSession.gameStage = GameStage.InProgress;
+
+            if (_userSession.player == GameStage.USER)
+            {
+                //SET UP QUESTIONS FOR USER
+
+                //REMOVE PREVIOUSLY ANSWERED QUESTIONS
+                _userSession.availableUserQuestions = new List<Question>(_userSession.allQuestions);
+                _userSession.availableUserQuestions.RemoveAll(q1 => _userSession.userAnsweredQuestions.Any(q2 => q1.questionID == q2.questionID));
+
+                //REMOVE SO ONLY REQUESTED CATEGORY REMAIN
+                if (userCategory != null)
+                {
+                    _userSession.availableUserQuestions.RemoveAll(q1 => q1.categoryID != userCategory.categoryID);
+                }
+            }
+            else if (_userSession.player == GameStage.GROUP)
+            {
+                //SET UP QUESTIONS FOR GROUP
+                _userSession.availableGroupQuestions = new List<Question>(_userSession.allQuestions);
+                _userSession.availableGroupQuestions.RemoveAll(q1 => _userSession.groupAnsweredQuestions.Any(q2 => q1.questionID == q2.questionID));
+            }
+
+            _userSession.questionRound = new QuestionRound();
+
+
+            _userSession.gameStage = GameStage.ReadyToStart;
+
         }
 
-        public static void removeAvailQ(Question q)
-        {
-            Console.WriteLine("Size before removed..." + availableQuestions.Count());
-            availableQuestions.Remove(q);
-            Console.WriteLine("Size after removed..." + availableQuestions.Count());
 
+        public static void getGroupInformation()
+        {
+            //GET USERS GROUP
+            getRemoteData(DataType.CURRENT_GROUP);
+            if (_userSession.currentGroup.groupName == null)
+            {
+                _userSession.currentGroup = null;
+            }
+
+            //IF USER HAS A GROUP, GET PLAYERS
+            if (_userSession.currentGroup != null)
+            {
+                getRemoteData(DataType.ALL_GROUP_PLAYERS);
+                if (_userSession.allGroupPlayers == null)
+                {
+                    //THERE IS A COMMUNICATION ERROR
+                    MainWindow.SwitchPage(new CommsError());
+                }
+
+                //GET INVITED USERS
+                getRemoteData(DataType.INVITED_USERS);
+                if (_userSession.invitedUsers == null)
+                {
+                    MainWindow.SwitchPage(new CommsError());
+                }
+            }
+
+            //GET NOTIFICATIONS
+            getRemoteData(DataType.ALL_NOTIFICATIONS);
+            if (_userSession.allNotifications == null)
+            {
+                _userSession.gameStage = GameStage.SetupError;
+            }
         }
   
-
-        public static QuestionRound NextQuestion()
+        //GET THE NEXT QUESTION ROUND
+        public static void NextQuestion()
         {
-          //log.  log.Debug("Next round...");
-
-            QuestionRound round = new QuestionRound();
-
-            round.Question = PickRandomQuestion(RequestedCategory, RequestedDifficulty);
-              //log.  log.Debug("round.Question = " + round.Question);
-                round.Category = RequestedCategory;
-              //log.  log.Debug("round.Category = " + round.Category);
-                round.RoundNumber = CurrentRoundNumber + 1;
-            //log.    log.Debug("round.RoundNumber = " + round.RoundNumber);
-                round.RequiredGrammar = PickRandomGrammar();
-             //log.   log.Debug("round.RequiredGrammar = " + round.RequiredGrammar);
-                round.RequiredPose = PickRandomPose();
-            //log.    log.Debug("round.RequiredPose = " + round.RequiredPose);
-                round.AnswerMethod = PickRandomAnswerMethod();
-            //log.    log.Debug("round.AnswerMethod = " + round.AnswerMethod);
-
-                _gameSession.CurrentRound = round;
-                _gameSession.QuestionHistory.Enqueue(round);
-
-
-                return round;
-           
-        }
-
-        private static void sortAvailQs(Category category, QuestionDifficulty difficulty)
-        {
-                        if (category == null)
-                category = Category.All;
-
-            //log. get a list of questions matching our difficulty
-            availableQuestions = new List<Question>(_gameSession.AllQuestions);
-            foreach (Question q in availableQuestions)
-            {
-                Console.WriteLine(q.questionText + " " + q.categoryID);
-            }
-
-            //log. remove questions based on difficulty
-            if (difficulty != QuestionDifficulty.Any)
-            {
-                availableQuestions.RemoveAll(q => q.difficulty != difficulty);
-            }
-
-            Console.WriteLine(category.Name + " " + category.categoryID);
-            //log. remove questions not in our category
-            if (category != Category.All)
-            {
-                availableQuestions.RemoveAll(q => q.categoryID != category.categoryID);
-            }
+            _userSession.questionRound.Question = PickRandomQuestion();
+            _userSession.questionRound.RoundNumber++;
+            _userSession.questionRound.RequiredGrammar = PickRandomGrammar();
+            _userSession.questionRound.RequiredPose = PickRandomPose();
+            _userSession.questionRound.AnswerMethod = PickRandomAnswerMethod();
         }
 
 
-            //log. now remove any questions already asked
-          //log.  availableQuestions.RemoveAll(question => _gameSession.QuestionHistory.Select(round => round.Question).Contains(question));
-          //log.  availableQuestions.RemoveAll(question => answeredQuestions.Contains(question));
-           //log. List<String> list1;
-        //log.    List<String> list2;
-           //log. list1.RemoveAll(c => list2.Any(c2 => c2.Length == c.Length));//log. && c2.City == c.City));
-           //log. availableQuestions = availableQuestions.RemoveAll(q => availableQuestions.All(q1 => (q.questionID.Equals(q1.questionID)));//log..questionID==q1.questionID));
-            //log.(q1 => q.questionID.Equals(q1.questionID)));//log..Equals().ToList();
-
-
-
-            //log. no questions left in any category and any difficulty?
             
 
-   
-
-        public static bool UserAnsweredQuestion(int index)
-        {
-            CurrentRound.UserAnswer = index;
-
-            return (index == CurrentRound.Question.correctAnswer);
-        }
-
-        public static void EndGame()
-        {
-            //log.SEND TO SERVER - ONLY NEED TO SEND MY SCORE AS IT WILL BE THE ONLY USER CHANGED LOCALLY
-            _clientComms.sendProgress(serverIP, serverPort, getUser(), roundAnsweredQ);
-            _gameSession.CurrentRound = null;
-            _gameSession.Stage = GameStage.Complete;
-        }
+  
 
         private static AnswerMethod PickRandomAnswerMethod()
         {
@@ -362,140 +429,36 @@ namespace SocialLearningGame.Logic
             return (Grammar)values.GetValue(random.Next(values.Length));
         }
 
-        private static Question PickRandomQuestion(Category category, QuestionDifficulty difficulty)
+        private static Question PickRandomQuestion()
         {
-            //sortAvailQs(category, difficulty);
-            if (availableQuestions.Count == 0 && category == Category.All && difficulty == QuestionDifficulty.Any)
+            if (_userSession.player == GameStage.USER)
             {
-             //log.   log.Debug("No more questions");
-                return null; //log. just give up
-            }
-
-            //log. no questions left in this category? try an easier difficulty
-            if (availableQuestions.Count == 0 && category != Category.All && difficulty == QuestionDifficulty.Hard)
-                return PickRandomQuestion(category, QuestionDifficulty.Medium);
-
-            //log. no questions left in this category? try an easier difficulty
-            if (availableQuestions.Count == 0 && category != Category.All && difficulty == QuestionDifficulty.Medium)
-                return PickRandomQuestion(category, QuestionDifficulty.Easy);
-
-            //log. no questions left in this category? try any category
-            if (availableQuestions.Count == 0 && category != Category.All && difficulty == QuestionDifficulty.Easy)
-                return PickRandomQuestion(Category.All, QuestionDifficulty.Easy);
-
-            //log. no questions left in any category? try on medium
-            if (availableQuestions.Count == 0 && category == Category.All && difficulty == QuestionDifficulty.Easy)
-                return PickRandomQuestion(Category.All, QuestionDifficulty.Medium);
-
-            //log. no questions left in any category? try on any difficulty
-            if (availableQuestions.Count == 0 && category == Category.All && difficulty == QuestionDifficulty.Medium)
-                return PickRandomQuestion(Category.All, QuestionDifficulty.Any);
-        
-
-            //log. there's questions available? return a random one
-            Console.WriteLine("AVIL: " + availableQuestions.Count);
-            if (availableQuestions.Count > 0)
-            {
-                return availableQuestions[random.Next(availableQuestions.Count)];
-            }
-            else
-            {
-                return null;
-            }
-        }
-
-        public static Boolean updateUserScore(int score)
-        {
-            int x = 0;
-            Boolean found = false;
-            while(x<allUsers.Count && !found)
-            {
-                if (allUsers[x].userJid.Equals(thisUser))
+                //CHECK IF QUESTIONS ARE AVAILABLE
+                if (_userSession.availableUserQuestions.Count() == 0)
                 {
-                    allUsers[x].score = allUsers[x].score + score;
-                    found = true;
-                    Console.WriteLine("Users new score: " + allUsers[x].score);
+                    //NO QUESTIONS AVAILABLE
+                    return null;
                 }
-                x++;
+
+                //QUESTION IS AVAILABLE
+                return _userSession.availableUserQuestions[random.Next(_userSession.availableUserQuestions.Count())];
             }
-            return found;
-        }
-
-        public static List<UserScore> getAllUsers()
-        {
-            return allUsers;
-        }
-
-        public static UserScore getUser()
-        {
-            Boolean found = false;
-            int x = 0;
-            while (x < allUsers.Count && !found)
+            else if (_userSession.player == GameStage.GROUP)
             {
-                if (allUsers[x].userJid.Equals(thisUser))
+                Console.WriteLine(DateTime.Now + "\t" +"In group questions");
+                //CHECK IF QUESTIONS ARE AVAILABLE
+                if (_userSession.availableGroupQuestions.Count() == 0)
                 {
-                    found = true;
+                    //NO QUESTIONS AVAILABLE
+                    return null;
                 }
-                else{
-                x++;
-                }
-            }
-            if (found)
-            {
-                return allUsers[x];
+
+                //QUESTION IS AVAILABLE
+                return _userSession.availableGroupQuestions[random.Next(_userSession.availableGroupQuestions.Count())];
             }
             return null;
         }
 
-
-
-        public static int QuestionsInGame { get; set; }
-
-        public static int CurrentRoundNumber
-        {
-            get
-            {
-                return _gameSession.QuestionHistory.Count;
-            }
-        }
-
-        public static int CorrectAnswerCount
-        {
-            get
-            {
-                int right = 0;
-                foreach (QuestionRound round in _gameSession.QuestionHistory)
-                {
-                    if (round.UserAnswer == round.Question.correctAnswer)
-                        right += 1;
-                }
-                return right;
-            }
-        }
-
-        public static int Score
-        {
-            get
-            {
-               //log. int score = 0;
-               /* foreach (QuestionRound round in _gameSession.QuestionHistory)
-                {
-                    if (round.UserAnswer == round.Question.correctAnswer)
-                        score += round.Question.pointsIfCorrect;
-                }*/
-                return GameLogic.getUser().score;
-            }
-        }
-
-        public static QuestionRound CurrentRound
-        {
-            get { return _gameSession.CurrentRound; }
-        }
-
-        public static List<String> getUserInterests()
-        {
-            return userInterests;
-        }
 
     }
 }

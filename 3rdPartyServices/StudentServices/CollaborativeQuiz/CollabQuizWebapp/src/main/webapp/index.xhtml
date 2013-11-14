@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xml:lang="en" lang="en">
+<h:head>
+    <title>Hello SOCIETIES 3PS</title>
+</h:head>
+
+<body>
+
+<h:form id="form">
+
+    <p:panel header="Colors">
+        <h:panelGrid columns="2" cellpadding="10">
+            <h:outputText value="Inline: "/>
+            <p:colorPicker id="inlineCP" value="#{index.color1}" mode="inline"/>
+
+            <h:outputText value="Popup: "/>
+            <p:colorPicker id="popupCP" value="#{index.color2}" widgetVar="picker"/>
+        </h:panelGrid>
+
+        <p:separator/>
+
+        <p:commandButton value="Submit" oncomplete="dlg.show()" update="grid @parent"/>
+    </p:panel>
+
+    <p:dialog modal="true" widgetVar="dlg" showEffect="fade" hideEffect="fade" header="Selected Colors"
+              resizable="false">
+        <h:panelGrid columns="2" id="grid">
+            <h:outputText value="Color 1: "/>
+            <h:outputText value="#{index.color1}" style="background-color:\##{index.color1}"/>
+
+            <h:outputText value="Color 2: "/>
+            <h:outputText value="#{index.color2}" style="background-color:\##{index.color2}"/>
+        </h:panelGrid>
+    </p:dialog>
+
+</h:form>
+
+</body>
+</html>

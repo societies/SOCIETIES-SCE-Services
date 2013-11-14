@@ -24,6 +24,7 @@
  */
 package ac.hw.services.socialLearning.app;
 
+import org.eclipse.jetty.util.log.Log;
 import org.societies.api.context.CtxException;
 import org.societies.api.context.model.CtxIdentifier;
 
@@ -152,7 +153,7 @@ public class SocialLearningService extends EventListener implements ISocialLearn
 		try {
 
 		this.myServiceExeURL = new URL("http://www2.macs.hw.ac.uk/~sww2/societies/SocialLearningGame.exe");
-		this.myServiceName = "SocialLearning";
+		this.myServiceName = "Collaborative Quiz";
 		this.displayDriverService.registerDisplayableService(this, myServiceName, myServiceExeURL, listenerPort, false);
 		logging.debug("Registered as a displayable service");
 	} catch (MalformedURLException e) {
@@ -344,6 +345,25 @@ public String getServerIPPort()
 @Override
 public List<String> getUserInterests()
 {
+	
+	try {
+		getContext();
+	} catch (ClassNotFoundException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	} catch (InterruptedException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	} catch (ExecutionException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	} catch (CtxException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	} catch (IOException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	}
 	return this.interests;
 }
 
@@ -409,12 +429,20 @@ public void setCommMgr(ICommManager commMgr) {
 @Override
 public void serviceStarted(String ipAddr) {
 	// TODO Auto-generated method stub
+	if(this.userIdentity!=null)
+	{
+		logging.info("CollabQuiz Started From: " + this.userIdentity.getBareJid());
+	}
 
 }
 
 @Override
 public void serviceStopped(String ipAddr) {
 	// TODO Auto-generated method stub
+	if(this.userIdentity!=null)
+	{
+		logging.info("CollabQuiz Stopped From: " + this.userIdentity.getBareJid());
+	}
 
 }
 

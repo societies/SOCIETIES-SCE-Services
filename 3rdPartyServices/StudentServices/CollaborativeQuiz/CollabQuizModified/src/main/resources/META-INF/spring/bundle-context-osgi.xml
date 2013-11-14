@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:osgi="http://www.springframework.org/schema/osgi"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+                      http://www.springframework.org/schema/osgi http://www.springframework.org/schema/osgi/spring-osgi.xsd">
+
+		
+	<osgi:reference id="commsManager" interface="org.societies.api.comm.xmpp.interfaces.ICommManager"/>
+	<osgi:reference id="services" interface="org.societies.api.services.IServices"/>
+	
+	 <osgi:service ref="quizRestServer"
+		interface="ac.hw.services.collabquiz.ICollabQuizServer">
+		<osgi:service-properties>
+			<entry key="TargetPlatform" value="SOCIETIES" />
+			<entry key="ServiceProvider" value="ICT-SOCIETIES" />
+			<entry key="ServiceMetaModel" value-ref="serMetamodel" />
+		</osgi:service-properties>
+	</osgi:service>
+
+	<bean id="serMetamodel" class="org.societies.api.schema.servicelifecycle.model.Service">
+		<property name="authorSignature" value="Heriot-Watt University" />
+		<property name="serviceDescription" value="Collaborative Quiz Learning Game SOCIETIES Application" />
+		<property name="serviceName" value="Collaborative Quiz" />
+		<property name="serviceType" value="THIRD_PARTY_SERVER" />
+		<property name="serviceCategory" value="quiz" />
+	</bean> 
+
+</beans>

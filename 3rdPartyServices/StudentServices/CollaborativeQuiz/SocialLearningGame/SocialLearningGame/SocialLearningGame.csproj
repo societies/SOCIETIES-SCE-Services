@@ -6,7 +6,7 @@
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{B5DAC0BB-E181-449B-A723-44A0CD7B9323}</ProjectGuid>
-    <OutputType>WinExe</OutputType>
+    <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>SocialLearningGame</RootNamespace>
     <AssemblyName>SocialLearningGame</AssemblyName>
@@ -123,6 +123,11 @@
     <Compile Include="Comms\ServerComms.cs" />
     <Compile Include="Entities\Category.cs" />
     <Compile Include="Entities\Class2.cs" />
+    <Compile Include="Entities\Logic\DataType.cs" />
+    <Compile Include="Entities\Logic\UserSession.cs" />
+    <Compile Include="Entities\UserGroups.cs" />
+    <Compile Include="Entities\PendingJoins.cs" />
+    <Compile Include="Entities\Groups.cs" />
     <Compile Include="Entities\QuestionRound.cs" />
     <Compile Include="Entities\Logic\AbstractPose.cs" />
     <Compile Include="Entities\Logic\AnswerMethod.cs" />
@@ -149,9 +154,6 @@
     <Compile Include="Pages\CategoriesPage.xaml.cs">
       <DependentUpon>CategoriesPage.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Pages\ChallengePage.xaml.cs">
-      <DependentUpon>ChallengePage.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Pages\CommsError.xaml.cs">
       <DependentUpon>CommsError.xaml</DependentUpon>
     </Compile>
@@ -176,6 +178,18 @@
     </Compile>
     <Compile Include="Pages\NotRegistered.xaml.cs">
       <DependentUpon>NotRegistered.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\GroupPlayPage.xaml.cs">
+      <DependentUpon>GroupPlayPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\NotificationsPage.xaml.cs">
+      <DependentUpon>NotificationsPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\InvitePage.xaml.cs">
+      <DependentUpon>InvitePage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\GroupPlayerListPage.xaml.cs">
+      <DependentUpon>GroupPlayerListPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Pages\PlayPage.xaml.cs">
       <DependentUpon>PlayPage.xaml</DependentUpon>
@@ -222,10 +236,6 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Pages\ChallengePage.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
     <Page Include="Pages\HomePage.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -235,6 +245,22 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Pages\NotRegistered.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Pages\GroupPlayPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Pages\NotificationsPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Pages\InvitePage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Pages\GroupPlayerListPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -331,7 +357,9 @@
     <Resource Include="Resources\Pose9.png" />
   </ItemGroup>
   <ItemGroup>
+    <Resource Include="Resources\pageloader.gif" />
     <Resource Include="Resources\SpeechGrammar.xml" />
+    <Resource Include="Resources\heriotwatt.png" />
     <Content Include="Resources\log4net.config.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

@@ -61,7 +61,7 @@ namespace HWUPortal
         private void appControlPanel_Leave(object sender, EventArgs e)
         {
             this.Focus();
-            if (log.IsDebugEnabled) log.Debug(this.AccessibleName + " got focus");
+             Console.WriteLine(DateTime.Now + "\t" +this.AccessibleName + " got focus");
         }
     }
 }

@@ -6,63 +6,45 @@
       xmlns:k="http://schemas.microsoft.com/kinect/2013"
       mc:Ignorable="d" 
       d:DesignHeight="600" d:DesignWidth="1000"
-      Title="HomePage" Height="600" Width="1000">
+      Title="Scoreboard" Height="600" Width="1000">
 
-    <Canvas Name="scoreBoard" Background="Transparent" Height="600" VerticalAlignment="Top" Margin="0" Width="1000">
-        <TextBlock Height="76" HorizontalAlignment="Left" Margin="353,44,0,0" Name="textBlock1" Text="Scoreboard" VerticalAlignment="Top" Width="304" TextAlignment="Center" FontSize="48" Canvas.Left="-4" Canvas.Top="-4" />
+        <Grid Name="scoreBoardGrid">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="25*" />
+                <RowDefinition Height="10*" />
+                <RowDefinition Height="10*" />
+                <RowDefinition Height="10*" />
+                <RowDefinition Height="10*" />
+                <RowDefinition Height="10*" />
+                <RowDefinition Height="10*" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="40*" />
+                <ColumnDefinition Width="20*" />
+                <ColumnDefinition Width="20*" />
+            </Grid.ColumnDefinitions>
         
         <!-- Current student's score and rank details -->
       <!--  <TextBlock Canvas.Left="59" Canvas.Top="120" Height="44" Name="studentName" Text="You" Width="400" FontSize="28" MinWidth="50" MaxWidth="400" /> -->
-        <TextBlock Canvas.Left="511" Canvas.Top="97" Height="31" Name="rankTitle" Text="Rank" Width="50" FontSize="20" />
-        <TextBlock Canvas.Left="594" Canvas.Top="97" FontSize="20" Height="31" Name="scoreTitle" Text="Score" Width="55" />
-       <!-- <TextBlock Canvas.Left="523" Canvas.Top="134" Name="studentRank" MinWidth="20" MinHeight="20" FontSize="20" />
-        <TextBlock Canvas.Left="612" Canvas.Top="134" Name="scoreBlock" MinWidth="20" MinHeight="20" FontSize="20" /> -->
+        <TextBlock Grid.Row="0" Grid.Column="0" Name="playerGroup" FontSize="32" />
+        <TextBlock Grid.Row="0" Grid.Column="1" Text="Rank" FontSize="32"  />
+        <TextBlock Grid.Row="0" Grid.Column="2" FontSize="32" Text="Score"  />
 
-        <!-- Right hand -->
-        <Ellipse Height="80" Width="80" Name="RightHand" Canvas.Left="305" Canvas.Top="0">
-            <Ellipse.Fill>
-                <ImageBrush ImageSource="/SocialLearningGame;component/Resources/hand.png" />
-            </Ellipse.Fill>
-        </Ellipse>
-        
-        <!-- Name Textblocks -->
-        <TextBlock Canvas.Left="160" Canvas.Top="184" Height="43" Name="person1" Width="Auto" FontSize="30" MinWidth="200" MaxWidth="400" />
-        <TextBlock Canvas.Left="160" Canvas.Top="247" Height="43" Name="person2" Width="Auto" FontSize="30" MinWidth="200" MaxWidth="400" />
-        <TextBlock Canvas.Left="160" Canvas.Top="310" Height="43" Name="person3" Width="Auto" FontSize="30" MinWidth="200" MaxWidth="400" />
-        <TextBlock Canvas.Left="160" Canvas.Top="373" Height="43" Name="person4" Width="Auto" FontSize="30" MinWidth="200" MaxWidth="400" />
-        <TextBlock Canvas.Left="160" Canvas.Top="436" Height="43" Name="person5" Width="Auto" FontSize="30" MinWidth="200" MaxWidth="400" />
-        <!-- Score textblocks -->
-        <TextBlock Canvas.Left="594" Canvas.Top="184" Height="43" Name="person1score" Width="124" FontSize="30" />
-        <TextBlock Canvas.Left="594" Canvas.Top="247" Height="43" Name="person2score" Width="124" FontSize="30" />
-        <TextBlock Height="43" Name="person3score" FontSize="30" Canvas.Left="594" Canvas.Top="310" Width="124" />
-        <TextBlock Height="43" Name="person4score" Width="124" FontSize="30" Canvas.Left="594" Canvas.Top="373" />
-        <TextBlock Canvas.Left="593" Canvas.Top="436" Height="43" Name="person5score" Width="125" FontSize="30" />
-        <!-- Rank textblocks -->
-        <TextBlock Canvas.Left="59" Canvas.Top="184" FontSize="30" Height="43" Name="rank1" Width="57" />
-        <TextBlock Canvas.Left="59" Canvas.Top="247" FontSize="30" Height="43" Name="rank2" Width="57" />
-        <TextBlock Canvas.Left="59" Canvas.Top="310" FontSize="30" Height="43" Name="rank3" Width="57" />
-        <TextBlock Canvas.Left="59" Canvas.Top="373" FontSize="30" Height="43" Name="rank4" Width="57" />
-        <TextBlock Canvas.Left="59" Canvas.Top="436" FontSize="30" Height="43" Name="rank5" Width="57" />
         
         <!-- next and previous buttons -->
         <k:KinectCircleButton x:Name="backButton" 
                               Click="backButton_Click"
-                              Label="Previous"
-                              Grid.Row="3" Grid.Column="1" Canvas.Left="644" Canvas.Top="500" Height="100" Width="150">
+                              Grid.Row="6" Grid.Column="2" Label="Back" LabelPosition="Right" Height="70" Margin="0.4,0,0,0" Visibility="Hidden">
         </k:KinectCircleButton>
         <!--<Controls:HoverButton x:Name="backButton" ImageSize="100" TimeInterval="1500" Height="56" Width="100" Canvas.Left="740" Canvas.Top="483" />-->
 
         <k:KinectCircleButton x:Name="nextButton" 
                               Click="nextButton_Click"
                               Label="Next"
-                              Grid.Row="3" Grid.Column="1" Canvas.Left="800" Canvas.Top="500" Height="100" Width="150">
+                              Grid.Row="6" Grid.Column="1" LabelPosition="Right"  Grid.ColumnSpan="2" Height="70" Margin="0,0,250,0" Visibility="Hidden" >
         </k:KinectCircleButton>
         <!--<Controls:HoverButton x:Name="nextButton" HorizontalAlignment="Left" Grid.Column="1" ImageSize="100" VerticalAlignment="Top" TimeInterval="1500" Height="56" Width="84" Margin="112,496,0,0" Canvas.Left="777" Canvas.Top="-13" />-->
-        
-    </Canvas>
+        </Grid>
     
-    <Page.Background>
-        <ImageBrush ImageSource="/SocialLearningGame;component/Resources/background.jpg" />
-    </Page.Background>
 </Page>
 <!-- list scores for all friends of current player -->

@@ -39,23 +39,23 @@ namespace HWUPortal
         }
         public void sendServiceInformationEvent(IPAddress remoteIPAddress, int port, String serviceName, ServiceRuntimeInformation sInformation)
         {
-            if (log.IsDebugEnabled)
-                log.Debug("Sending serviceInformation message: " + sInformation + " for service: " + serviceName + " using: " + remoteIPAddress + ":" + port);
+            
+                Console.WriteLine(DateTime.Now + "\t" +"Sending serviceInformation message: " + sInformation + " for service: " + serviceName + " using: " + remoteIPAddress + ":" + port);
             IPEndPoint ip = new IPEndPoint(remoteIPAddress, port);
             Socket server = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
             try
             {
                 server.Connect(ip);
-                if (log.IsDebugEnabled)
-                    log.Debug("Sending :  " + sInformation.ToString() + ":" + serviceName);
+                
+                    Console.WriteLine(DateTime.Now + "\t" +"Sending :  " + sInformation.ToString() + ":" + serviceName);
                 server.Send(Encoding.ASCII.GetBytes(sInformation.ToString() + ":" + serviceName));
-                if (log.IsDebugEnabled)
-                    log.Debug("message sent");
+                
+                    Console.WriteLine(DateTime.Now + "\t" +"message sent");
                 server.Close();
 
-                if (log.IsDebugEnabled)
-                    log.Debug("socket closed");
+                
+                    Console.WriteLine(DateTime.Now + "\t" +"socket closed");
 
             }
             catch (SocketException e)
@@ -77,8 +77,8 @@ namespace HWUPortal
         {
             ServiceRuntimeInformation sinfo = new ServiceRuntimeInformation();
             sinfo = ServiceRuntimeInformation.STARTED_SERVICE;
-            if (log.IsDebugEnabled)
-                log.Debug(sinfo);
+            
+                Console.WriteLine(DateTime.Now + "\t" + " "+ sinfo);
         }
     }
 

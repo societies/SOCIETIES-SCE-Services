@@ -34,11 +34,11 @@
 		<osgi:reference id="commManager" interface="org.societies.api.comm.xmpp.interfaces.ICommManager"></osgi:reference>
 		
 	<bean id="serMetamodel" class="org.societies.api.schema.servicelifecycle.model.Service">
-		<property name="authorSignature" value="elizaP" />
-		<property name="serviceDescription" value="Social Learning Game Virgo Application" />
+		<property name="authorSignature" value="Heriot-Watt University" />
+		<property name="serviceDescription" value="Collaborative Quiz Game SOCIETIES Application" />
 		<property name="serviceType" value="THIRD_PARTY_CLIENT" />		
-		<property name="serviceName" value="SocialLearning" />
+		<property name="serviceName" value="Collaborative Quiz" />
 		<property name="privacyPolicy" value="http://www.macs.hw.ac.uk/~ceeep1/societies/privacyPolicy/DisplayDriverPrivacyPolicy.xml" />
-		<property name="serviceCategory" value="socialLearning"></property>
+		<property name="serviceCategory" value="quiz"></property>
 	</bean>
 </beans>

@@ -31,139 +31,58 @@ using System.Net;
 using System.Net.Sockets;
 using Newtonsoft.Json;
 using SocialLearningGame.Entities;
+using SocialLearningGame.Pages;
 namespace SocialLearningGame.Comms
 {
-    class ClientComms
+    public class ClientComms
     {
-        Socket echoSocket;
-        String userID;
-        String endPoint;
-        int port;
-        Boolean connected;
-        String serverIP;
-        int serverPort;
-        private static String START_MSG = "START_MSG\n";
-        private static String END_MSG = "END_MSG\n";
+        //SOCKET VARIABLES
+        private static String clientIP;
+        private static String serverIP;
+        private static int clientPort;
+        private static int serverPort;
+        private static String userID;
+        public static Boolean connected;
+        private static Socket server;
+
+        //PORTAL IP & PORT
+        private String portalIP = "127.0.0.1";
+        private int portalPort = 2114;
+
+        //MESSAGE VARIABLES
         private static String REQUEST_SERVERIP = "REQUEST_SERVER\n";
+        private static String CURRENT_USER = "CURRENT_USER";
+        private static String VIRGO_ENDPOINT_IPADDRESS = "VIRGO_ENDPOINT_IPADDRESS";
+        private static String SERVICE_PORT = "SERVICE_PORT->Collaborative Quiz";
+        private static String RETRIEVE_SCORES = "RETRIEVE_SCORES\n";
+        private static String RETRIEVE_CATEGORIES = "RETRIEVE_CATEGORIES\n";
         private static String RETRIEVE_QUESTIONS = "RETRIEVE_QUESTIONS\n";
+        private static String RETRIEVE_USER_HISTORY = "RETRIEVE_USER_HISTORY\n";
+        private static String REQUEST_USER_INTERESTS = "REQUEST_USER_INTERESTS\n";
+        private static String RETRIEVE_INVITED_PLAYERS = "RETRIEVE_INVITED_PLAYERS\n";
+        private static String RETRIEVE_ALL_USERS = "RETRIEVE_ALL_USERS\n";
+        private static String UPLOAD_PROGRESS = "UPLOAD_PROGRESS\n";
+        private static String RETRIEVE_GROUP_PLAYERS = "RETRIEVE_GROUP_PLAYERS\n";
+        private static String LEAVE_GROUP = "LEAVE_GROUP\n";
+        private static String RETRIEVE_USER_GROUP = "RETRIEVE_USER_GROUP\n";
+        private static String RETRIEVE_NOTIFICATIONS = "RETRIEVE_NOTIFICATIONS\n";
+        private static String CREATE_GROUP = "CREATE_GROUP\n";
+        private static String INVITE_USER = "INVITE_USER\n";
+        private static String ADD_USER_TO_GROUP = "ADD_USER_TO_GROUP\n";
+        private static String REMOVE_USER_FROM_GROUP = "REMOVE_USER_FROM_GROUP\n";
+        private static String DELETE_GROUP = "DELETE_GROUP\n";
+        private static String RESET_USER = "RESET_USER\n";
+        private static String DELETE_NOTIFICATIONS = "DELETE_NOTIFICATIONS\n";
+        private static String RETRIEVE_GROUPS = "RETRIEVE_GROUPS\n";
+        private static String USER = "USER\n";
+        private static String GROUP = "GROUP\n";
+
         private static String NULL_REPLY = "NULL";
+        private static String TRUE_REPLY = "TRUE";
 
         public ClientComms()
         {
-            connected = false;
         }
-
-
-        public Boolean connect()
-        {
-            IPEndPoint ip = new IPEndPoint(IPAddress.Parse(endPoint), port);
-            echoSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            try
-            {
-                echoSocket.Connect(ip);
-                connected = true;
-                return true;
-            }
-            catch (SocketException e)
-            {
-                Console.WriteLine("SOCKET_CLIENT: Unable to connect to service client on node: " + endPoint + " on port: " + port);
-                Console.WriteLine(e.ToString());
-            }
-            return false;
-        }
-
-
-        public void disconnect()
-        {
-            if (echoSocket != null)
-            {
-                echoSocket.Shutdown(SocketShutdown.Both);
-                echoSocket.Close();
-                echoSocket = null;
-            }
-            connected = false;
-        }
-
-
-
-        public String sendMessage(String message)
-        {
-            String response = "";
-            if (connected)
-            {
-                Console.WriteLine("SOCKET_CLIENT: Sending message to service client:");
-                Console.WriteLine(message);
-
-                echoSocket.Send(Encoding.ASCII.GetBytes(message));
-                byte[] data = new byte[1024];
-                int receivedDataLength = echoSocket.Receive(data);
-                response = Encoding.ASCII.GetString(data, 0, receivedDataLength);
-                disconnect();
-                Console.WriteLine("SOCKET_CLIENT: received -> " + response);
-            }
-            else
-            {
-                if (connect())
-                {
-                    response = sendMessage(message);
-                }
-            }
-            return response;
-        }
-
-
-        //public String getChannelPreference()
-        //{
-        //    String response = "";
-        //    if (connected)
-        //    {
-        //        Console.WriteLine("SOCKET_CLIENT: Getting channel preference from service client");
-
-        //        String request = "START_MSG\n" +
-        //            "CHANNEL_REQUEST\n" +
-        //            "END_MSG\n";
-        //        echoSocket.Send(Encoding.ASCII.GetBytes(request));
-        //        byte[] data = new byte[1024];
-        //        int receivedDataLength = echoSocket.Receive(data);
-        //        response = Encoding.ASCII.GetString(data, 0, receivedDataLength);
-        //        disconnect();
-        //    }
-        //    else
-        //    {
-        //        if (connect())
-        //        {
-        //            response = getChannelPreference();
-        //        }
-        //    }
-        //    return response;
-        //}
-
-
-        //public String getMutedPreference()
-        //{
-        //    String response = "";
-        //    if (connected)
-        //    {
-        //        Console.WriteLine("SOCKET_CLIENT: Getting muted preference from service client");
-
-        //        String request = "START_MSG\n" +
-        //            "MUTED_REQUEST\n" +
-        //            "END_MSG\n";
-        //        echoSocket.Send(Encoding.ASCII.GetBytes(request));
-        //        byte[] data = new byte[1024];
-        //        int receivedDataLength = echoSocket.Receive(data);
-        //        response = Encoding.ASCII.GetString(data, 0, receivedDataLength);
-        //        disconnect();
-        //    }
-        //    else
-        //    {
-        //        if (connect())
-        //        {
-        //            response = getMutedPreference();
-        //        }
-        //    }
-        //    return response;
-        //}
 
 
         #region connection parameters
@@ -182,7 +101,7 @@ namespace SocialLearningGame.Comms
 
         private Boolean retrieveUserID()
         {
-            IPEndPoint ip = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 2114);
+            IPEndPoint ip = new IPEndPoint(IPAddress.Parse(portalIP), portalPort);
             Socket server = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             try
             {
@@ -190,14 +109,14 @@ namespace SocialLearningGame.Comms
             }
             catch (SocketException e)
             {
-                Console.WriteLine("SOCKET_CLIENT: Unable to connect to server.");
-                Console.WriteLine(e.ToString());
+                Console.WriteLine(DateTime.Now + "\t" +"SOCKET_CLIENT: Unable to connect to server.");
+                Console.WriteLine(DateTime.Now + "\t" +e.ToString());
                 return false;
             }
 
             //get current user
-            Console.WriteLine("SOCKET_CLIENT: Retrieving user ID");
-            server.Send(Encoding.ASCII.GetBytes("CURRENT_USER"));
+            Console.WriteLine(DateTime.Now + "\t" +"SOCKET_CLIENT: Retrieving user ID");
+            server.Send(Encoding.ASCII.GetBytes(CURRENT_USER));
             byte[] data = new byte[1024];
             int receivedDataLength = 0;
             receivedDataLength = server.Receive(data);
@@ -207,7 +126,7 @@ namespace SocialLearningGame.Comms
                 return false;
             }
             userID = Encoding.ASCII.GetString(data, 0, receivedDataLength);
-            Console.WriteLine("SOCKET_CLIENT: Received user identity from server: " + userID);
+            Console.WriteLine(DateTime.Now + "\t" +"SOCKET_CLIENT: Received user identity from server: " + userID);
 
             server.Close();
             return true;
@@ -215,7 +134,7 @@ namespace SocialLearningGame.Comms
 
         private Boolean retrieveEndPoint()
         {
-            IPEndPoint ip = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 2114);
+            IPEndPoint ip = new IPEndPoint(IPAddress.Parse(portalIP), portalPort);
             Socket server = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             try
             {
@@ -223,14 +142,14 @@ namespace SocialLearningGame.Comms
             }
             catch (SocketException e)
             {
-                Console.WriteLine("SOCKET_CLIENT: Unable to connect to server.");
-                Console.WriteLine(e.ToString());
+                Console.WriteLine(DateTime.Now + "\t" +"SOCKET_CLIENT: Unable to connect to server.");
+                Console.WriteLine(DateTime.Now + "\t" +e.ToString());
                 return false;
             }
 
             //get current end point
-            Console.WriteLine("SOCKET_CLIENT: Retrieving endpoint of service client");
-            server.Send(Encoding.ASCII.GetBytes("VIRGO_ENDPOINT_IPADDRESS"));
+            Console.WriteLine(DateTime.Now + "\t" +"SOCKET_CLIENT: Retrieving endpoint of service client");
+            server.Send(Encoding.ASCII.GetBytes(VIRGO_ENDPOINT_IPADDRESS));
             byte[] data = new byte[1024];
             int receivedDataLength = 0;
             receivedDataLength = server.Receive(data);
@@ -239,8 +158,8 @@ namespace SocialLearningGame.Comms
                 server.Close();
                 return false;
             }
-            endPoint = data[0] + "." + data[1] + "." + data[2] + "." + data[3];
-            Console.WriteLine("SOCKET_CLIENT: Received end point of service client: " + endPoint);
+            clientIP = data[0] + "." + data[1] + "." + data[2] + "." + data[3];
+            Console.WriteLine(DateTime.Now + "\t" +"SOCKET_CLIENT: Received end point of service client: " + clientIP);
 
             server.Close();
             return true;
@@ -248,7 +167,7 @@ namespace SocialLearningGame.Comms
 
         private Boolean retrievePort()
         {
-            IPEndPoint ip = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 2114);
+            IPEndPoint ip = new IPEndPoint(IPAddress.Parse(portalIP), portalPort);
             Socket server = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             try
             {
@@ -256,14 +175,13 @@ namespace SocialLearningGame.Comms
             }
             catch (SocketException e)
             {
-                Console.WriteLine("SOCKET_CLIENT: Unable to connect to server.");
-                Console.WriteLine(e.ToString());
+                Console.WriteLine(DateTime.Now + "\t" +"SOCKET_CLIENT: Unable to connect to server.");
+                Console.WriteLine(DateTime.Now + "\t" +e.ToString());
                 return false;
             }
 
-            //get service client listen port
-            Console.WriteLine("SOCKET_CLIENT: Retrieving listen port of service client");
-            server.Send(Encoding.ASCII.GetBytes("SERVICE_PORT->SocialLearning"));
+            Console.WriteLine(DateTime.Now + "\t" +"SOCKET_CLIENT: Retrieving listen port of service client");
+            server.Send(Encoding.ASCII.GetBytes(SERVICE_PORT));
             byte[] data = new byte[1024];
             int receivedDataLength = 0;
             receivedDataLength = server.Receive(data);
@@ -275,13 +193,13 @@ namespace SocialLearningGame.Comms
 
             try
             {
-                port = BitConverter.ToInt32(data, 0);
-                Console.WriteLine("SOCKET_CLIENT: Received listen port of service client: " + port.ToString());
+                clientPort = BitConverter.ToInt32(data, 0);
+                Console.WriteLine(DateTime.Now + "\t" +"SOCKET_CLIENT: Received listen port of service client: " + clientPort.ToString());
             }
             catch (Exception e)
             {
-                Console.WriteLine("Error converting bytes to port");
-                Console.WriteLine(e.ToString());
+                Console.WriteLine(DateTime.Now + "\t" +"Error converting bytes to port");
+                Console.WriteLine(DateTime.Now + "\t" +e.ToString());
                 server.Close();
                 return false;
             }
@@ -294,311 +212,146 @@ namespace SocialLearningGame.Comms
 
         public String getUserID()
         {
-            return this.userID;
+            return userID;
         }
 
-        public String getAddressPort()
+        public Boolean connectToServer(String connectIP, int connectPort)
         {
-            return this.endPoint + ":" + this.port.ToString();
-     
-        }
-
-        public String speakToClient(String address, int port)
-        {
-            Console.WriteLine("TRYING TO SPEAK TO CLIENT ON " + address + " " + port.ToString());
-            IPEndPoint ip = new IPEndPoint(IPAddress.Parse(address), port);
-            Socket server = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            IPEndPoint ip = new IPEndPoint(IPAddress.Parse(connectIP), connectPort);
+            server = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             try
             {
                 server.Connect(ip);
             }
             catch (SocketException e)
             {
-                Console.WriteLine("SOCKET_CLIENT: Unable to connect to server.");
-                Console.WriteLine(e.ToString());
-                return null;
+                Console.WriteLine(DateTime.Now + "\t" +"SOCKET_CLIENT: Unable to connect to server.");
+                Console.WriteLine(DateTime.Now + "\t" +e.ToString());
+                return false;
             }
+            return true;
+        }
 
-            //get current user
-            server.Send(Encoding.ASCII.GetBytes(REQUEST_SERVERIP));
-            Console.WriteLine("SENT TO CLIENT: " + REQUEST_SERVERIP);
-            String reply = recieveMessage(server);
-           /* byte[] data = new byte[1024];
-            int receivedDataLength = 0;
-            receivedDataLength = server.Receive(data);
-            if (receivedDataLength < 1)
-            {
-                Console.WriteLine("DIDNT GET A REPLY");
-                server.Close();
-                return null;
-            }
-            Console.WriteLine("GOT A REPLY");
-            String reply = Encoding.ASCII.GetString(data, 0, receivedDataLength).Trim(); */
-            Console.WriteLine("Reply:" + reply + "!");
-          /*  if (!reply.Equals(NULL_REPLY))
-            {
-                String[] replyMsg = reply.Split(':');
-                serverIP = replyMsg[0];
-                serverPort = Convert.ToInt32(replyMsg[1]);
-                Console.WriteLine("GUI: Received server IP: " + serverIP + " & Port: " + serverPort);
-                getQuestions(serverIP, serverPort);
-                speakToServer(userID, serverIP, serverPort);
-            }
-            else
-            {
-                Console.WriteLine("CLIENT DOES NOT HAVE SERVER IP");
-            }*/
-
+        public void disconnectFromServer()
+        {
             server.Close();
-            return reply;
         }
 
-        public List<UserScore> speakToServer(String user, String address, int port)
+
+        public Boolean getSocietiesServer()
         {
-            Console.WriteLine("TRYING TO SPEAK TO Server ON " + address + " " + port.ToString());
-            IPEndPoint ip = new IPEndPoint(IPAddress.Parse(address), port);
-            Socket server = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            try
+            //CONNECT TO SERVER
+            if (connectToServer(clientIP, clientPort))
             {
-                server.Connect(ip);
+                server.Send(Encoding.ASCII.GetBytes(REQUEST_SERVERIP));
+                String[] reply = recieveMessage().Split(':');
+                serverIP = reply[0];
+                serverPort = Convert.ToInt32(reply[1]);
+                disconnectFromServer();
+                return true;
             }
-            catch (SocketException e)
-            {
-                Console.WriteLine("SOCKET_CLIENT: Unable to connect to server.");
-                Console.WriteLine(e.ToString());
-                return null;
-            }
+            return false;
+            /*   Console.WriteLine(DateTime.Now + "\t" +"TRYING TO SPEAK TO CLIENT ON " + clientIP + " " + clientPort.ToString());
+               IPEndPoint ip = new IPEndPoint(IPAddress.Parse(clientIP), clientPort);
+               Socket server = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+               try
+               {
+                   server.Connect(ip);
+               }
+               catch (SocketException e)
+               {
+                   Console.WriteLine(DateTime.Now + "\t" +"SOCKET_CLIENT: Unable to connect to server.");
+                   Console.WriteLine(DateTime.Now + "\t" +e.ToString());
+                   return false;
+               }
 
-            //get current user
-            server.Send(Encoding.ASCII.GetBytes("RETRIEVE_SCORES\n"));
-            server.Send(Encoding.ASCII.GetBytes(user+"\n"));
+               //get current user
+               server.Send(Encoding.ASCII.GetBytes(REQUEST_SERVERIP));
+               Console.WriteLine(DateTime.Now + "\t" +"SENT TO CLIENT: " + REQUEST_SERVERIP);
+               String reply = recieveMessage(server);
+               String[] replyMsg = reply.Split(':');
+               serverIP = replyMsg[0];
+               serverPort = Convert.ToInt32(replyMsg[1]); 
+               Console.WriteLine(DateTime.Now + "\t" +"SERVER IP: " + serverIP + " SERVER PORT: " + serverPort);
+               return true;*/
 
-            Console.WriteLine("SENT TO SERVER: " + REQUEST_SERVERIP);
-            String reply = recieveMessage(server);
-          /*  byte[] data = new byte[1024];
-            int receivedDataLength = 0;
-            receivedDataLength = server.Receive(data);
-            if (receivedDataLength < 1)
-            {
-                Console.WriteLine("DIDNT GET A REPLY");
-                server.Close();
-                return null;
-            }
-            Console.WriteLine("GOT A REPLY");
-            String reply = Encoding.ASCII.GetString(data, 0, receivedDataLength).Trim();*/
-            Console.WriteLine("Reply:" + reply + "!");
-            //NOW CHANGE THE USERS INTO A LIST OF USER OBJECTS
-            Console.WriteLine("Converting JSON to USER Objects!!!");
-            List<UserScore> usersList = new List<UserScore>();
-            if (!reply.Equals("NULL"))
-            {
-                usersList = JsonConvert.DeserializeObject<List<UserScore>>(reply);
+        }
 
-                int x = 0;
-                while (x < usersList.Count)
+        public List<UserScore> getAllUsers()
+        {
+            if (connectToServer(serverIP, serverPort))
+            {
+                server.Send(Encoding.ASCII.GetBytes(RETRIEVE_SCORES));
+                server.Send(Encoding.ASCII.GetBytes(userID + "\n"));
+                String reply = recieveMessage(); //if(reply.Equals("ERROR")) MainWindow.SwitchPage(new CommsError());
+                if (!reply.Equals(NULL_REPLY))
                 {
-                    Console.WriteLine("User is: " + usersList[x].userJid);
-                    var name = (usersList[x].userJid.Substring(0, usersList[x].userJid.IndexOf('.')));
-                    Console.WriteLine("New name: " + name);
-                    usersList[x].name = name;
-                    Console.WriteLine("Confirmed: " + usersList[x].name);
-                    x++;
-                }
-            }
-
-           /* if (!reply.Equals(NULL_REPLY))
-            {
-                String[] replyMsg = reply.Split(':');
-                serverIP = replyMsg[0];
-                serverPort = Convert.ToInt32(replyMsg[1]);
-                Console.WriteLine("GUI: Received server IP: " + serverIP + " & Port: " + serverPort);
-            }
-            else
-            {
-                Console.WriteLine("CLIENT DOES NOT HAVE SERVER IP");
-            }*/
-
-            server.Close();
-          //  getQuestions("127.0.0.1", port);
-            return usersList;
-        }
-
-        public Category[] getCategories(String address, int port)
-        {
-            Console.WriteLine("TRYING TO SPEAK TO Server ON " + address + " " + port.ToString());
-            IPEndPoint ip = new IPEndPoint(IPAddress.Parse(address), port);
-            Socket server = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            try
-            {
-                server.Connect(ip);
-            }
-            catch (SocketException e)
-            {
-                Console.WriteLine("SOCKET_CLIENT: Unable to connect to server.");
-                Console.WriteLine(e.ToString());
-                return null;
-            }
-
-            //get current user
-            //  server.Send(Encoding.ASCII.GetBytes("bla\n"));
-            server.Send(Encoding.ASCII.GetBytes("RETRIEVE_CATEGORIES\n"));
-            Console.WriteLine("SENT TO SERVER: " + "RETRIEVE_CATEGORIES\n");
-         /*   byte[] data = new byte[1024];
-            int receivedDataLength = 0;
-            receivedDataLength = server.Receive(data);
-            if (receivedDataLength < 1)
-            {
-                Console.WriteLine("DIDNT GET A REPLY");
-                server.Close();
-                return null;
-            }
-            Console.WriteLine("GOT A REPLY");
-            String reply = Encoding.ASCII.GetString(data, 0, receivedDataLength).Trim();*/
-            String reply = recieveMessage(server);
-            Console.WriteLine("Reply:" + reply + "!");
-            if (!reply.Equals(NULL_REPLY))
-            {
-                Console.WriteLine("Category List: " + reply);
-            }
-            else
-            {
-                Console.WriteLine("SERVER DOESNT HAVE CATEGORIES TO SEND");
-                return null;
-            }
-
-            server.Close();
-
-            Category[] c = JsonConvert.DeserializeObject<Category[]>(reply);
-            Console.WriteLine("C: " + c[0].ToString());
-            return c;
-        }
-
-        public Question[] getQuestions(String address, int port)
-        {
-            Console.WriteLine("TRYING TO SPEAK TO Server ON " + address + " " + port.ToString());
-            IPEndPoint ip = new IPEndPoint(IPAddress.Parse(address), port);
-            Socket server = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            try
-            {
-                server.Connect(ip);
-            }
-            catch (SocketException e)
-            {
-                Console.WriteLine("SOCKET_CLIENT: Unable to connect to server.");
-                Console.WriteLine(e.ToString());
-                return null;
-            }
-
-            //get current user
-          //  server.Send(Encoding.ASCII.GetBytes("bla\n"));
-            server.Send(Encoding.ASCII.GetBytes("RETRIEVE_QUESTIONS\n"));
-            Console.WriteLine("SENT TO SERVER: " + RETRIEVE_QUESTIONS);
-           // byte[] data = new byte[1024];
-         //   int receivedDataLength = 0;
-            String reply = recieveMessage(server);
-         /*   receivedDataLength = server.Receive(data);
-            if (receivedDataLength < 1)
-            {
-                Console.WriteLine("DIDNT GET A REPLY");
-                server.Close();
-                return null;
-            }
-            Console.WriteLine("GOT A REPLY");
-            String reply = Encoding.ASCII.GetString(data, 0, receivedDataLength).Trim();
-            Console.WriteLine("Reply:" + reply + "!");*/
-            if (!reply.Equals(NULL_REPLY))
-            {
-                Console.WriteLine("Question List: " + reply);
-            }
-            else
-            {
-                Console.WriteLine("SERVER DOESNT HAVE QUESTIONS TO SEND");
-                return null;
-            }
-
-            server.Close();
-
-            Question[] q = JsonConvert.DeserializeObject<Question[]>(reply);
-            Console.WriteLine("Q: " + q[0].ToString());
-            return q;
-        }
-
-        //GET ANSWERED Q's
-        public List<UserAnsweredQ> getAnsweredQuestions(String address, int port)
-        {
-            Console.WriteLine("TRYING TO SPEAK TO Server ON " + address + " " + port.ToString());
-            IPEndPoint ip = new IPEndPoint(IPAddress.Parse(address), port);
-            Socket server = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            try
-            {
-                server.Connect(ip);
-            }
-            catch (SocketException e)
-            {
-                Console.WriteLine("SOCKET_CLIENT: Unable to connect to server.");
-                Console.WriteLine(e.ToString());
-                return null;
-            }
-
-            //get current user
-            //  server.Send(Encoding.ASCII.GetBytes("bla\n"));
-            server.Send(Encoding.ASCII.GetBytes("RETRIEVE_USER_HISTORY\n"));
-            Console.WriteLine("SENT TO SERVER: " + "RETRIEVE_USER_HISTORY");
-            server.Send(Encoding.ASCII.GetBytes(userID+"\n"));
-            Console.WriteLine("SENT TO SERVER: " + userID);
-           // byte[] data = new byte[1024];
-           // int receivedDataLength = 0;
-            String reply =recieveMessage(server);
-         /*   while (receivedDataLength < 1025)
-            {
-                receivedDataLength = server.Receive(data);
-                if (receivedDataLength < 1)
-                {
-                    Console.WriteLine("DIDNT GET A REPLY");
-                    server.Close();
-                    return null;
+                    List<UserScore> usersList = JsonConvert.DeserializeObject<List<UserScore>>(reply);
+                    disconnectFromServer();
+                    return usersList;
                 }
                 else
                 {
-                    reply = reply+Encoding.ASCII.GetString(data, 0, receivedDataLength).Trim();
-                    if (receivedDataLength < 1024)
-                    {
-                        break;
-                    }
+                    disconnectFromServer();
+                    return new List<UserScore>();
                 }
-            }*/
-            Console.WriteLine("GOT A REPLY");
-            
-            Console.WriteLine("Reply:" + reply + "!");
-            if (!reply.Equals(NULL_REPLY))
-            {
-                Console.WriteLine("Answered question List: " + reply);
             }
-            else
-            {
-                Console.WriteLine("SERVER DOESNT HAVE QUESTIONS TO SEND");
-                return null;
-            }
+            return null;
+            /* Console.WriteLine(DateTime.Now + "\t" +"TRYING TO SPEAK TO Server ON " + serverIP + " " + serverPort.ToString());
+             IPEndPoint ip = new IPEndPoint(IPAddress.Parse(serverIP), serverPort);
+             Socket server = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+             try
+             {
+                 server.Connect(ip);
+             }
+             catch (SocketException e)
+             {
+                 Console.WriteLine(DateTime.Now + "\t" +"SOCKET_CLIENT: Unable to connect to server.");
+                 Console.WriteLine(DateTime.Now + "\t" +e.ToString());
+                 return null;
+             }
 
-            server.Close();
+             //get current user
+             server.Send(Encoding.ASCII.GetBytes(RETRIEVE_SCORES));
+             server.Send(Encoding.ASCII.GetBytes(userID+"\n"));
 
-
-           // Newtonsoft.Json.Linq.JArray jArray = Newtonsoft.Json.Linq.JArray.Parse(reply);
-          //  Console.WriteLine(jArray);
-         //   List<UserAnsweredQ> q2 = jArray.ToObject<List<UserAnsweredQ>>();
-
-            List<UserAnsweredQ> q = JsonConvert.DeserializeObject<List<UserAnsweredQ>>(reply);
-            if (q.Count() > 0)
-            {
-                Console.WriteLine("Q: " + q[0].ToString());
-            }
-            return q;
+             Console.WriteLine(DateTime.Now + "\t" +"SENT TO SERVER: " + REQUEST_SERVERIP);
+             String reply = recieveMessage(server);
+             Console.WriteLine(DateTime.Now + "\t" +"Reply:" + reply + "!");
+             //NOW CHANGE THE USERS INTO A LIST OF USER OBJECTS
+             Console.WriteLine(DateTime.Now + "\t" +"Converting JSON to USER Objects!!!");
+             List<UserScore> usersList = new List<UserScore>();
+             if (!reply.Equals(NULL_REPLY) && !reply.Equals(EMPTY_REPLY))
+             {
+                 usersList = JsonConvert.DeserializeObject<List<UserScore>>(reply);
+             }
+             server.Close();
+             return usersList; */
         }
 
-        public List<String> getUserInterests(String address, int port)
+        public List<Category> getCategories()
         {
-            Console.WriteLine("TRYING TO CLIENT TO Server ON " + address + " " + port.ToString());
-            IPEndPoint ip = new IPEndPoint(IPAddress.Parse(address), port);
+            if (connectToServer(serverIP, serverPort))
+            {
+                server.Send(Encoding.ASCII.GetBytes(RETRIEVE_CATEGORIES));
+                String reply = recieveMessage();// if(reply.Equals("ERROR")) MainWindow.SwitchPage(new CommsError());
+                if (!reply.Equals(NULL_REPLY))
+                {
+                    List<Category> categories = JsonConvert.DeserializeObject<List<Category>>(reply);
+                    disconnectFromServer();
+                    return categories;
+                }
+                else
+                {
+                    disconnectFromServer();
+                    return new List<Category>();
+                }
+            }
+            return null;
+
+            /*
+            Console.WriteLine(DateTime.Now + "\t" +"TRYING TO SPEAK TO Server ON " + serverIP + " " + serverPort.ToString());
+            IPEndPoint ip = new IPEndPoint(IPAddress.Parse(serverIP), serverPort);
             Socket server = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             try
             {
@@ -606,51 +359,516 @@ namespace SocialLearningGame.Comms
             }
             catch (SocketException e)
             {
-                Console.WriteLine("SOCKET_CLIENT: Unable to connect to server.");
-                Console.WriteLine(e.ToString());
+                Console.WriteLine(DateTime.Now + "\t" +"SOCKET_CLIENT: Unable to connect to server.");
+                Console.WriteLine(DateTime.Now + "\t" +e.ToString());
                 return null;
             }
 
             //get current user
-            //  server.Send(Encoding.ASCII.GetBytes("bla\n"));
-            server.Send(Encoding.ASCII.GetBytes("REQUEST_USER_INTERESTS\n"));
-            Console.WriteLine("SENT TO SERVER: " + "REQUEST_USER_INTERESTS\n");
-            /*   byte[] data = new byte[1024];
-               int receivedDataLength = 0;
-               receivedDataLength = server.Receive(data);
-               if (receivedDataLength < 1)
-               {
-                   Console.WriteLine("DIDNT GET A REPLY");
-                   server.Close();
-                   return null;
-               }
-               Console.WriteLine("GOT A REPLY");
-               String reply = Encoding.ASCII.GetString(data, 0, receivedDataLength).Trim();*/
+            server.Send(Encoding.ASCII.GetBytes(RETRIEVE_CATEGORIES));
+            Console.WriteLine(DateTime.Now + "\t" +"SENT TO SERVER: " + "RETRIEVE_CATEGORIES\n");
             String reply = recieveMessage(server);
-            Console.WriteLine("Reply:" + reply + "!");
-            if (!reply.Equals(NULL_REPLY))
+            Console.WriteLine(DateTime.Now + "\t" +"Reply:" + reply + "!");
+            if (!reply.Equals(NULL_REPLY) && !reply.Equals(EMPTY_REPLY))
             {
-                Console.WriteLine("Category List: " + reply);
+                Console.WriteLine(DateTime.Now + "\t" +"Category List: " + reply);
             }
             else
             {
-                Console.WriteLine("SERVER DOESNT HAVE CATEGORIES TO SEND");
+                Console.WriteLine(DateTime.Now + "\t" +"SERVER DOESNT HAVE CATEGORIES TO SEND");
+                return new List<Category>();
+            }
+
+            server.Close();
+
+            List<Category> c = JsonConvert.DeserializeObject<List<Category>>(reply);
+            Console.WriteLine(DateTime.Now + "\t" +"C: " + c[0].ToString());
+            return c; */
+        }
+
+        public List<Question> getQuestions()
+        {
+            if (connectToServer(serverIP, serverPort))
+            {
+                server.Send(Encoding.ASCII.GetBytes(RETRIEVE_QUESTIONS));
+                String reply = recieveMessage(); //if(reply.Equals("ERROR")) MainWindow.SwitchPage(new CommsError());
+                if (!reply.Equals(NULL_REPLY))
+                {
+                    List<Question> questions = JsonConvert.DeserializeObject<List<Question>>(reply);
+                    disconnectFromServer();
+                    return questions;
+                }
+                else
+                {
+                    disconnectFromServer();
+                    return new List<Question>();
+                }
+            }
+            return null;
+            /*
+            Console.WriteLine(DateTime.Now + "\t" +"TRYING TO SPEAK TO Server ON " + serverIP + " " + serverPort.ToString());
+            IPEndPoint ip = new IPEndPoint(IPAddress.Parse(serverIP), serverPort);
+            Socket server = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            try
+            {
+                server.Connect(ip);
+            }
+            catch (SocketException e)
+            {
+                Console.WriteLine(DateTime.Now + "\t" +"SOCKET_CLIENT: Unable to connect to server.");
+                Console.WriteLine(DateTime.Now + "\t" +e.ToString());
                 return null;
+            }
+
+            //get current user
+            server.Send(Encoding.ASCII.GetBytes(RETRIEVE_QUESTIONS));
+            String reply = recieveMessage(server);
+            Console.WriteLine(DateTime.Now + "\t" +"SENT TO SERVER: " + RETRIEVE_QUESTIONS);
+            if (!reply.Equals(NULL_REPLY) && !reply.Equals(EMPTY_REPLY))
+            {
+                Console.WriteLine(DateTime.Now + "\t" +"Question List: " + reply);
+            }
+            else
+            {
+                Console.WriteLine(DateTime.Now + "\t" +"SERVER DOESNT HAVE QUESTIONS TO SEND");
+                return new List<Question>();
+            }
+
+            server.Close();
+
+            List<Question> q = JsonConvert.DeserializeObject<List<Question>>(reply);
+            Console.WriteLine(DateTime.Now + "\t" +"Q: " + q[0].ToString());
+            return q; */
+        }
+
+        //GET ANSWERED Q's
+        public List<UserAnsweredQ> getAnsweredQuestions(String player)
+        {
+            if (connectToServer(serverIP, serverPort))
+            {
+                server.Send(Encoding.ASCII.GetBytes(RETRIEVE_USER_HISTORY));
+                server.Send(Encoding.ASCII.GetBytes(player + "\n"));
+                String reply = recieveMessage(); //if(reply.Equals("ERROR")) MainWindow.SwitchPage(new CommsError());
+                if (!reply.Equals(NULL_REPLY))
+                {
+                    List<UserAnsweredQ> answers = JsonConvert.DeserializeObject<List<UserAnsweredQ>>(reply);
+                    disconnectFromServer();
+                    return answers;
+                }
+                else
+                {
+                    disconnectFromServer();
+                    return new List<UserAnsweredQ>();
+                }
+            }
+            return null;
+            /*Console.WriteLine(DateTime.Now + "\t" +"TRYING TO SPEAK TO Server ON " + serverIP + " " + serverPort.ToString());
+            IPEndPoint ip = new IPEndPoint(IPAddress.Parse(serverIP), serverPort);
+            Socket server = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            try
+            {
+                server.Connect(ip);
+            }
+            catch (SocketException e)
+            {
+                Console.WriteLine(DateTime.Now + "\t" +"SOCKET_CLIENT: Unable to connect to server.");
+                Console.WriteLine(DateTime.Now + "\t" +e.ToString());
+                return null;
+            }
+            server.Send(Encoding.ASCII.GetBytes(RETRIEVE_USER_HISTORY));
+            Console.WriteLine(DateTime.Now + "\t" +"SENT TO SERVER: " + "RETRIEVE_USER_HISTORY");
+
+            server.Send(Encoding.ASCII.GetBytes(player + "\n"));
+            Console.WriteLine(DateTime.Now + "\t" +"SENT TO SERVER: " + player);
+
+            String reply =recieveMessage(server);
+            Console.WriteLine(DateTime.Now + "\t" +"GOT A REPLY");
+            
+            Console.WriteLine(DateTime.Now + "\t" +"Reply:" + reply + "!");
+            if (!reply.Equals(NULL_REPLY) && !reply.Equals(EMPTY_REPLY))
+            {
+                Console.WriteLine(DateTime.Now + "\t" +"Answered question List: " + reply);
+            }
+            else
+            {
+                Console.WriteLine(DateTime.Now + "\t" +"SERVER DOESNT HAVE QUESTIONS TO SEND");
+                return new List<UserAnsweredQ>();
+            }
+            server.Close();
+            List<UserAnsweredQ> q = JsonConvert.DeserializeObject<List<UserAnsweredQ>>(reply);
+            if (q.Count() > 0)
+            {
+                Console.WriteLine(DateTime.Now + "\t" +"Q: " + q[0].ToString());
+            }
+            return q;*/
+        }
+
+        public List<String> getInvitedUsers(String groupID)
+        {
+            if (connectToServer(serverIP, serverPort))
+            {
+                server.Send(Encoding.ASCII.GetBytes(RETRIEVE_INVITED_PLAYERS));
+                server.Send(Encoding.ASCII.GetBytes(groupID + "\n"));
+                String reply = recieveMessage(); //if(reply.Equals("ERROR")) MainWindow.SwitchPage(new CommsError());
+                if (!reply.Equals(NULL_REPLY))
+                {
+                    List<String> invitedUsers = JsonConvert.DeserializeObject<List<String>>(reply);
+                    disconnectFromServer();
+                    return invitedUsers;
+                }
+                else
+                {
+                    disconnectFromServer();
+                    return new List<String>();
+                }
+            }
+            return null;
+
+            /*  Console.WriteLine(DateTime.Now + "\t" +"TRYING TO SPEAK TO Server ON " + serverIP + " " + serverPort.ToString());
+              IPEndPoint ip = new IPEndPoint(IPAddress.Parse(serverIP), serverPort);
+              Socket server = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+              try
+              {
+                  server.Connect(ip);
+              }
+              catch (SocketException e)
+              {
+                  Console.WriteLine(DateTime.Now + "\t" +"SOCKET_CLIENT: Unable to connect to server.");
+                  Console.WriteLine(DateTime.Now + "\t" +e.ToString());
+                  return null;
+              }
+              server.Send(Encoding.ASCII.GetBytes(RETRIEVE_INVITED_PLAYERS));
+              Console.WriteLine(DateTime.Now + "\t" +"SENT TO SERVER: " + "RETRIEVE_INVITED_PLAYERS");
+              server.Send(Encoding.ASCII.GetBytes(groupID + "\n"));
+              Console.WriteLine(DateTime.Now + "\t" +"SENT TO SERVER: " + groupID);
+
+              String reply = recieveMessage(server);
+
+              Console.WriteLine(DateTime.Now + "\t" +"GOT A REPLY");
+              Console.WriteLine(DateTime.Now + "\t" +"Reply:" + reply + "!");
+              if (!reply.Equals(NULL_REPLY) && !reply.Equals(EMPTY_REPLY))
+              {
+                  Console.WriteLine(DateTime.Now + "\t" +"Answered question List: " + reply);
+              }
+              else
+              {
+                  Console.WriteLine(DateTime.Now + "\t" +"SERVER DOESNT HAVE QUESTIONS TO SEND");
+                  return new List<String>();
+              }
+              server.Close();
+
+              List<String> players = JsonConvert.DeserializeObject<List<String>>(reply);
+              return players; */
+        }
+
+        public List<String> getUserInterests()
+        {
+            if (connectToServer(clientIP, clientPort))
+            {
+                server.Send(Encoding.ASCII.GetBytes(REQUEST_USER_INTERESTS));
+                String reply = recieveMessage(); //if(reply.Equals("ERROR")) MainWindow.SwitchPage(new CommsError());
+                if (!reply.Equals(NULL_REPLY))
+                {
+                    List<String> interests = JsonConvert.DeserializeObject<List<String>>(reply);
+                    disconnectFromServer();
+                    return interests;
+                }
+                else
+                {
+                    disconnectFromServer();
+                    return new List<String>();
+                }
+
+            }
+            return null;
+            /*
+            Console.WriteLine(DateTime.Now + "\t" +"TRYING TO CLIENT TO Server ON " + clientIP + " " + clientPort.ToString());
+            IPEndPoint ip = new IPEndPoint(IPAddress.Parse(clientIP), clientPort);
+            Socket server = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            try
+            {
+                server.Connect(ip);
+            }
+            catch (SocketException e)
+            {
+                Console.WriteLine(DateTime.Now + "\t" +"SOCKET_CLIENT: Unable to connect to server.");
+                Console.WriteLine(DateTime.Now + "\t" +e.ToString());
+                return null;
+            }
+            server.Send(Encoding.ASCII.GetBytes(REQUEST_USER_INTERESTS));
+            Console.WriteLine(DateTime.Now + "\t" +"SENT TO SERVER: " + "REQUEST_USER_INTERESTS\n");
+            String reply = recieveMessage(server);
+            Console.WriteLine(DateTime.Now + "\t" +"Reply:" + reply + "!");
+            if (!reply.Equals(NULL_REPLY) && !reply.Equals(EMPTY_REPLY))
+            {
+                Console.WriteLine(DateTime.Now + "\t" +"Category List: " + reply);
+            }
+            else
+            {
+                Console.WriteLine(DateTime.Now + "\t" +"SERVER DOESNT HAVE CATEGORIES TO SEND");
+                server.Close();
+                return new List<String>();
             }
 
             server.Close();
 
             List<String> userInterests = JsonConvert.DeserializeObject<List<String>>(reply);
-
-            return userInterests;
+            Console.WriteLine(DateTime.Now + "\t" +userInterests);
+            return userInterests; */
         }
 
         //CHANGE TO RECEIVE ACK, SEND QUESTIONS USER HAS ANSWERED
-        public void sendProgress(String address, int port, UserScore user, List<UserAnsweredQ> answeredQ)
+        public Boolean sendProgress(Object user, UserAnsweredQ answeredQ)
         {
-            Console.WriteLine("UPLOADING PROGRESS TO SERVER");
-            Console.WriteLine("TRYING TO SPEAK TO Server ON " + address + " " + port.ToString());
-            IPEndPoint ip = new IPEndPoint(IPAddress.Parse(address), port);
+            if (connectToServer(serverIP, serverPort))
+            {
+                server.Send(Encoding.ASCII.GetBytes(UPLOAD_PROGRESS));
+                if (user is UserScore)
+                {
+                    server.Send(Encoding.ASCII.GetBytes(USER));
+                }
+                else if (user is Groups)
+                {
+                    server.Send(Encoding.ASCII.GetBytes(GROUP));
+                }
+                var sendUserScore = JsonConvert.SerializeObject(user);
+                server.Send(Encoding.ASCII.GetBytes(sendUserScore + "\n"));
+                var sendAnsweredQ = JsonConvert.SerializeObject(answeredQ);
+                server.Send(Encoding.ASCII.GetBytes(sendAnsweredQ + "\n"));
+                disconnectFromServer();
+                return true;
+            }
+            return false;
+            /* Console.WriteLine(DateTime.Now + "\t" +"UPLOADING PROGRESS TO SERVER");
+             Console.WriteLine(DateTime.Now + "\t" +"TRYING TO SPEAK TO Server ON " + serverIP + " " + serverPort.ToString());
+             IPEndPoint ip = new IPEndPoint(IPAddress.Parse(serverIP), serverPort);
+             Socket server = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+             try
+             {
+                 server.Connect(ip);
+             }
+             catch (SocketException e)
+             {
+                 Console.WriteLine(DateTime.Now + "\t" +"SOCKET_CLIENT: Unable to connect to server.");
+                 Console.WriteLine(DateTime.Now + "\t" +e.ToString());
+                 return;
+             }
+             server.Send(Encoding.ASCII.GetBytes(UPLOAD_PROGRESS));
+             if(user is UserScore)
+             {
+                 Console.WriteLine(DateTime.Now + "\t" +"SENT AS USER");
+                 server.Send(Encoding.ASCII.GetBytes("USER\n"));
+             }
+             else
+             {
+                 Console.WriteLine(DateTime.Now + "\t" +"SENT AS GROUP");
+                 server.Send(Encoding.ASCII.GetBytes("GROUP\n"));
+             }
+             var sendUserScore = JsonConvert.SerializeObject(user);
+             Console.WriteLine(DateTime.Now + "\t" +"Sending ... " + sendUserScore);
+             server.Send(Encoding.ASCII.GetBytes(sendUserScore+"\n"));
+             var sendAnsweredQ = JsonConvert.SerializeObject(answeredQ);
+             Console.WriteLine(DateTime.Now + "\t" +"Sending..." + sendAnsweredQ);
+
+             server.Send(Encoding.ASCII.GetBytes(sendAnsweredQ + "\n"));
+             Console.WriteLine(DateTime.Now + "\t" +"THE LIST OF QUESTIONS ANSWERED ARE NOW UPLOADED!!!");
+
+
+             server.Close();*/
+        }
+
+
+
+        public Boolean userLeaveGroup(String userJid)
+        {
+            if (connectToServer(serverIP, serverPort))
+            {
+                server.Send(Encoding.ASCII.GetBytes(LEAVE_GROUP));
+                server.Send(Encoding.ASCII.GetBytes(userJid + "\n"));
+                String reply = recieveMessage(); //if(reply.Equals("ERROR")) MainWindow.SwitchPage(new CommsError());
+                if (reply.Equals(TRUE_REPLY))
+                {
+                    disconnectFromServer();
+                    return true;
+                }
+                else
+                {
+                    disconnectFromServer();
+                    return false;
+                }
+            }
+            return false;
+            /*  Console.WriteLine(DateTime.Now + "\t" +"TRYING TO SPEAK TO Server ON " + serverIP + " " + serverPort.ToString());
+              IPEndPoint ip = new IPEndPoint(IPAddress.Parse(serverIP), serverPort);
+              Socket server = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+              try
+              {
+                  server.Connect(ip);
+              }
+              catch (SocketException e)
+              {
+                  Console.WriteLine(DateTime.Now + "\t" +"SOCKET_CLIENT: Unable to connect to server.");
+                  Console.WriteLine(DateTime.Now + "\t" +e.ToString());
+                  return false;
+              }
+              server.Send(Encoding.ASCII.GetBytes(LEAVE_GROUP));
+              Console.WriteLine(DateTime.Now + "\t" +"SENT TO SERVER: " + "LEAVE_GROUP");
+              server.Send(Encoding.ASCII.GetBytes(userJid + "\n"));
+              Console.WriteLine(DateTime.Now + "\t" +"SENT TO SERVER: " + userJid);
+
+              String reply = recieveMessage(server);
+              if (reply.Equals("TRUE"))
+              {
+                  server.Close();
+                  Console.WriteLine(DateTime.Now + "\t" +"RETURNING TRUE FROM CREATE GROUP");
+                  return true;
+              }
+
+              server.Close();
+              return false;*/
+        }
+
+        public Groups getUsersGroup()
+        {
+            if (connectToServer(serverIP, serverPort))
+            {
+                server.Send(Encoding.ASCII.GetBytes(RETRIEVE_USER_GROUP));
+                server.Send(Encoding.ASCII.GetBytes(userID + "\n"));
+                String reply = recieveMessage(); //if(reply.Equals("ERROR")) MainWindow.SwitchPage(new CommsError());
+                if (!reply.Equals(NULL_REPLY))
+                {
+                    Groups group = JsonConvert.DeserializeObject<Groups>(reply);
+                    disconnectFromServer();
+                    return group;
+                }
+                else
+                {
+                    disconnectFromServer();
+                    Groups group = new Groups();
+                    group.groupName = null;
+                    return group;
+                }
+            }
+            return null;
+            /* Console.WriteLine(DateTime.Now + "\t" +"TRYING TO SPEAK TO Server ON " + serverIP + " " + serverPort.ToString());
+             IPEndPoint ip = new IPEndPoint(IPAddress.Parse(serverIP), serverPort);
+             Socket server = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+             try
+             {
+                 server.Connect(ip);
+             }
+             catch (SocketException e)
+             {
+                 Console.WriteLine(DateTime.Now + "\t" +"SOCKET_CLIENT: Unable to connect to server.");
+                 Console.WriteLine(DateTime.Now + "\t" +e.ToString());
+                 return null;
+             }
+             server.Send(Encoding.ASCII.GetBytes(RETRIEVE_USER_GROUP));
+             Console.WriteLine(DateTime.Now + "\t" +"SENT TO SERVER: " + "RETRIEVE_USER_GROUP");
+             server.Send(Encoding.ASCII.GetBytes(userID + "\n"));
+             Console.WriteLine(DateTime.Now + "\t" +"SENT TO SERVER: " + userID);
+
+             String reply = recieveMessage(server);
+
+             Console.WriteLine(DateTime.Now + "\t" +"GOT A REPLY");
+             Console.WriteLine(DateTime.Now + "\t" +"Reply:" + reply + "!");
+             if (!reply.Equals(NULL_REPLY))
+             {
+                 Console.WriteLine(DateTime.Now + "\t" +"Answered question List: " + reply);
+             }
+             else
+             {
+                 Console.WriteLine(DateTime.Now + "\t" +"SERVER DOESNT HAVE QUESTIONS TO SEND");
+                 return null;
+             }
+             server.Close();
+
+             Groups group = JsonConvert.DeserializeObject<Groups>(reply);
+             return group;
+             */
+        }
+
+        public List<String> getGroupPlayers(String groupID)
+        {
+            if (connectToServer(serverIP, serverPort))
+            {
+                server.Send(Encoding.ASCII.GetBytes(RETRIEVE_GROUP_PLAYERS));
+                server.Send(Encoding.ASCII.GetBytes(groupID + "\n"));
+                String reply = recieveMessage(); //if(reply.Equals("ERROR")) MainWindow.SwitchPage(new CommsError());
+                if (!reply.Equals(NULL_REPLY))
+                {
+                    List<String> groupPlayers = JsonConvert.DeserializeObject<List<String>>(reply);
+                    disconnectFromServer();
+                    return groupPlayers;
+                }
+                else
+                {
+                    disconnectFromServer();
+                    return new List<String>();
+                }
+            }
+            return null;
+            /* Console.WriteLine(DateTime.Now + "\t" +"TRYING TO SPEAK TO Server ON " + serverIP + " " + serverPort.ToString());
+             IPEndPoint ip = new IPEndPoint(IPAddress.Parse(serverIP), serverPort);
+             Socket server = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+             try
+             {
+                 server.Connect(ip);
+             }
+             catch (SocketException e)
+             {
+                 Console.WriteLine(DateTime.Now + "\t" +"SOCKET_CLIENT: Unable to connect to server.");
+                 Console.WriteLine(DateTime.Now + "\t" +e.ToString());
+                 return null;
+             }
+             server.Send(Encoding.ASCII.GetBytes(RETRIEVE_GROUP_PLAYERS));
+             Console.WriteLine(DateTime.Now + "\t" +"SENT TO SERVER: " + "RETRIEVE_GROUP_PLAYERS");
+             server.Send(Encoding.ASCII.GetBytes(groupID + "\n"));
+             Console.WriteLine(DateTime.Now + "\t" +"SENT TO SERVER: " + groupID);
+
+             String reply = recieveMessage(server);
+
+             Console.WriteLine(DateTime.Now + "\t" +"GOT A REPLY");
+             Console.WriteLine(DateTime.Now + "\t" +"Reply:" + reply + "!");
+             if (!reply.Equals(NULL_REPLY) && !reply.Equals(EMPTY_REPLY))
+             {
+                 Console.WriteLine(DateTime.Now + "\t" +"Answered question List: " + reply);
+             }
+             else
+             {
+                 Console.WriteLine(DateTime.Now + "\t" +"SERVER DOESNT HAVE QUESTIONS TO SEND");
+                 return new List<String>();
+             }
+             server.Close();
+
+             List<String> users = JsonConvert.DeserializeObject<List<String>>(reply);
+             return users;*/
+
+        }
+
+        public List<PendingJoins> getGroupNotifications()
+        {
+            if (connectToServer(serverIP, serverPort))
+            {
+                server.Send(Encoding.ASCII.GetBytes(RETRIEVE_NOTIFICATIONS));
+                server.Send(Encoding.ASCII.GetBytes(userID + "\n"));
+                String reply = recieveMessage(); //if(reply.Equals("ERROR")) MainWindow.SwitchPage(new CommsError());
+                if (!reply.Equals(NULL_REPLY))
+                {
+                    List<PendingJoins> pendingJoins = JsonConvert.DeserializeObject<List<PendingJoins>>(reply);
+                    disconnectFromServer();
+                    return pendingJoins;
+                }
+                else
+                {
+                    disconnectFromServer();
+                    return new List<PendingJoins>();
+                }
+            }
+            return null;
+            /*
+            Console.WriteLine(DateTime.Now + "\t" +"TRYING TO SPEAK TO Server ON " + serverIP + " " + serverPort.ToString());
+            IPEndPoint ip = new IPEndPoint(IPAddress.Parse(serverIP), serverPort);
             Socket server = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             try
             {
@@ -658,79 +876,714 @@ namespace SocialLearningGame.Comms
             }
             catch (SocketException e)
             {
-                Console.WriteLine("SOCKET_CLIENT: Unable to connect to server.");
-                Console.WriteLine(e.ToString());
-                return;
+                Console.WriteLine(DateTime.Now + "\t" +"SOCKET_CLIENT: Unable to connect to server.");
+                Console.WriteLine(DateTime.Now + "\t" +e.ToString());
+                return null;
             }
+            server.Send(Encoding.ASCII.GetBytes(RETRIEVE_NOTIFICATIONS));
+            Console.WriteLine(DateTime.Now + "\t" +"SENT TO SERVER: " + "RETRIEVE_NOTIFICATIONS");
+            server.Send(Encoding.ASCII.GetBytes(userID + "\n"));
+            Console.WriteLine(DateTime.Now + "\t" +"SENT TO SERVER: " + userID);
 
-            //get current user
-            //  server.Send(Encoding.ASCII.GetBytes("bla\n"));
-            var sendUserScore = JsonConvert.SerializeObject(user);
-            server.Send(Encoding.ASCII.GetBytes("UPLOAD_PROGRESS\n"));
-            server.Send(Encoding.ASCII.GetBytes(sendUserScore+"\n"));
-            var sendAnsweredQ = JsonConvert.SerializeObject(answeredQ);
-            Console.WriteLine("Sending..." + sendAnsweredQ);
+            String reply = recieveMessage(server);
 
-            server.Send(Encoding.ASCII.GetBytes(sendAnsweredQ + "\n"));
-            Console.WriteLine("THE LIST OF QUESTIONS ANSWERED ARE NOW UPLOADED!!!");
-
-            /*Console.WriteLine("SENT TO SERVER: JSON USER STRING");
-            byte[] data = new byte[1024];
-            int receivedDataLength = 0;
-            receivedDataLength = server.Receive(data);
-            if (receivedDataLength < 1)
+            Console.WriteLine(DateTime.Now + "\t" +"GOT A REPLY");
+            Console.WriteLine(DateTime.Now + "\t" +"Reply:" + reply + "!");
+            if (!reply.Equals(NULL_REPLY) && !reply.Equals(EMPTY_REPLY))
             {
-                Console.WriteLine("DIDNT GET A REPLY");
-                server.Close();
-                return;
-            }
-            Console.WriteLine("GOT A REPLY");
-            String reply = Encoding.ASCII.GetString(data, 0, receivedDataLength).Trim();
-            Console.WriteLine("Reply:" + reply + "!");
-            if (!reply.Equals(NULL_REPLY))
-            {
-                Console.WriteLine("Question List: " + reply);
+                Console.WriteLine(DateTime.Now + "\t" +"Answered question List: " + reply);
             }
             else
             {
-                Console.WriteLine("SERVER DOESNT HAVE QUESTIONS TO SEND");
-                return null;
-            }*/
-
+                Console.WriteLine(DateTime.Now + "\t" +"SERVER DOESNT HAVE QUESTIONS TO SEND");
+                return new List<PendingJoins>();
+            }
             server.Close();
 
-          //  Question[] q = JsonConvert.DeserializeObject<Question[]>(reply);
-            //Console.WriteLine("Q: " + q[0].ToString());
-            //return q;
+            List<PendingJoins> notifications = JsonConvert.DeserializeObject<List<PendingJoins>>(reply);
+            return notifications;*/
+
         }
 
-        private String recieveMessage(Socket server)
+        public Boolean createGroup(String userID)
         {
-            byte[] data = new byte[1024];
-            int receivedDataLength = 0;
-            String reply = "";
-            while (receivedDataLength < 1025)
+            if (connectToServer(serverIP, serverPort))
             {
-                receivedDataLength = server.Receive(data);
-                if (receivedDataLength < 1)
+                server.Send(Encoding.ASCII.GetBytes(CREATE_GROUP));
+                server.Send(Encoding.ASCII.GetBytes(userID + "\n"));
+                String reply = recieveMessage(); //if(reply.Equals("ERROR")) MainWindow.SwitchPage(new CommsError());
+                if (reply.Equals(TRUE_REPLY))
                 {
-                    Console.WriteLine("DIDNT GET A REPLY");
-                    server.Close();
-                    return null;
+                    disconnectFromServer();
+                    return true;
                 }
                 else
                 {
-                    reply = reply + Encoding.ASCII.GetString(data, 0, receivedDataLength).Trim();
-                    if (receivedDataLength < 1024)
-                    {
-                        break;
-                    }
+                    disconnectFromServer();
+                }
+
+            }
+            return false;
+            /*
+            Console.WriteLine(DateTime.Now + "\t" +"TRYING TO SPEAK TO Server ON " + serverIP + " " + serverPort.ToString());
+            IPEndPoint ip = new IPEndPoint(IPAddress.Parse(serverIP), serverPort);
+            Socket server = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            try
+            {
+                server.Connect(ip);
+            }
+            catch (SocketException e)
+            {
+                Console.WriteLine(DateTime.Now + "\t" +"SOCKET_CLIENT: Unable to connect to server.");
+                Console.WriteLine(DateTime.Now + "\t" +e.ToString());
+                return false;
+            }
+            server.Send(Encoding.ASCII.GetBytes(CREATE_GROUP));
+            Console.WriteLine(DateTime.Now + "\t" +"SENT TO SERVER: " + "CREATE_GROUP");
+            server.Send(Encoding.ASCII.GetBytes(userID + "\n"));
+            Console.WriteLine(DateTime.Now + "\t" +"SENT TO SERVER: " + userID);
+
+            String reply = recieveMessage(server);
+            if (reply.Equals("TRUE"))
+            {
+                server.Close();
+                Console.WriteLine(DateTime.Now + "\t" +"RETURNING TRUE FROM CREATE GROUP");
+                return true;
+            }
+          
+            server.Close();
+            return false; */
+
+        }
+
+        public List<String> getAllPlayers()
+        {
+            if (connectToServer(serverIP, serverPort))
+            {
+                server.Send(Encoding.ASCII.GetBytes(RETRIEVE_ALL_USERS));
+                String reply = recieveMessage(); //if(reply.Equals("ERROR")) MainWindow.SwitchPage(new CommsError());
+                if (!reply.Equals(NULL_REPLY))
+                {
+                    List<String> allPlayers = JsonConvert.DeserializeObject<List<String>>(reply);
+                    disconnectFromServer();
+                    return allPlayers;
+                }
+                else
+                {
+                    disconnectFromServer();
+                    return new List<String>();
+                }
+
+            }
+            return null;
+            /*
+            Console.WriteLine(DateTime.Now + "\t" +"TRYING TO SPEAK TO Server ON " + serverIP + " " + serverPort.ToString());
+            IPEndPoint ip = new IPEndPoint(IPAddress.Parse(serverIP), serverPort);
+            Socket server = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            try
+            {
+                server.Connect(ip);
+            }
+            catch (SocketException e)
+            {
+                Console.WriteLine(DateTime.Now + "\t" +"SOCKET_CLIENT: Unable to connect to server.");
+                Console.WriteLine(DateTime.Now + "\t" +e.ToString());
+                return null;
+            }
+            server.Send(Encoding.ASCII.GetBytes(RETRIEVE_ALL_USERS));
+            Console.WriteLine(DateTime.Now + "\t" +"SENT TO SERVER: " + "RETRIEVE_ALL_USERS");
+
+            String reply = recieveMessage(server);
+
+            Console.WriteLine(DateTime.Now + "\t" +"GOT A REPLY");
+            Console.WriteLine(DateTime.Now + "\t" +"Reply:" + reply + "!");
+            if (!reply.Equals(NULL_REPLY) && !reply.Equals(EMPTY_REPLY))
+            {
+                Console.WriteLine(DateTime.Now + "\t" +"Answered question List: " + reply);
+            }
+            else
+            {
+                Console.WriteLine(DateTime.Now + "\t" +"SERVER DOESNT HAVE QUESTIONS TO SEND");
+                return new List<String>();
+            }
+            server.Close();
+
+            List<String> allUsers = JsonConvert.DeserializeObject<List<String>>(reply);
+            return allUsers;*/
+
+        }
+
+        public Boolean inviteUserToGroup(String fromUser, String toUser, String groupName)
+        {
+            if (connectToServer(serverIP, serverPort))
+            {
+                server.Send(Encoding.ASCII.GetBytes(INVITE_USER));
+                server.Send(Encoding.ASCII.GetBytes(fromUser + "\n"));
+                server.Send(Encoding.ASCII.GetBytes(toUser + "\n"));
+                server.Send(Encoding.ASCII.GetBytes(groupName + "\n"));
+                String reply = recieveMessage(); //if(reply.Equals("ERROR")) MainWindow.SwitchPage(new CommsError());
+                if (reply.Equals(TRUE_REPLY))
+                {
+                    disconnectFromServer();
+                    return true;
+                }
+                else
+                {
+                    disconnectFromServer();
+                    return false;
                 }
             }
-            return reply;
+            return false;
+            /*
+            return false;
+            Console.WriteLine(DateTime.Now + "\t" +"TRYING TO SPEAK TO Server ON " + serverIP + " " + serverPort.ToString());
+            IPEndPoint ip = new IPEndPoint(IPAddress.Parse(serverIP), serverPort);
+            Socket server = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            try
+            {
+                server.Connect(ip);
+            }
+            catch (SocketException e)
+            {
+                Console.WriteLine(DateTime.Now + "\t" +"SOCKET_CLIENT: Unable to connect to server.");
+                Console.WriteLine(DateTime.Now + "\t" +e.ToString());
+                return false;
+            }
+            server.Send(Encoding.ASCII.GetBytes(INVITE_USER));
+            Console.WriteLine(DateTime.Now + "\t" +"SENT TO SERVER: " + "INVITE_USER");
+            server.Send(Encoding.ASCII.GetBytes(fromUser + "\n"));
+            Console.WriteLine(DateTime.Now + "\t" +"SENT TO SERVER: " + fromUser);
+            server.Send(Encoding.ASCII.GetBytes(toUser + "\n"));
+            Console.WriteLine(DateTime.Now + "\t" +"SENT TO SERVER: " + toUser);
+            server.Send(Encoding.ASCII.GetBytes(groupName + "\n"));
+            Console.WriteLine(DateTime.Now + "\t" +"SENT TO SERVER: " + groupName);
+            String reply = recieveMessage(server);
+            if (reply.Equals("TRUE"))
+            {
+                server.Close();
+                Console.WriteLine(DateTime.Now + "\t" +"RETURNING TRUE FROM CREATE GROUP");
+                return true;
+            }
+
+            server.Close();
+            return false; */
         }
+
+        public Boolean addUserToGroup(String groupName, String userID)
+        {
+            if (connectToServer(serverIP, serverPort))
+            {
+                server.Send(Encoding.ASCII.GetBytes(ADD_USER_TO_GROUP));
+                server.Send(Encoding.ASCII.GetBytes(groupName + "\n"));
+                server.Send(Encoding.ASCII.GetBytes(userID + "\n"));
+                String reply = recieveMessage();// if(reply.Equals("ERROR")) MainWindow.SwitchPage(new CommsError());
+                if (reply.Equals(TRUE_REPLY))
+                {
+                    disconnectFromServer();
+                    return true;
+                }
+                else
+                {
+                    disconnectFromServer();
+                    return false;
+                }
+            }
+            return false;
+            /*
+            Console.WriteLine(DateTime.Now + "\t" +"TRYING TO SPEAK TO Server ON " + serverIP + " " + serverPort.ToString());
+            IPEndPoint ip = new IPEndPoint(IPAddress.Parse(serverIP), serverPort);
+            Socket server = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            try
+            {
+                server.Connect(ip);
+            }
+            catch (SocketException e)
+            {
+                Console.WriteLine(DateTime.Now + "\t" +"SOCKET_CLIENT: Unable to connect to server.");
+                Console.WriteLine(DateTime.Now + "\t" +e.ToString());
+                return false;
+            }
+            server.Send(Encoding.ASCII.GetBytes(ADD_USER_TO_GROUP));
+            Console.WriteLine(DateTime.Now + "\t" +"SENT TO SERVER: " + "ADD_USER_TO_GROUP");
+            server.Send(Encoding.ASCII.GetBytes(groupName + "\n"));
+            Console.WriteLine(DateTime.Now + "\t" +"SENT TO SERVER: " + groupName);
+            server.Send(Encoding.ASCII.GetBytes(userID + "\n"));
+            Console.WriteLine(DateTime.Now + "\t" +"SENT TO SERVER: " + userID);
+
+            String reply = recieveMessage(server);
+
+            Console.WriteLine(DateTime.Now + "\t" +"GOT A REPLY");
+            Console.WriteLine(DateTime.Now + "\t" +"Reply:" + reply + "!");
+            if (!reply.Equals("TRUE\n"))
+            {
+                Console.WriteLine(DateTime.Now + "\t" +"Answered question List: " + reply);
+                server.Close();
+                return true;
+            }
+            else
+            {
+                Console.WriteLine(DateTime.Now + "\t" +"SERVER DOESNT HAVE QUESTIONS TO SEND");
+                server.Close();
+                return false;
+            }
+             * */
+        }
+
+        //TODO A REPLY
+        public Boolean removeUserFromGroup(String userID)
+        {
+            if (connectToServer(serverIP, serverPort))
+            {
+                server.Send(Encoding.ASCII.GetBytes(REMOVE_USER_FROM_GROUP));
+                server.Send(Encoding.ASCII.GetBytes(userID + "\n"));
+                disconnectFromServer();
+                return true;
+            }
+            return false;
+            /* Console.WriteLine(DateTime.Now + "\t" +"TRYING TO SPEAK TO Server ON " + serverIP + " " + serverPort.ToString());
+             IPEndPoint ip = new IPEndPoint(IPAddress.Parse(serverIP), serverPort);
+             Socket server = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+             try
+             {
+                 server.Connect(ip);
+             }
+             catch (SocketException e)
+             {
+                 Console.WriteLine(DateTime.Now + "\t" +"SOCKET_CLIENT: Unable to connect to server.");
+                 Console.WriteLine(DateTime.Now + "\t" +e.ToString());
+                 return false;
+             }
+             server.Send(Encoding.ASCII.GetBytes(REMOVE_USER_FROM_GROUP));
+             Console.WriteLine(DateTime.Now + "\t" +"SENT TO SERVER: " + "REMOVE_USER_FROM_GROUP");
+             server.Send(Encoding.ASCII.GetBytes(userID + "\n"));
+             Console.WriteLine(DateTime.Now + "\t" +"SENT TO SERVER: " + userID);
+
+             return true;*/
+
+        }
+
+        public Boolean deleteGroup(String groupID)
+        {
+            if (connectToServer(serverIP, serverPort))
+            {
+                server.Send(Encoding.ASCII.GetBytes(DELETE_GROUP));
+                server.Send(Encoding.ASCII.GetBytes(groupID + "\n"));
+                String reply = recieveMessage(); //if(reply.Equals("ERROR")) MainWindow.SwitchPage(new CommsError());
+                if (reply.Equals(TRUE_REPLY))
+                {
+                    disconnectFromServer();
+                    return true;
+                }
+                else
+                {
+                    disconnectFromServer();
+                    return false;
+                }
+            }
+            return false;
+            /*
+            Console.WriteLine(DateTime.Now + "\t" +"TRYING TO SPEAK TO Server ON " + serverIP + " " + serverPort.ToString());
+            IPEndPoint ip = new IPEndPoint(IPAddress.Parse(serverIP), serverPort);
+            Socket server = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            try
+            {
+                server.Connect(ip);
+            }
+            catch (SocketException e)
+            {
+                Console.WriteLine(DateTime.Now + "\t" +"SOCKET_CLIENT: Unable to connect to server.");
+                Console.WriteLine(DateTime.Now + "\t" +e.ToString());
+                return false;
+            }
+            server.Send(Encoding.ASCII.GetBytes(DELETE_GROUP));
+            Console.WriteLine(DateTime.Now + "\t" +"SENT TO SERVER: " + "DELETE_GROUP");
+            server.Send(Encoding.ASCII.GetBytes(groupID + "\n"));
+            Console.WriteLine(DateTime.Now + "\t" +"SENT TO SERVER: " + groupID);
+
+            String reply = recieveMessage(server);
+            if (reply.Equals("TRUE"))
+            {
+                server.Close();
+                Console.WriteLine(DateTime.Now + "\t" +"RETURNING TRUE FROM DELETE GROUP");
+                return true;
+            }
+
+            server.Close();
+            return false;
+            */
+        }
+
+        public Boolean resetUser(String userID)
+        {
+            if (connectToServer(serverIP, serverPort))
+            {
+                server.Send(Encoding.ASCII.GetBytes(RESET_USER));
+                server.Send(Encoding.ASCII.GetBytes(userID + "\n"));
+                String reply = recieveMessage(); //if(reply.Equals("ERROR")) MainWindow.SwitchPage(new CommsError());
+                if (reply.Equals(TRUE_REPLY))
+                {
+                    disconnectFromServer();
+                    return true;
+                }
+                else
+                {
+                    disconnectFromServer();
+                    return false;
+                }
+            }
+            return false;
+            /*
+            Console.WriteLine(DateTime.Now + "\t" +"TRYING TO SPEAK TO Server ON " + serverIP + " " + serverPort.ToString());
+            IPEndPoint ip = new IPEndPoint(IPAddress.Parse(serverIP), serverPort);
+            Socket server = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            try
+            {
+                server.Connect(ip);
+            }
+            catch (SocketException e)
+            {
+                Console.WriteLine(DateTime.Now + "\t" +"SOCKET_CLIENT: Unable to connect to server.");
+                Console.WriteLine(DateTime.Now + "\t" +e.ToString());
+                return false;
+            }
+            server.Send(Encoding.ASCII.GetBytes(RESET_USER));
+            Console.WriteLine(DateTime.Now + "\t" +"SENT TO SERVER: " + "RESET_USER");
+            server.Send(Encoding.ASCII.GetBytes(userID + "\n"));
+            Console.WriteLine(DateTime.Now + "\t" +"SENT TO SERVER: " + userID);
+
+            String reply = recieveMessage(server);
+            if (reply.Equals("TRUE"))
+            {
+                server.Close();
+                Console.WriteLine(DateTime.Now + "\t" +"RETURNING TRUE FROM CREATE GROUP");
+                return true;
+            }
+
+            server.Close();
+            return false;
+            */
+        }
+
+        public List<Groups> getGroups()
+        {
+            if (connectToServer(serverIP, serverPort))
+            {
+                server.Send(Encoding.ASCII.GetBytes(RETRIEVE_GROUPS));
+                String reply = recieveMessage(); //if(reply.Equals("ERROR")) MainWindow.SwitchPage(new CommsError());
+                if (!reply.Equals(NULL_REPLY))
+                {
+                    List<Groups> groups = JsonConvert.DeserializeObject<List<Groups>>(reply);
+                    disconnectFromServer();
+                    return groups;
+                }
+                else
+                {
+                    disconnectFromServer();
+                    return new List<Groups>();
+                }
+            }
+            return null;
+            /*Console.WriteLine(DateTime.Now + "\t" +"TRYING TO SPEAK TO Server ON " + serverIP + " " + serverPort.ToString());
+            IPEndPoint ip = new IPEndPoint(IPAddress.Parse(serverIP), serverPort);
+            Socket server = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            try
+            {
+                server.Connect(ip);
+            }
+            catch (SocketException e)
+            {
+                Console.WriteLine(DateTime.Now + "\t" +"SOCKET_CLIENT: Unable to connect to server.");
+                Console.WriteLine(DateTime.Now + "\t" +e.ToString());
+                return null;
+            }
+            server.Send(Encoding.ASCII.GetBytes(RETRIEVE_GROUPS));
+            Console.WriteLine(DateTime.Now + "\t" +"SENT TO SERVER: " + "RETRIEVE_GROUPS");
+
+            String reply = recieveMessage(server);
+            if (!reply.Equals(NULL_REPLY) && !reply.Equals(EMPTY_REPLY))
+            {
+                server.Close();
+                Console.WriteLine(DateTime.Now + "\t" +"RETURNING TRUE FROM CREATE GROUP");
+                return Newtonsoft.Json.JsonConvert.DeserializeObject<List<Groups>>(reply);
+            }
+
+
+            server.Close();
+            return new List<Groups>();*/
+
+        }
+
+        public Boolean deleteNotifications(List<PendingJoins> notifcations)
+        {
+            if (connectToServer(serverIP, serverPort))
+            {
+                server.Send(Encoding.ASCII.GetBytes(DELETE_NOTIFICATIONS));
+                String sendNotifications = "";
+                try
+                {
+                    Newtonsoft.Json.JsonConvert.SerializeObject(notifcations);
+                }
+                catch (Exception e)
+                {
+
+                }
+                server.Send(Encoding.ASCII.GetBytes(sendNotifications + "\n"));
+                String reply = recieveMessage(); //if(reply.Equals("ERROR")) MainWindow.SwitchPage(new CommsError());
+                if (reply.Equals(TRUE_REPLY))
+                {
+                    disconnectFromServer();
+                    return true;
+                }
+                else
+                {
+                    disconnectFromServer();
+                    return false;
+                }
+            }
+            return false;
+            /*
+            Console.WriteLine(DateTime.Now + "\t" +"TRYING TO SPEAK TO Server ON " + serverIP + " " + serverPort.ToString());
+            IPEndPoint ip = new IPEndPoint(IPAddress.Parse(serverIP), serverPort);
+            Socket server = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            try
+            {
+                server.Connect(ip);
+            }
+            catch (SocketException e)
+            {
+                Console.WriteLine(DateTime.Now + "\t" +"SOCKET_CLIENT: Unable to connect to server.");
+                Console.WriteLine(DateTime.Now + "\t" +e.ToString());
+                return false;
+            }
+            server.Send(Encoding.ASCII.GetBytes(DELETE_NOTIFICATIONS));
+            Console.WriteLine(DateTime.Now + "\t" +"SENT TO SERVER: " + "DELETE_NOTIFICATIONS");
+            String sendNotifications = Newtonsoft.Json.JsonConvert.SerializeObject(notifcations);
+            server.Send(Encoding.ASCII.GetBytes(sendNotifications + "\n"));
+            Console.WriteLine(DateTime.Now + "\t" +"SENT TO SERVER: " + sendNotifications);
+
+            String reply = recieveMessage(server);
+            if (reply.Equals("TRUE"))
+            {
+                server.Close();
+                Console.WriteLine(DateTime.Now + "\t" +"RETURNING TRUE FROM CREATE GROUP");
+                return true;
+            }
+
+            server.Close();
+            return false;
+            */
+        }
+
+
+        public Boolean deleteNotifications(PendingJoins notifcations)
+        {
+            if (connectToServer(serverIP, serverPort))
+            {
+                List<PendingJoins> joins = new List<PendingJoins>();
+                joins.Add(notifcations);
+                server.Send(Encoding.ASCII.GetBytes(DELETE_NOTIFICATIONS));
+                String sendNotifications = Newtonsoft.Json.JsonConvert.SerializeObject(joins);
+                server.Send(Encoding.ASCII.GetBytes(sendNotifications + "\n"));
+                String reply = recieveMessage();// if (reply.Equals("ERROR")) MainWindow.SwitchPage(new CommsError());
+                if (reply.Equals(TRUE_REPLY))
+                {
+                    disconnectFromServer();
+                    return true;
+                }
+                else
+                {
+                    disconnectFromServer();
+                    return false;
+                }
+            }
+            return false;
+            /*List<PendingJoins> joins = new List<PendingJoins>();
+            joins.Add(notifcations);
+            Console.WriteLine(DateTime.Now + "\t" +"TRYING TO SPEAK TO Server ON " + serverIP + " " + serverPort.ToString());
+            IPEndPoint ip = new IPEndPoint(IPAddress.Parse(serverIP), serverPort);
+            Socket server = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            try
+            {
+                server.Connect(ip);
+            }
+            catch (SocketException e)
+            {
+                Console.WriteLine(DateTime.Now + "\t" +"SOCKET_CLIENT: Unable to connect to server.");
+                Console.WriteLine(DateTime.Now + "\t" +e.ToString());
+                return false;
+            }
+            server.Send(Encoding.ASCII.GetBytes(DELETE_NOTIFICATIONS));
+            Console.WriteLine(DateTime.Now + "\t" +"SENT TO SERVER: " + "DELETE_NOTIFICATIONS");
+            String sendNotifications = Newtonsoft.Json.JsonConvert.SerializeObject(joins);
+            server.Send(Encoding.ASCII.GetBytes(sendNotifications + "\n"));
+            Console.WriteLine(DateTime.Now + "\t" +"SENT TO SERVER: " + sendNotifications);
+
+            String reply = recieveMessage(server);
+            if (reply.Equals("TRUE"))
+            {
+                server.Close();
+                Console.WriteLine(DateTime.Now + "\t" +"RETURNING TRUE FROM CREATE GROUP");
+                return true;
+            }
+
+            server.Close();
+            return false;
+            */
+        }
+
+
+        private String recieveMessage()
+        {
+                byte[] data = new byte[3072];
+                int receivedDataLength = 0;
+                StringBuilder sb = new StringBuilder();
+                receivedDataLength = server.Receive(data);
+                sb.Append(Encoding.ASCII.GetString(data, 0, receivedDataLength).Trim());
+                while (receivedDataLength == 3072)
+                {
+                   // Console.WriteLine(DateTime.Now + "\t" +"Reading next 1024 bytes");
+
+                    receivedDataLength = server.Receive(data);
+                    sb.Append(Encoding.ASCII.GetString(data, 0, receivedDataLength).Trim());
+    
+                }
+                Console.WriteLine(DateTime.Now + "\t" +sb.ToString());
+                return sb.ToString();
+            
+        }
+
+      /*  private String recieveMessage()
+        {
+            byte[] data = new byte[1024];
+            int receivedDataLength = 0;
+            StringBuilder sb = new StringBuilder();
+            receivedDataLength = server.Receive(data);
+            Console.WriteLine(DateTime.Now + "\t" +receivedDataLength.ToString());
+            sb.Append(Encoding.ASCII.GetString(data, 0, receivedDataLength).Trim());
+            while (receivedDataLength == 1024)
+            {
+                Console.WriteLine(DateTime.Now + "\t" +"Reading next 1024 bytes");
+                receivedDataLength = server.Receive(data);
+                sb.Append(Encoding.ASCII.GetString(data, 0, receivedDataLength).Trim());
+                /*      if (receivedDataLength < 1)
+                      {
+                          Console.WriteLine(DateTime.Now + "\t" +"DIDNT GET A REPLY");
+                          server.Close();
+                          return null;
+                      }
+                      else
+                      {
+                          Console.WriteLine(DateTime.Now + "\t" +"REPLY:" + reply + " .");
+                          sb.Append(Encoding.ASCII.GetString(data, 0, receivedDataLength).Trim());
+                         // reply = reply + Encoding.ASCII.GetString(data, 0, receivedDataLength).Trim();
+                          if (receivedDataLength < 1024)
+                          {
+                              break;
+                          }
+                      }
+            }
+          //  receivedDataLength = server.Receive(data);
+           // sb.Append(Encoding.ASCII.GetString(data, 0, receivedDataLength).Trim());
+            Console.WriteLine(DateTime.Now + "\t" +sb.ToString());
+        
+            return sb.ToString();
+        }*/
+
+      /*  public String receiveQuestions()
+        {
+            StringBuilder sb = new StringBuilder();
+            try
+            {
+               // int port = 2113;
+                byte[] bytes = new byte[1024];
+                string data;
+
+
+            
+                    //  TcpClient incoming = server.AcceptTcpClient();
+                    //  NetworkStream stream = incoming.GetStream();
+
+                    int i;
+                    int counter = 0;
+                    Boolean inTransfer = true;
+                  //  StringBuilder sb = new StringBuilder();
+
+
+                    // Loop to receive all the data sent by the client.
+                    //i = server.Receive(bytes);
+
+                    //i = stream.Read(bytes, 0, bytes.Length);
+                    // FileStream fileStream = null;
+                    String text = string.Empty;
+                   // data = System.Text.Encoding.ASCII.GetString(bytes, 0, i);
+                    //   if (this.gui.isUserLoggedIn(data.Trim()))
+                    //    {
+                  //  i = stream.Read(bytes, 0, bytes.Length);
+                    i = server.Receive(bytes);
+                    data = System.Text.Encoding.ASCII.GetString(bytes, 0, i);
+
+                    while (i != 0)
+                    {
+
+                        if (inTransfer)
+                        {
+                            counter = counter + i;
+
+                            //fileStream.Write(bytes, 0, i);
+                            sb.Append(data);
+                        }
+
+                        else
+                        {
+                            inTransfer = false;
+                           // data = System.Text.Encoding.ASCII.GetString(bytes, 0, i);
+                            if (log.IsDebugEnabled) log.Debug(String.Format("Received: {0}", data));
+
+
+                            this.outputFileName = data.Trim();
+
+                            this.transferImageInProgress = true;
+                            this.createfullPath();
+
+                            fileStream = File.OpenWrite(outputFileName);
+                            if (log.IsDebugEnabled) log.Debug("Writing to file: " + outputFileName);
+
+                            //stream.Flush();
+                        }
+
+
+                        i = server.Receive(bytes);
+                        //            if (log.IsDebugEnabled)  log.Debug("After :" + i);
+                    }
+                 //   if (log.IsDebugEnabled) log.Debug("copied: " + this.outputFileName);
+                //    if (log.IsDebugEnabled) log.Debug("bytes read:" + counter);
+                    
+              //      fileStream.Close();
+                  //  fileStream = null;
+                    inTransfer = false;
+              //      this.gui.showImage(this.outputFileName);
+                }
+
+           //     incoming.Close();
+
+            
+
+
+           // }
+            catch (Exception exc)
+            {
+                Console.WriteLine(DateTime.Now + "\t" +"Error:" + exc.ToString());
+           //     log.Error("", exc);
+            }
+            if(sb.Length < 1 )
+            {
+                return null;
+            }
+            return sb.ToString();
+            
+        }*/
 
     }
 
- 
+
 }

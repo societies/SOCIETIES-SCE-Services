@@ -6,8 +6,7 @@
       xmlns:k="http://schemas.microsoft.com/kinect/2013"
       mc:Ignorable="d" 
       d:DesignHeight="600" d:DesignWidth="1000"
-      Title="Quiz"
-      Loaded="Window_Loaded">
+      Title="Quiz" Loaded="window_Loaded">
 
     <Page.Resources>
         <Style x:Key="QuestionTextStyle" TargetType="TextBlock">

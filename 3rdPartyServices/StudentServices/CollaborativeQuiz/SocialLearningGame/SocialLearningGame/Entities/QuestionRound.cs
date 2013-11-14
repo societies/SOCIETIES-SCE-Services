@@ -30,14 +30,13 @@ namespace SocialLearningGame.Entities
     public class QuestionRound
     {
         public int RoundNumber { get; set; }
-
-        // variables representing the current round of questioning
         public Grammar RequiredGrammar { get; set; }
         public AbstractPose RequiredPose { get; set; }
         public AnswerMethod AnswerMethod { get; set; }
         public Question Question { get; set; }
-        public Category Category { get; set; }
-
+        public int roundScore { get; set; }
+        public int correctAnswerCount { get; set; }
+        public int incorrectAnswerCount { get; set; }
         public int UserAnswer { get; set; }
     }
 }

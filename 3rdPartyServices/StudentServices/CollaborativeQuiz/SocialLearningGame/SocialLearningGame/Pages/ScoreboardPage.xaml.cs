@@ -28,6 +28,8 @@ using SocialLearningGame.Logic;
 using SocialLearningGame.Entities;
 using System.Linq;
 using System;
+using System.Windows.Media;
+using System.Windows;
 
 namespace SocialLearningGame.Pages
 {
@@ -36,76 +38,226 @@ namespace SocialLearningGame.Pages
     /// </summary>
     public partial class ScoreboardPage : Page
     {
-        private static ScoreboardPage _instance = new ScoreboardPage();
-        public static ScoreboardPage Instance { get { _instance.refreshPage(); return _instance; } }
         private List<UserScore> allUsers;
+        private List<Groups> allGroups;
         private List<TextBlock> childNodes;
+        private SolidColorBrush highlight;
+        private static int index;
+        private static int maxCount;
      
         
 
         //<TextBlock Canvas.Left="59" Canvas.Top="120" Height="44" Name="studentName" Text="You" Width="400" FontSize="28" MinWidth="50" MaxWidth="400" />
 
-        private ScoreboardPage()
+        public ScoreboardPage()
         {
             InitializeComponent();
+        
             childNodes = new List<TextBlock>();
-            refreshPage();
+            if (GameLogic._userSession.player == GameStage.USER)
+            {
+                playerGroup.Text = "Player";
+                GameLogic.getRemoteData(DataType.ALL_USERS);
+                allUsers = GameLogic._userSession.allUsers.OrderByDescending(o => o.score).ToList();
+                maxCount = allUsers.Count();
+                if (maxCount > 5)
+                {
+                    nextButton.Visibility = Visibility.Visible;
+                }
+                refreshUserPage();
+            }
+            else if (GameLogic._userSession.player == GameStage.GROUP)
+            {
+                playerGroup.Text = "Group";
+                GameLogic.getRemoteData(DataType.ALL_GROUPS);
+                allGroups = GameLogic._userSession.allGroups.OrderByDescending(o => o.score).ToList();
+                maxCount = allGroups.Count();
+                if (maxCount > 5)
+                {
+                    nextButton.Visibility = Visibility.Visible;
+                }
+                refreshGroupPage();
+            }
         }
 
 
-        private void refreshPage()
+        private void refreshUserPage()
         {
             foreach (TextBlock oldTB in childNodes)
             {
-                scoreBoard.Children.Remove(oldTB);
+                scoreBoardGrid.Children.Remove(oldTB);
             }
             childNodes.Clear();
-            Console.WriteLine("Getting new user score...");
-            allUsers = GameLogic.getAllUsers().OrderByDescending(o => o.score).ToList();
-            double top_margin = 0;
+            Console.WriteLine(DateTime.Now + "\t" +"Getting new user score...");  
+            int row = 1;
+            int column = 0;
             int rank = 1;
             TextBlock tb;
-            foreach (UserScore user in allUsers)
+            int x = index;
+            UserScore user;
+            for (x = index; x < index + 5; x++)
             {
-                tb = new TextBlock();
-                tb.SetValue(Canvas.LeftProperty, 59.0);
-                tb.SetValue(Canvas.TopProperty, 120.0 + top_margin);
-                tb.Height = 44;
-                tb.Width = 400;
-                tb.Text = user.name;
-                tb.FontSize = 30;
-                scoreBoard.Children.Add(tb);
-                childNodes.Add(tb);
-                top_margin = top_margin + 63.0;
-                //        <TextBlock Canvas.Left="523" Canvas.Top="134" Name="studentRank" MinWidth="20" MinHeight="20" FontSize="20" />
-                //<TextBlock Canvas.Left="612" Canvas.Top="134" Name="scoreBlock" MinWidth="20" MinHeight="20" FontSize="20" />
-                tb = new TextBlock();
-                tb.SetValue(Canvas.LeftProperty, 523.0);
-                tb.SetValue(Canvas.TopProperty, 67.5 + top_margin);//= new System.Windows.Thickness(523, 120+top_margin, 1, 1);
-                tb.FontSize = 20;
-                tb.Text = rank.ToString();
-                scoreBoard.Children.Add(tb);
-                childNodes.Add(tb);
-                rank++;
+                if (x < allUsers.Count())
+                {
+                    user = allUsers[x];
+                    if (user.Equals(GameLogic._userSession.currentUser))
+                    {
+                        highlight = Brushes.DarkOrange;
+                    }
+                    else
+                    {
+                        highlight = Brushes.Black;
+                    }
+                    tb = new TextBlock();
+                    tb.Text = user.name;
+                    tb.FontSize = 28;
+                    tb.Foreground = highlight;
+                    Grid.SetRow(tb, row);
+                    Grid.SetColumn(tb, column);
+                    scoreBoardGrid.Children.Add(tb);
+                    childNodes.Add(tb);
 
-                tb = new TextBlock();
-                tb.SetValue(Canvas.LeftProperty, 612.0);
-                tb.SetValue(Canvas.TopProperty, 67.5 + top_margin);
-                tb.FontSize = 20;
-                tb.Text = user.score.ToString();
-                scoreBoard.Children.Add(tb);
-                childNodes.Add(tb);
+                    column++;
+
+                    tb = new TextBlock();
+                    tb.FontSize = 28;
+                    tb.Foreground = highlight;
+                    Grid.SetRow(tb, row);
+                    Grid.SetColumn(tb, column);
+                    tb.Text = rank.ToString();
+                    scoreBoardGrid.Children.Add(tb);
+                    childNodes.Add(tb);
+                    rank++;
+                    column++;
+
+                    tb = new TextBlock();
+                    tb.FontSize = 28;
+                    tb.Foreground = highlight;
+                    Grid.SetRow(tb, row);
+                    Grid.SetColumn(tb, column);
+                    tb.Text = user.score.ToString();
+                    scoreBoardGrid.Children.Add(tb);
+                    childNodes.Add(tb);
+                    column = 0;
+                    row++;
+                }
+            }
+        }
+
+        private void refreshGroupPage()
+        {
+            foreach (TextBlock oldTB in childNodes)
+            {
+                scoreBoardGrid.Children.Remove(oldTB);
+            }
+            childNodes.Clear();
+            Console.WriteLine(DateTime.Now + "\t" +"Getting new group score...");
+            int row = 1;
+            int column = 0;
+            int rank = 1;
+            TextBlock tb;
+            Groups group;
+            int x;
+            for (x = index; x < index + 5; x++)
+            {
+                if (x < allGroups.Count())
+                {
+                    group = allGroups[x];
+                    if (GameLogic._userSession.currentGroup == null)
+                    {
+                        highlight = Brushes.Black;
+                    }
+                    else
+                    {
+                        if (group.groupID.Equals(GameLogic._userSession.currentGroup.groupID))
+                        {
+                            highlight = Brushes.DarkOrange;
+                        }
+                        else
+                        {
+                            highlight = Brushes.Black;
+                        }
+                    }
+
+                    tb = new TextBlock();
+                    tb.FontSize = 28;
+                    Grid.SetRow(tb, row);
+                    Grid.SetColumn(tb, column);
+                    tb.Foreground = highlight;
+                    tb.Text = group.groupName;
+                    scoreBoardGrid.Children.Add(tb);
+                    childNodes.Add(tb);
+
+                    column++;
+
+                    tb = new TextBlock();
+                    tb.FontSize = 28;
+                    tb.Foreground = highlight;
+                    Grid.SetRow(tb, row);
+                    Grid.SetColumn(tb, column);
+                    tb.Text = rank.ToString();
+                    scoreBoardGrid.Children.Add(tb);
+                    childNodes.Add(tb);
+                    rank++;
+
+                    column++;
+
+                    tb = new TextBlock();
+                    tb.FontSize = 28;
+                    tb.Foreground = highlight;
+                    Grid.SetRow(tb, row);
+                    Grid.SetColumn(tb, column);
+                    tb.Text = group.score.ToString();
+                    scoreBoardGrid.Children.Add(tb);
+                    childNodes.Add(tb);
+                    column = 0;
+                    row++;
+                }
             }
         }
 
         private void backButton_Click(object sender, System.Windows.RoutedEventArgs e)
         {
-
+            index = index - 5;
+            if (index == 0)
+            {
+                backButton.Visibility = Visibility.Hidden;
+                nextButton.Visibility = Visibility.Visible;
+            }
+            else if (index < maxCount - 5)
+            {
+                nextButton.Visibility = Visibility.Visible;
+            }
+            if (GameLogic._userSession.player==GameStage.USER)
+            {               
+                refreshUserPage();
+            }
+            else if (GameLogic._userSession.player==GameStage.GROUP)
+            {
+                refreshGroupPage();
+            }
         }
 
         private void nextButton_Click(object sender, System.Windows.RoutedEventArgs e)
         {
-
+            index = index + 5;
+            if (index + 5 >=  maxCount)
+            {
+                backButton.Visibility = Visibility.Visible;
+                nextButton.Visibility = Visibility.Hidden;
+            }
+            if (index > 0)
+            {
+                backButton.Visibility = Visibility.Visible;
+            }
+            if (GameLogic._userSession.player == GameStage.USER)
+            {
+                refreshUserPage();
+            }
+            else if (GameLogic._userSession.player == GameStage.GROUP)
+            {
+                refreshGroupPage();
+            }
         }
     }
 }

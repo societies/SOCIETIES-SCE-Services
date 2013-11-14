@@ -28,6 +28,9 @@
             <Setter Property="HorizontalAlignment" Value="Center"/>
             <Setter Property="Height" Value="75"/>
             <Setter Property="Width" Value="150"/>
+            <Setter Property="ContentForeground" Value="DarkOrange" />
+            
+
             <!--<Setter Property="UseLayoutRounding" Value="True"/>-->
             <!--<Setter Property="LabelPosition" Value="Right"/>-->
             <Setter Property="Margin" Value="20 10 10 10"/>
@@ -61,6 +64,8 @@
                 <RowDefinition Height="50*" />
                 <RowDefinition Height="100" />
             </Grid.RowDefinitions>
+            
+            <TextBlock Name="welcomeText" Height="Auto" Grid.Row="0" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="18"/>
 
             <k:KinectUserViewer 
                 k:KinectRegion.KinectRegion="{Binding ElementName=kinectRegion}"

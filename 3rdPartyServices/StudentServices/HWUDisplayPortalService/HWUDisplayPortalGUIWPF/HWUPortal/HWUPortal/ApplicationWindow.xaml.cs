@@ -53,7 +53,7 @@ namespace HWUPortal
         //{
         //    if (!args.GracefullyExited)
         //    {
-        //                    if (log.IsDebugEnabled)  log.Debug("Service did not exit gracefully");
+        //                    Console.WriteLine(DateTime.Now + "\t" +"Service did not exit gracefully");
         //    }
         //    if (!this.currentService.serviceName.Equals(string.Empty))
         //    {

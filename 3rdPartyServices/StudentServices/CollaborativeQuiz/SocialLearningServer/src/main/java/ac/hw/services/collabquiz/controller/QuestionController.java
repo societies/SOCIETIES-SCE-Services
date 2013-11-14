@@ -49,6 +49,12 @@ public class QuestionController extends BasePageController {
         try {
             List<Question> storedQuestions = questionRepository.list();
             questions.addAll(storedQuestions);
+            for(Question q : questions)
+            {
+            	questionRepository.physicalDelete(q);
+            	q.setDifficulty(QuestionDifficulty.Medium);
+            	questionRepository.insert(q);
+            }
         } catch (Exception ex) {
             log.error("Error loading questions from repository, none loaded", ex);
         }

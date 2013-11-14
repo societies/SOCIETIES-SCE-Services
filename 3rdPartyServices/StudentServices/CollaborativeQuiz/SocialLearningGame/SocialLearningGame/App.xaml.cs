@@ -39,12 +39,31 @@ namespace SocialLearningGame
     public partial class App : Application
     {
         private static Dictionary<String, Assembly> assemblyDictionary = new Dictionary<string, Assembly>();
+        protected static StreamWriter writer;
        // protected static log4net.ILog log = log4net.LogManager.GetLogger(typeof(App));
 
     public App()
 
     {
-        Console.WriteLine("Getting assemblies");
+        //SETTING UP CONSOLE REDIRECTION
+
+        String userProfile = System.Environment.GetEnvironmentVariable("USERPROFILE");
+        String directory = userProfile + @"\HWUPortalLogs\";
+
+
+        if (!Directory.Exists(directory))
+        {
+            Directory.CreateDirectory(directory);
+        }
+        String logFilename = directory + "quiz_log.log";
+
+        writer = new StreamWriter(logFilename);
+        writer.AutoFlush = true;
+
+
+        Console.SetOut(writer);
+        Console.WriteLine(DateTime.Now + "\t" + "Logs are ready");
+        Console.WriteLine(DateTime.Now + "\t" +"Getting assemblies");
         AppDomain.CurrentDomain.AssemblyResolve += OnResolveAssembly;
 
    }
@@ -61,7 +80,7 @@ namespace SocialLearningGame
 
 
         string path = assemblyName.Name + ".dll";
-        Console.WriteLine("Path:" + path);
+        Console.WriteLine(DateTime.Now + "\t" +"Path:" + path);
 
         if (assemblyName.CultureInfo.Equals(CultureInfo.InvariantCulture) == false)
 
@@ -90,6 +109,8 @@ namespace SocialLearningGame
             return Assembly.Load(assemblyRawBytes);
 
         }
+
+
 
     }
 

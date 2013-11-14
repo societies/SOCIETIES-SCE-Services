@@ -71,7 +71,7 @@ namespace HWUPortal
                             {
 
                                 data = System.Text.Encoding.ASCII.GetString(bytes, 0, i);
-                                if (log.IsDebugEnabled) log.Debug(String.Format("Received: {0}", data));
+                                 Console.WriteLine(DateTime.Now + "\t" +String.Format("Received: {0}", data));
 
 
                                 this.outputFileName = data.Trim();
@@ -80,17 +80,17 @@ namespace HWUPortal
                                 this.createfullPath();
 
                                 fileStream = File.OpenWrite(outputFileName);
-                                if (log.IsDebugEnabled) log.Debug("Writing to file: " + outputFileName);
+                                 Console.WriteLine(DateTime.Now + "\t" +"Writing to file: " + outputFileName);
 
                                 //stream.Flush();
                             }
 
 
                             i = stream.Read(bytes, 0, bytes.Length);
-                            //            if (log.IsDebugEnabled)  log.Debug("After :" + i);
+                            //            Console.WriteLine(DateTime.Now + "\t" +"After :" + i);
                         }
-                        if (log.IsDebugEnabled) log.Debug("copied: " + this.outputFileName);
-                        if (log.IsDebugEnabled) log.Debug("bytes read:" + counter);
+                         Console.WriteLine(DateTime.Now + "\t" +"copied: " + this.outputFileName);
+                         Console.WriteLine(DateTime.Now + "\t" +"bytes read:" + counter);
                         fileStream.Close();
                         fileStream = null;
                         this.transferImageInProgress = false;

@@ -26,6 +26,8 @@
 using System.Windows;
 using System.Windows.Controls;
 using SocialLearningGame.Entities;
+using SocialLearningGame.Logic;
+using System;
 
 namespace SocialLearningGame.Pages
 {
@@ -35,12 +37,37 @@ namespace SocialLearningGame.Pages
     public partial class HomePage : Page
     {
 
-        private static HomePage _instance = new HomePage();
-        public static HomePage Instance { get { return _instance; } }
 
-        private HomePage()
+        public HomePage()
         {
             InitializeComponent();
+            GameLogic._userSession.player = GameStage.USER;
+            
+
+        }
+
+
+        public void refreshNotifications()
+        {
+            int notifications = GameLogic._userSession.allNotifications.Count;
+            Console.WriteLine(DateTime.Now + "\t" +"Number of notifications:" + notifications);
+            if (notifications > 0)
+            {
+                notificationCircle.Visibility = Visibility.Visible;
+                notificationText.Text = notifications.ToString();
+            }
+            else
+            {
+                notificationCircle.Visibility = Visibility.Hidden;
+            }
+        }
+
+        private void window_Loaded(object sender, RoutedEventArgs e)
+        {
+            GameLogic.getGroupInformation();
+            Console.WriteLine(DateTime.Now + "\t" +"Getting notifications.....");
+            refreshNotifications();
+
         }
 
         private void playButton_Click(object sender, RoutedEventArgs e)
@@ -50,12 +77,12 @@ namespace SocialLearningGame.Pages
 
         private void scoreboardButton_Click(object sender, RoutedEventArgs e)
         {
-            MainWindow.SwitchPage(ScoreboardPage.Instance);
+            MainWindow.SwitchPage(new ScoreboardPage());
         }
 
         private void challengeButton_Click(object sender, RoutedEventArgs e)
         {
-            MainWindow.SwitchPage(ChallengePage.Instance);
+            MainWindow.SwitchPage(new GroupPlayPage());
         }
 
         private void categoriesButton_Click(object sender, RoutedEventArgs e)

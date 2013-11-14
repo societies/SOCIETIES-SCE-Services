@@ -27,11 +27,11 @@
 
 
 	<bean id="serMetamodel" class="org.societies.api.schema.servicelifecycle.model.Service">
-		<property name="authorSignature" value="Stuart Whyte" />
-		<property name="serviceDescription" value="Social Learning Game Virgo Application" />
-		<property name="serviceName" value="SocialLearning" />
+		<property name="authorSignature" value="Heriot-Watt University" />
+		<property name="serviceDescription" value="Collaborative Quiz Learning Game SOCIETIES Application" />
+		<property name="serviceName" value="Collaborative Quiz" />
 		<property name="serviceType" value="THIRD_PARTY_SERVER" />
-		<property name="serviceCategory" value="socialLearning" />
+		<property name="serviceCategory" value="quiz" />
 	</bean> 
 	
 <bean id="collabQuizCommsServer" name="collabQuizCommsServer" class="ac.hw.services.collabquiz.comms.CommsServer" init-method="init">

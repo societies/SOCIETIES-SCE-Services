@@ -12,5 +12,6 @@ public interface IUserAnsweredQRepository {
 	void insert(UserAnsweredQ userAnsweredQ);
 	void insertList(List<UserAnsweredQ> userAnsweredQ);
 	void update(List<UserAnsweredQ> userAnsweredQ);
+	void deleteAll(String id);
 	void physicalDelete(UserAnsweredQ userAnsweredQ);
 }

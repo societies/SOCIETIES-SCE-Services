@@ -90,67 +90,67 @@ public class SocketServer extends Thread{
 		try {
 			server = new ServerSocket(port);
 		} catch (IOException e) {
-			LOG.debug("ServerSocket creation failed: "+port);
+			if(LOG.isDebugEnabled()) LOG.debug("ServerSocket creation failed: "+port);
 			e.printStackTrace();
 			return;
 		}
 		
 		try {
-			LOG.debug("Waiting for connection from GUI on port: "+port);
+			if(LOG.isDebugEnabled()) LOG.debug("Waiting for connection from GUI on port: "+port);
 			client = server.accept();
 		} catch (IOException e) {
-			LOG.debug("Accept failed: "+port);
+			if(LOG.isDebugEnabled()) LOG.debug("Accept failed: "+port);
 			e.printStackTrace();
 			return;
 		}
 
-		LOG.debug("Connection accepted from GUI!");
+		if(LOG.isDebugEnabled()) LOG.debug("Connection accepted from GUI!");
 
 		try {
 			out = new PrintWriter(client.getOutputStream(), true);
 			in = new BufferedReader(new InputStreamReader(client.getInputStream()));
 		} catch (IOException e) {
-			LOG.debug("Accept failed: "+port);
+			if(LOG.isDebugEnabled()) LOG.debug("Accept failed: "+port);
 			e.printStackTrace();
 			return;
 		}
 
 		try{
 			String start = in.readLine();
-			LOG.debug("Got new input: "+start);
+			if(LOG.isDebugEnabled()) LOG.debug("Got new input: "+start);
 			if(start.equalsIgnoreCase(START_MSG)){
-				LOG.debug("Processing new message...");
+				if(LOG.isDebugEnabled()) LOG.debug("Processing new message...");
 
 				//loop to get rest of message
 				String message = "";
 				boolean reading = true;
 				while(reading){
-					LOG.debug("running through while again...");
+					if(LOG.isDebugEnabled()) LOG.debug("running through while again...");
 					String next = in.readLine();
-					LOG.debug("next = "+next);
+					if(LOG.isDebugEnabled()) LOG.debug("next = "+next);
 					if(!next.equalsIgnoreCase(END_MSG)){
-						LOG.debug("Inside if");
+						if(LOG.isDebugEnabled()) LOG.debug("Inside if");
 						message = message+next+"\n";
 					}else{
-						LOG.debug("Inside else");
+						if(LOG.isDebugEnabled()) LOG.debug("Inside else");
 						reading  = false;
 					}
 				}
-				LOG.debug("message = "+message);
+				if(LOG.isDebugEnabled()) LOG.debug("message = "+message);
 
 				//handle message
 				String[] splitData = message.split("\n");
-				LOG.debug("splitData length = "+splitData.length);
+				if(LOG.isDebugEnabled()) LOG.debug("splitData length = "+splitData.length);
 				String command = splitData[0];
 				if (command.equalsIgnoreCase(GUI_STARTED)){
-					LOG.debug(GUI_STARTED+" message received");
+					if(LOG.isDebugEnabled()) LOG.debug(GUI_STARTED+" message received");
 					out.println(RECEIVED);
 					finalize();
 					String gui_ip = splitData[1];
 					commandHandler.connectToGUI(gui_ip);
 					
 				}else if (command.equalsIgnoreCase(USER_ACTION)){
-					LOG.debug(USER_ACTION+" message received");
+					if(LOG.isDebugEnabled()) LOG.debug(USER_ACTION+" message received");
 					out.println(RECEIVED);
 					finalize();
 					String parameterName = splitData[1];
@@ -158,44 +158,44 @@ public class SocketServer extends Thread{
 					commandHandler.processUserAction(parameterName, value);
 					
 				}else if(command.equalsIgnoreCase(CHANNEL_PREFERENCE_REQUEST)){
-					LOG.debug(CHANNEL_PREFERENCE_REQUEST+" message received");
+					if(LOG.isDebugEnabled()) LOG.debug(CHANNEL_PREFERENCE_REQUEST+" message received");
 					String response = commandHandler.getChannelPreference();
 					out.println(response);
 					finalize();
 
 				}else if(command.equalsIgnoreCase(MUTED_PREFERENCE_REQUEST)){
-					LOG.debug(MUTED_PREFERENCE_REQUEST+" message received");
+					if(LOG.isDebugEnabled()) LOG.debug(MUTED_PREFERENCE_REQUEST+" message received");
 					String response = commandHandler.getMutedPreference();
 					out.println(response);
 					finalize();
 					
 				}else if(command.equalsIgnoreCase(CHANNEL_INTENT_REQUEST)){
-					LOG.debug(CHANNEL_INTENT_REQUEST+" message received");
+					if(LOG.isDebugEnabled()) LOG.debug(CHANNEL_INTENT_REQUEST+" message received");
 					String response = commandHandler.getChannelIntent();
 					out.println(response);
 					finalize();
 					
 				}else if(command.equalsIgnoreCase(MUTED_INTENT_REQUEST)){
-					LOG.debug(MUTED_INTENT_REQUEST+" message received");
+					if(LOG.isDebugEnabled()) LOG.debug(MUTED_INTENT_REQUEST+" message received");
 					String response = commandHandler.getMutedIntent();
 					out.println(response);
 					finalize();
 
 				}else if (command.equalsIgnoreCase(GUI_STOPPED)){
-					LOG.debug(GUI_STOPPED+" message received");
+					if(LOG.isDebugEnabled()) LOG.debug(GUI_STOPPED+" message received");
 					out.println(RECEIVED);
 					finalize();
 					commandHandler.disconnectFromGUI();
 				}
 				
 				else{
-					LOG.debug("Unknown command received from MyTvUI: "+command);
+					if(LOG.isDebugEnabled()) LOG.debug("Unknown command received from MyTvUI: "+command);
 					out.println(FAILED);
 					finalize();
 				}
 			}
 		} catch (IOException e) {
-			LOG.debug("Read failed");
+			if(LOG.isDebugEnabled()) LOG.debug("Read failed");
 			out.println(FAILED);
 			finalize();
 		}
@@ -210,7 +210,7 @@ public class SocketServer extends Thread{
 			out.close();
 			server.close();
 		} catch (IOException e) {
-			LOG.debug("Could not close.");
+			if(LOG.isDebugEnabled()) LOG.debug("Could not close.");
 		}
 	}
 }

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd"
+	xmlns:context="http://www.springframework.org/schema/context">
+
+	<bean id="quizRestServer" class="ac.hw.services.collabquiz.CollabQuizServer"
+		init-method="init" name="quizRestServer" >
+		<property name="commsManager" ref="commsManager" />
+		<property name="services" ref="services" />
+		</bean>
+	
+<bean id="collabQuizCommsServer" name="collabQuizCommsServer" class="ac.hw.services.collabquiz.comms.CommsServer" init-method="init">
+		<property name="collabQuizServer" ref="quizRestServer" />
+		<property name="commsManager" ref="commsManager" />
+		</bean>
+		
+
+</beans>

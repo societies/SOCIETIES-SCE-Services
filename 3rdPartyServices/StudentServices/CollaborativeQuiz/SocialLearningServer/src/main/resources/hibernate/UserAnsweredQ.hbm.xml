@@ -13,8 +13,7 @@
 
 		<property name="userJid" type="string" column="userJid" />
 
-		<many-to-one name="question"
-			class="ac.hw.services.collabquiz.entities.Question" />
+		<property name="questionID" type="int" column="question_id"  />
 
 		<property name="answeredCorrect" column="answeredCorrect" />
 
