@@ -3,7 +3,6 @@ package ac.hw.services.collabquiz.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
-import ac.hw.services.collabquiz.Logic.QuestionDifficulty;
 import ac.hw.services.collabquiz.dao.IQuestionRepository;
 import ac.hw.services.collabquiz.dao.impl.QuestionRepository;
 import ac.hw.services.collabquiz.entities.Question;
@@ -112,7 +111,4 @@ public class QuestionController extends BasePageController {
         }
     }
 
-    public QuestionDifficulty[] getAvailableDifficulties() {
-        return QuestionDifficulty.values();
-    }
 }

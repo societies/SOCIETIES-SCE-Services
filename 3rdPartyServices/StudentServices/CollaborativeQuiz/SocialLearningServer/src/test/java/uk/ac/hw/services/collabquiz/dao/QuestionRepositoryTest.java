@@ -6,7 +6,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import ac.hw.services.collabquiz.Logic.QuestionDifficulty;
 import ac.hw.services.collabquiz.dao.impl.QuestionRepository;
 import ac.hw.services.collabquiz.entities.Question;
 
@@ -36,7 +35,6 @@ public class QuestionRepositoryTest {
         input1.setCorrectAnswer(1);
         input1.setCategoryID(1);
         input1.setPointsIfCorrect(1);
-        input1.setDifficulty(QuestionDifficulty.Medium);
         // **************************************************
 
         // Question test object 2 *****************************
@@ -51,7 +49,6 @@ public class QuestionRepositoryTest {
         input2.setCorrectAnswer(3);
         input2.setCategoryID(3);
         input2.setPointsIfCorrect(1);
-        input2.setDifficulty(QuestionDifficulty.Hard);
         // **************************************************
 
         // insert input1
@@ -109,7 +106,6 @@ public class QuestionRepositoryTest {
         input1.setCorrectAnswer(1);
         input1.setCategoryID(1);
         input1.setPointsIfCorrect(1);
-        input1.setDifficulty(QuestionDifficulty.Medium);
 
         questionRepository.insert(input1);
         // **************************************************
@@ -126,7 +122,6 @@ public class QuestionRepositoryTest {
         input2.setCorrectAnswer(1);
         input2.setCategoryID(1);
         input2.setPointsIfCorrect(1);
-        input2.setDifficulty(QuestionDifficulty.Easy);
 
         questionRepository.insert(input2);
         // **************************************************
@@ -143,7 +138,6 @@ public class QuestionRepositoryTest {
         input2.setCorrectAnswer(3);
         input2.setCategoryID(3);
         input2.setPointsIfCorrect(1);
-        input2.setDifficulty(QuestionDifficulty.Hard);
         // **************************************************
 
         // listByCategory test 4 *****************************
@@ -158,7 +152,6 @@ public class QuestionRepositoryTest {
         input4.setCorrectAnswer(3);
         input4.setCategoryID(4);
         input4.setPointsIfCorrect(1);
-        input4.setDifficulty(QuestionDifficulty.Easy);
 
         questionRepository.insert(input4);
         // **************************************************
@@ -193,6 +186,5 @@ public class QuestionRepositoryTest {
         Assert.assertEquals(expectedInput.getCorrectAnswer(), actualInput.getCorrectAnswer());
         Assert.assertEquals(expectedInput.getCategoryID(), actualInput.getCategoryID());
         Assert.assertEquals(expectedInput.getPointsIfCorrect(), actualInput.getPointsIfCorrect());
-        Assert.assertEquals(expectedInput.getDifficulty(), actualInput.getDifficulty());
     }
 }

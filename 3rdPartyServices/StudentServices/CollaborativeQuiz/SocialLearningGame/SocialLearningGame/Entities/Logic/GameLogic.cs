@@ -52,7 +52,6 @@ namespace SocialLearningGame.Logic
         private static ClientComms _clientComms;
 
         public static Category RequestedCategory { get; set; }
-        public static QuestionDifficulty RequestedDifficulty { get; set; }
         public static UserSession _userSession;
         private static String userJID;
         private static Boolean connectedToSocieties = false;

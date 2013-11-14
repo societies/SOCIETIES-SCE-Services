@@ -150,7 +150,6 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Entities\Logic\Poses\Pose3.cs" />
-    <Compile Include="Entities\Logic\QuestionDifficulty.cs" />
     <Compile Include="Pages\CategoriesPage.xaml.cs">
       <DependentUpon>CategoriesPage.xaml</DependentUpon>
     </Compile>

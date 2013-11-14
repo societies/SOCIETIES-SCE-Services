@@ -58,10 +58,6 @@
                     <h:outputText value="#{question.correctAnswer}"/>
                 </p:column>
 
-                <p:column headerText="Difficulty">
-                    <h:outputText value="#{question.difficulty}"/>
-                </p:column>
-
             </p:rowExpansion>
 
             <f:facet name="footer">
@@ -100,12 +96,6 @@
                     <h:outputText value="Correct Answer :"></h:outputText>
                     <p:inputText value="#{questionController.newQuestion.correctAnswer}" />
 
-                    <!--<h:outputText value="Difficulty :"></h:outputText>
-                    <p:inputText value="#-{questionController.newQuestion.difficulty}"/>-->
-
-                    <p:selectOneListbox value="#{questionController.newQuestion.difficulty}">
-                        <f:selectItems value="#{questionController.availableDifficulties}"/>
-                    </p:selectOneListbox>
 
                     <h:outputText value="Points if Correct :"></h:outputText>
                     <p:inputText value="#{questionController.newQuestion.pointsIfCorrect}"/>

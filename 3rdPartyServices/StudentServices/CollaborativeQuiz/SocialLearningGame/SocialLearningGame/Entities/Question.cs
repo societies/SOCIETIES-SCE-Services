@@ -40,7 +40,6 @@ namespace SocialLearningGame.Entities
         public int correctAnswer { get; set; }
         public int categoryID { get; set; }
         public int pointsIfCorrect { get; set; }
-        public QuestionDifficulty difficulty { get; set; }
 
         public Question()
         {
@@ -58,7 +57,7 @@ namespace SocialLearningGame.Entities
 
         public string ToString()
         {
-            return this.questionID + " " + this.pointsIfCorrect + " " + this.difficulty + " " + this.questionText + " " + this.answer1 + " " + this.answer2 + " " + this.answer3 + " " + this.answer4 + " " + this.correctAnswer + " " + this.categoryID;
+            return this.questionID + " " + this.pointsIfCorrect + " " + this.questionText + " " + this.answer1 + " " + this.answer2 + " " + this.answer3 + " " + this.answer4 + " " + this.correctAnswer + " " + this.categoryID;
         }
     }
 }

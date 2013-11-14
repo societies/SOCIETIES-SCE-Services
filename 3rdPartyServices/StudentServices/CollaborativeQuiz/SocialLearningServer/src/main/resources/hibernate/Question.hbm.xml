@@ -25,7 +25,6 @@
 
         <property name="correctAnswer" column="correct_answer"/>
 
-        <property name="difficulty" column="difficulty"/>
 
         <property name="pointsIfCorrect" column="points_if_correct"/>
 

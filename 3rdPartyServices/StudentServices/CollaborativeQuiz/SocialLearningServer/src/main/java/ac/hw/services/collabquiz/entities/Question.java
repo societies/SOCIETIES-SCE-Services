@@ -3,8 +3,6 @@ package ac.hw.services.collabquiz.entities;
 
 import javax.persistence.*;
 
-import ac.hw.services.collabquiz.Logic.QuestionDifficulty;
-
 import java.io.Serializable;
 
 /*
@@ -46,12 +44,10 @@ public class Question implements Serializable {
     private int correctAnswer;
     private int categoryID;
     private int pointsIfCorrect;
-    private QuestionDifficulty difficulty;
 
     public Question() {
         this.questionID = -1;
         this.pointsIfCorrect = 1;
-        this.difficulty = QuestionDifficulty.Easy;
         this.questionText = "[New question]";
         this.answer1 = "[Answer 1]";
         this.answer2 = "[Answer 2]";
@@ -150,12 +146,4 @@ public class Question implements Serializable {
         this.pointsIfCorrect = pointsIfCorrect;
     }
 
-    @Column(name = "difficulty")
-    public QuestionDifficulty getDifficulty() {
-        return difficulty;
-    }
-
-    public void setDifficulty(QuestionDifficulty difficulty) {
-        this.difficulty = difficulty;
-    }
 }
