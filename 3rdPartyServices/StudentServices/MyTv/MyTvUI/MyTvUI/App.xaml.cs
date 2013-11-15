@@ -32,7 +32,7 @@ namespace MyTvUI
             }
             String logFilename = directory + "mytv_log.log";
 
-            writer = new StreamWriter(logFilename);
+            writer = new StreamWriter(logFilename, true);
             writer.AutoFlush = true;
 
 

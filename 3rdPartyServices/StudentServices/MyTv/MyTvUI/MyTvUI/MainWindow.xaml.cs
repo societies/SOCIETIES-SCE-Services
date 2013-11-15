@@ -64,6 +64,7 @@ namespace MyTvUI
         private static readonly String channel4 = "http://www2.macs.hw.ac.uk/~im143/mytv/music.html";
 
         private static readonly String[] channels = { channel0, channel1, channel2, channel3, channel4 };
+        private bool isChannelSet = false;
 
         public KinectSensorChooser sensorChooser { get; private set; }
 
@@ -159,7 +160,15 @@ namespace MyTvUI
         {
             this.sensorChooser.Start();
 
-            setChannel(0);
+            if (!this.isChannelSet)
+            {
+                setChannel(0, false);
+                Console.WriteLine("Channel was not set by platform. Set default channel to 0");
+            }
+            else
+            {
+                Console.WriteLine("Channel was automatically set by platform.");
+            }
         }
 
         //close window
@@ -203,8 +212,9 @@ namespace MyTvUI
         #endregion window
 
         #region serviceactions
-        private Boolean setChannel(int channel)
+        private Boolean setChannel(int channel, Boolean monitor)
         {
+            isChannelSet = true;
             Console.WriteLine(DateTime.Now + "\t" +"Setting channel to " + channel);
             switch (channel)
             {
@@ -230,20 +240,23 @@ namespace MyTvUI
             //channel3Button.Fill = channelBg_deselected;
             //channel4Button.Fill = channelBg_deselected;
             //offButton.Fill = offBg_deselected;
-            if (commsInitialised)
+            if (monitor)
             {
-                Console.WriteLine(DateTime.Now + "\t" +"Sending channel " + channel + " action to UAM");
-                String response = socketClient.sendMessage(
-                "START_MSG\n" +
-                "USER_ACTION\n" +
-                "channel\n" +
-                channel+"\n" +
-                "END_MSG\n");
-                if (response.Contains("RECEIVED"))
+                if (commsInitialised)
                 {
-                    Console.WriteLine(DateTime.Now + "\t" +"UAM received channel " + channel + " action");
-                    //set channel button backgrounds
-                    currentChannel = channel;
+                    Console.WriteLine(DateTime.Now + "\t" + "Sending channel " + channel + " action to UAM");
+                    String response = socketClient.sendMessage(
+                    "START_MSG\n" +
+                    "USER_ACTION\n" +
+                    "channel\n" +
+                    channel + "\n" +
+                    "END_MSG\n");
+                    if (response.Contains("RECEIVED"))
+                    {
+                        Console.WriteLine(DateTime.Now + "\t" + "UAM received channel " + channel + " action");
+                        //set channel button backgrounds
+                        currentChannel = channel;
+                    }
                 }
             }
             return true;
@@ -251,7 +264,7 @@ namespace MyTvUI
 
         private Boolean setDefaultChannel()
         {
-            return setChannel(0);
+            return setChannel(0, false);
         }
 
     /*    private Boolean setDefaultVolume()
@@ -339,27 +352,27 @@ namespace MyTvUI
             if (channelPref.Equals("1"))
             {
                 Console.WriteLine(DateTime.Now + "\t" +"Personalising to channel 1");
-                setChannel(1);
+                setChannel(1, false);
             }
             else if (channelPref.Equals("2"))
             {
                 Console.WriteLine(DateTime.Now + "\t" +"Personalising to channel 2");
-                setChannel(2);
+                setChannel(2, false);
             }
             else if (channelPref.Equals("3"))
             {
                 Console.WriteLine(DateTime.Now + "\t" +"Personalising to channel 3");
-                setChannel(3);
+                setChannel(3, false);
             }
             else if (channelPref.Equals("4"))
             {
                 Console.WriteLine(DateTime.Now + "\t" +"Personalising to channel 4");
-                setChannel(4);
+                setChannel(4, false);
             }
             else if (channelPref.Equals("0"))
             {
                 Console.WriteLine(DateTime.Now + "\t" +"Personalising to channel 0");
-                setChannel(0);
+                setChannel(0, false);
             }
             else  //default channel is 0
             {
@@ -368,7 +381,7 @@ namespace MyTvUI
             //MessageBox.Show("Got channel preference");
 
             //set muted
-            Console.WriteLine(DateTime.Now + "\t" +"Requesting mute preference");
+            //Console.WriteLine(DateTime.Now + "\t" +"Requesting mute preference");
          /*   String muteRequest = "START_MSG\n" +
                     "MUTED_PREFERENCE_REQUEST\n" +
                     "END_MSG\n";
@@ -405,23 +418,23 @@ namespace MyTvUI
             Console.WriteLine(DateTime.Now + "\t" +"Got channel intent :" + channelIntent);
             if (channelIntent.Equals("1"))
             {
-                setChannel(1);
+                setChannel(1, false);
             }
             else if (channelIntent.Equals("2"))
             {
-                setChannel(2);
+                setChannel(2, false);
             }
             else if (channelIntent.Equals("3"))
             {
-                setChannel(3);
+                setChannel(3, false);
             }
             else if (channelIntent.Equals("4"))
             {
-                setChannel(4);
+                setChannel(4, false);
             }
             else  //default channel is 0
             {
-                setChannel(0);
+                setChannel(0, false);
             }
 
             //set muted
@@ -676,18 +689,18 @@ namespace MyTvUI
         private void channelButtonClick(object sender, RoutedEventArgs e)
         {
             if (sender == channel1Button)
-                setChannel(1);
+                setChannel(1, true);
             else if (sender == channel2Button)
-                setChannel(2);
+                setChannel(2, true);
             else if (sender == channel3Button)
-                setChannel(3);
+                setChannel(3, true);
             else if (sender == channel4Button)
-                setChannel(4);
+                setChannel(4, true);
         }
 
         private void offButtonClick(object sender, RoutedEventArgs e)
         {
-            setChannel(0);
+            setChannel(0, false);
         }
 
         private void exitButtonClick(object sender, RoutedEventArgs e)

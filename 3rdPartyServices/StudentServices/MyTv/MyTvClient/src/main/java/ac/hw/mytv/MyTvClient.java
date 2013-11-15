@@ -32,6 +32,8 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
+import javax.swing.JOptionPane;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.societies.api.activity.IActivityFeedManager;
@@ -56,26 +58,27 @@ import org.societies.api.schema.servicelifecycle.model.ServiceResourceIdentifier
 import org.societies.api.services.IServices;
 import org.societies.api.services.ServiceMgmtEvent;
 import org.societies.api.services.ServiceMgmtEventType;
+import org.societies.api.services.ServiceUtils;
 import org.societies.api.useragent.monitoring.IUserActionMonitor;
 
 public class MyTvClient extends EventListener implements IDisplayableService, IActionConsumer, IMyTv{
 
-	SocketClient socketClient;
-	SocketServer socketServer;
-	IUserActionMonitor uam;
-	IPersonalisationManager persoMgr;
-	IIdentity userID;
-	IServices serviceMgmt;
-	IEventMgr eventMgr;
-	ICommManager commsMgr;
-	IDisplayDriver displayDriver;
-	ServiceResourceIdentifier myServiceID;
-	String myServiceName;
-	String myServiceType;
-	URL myUIExeLocation;
-	List<String> myServiceTypes;
-	Thread activityFeedThread;
-	Logger LOG = LoggerFactory.getLogger(MyTvClient.class);
+	private SocketClient socketClient;
+	private SocketServer socketServer;
+	private IUserActionMonitor uam;
+	private IPersonalisationManager persoMgr;
+	private IIdentity userID;
+	private IServices serviceMgmt;
+	private IEventMgr eventMgr;
+	private ICommManager commsMgr;
+	private IDisplayDriver displayDriver;
+	private ServiceResourceIdentifier myServiceID;
+	private String myServiceName;
+	private String myServiceType;
+	private URL myUIExeLocation;
+	private List<String> myServiceTypes;
+	private Thread activityFeedThread;
+	private Logger LOG = LoggerFactory.getLogger(MyTvClient.class);
 
 	//personalisable parameters
 	int currentChannel;
@@ -87,6 +90,10 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 	}
 
 	public void initialiseMyTvClient(){
+		
+		//register for service events
+		registerForServiceEvents();
+
 		//set service descriptors
 		myServiceName = "MyTv";
 		myServiceType = "media";
@@ -97,6 +104,7 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 		currentChannel = 0;
 		mutedState = true;
 
+		
 		//start server listening for connections from GUI
 		socketServer = new SocketServer(this);
 		//find available port
@@ -105,31 +113,30 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 		socketServer.start();
 
 		try {
-			myUIExeLocation = new URL("http://www2.macs.hw.ac.uk/~sww2/societies/MyTvUI.exe");
+			myUIExeLocation = new URL("http://societies.local2.macs.hw.ac.uk:9090/portalApps/MyTvUI.exe");
 			displayDriver.registerDisplayableService(
 					this, 
 					myServiceName, 
 					myUIExeLocation, 
 					listenPort,
 					true);
-			if(LOG.isDebugEnabled()) LOG.debug("Registered as DisplayableService with the following info:");
-			if(LOG.isDebugEnabled()) LOG.debug("************************************************************");
-			if(LOG.isDebugEnabled()) LOG.debug("IDisplayableService = "+this);
-			if(LOG.isDebugEnabled()) LOG.debug("Service name = "+myServiceName);
-			if(LOG.isDebugEnabled()) LOG.debug("Exe location = "+myUIExeLocation.toString());
-			if(LOG.isDebugEnabled()) LOG.debug("SocketServer listen port = "+listenPort);
-			if(LOG.isDebugEnabled()) LOG.debug("Needs kinect = true");
-			if(LOG.isDebugEnabled()) LOG.debug("************************************************************");
+
 		} catch (MalformedURLException e) {
 			LOG.error("Could not register as displayable service with display driver");
 			e.printStackTrace();
 		}
-
-		//register for service events
-		registerForServiceEvents();
+		if(LOG.isDebugEnabled()) LOG.debug("Registered as DisplayableService with the following info:");
+		if(LOG.isDebugEnabled()) LOG.debug("************************************************************");
+		if(LOG.isDebugEnabled()) LOG.debug("IDisplayableService = "+this);
+		if(LOG.isDebugEnabled()) LOG.debug("Service name = "+myServiceName);
+		if(LOG.isDebugEnabled()) LOG.debug("Exe location = "+myUIExeLocation.toString());
+		if(LOG.isDebugEnabled()) LOG.debug("SocketServer listen port = "+listenPort);
+		if(LOG.isDebugEnabled()) LOG.debug("Needs kinect = true");
+		if(LOG.isDebugEnabled()) LOG.debug("************************************************************");
 
 		//register for portal events
 		registerForDisplayEvents();
+		
 	}
 
 	@Override
@@ -143,11 +150,11 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 	 */
 	private void registerForServiceEvents(){
 		String eventFilter = "(&" + 
-				"(" + CSSEventConstants.EVENT_NAME + "="+ServiceMgmtEventType.NEW_SERVICE+")" +
+				"(" + CSSEventConstants.EVENT_NAME + "="+ServiceMgmtEventType.SERVICE_STARTED+")" +
 				"(" + CSSEventConstants.EVENT_SOURCE + "=org/societies/servicelifecycle)" +
 				")";
 		this.eventMgr.subscribeInternalEvent(this, new String[]{EventTypes.SERVICE_LIFECYCLE_EVENT}, eventFilter);
-		if(LOG.isDebugEnabled()) LOG.debug("Subscribed to "+EventTypes.SERVICE_LIFECYCLE_EVENT+" events");
+		this.LOG.debug("Subscribed to "+EventTypes.SERVICE_LIFECYCLE_EVENT+" events");
 	}
 
 	private void unregisterForServiceEvents()
@@ -159,7 +166,7 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 
 		this.eventMgr.unSubscribeInternalEvent(this, new String[]{EventTypes.SERVICE_LIFECYCLE_EVENT}, eventFilter);
 		//this.evMgr.subscribeInternalEvent(this, new String[]{EventTypes.SERVICE_LIFECYCLE_EVENT}, eventFilter);
-		if(LOG.isDebugEnabled()) LOG.debug("Unsubscribed from "+EventTypes.SERVICE_LIFECYCLE_EVENT+" events");
+		this.LOG.debug("Unsubscribed from "+EventTypes.SERVICE_LIFECYCLE_EVENT+" events");
 	}
 
 	/*
@@ -193,7 +200,33 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 	public void handleInternalEvent(InternalEvent event) {
 		if(LOG.isDebugEnabled()) LOG.debug("Received internal event: "+event.geteventName());
 
-		if(event.geteventName().equalsIgnoreCase("NEW_SERVICE")){
+		if (event.geteventInfo() instanceof ServiceMgmtEvent){
+			if(LOG.isDebugEnabled()) LOG.debug("Received SLM event");
+			ServiceMgmtEvent slmEvent = (ServiceMgmtEvent) event.geteventInfo();
+			if (slmEvent.getBundleSymbolName().contains("ac.hw.mytv.MyTVClient")){
+				if(LOG.isDebugEnabled()) LOG.debug("Received SLM event for my bundle");
+				if (myServiceID == null){
+					myServiceID = slmEvent.getServiceId();
+					if(LOG.isDebugEnabled()) LOG.debug("client serviceID = "+ServiceUtils.serviceResourceIdentifierToString(myServiceID));
+					
+				}
+				//get user ID
+				if(userID == null){
+					userID = commsMgr.getIdManager().getThisNetworkNode();
+					if(LOG.isDebugEnabled()) LOG.debug("userID = "+userID.toString());
+				}
+
+				this.serverJid = this.serviceMgmt.getServer(myServiceID);
+				serverServiceIdentifier = this.serviceMgmt.getServerServiceIdentifier(myServiceID);
+				this.requestor = new RequestorService(serverJid, serverServiceIdentifier);
+				//unregister for SLM events
+				unregisterForServiceEvents();
+			}
+		}
+		
+		
+		
+/*		if(event.geteventName().equalsIgnoreCase("NEW_SERVICE")){
 			if(LOG.isDebugEnabled()) LOG.debug("Received SLM event");
 			ServiceMgmtEvent slmEvent = (ServiceMgmtEvent) event.geteventInfo();
 			if (slmEvent.getBundleSymbolName().equalsIgnoreCase("ac.hw.mytv.MyTVClient")){
@@ -218,8 +251,8 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 					//unregister for SLM events
 					unregisterForServiceEvents();
 				}
-			}
-		}else if(event.geteventName().equalsIgnoreCase("displayUpdate")){
+			}*/
+		else if(event.geteventName().equalsIgnoreCase("displayUpdate")){
 			if(LOG.isDebugEnabled()) LOG.debug("Received DisplayPortal event");
 		}else{
 			if(LOG.isDebugEnabled()) LOG.debug("Received unknown event with name: "+event.geteventName());
@@ -286,47 +319,59 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 		return true;
 	}
 
-	/*private void setChannel(int channel){
-
-	}
-
-	private void setMuted(String muted){
-
-	}*/
-
-	public void setUam(IUserActionMonitor uam){
-		this.uam = uam;
-	}
-
-
-	public void setPersoMgr(IPersonalisationManager persoMgr){
-		this.persoMgr = persoMgr;
-	}
-
-	public void setServiceMgmt(IServices serviceMgmt){
-		this.serviceMgmt = serviceMgmt;
-	}
-
-	public void setEventMgr(IEventMgr eventMgr){
-		this.eventMgr = eventMgr;
-	}
-
-	public void setCommsMgr(ICommManager commsMgr){
-		this.commsMgr = commsMgr;
-	}
-
-	public void setDisplayDriver(IDisplayDriver displayDriver){
-		this.displayDriver = displayDriver;
-	}
-
-	public static void main(String[] args) throws IOException{
-		new MyTvClient();
-	}
-
 
 
 	public CommandHandler getCommandHandler(){
 		return new CommandHandler();
+	}
+
+	public IUserActionMonitor getUam() {
+		return uam;
+	}
+
+	public void setUam(IUserActionMonitor uam) {
+		this.uam = uam;
+	}
+
+	public IPersonalisationManager getPersoMgr() {
+		return persoMgr;
+	}
+
+	public void setPersoMgr(IPersonalisationManager persoMgr) {
+		this.persoMgr = persoMgr;
+	}
+
+	public IServices getServiceMgmt() {
+		return serviceMgmt;
+	}
+
+	public void setServiceMgmt(IServices serviceMgmt) {
+		this.serviceMgmt = serviceMgmt;
+	}
+
+	public IEventMgr getEventMgr() {
+		return eventMgr;
+	}
+
+	public void setEventMgr(IEventMgr eventMgr) {
+		this.eventMgr = eventMgr;
+	}
+
+	public ICommManager getCommsMgr() {
+		return commsMgr;
+	}
+
+	public void setCommsMgr(ICommManager commsMgr) {
+		this.commsMgr = commsMgr;
+		this.userID = commsMgr.getIdManager().getThisNetworkNode();
+	}
+
+	public IDisplayDriver getDisplayDriver() {
+		return displayDriver;
+	}
+
+	public void setDisplayDriver(IDisplayDriver displayDriver) {
+		this.displayDriver = displayDriver;
 	}
 
 	/*
@@ -375,14 +420,14 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 			//create action object and send to uam
 			IAction action = new Action(myServiceID, myServiceType, parameterName, value);
 			if(LOG.isDebugEnabled()) LOG.debug("Sending action to UAM: "+action.toString());
-			uam.monitor(userID, action);
+			getUam().monitor(userID, action);
 		}
 
 		public String getChannelPreference(){
 			if(LOG.isDebugEnabled()) LOG.debug("Getting channel preference from personalisation manager");
 			String result = "PREFERENCE-ERROR";
 			try {
-				Future<IAction> futureOutcome = persoMgr.getPreference(requestor, userID, myServiceType, myServiceID, "channel");
+				Future<IAction> futureOutcome = getPersoMgr().getPreference(requestor, userID, myServiceType, myServiceID, "channel");
 				if(LOG.isDebugEnabled()) LOG.debug("Requested preference from personalisationManager");
 				IAction outcome = futureOutcome.get();
 				if(LOG.isDebugEnabled()) LOG.debug("Called .get()");
@@ -404,7 +449,7 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 			if(LOG.isDebugEnabled()) LOG.debug("Getting mute preference from personalisation manager");
 			String result = "PREFERENCE-ERROR";
 			try {
-				Future<IAction> futureOutcome = persoMgr.getPreference(requestor, userID, myServiceType, myServiceID, "muted");
+				Future<IAction> futureOutcome = getPersoMgr().getPreference(requestor, userID, myServiceType, myServiceID, "muted");
 				if(LOG.isDebugEnabled()) LOG.debug("Requested preference from personalisationManager");
 				IAction outcome = futureOutcome.get();
 				if(LOG.isDebugEnabled()) LOG.debug("Called .get()");
@@ -427,7 +472,7 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 			String result = "INTENT-ERROR";
 			try {
 
-				Future<IAction> futureOutcome = persoMgr.getIntentAction(requestor, userID, myServiceID, "channel");
+				Future<IAction> futureOutcome = getPersoMgr().getIntentAction(requestor, userID, myServiceID, "channel");
 				if(LOG.isDebugEnabled()) LOG.debug("Requested intent from personalisationManager");
 				IAction outcome = futureOutcome.get();
 				if(LOG.isDebugEnabled()) LOG.debug("Called .get()");
@@ -448,7 +493,7 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 			if(LOG.isDebugEnabled()) LOG.debug("Getting muted intent from personalisation manager");
 			String result = "INTENT_ERROR";
 			try {
-				Future<IAction> futureOutcome = persoMgr.getIntentAction(requestor, userID, myServiceID, "muted");
+				Future<IAction> futureOutcome = getPersoMgr().getIntentAction(requestor, userID, myServiceID, "muted");
 				if(LOG.isDebugEnabled()) LOG.debug("Requested intent from personalisationManager");
 				IAction outcome = futureOutcome.get();
 				if(LOG.isDebugEnabled()) LOG.debug("Called .get()");
@@ -465,4 +510,7 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 			return result;
 		}
 	}
+	
+	
+
 }
