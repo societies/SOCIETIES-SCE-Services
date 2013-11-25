@@ -329,9 +329,13 @@ public class SharedCalendar extends EventListener implements ISharedCalendarServ
 			ICisOwned calCis = getCisManager().getOwnedCis(myCal.getNodeId());
 			if(calCis == null){
 				log.debug("We have calendar {} but the CIS no longer exists. Deleting!",myCal.getCalendarName());
-				database.deleteEventsForCalendarId(myCal.getCalendarId());
-				database.deleteCalendar(myCal.getCalendarId());
-				googleUtil.deleteCalendar(myCal.getCalendarId());
+				try{
+					//database.deleteEventsForCalendarId(myCal.getCalendarId());
+					database.deleteCalendar(myCal.getCalendarId());
+					googleUtil.deleteCalendar(myCal.getCalendarId());
+				} catch(Exception ex){
+					log.error("Problem deleting calendar: {}", ex);
+				}
 			}
 		}
 		// TODO Now we clean up calendars for CIS that no longer exist...
@@ -351,12 +355,26 @@ public class SharedCalendar extends EventListener implements ISharedCalendarServ
 		cleaner.shutdown();
 		String[] eventTypes = new String[] {EventTypes.CIS_CREATION, EventTypes.CIS_DELETION, EventTypes.CIS_RESTORE, EventTypes.CIS_SUBS, EventTypes.CIS_UNSUBS,EventTypes.SERVICE_LIFECYCLE_EVENT};
 		getEvtMgr().unSubscribeInternalEvent(this, eventTypes, null);
+		
+		log.debug("Clearing up nodes!");
+		try{
+			List<String> myNode = getPubSub().discoItems(myId, null);
+			for(String node: myNode){
+				if(node.contains("group.calendar.google.com")){
+					log.debug("Deleting pubSub node {}",node);
+					getPubSub().ownerDelete(myId, node);
+				}
+			}
+		} catch(Exception ex){
+			log.error("Exception while trying to delete pubSub nodes! {} ",ex);
+		}
+
 	}
 	
 	protected String createCalendar(String calendarSummary, IIdentity node){
 			
-		if(log.isDebugEnabled())
-			log.debug("Creating a calendar for " + node.getJid() + " ; need to check what type of node it is");
+
+		log.debug("Creating a calendar for {} ; need to check what type of node it is",node.getJid());
 		
 		String calendarId = null;
 		boolean calendarResult = false;
@@ -402,8 +420,8 @@ public class SharedCalendar extends EventListener implements ISharedCalendarServ
 						
 						log.debug("Created a new Calendar: {} now creating the pubsub node",calendarId);
 						
-						getPubSub().ownerCreate(node, calendarId.replace('@', '-'));
-						getPubSub().subscriberSubscribe(node, calendarId.replace('@', '-'), this);
+						getPubSub().ownerCreate(myId, calendarId.replace('@', '-'));
+						getPubSub().subscriberSubscribe(myId, calendarId.replace('@', '-'), this);
 						
 						this.notifyCisActivity(node.getJid(), myId.getIdentifier(), VERB_CIS_CALENDAR_CREATED, calendarSummary, null);
 
@@ -429,16 +447,54 @@ public class SharedCalendar extends EventListener implements ISharedCalendarServ
 		
 	}
 
+	private boolean leaveCalendar(IIdentity node){
+		
+		log.debug("Leaving a calendar... unsubscribing from all events!");
+		boolean leaveResult = false;
+		Calendar calendar = retrieveCalendar(node,myId);
+		
+		String calendarId = null;
+		if(calendar != null)
+			calendarId = calendar.getCalendarId();
+		
+		if(calendarId == null){
+			if(log.isDebugEnabled())
+				log.debug("Couldn't find the Calendar Id");
+			
+			return false;
+		}
+		
+		log.debug("Removing events from this calendar from recommended and recents");
+
+		for(Event oldEvent: recentEvents.values()){
+			if(oldEvent.getNodeId().equals(node.getBareJid()))
+				recentEvents.remove(oldEvent);
+		}
+		
+		for(Event oldEvent: recommendedEvents.values()){
+			if(oldEvent.getNodeId().equals(node.getBareJid()))
+				recommendedEvents.remove(oldEvent);
+		}
+		
+		leaveResult = database.deleteEventsForCalendarId(calendarId);
+		if(leaveResult)
+			recentCalendars.remove(node.getBareJid());
+	
+		return leaveResult;
+	}
+	
 	private boolean deleteCalendar(IIdentity node){
 		
-		if(log.isDebugEnabled())
-			log.debug("Deleting a calendar for " + node.getJid() + " ; need to check what type of node it is");
+		log.debug("Deleting a calendar for {} ; need to check what type of node it is", node.getJid());
 		
 		boolean deleteResult = false;
 		
 		try{
 			Calendar calendar = retrieveCalendar(node,myId);
-			String calendarId = calendar.getCalendarId();
+			
+			String calendarId = null;
+			if(calendar != null)
+				calendarId = calendar.getCalendarId();
 			
 			if(calendarId == null){
 				if(log.isDebugEnabled())
@@ -489,8 +545,9 @@ public class SharedCalendar extends EventListener implements ISharedCalendarServ
 				if(log.isDebugEnabled())
 					log.debug("It's a CIS, let's determine if it is ours or not!");
 				
-				ICisOwned cisOwned = getCisManager().getOwnedCis(node.getJid());
-				if(cisOwned != null){
+			//	ICisOwned cisOwned = getCisManager().getOwnedCis(node.getJid());
+			//	if(cisOwned != null){
+				if(true){
 					if(log.isDebugEnabled())
 						log.debug("It's our own CIS, so we'll delete the calendar!");
 					
@@ -512,10 +569,10 @@ public class SharedCalendar extends EventListener implements ISharedCalendarServ
 						message.setMessage(Message.CALENDAR_DELETED);
 						message.setCalendarId(node.getBareJid());
 						String messageId = message.getMessage()+"_"+ message.getCalendarId();
-						getPubSub().subscriberUnsubscribe(node, calendarId.replace('@', '-'), this);
+						getPubSub().subscriberUnsubscribe(myId, calendarId.replace('@', '-'), this);
 						
-						getPubSub().publisherPublish(node, calendarId.replace('@', '-'), messageId, message);								
-						//getPubSub().ownerDelete(node, calendarId);
+						getPubSub().publisherPublish(myId, calendarId.replace('@', '-'), messageId, message);								
+						//getPubSub().ownerDelete(node, calendarId.replace('@', '-'));
 						
 						//TODO
 						//Unsubscribe from all events
@@ -594,7 +651,7 @@ public class SharedCalendar extends EventListener implements ISharedCalendarServ
 				
 					if(returnedCalendar != null){
 						log.debug("Received result: {}",returnedCalendar.getName());
-						getPubSub().subscriberSubscribe(node, returnedCalendar.getCalendarId().replace('@', '-'), this);
+						getPubSub().subscriberSubscribe(getIIdentityFromJid(targetCis.getOwnerId()), returnedCalendar.getCalendarId().replace('@', '-'), this);
 						recentCalendars.put(node.getBareJid(), returnedCalendar);
 					}
 					
@@ -610,14 +667,14 @@ public class SharedCalendar extends EventListener implements ISharedCalendarServ
 						log.debug("We have a calendar, so we check and subscribe to the pubsub!");
 						recentCalendars.put(node.getBareJid(), returnedCalendar);
 						try{
-							List<String> myNode = getPubSub().discoItems(node, null);
+							List<String> myNode = getPubSub().discoItems(myId, null);
 							if(!myNode.contains(returnedCalendar.getCalendarId().replace('@', '-'))){
 								log.debug("Creating pub-sub node for calendar {}!",returnedCalendar.getName());
-								getPubSub().ownerCreate(node, returnedCalendar.getCalendarId().replace('@', '-'));
+								getPubSub().ownerCreate(myId, returnedCalendar.getCalendarId().replace('@', '-'));
 							} else{
 								log.debug("PubSub node for calendar {} already Created!",returnedCalendar.getName());
 							}
-							getPubSub().subscriberSubscribe(node, returnedCalendar.getCalendarId().replace('@', '-'), this);
+							getPubSub().subscriberSubscribe(myId, returnedCalendar.getCalendarId().replace('@', '-'), this);
 							
 						} catch(Exception ex){
 							log.error("Error creating pubsub node for calendar {}! {}", returnedCalendar.getName(),ex.getMessage());
@@ -936,7 +993,7 @@ public class SharedCalendar extends EventListener implements ISharedCalendarServ
 							message.setCalendarId(newEvent.getCalendarId());
 							String messageId = message.getMessage()+"_"+ newEvent.getEventId();
 							
-							getPubSub().publisherPublish(node, calendarId.replace('@', '-'), messageId, message);
+							getPubSub().publisherPublish(myId, calendarId.replace('@', '-'), messageId, message);
 							
 							if(log.isDebugEnabled())
 								log.debug("Publishing event in activity feed!");
@@ -1082,7 +1139,7 @@ public class SharedCalendar extends EventListener implements ISharedCalendarServ
 					message.setCalendarId(myEvent.getCalendarId());
 					String messageId = message.getMessage()+"_"+ myEvent.getEventId();
 					
-					getPubSub().publisherPublish(node, myEvent.getCalendarId().replace('@', '-'), messageId, message);
+					getPubSub().publisherPublish(myId, myEvent.getCalendarId().replace('@', '-'), messageId, message);
 					
 					this.notifyCisActivity(node.getJid(), requestor.getIdentifier(), VERB_CIS_CALENDAR_EVENT_DELETED, myEvent.getName(), myEvent.getCalendarId());
 					
@@ -1188,7 +1245,7 @@ public class SharedCalendar extends EventListener implements ISharedCalendarServ
 						message.setCalendarId(eventUpdate.getCalendarId());
 						String messageId = message.getMessage()+"_"+ eventUpdate.getEventId();
 						
-						getPubSub().publisherPublish(node, eventUpdate.getCalendarId().replace('@', '-'), messageId, message);
+						getPubSub().publisherPublish(myId, eventUpdate.getCalendarId().replace('@', '-'), messageId, message);
 						
 						if(log.isDebugEnabled())
 							log.debug("Publishing event in activity feed!");
@@ -1315,7 +1372,7 @@ public class SharedCalendar extends EventListener implements ISharedCalendarServ
 						message.setEvent(theEvent);
 						String messageId = message.getMessage()+"_"+ theEvent.getEventId()+"_"+subscriber.getBareJid();
 						
-						getPubSub().publisherPublish(node, calendarId.replace('@', '-'), messageId, message);
+						getPubSub().publisherPublish(myId, calendarId.replace('@', '-'), messageId, message);
 						
 						if(log.isDebugEnabled())
 							log.debug("Publishing event in activity feed!");
@@ -1468,7 +1525,7 @@ public class SharedCalendar extends EventListener implements ISharedCalendarServ
 						message.setEvent(theEvent);
 						String messageId = message.getMessage()+"_"+ theEvent.getEventId()+"_"+subscriber.getBareJid();
 						
-						getPubSub().publisherPublish(node, calendarId.replace('@', '-'), messageId, message);
+						getPubSub().publisherPublish(myId, calendarId.replace('@', '-'), messageId, message);
 						
 						if(log.isDebugEnabled())
 							log.debug("Publishing event in activity feed!");
@@ -1762,16 +1819,16 @@ public class SharedCalendar extends EventListener implements ISharedCalendarServ
 					log.debug("{} has a Calendar",newCommunity);
 					
 					try{
-						List<String> myNode = getPubSub().discoItems(cisNode, null);
+						List<String> myNode = getPubSub().discoItems(myId, null);
 						if(!myNode.contains(cisCalendar.getCalendarId().replace('@', '-'))){
 							if(log.isDebugEnabled())
 								log.debug("Creating pub-sub node!");
-							getPubSub().ownerCreate(cisNode, cisCalendar.getCalendarId().replace('@', '-'));
+							getPubSub().ownerCreate(myId, cisCalendar.getCalendarId().replace('@', '-'));
 						} else{
 							if(log.isDebugEnabled())
 								log.debug("PubSub node already Created!");
 						}
-						getPubSub().subscriberSubscribe(cisNode, cisCalendar.getCalendarId().replace('@', '-'), this);
+						getPubSub().subscriberSubscribe(myId, cisCalendar.getCalendarId().replace('@', '-'), this);
 						
 					} catch(Exception ex){
 						log.error("Error creating pubsub node!");
@@ -1795,9 +1852,15 @@ public class SharedCalendar extends EventListener implements ISharedCalendarServ
 				log.debug("A CIS was deleted, we need to remove the calendar and the events associated with it.");
 			try{
 				Community newCommunity = (Community) event.geteventInfo();
+				IIdentity calendarOwnerId = getIIdentityFromJid(newCommunity.getOwnerJid());
 				IIdentity cisIdentity = getIIdentityFromJid(newCommunity.getCommunityJid());
-				this.deleteCalendar(cisIdentity);
-				
+				if(calendarOwnerId.equals(myId)){
+					log.debug("Calendar {} is ours, so we must delete it.",newCommunity.getCommunityName());
+					this.deleteCalendar(cisIdentity);
+				} else{
+					log.debug("Calendar {} is not ours, so we just leave it.", newCommunity.getCommunityName());
+					this.leaveCalendar(cisIdentity);
+				}
 			} catch(Exception ex){
 				log.error("Exception while processing CIS_DELETION: " + ex);
 				ex.printStackTrace();
@@ -1811,10 +1874,7 @@ public class SharedCalendar extends EventListener implements ISharedCalendarServ
 			try{
 				Community newCommunity = (Community) event.geteventInfo();
 				IIdentity cisIdentity = getIIdentityFromJid(newCommunity.getCommunityJid());
-				this.deleteCalendar(cisIdentity);
-				
-				if(log.isDebugEnabled())
-					log.debug("Remove events from that CIS from the Recommended Events List");
+				this.leaveCalendar(cisIdentity);
 				
 			} catch(Exception ex){
 				log.error("Exception while processing CIS_UNSUBS: " + ex);
@@ -1938,8 +1998,7 @@ public class SharedCalendar extends EventListener implements ISharedCalendarServ
 		
 		protected boolean deleteEventsForCalendarId(String calendarId){
 
-			if(log.isDebugEnabled())
-				log.debug("Deleting events for: " + calendarId);
+			log.debug("Deleting events for: {}", calendarId);
 			
 			boolean result = false;
 			Transaction t = null;
@@ -1959,11 +2018,11 @@ public class SharedCalendar extends EventListener implements ISharedCalendarServ
 					
 					result = true;		
 				} else {
-					if(log.isDebugEnabled())
-						log.debug("The events for calendar id have not been found.");
+					log.debug("The events for calendar id {} have not been found.", calendarId);
+					result = true;	
 				}
-				if(log.isDebugEnabled())
-					log.debug("Found " + results.size() + " ");
+				log.debug("Found {} events for calendar Id {}", results.size(), calendarId);
+				
 			} catch (HibernateException he) {
 				log.error("Hibernate Exception: {}",he.getMessage());
 
@@ -2222,8 +2281,7 @@ public class SharedCalendar extends EventListener implements ISharedCalendarServ
 		
 		protected List<EventDAO> getEventsForCalendarId(String calendarId){
 
-			if(log.isDebugEnabled())
-				log.debug("Getting events for: " + calendarId);
+			log.debug("Getting events for: {}", calendarId);
 			
 			List<EventDAO> results = new ArrayList<EventDAO>();
 			Transaction t = null;
@@ -2235,8 +2293,7 @@ public class SharedCalendar extends EventListener implements ISharedCalendarServ
 						.createCriteria(EventDAO.class)
 						.add(Restrictions.like("calendarId", calendarId)).list();
 				
-				if(log.isDebugEnabled())
-					log.debug("Found " + results.size() + " ");
+				log.debug("Found {} events for calendar {}", results.size(), calendarId);
 			} catch (HibernateException he) {
 				log.error("Hibernate Exception: {}",he.getMessage());
 
@@ -2265,6 +2322,7 @@ public class SharedCalendar extends EventListener implements ISharedCalendarServ
 						.add(Restrictions.like("calendarId", calendarId)).list();
 				if (results.size() == 1) {
 					
+					log.debug("Found calendar with id {}, deleting it...", calendarId);
 					t = session.beginTransaction();
 					CalendarDAO d = results.get(0);
 					session.delete(d);
@@ -2379,8 +2437,7 @@ public class SharedCalendar extends EventListener implements ISharedCalendarServ
 		
 		protected String getCalendarIdFromNodeId(String nodeId){
 			
-			if(log.isDebugEnabled())
-				log.debug("Getting CalendarId from NodeId {}",nodeId);
+			log.debug("Getting CalendarId from NodeId {}",nodeId);
 			
 			String result = null;
 			Transaction t = null;
@@ -2535,7 +2592,7 @@ public class SharedCalendar extends EventListener implements ISharedCalendarServ
 			if(calendarMessage.getMessage().equals(Message.DELETED_EVENT)){
 				Event deletedEvent = calendarMessage.getEvent();
 				
-				log.debug("Event was deleted: {}" + deletedEvent.getName());
+				log.debug("Event was deleted: {}", deletedEvent.getName());
 				
 				// First we check if the event was in the recommended events, and we remove it if so
 				if(recommendedEvents.get(deletedEvent.getEventId()) != null){

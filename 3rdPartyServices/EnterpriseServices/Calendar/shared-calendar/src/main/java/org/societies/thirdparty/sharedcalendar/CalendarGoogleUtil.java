@@ -188,7 +188,7 @@ public class CalendarGoogleUtil {
 		try {
 			service.calendars().delete(calendarId).execute();
 		} catch (IOException e) {
-			log.error("Unable to delete calendar with id '"+calendarId+"'", e);
+			log.error("Unable to delete calendar with id '{}': {}",calendarId, e);
 			throw e;
 		}
 	}
