@@ -45,7 +45,7 @@ public interface ICollabApps {
 	 * @param sessionName Collaborative session name
 	 * @param string
 	 */
-	public abstract void sendInvite(String member, String[] collabApps, String sessionName, String string);
+	public abstract void sendInvite(String member, String[] collabApps, String sessionName, String language, String msg);
 
 	/**
 	 * Remove member from a session	  

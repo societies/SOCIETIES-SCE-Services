@@ -120,7 +120,7 @@ public class Activator implements BundleActivator
 		//    	sessionGraphDbRegistration.unregister();
 		//        indexServiceRegistration.unregister();
 		personGraphDb.shutdown();
-		sessionGraphDb.shutdown(); 
+		sessionGraphDb.shutdown();
 	}
 
 	/**
@@ -153,6 +153,15 @@ public class Activator implements BundleActivator
 
 		//Caching last recently used for Location
 		((LuceneIndex<Node>) indexShortTermCtx).setCacheCapacity("name", 3000);
+	}
+
+	/**
+	 * Stop Graphdatabse
+	 */
+	public void stop() {
+		logger.info("Stopping Database...");
+		personGraphDb.shutdown();
+		sessionGraphDb.shutdown();
 	}  
 
 }

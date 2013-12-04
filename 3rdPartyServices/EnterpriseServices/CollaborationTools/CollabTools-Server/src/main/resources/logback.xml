@@ -1,12 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
+    <!-- Insert the current time formatted as "yyyyMMdd'T'HHmmss" under
+       the key "bySecond" into the logger context. This value will be
+       available to all subsequent configuration elements. -->
+  <timestamp key="bySecond" datePattern="yyyyMMdd'T'HHmmss"/>
+  
   <appender name="FILE" class="ch.qos.logback.core.FileAppender">
-    <File>databases/collabToolsLogFile.log</File>
-    <layout class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+    <File>databases/collabToolsLogFile-${bySecond}.log</File>
+   <encoder>
        <Pattern>%msg%n</Pattern>
                <Pattern>%d %p - %m%n</Pattern>
 <!--         <Pattern>%d %p %t %c - %m%n</Pattern> -->
-    </layout>
+    </encoder>
   </appender>
   <root level="debug">
     <appender-ref ref="FILE"/>

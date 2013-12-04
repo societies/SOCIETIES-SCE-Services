@@ -35,6 +35,7 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.societies.collabtools.acquisition.LongTermCtxTypes;
 import org.societies.collabtools.acquisition.Person;
 import org.societies.collabtools.acquisition.PersonRepository;
 import org.societies.collabtools.acquisition.ShortTermCtxTypes;
@@ -57,6 +58,7 @@ public class Engine implements IEngine {
 
 	private List<Rule> rules = new ArrayList<Rule>();
 	private ContextAnalyzer ctxRsn;
+	private boolean engineBypriority = true;
 
 	/**
 	 * @param sessionRepository 
@@ -122,7 +124,7 @@ public class Engine implements IEngine {
 	 */
 	@Override
 	public Hashtable<String, HashSet<Person>> getMatchingResultsByPriority() {
-		log.info("\r\n\r\n*****Evaluating rules...*****");
+		log.info("\r\n\r\n*****Evaluating rules by priority...*****");
 		long start = System.currentTimeMillis();
 		//Format ctx info and people
 		Hashtable<String, HashSet<Person>> matchingRules = new Hashtable<String, HashSet<Person>>(10,10);
@@ -142,6 +144,53 @@ public class Engine implements IEngine {
 					matchingRules.put(htKey, primarySet);					
 				}
 			}
+			log.info("matched rule: " + r.getName() + " with priority "+ r.getPriority()+" and weight "+r.getWeight()*10 +"%");
+			Enumeration<String> e = matchingRules.keys();
+			while (e.hasMoreElements()) {
+				log.info("matchingRules: " + e.nextElement());
+			}
+		}
+
+		log.info("*****Engine evaluation completed in " + (System.currentTimeMillis()-start) + " ms*****\r\n");
+		return matchingRules;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.societies.collabtools.api.IEngine#getMatchingResultsByRelevance()
+	 */
+	@Override
+	public Hashtable<String, HashSet<Person>> getMatchingResultsByRelevance() {
+		log.info("\r\n\r\n*****Evaluating rules by relevance...*****");
+		long start = System.currentTimeMillis();
+		//Format ctx info and people
+		Hashtable<String, HashSet<Person>> matchingRules = new Hashtable<String, HashSet<Person>>(10,10);
+		Hashtable<Person, Double> allPersons = new Hashtable<Person, Double>(10,10);
+		for(Rule r : this.rules){
+			matchingRules = evaluateRule(r.getOperator(), r.getCtxAttribute(), r.getValue(), r.getCtxType(), null);
+
+				for (Person person : personRepository.getAllPersons()) {
+					Enumeration<String> ctxAttIterator = matchingRules.keys();
+					while(ctxAttIterator.hasMoreElements()) {
+						String ctxAttr = ctxAttIterator.nextElement();
+						HashSet<Person> persons  = matchingRules.get(ctxAttr);
+						for (Person individual : persons){
+							if (individual.getName().equalsIgnoreCase(person.getName())) {
+								if (!r.getOperator().equals(Operators.SIMILAR)) {
+									allPersons.put(individual, r.getWeight()*1);
+								}
+								else {
+									//Or allPersons.put(individual, r.getWeight()*0)
+									allPersons.put(individual, 0.0);
+								}
+							}
+							else {
+								allPersons.put(individual, r.getWeight());
+							}
+
+						}
+					}
+				}
+
 			log.info("matched rule: " + r.getName() + " with priority "+ r.getPriority()+" and weight "+r.getWeight()*10 +"%");
 			Enumeration<String> e = matchingRules.keys();
 			while (e.hasMoreElements()) {
@@ -390,7 +439,7 @@ public class Engine implements IEngine {
 					return tablePersons;
 				}
 				else {
-//					ctxRsn.enrichedCtx(ctxAttribute);
+					//					ctxRsn.enrichedCtx(ctxAttribute);
 					//For tests only concept enrichment will be done
 					ctxRsn.incrementCtx(ctxAttribute, EnrichmentTypes.CONCEPT, null);
 					ctxRsn.setupWeightAmongPeople(ctxAttribute);
@@ -410,7 +459,7 @@ public class Engine implements IEngine {
 			}
 		}
 		throw new IllegalArgumentException("Rule name doesn't exist!");
-//		return new Hashtable<String, HashSet<Person>>();		
+		//		return new Hashtable<String, HashSet<Person>>();		
 	}
 
 	/**
@@ -429,6 +478,23 @@ public class Engine implements IEngine {
 		}
 		return true;
 	}
+
+	/**
+	 * @param flag Set engine mode to work with priority or relevance
+	 * 
+	 */
+	public void setEngineMode(boolean flag) {
+		this.engineBypriority  = flag;		
+	}
+
+	/**
+	 * @param flag Get engine mode. True for priority or false for relevance. Default true
+	 * 
+	 */
+	public boolean getEngineMode() {
+		return this.engineBypriority;		
+	}
+
 
 	//	public static <T> List<T> getDuplicate(Collection<T> list) {
 	//

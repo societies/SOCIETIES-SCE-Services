@@ -26,6 +26,7 @@ package org.societies.collabtools.runtime;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -273,8 +274,16 @@ public class SessionRepository implements Observer {
 
 		while (personIterator.hasNext()) {
 			//TODO: Implement floor control
-			Person person = (Person)personIterator.next();		
-			getSessionByName(sessionName).addMember(person, Session.VISITOR);
+			Person person = (Person)personIterator.next();	
+			//Send interests in a msg
+			String[] interests = person.getArrayLongTermCtx("ORIGINAL_interests");
+//			String[] sessionInterests = getSessionByName(sessionName).getMembersInterests();
+//			List<String> compareList = Arrays.asList(interests);
+//			List<String> baseList = Arrays.asList(sessionInterests);
+//			baseList.retainAll(compareList);
+			
+			getSessionByName(sessionName).addMember(person, Session.VISITOR, Arrays.toString(interests));
+			logger.info("Msg to user "+person.getName()+": "+Arrays.toString(interests));
 			sessionChanges = true;
             logger.debug("Inviting new members...");
 		}
@@ -283,13 +292,18 @@ public class SessionRepository implements Observer {
 		if (sessionChanges) {
 			Iterator<Person> it = getSessionByName(sessionName).getMembers();
 			List<String> membersList = new ArrayList<String>();
+			HashSet<String> hs = new HashSet<String>();
 			while (it.hasNext()) {
-				membersList.add(((Person)it.next()).getName());
+				Person person = (Person)it.next();
+				membersList.add(person.getName());
+				//TODO: ONLY FOR THE TESTS!
+				Collections.addAll(hs, person.getArrayLongTermCtx(LongTermCtxTypes.INTERESTS)); 
 			}
 			HashMap<String, String[]> ctxSessionHistory = new HashMap<String, String[]>();
 			String [] historyPeople = membersList.toArray(new String[0]);
 			logger.debug("members to the session history: ", Arrays.toString(historyPeople));
 			ctxSessionHistory.put(Session.MEMBERS_INVITED, historyPeople);
+			ctxSessionHistory.put(LongTermCtxTypes.INTERESTS, hs.toArray(new String[0])); //REMOVE THIS AFTER THE TESTS
 			getSessionByName(sessionName).addSessionHistoryStatus(ctxSessionHistory);
 			//Returning members which were inserted in a existed session
 			return historyPeople;

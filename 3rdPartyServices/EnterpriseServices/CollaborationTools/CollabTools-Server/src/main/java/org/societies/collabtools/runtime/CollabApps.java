@@ -53,14 +53,14 @@ public class CollabApps extends Observable implements ICollabApps, Observer
 
 	//member and applications available from this user
 	@Override
-	public void sendInvite(String member, String[] collabApps, String sessionName, String language)
+	public void sendInvite(String member, String[] collabApps, String sessionName, String language, String msg)
 	{
 		for (String app : collabApps){
 			for (AbstractCollabAppConnector connector : collabAppsconnectors) {
 				if (connector.getAppName().contains(app)){
 					//TODO:Start invitation
 					System.out.println("Send invitation to member: " + member + " using app " + connector.getAppName());
-					connector.join(member, sessionName, language);
+					connector.join(member, sessionName, language, msg);
 				}
 				else {				
 					throw new IllegalArgumentException(connector.getAppName()+" application not available");

@@ -37,6 +37,7 @@ import org.neo4j.index.impl.lucene.LuceneIndex;
 import org.neo4j.kernel.impl.util.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.societies.collabtools.acquisition.LongTermCtxTypes;
 import org.societies.collabtools.acquisition.PersonRepository;
 import org.societies.collabtools.api.AbstractCollabAppConnector;
 import org.societies.collabtools.runtime.CollabApps;
@@ -96,13 +97,13 @@ public class MainTest {
 		test.deleteSocialGraph();
 		
 //		test.menu();
-		test.createPersons(2); //5 people by default
+		test.createPersons(3); //5 people by default
 		
 //		Creating some updates
 		test.createMockLongTermCtx();
 		test.createMockShortTermCtx();
-//		test.enrichedCtx(LongTermCtxTypes.INTERESTS);
-//		test.setupWeightAmongPeople(LongTermCtxTypes.INTERESTS);
+		test.enrichedCtx(LongTermCtxTypes.INTERESTS);
+		test.setupWeightAmongPeople(LongTermCtxTypes.INTERESTS);
 
 		
 //		YouMightKnow ymn = new YouMightKnow(personRepository.getPersonByName("person#"+3), new String[] {"project planning"}, 5);

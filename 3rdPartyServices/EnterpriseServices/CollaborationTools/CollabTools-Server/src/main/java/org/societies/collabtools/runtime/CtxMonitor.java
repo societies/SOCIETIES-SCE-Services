@@ -57,47 +57,52 @@ public class CtxMonitor extends Observable implements Runnable, Observer {
 		this.sessionRepository = sessionRepository;
 
 		//Default rules when the FW starts, location and interests
-		Rule r01 = new Rule("r01",Operators.SAME, ShortTermCtxTypes.LOCATION, "--", 1, 0.5 ,ShortTermCtxTypes.class.getSimpleName());
-		Rule r02 = new Rule("r02",Operators.SIMILAR, LongTermCtxTypes.INTERESTS, "--", 2, 0.4 ,LongTermCtxTypes.class.getSimpleName());
+		Rule r01 = new Rule("r01",Operators.SAME, ShortTermCtxTypes.LOCATION, "--", 1, 0.3 ,ShortTermCtxTypes.class.getSimpleName());
+		Rule r02 = new Rule("r02",Operators.SIMILAR, LongTermCtxTypes.INTERESTS, "--", 2, 0.7 ,LongTermCtxTypes.class.getSimpleName());
 		//		Rule r03 = new Rule("r03",Operators.EQUAL, ShortTermCtxTypes.STATUS, "Available", 3, 0.1 ,ShortTermCtxTypes.class.getSimpleName()); //Check status of the user e.g busy, on phone, driving...
 		List<Rule> rules = Arrays.asList(r01, r02);
 		this.engine.setRules(rules);
 	}
 
 	public synchronized void run(){
-		logger.info("Checking if people context match");
+		logger.info("Checking if people context match. Priority {}", this.engine.getEngineMode());
 
-		//First rule: location Mandatory
-		Hashtable<String, HashSet<Person>> personsfirstRule = engine.evaluateRule("r01");
+		if (this.engine.getEngineMode()) {
+			//First rule: location Mandatory
+			Hashtable<String, HashSet<Person>> personsfirstRule = engine.evaluateRule("r01");
 
-		if (!personsfirstRule.isEmpty()) {
-			Enumeration<String> iterator = personsfirstRule.keys();
-			//For each different location, apply the following rules...
-			while(iterator.hasMoreElements()) {
-				//Session name = actual location
-				String sessionName = iterator.nextElement();
-				HashSet<Person> possibleMembers = engine.getMatchingResultsByPriority().get(sessionName);
-				//Check conflict if actual users in the session
-				if (!(possibleMembers).isEmpty()) {
-					if (!this.sessionRepository.containSession(sessionName)) {
-						logger.info("Starting a new session..");
-						logger.info("Inviting people..");
-						System.out.println("New Engine: "+possibleMembers.toString());
-						this.sessionRepository.createSession(sessionName);
-					}
-					String[] membersIncluded = this.sessionRepository.addMembers(sessionName, possibleMembers);
+			if (!personsfirstRule.isEmpty()) {
+				Enumeration<String> iterator = personsfirstRule.keys();
+				//For each different location, apply the following rules...
+				while(iterator.hasMoreElements()) {
+					//Session name = actual location
+					String sessionName = iterator.nextElement();
+					HashSet<Person> possibleMembers = engine.getMatchingResultsByPriority().get(sessionName);
+					//Check conflict if actual users in the session
+					if (!(possibleMembers).isEmpty()) {
+						if (!this.sessionRepository.containSession(sessionName)) {
+							logger.info("Starting a new session..");
+							logger.info("Inviting people..");
+							System.out.println("New Engine: "+possibleMembers.toString());
+							this.sessionRepository.createSession(sessionName);
+						}
+						String[] membersIncluded = this.sessionRepository.addMembers(sessionName, possibleMembers);
 
-					//System.out.println("New Engine: "+possibleMembers.toString());
+						//System.out.println("New Engine: "+possibleMembers.toString());
 
-					// Notify observers of change
-					if (membersIncluded.length>0){
-						Hashtable<String, String[]> response = new Hashtable<String, String[]>();
-						response.put(sessionName, membersIncluded);
-						setChanged();
-						notifyObservers(response);
+						// Notify observers of change
+						if (membersIncluded.length>0){
+							Hashtable<String, String[]> response = new Hashtable<String, String[]>();
+							response.put(sessionName, membersIncluded);
+							setChanged();
+							notifyObservers(response);
+						}
 					}
 				}
 			}
+		}
+		else {
+
 		}
 	}
 

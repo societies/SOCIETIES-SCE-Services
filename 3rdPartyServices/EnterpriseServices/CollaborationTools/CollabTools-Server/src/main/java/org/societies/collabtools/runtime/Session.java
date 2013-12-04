@@ -195,6 +195,21 @@ public class Session {
 			tx.finish();
 		}
 	}
+	
+	public String[] getMembersInterests()
+	{
+		Transaction tx = underlyingNode.getGraphDatabase().beginTx();
+		try
+		{
+			String[] membersParticipating  = (String[]) this.getLastSessionHistoryStatus().getProperty(LongTermCtxTypes.INTERESTS, null);
+			tx.success();
+			return membersParticipating;
+		}
+		finally
+		{
+			tx.finish();
+		}
+	}
 
 	/**
 	 * Include members that really accepted the invitation to join a session
@@ -223,7 +238,7 @@ public class Session {
 	 * @param member name of the member
 	 * @param role Role possibles are CHAIR and VISITOR
 	 */
-	public void addMember(Person member, String role)
+	public void addMember(Person member, String role, String msg)
 	{
 		Transaction tx = this.underlyingNode.getGraphDatabase().beginTx();
 		try
@@ -248,7 +263,7 @@ public class Session {
 			//Finally add to the status node
 			//				getLastSessionHistoryStatus().createRelationshipTo(tempNode, RelTypes.PARTICIPATE).setProperty(Session.ROLE, role);
 
-			this.inviteMember(member);
+			this.inviteMember(member, msg);
 
 			tx.success();
 		}
@@ -336,10 +351,10 @@ public class Session {
 	//			addSessionHistoryStatus(ctxSessionHistory);
 	//		}
 
-	private void inviteMember(Person member)
+	private void inviteMember(Person member, String msg)
 	{
 		String[] collabAppsAvailables = member.getArrayLongTermCtx(LongTermCtxTypes.COLLAB_APPS);
-		this.collabApps.sendInvite(member.getName(), collabAppsAvailables, getSessionName(), getLanguage());
+		this.collabApps.sendInvite(member.getName(), collabAppsAvailables, getSessionName(), getLanguage(), msg);
 	}
 
 	private void kickMember(Person member)

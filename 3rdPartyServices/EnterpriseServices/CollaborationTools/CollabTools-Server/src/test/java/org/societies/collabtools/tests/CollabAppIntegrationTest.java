@@ -43,7 +43,7 @@ public class CollabAppIntegrationTest {
 	@Test
 	public void test() {
 		ChatAppIntegrator chat = new ChatAppIntegrator("chat", "snoopy.av.it.pt");
-		chat.join("person#0", "teste", "french");
+		chat.join("person#0", "teste", "french", "Message");
 		
 //	    HashMap<String, String> collabAppsConfig = new HashMap<String, String>();
 //		CollabApps ca = new CollabApps("chat", "snoopy.av.it.pt");

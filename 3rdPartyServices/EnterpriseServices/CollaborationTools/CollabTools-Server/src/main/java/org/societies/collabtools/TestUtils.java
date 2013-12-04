@@ -96,7 +96,7 @@ public class TestUtils {
         //Set LongTerm Ctx
 		person.setLongTermCtx(LongTermCtxTypes.OCCUPATION, getRandomOccupation());
 		person.setLongTermCtx(LongTermCtxTypes.INTERESTS, getRandomInterests());
-		person.setLongTermCtx(LongTermCtxTypes.WORK_POSITION, getRandomWorkPosition());
+//		person.setLongTermCtx(LongTermCtxTypes.WORK_POSITION, getRandomWorkPosition());
 		
     	Map<Person, Integer> persons = personRepository.getPersonWithSimilarCtx(person, LongTermCtxTypes.INTERESTS);
 		for (Map.Entry<Person, Integer> entry : persons.entrySet()) {
@@ -166,7 +166,7 @@ public class TestUtils {
     	for (Person friend :personRepository.getAllPersons()) {
         	friend.setLongTermCtx(LongTermCtxTypes.OCCUPATION, getRandomOccupation());
         	friend.setLongTermCtx(LongTermCtxTypes.INTERESTS, getRandomInterests());
-        	friend.setLongTermCtx(LongTermCtxTypes.WORK_POSITION, getRandomWorkPosition());
+//        	friend.setLongTermCtx(LongTermCtxTypes.WORK_POSITION, getRandomWorkPosition());
     	}	
 	}
 	
@@ -325,7 +325,7 @@ public class TestUtils {
 //		ctxRsn.incrementCtx(LongTermCtxTypes.INTERESTS, EnrichmentTypes.ALL, null);
 		ctxRsn.incrementCtx(LongTermCtxTypes.INTERESTS, EnrichmentTypes.CONCEPT, null);
 //		// context enrichment considering previous concept performed
-		ctxRsn.incrementCtx(LongTermCtxTypes.INTERESTS, EnrichmentTypes.CATEGORY, null);
+//		ctxRsn.incrementCtx(LongTermCtxTypes.INTERESTS, EnrichmentTypes.CATEGORY, null);
 	}
 	
 //	private static void clearDirectory(File path)

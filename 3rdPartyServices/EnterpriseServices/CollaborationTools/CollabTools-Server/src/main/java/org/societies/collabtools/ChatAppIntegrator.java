@@ -139,7 +139,8 @@ public class ChatAppIntegrator extends AbstractCollabAppConnector {
 	 * @see org.societies.collabtools.api.ICollabAppIntegrator#join(java.lang.String)
 	 */
 	@Override
-	public void join(final String user, final String room, final String language) {
+	public void join(final String user, String room, final String language, String msg) {
+		room = room.replaceAll("\\s+","");
 		muc = new MultiUserChat(this.connection, room+"@conference."+this.host);
 		logger.debug("room: {}",room);
 		Collection<HostedRoom> rooms = null;
@@ -168,7 +169,7 @@ public class ChatAppIntegrator extends AbstractCollabAppConnector {
 				e.printStackTrace();
 			}
 		}
-		logger.debug(user+"@"+this.host+ " - CollabTools is inviting you to join "+room+" room");
+		logger.debug(user+"@"+this.host+ " - Interests "+msg+" matches in "+room);
 
 
 		//TODO: Change message to inform which context information trigger the event
@@ -180,7 +181,7 @@ public class ChatAppIntegrator extends AbstractCollabAppConnector {
 			muc.invite(user+"@"+host, "SOCIETIES vous invite à rejoindre "+room+" chambre");
 		}
 		else {
-			muc.invite(user+"@"+host, "SOCIETIES is inviting you to join "+room+" room");
+			muc.invite(user+"@"+host, " - Interests "+msg+" matches in "+room);
 
 		}
 
@@ -192,6 +193,7 @@ public class ChatAppIntegrator extends AbstractCollabAppConnector {
 	 */
 	@Override
 	public void kick(String user, String room) {
+		room = room.replaceAll("\\s+","");
 		muc = new MultiUserChat(this.connection, room+"@conference."+this.host);
 		//TODO: Change message to inform which context information trigger the event 
 		try {

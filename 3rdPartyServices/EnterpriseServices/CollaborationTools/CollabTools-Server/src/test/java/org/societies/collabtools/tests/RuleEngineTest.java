@@ -177,6 +177,27 @@ public class RuleEngineTest {
 	 */
 	@Test
 	public void testGetMatchingResultsByPriority() {
+		Rule r01 = new Rule("r01",Operators.SAME, ShortTermCtxTypes.LOCATION, "--", 1, 0.3 ,ShortTermCtxTypes.class.getSimpleName());
+//		Rule r02 = new Rule("r02",Operators.EQUAL, LongTermCtxTypes.COMPANY, "Intel", 2, 0.1 ,LongTermCtxTypes.class.getSimpleName());
+		Rule r03 = new Rule("r03",Operators.SIMILAR, LongTermCtxTypes.INTERESTS, "--", 3, 0.7 ,LongTermCtxTypes.class.getSimpleName());
+//		Rule r04 = new Rule("r04",Operators.NOT_EQUAL, ShortTermCtxTypes.STATUS, "busy", 4, 0.1 ,ShortTermCtxTypes.class.getSimpleName());
+//		Rule r05 = new Rule("r05",Operators.DIFFERENT, LongTermCtxTypes.OCCUPATION, "manager", 4, 0.1 ,ShortTermCtxTypes.class.getSimpleName());
+//		Rule r06 = new Rule("r06",Operators.GREATER_OR_EQUAL, "age", "20", 4, 0.1 , LongTermCtxTypes.class.getSimpleName());
+//		Rule r07 = new Rule("r07",Operators.LESS, "age", "20", 4, 0.1 ,LongTermCtxTypes.class.getSimpleName());
+//		Rule r08 = new Rule("r08",Operators.LESS_OR_EQUAL, "age", "20", 4, 0.1 ,LongTermCtxTypes.class.getSimpleName());
+//		List<Rule> rules = Arrays.asList(r01, r02, r03, r04, r05, r06, r07, r08);
+		List<Rule> rules = Arrays.asList(r01, r03);
+		engine.setRules(rules);
+		Hashtable<String, HashSet<Person>> matchingRules = engine.getMatchingResultsByPriority();
+		LOG.info(matchingRules.toString());
+		Assert.assertNotNull(matchingRules);
+	}
+	
+	/**
+	 * Test method for {@link org.societies.collabtools.runtime.Engine#getMatchingResultsByPriority()}.
+	 */
+	@Test
+	public void testGetMatchingResultsByRelevance() {
 		Rule r01 = new Rule("r01",Operators.SAME, ShortTermCtxTypes.LOCATION, "--", 1, 0.5 ,ShortTermCtxTypes.class.getSimpleName());
 //		Rule r02 = new Rule("r02",Operators.EQUAL, LongTermCtxTypes.COMPANY, "Intel", 2, 0.1 ,LongTermCtxTypes.class.getSimpleName());
 		Rule r03 = new Rule("r03",Operators.SIMILAR, LongTermCtxTypes.INTERESTS, "--", 3, 0.4 ,LongTermCtxTypes.class.getSimpleName());
@@ -188,7 +209,7 @@ public class RuleEngineTest {
 //		List<Rule> rules = Arrays.asList(r01, r02, r03, r04, r05, r06, r07, r08);
 		List<Rule> rules = Arrays.asList(r01, r03);
 		engine.setRules(rules);
-		Hashtable<String, HashSet<Person>> matchingRules = engine.getMatchingResultsByPriority();
+		Hashtable<String, HashSet<Person>> matchingRules = engine.getMatchingResultsByRelevance();
 		LOG.info(matchingRules.toString());
 		Assert.assertNotNull(matchingRules);
 	}

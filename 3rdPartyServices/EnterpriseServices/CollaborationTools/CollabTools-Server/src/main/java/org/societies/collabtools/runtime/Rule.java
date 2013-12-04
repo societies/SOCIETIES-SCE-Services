@@ -44,9 +44,10 @@ public class Rule implements Comparable<Rule> {
 
 	/**
 	 * @param operator available in {@link Operators}
-	 * @param ctxAttribute
+	 * @param ctxAttribute long term or short term
 	 * @param value Can be a string or a numeric value. For same or similar leave in blank.
-	 * @param priority integer representing a the a priority. Lower values have more priority
+	 * @param priority integer representing a priority. Lower values have more priority.
+	 * @param weight double representing a the a weight. The values are percentage.
 	 * @param ctxType LongTermCtxTypes or ShortTermCtxTypes
 	 */
 	public Rule(String name, Operators operator, String ctxAttribute, String value, int priority, double weight, String ctxType) {
@@ -102,7 +103,7 @@ public class Rule implements Comparable<Rule> {
 	}
 	
 	/**
-	 * @return The priority of the rule.  Used to determine which order the rules should be run.
+	 * @return The weight of the rule.  Used to determine relevance for rules.
 	 */
 	public double getWeight() {
 		return weight;

@@ -66,19 +66,22 @@ public interface IEngine {
 	public abstract List<Rule> getRules();
 
 	public abstract Hashtable<String, HashSet<Person>> getMatchingResultsByPriority();
+	
+	public abstract Hashtable<String, HashSet<Person>> getMatchingResultsByRelevance();
 
 	/**
 	 * @param operator Filter operators available in {@link Operators}
-	 * @param ctx Context information 
+	 * @param ctx Context information. E.g. Location, interests, etc...
 	 * @param value Value if wants to compare. Null for SAME or DIFFERENT operators
 	 * @param ctxType Context type. Can be {@link ShortTermCtxTypes} or {@link LongTermCtxTypes}
-	 * @return hashtable of persons
+	 * @param setOfPersons A group of persons to analyze. If null, it will take all persons from the graph
+	 * @return hashtable of persons with keys context attribute.E.g. Location, interests, etc...
 	 */
-	public abstract Hashtable<String, HashSet<Person>> evaluateRule(Operators operator, final String ctxAttribute, String value, final String ctxType, HashSet<Person> primarySet);
+	public abstract Hashtable<String, HashSet<Person>> evaluateRule(Operators operator, final String ctxAttribute, String value, final String ctxType, HashSet<Person> setOfPersons);
 
 	/**
 	 * @param ruleName Name of the rule to evaluate
-	 * @return hashtable of persons
+	 * @return hashtable of persons with keys context attribute.E.g. Location, interests, etc...
 	 */
 	Hashtable<String, HashSet<Person>> evaluateRule(String ruleName);
 

@@ -65,7 +65,7 @@ public abstract class AbstractCollabAppConnector extends Observable {
 	 * @param room conference room to join
 	 * @param language default language for discussion
 	 */
-	public abstract void join(String user, String room, String language);
+	public abstract void join(String user, String room, String language, String msg);
 	
 	/**
 	 * @param user individual who wants to leave the room
