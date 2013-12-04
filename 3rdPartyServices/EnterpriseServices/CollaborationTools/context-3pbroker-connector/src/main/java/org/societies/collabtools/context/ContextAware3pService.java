@@ -107,13 +107,19 @@ public class ContextAware3pService implements IContextAware3pService  {
 		LOG.info("idMgr : "+this.idMgr );
 		LOG.info("serviceMgmt : "+this.serviceMgmt );
 
-		File logFile = new File("databases/collabToolsLogFile.log");
-		try {
-			logFile.createNewFile();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+//		File logFile = new File("databases/collabToolsLogFile.log");
+//		if (!logFile.getParentFile().exists()) {
+//			logFile.getParentFile().mkdirs();
+//		}
+//		if (!logFile.exists()) {
+//			try {
+//				logFile.createNewFile();
+//			} catch (IOException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+//		}
+
 
 
 		//		this.userIdentity = this.idMgr.getThisNetworkNode();

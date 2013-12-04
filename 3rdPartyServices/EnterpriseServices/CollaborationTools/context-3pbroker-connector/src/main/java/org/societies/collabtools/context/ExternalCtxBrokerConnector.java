@@ -31,7 +31,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Observable;
 import java.util.Set;
-import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.ExecutionException;
 
 import org.slf4j.Logger;
@@ -44,12 +43,10 @@ import org.societies.api.context.event.CtxChangeEventListener;
 import org.societies.api.context.model.CtxAssociation;
 import org.societies.api.context.model.CtxAttribute;
 import org.societies.api.context.model.CtxAttributeTypes;
-import org.societies.api.context.model.CtxEntity;
 import org.societies.api.context.model.CtxEntityIdentifier;
 import org.societies.api.context.model.CtxIdentifier;
 import org.societies.api.context.model.CtxModelObject;
 import org.societies.api.context.model.CtxModelType;
-import org.societies.api.identity.IIdentity;
 import org.societies.api.identity.InvalidFormatException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -280,7 +277,20 @@ public class ExternalCtxBrokerConnector extends Observable {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
 						}
+						String getOnlyNameSubstring[] = oldMember.getOwnerId().split("\\.");
+						String person = getOnlyNameSubstring[0];
+						String [] response = new String [] {"remove", "", person};
+						LOG.info("removeUser");
+						LOG.info("Ctx value type: "+response[0]);
+						LOG.info("Ctx new value: "+response[1]);
+						LOG.info("Ctx person: "+response[2]);
+
+
+						// Notify observers of change
+						setChanged();
+						notifyObservers(response);
 					}
+
 				}
 				// update members
 				ca3pService.setMembersList(currentMembers);
