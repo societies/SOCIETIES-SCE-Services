@@ -114,7 +114,7 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
     public static final String DOMAIN = "crowdtasking.appspot.com";
 //    public static final String DOMAIN = "crowdtaskingtest.appspot.com";
 //    public static final String DOMAIN = "simonix";
-//    public static final String DOMAIN = "192.1č68.1.71";
+//    public static final String DOMAIN = "192.168.1.71";
 //   	public static final String DOMAIN = "192.168.1.102";
 //   	public static final String DOMAIN = "192.168.1.236";
 //   	public static final String DOMAIN = "192.168.76.191";

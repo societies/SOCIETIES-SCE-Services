@@ -24,6 +24,7 @@ public class SocketClient implements Runnable {
 //    static final String SERVER_IP = "192.168.64.103";
 //    static final String SERVER_IP = "192.168.1.67";
     static final String SERVER_IP = "137.195.27.87";
+//    static final String SERVER_IP = "137.195.27.90";
     private boolean connected = true;
     private ObjectInputStream in = null;
     private ObjectOutputStream out =null;
