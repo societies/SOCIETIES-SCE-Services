@@ -262,6 +262,7 @@ var Community = function () {
             $('#editCommunityButton').hide();
         }
         else {
+            var picUrl;
             list = $('#requestList');
             list.empty();
             list.append('<li data-role="list-divider" role="heading">Requests:</li>');
@@ -269,7 +270,7 @@ var Community = function () {
                 for (var i = 0; i < community.requests.length; i++) {
                     var request = community.requests[i];
                     var newLi = $('<li>');
-                    var picUrl = request.picUrl;
+                    picUrl = request.picUrl;
                     if (picUrl == undefined) {
                         picUrl = '/images/pic' + (Math.floor(Math.random() * 4) + 1) + '.png';
                     }
@@ -292,7 +293,7 @@ var Community = function () {
                 var member = community.members[i];
                 var newLi = $('<li data-role="fieldcontain">');
                 newLi.append('<h3 style="white-space:normal;">' + member.username + '</h3>');
-                var picUrl = member.picUrl;
+                picUrl = member.picUrl;
                 if (picUrl == undefined) {
                     picUrl = '/images/pic' + (Math.floor(Math.random() * 4) + 1) + '.png';
                 }

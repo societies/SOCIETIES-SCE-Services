@@ -71,7 +71,7 @@ public class UsersAPI implements IUsersAPI {
         Long userId = (Long) session.getAttribute("CTUserId");
         if (userId != null) {
 /*
-            if (userId.longValue() == 5910974510923776L) {
+            if (userId.longValue() == 5066549580791808L) {
                 CTUser user = getUserById(userId);
                 user.setAdmin(true);
                 UsersAPI.saveUser(user);
