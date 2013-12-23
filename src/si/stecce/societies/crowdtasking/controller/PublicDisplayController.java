@@ -62,14 +62,18 @@ public class PublicDisplayController extends HttpServlet {
             throws ServletException, IOException {
 
         String channelId = request.getParameter("id");
+        String page = request.getParameter("p");
+        if (page == null) {
+            page = "";
+        }
         if (channelId == null || "".equalsIgnoreCase(channelId)) {
             sendFirstScreen(response);
         } else {
-            showPublicDisplay(Long.valueOf(channelId), request, response);
+            showPublicDisplay(Long.valueOf(channelId), request, response, page);
         }
     }
 
-    private void showPublicDisplay(Long channelNumber, HttpServletRequest request, HttpServletResponse response) throws IOException {
+    private void showPublicDisplay(Long channelNumber, HttpServletRequest request, HttpServletResponse response, String page) throws IOException {
         Channel channel = ChannelDAO.loadChannelByNumber(channelNumber);
         if (channel == null) {
             sendFirstScreen(response);
@@ -91,7 +95,7 @@ public class PublicDisplayController extends HttpServlet {
         System.out.println("Channel created with id: " + spaceId);
         log.info("token created:" + token);
 
-        FileReader reader = new FileReader("WEB-INF/html/publicDisplay.html");
+        FileReader reader = new FileReader("WEB-INF/html/publicDisplay"+page+".html");
         CharBuffer buffer = CharBuffer.allocate(16384);
         reader.read(buffer);
 

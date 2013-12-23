@@ -1,12 +1,14 @@
 $(document).on('pageinit', '#remoteControlPage', function(event, data){       
     $('#defaultSC').bind('tap', function(event, data) {
         event.preventDefault();
-        page('1');
+        page('');
     });
+/*
     $('#oldSC').bind('tap', function(event, data) {
         event.preventDefault();
         page('2');
     });
+*/
     $('#meetingsSC').bind('tap', function(event, data) {
         event.preventDefault();
         page('4');
@@ -26,7 +28,7 @@ var remoteControl = function(channel, params, callback) {
 			if (callback !== undefined) {
 				callback();
 			}
-		},
+		}
 	});
 };
 

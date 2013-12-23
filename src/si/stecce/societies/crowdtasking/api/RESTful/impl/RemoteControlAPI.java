@@ -55,8 +55,8 @@ import java.util.logging.Logger;
  */
 @Path("/remote/{querytype}")
 public class RemoteControlAPI implements IRemoteControlAPI {
-    private static final String notCheckedInMessage = "To see this on a larger screen, please go to a SOCIETIES public display screen and update your location.";
-    //    private static final String notCheckedInMessage = "You are not a member of any community with this collaborative space.";
+//    private static final String notCheckedInMessage = "To see this on a larger screen, please go to a SOCIETIES public display screen and update your location.";
+        private static final String notCheckedInMessage = "You have to check-in first.";
     private static final Logger log = Logger.getLogger(RemoteControlAPI.class.getName());
 
     private boolean isTooLate(Date date) {
@@ -139,7 +139,11 @@ public class RemoteControlAPI implements IRemoteControlAPI {
         }
 
         if ("changeChannel".equalsIgnoreCase(querytype)) {
-            message = "changeTo:/cs/" + SpaceAPI.getCollaborativeSpace(user.getSpaceId()).getUrlMapping() + "?p=" + page;
+            Channel channel = ChannelDAO.load(user.getChannelId());
+            if (channel == null || isTooLate(channel.getCreated())) {
+                return Response.status(Status.GONE).entity("Take control of the public display first.").type("text/plain").build();
+            }
+            message = "changeTo:/publicDisplay?id="+ channel.getChannelNumber() + "&p=" + page;
         }
         if ("showTask".equalsIgnoreCase(querytype)) {
             // check if user took control

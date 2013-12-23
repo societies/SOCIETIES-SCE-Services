@@ -12,6 +12,7 @@ var refreshOnShake = function () {
         if (typeof(android) !== "undefined") {
             window.android.toast('Refreshing...');
             console.log("refreshing...");
+            console.log("function: "+refreshFunction);
         }
         refreshFunction();
     }
@@ -618,6 +619,7 @@ var CrowdTaskingApp = function () {
         },
 
         myTasks: function () {
+            console.log("myTasks");
             getCommunities4User(setAddTaskButton);
             loadTasks('my');
         },
@@ -1015,7 +1017,7 @@ $(document).on('pageshow', '#indexPage', function (event, data) {
     CrowdTaskingApp.user();
     if (typeof(android) !== "undefined") {
         $('#androidMenu').show();
-        $('#logoutOption').hide();
+        //$('#logoutOption').hide();
     }
     //trackPageView(event);
     /*	var android = getUrlVars()["android"];
