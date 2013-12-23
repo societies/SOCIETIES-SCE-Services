@@ -9,4 +9,5 @@
 	<string name="result_failed_why">"The user gave up and pressed Back"</string>
     <string name="result_succeeded">Found QR code</string>
     <string name="title_activity_remote_control">Remote control</string>
+    <string name="app_description">Discover ideas ° Create a team ° Organize collaboration</string>
 </resources>

@@ -110,7 +110,7 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
 	public static final String SET_FOCUS = "si.setcce.societies.android.activity.FOCUS";
 
     private static final String SCHEME ="http";
-    private static String SCOPE="HWU";
+    private static String SCOPE="";
     public static final String DOMAIN = "crowdtasking.appspot.com";
 //    public static final String DOMAIN = "crowdtaskingtest.appspot.com";
 //    public static final String DOMAIN = "simonix";
@@ -118,7 +118,7 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
 //   	public static final String DOMAIN = "192.168.1.102";
 //   	public static final String DOMAIN = "192.168.1.236";
 //   	public static final String DOMAIN = "192.168.76.191";
-private static final String PORT = "";
+    private static final String PORT = "";
 //    private static final String PORT = ":8888";
     public static final String APPLICATION_URL = SCHEME +"://" + DOMAIN + PORT;
     private static final String HOME_URL = APPLICATION_URL + "/menu";
@@ -149,6 +149,7 @@ private static final String PORT = "";
 	private float mAccel;			// acceleration apart from gravity
 	private float mAccelCurrent;	// current acceleration including gravity
 	private float mAccelLast;		// last acceleration including gravity
+    long lastRefresh = System.currentTimeMillis();
     private CommunityManagementClient communityManagementClient;
     private CisDirectoryClient cisDirectoryClient;
     private ContextClient contextClient;
@@ -160,7 +161,6 @@ private static final String PORT = "";
     private static final String PROPERTY_APP_VERSION = "appVersion";
     private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
     private boolean firstTimeOnMenuPage = true;
-	Timer locationTimer = new Timer();
     private ProgressDialog progressDialog;
     private String signedUrl;
     private int sessionId;
@@ -206,7 +206,6 @@ private static final String PORT = "";
 
     /**
      * Gets the current registration ID for application on GCM service, if there is one.
-     * <p>
      * If result is empty, the app needs to register.
      *
      * @return registration ID, or empty string if there is no existing
@@ -268,10 +267,8 @@ private static final String PORT = "";
         editor.commit();
     }
 
-
     /**
      * Registers the application with GCM servers asynchronously.
-     * <p>
      * Stores the registration ID and the app versionCode in the application's
      * shared preferences.
      */
@@ -286,9 +283,9 @@ private static final String PORT = "";
                 }
 
                 try {
-                    if (gcm == null) {
+//                    if (gcm == null) {
                         gcm = GoogleCloudMessaging.getInstance(getApplicationContext());
-                    }
+//                    }
                     regid = gcm.register(SENDER_ID);
                     msg = "Device registered, registration ID=" + regid;
                     sendRegistrationIdToBackend(regid);
@@ -403,7 +400,9 @@ private static final String PORT = "";
 	    mAccelCurrent = SensorManager.GRAVITY_EARTH;
 	    mAccelLast = SensorManager.GRAVITY_EARTH;
         showProgressBar();
-	    setup(this);
+        // TODO check internet connection
+
+        setup(this);
 /*
         mNfcAdapter = NfcAdapter.getDefaultAdapter(this);
         if (mNfcAdapter == null) {
@@ -423,7 +422,7 @@ private static final String PORT = "";
         }*/
 
 //        loginUser();
-        checkIntent(getIntent());
+//        checkIntent(getIntent());
     }
 
 	private void setScope() {
@@ -442,10 +441,12 @@ private static final String PORT = "";
 		new AsyncTask<Void, Void, Boolean>() {
 			@Override
 			protected Boolean doInBackground(Void... params) {
+/*
 				societiesServices = isSocietiesServiceRunning();
 				if (societiesServices) {
 					connectToSocieties();
 				}
+*/
 				CheckUpdateTask checkUpdateTask = new CheckUpdateTask(appContext);
 				checkUpdateTask.execute();
 				return societiesServices;
@@ -505,30 +506,6 @@ private static final String PORT = "";
             Log.i(LOG_TAG, "InterruptedException "+e.getMessage());
             return false;
         }
-    }
-
-    private void checkLocation() {
-        final Handler handler = new Handler();
-        TimerTask doAsynchronousTask = new TimerTask() {
-            @Override
-            public void run() {
-                handler.post(new Runnable() {
-                    public void run() {
-                        try {
-                            if (contextClientRunning) {
-                                contextClient.getSymbolicLocation(societiesUser.getUserId());
-                            } else {
-                                contextClient = new ContextClient(getApplicationContext());
-                                contextClient.setUpService();
-                            }
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                    }
-                });
-            }
-        };
-        locationTimer.schedule(doAsynchronousTask, 0, 15000); //execute in every 15000 ms
     }
 
 /*
@@ -609,6 +586,7 @@ private static final String PORT = "";
 	}
 
 	private void checkIntent(Intent intent) {
+        setIntent(null);
         if (intent == null) {
             return;
         }
@@ -641,12 +619,6 @@ private static final String PORT = "";
 
     @Override
 	protected void onNewIntent(Intent intent) {
-/*
-        super.onNewIntent(intent);
-        if (intent.getAction().equalsIgnoreCase("GCM")) {
-            handleGcmIntent(intent);
-        }
-*/
         checkIntent(intent);
     }
 
@@ -669,35 +641,6 @@ private static final String PORT = "";
         sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
 
         checkIntent(getIntent());
-/*
-        if (getIntent() == null) {
-            return;
-        }
-        if (getIntent().getAction() == null) {
-            return;
-        }
-    	if (getIntent().getAction().equalsIgnoreCase("GCM")) {
-            handleGcmIntent(getIntent());
-    	}
-    	if (getIntent().getAction().equalsIgnoreCase(CHECK_IN_OUT)) {
-    		String[] response = getIntent().getStringArrayExtra(RestTask.HTTP_RESPONSE);
-    		System.out.println(response[1]);
-			Toast.makeText(getApplicationContext(), response[1], Toast.LENGTH_SHORT).show();
-    	}
-*/
-/*
-        SocietiesUser societiesUser = getSocietiesUserData();
-        JSONObject societiesUserJSON = new JSONObject();
-        try {
-            societiesUserJSON.put("userId", societiesUser.getUserId());
-            societiesUserJSON.put("name", societiesUser.getName());
-            societiesUserJSON.put("foreName", societiesUser.getForeName());
-            societiesUserJSON.put("email", societiesUser.getEmail());
-        } catch (JSONException e) {
-            e.printStackTrace();
-            return;
-        }
-*/
     }
 
     private void handleGcmIntent(Intent intent) {
@@ -715,6 +658,7 @@ private static final String PORT = "";
 	private void signDocument(String downloadUrl, String meetingId) {
 		Intent i = new Intent(Sign.ACTION);
 		i.putExtra(Sign.Params.DOC_TO_SIGN_URL, downloadUrl);
+        i.putExtra(Sign.Params.COMMUNITY_SIGNATURE_SERVER_URI, downloadUrl);
 
 		ArrayList<String> idsToSign = new ArrayList<String>();
 		idsToSign.add(meetingId);
@@ -751,7 +695,6 @@ private static final String PORT = "";
         		return;
         	}
         	if (historyUrl.equalsIgnoreCase(APPLICATION_URL+"/task/new")) {
-                //CrowdTaskingApp.cancelTask();
                 webView.loadUrl("javascript:CrowdTaskingApp.cancelTask()");
                 return;
         	}
@@ -790,13 +733,6 @@ private static final String PORT = "";
             	startActivity(startIntent);*/
                 CheckUpdateTask checkUpdateTask = new CheckUpdateTask(this, true);
                 checkUpdateTask.execute();
-
-/*
-				// set location
-	            Random rand = new Random();
-	            int  n = rand.nextInt(500);
-	            contextClient.setSymbolicLocation("screen1");
-*/
                 return true;
 
             case R.id.logout:
@@ -829,7 +765,6 @@ private static final String PORT = "";
 	}
 
     private void loginUser(boolean societiesUser) {
-	    // TODO check internet connection
 	    if (societiesUser) {
 		    startUrl = APPLICATION_URL + "/loginSocietiesUser.html";
 	    } else {
@@ -1049,21 +984,16 @@ private static final String PORT = "";
         	}
             if (intent.getAction().equalsIgnoreCase(Sign.ACTION_FINISHED)) {
                 boolean success = intent.getBooleanExtra(Sign.Params.SUCCESS, false);
+                boolean uploadSuccess = intent.getBooleanExtra(Sign.Params.UPLOAD_SUCCESS, false);
                 int sid = intent.getIntExtra(Sign.Params.SESSION_ID, -1);
 
                 if (success && sid == MainActivity.this.sessionId) {
-                    try {
-                        InputStream is = getContentResolver().openInputStream(Uri.parse(signedUrl));
-                        // Now you can read the file directly
-                        is.close();
-                        // Delete the file when it is not needed anymore
-                        getContentResolver().delete(Uri.parse(signedUrl), null, null);
-                    } catch(Exception e) {
-                        e.printStackTrace();
-                        Log.w(LOG_TAG, e);
+                    if (success) {
+                        Toast.makeText(getApplicationContext(), "File signed successfully.", Toast.LENGTH_LONG).show();
                     }
-                    Toast.makeText(getApplicationContext(), "File signed successfully. Output is " +
-		                    "in signed.xml on SD card!", Toast.LENGTH_LONG).show();
+                    if (!uploadSuccess) {
+                        Toast.makeText(getApplicationContext(), "File NOT uploaded successfully.", Toast.LENGTH_LONG).show();
+                    }
                 }
                 else {
                     // Ignore non-relevant notifications, react to failure...
@@ -1357,9 +1287,10 @@ private static final String PORT = "";
         mAccelCurrent = (float) Math.sqrt((double) (x*x + y*y + z*z));
         float delta = mAccelCurrent - mAccelLast;
         mAccel = mAccel * 0.9f + delta; // perform low-cut filter
-        if (mAccel > 5) {
+        if (mAccel > 9 && (System.currentTimeMillis() - lastRefresh) > 3000) {
 //            Toast.makeText(getApplicationContext(), "shake detected ("+mAccel+")", Toast.LENGTH_SHORT).show();
         	mAccel = 0;
+            lastRefresh = System.currentTimeMillis();
         	refreshData();
         }
 	}
@@ -1466,9 +1397,9 @@ private static final String PORT = "";
 		                TrustTask task = new TrustTask(getApplicationContext(), DOMAIN, APPLICATION_URL);
 		                task.execute(societiesUser.getUserId());
 	                }
-//                    if ("".equalsIgnoreCase(getRegistrationId(getApplicationContext()))) {
+                    if ("".equalsIgnoreCase(getRegistrationId(getApplicationContext()))) {
                         registerInBackground();
-//                    }
+                    }
                     cookies = CookieManager.getInstance().getCookie(url);
                     firstTimeOnMenuPage = false;
                 }
@@ -1478,8 +1409,6 @@ private static final String PORT = "";
 
     @Override
     protected void onDestroy() {
-//	    locationTimer.cancel();
-
 	    super.onStop();
         if (isSocietiesUser) {
             clearCookies();
