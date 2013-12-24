@@ -4,8 +4,7 @@ $(document).on('pageinit', '#profilePage', function(){
 		errorPlacement: function(error, element) {
 			error.insertAfter($(element).parent());
 		}
-	});	
-	
+	});
 	$('#submitButton').bind('tap', function(event, data) {
 	    event.preventDefault();
 	    //$('#userProfileForm').submit();
@@ -70,7 +69,7 @@ function getUserProfile() {
 			else {
 				// update profile
 				$('#submitButton').text('Update profile');
-				$('#submitButton').button('refresh');
+//				$('#submitButton').button('refresh');
 			}
 			fillForm(user);
 		}

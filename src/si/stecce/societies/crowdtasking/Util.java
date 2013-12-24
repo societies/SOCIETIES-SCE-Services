@@ -95,8 +95,6 @@ public final class Util {
 	    	return null;
 		}
 	    String index = new String(buffer.array());
-	    // do template magic
-	    // ...
 	    return index;
 	}
 

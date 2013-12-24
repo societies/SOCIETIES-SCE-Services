@@ -9,7 +9,7 @@
     <script src="/js/communities.js" type="text/javascript" charset="utf-8"></script>
 </head>
 <body>
-<div data-role="page" id="viewCommunity" data-theme="c">
+<div data-role="page" id="viewCommunity">
     <div data-role="header" id="header" data-position="fixed"
          data-theme="b">
         <a id='backButton' data-icon="back" data-rel="back">Back</a>
@@ -29,7 +29,7 @@
 
             <div style="padding:10px 20px;">
                 <h3>Collaborative space</h3>
-                <ul data-role="listview" data-theme="c">
+                <ul data-role="listview">
                     <div id="spaceDetails" style="display: none">
                         <li data-role="fieldcontain">
                             <label for="spaceName">Name*</label>
@@ -56,14 +56,14 @@
                 <!--</div>-->
                 <!--</div>-->
                 <a style="display: none" id="cancelCSButton" data-role="button" data-inline="true"
-                   data-theme="c">Cancel</a>
+                  >Cancel</a>
                 <a style="display: none" id="saveCSButton" data-role="button" data-inline="true" data-transition="flow"
-                   data-theme="b">Save</a>
+                   data-theme="a">Save</a>
             </div>
         </form>
     </div>
-    <div data-role="content" data-theme="c">
-        <div data-role="collapsible" data-collapsed="false" data-theme="b">
+    <div data-role="content">
+        <div data-role="collapsible" data-collapsed="false" data-theme="a">
             <h3>Community details</h3>
             <table>
                 <tr>
@@ -95,14 +95,14 @@
                 </tr>
             </table>
 
-            <div data-role="popup" id="confirmPopup" data-theme="d" data-overlay-theme="b" class="ui-content"
+            <div data-role="popup" id="confirmPopup" data-overlay-theme="b" class="ui-content"
                  style="max-width:340px; padding-bottom:2em;">
                 <h3>Approve user request?</h3>
 
                 <p>User will become a member of community.</p>
-                <a id="confirmUserButton" data-role="button" data-rel="back" data-theme="b" data-icon="check"
+                <a id="confirmUserButton" data-role="button" data-rel="back" data-theme="a" data-icon="check"
                    data-inline="true" data-mini="true">Approve</a>
-                <a id="rejectUserButton" data-role="button" data-rel="back" data-theme="b" data-icon="check"
+                <a id="rejectUserButton" data-role="button" data-rel="back" data-theme="a" data-icon="check"
                    data-inline="true" data-mini="true">Reject</a>
                 <a data-role="button" data-rel="back" data-inline="true" data-mini="true">Cancel</a>
             </div>
@@ -111,7 +111,7 @@
                 style='white-space: normal; display:none'>
                 <li></li>
             </ul>
-            <ul data-role="listview" id="memeberList" data-theme="c" data-inset="true"
+            <ul data-role="listview" id="memeberList" data-inset="true"
                 style='white-space: normal; display:none'>
                 <li></li>
             </ul>

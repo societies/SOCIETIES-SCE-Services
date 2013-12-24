@@ -1,3 +1,5 @@
+// meeting display
+
 var MAX_EVENTS = 10;
 
 $(document).ready(function() {

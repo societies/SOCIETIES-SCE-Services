@@ -46,9 +46,9 @@ if ("SOCIETIES".equalsIgnoreCase(federatedIdentity)) {
 	<meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no">
 	<title>Welcome to Crowd tasking!</title>
-	<link rel="stylesheet" href="/css/jquery.mobile-1.3.2.min.css" type="text/css" media="screen"/>
-	<script src="/js/jquery-2.0.0.min.js" type="text/javascript" charset="utf-8"></script>
-	<script src="/js/jquery.mobile-1.3.2.min.js" type="text/javascript" charset="utf-8"></script>
+	<link rel="stylesheet" href="/css/jquery.mobile-1.4.0.min.css" type="text/css" media="screen"/>
+	<script src="/js/jquery-2.0.3.min.js" type="text/javascript" charset="utf-8"></script>
+	<script src="/js/jquery.mobile-1.4.0.min.js" type="text/javascript" charset="utf-8"></script>
 	<script src="/js/mobile.js" type="text/javascript" charset="utf-8"></script>
 </head>
 <body>

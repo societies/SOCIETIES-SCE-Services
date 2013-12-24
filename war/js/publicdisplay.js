@@ -1,3 +1,5 @@
+// default
+
 var MAX_EVENTS = 8;
 
 $(document).ready(function() {

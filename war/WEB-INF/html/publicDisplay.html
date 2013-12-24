@@ -36,8 +36,8 @@
 	</style>
 </head>
 <body>
-	<div data-role="page" id="publicDisplay" class="type-interior" data-theme="d">
-		<div data-role="header" data-theme="b">
+	<div data-role="page" id="publicDisplay" class="type-interior">
+		<div data-role="header" data-theme="a">
 			<h1>{{ pdHeader }}</h1>
 		</div><!-- /header -->
 		<div data-role="content">
@@ -95,8 +95,8 @@
 			</div><!-- /content-secondary -->
 		</div><!-- /content -->
 		
-	    <div data-role="panel" id="taskPanel" data-position="left" data-display="overlay" data-dismissible="true" data-theme="b">
-               	<div data-role="collapsible" data-collapsed="false" data-theme="b">
+	    <div data-role="panel" id="taskPanel" data-position="left" data-display="overlay" data-dismissible="true" data-theme="a">
+               	<div data-role="collapsible" data-collapsed="false" data-theme="a">
 					<h3>Task details</h3>
 	                	<table>
 	                		<tr>
@@ -125,13 +125,13 @@
 	                		</tr>
 	                	</table>
 				</div>
-				<div id="meetingDiv" data-role="collapsible" data-collapsed="false" data-theme="b" style="display:none">
+				<div id="meetingDiv" data-role="collapsible" data-collapsed="false" data-theme="a" style="display:none">
 					<h3>Meetings</h3>
 					<form action="" id="meetingForm">
                 	<input type="hidden" name="taskId" id="taskId" value="">
-	                <ul data-role="listview" id="meetingList" data-theme="c" data-inset="true" style='white-space:normal;'>
+	                <ul data-role="listview" id="meetingList" data-inset="true" style='white-space:normal;'>
 	                </ul>
-                    <ul data-role="listview" id="newMeetingList" data-theme="c" style="display:none">
+                    <ul data-role="listview" id="newMeetingList" style="display:none">
                         <li data-role="fieldcontain">
                             <label for="meetingSubject">Subject</label>
                             <input type="text" name="meetingSubject" id="meetingSubject" value="">
@@ -159,12 +159,12 @@
                 </form>
 				</div>
 				<form action="" id="commentsForm">
-                <ul data-role="listview" id="commentList" data-theme="c" data-inset="true" style='white-space:normal;'>
+                <ul data-role="listview" id="commentList" data-inset="true" style='white-space:normal;'>
                 	<li></li>
                 </ul>
                 </form>
 		</div><!-- /panel -->
-		<div data-role="footer" class="footer-docs" data-position="fixed" data-theme="c">
+		<div data-role="footer" class="footer-docs" data-position="fixed">
 			<p style="margin: 1em 1em; text-align:center;">Crowd Tasking &copy; SETCCE, 2012, 2013</p>
 		</div>
 	</div>

@@ -63,6 +63,9 @@ public class RootController extends HttpServlet {
 		if ("/newsfeed".equalsIgnoreCase(uri)) {
 			template = "WEB-INF/html/feed.html";
 		}
+		if ("/remoteControl".equalsIgnoreCase(uri)) {
+			template = "WEB-INF/html/remoteControl.html";
+		}
 	    if (template == null) {
 	    	template = request.getRequestURI();
 	    	if (template.startsWith("/")) {
@@ -75,6 +78,12 @@ public class RootController extends HttpServlet {
             response.sendRedirect("/menu");
             return;
         }
+        String head = Util.readFile("WEB-INF/html/include/head.html");
+        if (head == null) {
+            System.out.println("head == null");
+        }
+        template = template.replaceAll("\\{\\{ head \\}\\}", head);
+
 	    response.setContentType("text/html");
 	    response.getWriter().write(template);
 	}

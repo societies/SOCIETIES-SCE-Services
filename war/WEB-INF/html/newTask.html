@@ -9,45 +9,45 @@
 	<script src="/js/remoteControl.js" type="text/javascript" charset="utf-8"></script>
 </head>
 <body>
-        <div data-role="page" id="formPage" data-theme="b">
+        <div data-role="page" id="formPage" data-theme="a">
             <div data-role="header" data-position="fixed" data-theme="b">
                 <a id="cancelButton" data-icon="back" data-rel="back">Cancel</a>
                 <h3 id='formTitle'>New task</h3>
                 <a id="saveButton" data-icon="check">Save</a>
             </div>
-			<div data-role="popup" id="popupDialog" data-overlay-theme="a" data-theme="c" style="max-width:400px;" class="ui-corner-all">
-				<div data-role="header" data-theme="a" class="ui-corner-top">
+			<div data-role="popup" id="popupDialog" data-overlay-theme="a" style="max-width:400px;" class="ui-corner-all">
+				<div data-role="header" data-theme="b" class="ui-corner-top">
 					<h1>Add tag(s)?</h1>
 				</div>
-				<div data-role="content" data-theme="d" class="ui-corner-bottom ui-content">
+				<div data-role="content" class="ui-corner-bottom ui-content">
 					<h3 class="ui-title" id="tagWarning">Do you want to add: </h3>
-					<a id="addTagAndSaveButton" data-role="button" data-mini="true" data-inline="true" data-transition="flow" data-theme="b">Yes</a>  
-					<a id="dontAddTagAndSaveButton" data-role="button" data-mini="true" data-inline="true" data-theme="c">No</a>    
-					<a href="#" data-role="button" data-inline="true" data-mini="true" data-rel="back" data-theme="c">Cancel</a>    
+					<a id="addTagAndSaveButton" data-role="button" data-mini="true" data-inline="true" data-transition="flow" data-theme="a">Yes</a>
+					<a id="dontAddTagAndSaveButton" data-role="button" data-mini="true" data-inline="true">No</a>
+					<a href="#" data-role="button" data-inline="true" data-mini="true" data-rel="back">Cancel</a>
 				</div>
 			</div>
 
-			<div data-role="popup" id="cancelDialog" data-overlay-theme="a" data-theme="c" data-dismissible="false" style="max-width:400px;" class="ui-corner-all">
-			    <div data-role="header" data-theme="a" class="ui-corner-top">
+			<div data-role="popup" id="cancelDialog" data-overlay-theme="a" data-dismissible="false" style="max-width:400px;" class="ui-corner-all">
+			    <div data-role="header" data-theme="b" class="ui-corner-top">
 			        <h1>Save</h1>
 			    </div>
-			    <div data-role="content" data-theme="d" class="ui-corner-bottom ui-content">
+			    <div data-role="content" class="ui-corner-bottom ui-content">
 			        <h3 class="ui-title">Save task?</h3>
-					<a id="cancelTaskSaveButton" data-role="button" data-mini="true" data-inline="true" data-transition="flow" data-theme="b">Yes</a>  
-			        <a id="cancelTaskNoButton" data-role="button" data-mini="true" data-inline="true" data-rel="back" data-theme="c">No</a>
-			        <a data-role="button" data-mini="true" data-inline="true" data-rel="back" data-theme="c">Cancel</a>
+					<a id="cancelTaskSaveButton" data-role="button" data-mini="true" data-inline="true" data-transition="flow" data-theme="a">Yes</a>
+			        <a id="cancelTaskNoButton" data-role="button" data-mini="true" data-inline="true" data-rel="back">No</a>
+			        <a data-role="button" data-mini="true" data-inline="true" data-rel="back">Cancel</a>
 			    </div>
 			</div>
 
-			<div data-role="popup" id="popupInfo" class="ui-content" data-theme="e" style="max-width:350px;">
+			<div data-role="popup" id="popupInfo" class="ui-content" style="max-width:350px;">
 				<p>You need to select at least one community.</p>
 			</div>
-            <div data-role="content" data-theme="c">
+            <div data-role="content">
                 <form action="" id="newTaskForm">
                 	<input type=hidden name=action value="create"/>
                 	<input type="hidden" name="vwTaskId" id="vwTaskId" value="taskId">
                     <input type="hidden" name="status" id="status">
-                    <ul data-role="listview" data-theme="c">
+                    <ul data-role="listview">
                         <li data-role="list-divider">Task Details</li>
                         <li data-role="fieldcontain">
                             <label for="taskName">Task title*</label>
@@ -65,14 +65,14 @@
 -->
                         <li data-role="fieldcontain">
                             <div id="ctCommunities">
-                                <label for="taskCommunity" class="select">Communities* <a href="#popupInfo" data-rel="popup" data-role="button" class="ui-icon-alt" data-inline="true" data-transition="pop" data-icon="info" data-theme="e" data-iconpos="notext">Learn more</a></label>
+                                <label for="taskCommunity" class="select">Communities* <a href="#popupInfo" data-rel="popup" data-role="button" class="ui-icon-alt" data-inline="true" data-transition="pop" data-icon="info" data-iconpos="notext">Learn more</a></label>
                                 <select name="taskCommunity" id="taskCommunity" multiple="multiple" data-native-menu="false">
                                     <option>Choose communities</option>
                                 </select>
                             </div>
 <!--
                             <div id="societiesCommunities">
-                                <label for="taskCommunityJids" class="select">Communities* <a href="#popupInfo" data-rel="popup" data-role="button" class="ui-icon-alt" data-inline="true" data-transition="pop" data-icon="info" data-theme="e" data-iconpos="notext">Learn more</a></label>
+                                <label for="taskCommunityJids" class="select">Communities* <a href="#popupInfo" data-rel="popup" data-role="button" class="ui-icon-alt" data-inline="true" data-transition="pop" data-icon="info" data-iconpos="notext">Learn more</a></label>
                                 <select name="taskCommunityJids" id="taskCommunityJids" multiple="multiple" data-native-menu="false">
                                     <option>Choose communities</option>
                                 </select>
@@ -89,14 +89,14 @@
                            	<input type="hidden" name="taskTags" id="taskTags">
                         </li>
                     </ul>
-                    <ul data-role="listview" id="commentList" data-theme="c" data-inset="false">
+                    <ul data-role="listview" id="commentList" data-inset="false">
                     	<li></li>
                     </ul>
                     <div data-role="fieldcontain" id="vwReply" style='display:none'>
                     	<br>
 						<input type=hidden id="commentForExecution" name=execution value="false">
 						<TEXTAREA NAME="commentText" id="vwComment"></TEXTAREA>
-						<button id='commentButton' data-theme="b">Post comment</button>
+						<button id='commentButton' data-theme="a">Post comment</button>
 					</div>
                 </form>
             </div>

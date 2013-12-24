@@ -106,7 +106,8 @@
 		<url-pattern>/settings</url-pattern>
 		<url-pattern>/mobile</url-pattern>
 		<url-pattern>/newsfeed</url-pattern>
-		<url-pattern>/AndroidMenu</url-pattern> 
+		<url-pattern>/remoteControl</url-pattern>
+		<url-pattern>/AndroidMenu</url-pattern>
 	</servlet-mapping>
 	<servlet>
 		<servlet-name>CommunityController</servlet-name>
