@@ -24,9 +24,12 @@
  */
 package si.stecce.societies.crowdtasking.model;
 
-import java.util.Date;
-import java.util.List;
-
+import com.googlecode.objectify.Key;
+import com.googlecode.objectify.Ref;
+import com.googlecode.objectify.annotation.Entity;
+import com.googlecode.objectify.annotation.Id;
+import com.googlecode.objectify.annotation.Ignore;
+import com.googlecode.objectify.annotation.Index;
 import si.stecce.societies.crowdtasking.Util;
 import si.stecce.societies.crowdtasking.api.RESTful.impl.CommentAPI;
 import si.stecce.societies.crowdtasking.api.RESTful.impl.SpaceAPI;
@@ -35,56 +38,61 @@ import si.stecce.societies.crowdtasking.model.dao.CommunityDAO;
 import si.stecce.societies.crowdtasking.model.dao.MeetingDAO;
 import si.stecce.societies.crowdtasking.model.dao.TaskDao;
 
-import com.googlecode.objectify.Key;
-import com.googlecode.objectify.Ref;
-import com.googlecode.objectify.annotation.Entity;
-import com.googlecode.objectify.annotation.Id;
-import com.googlecode.objectify.annotation.Ignore;
-import com.googlecode.objectify.annotation.Index;
+import java.util.Date;
+import java.util.List;
 
 /**
  * Describe your class here...
  *
  * @author Simon Jureša
- *
  */
 @Entity
 public class Event {
-	@Id private Long id;
-	private EventType type;
-	private Ref<CTUser> userRef;
-	@Index private Ref<CollaborativeSpace> collaborativeSpaceRef;
-	@Index private List<Ref<Community>> communityRefs;
-	private Ref<Task> taskRef;
-	@Ignore private Task task;
-	private Ref<Comment> commentRef;
-	@Index private Date eventDate;
+    @Id
+    private Long id;
+    private EventType type;
+    private Ref<CTUser> userRef;
+    @Index
+    private Ref<CollaborativeSpace> collaborativeSpaceRef;
+    @Index
+    private List<Ref<Community>> communityRefs;
+    private Ref<Task> taskRef;
+    @Ignore
+    private Task task;
+    private Ref<Comment> commentRef;
+    @Index
+    private Date eventDate;
     private String eventText;
     private String eventTextHTML;
-	@Ignore private CTUser user;
-	private Ref<Meeting> meetingRef;
-	@Ignore private Meeting meeting;
-	@Ignore private Community community;
-    @Index private List<String> communityJids;
+    @Ignore
+    private CTUser user;
+    private Ref<Meeting> meetingRef;
+    @Ignore
+    private Meeting meeting;
+    @Ignore
+    private Community community;
+    @Index
+    private List<String> communityJids;
 
-	public Event() {}
-	
-	public Event(EventType type, CTUser user, List<Ref<Community>> communityRefs,
-			Ref<CollaborativeSpace> collaborativeSpaceRef, Long taskId, Long commentId,
-			Date eventDate, Meeting meeting, Community community, List<String> communityJids) {
+    public Event() {
+    }
 
-		this.id = null;
-		this.type = type;
-		this.user = user;
-		this.userRef = Ref.create(Key.create(CTUser.class, user.getId()));
-		this.communityRefs = communityRefs;
-		this.collaborativeSpaceRef = collaborativeSpaceRef;
-		this.taskRef = taskId == null ? null : Ref.create(Key.create(Task.class, taskId));
-		this.commentRef = commentId == null ? null : Ref.create(Key.create(Comment.class, commentId));
-		this.eventDate = eventDate;
-		this.meeting = meeting;
-		this.meetingRef = meeting == null ? null : Ref.create(Key.create(Meeting.class, meeting.getId()));
-		this.community = community;
+    public Event(EventType type, CTUser user, List<Ref<Community>> communityRefs,
+                 Ref<CollaborativeSpace> collaborativeSpaceRef, Long taskId, Long commentId,
+                 Date eventDate, Meeting meeting, Community community, List<String> communityJids) {
+
+        this.id = null;
+        this.type = type;
+        this.user = user;
+        this.userRef = Ref.create(Key.create(CTUser.class, user.getId()));
+        this.communityRefs = communityRefs;
+        this.collaborativeSpaceRef = collaborativeSpaceRef;
+        this.taskRef = taskId == null ? null : Ref.create(Key.create(Task.class, taskId));
+        this.commentRef = commentId == null ? null : Ref.create(Key.create(Comment.class, commentId));
+        this.eventDate = eventDate;
+        this.meeting = meeting;
+        this.meetingRef = meeting == null ? null : Ref.create(Key.create(Meeting.class, meeting.getId()));
+        this.community = community;
         this.communityJids = communityJids;
 //        task = null;
         if (taskRef != null) {
@@ -93,49 +101,49 @@ public class Event {
         setEventText();
     }
 
-	public Long getId() {
-		return id;
-	}
+    public Long getId() {
+        return id;
+    }
 
-	public EventType getType() {
-		return type;
-	}
+    public EventType getType() {
+        return type;
+    }
 
-	public Long getCollaborativeSpaceId() {
-		return collaborativeSpaceRef.getKey().getId();
-	}
+    public Long getCollaborativeSpaceId() {
+        return collaborativeSpaceRef.getKey().getId();
+    }
 
-	public Long getTaskId() {
-		if (taskRef == null) {
-			return null;
-		}
-		
-		return taskRef.getKey().getId();
-	}
+    public Long getTaskId() {
+        if (taskRef == null) {
+            return null;
+        }
 
-	public Long getCommentId() {
-		return commentRef.getKey().getId();
-	}
+        return taskRef.getKey().getId();
+    }
 
-	public Date getEventDate() {
-		return eventDate;
-	}
+    public Long getCommentId() {
+        return commentRef.getKey().getId();
+    }
 
-	private String when(Date eventDate) {
-		return " at "+Util.formatDate(eventDate);
-	}
-	
-	public Ref<CTUser> getUserRef() {
-		return userRef;
-	}
+    public Date getEventDate() {
+        return eventDate;
+    }
 
-	public Ref<Meeting> getMeetingRef() {
-		return meetingRef;
-	}
+    private String when(Date eventDate) {
+        return " at " + Util.formatDate(eventDate);
+    }
 
-	private void setEventText() {
-		String commentOwner;
-		
+    public Ref<CTUser> getUserRef() {
+        return userRef;
+    }
+
+    public Ref<Meeting> getMeetingRef() {
+        return meetingRef;
+    }
+
+    private void setEventText() {
+        String commentOwner;
+
         try {
             String userName = user.getUserName();
             switch (type) {
@@ -144,15 +152,15 @@ public class Event {
                     eventTextHTML = eventText;
                     break;
                 case COMMUNITY_CREATED:
-                    eventText = userName + " created community '" + community.getName() +"'" + when(eventDate);
+                    eventText = userName + " created community '" + community.getName() + "'" + when(eventDate);
                     eventTextHTML = userName + " created community " + Util.communityHTMLLinkRelative(community) + when(eventDate);
                     break;
                 case CREATE_TASK:
-                    eventText = userName + " created a new task '" + task.getTitle() +"'"  + when(eventDate);
-                    eventTextHTML = userName + " created the new task " + Util.taskHTMLLinkRelative(task)  + when(eventDate);
+                    eventText = userName + " created a new task '" + task.getTitle() + "'" + when(eventDate);
+                    eventTextHTML = userName + " created the new task " + Util.taskHTMLLinkRelative(task) + when(eventDate);
                     break;
                 case TASK_COMMENT:
-                    eventText = userName + " commented on '" + task.getTitle() +"'" + when(eventDate);
+                    eventText = userName + " commented on '" + task.getTitle() + "'" + when(eventDate);
                     eventTextHTML = userName + " commented on " + Util.taskHTMLLinkRelative(task) + when(eventDate);
                     break;
 /*
@@ -162,7 +170,7 @@ public class Event {
                     break;
 */
                 case FINALIZE_TASK:
-                    eventText = userName + " finalized task '" + task.getTitle() +"'" + when(eventDate);
+                    eventText = userName + " finalized task '" + task.getTitle() + "'" + when(eventDate);
                     eventTextHTML = userName + " finalized task " + Util.taskHTMLLinkRelative(task) + when(eventDate);
                     break;
                 case ENTER_COLLABORATIVE_SPACE:
@@ -174,41 +182,41 @@ public class Event {
                     eventTextHTML = eventText;
                     break;
                 case LIKE_TASK:
-                    eventText = userName + " liked the task '" + task.getTitle() +"'" + when(eventDate);
+                    eventText = userName + " liked the task '" + task.getTitle() + "'" + when(eventDate);
                     eventTextHTML = userName + " liked the task " + Util.taskHTMLLinkRelative(task) + when(eventDate);
                     break;
                 case UNLIKE_TASK:
-                    eventText = userName + " unliked the task' " + task.getTitle() +"'" + when(eventDate);
+                    eventText = userName + " unliked the task' " + task.getTitle() + "'" + when(eventDate);
                     eventTextHTML = userName + " unliked the task " + Util.taskHTMLLinkRelative(task) + when(eventDate);
                     break;
                 case LIKE_COMMENT:
                     commentOwner = CommentAPI.getCommentById(getCommentId()).getOwner().getUserName();
-                    eventText = userName + " liked " + commentOwner + "'s comment on the task '" + task.getTitle() +"'" + when(eventDate);
+                    eventText = userName + " liked " + commentOwner + "'s comment on the task '" + task.getTitle() + "'" + when(eventDate);
                     eventTextHTML = userName + " liked " + commentOwner + "'s comment on the task " + Util.taskHTMLLinkRelative(task) + when(eventDate);
                     break;
                 case UNLIKE_COMMENT:
                     commentOwner = CommentAPI.getCommentById(getCommentId()).getOwner().getUserName();
-                    eventText = userName + " unliked " + commentOwner + "'s comment on the task '" + task.getTitle() +"'" + when(eventDate);
+                    eventText = userName + " unliked " + commentOwner + "'s comment on the task '" + task.getTitle() + "'" + when(eventDate);
                     eventTextHTML = userName + " unliked " + commentOwner + "'s comment on the task " + Util.taskHTMLLinkRelative(task) + when(eventDate);
                     break;
                 case NEW_MEETING:
-                    eventText = userName + " created a new meeting '"+meeting.getSubject() +"' in "+meeting.getCollaborativeSpace().getName()+when(eventDate);
-                    eventTextHTML = userName + " created a meeting "+Util.taskHTMLLink(meeting, task)+" in "+meeting.getCollaborativeSpace().getName()+when(eventDate);
+                    eventText = userName + " created a new meeting '" + meeting.getSubject() + "' in " + meeting.getCollaborativeSpace().getName() + when(eventDate);
+                    eventTextHTML = userName + " created a meeting " + Util.taskHTMLLinkRealtive(meeting, task) + " in " + meeting.getCollaborativeSpace().getName() + when(eventDate);
                     break;
                 case SHOW_TASK_ON_PD:
-                    eventText = userName + " showed the task '" + task.getTitle() +"'" + " on public display" + when(eventDate);
+                    eventText = userName + " showed the task '" + task.getTitle() + "'" + " on public display" + when(eventDate);
                     eventTextHTML = userName + " showed task " + Util.taskHTMLLinkRelative(task) + " on public display" + when(eventDate);
                     break;
                 case PICK_TASK_FROM_PD:
-                    eventText = userName + " picked the task '" + task.getTitle() +"'" + " from public display" + when(eventDate);
+                    eventText = userName + " picked the task '" + task.getTitle() + "'" + " from public display" + when(eventDate);
                     eventTextHTML = userName + " picked task " + Util.taskHTMLLinkRelative(task) + " from public display" + when(eventDate);
                     break;
                 case REQUEST_TO_JOIN_COMMUNITY:
-                    eventText = userName + " requested to join the community '" + community.getName() +"'" + when(eventDate);
+                    eventText = userName + " requested to join the community '" + community.getName() + "'" + when(eventDate);
                     eventTextHTML = userName + " requested to join the community " + Util.communityHTMLLinkRelative(community) + when(eventDate);
                     break;
                 case JOINED_COMMUNITY:
-                    eventText = userName + " joined the community '" + community.getName() +"'" + when(eventDate);
+                    eventText = userName + " joined the community '" + community.getName() + "'" + when(eventDate);
                     eventTextHTML = userName + " joined the community " + Util.communityHTMLLinkRelative(community) + when(eventDate);
                     break;
                 default:
@@ -216,11 +224,11 @@ public class Event {
             }
         } catch (NullPointerException e) {
         }
-	}
+    }
 
     public void convertEventText() {
         String commentOwner;
-        Meeting meeting=null;
+        Meeting meeting = null;
 
         user = UsersAPI.getUser(userRef);
         if (meetingRef != null) {
@@ -248,6 +256,6 @@ public class Event {
     }
 
     public List<Ref<Community>> getCommunityRefs() {
-		return communityRefs;
-	}
+        return communityRefs;
+    }
 }

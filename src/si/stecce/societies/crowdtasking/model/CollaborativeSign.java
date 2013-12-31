@@ -5,18 +5,19 @@ import com.googlecode.objectify.annotation.Id;
 
 /**
  * Created with IntelliJ IDEA.
- * User: juresas
+ * User: Simon Jureša
  * Date: 28.10.2013
  * Time: 14:35
- * To change this template use File | Settings | File Templates.
  */
 @Entity
 public class CollaborativeSign {
     @Id
     private Long collaborativeSignId;
     Long meetingId;
+    private String gcmRegistrationId;
 
-    public CollaborativeSign() {}
+    public CollaborativeSign() {
+    }
 
     public Long getMeetingId() {
         return meetingId;
@@ -24,5 +25,13 @@ public class CollaborativeSign {
 
     public void setMeetingId(Long meetingId) {
         this.meetingId = meetingId;
+    }
+
+    public String getGcmRegistrationId() {
+        return gcmRegistrationId;
+    }
+
+    public void setGcmRegistrationId(String gcmRegistrationId) {
+        this.gcmRegistrationId = gcmRegistrationId;
     }
 }
