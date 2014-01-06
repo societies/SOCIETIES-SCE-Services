@@ -1,26 +1,31 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<meta charset="utf-8" />
-	<meta name="apple-mobile-web-app-capable" content="yes">
+    <meta charset="utf-8"/>
+    <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no">
-	<title>Welcome to Crowd tasking!</title>
-	{{ head }}
-	<script src="/js/communities.js" type="text/javascript" charset="utf-8"></script>
+    <title>Welcome to Crowd tasking!</title>
+    {{ head }}
+    <script src="/js/communities.js" type="text/javascript" charset="utf-8"></script>
 </head>
 <body>
-	<div data-role="page" id="communitiesPage" data-theme="a">
-		<div class="header" data-role="header" data-position="fixed" data-theme="b">
-	        <a id="backButton" data-icon="back" data-rel="back">Back</a>
-			<h2>Crowd tasking</h2>
-		</div>
-		<div class="main" data-role="content">
-	        <ul data-role="listview" data-divider-theme="b" id="communitiesList" data-inset="true">
-	            <li data-role="list-divider" style='white-space:normal;'>Communities</li>
-	        </ul>
-			<a id="addCommunityButton" data-transition="slide" data-role="button" data-icon="plus"
-			    class="ui-btn ui-corner-all">Create a new community</a>
-		</div>
-	</div>
+<div data-role="page" id="communitiesPage" data-theme="a">
+    <div class="header" data-role="header" data-position="fixed" data-theme="b">
+        <a id="backButton" data-icon="back" data-rel="back">Back</a>
+
+        <h2>Crowd tasking</h2>
+    </div>
+    <div class="main" data-role="content">
+        <form class="ui-filterable">
+            <input id="filterInput" data-type="search">
+        </form>
+        <ul data-role="listview" data-divider-theme="b" id="communitiesList" data-inset="true" data-filter="true"
+            data-input="#filterInput">
+            <li data-role="list-divider" style='white-space:normal;'>Communities</li>
+        </ul>
+        <a id="addCommunityButton" data-transition="slide" data-role="button" data-icon="plus"
+           class="ui-btn ui-corner-all">Create a new community</a>
+    </div>
+</div>
 </body>
 </html>

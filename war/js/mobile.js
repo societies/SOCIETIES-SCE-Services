@@ -12,7 +12,7 @@ var refreshOnShake = function () {
         if (typeof(android) !== "undefined") {
             window.android.toast('Refreshing...');
             console.log("refreshing...");
-            console.log("function: "+refreshFunction);
+            console.log("function: " + refreshFunction);
         }
         refreshFunction();
     }
@@ -188,6 +188,7 @@ var CrowdTaskingApp = function () {
     };
 
     var showComments = function (taskId, showOnlyCommentsForExecution) {
+        console.log("showComments");
         if (typeof(showOnlyCommentsForExecution) === 'undefined') showOnlyCommentsForExecution = false;
 
         $("#comments").find("tr:gt(0)").remove();
@@ -727,6 +728,7 @@ var CrowdTaskingApp = function () {
         },
 
         refreshViewTask: function () {
+            $('#status').val("refresh");
             var task = tasks[currentTaskIndex];
             getTaskById(task.id);
         },
@@ -1029,11 +1031,13 @@ $(document).on('pageshow', '#indexPage', function (event, data) {
 
 $(document).on('pageinit', '#mobilePage', function (event, data) {
     refreshFunction = CrowdTaskingApp.init;
+    console.log("refreshFunction = CrowdTaskingApp.init");
     CrowdTaskingApp.init();
 });
 
 $(document).on('pageshow', '#myTasksPage', function (event, data) {
     refreshFunction = CrowdTaskingApp.myTasks;
+    console.log("refreshFunction = CrowdTaskingApp.myTasks");
     CrowdTaskingApp.myTasks();
 
     /*$('#addTaskButton').bind('tap', function(event, data) {
@@ -1044,11 +1048,13 @@ $(document).on('pageshow', '#myTasksPage', function (event, data) {
 
 $(document).on('pageinit', '#newsFeed', function (event, data) {
     refreshFunction = showNewsFeed;
+    console.log("refreshFunction = showNewsFeed");
     showNewsFeed();
 });
 
 $(document).on('pageinit', '#formPage', function (event, data) {
     refreshFunction = null;
+    console.log("refreshFunction = null ('pageinit', '#formPage')");
     $('#cancelButton').bind('tap', function (event, data) {
         event.preventDefault();
         CrowdTaskingApp.cancelTask();
@@ -1106,6 +1112,7 @@ $(document).on('pagebeforeshow', '#formPage', function (event, data) {
 
 $(document).on('pageshow', '#viewTask', function (event, data) {
     refreshFunction = CrowdTaskingApp.refreshViewTask;
+    console.log("refreshFunction = CrowdTaskingApp.refreshViewTask");
     CrowdTaskingApp.displayTask('view');
 });
 
@@ -1175,6 +1182,7 @@ $(document).on('pageshow', '#executeTask', function (event, data) {
 
 $(document).on('pageinit', '#executeTask', function (event, data) {
     refreshFunction = null;
+    console.log("refreshFunction = null ('pageinit', '#executeTask')");
     $('#executeButton').bind('tap', function (event, data) {
         event.preventDefault();
         $('#executeButton').hide();
@@ -1184,6 +1192,7 @@ $(document).on('pageinit', '#executeTask', function (event, data) {
 
 $(document).on('pageinit', '#settingsPage', function (event, data) {
     refreshFunction = null;
+    console.log("refreshFunction = null ('pageinit', '#settingsPage')");
     getSettings();
 
     $('#submitSettingsButton').bind('click', function (event, data) {
@@ -1195,6 +1204,7 @@ $(document).on('pageinit', '#settingsPage', function (event, data) {
 
 $(document).on('pageinit', '#communitiesPage', function (event, data) {
     refreshFunction = Community.loadCommunities;
+    console.log("refreshFunction = CrowdTaskingApp.loadCommunities");
     $('#addCommunityButton').bind('tap', function (event, data) {
         event.preventDefault();
         Community.setMode('new');
@@ -1205,6 +1215,7 @@ $(document).on('pageinit', '#communitiesPage', function (event, data) {
 
 $(document).on('pageinit', '#editCommunityPage', function (event, data) {
     refreshFunction = null;
+    console.log("refreshFunction = null ('pageinit', '#editCommunityPage')");
     $('#saveButton').bind('tap', function (event, data) {
         event.preventDefault();
         $('#saveButton').unbind('tap');
@@ -1241,6 +1252,7 @@ $(document).on('pageshow', '#editCommunityPage', function (event, data) {
 
 $(document).on('pageinit', '#viewCommunity', function (event, data) {
     refreshFunction = Community.view;
+    console.log("refreshFunction = CrowdTaskingApp.view");
     $('#editCommunityButton').bind('tap', function (event, data) {
         event.preventDefault();
         Community.setMode('edit');
