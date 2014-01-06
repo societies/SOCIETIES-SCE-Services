@@ -11,21 +11,20 @@ package si.stecce.societies.crowdtasking.gcm;
 import si.stecce.societies.crowdtasking.api.RESTful.impl.UsersAPI;
 import si.stecce.societies.crowdtasking.model.ApplicationSettings;
 
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import static si.stecce.societies.crowdtasking.model.dao.OfyService.ofy;
 
 /**
  * Servlet that sends a message to a device.
- * <p>
+ * <p/>
  * This servlet is invoked by AppEngine's Push Queue mechanism.
  */
 @SuppressWarnings("serial")
@@ -36,10 +35,14 @@ public class SendMessageServlet extends BaseServlet {
     private static final int MAX_RETRY = 3;
 
     static public final String PARAMETER_DEVICE = "device";
+    static public final String PARAMETERS = "parameters";
+    static public final String PARAMETER_ACTION = "action";
     static public final String PARAMETER_MESSAGE = "message";
     static public final String PARAMETER_URL = "downloadUrl";
     static public final String PARAMETER_MEETING_ID = "meetingId";
     static public final String PARAMETER_MULTICAST = "multicastKey";
+    static public final String PARAMETER_USERNAME = "username";
+    static public final String PARAMETER_USER_ID = "userId";
 
     private Sender sender;
 
@@ -101,20 +104,28 @@ public class SendMessageServlet extends BaseServlet {
             }
         }
         String regId = req.getParameter(PARAMETER_DEVICE);
+/*
         String message = req.getParameter(PARAMETER_MESSAGE);
         String url = req.getParameter(PARAMETER_URL);
         String meetingId = req.getParameter(PARAMETER_MEETING_ID);
+*/
         logger.info("getting data");
-        logger.info("regId: "+regId);
-        logger.info("downloadUrl: "+url);
-        logger.info("meetingId: "+meetingId);
+        logger.info("regId: " + regId);
+//        logger.info("downloadUrl: "+url);
+//        logger.info("meetingId: "+meetingId);
         if (regId != null) {
-            sendSingleMessage(regId, message, url, meetingId, resp);
+            sendSingleMessage(regId, req.getParameter(PARAMETER_MESSAGE), resp);
             return;
         }
         String multicastKey = req.getParameter(PARAMETER_MULTICAST);
         if (multicastKey != null) {
-            sendMulticastMessage(multicastKey, message, url, meetingId, resp);
+/*
+            List<Parameter> parameters = new ArrayList<>();
+            parameters.add(new Parameter(PARAMETER_MESSAGE, message));
+            parameters.add(new Parameter(PARAMETER_URL, url));
+            parameters.add(new Parameter(PARAMETER_MEETING_ID, meetingId));
+*/
+            sendMulticastMessage(multicastKey, req.getParameter(PARAMETERS), resp);
             return;
         }
         logger.severe("Invalid request!");
@@ -123,7 +134,7 @@ public class SendMessageServlet extends BaseServlet {
     }
 
     private Message createMessage(String text, String url, String meetingId) {
-        logger.info("createMessage("+text+","+url+","+meetingId+")");
+        logger.info("createMessage(" + text + "," + url + "," + meetingId + ")");
 //        Message message = new Message.Builder().addData(PARAMETER_MESSAGE, text).build();
         Message message = new Message.Builder().addData(PARAMETER_MESSAGE, text)
                 .addData(PARAMETER_URL, url)
@@ -131,13 +142,30 @@ public class SendMessageServlet extends BaseServlet {
         return message;
     }
 
-    private void sendSingleMessage(String regId, String messageText, String url, String meetingId, HttpServletResponse resp) {
+    private Message createMessage(List<Parameter> parameters) {
+        String logMessage = "";
+        for (Parameter parameter : parameters) {
+            logMessage += parameter.getValue() + ", "; // good enough for logging
+        }
+        logger.info("createMessage(" + logMessage + ")");
+        Message message = new Message.Builder().build();
+        for (Parameter parameter : parameters) {
+            message.addData(parameter.getName(), parameter.getValue());
+        }
+        return message;
+    }
+
+    private void sendSingleMessage(String regId, String params, HttpServletResponse resp) {
+        List<Parameter> parameters = Parameters.fromString(params);
+
         logger.info("Sending message to device " + regId);
         logger.info("message");
+/*
         logger.info("messageText: "+messageText);
         logger.info("downloadUrl: "+url);
         logger.info("meetingId: "+meetingId);
-        Message message = createMessage(messageText, url, meetingId);
+*/
+        Message message = createMessage(parameters);
         Result result;
         try {
             result = sender.sendNoRetry(message, regId);
@@ -170,15 +198,16 @@ public class SendMessageServlet extends BaseServlet {
         }
     }
 
-    private void sendMulticastMessage(String multicastKey, String messageText, String url, String meetingId, HttpServletResponse resp) {
+    private void sendMulticastMessage(String multicastKey, String params, HttpServletResponse resp) {
+        List<Parameter> parameters = Parameters.fromString(params);
         // Recover registration ids from datastore
         logger.info("sendMulticastMessage");
         List<String> regIds = Datastore.getMulticast(multicastKey);
-        Message message = createMessage(messageText, url, meetingId);
+        Message message = createMessage(parameters);
         MulticastResult multicastResult;
         try {
             multicastResult = sender.sendNoRetry(message, regIds);
-            logger.info("multicastResult: "+multicastResult);
+            logger.info("multicastResult: " + multicastResult);
         } catch (IOException e) {
             logger.log(Level.SEVERE, "Exception posting " + message, e);
             multicastDone(resp, multicastKey);

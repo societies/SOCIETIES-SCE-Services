@@ -32,6 +32,8 @@ import si.stecce.societies.crowdtasking.api.RESTful.json.MeetingDetails4CSignJS;
 import si.stecce.societies.crowdtasking.api.RESTful.json.MeetingJS;
 import si.stecce.societies.crowdtasking.api.RESTful.json.TaskJS;
 import si.stecce.societies.crowdtasking.api.RESTful.json.UserJS;
+import si.stecce.societies.crowdtasking.gcm.Parameters;
+import si.stecce.societies.crowdtasking.gcm.SendMessageServlet;
 import si.stecce.societies.crowdtasking.model.CTUser;
 import si.stecce.societies.crowdtasking.model.CollaborativeSign;
 import si.stecce.societies.crowdtasking.model.Meeting;
@@ -50,6 +52,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.logging.Logger;
 
 import static si.stecce.societies.crowdtasking.model.dao.OfyService.ofy;
@@ -83,7 +86,7 @@ public class MeetingAPI implements IMeetingAPI {
                 log.info("sending meeting details");
                 MeetingDetails4CSignJS meetingDetails = new MeetingDetails4CSignJS(meeting);
                 for (UserJS user : meetingDetails.users) {
-                    log.info("participant: "+user.username);
+                    log.info("participant: " + user.username);
                 }
                 return gson.toJson(meetingDetails);
             } else {
@@ -117,6 +120,7 @@ public class MeetingAPI implements IMeetingAPI {
                                @FormParam("taskEnd") String taskEnd,
                                @FormParam("meetingIdToSign") String meetingIdToSignStr,
                                @FormParam("downloadUrl") String downloadUrl,
+                               @FormParam("registrationId") String regId,
                                @Context HttpServletRequest request) {
 
         Long meetingIdToSign;
@@ -165,23 +169,43 @@ public class MeetingAPI implements IMeetingAPI {
         }
         if ("communitysign".equalsIgnoreCase(querytype)) {
             Meeting meeting = null;
-            try {
-                meeting = MeetingDAO.loadMeeting(meetingIdToSign);
-            } catch (Exception e) {
+            meeting = MeetingDAO.loadMeeting(meetingIdToSign);
+            if (meeting == null) {
                 return Response.status(Status.BAD_REQUEST).entity("Wrong meeting id.").type("text/plain").build();
             }
             CollaborativeSign collaborativeSign = getCollaborativeSign();
-            collaborativeSign.setMeetingId(meetingIdToSign);
-            setCollaborativeSign(collaborativeSign);
+
             if (downloadUrl == null || "".equalsIgnoreCase(downloadUrl)) {
-                return Response.ok().entity("The meeting is set.").build();
+                if (meetingIdToSign.longValue() != collaborativeSign.getMeetingId().longValue()) {
+                    collaborativeSign.setMeetingId(meetingIdToSign);
+                    setCollaborativeSign(collaborativeSign);
+                    return Response.ok().entity("The meeting is set.").build();
+                } else {
+                    List<String> devices = new ArrayList();
+                    devices.add(collaborativeSign.getGcmRegistrationId());
+                    Parameters parameters = new Parameters();
+                    parameters.addParameter(SendMessageServlet.PARAMETER_ACTION, "check-in");
+                    parameters.addParameter(SendMessageServlet.PARAMETER_MESSAGE, user.getUserName() + " is present on the meeting.");
+                    parameters.addParameter(SendMessageServlet.PARAMETER_USERNAME, user.getUserName());
+                    parameters.addParameter(SendMessageServlet.PARAMETER_USER_ID, user.getId().toString());
+                    NotificationsSender.sendGCMMessage(devices, parameters.toString());
+                    return Response.ok().entity("Meeting check-in.").build();
+                }
             }
-            log.info("downloadUrl: "+downloadUrl);
+            log.info("downloadUrl: " + downloadUrl);
             meeting.setDownloadUrl(downloadUrl);
             NotificationsSender.meetingIsReadyToBeSigned(meeting);
             MeetingDAO.saveMeeting(meeting);
             return Response.ok().entity("The meeting minutes are ready to be signed.").build();
 
+        }
+        if ("registerCollaborativeSign4GCM".equalsIgnoreCase(querytype)) {
+            if (regId != null && !"".equalsIgnoreCase(regId)) {
+                CollaborativeSign collaborativeSign = getCollaborativeSign();
+                collaborativeSign.setGcmRegistrationId(regId);
+                setCollaborativeSign(collaborativeSign);
+                return Response.ok().entity("The meeting minutes are ready to be signed.").build();
+            }
         }
         return Response.status(Status.BAD_REQUEST).entity("Request not understood.").type("text/plain").build();
     }

@@ -27,5 +27,6 @@ public interface IMeetingAPI {
                         @FormParam("taskEnd") String taskEnd,
                         @FormParam("meetingIdToSign") String meetingIdToSignStr,
                         @FormParam("downloadUrl") String downloadUrl,
+                        @QueryParam("registrationId") String regId,
                         @Context HttpServletRequest request);
 }

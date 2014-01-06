@@ -7,23 +7,23 @@ package si.stecce.societies.crowdtasking.gcm;
  * Time: 11:48
  * To change this template use File | Settings | File Templates.
  */
+
 import java.io.Serializable;
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
  * GCM message.
- *
- * <p>
+ * <p/>
+ * <p/>
  * Instances of this class are immutable and should be created using a
  * {@link Builder}. Examples:
- *
+ * <p/>
  * <strong>Simplest message:</strong>
  * <pre><code>
  * Message message = new Message.Builder().build();
  * </pre></code>
- *
+ * <p/>
  * <strong>Message with optional attributes:</strong>
  * <pre><code>
  * Message message = new Message.Builder()
@@ -34,7 +34,7 @@ import java.util.Map;
  *    .restrictedPackageName(restrictedPackageName)
  *    .build();
  * </pre></code>
- *
+ * <p/>
  * <strong>Message with optional attributes and payload data:</strong>
  * <pre><code>
  * Message message = new Message.Builder()
@@ -129,7 +129,8 @@ public final class Message implements Serializable {
     private Message(Builder builder) {
         collapseKey = builder.collapseKey;
         delayWhileIdle = builder.delayWhileIdle;
-        data = Collections.unmodifiableMap(builder.data);
+//        data = Collections.unmodifiableMap(builder.data);
+        data = builder.data;
         timeToLive = builder.timeToLive;
         dryRun = builder.dryRun;
         restrictedPackageName = builder.restrictedPackageName;
@@ -175,6 +176,13 @@ public final class Message implements Serializable {
      */
     public Map<String, String> getData() {
         return data;
+    }
+
+    /**
+     * Adds a key/value pair to the payload data.
+     */
+    public void addData(String key, String value) {
+        data.put(key, value);
     }
 
     @Override

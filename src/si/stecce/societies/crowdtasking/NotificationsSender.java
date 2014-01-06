@@ -35,6 +35,7 @@ import com.googlecode.objectify.Key;
 import com.googlecode.objectify.Ref;
 import si.stecce.societies.crowdtasking.api.RESTful.impl.UsersAPI;
 import si.stecce.societies.crowdtasking.gcm.Datastore;
+import si.stecce.societies.crowdtasking.gcm.Parameters;
 import si.stecce.societies.crowdtasking.gcm.SendMessageServlet;
 import si.stecce.societies.crowdtasking.model.*;
 
@@ -167,13 +168,13 @@ public final class NotificationsSender {
             if (user.getGcmRegistrationId() != null) {
                 partialDevices.add(user.getGcmRegistrationId());
                 if (partialDevices.size() == Datastore.MULTICAST_SIZE) {
-                    sendGCMMessage(partialDevices, message, "", "");
+                    sendGCMMessage(partialDevices, "message=" + message);
                     partialDevices.clear();
                 }
             }
         }
         if (!partialDevices.isEmpty()) {
-            sendGCMMessage(partialDevices, message, "", "");
+            sendGCMMessage(partialDevices, "message=" + message);
         }
     }
 
@@ -188,26 +189,34 @@ public final class NotificationsSender {
             if (user.getGcmRegistrationId() != null) {
                 partialDevices.add(user.getGcmRegistrationId());
                 if (partialDevices.size() == Datastore.MULTICAST_SIZE) {
-                    sendGCMMessage(partialDevices, message, meeting.getDownloadUrl(), meeting.getId().toString());
+                    sendGCMMessage(partialDevices, createParamsString(message, meeting.getDownloadUrl(), meeting.getId().toString()));
                     partialDevices.clear();
                 }
             }
         }
         if (!partialDevices.isEmpty()) {
-            sendGCMMessage(partialDevices, message, meeting.getDownloadUrl(), meeting.getId().toString());
+
+            sendGCMMessage(partialDevices, createParamsString(message, meeting.getDownloadUrl(), meeting.getId().toString()));
         }
     }
 
-    private static void sendGCMMessage(List<String> partialDevices, String message, String downloadUrl, String meetingId) {
+    private static String createParamsString(String message, String downloadUrl, String meetingId) {
+        Parameters parameters = new Parameters();
+        parameters.addParameter(SendMessageServlet.PARAMETER_MESSAGE, message);
+        parameters.addParameter(SendMessageServlet.PARAMETER_URL, downloadUrl);
+        parameters.addParameter(SendMessageServlet.PARAMETER_MEETING_ID, meetingId);
+        return parameters.toString();
+    }
+
+    public static void sendGCMMessage(List<String> partialDevices, String parameters) {
         String multicastKey = Datastore.createMulticast(partialDevices);
         logger.info("Queuing " + partialDevices.size() + " devices on multicast " +
                 multicastKey);
+
         TaskOptions taskOptions = TaskOptions.Builder
                 .withUrl("/send")
                 .param(SendMessageServlet.PARAMETER_MULTICAST, multicastKey)
-                .param(SendMessageServlet.PARAMETER_MESSAGE, message)
-                .param(SendMessageServlet.PARAMETER_URL, downloadUrl)
-                .param(SendMessageServlet.PARAMETER_MEETING_ID, meetingId)
+                .param(SendMessageServlet.PARAMETERS, parameters)
                 .method(Method.POST);
         Queue queue = QueueFactory.getQueue("gcm");
         queue.add(taskOptions);

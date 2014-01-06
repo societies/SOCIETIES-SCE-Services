@@ -76,6 +76,7 @@ public class SessionFilter implements Filter {
                 !url.equalsIgnoreCase("/publicDisplay") &&
                 // special case for collaborative sign
                 !url.startsWith("/rest/meeting/communitysign") &&
+                !url.startsWith("/rest/meeting/registerCollaborativeSign4GCM") &&
                 !url.equalsIgnoreCase("/rest/noaccess") &&
 //				!url.startsWith("/rest/remote") &&
                 !url.startsWith(loginUrl) &&
