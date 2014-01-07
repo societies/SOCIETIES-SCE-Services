@@ -4,7 +4,6 @@ package si.stecce.societies.crowdtasking.gcm;
  * Created with IntelliJ IDEA.
  * User: juresas
  * Date: 22.10.2013
- * Time: 15:22
  * To change this template use File | Settings | File Templates.
  */
 
@@ -33,16 +32,6 @@ public class SendMessageServlet extends BaseServlet {
     private static final String HEADER_QUEUE_COUNT = "X-AppEngine-TaskRetryCount";
     private static final String HEADER_QUEUE_NAME = "X-AppEngine-QueueName";
     private static final int MAX_RETRY = 3;
-
-    static public final String PARAMETER_DEVICE = "device";
-    static public final String PARAMETERS = "parameters";
-    static public final String PARAMETER_ACTION = "action";
-    static public final String PARAMETER_MESSAGE = "message";
-    static public final String PARAMETER_URL = "downloadUrl";
-    static public final String PARAMETER_MEETING_ID = "meetingId";
-    static public final String PARAMETER_MULTICAST = "multicastKey";
-    static public final String PARAMETER_USERNAME = "username";
-    static public final String PARAMETER_USER_ID = "userId";
 
     private Sender sender;
 
@@ -103,7 +92,7 @@ public class SendMessageServlet extends BaseServlet {
                 return;
             }
         }
-        String regId = req.getParameter(PARAMETER_DEVICE);
+        String regId = req.getParameter(GcmMessage.PARAMETER_DEVICE);
 /*
         String message = req.getParameter(PARAMETER_MESSAGE);
         String url = req.getParameter(PARAMETER_URL);
@@ -114,58 +103,47 @@ public class SendMessageServlet extends BaseServlet {
 //        logger.info("downloadUrl: "+url);
 //        logger.info("meetingId: "+meetingId);
         if (regId != null) {
-            sendSingleMessage(regId, req.getParameter(PARAMETER_MESSAGE), resp);
+            sendSingleMessage(regId, req.getParameter(GcmMessage.PARAMETER_MESSAGE), req.getParameter(GcmMessage.PARAMETER_JSON), resp);
             return;
         }
-        String multicastKey = req.getParameter(PARAMETER_MULTICAST);
+        String multicastKey = req.getParameter(GcmMessage.PARAMETER_MULTICAST);
         if (multicastKey != null) {
-/*
-            List<Parameter> parameters = new ArrayList<>();
-            parameters.add(new Parameter(PARAMETER_MESSAGE, message));
-            parameters.add(new Parameter(PARAMETER_URL, url));
-            parameters.add(new Parameter(PARAMETER_MEETING_ID, meetingId));
-*/
-            sendMulticastMessage(multicastKey, req.getParameter(PARAMETERS), resp);
+            sendMulticastMessage(multicastKey, req.getParameter(GcmMessage.PARAMETERS), req.getParameter(GcmMessage.PARAMETER_JSON), resp);
             return;
         }
         logger.severe("Invalid request!");
         taskDone(resp);
-        return;
     }
 
+/*
     private Message createMessage(String text, String url, String meetingId) {
         logger.info("createMessage(" + text + "," + url + "," + meetingId + ")");
 //        Message message = new Message.Builder().addData(PARAMETER_MESSAGE, text).build();
-        Message message = new Message.Builder().addData(PARAMETER_MESSAGE, text)
-                .addData(PARAMETER_URL, url)
-                .addData(PARAMETER_MEETING_ID, meetingId).build();
+        Message message = new Message.Builder().addData(GcmMessage.PARAMETER_MESSAGE, text)
+                .addData(GcmMessage.PARAMETER_URL, url)
+                .addData(GcmMessage.PARAMETER_MEETING_ID, meetingId).build();
         return message;
     }
+*/
 
-    private Message createMessage(List<Parameter> parameters) {
-        String logMessage = "";
-        for (Parameter parameter : parameters) {
-            logMessage += parameter.getValue() + ", "; // good enough for logging
-        }
-        logger.info("createMessage(" + logMessage + ")");
+    private Message createMessage(List<Parameter> parameters, String json) {
+        logger.info("createMessage(" + parameters.toString() + ")");
         Message message = new Message.Builder().build();
         for (Parameter parameter : parameters) {
             message.addData(parameter.getName(), parameter.getValue());
         }
+        if (json != null) {
+            message.addData(GcmMessage.PARAMETER_JSON, json);
+        }
         return message;
     }
 
-    private void sendSingleMessage(String regId, String params, HttpServletResponse resp) {
+    private void sendSingleMessage(String regId, String params, String json, HttpServletResponse resp) {
         List<Parameter> parameters = Parameters.fromString(params);
 
         logger.info("Sending message to device " + regId);
         logger.info("message");
-/*
-        logger.info("messageText: "+messageText);
-        logger.info("downloadUrl: "+url);
-        logger.info("meetingId: "+meetingId);
-*/
-        Message message = createMessage(parameters);
+        Message message = createMessage(parameters, json);
         Result result;
         try {
             result = sender.sendNoRetry(message, regId);
@@ -179,7 +157,7 @@ public class SendMessageServlet extends BaseServlet {
             return;
         }
         if (result.getMessageId() != null) {
-            logger.info("Succesfully sent message to device " + regId);
+            logger.info("Successfully sent message to device " + regId);
             String canonicalRegId = result.getCanonicalRegistrationId();
             if (canonicalRegId != null) {
                 // same device has more than on registration id: update it
@@ -198,12 +176,12 @@ public class SendMessageServlet extends BaseServlet {
         }
     }
 
-    private void sendMulticastMessage(String multicastKey, String params, HttpServletResponse resp) {
+    private void sendMulticastMessage(String multicastKey, String params, String json, HttpServletResponse resp) {
         List<Parameter> parameters = Parameters.fromString(params);
         // Recover registration ids from datastore
         logger.info("sendMulticastMessage");
         List<String> regIds = Datastore.getMulticast(multicastKey);
-        Message message = createMessage(parameters);
+        Message message = createMessage(parameters, json);
         MulticastResult multicastResult;
         try {
             multicastResult = sender.sendNoRetry(message, regIds);

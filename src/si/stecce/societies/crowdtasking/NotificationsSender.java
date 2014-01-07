@@ -35,8 +35,8 @@ import com.googlecode.objectify.Key;
 import com.googlecode.objectify.Ref;
 import si.stecce.societies.crowdtasking.api.RESTful.impl.UsersAPI;
 import si.stecce.societies.crowdtasking.gcm.Datastore;
+import si.stecce.societies.crowdtasking.gcm.GcmMessage;
 import si.stecce.societies.crowdtasking.gcm.Parameters;
-import si.stecce.societies.crowdtasking.gcm.SendMessageServlet;
 import si.stecce.societies.crowdtasking.model.*;
 
 import java.text.SimpleDateFormat;
@@ -202,21 +202,30 @@ public final class NotificationsSender {
 
     private static String createParamsString(String message, String downloadUrl, String meetingId) {
         Parameters parameters = new Parameters();
-        parameters.addParameter(SendMessageServlet.PARAMETER_MESSAGE, message);
-        parameters.addParameter(SendMessageServlet.PARAMETER_URL, downloadUrl);
-        parameters.addParameter(SendMessageServlet.PARAMETER_MEETING_ID, meetingId);
+        parameters.addParameter(GcmMessage.PARAMETER_MESSAGE, message);
+        parameters.addParameter(GcmMessage.PARAMETER_URL, downloadUrl);
+        parameters.addParameter(GcmMessage.PARAMETER_MEETING_ID, meetingId);
         return parameters.toString();
     }
 
     public static void sendGCMMessage(List<String> partialDevices, String parameters) {
+        sendGCMMessage(partialDevices, parameters, null);
+    }
+
+    public static void sendGCMMessage(List<String> partialDevices, String parameters, String json) {
         String multicastKey = Datastore.createMulticast(partialDevices);
         logger.info("Queuing " + partialDevices.size() + " devices on multicast " +
                 multicastKey);
 
+        if (json == null) {
+            json = "";
+        }
+
         TaskOptions taskOptions = TaskOptions.Builder
                 .withUrl("/send")
-                .param(SendMessageServlet.PARAMETER_MULTICAST, multicastKey)
-                .param(SendMessageServlet.PARAMETERS, parameters)
+                .param(GcmMessage.PARAMETER_MULTICAST, multicastKey)
+                .param(GcmMessage.PARAMETERS, parameters)
+                .param(GcmMessage.PARAMETER_JSON, json)
                 .method(Method.POST);
         Queue queue = QueueFactory.getQueue("gcm");
         queue.add(taskOptions);
