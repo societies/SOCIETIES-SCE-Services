@@ -24,24 +24,21 @@
  */
 package si.setcce.societies.android.rest;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.StatusLine;
-import org.apache.http.client.CookieStore;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.client.protocol.ClientContext;
-import org.apache.http.cookie.Cookie;
-import org.apache.http.impl.client.BasicCookieStore;
-import org.apache.http.impl.client.BasicResponseHandler;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.impl.cookie.BasicClientCookie;
-import org.apache.http.protocol.BasicHttpContext;
-import org.apache.http.protocol.HttpContext;
-
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.util.Log;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.client.CookieStore;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.client.protocol.ClientContext;
+import org.apache.http.impl.client.BasicCookieStore;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.cookie.BasicClientCookie;
+import org.apache.http.protocol.BasicHttpContext;
+import org.apache.http.protocol.HttpContext;
 
 import java.io.ByteArrayOutputStream;
 
@@ -97,9 +94,9 @@ public class RestTask extends AsyncTask<HttpUriRequest, Void, String[]> {
             response[0] = serverResponse.getStatusLine().toString();
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             serverResponse.getEntity().writeTo(out);
-            out.close();
             response[1] = out.toString();
-            System.out.println(response);
+            out.close();
+            System.out.println(response.toString());
             return response;
 		} catch (Exception e) {
 			e.printStackTrace();

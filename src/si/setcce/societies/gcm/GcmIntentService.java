@@ -22,7 +22,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Created by juresas on 21.10.2013.
+ * Created by Simon on 21.10.2013.
  */
 /**
  * This {@code IntentService} does the actual handling of the GCM message.
@@ -34,7 +34,6 @@ import java.util.Map;
 public class GcmIntentService extends IntentService {
     public static final int NOTIFICATION_ID = 1;
     private NotificationManager mNotificationManager;
-    NotificationCompat.Builder builder;
     static public final String PARAMETER_MESSAGE = "message";
     static public final String PARAMETER_URL = "downloadUrl";
     static public final String PARAMETER_MEETING_ID = "meetingId";
@@ -52,8 +51,8 @@ public class GcmIntentService extends IntentService {
         // in your BroadcastReceiver.
         String messageType = gcm.getMessageType(intent);
 
-        if (!extras.isEmpty()) {  // has effect of unparcelling Bundle
-	        Map<String, String> parameters = new HashMap<String, String>();
+        if (extras != null && !extras.isEmpty()) {  // has effect of unparcelling Bundle
+            Map<String, String> parameters = new HashMap<String, String>();
             /*
              * Filter messages based on message type. Since it is likely that GCM will be
              * extended in the future with new message types, just ignore any message types you're
@@ -72,7 +71,7 @@ public class GcmIntentService extends IntentService {
 	            parameters.put(PARAMETER_MESSAGE, extras.getString(PARAMETER_MESSAGE));
 	            parameters.put(PARAMETER_URL, extras.getString(PARAMETER_URL));
 	            parameters.put(PARAMETER_MEETING_ID, extras.getString(PARAMETER_MEETING_ID));
-                sendNotification(parameters);
+                sendNotification(parameters, extras.getString(PARAMETER_URL));
                 Log.i(TAG, "Received: " + extras.toString());
             }
         }
@@ -80,19 +79,22 @@ public class GcmIntentService extends IntentService {
         GcmBroadcastReceiver.completeWakefulIntent(intent);
     }
 
+    private void sendNotification(Map<String, String> parameters) {
+        sendNotification(parameters, "");
+    }
+
     // Put the message into a notification and post it.
     // This is just one simple example of what you might choose to do with
     // a GCM message.
-    private void sendNotification(Map<String, String> parameters) {
+    private void sendNotification(Map<String, String> parameters, String downloadUrl) {
         mNotificationManager = (NotificationManager)
                 this.getSystemService(Context.NOTIFICATION_SERVICE);
 
 	    String msg = parameters.get(PARAMETER_MESSAGE);
-	    String url = parameters.get(PARAMETER_URL);
         Intent intent = new Intent(this, MainActivity.class);
         intent.setAction("GCM");
         intent.putExtra(PARAMETER_MESSAGE, msg);
-        intent.putExtra(PARAMETER_URL, url);
+        intent.putExtra(PARAMETER_URL, downloadUrl);
         intent.putExtra(PARAMETER_MEETING_ID, parameters.get(PARAMETER_MEETING_ID));
         intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
         PendingIntent contentIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);

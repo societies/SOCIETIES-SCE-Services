@@ -19,14 +19,12 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.net.Uri;
 import android.nfc.NdefMessage;
 import android.nfc.NdefRecord;
 import android.nfc.NfcAdapter;
 import android.nfc.NfcEvent;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.Parcelable;
 import android.provider.CalendarContract.Events;
 import android.util.Log;
@@ -73,7 +71,6 @@ import org.societies.security.digsig.api.Sign;
 import org.societies.thirdpartyservices.crowdtasking.tools.SocketClient;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -85,8 +82,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -111,13 +106,10 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
 
     private static final String SCHEME ="http";
     private static String SCOPE="";
-    public static final String DOMAIN = "crowdtasking.appspot.com";
 //    public static final String DOMAIN = "crowdtaskingtest.appspot.com";
 //    public static final String DOMAIN = "simonix";
-//    public static final String DOMAIN = "192.168.1.71";
-//   	public static final String DOMAIN = "192.168.1.102";
-//   	public static final String DOMAIN = "192.168.1.236";
-//   	public static final String DOMAIN = "192.168.76.191";
+public static final String DOMAIN = "crowdtasking.appspot.com";
+    //    public static final String DOMAIN = "192.168.1.30";
     private static final String PORT = "";
 //    private static final String PORT = ":8888";
     public static final String APPLICATION_URL = SCHEME +"://" + DOMAIN + PORT;
@@ -169,7 +161,7 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
 	private boolean societiesServices;
 
 	/**
-     * This is the project number from the API Console
+     * This is the Crowd Tasking (GAE) project number (from the API Console)
      */
     String SENDER_ID = "567873389890";
 
@@ -276,7 +268,7 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
         new AsyncTask<Void, Void, String>() {
             @Override
             protected String doInBackground(Void... params) {
-                String msg = "";
+                String msg;
                 // Check device for Play Services APK. If check succeeds, proceed with GCM registration.
                 if (!checkPlayServices()) {
                     return "No valid Google Play Services APK found.";
@@ -314,8 +306,6 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
             e.printStackTrace();
         }
     }
-
-    NfcAdapter mNfcAdapter;
 
     @Override
     public NdefMessage createNdefMessage(NfcEvent event) {
@@ -1258,9 +1248,9 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
 			if ("PD".equalsIgnoreCase(action)) {
 				schema="http:";
 			}
-			String text = APPLICATION_URL+"/cs/"+spejs;
-//			String text = schema+"//crowdtasking.appspot.com/cs/"+spejs;
-			if ("CI".equalsIgnoreCase(action)) {
+            String text = schema + "//" + DOMAIN + PORT + "/cs/" + spejs;
+            //			String text = schema+"//crowdtasking.appspot.com/cs/"+spejs;
+            if ("CI".equalsIgnoreCase(action)) {
 				text+="/enter";
 			}
 			if ("CO".equalsIgnoreCase(action)) {
@@ -1362,6 +1352,31 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
                     Log.e(LOG_TAG, "Can't log event: "+e.getMessage());
                 }
 
+/*
+                AlertDialog.Builder alert = new AlertDialog.Builder(getApplicationContext());
+
+                alert.setTitle("Title");
+                alert.setMessage("Message");
+
+                // Set an EditText view to get user input
+                final EditText input = new EditText(getApplicationContext());
+                alert.setView(input);
+
+                alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        String value = input.getText().toString();
+                        Toast.makeText(getApplicationContext(), "value", Toast.LENGTH_LONG);
+                    }
+                });
+
+                alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        // Canceled.
+                    }
+                });
+
+                alert.show();
+*/
 /*
                 RestTask task = new RestTask(getApplicationContext(), SET_MEETING_ACTION, CookieManager.getInstance().getCookie(DOMAIN), DOMAIN);
                 try {
