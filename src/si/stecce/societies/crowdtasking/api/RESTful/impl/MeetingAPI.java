@@ -186,7 +186,7 @@ public class MeetingAPI implements IMeetingAPI {
                     Parameters parameters = new Parameters();
                     parameters.addParameter(GcmMessage.PARAMETER_ACTION, GcmMessage.ACTION_SET_MEETING);
                     parameters.addParameter(GcmMessage.PARAMETER_MESSAGE, "The meeting is set");
-                    NotificationsSender.sendGCMMessage(getDeviceRegId(collaborativeSign), parameters.toString(), gson.toJson(meetingDetails));
+                    NotificationsSender.sendGCMMessage(getDeviceRegId(collaborativeSign), parameters.toString(), gson.toJson(meetingDetails), null);
 
                     return Response.ok().entity("The meeting is set.").build();
                 } else {

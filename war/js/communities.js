@@ -537,19 +537,17 @@ var Community = function () {
     };
 }();
 
-/*
- function copyToClipboard(action) {
- if (typeof(android) !== 'undefined') {
- window.android.share($('#urlMapping').val(), action);
- }
- else {
- if (action === 'PD') {
- //var pdUrl = location.protocol+'//'+location.hostname+(location.port ? ':'+location.port: '')+'/cs/'+$('#urlMapping').val();
- window.prompt('Copy to clipboard: Ctrl+C, Enter', location.origin+'/cs/'+$('#urlMapping').val());
- }
- }
- }
- */
+function copyToClipboard(action) {
+    if (typeof(android) !== 'undefined') {
+        window.android.share($('#symbolicLocation').val(), action);
+    }
+    else {
+        if (action === 'PD') {
+            //var pdUrl = location.protocol+'//'+location.hostname+(location.port ? ':'+location.port: '')+'/cs/'+$('#urlMapping').val();
+            window.prompt('Copy to clipboard: Ctrl+C, Enter', location.origin + '/cs/' + $('#symbolicLocation').val());
+        }
+    }
+}
 
 function confirm(memberId) {
     $('#memberId').val(memberId);

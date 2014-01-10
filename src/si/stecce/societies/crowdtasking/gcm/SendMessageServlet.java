@@ -103,12 +103,18 @@ public class SendMessageServlet extends BaseServlet {
 //        logger.info("downloadUrl: "+url);
 //        logger.info("meetingId: "+meetingId);
         if (regId != null) {
-            sendSingleMessage(regId, req.getParameter(GcmMessage.PARAMETER_MESSAGE), req.getParameter(GcmMessage.PARAMETER_JSON), resp);
+            sendSingleMessage(regId, req.getParameter(GcmMessage.PARAMETER_MESSAGE),
+                    req.getParameter(GcmMessage.PARAMETER_JSON),
+                    req.getParameter(GcmMessage.PARAMETER_URL),
+                    resp);
             return;
         }
         String multicastKey = req.getParameter(GcmMessage.PARAMETER_MULTICAST);
         if (multicastKey != null) {
-            sendMulticastMessage(multicastKey, req.getParameter(GcmMessage.PARAMETERS), req.getParameter(GcmMessage.PARAMETER_JSON), resp);
+            sendMulticastMessage(multicastKey, req.getParameter(GcmMessage.PARAMETERS),
+                    req.getParameter(GcmMessage.PARAMETER_JSON),
+                    req.getParameter(GcmMessage.PARAMETER_URL),
+                    resp);
             return;
         }
         logger.severe("Invalid request!");
@@ -126,7 +132,7 @@ public class SendMessageServlet extends BaseServlet {
     }
 */
 
-    private Message createMessage(List<Parameter> parameters, String json) {
+    private Message createMessage(List<Parameter> parameters, String json, String downloadUrl) {
         logger.info("createMessage(" + parameters.toString() + ")");
         Message message = new Message.Builder().build();
         for (Parameter parameter : parameters) {
@@ -135,15 +141,18 @@ public class SendMessageServlet extends BaseServlet {
         if (json != null) {
             message.addData(GcmMessage.PARAMETER_JSON, json);
         }
+        if (downloadUrl != null) {
+            message.addData(GcmMessage.PARAMETER_URL, downloadUrl);
+        }
         return message;
     }
 
-    private void sendSingleMessage(String regId, String params, String json, HttpServletResponse resp) {
+    private void sendSingleMessage(String regId, String params, String json, String downloadUrl, HttpServletResponse resp) {
         List<Parameter> parameters = Parameters.fromString(params);
 
         logger.info("Sending message to device " + regId);
         logger.info("message");
-        Message message = createMessage(parameters, json);
+        Message message = createMessage(parameters, json, downloadUrl);
         Result result;
         try {
             result = sender.sendNoRetry(message, regId);
@@ -176,12 +185,12 @@ public class SendMessageServlet extends BaseServlet {
         }
     }
 
-    private void sendMulticastMessage(String multicastKey, String params, String json, HttpServletResponse resp) {
+    private void sendMulticastMessage(String multicastKey, String params, String json, String downloadUrl, HttpServletResponse resp) {
         List<Parameter> parameters = Parameters.fromString(params);
         // Recover registration ids from datastore
         logger.info("sendMulticastMessage");
         List<String> regIds = Datastore.getMulticast(multicastKey);
-        Message message = createMessage(parameters, json);
+        Message message = createMessage(parameters, json, downloadUrl);
         MulticastResult multicastResult;
         try {
             multicastResult = sender.sendNoRetry(message, regIds);
@@ -206,7 +215,7 @@ public class SendMessageServlet extends BaseServlet {
         if (multicastResult.getFailure() != 0) {
             // there were failures, check if any could be retried
             List<Result> results = multicastResult.getResults();
-            List<String> retriableRegIds = new ArrayList<String>();
+            List<String> retriableRegIds = new ArrayList<>();
             for (int i = 0; i < results.size(); i++) {
                 String error = results.get(i).getErrorCodeName();
                 if (error != null) {

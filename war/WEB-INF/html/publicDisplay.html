@@ -1,227 +1,240 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<meta charset="utf-8" />
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<link rel="stylesheet" href="/css/pd.css" type="text/css" media="screen"/>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/css/pd.css" type="text/css" media="screen"/>
 
-	<link rel="stylesheet" href="/css/jquery.mobile-1.3.2.min.css" type="text/css" media="screen"/>
-	<script src="/js/jquery-1.8.3.min.js" type="text/javascript" charset="utf-8"></script>
-	<script src="/js/jquery.mobile-1.3.2.min.js" type="text/javascript" charset="utf-8"></script>
-	<script type="text/javascript" src="/_ah/channel/jsapi"></script>
-	<script src="/js/mobile.js" type="text/javascript" charset="utf-8"></script>
-	<script src="/js/publicdisplay.js" type="text/javascript" charset="utf-8"></script>
-	<style>
-		#taskPanel.ui-panel {
-			width: 35em;
-		}
-		#taskPanel.ui-panel-closed {
-			width: 0;
-		}
-		.ui-panel-position-left.ui-panel-display-reveal {
-			left: 0;
-		}
-		.ui-panel-content-wrap-position-left.ui-panel-content-wrap-open,
-		.ui-panel-dismiss-position-left.ui-panel-dismiss-open {
-			left: 35em;
-			right: -35em;
-		}
-		.ui-panel-animate.ui-panel-content-wrap-position-left.ui-panel-content-wrap-open.ui-panel-content-wrap-display-reveal {
-			left: 0;
-			right: 0;
-			-webkit-transform: translate3d(35em,0,0);
-			-moz-transform: translate3d(35em,0,0);
-			transform: translate3d(35em,0,0);
-		}
-	</style>
+    <link rel="stylesheet" href="/css/jquery.mobile-1.3.2.min.css" type="text/css" media="screen"/>
+    <script src="/js/jquery-1.8.3.min.js" type="text/javascript" charset="utf-8"></script>
+    <script src="/js/jquery.mobile-1.3.2.min.js" type="text/javascript" charset="utf-8"></script>
+    <script type="text/javascript" src="/_ah/channel/jsapi"></script>
+    <script src="/js/mobile.js" type="text/javascript" charset="utf-8"></script>
+    <script src="/js/publicdisplay.js" type="text/javascript" charset="utf-8"></script>
+    <style>
+        #taskPanel.ui-panel {
+            width: 35em;
+        }
+
+        #taskPanel.ui-panel-closed {
+            width: 0;
+        }
+
+        .ui-panel-position-left.ui-panel-display-reveal {
+            left: 0;
+        }
+
+        .ui-panel-content-wrap-position-left.ui-panel-content-wrap-open,
+        .ui-panel-dismiss-position-left.ui-panel-dismiss-open {
+            left: 35em;
+            right: -35em;
+        }
+
+        .ui-panel-animate.ui-panel-content-wrap-position-left.ui-panel-content-wrap-open.ui-panel-content-wrap-display-reveal {
+            left: 0;
+            right: 0;
+            -webkit-transform: translate3d(35em, 0, 0);
+            -moz-transform: translate3d(35em, 0, 0);
+            transform: translate3d(35em, 0, 0);
+        }
+    </style>
 </head>
 <body>
-	<div data-role="page" id="publicDisplay" class="type-interior">
-		<div data-role="header" data-theme="a">
-			<h1>{{ pdHeader }}</h1>
-		</div><!-- /header -->
-		<div data-role="content">
-			<div class="content-primary">
-				<table data-role="table" id="task_list" data-mode="reflow" class="ui-responsive table-stroke bordered">
-					<thead>
-						<tr>
-							<th style="text-align: center;"></th>
-							<th>Title</th>
-							<th>Posted by</th>
-							<th>Due date</th>
-							<th>Description</th>
-							<th>Meetings</th>
-							<th>QR code</th>
-						</tr>
-					</thead>
-					<tbody>
-						<tr class="template" style="display:none;">
-							<td class="task_status" style="text-align: center; width: 16px;"></td>
-							<td class="task_title">title</td>
-							<td class="task_postedby">posted by</td>
-							<td class="task_description">description</td>
-							<td class="task_meetings"></td>
-							<td class="task_qrcode"></td>
-						</tr>
-					</tbody>
-				</table>
-			</div><!-- /content-primary -->
+<div data-role="page" id="publicDisplay" class="type-interior">
+    <div data-role="header" data-theme="a">
+        <h1>{{ pdHeader }}</h1>
+    </div>
+    <!-- /header -->
+    <div data-role="content">
+        <div class="content-primary">
+            <table data-role="table" id="task_list" data-mode="reflow" class="ui-responsive table-stroke bordered">
+                <thead>
+                <tr>
+                    <th style="text-align: center;"></th>
+                    <th>Title</th>
+                    <th>Posted by</th>
+                    <th>Due date</th>
+                    <th>Description</th>
+                    <th>Meetings</th>
+                    <th>QR code</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr class="template" style="display:none;">
+                    <td class="task_status" style="text-align: center; width: 16px;"></td>
+                    <td class="task_title">title</td>
+                    <td class="task_postedby">posted by</td>
+                    <td class="task_description">description</td>
+                    <td class="task_meetings"></td>
+                    <td class="task_qrcode"></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <!-- /content-primary -->
 
-			<div class="content-secondary">
-				<div>
-					<table id='top_users' class='bordered'>
-						<thead>
-							<tr>
-								<th>User</th>
-								<th>Points</th>
-							</tr>
-						</thead>
-						<tbody>
-							<tr class="topuser_template" style="display:none;">
-								<td class="user_name">Dyer</td>
-								<td class="user_karma">2</td>
-							</tr>
-						</tbody>
-					</table>
-					<br>
-					<br>
-					<div id="feedWidget">
-						<div id="activeTab" class="">Activity feed</div>
-						<div class="line"></div>
-						<div id="tabContent"></div>
-					</div>
-					<div class="shadow"></div>
-				</div>
-			</div><!-- /content-secondary -->
-		</div><!-- /content -->
-		
-	    <div data-role="panel" id="taskPanel" data-position="left" data-display="overlay" data-dismissible="true" data-theme="a">
-               	<div data-role="collapsible" data-collapsed="false" data-theme="a">
-					<h3>Task details</h3>
-	                	<table>
-	                		<tr>
-	                			<td>Task title:</td>
-	                			<td id="taskName"></td>
-	                		</tr>
-	                		<tr>
-	                			<td>Description:</td>
-	                			<td id="taskDescription"></td>
-	                		</tr>
-	                		<tr>
-	                			<td>Created:</td>
-	                			<td id="taskCreated"></td>
-	                		</tr>
-	                		<tr>
-	                			<td>Due date:</td>
-	                			<td id="taskDate"></td>
-	                		</tr>
-	                		<tr>
-	                			<td>Communities:</td>
-	                			<td id="taskCommunities"></td>
-	                		</tr>
-	                		<tr>
-	                			<td>Tags:</td>
-	                			<td id="taskTags"></td>
-	                		</tr>
-	                	</table>
-				</div>
-				<div id="meetingDiv" data-role="collapsible" data-collapsed="false" data-theme="a" style="display:none">
-					<h3>Meetings</h3>
-					<form action="" id="meetingForm">
-                	<input type="hidden" name="taskId" id="taskId" value="">
-	                <ul data-role="listview" id="meetingList" data-inset="true" style='white-space:normal;'>
-	                </ul>
-                    <ul data-role="listview" id="newMeetingList" style="display:none">
-                        <li data-role="fieldcontain">
-                            <label for="meetingSubject">Subject</label>
-                            <input type="text" name="meetingSubject" id="meetingSubject" value="">
-                        </li>
-                        <li data-role="fieldcontain">
-                            <label for="meetingDescription">Description</label>
-                            <textarea name="meetingDescription"
-                                id="meetingDescription"></textarea>
-                        </li>
-                        <li data-role="fieldcontain">
-                            <label for="meetingCS">Collaboration space</label>
-							<select name="meetingCS" id="meetingCS" data-native-menu="false">
-								<option>Choose Collaboration space</option>
-							</select>
-                        </li>
-                        <li data-role="fieldcontain">
-                            <label for="taskStart">Start time</label>
-                            <input id="taskStart" name="taskStart" />
-                        </li>
-                        <li data-role="fieldcontain">
-                            <label for="taskEnd">End time</label>
-                            <input id="taskEnd" name="taskEnd" />
-                        </li><br>
-                    </ul>
-                </form>
-				</div>
-				<form action="" id="commentsForm">
-                <ul data-role="listview" id="commentList" data-inset="true" style='white-space:normal;'>
-                	<li></li>
+        <div class="content-secondary">
+            <div>
+                <table id='top_users' class='bordered'>
+                    <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>Points</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr class="topuser_template" style="display:none;">
+                        <td class="user_name">Dyer</td>
+                        <td class="user_karma">2</td>
+                    </tr>
+                    </tbody>
+                </table>
+                <br>
+                <br>
+
+                <div id="feedWidget">
+                    <div id="activeTab" class="">Activity feed</div>
+                    <div class="line"></div>
+                    <div id="tabContent"></div>
+                </div>
+                <div class="shadow"></div>
+            </div>
+        </div>
+        <!-- /content-secondary -->
+    </div>
+    <!-- /content -->
+
+    <div data-role="panel" id="taskPanel" data-position="left" data-display="overlay" data-dismissible="true"
+         data-theme="a">
+        <div data-role="collapsible" data-collapsed="false" data-theme="a">
+            <h3>Task details</h3>
+            <table>
+                <tr>
+                    <td>Task title:</td>
+                    <td id="taskName"></td>
+                </tr>
+                <tr>
+                    <td>Description:</td>
+                    <td id="taskDescription"></td>
+                </tr>
+                <tr>
+                    <td>Created:</td>
+                    <td id="taskCreated"></td>
+                </tr>
+                <tr>
+                    <td>Due date:</td>
+                    <td id="taskDate"></td>
+                </tr>
+                <tr>
+                    <td>Communities:</td>
+                    <td id="taskCommunities"></td>
+                </tr>
+                <tr>
+                    <td>Tags:</td>
+                    <td id="taskTags"></td>
+                </tr>
+            </table>
+        </div>
+        <div id="meetingDiv" data-role="collapsible" data-collapsed="false" data-theme="a" style="display:none">
+            <h3>Meetings</h3>
+
+            <form action="" id="meetingForm">
+                <input type="hidden" name="taskId" id="taskId" value="">
+                <ul data-role="listview" id="meetingList" data-inset="true" style='white-space:normal;'>
                 </ul>
-                </form>
-		</div><!-- /panel -->
-		<div data-role="footer" class="footer-docs" data-position="fixed">
-			<p style="margin: 1em 1em; text-align:center;">Crowd Tasking &copy; SETCCE, 2012, 2013</p>
-		</div>
-	</div>
+                <ul data-role="listview" id="newMeetingList" style="display:none">
+                    <li data-role="fieldcontain">
+                        <label for="meetingSubject">Subject</label>
+                        <input type="text" name="meetingSubject" id="meetingSubject" value="">
+                    </li>
+                    <li data-role="fieldcontain">
+                        <label for="meetingDescription">Description</label>
+                        <textarea name="meetingDescription"
+                                  id="meetingDescription"></textarea>
+                    </li>
+                    <li data-role="fieldcontain">
+                        <label for="meetingCS">Collaboration space</label>
+                        <select name="meetingCS" id="meetingCS" data-native-menu="false">
+                            <option>Choose Collaboration space</option>
+                        </select>
+                    </li>
+                    <li data-role="fieldcontain">
+                        <label for="taskStart">Start time</label>
+                        <input id="taskStart" name="taskStart"/>
+                    </li>
+                    <li data-role="fieldcontain">
+                        <label for="taskEnd">End time</label>
+                        <input id="taskEnd" name="taskEnd"/>
+                    </li>
+                    <br>
+                </ul>
+            </form>
+        </div>
+        <form action="" id="commentsForm">
+            <ul data-role="listview" id="commentList" data-inset="true" style='white-space:normal;'>
+                <li></li>
+            </ul>
+        </form>
+    </div>
+    <!-- /panel -->
+    <div data-role="footer" class="footer-docs" data-position="fixed">
+        <p style="margin: 1em 1em; text-align:center;">Crowd Tasking &copy; SETCCE, 2012-2014</p>
+    </div>
+</div>
 
-	<script type='text/javascript'>
-	var myModule = Object.create({
-	    sendMessage : function() {
-	      var xhr = new XMLHttpRequest();
-	      xhr.open('POST', '/Events', true);
-	      xhr.send();
-	    },
-	    showEvents : function() {
-	        showTasks('{{ communityId }}');
-	    	getEvents('{{ communityId }}', '{{ spaceId }}');
-	    	showTopUsers();
-	    },
-	    initChannel : function() {
-	      var channel = new goog.appengine.Channel('{{ token }}');
-	      var socket = channel.open();
-	      socket.onopen = channelHandler.onOpened;
-	      socket.onmessage = channelHandler.onMessage;
-	      socket.onerror = channelHandler.onError;
-	      socket.onclose = channelHandler.onClose;
-	}});
-	    
-	var channelHandler = Object.create({
-		onOpened : function() {
-		},
-		onMessage : function(message) {
-			message.data = message.data.replace(/\r\n/g,'');
-			//message = message.replace(/\r\n/g,'');
-			var change = "changeTo:";
-			var show = "showTask:"
-			var hideTaskMsg = "hideTask"
-			var length = message.data.length;
-			if (message.data.substring(0, change.length) === change) {
-				window.location.replace(message.data.substring(change.length, length));
-			}
-			else if (message.data.substring(0, show.length) === show) {
-				var id = message.data.substring(show.length, length);
-				showTask(id);
-			}
-			else if (message.data.substring(0, hideTaskMsg.length) === hideTaskMsg) {
-				hideTask();
-			}
-			else {
-	   			addEvent(message.data);
-	   			showTasks('{{ communityId }}');
-	   			showTopUsers();
-			}
-		},
-		onError : function() {
-			window.location.reload();
-		},
-		onClose : function() {
-	}
-	});    
-    </script>
+<script type='text/javascript'>
+    var myModule = Object.create({
+        sendMessage: function () {
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', '/Events', true);
+            xhr.send();
+        },
+        showEvents: function () {
+            showTasks('{{ communityId }}');
+            getEvents('{{ communityId }}', '{{ spaceId }}');
+            showTopUsers();
+        },
+        initChannel: function () {
+            var channel = new goog.appengine.Channel('{{ token }}');
+            var socket = channel.open();
+            socket.onopen = channelHandler.onOpened;
+            socket.onmessage = channelHandler.onMessage;
+            socket.onerror = channelHandler.onError;
+            socket.onclose = channelHandler.onClose;
+        }});
+
+    var channelHandler = Object.create({
+        onOpened: function () {
+        },
+        onMessage: function (message) {
+            message.data = message.data.replace(/\r\n/g, '');
+            //message = message.replace(/\r\n/g,'');
+            var change = "changeTo:";
+            var show = "showTask:"
+            var hideTaskMsg = "hideTask"
+            var length = message.data.length;
+            if (message.data.substring(0, change.length) === change) {
+                window.location.replace(message.data.substring(change.length, length));
+            }
+            else if (message.data.substring(0, show.length) === show) {
+                var id = message.data.substring(show.length, length);
+                showTask(id);
+            }
+            else if (message.data.substring(0, hideTaskMsg.length) === hideTaskMsg) {
+                hideTask();
+            }
+            else {
+                addEvent(message.data);
+                showTasks('{{ communityId }}');
+                showTopUsers();
+            }
+        },
+        onError: function () {
+            window.location.reload();
+        },
+        onClose: function () {
+        }
+    });
+</script>
 </body>
 </html>

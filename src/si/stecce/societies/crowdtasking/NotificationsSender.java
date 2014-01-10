@@ -189,30 +189,29 @@ public final class NotificationsSender {
             if (user.getGcmRegistrationId() != null) {
                 partialDevices.add(user.getGcmRegistrationId());
                 if (partialDevices.size() == Datastore.MULTICAST_SIZE) {
-                    sendGCMMessage(partialDevices, createParamsString(message, meeting.getDownloadUrl(), meeting.getId().toString()));
+                    sendGCMMessage(partialDevices, createParamsString(message, meeting.getId().toString()), null, meeting.getDownloadUrl());
                     partialDevices.clear();
                 }
             }
         }
         if (!partialDevices.isEmpty()) {
 
-            sendGCMMessage(partialDevices, createParamsString(message, meeting.getDownloadUrl(), meeting.getId().toString()));
+            sendGCMMessage(partialDevices, createParamsString(message, meeting.getId().toString()), null, meeting.getDownloadUrl());
         }
     }
 
-    private static String createParamsString(String message, String downloadUrl, String meetingId) {
+    private static String createParamsString(String message, String meetingId) {
         Parameters parameters = new Parameters();
         parameters.addParameter(GcmMessage.PARAMETER_MESSAGE, message);
-        parameters.addParameter(GcmMessage.PARAMETER_URL, downloadUrl);
         parameters.addParameter(GcmMessage.PARAMETER_MEETING_ID, meetingId);
         return parameters.toString();
     }
 
     public static void sendGCMMessage(List<String> partialDevices, String parameters) {
-        sendGCMMessage(partialDevices, parameters, null);
+        sendGCMMessage(partialDevices, parameters, null, null);
     }
 
-    public static void sendGCMMessage(List<String> partialDevices, String parameters, String json) {
+    public static void sendGCMMessage(List<String> partialDevices, String parameters, String json, String downloadUrl) {
         String multicastKey = Datastore.createMulticast(partialDevices);
         logger.info("Queuing " + partialDevices.size() + " devices on multicast " +
                 multicastKey);
@@ -220,12 +219,16 @@ public final class NotificationsSender {
         if (json == null) {
             json = "";
         }
+        if (downloadUrl == null) {
+            downloadUrl = "";
+        }
 
         TaskOptions taskOptions = TaskOptions.Builder
                 .withUrl("/send")
                 .param(GcmMessage.PARAMETER_MULTICAST, multicastKey)
                 .param(GcmMessage.PARAMETERS, parameters)
                 .param(GcmMessage.PARAMETER_JSON, json)
+                .param(GcmMessage.PARAMETER_URL, downloadUrl)
                 .method(Method.POST);
         Queue queue = QueueFactory.getQueue("gcm");
         queue.add(taskOptions);
