@@ -232,10 +232,7 @@ public class UsersAPI implements IUsersAPI {
     }
 
     private boolean stringToBoolean(String value) {
-        if (value == null) {
-            return false;
-        }
-        return "on".equalsIgnoreCase(value);
+        return value != null && "on".equalsIgnoreCase(value);
     }
 
     public static void saveUser(CTUser user) {
