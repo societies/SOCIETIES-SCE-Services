@@ -61,7 +61,7 @@ public final class NotificationsSender {
 
     public static void newMeeting(Meeting meeting, Task task) {
         Set<Long> involvedUsers = task.getInvolvedUsers();
-        Map<Long, CTUser> usersMap = UsersAPI.getUsersMap(involvedUsers.toArray(new Long[0]));
+        Map<Long, CTUser> usersMap = UsersAPI.getUsersMap(involvedUsers.toArray(new Long[involvedUsers.size()]));
         for (Long userId : involvedUsers) {
             CTUser user = usersMap.get(userId);
             String organizer = "";
@@ -103,20 +103,6 @@ public final class NotificationsSender {
         }
     }
 
-    public static void executionStarted(Task task, Set<Long> involvedUsers) {
-        Map<Long, CTUser> usersMap = UsersAPI.getUsersMap(involvedUsers.toArray(new Long[0]));
-        for (Long userId : involvedUsers) {
-            CTUser user = usersMap.get(userId);
-            if (user.getNotifications().isExecuteTask()) {
-                sendMail(user.getEmail(), "Task '" + task.getTitle() + "' is being executed",
-                        "Hello!\n\rLet as inform you that task " + task.getTitle() + " is being executed\n\r" +
-                                "Here is direct link to the task " + Util.taskLink(task.getId()) +
-                                "\n\n\rMessage from task owner: " + task.getExecuteMessage() +
-                                "\n\r\n\nHave a nice day", "", null);
-            }
-        }
-    }
-
     public static void taskFinalized(Task task, Set<Long> involvedUsers) {
         Map<Long, CTUser> usersMap = UsersAPI.getUsersMap(involvedUsers.toArray(new Long[0]));
         for (Long userId : involvedUsers) {
@@ -149,8 +135,8 @@ public final class NotificationsSender {
     }
 
     public static void commentOnTaskIParticipate(Task task, Long lastCommenterId) {
-        Map<Long, CTUser> usersMap = UsersAPI.getUsersMap(task.getInvolvedUsers().toArray(new Long[0]));
-        List<String> partialDevices = new ArrayList();
+        Map<Long, CTUser> usersMap = UsersAPI.getUsersMap(task.getInvolvedUsers().toArray(new Long[task.getInvolvedUsers().size()]));
+        List<String> partialDevices = new ArrayList<>();
 
         String message = "A new comment on the task '" + task.getTitle() + "'.";
 
@@ -180,7 +166,7 @@ public final class NotificationsSender {
 
     public static void meetingIsReadyToBeSigned(Meeting meeting) {
         String message = "The meeting minutes are ready to be signed.";
-        List<String> partialDevices = new ArrayList();
+        List<String> partialDevices = new ArrayList<>();
         CTUser organizer = meeting.getOrganizer();
         Set<Ref<CTUser>> users = meeting.getUsers();
         users.add(Ref.create(Key.create(CTUser.class, organizer.getId())));
