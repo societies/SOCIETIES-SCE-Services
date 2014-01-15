@@ -104,7 +104,7 @@ public final class NotificationsSender {
     }
 
     public static void taskFinalized(Task task, Set<Long> involvedUsers) {
-        Map<Long, CTUser> usersMap = UsersAPI.getUsersMap(involvedUsers.toArray(new Long[0]));
+        Map<Long, CTUser> usersMap = UsersAPI.getUsersMap(involvedUsers.toArray(new Long[involvedUsers.size()]));
         for (Long userId : involvedUsers) {
             CTUser user = usersMap.get(userId);
             if (user.getNotifications().isFinalizeTask()) {
