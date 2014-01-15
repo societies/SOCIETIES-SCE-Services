@@ -170,7 +170,6 @@ public class CSController extends HttpServlet {
         log.warning("You are not a member of this community!");
         response.setContentType("text/html");
         response.getWriter().write("You are not a member of this community!");
-        return;
     }
 
     private void sendFirstScreen(HttpServletResponse response) throws IOException {

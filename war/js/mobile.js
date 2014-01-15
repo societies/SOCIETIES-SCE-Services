@@ -674,7 +674,6 @@ var CrowdTaskingApp = function () {
                 }
                 else {
                     history.back();
-                    return;
                 }
             }
             else {
