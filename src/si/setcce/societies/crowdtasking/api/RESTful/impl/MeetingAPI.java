@@ -24,6 +24,8 @@
  */
 package si.setcce.societies.crowdtasking.api.RESTful.impl;
 
+// TeamCity test
+
 import com.google.gson.Gson;
 import com.googlecode.objectify.Key;
 import si.setcce.societies.crowdtasking.NotificationsSender;
@@ -74,8 +76,7 @@ public class MeetingAPI implements IMeetingAPI {
             }
             Gson gson = new Gson();
             // get meeting
-            Meeting meeting = null;
-            meeting = MeetingDAO.loadMeeting(meetingId);
+            Meeting meeting = MeetingDAO.loadMeeting(meetingId);
             return gson.toJson(new MeetingJS(meeting));
         }
         if ("communitysign".equalsIgnoreCase(querytype)) {
@@ -245,7 +246,7 @@ public class MeetingAPI implements IMeetingAPI {
     }
 
     private List<String> getDeviceRegId(CollaborativeSign collaborativeSign) {
-        List<String> devices = new ArrayList();
+        List<String> devices = new ArrayList<>();
         devices.add(collaborativeSign.getGcmRegistrationId());
         return devices;
     }
