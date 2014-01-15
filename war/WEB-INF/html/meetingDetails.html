@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no">
+    {{ head }}
+</head>
+<body>
+<div data-role="page" id="meetingDetails">
+    <div data-role="header" id="header" data-position="fixed" data-theme="b">
+        <a id='backButton' data-icon="back" data-rel="back">Back</a>
+
+        <h3 id='formTitle'>View meeting</h3>
+    </div>
+    <div data-role="content">
+        <div data-role="collapsible" data-collapsed="false" data-theme="a">
+            <h3>Meeting details</h3>
+            <table>
+                <tr>
+                    <td>Subject:</td>
+                    <td id="meetingSubject"></td>
+                </tr>
+                <tr>
+                    <td>Description:</td>
+                    <td id="meetingDescription"></td>
+                </tr>
+                <tr>
+                    <td>Collaborative space:</td>
+                    <td id="meetingCS"></td>
+                </tr>
+                <tr>
+                    <td>Created:</td>
+                    <td id="meetingCreated"></td>
+                </tr>
+                <tr>
+                    <td>Status:</td>
+                    <td id="meetingStatus">Not started yet.</td>
+                </tr>
+            </table>
+        </div>
+        <div>
+            <a href="" id='startOrAttendMeetingButton' data-role="button" data-inline="true" data-theme="a">Start</a>
+        </div>
+        <form action="" id="minutesForm">
+            <ul data-role="listview" id="commentList" data-inset="true" style='white-space:normal;'>
+                <li data-role="list-divider" role="heading">Minutes:</li>
+            </ul>
+        </form>
+        <form id="meetingDetailsForm">
+            <input type="hidden" name="meetingIdToSign" id="meetingIdToSign" value="">
+
+            <div data-role="fieldcontain" id="vwReply">
+                <TEXTAREA NAME="minute" id="minute"></TEXTAREA>
+                <a data-role="button" id="minuteButton" data-theme="a">Send to Collaborative table</a>
+            </div>
+        </form>
+        <a href="javascript:refreshOnShake()">refresh</a>
+    </div>
+</div>
+</body>
+</html>

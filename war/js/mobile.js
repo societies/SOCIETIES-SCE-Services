@@ -25,6 +25,8 @@ var CrowdTaskingApp = function () {
 
     var tasks = [];
     var currentTaskIndex = -1;
+    var taskMeetings = [];
+    var currentMeetingIndex = -1;
     var mode = 'new';
     var currentUser = null;
     var communities = [];
@@ -189,7 +191,7 @@ var CrowdTaskingApp = function () {
 
     var showComments = function (taskId, showOnlyCommentsForExecution) {
         console.log("showComments");
-        if (typeof(showOnlyCommentsForExecution) === 'undefined') showOnlyCommentsForExecution = false;
+//        if (typeof(showOnlyCommentsForExecution) === 'undefined') showOnlyCommentsForExecution = false;
 
         $("#comments").find("tr:gt(0)").remove();
         $.ajax({
@@ -225,8 +227,27 @@ var CrowdTaskingApp = function () {
         });
     };
 
+    var _postMinute = function () {
+        var form_data = $('#meetingDetailsForm').serialize();
+        $.ajax({
+            type: "POST",
+            url: "/rest/meeting/postMinute",
+            data: form_data,
+            error: function (error) {
+                toast(error.responseText);
+            },
+            success: function () {
+//                showComments($('#vwTaskId').val(), $('#commentForExecution').val());
+//                $('#vwComment').val('');
+            },
+            complete: function () {
+                $('#minuteButton').removeClass('ui-disabled');
+            }
+        });
+    };
+
     var postMeeting = function () {
-        var form_data = $('#meetingForm').serialize();
+        var form_data = $('#meetingDetailsForm').serialize();
         $.ajax({
             type: "POST",
             url: "/rest/meeting/create",
@@ -293,96 +314,122 @@ var CrowdTaskingApp = function () {
 
         $('#meetingDiv').show();
         $meetingList = $('#meetingList');
-        if (task.meetings == null || task.meetings.length == 0) {
+        if (task.meetings === undefined || task.meetings == null || task.meetings.length == 0) {
             $meetingList.hide();
             return;
         }
         else {
             $meetingList.show();
+            taskMeetings = task.meetings;
         }
         $meetingList.empty();
+
+        var createMeetingTapHandler = function (currentIndex) {
+            return function (event, data) {
+                CrowdTaskingApp.setCurrentMeeting(currentIndex);
+            };
+        };
+
         for (var i = 0; i < task.meetings.length; i++) {
             var miting = task.meetings[i];
             var organizer = miting.organizer == '' ? '' : ' organized by ' + miting.organizer;
             var meetingText = miting.subject + ' in ' + miting.cs.name + ' at ' + formatDate(miting.startTime) + organizer;
+            var editLink = $('<a style="white-space:normal;" href="/meeting/view">' + meetingText + '</a>');
+            editLink.bind('tap', createMeetingTapHandler(i));
+            var newLi = $('<li>');
+            newLi.append(editLink);
+            $meetingList.append(newLi);
+//            $meetingList.append($('<li><a style="white-space:normal;" href="/meeting/view">' + meetingText + '</a></li>'));
 
-            if (typeof(android) !== "undefined") {
-                $meetingList.append($('<li><a style="white-space:normal;" href="/android/meeting/' + miting.id + '" data-ajax="false">' + meetingText + '</a></li>'));
-            }
-            else {
-                $meetingList.append($('<li style="white-space:normal;">' + meetingText + '</li>'));
-            }
+            /*
+             if (typeof(android) !== "undefined") {
+             $meetingList.append($('<li><a style="white-space:normal;" href="/android/meeting/' + miting.id + '" data-ajax="false">' + meetingText + '</a></li>'));
+             }
+             else {
+             $meetingList.append($('<li style="white-space:normal;">' + meetingText + '</li>'));
+             }
+             */
         }
         $meetingList.listview('refresh', true);
     };
 
     var displayComments = function (comments) {
-        if (mode === 'execute') {
-            var commentsDiv = $('#commentsDiv');
+        /*        if (mode === 'execute') {
+         var commentsDiv = $('#commentsDiv');
+         for (var i = 0; i < comments.length; i++) {
+         var comment = comments[i];
+         var newDiv = $('<div>');
+         newDiv.append('<input type="checkbox" name="activeComments" value="' + comment.id + '" id="' + comment.id + '" class="custom">');
+         newDiv.append('<label style="width:100%;" for="' + comment.id + '" data-corners="true" data-shadow="false" data-iconshadow="true"' +
+         'data-icon="checkbox-off" data-theme="c">' +
+         comment.commentText + '<br><span style="font-weight:normal">by ' + comment.postedBy + '</span></label>');
+         commentsDiv.append(newDiv);
+         }
+         $("#commentsFieldset").fieldcontain();
+         $("input[type='checkbox']").checkboxradio();
+         }
+         else {*/
+        var list = $('#commentList');
+        list.empty();
+
+        if (comments.length > 0) {
+            $("#commentList").append('<li data-role="list-divider" role="heading">Comments:</li>');
+            var task = tasks[currentTaskIndex];
+            if (task.status == 'IN_PROGRESS' && task.myTask == true) {
+                $("a.rightHeaderButton").eq(0).show();	// show finalize button
+            }
+            /*
+             if (task.status == 'OPEN' && task.myTask == true) {
+             $("a.rightHeaderButton").hide().eq(0).show();	// show execute button
+             }
+             */
             for (var i = 0; i < comments.length; i++) {
                 var comment = comments[i];
-                var newDiv = $('<div>');
-                newDiv.append('<input type="checkbox" name="activeComments" value="' + comment.id + '" id="' + comment.id + '" class="custom">');
-                newDiv.append('<label style="width:100%;" for="' + comment.id + '" data-corners="true" data-shadow="false" data-iconshadow="true"' +
-                    'data-icon="checkbox-off" data-theme="c">' +
-                    comment.commentText + '<br><span style="font-weight:normal">by ' + comment.postedBy + '</span></label>');
-                commentsDiv.append(newDiv);
-            }
-            $("#commentsFieldset").fieldcontain();
-            $("input[type='checkbox']").checkboxradio();
-        }
-        else {
-            var list = $('#commentList');
-            list.empty();
+                var newLi = $('<li data-role="fieldcontain">');
 
-            if (comments.length > 0) {
-                $("#commentList").append('<li data-role="list-divider" role="heading">Comments:</li>');
-                var task = tasks[currentTaskIndex];
-                if (task.status == 'IN_PROGRESS' && task.myTask == true) {
-                    $("a.rightHeaderButton").eq(0).show();	// show finalize button
+
+                //URLs starting with http://, https://, or ftp://
+                replacePattern = /(\b(https?|ftp):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/gim;
+                var newCommentText = comment.commentText.replace(replacePattern, '<a href="$1" target="_blank">$1</a>');
+
+                newLi.append('<h3 style="white-space:normal;">' + newCommentText + '</h3>');
+                newLi.append('<p style="white-space:normal;">' + comment.postedBy + '<img class="' + comment.trustLevel + '" src="/images/img_trans.gif" width="1" height="1" /> (' + formatDate(comment.posted) + ')</p>');
+                var picUrl = comment.picUrl;
+                if (picUrl == undefined) {
+                    picUrl = '/images/pic' + (Math.floor(Math.random() * 4) + 1) + '.png';
                 }
-                /*
-                 if (task.status == 'OPEN' && task.myTask == true) {
-                 $("a.rightHeaderButton").hide().eq(0).show();	// show execute button
-                 }
-                 */
-                for (var i = 0; i < comments.length; i++) {
-                    var comment = comments[i];
-                    var newLi = $('<li data-role="fieldcontain">');
-
-
-                    //URLs starting with http://, https://, or ftp://
-                    replacePattern = /(\b(https?|ftp):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/gim;
-                    var newCommentText = comment.commentText.replace(replacePattern, '<a href="$1" target="_blank">$1</a>');
-
-                    newLi.append('<h3 style="white-space:normal;">' + newCommentText + '</h3>');
-                    newLi.append('<p style="white-space:normal;">' + comment.postedBy + '<img class="' + comment.trustLevel + '" src="/images/img_trans.gif" width="1" height="1" /> (' + formatDate(comment.posted) + ')</p>');
-                    var picUrl = comment.picUrl;
-                    if (picUrl == undefined) {
-                        picUrl = '/images/pic' + (Math.floor(Math.random() * 4) + 1) + '.png';
-                    }
-                    newLi.append('<img src="' + picUrl + '" class="ui-li-icon" style="left:12px; top:34px;">');
-                    //newLi.append('<img src="/images/pic'+(Math.floor(Math.random()*4)+1)+'.png" class="ui-li-icon" style="left:12px; top:34px;">');
-                    if (!comment.myComment) {
-                        var selectedOff = !comment.liked ? 'selected' : '';
-                        var selectedOn = comment.liked ? 'selected' : '';
-                        newLi.append(' \
+                newLi.append('<img src="' + picUrl + '" class="ui-li-icon" style="left:12px; top:34px;">');
+                //newLi.append('<img src="/images/pic'+(Math.floor(Math.random()*4)+1)+'.png" class="ui-li-icon" style="left:12px; top:34px;">');
+                if (!comment.myComment) {
+                    var selectedOff = !comment.liked ? 'selected' : '';
+                    var selectedOn = comment.liked ? 'selected' : '';
+                    newLi.append(' \
 		            		<select name="slider" id="slider' + i + '" data-role="slider"> \
 								<option value="off-' + comment.id + '" ' + selectedOff + '>Like</option> \
 								<option value="on-' + comment.id + '" ' + selectedOn + '>Liked</option> \
 							</select> \
 				        ');
-                    }
-                    list.append(newLi);
-                    $('#slider' + i).slider();
-                    $('#slider' + i).on("change", function (event, ui) {
-                        event.preventDefault();
-                        postCommentsLikes();
-                    });
                 }
+                list.append(newLi);
+                $('#slider' + i).slider();
+                $('#slider' + i).on("change", function (event, ui) {
+                    event.preventDefault();
+                    postCommentsLikes();
+                });
             }
-            list.listview('refresh', true);
         }
+        list.listview('refresh', true);
+//        }
+    };
+
+    var showMeetingDetails = function () {
+        var meeting = taskMeetings[currentMeetingIndex];
+        $('#meetingIdToSign').val(meeting.id);
+        $('#meetingSubject').text(meeting.subject);
+        $('#meetingDescription').text(meeting.description);
+        $('#meetingCS').text(meeting.cs.name);
+        $('#meetingCreated').text(meeting.organizer);
+
     };
 
     var fillForm = function () {
@@ -401,35 +448,18 @@ var CrowdTaskingApp = function () {
             //desc = $('#taskDescription').val();
             $('#taskTags').text(task.tags);
         }
-        else {	// view, execute task
-            // ui-title
-            //var title = $('#formTitle').text();
-            var tazkId = $('#vwTaskId').val();
-            /*
-             if (mode === 'execute') {
-             form_data= $('#executeTaskForm').serialize();
-             }
-             */
+        else {	// view task
             $('#vwTaskId').val(task.id);	// post comment form
             $('#taskId').val(task.id);	    // new meeting form
-            /*
-             if (task.status === 'inprogress') {
-             $('#formTitle').text("Task's execution");
-             $("a.rightHeaderButton").hide();	// hide execute & finalize buttons
-             }
-             */
             hideLikeTaskButton();
             hideLikedTaskButton();
             if (task.status === 'FINISHED') {
                 $("#finalizeButton").hide();
-            }
-            if (task.status !== 'FINISHED') {
-                $('#vwReply').show();
-            }
-            else {
                 $('#vwReply').hide();
             }
-//            if (task.status === "OPEN") {
+            else {
+                $('#vwReply').show();
+            }
             if (task.status === "IN_PROGRESS") {
 //                $('#viewTaskDialog').dialog('option', 'title', 'View task and reply');
                 if (!task.myTask) {
@@ -438,10 +468,9 @@ var CrowdTaskingApp = function () {
             }
             $('#taskName').text(task.title);
             $('#taskDescription').text(task.description);
-            var d1 = new Date(task.created);
-            $('#taskCreated').text(d1.getDate() + "." + (d1.getMonth() + 1) + "." + d1.getFullYear());
+            var dateCreated = new Date(task.created);
+            $('#taskCreated').text(dateCreated.getDate() + "." + (dateCreated.getMonth() + 1) + "." + dateCreated.getFullYear());
 
-            //var communities = [];
             var communitiesText = "";
             if (task.communities !== undefined) {
                 var communities = task.communities;
@@ -461,8 +490,6 @@ var CrowdTaskingApp = function () {
             $('#taskCommunities').text(communitiesText);
             $('#taskTags').text(task.tags);
 
-            //$('#commentForExecution').val(task.status == 'IN_PROGRESS' || task.status == 'FINISHED');
-
             $spaces = $('#meetingCS');
             $spaces.empty();
             if (task.spaces.length > 0) {
@@ -470,7 +497,6 @@ var CrowdTaskingApp = function () {
                     if (task.spaces[i] === undefined || task.spaces[i] === null) continue;
                     var spaceId = task.spaces[i].id;
                     var spaceName = task.spaces[i].name;
-                    //$meetingCS.append('<option value='+task.spaces[i].id+'>'+task.spaces[i].name+'</option>');
                     $spaces.append('<option value=' + spaceId + '>' + spaceName + '</option>');
                 }
             }
@@ -660,6 +686,10 @@ var CrowdTaskingApp = function () {
             getTaskById(id);
         },
 
+        displayMeeting: function () {
+            showMeetingDetails();
+        },
+
         saveTask: function () {
             var ctCommunities = $("#ctCommunities option:selected");
 //            var societiesCommunities = $("#societiesCommunities option:selected");
@@ -715,8 +745,16 @@ var CrowdTaskingApp = function () {
             _postComment();
         },
 
+        postMinute: function () {
+            _postMinute();
+        },
+
         setCurrentTask: function (index) {
             currentTaskIndex = index;
+        },
+
+        setCurrentMeeting: function (index) {
+            currentMeetingIndex = index;
         },
 
         setCurrentTaskById: function (id) {
@@ -1176,18 +1214,34 @@ $(document).on('pageinit', '#viewTask', function (event, data) {
     $("#taskEnd").scroller({preset: 'datetime', dateFormat: 'dd.mm.yyyy', timeFormat: 'HH:ii', dateOrder: 'ddmmyy', timeWheels: 'HHii'});
 });
 
-$(document).on('pageshow', '#executeTask', function (event, data) {
-    CrowdTaskingApp.displayTask('execute');
+/*
+ $(document).on('pageshow', '#executeTask', function (event, data) {
+ CrowdTaskingApp.displayTask('execute');
+ });
+
+ $(document).on('pageinit', '#executeTask', function (event, data) {
+ refreshFunction = null;
+ console.log("refreshFunction = null ('pageinit', '#executeTask')");
+ $('#executeButton').bind('tap', function (event, data) {
+ event.preventDefault();
+ $('#executeButton').hide();
+ CrowdTaskingApp.executeTask();
+ });
+ });
+ */
+
+$(document).on('pageinit', '#meetingDetails', function (event, data) {
+    $('#minuteButton').bind('tap', function (event, data) {
+        event.preventDefault();
+        $('#minuteButton').addClass('ui-disabled');
+        CrowdTaskingApp.postMinute();
+    });
 });
 
-$(document).on('pageinit', '#executeTask', function (event, data) {
-    refreshFunction = null;
-    console.log("refreshFunction = null ('pageinit', '#executeTask')");
-    $('#executeButton').bind('tap', function (event, data) {
-        event.preventDefault();
-        $('#executeButton').hide();
-        CrowdTaskingApp.executeTask();
-    });
+$(document).on('pageshow', '#meetingDetails', function (event, data) {
+    refreshFunction = CrowdTaskingApp.displayMeeting;
+    console.log("refreshFunction = CrowdTaskingApp.displayMeeting");
+    CrowdTaskingApp.displayMeeting();
 });
 
 $(document).on('pageinit', '#settingsPage', function (event, data) {
