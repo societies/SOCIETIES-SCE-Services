@@ -14,7 +14,6 @@ import javax.ws.rs.core.Response;
  * User: juresas
  * Date: 22.10.2013
  * Time: 12:25
- * To change this template use File | Settings | File Templates.
  */
 @Path("/gcm")
 public class GcmRegistrationAPI {

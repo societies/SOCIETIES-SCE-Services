@@ -162,18 +162,16 @@ public class Meeting {
             return null;
         }
 
-        CTUser user = null;
-        if (organizerRef != null) {
-            try {
-                user = organizerRef.get();
-            } catch (Exception e) {
-                System.out.println("Error in getUser() in Meeting class: " + e.getMessage());
-                user = UsersAPI.getUser(organizerRef);
-                if (user != null) {
-                    System.out.println("Got user from UsersAPI instead");
-                } else {
-                    System.out.println("Error! Didn't get user (organizer).");
-                }
+        CTUser user;
+        try {
+            user = organizerRef.get();
+        } catch (Exception e) {
+            System.out.println("Error in getUser() in Meeting class: " + e.getMessage());
+            user = UsersAPI.getUser(organizerRef);
+            if (user != null) {
+                System.out.println("Got user from UsersAPI instead");
+            } else {
+                System.out.println("Error! Didn't get user (organizer).");
             }
         }
         return user;
