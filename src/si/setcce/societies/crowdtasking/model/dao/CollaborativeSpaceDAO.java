@@ -27,7 +27,6 @@ package si.setcce.societies.crowdtasking.model.dao;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.NotFoundException;
 import com.googlecode.objectify.Ref;
-import com.googlecode.objectify.cmd.Query;
 import si.setcce.societies.crowdtasking.model.CTUser;
 import si.setcce.societies.crowdtasking.model.CollaborativeSpace;
 import si.setcce.societies.crowdtasking.model.Community;
@@ -51,13 +50,13 @@ public final class CollaborativeSpaceDAO {
         CollaborativeSpace cs = null;
         try {
             Object obj = ofy().load().type(CollaborativeSpace.class).id(id).get();
-            if (obj instanceof CollaborativeSpace) {
+            if (obj != null) {
                 cs = (CollaborativeSpace) obj;
             } else {
                 ofy().clear();
                 cs = ofy().load().type(CollaborativeSpace.class).id(id).get();
             }
-        } catch (NotFoundException e) {
+        } catch (NotFoundException ignored) {
         }
         return cs;
     }
@@ -66,6 +65,7 @@ public final class CollaborativeSpaceDAO {
         return ofy().load().ref(csRef).get();
     }
 
+/*
     public static Query<CollaborativeSpace> loadCollaborativeSpaces() {
         return ofy().load().type(CollaborativeSpace.class);
     }
@@ -73,6 +73,7 @@ public final class CollaborativeSpaceDAO {
     public static Query<CollaborativeSpace> loadCollaborativeSpaces(int limit) {
         return ofy().load().type(CollaborativeSpace.class).limit(limit);
     }
+*/
 
     public static Key<CollaborativeSpace> save(CollaborativeSpace cs) {
         return ofy().save().entity(cs).now();

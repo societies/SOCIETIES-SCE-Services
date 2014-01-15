@@ -23,8 +23,6 @@ import javax.ws.rs.core.Response.Status;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
 import static si.setcce.societies.crowdtasking.model.dao.OfyService.ofy;
 
@@ -35,10 +33,9 @@ public class CommentAPI implements ICommentAPI {
     @GET
     @Produces({MediaType.APPLICATION_JSON})
     public String getComment(@QueryParam("taskId") Long taskId,
-                             @DefaultValue("false") @QueryParam("execution") boolean execution,
                              @Context HttpServletRequest request) {
 
-        ArrayList<CommentJS> list = new ArrayList<CommentJS>();
+        ArrayList<CommentJS> list = new ArrayList<>();
         Gson gson = new Gson();
 
         if (taskId == null) {
@@ -46,11 +43,8 @@ public class CommentAPI implements ICommentAPI {
         }
 
         Query<Comment> q;
-        if (execution) {
-            q = ofy().load().type(Comment.class).filter("taskRef", Ref.create(Key.create(Task.class, taskId))).filter("execution", true).order("posted");
-        } else {
-            q = ofy().load().type(Comment.class).filter("taskRef", Ref.create(Key.create(Task.class, taskId))).order("posted");
-        }
+        // get comments for task
+        q = ofy().load().type(Comment.class).filter("taskRef", Ref.create(Key.create(Task.class, taskId))).order("posted");
         CTUser user = UsersAPI.getLoggedInUser(request.getSession());
         for (Comment comment : q) {
             CommentJS commentJS = new CommentJS(comment, user);
@@ -89,7 +83,7 @@ public class CommentAPI implements ICommentAPI {
         TaskDao.save(task);
 
         EventAPI.logTaskComment(taskId, commentId, comment.getPosted(), user);
-        Map<Long, CTUser> usersMap = UsersAPI.getUsersMap(task.getInvolvedUsers().toArray(new Long[0]));
+//        Map<Long, CTUser> usersMap = UsersAPI.getUsersMap(task.getInvolvedUsers().toArray(new Long[task.getInvolvedUsers().size()]));
         NotificationsSender.commentOnTaskIParticipate(comment.getTask(), user.getId());
         return Response.ok().build();
     }
@@ -98,6 +92,7 @@ public class CommentAPI implements ICommentAPI {
         return ofy().save().entity(comment).now().getId();
     }
 
+/*
     public static void saveComments(List<Comment> comments) {
         ofy().save().entities(comments);
     }
@@ -115,6 +110,7 @@ public class CommentAPI implements ICommentAPI {
     public static Query<Comment> getComments() {
         return ofy().load().type(Comment.class);
     }
+*/
 
     public static void changeCommentScore(Long commentId, int change) {
         Comment comment = getCommentById(commentId);
@@ -132,16 +128,13 @@ public class CommentAPI implements ICommentAPI {
         Comment comment = null;
         try {
             comment = ofy().load().type(Comment.class).id(id).get();
-        } catch (NotFoundException e) {
+        } catch (NotFoundException ignored) {
+
         }
         return comment;
     }
 
     public static Query<Comment> findCommentsByUser(Long userId) {
         return ofy().load().type(Comment.class).filter("owner", userId);
-    }
-
-    public static Query<Comment> getExecutionComments(Long taskId) {
-        return ofy().load().type(Comment.class).filter("taskRef", Ref.create(Key.create(Task.class, taskId))).filter("execution", true);
     }
 }

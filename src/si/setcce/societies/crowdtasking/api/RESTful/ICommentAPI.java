@@ -16,7 +16,6 @@ public interface ICommentAPI {
     @GET
     @Produces({MediaType.APPLICATION_JSON})
     String getComment(@QueryParam("taskId") Long taskId,
-                      @DefaultValue("false") @QueryParam("execution") boolean execution,
                       @Context HttpServletRequest request);
 
     @POST
