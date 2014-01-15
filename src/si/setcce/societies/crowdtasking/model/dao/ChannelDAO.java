@@ -29,8 +29,6 @@ import com.googlecode.objectify.NotFoundException;
 import com.googlecode.objectify.Ref;
 import si.setcce.societies.crowdtasking.model.Channel;
 
-import java.util.List;
-
 import static si.setcce.societies.crowdtasking.model.dao.OfyService.ofy;
 
 /**
@@ -46,13 +44,13 @@ public final class ChannelDAO {
         Channel cs = null;
         try {
             Object obj = ofy().load().type(Channel.class).id(id).get();
-            if (obj instanceof Channel) {
+            if (obj != null) {
                 cs = (Channel) obj;
             } else {
                 ofy().clear();
                 cs = ofy().load().type(Channel.class).id(id).get();
             }
-        } catch (NotFoundException e) {
+        } catch (NotFoundException ignored) {
         }
         return cs;
     }
@@ -69,6 +67,7 @@ public final class ChannelDAO {
         ofy().delete().type(Channel.class).id(id).now();
     }
 
+/*
     public static List<Channel> loadChannels() {
         return ofy().load().type(Channel.class).list();
     }
@@ -76,6 +75,7 @@ public final class ChannelDAO {
     public static List<Channel> loadChannels(int limit) {
         return ofy().load().type(Channel.class).limit(limit).list();
     }
+*/
 
     public static Channel save(Channel cs) {
         Key<Channel> key = ofy().save().entity(cs).now();
