@@ -117,7 +117,7 @@ public class UsersAPI implements IUsersAPI {
             return gson.toJson(getTopUsers(limit));
         }
         if ("all".equalsIgnoreCase(querytype)) {
-            List<UserJS> usersJS = new ArrayList<UserJS>();
+            List<UserJS> usersJS = new ArrayList<>();
             for (CTUser userCT : getUsers()) {
                 usersJS.add(new UserJS(userCT, user.getId()));
             }
@@ -171,7 +171,7 @@ public class UsersAPI implements IUsersAPI {
             if (authenticatedUser == null) {*/
             return Response.status(Status.UNAUTHORIZED).entity("Not authorized.").type("text/plain").build();
             /*}
-			// register
+            // register
 			user = new CTUser(authenticatedUser);*/
         }
         if ("profile".equalsIgnoreCase(querytype)) {
@@ -187,7 +187,6 @@ public class UsersAPI implements IUsersAPI {
             user.setLastLogin(new Date());
             saveUser(user);
             HttpSession session = request.getSession();
-//            System.out.println(session.getAttribute("loggedIn"));
             // registered user
             if (session.getAttribute("CTUserId") == null) {
                 session.setAttribute("CTUserId", user.getId());
@@ -236,10 +235,7 @@ public class UsersAPI implements IUsersAPI {
         if (value == null) {
             return false;
         }
-        if ("on".equalsIgnoreCase(value)) {
-            return true;
-        }
-        return false;
+        return "on".equalsIgnoreCase(value);
     }
 
     public static void saveUser(CTUser user) {
