@@ -26,15 +26,13 @@ package si.setcce.societies.crowdtasking.model;
 
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.Ref;
-import com.googlecode.objectify.annotation.Entity;
-import com.googlecode.objectify.annotation.Id;
-import com.googlecode.objectify.annotation.Index;
-import com.googlecode.objectify.annotation.Load;
+import com.googlecode.objectify.annotation.*;
 import si.setcce.societies.crowdtasking.api.RESTful.impl.UsersAPI;
 import si.setcce.societies.crowdtasking.model.dao.CollaborativeSpaceDAO;
 
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -42,6 +40,13 @@ import java.util.Set;
  *
  * @author Simon Jureša
  */
+
+@Embed
+class MeetingMinute {
+    public Date timestamp;
+    public String minute;
+}
+
 @Entity
 public class Meeting {
     @Id
@@ -54,10 +59,13 @@ public class Meeting {
     @Index
     private Date startTime;
     private Date endTime, created;
-    private Set<Ref<CTUser>> users;
+    private Set<Ref<CTUser>> invitedUser;
     @Load
     private Ref<CTUser> organizerRef;
-    String downloadUrl;
+    private String downloadUrl;
+    private MeetingStatus meetingStatus = MeetingStatus.CREATED;
+    private List<MeetingMinute> meetingMinutes;
+    private List<CTUser> attendes;
 
     public Meeting() {
     }
@@ -73,9 +81,9 @@ public class Meeting {
         this.startTime = startTime;
         this.endTime = endTime;
         this.created = new Date();
-        this.users = new HashSet<>();
+        this.invitedUser = new HashSet<>();
         for (Long userId : userIds) {
-            users.add(Ref.create(Key.create(CTUser.class, userId)));
+            invitedUser.add(Ref.create(Key.create(CTUser.class, userId)));
         }
     }
 
@@ -137,12 +145,12 @@ public class Meeting {
         this.endTime = endTime;
     }
 
-    public Set<Ref<CTUser>> getUsers() {
-        return users;
+    public Set<Ref<CTUser>> getInvitedUser() {
+        return invitedUser;
     }
 
-    public void setUsers(Set<Ref<CTUser>> users) {
-        this.users = users;
+    public void setInvitedUser(Set<Ref<CTUser>> invitedUser) {
+        this.invitedUser = invitedUser;
     }
 
     public Long getId() {
@@ -183,5 +191,29 @@ public class Meeting {
 
     public void setDownloadUrl(String downloadUrl) {
         this.downloadUrl = downloadUrl;
+    }
+
+    public MeetingStatus getMeetingStatus() {
+        return meetingStatus;
+    }
+
+    public void setMeetingStatus(MeetingStatus meetingStatus) {
+        this.meetingStatus = meetingStatus;
+    }
+
+    public List<MeetingMinute> getMeetingMinutes() {
+        return meetingMinutes;
+    }
+
+    public void setMeetingMinutes(List<MeetingMinute> meetingMinutes) {
+        this.meetingMinutes = meetingMinutes;
+    }
+
+    public List<CTUser> getAttendes() {
+        return attendes;
+    }
+
+    public void setAttendes(List<CTUser> attendes) {
+        this.attendes = attendes;
     }
 }

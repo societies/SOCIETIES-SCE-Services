@@ -31,6 +31,15 @@
     <orderEntry type="library" scope="PROVIDED" name="AppEngineAPI" level="application" />
     <orderEntry type="library" scope="PROVIDED" name="AppEngineDev" level="application" />
     <orderEntry type="library" name="json-simple-1.1.1" level="project" />
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$APPLICATION_HOME_DIR$/lib/junit-4.10.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
   </component>
 </module>
 

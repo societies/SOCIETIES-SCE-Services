@@ -13,7 +13,6 @@ import java.util.List;
  * User: juresas
  * Date: 29.10.2013
  * Time: 9:14
- * To change this template use File | Settings | File Templates.
  */
 public class MeetingDetails4CSignJS extends MeetingJS {
     public List<UserJS> users;
@@ -21,7 +20,7 @@ public class MeetingDetails4CSignJS extends MeetingJS {
     public MeetingDetails4CSignJS(Meeting meeting) {
         super(meeting);
         users = new ArrayList<>();
-        for (Ref<CTUser> ctUserRef : meeting.getUsers()) {
+        for (Ref<CTUser> ctUserRef : meeting.getInvitedUser()) {
             CTUser ctUser = UsersAPI.getUser(ctUserRef);
             users.add(new UserJS(ctUser, 0L));
         }
