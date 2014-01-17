@@ -36,10 +36,7 @@ import si.setcce.societies.crowdtasking.api.RESTful.json.TaskJS;
 import si.setcce.societies.crowdtasking.api.RESTful.json.UserJS;
 import si.setcce.societies.crowdtasking.gcm.GcmMessage;
 import si.setcce.societies.crowdtasking.gcm.Parameters;
-import si.setcce.societies.crowdtasking.model.CTUser;
-import si.setcce.societies.crowdtasking.model.CollaborativeSign;
-import si.setcce.societies.crowdtasking.model.Meeting;
-import si.setcce.societies.crowdtasking.model.Task;
+import si.setcce.societies.crowdtasking.model.*;
 import si.setcce.societies.crowdtasking.model.dao.MeetingDAO;
 import si.setcce.societies.crowdtasking.model.dao.TaskDao;
 
@@ -136,6 +133,41 @@ public class MeetingAPI implements IMeetingAPI {
         Long meetingIdToSign;
         CTUser user = UsersAPI.getLoggedInUser(request.getSession());
 
+        if ("create".equalsIgnoreCase(querytype)) {
+            Task task = TaskDao.getTaskById(taskId);
+            DateFormat formatter = new SimpleDateFormat("dd.MM.yyyy HH:mm");
+            Date startTime;
+            try {
+                startTime = formatter.parse(taskStart);
+            } catch (ParseException e) {
+                return Response.status(Status.BAD_REQUEST).entity("Start time error.").type("text/plain").build();
+            }
+            if (startTime.before(new Date())) {
+                return Response.status(Status.BAD_REQUEST).entity("Start time is in the past.").type("text/plain").build();
+            }
+            Date endTime;
+            try {
+                endTime = formatter.parse(taskEnd);
+            } catch (ParseException e) {
+                return Response.status(Status.BAD_REQUEST).entity("End time error.").type("text/plain").build();
+            }
+            if (startTime.after(endTime)) {
+                return Response.status(Status.BAD_REQUEST).entity("Start time is after end time.").type("text/plain").build();
+            }
+
+            Meeting meeting = new Meeting(meetingSubject, meetingDescription, csId, startTime, endTime, user, task.getInvolvedUsers());
+            Key<Meeting> meetingKey = MeetingDAO.saveMeeting(meeting);
+            task.addMeeting(meetingKey);
+            TaskDao.save(task);
+            NotificationsSender.newMeeting(meeting, task);
+            TaskDao.setTransientTaskParams(user, task);
+            EventAPI.logNewMeeting(task, meeting, new Date(), user);
+            // because of Ref<?> value has not been initialized
+            task = TaskDao.getTaskById(task.getId());
+            Gson gson = new Gson();
+            return Response.ok().entity(gson.toJson(new TaskJS(task, user))).build();
+        }
+
         try {
             meetingIdToSign = Long.parseLong(meetingIdToSignStr);
         } catch (Exception e) {
@@ -151,40 +183,6 @@ public class MeetingAPI implements IMeetingAPI {
                 return postMinute(meetingIdToSign, user, minute);
         }
 
-        if ("create".equalsIgnoreCase(querytype)) {
-            Task task = TaskDao.getTaskById(taskId);
-            DateFormat formatter = new SimpleDateFormat("dd.MM.yyyy HH:mm");
-            Date startTime;
-            try {
-                startTime = formatter.parse(taskStart);
-            } catch (ParseException e) {
-                return Response.status(Status.BAD_REQUEST).entity("Start time error.").type("text/plain").build();
-            }
-            if (startTime.before(new Date())) {
-                return Response.status(Status.BAD_REQUEST).entity("Strat time is in the past.").type("text/plain").build();
-            }
-            Date endTime;
-            try {
-                endTime = formatter.parse(taskEnd);
-            } catch (ParseException e) {
-                return Response.status(Status.BAD_REQUEST).entity("End time error.").type("text/plain").build();
-            }
-            if (startTime.after(endTime)) {
-                return Response.status(Status.BAD_REQUEST).entity("Strat time is after end time.").type("text/plain").build();
-            }
-
-            Meeting meeting = new Meeting(meetingSubject, meetingDescription, csId, startTime, endTime, user, task.getInvolvedUsers());
-            Key<Meeting> meetingKey = MeetingDAO.saveMeeting(meeting);
-            task.addMeeting(meetingKey);
-            TaskDao.save(task);
-            NotificationsSender.newMeeting(meeting, task);
-            TaskDao.setTransientTaskParams(user, task);
-            EventAPI.logNewMeeting(task, meeting, new Date(), user);
-            // because of Ref<?> value has not been initialized
-            task = TaskDao.getTaskById(task.getId());
-            Gson gson = new Gson();
-            return Response.ok().entity(gson.toJson(new TaskJS(task, user))).build();
-        }
         if ("communitysign".equalsIgnoreCase(querytype)) {
             Meeting meeting = MeetingDAO.loadMeeting(meetingIdToSign);
             if (meeting == null) {
@@ -203,20 +201,22 @@ public class MeetingAPI implements IMeetingAPI {
                 return Response.status(Status.BAD_REQUEST).entity("Wrong meeting id.").type("text/plain").build();
             }
             CollaborativeSign collaborativeSign = getCollaborativeSign();
-            if ("attend".equals(querytype)) {
+            if ("setActive".equals(querytype)) {
                 collaborativeSign.setMeetingId(meetingIdToSign);
                 setCollaborativeSign(collaborativeSign);
                 MeetingDetails4CSignJS meetingDetails = new MeetingDetails4CSignJS(meeting);
                 Gson gson = new Gson();
-                gson.toJson(meetingDetails);
                 Parameters parameters = new Parameters();
                 parameters.addParameter(GcmMessage.PARAMETER_ACTION, GcmMessage.ACTION_SET_MEETING);
                 parameters.addParameter(GcmMessage.PARAMETER_MESSAGE, "The meeting is set");
                 NotificationsSender.sendGCMMessage(getDeviceRegId(collaborativeSign), parameters.toString(), gson.toJson(meetingDetails), null);
-
+                meeting.setMeetingStatus(MeetingStatus.STARTED);
+                MeetingDAO.saveMeeting(meeting);
                 return Response.ok().entity("The meeting is set.").build();
             }
-            if ("setActive".equals(querytype)) {
+            if ("attend".equals(querytype)) {
+                meeting.addAttendee(user);
+                MeetingDAO.saveMeeting(meeting);
                 Parameters parameters = new Parameters();
                 parameters.addParameter(GcmMessage.PARAMETER_ACTION, GcmMessage.ACTION_CHECK_IN);
                 parameters.addParameter(GcmMessage.PARAMETER_MESSAGE, user.getUserName() + " is present on the meeting.");
@@ -234,6 +234,8 @@ public class MeetingAPI implements IMeetingAPI {
         if (meeting == null) {
             return Response.status(Status.BAD_REQUEST).entity("Wrong meeting id.").type("text/plain").build();
         }
+        meeting.addMinute(user, minute);
+        MeetingDAO.saveMeeting(meeting);
         CollaborativeSign collaborativeSign = getCollaborativeSign();
         Parameters parameters = new Parameters();
         parameters.addParameter(GcmMessage.PARAMETER_ACTION, GcmMessage.ACTION_MEETING_MINUTE);
@@ -242,7 +244,8 @@ public class MeetingAPI implements IMeetingAPI {
         parameters.addParameter(GcmMessage.PARAMETER_USERNAME, user.getUserName());
         parameters.addParameter(GcmMessage.PARAMETER_MEETING_MINUTE, minute);
         NotificationsSender.sendGCMMessage(getDeviceRegId(collaborativeSign), parameters.toString(), null, null);
-        return Response.ok().entity("The minute was sent to the Collaborative table.").build();
+        Gson gson = new Gson();
+        return Response.ok().entity(gson.toJson(new MeetingJS(meeting))).build();
     }
 
     private List<String> getDeviceRegId(CollaborativeSign collaborativeSign) {

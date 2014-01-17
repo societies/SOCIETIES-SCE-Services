@@ -61,12 +61,16 @@ var CrowdTaskingApp = function () {
         return false;
     };
 
-    var refreshTasks = function () {
+    var refreshTasks = function (successFn) {
         $.ajax({
             type: 'GET',
             url: '/rest/tasks/inmycommunities',
             success: function (allTasks) {
                 tasks = allTasks;
+                if (successFn !== undefined) {
+                    successFn();
+                }
+
             }
         });
     };
@@ -236,9 +240,9 @@ var CrowdTaskingApp = function () {
             error: function (error) {
                 toast(error.responseText);
             },
-            success: function () {
-//                showComments($('#vwTaskId').val(), $('#commentForExecution').val());
-//                $('#vwComment').val('');
+            success: function (meeting) {
+                displayMinutes(JSON.parse(meeting));
+                $('#minute').val('');
             },
             complete: function () {
                 $('#minuteButton').removeClass('ui-disabled');
@@ -246,8 +250,44 @@ var CrowdTaskingApp = function () {
         });
     };
 
-    var postMeeting = function () {
+    var _startMeeting = function () {
         var form_data = $('#meetingDetailsForm').serialize();
+        $.ajax({
+            type: "POST",
+            url: "/rest/meeting/setActive",
+            data: form_data,
+            error: function (error) {
+                toast(error.responseText);
+            },
+            success: function () {
+                $('#startMeetingButton').hide();
+                $('#attendMeetingButton').show();
+            },
+            complete: function () {
+                $('#startMeeting').removeClass('ui-disabled');
+            }
+        });
+    };
+
+    var _attendMeeting = function () {
+        var form_data = $('#meetingDetailsForm').serialize();
+        $.ajax({
+            type: "POST",
+            url: "/rest/meeting/attend",
+            data: form_data,
+            error: function (response) {
+                toast(response.responseText);
+                $('#attendMeetingButton').removeClass('ui-disabled');
+            },
+            success: function (response) {
+            },
+            complete: function () {
+            }
+        });
+    };
+
+    var postMeeting = function () {
+        var form_data = $('#meetingForm').serialize();
         $.ajax({
             type: "POST",
             url: "/rest/meeting/create",
@@ -354,21 +394,6 @@ var CrowdTaskingApp = function () {
     };
 
     var displayComments = function (comments) {
-        /*        if (mode === 'execute') {
-         var commentsDiv = $('#commentsDiv');
-         for (var i = 0; i < comments.length; i++) {
-         var comment = comments[i];
-         var newDiv = $('<div>');
-         newDiv.append('<input type="checkbox" name="activeComments" value="' + comment.id + '" id="' + comment.id + '" class="custom">');
-         newDiv.append('<label style="width:100%;" for="' + comment.id + '" data-corners="true" data-shadow="false" data-iconshadow="true"' +
-         'data-icon="checkbox-off" data-theme="c">' +
-         comment.commentText + '<br><span style="font-weight:normal">by ' + comment.postedBy + '</span></label>');
-         commentsDiv.append(newDiv);
-         }
-         $("#commentsFieldset").fieldcontain();
-         $("input[type='checkbox']").checkboxradio();
-         }
-         else {*/
         var list = $('#commentList');
         list.empty();
 
@@ -378,11 +403,6 @@ var CrowdTaskingApp = function () {
             if (task.status == 'IN_PROGRESS' && task.myTask == true) {
                 $("a.rightHeaderButton").eq(0).show();	// show finalize button
             }
-            /*
-             if (task.status == 'OPEN' && task.myTask == true) {
-             $("a.rightHeaderButton").hide().eq(0).show();	// show execute button
-             }
-             */
             for (var i = 0; i < comments.length; i++) {
                 var comment = comments[i];
                 var newLi = $('<li data-role="fieldcontain">');
@@ -422,14 +442,50 @@ var CrowdTaskingApp = function () {
 //        }
     };
 
+    function displayMinutes(meeting) {
+        var list = $('#minutesList');
+        list.empty();
+
+        var minutes = meeting.meetingMinutes;
+        if (minutes.length > 0) {
+            list.append('<li data-role="list-divider" role="heading">Minutes:</li>');
+            for (var i = 0; i < minutes.length; i++) {
+                var minute = minutes[i];
+                var newLi = $('<li data-role="fieldcontain">');
+
+                //URLs starting with http://, https://, or ftp://
+                replacePattern = /(\b(https?|ftp):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/gim;
+                var newMinuteText = minute.minute.replace(replacePattern, '<a href="$1" target="_blank">$1</a>');
+
+                newLi.append('<h3 style="white-space:normal;">' + newMinuteText + '</h3>');
+                newLi.append('<p style="white-space:normal;">' + minute.postedBy + formatDate(minute.timestamp) + ')</p>');
+//                var picUrl = comment.picUrl;
+//                if (picUrl == undefined) {
+                picUrl = '/images/pic' + (Math.floor(Math.random() * 4) + 1) + '.png';
+//                }
+                newLi.append('<img src="' + picUrl + '" class="ui-li-icon" style="left:12px; top:34px;">');
+                //newLi.append('<img src="/images/pic'+(Math.floor(Math.random()*4)+1)+'.png" class="ui-li-icon" style="left:12px; top:34px;">');
+                list.append(newLi);
+            }
+        }
+        list.listview('refresh', true);
+    }
+
     var showMeetingDetails = function () {
-        var meeting = taskMeetings[currentMeetingIndex];
+        var meeting = tasks[currentTaskIndex].meetings[currentMeetingIndex];
         $('#meetingIdToSign').val(meeting.id);
         $('#meetingSubject').text(meeting.subject);
         $('#meetingDescription').text(meeting.description);
         $('#meetingCS').text(meeting.cs.name);
         $('#meetingCreated').text(meeting.organizer);
 
+        if (meeting.meetingStatus === 'STARTED') {
+            $('#startMeetingButton').hide();
+            $('#attendMeetingButton').show();
+//            $('#attendMeetingButton').addClass('ui-disabled');
+            $('#meetingStatus').text('Started.');
+        }
+        displayMinutes(meeting);
     };
 
     var fillForm = function () {
@@ -689,6 +745,10 @@ var CrowdTaskingApp = function () {
             showMeetingDetails();
         },
 
+        refreshMeeting: function () {
+            refreshTasks(showMeetingDetails);
+        },
+
         saveTask: function () {
             var ctCommunities = $("#ctCommunities option:selected");
 //            var societiesCommunities = $("#societiesCommunities option:selected");
@@ -746,6 +806,14 @@ var CrowdTaskingApp = function () {
 
         postMinute: function () {
             _postMinute();
+        },
+
+        startMeeting: function () {
+            _startMeeting();
+        },
+
+        attendMeeting: function () {
+            _attendMeeting();
         },
 
         setCurrentTask: function (index) {
@@ -849,7 +917,7 @@ function postLike() {
         error: function () {
         },
         success: function () {
-            refreshTasks();
+            //refreshTasks();
         },
         complete: function () {
         }
@@ -1213,32 +1281,26 @@ $(document).on('pageinit', '#viewTask', function (event, data) {
     $("#taskEnd").scroller({preset: 'datetime', dateFormat: 'dd.mm.yyyy', timeFormat: 'HH:ii', dateOrder: 'ddmmyy', timeWheels: 'HHii'});
 });
 
-/*
- $(document).on('pageshow', '#executeTask', function (event, data) {
- CrowdTaskingApp.displayTask('execute');
- });
-
- $(document).on('pageinit', '#executeTask', function (event, data) {
- refreshFunction = null;
- console.log("refreshFunction = null ('pageinit', '#executeTask')");
- $('#executeButton').bind('tap', function (event, data) {
- event.preventDefault();
- $('#executeButton').hide();
- CrowdTaskingApp.executeTask();
- });
- });
- */
-
 $(document).on('pageinit', '#meetingDetails', function (event, data) {
+    refreshFunction = CrowdTaskingApp.refreshMeeting;
     $('#minuteButton').bind('tap', function (event, data) {
         event.preventDefault();
         $('#minuteButton').addClass('ui-disabled');
         CrowdTaskingApp.postMinute();
     });
+    $('#startMeetingButton').bind('tap', function (event, data) {
+        event.preventDefault();
+        $('#startMeetingButton').addClass('ui-disabled');
+        CrowdTaskingApp.startMeeting();
+    });
+    $('#attendMeetingButton').bind('tap', function (event, data) {
+        event.preventDefault();
+        $('#attendMeetingButton').addClass('ui-disabled');
+        CrowdTaskingApp.attendMeeting();
+    });
 });
 
 $(document).on('pageshow', '#meetingDetails', function (event, data) {
-    refreshFunction = CrowdTaskingApp.displayMeeting;
     console.log("refreshFunction = CrowdTaskingApp.displayMeeting");
     CrowdTaskingApp.displayMeeting();
 });

@@ -20,7 +20,7 @@ public class MeetingDetails4CSignJS extends MeetingJS {
     public MeetingDetails4CSignJS(Meeting meeting) {
         super(meeting);
         users = new ArrayList<>();
-        for (Ref<CTUser> ctUserRef : meeting.getInvitedUser()) {
+        for (Ref<CTUser> ctUserRef : meeting.getUsers()) {
             CTUser ctUser = UsersAPI.getUser(ctUserRef);
             users.add(new UserJS(ctUser, 0L));
         }

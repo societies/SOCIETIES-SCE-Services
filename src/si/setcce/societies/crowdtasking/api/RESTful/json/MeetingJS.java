@@ -26,10 +26,7 @@ package si.setcce.societies.crowdtasking.api.RESTful.json;
 
 import com.googlecode.objectify.Ref;
 import si.setcce.societies.crowdtasking.api.RESTful.impl.UsersAPI;
-import si.setcce.societies.crowdtasking.model.CTUser;
-import si.setcce.societies.crowdtasking.model.CollaborativeSpace;
-import si.setcce.societies.crowdtasking.model.Meeting;
-import si.setcce.societies.crowdtasking.model.MeetingStatus;
+import si.setcce.societies.crowdtasking.model.*;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -40,6 +37,18 @@ import java.util.List;
  *
  * @author Simon Jureša
  */
+class MeetingMinuteJs {
+    public Date timestamp;
+    public String postedBy;
+    public String minute;
+
+    MeetingMinuteJs(MeetingMinute minute) {
+        timestamp = new Date();
+        this.minute = minute.minute;
+        postedBy = UsersAPI.getUser(minute.userRef).getUserName();
+    }
+}
+
 @SuppressWarnings("unused")
 public class MeetingJS {
     private Long id;
@@ -52,6 +61,7 @@ public class MeetingJS {
     private String userStatus;
     private List<UserJS> attendees;
     public List<UserJS> invitedUser;
+    private List<MeetingMinuteJs> meetingMinutes;
 
     public MeetingJS(Meeting meeting, Long loggedInUserId) {
         init(meeting);
@@ -73,18 +83,28 @@ public class MeetingJS {
         this.created = meeting.getCreated();
         this.organizer = meeting.getOrganizer() == null ? "" : meeting.getOrganizer().getUserName();
         invitedUser = new ArrayList<>();
-        for (Ref<CTUser> ctUserRef : meeting.getInvitedUser()) {
+        this.meetingStatus = meeting.getMeetingStatus();
+        for (Ref<CTUser> ctUserRef : meeting.getUsers()) {
             CTUser ctUser = UsersAPI.getUser(ctUserRef);
             invitedUser.add(new UserJS(ctUser, 0L));
+        }
+        meetingMinutes = new ArrayList<>();
+        if (meeting.getMeetingMinutes() != null) {
+            for (MeetingMinute minute : meeting.getMeetingMinutes()) {
+                meetingMinutes.add(new MeetingMinuteJs(minute));
+            }
         }
     }
 
     private void setAttendees(Meeting meeting, Long loggedInUserId) {
         attendees = new ArrayList<>();
-        for (CTUser ctUser : meeting.getAttendes()) {
-            attendees.add(new UserJS(ctUser, 0L));
-            if (ctUser.getId().longValue() == loggedInUserId.longValue()) {
-                userStatus = "Checked in.";
+        if (meeting.getAttendees() != null) {
+            for (Ref<CTUser> ctUserRef : meeting.getAttendees()) {
+                CTUser ctUser = UsersAPI.getUser(ctUserRef);
+                attendees.add(new UserJS(ctUser, 0L));
+                if (ctUser.getId().longValue() == loggedInUserId.longValue()) {
+                    userStatus = "Checked in.";
+                }
             }
         }
 

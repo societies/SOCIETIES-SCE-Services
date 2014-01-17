@@ -168,7 +168,7 @@ public final class NotificationsSender {
         String message = "The meeting minutes are ready to be signed.";
         List<String> partialDevices = new ArrayList<>();
         CTUser organizer = meeting.getOrganizer();
-        Set<Ref<CTUser>> users = meeting.getInvitedUser();
+        Set<Ref<CTUser>> users = meeting.getUsers();
         users.add(Ref.create(Key.create(CTUser.class, organizer.getId())));
         for (Ref<CTUser> ctUserRef : users) {
             CTUser user = UsersAPI.getUser(ctUserRef);

@@ -26,26 +26,20 @@ package si.setcce.societies.crowdtasking.model;
 
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.Ref;
-import com.googlecode.objectify.annotation.*;
+import com.googlecode.objectify.annotation.Entity;
+import com.googlecode.objectify.annotation.Id;
+import com.googlecode.objectify.annotation.Index;
+import com.googlecode.objectify.annotation.Load;
 import si.setcce.societies.crowdtasking.api.RESTful.impl.UsersAPI;
 import si.setcce.societies.crowdtasking.model.dao.CollaborativeSpaceDAO;
 
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Describe your class here...
  *
  * @author Simon Jureša
  */
-
-@Embed
-class MeetingMinute {
-    public Date timestamp;
-    public String minute;
-}
 
 @Entity
 public class Meeting {
@@ -59,13 +53,13 @@ public class Meeting {
     @Index
     private Date startTime;
     private Date endTime, created;
-    private Set<Ref<CTUser>> invitedUser;
+    private Set<Ref<CTUser>> users;
     @Load
     private Ref<CTUser> organizerRef;
     private String downloadUrl;
     private MeetingStatus meetingStatus = MeetingStatus.CREATED;
     private List<MeetingMinute> meetingMinutes;
-    private List<CTUser> attendes;
+    private Set<Ref<CTUser>> attendees;
 
     public Meeting() {
     }
@@ -81,9 +75,9 @@ public class Meeting {
         this.startTime = startTime;
         this.endTime = endTime;
         this.created = new Date();
-        this.invitedUser = new HashSet<>();
+        this.users = new HashSet<>();
         for (Long userId : userIds) {
-            invitedUser.add(Ref.create(Key.create(CTUser.class, userId)));
+            users.add(Ref.create(Key.create(CTUser.class, userId)));
         }
     }
 
@@ -145,12 +139,12 @@ public class Meeting {
         this.endTime = endTime;
     }
 
-    public Set<Ref<CTUser>> getInvitedUser() {
-        return invitedUser;
+    public Set<Ref<CTUser>> getUsers() {
+        return users;
     }
 
-    public void setInvitedUser(Set<Ref<CTUser>> invitedUser) {
-        this.invitedUser = invitedUser;
+    public void setUsers(Set<Ref<CTUser>> users) {
+        this.users = users;
     }
 
     public Long getId() {
@@ -209,11 +203,25 @@ public class Meeting {
         this.meetingMinutes = meetingMinutes;
     }
 
-    public List<CTUser> getAttendes() {
-        return attendes;
+    public Set<Ref<CTUser>> getAttendees() {
+        return attendees;
     }
 
-    public void setAttendes(List<CTUser> attendes) {
-        this.attendes = attendes;
+    public void setAttendees(Set<Ref<CTUser>> attendees) {
+        this.attendees = attendees;
+    }
+
+    public void addAttendee(CTUser attendee) {
+        if (attendees == null) {
+            attendees = new HashSet<>();
+        }
+        attendees.add(Ref.create(Key.create(CTUser.class, attendee.getId())));
+    }
+
+    public void addMinute(CTUser user, String minute) {
+        if (meetingMinutes == null) {
+            meetingMinutes = new ArrayList<>();
+        }
+        meetingMinutes.add(new MeetingMinute(user, minute));
     }
 }

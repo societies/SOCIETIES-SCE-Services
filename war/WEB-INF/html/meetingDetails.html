@@ -40,10 +40,12 @@
             </table>
         </div>
         <div>
-            <a href="" id='startOrAttendMeetingButton' data-role="button" data-inline="true" data-theme="a">Start</a>
+            <a href="" id='startMeetingButton' data-role="button" data-inline="true" data-theme="a">Start</a>
+            <a href="" id='attendMeetingButton' data-role="button" data-inline="true" data-theme="a"
+               style="display: none">Attend</a>
         </div>
         <form action="" id="minutesForm">
-            <ul data-role="listview" id="commentList" data-inset="true" style='white-space:normal;'>
+            <ul data-role="listview" id="minutesList" data-inset="true" style='white-space:normal;'>
                 <li data-role="list-divider" role="heading">Minutes:</li>
             </ul>
         </form>
@@ -55,7 +57,7 @@
                 <a data-role="button" id="minuteButton" data-theme="a">Send to Collaborative table</a>
             </div>
         </form>
-        <a href="javascript:refreshOnShake()">refresh</a>
+        <!--<a href="javascript:refreshOnShake()">refresh</a>-->
     </div>
 </div>
 </body>
