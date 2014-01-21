@@ -109,7 +109,7 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
 //    public static final String DOMAIN = "crowdtaskingtest.appspot.com";
 //    public static final String DOMAIN = "simonix";
 public static final String DOMAIN = "crowdtasking.appspot.com";
-    //    public static final String DOMAIN = "192.168.1.30";
+    //        public static final String DOMAIN = "192.168.1.30";
     private static final String PORT = "";
 //    private static final String PORT = ":8888";
     public static final String APPLICATION_URL = SCHEME +"://" + DOMAIN + PORT;
@@ -181,7 +181,9 @@ public static final String DOMAIN = "crowdtasking.appspot.com";
         int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
         if (resultCode != ConnectionResult.SUCCESS) {
             if (GooglePlayServicesUtil.isUserRecoverableError(resultCode)) {
-	            try {
+                Log.i(LOG_TAG, "This device is not supported.");
+/*
+                try {
 		            GooglePlayServicesUtil.getErrorDialog(resultCode, this, PLAY_SERVICES_RESOLUTION_REQUEST).show();
 	            } catch (Exception e) {
 		            e.printStackTrace();
@@ -190,6 +192,7 @@ public static final String DOMAIN = "crowdtasking.appspot.com";
             } else {
                 Log.i(LOG_TAG, "This device is not supported.");
 //                finish();
+*/
             }
             return false;
         }
@@ -269,13 +272,13 @@ public static final String DOMAIN = "crowdtasking.appspot.com";
             @Override
             protected String doInBackground(Void... params) {
                 String msg;
-                // Check device for Play Services APK. If check succeeds, proceed with GCM registration.
-                if (!checkPlayServices()) {
-                    return "No valid Google Play Services APK found.";
-                }
 
                 try {
-//                    if (gcm == null) {
+                    // Check device for Play Services APK. If check succeeds, proceed with GCM registration.
+                    if (!checkPlayServices()) {
+                        return "No valid Google Play Services APK found.";
+                    }
+                    //                    if (gcm == null) {
                         gcm = GoogleCloudMessaging.getInstance(getApplicationContext());
 //                    }
                     regid = gcm.register(SENDER_ID);
@@ -746,7 +749,8 @@ public static final String DOMAIN = "crowdtasking.appspot.com";
 
     private void checkInOut(String url) {
 		try {
-			RestTask task = new RestTask(getApplicationContext(), CHECK_IN_OUT, CookieManager.getInstance().getCookie(DOMAIN), DOMAIN);
+            url = "http://" + DOMAIN + PORT + "/cs/research.lab/leave";
+            RestTask task = new RestTask(getApplicationContext(), CHECK_IN_OUT, CookieManager.getInstance().getCookie(DOMAIN), DOMAIN);
 			task.execute(new HttpGet(new URI(url)));
 		} catch (URISyntaxException e) {
 			e.printStackTrace();
@@ -944,12 +948,9 @@ public static final String DOMAIN = "crowdtasking.appspot.com";
             }
         	if (intent.getAction().equalsIgnoreCase(CHECK_IN_OUT)) {
                 String[] response = intent.getStringArrayExtra(RestTask.HTTP_RESPONSE);
-/*
-                if (!response[1].startsWith("Check") && !response[1].startsWith("You are")) {
+                if (!isResponseOk(response[0])) {
                     response[1] = "Please sign in first.";
         		}
-*/
-                System.out.println(response);
                 Toast.makeText(getApplicationContext(), response[1], Toast.LENGTH_SHORT).show();
         	}
         	if (intent.getAction().equalsIgnoreCase(TAKE_CONTROL)) {
@@ -1412,9 +1413,9 @@ public static final String DOMAIN = "crowdtasking.appspot.com";
 		                TrustTask task = new TrustTask(getApplicationContext(), DOMAIN, APPLICATION_URL);
 		                task.execute(societiesUser.getUserId());
 	                }
-                    if ("".equalsIgnoreCase(getRegistrationId(getApplicationContext()))) {
-                        registerInBackground();
-                    }
+                    //                    if ("".equalsIgnoreCase(getRegistrationId(getApplicationContext()))) {
+                    registerInBackground();
+                    //                    }
                     cookies = CookieManager.getInstance().getCookie(url);
                     firstTimeOnMenuPage = false;
                 }
