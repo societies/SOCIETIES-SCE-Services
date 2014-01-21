@@ -21,6 +21,8 @@ import org.societies.thirdpartyservices.crowdtasking.R;
 import java.util.HashMap;
 import java.util.Map;
 
+import si.setcce.societies.crowdtasking.gcm.GcmMessage;
+
 /**
  * Created by Simon on 21.10.2013.
  */
@@ -34,9 +36,6 @@ import java.util.Map;
 public class GcmIntentService extends IntentService {
     public static final int NOTIFICATION_ID = 1;
     private NotificationManager mNotificationManager;
-    static public final String PARAMETER_MESSAGE = "message";
-    static public final String PARAMETER_URL = "downloadUrl";
-    static public final String PARAMETER_MEETING_ID = "meetingId";
 
     public GcmIntentService() {
         super("GcmIntentService");
@@ -59,19 +58,20 @@ public class GcmIntentService extends IntentService {
              * not interested in, or that you don't recognize.
              */
             if (GoogleCloudMessaging.MESSAGE_TYPE_SEND_ERROR.equals(messageType)) {
-	            parameters.put(PARAMETER_MESSAGE, "Send error: " + extras.toString());
-	            sendNotification(parameters);
+                parameters.put(GcmMessage.PARAMETER_MESSAGE, "Send error: " + extras.toString());
+                sendNotification(parameters);
             } else if (GoogleCloudMessaging.MESSAGE_TYPE_DELETED.equals(messageType)) {
-	            parameters.put(PARAMETER_MESSAGE, "Deleted messages on server: " + extras.toString());
-	            sendNotification(parameters);
+                parameters.put(GcmMessage.PARAMETER_MESSAGE, "Deleted messages on server: " + extras.toString());
+                sendNotification(parameters);
                 // If it's a regular GCM message, do some work.
             } else if (GoogleCloudMessaging.MESSAGE_TYPE_MESSAGE.equals(messageType)) {
                 Log.i(TAG, "Completed work @ " + SystemClock.elapsedRealtime());
                 // Post notification of received message.
-	            parameters.put(PARAMETER_MESSAGE, extras.getString(PARAMETER_MESSAGE));
-	            parameters.put(PARAMETER_URL, extras.getString(PARAMETER_URL));
-	            parameters.put(PARAMETER_MEETING_ID, extras.getString(PARAMETER_MEETING_ID));
-                sendNotification(parameters, extras.getString(PARAMETER_URL));
+                parameters.put(GcmMessage.PARAMETER_MESSAGE, extras.getString(GcmMessage.PARAMETER_MESSAGE));
+                //	            parameters.put(GcmMessage.PARAMETER_URL, extras.getString(GcmMessage.PARAMETER_URL));
+                parameters.put(GcmMessage.PARAMETER_MEETING_SUBJECT, extras.getString(GcmMessage.PARAMETER_MEETING_SUBJECT));
+                parameters.put(GcmMessage.PARAMETER_MEETING_ID, extras.getString(GcmMessage.PARAMETER_MEETING_ID));
+                sendNotification(parameters, extras.getString(GcmMessage.PARAMETER_URL));
                 Log.i(TAG, "Received: " + extras.toString());
             }
         }
@@ -90,12 +90,13 @@ public class GcmIntentService extends IntentService {
         mNotificationManager = (NotificationManager)
                 this.getSystemService(Context.NOTIFICATION_SERVICE);
 
-	    String msg = parameters.get(PARAMETER_MESSAGE);
+        String msg = parameters.get(GcmMessage.PARAMETER_MESSAGE);
         Intent intent = new Intent(this, MainActivity.class);
         intent.setAction("GCM");
-        intent.putExtra(PARAMETER_MESSAGE, msg);
-        intent.putExtra(PARAMETER_URL, downloadUrl);
-        intent.putExtra(PARAMETER_MEETING_ID, parameters.get(PARAMETER_MEETING_ID));
+        intent.putExtra(GcmMessage.PARAMETER_MESSAGE, msg);
+        intent.putExtra(GcmMessage.PARAMETER_URL, downloadUrl);
+        intent.putExtra(GcmMessage.PARAMETER_MEETING_SUBJECT, parameters.get(GcmMessage.PARAMETER_MEETING_SUBJECT));
+        intent.putExtra(GcmMessage.PARAMETER_MEETING_ID, parameters.get(GcmMessage.PARAMETER_MEETING_ID));
         intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
         PendingIntent contentIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
 
