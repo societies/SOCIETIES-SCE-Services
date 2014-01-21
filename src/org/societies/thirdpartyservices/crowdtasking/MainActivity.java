@@ -87,7 +87,7 @@ import java.util.concurrent.TimeUnit;
 
 import si.setcce.societies.android.rest.RestTask;
 import si.setcce.societies.crowdtasking.api.RESTful.json.CommunityJS;
-import si.setcce.societies.gcm.GcmIntentService;
+import si.setcce.societies.crowdtasking.gcm.GcmMessage;
 
 @SuppressLint("SimpleDateFormat")
 public class MainActivity extends Activity implements SensorEventListener, NfcAdapter.CreateNdefMessageCallback {
@@ -109,7 +109,7 @@ public class MainActivity extends Activity implements SensorEventListener, NfcAd
 //    public static final String DOMAIN = "crowdtaskingtest.appspot.com";
 //    public static final String DOMAIN = "simonix";
 public static final String DOMAIN = "crowdtasking.appspot.com";
-    //        public static final String DOMAIN = "192.168.1.30";
+    //            public static final String DOMAIN = "192.168.1.30";
     private static final String PORT = "";
 //    private static final String PORT = ":8888";
     public static final String APPLICATION_URL = SCHEME +"://" + DOMAIN + PORT;
@@ -637,20 +637,22 @@ public static final String DOMAIN = "crowdtasking.appspot.com";
     }
 
     private void handleGcmIntent(Intent intent) {
-        String message = intent.getStringExtra(GcmIntentService.PARAMETER_MESSAGE);
-        String downloadUrl = intent.getStringExtra(GcmIntentService.PARAMETER_URL);
-        String meetingId = intent.getStringExtra(GcmIntentService.PARAMETER_MEETING_ID);
+        String message = intent.getStringExtra(GcmMessage.PARAMETER_MESSAGE);
+        String downloadUrl = intent.getStringExtra(GcmMessage.PARAMETER_URL);
+        String meetingId = intent.getStringExtra(GcmMessage.PARAMETER_MEETING_ID);
+        String meetingSubject = intent.getStringExtra(GcmMessage.PARAMETER_MEETING_SUBJECT);
 
-	    if (!"".equalsIgnoreCase(downloadUrl) && downloadUrl != null) {
+        if (!"".equalsIgnoreCase(downloadUrl) && downloadUrl != null) {
 		    Log.i(LOG_TAG, "downloadUrl: "+downloadUrl+", meetingId: "+meetingId);
-		    signDocument(downloadUrl, meetingId);
-	    }
+            signDocument(downloadUrl, meetingId, meetingSubject);
+        }
 //        Toast.makeText(getApplicationContext(), response, Toast.LENGTH_SHORT).show();
     }
 
-	private void signDocument(String downloadUrl, String meetingId) {
-		Intent i = new Intent(Sign.ACTION);
+    private void signDocument(String downloadUrl, String meetingId, String title) {
+        Intent i = new Intent(Sign.ACTION);
 		i.putExtra(Sign.Params.DOC_TO_SIGN_URL, downloadUrl);
+        i.putExtra(Sign.Params.DOC_TITLE, title);
         i.putExtra(Sign.Params.COMMUNITY_SIGNATURE_SERVER_URI, downloadUrl);
 
 		ArrayList<String> idsToSign = new ArrayList<String>();
