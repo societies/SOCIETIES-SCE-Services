@@ -175,20 +175,21 @@ public final class NotificationsSender {
             if (user.getGcmRegistrationId() != null) {
                 partialDevices.add(user.getGcmRegistrationId());
                 if (partialDevices.size() == Datastore.MULTICAST_SIZE) {
-                    sendGCMMessage(partialDevices, createParamsString(message, meeting.getId().toString()), null, meeting.getDownloadUrl());
+                    sendGCMMessage(partialDevices, createParamsString(message, meeting.getId().toString(), meeting.getSubject()), null, meeting.getDownloadUrl());
                     partialDevices.clear();
                 }
             }
         }
         if (!partialDevices.isEmpty()) {
-            sendGCMMessage(partialDevices, createParamsString(message, meeting.getId().toString()), null, meeting.getDownloadUrl());
+            sendGCMMessage(partialDevices, createParamsString(message, meeting.getId().toString(), meeting.getSubject()), null, meeting.getDownloadUrl());
         }
     }
 
-    private static String createParamsString(String message, String meetingId) {
+    private static String createParamsString(String message, String meetingId, String subject) {
         Parameters parameters = new Parameters();
         parameters.addParameter(GcmMessage.PARAMETER_MESSAGE, message);
         parameters.addParameter(GcmMessage.PARAMETER_MEETING_ID, meetingId);
+        parameters.addParameter(GcmMessage.PARAMETER_MEETING_SUBJECT, subject);
         return parameters.toString();
     }
 
