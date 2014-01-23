@@ -23,7 +23,6 @@ public class MeetingMinute {
     MeetingMinute(CTUser user, String minute) {
         timestamp = new Date();
         this.userRef = Ref.create(Key.create(CTUser.class, user.getId()));
-        ;
         this.minute = minute;
     }
 }

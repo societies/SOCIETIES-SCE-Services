@@ -38,14 +38,18 @@ import java.util.List;
  * @author Simon Jureša
  */
 class MeetingMinuteJs {
+    // dodaj user id
+    public Long userId;
     public Date timestamp;
     public String postedBy;
-    public String minute;
+    public String text;
 
     MeetingMinuteJs(MeetingMinute minute) {
         timestamp = new Date();
-        this.minute = minute.minute;
-        postedBy = UsersAPI.getUser(minute.userRef).getUserName();
+        this.text = minute.minute;
+        CTUser user = UsersAPI.getUser(minute.userRef);
+        userId = user.getId();
+        postedBy = user.getUserName();
     }
 }
 

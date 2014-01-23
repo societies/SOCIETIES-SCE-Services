@@ -455,7 +455,7 @@ var CrowdTaskingApp = function () {
 
                 //URLs starting with http://, https://, or ftp://
                 replacePattern = /(\b(https?|ftp):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/gim;
-                var newMinuteText = minute.minute.replace(replacePattern, '<a href="$1" target="_blank">$1</a>');
+                var newMinuteText = minute.text.replace(replacePattern, '<a href="$1" target="_blank">$1</a>');
 
                 newLi.append('<h3 style="white-space:normal;">' + newMinuteText + '</h3>');
                 newLi.append('<p style="white-space:normal;">' + minute.postedBy + formatDate(minute.timestamp) + ')</p>');

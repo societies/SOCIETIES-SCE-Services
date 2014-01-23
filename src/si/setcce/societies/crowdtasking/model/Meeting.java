@@ -218,10 +218,12 @@ public class Meeting {
         attendees.add(Ref.create(Key.create(CTUser.class, attendee.getId())));
     }
 
-    public void addMinute(CTUser user, String minute) {
+    public MeetingMinute addMinute(CTUser user, String minute) {
         if (meetingMinutes == null) {
             meetingMinutes = new ArrayList<>();
         }
-        meetingMinutes.add(new MeetingMinute(user, minute));
+        MeetingMinute meetingMinute = new MeetingMinute(user, minute);
+        meetingMinutes.add(meetingMinute);
+        return meetingMinute;
     }
 }
