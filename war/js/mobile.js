@@ -81,8 +81,6 @@ var CrowdTaskingApp = function () {
             url: '/rest/users/me',
             success: function (user) {
                 currentUser = user;
-                $('#currentUser .ui-btn-text').text(user.firstName + ' ' + user.lastName);
-                $('#currentUser').show();
             }
         });
     };
