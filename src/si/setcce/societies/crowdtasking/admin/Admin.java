@@ -30,6 +30,7 @@ import com.googlecode.objectify.cmd.Query;
 import si.setcce.societies.crowdtasking.api.RESTful.impl.UsersAPI;
 import si.setcce.societies.crowdtasking.model.*;
 import si.setcce.societies.crowdtasking.model.dao.CommunityDAO;
+import si.setcce.societies.crowdtasking.model.dao.TaskDao;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -40,7 +41,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
 
 import static si.setcce.societies.crowdtasking.model.dao.OfyService.ofy;
 
@@ -61,6 +61,7 @@ public class Admin extends HttpServlet {
         response.getWriter().write("<html><body>");
 
         String action = request.getParameter("action");
+        String kind = request.getParameter("kind");
         if ("admin".equalsIgnoreCase(action)) {
             response.sendRedirect("/admin.html");
             return;
@@ -70,6 +71,11 @@ public class Admin extends HttpServlet {
             response.getWriter().write("count: " + count);
         }
         if ("clean".equalsIgnoreCase(action)) {
+            if ("task".equalsIgnoreCase(kind)) {
+                String id = request.getParameter("id");
+                deleteTask(new Long(id));
+            }
+/*
             List<Community> communities = ofy().load().type(Community.class).list();
             for (Community community : communities) {
                 Set<Ref<CTUser>> membersRefs = community.getMembers();
@@ -91,6 +97,7 @@ public class Admin extends HttpServlet {
                     }
                 }
             }
+*/
         }
         if ("loadCommunities4User".equalsIgnoreCase(action)) {
             Long userId = new Long(request.getParameter("user"));
@@ -131,6 +138,35 @@ public class Admin extends HttpServlet {
         response.getWriter().write("<br><br>time: " + diff);
         response.getWriter().write("<br><br><a href='/admin.html'>admin</a>");
         response.getWriter().write("</body></html>");
+    }
+
+    private void deleteTask(Long taskId) {
+        // task
+        Task task = TaskDao.loadTask(taskId);
+        if (task == null) {
+            return;
+        }
+        // comments
+        List<Comment> comments = ofy().load().type(Comment.class).filter("taskRef", Ref.create(Key.create(Task.class, taskId))).list();
+        // likes
+        deleteLikes(ofy().load().type(Like.class).filter("taskId", taskId).list());
+        for (Comment comment : comments) {
+            deleteLikes(ofy().load().type(Like.class).filter("commentId", comment.getId()).list());
+            ofy().delete().entity(comment);
+        }
+        // meetings
+        for (Meeting meeting : task.getMeetings()) {
+            System.out.println(meeting);
+            ofy().delete().entity(meeting);
+        }
+        ofy().delete().entity(task);
+    }
+
+    private void deleteLikes(List<Like> likes) {
+        for (Like lajk : likes) {
+            ofy().delete().entity(lajk);
+            System.out.println(lajk);
+        }
     }
 
     private void refreshCommunities() {

@@ -134,7 +134,7 @@ public class MeetingAPI implements IMeetingAPI {
         CTUser user = UsersAPI.getLoggedInUser(request.getSession());
 
         if ("create".equalsIgnoreCase(querytype)) {
-            Task task = TaskDao.getTaskById(taskId);
+            Task task = TaskDao.loadTask(taskId);
             DateFormat formatter = new SimpleDateFormat("dd.MM.yyyy HH:mm");
             Date startTime;
             try {
@@ -163,7 +163,7 @@ public class MeetingAPI implements IMeetingAPI {
             TaskDao.setTransientTaskParams(user, task);
             EventAPI.logNewMeeting(task, meeting, new Date(), user);
             // because of Ref<?> value has not been initialized
-            task = TaskDao.getTaskById(task.getId());
+            task = TaskDao.loadTask(task.getId());
             Gson gson = new Gson();
             return Response.ok().entity(gson.toJson(new TaskJS(task, user))).build();
         }
@@ -234,7 +234,6 @@ public class MeetingAPI implements IMeetingAPI {
         if (meeting == null) {
             return Response.status(Status.BAD_REQUEST).entity("Wrong meeting id.").type("minute/plain").build();
         }
-        MeetingMinute meetingMinute = meeting.addMinute(user, minute);
         MeetingDAO.saveMeeting(meeting);
         CollaborativeSign collaborativeSign = getCollaborativeSign();
         Parameters parameters = new Parameters();

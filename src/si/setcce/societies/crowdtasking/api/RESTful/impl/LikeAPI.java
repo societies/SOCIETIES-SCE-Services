@@ -134,7 +134,7 @@ public class LikeAPI implements ILikeAPI {
                 like = new Like(user.getId(), taskId, null);
                 ofy().save().entity(like);
                 // increase task's score
-                Task task = TaskDao.getTaskById(taskId);
+                Task task = TaskDao.loadTask(taskId);
                 TaskDao.changeTaskScore(task, user.getKarma());
                 // increase owner's karma
                 changeUserKarma(UsersAPI.getUserById(task.getOwnerId()), 1);
@@ -145,7 +145,7 @@ public class LikeAPI implements ILikeAPI {
             else {
                 ofy().delete().type(Like.class).id(like.getId());
                 // decrease task's score
-                Task task = TaskDao.getTaskById(taskId);
+                Task task = TaskDao.loadTask(taskId);
                 // ??? to je lahko več kot je bil plus
                 TaskDao.changeTaskScore(task, -user.getKarma());
                 // decrease owner's karma

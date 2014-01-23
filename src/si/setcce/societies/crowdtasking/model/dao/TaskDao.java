@@ -49,11 +49,11 @@ public final class TaskDao {
     private TaskDao() {
     }
 
-    public static Task getTaskById(Long id) {
+    public static Task loadTask(Long id) {
         Task task = null;
         try {
             task = ofy().load().type(Task.class).id(id).get();
-        } catch (NotFoundException e) {
+        } catch (NotFoundException ignored) {
         }
         return task;
     }
@@ -67,11 +67,11 @@ public final class TaskDao {
     public static Task getTaskById4User(Long id, CTUser user) {
         Task task = null;
         try {
-            task = ofy().load().type(Task.class).id(id).get();
+            task = loadTask(id);
             if (!taskIsVisibleToUser(task, user)) {
                 return null;
             }
-        } catch (NotFoundException e) {
+        } catch (NotFoundException ignored) {
         }
         return task;
     }
@@ -92,7 +92,7 @@ public final class TaskDao {
                     if (community1.getId().longValue() == community2.getId().longValue()) {
                         return true;
                     }
-                } catch (NullPointerException npe) {
+                } catch (NullPointerException ignored) {
                 }
             }
         }
@@ -103,9 +103,11 @@ public final class TaskDao {
         return ofy().load().ref(taskRef).get();
     }
 
+/*
     public static Query<Task> getHighestRatedTasks(int limit) {
         return ofy().load().type(Task.class).order("-score").limit(limit);
     }
+*/
 
     public static List<Task> getHighestRatedTasks4User(CTUser user) {
         Query<Task> tasks = ofy().load().type(Task.class).order("-score").limit(MAX_HIGHEST_RATED_TASKS);
@@ -114,7 +116,7 @@ public final class TaskDao {
     }
 
     private static List<Task> filterVisibleToUser(Query<Task> tasks, List<Community> communities4User) {
-        List<Task> filteredTasks = new ArrayList<Task>();
+        List<Task> filteredTasks = new ArrayList<>();
         for (Task task : tasks) {
             if (taskIsVisibleToUser(task, communities4User)) {
                 filteredTasks.add(task);
@@ -169,11 +171,11 @@ public final class TaskDao {
         List<Long> taskIds = TagTaskDao.getTaskIdsForInterests(user
                 .getInterests());
         if (taskIds == null) {
-            return new ArrayList<Task>();
+            return new ArrayList<>();
         }
 
         Collection<Task> tasks = ofy().load().type(Task.class).ids(taskIds).values();
-        ArrayList<Task> filteredTasks = new ArrayList<Task>();
+        ArrayList<Task> filteredTasks = new ArrayList<>();
         List<Community> communities4User = CommunityDAO.loadCommunities4User(user);
         for (Task task : tasks) {
             if (taskIsVisibleToUser(task, communities4User)) {
@@ -194,7 +196,7 @@ public final class TaskDao {
     }
 
     public static void changeTaskScore(Long taskId, Long change) {
-        changeTaskScore(getTaskById(taskId), change);
+        changeTaskScore(loadTask(taskId), change);
     }
 
     public static void changeTaskScore(Task task, Long change) {

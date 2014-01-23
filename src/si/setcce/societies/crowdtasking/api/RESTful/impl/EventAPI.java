@@ -171,7 +171,7 @@ public class EventAPI implements IEventAPI {
     }
 
     public static void logTaskComment(Long taskId, Long commentId, Date eventDate, CTUser user) {
-        createEvent(EventType.TASK_COMMENT, null, TaskDao.getTaskById(taskId), commentId, eventDate, user, null);
+        createEvent(EventType.TASK_COMMENT, null, TaskDao.loadTask(taskId), commentId, eventDate, user, null);
     }
 
     public static void logLikeTask(Task task, Date eventDate, CTUser user) {
@@ -190,12 +190,8 @@ public class EventAPI implements IEventAPI {
         createEvent(EventType.UNLIKE_COMMENT, null, comment.getTask(), comment.getId(), eventDate, user, null);
     }
 
-    public static void logExecuteTask(Long taskId, Date eventDate, CTUser user) {
-        createEvent(EventType.EXECUTE_TASK, null, TaskDao.getTaskById(taskId), null, eventDate, user, null);
-    }
-
     public static void logFinalizeTask(Long taskId, Date eventDate, CTUser user) {
-        createEvent(EventType.FINALIZE_TASK, null, TaskDao.getTaskById(taskId), null, eventDate, user, null);
+        createEvent(EventType.FINALIZE_TASK, null, TaskDao.loadTask(taskId), null, eventDate, user, null);
     }
 
     public static void logEnterCollaborativeSpace(Long collaborativeSpaceId, Date eventDate, CTUser user, List<Ref<Community>> communitiesRefs) {
@@ -217,11 +213,11 @@ public class EventAPI implements IEventAPI {
     }
 
     public static void logShowTaskOnPd(Long taskId, CTUser user) {
-        createEvent(EventType.SHOW_TASK_ON_PD, null, TaskDao.getTaskById(taskId), null, new Date(), user, null);
+        createEvent(EventType.SHOW_TASK_ON_PD, null, TaskDao.loadTask(taskId), null, new Date(), user, null);
     }
 
     public static void logPickTaskFromPd(Long taskId, CTUser user) {
-        createEvent(EventType.PICK_TASK_FROM_PD, null, TaskDao.getTaskById(taskId), null, new Date(), user, null);
+        createEvent(EventType.PICK_TASK_FROM_PD, null, TaskDao.loadTask(taskId), null, new Date(), user, null);
     }
 
     public static void logRequestToJoinCommunity(Long communityId, String communityJid, CTUser user) {

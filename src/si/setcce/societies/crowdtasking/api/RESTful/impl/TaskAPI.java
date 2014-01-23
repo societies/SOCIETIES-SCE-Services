@@ -42,8 +42,7 @@ public class TaskAPI implements ITaskAPI {
         Gson gson = new Gson();
         // get task
         if (id != 0) {
-            Task task = null;
-            task = TaskDao.getTaskById4User(id, user);
+            Task task = TaskDao.getTaskById4User(id, user);
             if (task != null) {
                 TaskDao.setTransientTaskParams(user, task);
                 return gson.toJson(new TaskJS(task, user));
@@ -53,7 +52,7 @@ public class TaskAPI implements ITaskAPI {
 
         // get tasks - deprecated
         Query<Task> q = TaskDao.getTasks();
-        ArrayList<Task> list = new ArrayList<Task>();
+        ArrayList<Task> list = new ArrayList<>();
         for (Task task : q) {
             TaskDao.setTransientTaskParams(user, task);
             list.add(task);
@@ -77,10 +76,10 @@ public class TaskAPI implements ITaskAPI {
         }
         List<Tag> tagList = getTagListFromStringList(tags);
         Map<String, Tag> tagMap = TagAPI.getTagsMap();
-        for (int i = 0; i < tags.length; i++) {
-            Tag tag = tagMap.get(tags[i].trim());
+        for (String tag1 : tags) {
+            Tag tag = tagMap.get(tag1.trim());
             if (tag == null) {
-                tag = new Tag(tags[i].trim());
+                tag = new Tag(tag1.trim());
             }
             tag.setTagFrequency(tag.getTagFrequency() + 1);
         }
@@ -91,7 +90,7 @@ public class TaskAPI implements ITaskAPI {
         TaskDao.save(task);
         TagAPI.updateTags(tagList);
 
-        ArrayList<TagTask> tagTasks = new ArrayList<TagTask>();
+        ArrayList<TagTask> tagTasks = new ArrayList<>();
         for (Tag tag : tagList) {
             tagTasks.add(new TagTask(tag.getTagName(), task.getId()));
         }
@@ -105,13 +104,13 @@ public class TaskAPI implements ITaskAPI {
     }
 
     private List<Tag> getTagListFromStringList(String[] tags) {
-        ArrayList<Tag> tagList = new ArrayList<Tag>();
+        ArrayList<Tag> tagList = new ArrayList<>();
         if (tags != null) {
             Map<String, Tag> tagMap = TagAPI.getTagsMap();
-            for (int i = 0; i < tags.length; i++) {
-                Tag tag = tagMap.get(tags[i].trim());
+            for (String tag1 : tags) {
+                Tag tag = tagMap.get(tag1.trim());
                 if (tag == null) {
-                    tag = new Tag(tags[i].trim());
+                    tag = new Tag(tag1.trim());
                 }
                 tag.setTagFrequency(tag.getTagFrequency() + 1);
                 tagList.add(tag);
@@ -153,7 +152,7 @@ public class TaskAPI implements ITaskAPI {
 
     private Response finalizeTask(String taskId, CTUser user) {
         // get active comments
-        Task task = TaskDao.getTaskById(new Long(taskId));
+        Task task = TaskDao.loadTask(new Long(taskId));
         task.setTaskStatus(TaskStatus.FINISHED);
         ofy().save().entity(task);
         EventAPI.logFinalizeTask(new Long(taskId), new Date(), user);

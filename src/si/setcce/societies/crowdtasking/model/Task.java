@@ -64,12 +64,11 @@ public class Task {
         this.tagList = tagList;
         this.taskStatus = TaskStatus.OPEN;
         if (communityIds != null) {
-            communityRefs = new ArrayList<Ref<Community>>();
+            communityRefs = new ArrayList<>();
             for (Long communityId : communityIds) {
                 communityRefs.add(Ref.create(Key.create(Community.class, communityId)));
             }
         }
-        this.communityJids = communityJids;
     }
 
     public void setId(Long id) {
@@ -212,9 +211,9 @@ public class Task {
 
     public List<Meeting> getMeetings() {
         if (meetingsRefs == null) {
-            return null;
+            return new ArrayList<>();
         }
-        List<Meeting> meetings = new ArrayList<Meeting>();
+        List<Meeting> meetings = new ArrayList<>();
         for (Ref<Meeting> meetingRef : meetingsRefs) {
             if (meetingRef.get() != null) {
                 meetings.add(meetingRef.get());
@@ -227,7 +226,7 @@ public class Task {
         if (communityRefs == null) {
             return null;
         }
-        List<Community> communities = new ArrayList<Community>();
+        List<Community> communities = new ArrayList<>();
         for (Ref<Community> communitiesRef : communityRefs) {
             communities.add(communitiesRef.get());
         }

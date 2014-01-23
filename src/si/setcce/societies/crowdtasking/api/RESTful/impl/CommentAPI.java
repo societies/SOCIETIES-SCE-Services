@@ -78,7 +78,7 @@ public class CommentAPI implements ICommentAPI {
         Comment comment = new Comment(taskId, user, commentText);
 //		comment.setExecution(execution);
         Long commentId = saveComment(comment);
-        Task task = TaskDao.getTaskById(taskId);
+        Task task = TaskDao.loadTask(taskId);
         task.addInvolvedUser(user.getId());
         TaskDao.save(task);
 

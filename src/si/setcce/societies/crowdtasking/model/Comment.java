@@ -99,7 +99,7 @@ public class Comment {
                 task = taskRef.get();
             } catch (Exception e) {
                 System.out.println("Error in getTask() in Comment class: " + e.getMessage());
-                task = TaskDao.getTaskById(taskRef.getKey().getId());
+                task = TaskDao.loadTask(taskRef.getKey().getId());
             }
         }
         return task;
