@@ -1,25 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="org.societies.thirdpartyservices.crowdtasking"
-    android:versionCode="21"
-    android:versionName="1.1.2">
+          package="org.societies.thirdpartyservices.crowdtasking"
+          android:versionCode="21"
+          android:versionName="1.1.2">
 
-<uses-sdk
+    <uses-sdk
         android:minSdkVersion="14"
-        android:targetSdkVersion="17" />
+        android:targetSdkVersion="17"/>
 
     <permission
-        android:name="com.google.cloud.backend.android.permission.C2D_MESSAGE"
-        android:protectionLevel="signature" />
+        android:name="org.societies.thirdpartyservices.crowdtasking.permission.C2D_MESSAGE"
+        android:protectionLevel="signature"/>
 
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="com.google.cloud.backend.android.permission.C2D_MESSAGE" />
-    <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
-    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="com.google.cloud.backend.android.permission.C2D_MESSAGE"/>
+    <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE"/>
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>
     <!--<uses-permission android:name="android.permission.GET_ACCOUNTS" />-->
     <!--<uses-permission android:name="android.permission.USE_CREDENTIALS" />-->
-    <uses-permission android:name="android.permission.NFC" />
-    <uses-permission android:name="org.societies.security.digsig.provider.permission.SIGN" />
+    <uses-permission android:name="android.permission.NFC"/>
+    <uses-permission android:name="org.societies.security.digsig.provider.permission.SIGN"/>
 
     <application
         android:name="org.societies.thirdpartyservices.crowdtasking.CrowdTasking"
@@ -33,44 +33,53 @@
             android:launchMode="singleTask"
             android:configChanges="orientation|keyboardHidden"
             android:label="@string/title_activity_main"
-            android:screenOrientation="portrait" >
+            android:screenOrientation="portrait">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
-	        <intent-filter>
-	            <action android:name="android.intent.action.VIEW" />
-	            <category android:name="android.intent.category.DEFAULT" />
-	            <category android:name="android.intent.category.BROWSABLE" />
-	                <data android:scheme="http"
-	                  android:host="crowdtasking.appspot.com"
-	                  android:pathPrefix="/task"/>
-	        </intent-filter>
-	        <intent-filter>
-	            <action android:name="android.intent.action.VIEW" />
-	            <category android:name="android.intent.category.DEFAULT" />
-	            <category android:name="android.intent.category.BROWSABLE" />
-	                <data android:scheme="http"
-	                  android:host="crowdtasking.appspot.com"
-	                  android:pathPrefix="/community"/>
-	        </intent-filter>
-	        	        <intent-filter>
-	            <action android:name="android.nfc.action.NDEF_DISCOVERED" />
-	            <category android:name="android.intent.category.DEFAULT" />
-	            <category android:name="android.intent.category.BROWSABLE" />
-	                <data android:scheme="cs"
-	                  android:host="crowdtasking.appspot.com"/>
-	        </intent-filter>
-	    </activity>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+
+                <data
+                    android:scheme="http"
+                    android:host="crowdtasking.appspot.com"
+                    android:pathPrefix="/task"/>
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+
+                <data
+                    android:scheme="http"
+                    android:host="crowdtasking.appspot.com"
+                    android:pathPrefix="/community"/>
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.nfc.action.NDEF_DISCOVERED"/>
+
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+
+                <data
+                    android:scheme="cs"
+                    android:host="crowdtasking.appspot.com"/>
+            </intent-filter>
+        </activity>
 
         <receiver
             android:name="si.setcce.societies.gcm.GcmBroadcastReceiver"
-            android:permission="com.google.android.c2dm.permission.SEND" >
+            android:permission="com.google.android.c2dm.permission.SEND">
             <intent-filter>
-                <action android:name="com.google.android.c2dm.intent.RECEIVE" />
-                <category android:name="org.societies.thirdpartyservices.crowdtasking" />
+                <action android:name="com.google.android.c2dm.intent.RECEIVE"/>
+                <category android:name="org.societies.thirdpartyservices.crowdtasking"/>
             </intent-filter>
         </receiver>
-        <service android:name="si.setcce.societies.gcm.GcmIntentService" />
+        <service android:name="si.setcce.societies.gcm.GcmIntentService"/>
     </application>
 </manifest>
