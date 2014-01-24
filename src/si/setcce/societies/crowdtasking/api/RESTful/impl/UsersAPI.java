@@ -55,7 +55,12 @@ public class UsersAPI implements IUsersAPI {
     }
 
     public static AuthenticatedUser getAuthenticatedUser(HttpSession session) {
-        AuthenticatedUser authenticatedUser = (AuthenticatedUser) session.getAttribute("authenticatedUser");
+        // fix for #SCT-98
+        Object authUser = session.getAttribute("authenticatedUser");
+        AuthenticatedUser authenticatedUser = null;
+        if (authUser instanceof AuthenticatedUser) {
+            authenticatedUser = (AuthenticatedUser) authUser;
+        }
         if (authenticatedUser != null) {
             return authenticatedUser;
         }
