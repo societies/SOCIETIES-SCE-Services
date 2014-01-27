@@ -249,6 +249,10 @@ public class Task {
         return communityRefs;
     }
 
+    public void setCommunityRefs(List<Ref<Community>> communityRefs) {
+        this.communityRefs = communityRefs;
+    }
+
     public TaskStatus getTaskStatus() {
         return taskStatus;
     }

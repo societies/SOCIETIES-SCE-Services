@@ -65,6 +65,18 @@ public final class CollaborativeSpaceDAO {
         return ofy().load().ref(csRef).get();
     }
 
+    public static List<CollaborativeSpace> load() {
+        return ofy().load().type(CollaborativeSpace.class).list();
+    }
+
+    public static void delete(CollaborativeSpace collaborativeSpace) {
+        ofy().delete().entity(collaborativeSpace).now();    // synchronous, without now() would be asynchronous
+    }
+
+    public static void delete(Long id) {
+        ofy().delete().type(CollaborativeSpace.class).id(id).now(); // synchronous
+    }
+
 /*
     public static Query<CollaborativeSpace> loadCollaborativeSpaces() {
         return ofy().load().type(CollaborativeSpace.class);

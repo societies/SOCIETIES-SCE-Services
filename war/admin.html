@@ -6,16 +6,22 @@
 <body>
 <form action="/admin" method="get">
 
-    Id:<input type="text" name="id" value="5545936650502144"><br>
-    <input type="radio" name="action" value="loadCommunities4User">loadCommunities4User<br>
+    Id:<input type="text" size="50" name="id" value="5915372557434880"><br>
+    <br>
+    <input type="radio" name="action" value="show">show<br>
     <input type="radio" name="action" value="count">count<br>
-    <input type="radio" name="action" value="clean" checked>clean<br>
-    <input type="radio" name="action" value="delete">delete first 10<br>
-    <input type="radio" name="action" value="admin">admin<br><br>
-
+    <input type="radio" name="action" value="clean">clean<br>
+    <input type="radio" name="action" value="delete" checked>delete<br>
+    <input type="radio" name="action" value="unused">delete unused<br>
+    <input type="radio" name="action" value="showUnused">show unused<br>
+    <!--<input type="radio" name="action" value="admin">admin<br>-->
+    <br>
     <input type="radio" name="kind" value="event">Event<br>
-    <input type="radio" name="kind" value="show">show<br>
-    <input type="radio" name="kind" value="task" checked>task<br>
+    <input type="radio" name="kind" value="cs">Collaborative Space<br>
+    <input type="radio" name="kind" value="task">Task<br>
+    <input type="radio" name="kind" value="community" checked>Community<br>
+    <br>
+    Delete?<input type="text" name="confirm" value="no"><br>
     <input type="submit" value="Submit">
 </form>
 </body>

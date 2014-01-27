@@ -130,6 +130,10 @@ public final class TaskDao {
                 .order("-score").limit(limit);
     }
 
+    public static Query<Task> getTasksForCommunity(Long communityId) {
+        return ofy().load().type(Task.class).filter("communityRefs", Ref.create(Key.create(Community.class, communityId)));
+    }
+
     public static Query<Task> getTasksInCommunities(List<Ref<Community>> communityRefs) {
         return ofy().load().type(Task.class).filter("communityRefs in", communityRefs);
     }

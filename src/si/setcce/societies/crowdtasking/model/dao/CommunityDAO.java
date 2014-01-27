@@ -117,4 +117,8 @@ public final class CommunityDAO {
     public static Key<Community> saveCommunity(Community community) {
         return ofy().save().entity(community).now();
     }
+
+    public static void delete(Long id) {
+        ofy().delete().type(Community.class).id(id).now(); // synchronous
+    }
 }

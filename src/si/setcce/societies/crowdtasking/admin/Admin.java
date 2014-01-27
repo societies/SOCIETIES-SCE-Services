@@ -29,7 +29,9 @@ import com.googlecode.objectify.Ref;
 import com.googlecode.objectify.cmd.Query;
 import si.setcce.societies.crowdtasking.api.RESTful.impl.UsersAPI;
 import si.setcce.societies.crowdtasking.model.*;
+import si.setcce.societies.crowdtasking.model.dao.CollaborativeSpaceDAO;
 import si.setcce.societies.crowdtasking.model.dao.CommunityDAO;
+import si.setcce.societies.crowdtasking.model.dao.MeetingDAO;
 import si.setcce.societies.crowdtasking.model.dao.TaskDao;
 
 import javax.servlet.ServletException;
@@ -52,6 +54,7 @@ import static si.setcce.societies.crowdtasking.model.dao.OfyService.ofy;
 public class Admin extends HttpServlet {
     private static final long serialVersionUID = -6134754657162343082L;
     private static final String SENDER = "No Reply <setcce.research@gmail.com>";
+    private boolean doDelete = false;
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -60,21 +63,74 @@ public class Admin extends HttpServlet {
         long startTime = System.currentTimeMillis();
         response.getWriter().write("<html><body>");
 
-        String action = request.getParameter("action");
-        String kind = request.getParameter("kind");
-        if ("admin".equalsIgnoreCase(action)) {
-            response.sendRedirect("/admin.html");
-            return;
+        String action = request.getParameter("action") != null ? request.getParameter("action") : "";
+        String kind = request.getParameter("kind") != null ? request.getParameter("kind") : "";
+        String confirm = request.getParameter("confirm") != null ? request.getParameter("confirm") : "";
+        if ("yes".equalsIgnoreCase(confirm)) {
+            doDelete = true;
+        } else {
+            doDelete = false;
         }
-        if ("count".equalsIgnoreCase(action)) {
-            int count = ofy().load().type(Event.class).count();
-            response.getWriter().write("count: " + count);
+
+        switch (action) {
+            case "admin":
+                response.sendRedirect("/admin.html");
+                return;
+            case "count":
+                int count = ofy().load().type(Event.class).count();
+                response.getWriter().write("count: " + count);
+                break;
+            case "clean":
+                switch (kind) {
+                }
+                break;
+            case "show":
+                switch (kind) {
+                    case "cs":
+                        showCS(new Long(request.getParameter("id")), response);
+                        break;
+                    case "community":
+                        showCommunity(new Long(request.getParameter("id")), response);
+                        break;
+                }
+                break;
+            case "delete":
+                switch (kind) {
+                    case "cs":
+                        deleteCS(new Long(request.getParameter("id")), response);
+                        break;
+                    case "task":
+                        deleteTask(new Long(request.getParameter("id")));
+                        break;
+                    case "community":
+                        deleteCommunity(new Long(request.getParameter("id")), true, response);
+
+                }
+                break;
+            case "unused":
+                doDelete = true;
+                switch (kind) {
+                    case "cs":
+                        deleteUnusedCS(response);
+                        break;
+                    case "community":
+                        deleteUnusedCommunities(response);
+                        break;
+                }
+                break;
+            case "showUnused":
+                doDelete = false;
+                switch (kind) {
+                    case "cs":
+                        deleteUnusedCS(response);
+                        break;
+                    case "community":
+                        deleteUnusedCommunities(response);
+                        break;
+                }
+                break;
         }
         if ("clean".equalsIgnoreCase(action)) {
-            if ("task".equalsIgnoreCase(kind)) {
-                String id = request.getParameter("id");
-                deleteTask(new Long(id));
-            }
 /*
             List<Community> communities = ofy().load().type(Community.class).list();
             for (Community community : communities) {
@@ -126,18 +182,116 @@ public class Admin extends HttpServlet {
         }
 
 
-        //System.out.println("kind: "+kind);
-        //JavaMail.sendJavaMail(SENDER, "simon.juresa@setcce.si", "hoj", "navaden text", "HTML text", getBody());
-        //sendMeetingRequest1();
-        //sendMeetingRequest2();
-//        response.getWriter().write("refreshCommunities (4th)...");
-//        refreshCommunities();
-        //convertTasks();
-        //convertEvents();
         long diff = System.currentTimeMillis() - startTime;
         response.getWriter().write("<br><br>time: " + diff);
         response.getWriter().write("<br><br><a href='/admin.html'>admin</a>");
         response.getWriter().write("</body></html>");
+    }
+
+    private void deleteUnusedCommunities(HttpServletResponse response) throws IOException {
+        for (Community community : CommunityDAO.loadCommunities()) {
+            deleteCommunity(community.getId(), response);
+        }
+    }
+
+    private void deleteCommunity(Long id, HttpServletResponse response) throws IOException {
+        deleteCommunity(id, false, response);
+    }
+
+    private void deleteCommunity(Long id, boolean force, HttpServletResponse response) throws IOException {
+        boolean safeToDelete = true;
+        response.getWriter().write("Deleting Community with id: " + id);
+
+        if (!TaskDao.getTasksForCommunity(id).list().isEmpty()) {
+            safeToDelete = false;
+        }
+
+        // any other check?
+
+        if (safeToDelete) {
+            response.getWriter().write("<br>Safe to delete.<br><br>");
+            if (doDelete) {
+                CommunityDAO.delete(id);
+                response.getWriter().write("<br>Deleted!<br><br>");
+            }
+        } else {
+            response.getWriter().write("<br>Error! Not safe to delete.<br><br>");
+            if (force) {
+                response.getWriter().write("But we will delete it anyway. :D<br><br>");
+                Ref<Community> communityRef = Ref.create(Key.create(Community.class, id));
+                for (Task task : TaskDao.getTasksForCommunity(id).list()) {
+                    List<Ref<Community>> communityRefs = task.getCommunitiesRefs();
+                    if (communityRefs.size() == 1) {
+                        if (doDelete) {
+                            deleteTask(task.getId());
+                        }
+                        response.getWriter().write("Task " + task.getTitle() + " deleted<br>");
+                    } else {
+                        communityRefs.remove(communityRef);
+                        task.setCommunityRefs(communityRefs);
+                        if (doDelete) {
+                            TaskDao.save(task);
+                        }
+                        response.getWriter().write("Community removed from task " + task.getTitle() + ". <br>");
+                    }
+                    CommunityDAO.delete(id);
+                }
+            }
+        }
+    }
+
+
+    private void showCommunity(Long id, HttpServletResponse response) throws IOException {
+        boolean safeToDelete = true;
+        response.getWriter().write("Inspection for Community with id: " + id);
+        response.getWriter().write("<br><br><b>Tasks:</b><br>");
+        for (Task task : TaskDao.getTasksForCommunity(id)) {
+            safeToDelete = false;
+            response.getWriter().write(task.getTitle() + "<br>");
+        }
+        response.getWriter().write("<br>Safe To Delete? " + safeToDelete);
+    }
+
+    private void deleteUnusedCS(HttpServletResponse response) throws IOException {
+        for (CollaborativeSpace cs : CollaborativeSpaceDAO.load()) {
+            deleteCS(cs.getId(), response);
+        }
+    }
+
+    private void showCS(Long id, HttpServletResponse response) throws IOException {
+        boolean safeToDelete = true;
+        response.getWriter().write("Inspection for CS with id: " + id);
+        response.getWriter().write("<br><br><b>Communities:</b><br>");
+        for (Community community : CommunityDAO.findCommunities(id).list()) {
+            safeToDelete = false;
+            response.getWriter().write(community.getName() + "<br>");
+        }
+        response.getWriter().write("<br><b>Meetings:</b><br>");
+        for (Meeting meeting : MeetingDAO.getMeetingsForCS(id, 1000)) {
+            safeToDelete = false;
+            response.getWriter().write(meeting.getSubject() + "<br>");
+        }
+        response.getWriter().write("<br>Safe To Delete? " + safeToDelete);
+    }
+
+    private void deleteCS(Long id, HttpServletResponse response) throws IOException {
+        boolean safeToDelete = true;
+        response.getWriter().write("Deleting CS with id: " + id);
+        if (!CommunityDAO.findCommunities(id).list().isEmpty()) {
+            safeToDelete = false;
+        }
+        if (!MeetingDAO.getMeetingsForCS(id, 1000).list().isEmpty()) {
+            safeToDelete = false;
+        }
+        if (safeToDelete) {
+            response.getWriter().write("<br>Safe to delete.<br><br>");
+            if (doDelete) {
+                CollaborativeSpaceDAO.delete(id);
+                response.getWriter().write("<br>Deleted!<br><br>");
+            }
+        } else {
+            response.getWriter().write("<br>Error! Not safe to delete.<br><br>");
+        }
     }
 
     private void deleteTask(Long taskId) {
