@@ -474,7 +474,7 @@ var CrowdTaskingApp = function () {
         $('#meetingIdToSign').val(meeting.id);
         $('#meetingSubject').text(meeting.subject);
         $('#meetingDescription').text(meeting.description);
-        $('#meetingCS').text(meeting.cs.name);
+        $('#meetingCS').text(meeting.cs.name + ' at ' + formatDate(meeting.startTime));
         $('#meetingCreated').text(meeting.organizer);
 
         if (meeting.meetingStatus === 'STARTED') {
