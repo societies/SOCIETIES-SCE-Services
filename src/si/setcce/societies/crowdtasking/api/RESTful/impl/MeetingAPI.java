@@ -234,6 +234,7 @@ public class MeetingAPI implements IMeetingAPI {
         if (meeting == null) {
             return Response.status(Status.BAD_REQUEST).entity("Wrong meeting id.").type("minute/plain").build();
         }
+        meeting.addMinute(user, minute);
         MeetingDAO.saveMeeting(meeting);
         CollaborativeSign collaborativeSign = getCollaborativeSign();
         Parameters parameters = new Parameters();

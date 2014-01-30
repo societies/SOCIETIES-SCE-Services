@@ -299,7 +299,7 @@ var CrowdTaskingApp = function () {
                 tasks[currentTaskIndex] = updatedTask;
                 showMeetings(updatedTask);
             },
-            complete: function (response) {
+            complete: function () {
                 $('#saveNewMeetingButton').show();
             }
         });
@@ -309,7 +309,7 @@ var CrowdTaskingApp = function () {
         if (typeof(heading) === 'undefined') heading = 'Tasks in my communities';
 
         var createTapHandler = function (currentIndex) {
-            return function (event, data) {
+            return function () {
                 CrowdTaskingApp.setCurrentTask(currentIndex);
             };
         };
@@ -363,7 +363,7 @@ var CrowdTaskingApp = function () {
         $meetingList.empty();
 
         var createMeetingTapHandler = function (currentIndex) {
-            return function (event, data) {
+            return function () {
                 CrowdTaskingApp.setCurrentMeeting(currentIndex);
             };
         };
@@ -403,8 +403,13 @@ var CrowdTaskingApp = function () {
             }
             for (var i = 0; i < comments.length; i++) {
                 var comment = comments[i];
-                var newLi = $('<li data-role="fieldcontain">');
+                var newLi = $('<li data-role="listview">');
 
+                var picUrl = comment.picUrl;
+                if (picUrl == undefined) {
+                    picUrl = '/images/pic' + (Math.floor(Math.random() * 4) + 1) + '.png';
+                }
+                newLi.append('<img src="' + picUrl + '" class="ui-li-icon" style="left:12px; top:34px;">');
 
                 //URLs starting with http://, https://, or ftp://
                 replacePattern = /(\b(https?|ftp):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/gim;
@@ -412,11 +417,6 @@ var CrowdTaskingApp = function () {
 
                 newLi.append('<h3 style="white-space:normal;">' + newCommentText + '</h3>');
                 newLi.append('<p style="white-space:normal;">' + comment.postedBy + '<img class="' + comment.trustLevel + '" src="/images/img_trans.gif" width="1" height="1" /> (' + formatDate(comment.posted) + ')</p>');
-                var picUrl = comment.picUrl;
-                if (picUrl == undefined) {
-                    picUrl = '/images/pic' + (Math.floor(Math.random() * 4) + 1) + '.png';
-                }
-                newLi.append('<img src="' + picUrl + '" class="ui-li-icon" style="left:12px; top:34px;">');
                 //newLi.append('<img src="/images/pic'+(Math.floor(Math.random()*4)+1)+'.png" class="ui-li-icon" style="left:12px; top:34px;">');
                 if (!comment.myComment) {
                     var selectedOff = !comment.liked ? 'selected' : '';
@@ -451,18 +451,18 @@ var CrowdTaskingApp = function () {
                 var minute = minutes[i];
                 var newLi = $('<li data-role="fieldcontain">');
 
+                var picUrl = minute.picUrl;
+                if (picUrl == undefined) {
+                    picUrl = '/images/pic' + (Math.floor(Math.random() * 4) + 1) + '.png';
+                }
+                newLi.append('<img src="' + picUrl + '" class="ui-li-icon" style="left:12px; top:34px;">');
+
                 //URLs starting with http://, https://, or ftp://
                 replacePattern = /(\b(https?|ftp):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/gim;
                 var newMinuteText = minute.text.replace(replacePattern, '<a href="$1" target="_blank">$1</a>');
 
                 newLi.append('<h3 style="white-space:normal;">' + newMinuteText + '</h3>');
                 newLi.append('<p style="white-space:normal;">' + minute.postedBy + formatDate(minute.timestamp) + ')</p>');
-//                var picUrl = comment.picUrl;
-//                if (picUrl == undefined) {
-                picUrl = '/images/pic' + (Math.floor(Math.random() * 4) + 1) + '.png';
-//                }
-                newLi.append('<img src="' + picUrl + '" class="ui-li-icon" style="left:12px; top:34px;">');
-                //newLi.append('<img src="/images/pic'+(Math.floor(Math.random()*4)+1)+'.png" class="ui-li-icon" style="left:12px; top:34px;">');
                 list.append(newLi);
             }
         }
@@ -1281,41 +1281,41 @@ $(document).on('pageinit', '#viewTask', function (event, data) {
 
 $(document).on('pageinit', '#meetingDetails', function (event, data) {
     refreshFunction = CrowdTaskingApp.refreshMeeting;
-    $('#minuteButton').bind('tap', function (event, data) {
+    $('#minuteButton').bind('tap', function (event) {
         event.preventDefault();
         $('#minuteButton').addClass('ui-disabled');
         CrowdTaskingApp.postMinute();
     });
-    $('#startMeetingButton').bind('tap', function (event, data) {
+    $('#startMeetingButton').bind('tap', function (event) {
         event.preventDefault();
         $('#startMeetingButton').addClass('ui-disabled');
         CrowdTaskingApp.startMeeting();
     });
-    $('#attendMeetingButton').bind('tap', function (event, data) {
+    $('#attendMeetingButton').bind('tap', function (event) {
         event.preventDefault();
         $('#attendMeetingButton').addClass('ui-disabled');
         CrowdTaskingApp.attendMeeting();
     });
 });
 
-$(document).on('pageshow', '#meetingDetails', function (event, data) {
+$(document).on('pageshow', '#meetingDetails', function () {
     console.log("refreshFunction = CrowdTaskingApp.displayMeeting");
     CrowdTaskingApp.displayMeeting();
 });
 
-$(document).on('pageinit', '#settingsPage', function (event, data) {
+$(document).on('pageinit', '#settingsPage', function () {
     refreshFunction = null;
     console.log("refreshFunction = null ('pageinit', '#settingsPage')");
     getSettings();
 
-    $('#submitSettingsButton').bind('click', function (event, data) {
+    $('#submitSettingsButton').bind('click', function (event) {
         event.preventDefault();
         $('#submitSettingsButton').unbind('tap');
         submitSettings();
     });
 });
 
-$(document).on('pageinit', '#communitiesPage', function (event, data) {
+$(document).on('pageinit', '#communitiesPage', function () {
     refreshFunction = Community.loadCommunities;
     console.log("refreshFunction = CrowdTaskingApp.loadCommunities");
     $('#addCommunityButton').bind('tap', function (event, data) {

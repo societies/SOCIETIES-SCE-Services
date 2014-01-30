@@ -38,16 +38,16 @@ import java.util.Random;
  */
 @SuppressWarnings("unused")
 public class CommentJS {
-    private Long id;
-    private Long taskId;
-    private String postedBy;
-    private String commentText;
-    private String picUrl;
-    private Date posted;
-    private boolean execution;
-    private boolean liked;
-    private boolean myComment;
-    private String trustLevel;
+    public Long id;
+    public Long taskId;
+    public String postedBy;
+    public String commentText;
+    public String picUrl;
+    public Date posted;
+    public boolean execution;
+    public boolean liked;
+    public boolean myComment;
+    public String trustLevel;
 
     public CommentJS(Comment comment, CTUser loggedinUser) {
         id = comment.getId();

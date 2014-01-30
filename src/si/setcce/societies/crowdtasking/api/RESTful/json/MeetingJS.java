@@ -38,11 +38,11 @@ import java.util.List;
  * @author Simon Jureša
  */
 class MeetingMinuteJs {
-    // dodaj user id
     public Long userId;
     public Date timestamp;
     public String postedBy;
     public String text;
+    public String picUrl;
 
     MeetingMinuteJs(MeetingMinute minute) {
         timestamp = new Date();
@@ -50,27 +50,29 @@ class MeetingMinuteJs {
         CTUser user = UsersAPI.getUser(minute.userRef);
         userId = user.getId();
         postedBy = user.getUserName();
+        picUrl = user.getPicUrl();
     }
 }
 
-@SuppressWarnings("unused")
 public class MeetingJS {
-    private Long id;
-    private String subject;
-    private String description;
-    private CollaborativeSpace cs;
-    private Date startTime, endTime, created;
-    private String organizer;
-    private MeetingStatus meetingStatus;
-    private String userStatus;
-    private List<UserJS> attendees;
+    public Long id;
+    public String subject;
+    public String description;
+    public CollaborativeSpace cs;
+    public Date startTime, endTime, created;
+    public String organizer;
+    public MeetingStatus meetingStatus;
+    public String userStatus;
+    public List<UserJS> attendees;
     public List<UserJS> invitedUser;
-    private List<MeetingMinuteJs> meetingMinutes;
+    public List<MeetingMinuteJs> meetingMinutes;
 
+/*
     public MeetingJS(Meeting meeting, Long loggedInUserId) {
         init(meeting);
         setAttendees(meeting, loggedInUserId);
     }
+*/
 
     public MeetingJS(Meeting meeting) {
         init(meeting);
@@ -112,101 +114,5 @@ public class MeetingJS {
             }
         }
 
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public List<UserJS> getAttendees() {
-        return attendees;
-    }
-
-    public void setAttendees(List<UserJS> attendees) {
-        this.attendees = attendees;
-    }
-
-    public List<UserJS> getInvitedUser() {
-        return invitedUser;
-    }
-
-    public void setInvitedUser(List<UserJS> invitedUser) {
-        this.invitedUser = invitedUser;
-    }
-
-    public String getSubject() {
-        return subject;
-    }
-
-    public void setSubject(String subject) {
-        this.subject = subject;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public CollaborativeSpace getCs() {
-        return cs;
-    }
-
-    public void setCs(CollaborativeSpace cs) {
-        this.cs = cs;
-    }
-
-    public Date getStartTime() {
-        return startTime;
-    }
-
-    public void setStartTime(Date startTime) {
-        this.startTime = startTime;
-    }
-
-    public Date getEndTime() {
-        return endTime;
-    }
-
-    public void setEndTime(Date endTime) {
-        this.endTime = endTime;
-    }
-
-    public Date getCreated() {
-        return created;
-    }
-
-    public void setCreated(Date created) {
-        this.created = created;
-    }
-
-    public String getOrganizer() {
-        return organizer;
-    }
-
-    public void setOrganizer(String organizer) {
-        this.organizer = organizer;
-    }
-
-    public MeetingStatus getMeetingStatus() {
-        return meetingStatus;
-    }
-
-    public void setMeetingStatus(MeetingStatus meetingStatus) {
-        this.meetingStatus = meetingStatus;
-    }
-
-    public String getUserStatus() {
-        return userStatus;
-    }
-
-    public void setUserStatus(String userStatus) {
-        this.userStatus = userStatus;
     }
 }

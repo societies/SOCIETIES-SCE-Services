@@ -17,6 +17,7 @@ public class MeetingMinute {
     public Ref<CTUser> userRef;
     public String minute;
 
+    @SuppressWarnings("UnusedDeclaration")
     MeetingMinute() {
     }
 
