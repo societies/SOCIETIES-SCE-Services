@@ -94,7 +94,7 @@ public class MeetingAPI implements IMeetingAPI {
         if ("cs".equalsIgnoreCase(querytype)) {
             return getMeetingsForCS(csId);
         }
-        return Response.status(Status.BAD_REQUEST).entity("Request not understood.").type("minute/plain").build().toString();
+        return Response.status(Status.BAD_REQUEST).entity("Request not understood.").type("text/plain").build().toString();
     }
 
     private String getMeetingsForCS(Long csId) {
@@ -140,19 +140,19 @@ public class MeetingAPI implements IMeetingAPI {
             try {
                 startTime = formatter.parse(taskStart);
             } catch (ParseException e) {
-                return Response.status(Status.BAD_REQUEST).entity("Start time error.").type("minute/plain").build();
+                return Response.status(Status.BAD_REQUEST).entity("Start time error.").type("text/plain").build();
             }
             if (startTime.before(new Date())) {
-                return Response.status(Status.BAD_REQUEST).entity("Start time is in the past.").type("minute/plain").build();
+                return Response.status(Status.BAD_REQUEST).entity("Start time is in the past.").type("text/plain").build();
             }
             Date endTime;
             try {
                 endTime = formatter.parse(taskEnd);
             } catch (ParseException e) {
-                return Response.status(Status.BAD_REQUEST).entity("End time error.").type("minute/plain").build();
+                return Response.status(Status.BAD_REQUEST).entity("End time error.").type("text/plain").build();
             }
             if (startTime.after(endTime)) {
-                return Response.status(Status.BAD_REQUEST).entity("Start time is after end time.").type("minute/plain").build();
+                return Response.status(Status.BAD_REQUEST).entity("Start time is after end time.").type("text/plain").build();
             }
 
             Meeting meeting = new Meeting(meetingSubject, meetingDescription, csId, startTime, endTime, user, task.getInvolvedUsers());
@@ -171,10 +171,10 @@ public class MeetingAPI implements IMeetingAPI {
         try {
             meetingIdToSign = Long.parseLong(meetingIdToSignStr);
         } catch (Exception e) {
-            return Response.status(Status.BAD_REQUEST).entity("Invalid meeting id.").type("minute/plain").build();
+            return Response.status(Status.BAD_REQUEST).entity("Invalid meeting id.").type("text/plain").build();
         }
         if ("".equals(meetingSubject)) {
-            return Response.status(Status.BAD_REQUEST).entity("Subject is required.").type("minute/plain").build();
+            return Response.status(Status.BAD_REQUEST).entity("Subject is required.").type("text/plain").build();
         }
 
         // todo: move old ifs to switch?
@@ -186,7 +186,7 @@ public class MeetingAPI implements IMeetingAPI {
         if ("communitysign".equalsIgnoreCase(querytype)) {
             Meeting meeting = MeetingDAO.loadMeeting(meetingIdToSign);
             if (meeting == null) {
-                return Response.status(Status.BAD_REQUEST).entity("Wrong meeting id.").type("minute/plain").build();
+                return Response.status(Status.BAD_REQUEST).entity("Wrong meeting id.").type("text/plain").build();
             }
             log.info("downloadUrl: " + downloadUrl);
             meeting.setDownloadUrl(downloadUrl);
@@ -198,7 +198,7 @@ public class MeetingAPI implements IMeetingAPI {
         if ("setActive".equals(querytype) || "attend".equals(querytype)) {
             Meeting meeting = MeetingDAO.loadMeeting(meetingIdToSign);
             if (meeting == null) {
-                return Response.status(Status.BAD_REQUEST).entity("Wrong meeting id.").type("minute/plain").build();
+                return Response.status(Status.BAD_REQUEST).entity("Wrong meeting id.").type("text/plain").build();
             }
             CollaborativeSign collaborativeSign = getCollaborativeSign();
             if ("setActive".equals(querytype)) {
@@ -226,13 +226,13 @@ public class MeetingAPI implements IMeetingAPI {
                 return Response.ok().entity("Meeting check-in.").build();
             }
         }
-        return Response.status(Status.BAD_REQUEST).entity("Request not understood.").type("minute/plain").build();
+        return Response.status(Status.BAD_REQUEST).entity("Request not understood.").type("text/plain").build();
     }
 
     private Response postMinute(Long meetingIdToSign, CTUser user, String minute) {
         Meeting meeting = MeetingDAO.loadMeeting(meetingIdToSign);
         if (meeting == null) {
-            return Response.status(Status.BAD_REQUEST).entity("Wrong meeting id.").type("minute/plain").build();
+            return Response.status(Status.BAD_REQUEST).entity("Wrong meeting id.").type("text/plain").build();
         }
         meeting.addMinute(user, minute);
         MeetingDAO.saveMeeting(meeting);
