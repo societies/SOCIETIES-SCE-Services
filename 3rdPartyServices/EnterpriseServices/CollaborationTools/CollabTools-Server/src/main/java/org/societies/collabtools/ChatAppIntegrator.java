@@ -149,43 +149,44 @@ public class ChatAppIntegrator extends AbstractCollabAppConnector {
 		} catch (XMPPException e) {
 			e.printStackTrace();
 		}
-		Iterator<HostedRoom> it = rooms.iterator();
-		boolean roomAlreadyExist = false;
-		while(it.hasNext()){
-			String roomName = it.next().getName();
-			logger.debug("room exist: {}",roomName);
-			if (roomName.equalsIgnoreCase(room)){
-				//Room already created
-				roomAlreadyExist = true;
-				break;
+		//Just to avoid null for safety
+		if (rooms != null) {
+			Iterator<HostedRoom> roomsIterator = rooms.iterator();
+			boolean roomAlreadyExist = false;
+			while(roomsIterator.hasNext()){
+				String roomName = roomsIterator.next().getName();
+				logger.debug("room exist: {}",roomName);
+				if (roomName.equalsIgnoreCase(room)){
+					//Room already created
+					roomAlreadyExist = true;
+					break;
+				}
+			}
+			if (!roomAlreadyExist){
+				try {
+					//				setListeners(muc);
+					muc.create(room);
+					muc.sendConfigurationForm(new Form(Form.TYPE_SUBMIT));
+				} catch (XMPPException e) {
+					e.printStackTrace();
+				}
+			}
+			logger.debug(user+"@"+this.host+ " - Interests "+msg+" matches in "+room);
+
+
+			//TODO: Change message to inform which context information trigger the event
+			logger.debug("Language for chat: {}",language);
+			if (language.equalsIgnoreCase("German")) {
+				muc.invite(user+"@"+host, "SOCIETIES lädt Sie zu "+room+" betreten");
+			}
+			else if (language.equalsIgnoreCase("French")){
+				muc.invite(user+"@"+host, "SOCIETIES vous invite à rejoindre "+room+" chambre");
+			}
+			else {
+				muc.invite(user+"@"+host, " - Interests "+msg+" matches in "+room);
+
 			}
 		}
-		if (!roomAlreadyExist){
-			try {
-				//				setListeners(muc);
-				muc.create(room);
-				muc.sendConfigurationForm(new Form(Form.TYPE_SUBMIT));
-			} catch (XMPPException e) {
-				e.printStackTrace();
-			}
-		}
-		logger.debug(user+"@"+this.host+ " - Interests "+msg+" matches in "+room);
-
-
-		//TODO: Change message to inform which context information trigger the event
-		logger.debug("Language for chat: {}",language);
-		if (language.equalsIgnoreCase("German")) {
-			muc.invite(user+"@"+host, "SOCIETIES lädt Sie zu "+room+" betreten");
-		}
-		else if (language.equalsIgnoreCase("French")){
-			muc.invite(user+"@"+host, "SOCIETIES vous invite à rejoindre "+room+" chambre");
-		}
-		else {
-			muc.invite(user+"@"+host, " - Interests "+msg+" matches in "+room);
-
-		}
-
-
 	}
 
 	/* (non-Javadoc)
@@ -202,8 +203,8 @@ public class ChatAppIntegrator extends AbstractCollabAppConnector {
 			muc.kickParticipant(user+"@"+this.host, "Context change");
 			//Sending kick event to be triggered by leaveEvent
 			Presence leavePresence = new Presence(Presence.Type.unavailable);
-	        leavePresence.setTo(room + "/" + user);
-	        connection.sendPacket(leavePresence);
+			leavePresence.setTo(room + "/" + user);
+			connection.sendPacket(leavePresence);
 		} catch (XMPPException e) {
 			e.printStackTrace();
 		}
