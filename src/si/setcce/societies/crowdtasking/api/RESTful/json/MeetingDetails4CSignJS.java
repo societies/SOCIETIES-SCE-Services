@@ -15,14 +15,14 @@ import java.util.List;
  * Time: 9:14
  */
 public class MeetingDetails4CSignJS extends MeetingJS {
-    public List<UserJS> users;
+    public List<BasicUserJS> users;
 
     public MeetingDetails4CSignJS(Meeting meeting) {
         super(meeting);
         users = new ArrayList<>();
-        for (Ref<CTUser> ctUserRef : meeting.getUsers()) {
+        for (Ref<CTUser> ctUserRef : meeting.getInvitedUsers()) {
             CTUser ctUser = UsersAPI.getUser(ctUserRef);
-            users.add(new UserJS(ctUser, 0L));
+            users.add(new BasicUserJS(ctUser));
         }
     }
 }

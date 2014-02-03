@@ -258,6 +258,7 @@ var CrowdTaskingApp = function () {
                 toast(error.responseText);
             },
             success: function () {
+                $('#meetingStatus').text('Started.');
                 $('#startMeetingButton').hide();
                 $('#attendMeetingButton').show();
             },
@@ -479,9 +480,15 @@ var CrowdTaskingApp = function () {
 
         if (meeting.meetingStatus === 'STARTED') {
             $('#startMeetingButton').hide();
-            $('#attendMeetingButton').show();
-//            $('#attendMeetingButton').addClass('ui-disabled');
+            if (meeting.userStatus !== 'Checked in.') {
+                $('#attendMeetingButton').show();
+            }
             $('#meetingStatus').text('Started.');
+        }
+        if (meeting.meetingStatus === 'FINISHED') {
+            $('#startMeetingButton').hide();
+            $('#attendMeetingButton').hide();
+            $('#meetingStatus').text('Finished.');
         }
         displayMinutes(meeting);
     };

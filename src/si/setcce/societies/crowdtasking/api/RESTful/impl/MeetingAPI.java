@@ -33,7 +33,6 @@ import si.setcce.societies.crowdtasking.api.RESTful.IMeetingAPI;
 import si.setcce.societies.crowdtasking.api.RESTful.json.MeetingDetails4CSignJS;
 import si.setcce.societies.crowdtasking.api.RESTful.json.MeetingJS;
 import si.setcce.societies.crowdtasking.api.RESTful.json.TaskJS;
-import si.setcce.societies.crowdtasking.api.RESTful.json.UserJS;
 import si.setcce.societies.crowdtasking.gcm.GcmMessage;
 import si.setcce.societies.crowdtasking.gcm.Parameters;
 import si.setcce.societies.crowdtasking.model.*;
@@ -66,7 +65,43 @@ public class MeetingAPI implements IMeetingAPI {
     @Produces({MediaType.APPLICATION_JSON})
     public String getMeeting(@PathParam("querytype") String querytype,
                              @QueryParam("id") Long meetingId,
-                             @QueryParam("csId") Long csId) {
+                             @QueryParam("csId") Long csId,
+                             @Context HttpServletRequest request) {
+
+        Meeting meeting;
+        CollaborativeSign collaborativeSign;
+        Gson gson = new Gson();
+
+        switch (querytype) {
+            case "data":
+                if (meetingId == null) {
+                    return "Missing id.";
+                }
+                // get meeting
+                meeting = MeetingDAO.loadMeeting(meetingId);
+                return gson.toJson(new MeetingJS(meeting));
+            case "communitysign":
+                collaborativeSign = getCollaborativeSign();
+                if (collaborativeSign.getMeetingId() != null) {
+                    meeting = MeetingDAO.loadMeeting(collaborativeSign.getMeetingId());
+                    log.info("sending meeting details");
+                    MeetingDetails4CSignJS meetingDetails = new MeetingDetails4CSignJS(meeting);
+                    return gson.toJson(meetingDetails);
+                } else {
+                    log.warning("No meeting id in community sign");
+                }
+            case "cs":
+                return getMeetingsForCS(csId);
+            case "attend":
+                // get meeting
+                collaborativeSign = MeetingAPI.getCollaborativeSign();
+                meeting = MeetingDAO.loadMeeting(collaborativeSign.getMeetingId());
+                // attend meeting
+                MeetingAPI.attendMeeting(UsersAPI.getLoggedInUser(request.getSession()), meeting, collaborativeSign);
+                return "Meeting check-in.";
+        }
+
+/*
         if ("data".equalsIgnoreCase(querytype)) {
             if (meetingId == null) {
                 return "Missing id.";
@@ -94,6 +129,10 @@ public class MeetingAPI implements IMeetingAPI {
         if ("cs".equalsIgnoreCase(querytype)) {
             return getMeetingsForCS(csId);
         }
+        if ("attend".equalsIgnoreCase(querytype)) {
+            return "";
+        }
+*/
         return Response.status(Status.BAD_REQUEST).entity("Request not understood.").type("text/plain").build().toString();
     }
 
@@ -191,6 +230,7 @@ public class MeetingAPI implements IMeetingAPI {
             log.info("downloadUrl: " + downloadUrl);
             meeting.setDownloadUrl(downloadUrl);
             NotificationsSender.meetingIsReadyToBeSigned(meeting);
+            meeting.setMeetingStatus(MeetingStatus.CREATED);
             MeetingDAO.saveMeeting(meeting);
             return Response.ok().entity("The meeting minutes are ready to be signed.").build();
 
@@ -210,23 +250,28 @@ public class MeetingAPI implements IMeetingAPI {
                 parameters.addParameter(GcmMessage.PARAMETER_ACTION, GcmMessage.ACTION_SET_MEETING);
                 parameters.addParameter(GcmMessage.PARAMETER_MESSAGE, "The meeting is set");
                 NotificationsSender.sendGCMMessage(getDeviceRegId(collaborativeSign), parameters.toString(), gson.toJson(meetingDetails), null);
-                meeting.setMeetingStatus(MeetingStatus.STARTED);
+                meeting.start();
                 MeetingDAO.saveMeeting(meeting);
                 return Response.ok().entity("The meeting is set.").build();
             }
             if ("attend".equals(querytype)) {
-                meeting.addAttendee(user);
-                MeetingDAO.saveMeeting(meeting);
-                Parameters parameters = new Parameters();
-                parameters.addParameter(GcmMessage.PARAMETER_ACTION, GcmMessage.ACTION_CHECK_IN);
-                parameters.addParameter(GcmMessage.PARAMETER_MESSAGE, user.getUserName() + " is present on the meeting.");
-                parameters.addParameter(GcmMessage.PARAMETER_USERNAME, user.getUserName());
-                parameters.addParameter(GcmMessage.PARAMETER_USER_ID, user.getId().toString());
-                NotificationsSender.sendGCMMessage(getDeviceRegId(collaborativeSign), parameters.toString());
+                attendMeeting(user, meeting, collaborativeSign);
                 return Response.ok().entity("Meeting check-in.").build();
             }
         }
         return Response.status(Status.BAD_REQUEST).entity("Request not understood.").type("text/plain").build();
+    }
+
+    public static void attendMeeting(CTUser user, Meeting meeting, CollaborativeSign collaborativeSign) {
+        log.info("attendMeeting - user:" + user.getUserName() + ", meeting:" + meeting.getSubject());
+        meeting.addAttendee(user);
+        MeetingDAO.saveMeeting(meeting);
+        Parameters parameters = new Parameters();
+        parameters.addParameter(GcmMessage.PARAMETER_ACTION, GcmMessage.ACTION_CHECK_IN);
+        parameters.addParameter(GcmMessage.PARAMETER_MESSAGE, user.getUserName() + " is present on the meeting.");
+        parameters.addParameter(GcmMessage.PARAMETER_USERNAME, user.getUserName());
+        parameters.addParameter(GcmMessage.PARAMETER_USER_ID, user.getId().toString());
+        NotificationsSender.sendGCMMessage(getDeviceRegId(collaborativeSign), parameters.toString());
     }
 
     private Response postMinute(Long meetingIdToSign, CTUser user, String minute) {
@@ -248,7 +293,7 @@ public class MeetingAPI implements IMeetingAPI {
         return Response.ok().entity(gson.toJson(new MeetingJS(meeting))).build();
     }
 
-    private List<String> getDeviceRegId(CollaborativeSign collaborativeSign) {
+    private static List<String> getDeviceRegId(CollaborativeSign collaborativeSign) {
         List<String> devices = new ArrayList<>();
         devices.add(collaborativeSign.getGcmRegistrationId());
         return devices;

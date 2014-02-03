@@ -63,16 +63,14 @@ public class MeetingJS {
     public String organizer;
     public MeetingStatus meetingStatus;
     public String userStatus;
-    public List<UserJS> attendees;
-    public List<UserJS> invitedUser;
+    public List<BasicUserJS> attendees;
+    public List<BasicUserJS> invitedUsers;
     public List<MeetingMinuteJs> meetingMinutes;
 
-/*
     public MeetingJS(Meeting meeting, Long loggedInUserId) {
         init(meeting);
         setAttendees(meeting, loggedInUserId);
     }
-*/
 
     public MeetingJS(Meeting meeting) {
         init(meeting);
@@ -88,11 +86,11 @@ public class MeetingJS {
         this.endTime = meeting.getEndTime();
         this.created = meeting.getCreated();
         this.organizer = meeting.getOrganizer() == null ? "" : meeting.getOrganizer().getUserName();
-        invitedUser = new ArrayList<>();
+        invitedUsers = new ArrayList<>();
         this.meetingStatus = meeting.getMeetingStatus();
-        for (Ref<CTUser> ctUserRef : meeting.getUsers()) {
+        for (Ref<CTUser> ctUserRef : meeting.getInvitedUsers()) {
             CTUser ctUser = UsersAPI.getUser(ctUserRef);
-            invitedUser.add(new UserJS(ctUser, 0L));
+            invitedUsers.add(new BasicUserJS(ctUser));
         }
         meetingMinutes = new ArrayList<>();
         if (meeting.getMeetingMinutes() != null) {
@@ -104,15 +102,12 @@ public class MeetingJS {
 
     private void setAttendees(Meeting meeting, Long loggedInUserId) {
         attendees = new ArrayList<>();
-        if (meeting.getAttendees() != null) {
-            for (Ref<CTUser> ctUserRef : meeting.getAttendees()) {
-                CTUser ctUser = UsersAPI.getUser(ctUserRef);
-                attendees.add(new UserJS(ctUser, 0L));
-                if (ctUser.getId().longValue() == loggedInUserId.longValue()) {
-                    userStatus = "Checked in.";
-                }
+        for (Ref<CTUser> ctUserRef : meeting.getAttendees()) {
+            CTUser ctUser = UsersAPI.getUser(ctUserRef);
+            attendees.add(new BasicUserJS(ctUser));
+            if (ctUser.getId().longValue() == loggedInUserId.longValue()) {
+                userStatus = "Checked in.";
             }
         }
-
     }
 }

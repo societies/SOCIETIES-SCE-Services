@@ -139,7 +139,7 @@ public class Meeting {
         this.endTime = endTime;
     }
 
-    public Set<Ref<CTUser>> getUsers() {
+    public Set<Ref<CTUser>> getInvitedUsers() {
         return users;
     }
 
@@ -204,6 +204,9 @@ public class Meeting {
     }
 
     public Set<Ref<CTUser>> getAttendees() {
+        if (attendees == null) {
+            return new HashSet<>();
+        }
         return attendees;
     }
 
@@ -225,5 +228,10 @@ public class Meeting {
         MeetingMinute meetingMinute = new MeetingMinute(user, minute);
         meetingMinutes.add(meetingMinute);
         return meetingMinute;
+    }
+
+    public void start() {
+        setMeetingStatus(MeetingStatus.STARTED);
+        attendees = new HashSet<>();
     }
 }

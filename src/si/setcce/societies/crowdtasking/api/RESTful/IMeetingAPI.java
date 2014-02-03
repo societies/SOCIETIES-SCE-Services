@@ -14,7 +14,8 @@ public interface IMeetingAPI {
     @Produces({MediaType.APPLICATION_JSON})
     String getMeeting(@PathParam("querytype") String querytype,
                       @QueryParam("id") Long meetingId,
-                      @QueryParam("csId") Long csId);
+                      @QueryParam("csId") Long csId,
+                      @Context HttpServletRequest request);
 
     @POST
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
