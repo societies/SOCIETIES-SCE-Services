@@ -93,6 +93,7 @@ import si.setcce.societies.crowdtasking.gcm.GcmMessage;
 public class MainActivity extends Activity implements SensorEventListener, NfcAdapter.CreateNdefMessageCallback {
 	//private static final String TEST_ACTION = "si.setcce.societies.android.rest.TEST";
     public static final String CHECK_IN_OUT = "si.setcce.societies.android.rest.CHECK_IN_OUT";
+    public static final String ATTEND_MEETING = "si.setcce.societies.android.rest.ATTEND_MEETING";
     public static final String GET_LOCATION_ACTION = "si.setcce.societies.android.rest.GET_LOCATION";
     private static final String GET_USER = "si.setcce.societies.android.rest.GET_USER";
 	private static final String LOG_EVENT = "si.setcce.societies.android.rest.LOG_EVENT";
@@ -598,9 +599,13 @@ public static final String DOMAIN = "crowdtasking.appspot.com";
         	nfcUrl = intent.getData().toString();
         }		
     	if (nfcUrl != null) {
-    		checkInOut(nfcUrl.replaceFirst("cs", "http"));
-			nfcUrl = null;
-    	}
+            if ("cs:attend".equals(nfcUrl)) {
+                attendMeeting();
+            } else {
+                checkInOut(nfcUrl.replaceFirst("cs", "http"));
+            }
+            nfcUrl = null;
+        }
 
         if (intent.getAction().equalsIgnoreCase(CHECK_IN_OUT)) {
             String[] response = getIntent().getStringArrayExtra(RestTask.HTTP_RESPONSE);
@@ -751,7 +756,7 @@ public static final String DOMAIN = "crowdtasking.appspot.com";
 
     private void checkInOut(String url) {
 		try {
-            url = "http://" + DOMAIN + PORT + "/cs/research.lab/leave";
+            //            url = "http://" + DOMAIN + PORT + "/cs/research.lab/leave";
             RestTask task = new RestTask(getApplicationContext(), CHECK_IN_OUT, CookieManager.getInstance().getCookie(DOMAIN), DOMAIN);
 			task.execute(new HttpGet(new URI(url)));
 		} catch (URISyntaxException e) {
@@ -759,6 +764,16 @@ public static final String DOMAIN = "crowdtasking.appspot.com";
 			Toast.makeText(getApplicationContext(), "Error: "+e.getMessage(), Toast.LENGTH_LONG).show();
 		}
 	}
+
+    private void attendMeeting() {
+        try {
+            RestTask task = new RestTask(getApplicationContext(), ATTEND_MEETING, CookieManager.getInstance().getCookie(DOMAIN), DOMAIN);
+            task.execute(new HttpGet(new URI("http://" + DOMAIN + PORT + "/rest/meeting/attend")));
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+            Toast.makeText(getApplicationContext(), "Error: " + e.getMessage(), Toast.LENGTH_LONG).show();
+        }
+    }
 
     private void loginUser(boolean societiesUser) {
 	    if (societiesUser) {
@@ -955,7 +970,11 @@ public static final String DOMAIN = "crowdtasking.appspot.com";
         		}
                 Toast.makeText(getApplicationContext(), response[1], Toast.LENGTH_SHORT).show();
         	}
-        	if (intent.getAction().equalsIgnoreCase(TAKE_CONTROL)) {
+            if (intent.getAction().equalsIgnoreCase(ATTEND_MEETING)) {
+                String response = intent.getStringExtra(RestTask.HTTP_RESPONSE);
+                Toast.makeText(getApplicationContext(), response, Toast.LENGTH_SHORT).show();
+            }
+            if (intent.getAction().equalsIgnoreCase(TAKE_CONTROL)) {
         		String[] response = intent.getStringArrayExtra(RestTask.HTTP_RESPONSE);
                 if ("HTTP/1.1 409 Conflict".equalsIgnoreCase(response[0])) {
                     selectCommunityForPD(response);

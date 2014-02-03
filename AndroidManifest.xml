@@ -8,18 +8,18 @@
         android:minSdkVersion="14"
         android:targetSdkVersion="17"/>
 
-    <permission
-        android:name="org.societies.thirdpartyservices.crowdtasking.permission.C2D_MESSAGE"
-        android:protectionLevel="signature"/>
-
     <uses-permission android:name="android.permission.INTERNET"/>
-    <uses-permission android:name="com.google.cloud.backend.android.permission.C2D_MESSAGE"/>
     <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE"/>
+    <uses-permission android:name="org.societies.thirdpartyservices.crowdtasking.permission.C2D_MESSAGE"/>
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
     <!--<uses-permission android:name="android.permission.GET_ACCOUNTS" />-->
     <!--<uses-permission android:name="android.permission.USE_CREDENTIALS" />-->
     <uses-permission android:name="android.permission.NFC"/>
     <uses-permission android:name="org.societies.security.digsig.provider.permission.SIGN"/>
+
+    <permission
+        android:name="org.societies.thirdpartyservices.crowdtasking.permission.C2D_MESSAGE"
+        android:protectionLevel="signature"></permission>
 
     <application
         android:name="org.societies.thirdpartyservices.crowdtasking.CrowdTasking"
@@ -67,8 +67,8 @@
                 <category android:name="android.intent.category.BROWSABLE"/>
 
                 <data
-                    android:scheme="cs"
-                    android:host="crowdtasking.appspot.com"/>
+                    android:scheme="cs"/>
+                <!--android:host="crowdtasking.appspot.com"/>-->
             </intent-filter>
         </activity>
 
