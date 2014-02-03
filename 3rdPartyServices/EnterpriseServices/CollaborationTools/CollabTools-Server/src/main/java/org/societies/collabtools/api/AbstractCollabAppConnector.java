@@ -25,7 +25,6 @@
 package org.societies.collabtools.api;
 
 import java.util.Observable;
-import java.util.Observer;
 
 /**
  * Interface to integrate SYNCHRONOUS collaborative applications. 1..1

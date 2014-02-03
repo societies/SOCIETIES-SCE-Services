@@ -61,7 +61,8 @@ public class SessionHistory extends Observable
         return underlyingNode;
     }
 
-    @Deprecated
+    @SuppressWarnings("unused")
+	@Deprecated
     private Node getSessionNode()
     {
         TraversalDescription traversalDescription = Traversal.description().

@@ -36,7 +36,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Node;
@@ -54,7 +53,6 @@ import org.slf4j.LoggerFactory;
 import org.societies.collabtools.acquisition.LongTermCtxTypes;
 import org.societies.collabtools.acquisition.Person;
 import org.societies.collabtools.acquisition.RelTypes;
-import org.societies.collabtools.acquisition.ShortTermContextUpdates;
 import org.societies.collabtools.api.ICollabApps;
 
 /**

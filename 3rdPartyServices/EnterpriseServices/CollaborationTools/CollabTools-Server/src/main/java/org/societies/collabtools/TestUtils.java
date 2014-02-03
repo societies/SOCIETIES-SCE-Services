@@ -25,7 +25,6 @@
 package org.societies.collabtools;
 
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Random;
@@ -171,7 +170,8 @@ public class TestUtils {
 	}
 	
 
-    private Person getRandomPerson()
+    @SuppressWarnings("unused")
+	private Person getRandomPerson()
     {
         return personRepository.getPersonByName( "person#"
                 + r.nextInt(this.nrOfPersons) );
@@ -216,6 +216,7 @@ public class TestUtils {
 	/**
 	 * @return
 	 */
+	@SuppressWarnings("unused")
 	private static String getRandomWorkPosition() {
 		final String[] workPosition={"Manager","Marketing","Programmer"};
 		return workPosition[r.nextInt(3)];

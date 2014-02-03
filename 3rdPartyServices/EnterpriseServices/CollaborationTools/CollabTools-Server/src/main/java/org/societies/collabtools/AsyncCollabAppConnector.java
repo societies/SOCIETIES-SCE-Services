@@ -45,6 +45,7 @@ public class AsyncCollabAppConnector implements IAsyncCollabAppConnector {
 	/* (non-Javadoc)
 	 * @see java.util.Observer#update(java.util.Observable, java.lang.Object)
 	 */
+	@SuppressWarnings("unchecked")
 	@Override
 	public void update(Observable o, Object arg) {
 		// TODO Auto-generated method stub
