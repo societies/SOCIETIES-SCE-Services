@@ -64,6 +64,7 @@ import org.societies.collabtools.api.ICollabApps;
  *
  */
 public class Session {
+
 	private static final Logger logger = LoggerFactory.getLogger(Session.class);
 
 
@@ -311,7 +312,7 @@ public class Session {
 			HashMap<String, String[]> ctxSessionHistory = new HashMap<String, String[]>();
 			logger.debug("List of members in session history after person leaves: {}",Arrays.toString(membersList.toArray(new String[0])));
 			ctxSessionHistory.put(Session.MEMBERS_INVITED, membersList.toArray(new String[0]));
-			Node sessionHistoryNode = this.addSessionHistoryStatus(ctxSessionHistory);
+//			Node sessionHistoryNode = this.addSessionHistoryStatus(ctxSessionHistory);
 
 			//				personNode = index.get(Person.NAME, this.getSessionName()).iterator();
 			//				while (personNode.hasNext()) {
@@ -363,12 +364,6 @@ public class Session {
 		this.collabApps.sendKick(member.getName(), collabAppsAvailables, getSessionName());
 	}
 
-	public boolean equals(Object o)
-	{
-		return ((o instanceof Person)) && 
-				(this.underlyingNode.equals(((Person)o).getUnderlyingNode()));
-
-	}
 
 	public Node addSessionHistoryStatus(Map<String, String[]> ctxSessionHistory)
 	{
@@ -477,5 +472,37 @@ public class Session {
 		 }
 		 return firstStatus.getEndNode();
 	 }
+	 
+		/* (non-Javadoc)
+		 * @see java.lang.Object#hashCode()
+		 */
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result
+					+ ((underlyingNode == null) ? 0 : underlyingNode.hashCode());
+			return result;
+		}
+
+		/* (non-Javadoc)
+		 * @see java.lang.Object#equals(java.lang.Object)
+		 */
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			Session other = (Session) obj;
+			if (underlyingNode == null) {
+				if (other.underlyingNode != null)
+					return false;
+			} else if (!underlyingNode.equals(other.underlyingNode))
+				return false;
+			return true;
+		}
 
 }

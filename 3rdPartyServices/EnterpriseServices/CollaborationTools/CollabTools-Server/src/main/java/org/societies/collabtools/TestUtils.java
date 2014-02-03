@@ -49,7 +49,7 @@ import org.xml.sax.SAXException;
 public class TestUtils {
 
     private static final Random r = new Random( System.currentTimeMillis() );
-	private static int nrOfPersons;
+	private int nrOfPersons;
     private PersonRepository personRepository;
     private ContextSubscriber ctxSub;
     AsyncCollabAppConnector asyncIntegration;
@@ -64,7 +64,7 @@ public class TestUtils {
     
 	public void createPersons(int nrOfPersons) throws Exception
     {
-		TestUtils.nrOfPersons = nrOfPersons;
+		this.nrOfPersons = nrOfPersons;
         for ( int i = 0; i < nrOfPersons; i++ )
         {    	
             Person person = personRepository.createPerson("person#" + i);
@@ -174,7 +174,7 @@ public class TestUtils {
     private Person getRandomPerson()
     {
         return personRepository.getPersonByName( "person#"
-                + r.nextInt(TestUtils.nrOfPersons) );
+                + r.nextInt(this.nrOfPersons) );
     }
 
 

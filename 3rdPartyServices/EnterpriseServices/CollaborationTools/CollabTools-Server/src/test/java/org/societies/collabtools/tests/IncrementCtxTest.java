@@ -83,7 +83,7 @@ public class IncrementCtxTest {
 		System.out.println(Arrays.toString(response));
 		response = alchemyObj.incrementString(ctx, EnrichmentTypes.CATEGORY);
 		System.out.println(Arrays.toString(response));
-		Assert.assertNotNull(response.toString(), response);
+		Assert.assertNotNull(Arrays.toString(response), response);
 	}
 	
 	/**
