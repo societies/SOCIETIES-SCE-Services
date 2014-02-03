@@ -403,13 +403,13 @@ var CrowdTaskingApp = function () {
             }
             for (var i = 0; i < comments.length; i++) {
                 var comment = comments[i];
-                var newLi = $('<li data-role="listview">');
+                var newLi = $('<li data-role="listview" style="padding-left:50px">');
 
                 var picUrl = comment.picUrl;
                 if (picUrl == undefined) {
                     picUrl = '/images/pic' + (Math.floor(Math.random() * 4) + 1) + '.png';
                 }
-                newLi.append('<img src="' + picUrl + '" class="ui-li-icon" style="left:12px; top:34px;">');
+                newLi.append('<img src="' + picUrl + '" style="left:12px; top:25px;">');
 
                 //URLs starting with http://, https://, or ftp://
                 replacePattern = /(\b(https?|ftp):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/gim;
@@ -449,13 +449,13 @@ var CrowdTaskingApp = function () {
             list.append('<li data-role="list-divider" role="heading">Minutes:</li>');
             for (var i = 0; i < minutes.length; i++) {
                 var minute = minutes[i];
-                var newLi = $('<li data-role="fieldcontain">');
+                var newLi = $('<li data-role="listview" style="padding-left:50px">');
 
                 var picUrl = minute.picUrl;
                 if (picUrl == undefined) {
                     picUrl = '/images/pic' + (Math.floor(Math.random() * 4) + 1) + '.png';
                 }
-                newLi.append('<img src="' + picUrl + '" class="ui-li-icon" style="left:12px; top:34px;">');
+                newLi.append('<img src="' + picUrl + '" style="left:12px; top:25px;">');
 
                 //URLs starting with http://, https://, or ftp://
                 replacePattern = /(\b(https?|ftp):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/gim;
