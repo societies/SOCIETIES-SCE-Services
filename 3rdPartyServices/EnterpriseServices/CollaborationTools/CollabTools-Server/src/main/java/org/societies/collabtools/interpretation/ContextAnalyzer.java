@@ -78,7 +78,7 @@ public class ContextAnalyzer implements IContextAnalyzer {
 	/**
 	 * 	Context enrichment with Concept and Category
 	 * 
-	 * @param ctxAttribute Context attirbute. e.g LongTermCtxTypes.INTERESTS
+	 * @param ctxAttribute Context attribute. e.g LongTermCtxTypes.INTERESTS
 	 */
 	public void enrichedCtx(String ctxAttribute)
 	{
@@ -125,23 +125,32 @@ public class ContextAnalyzer implements IContextAnalyzer {
 	 * @param person if null will perform with all persons
 	 */
 	public void incrementCtx(final String ctxType, final EnrichmentTypes enrichmentType, Person person) {
+		//Considering all persons to increment when null
 		if (person == null) {
 			ExecutorService executor = Executors.newCachedThreadPool();
 			List<FutureTask<Boolean>> results = new ArrayList<FutureTask<Boolean>>();
 			for (final Person friend :personRepository.getAllPersons()) {
+				//Check if this ctxTyp was incremented
+				if (friend.getArrayLongTermCtx("ORIGINAL_"+ctxType) != null){
+					continue;
+				}
 				// Start thread for the first half of the numbers
 				FutureTask<Boolean> task = new FutureTask<Boolean>(new Callable<Boolean>() {
 					@Override
 					public Boolean call() throws Exception {
 						String[] originalCtx;
-						//Check if this ctxTyp was incremented
-						if (friend.getArrayLongTermCtx("ORIGINAL_"+ctxType) == null) {
-							//Keeping the original ctx information
-							originalCtx = friend.getArrayLongTermCtx(ctxType);
-						}
-						else {
-							originalCtx = friend.getArrayLongTermCtx("ORIGINAL_"+ctxType);
-						}
+						//Keeping the original ctx information
+						originalCtx = friend.getArrayLongTermCtx(ctxType);
+						
+//						//Check if this ctxTyp was incremented
+//						if (friend.getArrayLongTermCtx("ORIGINAL_"+ctxType) == null) {
+//							//Keeping the original ctx information
+//							originalCtx = friend.getArrayLongTermCtx(ctxType);
+//						}
+//						else {
+//							originalCtx = friend.getArrayLongTermCtx("ORIGINAL_"+ctxType);
+//						}
+						
 						//Saving the original ctx in a diferent property
 						friend.setLongTermCtx("ORIGINAL_"+ctxType, originalCtx);
 						//Adding the new ctx info + orignal ctx info
@@ -357,21 +366,21 @@ public class ContextAnalyzer implements IContextAnalyzer {
 
 	public void setupWeightAmongPeople(String CtxAttribute)
 	{
-		log.debug("\r\n\r\n*****Assign weight for {} *****",CtxAttribute);
+		log.info("\r\n\r\n*****Assign weight for {} *****",CtxAttribute);
 		long start = System.currentTimeMillis();
 		for (Person person : personRepository.getAllPersons())
 		{
 			Map<Person, Integer> persons = personRepository.getPersonWithSimilarCtx(person, CtxAttribute);
-			log.info("{} CtxAttribute {}", person.getName(), Arrays.toString(person.getArrayLongTermCtx(CtxAttribute)));
-			log.info(persons.toString());
+			log.debug("{} CtxAttribute {}", person.getName(), Arrays.toString(person.getArrayLongTermCtx(CtxAttribute)));
+			log.info("\r\n\r\nCalculating for person {} \r\n", person.getName());
 			for (Map.Entry<Person, Integer> entry : persons.entrySet()) {
 				//Similarity Formula is: (similar ctx/ personA + similar ctx/personB) / 2
 				float weight = ContextAnalyzer.personCtxSimilarity(entry.getValue(), CtxAttribute, entry.getKey(), person);
 				person.addSimilarityRelationship(entry.getKey(), weight, CtxAttribute);
-				log.debug("Weight {} assigned for person {}", weight, entry.getKey());
+				log.info("Weight {} assigned for person {}", weight, entry.getKey());
 			}
 		}
-		log.debug("*****Weight assigned in {} ms*****\r\n",(System.currentTimeMillis()-start));
+		log.info("*****Weight assigned in {} ms*****\r\n",(System.currentTimeMillis()-start));
 	}
 
 	

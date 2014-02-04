@@ -218,11 +218,11 @@ public class IncrementCtx implements IIncrementCtx {
 		private static final String OUTPUT_XML = "xml";
 		private static final String OUTPUT_RDF = "rdf";
 
-//		private String url;
-//		private String html;
+		//		private String url;
+		//		private String html;
 		private String text;
 		private String outputMode = OUTPUT_XML;
-//		private String customParameters;
+		//		private String customParameters;
 
 
 		public void setText(String text) {
@@ -235,10 +235,10 @@ public class IncrementCtx implements IIncrementCtx {
 		public String getParameterString(){
 			String retString = "";
 			try{
-//				if(url!=null) retString+="&url="+URLEncoder.encode(url,"UTF-8");
-//				if(html!=null) retString+="&html="+URLEncoder.encode(html,"UTF-8");
+				//				if(url!=null) retString+="&url="+URLEncoder.encode(url,"UTF-8");
+				//				if(html!=null) retString+="&html="+URLEncoder.encode(html,"UTF-8");
 				if(text!=null) retString+="&text="+URLEncoder.encode(text,"UTF-8");
-//				if(customParameters!=null) retString+=customParameters;
+				//				if(customParameters!=null) retString+=customParameters;
 				if(outputMode!=null) retString+="&outputMode="+outputMode;
 			}
 			catch(UnsupportedEncodingException e ){

@@ -97,13 +97,14 @@ public class MainTest {
 		test.deleteSocialGraph();
 		
 //		test.menu();
-		test.createPersons(3); //5 people by default
+		test.createPersons(11); //5 people by default
 		
 //		Creating some updates
 		test.createMockLongTermCtx();
+		Thread.sleep(5 * 1000);
 		test.createMockShortTermCtx();
-		test.enrichedCtx(LongTermCtxTypes.INTERESTS);
-		test.setupWeightAmongPeople(LongTermCtxTypes.INTERESTS);
+//		test.enrichedCtx(LongTermCtxTypes.INTERESTS);
+//		test.setupWeightAmongPeople(LongTermCtxTypes.INTERESTS);
 
 		
 //		YouMightKnow ymn = new YouMightKnow(personRepository.getPersonByName("person#"+3), new String[] {"project planning"}, 5);
