@@ -257,10 +257,13 @@ var CrowdTaskingApp = function () {
             error: function (error) {
                 toast(error.responseText);
             },
-            success: function () {
-                $('#meetingStatus').text('Started.');
-                $('#startMeetingButton').hide();
-                $('#attendMeetingButton').show();
+            success: function (meeting) {
+                refreshTasks(showMeetingDetails);
+                /*
+                 $('#meetingStatus').text('Started.');
+                 $('#startMeetingButton').hide();
+                 $('#attendMeetingButton').show();
+                 */
             },
             complete: function () {
                 $('#startMeeting').removeClass('ui-disabled');
@@ -278,7 +281,8 @@ var CrowdTaskingApp = function () {
                 toast(response.responseText);
                 $('#attendMeetingButton').removeClass('ui-disabled');
             },
-            success: function (response) {
+            success: function (meeting) {
+                refreshTasks(showMeetingDetails);
             },
             complete: function () {
             }
@@ -480,8 +484,10 @@ var CrowdTaskingApp = function () {
 
         if (meeting.meetingStatus === 'STARTED') {
             $('#startMeetingButton').hide();
-            if (meeting.userStatus !== 'Checked in.') {
-                $('#attendMeetingButton').show();
+            $('#attendMeetingButton').show();
+            if (meeting.userStatus === 'Checked in.') {
+                $('#attendMeetingButton').addClass('ui-disabled');
+                $('#minuteButton').removeClass('ui-disabled');
             }
             $('#meetingStatus').text('Started.');
         }
@@ -489,6 +495,10 @@ var CrowdTaskingApp = function () {
             $('#startMeetingButton').hide();
             $('#attendMeetingButton').hide();
             $('#meetingStatus').text('Finished.');
+        }
+        if (meeting.meetingStatus === 'PAUSED') {
+            $('#startMeetingButton').text('Resume');
+            $('#meetingStatus').text('Paused.');
         }
         displayMinutes(meeting);
     };

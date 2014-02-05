@@ -45,7 +45,7 @@ class MeetingMinuteJs {
     public String picUrl;
 
     MeetingMinuteJs(MeetingMinute minute) {
-        timestamp = new Date();
+        timestamp = minute.timestamp;
         this.text = minute.minute;
         CTUser user = UsersAPI.getUser(minute.userRef);
         userId = user.getId();

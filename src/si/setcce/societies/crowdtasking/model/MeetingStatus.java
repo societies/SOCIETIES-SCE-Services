@@ -6,5 +6,6 @@ package si.setcce.societies.crowdtasking.model;
 public enum MeetingStatus {
     CREATED,
     STARTED,
+    PAUSED,
     FINISHED
 }

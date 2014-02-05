@@ -101,9 +101,9 @@ public class Meeting {
         return csRef;
     }
 
-    public void setCsRef(Ref<CollaborativeSpace> csRef) {
-        this.csRef = csRef;
-    }
+//    public void setCsRef(Ref<CollaborativeSpace> csRef) {
+//        this.csRef = csRef;
+//    }
 
     public CollaborativeSpace getCollaborativeSpace() {
         if (csRef == null) {
@@ -135,9 +135,9 @@ public class Meeting {
         return endTime;
     }
 
-    public void setEndTime(Date endTime) {
-        this.endTime = endTime;
-    }
+//    public void setEndTime(Date endTime) {
+//        this.endTime = endTime;
+//    }
 
     public Set<Ref<CTUser>> getInvitedUsers() {
         return users;
@@ -199,9 +199,9 @@ public class Meeting {
         return meetingMinutes;
     }
 
-    public void setMeetingMinutes(List<MeetingMinute> meetingMinutes) {
-        this.meetingMinutes = meetingMinutes;
-    }
+//    public void setMeetingMinutes(List<MeetingMinute> meetingMinutes) {
+//        this.meetingMinutes = meetingMinutes;
+//    }
 
     public Set<Ref<CTUser>> getAttendees() {
         if (attendees == null) {
@@ -210,9 +210,9 @@ public class Meeting {
         return attendees;
     }
 
-    public void setAttendees(Set<Ref<CTUser>> attendees) {
-        this.attendees = attendees;
-    }
+//    public void setAttendees(Set<Ref<CTUser>> attendees) {
+//        this.attendees = attendees;
+//    }
 
     public void addAttendee(CTUser attendee) {
         if (attendees == null) {
@@ -233,5 +233,13 @@ public class Meeting {
     public void start() {
         setMeetingStatus(MeetingStatus.STARTED);
         attendees = new HashSet<>();
+    }
+
+    public void pause() {
+        setMeetingStatus(MeetingStatus.PAUSED);
+    }
+
+    public void finish() {
+        setMeetingStatus(MeetingStatus.FINISHED);
     }
 }

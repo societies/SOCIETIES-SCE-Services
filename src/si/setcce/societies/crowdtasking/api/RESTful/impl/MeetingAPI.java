@@ -30,7 +30,6 @@ import com.google.gson.Gson;
 import com.googlecode.objectify.Key;
 import si.setcce.societies.crowdtasking.NotificationsSender;
 import si.setcce.societies.crowdtasking.api.RESTful.IMeetingAPI;
-import si.setcce.societies.crowdtasking.api.RESTful.json.MeetingDetails4CSignJS;
 import si.setcce.societies.crowdtasking.api.RESTful.json.MeetingJS;
 import si.setcce.societies.crowdtasking.api.RESTful.json.TaskJS;
 import si.setcce.societies.crowdtasking.gcm.GcmMessage;
@@ -88,8 +87,8 @@ public class MeetingAPI implements IMeetingAPI {
                 if (collaborativeSign.getMeetingId() != null) {
                     meeting = MeetingDAO.loadMeeting(collaborativeSign.getMeetingId());
                     log.info("sending meeting details");
-                    MeetingDetails4CSignJS meetingDetails = new MeetingDetails4CSignJS(meeting);
-                    return gson.toJson(meetingDetails);
+                    MeetingJS meetingJS = new MeetingJS(meeting);
+                    return gson.toJson(meetingJS);
                 } else {
                     log.warning("No meeting id in community sign");
                 }
@@ -103,39 +102,6 @@ public class MeetingAPI implements IMeetingAPI {
                 MeetingAPI.attendMeeting(UsersAPI.getLoggedInUser(request.getSession()), meeting, collaborativeSign);
                 return "Meeting check-in.";
         }
-
-/*
-        if ("data".equalsIgnoreCase(querytype)) {
-            if (meetingId == null) {
-                return "Missing id.";
-            }
-            Gson gson = new Gson();
-            // get meeting
-            Meeting meeting = MeetingDAO.loadMeeting(meetingId);
-            return gson.toJson(new MeetingJS(meeting));
-        }
-        if ("communitysign".equalsIgnoreCase(querytype)) {
-            CollaborativeSign collaborativeSign = getCollaborativeSign();
-            if (collaborativeSign.getMeetingId() != null) {
-                Meeting meeting = MeetingDAO.loadMeeting(collaborativeSign.getMeetingId());
-                Gson gson = new Gson();
-                log.info("sending meeting details");
-                MeetingDetails4CSignJS meetingDetails = new MeetingDetails4CSignJS(meeting);
-                for (UserJS user : meetingDetails.users) {
-                    log.info("participant: " + user.username);
-                }
-                return gson.toJson(meetingDetails);
-            } else {
-                log.warning("No meeting id in community sign");
-            }
-        }
-        if ("cs".equalsIgnoreCase(querytype)) {
-            return getMeetingsForCS(csId);
-        }
-        if ("attend".equalsIgnoreCase(querytype)) {
-            return "";
-        }
-*/
         return Response.status(Status.BAD_REQUEST).entity("Request not understood.").type("text/plain").build().toString();
     }
 
@@ -225,6 +191,7 @@ public class MeetingAPI implements IMeetingAPI {
                 return postMinute(meetingIdToSign, user, minute);
         }
 
+        // finalize meeting
         if ("communitysign".equalsIgnoreCase(querytype)) {
             Meeting meeting = MeetingDAO.loadMeeting(meetingIdToSign);
             if (meeting == null) {
@@ -233,11 +200,12 @@ public class MeetingAPI implements IMeetingAPI {
             log.info("downloadUrl: " + downloadUrl);
             meeting.setDownloadUrl(downloadUrl);
             NotificationsSender.meetingIsReadyToBeSigned(meeting);
-//            meeting.setMeetingStatus(MeetingStatus.CREATED);
+            meeting.finish();
             MeetingDAO.saveMeeting(meeting);
             return Response.ok().entity("The meeting minutes are ready to be signed.").build();
 
         }
+        // start meeting
         if ("setActive".equals(querytype) || "attend".equals(querytype)) {
             Meeting meeting = MeetingDAO.loadMeeting(meetingIdToSign);
             if (meeting == null) {
@@ -245,16 +213,19 @@ public class MeetingAPI implements IMeetingAPI {
             }
             CollaborativeSign collaborativeSign = getCollaborativeSign();
             if ("setActive".equals(querytype)) {
+                Meeting oldMeeting = MeetingDAO.loadMeeting(collaborativeSign.getMeetingId());
+                oldMeeting.pause();
+                MeetingDAO.saveMeeting(oldMeeting);
                 collaborativeSign.setMeetingId(meetingIdToSign);
                 setCollaborativeSign(collaborativeSign);
-                MeetingDetails4CSignJS meetingDetails = new MeetingDetails4CSignJS(meeting);
-                Gson gson = new Gson();
+                meeting.start();
+                meeting.addAttendee(user);
+                MeetingDAO.saveMeeting(meeting);
                 Parameters parameters = new Parameters();
                 parameters.addParameter(GcmMessage.PARAMETER_ACTION, GcmMessage.ACTION_SET_MEETING);
                 parameters.addParameter(GcmMessage.PARAMETER_MESSAGE, "The meeting is set");
-                NotificationsSender.sendGCMMessage(getDeviceRegId(collaborativeSign), parameters.toString(), gson.toJson(meetingDetails), null);
-                meeting.start();
-                MeetingDAO.saveMeeting(meeting);
+                Gson gson = new Gson();
+                NotificationsSender.sendGCMMessage(getDeviceRegId(collaborativeSign), parameters.toString(), gson.toJson(new MeetingJS(meeting)), null);
                 return Response.ok().entity("The meeting is set.").build();
             }
             if ("attend".equals(querytype)) {
