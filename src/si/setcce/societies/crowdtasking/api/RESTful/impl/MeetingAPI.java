@@ -35,7 +35,10 @@ import si.setcce.societies.crowdtasking.api.RESTful.json.MeetingJS;
 import si.setcce.societies.crowdtasking.api.RESTful.json.TaskJS;
 import si.setcce.societies.crowdtasking.gcm.GcmMessage;
 import si.setcce.societies.crowdtasking.gcm.Parameters;
-import si.setcce.societies.crowdtasking.model.*;
+import si.setcce.societies.crowdtasking.model.CTUser;
+import si.setcce.societies.crowdtasking.model.CollaborativeSign;
+import si.setcce.societies.crowdtasking.model.Meeting;
+import si.setcce.societies.crowdtasking.model.Task;
 import si.setcce.societies.crowdtasking.model.dao.MeetingDAO;
 import si.setcce.societies.crowdtasking.model.dao.TaskDao;
 
@@ -230,7 +233,7 @@ public class MeetingAPI implements IMeetingAPI {
             log.info("downloadUrl: " + downloadUrl);
             meeting.setDownloadUrl(downloadUrl);
             NotificationsSender.meetingIsReadyToBeSigned(meeting);
-            meeting.setMeetingStatus(MeetingStatus.CREATED);
+//            meeting.setMeetingStatus(MeetingStatus.CREATED);
             MeetingDAO.saveMeeting(meeting);
             return Response.ok().entity("The meeting minutes are ready to be signed.").build();
 
