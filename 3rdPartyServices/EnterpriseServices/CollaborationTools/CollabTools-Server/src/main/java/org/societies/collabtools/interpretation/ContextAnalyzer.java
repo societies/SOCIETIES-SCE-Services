@@ -121,7 +121,7 @@ public class ContextAnalyzer implements IContextAnalyzer {
 	/**
 	 * 
 	 * @param ctxType Long term Context type. e.g LongTermCtxTypes.INTERESTS
-	 * @param enrichmentType concept or category
+	 * @param enrichmentType concept, category or even both
 	 * @param person if null will perform with all persons
 	 */
 	public void incrementCtx(final String ctxType, final EnrichmentTypes enrichmentType, Person person) {

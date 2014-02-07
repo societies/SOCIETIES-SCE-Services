@@ -145,7 +145,8 @@ public class Person extends Observable
 		List<String> list = new ArrayList<String>();
 		for(String s : values) {
 			if(s != null && s.length() > 0) {
-				list.add(s);
+				//using trim to remove white space
+				list.add(s.trim());
 			}
 		}
 		values = list.toArray(new String[list.size()]);

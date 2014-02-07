@@ -32,13 +32,13 @@ import java.util.Hashtable;
 import java.util.Random;
 import java.util.Set;
 
-import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 import org.neo4j.graphdb.index.Index;
+import org.neo4j.helpers.collection.MapUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.societies.collabtools.acquisition.LongTermCtxTypes;
@@ -47,14 +47,13 @@ import org.societies.collabtools.acquisition.PersonRepository;
 import org.societies.collabtools.acquisition.ShortTermCtxTypes;
 import org.societies.collabtools.api.IIncrementCtx.EnrichmentTypes;
 import org.societies.collabtools.interpretation.ContextAnalyzer;
-import org.societies.collabtools.runtime.CollabApps;
 import org.societies.collabtools.runtime.Operators;
 import org.societies.collabtools.runtime.SessionRepository;
 
 /**
  * ContextAnalyzer unit tests
  *
- * @author Christopher Viana Lima
+ * @author Christopher Lima
  *
  */
 public class ContextAnalyzerTest {
@@ -64,10 +63,10 @@ public class ContextAnalyzerTest {
 	
 	private static final Random r = new Random( System.currentTimeMillis() );
 	private  GraphDatabaseService personGraphDb, sessionGraphDb;
-	private  Index<Node> indexPerson, indexSession, indexShortTermCtx;
+//	private  Index<Node> indexShortTermCtx;
 	private  PersonRepository personRepository;
 
-	private static SessionRepository sessionRepository;
+//	private static SessionRepository sessionRepository;
 	private ContextAnalyzer ctxRsn;
 
 
@@ -79,11 +78,9 @@ public class ContextAnalyzerTest {
 		int random = new Random().nextInt(100);
 		personGraphDb = new GraphDatabaseFactory().newEmbeddedDatabase("target/persontestdb00"  + random);
 		sessionGraphDb = new GraphDatabaseFactory().newEmbeddedDatabase("target/sessiontestdb00"  + random);
-	    indexPerson = personGraphDb.index().forNodes("PersonNodes");
-	    indexSession = sessionGraphDb.index().forNodes("SessionNodes");
-	    indexShortTermCtx = personGraphDb.index().forNodes("CtxNodes");
+//	    indexShortTermCtx = personGraphDb.index().forNodes("CtxNodes", MapUtil.stringMap("to_lower_case", "true" ) );
 		personRepository = new PersonRepository(personGraphDb);
-//		sessionRepository = new SessionRepository(sessionGraphDb,indexSession, new CollabApps());
+//		sessionRepository = new SessionRepository(sessionGraphDb, new CollabApps());
 		
 		LOG.info("personGraphDb path: "+"target/persontestdb00"  + random);
 //		LOG.info("sessionGraphDb path: "+"target/sessiontestdb00"  + random);
@@ -182,7 +179,7 @@ public class ContextAnalyzerTest {
 		//Twice for test
 		ctxRsn.incrementCtx(LongTermCtxTypes.INTERESTS, EnrichmentTypes.CONCEPT, null);
 		ctxRsn.setupWeightAmongPeople(LongTermCtxTypes.INTERESTS);
-		ctxRsn.incrementCtx(LongTermCtxTypes.INTERESTS, EnrichmentTypes.CONCEPT, null);
+		ctxRsn.incrementCtx(LongTermCtxTypes.INTERESTS, EnrichmentTypes.CATEGORY, null);
 		ctxRsn.setupWeightAmongPeople(LongTermCtxTypes.INTERESTS);
 		Hashtable<String, HashSet<Person>> matchingRules = new Hashtable<String, HashSet<Person>>(10,10);
 		matchingRules = ctxRsn.getPersonsBySimilarity("session", personHashSet, LongTermCtxTypes.INTERESTS);
