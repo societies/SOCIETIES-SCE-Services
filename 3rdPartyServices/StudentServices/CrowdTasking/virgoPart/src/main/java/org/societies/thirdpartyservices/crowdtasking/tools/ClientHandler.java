@@ -35,12 +35,6 @@ import org.slf4j.LoggerFactory;
 import org.societies.thirdpartyservices.crowdtasking.CrowdTasking;
 
 
-/**
- * Describe your class here...
- *
- * @author Simon Jureša
- *
- */
 public class ClientHandler implements Runnable {
 
 	Logger log = LoggerFactory.getLogger(this.getClass());
@@ -48,7 +42,7 @@ public class ClientHandler implements Runnable {
 	private ObjectOutputStream out ;
 	private ObjectInputStream in = null;
 
-	private String cssId;
+	private String clientMessage;
 	private CrowdTasking crowdTasking;
 
 	public ClientHandler(Socket socket, CrowdTasking crowdTasking){
@@ -86,13 +80,13 @@ public class ClientHandler implements Runnable {
 			while(reading){
 				x=in.readObject();
 				if(x instanceof String){
-					cssId = (String)x;			
-					this.log.debug("received cssId: " + cssId + " from Android");
+					clientMessage = (String)x;			
+					this.log.info("Received a message from Android: " + clientMessage);
 					if (crowdTasking.getMyServiceID() != null){
-						this.sendMessage(crowdTasking.getMyServiceID().toString());
+						this.sendMessage(crowdTasking.getMyServiceID().getServiceInstanceIdentifier());
 					}
 					else {
-						this.sendMessage("I am a message from the Virgo.");
+						this.sendMessage("No service id.");
 					}
 				}
 			}		
@@ -108,7 +102,7 @@ public class ClientHandler implements Runnable {
 	public void sendMessage(String message){
 		this.log.debug("In sendMessage");
 		try{
-			this.log.debug("Attempting to send location: " + message);
+			this.log.debug("Attempting to send service id: " + message);
 			out.writeObject(message);
 			this.log.debug("Message sent to client: " + message);
 			out.flush();

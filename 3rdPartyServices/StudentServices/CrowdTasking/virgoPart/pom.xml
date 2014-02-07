@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<!-- change the artifactid to your project artifactid -->
 	<groupId>org.societies.thirdpartyservices.crowdtasking</groupId>
-	<artifactId>CrowdTaskingVirgoPart</artifactId>
+	<artifactId>CrowdTaskingClient</artifactId>
 	<packaging>bundle</packaging>
 	<version>0.0.1-SNAPSHOT</version>
 
@@ -27,7 +27,6 @@
 	</parent>
 
 	<dependencies>
-		<!-- add your dependencies here -->
 		<dependency>
 			<groupId>org.societies.api.external</groupId>
 			<artifactId>societies-api</artifactId>
