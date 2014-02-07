@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/mainLayout"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#000000"
+    android:clickable="true"
+    android:onClick="flipSide">
+
+    <TextView
+        android:id="@+id/lblTitle"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="300dp"
+        android:textColor="#FFFFFF"
+        android:textSize="100dp"
+        android:text="Collaborative Table"
+        android:gravity="center_horizontal"/>
+
+    <TextView
+        android:id="@+id/lblCreated"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="50dp"
+        android:text="Created by SETCCE"
+        android:textColor="#FFFFFF"
+        android:gravity="center_horizontal"
+        android:textSize="50dp"/>
+
+    <TextView
+        android:id="@+id/lblDeveloped"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="50dp"
+        android:text="Developed by\nClive Cauchi"
+        android:textColor="#FFFFFF"
+        android:gravity="center_horizontal"
+        android:textSize="25dp"/>
+
+</LinearLayout>

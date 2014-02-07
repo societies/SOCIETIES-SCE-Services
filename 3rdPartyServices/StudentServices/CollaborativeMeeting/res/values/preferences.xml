@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="crowdTaskingServerUsers">http://crowdtasking.appspot.com/rest/meeting/communitysign</string>
+    <string name="crowdTaskingServerMinutes">http://crowdtasking.appspot.com/rest/meeting/communitysign</string>
+    <string name="crowdTaskingRegisterGcm">http://crowdtasking.appspot.com/rest/meeting/registerCollaborativeSign4GCM</string>
+<!--
+    <string name="crowdTaskingServerUsers">http://192.168.1.30:8888/rest/meeting/communitysign</string>
+    <string name="crowdTaskingServerMinutes">http://192.168.1.30:8888/rest/meeting/communitysign</string>
+    <string name="crowdTaskingRegisterGcm">http://192.168.1.30:8888/rest/meeting/registerCollaborativeSign4GCM</string>
+-->
+
+    <string name="communitySignatureNotificationUrl">http://192.168.1.92/societies/community-signature/notify</string>
+    <string name="communitySignatureNumSignersThreshold">3</string>
+    
+</resources>

@@ -1,0 +1,32 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item android:id="@+id/menu_addUser"
+        android:icon="@drawable/ic_action_user_add"
+        android:title="@string/action_addUser"
+        android:showAsAction="ifRoom|withText" />
+
+    <item android:id="@+id/menu_edit"
+        android:icon="@drawable/ic_action_edit"
+        android:title="@string/action_edit"
+        android:showAsAction="ifRoom|withText" />
+
+    <item android:id="@+id/menu_delete"
+        android:icon="@drawable/ic_action_delete"
+        android:title="@string/action_delete"
+        android:showAsAction="ifRoom|withText" />
+    
+    <item android:id="@+id/menu_finalize"
+        android:icon="@drawable/ic_action_finalize"
+        android:title="@string/action_finalize"
+        android:showAsAction="ifRoom|withText" />
+    
+    <item android:id="@+id/menu_showQrCodeOfDownloadUri"
+        android:icon="@drawable/ic_action_qr"
+        android:title="@string/action_showQrCodeOfDownloadUri"
+        android:showAsAction="ifRoom|withText" />
+    
+    <item android:id="@+id/menu_newMeeting"
+        android:icon="@drawable/ic_action_user_add"
+        android:title="@string/action_newMeeting"
+        android:showAsAction="ifRoom|withText" />
+</menu>

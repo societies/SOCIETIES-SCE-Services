@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Collaborative Sign</string>
+    <string name="action_settings">Settings</string>
+    <string name="action_finalize">Finalize</string>
+    <string name="action_showQrCodeOfDownloadUri">Show Document URL</string>
+    <string name="user">User</string>
+    <string name="action_edit">Edit</string>
+    <string name="action_delete">Delete</string>
+    <string name="action_renameUser">Rename User</string>
+    <string name="action_addUser">Add User</string>
+    <string name="action_newMeeting">New Meeting</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+    <string name="editMinute">Edit Minute</string>
+    <string name="enterMinute">Enter Minute</string>
+    <string name="newName">New name</string>
+    <string name="confirmDeleteMinute">Really delete selected minute</string>
+    <string name="confirmDeleteUser">Really delete user</string>
+    <string name="confirmNewMeeting">Discard current meeting and start a new one?</string>
+    <string name="defaultMeetingSubject">Conversation</string>
+    <string name="minutesAreDistributed">Meeting minutes are distributed to the participants.</string>
+    <string name="retrievingDataFromNetwork">Getting new data from server</string>
+    <string name="userExists">User already exists: </string>
+</resources>
