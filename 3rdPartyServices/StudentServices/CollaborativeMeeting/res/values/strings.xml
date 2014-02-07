@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">Collaborative Sign</string>
+    <string name="app_name">Collaborative Meeting</string>
     <string name="action_settings">Settings</string>
     <string name="action_finalize">Finalize</string>
     <string name="action_showQrCodeOfDownloadUri">Show Document URL</string>
