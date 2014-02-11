@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+    <PreferenceCategory>
+        <EditTextPreference 
+            android:title="@string/ipAddressPreference" 
+            android:key="ipAddress" 
+            android:defaultValue="137.195.27.87"/>
+        <EditTextPreference 
+            android:title="@string/portNumPreference" 
+            android:key="port" 
+            android:defaultValue="38580"/>
+    </PreferenceCategory>
+    
+
+</PreferenceScreen>
