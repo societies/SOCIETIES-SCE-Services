@@ -150,7 +150,7 @@ public class Person extends Observable
 			}
 		}
 		values = list.toArray(new String[list.size()]);
-		System.out.println(Arrays.toString(values));
+		System.out.println("Values added: "+Arrays.toString(values));
 
 		try
 		{

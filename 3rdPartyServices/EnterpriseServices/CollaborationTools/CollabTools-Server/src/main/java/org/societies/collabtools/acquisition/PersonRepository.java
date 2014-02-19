@@ -102,7 +102,7 @@ public class PersonRepository
             if (alreadyExist != null)
             {
                 tx.failure();
-                throw new Exception("Person with this name already exists ");
+                throw new Exception("Person with this name already exists: "+alreadyExist.getProperty(LongTermCtxTypes.NAME));
             }
             newPersonNode.setProperty(LongTermCtxTypes.NAME, name);
             indexPerson.add(newPersonNode, LongTermCtxTypes.NAME, name);
