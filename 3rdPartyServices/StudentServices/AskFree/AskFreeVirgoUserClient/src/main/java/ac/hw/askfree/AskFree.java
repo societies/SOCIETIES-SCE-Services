@@ -25,38 +25,22 @@
 package ac.hw.askfree;
 
 import java.net.MalformedURLException;
-import java.net.Socket;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.societies.api.comm.xmpp.interfaces.ICommManager;
 import org.societies.api.context.broker.ICtxBroker;
-import org.societies.api.context.model.CtxAttribute;
-import org.societies.api.context.model.CtxAttributeTypes;
-import org.societies.api.context.model.CtxEntity;
-import org.societies.api.context.model.CtxEntityIdentifier;
-import org.societies.api.context.model.CtxEntityTypes;
-import org.societies.api.context.model.CtxIdentifier;
-import org.societies.api.context.model.CtxModelType;
 import org.societies.api.css.devicemgmt.display.IDisplayDriver;
 import org.societies.api.css.devicemgmt.display.IDisplayableService;
 import org.societies.api.identity.IIdentity;
-import org.societies.api.identity.IIdentityManager;
-import org.societies.api.identity.InvalidFormatException;
 import org.societies.api.identity.Requestor;
-import org.societies.api.identity.RequestorService;
 import org.societies.api.osgi.event.CSSEvent;
 import org.societies.api.osgi.event.CSSEventConstants;
 import org.societies.api.osgi.event.EventListener;
 import org.societies.api.osgi.event.EventTypes;
 import org.societies.api.osgi.event.IEventMgr;
 import org.societies.api.osgi.event.InternalEvent;
-import org.societies.api.schema.servicelifecycle.model.ServiceResourceIdentifier;
 import org.societies.api.services.IServices;
 import org.societies.api.services.ServiceMgmtEvent;
 import org.societies.api.services.ServiceMgmtEventType;
@@ -71,53 +55,18 @@ import org.societies.api.services.ServiceMgmtEventType;
  */
 public class AskFree extends EventListener implements IAskFreeClient, IDisplayableService{
 
+	Logger logging = LoggerFactory.getLogger(this.getClass());
+
 	private IDisplayDriver displayDriverService;
 	private IServices serviceMgmt;
 	private IEventMgr eventMgr;
-
 	private IAskFreeServerRemote askFreeCommsClient;
-	Logger logging = LoggerFactory.getLogger(this.getClass());
 	private IIdentity serverIdentity;
 	private IIdentity userIdentity;
 	private ICtxBroker ctxBroker;
-
-
-	/**
-	 * @return the ctxBroker
-	 */
-	public ICtxBroker getCtxBroker() {
-		return ctxBroker;
-	}
-
-	/**
-	 * @param ctxBroker the ctxBroker to set
-	 */
-	public void setCtxBroker(ICtxBroker ctxBroker) {
-		this.ctxBroker = ctxBroker;
-	}
-
+	private ICommManager commManager;
 	private Requestor requestor;
 
-
-
-	//private IIdentity userIdentity;
-
-	private ICommManager commManager;
-
-
-	/**
-	 * @return the eventMgr
-	 */
-	public IEventMgr getEventMgr() {
-		return eventMgr;
-	}
-
-	/**
-	 * @param eventMgr the eventMgr to set
-	 */
-	public void setEventMgr(IEventMgr eventMgr) {
-		this.eventMgr = eventMgr;
-	}
 
 	public void init(){
 
@@ -140,21 +89,8 @@ public class AskFree extends EventListener implements IAskFreeClient, IDisplayab
 		ContextEventListener listener = new ContextEventListener(this, this.commManager.getIdManager().getThisNetworkNode(), this.ctxBroker);
 		listener.registerForSymLocChanges();
 	}
-
-	//THIS IS NEW 
-	public void updateUserLocation(String location)
-	{
-		//SEND MESSAGE TO SERVER
-		if(this.serverIdentity!=null)
-		{
-			askFreeCommsClient.sendLocation(this.serverIdentity, location);
-		}
-		else
-		{
-			if(logging.isDebugEnabled()) logging.debug("Opps! Something went wrong, serverID is not set!!!");
-		}
-	}
-
+	
+	
 	/*
 	 * Register for events from SLM so I can get my service parameters and finish initialising
 	 */
@@ -179,9 +115,7 @@ public class AskFree extends EventListener implements IAskFreeClient, IDisplayab
 		this.logging.debug("Unsubscribed from "+EventTypes.SERVICE_LIFECYCLE_EVENT+" events");
 	}
 
-	/* (non-Javadoc)
-	 * @see org.societies.api.osgi.event.EventListener#handleInternalEvent(org.societies.api.osgi.event.InternalEvent)
-	 */
+	
 	@Override
 	public void handleInternalEvent(InternalEvent event) {
 		// This method is called after the bundle has been successfully installed on virgo
@@ -203,6 +137,18 @@ public class AskFree extends EventListener implements IAskFreeClient, IDisplayab
 		}
 	}
 
+	public void updateUserLocation(String location)
+	{
+		//SEND MESSAGE TO SERVER
+		if(this.serverIdentity!=null)
+		{
+			askFreeCommsClient.sendLocation(this.serverIdentity, location);
+		}
+		else
+		{
+			if(logging.isDebugEnabled()) logging.debug("Opps! Something went wrong, serverID is not set!!!");
+		}
+	}
 
 	/**
 	 * @return the serviceMgmt
@@ -250,8 +196,6 @@ public class AskFree extends EventListener implements IAskFreeClient, IDisplayab
 	public void setRequestor(Requestor requestor) {
 		this.requestor = requestor;
 	}
-
-
 
 	/**
 	 * @return the userIdentity
@@ -335,5 +279,33 @@ public class AskFree extends EventListener implements IAskFreeClient, IDisplayab
 	 */
 	public void setCommManager(ICommManager commManager) {
 		this.commManager = commManager;
+	}
+
+	/**
+	 * @return the ctxBroker
+	 */
+	public ICtxBroker getCtxBroker() {
+		return ctxBroker;
+	}
+
+	/**
+	 * @param ctxBroker the ctxBroker to set
+	 */
+	public void setCtxBroker(ICtxBroker ctxBroker) {
+		this.ctxBroker = ctxBroker;
+	}
+
+	/**
+	 * @return the eventMgr
+	 */
+	public IEventMgr getEventMgr() {
+		return eventMgr;
+	}
+
+	/**
+	 * @param eventMgr the eventMgr to set
+	 */
+	public void setEventMgr(IEventMgr eventMgr) {
+		this.eventMgr = eventMgr;
 	}
 }

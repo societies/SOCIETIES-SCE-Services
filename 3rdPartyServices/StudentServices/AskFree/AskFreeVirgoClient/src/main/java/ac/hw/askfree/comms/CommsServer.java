@@ -49,6 +49,8 @@ import ac.hw.askfree.AskFree;
  *
  */
 public class CommsServer implements IFeatureServer{
+	
+	private static Logger LOG = LoggerFactory.getLogger(CommsServer.class);
 
 	private static final List<String> NAMESPACES = Collections.unmodifiableList(
 
@@ -56,27 +58,8 @@ public class CommsServer implements IFeatureServer{
 	private static final List<String> PACKAGES = Collections.unmodifiableList(
 			Arrays.asList("org.societies.api.schema.askfree.serverbean"));
 
-
-
 	private ICommManager commManager;
 	private AskFree askFreeServer;
-
-	private static Logger LOG = LoggerFactory.getLogger(CommsServer.class);
-
-	/**
-	 * @return the commManager
-	 */
-	public ICommManager getCommManager() {
-		return commManager;
-	}
-
-	/**
-	 * @param commManager the commManager to set
-	 */
-	public void setCommManager(ICommManager commManager) {
-		this.commManager = commManager;
-	}
-
 
 	//METHODS
 	public CommsServer() {
@@ -123,9 +106,7 @@ public class CommsServer implements IFeatureServer{
 				String location = ((AskFreeServerBean) payload).getUserLocation();
 				askFreeServer.setUserLocation(stanza.getFrom().getBareJid(), location);
 				askFreeServer.pushToAndroid(stanza.getFrom().getBareJid());
-
 			}
-
 		}
 	}
 
@@ -147,6 +128,20 @@ public class CommsServer implements IFeatureServer{
 	 */
 	public void setAskFreeServer(AskFree askFreeServer) {
 		this.askFreeServer = askFreeServer;
+	}
+	
+	/**
+	 * @return the commManager
+	 */
+	public ICommManager getCommManager() {
+		return commManager;
+	}
+
+	/**
+	 * @param commManager the commManager to set
+	 */
+	public void setCommManager(ICommManager commManager) {
+		this.commManager = commManager;
 	}
 
 }

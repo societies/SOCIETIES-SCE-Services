@@ -55,15 +55,14 @@ import ac.hw.askfree.AskFree;
  */
 public class ContextEventListener implements CtxChangeEventListener{
 
-	private final IAskFreeClient client;
 	Logger LOG = LoggerFactory.getLogger(this.getClass());
+	
+	private final IAskFreeClient client;
 	private Requestor requestor;
-
 	private ICtxBroker ctxBroker;
 	private IIdentity userIdentity;
 
-
-
+	
 	public ContextEventListener(IAskFreeClient client, IIdentity userIdentity, ICtxBroker ctxBroker){
 		this.ctxBroker=ctxBroker;
 		this.client=client;
@@ -107,7 +106,6 @@ public class ContextEventListener implements CtxChangeEventListener{
 	public void onModification(final CtxChangeEvent event) {
 		this.LOG.debug("Received context event: "+event.getId().toUriString());
 
-
 		CtxIdentifier ctxIdentifier = event.getId();
 
 		LOG.debug("ctxIdentifier " + ctxIdentifier);
@@ -119,13 +117,11 @@ public class ContextEventListener implements CtxChangeEventListener{
 				LOG.debug("futureAttribute " + ctxAttribute.getStringValue());
 				LOG.debug("Received context event for "+ctxAttribute.getType()+" with value: "+ctxAttribute.getStringValue());
 
-
 				client.updateUserLocation(ctxAttribute.getStringValue());
 			}
 			else{
 				LOG.debug("Context Attribute is null");
 			}
-
 		} catch (CtxException e) {
 			e.printStackTrace();
 		} catch (InterruptedException e) {
@@ -138,17 +134,12 @@ public class ContextEventListener implements CtxChangeEventListener{
 	}
 
 
-
-
-
-
 	/* (non-Javadoc)
 	 * @see org.societies.api.context.event.CtxChangeEventListener#onRemoval(org.societies.api.context.event.CtxChangeEvent)
 	 */
 	@Override
 	public void onRemoval(CtxChangeEvent arg0) {
 		// TODO Auto-generated method stub
-
 	}
 
 	/* (non-Javadoc)
@@ -159,7 +150,4 @@ public class ContextEventListener implements CtxChangeEventListener{
 		// TODO Auto-generated method stub
 
 	}
-
-
-
 }

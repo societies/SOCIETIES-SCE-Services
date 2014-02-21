@@ -39,7 +39,7 @@
 			<version>1.9.7</version>
 		</dependency>
 
-		<dependency>
+ 		<dependency> 
            <groupId>org.societies.android.remote.helper</groupId>
            <artifactId>SocietiesAndroidRemoteHelpers</artifactId>
            <version>${release.version}</version>

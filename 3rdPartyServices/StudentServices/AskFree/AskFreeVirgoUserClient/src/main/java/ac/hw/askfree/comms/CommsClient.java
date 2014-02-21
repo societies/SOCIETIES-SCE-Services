@@ -65,7 +65,7 @@ public class CommsClient implements ICommCallback, IAskFreeServerRemote{
 	public void InitService() {
 		//REGISTER OUR ServiceManager WITH THE XMPP Communication Manager
 		try {
-			if(this.logging.isDebugEnabled()) this.logging.debug("Registering with comms manager");
+			this.logging.debug("Registering with comms manager");
 			getCommManager().register(this);
 		} catch (CommunicationException e) {
 			e.printStackTrace();
@@ -79,14 +79,14 @@ public class CommsClient implements ICommCallback, IAskFreeServerRemote{
 	@Override
 	public void sendLocation(IIdentity destinationIdentity,
 			String location) {
-		if(this.logging.isDebugEnabled()) this.logging.debug("Sending new locagtion to AskFreeServer");
+		this.logging.debug("Sending new location to AskFreeServer");
 		AskFreeServerBean serverBean = new AskFreeServerBean();
 		serverBean.setMethod(AskFreeMethodType.UPDATE_USER_LOCATION);
 		serverBean.setUserLocation(location);
 		Stanza stanza = new Stanza(destinationIdentity);
 		try {
 			this.commManager.sendMessage(stanza, serverBean);
-			if(this.logging.isDebugEnabled()) this.logging.debug("AskFreeBean has sent successfully!");
+			this.logging.debug("AskFreeBean has sent successfully!");
 		} catch (CommunicationException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

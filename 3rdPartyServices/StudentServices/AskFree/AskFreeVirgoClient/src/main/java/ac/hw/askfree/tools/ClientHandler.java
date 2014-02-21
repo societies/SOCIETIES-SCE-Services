@@ -30,6 +30,8 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -79,20 +81,46 @@ public class ClientHandler implements Runnable {
 	}
 
 	private void getClientMessage(){
+		JSONObject jObj = null;
+		String json = "";
+		
 		try{
 			Object x;
 			boolean reading = true;
 			while(reading){
 				x=in.readObject();
-				if(x instanceof String){
-					cssId = (String)x;			
-					this.log.info("received cssId: " + cssId + " from Android");
-					//ADD THIS TO THE MAP (OVERWRITES ANY PREVIOUS)
-					askFree.addHandler(cssId, this);
-					if (askFree.getSymbolicLocation(cssId) != null){
-						this.sendMessage(askFree.getSymbolicLocation(cssId));
+				this.log.info("received message from Android: " + x.toString());
+				
+				//if(x instanceof String){	
+					jObj = new JSONObject(x.toString());
+					if (jObj.has("cssid")){
+						this.log.info("cssid message");
+						try {
+							cssId = jObj.getString("cssid");
+						} catch (JSONException e) {
+							e.printStackTrace();
+						}
+						//cssId = (String)x;			
+						this.log.info("received cssId: " + cssId + " from Android");
+						//ADD THIS TO THE MAP (OVERWRITES ANY PREVIOUS)
+						askFree.addHandler(cssId, this);
+						if (askFree.getSymbolicLocation(cssId) != null){
+							this.sendMessage(askFree.getSymbolicLocation(cssId));
+							this.log.info("User already has symbolic location: " + askFree.getSymbolicLocation(cssId));
+						}
+					}else if(jObj.has("activity")){
+						this.log.info("received activity");
+						try {
+							String activity = jObj.getString("activity");
+							this.log.info("activity: " + activity);
+						} catch (JSONException e) {
+							e.printStackTrace();
+						}
+						//post activity to users css
+						
 					}
-				}
+					
+				//}
 			}		
 		}catch(ClassNotFoundException e){
 			this.log.debug("ClassNotFoundException: " + e.getMessage());
@@ -100,20 +128,23 @@ public class ClientHandler implements Runnable {
 			this.log.debug("InvalidClassException: " + e.getMessage());
 		}catch(IOException e) {
 			this.log.debug("IOException: " + e.getMessage());
+		} catch (JSONException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
 		}
 	}
 
 	public void sendMessage(String message){
-		this.log.debug("In sendMessage");
+		this.log.info("In sendMessage");
 		try{
-			this.log.debug("Attempting to send location: " + message);
+			this.log.info("Attempting to send location: " + message);
 			out.writeObject(message);
 			this.log.info("Message sent to client: " + message);
 			out.flush();
 			out.reset();
 		}
 		catch(IOException ioException){
-			this.log.debug("ERROR WHILE SENDING LOCATION!" + ioException.getStackTrace());
+			this.log.info("ERROR WHILE SENDING LOCATION!" + ioException.getStackTrace());
 		}
 	}
 

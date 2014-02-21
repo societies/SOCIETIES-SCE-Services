@@ -72,9 +72,10 @@ import ac.hw.askfree.tools.SocketServer;
  */
 public class AskFree extends EventListener implements IAskFree{
 
+	Logger logging = LoggerFactory.getLogger(this.getClass());
+	
 	private IServices serviceMgmt;
 	private IEventMgr eventMgr;
-	Logger logging = LoggerFactory.getLogger(this.getClass());
 	private ServiceResourceIdentifier myServiceID;
 	private IIdentity serverIdentity;
 	private IIdentity userIdentity;
@@ -314,13 +315,16 @@ public class AskFree extends EventListener implements IAskFree{
 	public void setUserLocation(String userJID, String location) {
 		synchronized (userToLocation)
 		{
+			//user location changed
 			userToLocation.put(userJID, location);
 		}
 	}
 
 	public void addHandler(String cssID, ClientHandler clientHandler)
 	{
+		
 		this.userToHandler.put(cssID, clientHandler);
+		this.logging.info("added handler " + clientHandler + "for " + cssID);
 	}
 
 	/* (non-Javadoc)
@@ -330,6 +334,8 @@ public class AskFree extends EventListener implements IAskFree{
 	public void pushToAndroid(String userJID) {
 		//need sync blocks here?!
 		ClientHandler handler = this.userToHandler.get(userJID);
+		this.logging.info("pushToAndroid - userJID: " + userJID);
+		this.logging.info("pushToAndroid - handler: " + handler);
 		if(handler!=null)
 		{
 			String location = this.userToLocation.get(userJID);
