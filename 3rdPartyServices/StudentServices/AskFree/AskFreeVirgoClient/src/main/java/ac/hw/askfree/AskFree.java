@@ -59,9 +59,9 @@ import org.societies.api.services.IServices;
 import org.societies.api.services.ServiceMgmtEvent;
 import org.societies.api.services.ServiceMgmtEventType;
 
-import ac.hw.askfree.tools.ClientHandler;
+import ac.hw.askfree.sockets.ClientHandler;
+import ac.hw.askfree.sockets.SocketServer;
 //import ac.hw.askfree.tools.ContextEventListener;
-import ac.hw.askfree.tools.SocketServer;
 
 
 /**
