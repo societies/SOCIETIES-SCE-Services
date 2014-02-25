@@ -46,6 +46,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 import org.neo4j.graphdb.index.Index;
 import org.neo4j.helpers.collection.IteratorUtil;
@@ -74,8 +75,10 @@ public class PersonTest
 	public static void setup() throws Exception
 	{
 		int random = new Random().nextInt(100);
-		personGraphDb = new GraphDatabaseFactory().newEmbeddedDatabase("target/persontestdb"  + random);
-		sessionGraphDb = new GraphDatabaseFactory().newEmbeddedDatabase("target/sessiontestdb"  + random);
+		System.out.println("Creating persontestdbUnitTest" +random );
+		System.out.println("Creating sessiontestdbUnitTest" +random );
+		personGraphDb = new GraphDatabaseFactory().newEmbeddedDatabase("target/persontestdbUnitTest"  + random);
+		sessionGraphDb = new GraphDatabaseFactory().newEmbeddedDatabase("target/sessiontestdbUnitTest"  + random);
 	    indexShortTermCtx = personGraphDb.index().forNodes("CtxNodes");
 		personRepository = new PersonRepository(personGraphDb);
 		sessionRepository = new SessionRepository(sessionGraphDb, new CollabApps());
@@ -352,6 +355,30 @@ public class PersonTest
 			System.out.println( ", matching features: "
 					+ Arrays.toString( matchingProps.toArray() ) );
 		}
+	}
+	
+	@Test
+	public void testgetAllPersonRelationships() {
+		Person person = getRandomPersonWithFriends();
+		Iterable<Relationship> relationships = person.getSimilarityRelationships(RelTypes.SIMILARITY.toString());
+		for (Relationship rel: relationships) {
+			//Verifying if A is the end node. (a) --- REL_TYPE ---> (b)
+			Person a = new Person(rel.getStartNode());
+			Person b = new Person(rel.getEndNode());
+			System.out.println("("+a+") --- REL_TYPE ---> ("+b+")");
+			if (person.equals(b))  {
+				System.out.println("Person "+person+" has relationship with: ");
+				System.out.println(a.getName());
+				System.out.println(rel.getProperty("weight"));
+			}
+			else {
+				System.out.println("Person "+person+" has relationship with: ");
+				System.out.println(b.getName());
+				System.out.println(rel.getProperty("weight"));
+			}
+		}
+		assert !relationships.equals(null);
+
 	}
 
     //TODO:

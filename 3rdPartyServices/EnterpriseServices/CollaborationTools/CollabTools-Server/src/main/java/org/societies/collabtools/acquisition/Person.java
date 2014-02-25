@@ -220,6 +220,17 @@ public class Person extends Observable
 		}
 	}
 
+	public Iterable<Relationship> getSimilarityRelationships(String ctxAttribute)
+	{
+		ArrayList<Relationship> retVal = new ArrayList<Relationship>();
+		for (Relationship rel : underlyingNode.getRelationships(DynamicRelationshipType.withName("SIMILARITY_"+ctxAttribute)))
+		{
+			retVal.add(rel);
+		}
+		//return type: //(a) --- REL_TYPE ---> (b)
+		return retVal;
+	}
+
 	public int getNrOfFriends()
 	{
 		return IteratorUtil.count(getFriends());
@@ -521,7 +532,7 @@ public class Person extends Observable
 		}
 		return null;
 	}
-
+	
 	private Iterable<Person> getPersonsByDepth(int depth)
 	{
 		// return all my friends and their friends using new traversal API

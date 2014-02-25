@@ -33,6 +33,7 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 
+import org.neo4j.graphdb.Relationship;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.societies.collabtools.acquisition.Person;
@@ -163,32 +164,35 @@ public class Engine implements IEngine {
 		long start = System.currentTimeMillis();
 		//Format ctx info and people
 		Hashtable<String, HashSet<Person>> matchingRules = new Hashtable<String, HashSet<Person>>(10,10);
-		Hashtable<Person, Double> allPersons = new Hashtable<Person, Double>(10,10);
+//		Hashtable<Person, Double> allPersons = new Hashtable<Person, Double>(10,10);
+		Hashtable <Double, Hashtable<String, HashSet<Person>>> calculatedRule = new Hashtable<Double, Hashtable<String, HashSet<Person>>>();
 		for(Rule r : this.rules){
 			matchingRules = evaluateRule(r.getOperator(), r.getCtxAttribute(), r.getValue(), r.getCtxType(), null);
-
-				for (Person person : personRepository.getAllPersons()) {
-					Enumeration<String> ctxAttIterator = matchingRules.keys();
-					while(ctxAttIterator.hasMoreElements()) {
-						String ctxAttr = ctxAttIterator.nextElement();
-						HashSet<Person> persons  = matchingRules.get(ctxAttr);
-						for (Person individual : persons){
-							if (individual.getName().equalsIgnoreCase(person.getName())) {
-								if (!r.getOperator().equals(Operators.SIMILAR)) {
-									allPersons.put(individual, r.getWeight()*1);
-								}
-								else {
-									//Or allPersons.put(individual, r.getWeight()*0)
-									allPersons.put(individual, 0.0);
-								}
-							}
-							else {
-								allPersons.put(individual, r.getWeight());
-							}
-
-						}
-					}
-				}
+			calculatedRule.put(r.getWeight(), matchingRules);
+//			Relationship rel = individual.getPersonRelationshipTo(otherPerson, ctxAttribute);
+//				for (Person person : personRepository.getAllPersons()) {
+//					Enumeration<String> ctxAttIterator = matchingRules.keys();
+//					while(ctxAttIterator.hasMoreElements()) {
+//						String ctxAttr = ctxAttIterator.nextElement();
+//						HashSet<Person> persons  = matchingRules.get(ctxAttr);
+//						for (Person individual : persons){
+//							if (individual.getName().equalsIgnoreCase(person.getName())) {
+//								//If the operator is similar or same , is not binary case
+//								if (!r.getOperator().equals(Operators.SIMILAR) && !r.getOperator().equals(Operators.SAME)) {
+//									allPersons.put(individual, r.getWeight()*1);
+//								}
+//								else {
+//									//Or allPersons.put(individual, r.getWeight()*0)
+//									allPersons.put(individual, 0.0);
+//								}
+//							}
+//							else {
+//								allPersons.put(individual, r.getWeight());
+//							}
+//
+//						}
+//					}
+//				}
 
 			log.info("matched rule: " + r.getName() + " with priority "+ r.getPriority()+" and weight "+r.getWeight()*10 +"%");
 			Enumeration<String> e = matchingRules.keys();
@@ -442,7 +446,7 @@ public class Engine implements IEngine {
 					//For tests only concept enrichment will be done
 					ctxRsn.incrementCtx(ctxAttribute, EnrichmentTypes.CONCEPT, null);
 					ctxRsn.setupWeightAmongPeople(ctxAttribute);
-					return ctxRsn.getPersonsBySimilarity(ctxAttribute, personHashSet, ctxAttribute);
+					return ctxRsn.getPersonsPerSimilarity(ctxAttribute, personHashSet, ctxAttribute);
 				}						
 			}
 			break;

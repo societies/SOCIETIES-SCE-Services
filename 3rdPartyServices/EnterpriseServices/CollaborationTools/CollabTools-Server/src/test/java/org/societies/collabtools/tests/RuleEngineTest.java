@@ -35,14 +35,11 @@ import java.util.Set;
 
 import org.junit.AfterClass;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
-import org.neo4j.graphdb.index.Index;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.societies.collabtools.acquisition.ContextSubscriber;
@@ -50,7 +47,6 @@ import org.societies.collabtools.acquisition.LongTermCtxTypes;
 import org.societies.collabtools.acquisition.Person;
 import org.societies.collabtools.acquisition.PersonRepository;
 import org.societies.collabtools.acquisition.ShortTermCtxTypes;
-import org.societies.collabtools.interpretation.ContextAnalyzer;
 import org.societies.collabtools.runtime.CollabApps;
 import org.societies.collabtools.runtime.Engine;
 import org.societies.collabtools.runtime.Operators;
@@ -69,7 +65,7 @@ public class RuleEngineTest {
 	
 	private static final Random r = new Random( System.currentTimeMillis() );
 	private static GraphDatabaseService personGraphDb, sessionGraphDb;
-	private static Index<Node> indexPerson, indexSession, indexShortTermCtx;
+//	private static Index<Node> indexPerson, indexSession, indexShortTermCtx;
 	private static PersonRepository personRepository;
 	private static SessionRepository sessionRepository;
 	private static int nrOfPersons = 5;
@@ -181,10 +177,10 @@ public class RuleEngineTest {
 //		Rule r02 = new Rule("r02",Operators.EQUAL, LongTermCtxTypes.COMPANY, "Intel", 2, 0.1 ,LongTermCtxTypes.class.getSimpleName());
 		Rule r03 = new Rule("r03",Operators.SIMILAR, LongTermCtxTypes.INTERESTS, "--", 3, 0.7 ,LongTermCtxTypes.class.getSimpleName());
 //		Rule r04 = new Rule("r04",Operators.NOT_EQUAL, ShortTermCtxTypes.STATUS, "busy", 4, 0.1 ,ShortTermCtxTypes.class.getSimpleName());
-//		Rule r05 = new Rule("r05",Operators.DIFFERENT, LongTermCtxTypes.OCCUPATION, "manager", 4, 0.1 ,ShortTermCtxTypes.class.getSimpleName());
-//		Rule r06 = new Rule("r06",Operators.GREATER_OR_EQUAL, "age", "20", 4, 0.1 , LongTermCtxTypes.class.getSimpleName());
-//		Rule r07 = new Rule("r07",Operators.LESS, "age", "20", 4, 0.1 ,LongTermCtxTypes.class.getSimpleName());
-//		Rule r08 = new Rule("r08",Operators.LESS_OR_EQUAL, "age", "20", 4, 0.1 ,LongTermCtxTypes.class.getSimpleName());
+//		Rule r05 = new Rule("r05",Operators.DIFFERENT, LongTermCtxTypes.OCCUPATION, "manager", 5, 0.1 ,ShortTermCtxTypes.class.getSimpleName());
+//		Rule r06 = new Rule("r06",Operators.GREATER_OR_EQUAL, "age", "20", 6, 0.1 , LongTermCtxTypes.class.getSimpleName());
+//		Rule r07 = new Rule("r07",Operators.LESS, "age", "20", 7, 0.1 ,LongTermCtxTypes.class.getSimpleName());
+//		Rule r08 = new Rule("r08",Operators.LESS_OR_EQUAL, "age", "20", 8, 0.1 ,LongTermCtxTypes.class.getSimpleName());
 //		List<Rule> rules = Arrays.asList(r01, r02, r03, r04, r05, r06, r07, r08);
 		List<Rule> rules = Arrays.asList(r01, r03);
 		engine.setRules(rules);
@@ -198,14 +194,14 @@ public class RuleEngineTest {
 	 */
 	@Test
 	public void testGetMatchingResultsByRelevance() {
-		Rule r01 = new Rule("r01",Operators.SAME, ShortTermCtxTypes.LOCATION, "--", 1, 0.5 ,ShortTermCtxTypes.class.getSimpleName());
+		Rule r01 = new Rule("r01",Operators.SAME, ShortTermCtxTypes.LOCATION, "--", 1, 0.3 ,ShortTermCtxTypes.class.getSimpleName());
 //		Rule r02 = new Rule("r02",Operators.EQUAL, LongTermCtxTypes.COMPANY, "Intel", 2, 0.1 ,LongTermCtxTypes.class.getSimpleName());
-		Rule r03 = new Rule("r03",Operators.SIMILAR, LongTermCtxTypes.INTERESTS, "--", 3, 0.4 ,LongTermCtxTypes.class.getSimpleName());
+		Rule r03 = new Rule("r03",Operators.SIMILAR, LongTermCtxTypes.INTERESTS, "--", 3, 0.7 ,LongTermCtxTypes.class.getSimpleName());
 //		Rule r04 = new Rule("r04",Operators.NOT_EQUAL, ShortTermCtxTypes.STATUS, "busy", 4, 0.1 ,ShortTermCtxTypes.class.getSimpleName());
-//		Rule r05 = new Rule("r05",Operators.DIFFERENT, LongTermCtxTypes.OCCUPATION, "manager", 4, 0.1 ,ShortTermCtxTypes.class.getSimpleName());
-//		Rule r06 = new Rule("r06",Operators.GREATER_OR_EQUAL, "age", "20", 4, 0.1 , LongTermCtxTypes.class.getSimpleName());
-//		Rule r07 = new Rule("r07",Operators.LESS, "age", "20", 4, 0.1 ,LongTermCtxTypes.class.getSimpleName());
-//		Rule r08 = new Rule("r08",Operators.LESS_OR_EQUAL, "age", "20", 4, 0.1 ,LongTermCtxTypes.class.getSimpleName());
+//		Rule r05 = new Rule("r05",Operators.DIFFERENT, LongTermCtxTypes.OCCUPATION, "manager", 5, 0.1 ,ShortTermCtxTypes.class.getSimpleName());
+//		Rule r06 = new Rule("r06",Operators.GREATER_OR_EQUAL, "age", "20", 6, 0.1 , LongTermCtxTypes.class.getSimpleName());
+//		Rule r07 = new Rule("r07",Operators.LESS, "age", "20", 7, 0.1 ,LongTermCtxTypes.class.getSimpleName());
+//		Rule r08 = new Rule("r08",Operators.LESS_OR_EQUAL, "age", "20", 8, 0.1 ,LongTermCtxTypes.class.getSimpleName());
 //		List<Rule> rules = Arrays.asList(r01, r02, r03, r04, r05, r06, r07, r08);
 		List<Rule> rules = Arrays.asList(r01, r03);
 		engine.setRules(rules);
@@ -214,6 +210,32 @@ public class RuleEngineTest {
 		Assert.assertNotNull(matchingRules);
 	}
 
+	@Test
+	public void testComparingRelevanceAndPriorityResults() {
+		Rule r01 = new Rule("r01",Operators.SAME, ShortTermCtxTypes.LOCATION, "--", 1, 0.3 ,ShortTermCtxTypes.class.getSimpleName());
+//		Rule r02 = new Rule("r02",Operators.EQUAL, LongTermCtxTypes.COMPANY, "Intel", 2, 0.1 ,LongTermCtxTypes.class.getSimpleName());
+		Rule r03 = new Rule("r03",Operators.SIMILAR, LongTermCtxTypes.INTERESTS, "--", 3, 0.7 ,LongTermCtxTypes.class.getSimpleName());
+//		Rule r04 = new Rule("r04",Operators.NOT_EQUAL, ShortTermCtxTypes.STATUS, "busy", 4, 0.1 ,ShortTermCtxTypes.class.getSimpleName());
+//		Rule r05 = new Rule("r05",Operators.DIFFERENT, LongTermCtxTypes.OCCUPATION, "manager", 4, 0.1 ,ShortTermCtxTypes.class.getSimpleName());
+//		Rule r06 = new Rule("r06",Operators.GREATER_OR_EQUAL, "age", "20", 4, 0.1 , LongTermCtxTypes.class.getSimpleName());
+//		Rule r07 = new Rule("r07",Operators.LESS, "age", "20", 4, 0.1 ,LongTermCtxTypes.class.getSimpleName());
+//		Rule r08 = new Rule("r08",Operators.LESS_OR_EQUAL, "age", "20", 4, 0.1 ,LongTermCtxTypes.class.getSimpleName());
+//		List<Rule> rules = Arrays.asList(r01, r02, r03, r04, r05, r06, r07, r08);
+		List<Rule> rules = Arrays.asList(r01, r03);
+		engine.setRules(rules);
+		
+		//Relevance
+		Hashtable<String, HashSet<Person>> matchingRules1 = engine.getMatchingResultsByPriority();
+		LOG.info("Results of priority test: {}",matchingRules1.toString());
+		
+		//Priority
+		Hashtable<String, HashSet<Person>> matchingRules2 = engine.getMatchingResultsByRelevance();
+		LOG.info("Results of relevance test: {}", matchingRules2.toString());
+		
+		
+		Assert.assertNotNull(matchingRules1);
+		Assert.assertNotNull(matchingRules2);
+	}
 	/**
 	 * Test method for {@link org.societies.collabtools.runtime.Engine#evaluateRule(org.societies.collabtools.runtime.Operators, java.lang.String, java.lang.String, java.lang.String)}.
 	 */
@@ -275,11 +297,13 @@ public class RuleEngineTest {
 	public static void setup() throws Exception
 	{
 		int random = new Random().nextInt(100);
-		personGraphDb = new GraphDatabaseFactory().newEmbeddedDatabase("target/persontestdb00"  + random);
-		sessionGraphDb = new GraphDatabaseFactory().newEmbeddedDatabase("target/sessiontestdb00"  + random);
-	    indexPerson = personGraphDb.index().forNodes("PersonNodes");
-	    indexSession = sessionGraphDb.index().forNodes("SessionNodes");
-	    indexShortTermCtx = personGraphDb.index().forNodes("CtxNodes");
+		LOG.info("Creating persontestdbUnitTest" +random );
+		LOG.info("Creating sessiontestdbUnitTest" +random );
+		personGraphDb = new GraphDatabaseFactory().newEmbeddedDatabase("target/persontestdbUnitTest" +random );
+		sessionGraphDb = new GraphDatabaseFactory().newEmbeddedDatabase("target/sessiontestdbUnitTest"  +random);
+//	    indexPerson = personGraphDb.index().forNodes("PersonNodes");
+//	    indexSession = sessionGraphDb.index().forNodes("SessionNodes");
+//	    indexShortTermCtx = personGraphDb.index().forNodes("CtxNodes");
 		personRepository = new PersonRepository(personGraphDb);
 		sessionRepository = new SessionRepository(sessionGraphDb, new CollabApps());
         ctxSub = new ContextSubscriber(null,personRepository, sessionRepository);
@@ -295,6 +319,7 @@ public class RuleEngineTest {
 
 	private static void createPersons(final int nrOfPersons) throws Exception
 	{
+		LOG.info("Creating {} persons", nrOfPersons);
 		for (int i = 0; i < nrOfPersons; i++)
 		{
 			Person person = personRepository.createPerson("person#" + i);
@@ -316,7 +341,7 @@ public class RuleEngineTest {
 	}
 
 
-	private void deleteSocialGraph()
+	private static void deleteSocialGraph()
 	{
 		for (Person person : personRepository.getAllPersons())
 		{
