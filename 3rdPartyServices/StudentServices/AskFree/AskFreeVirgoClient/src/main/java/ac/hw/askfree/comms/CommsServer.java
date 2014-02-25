@@ -69,6 +69,7 @@ public class CommsServer implements IFeatureServer{
 		//REGISTER OUR ServiceManager WITH THE XMPP Communication Manager
 		try {
 			getCommManager().register(this);
+			LOG.debug("Registering with comms manager for server");
 		} catch (CommunicationException e) {
 			e.printStackTrace();
 		}

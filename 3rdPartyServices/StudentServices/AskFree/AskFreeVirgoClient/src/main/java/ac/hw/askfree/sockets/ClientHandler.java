@@ -30,12 +30,14 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 
+import org.hsqldb.types.JavaObject;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ac.hw.askfree.AskFree;
+import ac.hw.askfree.activityfeed.ActivityFeedMgr;
 
 /**
  * Describe your class here...
@@ -108,15 +110,20 @@ public class ClientHandler implements Runnable {
 							this.sendMessage(askFree.getSymbolicLocation(cssId));
 							this.log.info("User already has symbolic location: " + askFree.getSymbolicLocation(cssId));
 						}
-					}else if(jObj.has("activity")){
+					}else if(jObj.has("activity") && jObj.has("userJID")){
 						this.log.info("received activity");
 						try {
 							String activity = jObj.getString("activity");
 							this.log.info("activity: " + activity);
+							
+							String userJID = jObj.getString("userJID");
+							this.log.info("userJID: " + userJID);
+							//SEND MSG TO ASK FREE CLIENT
+							askFree.pushToAskFreeUserClient(activity, userJID);
 						} catch (JSONException e) {
 							e.printStackTrace();
 						}
-						//post activity to users css
+						
 						
 					}
 					

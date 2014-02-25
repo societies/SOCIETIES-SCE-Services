@@ -43,6 +43,7 @@ import org.societies.api.context.model.CtxEntityIdentifier;
 import org.societies.api.context.model.CtxEntityTypes;
 import org.societies.api.context.model.CtxIdentifier;
 import org.societies.api.context.model.CtxModelType;
+import org.societies.api.css.ICSSManager;
 import org.societies.api.identity.IIdentity;
 import org.societies.api.identity.IIdentityManager;
 import org.societies.api.identity.InvalidFormatException;
@@ -78,6 +79,7 @@ public class AskFree extends EventListener implements IAskFree{
 	private IEventMgr eventMgr;
 	private ServiceResourceIdentifier myServiceID;
 	private IIdentity serverIdentity;
+	private IIdentity remoteServerIdentity;
 	private IIdentity userIdentity;
 	private ICtxBroker ctxBroker;
 	private HashMap<String, String> userToLocation;
@@ -85,7 +87,8 @@ public class AskFree extends EventListener implements IAskFree{
 	private Requestor requestor;
 	private ICommManager commManager;
 	private IIdentityManager idMgr;
-	private String symbolicLocation;
+	private IAskFreeServerRemote askFreeCommsClient;
+	
 
 	public void init(){
 		//SET UP NEW MAP FOR USER -> LOCATION
@@ -129,7 +132,9 @@ public class AskFree extends EventListener implements IAskFree{
 	public void handleInternalEvent(InternalEvent event) {
 		// This method is called after the bundle has been successfully installed on virgo
 		//and we need this to receive the AskFree service identifier (ServiceResourceIdentifier)
-
+		SocketServer server = null;
+		Thread t;
+		
 		logging.debug("Received internal event: "+event.geteventName());
 		logging.debug("Received SLM event");
 		ServiceMgmtEvent slmEvent = (ServiceMgmtEvent) event.geteventInfo();
@@ -147,11 +152,19 @@ public class AskFree extends EventListener implements IAskFree{
 				this.setServerIdentity(this.idMgr.getThisNetworkNode());
 				logging.info("2.Server Identity: " + getServerIdentity());
 
-				SocketServer server = new SocketServer(this);
-				new Thread(server).start();
+				server = new SocketServer(this);			
+				t = new Thread(server);
+				t.start();
 				this.requestor = new RequestorService(serverIdentity, myServiceID);
+				
+			
+				
 				this.unregisterForServiceEvents();
-			}
+			}/*else if(slmEvent.getEventType().equals(ServiceMgmtEventType.SERVICE_STOPPED)){
+				logging.debug("AskFree Virgo Server STOPPED!!");
+				server.kill();
+				
+			}*/
 		}
 	}
 
@@ -170,6 +183,79 @@ public class AskFree extends EventListener implements IAskFree{
 
 		//send the location of the user to the appropriate android client (based on userIdentity)
 		cHandler.sendMessage(this.getSymbolicLocation(userIdentity));
+	}
+	
+	/* (non-Javadoc)
+	 * @see ac.hw.askfree.IAskFree#setUserLocation(java.lang.String, java.lang.String)
+	 */
+	@Override
+	public void setUserLocation(String userJID, String location) {
+		synchronized (userToLocation)
+		{
+			//user location changed
+			userToLocation.put(userJID, location);
+		}
+	}
+
+	public void addHandler(String cssID, ClientHandler clientHandler)
+	{
+		
+		this.userToHandler.put(cssID, clientHandler);
+		this.logging.info("added handler " + clientHandler + "for " + cssID);
+	}
+
+	/* (non-Javadoc)
+	 * @see ac.hw.askfree.IAskFree#pushToAndroid(java.lang.String)
+	 */
+	@Override
+	public void pushToAndroid(String userJID) {
+		//need sync blocks here?!
+		ClientHandler handler = this.userToHandler.get(userJID);
+		this.logging.info("pushToAndroid - userJID: " + userJID);
+		this.logging.info("pushToAndroid - handler: " + handler);
+		if(handler!=null)
+		{
+			String location = this.userToLocation.get(userJID);
+			if(location!=null)
+			{
+				//SEND MESSSAGE
+				handler.sendMessage(location);
+			}
+			else
+			{
+				//Perhaps send a error message to Android in future?
+				logging.debug("Opps, location is null! Not sending...");
+			}
+		}
+		else
+		{
+			logging.debug("Opps, handler is null! Cant send message to Android...");
+		}
+
+	}
+	
+	/* (non-Javadoc)
+	 * @see ac.hw.askfree.IAskFree#pushToAskFreeUserClient(java.lang.String)
+	 */
+	@Override
+	public void pushToAskFreeUserClient(String activityPost, String userJID) {
+		logging.debug("pushToAskFreeUserClient");
+				
+		try {
+			this.remoteServerIdentity = this.idMgr.fromJid(userJID);
+			logging.debug("remoteServerIdentity: " + this.remoteServerIdentity.getBareJid());
+		} catch (InvalidFormatException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+				
+		if(remoteServerIdentity != null){
+			askFreeCommsClient.sendActivityPost(remoteServerIdentity, activityPost);
+			logging.debug("remote server identity: " + remoteServerIdentity.getBareJid());
+			logging.debug("pushed to AskFreeUserClient: " + activityPost);
+		}else{
+			logging.debug("remote serverIdentity is null!!");
+		}
 	}
 
 	/**
@@ -291,6 +377,21 @@ public class AskFree extends EventListener implements IAskFree{
 	public void setUserIdentity(IIdentity userIdentity) {
 		this.userIdentity = userIdentity;
 	}
+	
+	
+	/**
+	 * @return the askFreeCommsClient
+	 */
+	public IAskFreeServerRemote getAskFreeCommsClient() {
+		return askFreeCommsClient;
+	}
+
+	/**
+	 * @param askFreeCommsClient the askFreeCommsClient to set
+	 */
+	public void setAskFreeCommsClient(IAskFreeServerRemote askFreeCommsClient) {
+		this.askFreeCommsClient = askFreeCommsClient;
+	}
 
 	/**
 	 * @return the symbolicLocation
@@ -308,53 +409,18 @@ public class AskFree extends EventListener implements IAskFree{
 		this.logging.debug("Set symbolic location: "+symbolicLocation+" for user: " + userIdentity);
 	}
 
-	/* (non-Javadoc)
-	 * @see ac.hw.askfree.IAskFree#setUserLocation(java.lang.String, java.lang.String)
+	/**
+	 * @return the remoteServerIdentity
 	 */
-	@Override
-	public void setUserLocation(String userJID, String location) {
-		synchronized (userToLocation)
-		{
-			//user location changed
-			userToLocation.put(userJID, location);
-		}
+	public IIdentity getRemoteServerIdentity() {
+		return remoteServerIdentity;
 	}
 
-	public void addHandler(String cssID, ClientHandler clientHandler)
-	{
-		
-		this.userToHandler.put(cssID, clientHandler);
-		this.logging.info("added handler " + clientHandler + "for " + cssID);
-	}
-
-	/* (non-Javadoc)
-	 * @see ac.hw.askfree.IAskFree#pushToAndroid(java.lang.String)
+	/**
+	 * @param remoteServerIdentity the remoteServerIdentity to set
 	 */
-	@Override
-	public void pushToAndroid(String userJID) {
-		//need sync blocks here?!
-		ClientHandler handler = this.userToHandler.get(userJID);
-		this.logging.info("pushToAndroid - userJID: " + userJID);
-		this.logging.info("pushToAndroid - handler: " + handler);
-		if(handler!=null)
-		{
-			String location = this.userToLocation.get(userJID);
-			if(location!=null)
-			{
-				//SEND MESSSAGE
-				handler.sendMessage(location);
-			}
-			else
-			{
-				//Perhaps send a error message to Android in future?
-				logging.debug("Opps, location is null! Not sending...");
-			}
-		}
-		else
-		{
-			logging.debug("Opps, handler is null! Cant send message to Android...");
-		}
-
+	public void setRemoteServerIdentity(IIdentity remoteServerIdentity) {
+		this.remoteServerIdentity = remoteServerIdentity;
 	}
 
 }

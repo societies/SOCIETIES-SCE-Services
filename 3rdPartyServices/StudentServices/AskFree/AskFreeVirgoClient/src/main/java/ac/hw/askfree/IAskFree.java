@@ -34,5 +34,6 @@ public interface IAskFree {
 	
 	void setUserLocation(String userJID, String location);
 	void pushToAndroid(String userJID);
+	void pushToAskFreeUserClient(String activityPost, String userJID);
 
 }

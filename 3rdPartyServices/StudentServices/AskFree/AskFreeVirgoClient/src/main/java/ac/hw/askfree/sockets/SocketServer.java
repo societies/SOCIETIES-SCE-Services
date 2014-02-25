@@ -52,6 +52,8 @@ public class SocketServer implements Runnable{
 	private Socket connection = null;
 
 	private AskFree askFree;
+	
+	private volatile boolean isRunning = true;
 
 	public SocketServer(AskFree askFree){
 		this.askFree = askFree;
@@ -71,8 +73,8 @@ public class SocketServer implements Runnable{
 
 	public void run(){
 		this.openSocket();
-		while(true){
-			try{
+		while(isRunning){
+			try{				
 				connection = providerSocket.accept();        				
 				this.log.info("client connected: " + connection.getInetAddress().getHostName());
 				(new Thread(new ClientHandler(connection,askFree))).start();
@@ -81,5 +83,9 @@ public class SocketServer implements Runnable{
 				return;
 			}
 		}
+	}
+	
+	public void kill(){
+		isRunning = false;
 	}
 }

@@ -25,16 +25,6 @@
      	<property name="serviceType" value="THIRD_PARTY_SERVER" />
      	<property name="serviceCategory" value="education" />
  	</bean>
-
-	<!-- Import External services -->
-	<!-- uam -->
-<!-- 	<osgi:reference id="uam" interface="org.societies.api.useragent.monitoring.IUserActionMonitor">
-	</osgi:reference>
-	
-	<osgi:reference id="persoMgr" interface="org.societies.api.personalisation.mgmt.IPersonalisationManager">
-	</osgi:reference>
-	 -->
-	 
 	 
 	<osgi:reference id="serviceMgmt" interface="org.societies.api.services.IServices">
 	</osgi:reference>
@@ -47,6 +37,4 @@
 	
 	<osgi:reference id="ctxBroker" interface="org.societies.api.context.broker.ICtxBroker">
 	</osgi:reference>
-	
-	
 </beans>
