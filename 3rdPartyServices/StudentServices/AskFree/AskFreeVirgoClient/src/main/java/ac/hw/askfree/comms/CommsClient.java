@@ -50,6 +50,7 @@ import ac.hw.askfree.IAskFreeServerRemote;
  */
 public class CommsClient implements ICommCallback, IAskFreeServerRemote{
 
+	Logger logging = LoggerFactory.getLogger(this.getClass());
 
 	private static final List<String> NAMESPACES = Collections.unmodifiableList(
 
@@ -57,32 +58,27 @@ public class CommsClient implements ICommCallback, IAskFreeServerRemote{
 	private static final List<String> PACKAGES = Collections.unmodifiableList(
 			Arrays.asList("org.societies.api.schema.askfree.serverbean"));
 
-	Logger logging = LoggerFactory.getLogger(this.getClass());
-
-
 	private ICommManager commManager;
 
 	public void InitService() {
 		//REGISTER OUR ServiceManager WITH THE XMPP Communication Manager
 		try {
-			this.logging.debug("Registering with comms manager for client");
+			this.logging.debug("Registering with comms manager");
 			getCommManager().register(this);
 		} catch (CommunicationException e) {
 			e.printStackTrace();
 		}
 	}
 
-
 	/* (non-Javadoc)
-	 * @see ac.hw.askfree.IAskFreeServerRemote#registerAfterRestart(java.lang.String, java.lang.String)
+	 * @see ac.hw.askfree.IAskFreeServerRemote#sendActivityPost(org.societies.api.identity.IIdentity, java.lang.String)
 	 */
 	@Override
-	public void sendLocation(IIdentity destinationIdentity,
-			String location) {
-		this.logging.debug("Sending new location to AskFreeServer");
+	public void sendActivityPost(IIdentity destinationIdentity, String activityPost) {
+		this.logging.debug("Sending new activityPost to AskFreeUserClient/CommsServer");
 		AskFreeServerBean serverBean = new AskFreeServerBean();
-		serverBean.setMethod(AskFreeMethodType.UPDATE_USER_LOCATION);
-		serverBean.setUserLocation(location);
+		serverBean.setMethod(AskFreeMethodType.ADD_ACTIVITY);
+		serverBean.setActivityPost(activityPost);
 		Stanza stanza = new Stanza(destinationIdentity);
 		try {
 			this.commManager.sendMessage(stanza, serverBean);
@@ -91,15 +87,7 @@ public class CommsClient implements ICommCallback, IAskFreeServerRemote{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-	}
 
-	/* (non-Javadoc)
-	 * @see org.societies.api.comm.xmpp.interfaces.ICommCallback#getJavaPackages()
-	 */
-	@Override
-	public List<String> getJavaPackages() {
-		// TODO Auto-generated method stub
-		return PACKAGES;
 	}
 
 	/* (non-Javadoc)
@@ -107,15 +95,31 @@ public class CommsClient implements ICommCallback, IAskFreeServerRemote{
 	 */
 	@Override
 	public List<String> getXMLNamespaces() {
-		// TODO Auto-generated method stub
 		return NAMESPACES;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.societies.api.comm.xmpp.interfaces.ICommCallback#getJavaPackages()
+	 */
+	@Override
+	public List<String> getJavaPackages() {
+		return PACKAGES;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.societies.api.comm.xmpp.interfaces.ICommCallback#receiveResult(org.societies.api.comm.xmpp.datatypes.Stanza, java.lang.Object)
+	 */
+	@Override
+	public void receiveResult(Stanza stanza, Object payload) {
+		// TODO Auto-generated method stub
+
 	}
 
 	/* (non-Javadoc)
 	 * @see org.societies.api.comm.xmpp.interfaces.ICommCallback#receiveError(org.societies.api.comm.xmpp.datatypes.Stanza, org.societies.api.comm.xmpp.exceptions.XMPPError)
 	 */
 	@Override
-	public void receiveError(Stanza arg0, XMPPError arg1) {
+	public void receiveError(Stanza stanza, XMPPError error) {
 		// TODO Auto-generated method stub
 
 	}
@@ -124,7 +128,7 @@ public class CommsClient implements ICommCallback, IAskFreeServerRemote{
 	 * @see org.societies.api.comm.xmpp.interfaces.ICommCallback#receiveInfo(org.societies.api.comm.xmpp.datatypes.Stanza, java.lang.String, org.societies.api.comm.xmpp.datatypes.XMPPInfo)
 	 */
 	@Override
-	public void receiveInfo(Stanza arg0, String arg1, XMPPInfo arg2) {
+	public void receiveInfo(Stanza stanza, String node, XMPPInfo info) {
 		// TODO Auto-generated method stub
 
 	}
@@ -133,7 +137,7 @@ public class CommsClient implements ICommCallback, IAskFreeServerRemote{
 	 * @see org.societies.api.comm.xmpp.interfaces.ICommCallback#receiveItems(org.societies.api.comm.xmpp.datatypes.Stanza, java.lang.String, java.util.List)
 	 */
 	@Override
-	public void receiveItems(Stanza arg0, String arg1, List<String> arg2) {
+	public void receiveItems(Stanza stanza, String node, List<String> items) {
 		// TODO Auto-generated method stub
 
 	}
@@ -142,16 +146,7 @@ public class CommsClient implements ICommCallback, IAskFreeServerRemote{
 	 * @see org.societies.api.comm.xmpp.interfaces.ICommCallback#receiveMessage(org.societies.api.comm.xmpp.datatypes.Stanza, java.lang.Object)
 	 */
 	@Override
-	public void receiveMessage(Stanza arg0, Object arg1) {
-		// TODO Auto-generated method stub
-
-	}
-
-	/* (non-Javadoc)
-	 * @see org.societies.api.comm.xmpp.interfaces.ICommCallback#receiveResult(org.societies.api.comm.xmpp.datatypes.Stanza, java.lang.Object)
-	 */
-	@Override
-	public void receiveResult(Stanza arg0, Object arg1) {
+	public void receiveMessage(Stanza stanza, Object payload) {
 		// TODO Auto-generated method stub
 
 	}
@@ -169,5 +164,7 @@ public class CommsClient implements ICommCallback, IAskFreeServerRemote{
 	public void setCommManager(ICommManager commManager) {
 		this.commManager = commManager;
 	}
+
+	
 
 }

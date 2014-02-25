@@ -29,8 +29,13 @@ import java.net.URL;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.societies.api.activity.IActivity;
+import org.societies.api.activity.IActivityFeed;
+import org.societies.api.activity.IActivityFeedCallback;
+import org.societies.api.activity.IActivityFeedManager;
 import org.societies.api.comm.xmpp.interfaces.ICommManager;
 import org.societies.api.context.broker.ICtxBroker;
+import org.societies.api.css.ICSSManager;
 import org.societies.api.css.devicemgmt.display.IDisplayDriver;
 import org.societies.api.css.devicemgmt.display.IDisplayableService;
 import org.societies.api.identity.IIdentity;
@@ -41,6 +46,7 @@ import org.societies.api.osgi.event.EventListener;
 import org.societies.api.osgi.event.EventTypes;
 import org.societies.api.osgi.event.IEventMgr;
 import org.societies.api.osgi.event.InternalEvent;
+import org.societies.api.schema.activityfeed.MarshaledActivityFeed;
 import org.societies.api.services.IServices;
 import org.societies.api.services.ServiceMgmtEvent;
 import org.societies.api.services.ServiceMgmtEventType;
@@ -66,11 +72,13 @@ public class AskFree extends EventListener implements IAskFreeClient, IDisplayab
 	private ICtxBroker ctxBroker;
 	private ICommManager commManager;
 	private Requestor requestor;
+	private IActivityFeedManager activityFeedManager;
 
 
 	public void init(){
 
 		this.registerForServiceEvents();
+
 
 		//REGISTER AS A DISPLAYABLE SERVICE
 		URL askFreeURL = null;
@@ -89,8 +97,8 @@ public class AskFree extends EventListener implements IAskFreeClient, IDisplayab
 		ContextEventListener listener = new ContextEventListener(this, this.commManager.getIdManager().getThisNetworkNode(), this.ctxBroker);
 		listener.registerForSymLocChanges();
 	}
-	
-	
+
+
 	/*
 	 * Register for events from SLM so I can get my service parameters and finish initialising
 	 */
@@ -115,7 +123,7 @@ public class AskFree extends EventListener implements IAskFreeClient, IDisplayab
 		this.logging.debug("Unsubscribed from "+EventTypes.SERVICE_LIFECYCLE_EVENT+" events");
 	}
 
-	
+
 	@Override
 	public void handleInternalEvent(InternalEvent event) {
 		// This method is called after the bundle has been successfully installed on virgo
@@ -137,17 +145,49 @@ public class AskFree extends EventListener implements IAskFreeClient, IDisplayab
 		}
 	}
 
-	public void updateUserLocation(String location)
-	{
+	public void updateUserLocation(String location){
 		//SEND MESSAGE TO SERVER
-		if(this.serverIdentity!=null)
-		{
+		if(this.serverIdentity!=null){
+			logging.debug("server identity: " + this.serverIdentity);
 			askFreeCommsClient.sendLocation(this.serverIdentity, location);
 		}
-		else
-		{
+		else{
 			if(logging.isDebugEnabled()) logging.debug("Opps! Something went wrong, serverID is not set!!!");
 		}
+	}
+	
+	public void postActivityToCSS(String activity){
+		IActivityFeed activityFeed = null;
+		logging.debug("creating activity feed");
+		String myJid = getCommManager().getIdManager().getThisNetworkNode().getJid();
+		activityFeed = this.activityFeedManager.getOrCreateFeed(myJid, myJid, false);
+		
+		IActivity notifyActivity = activityFeed.getEmptyIActivity();
+		
+		notifyActivity.setActor(myJid);
+		notifyActivity.setVerb(activity);
+		notifyActivity.setObject("AskFree");
+		notifyActivity.setTarget(null);
+		logging.debug("activity feed created");
+		
+		logging.debug("Inserting activity into CIS");
+		activityFeed.addActivity(notifyActivity,new IActivityFeedCallback() {
+
+			@Override
+			public void receiveResult(MarshaledActivityFeed activityFeedObject) {
+				logging.debug("Added an activity to the Activity Feed.");	
+			}
+		});
+
+/*		logging.debug("Checking that cis has activity");
+		activityFeed.getActivities("0 " + Long.toString(System.currentTimeMillis()), new IActivityFeedCallback(){
+
+			@Override
+			public void receiveResult(MarshaledActivityFeed activityFeedObject) {
+				logging.debug(activityFeedObject.getGetActivitiesResponse().getMarshaledActivity().toString());
+			}
+
+		});*/
 	}
 
 	/**
@@ -308,4 +348,22 @@ public class AskFree extends EventListener implements IAskFreeClient, IDisplayab
 	public void setEventMgr(IEventMgr eventMgr) {
 		this.eventMgr = eventMgr;
 	}
+
+
+	/**
+	 * @return the activityFeedManager
+	 */
+	public IActivityFeedManager getActivityFeedManager() {
+		return activityFeedManager;
+	}
+
+
+	/**
+	 * @param activityFeedManager the activityFeedManager to set
+	 */
+	public void setActivityFeedManager(IActivityFeedManager activityFeedManager) {
+		this.activityFeedManager = activityFeedManager;
+	}
+
+
 }

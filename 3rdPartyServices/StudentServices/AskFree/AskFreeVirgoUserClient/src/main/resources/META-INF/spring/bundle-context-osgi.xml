@@ -25,14 +25,10 @@
      	<property name="serviceType" value="THIRD_PARTY_CLIENT" />
      	<property name="serviceCategory" value="education" />
  	</bean>
-	<!-- Import External services -->
-	<!-- uam -->
-<!-- 	<osgi:reference id="uam" interface="org.societies.api.useragent.monitoring.IUserActionMonitor">
-	</osgi:reference>
+ 	
 	
-	<osgi:reference id="persoMgr" interface="org.societies.api.personalisation.mgmt.IPersonalisationManager">
-	</osgi:reference>
-	 -->
+	<!-- Import External services -->
+	
 	<osgi:reference id="serviceMgmt" interface="org.societies.api.services.IServices">
 	</osgi:reference>
 	
@@ -41,9 +37,13 @@
 	
 	<osgi:reference id="eventMgr" interface="org.societies.api.osgi.event.IEventMgr">
 	</osgi:reference>
+	
+	<osgi:reference id="activityFeedManager" interface="org.societies.api.activity.IActivityFeedManager">
+	</osgi:reference>
 
 	<osgi:reference id="displayDriverService" interface="org.societies.api.css.devicemgmt.display.IDisplayDriver">
 	</osgi:reference>	
-		<osgi:reference id="commManager" interface="org.societies.api.comm.xmpp.interfaces.ICommManager">
+	
+	<osgi:reference id="commManager" interface="org.societies.api.comm.xmpp.interfaces.ICommManager">
 	</osgi:reference>
 </beans>
