@@ -7,10 +7,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.json.JSONObject;
-import org.societies.android.api.contentproviders.CSSContentProvider;
 import org.societies.thirdpartyservices.askfree.remotedbdata.GetTopicDataTask;
 import org.societies.thirdpartyservices.askfree.remotedbdata.Topic;
 import org.societies.thirdpartyservices.askfree.tools.CheckUpdateTask;
+import org.societies.thirdpartyservices.askfree.tools.SocietiesManager;
 import org.societies.thirdpartyservices.askfree.tools.SocketService;
 
 import de.tavendo.autobahn.Autobahn;
@@ -25,7 +25,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.database.Cursor;
 import android.graphics.Color;
 import android.util.Log;
 import android.view.Menu;
@@ -74,7 +73,9 @@ public class MainActivity extends Activity {
 	protected static final String LOCATION_CHANGE = "org.societies.thirdpartyservices.askfree.location.LOCATION_CHANGE";
 	protected static final String LOCATION_DB_DATA = "org.societies.thirdpartyservices.askfree.location.LOCATION_DB_DATA";
 	protected static final String TOPIC_DATA = "org.societies.thirdpartyservices.askfree.remotedbdata.TOPIC_DATA";
+	protected static final String ACTIVITY = "org.societies.thirdpartyservices.askfree.ACTIVITY";
 
+	private SocietiesManager socMgr;
 
 	Context appContext; 
 
@@ -129,7 +130,9 @@ public class MainActivity extends Activity {
 
 		//create a session object
 		session = new SessionManager(getApplicationContext());
-
+		
+		socMgr = new SocietiesManager(getApplicationContext());
+		
 		//get login status, if false kill the activity
 		if(session.isLoggedIn() == false){
 			finish();
@@ -384,11 +387,13 @@ public class MainActivity extends Activity {
 					JSONObject json = jsonParser.writeJSON(this.getQuestion(), "1");
 					mConnection.publish(topicURI, json.toString());
 					Log.d(TAG, "SQ is on ");
+					this.broadcastMessage("Posted question: " + this.getQuestion());
 				}else{
 					//JSONObject json = jsonParser.writeJSON(this.getQuestion(), "2");
-					JSONObject json = jsonParser.writeJSON2(this.getQuestion(), getCssId(),"2");
+					JSONObject json = jsonParser.writeJSON2(this.getQuestion(), socMgr.getCssId(),"2");
 					mConnection.publish(topicURI, json.toString());
 					Log.d(TAG, "SQ is off ");
+					this.broadcastMessage("Posted question: " + this.getQuestion());
 				}
 
 				String topicID = locationToTopicID.get(topicLoc);
@@ -505,7 +510,7 @@ public class MainActivity extends Activity {
 	}
 
 	/* **************************************************************************************************** */
-	public String getCssId() {
+	/*public String getCssId() {
 		Cursor cursor = getContentResolver().query(CSSContentProvider.CssRecord.CONTENT_URI, null, null, null, null);
 		cursor.moveToFirst();
 		String cssId = cursor.getString(cursor.getColumnIndex(CSSContentProvider.CssRecord.CSS_RECORD_CSS_IDENTITY));
@@ -515,7 +520,7 @@ public class MainActivity extends Activity {
 		String username = cssId.substring(0, end);
 		return username;
 		//return cssId;
-	}
+	}*/
 	/* **************************************************************************************************** */	
 	private void teardownBroadcastReceiver() {
 		Log.d(TAG, "Tear down broadcast receiver");
@@ -568,15 +573,22 @@ public class MainActivity extends Activity {
 		}
 	}
 
-	/* **************************************************************************************************** */
+	
 	public void enableScreenComponents(boolean arg){
 		publishBtn.setEnabled(arg);
 		questionEditText.setEnabled(arg);
 		Log.d(TAG, "Enable Screen Components " + arg);
 	}
+	
+	//TODO
+	public void broadcastMessage(String message){
+		Intent i = new Intent(ACTIVITY);
+		i.putExtra("activity", message);
+		sendBroadcast(i);
+		Log.d(TAG, "Intent" + i + "sent");
+	}
 
 	/* **************************************************************************************************** */
-
 
 	private void alert(String message) {
 		Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();

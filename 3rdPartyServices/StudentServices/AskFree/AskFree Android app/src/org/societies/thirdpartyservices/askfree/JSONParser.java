@@ -63,6 +63,33 @@ public class JSONParser {
 		return json;
 	}
 	
+	public JSONObject writeJSONSimple(String id, String value) {
+	
+		JSONObject json  = new JSONObject();
+		
+		try{
+			json.put(id, value);
+		}catch(JSONException e){
+			e.printStackTrace();
+		}
+		
+		return json;
+	}
+	
+	public JSONObject writeJSONSimple2(String id1, String value1, String id2, String value2) {
+		
+		JSONObject json  = new JSONObject();
+		
+		try{
+			json.put(id1, value1);
+			json.put(id2, value2);
+		}catch(JSONException e){
+			e.printStackTrace();
+		}
+		
+		return json;
+	}
+	
 	public JSONObject makeHttpRequest(String url, List<NameValuePair>parameters){
 		try {
 			DefaultHttpClient httpClient = new DefaultHttpClient();

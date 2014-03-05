@@ -2,6 +2,7 @@ package org.societies.thirdpartyservices.askfree;
 
 import org.societies.android.api.contentproviders.CSSContentProvider;
 import org.societies.thirdpartyservices.askfree.R;
+import org.societies.thirdpartyservices.askfree.tools.SocietiesManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -60,6 +61,8 @@ public class RegistrationActivity extends Activity {
 	
 	private static final String TAG_SUCCESS = "success";
 	private static final String TAG_MESSAGE = "message";
+	
+	private SocietiesManager socMngr;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -68,13 +71,15 @@ public class RegistrationActivity extends Activity {
 		
 		context = getApplicationContext();
 		
+		socMngr = new SocietiesManager(context);
+		
 		email=(EditText)findViewById(R.id.emailRegEditText);
 		password=(EditText)findViewById(R.id.passRegEditText);
 		fname=(EditText)findViewById(R.id.fnameRegEditText);
 		lname=(EditText)findViewById(R.id.lnameRegEditText);
 		register=(Button)findViewById(R.id.registerRegButton);
 		
-		email.setText(this.getCssId());
+		email.setText(socMngr.getCssId());
 		email.setKeyListener(null);
 			
 		register.setOnClickListener(new OnClickListener() {
@@ -94,7 +99,7 @@ public class RegistrationActivity extends Activity {
 		return true;
 	}*/
 	
-	public String getCssId() {
+	/*public String getCssId() {
 		Cursor cursor = this.getApplicationContext().getContentResolver().query(CSSContentProvider.CssRecord.CONTENT_URI, null, null, null, null);
 		cursor.moveToFirst();
 		String cssId = cursor.getString(cursor.getColumnIndex(CSSContentProvider.CssRecord.CSS_RECORD_CSS_IDENTITY));
@@ -103,7 +108,7 @@ public class RegistrationActivity extends Activity {
 		int end = cssId.indexOf('.');
 		String username = cssId.substring(0, end);
 		return username;
-	}
+	}*/
 	
 	//Register a new User
 	private class CreateUserTask extends AsyncTask<String,String,String>{
@@ -151,7 +156,7 @@ public class RegistrationActivity extends Activity {
         			
         			
         			Intent intent = new Intent(context, LoginActivity.class);
-        			intent.putExtra("username", getCssId());
+        			intent.putExtra("username", socMngr.getCssId());
         			intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         			context.startActivity (intent);
         			

@@ -30,14 +30,22 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 
 import org.societies.android.api.contentproviders.CSSContentProvider;
-import org.societies.api.schema.servicelifecycle.model.ServiceResourceIdentifier;
+//import org.societies.api.schema.servicelifecycle.model.ServiceResourceIdentifier;
 
+import org.societies.thirdpartyservices.askfree.JSONParser;
+import org.societies.thirdpartyservices.askfree.remotedbdata.Topic;
+import org.societies.thirdpartyservices.askfree.tools.SocietiesManager;
+
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
@@ -52,20 +60,20 @@ public class SocketClient implements Runnable{
 	private final static String LOG_TAG = "SocketClient";
 	
 	protected static final String LOCATION_CHANGE = "org.societies.thirdpartyservices.askfree.location.LOCATION_CHANGE";
+	protected static final String ACTIVITY = "org.societies.thirdpartyservices.askfree.ACTIVITY";
 
 	private String symbolicLocation;
-	private Socket requestSocket;
-	
+	private Socket requestSocket;	
 	private String SERVERPORT;
 	private String SERVER_IP;
-	
 	private ObjectInputStream in = null;
 	private ObjectOutputStream out =null;
-	
 	Context context;
 	private boolean connected = true;
-
 	private String cssId;
+	private SocietiesManager socMgr;
+	private JSONParser jsonParser;
+	Receiver receiver;
 
 	public SocketClient(Context context){
 		this.context = context;	
@@ -74,6 +82,12 @@ public class SocketClient implements Runnable{
 		SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
 		this.SERVER_IP = sharedPref.getString("ipAddress", "");
 		this.SERVERPORT = sharedPref.getString("port","");
+		
+		receiver = new Receiver();
+		context.registerReceiver(receiver, createIntentFilter());
+		Log.d(LOG_TAG, "Register broadcast receiver: "+receiver.getClass().getName());
+		socMgr = new SocietiesManager(context);
+		jsonParser= new JSONParser();
 	}
 
 	public void run(){
@@ -91,11 +105,13 @@ public class SocketClient implements Runnable{
 			
 			//3: Communicating with the server
 			try{					
-				cssId = getCssId();
+				cssId = socMgr.getFullCssId();
 				Log.d(LOG_TAG, "Got cssId from Societies app: " + cssId);
 
 				//Output
-				out.writeObject(cssId);
+				//out.writeObject(cssId);
+				String cssIdJson = jsonParser.writeJSONSimple("cssid", cssId).toString();
+				this.sendMessage(cssIdJson);
 				Log.d(LOG_TAG, "User cssId sent to the server: " + cssId);
 				out.reset();
 
@@ -124,7 +140,19 @@ public class SocketClient implements Runnable{
 		catch(IOException e){
 			Log.e(LOG_TAG, "IOException: " + e);
 		}
-		
+	}
+	
+	public void sendMessage(String message){
+		try{
+			Log.e(LOG_TAG, "Attempting to send message: " + message);
+			out.writeObject(message);
+			Log.e(LOG_TAG, "Message sent to server: " + message);
+			out.flush();
+			out.reset();
+		}
+		catch(IOException ioException){
+			Log.e(LOG_TAG, "ERROR WHILE SENDING MESSAGE!" + ioException.getStackTrace());
+		}
 	}
 	
 	public void closeConnection(){
@@ -139,13 +167,7 @@ public class SocketClient implements Runnable{
 		}
 	}
 
-	public String getCssId() {
-		Cursor cursor = context.getContentResolver().query(CSSContentProvider.CssRecord.CONTENT_URI, null, null, null, null);
-		cursor.moveToFirst();
-		String cssId = cursor.getString(cursor.getColumnIndex(CSSContentProvider.CssRecord.CSS_RECORD_CSS_IDENTITY));
-		Log.d(LOG_TAG, "Get CSSId: " + cssId);
-		return cssId;
-	}
+	
 
 	/**
 	 * @return the symbolicLocation
@@ -166,6 +188,27 @@ public class SocketClient implements Runnable{
 		i.putExtra("symloc", symbolicLocation);
 		context.sendBroadcast(i);
 		Log.d(LOG_TAG, "Intent" + i + "sent");
+	}
+	
+	protected IntentFilter createIntentFilter() {
+		IntentFilter intentFilter = new IntentFilter();
+		intentFilter.addAction(ACTIVITY);
+		return intentFilter;
+	}
+	
+	class Receiver extends BroadcastReceiver {
+
+		@Override
+		public void onReceive(Context context, Intent intent) {
+
+			Log.i(LOG_TAG, "Received action: " + intent.getAction());
+
+			if(intent.getAction().equalsIgnoreCase(ACTIVITY)){
+				String activity = intent.getStringExtra("activity");
+				String activityJson = jsonParser.writeJSONSimple2("activity", activity, "userJID", socMgr.getFullCssId()).toString();
+				sendMessage(activityJson);
+			}
+		}
 	}
 	
 }
