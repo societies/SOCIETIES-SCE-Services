@@ -26,7 +26,7 @@ package org.societies.collabtools.api;
 
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.List;
 
 import org.societies.collabtools.acquisition.LongTermCtxTypes;
@@ -65,9 +65,9 @@ public interface IEngine {
 	 */
 	public abstract List<Rule> getRules();
 
-	public abstract Hashtable<String, HashSet<Person>> getMatchingResultsByPriority();
+	public abstract HashMap<String, HashSet<Person>> getMatchingResultsByPriority();
 	
-	public abstract Hashtable<String, HashSet<Person>> getMatchingResultsByRelevance();
+	public abstract HashMap<String, HashSet<Person>> getMatchingResultsByRelevance();
 
 	/**
 	 * @param operator Filter operators available in {@link Operators}
@@ -75,14 +75,19 @@ public interface IEngine {
 	 * @param value Value if wants to compare. Null for SAME or DIFFERENT operators
 	 * @param ctxType Context type. Can be {@link ShortTermCtxTypes} or {@link LongTermCtxTypes}
 	 * @param setOfPersons A group of persons to analyze. If null, it will take all persons from the graph
-	 * @return hashtable of persons with keys context attribute.E.g. Location, interests, etc...
+	 * @return HashMap of persons with keys context attribute.E.g. Location, interests, etc...
 	 */
-	public abstract Hashtable<String, HashSet<Person>> evaluateRule(Operators operator, final String ctxAttribute, String value, final String ctxType, HashSet<Person> setOfPersons);
+	public abstract HashMap<String, HashSet<Person>> evaluateRule(Operators operator, final String ctxAttribute, String value, final String ctxType, HashSet<Person> setOfPersons);
 
 	/**
 	 * @param ruleName Name of the rule to evaluate
-	 * @return hashtable of persons with keys context attribute.E.g. Location, interests, etc...
+	 * @return HashMap of persons with keys context attribute.E.g. Location, interests, etc...
 	 */
-	Hashtable<String, HashSet<Person>> evaluateRule(String ruleName);
+	HashMap<String, HashSet<Person>> evaluateRule(String ruleName);
+
+	/**
+	 * @return the sum of all rule weights
+	 */
+	double getRulesWeightSum();
 
 }

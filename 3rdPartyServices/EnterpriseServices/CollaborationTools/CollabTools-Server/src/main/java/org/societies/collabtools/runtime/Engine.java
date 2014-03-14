@@ -28,12 +28,13 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map.Entry;
 
-import org.neo4j.graphdb.Relationship;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.societies.collabtools.acquisition.Person;
@@ -59,6 +60,7 @@ public class Engine implements IEngine {
 	private List<Rule> rules = new ArrayList<Rule>();
 	private ContextAnalyzer ctxRsn;
 	private boolean engineBypriority = true;
+	private double weightSum;
 
 	/**
 	 * @param sessionRepository 
@@ -78,7 +80,10 @@ public class Engine implements IEngine {
 	public synchronized void insertRule(Rule rule){
 		if (rule.getOperator().equals(Operators.SIMILAR)){
 			// context enrichment with Concept and Category
-			ctxRsn.enrichedCtx(rule.getCtxAttribute());
+//			ctxRsn.enrichedCtx(rule.getCtxAttribute());
+			//For tests only concept enrichment will be done
+			ctxRsn.incrementCtx(rule.getCtxAttribute(), EnrichmentTypes.CONCEPT, null);
+			ctxRsn.setupWeightAmongPeople(rule.getCtxAttribute());
 			//Assigning new weights or update the existing one
 			ctxRsn.setupWeightAmongPeople(rule.getCtxAttribute());
 		}
@@ -97,13 +102,19 @@ public class Engine implements IEngine {
 	}
 
 	/** 
-	 * Handles the initialization 
+	 * Insert a set of rules that handles the initialization 
 	 * 
 	 * @param rules The rules which define the system.
 	 * 
 	 * */
 	public synchronized void setRules(final Collection<Rule> rules){
 		for(Rule r : rules){
+			if (r.getOperator().equals(Operators.SIMILAR)){
+				// context enrichment with Concept and Category
+//				ctxRsn.enrichedCtx(r.getCtxAttribute());
+				//Assigning new weights or update the existing one
+				ctxRsn.setupWeightAmongPeople(r.getCtxAttribute());
+			}
 			this.rules.add(r);
 			log.info("added rule: " + r);
 		}
@@ -118,26 +129,37 @@ public class Engine implements IEngine {
 	public synchronized List<Rule> getRules() {
 		return rules;
 	}
+	
+	/* (non-Javadoc)
+	 * @see org.societies.collabtools.runtime.IEngine#getRulesWeightSum()
+	 */
+	@Override
+	public double getRulesWeightSum() {
+		for(Rule r : this.rules){
+			this.weightSum += r.getWeight();
+		}
+		return weightSum;
+	}
 
 	/* (non-Javadoc)
 	 * @see org.societies.collabtools.runtime.IEngine#getMatchingResults()
 	 */
 	@Override
-	public Hashtable<String, HashSet<Person>> getMatchingResultsByPriority() {
+	public HashMap<String, HashSet<Person>> getMatchingResultsByPriority() {
 		log.info("\r\n\r\n*****Evaluating rules by priority...*****");
 		long start = System.currentTimeMillis();
 		//Format ctx info and people
-		Hashtable<String, HashSet<Person>> matchingRules = new Hashtable<String, HashSet<Person>>(10,10);
+		HashMap<String, HashSet<Person>> matchingRules = new HashMap<String, HashSet<Person>>(10,10);
 		for(Rule r : this.rules){
 			if (matchingRules.isEmpty()) {
 				matchingRules = evaluateRule(r.getOperator(), r.getCtxAttribute(), r.getValue(), r.getCtxType(), null);
 			}
 			else {
-				Enumeration<String> iterator = matchingRules.keys();
-				while(iterator.hasMoreElements()) {
-					String htKey = iterator.nextElement();
+				Iterator<String> iterator = matchingRules.keySet().iterator();
+				while(iterator.hasNext()) {
+					String htKey = iterator.next();
 					HashSet<Person> primarySet  = matchingRules.get(htKey);
-					Hashtable<String, HashSet<Person>> htTemp = evaluateRule(r.getOperator(), r.getCtxAttribute(), r.getValue(), r.getCtxType(), primarySet);
+					HashMap<String, HashSet<Person>> htTemp = evaluateRule(r.getOperator(), r.getCtxAttribute(), r.getValue(), r.getCtxType(), primarySet);
 					//Check here for SAME operator
 					HashSet<Person> secondarySet  = htTemp.get(r.getCtxAttribute());
 					primarySet.retainAll(secondarySet);
@@ -145,10 +167,10 @@ public class Engine implements IEngine {
 				}
 			}
 			log.info("matched rule: " + r.getName() + " with priority "+ r.getPriority()+" and weight "+r.getWeight()*10 +"%");
-			Enumeration<String> e = matchingRules.keys();
-			while (e.hasMoreElements()) {
-				log.info("matchingRules: " + e.nextElement());
-			}
+//			Enumeration<String> e = matchingRules.keys();
+//			while (e.hasMoreElements()) {
+//				log.info("matchingRules: " + e.nextElement());
+//			}
 		}
 
 		log.info("*****Engine evaluation completed in " + (System.currentTimeMillis()-start) + " ms*****\r\n");
@@ -159,49 +181,109 @@ public class Engine implements IEngine {
 	 * @see org.societies.collabtools.api.IEngine#getMatchingResultsByRelevance()
 	 */
 	@Override
-	public Hashtable<String, HashSet<Person>> getMatchingResultsByRelevance() {
+	public HashMap<String, HashSet<Person>> getMatchingResultsByRelevance() {
+		//Using multivariate distance
 		log.info("\r\n\r\n*****Evaluating rules by relevance...*****");
 		long start = System.currentTimeMillis();
+		double weightSum = getRulesWeightSum();
 		//Format ctx info and people
-		Hashtable<String, HashSet<Person>> matchingRules = new Hashtable<String, HashSet<Person>>(10,10);
-//		Hashtable<Person, Double> allPersons = new Hashtable<Person, Double>(10,10);
-		Hashtable <Double, Hashtable<String, HashSet<Person>>> calculatedRule = new Hashtable<Double, Hashtable<String, HashSet<Person>>>();
-		for(Rule r : this.rules){
-			matchingRules = evaluateRule(r.getOperator(), r.getCtxAttribute(), r.getValue(), r.getCtxType(), null);
-			calculatedRule.put(r.getWeight(), matchingRules);
-//			Relationship rel = individual.getPersonRelationshipTo(otherPerson, ctxAttribute);
-//				for (Person person : personRepository.getAllPersons()) {
-//					Enumeration<String> ctxAttIterator = matchingRules.keys();
-//					while(ctxAttIterator.hasMoreElements()) {
-//						String ctxAttr = ctxAttIterator.nextElement();
-//						HashSet<Person> persons  = matchingRules.get(ctxAttr);
-//						for (Person individual : persons){
-//							if (individual.getName().equalsIgnoreCase(person.getName())) {
-//								//If the operator is similar or same , is not binary case
-//								if (!r.getOperator().equals(Operators.SIMILAR) && !r.getOperator().equals(Operators.SAME)) {
-//									allPersons.put(individual, r.getWeight()*1);
-//								}
-//								else {
-//									//Or allPersons.put(individual, r.getWeight()*0)
-//									allPersons.put(individual, 0.0);
-//								}
-//							}
-//							else {
-//								allPersons.put(individual, r.getWeight());
-//							}
-//
-//						}
-//					}
-//				}
-
-			log.info("matched rule: " + r.getName() + " with priority "+ r.getPriority()+" and weight "+r.getWeight()*10 +"%");
-			Enumeration<String> e = matchingRules.keys();
-			while (e.hasMoreElements()) {
-				log.info("matchingRules: " + e.nextElement());
+		HashMap<String, HashSet<Person>> matchingRules = new HashMap<String, HashSet<Person>>(10,10);
+		//Building a distance matrix to calculate similarity, including weight
+		HashMap <Person, HashMap<Person,Double>> weightedDistanceMatrix = new HashMap<Person, HashMap<Person,Double>>(10,10);
+		for (Person person : personRepository.getAllPersons()) {
+			HashMap<Person, Double> personPlusSimilarity = new HashMap<Person,Double>(10,10);
+			for(Rule r : this.rules){
+				if (r.getOperator().equals(Operators.SAME)){
+					matchingRules = evaluateRule(r.getOperator(), r.getCtxAttribute(), r.getValue(), r.getCtxType(), null);
+					//A set of same context information.E.g. Work, Gym
+					for (Entry<String, HashSet<Person>> entry : matchingRules.entrySet()) {
+						HashSet<Person> allPersons = entry.getValue();
+						//If this person has same ctx of the group then it is 1
+						boolean personWithSameCtx = allPersons.remove(person);
+						if (personWithSameCtx) {
+							for (Person individual : allPersons){
+								if (personPlusSimilarity.containsKey(individual)) {
+									//if this individual is on the list then is the old value + (1+weight value) 
+									personPlusSimilarity.put(individual, personPlusSimilarity.get(individual)+1*r.getWeight());
+								} 
+								else {
+									//if this individual is on the list then is 1 (positive evaluation)
+									personPlusSimilarity.put(individual, 1*r.getWeight());
+								}
+							}
+						}
+					}
+				}
+				else if (r.getOperator().equals(Operators.SIMILAR)){
+					HashMap<Person, Double> allPersons = ctxRsn.getSimilarityPerPerson(person, r.getCtxAttribute());
+					for (Person individual : allPersons.keySet()){
+						if (personPlusSimilarity.containsKey(individual)) {
+							//if this individual is on the list then is the old value + weighted similarity 
+							personPlusSimilarity.put(individual, personPlusSimilarity.get(individual)+(allPersons.get(individual)*r.getWeight()));
+						}
+						else { 
+							personPlusSimilarity.put(individual, allPersons.get(individual)*r.getWeight());
+						}
+					}
+				}
+				else {
+					matchingRules = evaluateRule(r.getOperator(), r.getCtxAttribute(), r.getValue(), r.getCtxType(), null);					
+					HashSet<Person> allPersons = matchingRules.get(r.getCtxAttribute());
+					allPersons.remove(person);
+					for (Person individual : allPersons){
+						if (personPlusSimilarity.containsKey(individual)) {
+							//if this individual is on the list then is the old value + (1+weight value) 
+							personPlusSimilarity.put(individual, personPlusSimilarity.get(individual)+1*r.getWeight());
+						} 
+						else {
+							//if this individual is on the list then is 1 (presence of attribute)
+							personPlusSimilarity.put(individual, 1*r.getWeight());
+						}
+					}
+				}
 			}
-		}
+			for (Person individual : personPlusSimilarity.keySet()){
+				personPlusSimilarity.put(individual, personPlusSimilarity.get(individual)/weightSum);
+				log.debug("WeightSum: "+weightSum);
+				log.debug("Calculating with weight: "+individual+ personPlusSimilarity.get(individual));
+			}
+			weightedDistanceMatrix.put(person, personPlusSimilarity);
+			
 
-		log.info("*****Engine evaluation completed in " + (System.currentTimeMillis()-start) + " ms*****\r\n");
+			//			Relationship rel = individual.getPersonRelationshipTo(otherPerson, ctxAttribute);
+			//				for (Person person : personRepository.getAllPersons()) {
+			//					Enumeration<String> ctxAttIterator = matchingRules.keys();
+			//					while(ctxAttIterator.hasMoreElements()) {
+			//						String ctxAttr = ctxAttIterator.nextElement();
+			//						HashSet<Person> persons  = matchingRules.get(ctxAttr);
+			//						for (Person individual : persons){
+			//							if (individual.getName().equalsIgnoreCase(person.getName())) {
+			//								//If the operator is similar or same , is not binary case
+			//								if (!r.getOperator().equals(Operators.SIMILAR) && !r.getOperator().equals(Operators.SAME)) {
+			//									allPersons.put(individual, r.getWeight()*1);
+			//								}
+			//								else {
+			//									//Or allPersons.put(individual, r.getWeight()*0)
+			//									allPersons.put(individual, 0.0);
+			//								}
+			//							}
+			//							else {
+			//								allPersons.put(individual, r.getWeight());
+			//							}
+			//
+			//						}
+			//					}
+			//				}
+
+			//			log.info("matched rule: " + r.getName() + " with priority "+ r.getPriority()+" and weight "+r.getWeight()*100 +"%");
+
+		}
+		
+		for (Entry<Person, HashMap<Person, Double>> entry : weightedDistanceMatrix.entrySet()) {
+
+			System.out.println("weightedDistanceMatrix: " +entry.getKey().toString()+"->"+ entry.getValue());
+		}
+		log.info("*****Engine evaluation for relevance completed in " + (System.currentTimeMillis()-start) + " ms*****\r\n");
 		return matchingRules;
 	}
 
@@ -209,7 +291,7 @@ public class Engine implements IEngine {
 	 * @see org.societies.collabtools.runtime.IEngine#evaluateRule(org.societies.collabtools.runtime.Operators, java.lang.String, java.lang.String, java.lang.String)
 	 */
 	@Override
-	public Hashtable<String, HashSet<Person>> evaluateRule(Operators operator, final String ctxAttribute, String value, final String ctxType, HashSet<Person> personHashSet) {
+	public HashMap<String, HashSet<Person>> evaluateRule(Operators operator, final String ctxAttribute, String value, final String ctxType, HashSet<Person> personHashSet) {
 		if (personHashSet == null) {
 			personHashSet = new HashSet<Person>();
 			//Get all people in the graph 
@@ -220,7 +302,7 @@ public class Engine implements IEngine {
 
 		Iterator<Person> itPerson = personHashSet.iterator();
 		HashSet<Person> setPersons = new HashSet<Person>();
-		Hashtable<String, HashSet<Person>> tablePersons = new Hashtable<String, HashSet<Person>>();
+		HashMap<String, HashSet<Person>> tablePersons = new HashMap<String, HashSet<Person>>(10,10);
 
 		//Check if ctxType is short term or long term
 		switch (ctxType.equals(ShortTermCtxTypes.class.getSimpleName()) ? 1 : 2){
@@ -442,11 +524,9 @@ public class Engine implements IEngine {
 					return tablePersons;
 				}
 				else {
-					//					ctxRsn.enrichedCtx(ctxAttribute);
-					//For tests only concept enrichment will be done
-					ctxRsn.incrementCtx(ctxAttribute, EnrichmentTypes.CONCEPT, null);
-					ctxRsn.setupWeightAmongPeople(ctxAttribute);
-					return ctxRsn.getPersonsPerSimilarity(ctxAttribute, personHashSet, ctxAttribute);
+					HashMap<String, HashSet<Person>> result = new HashMap<String, HashSet<Person>>(10,10);
+					result.put(ctxAttribute, ctxRsn.getPersonsPerSimilarity(personHashSet, ctxAttribute));
+					return result;
 				}						
 			}
 			break;
@@ -455,14 +535,14 @@ public class Engine implements IEngine {
 	}
 
 	@Override
-	public Hashtable<String, HashSet<Person>> evaluateRule(String ruleName) {
+	public HashMap<String, HashSet<Person>> evaluateRule(String ruleName) {
 		for (Rule r : rules) {
 			if (r.getName().equalsIgnoreCase(ruleName)){
 				return evaluateRule(r.getOperator(), r.getCtxAttribute(), r.getValue(), r.getCtxType(), null);
 			}
 		}
 		throw new IllegalArgumentException("Rule name doesn't exist!");
-		//		return new Hashtable<String, HashSet<Person>>();		
+		//		return new HashMap<String, HashSet<Person>>();		
 	}
 
 	/**
@@ -497,43 +577,5 @@ public class Engine implements IEngine {
 	public boolean getEngineMode() {
 		return this.engineBypriority;		
 	}
-
-
-	//	public static <T> List<T> getDuplicate(Collection<T> list) {
-	//
-	//		final List<T> duplicatedObjects = new ArrayList<T>();
-	//		Set<T> set = new HashSet<T>() {
-	//			private static final long serialVersionUID = 1L;
-	//
-	//			@Override
-	//			public boolean add(T e) {
-	//				if (contains(e)) {
-	//					duplicatedObjects.add(e);
-	//				}
-	//				return super.add(e);
-	//			}
-	//		};
-	//		for (T t : list) {
-	//			set.add(t);
-	//		}
-	//		return duplicatedObjects;
-	//	}
-
-	//	public static <T> boolean hasDuplicate(Collection<T> list) {
-	//		if (getDuplicate(list).isEmpty())
-	//			return false;
-	//		return true;
-	//	}
-
-	//	public static boolean checkDuplicate(List<ShortTermContextUpdates> list) {
-	//		HashSet<String> set = new HashSet<String>();
-	//		for (int i = 0; i < list.size(); i++) {
-	//			boolean val = set.add(list.get(i).getShortTermCtx(ShortTermCtxTypes.STATUS));
-	//			if (val == false) {
-	//				return val;
-	//			}
-	//		}
-	//		return true;
-	//	}
 
 }

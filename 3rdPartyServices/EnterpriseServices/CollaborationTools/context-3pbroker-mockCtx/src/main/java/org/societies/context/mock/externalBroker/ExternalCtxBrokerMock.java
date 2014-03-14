@@ -27,7 +27,7 @@ package org.societies.context.mock.externalBroker;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
@@ -100,7 +100,7 @@ public class ExternalCtxBrokerMock 	{
 		LOG.info("*** requestor = " + this.requestor);
 
 		//Setting membership criteria
-		Hashtable<String,MembershipCriteria> cisCriteria = new Hashtable<String,MembershipCriteria>();
+		HashMap<String,MembershipCriteria> cisCriteria = new HashMap<String,MembershipCriteria>();
 		MembershipCriteria criteria = new MembershipCriteria();
 
 		Rule rule1 = new Rule("equals",new ArrayList<String>(Arrays.asList("married")));
