@@ -1,0 +1,55 @@
+.wrapper {
+	width: 98%;
+	margin: 0 auto 0 auto;
+}
+
+.main {
+	position: relative;
+}
+
+.left {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 70%;
+}
+
+.right {
+	width: 25%;
+	position: absolute;
+	top: 0;
+	right: 0;
+}
+
+header {
+	text-align: center;
+	padding: 10px 0 0 0;
+	border-bottom: 8px solid rgb(59,67,68);
+	margin-bottom: 40px;
+}
+
+header h1 {
+	font-size: 200%;
+	border-bottom: 1px solid rgb(59,67,68);
+	margin-bottom: 2px;
+	padding-bottom: 10px;
+	color: rgb(241,47,93);
+}
+
+.datatable {
+	width: 100%;
+	border: 1px solid #d6dde6;
+	border-collapse: collapse;
+}
+
+.caption {
+	font: bold 110% Arial, Helvetica, sans-serif;
+	color: #33517a;
+	text-align: left;
+	padding: 0.4em 0 0.8em 0;
+}
+
+.datatable tr:nth-child(odd) {
+	background-color: #dfe7f2;
+	color: #000000;
+}

@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, maximum-scale=1.0, user-scalable=no">
+	<title>Welcome to Crowd tasking!</title>
+	{{ head }}
+	<script src="/js/communities.js" type="text/javascript" charset="utf-8"></script>
+</head>
+<body>
+	<div data-role="page" id="editCommunityPage" data-theme="a">
+	    <div data-role="header" data-position="fixed" data-theme="b">
+		<a data-icon="back" data-rel="back">Cancel</a>
+	        <h3 id='formTitle'>Community</h3>
+	        <a id="saveButton" data-icon="check">Save</a>
+	    </div>
+	    <div data-role="content">
+	        <form action="" id="editCommunityForm">
+	        	<input type="hidden" name="communityId" id="communityId">
+                <input type="hidden" name="status" id="status">
+	        	<input type="hidden" name="communityJid" id="communityJid">
+	        	<input type="hidden" name="ownerJid" id="ownerJid">
+	        	<input type=hidden name=action value="create"/>
+	            <ul data-role="listview">
+	                <li data-role="list-divider">Community Details</li>
+                    <div id="sctCommunity">
+	                <li data-role="fieldcontain">
+	                    <label for="name">Name*</label>
+	                    <input type="text" name="name" id="name">
+	                </li>
+	                <li data-role="fieldcontain">
+	                    <label for="description">Description</label>
+	                    <textarea name="description" id="description"></textarea>
+	                </li>
+                    </div>
+                    <div id="cisCommunity" style="display: none">
+	                <li data-role="fieldcontain">
+	                    <label for="name">Name*</label>
+                        <span id=txtName></span>
+	                </li>
+	                <li data-role="fieldcontain">
+	                    <label for="description">Description</label>
+                        <span id=txtDescription></span>
+	                </li>
+                    </div>
+                    <li data-role="fieldcontain">
+                        <label for="spacesCombo">Collaborative spaces</label>
+                        <select name="spacesCombo" id="spacesCombo" multiple="multiple" data-native-menu="false">
+                            <option>Select collaborative spaces</option>
+                        </select>
+                    </li>
+                    <!--li data-role="fieldcontain">
+                               <label for="csName">Collaborative space</label>
+                               <textarea name="csName" id="csName"></textarea>
+                           </li>
+                           <li data-role="fieldcontain">
+                               <label for="urlMapping">URL mapping</label>
+                               <textarea name="urlMapping" id="urlMapping"></textarea>
+                           </li-->
+	                <li data-role="fieldcontain" style="display:none">
+					<div id="usersDiv" role="heading" class="ui-controlgroup-label">Select users:</div>
+	                </li>
+	            </ul>
+	        </form>
+	    </div>
+	</div>
+</body>
+</html>

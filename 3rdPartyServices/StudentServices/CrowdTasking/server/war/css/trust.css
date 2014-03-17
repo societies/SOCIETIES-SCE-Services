@@ -1,0 +1,43 @@
+img.trusted
+{
+	width:16px;
+	height:17px;
+	background:url(/images/trust.png) 0px 0;
+}
+img.marginallytrusted
+{
+	width:16px;
+	height:17px;
+	background:url(/images/trust.png) -32px 0;
+}
+img.distrusted
+{
+	width:16px;
+	height:17px;
+	background:url(/images/trust.png) -16px 0;
+}
+img.unknown
+{
+	width:1px;
+	height:1px;
+	background:url(/images/trust.png) 0 0;
+}
+
+img.fullytrustedS
+{
+	width:13px;
+	height:15px;
+	background:url(/images/trustS.png) 0 0;
+}
+img.marginallytrustedS
+{
+	width:13px;
+	height:15px;
+	background:url(/images/trustS.png) -13px 0;
+}
+img.distrustedS
+{
+	width:13px;
+	height:15px;
+	background:url(/images/trustS.png) -25px 0;
+}

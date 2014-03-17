@@ -1,0 +1,22 @@
+<component name="ArtifactManager">
+  <artifact type="exploded-war" build-on-make="true" name="CrowdTaskingGAE:war exploded">
+    <output-path>$PROJECT_DIR$/out/artifacts/CrowdTaskingGAE_war_exploded</output-path>
+    <root id="root">
+      <element id="javaee-facet-resources" facet="CrowdTaskingGAE/web/Web" />
+      <element id="directory" name="WEB-INF">
+        <element id="directory" name="classes">
+          <element id="module-output" name="CrowdTaskingGAE" />
+        </element>
+        <element id="directory" name="lib">
+          <element id="library" level="project" name="gson-2.2.4" />
+          <element id="library" level="project" name="jersey1.12" />
+          <element id="library" level="project" name="asm-3.1" />
+          <element id="library" level="project" name="objectify-appengine-4.0b1" />
+          <element id="library" level="application" name="AppEngineAPI" />
+          <element id="library" level="application" name="AppEngineDev" />
+          <element id="library" level="project" name="json-simple-1.1.1" />
+        </element>
+      </element>
+    </root>
+  </artifact>
+</component>
