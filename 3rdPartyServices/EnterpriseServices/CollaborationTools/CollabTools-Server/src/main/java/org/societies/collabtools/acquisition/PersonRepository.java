@@ -29,11 +29,13 @@ import static org.societies.collabtools.acquisition.RelTypes.A_PERSON_REMOVED;
 import static org.societies.collabtools.acquisition.RelTypes.REF_PERSONS;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.neo4j.graphdb.Direction;
+import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
@@ -41,10 +43,11 @@ import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.index.Index;
 import org.neo4j.helpers.collection.IterableWrapper;
 import org.neo4j.helpers.collection.MapUtil;
+import org.neo4j.tooling.GlobalGraphOperations;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import scala.actors.threadpool.Arrays;
+
 
 public class PersonRepository
 {
@@ -54,16 +57,14 @@ public class PersonRepository
 	
 	private static final Logger logger  = LoggerFactory.getLogger(PersonRepository.class);
 
-    public PersonRepository(GraphDatabaseService graphDb)
-    {
+    public PersonRepository(GraphDatabaseService graphDb) {
         this.graphDb = graphDb;
         this.indexPerson = this.graphDb.index().forNodes("PersonNodes", MapUtil.stringMap("type", "fulltext", "to_lower_case", "true" ) );
 
         personRefNode = getPersonsRootNode(graphDb);
     }
 
-    private Node getPersonsRootNode(GraphDatabaseService graphDb)
-    {
+    private Node getPersonsRootNode(GraphDatabaseService graphDb) {
         Relationship rel = graphDb.getReferenceNode().getSingleRelationship(
                 REF_PERSONS, Direction.OUTGOING );
         if ( rel != null )
@@ -87,8 +88,7 @@ public class PersonRepository
         }
     }
 
-    public Person createPerson(String name) throws Exception
-    {
+    public Person createPerson(String name) throws Exception {
         // to guard against duplications we use the lock grabbed on ref node
         // when
         // creating a relationship and are optimistic about person not existing
@@ -119,8 +119,7 @@ public class PersonRepository
 
     }
 
-    public Person getPersonByName(String name)
-    {
+    public Person getPersonByName(String name) {
         Node personNode = indexPerson.query(LongTermCtxTypes.NAME, name).getSingle();
         if ( personNode == null )
         {
@@ -130,16 +129,14 @@ public class PersonRepository
         return new Person(personNode);
     }
     
-    public boolean hasPerson(String name)
-    {
+    public boolean hasPerson(String name) {
         Node personNode = indexPerson.query(LongTermCtxTypes.NAME, name).getSingle();
         if (personNode == null)
         	return false;
         return true;
     }
     
-    public Map<Person, Integer> getPersonWithSimilarCtx(Person self, String property)
-    {
+    public Map<Person, Integer> getPersonWithSimilarCtx(Person self, String property) {
     	Map<Person,Integer> persons = new HashMap<Person, Integer>();
     	for (Person person : getAllPersons())
     	{
@@ -159,8 +156,7 @@ public class PersonRepository
     	return persons;
     }
     
-    public Person[] getPersonsByProperty(String property, String value)
-    {
+    public Person[] getPersonsByProperty(String property, String value) {
     	List<Person> persons = new ArrayList<Person>();
     	//E.g. LongTermCtxTypes.COMPANY
     	for (Node personNode : indexPerson.query(property, value))
@@ -182,8 +178,7 @@ public class PersonRepository
 		return persons.toArray(new Person[persons.size()]);
     }
 
-    public void deletePerson(Person person)
-    {
+    public void deletePerson(Person person) {
         Transaction tx = graphDb.beginTx();
         try
         {
@@ -215,16 +210,50 @@ public class PersonRepository
         }
     }
 
-    public Iterable<Person> getAllPersons()
-    {
+    public Iterable<Person> getAllPersons() {
         return new IterableWrapper<Person, Relationship>(
                 personRefNode.getRelationships(A_PERSON) )
         {
             @Override
             protected Person underlyingObjectToObject(Relationship personRel)
             {
-                return new Person( personRel.getEndNode() );
+                return new Person(personRel.getEndNode());
             }
         };
+    }
+    
+    public Iterable<Relationship> getRelationships(String relationshipType) {
+    	Iterable<Relationship> relationships = GlobalGraphOperations.at(graphDb).getAllRelationships();
+    	ArrayList<Relationship> results = new ArrayList<Relationship>();
+    	//Check for static enum
+    	for (RelTypes rel : RelTypes.values()){
+    		if (rel.name().equals(relationshipType)){
+    			for(Relationship relationship : relationships)
+    	        {
+    	            if (relationship.isType(rel))
+    	            {
+    	            	results.add(relationship);
+    	            }
+    	        }
+    			return results;
+    		}
+    	}
+    	//Check for dynamic relationship
+    	for(Relationship relationship : relationships)
+        {
+            if (relationship.isType(DynamicRelationshipType.withName(relationshipType)))
+            {
+            	results.add(relationship);
+            }
+        }
+		return results;
+    }
+    
+    public int size() {
+    	int size = 0;
+    	for(@SuppressWarnings("unused") Person person : this.getAllPersons()) {
+    		size++;
+    	}
+    	return size;
     }
 }

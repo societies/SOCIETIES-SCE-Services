@@ -27,18 +27,16 @@ package org.societies.collabtools.tests;
 import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Hashtable;
 import java.util.Random;
 import java.util.Set;
 
+import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
-import org.neo4j.graphdb.index.Index;
-import org.neo4j.helpers.collection.MapUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.societies.collabtools.acquisition.LongTermCtxTypes;
@@ -48,7 +46,6 @@ import org.societies.collabtools.acquisition.ShortTermCtxTypes;
 import org.societies.collabtools.api.IIncrementCtx.EnrichmentTypes;
 import org.societies.collabtools.interpretation.ContextAnalyzer;
 import org.societies.collabtools.runtime.Operators;
-import org.societies.collabtools.runtime.SessionRepository;
 
 /**
  * ContextAnalyzer unit tests
@@ -60,35 +57,107 @@ public class ContextAnalyzerTest {
 
 	/** The logging facility. */
 	private static final Logger LOG = LoggerFactory.getLogger(ContextAnalyzerTest.class);
-	
-	private static final Random r = new Random( System.currentTimeMillis() );
-	private  GraphDatabaseService personGraphDb, sessionGraphDb;
-//	private  Index<Node> indexShortTermCtx;
-	private  PersonRepository personRepository;
 
-//	private static SessionRepository sessionRepository;
+	private static final Random r = new Random( System.currentTimeMillis() );
+	/**
+	 * @return
+	 */
+	private static String[] getRandomInterests() {
+		final String[] interests={"bioinformatics", "web development", "semantic web", "requirements analysis", "system modeling", 
+				"project planning", "project management", "software engineering", "software development", "technical writing"};
+		Set<String> finalInterests = new HashSet<String>();
+		for(int i=0; i<3; i++){
+			String temp = interests[r.nextInt(interests.length)];
+			//Check if duplicated
+			if (!finalInterests.contains(temp))
+				finalInterests.add(temp);
+			else
+				i--;
+		}
+		return finalInterests.toArray(new String[0]);
+	}
+	/**
+	 * @return
+	 */
+	private static String getRandomLocation() {
+		final String[] location={"Work","Home","Gym"};
+		return location[r.nextInt(3)];
+	}
+
+	/**
+	 * @return
+	 */
+	private static String getRandomOccupation() {
+		final String[] work={"Manager","Developer","Beta Tester"};
+		return work[r.nextInt(3)];
+	}
+
+
+
+	/**
+	 * @return
+	 */
+	private static String getRandomStatus() {
+		final String[] status={"Online","Busy","Away"};
+		return status[r.nextInt(3)];
+	}
+
+	/**
+	 * @return
+	 */
+	private static String getRandomWorkPosition() {
+		final String[] workPosition={"Manager","Marketing","Programmer"};
+		return workPosition[r.nextInt(3)];
+	}
+
+	//	private static SessionRepository sessionRepository;
 	private ContextAnalyzer ctxRsn;
 
+	private  GraphDatabaseService personGraphDb, sessionGraphDb;
 
+	//	private  Index<Node> indexShortTermCtx;
+	private  PersonRepository personRepository;
 
 	/**
 	 * @param ctxRsn
 	 */
 	public ContextAnalyzerTest() {
-		int random = new Random().nextInt(100);
+		int random = 6666;//new Random().nextInt(100);
 		personGraphDb = new GraphDatabaseFactory().newEmbeddedDatabase("target/persontestdb00"  + random);
 		sessionGraphDb = new GraphDatabaseFactory().newEmbeddedDatabase("target/sessiontestdb00"  + random);
-//	    indexShortTermCtx = personGraphDb.index().forNodes("CtxNodes", MapUtil.stringMap("to_lower_case", "true" ) );
+		//	    indexShortTermCtx = personGraphDb.index().forNodes("CtxNodes", MapUtil.stringMap("to_lower_case", "true" ) );
 		personRepository = new PersonRepository(personGraphDb);
-//		sessionRepository = new SessionRepository(sessionGraphDb, new CollabApps());
-		
+		//		sessionRepository = new SessionRepository(sessionGraphDb, new CollabApps());
+
 		LOG.info("personGraphDb path: "+"target/persontestdb00"  + random);
-//		LOG.info("sessionGraphDb path: "+"target/sessiontestdb00"  + random);
-		
-//        ctxSub = new ContextSubscriber(null,personRepository, sessionRepository);
+		//		LOG.info("sessionGraphDb path: "+"target/sessiontestdb00"  + random);
+
+		//        ctxSub = new ContextSubscriber(null,personRepository, sessionRepository);
 		LOG.info("Setup done...");
-		
+
 		this.ctxRsn = new ContextAnalyzer(personRepository);
+	}
+
+	private void createPersons(int nrOfPersons) throws Exception
+	{
+		for (int i = 0; i < nrOfPersons; i++)
+		{
+			Person person = personRepository.createPerson("person#" + i);
+			//Set long term context
+			person.setLongTermCtx(LongTermCtxTypes.NAME, "person#" + i);
+			person.setLongTermCtx(LongTermCtxTypes.COLLAB_APPS, new String[] { "chat" });
+			person.setLongTermCtx(LongTermCtxTypes.OCCUPATION, getRandomOccupation());
+			person.setLongTermCtx(LongTermCtxTypes.INTERESTS, getRandomInterests());
+			person.setLongTermCtx(LongTermCtxTypes.WORK_POSITION, getRandomWorkPosition());
+			person.setLongTermCtx("age", "20");
+
+			//Set short term context
+			//			String [] response = new String [] {ShortTermCtxTypes.STATUS, getRandomStatus(), person.getName()};
+			//			ctxSub.update(null, response);
+			//			
+			//			response = new String [] {ShortTermCtxTypes.LOCATION, getRandomLocation(), person.getName()};
+			//			ctxSub.update(null, response);
+		}
 	}
 
 	/**
@@ -108,6 +177,104 @@ public class ContextAnalyzerTest {
 	}
 
 	/**
+	 * Test method for {@link org.societies.collabtools.interpretation.ContextAnalyzer#getAllPersonsWithSameCtx(java.lang.String, java.lang.String)}.
+	 */
+	@Test
+	public void testGetAllPersonsWithSameCtx() {
+		HashMap<String, HashSet<Person>>  ht1 = ctxRsn.getAllPersonsWithSameCtx(LongTermCtxTypes.INTERESTS, ShortTermCtxTypes.class.getSimpleName());
+		HashMap<String, HashSet<Person>>  ht2 = ctxRsn.getAllPersonsWithSameCtx(LongTermCtxTypes.NAME, LongTermCtxTypes.class.getSimpleName());
+		Assert.assertNotNull(ht1);
+		Assert.assertNotNull(ht2);
+	}
+
+	/**
+	 * Test method for {@link org.societies.collabtools.interpretation.ContextAnalyzer#getAutoThreshold(java.util.ArrayList)}.
+	 */
+	@Test
+	public void testGetAutoThreshold() {
+		ArrayList<Double> elements = new ArrayList<Double>();
+		double threshold = ContextAnalyzer.getAutoThreshold(elements);
+		Assert.assertNotNull(threshold);
+	}
+
+	/**
+	 * Test method for {@link org.societies.collabtools.interpretation.ContextAnalyzer#getPersonsPerSimilarity(java.lang.String, java.util.HashSet, java.lang.String)}.
+	 */
+	@Test
+	public void testGetPersonsPerSimilarity() {
+		try {
+			createPersons(4);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		HashSet<Person> personHashSet = new HashSet<Person>();
+		personHashSet.add(personRepository.getPersonByName("person#0"));
+		personHashSet.add(personRepository.getPersonByName("person#1"));
+		personHashSet.add(personRepository.getPersonByName("person#2"));
+		personHashSet.add(personRepository.getPersonByName("person#3"));
+
+		//Twice for test
+		ctxRsn.incrementCtx(LongTermCtxTypes.INTERESTS, EnrichmentTypes.CONCEPT, null);
+		ctxRsn.setupWeightAmongPeople(LongTermCtxTypes.INTERESTS);
+		ctxRsn.incrementCtx(LongTermCtxTypes.INTERESTS, EnrichmentTypes.CATEGORY, null);
+		ctxRsn.setupWeightAmongPeople(LongTermCtxTypes.INTERESTS);
+		HashSet<Person> matchingRules = new HashSet<Person>(10,10);
+		matchingRules = ctxRsn.getPersonsPerSimilarity(personHashSet, LongTermCtxTypes.INTERESTS);
+		LOG.info("Matching results: {}", matchingRules.toString());
+		Assert.assertNotNull(matchingRules);
+	}
+
+	/**
+	 * Test method for {@link org.societies.collabtools.interpretation.ContextAnalyzer#getSimilarityPerPersons}.
+	 */
+	@Test
+	public void testGetSimilarityPerPersons() {
+		try {
+			createPersons(4);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		HashSet<Person> personHashSet = new HashSet<Person>();
+		personHashSet.add(personRepository.getPersonByName("person#0"));
+		personHashSet.add(personRepository.getPersonByName("person#1"));
+		personHashSet.add(personRepository.getPersonByName("person#2"));
+		personHashSet.add(personRepository.getPersonByName("person#3"));
+
+		//Twice for test
+		ctxRsn.incrementCtx(LongTermCtxTypes.INTERESTS, EnrichmentTypes.CONCEPT, null);
+		ctxRsn.setupWeightAmongPeople(LongTermCtxTypes.INTERESTS);
+		ctxRsn.incrementCtx(LongTermCtxTypes.INTERESTS, EnrichmentTypes.CATEGORY, null);
+		ctxRsn.setupWeightAmongPeople(LongTermCtxTypes.INTERESTS);
+
+		HashMap<Person, HashMap<Person, Double>> participantsMatrix = ctxRsn.getPersonMatrix(LongTermCtxTypes.INTERESTS);
+		
+		LOG.info(participantsMatrix.toString());
+		Assert.assertNotNull(participantsMatrix);
+	}
+
+	/**
+	 * Test method for {@link org.societies.collabtools.interpretation.ContextAnalyzer#getPersonsWithMatchingLongTermCtx(java.lang.String, java.util.HashSet)}.
+	 */
+	@Test
+	public void testGetPersonsWithMatchingLongTermCtx() {
+		HashSet<Person> hashsetPersons = new HashSet<Person>();
+		HashMap<String, HashSet<Person>>  ht1 = ctxRsn.getPersonsWithMatchingLongTermCtx(LongTermCtxTypes.INTERESTS, hashsetPersons);
+		Assert.assertNotNull(ht1);
+	}	
+
+	/**
+	 * Test method for {@link org.societies.collabtools.interpretation.ContextAnalyzer#getPersonsWithMatchingShortTermCtx(org.societies.collabtools.runtime.Operators, java.lang.String, java.util.HashSet)}.
+	 */
+	@Test
+	public void testGetPersonsWithMatchingShortTermCtx() {
+		HashSet<Person> hashsetPersons = new HashSet<Person>();
+		HashMap<String, HashSet<Person>>  ht1 = ctxRsn.getPersonsWithMatchingShortTermCtx(Operators.SIMILAR, LongTermCtxTypes.INTERESTS, hashsetPersons);
+		Assert.assertNotNull(ht1);
+	}
+
+	/**
 	 * Test method for {@link org.societies.collabtools.interpretation.ContextAnalyzer#incrementCtx(java.lang.String, org.societies.collabtools.api.IIncrementCtx.EnrichmentTypes, org.societies.collabtools.acquisition.Person)}.
 	 */
 	@Test
@@ -122,68 +289,7 @@ public class ContextAnalyzerTest {
 	 */
 	@Test
 	public void testPersonCtxSimilarity() {
-//		ctxRsn.personCtxSimilarity(0, LongTermCtxTypes.INTERESTS, personA, personB);
-	}
-
-	/**
-	 * Test method for {@link org.societies.collabtools.interpretation.ContextAnalyzer#getAutoThreshold(java.util.ArrayList)}.
-	 */
-	@Test
-	public void testGetAutoThreshold() {
-		ArrayList<Float> elements = new ArrayList<Float>();
-		ContextAnalyzer.getAutoThreshold(elements);
-	}
-
-	/**
-	 * Test method for {@link org.societies.collabtools.interpretation.ContextAnalyzer#getPersonsWithMatchingShortTermCtx(org.societies.collabtools.runtime.Operators, java.lang.String, java.util.HashSet)}.
-	 */
-	@Test
-	public void testGetPersonsWithMatchingShortTermCtx() {
-		HashSet<Person> hashsetPersons = new HashSet<Person>();
-		ctxRsn.getPersonsWithMatchingShortTermCtx(Operators.SIMILAR, LongTermCtxTypes.INTERESTS, hashsetPersons);
-	}
-
-	/**
-	 * Test method for {@link org.societies.collabtools.interpretation.ContextAnalyzer#getPersonsWithMatchingLongTermCtx(java.lang.String, java.util.HashSet)}.
-	 */
-	@Test
-	public void testGetPersonsWithMatchingLongTermCtx() {
-		HashSet<Person> hashsetPersons = new HashSet<Person>();
-		ctxRsn.getPersonsWithMatchingLongTermCtx(LongTermCtxTypes.INTERESTS, hashsetPersons);
-	}
-
-	/**
-	 * Test method for {@link org.societies.collabtools.interpretation.ContextAnalyzer#getAllPersonsWithSameCtx(java.lang.String, java.lang.String)}.
-	 */
-	@Test
-	public void testGetAllPersonsWithSameCtx() {
-		ctxRsn.getAllPersonsWithSameCtx(LongTermCtxTypes.INTERESTS, ShortTermCtxTypes.class.getSimpleName());
-		ctxRsn.getAllPersonsWithSameCtx(LongTermCtxTypes.NAME, LongTermCtxTypes.class.getSimpleName());
-	}
-
-	/**
-	 * Test method for {@link org.societies.collabtools.interpretation.ContextAnalyzer#getPersonsBySimilarity(java.lang.String, java.util.HashSet, java.lang.String)}.
-	 */
-	@Test
-	public void testGetPersonsBySimilarity() {
-		try {
-			createPersons(2);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		HashSet<Person> personHashSet = new HashSet<Person>();
-		personHashSet.add(personRepository.getPersonByName("person#0"));
-		personHashSet.add(personRepository.getPersonByName("person#1"));
-		
-		//Twice for test
-		ctxRsn.incrementCtx(LongTermCtxTypes.INTERESTS, EnrichmentTypes.CONCEPT, null);
-		ctxRsn.setupWeightAmongPeople(LongTermCtxTypes.INTERESTS);
-		ctxRsn.incrementCtx(LongTermCtxTypes.INTERESTS, EnrichmentTypes.CATEGORY, null);
-		ctxRsn.setupWeightAmongPeople(LongTermCtxTypes.INTERESTS);
-		Hashtable<String, HashSet<Person>> matchingRules = new Hashtable<String, HashSet<Person>>(10,10);
-		matchingRules = ctxRsn.getPersonsBySimilarity("session", personHashSet, LongTermCtxTypes.INTERESTS);
-		LOG.info(matchingRules.values().toString());
+		//		ctxRsn.personCtxSimilarity(0, LongTermCtxTypes.INTERESTS, personA, personB);
 	}
 
 	/**
@@ -192,78 +298,6 @@ public class ContextAnalyzerTest {
 	@Test
 	public void testSetupWeightAmongPeople() {
 		ctxRsn.setupWeightAmongPeople(LongTermCtxTypes.INTERESTS);
-	}
-	
-	private void createPersons(int nrOfPersons) throws Exception
-	{
-		for (int i = 0; i < nrOfPersons; i++)
-		{
-			Person person = personRepository.createPerson("person#" + i);
-	        //Set long term context
-	        person.setLongTermCtx(LongTermCtxTypes.NAME, "person#" + i);
-	        person.setLongTermCtx(LongTermCtxTypes.COLLAB_APPS, new String[] { "chat" });
-	        person.setLongTermCtx(LongTermCtxTypes.OCCUPATION, getRandomOccupation());
-	        person.setLongTermCtx(LongTermCtxTypes.INTERESTS, getRandomInterests());
-	        person.setLongTermCtx(LongTermCtxTypes.WORK_POSITION, getRandomWorkPosition());
-	        person.setLongTermCtx("age", "20");
-	        
-	        //Set short term context
-//			String [] response = new String [] {ShortTermCtxTypes.STATUS, getRandomStatus(), person.getName()};
-//			ctxSub.update(null, response);
-//			
-//			response = new String [] {ShortTermCtxTypes.LOCATION, getRandomLocation(), person.getName()};
-//			ctxSub.update(null, response);
-		}
-	}
-	
-	/**
-	 * @return
-	 */
-	private static String getRandomLocation() {
-		final String[] location={"Work","Home","Gym"};
-		return location[r.nextInt(3)];
-	}	
-
-	/**
-	 * @return
-	 */
-	private static String[] getRandomInterests() {
-		final String[] interests={"bioinformatics", "web development", "semantic web", "requirements analysis", "system modeling", 
-				"project planning", "project management", "software engineering", "software development", "technical writing"};
-		Set<String> finalInterests = new HashSet<String>();
-		for(int i=0; i<3; i++){
-			String temp = interests[r.nextInt(interests.length)];
-			//Check if duplicated
-			if (!finalInterests.contains(temp))
-				finalInterests.add(temp);
-			else
-				i--;
-		}
-		return finalInterests.toArray(new String[0]);
-	}
-	
-	/**
-	 * @return
-	 */
-	private static String getRandomStatus() {
-		final String[] status={"Online","Busy","Away"};
-		return status[r.nextInt(3)];
-	}
-	
-	/**
-	 * @return
-	 */
-	private static String getRandomWorkPosition() {
-		final String[] workPosition={"Manager","Marketing","Programmer"};
-		return workPosition[r.nextInt(3)];
-	}
-	
-	/**
-	 * @return
-	 */
-	private static String getRandomOccupation() {
-		final String[] work={"Manager","Developer","Beta Tester"};
-		return work[r.nextInt(3)];
 	}	
 
 

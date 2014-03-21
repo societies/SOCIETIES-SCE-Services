@@ -25,7 +25,7 @@
 package org.societies.collabtools;
 
 import java.util.Arrays;
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.Map.Entry;
 import java.util.Observable;
 
@@ -49,8 +49,8 @@ public class AsyncCollabAppConnector implements IAsyncCollabAppConnector {
 	@Override
 	public void update(Observable o, Object arg) {
 		// TODO Auto-generated method stub
-		Hashtable<String, String[]> ht = new Hashtable<String, String[]>();
-		ht = (Hashtable<String, String[]>) arg;
+		HashMap<String, String[]> ht = new HashMap<String, String[]>();
+		ht = (HashMap<String, String[]>) arg;
 		for (Entry<String, String[]> entry : ht.entrySet()) {
 		    System.out.println("Location: "+entry.getKey()+ " people: "+Arrays.toString(entry.getValue()));
 		}

@@ -100,7 +100,7 @@ public class TestUtils {
     	Map<Person, Integer> persons = personRepository.getPersonWithSimilarCtx(person, LongTermCtxTypes.INTERESTS);
 		for (Map.Entry<Person, Integer> entry : persons.entrySet()) {
 			//Similarity Formula is: (similar ctx/ personA + similar ctx/personB) / 2
-			float weight = ContextAnalyzer.personCtxSimilarity(entry.getValue(), LongTermCtxTypes.INTERESTS, entry.getKey(), person);
+			double weight = ContextAnalyzer.personCtxSimilarity(entry.getValue(), LongTermCtxTypes.INTERESTS, entry.getKey(), person);
     		person.addSimilarityRelationship(entry.getKey(), weight, LongTermCtxTypes.INTERESTS);
 		}
 		
@@ -123,7 +123,7 @@ public class TestUtils {
         	Map<Person, Integer> persons = personRepository.getPersonWithSimilarCtx(person, ctxType);
 			for (Map.Entry<Person, Integer> entry : persons.entrySet()) {
 				//Similarity Formula is: (similar ctx/ personA + similar ctx/personB) / 2
-				float weight = ContextAnalyzer.personCtxSimilarity(entry.getValue(), ctxType, entry.getKey(), person);
+				double weight = ContextAnalyzer.personCtxSimilarity(entry.getValue(), ctxType, entry.getKey(), person);
         		person.addSimilarityRelationship(entry.getKey(),weight, ctxType);  
 			}
         }

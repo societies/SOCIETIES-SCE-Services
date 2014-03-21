@@ -28,7 +28,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -63,10 +63,11 @@ public class ContextAnalyzer implements IContextAnalyzer {
 
 	private static final Logger log = LoggerFactory.getLogger(ContextAnalyzer.class);
 	private final PersonRepository personRepository;
-	private Hashtable<String, HashSet<Person>> hashCtxList = new Hashtable<String, HashSet<Person>>(10,10);
+	private HashMap<String, HashSet<Person>> hashCtxList = new HashMap<String, HashSet<Person>>(10);
 	
 	//TODO: api key hardcoded....Change to config.propreties
 	final String APIKEY = "ca193cc1d3101c225266787a3d5fc1f810b52f02";
+	private boolean weightAlreadyAssigned = false;
 
 	/**
 	 * @param personRepository
@@ -124,6 +125,7 @@ public class ContextAnalyzer implements IContextAnalyzer {
 	 * @param enrichmentType concept, category or even both
 	 * @param person if null will perform with all persons
 	 */
+	@Override
 	public void incrementCtx(final String ctxType, final EnrichmentTypes enrichmentType, Person person) {
 		//Considering all persons to increment when null
 		if (person == null) {
@@ -167,10 +169,8 @@ public class ContextAnalyzer implements IContextAnalyzer {
 				try {
 					fut.get();
 				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				} catch (ExecutionException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
@@ -195,30 +195,44 @@ public class ContextAnalyzer implements IContextAnalyzer {
 
 	}
 
-	static public float personCtxSimilarity (int similarCtx, String ctxType, Person personA, Person personB) {
-		//Similarity Formula is: (similar ctx/ personA + similar ctx/personB) / 2
-		//Check if there is no similarity between both
+	/**
+	 * Check if there is no similarity between both persons.
+	 * Similarity Formula is: (similar ctx/ personA + similar ctx/personB) / 2
+	 * 
+	 * @param similarCtx
+	 * @param ctxType context type
+	 * @param personA
+	 * @param personB
+	 * @return
+	 */
+	static public double personCtxSimilarity (int similarCtx, String ctxType, Person personA, Person personB) {
 		if (similarCtx != 0) {
-			float PersonAweight = (float)similarCtx/personA.getArrayLongTermCtx(ctxType).length;
-			float PersonBweight = (float)similarCtx/personB.getArrayLongTermCtx(ctxType).length;
+			double PersonAweight = (double)similarCtx/personA.getArrayLongTermCtx(ctxType).length;
+			double PersonBweight = (double)similarCtx/personB.getArrayLongTermCtx(ctxType).length;
 			return (PersonAweight + PersonBweight) / 2;
 		}
 		else
 			throw new IllegalArgumentException("There is no similarity between this individuals");
 	}
 
-	//Based on automatic thresholding. Formula: (avg < Mean/avg > Mean)/2
-	public static float getAutoThreshold(ArrayList<Float> elements) {
-		float initialThreshold = 0;
-		for (float value : elements)
+
+	/**
+	 * Based on automatic thresholding. Formula: (avg < Mean/avg > Mean)/2
+	 * 
+	 * @param elements
+	 * @return a double value as a cut point
+	 */
+	public static double getAutoThreshold(ArrayList<Double> elements) {
+		double initialThreshold = 0;
+		for (double value : elements)
 		{
 			initialThreshold += value;
 		}
 		initialThreshold = initialThreshold / elements.size();
-		float finalThreshold = 0;
+		double finalThreshold = 0;
 		boolean done = false;
 		while (!done) {
-			float avgG1 = 0,  avgG2 = 0;
+			double avgG1 = 0,  avgG2 = 0;
 			int nG1 = 0, nG2 = 0;
 			for (int i = 0; i < elements.size(); i++) {
 				if (elements.get(i) > initialThreshold) {
@@ -234,10 +248,10 @@ public class ContextAnalyzer implements IContextAnalyzer {
 			avgG2 = avgG2 / nG2;
 			finalThreshold = (avgG1 + avgG2) / 2;
 			//Check division by zero. Not a Number
-			if (Float.isNaN(finalThreshold)){
+			if (Double.isNaN(finalThreshold)){
 				return initialThreshold;
 			}
-			//Because floating point calculations may involve rounding, calculated float and double values may not be accurate
+			//Because doubleing point calculations may involve rounding, calculated double and double values may not be accurate
 			if (Math.abs(initialThreshold - finalThreshold) < .0000001) {
 				done = true;
 			}
@@ -249,12 +263,12 @@ public class ContextAnalyzer implements IContextAnalyzer {
 	
 	
 	/**
-	 * @param operator Operators available in 
+	 * @param operator Operators available in org.societies.collabtools.runtime.Operators
 	 * @param ctxAtributte Context attribute. The context can range from interests, occupation, etc..
 	 * @param hashsetPersons Persons to analyze
-	 * @return Hashtable of everyone in the graph with same context attribute
+	 * @return HashMap of everyone in the graph with same context attribute
 	 */
-	public synchronized Hashtable<String, HashSet<Person>> getPersonsWithMatchingShortTermCtx(Operators operator, final String ctxAtributte, HashSet<Person> personHashSet) {
+	public synchronized HashMap<String, HashSet<Person>> getPersonsWithMatchingShortTermCtx(Operators operator, final String ctxAtributte, HashSet<Person> personHashSet) {
 		//Compare ctxAtributte
 		this.hashCtxList.clear();
 		Set<ShortTermContextUpdates> lastestShortTermCtxUpdates = new HashSet<ShortTermContextUpdates>();
@@ -273,10 +287,10 @@ public class ContextAnalyzer implements IContextAnalyzer {
 	/**
 	 * @param ctxAtributte Context attribute. The context can range from interests, occupation, etc..
 	 * @param hashsetPersons Persons to analyze
-	 * @return Hashtable of everyone in the graph with same context attribute
+	 * @return HashMap of everyone in the graph with same context attribute
 	 */
 	@SuppressWarnings("unchecked")
-	public synchronized Hashtable<String, HashSet<Person>> getPersonsWithMatchingLongTermCtx(final String ctxAtributte, HashSet<Person> hashsetPersons) {
+	public synchronized HashMap<String, HashSet<Person>> getPersonsWithMatchingLongTermCtx(final String ctxAtributte, HashSet<Person> hashsetPersons) {
 		//For long term context types
 		this.hashCtxList.clear();
 		Person[] person = new Person[hashsetPersons.size()];
@@ -291,7 +305,7 @@ public class ContextAnalyzer implements IContextAnalyzer {
 				temp[count++] = person[j];
 		}
 		log.debug("Number of persons with context {}",ctxAtributte);
-		Hashtable<String, HashSet<Person>> hashCtxList = (Hashtable<String, HashSet<Person>>) this.hashCtxList.clone();
+		HashMap<String, HashSet<Person>> hashCtxList = (HashMap<String, HashSet<Person>>) this.hashCtxList.clone();
 		return hashCtxList;
 	}
 
@@ -299,9 +313,9 @@ public class ContextAnalyzer implements IContextAnalyzer {
 	/**
 	 * @param ctxAtributte Context attribute. The context can range from interests, occupation, etc..
 	 * @param ctxType The context type needs to be long term or short term
-	 * @return Hashtable of everyone in the graph with same context attribute
+	 * @return HashMap of everyone in the graph with same context attribute
 	 */
-	public Hashtable<String, HashSet<Person>> getAllPersonsWithSameCtx(final String ctxAttribute, final String ctxType) {
+	public HashMap<String, HashSet<Person>> getAllPersonsWithSameCtx(final String ctxAttribute, final String ctxType) {
 		HashSet<Person> personHashSet = new HashSet<Person>();
 		for (Person person : personRepository.getAllPersons() ) {
 			personHashSet.add(person);
@@ -319,68 +333,61 @@ public class ContextAnalyzer implements IContextAnalyzer {
 	/**
 	 * @param sessionName Name of the session
 	 * @param hashSet Persons to analyze
-	 * @return Hashtable Return the results with a session name and the persons
+	 * @return HashMap Return the results with a session name and the persons
 	 */
-	public Hashtable<String, HashSet<Person>> getPersonsBySimilarity(String sessionName, HashSet<Person> hashsetPersons, String ctxAttribute) {
-		//For long term context types
-		Hashtable<String, HashSet<Person>> hashCtxListTemp = new Hashtable<String, HashSet<Person>>(10,10);
+	public HashSet<Person> getPersonsPerSimilarity(HashSet<Person> hashsetPersons, String ctxAttribute) {
 		if (!hashsetPersons.isEmpty()) {
-			Person[] person = new Person[hashsetPersons.size()];
-			hashsetPersons.toArray(person);
-			ArrayList<Float> elements = new ArrayList<Float>(); 
-			for (Person p : person) {
-				Iterable<Relationship> similarityWeights = p.getUnderlyingNode().getRelationships(DynamicRelationshipType.withName("SIMILARITY_"+ctxAttribute), Direction.OUTGOING);
-				while (similarityWeights.iterator().hasNext()) {
-					Relationship rel = similarityWeights.iterator().next();
-					elements.add((Float) rel.getProperty("weight"));//Property of relationship similarity
-				}
-			}
-			float weight = ContextAnalyzer.getAutoThreshold(elements);
-			log.debug("automaticThresholding: {}",weight);
+			ArrayList<Double> weightValues = this.getWeightSum(hashsetPersons, ctxAttribute);
+			double threshold = ContextAnalyzer.getAutoThreshold(weightValues);
+			log.info("automaticThresholding: {}",threshold);
 			HashSet<Person> newHashsetPersons = new HashSet<Person>();
 			HashSet<Long> hashsetTemp = new HashSet<Long>();
-			for (Person individual : person) {
-				for (Person otherPerson : person) {
+			for (Person individual : hashsetPersons) {
+				for (Person otherPerson : hashsetPersons) {
 					Relationship rel = individual.getPersonRelationshipTo(otherPerson, ctxAttribute);
 					//Check by relationship ID if the weight was included in the hashset
 					if (rel != null &&  !hashsetTemp.contains(rel.getId())) {
-						//							log.info(((Float)rel.getProperty("weight")));
+						//							log.info(((double)rel.getProperty("weight")));
 						hashsetTemp.add(rel.getId());
-						if ((Float)rel.getProperty("weight") >= weight) {
+						if ((Double)rel.getProperty("weight") >= threshold) {
 							newHashsetPersons.add(individual);
 							newHashsetPersons.add(otherPerson);
 						}
 					}
 				}
 			}
-			hashCtxListTemp.put(sessionName, newHashsetPersons);
-			return hashCtxListTemp;
+			return newHashsetPersons;
 		}
 		else {
-			hashCtxListTemp.put(sessionName, hashsetPersons);
+			return hashsetPersons;
 		}
-		return hashCtxListTemp;
-
 	}
 	
-
+	/**
+	 * This method generate weight among the relationship of all person nodes based on similarity
+	 * 
+	 * @param CtxAttribute LongTermCtx attribute
+	 */
 	public void setupWeightAmongPeople(String CtxAttribute)
 	{
-		log.info("\r\n\r\n*****Assign weight for {} *****",CtxAttribute);
-		long start = System.currentTimeMillis();
-		for (Person person : personRepository.getAllPersons())
-		{
-			Map<Person, Integer> persons = personRepository.getPersonWithSimilarCtx(person, CtxAttribute);
-			log.debug("{} CtxAttribute {}", person.getName(), Arrays.toString(person.getArrayLongTermCtx(CtxAttribute)));
-			log.info("\r\n\r\nCalculating for person {} \r\n", person.getName());
-			for (Map.Entry<Person, Integer> entry : persons.entrySet()) {
-				//Similarity Formula is: (similar ctx/ personA + similar ctx/personB) / 2
-				float weight = ContextAnalyzer.personCtxSimilarity(entry.getValue(), CtxAttribute, entry.getKey(), person);
-				person.addSimilarityRelationship(entry.getKey(), weight, CtxAttribute);
-				log.info("Weight {} assigned for person {}", weight, entry.getKey());
+		if (!weightAlreadyAssigned) {
+			log.info("\r\n\r\n*****Assign weight for {} *****",CtxAttribute);
+			long start = System.currentTimeMillis();
+			for (Person person : personRepository.getAllPersons())
+			{
+				Map<Person, Integer> persons = personRepository.getPersonWithSimilarCtx(person, CtxAttribute);
+				log.debug("{} CtxAttribute {}", person.getName(), Arrays.toString(person.getArrayLongTermCtx(CtxAttribute)));
+				log.info("\r\n\r\nCalculating for person {} \r\n", person.getName());
+				for (Map.Entry<Person, Integer> entry : persons.entrySet()) {
+					//Similarity Formula is: (similar ctx/ personA + similar ctx/personB) / 2
+					double weight = ContextAnalyzer.personCtxSimilarity(entry.getValue(), CtxAttribute, entry.getKey(), person);
+					person.addSimilarityRelationship(entry.getKey(), weight, CtxAttribute);
+					log.info("Weight {} assigned for person {}", weight, entry.getKey());
+				}
 			}
+			log.info("*****Weight assigned in {} ms*****\r\n",(System.currentTimeMillis()-start));
+			weightAlreadyAssigned = true;
 		}
-		log.info("*****Weight assigned in {} ms*****\r\n",(System.currentTimeMillis()-start));
 	}
 
 	
@@ -434,7 +441,7 @@ public class ContextAnalyzer implements IContextAnalyzer {
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
-	private Hashtable<String, HashSet<Person>>  getUniqueElements(ShortTermContextUpdates[] statusArray, final String ctxAttribute) {
+	private HashMap<String, HashSet<Person>>  getUniqueElements(ShortTermContextUpdates[] statusArray, final String ctxAttribute) {
 		ShortTermContextUpdates[] temp = new ShortTermContextUpdates[statusArray.length]; // null elements
 		log.debug("Number of persons: {} with context [}",temp.length,ctxAttribute);
 		int count = 0;
@@ -442,7 +449,93 @@ public class ContextAnalyzer implements IContextAnalyzer {
 			if(hasSameShortTermCtx(statusArray[j], temp, ctxAttribute))
 				temp[count++] = statusArray[j];
 		}
-		Hashtable<String, HashSet<Person>>  hashCtxList = (Hashtable<String, HashSet<Person>>) this.hashCtxList.clone();
+		HashMap<String, HashSet<Person>>  hashCtxList = (HashMap<String, HashSet<Person>>) this.hashCtxList.clone();
 		return hashCtxList;
 	}
+
+	/**
+	 * @param person persons as a start node
+	 * @param ctxAttribute LongTermCtx attribute
+	 * @param threshold cut-off point
+	 * @return a HashMap with a person key and his relationships weights with other persons
+	 */
+	public HashMap<Person, Double> getSimilarityPerPerson(Person person, String ctxAttribute, double threshold) {
+		Iterable<Relationship> relationships = person.getSimilarityRelationships(ctxAttribute);
+		HashMap<Person, Double> hashWeightList = new HashMap<Person, Double>(10);
+		for (Relationship rel: relationships) {
+			Double weight = (Double)rel.getProperty("weight");
+			log.debug("weight {}", weight);
+			if (weight>=threshold){
+				//Verifying if A is the end node. (a) --- REL_TYPE ---> (b)
+				Person a = new Person(rel.getStartNode());
+				Person b = new Person(rel.getEndNode());
+				if (person.equals(b))  {
+					hashWeightList.put(a, weight);
+					log.debug("Person {} has relationship with: {}", person, a.getName());
+				}
+				else {
+					hashWeightList.put(b, weight);
+					log.debug("Person {} has relationship with: {}", person, b.getName());
+				}
+
+			}
+		}
+		return hashWeightList;
+	}
+
+	/**
+	 * @param ctxAttribute Long Term ctx type
+	 * @return a HashMap with format: Person and his weight
+	 */
+	public HashMap<Person, HashMap<Person, Double>> getPersonMatrix(String ctxAttribute) {
+		HashMap<Person, HashMap<Person, Double>> participantsMatrix = new HashMap<Person, HashMap<Person, Double>>();
+		HashMap<Person, Double> matchingResults = new  HashMap<Person, Double>();
+		ArrayList<Double> weightSum = this.getWeightSum(null, ctxAttribute);
+		double threshold = ContextAnalyzer.getAutoThreshold(weightSum);
+		log.info("Autothreshold {}", threshold);
+		for (Person person : personRepository.getAllPersons()) {
+			matchingResults = this.getSimilarityPerPerson(person, ctxAttribute, threshold);
+			//Remove empty sets
+			if (!matchingResults.values().isEmpty()){
+				participantsMatrix.put(person, matchingResults);
+			}
+			//Remove cases where results have 2-3 and 3-2 which is the same similarity
+//			Set<Person> group = matchingResults.keySet();
+//			for (Person individual : group){
+//				HashMap<Person, Double> personToCompare = participantsMatrix.get(individual);
+//				if (personToCompare != null && personToCompare.containsKey(person)){
+//					participantsMatrix.get(individual).remove(person);
+//					if (participantsMatrix.get(individual).isEmpty()){
+//						participantsMatrix.remove(individual);
+//					}
+//				}
+//			}
+		}
+		return participantsMatrix;
+	}
+	
+	public ArrayList<Double> getWeightSum(HashSet<Person> hashsetPersons, String ctxAttribute){
+		ArrayList<Double> weightValues = new ArrayList<Double>(); 
+		if (hashsetPersons == null){
+			for (Person person : personRepository.getAllPersons()) {				
+				Iterable<Relationship> similarityWeights = person.getUnderlyingNode().getRelationships(DynamicRelationshipType.withName("SIMILARITY_"+ctxAttribute), Direction.OUTGOING);
+				for (Relationship rel : similarityWeights) {
+					log.debug("startNode: {}", new Person(rel.getStartNode()));
+					log.debug("endNode: {}",new Person(rel.getEndNode()));
+					weightValues.add((Double) rel.getProperty("weight"));//Property of relationship similarity
+				}
+			}
+		}
+		else {
+			for (Person person : hashsetPersons) {				
+				Iterable<Relationship> similarityWeights = person.getUnderlyingNode().getRelationships(DynamicRelationshipType.withName("SIMILARITY_"+ctxAttribute), Direction.OUTGOING);
+				for (Relationship rel : similarityWeights) {
+					log.debug("startNode: {}", new Person(rel.getStartNode()));
+					log.debug("endNode: {}",new Person(rel.getEndNode()));
+					weightValues.add((Double) rel.getProperty("weight"));//Property of relationship similarity
+				}
+			}
+		}		
+		return weightValues;		
+	}	
 }

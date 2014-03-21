@@ -42,6 +42,7 @@ import org.societies.collabtools.context.ExternalCtxBrokerConnector;
  */
 public class InternalContextConnector implements IContextConnector {
 
+	@SuppressWarnings("unused")
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
 	
 	BundleContext bundleContext = FrameworkUtil.getBundle(this.getClass()).getBundleContext();

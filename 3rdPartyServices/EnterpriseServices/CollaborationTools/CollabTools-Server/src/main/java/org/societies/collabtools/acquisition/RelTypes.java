@@ -34,7 +34,8 @@ public enum RelTypes implements RelationshipType
 	  A_PERSON_REMOVED, 
 	  REALTIME_STATUS, 
 	  NEXT, 
-	  SIMILARITY, 
+	  SIMILARITY,
+	  WEIGHTED,
 
 	  REF_SESSIONS, 
 

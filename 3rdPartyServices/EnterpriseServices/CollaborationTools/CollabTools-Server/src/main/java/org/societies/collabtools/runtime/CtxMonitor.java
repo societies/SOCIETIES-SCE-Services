@@ -25,9 +25,9 @@
 package org.societies.collabtools.runtime;
 
 import java.util.Arrays;
-import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
@@ -54,6 +54,7 @@ public class CtxMonitor extends Observable implements Runnable, Observer {
 
 	public CtxMonitor (PersonRepository personRepository, SessionRepository sessionRepository) {
 		this.engine = new Engine(personRepository);
+		this.engine.setEngineModeByPriority(false);
 		this.sessionRepository = sessionRepository;
 
 		//Default rules when the FW starts, location and interests
@@ -65,21 +66,23 @@ public class CtxMonitor extends Observable implements Runnable, Observer {
 	}
 
 	public synchronized void run(){
-		logger.info("Checking if people context match. Priority {}", this.engine.getEngineMode());
+		logger.info("Checking if people context match. Engine mode {}", this.engine.getEngineMode() ? "Priority" : "Relevance");
 
-		if (this.engine.getEngineMode()) {
+		switch (this.engine.getEngineMode() ? 1 : 2){
+		//Priority
+		case 1:	
 			//First rule: location Mandatory
-			Hashtable<String, HashSet<Person>> personsfirstRule = engine.evaluateRule("r01");
+			HashMap<String, HashSet<Person>> personsfirstRule = engine.evaluateRule("r01");
 
 			if (!personsfirstRule.isEmpty()) {
-				Enumeration<String> iterator = personsfirstRule.keys();
+				Iterator<String> iterator = personsfirstRule.keySet().iterator();
 				//For each different location, apply the following rules...
-				while(iterator.hasMoreElements()) {
+				while(iterator.hasNext()) {
 					//Session name = actual location
-					String sessionName = iterator.nextElement();
+					String sessionName = iterator.next();
 					HashSet<Person> possibleMembers = engine.getMatchingResultsByPriority().get(sessionName);
 					//Check conflict if actual users in the session
-					if (!(possibleMembers).isEmpty()) {
+					if (possibleMembers != null && !possibleMembers.isEmpty()) {
 						if (!this.sessionRepository.containSession(sessionName)) {
 							logger.info("Starting a new session..");
 							logger.info("Inviting people..");
@@ -92,7 +95,7 @@ public class CtxMonitor extends Observable implements Runnable, Observer {
 
 						// Notify observers of change
 						if (membersIncluded.length>0){
-							Hashtable<String, String[]> response = new Hashtable<String, String[]>();
+							HashMap<String, String[]> response = new HashMap<String, String[]>();
 							response.put(sessionName, membersIncluded);
 							setChanged();
 							notifyObservers(response);
@@ -100,9 +103,36 @@ public class CtxMonitor extends Observable implements Runnable, Observer {
 					}
 				}
 			}
-		}
-		else {
+			break;
+		//Relevance
+		case 2:	
+			Iterator<String> iterator = engine.getMatchingResultsByRelevance().keySet().iterator();
+			//For each different location, apply the following rules...
+			while(iterator.hasNext()) {
+				//Session name = actual location
+				String sessionName = iterator.next();
+				HashSet<Person> possibleMembers = engine.getMatchingResultsByRelevance().get(sessionName);
+				//Check conflict if actual users in the session
+				if (possibleMembers != null && !possibleMembers.isEmpty()) {
+					if (!this.sessionRepository.containSession(sessionName)) {
+						logger.info("Starting a new session..");
+						logger.info("Inviting people..");
+						System.out.println("New Engine: "+possibleMembers.toString());
+						this.sessionRepository.createSession(sessionName);
+					}
+					String[] membersIncluded = this.sessionRepository.addMembers(sessionName, possibleMembers);
 
+					//System.out.println("New Engine: "+possibleMembers.toString());
+
+					// Notify observers of change
+					if (membersIncluded.length>0){
+						HashMap<String, String[]> response = new HashMap<String, String[]>();
+						response.put(sessionName, membersIncluded);
+						setChanged();
+						notifyObservers(response);
+					}
+				}
+			}
 		}
 	}
 

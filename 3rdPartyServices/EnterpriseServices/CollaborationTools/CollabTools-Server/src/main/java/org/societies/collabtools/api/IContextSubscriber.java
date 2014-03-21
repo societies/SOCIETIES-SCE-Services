@@ -24,7 +24,7 @@
  */
 package org.societies.collabtools.api;
 
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Observable;
 
@@ -60,7 +60,7 @@ public interface IContextSubscriber {
 	 * 
 	 * @return current sessions
 	 */
-	public Hashtable<String,List<String>> getSessions();
+	public HashMap<String,List<String>> getSessions();
 	
 	public void update(Observable o, Object arg);	
 

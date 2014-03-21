@@ -27,10 +27,8 @@ package org.societies.collabtools.runtime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
@@ -39,6 +37,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.societies.collabtools.acquisition.Person;
 import org.societies.collabtools.acquisition.PersonRepository;
+import org.societies.collabtools.acquisition.RelTypes;
 import org.societies.collabtools.acquisition.ShortTermCtxTypes;
 import org.societies.collabtools.api.IEngine;
 import org.societies.collabtools.api.IIncrementCtx.EnrichmentTypes;
@@ -59,7 +58,7 @@ public class Engine implements IEngine {
 
 	private List<Rule> rules = new ArrayList<Rule>();
 	private ContextAnalyzer ctxRsn;
-	private boolean engineBypriority = true;
+	private boolean engineByPriority = true;
 	private double weightSum;
 
 	/**
@@ -80,12 +79,8 @@ public class Engine implements IEngine {
 	public synchronized void insertRule(Rule rule){
 		if (rule.getOperator().equals(Operators.SIMILAR)){
 			// context enrichment with Concept and Category
-//			ctxRsn.enrichedCtx(rule.getCtxAttribute());
-			//For tests only concept enrichment will be done
-			ctxRsn.incrementCtx(rule.getCtxAttribute(), EnrichmentTypes.CONCEPT, null);
-			ctxRsn.setupWeightAmongPeople(rule.getCtxAttribute());
-			//Assigning new weights or update the existing one
-			ctxRsn.setupWeightAmongPeople(rule.getCtxAttribute());
+			//			ctxRsn.enrichedCtx(rule.getCtxAttribute());
+
 		}
 		this.rules.add(rule);
 
@@ -110,10 +105,10 @@ public class Engine implements IEngine {
 	public synchronized void setRules(final Collection<Rule> rules){
 		for(Rule r : rules){
 			if (r.getOperator().equals(Operators.SIMILAR)){
-				// context enrichment with Concept and Category
-//				ctxRsn.enrichedCtx(r.getCtxAttribute());
+				// context enrichment with Concept 
+				//				ctxRsn.incrementCtx(r.getCtxAttribute(), EnrichmentTypes.CONCEPT, null);
 				//Assigning new weights or update the existing one
-				ctxRsn.setupWeightAmongPeople(r.getCtxAttribute());
+				//				ctxRsn.setupWeightAmongPeople(r.getCtxAttribute());
 			}
 			this.rules.add(r);
 			log.info("added rule: " + r);
@@ -129,7 +124,7 @@ public class Engine implements IEngine {
 	public synchronized List<Rule> getRules() {
 		return rules;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.societies.collabtools.runtime.IEngine#getRulesWeightSum()
 	 */
@@ -149,7 +144,7 @@ public class Engine implements IEngine {
 		log.info("\r\n\r\n*****Evaluating rules by priority...*****");
 		long start = System.currentTimeMillis();
 		//Format ctx info and people
-		HashMap<String, HashSet<Person>> matchingRules = new HashMap<String, HashSet<Person>>(10,10);
+		HashMap<String, HashSet<Person>> matchingRules = new HashMap<String, HashSet<Person>>();
 		for(Rule r : this.rules){
 			if (matchingRules.isEmpty()) {
 				matchingRules = evaluateRule(r.getOperator(), r.getCtxAttribute(), r.getValue(), r.getCtxType(), null);
@@ -163,17 +158,25 @@ public class Engine implements IEngine {
 					//Check here for SAME operator
 					HashSet<Person> secondarySet  = htTemp.get(r.getCtxAttribute());
 					primarySet.retainAll(secondarySet);
-					matchingRules.put(htKey, primarySet);					
+					matchingRules.put(htKey, primarySet);
 				}
 			}
 			log.info("matched rule: " + r.getName() + " with priority "+ r.getPriority()+" and weight "+r.getWeight()*10 +"%");
-//			Enumeration<String> e = matchingRules.keys();
-//			while (e.hasMoreElements()) {
-//				log.info("matchingRules: " + e.nextElement());
-//			}
+			//			Enumeration<String> e = matchingRules.keys();
+			//			while (e.hasMoreElements()) {
+			//				log.info("matchingRules: " + e.nextElement());
+			//			}
 		}
-
-		log.info("*****Engine evaluation completed in " + (System.currentTimeMillis()-start) + " ms*****\r\n");
+		//Remove entries with empty values
+		Iterator<Entry<String, HashSet<Person>>> it = matchingRules.entrySet().iterator();
+		while (it.hasNext()) {
+		    Entry<String, HashSet<Person>> e = it.next();
+		    HashSet<Person> value = e.getValue();
+		    if (value.isEmpty()) {
+		        it.remove();
+		    }
+		}
+		log.info("*****Engine evaluation by priority completed in " + (System.currentTimeMillis()-start) + " ms*****\r\n");
 		return matchingRules;
 	}
 
@@ -182,26 +185,32 @@ public class Engine implements IEngine {
 	 */
 	@Override
 	public HashMap<String, HashSet<Person>> getMatchingResultsByRelevance() {
-		//Using multivariate distance
+		//Using Multivariate distance matrix
+		//1-Determine distance matrix for each features variable based on coordinate
+		//2-Aggregate the distance matrix
 		log.info("\r\n\r\n*****Evaluating rules by relevance...*****");
 		long start = System.currentTimeMillis();
 		double weightSum = getRulesWeightSum();
 		//Format ctx info and people
-		HashMap<String, HashSet<Person>> matchingRules = new HashMap<String, HashSet<Person>>(10,10);
+		HashMap<String, HashSet<Person>> matchingRules = new HashMap<String, HashSet<Person>>();
+		HashMap<Person, Double> personPlusSimilarity = new HashMap<Person,Double>();
+		HashSet<Person> allPersonsFromRules;
+//		ArrayList<Double> list = new ArrayList<Double>();
 		//Building a distance matrix to calculate similarity, including weight
-		HashMap <Person, HashMap<Person,Double>> weightedDistanceMatrix = new HashMap<Person, HashMap<Person,Double>>(10,10);
+//		Map<Person, HashMap<Person,Double>> weightedDistanceMatrix = new HashMap<Person, HashMap<Person,Double>>();
 		for (Person person : personRepository.getAllPersons()) {
-			HashMap<Person, Double> personPlusSimilarity = new HashMap<Person,Double>(10,10);
+			//Beginning with a new hashmap
+			personPlusSimilarity.clear();
 			for(Rule r : this.rules){
+				//Same operator case
 				if (r.getOperator().equals(Operators.SAME)){
 					matchingRules = evaluateRule(r.getOperator(), r.getCtxAttribute(), r.getValue(), r.getCtxType(), null);
 					//A set of same context information.E.g. Work, Gym
 					for (Entry<String, HashSet<Person>> entry : matchingRules.entrySet()) {
-						HashSet<Person> allPersons = entry.getValue();
+						allPersonsFromRules = entry.getValue();
 						//If this person has same ctx of the group then it is 1
-						boolean personWithSameCtx = allPersons.remove(person);
-						if (personWithSameCtx) {
-							for (Person individual : allPersons){
+						if (allPersonsFromRules.remove(person)) {
+							for (Person individual : allPersonsFromRules){
 								if (personPlusSimilarity.containsKey(individual)) {
 									//if this individual is on the list then is the old value + (1+weight value) 
 									personPlusSimilarity.put(individual, personPlusSimilarity.get(individual)+1*r.getWeight());
@@ -214,77 +223,93 @@ public class Engine implements IEngine {
 						}
 					}
 				}
+				//Similar operator case
 				else if (r.getOperator().equals(Operators.SIMILAR)){
-					HashMap<Person, Double> allPersons = ctxRsn.getSimilarityPerPerson(person, r.getCtxAttribute());
-					for (Person individual : allPersons.keySet()){
-						if (personPlusSimilarity.containsKey(individual)) {
-							//if this individual is on the list then is the old value + weighted similarity 
-							personPlusSimilarity.put(individual, personPlusSimilarity.get(individual)+(allPersons.get(individual)*r.getWeight()));
+					//For tests only concept enrichment will be done
+					ctxRsn.incrementCtx(r.getCtxAttribute(), EnrichmentTypes.CONCEPT, null);
+					//Assigning new weights or update the existing one
+					ctxRsn.setupWeightAmongPeople(r.getCtxAttribute());
+					HashMap<Person, Double> allPersonsMap = ctxRsn.getSimilarityPerPerson(person, r.getCtxAttribute(), 0);
+						for (Person individual : allPersonsMap.keySet()){
+							if (personPlusSimilarity.containsKey(individual)) {
+								//if this individual is on the list then is the old value + weighted similarity 
+								personPlusSimilarity.put(individual, personPlusSimilarity.get(individual)+(allPersonsMap.get(individual)*r.getWeight()));
+							}
+							else { 
+								personPlusSimilarity.put(individual, allPersonsMap.get(individual)*r.getWeight());
+							}
 						}
-						else { 
-							personPlusSimilarity.put(individual, allPersons.get(individual)*r.getWeight());
-						}
-					}
+
 				}
+				//Other cases (Binary operators)
 				else {
-					matchingRules = evaluateRule(r.getOperator(), r.getCtxAttribute(), r.getValue(), r.getCtxType(), null);					
-					HashSet<Person> allPersons = matchingRules.get(r.getCtxAttribute());
-					allPersons.remove(person);
-					for (Person individual : allPersons){
-						if (personPlusSimilarity.containsKey(individual)) {
-							//if this individual is on the list then is the old value + (1+weight value) 
-							personPlusSimilarity.put(individual, personPlusSimilarity.get(individual)+1*r.getWeight());
-						} 
-						else {
-							//if this individual is on the list then is 1 (presence of attribute)
-							personPlusSimilarity.put(individual, 1*r.getWeight());
+					matchingRules = evaluateRule(r.getOperator(), r.getCtxAttribute(), r.getValue(), r.getCtxType(), null);	
+					allPersonsFromRules = matchingRules.get(r.getCtxAttribute());
+					//If person is in the result then 1-1 the rule matched
+					if (allPersonsFromRules.remove(person)) {
+						for (Person individual : allPersonsFromRules){
+							if (personPlusSimilarity.containsKey(individual)) {
+								//if this individual is on the list then is the old value + (1+weight value) 
+								personPlusSimilarity.put(individual, personPlusSimilarity.get(individual)+1*r.getWeight());
+							} 
+							else {
+								//if this individual is on the list then is 1 (presence of attribute)
+								personPlusSimilarity.put(individual, 1*r.getWeight());
+							}
 						}
 					}
 				}
 			}
 			for (Person individual : personPlusSimilarity.keySet()){
-				personPlusSimilarity.put(individual, personPlusSimilarity.get(individual)/weightSum);
+				double individualFinalWeight = personPlusSimilarity.get(individual)/weightSum;
+				personPlusSimilarity.put(individual, individualFinalWeight);
+//				list.add(individualFinalWeight);
+				person.addSimilarityRelationship(individual, individualFinalWeight, RelTypes.WEIGHTED.name());
 				log.debug("WeightSum: "+weightSum);
 				log.debug("Calculating with weight: "+individual+ personPlusSimilarity.get(individual));
 			}
-			weightedDistanceMatrix.put(person, personPlusSimilarity);
-			
-
-			//			Relationship rel = individual.getPersonRelationshipTo(otherPerson, ctxAttribute);
-			//				for (Person person : personRepository.getAllPersons()) {
-			//					Enumeration<String> ctxAttIterator = matchingRules.keys();
-			//					while(ctxAttIterator.hasMoreElements()) {
-			//						String ctxAttr = ctxAttIterator.nextElement();
-			//						HashSet<Person> persons  = matchingRules.get(ctxAttr);
-			//						for (Person individual : persons){
-			//							if (individual.getName().equalsIgnoreCase(person.getName())) {
-			//								//If the operator is similar or same , is not binary case
-			//								if (!r.getOperator().equals(Operators.SIMILAR) && !r.getOperator().equals(Operators.SAME)) {
-			//									allPersons.put(individual, r.getWeight()*1);
-			//								}
-			//								else {
-			//									//Or allPersons.put(individual, r.getWeight()*0)
-			//									allPersons.put(individual, 0.0);
-			//								}
-			//							}
-			//							else {
-			//								allPersons.put(individual, r.getWeight());
-			//							}
-			//
-			//						}
-			//					}
-			//				}
-
-			//			log.info("matched rule: " + r.getName() + " with priority "+ r.getPriority()+" and weight "+r.getWeight()*100 +"%");
-
+			//Gower similarity approach
+//			weightedDistanceMatrix.put(person, personPlusSimilarity);
 		}
+		HashMap<Person, HashMap<Person, Double>> participantsMatrix = ctxRsn.getPersonMatrix(RelTypes.WEIGHTED.name());
+		//Print distance matrix to visualize
+//		for (Person i :weightedDistanceMatrix.keySet()) {
+//			System.out.println("weightedDistanceMatrix: " +i.toString()+"->"+ weightedDistanceMatrix.get(i));
+//		}
+		log.info("*****Engine evaluation by relevance completed in " + (System.currentTimeMillis()-start) + " ms*****\r\n");
 		
-		for (Entry<Person, HashMap<Person, Double>> entry : weightedDistanceMatrix.entrySet()) {
-
-			System.out.println("weightedDistanceMatrix: " +entry.getKey().toString()+"->"+ entry.getValue());
+//		System.out.println("participantsMatrix: "+participantsMatrix);
+		//Gower similarity coefficient
+//		System.out.println("Autothreshold: "+ContextAnalyzer.getAutoThreshold(list));
+//		weightedDistanceMatrix = new TreeMap<Person, HashMap<Person,Double>>(weightedDistanceMatrix);
+		
+//		Used to compare with autothreshold result
+//		double counter = 0;
+//		for (double element : list) {
+//			counter += element;
+//		}
+//		System.out.println("Autothreshold: "+counter/list.size());
+		HashMap<String, HashSet<Person>> resultsByOperatorSAME = new HashMap<String, HashSet<Person>>();
+		for(Rule r : this.rules){
+			//Same operator case
+			if (r.getOperator().equals(Operators.SAME)){
+				matchingRules = evaluateRule(r.getOperator(), r.getCtxAttribute(), r.getValue(), r.getCtxType(), null);
+				//A set of same context information.E.g. Work, Gym
+				for (Entry<String, HashSet<Person>> entry : matchingRules.entrySet()) {
+					HashSet<Person> personsToInclude = new HashSet<Person>();
+					for (Person personToCompare : entry.getValue()) {
+						if (participantsMatrix.containsKey(personToCompare)){
+							personsToInclude.add(personToCompare);
+						}
+					}
+					if (!personsToInclude.isEmpty() && personsToInclude.size()>=2){
+						resultsByOperatorSAME.put(entry.getKey(), personsToInclude);
+					}
+				}
+			}
 		}
-		log.info("*****Engine evaluation for relevance completed in " + (System.currentTimeMillis()-start) + " ms*****\r\n");
-		return matchingRules;
+
+		return resultsByOperatorSAME;
 	}
 
 	/* (non-Javadoc)
@@ -302,7 +327,7 @@ public class Engine implements IEngine {
 
 		Iterator<Person> itPerson = personHashSet.iterator();
 		HashSet<Person> setPersons = new HashSet<Person>();
-		HashMap<String, HashSet<Person>> tablePersons = new HashMap<String, HashSet<Person>>(10,10);
+		HashMap<String, HashSet<Person>> tablePersons = new HashMap<String, HashSet<Person>>();
 
 		//Check if ctxType is short term or long term
 		switch (ctxType.equals(ShortTermCtxTypes.class.getSimpleName()) ? 1 : 2){
@@ -414,7 +439,7 @@ public class Engine implements IEngine {
 			}
 			break;
 
-			//********Long term
+		//********Long term
 		case 2:
 			switch (operator){
 			case SAME:
@@ -524,7 +549,11 @@ public class Engine implements IEngine {
 					return tablePersons;
 				}
 				else {
-					HashMap<String, HashSet<Person>> result = new HashMap<String, HashSet<Person>>(10,10);
+					//For tests only concept enrichment will be done
+					ctxRsn.incrementCtx(ctxAttribute, EnrichmentTypes.CONCEPT, null);
+					//Assigning new weights or update the existing one
+					ctxRsn.setupWeightAmongPeople(ctxAttribute);
+					HashMap<String, HashSet<Person>> result = new HashMap<String, HashSet<Person>>();
 					result.put(ctxAttribute, ctxRsn.getPersonsPerSimilarity(personHashSet, ctxAttribute));
 					return result;
 				}						
@@ -566,8 +595,8 @@ public class Engine implements IEngine {
 	 * @param flag Set engine mode to work with priority or relevance
 	 * 
 	 */
-	public void setEngineMode(boolean flag) {
-		this.engineBypriority  = flag;		
+	public void setEngineModeByPriority(boolean flag) {
+		this.engineByPriority  = flag;		
 	}
 
 	/**
@@ -575,7 +604,7 @@ public class Engine implements IEngine {
 	 * 
 	 */
 	public boolean getEngineMode() {
-		return this.engineBypriority;		
+		return this.engineByPriority;		
 	}
 
 }

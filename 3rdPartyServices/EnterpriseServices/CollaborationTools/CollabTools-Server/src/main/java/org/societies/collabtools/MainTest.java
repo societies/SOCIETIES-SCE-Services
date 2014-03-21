@@ -37,7 +37,6 @@ import org.neo4j.index.impl.lucene.LuceneIndex;
 import org.neo4j.kernel.impl.util.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.societies.collabtools.acquisition.LongTermCtxTypes;
 import org.societies.collabtools.acquisition.PersonRepository;
 import org.societies.collabtools.api.AbstractCollabAppConnector;
 import org.societies.collabtools.runtime.CollabApps;
@@ -97,11 +96,11 @@ public class MainTest {
 		test.deleteSocialGraph();
 		
 //		test.menu();
-		test.createPersons(11); //5 people by default
+		test.createPersons(10); //5 people by default
 		
 //		Creating some updates
 		test.createMockLongTermCtx();
-		Thread.sleep(5 * 1000);
+//		Thread.sleep(5 * 1000);
 		test.createMockShortTermCtx();
 //		test.enrichedCtx(LongTermCtxTypes.INTERESTS);
 //		test.setupWeightAmongPeople(LongTermCtxTypes.INTERESTS);

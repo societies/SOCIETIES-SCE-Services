@@ -32,11 +32,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Hashtable;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Map.Entry;
 
 import org.hamcrest.CoreMatchers;
 import org.junit.AfterClass;
@@ -121,17 +123,6 @@ public class PersonTest
 		}
 	}
 
-	//    @Test
-	//    public void YouMightKnow() throws Exception
-	//    {
-	//    	String[] features = new String[] { "name", "company" };
-	//        Person person = getRandomPerson();
-	//    	YouMightKnow mightKnow = new YouMightKnow( person, features, 2 );
-	//    	List<List<Node>> suggestions = mightKnow.result;
-	//        printMightKnow( suggestions, features );
-	////        Person recommendation = IteratorUtil.single( person.getFriendRecommendation( 1 ).iterator() );
-	////        printMightKnow( mightKnow.findYouMightKnow(person) , features );
-	//    }
 
 	@Test
 	public void multipleShortCtxComeOutInTheRightOrder() throws Exception
@@ -369,17 +360,36 @@ public class PersonTest
 			if (person.equals(b))  {
 				System.out.println("Person "+person+" has relationship with: ");
 				System.out.println(a.getName());
-				System.out.println(rel.getProperty("weight"));
 			}
 			else {
 				System.out.println("Person "+person+" has relationship with: ");
 				System.out.println(b.getName());
-				System.out.println(rel.getProperty("weight"));
 			}
+			System.out.println(rel.getProperty("weight"));
 		}
+		
+//		//Comparing with getFriends
+//		Iterable<Person> friends = person.getFriends();
+//		System.out.println("Person "+person+" has "+person.getNrOfFriends()+" friends");
+//		for (Person friend: friends) {
+//			System.out.println("Person "+person+" is friend of: ");
+//			System.out.println(friend.getName());
+//		}
 		assert !relationships.equals(null);
 
 	}
+	
+	@Test
+	public void testGetFriends() {
+		Person person = getRandomPersonWithFriends();
+		Iterable<Person> friends = person.getFriends();
+		System.out.println("Person "+person+" has "+person.getNrOfFriends()+" friends");
+		for (Person friend: friends) {
+			System.out.println("Person "+person+" is friend of: ");
+			System.out.println(friend.getUnderlyingNode());
+		}
+	}
+
 
     //TODO:
 	@Test
@@ -395,29 +405,30 @@ public class PersonTest
 		String[] arg = {"locationSymbolic","Funfair","person#0"};
 		ctxSub.update(null, arg);
 		
-		Hashtable<String, List<String>> sessionHashtable = ctxSub.getSessions();
-		while (sessionHashtable.keys().hasMoreElements()){
-			String sessionName = sessionHashtable.keys().nextElement();
+		HashMap<String, List<String>> sessionHashMap = ctxSub.getSessions();
+		Iterator<Entry<String, List<String>>> it = sessionHashMap.entrySet().iterator();
+		while (it.hasNext()){
+			String sessionName = it.next().getKey();
 			String result = "Session: "+sessionName;
-			result = " Members: "+sessionHashtable.get(sessionName).toString();
+			result = " Members: "+sessionHashMap.get(sessionName).toString();
 			ctxSub.getSessionLanguage("language");
 			System.out.println(result);
 
 		}
 		
-		Assert.assertNotNull(sessionHashtable);
+		Assert.assertNotNull(sessionHashMap);
 	}
 	
     //TODO:
 	@Test
 	public void autoThresholdingTest() throws Exception
 	{
-		ArrayList<Float> elements = new ArrayList<Float>();
+		ArrayList<Double> elements = new ArrayList<Double>();
 //		elements.add((float) 100);
 //		elements.add((float) 100);
 //		elements.add((float) 100);
 //		elements.add((float) 100);
-		float number = ContextAnalyzer.getAutoThreshold(elements);
+		double number = ContextAnalyzer.getAutoThreshold(elements);
 		System.out.println(number);
 	}
 
@@ -545,6 +556,7 @@ public class PersonTest
 			public void run()
 			{
 				personGraphDb.shutdown();
+				sessionGraphDb.shutdown();
 			}
 		} );
 	}

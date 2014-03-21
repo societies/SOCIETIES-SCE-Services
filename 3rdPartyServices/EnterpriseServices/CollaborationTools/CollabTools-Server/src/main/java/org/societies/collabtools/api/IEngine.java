@@ -25,8 +25,8 @@
 package org.societies.collabtools.api;
 
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 
 import org.societies.collabtools.acquisition.LongTermCtxTypes;

@@ -25,8 +25,8 @@
 package org.societies.collabtools.acquisition;
 
 import static org.societies.collabtools.acquisition.RelTypes.NEXT;
-import static org.societies.collabtools.acquisition.RelTypes.SIMILARITY;
 import static org.societies.collabtools.acquisition.RelTypes.REALTIME_STATUS;
+import static org.societies.collabtools.acquisition.RelTypes.SIMILARITY;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -60,7 +60,7 @@ import org.neo4j.kernel.Traversal;
 import org.neo4j.kernel.Uniqueness;
 import org.societies.collabtools.runtime.SessionRepository;
 
-public class Person extends Observable
+public class Person extends Observable implements Comparable<Person>
 {
 	//	private static final String ID = "id";
 
@@ -150,7 +150,7 @@ public class Person extends Observable
 			}
 		}
 		values = list.toArray(new String[list.size()]);
-		System.out.println("Values added: "+Arrays.toString(values));
+		System.out.println("Values added: "+getName()+Arrays.toString(values));
 
 		try
 		{
@@ -170,7 +170,6 @@ public class Person extends Observable
 
 	}
 
-	// START SNIPPET: override
 	@Override
 	public int hashCode()
 	{
@@ -190,9 +189,12 @@ public class Person extends Observable
 		return "Person[" + getName() + "]";
 	}
 
-	// END SNIPPET: override
+	@Override
+	public int compareTo(Person o) {
+		return this.getName().compareTo(o.getName());
+	}
 
-	public void addSimilarityRelationship(Person otherPerson, float weight, String ctxAttribute)
+	public void addSimilarityRelationship(Person otherPerson, double weight, String ctxAttribute)
 	{
 		Transaction tx = underlyingNode.getGraphDatabase().beginTx();
 		try
@@ -386,19 +388,6 @@ public class Person extends Observable
 
 			underlyingNode.createRelationshipTo(newStatus, RelTypes.REALTIME_STATUS);  
 			tx.success();
-			//            Node newStatus = createNewCtxNode(shortTermCtx, sessionRep);
-			//            //Verify if oldstatus exist
-			//            if (getStatus().iterator().hasNext())
-			//            {
-			//            	ShortTermContextUpdates oldStatus = getStatus().iterator().next();
-			//                underlyingNode.getSingleRelationship(RelTypes.STATUS, Direction.OUTGOING).delete();
-			//                newStatus.createRelationshipTo(oldStatus.getUnderlyingNode(), RelTypes.NEXT);
-			//            } 
-			//            else
-			//            {
-			//                underlyingNode.createRelationshipTo(newStatus, RelTypes.STATUS);  
-			//            }
-			//            tx.success();
 		}
 		finally
 		{
