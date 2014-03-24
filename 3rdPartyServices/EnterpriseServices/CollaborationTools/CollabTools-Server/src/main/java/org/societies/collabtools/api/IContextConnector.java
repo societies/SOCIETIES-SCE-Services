@@ -34,10 +34,10 @@ import java.util.HashMap;
  */
 public interface IContextConnector {
 	
-	public HashMap<String, HashMap<String, String[]>> getInitialContext(Object parameter);
+	HashMap<String, HashMap<String, String[]>> getInitialContext(Object parameter);
 	
-	public void registerForshortTermCtxUpdates(Object parameter);
+	void registerForshortTermCtxUpdates(Object parameter);
 	
-	public void unregisterForshortTermCtxUpdates(Object parameter);
+	void unregisterForshortTermCtxUpdates(Object parameter);
 
 }

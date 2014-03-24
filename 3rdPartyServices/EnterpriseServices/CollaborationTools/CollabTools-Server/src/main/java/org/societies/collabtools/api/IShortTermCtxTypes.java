@@ -24,70 +24,12 @@
  */
 package org.societies.collabtools.api;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-
-import org.societies.collabtools.acquisition.LongTermCtxTypes;
-import org.societies.collabtools.acquisition.Person;
-import org.societies.collabtools.acquisition.ShortTermCtxTypes;
-import org.societies.collabtools.runtime.Operators;
-import org.societies.collabtools.runtime.Rule;
-
 /**
- * Interface for Rule engine
+ * Interface for ShortTermCtxTypes
  *
- * @author Chris Lima
+ * @author Christopher Viana Lima
  *
  */
-public interface IEngine {
-	/**
-	 * Insert a individual rule
-	 **/
-	void insertRule(Rule rule);
-	
-	/**
-	 * Delete a individual rule
-	 **/
-	void deleteRule(Rule rule);
-	
-	/** 
-	 * Handles the initialization 
-	 * 
-	 * @param rules The rules which define the system.
-	 * 
-	 * */
-	void setRules(final Collection<Rule> rules);
-
-	/**
-	 * @return a List of rules
-	 */
-	List<Rule> getRules();
-
-	HashMap<String, HashSet<Person>> getMatchingResultsByPriority();
-	
-	HashMap<String, HashSet<Person>> getMatchingResultsByRelevance();
-
-	/**
-	 * @param operator Filter operators available in {@link Operators}
-	 * @param ctx Context information. E.g. Location, interests, etc...
-	 * @param value Value if wants to compare. Null for SAME or DIFFERENT operators
-	 * @param ctxType Context type. Can be {@link ShortTermCtxTypes} or {@link LongTermCtxTypes}
-	 * @param setOfPersons A group of persons to analyze. If null, it will take all persons from the graph
-	 * @return HashMap of persons with keys context attribute.E.g. Location, interests, etc...
-	 */
-	HashMap<String, HashSet<Person>> evaluateRule(Operators operator, final String ctxAttribute, String value, final String ctxType, HashSet<Person> setOfPersons);
-
-	/**
-	 * @param ruleName Name of the rule to evaluate
-	 * @return HashMap of persons with keys context attribute.E.g. Location, interests, etc...
-	 */
-	HashMap<String, HashSet<Person>> evaluateRule(String ruleName);
-
-	/**
-	 * @return the sum of all rule weights
-	 */
-	double getRulesWeightSum();
+public interface IShortTermCtxTypes {
 
 }
