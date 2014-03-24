@@ -126,7 +126,7 @@ public class ChatAppIntegrator extends AbstractCollabAppConnector {
 			 * @return the MUCUser found in the packet.
 			 */
 			private MUCUser getMUCUserExtension(Packet packet) {
-				if (packet != null) {
+				if (null != packet) {
 					// Get the MUC User extension
 					return (MUCUser) packet.getExtension("x", "http://jabber.org/protocol/muc#user");
 				}
@@ -150,7 +150,7 @@ public class ChatAppIntegrator extends AbstractCollabAppConnector {
 			e.printStackTrace();
 		}
 		//Just to avoid null for safety
-		if (rooms != null) {
+		if (null != rooms) {
 			Iterator<HostedRoom> roomsIterator = rooms.iterator();
 			boolean roomAlreadyExist = false;
 			while(roomsIterator.hasNext()){

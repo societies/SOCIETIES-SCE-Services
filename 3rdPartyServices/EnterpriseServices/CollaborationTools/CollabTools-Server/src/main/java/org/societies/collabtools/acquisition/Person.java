@@ -109,7 +109,7 @@ public class Person extends Observable implements Comparable<Person>
 	//Array of ctx
 	public String[] getArrayLongTermCtx(String property){
 		Object o = this.underlyingNode.getProperty(property, null);
-		if (o != null){
+		if (null != o){
 			if (o instanceof String[]) {
 				return (String[]) o;
 			} 
@@ -144,7 +144,7 @@ public class Person extends Observable implements Comparable<Person>
 		//Cleaning array from null and blank words 
 		List<String> list = new ArrayList<String>();
 		for(String s : values) {
-			if(s != null && s.length() > 0) {
+			if(null != s && s.length() > 0) {
 				//using trim to remove white space
 				list.add(s.trim());
 			}
@@ -177,10 +177,14 @@ public class Person extends Observable implements Comparable<Person>
 	}
 
 	@Override
-	public boolean equals(Object o)
+	public boolean equals(Object obj)
 	{
-		return o instanceof Person &&
-				underlyingNode.equals(((Person)o).getUnderlyingNode());
+		if ( this == obj )  
+			return true;
+		if (obj instanceof Person){
+			return obj instanceof Person &&	underlyingNode.equals(((Person)obj).getUnderlyingNode());
+		}
+		return false;
 	}
 
 	@Override
@@ -202,7 +206,7 @@ public class Person extends Observable implements Comparable<Person>
 			if (!this.equals(otherPerson))
 			{
 				Relationship friendRel = getPersonRelationshipTo(otherPerson, ctxAttribute);
-				if (friendRel == null)
+				if (null == friendRel)
 				{
 					System.out.println("assign weight: "+weight);
 					//Creating a dynamic relationship and assigning a weight based on the context attribute type 
@@ -252,7 +256,7 @@ public class Person extends Observable implements Comparable<Person>
 			{
 				for (Relationship rel : underlyingNode.getRelationships())
 				{
-					if (rel != null)
+					if (null != rel)
 					{
 						rel.delete();
 					}
@@ -310,7 +314,7 @@ public class Person extends Observable implements Comparable<Person>
 	{
 		Relationship firstStatus = underlyingNode.getSingleRelationship(
 				REALTIME_STATUS, Direction.OUTGOING );
-		if (firstStatus == null)
+		if (null == firstStatus)
 		{
 			return Collections.emptyList();
 		}
@@ -339,7 +343,7 @@ public class Person extends Observable implements Comparable<Person>
 		Relationship firstStatus = underlyingNode.getSingleRelationship(
 				REALTIME_STATUS, Direction.OUTGOING);
 		//Check if status is empty
-		if (firstStatus == null)
+		if (null == firstStatus)
 		{
 			//TODO:FIX THIS!!
 			return null;
@@ -380,7 +384,7 @@ public class Person extends Observable implements Comparable<Person>
 
 			Node newStatus = createShortTermCtxNode(shortTermCtx, sessionRep);
 
-			if (oldStatus != null)
+			if (null != oldStatus)
 			{
 				underlyingNode.getSingleRelationship(RelTypes.REALTIME_STATUS, Direction.OUTGOING).delete();
 				newStatus.createRelationshipTo(oldStatus.getUnderlyingNode(), RelTypes.NEXT);
@@ -412,7 +416,7 @@ public class Person extends Observable implements Comparable<Person>
 
 			ShortTermContextUpdates oldStatus = getLastShortTermUpdate();
 			boolean contextChanged = false;
-			if (oldStatus != null) {
+			if (null != oldStatus) {
 				Node lastNodeStatus = oldStatus.getUnderlyingNode();
 				for (String propertyKey : getLastShortTermUpdate().getUnderlyingNode().getPropertyKeys()) {
 					if (!propertyKey.equals(ShortTermContextUpdates.DATE)) {
@@ -449,10 +453,10 @@ public class Person extends Observable implements Comparable<Person>
 	private boolean contextHasChanged(final String contextType, String context) {
 		ShortTermContextUpdates ctxStatus= this.getLastShortTermUpdate();
 		//Verify if previous shortTermctx node exists
-		if (ctxStatus != null && !ctxStatus.getShortTermCtx(contextType).isEmpty()) {
+		if (null != ctxStatus && !ctxStatus.getShortTermCtx(contextType).isEmpty()) {
 			//Verify if the new property to compare exists in old shortTermctx node 
 			String propValue= ctxStatus.getShortTermCtx(contextType);
-			if (propValue != null && !context.equals(propValue)) {
+			if (null != propValue && !context.equals(propValue)) {
 				System.out.println(ctxStatus.getPerson() + " had context: " + contextType+" "+ propValue + " and now has context: " + context);
 				return true;
 			}

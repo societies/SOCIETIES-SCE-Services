@@ -72,7 +72,7 @@ public class ContextAnalyzer implements IContextAnalyzer {
 	/**
 	 * @param personRepository
 	 */
-	public ContextAnalyzer(PersonRepository personRepository) {
+	public ContextAnalyzer(final PersonRepository personRepository) {
 		this.personRepository = personRepository;
 	}
 
@@ -81,7 +81,7 @@ public class ContextAnalyzer implements IContextAnalyzer {
 	 * 
 	 * @param ctxAttribute Context attribute. e.g LongTermCtxTypes.INTERESTS
 	 */
-	public void enrichedCtx(String ctxAttribute)
+	public final void enrichedCtx(String ctxAttribute)
 	{
 		log.debug("\r\n\r\n*****Incrementing Ctx*****");
 		long start = System.currentTimeMillis();
@@ -126,14 +126,14 @@ public class ContextAnalyzer implements IContextAnalyzer {
 	 * @param person if null will perform with all persons
 	 */
 	@Override
-	public void incrementCtx(final String ctxType, final EnrichmentTypes enrichmentType, Person person) {
+	public final void incrementCtx(final String ctxType, final EnrichmentTypes enrichmentType, Person person) {
 		//Considering all persons to increment when null
-		if (person == null) {
+		if (null == person) {
 			ExecutorService executor = Executors.newCachedThreadPool();
 			List<FutureTask<Boolean>> results = new ArrayList<FutureTask<Boolean>>();
 			for (final Person friend :personRepository.getAllPersons()) {
 				//Check if this ctxTyp was incremented
-				if (friend.getArrayLongTermCtx("ORIGINAL_"+ctxType) != null){
+				if (null != friend.getArrayLongTermCtx("ORIGINAL_"+ctxType)){
 					continue;
 				}
 				// Start thread for the first half of the numbers
@@ -165,7 +165,7 @@ public class ContextAnalyzer implements IContextAnalyzer {
 				results.add(task);
 				executor.execute(task);
 			}
-			for(FutureTask<Boolean> fut : results){
+			for(FutureTask<Boolean> fut : results) {
 				try {
 					fut.get();
 				} catch (InterruptedException e) {
@@ -178,7 +178,7 @@ public class ContextAnalyzer implements IContextAnalyzer {
 		}
 		else {
 			String[] originalCtx;
-			if (person.getArrayLongTermCtx("ORIGINAL_"+ctxType) == null) {
+			if (null == person.getArrayLongTermCtx("ORIGINAL_"+ctxType)) {
 				//Keeping the original ctx information
 				originalCtx = person.getArrayLongTermCtx(ctxType);
 			}
@@ -206,7 +206,7 @@ public class ContextAnalyzer implements IContextAnalyzer {
 	 * @return
 	 */
 	static public double personCtxSimilarity (int similarCtx, String ctxType, Person personA, Person personB) {
-		if (similarCtx != 0) {
+		if (0 != similarCtx) {
 			double PersonAweight = (double)similarCtx/personA.getArrayLongTermCtx(ctxType).length;
 			double PersonBweight = (double)similarCtx/personB.getArrayLongTermCtx(ctxType).length;
 			return (PersonAweight + PersonBweight) / 2;
@@ -222,7 +222,7 @@ public class ContextAnalyzer implements IContextAnalyzer {
 	 * @param elements
 	 * @return a double value as a cut point
 	 */
-	public static double getAutoThreshold(ArrayList<Double> elements) {
+	public static double getAutoThreshold(final ArrayList<Double> elements) {
 		double initialThreshold = 0;
 		for (double value : elements)
 		{
@@ -315,7 +315,7 @@ public class ContextAnalyzer implements IContextAnalyzer {
 	 * @param ctxType The context type needs to be long term or short term
 	 * @return HashMap of everyone in the graph with same context attribute
 	 */
-	public HashMap<String, HashSet<Person>> getAllPersonsWithSameCtx(final String ctxAttribute, final String ctxType) {
+	public final HashMap<String, HashSet<Person>> getAllPersonsWithSameCtx(final String ctxAttribute, final String ctxType) {
 		HashSet<Person> personHashSet = new HashSet<Person>();
 		for (Person person : personRepository.getAllPersons() ) {
 			personHashSet.add(person);
@@ -335,7 +335,7 @@ public class ContextAnalyzer implements IContextAnalyzer {
 	 * @param hashSet Persons to analyze
 	 * @return HashMap Return the results with a session name and the persons
 	 */
-	public HashSet<Person> getPersonsPerSimilarity(HashSet<Person> hashsetPersons, String ctxAttribute) {
+	public final HashSet<Person> getPersonsPerSimilarity(HashSet<Person> hashsetPersons, String ctxAttribute) {
 		if (!hashsetPersons.isEmpty()) {
 			ArrayList<Double> weightValues = this.getWeightSum(hashsetPersons, ctxAttribute);
 			double threshold = ContextAnalyzer.getAutoThreshold(weightValues);
@@ -346,7 +346,7 @@ public class ContextAnalyzer implements IContextAnalyzer {
 				for (Person otherPerson : hashsetPersons) {
 					Relationship rel = individual.getPersonRelationshipTo(otherPerson, ctxAttribute);
 					//Check by relationship ID if the weight was included in the hashset
-					if (rel != null &&  !hashsetTemp.contains(rel.getId())) {
+					if (null != rel &&  !hashsetTemp.contains(rel.getId())) {
 						//							log.info(((double)rel.getProperty("weight")));
 						hashsetTemp.add(rel.getId());
 						if ((Double)rel.getProperty("weight") >= threshold) {
@@ -368,20 +368,20 @@ public class ContextAnalyzer implements IContextAnalyzer {
 	 * 
 	 * @param CtxAttribute LongTermCtx attribute
 	 */
-	public void setupWeightAmongPeople(String CtxAttribute)
+	public final void setupWeightAmongPeople(String ctxAttribute)
 	{
 		if (!weightAlreadyAssigned) {
-			log.info("\r\n\r\n*****Assign weight for {} *****",CtxAttribute);
+			log.info("\r\n\r\n*****Assign weight for {} *****", ctxAttribute);
 			long start = System.currentTimeMillis();
 			for (Person person : personRepository.getAllPersons())
 			{
-				Map<Person, Integer> persons = personRepository.getPersonWithSimilarCtx(person, CtxAttribute);
-				log.debug("{} CtxAttribute {}", person.getName(), Arrays.toString(person.getArrayLongTermCtx(CtxAttribute)));
+				Map<Person, Integer> persons = personRepository.getPersonWithSimilarCtx(person, ctxAttribute);
+				log.debug("{} CtxAttribute {}", person.getName(), Arrays.toString(person.getArrayLongTermCtx(ctxAttribute)));
 				log.info("\r\n\r\nCalculating for person {} \r\n", person.getName());
 				for (Map.Entry<Person, Integer> entry : persons.entrySet()) {
 					//Similarity Formula is: (similar ctx/ personA + similar ctx/personB) / 2
-					double weight = ContextAnalyzer.personCtxSimilarity(entry.getValue(), CtxAttribute, entry.getKey(), person);
-					person.addSimilarityRelationship(entry.getKey(), weight, CtxAttribute);
+					double weight = ContextAnalyzer.personCtxSimilarity(entry.getValue(), ctxAttribute, entry.getKey(), person);
+					person.addSimilarityRelationship(entry.getKey(), weight, ctxAttribute);
 					log.info("Weight {} assigned for person {}", weight, entry.getKey());
 				}
 			}
@@ -391,12 +391,12 @@ public class ContextAnalyzer implements IContextAnalyzer {
 	}
 
 	
-	private boolean hasSameShortTermCtx(ShortTermContextUpdates ctx, ShortTermContextUpdates[] temp, final String ctxAttribute) {
+	private boolean hasSameShortTermCtx(final ShortTermContextUpdates ctx, final ShortTermContextUpdates[] temp, final String ctxAttribute) {
 		HashSet<Person> hashsetTemp;
 		hashsetTemp = hashCtxList.get(ctx.getShortTermCtx(ctxAttribute));
 		for(int j = 0; j < temp.length; j++) {
-			if(temp[j] != null && ctx.getShortTermCtx(ctxAttribute).equals(temp[j].getShortTermCtx(ctxAttribute))) {
-				if (hashsetTemp==null) {
+			if(null != temp[j] && ctx.getShortTermCtx(ctxAttribute).equals(temp[j].getShortTermCtx(ctxAttribute))) {
+				if (null == hashsetTemp) {
 					//has first element?
 					hashsetTemp = new HashSet<Person>();
 					hashsetTemp.add(temp[j].getPerson());
@@ -415,12 +415,12 @@ public class ContextAnalyzer implements IContextAnalyzer {
 	 * @param ctxAtributte Context attribute. The context can range from interests, occupation, etc..
 	 * @return True if person has same context attribute
 	 */
-	private boolean hasSameLongTermCtx(Person person, Person[] people, final String ctxAtributte) {
+	private boolean hasSameLongTermCtx(final Person person, final Person[] people, final String ctxAtributte) {
 		HashSet<Person> hashsetTemp;
 		hashsetTemp = hashCtxList.get(person.getLongTermCtx(ctxAtributte));
 		for(int j = 0; j < people.length; j++) {
-			if(people[j] != null && person.getLongTermCtx(ctxAtributte).equals(people[j].getLongTermCtx(ctxAtributte))) {
-				if (hashsetTemp==null) {
+			if(null != people[j] && person.getLongTermCtx(ctxAtributte).equals(people[j].getLongTermCtx(ctxAtributte))) {
+				if (null == hashsetTemp) {
 					//has first element?
 					hashsetTemp = new HashSet<Person>();
 					hashsetTemp.add(people[j]);
@@ -441,7 +441,7 @@ public class ContextAnalyzer implements IContextAnalyzer {
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
-	private HashMap<String, HashSet<Person>>  getUniqueElements(ShortTermContextUpdates[] statusArray, final String ctxAttribute) {
+	private HashMap<String, HashSet<Person>>  getUniqueElements(final ShortTermContextUpdates[] statusArray, final String ctxAttribute) {
 		ShortTermContextUpdates[] temp = new ShortTermContextUpdates[statusArray.length]; // null elements
 		log.debug("Number of persons: {} with context [}",temp.length,ctxAttribute);
 		int count = 0;
@@ -459,7 +459,7 @@ public class ContextAnalyzer implements IContextAnalyzer {
 	 * @param threshold cut-off point
 	 * @return a HashMap with a person key and his relationships weights with other persons
 	 */
-	public HashMap<Person, Double> getSimilarityPerPerson(Person person, String ctxAttribute, double threshold) {
+	public final HashMap<Person, Double> getSimilarityPerPerson(final Person person, final String ctxAttribute, final double threshold) {
 		Iterable<Relationship> relationships = person.getSimilarityRelationships(ctxAttribute);
 		HashMap<Person, Double> hashWeightList = new HashMap<Person, Double>(10);
 		for (Relationship rel: relationships) {
@@ -487,7 +487,7 @@ public class ContextAnalyzer implements IContextAnalyzer {
 	 * @param ctxAttribute Long Term ctx type
 	 * @return a HashMap with format: Person and his weight
 	 */
-	public HashMap<Person, HashMap<Person, Double>> getPersonMatrix(String ctxAttribute) {
+	public final HashMap<Person, HashMap<Person, Double>> getPersonMatrix(final String ctxAttribute) {
 		HashMap<Person, HashMap<Person, Double>> participantsMatrix = new HashMap<Person, HashMap<Person, Double>>();
 		HashMap<Person, Double> matchingResults = new  HashMap<Person, Double>();
 		ArrayList<Double> weightSum = this.getWeightSum(null, ctxAttribute);
@@ -514,9 +514,9 @@ public class ContextAnalyzer implements IContextAnalyzer {
 		return participantsMatrix;
 	}
 	
-	public ArrayList<Double> getWeightSum(HashSet<Person> hashsetPersons, String ctxAttribute){
+	public final ArrayList<Double> getWeightSum(final HashSet<Person> hashsetPersons, final String ctxAttribute){
 		ArrayList<Double> weightValues = new ArrayList<Double>(); 
-		if (hashsetPersons == null){
+		if (null == hashsetPersons){
 			for (Person person : personRepository.getAllPersons()) {				
 				Iterable<Relationship> similarityWeights = person.getUnderlyingNode().getRelationships(DynamicRelationshipType.withName("SIMILARITY_"+ctxAttribute), Direction.OUTGOING);
 				for (Relationship rel : similarityWeights) {

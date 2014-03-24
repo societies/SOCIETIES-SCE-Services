@@ -24,13 +24,15 @@
  */
 package org.societies.collabtools.acquisition;
 
+import org.societies.collabtools.api.IShortTermCtxTypes;
+
 /**
  * Short term relationship types
  *
  * @author cviana
  *
  */
-public final class ShortTermCtxTypes {
+public final class ShortTermCtxTypes implements IShortTermCtxTypes {
     public static final String STATUS = "status";
     public static final String LOCATION = "locationSymbolic";
 }

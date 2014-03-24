@@ -53,8 +53,8 @@ public class CtxMonitor extends Observable implements Runnable, Observer {
 	private static final Logger logger  = LoggerFactory.getLogger(CtxMonitor.class);
 
 	public CtxMonitor (PersonRepository personRepository, SessionRepository sessionRepository) {
+		//By default the engine mode is by priority!
 		this.engine = new Engine(personRepository);
-		this.engine.setEngineModeByPriority(false);
 		this.sessionRepository = sessionRepository;
 
 		//Default rules when the FW starts, location and interests
@@ -65,7 +65,7 @@ public class CtxMonitor extends Observable implements Runnable, Observer {
 		this.engine.setRules(rules);
 	}
 
-	public synchronized void run(){
+	public final synchronized void run(){
 		logger.info("Checking if people context match. Engine mode {}", this.engine.getEngineMode() ? "Priority" : "Relevance");
 
 		switch (this.engine.getEngineMode() ? 1 : 2){
@@ -82,7 +82,7 @@ public class CtxMonitor extends Observable implements Runnable, Observer {
 					String sessionName = iterator.next();
 					HashSet<Person> possibleMembers = engine.getMatchingResultsByPriority().get(sessionName);
 					//Check conflict if actual users in the session
-					if (possibleMembers != null && !possibleMembers.isEmpty()) {
+					if (null != possibleMembers && !possibleMembers.isEmpty()) {
 						if (!this.sessionRepository.containSession(sessionName)) {
 							logger.info("Starting a new session..");
 							logger.info("Inviting people..");
@@ -113,7 +113,7 @@ public class CtxMonitor extends Observable implements Runnable, Observer {
 				String sessionName = iterator.next();
 				HashSet<Person> possibleMembers = engine.getMatchingResultsByRelevance().get(sessionName);
 				//Check conflict if actual users in the session
-				if (possibleMembers != null && !possibleMembers.isEmpty()) {
+				if (null != possibleMembers && !possibleMembers.isEmpty()) {
 					if (!this.sessionRepository.containSession(sessionName)) {
 						logger.info("Starting a new session..");
 						logger.info("Inviting people..");
@@ -140,7 +140,7 @@ public class CtxMonitor extends Observable implements Runnable, Observer {
 	 * @see java.util.Observer#update(java.util.Observable, java.lang.Object)
 	 */
 	@Override
-	public void update(Observable o, Object arg) {
+	public final void update(Observable o, Object arg) {
 		this.run();
 	}
 }

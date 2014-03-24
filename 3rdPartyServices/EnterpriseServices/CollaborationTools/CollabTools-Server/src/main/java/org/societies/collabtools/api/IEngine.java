@@ -89,5 +89,17 @@ public interface IEngine {
 	 * @return the sum of all rule weights
 	 */
 	double getRulesWeightSum();
+	
+	/**
+	 * @param flag Set engine mode to work with priority or relevance
+	 * 
+	 */
+	void setEngineModeByPriority(final boolean flag);
+	
+	/**
+	 * @param flag Get engine mode. True for priority or false for relevance. Default true
+	 * 
+	 */
+	boolean getEngineMode();
 
 }

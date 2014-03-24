@@ -77,7 +77,7 @@ public class SessionRepository implements Observer {
 	{
 		Relationship rel = graphDb.getReferenceNode().getSingleRelationship(
 				RelTypes.REF_SESSIONS, Direction.OUTGOING);
-		if (rel != null)
+		if (null != rel)
 		{
 			return rel.getEndNode();
 		}
@@ -100,8 +100,8 @@ public class SessionRepository implements Observer {
 	public Session getSessionByName(String sessionName)
 	{
 		//Using query for index, not get()
-		Node sessionNode = (Node)this.indexSession.query(Session.SESSION, sessionName).getSingle();
-		if (sessionNode == null)
+		Node sessionNode = this.indexSession.query(Session.SESSION, sessionName).getSingle();
+		if (null == sessionNode)
 		{
 			throw new IllegalArgumentException("Session[" + sessionName + "] not found");
 		}
@@ -122,7 +122,7 @@ public class SessionRepository implements Observer {
 				List<String> personList = new ArrayList<String>();
 				Iterator<Person> it = getSessionByName(sessionName).getMembers();
 				while (it.hasNext()) {
-					personList.add(((Person)it.next()).getName());
+					personList.add((it.next()).getName());
 				}
 				logger.debug("{} Session graph before: {}",sessionName, personList.toString());
 
@@ -131,7 +131,7 @@ public class SessionRepository implements Observer {
 				it = getSessionByName(sessionName).getMembers();
 				personList.removeAll(personList);
 				while (it.hasNext()) {
-					personList.add(((Person)it.next()).getName());
+					personList.add((it.next()).getName());
 				}
 				logger.debug("{} Session graph after: {}", sessionName, personList.toString());
 			}
@@ -151,7 +151,7 @@ public class SessionRepository implements Observer {
 			String[] membersParticipating  = this.getSessionByName(sessionName).getMembersParticipating();
 
 			if (event.equals("joinEvent")) {
-				if (membersParticipating == null || membersParticipating.length==0){
+				if (null == membersParticipating || 0 == membersParticipating.length){
 					membersParticipating = new String[]{newMember};
 				}
 				else {
@@ -183,7 +183,7 @@ public class SessionRepository implements Observer {
 	{
 		Iterator<Node> personNode = this.indexSession.query(LongTermCtxTypes.NAME, session).iterator();
 		while (personNode.hasNext()) {
-			Node temp = (Node)personNode.next();
+			Node temp = personNode.next();
 			if (person.getName().equals(new Person(temp).getName()))
 				return true;
 		}
@@ -192,8 +192,8 @@ public class SessionRepository implements Observer {
 
 	public boolean containSession(String sessionName)
 	{
-		Node temp = (Node)this.indexSession.query(Session.SESSION, sessionName).getSingle();
-		if (temp == null) {
+		Node temp = this.indexSession.query(Session.SESSION, sessionName).getSingle();
+		if (null == temp) {
 			return false;
 		}
 		return true;
@@ -212,8 +212,8 @@ public class SessionRepository implements Observer {
 			Node newSessionNode = this.graphDb.createNode();
 			this.sessionRefNode.createRelationshipTo(newSessionNode, RelTypes.A_SESSION);
 
-			Node sessionAlreadyExist = (Node)this.indexSession.query(Session.SESSION, sessionName).getSingle();
-			if (sessionAlreadyExist != null)
+			Node sessionAlreadyExist = this.indexSession.query(Session.SESSION, sessionName).getSingle();
+			if (null != sessionAlreadyExist)
 			{
 				tx.failure();
 				try {
@@ -258,7 +258,7 @@ public class SessionRepository implements Observer {
 		List<Person> membersPersonList = new ArrayList<Person>();
 		Iterator<Person> personIterator = members.iterator();
 		while (personIterator.hasNext()) {
-			Person person = (Person)personIterator.next();
+			Person person = personIterator.next();
 			//Verify if person is already in session
 			if (!isInSession(person, sessionName)) {
 				person.addSession(sessionName);  
@@ -274,7 +274,7 @@ public class SessionRepository implements Observer {
 
 		while (personIterator.hasNext()) {
 			//TODO: Implement floor control
-			Person person = (Person)personIterator.next();	
+			Person person = personIterator.next();	
 			//Send interests in a msg
 			String[] interests = person.getArrayLongTermCtx("ORIGINAL_interests");
 //			String[] sessionInterests = getSessionByName(sessionName).getMembersInterests();
@@ -294,7 +294,7 @@ public class SessionRepository implements Observer {
 			List<String> membersList = new ArrayList<String>();
 			HashSet<String> hs = new HashSet<String>();
 			while (it.hasNext()) {
-				Person person = (Person)it.next();
+				Person person = it.next();
 				membersList.add(person.getName());
 				//TODO: ONLY FOR THE TESTS!
 				Collections.addAll(hs, person.getArrayLongTermCtx(LongTermCtxTypes.INTERESTS)); 
@@ -322,7 +322,7 @@ public class SessionRepository implements Observer {
 		for (Session session : this.getAllSessions() ) {
 			Iterator<Person> it = session.getMembers();
 			while (it.hasNext()) {
-				String personToCompare = ((Person)it.next()).getName();
+				String personToCompare = (it.next()).getName();
 				if (person.getName().equalsIgnoreCase(personToCompare)){
 					session.removeMember(person);
 				}
@@ -349,7 +349,7 @@ public class SessionRepository implements Observer {
 	 * @param string language of sessions
 	 */
 	public void setLanguage(String language) {
-		if (language != null){
+		if (null != language){
 			this.language = language;
 			logger.debug("*Setting language: {}",language );
 		}

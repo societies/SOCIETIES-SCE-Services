@@ -57,7 +57,7 @@ class CheckAllCtxActivityStreamIterator implements Iterator<ShortTermContextUpda
 
     public ShortTermContextUpdates next()
     {
-        if (ctxUpdates.size() == 0)
+        if (0 == ctxUpdates.size())
         {
             throw new NoSuchElementException();
         }

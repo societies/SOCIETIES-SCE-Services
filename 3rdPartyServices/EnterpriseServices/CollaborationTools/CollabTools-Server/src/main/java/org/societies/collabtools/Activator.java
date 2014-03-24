@@ -54,6 +54,8 @@ import org.societies.collabtools.runtime.CollabApps;
 import org.societies.collabtools.runtime.SessionRepository;
 
 
+/**
+ */
 public class Activator implements BundleActivator
 {
 
@@ -72,6 +74,12 @@ public class Activator implements BundleActivator
 	CollabApps collabApps;
 	ResourceBundle rs;
 
+	/**
+	 * Method start.
+	 * @param context BundleContext
+	 * @throws Exception
+	 * @see org.osgi.framework.BundleActivator#start(BundleContext)
+	 */
 	@Override
 	public void start(BundleContext context) throws Exception
 	{
@@ -110,6 +118,12 @@ public class Activator implements BundleActivator
 
 	}
 
+	/**
+	 * Method stop.
+	 * @param context BundleContext
+	 * @throws Exception
+	 * @see org.osgi.framework.BundleActivator#stop(BundleContext)
+	 */
 	@Override
 	public void stop(BundleContext context) throws Exception
 	{

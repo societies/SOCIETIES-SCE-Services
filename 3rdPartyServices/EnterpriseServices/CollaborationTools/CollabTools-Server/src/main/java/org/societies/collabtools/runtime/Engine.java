@@ -62,10 +62,9 @@ public class Engine implements IEngine {
 	private double weightSum;
 
 	/**
-	 * @param sessionRepository 
-	 * 
+	 * @param personRepository the personrepository
 	 */
-	public Engine(PersonRepository personRepository) {
+	public Engine(final PersonRepository personRepository) {
 		this.personRepository = personRepository;
 		this.ctxRsn = new ContextAnalyzer(personRepository);
 	}
@@ -75,9 +74,10 @@ public class Engine implements IEngine {
 	 * 
 	 * @param rules individual rule for the engine.
 	 * 
-	 * */
-	public synchronized void insertRule(Rule rule){
-		if (rule.getOperator().equals(Operators.SIMILAR)){
+	 **/
+	@Override
+	public synchronized void insertRule(final Rule rule) {
+		if (rule.getOperator().equals(Operators.SIMILAR)) {
 			// context enrichment with Concept and Category
 			//			ctxRsn.enrichedCtx(rule.getCtxAttribute());
 
@@ -85,14 +85,15 @@ public class Engine implements IEngine {
 		this.rules.add(rule);
 
 		//order by priority
-		Collections.sort(this.rules,Collections.reverseOrder());
+		Collections.sort(this.rules, Collections.reverseOrder());
 		log.info("inserted rule: " + rule);
 	}
 
-	public synchronized void deleteRule(Rule rule){
+	@Override
+	public synchronized void deleteRule(final Rule rule){
 		this.rules.remove(rule);
 		//order by priority
-		Collections.sort(this.rules,Collections.reverseOrder());
+		Collections.sort(this.rules, Collections.reverseOrder());
 		log.info("delete rule: " + rule);
 	}
 
@@ -102,9 +103,10 @@ public class Engine implements IEngine {
 	 * @param rules The rules which define the system.
 	 * 
 	 * */
+	@Override
 	public synchronized void setRules(final Collection<Rule> rules){
-		for(Rule r : rules){
-			if (r.getOperator().equals(Operators.SIMILAR)){
+		for(Rule r : rules) {
+			if (r.getOperator().equals(Operators.SIMILAR)) {
 				// context enrichment with Concept 
 				//				ctxRsn.incrementCtx(r.getCtxAttribute(), EnrichmentTypes.CONCEPT, null);
 				//Assigning new weights or update the existing one
@@ -114,7 +116,7 @@ public class Engine implements IEngine {
 			log.info("added rule: " + r);
 		}
 		//order by priority
-		Collections.sort(this.rules,Collections.reverseOrder());
+		Collections.sort(this.rules, Collections.reverseOrder());
 	}
 
 	/* (non-Javadoc)
@@ -130,7 +132,7 @@ public class Engine implements IEngine {
 	 */
 	@Override
 	public double getRulesWeightSum() {
-		for(Rule r : this.rules){
+		for(Rule r : this.rules) {
 			this.weightSum += r.getWeight();
 		}
 		return weightSum;
@@ -145,7 +147,7 @@ public class Engine implements IEngine {
 		long start = System.currentTimeMillis();
 		//Format ctx info and people
 		HashMap<String, HashSet<Person>> matchingRules = new HashMap<String, HashSet<Person>>();
-		for(Rule r : this.rules){
+		for(Rule r : this.rules) {
 			if (matchingRules.isEmpty()) {
 				matchingRules = evaluateRule(r.getOperator(), r.getCtxAttribute(), r.getValue(), r.getCtxType(), null);
 			}
@@ -184,7 +186,7 @@ public class Engine implements IEngine {
 	 * @see org.societies.collabtools.api.IEngine#getMatchingResultsByRelevance()
 	 */
 	@Override
-	public HashMap<String, HashSet<Person>> getMatchingResultsByRelevance() {
+	public final HashMap<String, HashSet<Person>> getMatchingResultsByRelevance() {
 		//Using Multivariate distance matrix
 		//1-Determine distance matrix for each features variable based on coordinate
 		//2-Aggregate the distance matrix
@@ -201,7 +203,7 @@ public class Engine implements IEngine {
 		for (Person person : personRepository.getAllPersons()) {
 			//Beginning with a new hashmap
 			personPlusSimilarity.clear();
-			for(Rule r : this.rules){
+			for(Rule r : this.rules) {
 				//Same operator case
 				if (r.getOperator().equals(Operators.SAME)){
 					matchingRules = evaluateRule(r.getOperator(), r.getCtxAttribute(), r.getValue(), r.getCtxType(), null);
@@ -290,7 +292,7 @@ public class Engine implements IEngine {
 //		}
 //		System.out.println("Autothreshold: "+counter/list.size());
 		HashMap<String, HashSet<Person>> resultsByOperatorSAME = new HashMap<String, HashSet<Person>>();
-		for(Rule r : this.rules){
+		for(Rule r : this.rules) {
 			//Same operator case
 			if (r.getOperator().equals(Operators.SAME)){
 				matchingRules = evaluateRule(r.getOperator(), r.getCtxAttribute(), r.getValue(), r.getCtxType(), null);
@@ -316,8 +318,8 @@ public class Engine implements IEngine {
 	 * @see org.societies.collabtools.runtime.IEngine#evaluateRule(org.societies.collabtools.runtime.Operators, java.lang.String, java.lang.String, java.lang.String)
 	 */
 	@Override
-	public HashMap<String, HashSet<Person>> evaluateRule(Operators operator, final String ctxAttribute, String value, final String ctxType, HashSet<Person> personHashSet) {
-		if (personHashSet == null) {
+	public final HashMap<String, HashSet<Person>> evaluateRule(Operators operator, final String ctxAttribute, String value, final String ctxType, HashSet<Person> personHashSet) {
+		if (null == personHashSet) {
 			personHashSet = new HashSet<Person>();
 			//Get all people in the graph 
 			for (Person person : personRepository.getAllPersons()) {
@@ -345,7 +347,7 @@ public class Engine implements IEngine {
 					String valueToCompare = person.getLastShortTermUpdate().getShortTermCtx(ctxAttribute);
 					//Check if the given value is a string or a number
 					if (isNumeric(value)) {
-						if(Double.parseDouble(value) == Double.parseDouble(valueToCompare)){
+						if(Math.abs((Double.parseDouble(value)-Double.parseDouble(valueToCompare))) < .0000001){
 							setPersons.add(person);
 						}
 					}
@@ -362,7 +364,7 @@ public class Engine implements IEngine {
 					String valueToCompare = person.getLastShortTermUpdate().getShortTermCtx(ctxAttribute);
 					//Check if the given value is a string or a number
 					if (isNumeric(value)) {
-						if(Double.parseDouble(value) != Double.parseDouble(valueToCompare)){
+						if(Math.abs((Double.parseDouble(value)-Double.parseDouble(valueToCompare))) > .0000001){
 							setPersons.add(person);
 						}
 					}
@@ -453,7 +455,7 @@ public class Engine implements IEngine {
 					String valueToCompare = person.getLongTermCtx(ctxAttribute);
 					//Check if the given value is a string or a number
 					if (isNumeric(value)) {
-						if(Double.parseDouble(value) == Double.parseDouble(valueToCompare)){
+						if(Math.abs((Double.parseDouble(value)-Double.parseDouble(valueToCompare))) < .0000001){
 							setPersons.add(person);
 						}
 					}
@@ -469,7 +471,7 @@ public class Engine implements IEngine {
 					String valueToCompare = person.getLongTermCtx(ctxAttribute);
 					//Check if the given value is a string or a number
 					if (isNumeric(value)) {
-						if(Double.parseDouble(value) != Double.parseDouble(valueToCompare)){
+						if(Math.abs((Double.parseDouble(value)-Double.parseDouble(valueToCompare))) > .0000001){
 							setPersons.add(person);
 						}
 					}
@@ -564,7 +566,7 @@ public class Engine implements IEngine {
 	}
 
 	@Override
-	public HashMap<String, HashSet<Person>> evaluateRule(String ruleName) {
+	public final HashMap<String, HashSet<Person>> evaluateRule(final String ruleName) {
 		for (Rule r : rules) {
 			if (r.getName().equalsIgnoreCase(ruleName)){
 				return evaluateRule(r.getOperator(), r.getCtxAttribute(), r.getValue(), r.getCtxType(), null);
@@ -580,10 +582,8 @@ public class Engine implements IEngine {
 	 * 
 	 * @return True for numeric values
 	 */
-	private static boolean isNumeric(String str)
-	{
-		for (char character : str.toCharArray())
-		{
+	private static boolean isNumeric(final String str) {
+		for (char character : str.toCharArray()) {
 			if (!Character.isDigit(character)) {
 				return false;
 			}
@@ -595,7 +595,7 @@ public class Engine implements IEngine {
 	 * @param flag Set engine mode to work with priority or relevance
 	 * 
 	 */
-	public void setEngineModeByPriority(boolean flag) {
+	public final void setEngineModeByPriority(final boolean flag) {
 		this.engineByPriority  = flag;		
 	}
 
@@ -603,7 +603,7 @@ public class Engine implements IEngine {
 	 * @param flag Get engine mode. True for priority or false for relevance. Default true
 	 * 
 	 */
-	public boolean getEngineMode() {
+	public final boolean getEngineMode() {
 		return this.engineByPriority;		
 	}
 

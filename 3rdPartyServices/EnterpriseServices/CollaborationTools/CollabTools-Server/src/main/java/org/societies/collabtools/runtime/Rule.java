@@ -126,14 +126,14 @@ public class Rule implements Comparable<Rule> {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result
-				+ ((ctxAttribute == null) ? 0 : ctxAttribute.hashCode());
-		result = prime * result + ((ctxType == null) ? 0 : ctxType.hashCode());
-		result = prime * result + ((name == null) ? 0 : name.hashCode());
+				+ ((null == ctxAttribute) ? 0 : ctxAttribute.hashCode());
+		result = prime * result + ((null == ctxType) ? 0 : ctxType.hashCode());
+		result = prime * result + ((null == name) ? 0 : name.hashCode());
 		result = prime * result
-				+ ((operator == null) ? 0 : operator.hashCode());
+				+ ((null == operator) ? 0 : operator.hashCode());
 		result = prime * result
-				+ ((priority == null) ? 0 : priority.hashCode());
-		result = prime * result + ((value == null) ? 0 : value.hashCode());
+				+ ((null == priority) ? 0 : priority.hashCode());
+		result = prime * result + ((null == value) ? 0 : value.hashCode());
 		long temp;
 		temp = Double.doubleToLongBits(weight);
 		result = prime * result + (int) (temp ^ (temp >>> 32));
@@ -145,37 +145,41 @@ public class Rule implements Comparable<Rule> {
 	 */
 	@Override
 	public boolean equals(Object obj) {
+		if ( this == obj )  
+			return true;
+		if (obj instanceof Rule)
+			return true;
 		if (this == obj)
 			return true;
-		if (obj == null)
+		if (null == obj)
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
 		Rule other = (Rule) obj;
-		if (ctxAttribute == null) {
-			if (other.ctxAttribute != null)
+		if (null == ctxAttribute) {
+			if (null != other.ctxAttribute)
 				return false;
 		} else if (!ctxAttribute.equals(other.ctxAttribute))
 			return false;
-		if (ctxType == null) {
-			if (other.ctxType != null)
+		if (null == ctxType) {
+			if (null != other.ctxType)
 				return false;
 		} else if (!ctxType.equals(other.ctxType))
 			return false;
-		if (name == null) {
-			if (other.name != null)
+		if (null == name) {
+			if (null != other.name)
 				return false;
 		} else if (!name.equals(other.name))
 			return false;
 		if (operator != other.operator)
 			return false;
-		if (priority == null) {
-			if (other.priority != null)
+		if (null == priority) {
+			if (null != other.priority)
 				return false;
 		} else if (!priority.equals(other.priority))
 			return false;
-		if (value == null) {
-			if (other.value != null)
+		if (null == value) {
+			if (null != other.value)
 				return false;
 		} else if (!value.equals(other.value))
 			return false;

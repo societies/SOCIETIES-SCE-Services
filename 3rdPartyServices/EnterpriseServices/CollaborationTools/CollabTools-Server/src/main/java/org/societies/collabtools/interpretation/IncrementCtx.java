@@ -67,15 +67,16 @@ public class IncrementCtx implements IIncrementCtx {
 	private void SetAPIKey(String apiKey) {
 		_apiKey = apiKey;
 
-		if (null == _apiKey || _apiKey.length() < 5)
-			throw new IllegalArgumentException("Too short API key.");		
+		if (null == _apiKey || _apiKey.length() < 5) {
+			throw new IllegalArgumentException("Too short API key.");
+		}		
 	}
 
 	/* (non-Javadoc)
 	 * @see org.societies.collabtools.api.IIncrementCtx#incrementString(java.lang.String)
 	 */
 	@Override
-	public String[] incrementString(String text, EnrichmentTypes type) {
+	public final String[] incrementString(final String text, EnrichmentTypes type) {
 		Document doc = null;
 		List<String> stringCollection = new ArrayList<String>();
 		try {
@@ -98,7 +99,7 @@ public class IncrementCtx implements IIncrementCtx {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		if (doc != null) {
+		if (null != doc) {
 			NodeList nodeResults = doc.getElementsByTagName("text");
 			for (int i = 0; i < nodeResults.getLength(); i++) {
 				stringCollection.add(nodeResults.item(i).getTextContent().toLowerCase());
@@ -155,7 +156,7 @@ public class IncrementCtx implements IIncrementCtx {
 		return doRequest(handle, params.getOutputMode());
 			}
 
-	private Document doRequest(HttpURLConnection handle, String outputMode)
+	private Document doRequest(final HttpURLConnection handle, final String outputMode)
 			throws IOException, SAXException,
 			ParserConfigurationException, XPathExpressionException
 			{
@@ -193,7 +194,7 @@ public class IncrementCtx implements IIncrementCtx {
 		return doc;
 			}
 
-	private String getNodeValue(XPathFactory factory, Document doc, String xpathStr)
+	private String getNodeValue(final XPathFactory factory, final Document doc, final String xpathStr)
 			throws XPathExpressionException
 			{
 		XPath xpath = factory.newXPath();
@@ -208,7 +209,7 @@ public class IncrementCtx implements IIncrementCtx {
 			}
 
 
-	private final void CheckText(String text) {
+	private final void CheckText(final String text) {
 		if (null == text || text.length() < 5) {
 			throw new IllegalArgumentException("Enter some text to analyze. The text must have at least 5 words");
 		}
@@ -225,7 +226,7 @@ public class IncrementCtx implements IIncrementCtx {
 		//		private String customParameters;
 
 
-		public void setText(String text) {
+		public void setText(final String text) {
 			this.text = text;
 		}
 		public String getOutputMode() {
@@ -237,9 +238,9 @@ public class IncrementCtx implements IIncrementCtx {
 			try{
 				//				if(url!=null) retString+="&url="+URLEncoder.encode(url,"UTF-8");
 				//				if(html!=null) retString+="&html="+URLEncoder.encode(html,"UTF-8");
-				if(text!=null) retString+="&text="+URLEncoder.encode(text,"UTF-8");
+				if(null != text) retString+="&text="+URLEncoder.encode(text,"UTF-8");
 				//				if(customParameters!=null) retString+=customParameters;
-				if(outputMode!=null) retString+="&outputMode="+outputMode;
+				if(null != outputMode) retString+="&outputMode="+outputMode;
 			}
 			catch(UnsupportedEncodingException e ){
 				retString = "";
@@ -261,12 +262,12 @@ public class IncrementCtx implements IIncrementCtx {
 		public String getParameterString(){
 			String retString = super.getParameterString();
 			try{
-				if(sourceText!=null) retString+="&sourceText="+sourceText;
-				if(showSourceText!=null) retString+="&showSourceText="+(showSourceText?"1":"0");
-				if(cQuery!=null) retString+="&cquery="+URLEncoder.encode(cQuery,"UTF-8");
-				if(xPath!=null) retString+="&xpath="+URLEncoder.encode(xPath,"UTF-8");
-				if(maxRetrieve!=null) retString+="&maxRetrieve="+maxRetrieve.toString();
-				if(linkedData!=null) retString+="&linkedData="+(linkedData?"1":"0");
+				if(null != sourceText) retString+="&sourceText="+sourceText;
+				if(null != showSourceText) retString+="&showSourceText="+(showSourceText?"1":"0");
+				if(null != cQuery) retString+="&cquery="+URLEncoder.encode(cQuery,"UTF-8");
+				if(null != xPath) retString+="&xpath="+URLEncoder.encode(xPath,"UTF-8");
+				if(null != maxRetrieve) retString+="&maxRetrieve="+maxRetrieve.toString();
+				if(null != linkedData) retString+="&linkedData="+(linkedData?"1":"0");
 			}
 			catch(UnsupportedEncodingException e ){
 				retString = "";
@@ -284,15 +285,15 @@ public class IncrementCtx implements IIncrementCtx {
 		private String xPath;
 		private Boolean linkedData;		
 
-		public String getParameterString(){
+		public String getParameteString(){
 			String retString = super.getParameterString();
 			try{
-				if(sourceText!=null) retString+="&sourceText="+sourceText;
-				if(showSourceText!=null) retString+="&showSourceText="+(showSourceText?"1":"0");
-				if(cQuery!=null) retString+="&cquery="+URLEncoder.encode(cQuery,"UTF-8");
-				if(xPath!=null) retString+="&xpath="+URLEncoder.encode(xPath,"UTF-8");
-				if(maxRetrieve!=null) retString+="&maxRetrieve="+maxRetrieve.toString();
-				if(linkedData!=null) retString+="&linkedData="+(linkedData?"1":"0");
+				if(null != sourceText) retString+="&sourceText="+sourceText;
+				if(null != showSourceText) retString+="&showSourceText="+(showSourceText?"1":"0");
+				if(null != cQuery) retString+="&cquery="+URLEncoder.encode(cQuery,"UTF-8");
+				if(null != xPath) retString+="&xpath="+URLEncoder.encode(xPath,"UTF-8");
+				if(null != maxRetrieve) retString+="&maxRetrieve="+maxRetrieve.toString();
+				if(null != linkedData) retString+="&linkedData="+(linkedData?"1":"0");
 			}
 			catch(UnsupportedEncodingException e ){
 				retString = "";

@@ -88,7 +88,7 @@ public class ShortTermContextUpdates extends Observable
         SimpleDateFormat formatter = new SimpleDateFormat(DATE_FORMAT);
         Date date = null;
 		try {
-			date = (Date)formatter.parse(strdate);
+			date = formatter.parse(strdate);
 		} catch (ParseException e) {
 			// TODO Auto-generated catch block
             System.err.println("Date property is null");

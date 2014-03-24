@@ -287,13 +287,13 @@ public class Session {
 
 
 			while (personNode.hasNext()) {
-				temp = (Node)personNode.next();
+				temp = personNode.next();
 				if (member.getName().equals(new Person(temp).getName())) {
 					personNodeToDelete = temp;
 					break;
 				}
 			}
-			if (personNodeToDelete == null)
+			if (null == personNodeToDelete)
 			{
 				throw new IllegalArgumentException("Person[" + member.getName() + "] not found");
 			}
@@ -379,7 +379,7 @@ public class Session {
 
 			newStatus = createNewSessionHistoryNode(ctxSessionHistory);
 
-			if (oldStatus != null){
+			if (null != oldStatus){
 				underlyingNode.getSingleRelationship(RelTypes.REALTIME_STATUS, Direction.OUTGOING).delete();
 				newStatus.createRelationshipTo(oldStatus.getUnderlyingNode(), RelTypes.NEXT );
 			}
@@ -399,7 +399,7 @@ public class Session {
 	 private Iterable<SessionHistory> getHistoryStatus() {
 		Relationship firstStatus = underlyingNode.getSingleRelationship(
 				REALTIME_STATUS, Direction.OUTGOING );
-		if (firstStatus == null)
+		if (null == firstStatus)
 		{
 			return Collections.emptyList();
 		}
@@ -435,7 +435,7 @@ public class Session {
 			 newCtx.setProperty(DATE, formatter.format(new Date().getTime()));
 
 			 Node lastNodeStatus = getLastSessionHistoryStatus();
-			 if (lastNodeStatus != null) {
+			 if (null != lastNodeStatus) {
 				 for (String propertyKey : lastNodeStatus.getPropertyKeys()) {
 					 if (!propertyKey.equals(DATE)) {
 						 newCtx.setProperty(propertyKey, lastNodeStatus.getProperty(propertyKey) );
@@ -444,7 +444,7 @@ public class Session {
 			 } 
 
 			 for (Map.Entry<String, String[]> entry : ctxSessionHistory.entrySet()) {
-				 newCtx.setProperty((String)entry.getKey(), entry.getValue());
+				 newCtx.setProperty(entry.getKey(), entry.getValue());
 			 }
 			 tx.success();
 			 return newCtx;
@@ -460,7 +460,7 @@ public class Session {
 		 Relationship firstStatus = underlyingNode.getSingleRelationship(
 				 REALTIME_STATUS, Direction.OUTGOING);
 		 //Check status is empty
-		 if (firstStatus == null)
+		 if (null == firstStatus)
 		 {
 			 //	    		Node newStatus = createNewSessionHistoryNode(new HashMap<String, Object>()); 
 			 //	    	    underlyingNode.createRelationshipTo(newStatus, RelTypes.STATUS);
@@ -479,7 +479,7 @@ public class Session {
 			final int prime = 31;
 			int result = 1;
 			result = prime * result
-					+ ((underlyingNode == null) ? 0 : underlyingNode.hashCode());
+					+ ((null == underlyingNode) ? 0 : underlyingNode.hashCode());
 			return result;
 		}
 
@@ -488,15 +488,19 @@ public class Session {
 		 */
 		@Override
 		public boolean equals(Object obj) {
+			if ( this == obj )  
+				return true;
+			if (obj instanceof Session)
+				return true;
 			if (this == obj)
 				return true;
-			if (obj == null)
+			if (null == obj)
 				return false;
 			if (getClass() != obj.getClass())
 				return false;
 			Session other = (Session) obj;
-			if (underlyingNode == null) {
-				if (other.underlyingNode != null)
+			if (null == underlyingNode) {
+				if (null != other.underlyingNode)
 					return false;
 			} else if (!underlyingNode.equals(other.underlyingNode))
 				return false;

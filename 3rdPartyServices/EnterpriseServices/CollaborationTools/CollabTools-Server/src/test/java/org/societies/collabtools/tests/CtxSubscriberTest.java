@@ -26,13 +26,10 @@ package org.societies.collabtools.tests;
 
 import static org.junit.Assert.fail;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
@@ -185,7 +182,7 @@ public class CtxSubscriberTest {
 		Class[] methodParameters = new Class[]{String.class, String[].class, String.class};
 		Method method = ContextSubscriber.class.getDeclaredMethod("setContext", methodParameters );
 		String [] ctxType= {ShortTermCtxTypes.STATUS};
-		Object[] params = new Object[]{new String("Busy"),ctxType,new String("person#9") };
+		Object[] params = new Object[]{"Busy",ctxType,"person#9" };
 
 
 		method.setAccessible(true);
@@ -194,7 +191,7 @@ public class CtxSubscriberTest {
 		
 		//Insert status
 		ctxType[0]= ShortTermCtxTypes.LOCATION;
-		params = new Object[]{new String("Home"),ctxType,new String("person#9") };
+		params = new Object[]{"Home",ctxType,"person#9" };
 		method.invoke(ctxSub, params);
 		
 		
@@ -205,14 +202,14 @@ public class CtxSubscriberTest {
 //		shortTermCtx.put(ShortTermCtxTypes.STATUS,new String("Busy"));
 //		individual.addContextStatus(shortTermCtx, this.sessionRepository);
 		
-		if (individual.getLastShortTermUpdate()==null) {
+		if (null == individual.getLastShortTermUpdate()) {
 			shortTermCtx.put(ShortTermCtxTypes.STATUS, "Online");
 			individual.addContextStatus(shortTermCtx, this.sessionRepository);
 		}
 //		shortTermCtx.put(individual.getLastShortTermUpdate() == null ? "" : individual.getLastShortTermUpdate().getShortTermCtx(ShortTermCtxTypes.STATUS), "Home");
 //		if (individual.getLastShortTermUpdate()==null)
 //			LOG.info("null");
-		shortTermCtx.put(ShortTermCtxTypes.LOCATION,new String("Home"));
+		shortTermCtx.put(ShortTermCtxTypes.LOCATION,"Home");
 		individual.addContextStatus(shortTermCtx, this.sessionRepository);
 		
 //		

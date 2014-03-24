@@ -67,7 +67,7 @@ public class PersonRepository
     private Node getPersonsRootNode(GraphDatabaseService graphDb) {
         Relationship rel = graphDb.getReferenceNode().getSingleRelationship(
                 REF_PERSONS, Direction.OUTGOING );
-        if ( rel != null )
+        if ( null != rel )
         {
             return rel.getEndNode();
         } else
@@ -99,7 +99,7 @@ public class PersonRepository
             personRefNode.createRelationshipTo(newPersonNode, A_PERSON);
             // lock now taken, we can check if  already exist in index
             Node alreadyExist = indexPerson.query(LongTermCtxTypes.NAME, name).getSingle();
-            if (alreadyExist != null)
+            if (null != alreadyExist)
             {
                 tx.failure();
                 throw new Exception("Person with this name already exists: "+alreadyExist.getProperty(LongTermCtxTypes.NAME));
@@ -121,7 +121,7 @@ public class PersonRepository
 
     public Person getPersonByName(String name) {
         Node personNode = indexPerson.query(LongTermCtxTypes.NAME, name).getSingle();
-        if ( personNode == null )
+        if ( null == personNode )
         {
             throw new IllegalArgumentException( "Person[" + name
                     + "] not found" );
@@ -131,7 +131,7 @@ public class PersonRepository
     
     public boolean hasPerson(String name) {
         Node personNode = indexPerson.query(LongTermCtxTypes.NAME, name).getSingle();
-        if (personNode == null)
+        if (null == personNode)
         	return false;
         return true;
     }
