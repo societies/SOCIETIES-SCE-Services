@@ -25,16 +25,14 @@
 package org.societies.collabtools.webapp.controller;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -70,6 +68,7 @@ public class Admin {
 
 	@Autowired
 	private ICisManager cisManager;
+	private IContextSubscriber ctxSub = getCtxSubscriber();
 
 	private String cisName = "";
 
@@ -132,18 +131,18 @@ public class Admin {
 	@RequestMapping(value = "/checkcis.html", method = RequestMethod.GET)
 	public @ResponseBody String checkCisID(@RequestParam String name, String check) {
 		String result;
-		if (getCtxSubscriber() == null){
+		if (ctxSub == null){
 			return result="Collabtools is not running";
 		}
 		if (!name.isEmpty()) {
 			if (check.equalsIgnoreCase("start")){
 				result = "Started with cisID: "+name;
-				getCtxSubscriber().initialCtx(name);
+				ctxSub.initialCtx(name);
 				cisName  = name;
 			}
 			else {
 				result = "Stop cisID: "+name;
-				getCtxSubscriber().stopCtx(name);
+				ctxSub.stopCtx(name);
 				cisName  = "";
 			}
 
@@ -216,11 +215,12 @@ public class Admin {
 
 		List<String[]> rulesresults = new ArrayList<String[]>();
 		for (Rule rule : getEngine().getRules()) {
-			String[] elements = {rule.getName(), rule.getCtxAttribute(), rule.getOperator().toString(), rule.getCtxType(), Integer.toString(rule.getPriority()), rule.getValue()}; 
+			String[] elements = {rule.getName(), rule.getCtxAttribute(), rule.getOperator().toString(), rule.getCtxType(), Integer.toString(rule.getPriority()), Double.toString(rule.getWeight()), rule.getValue()}; 
 			rulesresults.add(elements);
 		}
 
 		model.put("rulesresults", rulesresults);
+		model.put("enginemode", getEngine().getEngineMode() ? "Priority" : "Relevance");
 		model.put("attribute_label", CtxModelType.ATTRIBUTE.name().toString());
 
 		return new ModelAndView("rules", model) ;
@@ -233,10 +233,21 @@ public class Admin {
 			@RequestParam(value = "value2", required = true) Operators operator, 
 			@RequestParam(value = "value3", required = true) String ctxType,
 			@RequestParam(value = "value4", required = true) String priority,
-			@RequestParam(value = "value5", required = true) String value,
-			@RequestParam(value = "value6", required = true) String edit) {
+			@RequestParam(value = "value5", required = true) String weight,
+			@RequestParam(value = "value6", required = true) String value,
+			@RequestParam(value = "value7", required = true) String edit) {
 		logger.debug("*** Edit: {}", edit);
-		if (edit.equals("delete")) {
+		if (edit.equals("enginemode")) {
+			logger.debug("*** Engine Mode");
+			if (getEngine().getEngineMode()) {
+				getEngine().setEngineModeByPriority(false);
+			}
+			else {
+				getEngine().setEngineModeByPriority(true);
+			}
+			return ("Engine Mode"+ getEngine().getEngineMode() != null ? "Priority" : "Relevance");
+		}
+		else if (edit.equals("delete")) {
 			logger.debug("*** Delete");
 			Rule ruleTodelete = null;
 			for (Rule rulesTemp : getEngine().getRules()) {
@@ -248,7 +259,7 @@ public class Admin {
 		}
 		else {
 			logger.debug("*** Insert");
-			Rule newRule = new Rule(ruleName, operator, ctxAttr, value, Integer.parseInt(priority), 0, ctxType);
+			Rule newRule = new Rule(ruleName, operator, ctxAttr, value, Integer.parseInt(priority), Double.parseDouble(weight), ctxType);
 			getEngine().insertRule(newRule);
 
 			return (ruleName +" included");
@@ -322,24 +333,24 @@ public class Admin {
 	@RequestMapping(value="/notification.html",method = RequestMethod.GET)
 	public ModelAndView getNotification() {
 		Map<String, Object> model = new HashMap<String, Object>();
-		Hashtable<String,List<String>> sessionHashtable = getCtxSubscriber().getSessions();
+		HashMap<String,List<String>> sessionHashMap = getCtxSubscriber().getSessions();
 		List<String[]> results = new ArrayList<String[]>();
-		Enumeration<String> enumKey = sessionHashtable.keys();
+		Iterator<String> enumKey = sessionHashMap.keySet().iterator();
 
-		while(enumKey.hasMoreElements()) {
-			String sessionName = enumKey.nextElement();
-			String[] elements = {sessionName, sessionHashtable.get(sessionName).toString(), getCtxSubscriber().getSessionLanguage(sessionName)}; 
+		while(enumKey.hasNext()) {
+			String sessionName = enumKey.next();
+			String[] elements = {sessionName, sessionHashMap.get(sessionName).toString(), getCtxSubscriber().getSessionLanguage(sessionName)}; 
 			results.add(elements);
 		}
 
 		model.put("results", results);
-		model.put("log", readLogFile());
+//		model.put("log", readLogFile());
 
 		//TODO: Example with async application here!!***************************
 		//		this.app.setAppName("APP_NAME");
 		//		
 		//		List<String[]> resultsAsync = new ArrayList<String[]>();
-		//		for (Entry<String, String[]> entry : this.app.getHashTableResults().entrySet()) {
+		//		for (Entry<String, String[]> entry : this.app.getHashMapResults().entrySet()) {
 		//			String[] elements = {"Location: "+entry.getKey()+ " people: "+Arrays.toString(entry.getValue())};
 		//			resultsAsync.add(elements);
 		//		}		
@@ -352,20 +363,14 @@ public class Admin {
 		return new ModelAndView("notification", model) ;
 	}
 
+	@SuppressWarnings("unused")
 	private String readLogFile()  {
 		Reader fileReader = null;
-		File file = new File("databases/collabToolsLogFile.log");
 		try {
-			if (!file.exists()) {
-			    file.createNewFile();
-			}
 			fileReader = new FileReader("databases/collabToolsLogFile.log");
-		} catch (FileNotFoundException e) {
+		} catch (FileNotFoundException e1) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			e1.printStackTrace();
 		}
 		BufferedReader input = new BufferedReader(fileReader);
 		String line = null;
@@ -374,21 +379,14 @@ public class Admin {
 				if ((line = input.readLine()) != null) {
 					return line;
 				}
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			try {
 				Thread.sleep(1000L);
-			} catch (InterruptedException x) {
-				Thread.currentThread().interrupt();
-			}
-
-			try {
 				input.close();
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				Thread.currentThread().interrupt();
 			}
 		}
 

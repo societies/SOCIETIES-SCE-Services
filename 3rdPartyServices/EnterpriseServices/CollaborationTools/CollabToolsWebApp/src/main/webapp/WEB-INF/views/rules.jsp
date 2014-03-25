@@ -20,7 +20,7 @@
     function mangeRule(input) {
       $.ajax({
         url: 'rulesmanager.html',
-        data:{ "value0":input[0], "value1":input[1], "value2":input[2], "value3":input[3], "value4":input[4], "value5":input[5], "value6":input[6]},
+        data:{ "value0":input[0], "value1":input[1], "value2":input[2], "value3":input[3], "value4":input[4], "value5":input[5], "value6":input[6], "value7":input[7]},
         success: function(data) {
           $('#rules').html(data);
         }
@@ -34,24 +34,40 @@
 		info[2] = document.getElementById('operatorValue').value;
 		info[3] = document.getElementById('typeValue').value;
 		info[4] = document.getElementById('priorityValue').value;
-		info[5] = document.getElementById('ctxValue').value;
-		info[6] = 'insert';
+		info[5] = document.getElementById('weightValue').value;
+		info[6] = document.getElementById('ctxValue').value;
+		info[7] = 'insert';
 		mangeRule(info);
 		setTimeout(function(){location.reload();}, 1000);
       }
     
-    function deleteRule(rulename, ctxAttribute, operator, type, priority, value) {
+    function deleteRule(rulename, ctxAttribute, operator, type, priority, weight, value) {
     	var info = []; 
 		info[0] = rulename; 
 		info[1] = ctxAttribute; 
 		info[2] = operator; 
 		info[3] = type; 
 		info[4] = priority;
-		info[5] = value;
-		info[6] = 'delete';
+		info[5] = weight;
+		info[6] = value;
+		info[7] = 'delete';
 		mangeRule(info);
 		setTimeout(function(){location.reload();}, 1000);
     }
+    
+    function engineMode() {
+    	var info = [];
+		info[0] = document.getElementById('ruleValue').value; 
+		info[1] = document.getElementById('${attribute_label}').value; 
+		info[2] = document.getElementById('operatorValue').value;
+		info[3] = document.getElementById('typeValue').value;
+		info[4] = document.getElementById('priorityValue').value;
+		info[5] = document.getElementById('weightValue').value;
+		info[6] = document.getElementById('ctxValue').value;
+		info[7] = 'enginemode';
+		mangeRule(info);
+		setTimeout(function(){location.reload();}, 1000);
+      }
     
 
   </script>
@@ -73,7 +89,7 @@
 			<h1>Rules</h1>
 				<table id="ruleTable">
 					<tbody>
-					<tr id="ruleFistRow"><td>Name</td><td>Attribute</td><td>Operator</td><td>Type</td><td>Priority</td><td>Value</td></tr>
+					<tr id="ruleFistRow"><td>Name</td><td>Attribute</td><td>Operator</td><td>Type</td><td>Priority</td><td>Weight</td><td>Value</td></tr>
 					
 					<tr>
 					<td><input size="10" id="ruleValue"/></td>
@@ -99,20 +115,22 @@
 							<option value="LongTermCtxTypes">Long Term Ctx</option>
 						</select></td>
  					<td><input size="8" id="priorityValue" name="priorityValue" type="text" value=""/></td>
-<!-- 					<td><select id="weightValue" name="weight" class="textArea"> -->
-<!-- 						<option value="10">10 %</option> -->
-<!-- 						<option value="20">20 %</option> -->
-<!-- 						<option value="30">30 %</option> -->
-<!-- 						<option value="40">40 %</option> -->
-<!-- 						<option value="50" selected="selected">50 %</option> -->
-<!-- 						<option value="60">60 %</option> -->
-<!-- 						<option value="70">70 %</option> -->
-<!-- 						<option value="80">80 %</option> -->
-<!-- 						<option value="90">90 %</option> -->
-<!-- 						<option value="100">100 %</option> -->
-<!-- 					</select></td> -->
+					<td><select id="weightValue" name="weightValue" class="textArea">
+						<option value="0.1">10 %</option>
+						<option value="0.2">20 %</option>
+						<option value="0.3">30 %</option>
+						<option value="0.4">40 %</option>
+						<option value="0.5" selected="selected">50 %</option>
+						<option value="0.6">60 %</option>
+						<option value="0.7">70 %</option>
+						<option value="0.8">80 %</option>
+						<option value="0.9">90 %</option>
+						<option value="1">100 %</option>
+					</select></td>
 					<td><input size="8" id="ctxValue"/></td>
-					<td><button type="button" onclick="insertRule()" id="addRule">Add Rule</button></td>			
+					<td><button type="button" onclick="insertRule()" id="addRule">Add Rule</button></td>
+					<td><button type="button" onclick="engineMode()" id="enginemode">Engine Mode by ${enginemode}</button></td>			
+								
 					
 					</tr>
 
@@ -138,6 +156,7 @@
 					<th scope="col" id="operator">Operator</th>
 					<th scope="col" id="ctx-type">Context Type</th>
 					<th scope="col" id="priority">Priority</th>
+					<th scope="col" id="weight">Weight</th>
 					<th scope="col" id="value">Value</th>
 					<th scope="col" id="action">Action</th>
 
@@ -159,9 +178,10 @@
 						<td  name="Operatortype">${element[2]}</td>
 						<td  name="Ctxtype">${element[3]}</td>
 						<td  name="Prioritytype">${element[4]}</td>
-						<td  name="Valuetype">${element[5]}</td>
+						<td  name="Weighttype">${element[5]}</td>
+						<td  name="Valuetype">${element[6]}</td>
 						<td>
-						    <button onclick="deleteRule('${element[0]}','${element[1]}','${element[2]}','${element[3]}','${element[4]}','${element[5]}')"> Delete </button>
+						    <button onclick="deleteRule('${element[0]}','${element[1]}','${element[2]}','${element[3]}','${element[4]}','${element[5]}','${element[6]}')"> Delete </button>
 						</td>
 
 					</tr>

@@ -25,7 +25,7 @@
 package org.societies.collabtools.webapp.controller;
 
 import java.util.Arrays;
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.Map.Entry;
 import java.util.Observable;
 
@@ -43,24 +43,25 @@ public class AsyncCollabAppConnector implements IAsyncCollabAppConnector {
 	
 	private static final Logger logger = LoggerFactory.getLogger(AsyncCollabAppConnector.class);
 	private String app_name;
-	private Hashtable<String, String[]> hashTableResults = new Hashtable<String, String[]>();
+	private HashMap<String, String[]> HashMapResults = new HashMap<String, String[]>();
 
 
 	/**
-	 * @return the hashTableResults
+	 * @return the HashMapResults
 	 */
-	public Hashtable<String, String[]> getHashTableResults() {
-		return hashTableResults;
+	public HashMap<String, String[]> getHashMapResults() {
+		return HashMapResults;
 	}
 
 	/* (non-Javadoc)
 	 * @see java.util.Observer#update(java.util.Observable, java.lang.Object)
 	 */
+	@SuppressWarnings("unchecked")
 	@Override
 	public void update(Observable o, Object arg) {
 		logger.debug("***************************AsyncCollabAppConnector TEST**************************************");
-		hashTableResults = (Hashtable<String, String[]>) arg;
-		for (Entry<String, String[]> entry : hashTableResults.entrySet()) {
+		HashMapResults = (HashMap<String, String[]>) arg;
+		for (Entry<String, String[]> entry : HashMapResults.entrySet()) {
 		    logger.debug("Location: {} people: {}",entry.getKey(), Arrays.toString(entry.getValue()));
 		}
 	}
