@@ -258,7 +258,6 @@ public class IncrementCtx implements IIncrementCtx {
 		private String xPath;
 		private Boolean linkedData;
 
-
 		public String getParameterString(){
 			String retString = super.getParameterString();
 			try{
@@ -285,7 +284,7 @@ public class IncrementCtx implements IIncrementCtx {
 		private String xPath;
 		private Boolean linkedData;		
 
-		public String getParameteString(){
+		public String getParameterString(){
 			String retString = super.getParameterString();
 			try{
 				if(null != sourceText) retString+="&sourceText="+sourceText;

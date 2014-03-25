@@ -155,7 +155,7 @@ public class ExternalCtxBrokerMock 	{
 		this.personIndiEnt = this.ctxBroker.retrieveIndividualEntityId(this.requestor, this.cssID).get();
 		final IndividualCtxEntity operatorCtxEnt = (IndividualCtxEntity) this.ctxBroker.retrieve(this.requestor,personIndiEnt).get();
 		
-		CtxAttribute interestsAttr = (CtxAttribute)this.ctxBroker.createAttribute(this.requestor, this.personIndiEnt, "interests").get();
+		CtxAttribute interestsAttr = this.ctxBroker.createAttribute(this.requestor, this.personIndiEnt, "interests").get();
 		String[] interests = getRandomInterests();
 		interestsAttr.setStringValue(interests[0] +","+ interests[1] +","+interests[2]);
 		

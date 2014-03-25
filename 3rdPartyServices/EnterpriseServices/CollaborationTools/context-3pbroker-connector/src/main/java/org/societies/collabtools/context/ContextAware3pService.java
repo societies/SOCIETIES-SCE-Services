@@ -24,8 +24,6 @@
  */
 
 package org.societies.collabtools.context;
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -45,7 +43,6 @@ import org.societies.api.context.model.CtxAssociation;
 import org.societies.api.context.model.CtxAssociationIdentifier;
 import org.societies.api.context.model.CtxAssociationTypes;
 import org.societies.api.context.model.CtxAttribute;
-import org.societies.api.context.model.CtxAttributeComplexValue;
 import org.societies.api.context.model.CtxAttributeTypes;
 import org.societies.api.context.model.CtxAttributeValueType;
 import org.societies.api.context.model.CtxEntityIdentifier;
@@ -424,7 +421,7 @@ public class ContextAware3pService implements IContextAware3pService  {
 	 */
 	private Set<CtxEntityIdentifier> getCommunityMembers(IIdentity cisID) {
 
-		Set<CtxEntityIdentifier> ctxMembersIDs = new HashSet<CtxEntityIdentifier>();;
+		Set<CtxEntityIdentifier> ctxMembersIDs = new HashSet<CtxEntityIdentifier>();
 		try {
 			CtxEntityIdentifier ctxCommunityEntityIdentifier = this.ctxBroker.retrieveCommunityEntityId(getRequestor(), cisID).get();
 
@@ -523,7 +520,7 @@ public class ContextAware3pService implements IContextAware3pService  {
 					// if community context attribute value is expressed as a complex value
 				} else if (CtxAttributeValueType.COMPLEX == communityLanguages.getValueType()) {
 					//TODO: complex values not working, english by default
-					CtxAttributeComplexValue communityLanguagesComplexValue = communityLanguages.getComplexValue();
+//					CtxAttributeComplexValue communityLanguagesComplexValue = communityLanguages.getComplexValue();
 					results.put(ctxAttr, "English");
 				}
 			}
