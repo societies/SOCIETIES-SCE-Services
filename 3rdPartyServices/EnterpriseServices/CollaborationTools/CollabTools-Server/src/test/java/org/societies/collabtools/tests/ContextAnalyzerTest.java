@@ -122,7 +122,7 @@ public class ContextAnalyzerTest {
 	 * @param ctxRsn
 	 */
 	public ContextAnalyzerTest() {
-		int random = 6666;//new Random().nextInt(100);
+		int random = new Random().nextInt(100);
 		personGraphDb = new GraphDatabaseFactory().newEmbeddedDatabase("target/persontestdb00"  + random);
 		sessionGraphDb = new GraphDatabaseFactory().newEmbeddedDatabase("target/sessiontestdb00"  + random);
 		//	    indexShortTermCtx = personGraphDb.index().forNodes("CtxNodes", MapUtil.stringMap("to_lower_case", "true" ) );
@@ -279,6 +279,21 @@ public class ContextAnalyzerTest {
 	 */
 	@Test
 	public void testIncrementCtx() {
+		for (int i = 0; i < 4; i++)
+		{
+			Person person;
+			try {
+				person = personRepository.createPerson("person#" + i);
+				//Set long term context
+				person.setLongTermCtx(LongTermCtxTypes.NAME, "person#" + i);
+				String[] interests = {"Online","Busy","Away"};
+				person.setLongTermCtx(LongTermCtxTypes.INTERESTS, interests);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+		}
 		ctxRsn.incrementCtx(LongTermCtxTypes.INTERESTS, EnrichmentTypes.CONCEPT, null);
 		// context enrichment considering previous concept performed
 		ctxRsn.incrementCtx(LongTermCtxTypes.INTERESTS, EnrichmentTypes.CATEGORY, null);

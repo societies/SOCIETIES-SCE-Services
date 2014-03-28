@@ -83,20 +83,25 @@ public class IncrementCtx implements IIncrementCtx {
 			if (type.equals(EnrichmentTypes.CATEGORY)) {
 				doc = this.TextGetCategory(text);
 			}
-			if (type.equals(EnrichmentTypes.CONCEPT)) {
+			else if (type.equals(EnrichmentTypes.CONCEPT)) {
 				doc = this.TextGetRankedConcepts(text);
 			}
+			else if (type.equals(EnrichmentTypes.TAXONOMY)) {
+				doc = this.TextGetRankedTaxonomy(text);
+				//TODO: Fix this to get taxonomies above the confidence score
+				NodeList nodeResults = doc.getElementsByTagName("label");
+				for (int i = 0; i < nodeResults.getLength(); i++) {
+					stringCollection.add(nodeResults.item(i).getTextContent().toLowerCase());
+				}
+//				return stringCollection.toArray(new String[stringCollection.size()]);
+			}
 		} catch (XPathExpressionException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (SAXException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (ParserConfigurationException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		if (null != doc) {
@@ -132,6 +137,21 @@ public class IncrementCtx implements IIncrementCtx {
 		params.setText(text);
 		return POST("TextGetCategory", "text", params);
 	}
+	
+	private Document TextGetRankedTaxonomy(String text) throws IOException, SAXException, ParserConfigurationException, XPathExpressionException
+	{
+		return TextGetRankedTaxonomy(text, new AlchemyAPITaxonomyParams());
+	}
+
+	private Document TextGetRankedTaxonomy(String text, AlchemyAPITaxonomyParams params) throws IOException, SAXException,
+	ParserConfigurationException, XPathExpressionException
+	{
+		CheckText(text);
+		params.setText(text);
+		return POST("TextGetRankedTaxonomy", "text", params);
+	}
+	
+	
 
 	private Document POST(String callName, String callPrefix, AlchemyAPIParams params)
 			throws IOException, SAXException,
@@ -299,5 +319,25 @@ public class IncrementCtx implements IIncrementCtx {
 			}
 			return retString;
 		}		
+	}
+	
+	private class AlchemyAPITaxonomyParams extends AlchemyAPIParams{
+
+		private Boolean showSourceText;
+		private String target;
+		
+		public String getParameterString(){
+			String retString = super.getParameterString();
+			try{
+				if(showSourceText!=null) retString+="&showSourceText="+(showSourceText?"1":"0");
+				if(target!=null) retString+="&target="+URLEncoder.encode(target, "UTF-8");
+						
+			}
+			catch(UnsupportedEncodingException e ){
+				retString = "";
+			}
+			
+			return retString;
+		}	
 	}
 }

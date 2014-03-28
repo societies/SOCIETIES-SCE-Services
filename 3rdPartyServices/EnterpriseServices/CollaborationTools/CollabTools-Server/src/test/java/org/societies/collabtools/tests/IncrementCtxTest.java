@@ -24,9 +24,16 @@
  */
 package org.societies.collabtools.tests;
 
+import java.io.StringWriter;
 import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
+
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 
 import junit.framework.Assert;
 
@@ -34,6 +41,7 @@ import org.junit.Test;
 import org.societies.collabtools.api.IIncrementCtx;
 import org.societies.collabtools.api.IIncrementCtx.EnrichmentTypes;
 import org.societies.collabtools.interpretation.IncrementCtx;
+import org.w3c.dom.Document;
 
 import scala.actors.threadpool.Arrays;
 
@@ -67,23 +75,36 @@ public class IncrementCtxTest {
 	 * Test method for {@link org.societies.collabtools.interpretation.IncrementCtx#incrementString(java.lang.String, org.societies.collabtools.api.IIncrementCtx.EnrichmentTypes)}.
 	 */
 	@Test
-	public void testIncrementString() {
-//		for (String ctx : getRandomInterests()){
-//			System.out.println("Original ctx: "+ctx);
-//			String [] response = alchemyObj.incrementString(ctx, EnrichmentTypes.CONCEPT);
-//			System.out.println(Arrays.toString(response));
-//			response = alchemyObj.incrementString(ctx, EnrichmentTypes.CATEGORY);
-//			System.out.println(Arrays.toString(response));
-//			Assert.assertNotNull(response.toString(), response);
-//		}
-		
-		String ctx = "Aquatic Ecotoxicology, Aquatic Invertebrates, bioaccumulation and Biomagnification, Biodiversity and Conservation, Outdoor sports (e.g. soccer, basketball...), Travel";
+	public void testIncrementStringTrial() {
+		String ctx = "Aquatic Ecotoxicology, Terrestrial Ecotoxicology, Aquatic Invertebrates, Terrestrial Invertebrates, " +
+				"Bioaccumulation and Biomagnification, Oxidative Stress Biomarkers, Environmental Toxicology, Biodiversity and Conservation, " +
+				"Metabolomics, Proteomics, Nanoparticles, Pesticides, Metals, " +
+				"R Statistical Software, IBM SPSS Statistics, Minitab Statistics Package" ;
+		String ctx1 = "Biomarkers in Ecotoxicology";
 		System.out.println("\nOriginal ctx: "+ctx);
-		String [] response = alchemyObj.incrementString(ctx, EnrichmentTypes.CONCEPT);
-		System.out.println(Arrays.toString(response));
-		response = alchemyObj.incrementString(ctx, EnrichmentTypes.CATEGORY);
-		System.out.println(Arrays.toString(response));
+		String [] response = alchemyObj.incrementString(ctx1, EnrichmentTypes.CONCEPT);
+		System.out.println("Response concept: "+Arrays.toString(response));
+		response = alchemyObj.incrementString(ctx1, EnrichmentTypes.CATEGORY);
+		System.out.println("Response category: "+Arrays.toString(response));
 		Assert.assertNotNull(Arrays.toString(response), response);
+		response = alchemyObj.incrementString(ctx1, EnrichmentTypes.TAXONOMY);
+		System.out.println("Response taxonomy: "+Arrays.toString(response));
+		Assert.assertNotNull(Arrays.toString(response), response);
+	}
+	
+	/**
+	 * Test method for {@link org.societies.collabtools.interpretation.IncrementCtx#incrementString(java.lang.String, org.societies.collabtools.api.IIncrementCtx.EnrichmentTypes)}.
+	 */
+	@Test
+	public void testIncrementString() {
+		for (String ctx : getRandomInterests()){
+			System.out.println("Original ctx: "+ctx);
+			String [] response = alchemyObj.incrementString(ctx, EnrichmentTypes.CONCEPT);
+			System.out.println("Response concept: "+Arrays.toString(response));
+			response = alchemyObj.incrementString(ctx, EnrichmentTypes.CATEGORY);
+			System.out.println("Response category: "+Arrays.toString(response));
+			Assert.assertNotNull(response.toString(), response);
+		}
 	}
 	
 	/**

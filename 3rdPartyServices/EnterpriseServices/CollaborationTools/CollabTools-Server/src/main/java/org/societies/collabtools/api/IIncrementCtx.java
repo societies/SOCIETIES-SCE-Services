@@ -32,7 +32,7 @@ package org.societies.collabtools.api;
  */
 public interface IIncrementCtx {
 
-	public enum EnrichmentTypes {CONCEPT, CATEGORY, ALL};
+	public enum EnrichmentTypes {CONCEPT, CATEGORY, ALL, TAXONOMY};
 	
 	public abstract String[] incrementString(String text, EnrichmentTypes type);
 

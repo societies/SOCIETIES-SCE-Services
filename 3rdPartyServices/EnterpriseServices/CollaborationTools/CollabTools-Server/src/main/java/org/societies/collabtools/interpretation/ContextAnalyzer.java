@@ -142,23 +142,31 @@ public class ContextAnalyzer implements IContextAnalyzer {
 					public Boolean call() throws Exception {
 						String[] originalCtx;
 						//Keeping the original ctx information
-						originalCtx = friend.getArrayLongTermCtx(ctxType);
+//						originalCtx = friend.getArrayLongTermCtx(ctxType);
 						
-//						//Check if this ctxTyp was incremented
-//						if (friend.getArrayLongTermCtx("ORIGINAL_"+ctxType) == null) {
-//							//Keeping the original ctx information
-//							originalCtx = friend.getArrayLongTermCtx(ctxType);
-//						}
-//						else {
-//							originalCtx = friend.getArrayLongTermCtx("ORIGINAL_"+ctxType);
-//						}
+						//Check if this ctxTyp was incremented
+						if (friend.getArrayLongTermCtx("ORIGINAL_"+ctxType) == null) {
+							//Taking the original ctx information
+							originalCtx = friend.getArrayLongTermCtx(ctxType);
+							//Saving the original ctx in a different property
+							friend.setLongTermCtx("ORIGINAL_"+ctxType, originalCtx);
+						}
+						else {
+							originalCtx = friend.getArrayLongTermCtx("ORIGINAL_"+ctxType);
+						}
 						
-						//Saving the original ctx in a diferent property
-						friend.setLongTermCtx("ORIGINAL_"+ctxType, originalCtx);
-						//Adding the new ctx info + orignal ctx info
+						//Adding the new ctx info + original ctx info
 						String[] newContexts = ctxEnrichment(originalCtx, ctxType.toString(), enrichmentType);
 						friend.setLongTermCtx(ctxType, newContexts);
-						log.debug("{} enrichment done for person {}",enrichmentType,friend.getName());
+						if (newContexts.length != originalCtx.length) {
+							log.debug("{} enrichment done for person {}",enrichmentType,friend.getName());
+							System.out.println("Done");
+						}
+						else {
+							log.debug("{} enrichment WAS NOT done for person {}",enrichmentType,friend.getName());
+							System.out.println("NOT Done");
+						}
+
 						return true;
 					}
 				});
