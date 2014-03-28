@@ -214,8 +214,10 @@ public class MeetingAPI implements IMeetingAPI {
             CollaborativeSign collaborativeSign = getCollaborativeSign();
             if ("setActive".equals(querytype)) {
                 Meeting oldMeeting = MeetingDAO.loadMeeting(collaborativeSign.getMeetingId());
-                oldMeeting.pause();
-                MeetingDAO.saveMeeting(oldMeeting);
+                if (oldMeeting != null) {
+                    oldMeeting.pause();
+                    MeetingDAO.saveMeeting(oldMeeting);
+                }
                 collaborativeSign.setMeetingId(meetingIdToSign);
                 setCollaborativeSign(collaborativeSign);
                 meeting.start();

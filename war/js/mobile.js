@@ -435,6 +435,7 @@ var CrowdTaskingApp = function () {
                 }
                 list.append(newLi);
                 $('#slider' + i).slider();
+//                $('#slider' + i).flipswitch();
                 $('#slider' + i).on("change", function (event, ui) {
                     event.preventDefault();
                     postCommentsLikes();

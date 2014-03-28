@@ -15,6 +15,7 @@
           <element id="library" level="application" name="AppEngineAPI" />
           <element id="library" level="application" name="AppEngineDev" />
           <element id="library" level="project" name="json-simple-1.1.1" />
+          <element id="file-copy" path="$APPLICATION_HOME_DIR$/lib/junit-4.10.jar" />
         </element>
       </element>
     </root>
