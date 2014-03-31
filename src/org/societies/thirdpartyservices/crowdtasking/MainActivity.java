@@ -441,9 +441,9 @@ public static final String DOMAIN = "crowdtasking.appspot.com";
 					connectToSocieties();
 				}
 */
-				CheckUpdateTask checkUpdateTask = new CheckUpdateTask(appContext);
-				checkUpdateTask.execute();
-				return societiesServices;
+                //				CheckUpdateTask checkUpdateTask = new CheckUpdateTask(appContext);
+                //				checkUpdateTask.execute();
+                return societiesServices;
 			}
 
 			@Override
