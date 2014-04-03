@@ -67,7 +67,6 @@ public class CtxSubscriberTest {
 	
 	private static final Random r = new Random( System.currentTimeMillis() );
 	private static GraphDatabaseService personGraphDb, sessionGraphDb;
-	private static Index<Node> indexPerson, indexSession;
 	private static PersonRepository personRepository;
 	private static SessionRepository sessionRepository;
 	private static int nrOfPersons = 5;
@@ -131,7 +130,7 @@ public class CtxSubscriberTest {
         System.out.println("Person#" +i+" created and populated");
         
         //Set ShortTerm Ctx
-        Person person = this.personRepository.getPersonByName("person#" + i);
+        Person person = CtxSubscriberTest.personRepository.getPersonByName("person#" + i);
         response = new String [] {ShortTermCtxTypes.LOCATION, getRandomLocation(), person.getName()};
 		ctxSub.update(null, response);
 		response = new String [] {ShortTermCtxTypes.STATUS, getRandomStatus(), person.getName()};
@@ -226,10 +225,11 @@ public class CtxSubscriberTest {
 		int random = new Random().nextInt(100);
 		personGraphDb = new GraphDatabaseFactory().newEmbeddedDatabase("target/persontestdb0"  + random);
 		sessionGraphDb = new GraphDatabaseFactory().newEmbeddedDatabase("target/sessiontestdb0"  + random);
-	    indexPerson = personGraphDb.index().forNodes("PersonNodes");
-	    indexSession = sessionGraphDb.index().forNodes("SessionNodes");
 		personRepository = new PersonRepository(personGraphDb);
 		sessionRepository = new SessionRepository(sessionGraphDb, new CollabApps());
+		
+		LOG.info("personGraphDb path: "+"target/persontestdb00"  + random);
+		
         ctxSub = new ContextSubscriber(null,personRepository, sessionRepository);
         ctxRsn = new ContextAnalyzer(personRepository);
 		LOG.info("personGraphDb path: "+"target/persontestdb0"  + random);

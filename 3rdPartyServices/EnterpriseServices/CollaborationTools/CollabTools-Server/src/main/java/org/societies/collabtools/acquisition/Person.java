@@ -60,14 +60,26 @@ import org.neo4j.kernel.Traversal;
 import org.neo4j.kernel.Uniqueness;
 import org.societies.collabtools.runtime.SessionRepository;
 
+/**
+ */
 public class Person extends Observable implements Comparable<Person>
 {
 	//	private static final String ID = "id";
 
 	// START SNIPPET: the-node
+	/**
+	 * Field underlyingNode.
+	 */
 	private final Node underlyingNode;
+	/**
+	 * Field index.
+	 */
 	private Index<Node> index;
 
+	/**
+	 * Constructor for Person.
+	 * @param personNode Node
+	 */
 	public Person(Node personNode)
 	{
 		this.underlyingNode = personNode;
@@ -75,6 +87,10 @@ public class Person extends Observable implements Comparable<Person>
 
 	}
 
+	/**
+	 * Method getUnderlyingNode.
+	 * @return Node
+	 */
 	public Node getUnderlyingNode()
 	{
 		return underlyingNode;
@@ -83,6 +99,10 @@ public class Person extends Observable implements Comparable<Person>
 	// END SNIPPET: the-node
 
 	// START SNIPPET: delegate-to-the-node
+	/**
+	 * Return person name
+	 * @return String
+	 */
 	public String getName()
 	{
 		Object o = underlyingNode.getProperty(LongTermCtxTypes.NAME);
@@ -96,6 +116,11 @@ public class Person extends Observable implements Comparable<Person>
 
 	// END SNIPPET: delegate-to-the-node
 
+	/**
+	 * Return a long term context information.
+	 * @param property String of LongTermCtxTypes
+	 * @return String
+	 */
 	public String getLongTermCtx(String property){
 		Object o = underlyingNode.getProperty(property.toString(), "");
 		if (o instanceof String[]) {			
@@ -106,7 +131,11 @@ public class Person extends Observable implements Comparable<Person>
 		}
 	}
 
-	//Array of ctx
+	/**
+	 * Method getArrayLongTermCtx  of context information
+	 * @param property String of RelTypes
+	 * @return String[] return a string array of long term context information 
+	 */
 	public String[] getArrayLongTermCtx(String property){
 		Object o = this.underlyingNode.getProperty(property, null);
 		if (null != o){
@@ -123,6 +152,11 @@ public class Person extends Observable implements Comparable<Person>
 		}
 	}
 
+	/**
+	 * Set a LongTermCtxTypes. For include a array use setLongTermCtx(String property, String[] values)
+	 * @param property String of LongTermCtxTypes
+	 * @param value String store in the graph a string of long term context information 
+	 */
 	public void setLongTermCtx(String property, String value){
 		Transaction tx = underlyingNode.getGraphDatabase().beginTx();
 		try
@@ -138,6 +172,11 @@ public class Person extends Observable implements Comparable<Person>
 
 	}
 
+	/**
+	 * Set a array of LongTermCtxTypes
+	 * @param property String of LongTermCtxTypes
+	 * @param values String[] store in the graph a string of long term context information 
+	 */
 	public void setLongTermCtx(String property, String[] values){
 		Transaction tx = underlyingNode.getGraphDatabase().beginTx();
 
@@ -170,12 +209,21 @@ public class Person extends Observable implements Comparable<Person>
 
 	}
 
+	/**
+	 * Method hashCode.
+	 * @return int
+	 */
 	@Override
 	public int hashCode()
 	{
 		return underlyingNode.hashCode();
 	}
 
+	/**
+	 * Method equals.
+	 * @param obj Object
+	 * @return boolean
+	 */
 	@Override
 	public boolean equals(Object obj)
 	{
@@ -187,17 +235,32 @@ public class Person extends Observable implements Comparable<Person>
 		return false;
 	}
 
+	/**
+	 * Method toString.
+	 * @return String
+	 */
 	@Override
 	public String toString()
 	{
 		return "Person[" + getName() + "]";
 	}
 
+	/**
+	 * Method compareTo.
+	 * @param o Person
+	 * @return int
+	 */
 	@Override
 	public int compareTo(Person o) {
 		return this.getName().compareTo(o.getName());
 	}
 
+	/**
+	 * Method include a edge to another person in the graph with a certain relationship.
+	 * @param otherPerson Person to include in the relationship
+	 * @param weight double value to include as a property of the relationship
+	 * @param ctxAttribute String of RelTypes
+	 */
 	public void addSimilarityRelationship(Person otherPerson, double weight, String ctxAttribute)
 	{
 		Transaction tx = underlyingNode.getGraphDatabase().beginTx();
@@ -226,6 +289,11 @@ public class Person extends Observable implements Comparable<Person>
 		}
 	}
 
+	/**
+	 * Method getSimilarityRelationships.
+	 * @param ctxAttribute String LongTermCtx
+	 * @return Iterable<Relationship> return the relationships with a specific RelTypes 
+	 */
 	public Iterable<Relationship> getSimilarityRelationships(String ctxAttribute)
 	{
 		ArrayList<Relationship> retVal = new ArrayList<Relationship>();
@@ -237,16 +305,28 @@ public class Person extends Observable implements Comparable<Person>
 		return retVal;
 	}
 
+	/**
+	 * Method getNrOfFriends.
+	 * @return int
+	 */
 	public int getNrOfFriends()
 	{
 		return IteratorUtil.count(getFriends());
 	}
 
+	/**
+	 * Method getFriends.
+	 * @return Iterable<Person>
+	 */
 	public Iterable<Person> getFriends()
 	{
 		return getPersonsByDepth(1);
 	}
 
+	/**
+	 * Method removeFriend.
+	 * @param otherPerson Person
+	 */
 	public void removeFriend(Person otherPerson)
 	{
 		Transaction tx = underlyingNode.getGraphDatabase().beginTx();
@@ -270,11 +350,21 @@ public class Person extends Observable implements Comparable<Person>
 		}
 	}
 
+	/**
+	 * Method getFriendsOfFriends.
+	 * @return Iterable<Person>
+	 */
 	public Iterable<Person> getFriendsOfFriends()
 	{
 		return getPersonsByDepth(2);
 	}
 
+	/**
+	 * Method getShortestPathTo.
+	 * @param otherPerson Person
+	 * @param maxDepth int
+	 * @return Iterable<Person>
+	 */
 	public Iterable<Person> getShortestPathTo(Person otherPerson, int maxDepth)
 	{
 		// use graph algo to calculate a shortest path
@@ -286,6 +376,11 @@ public class Person extends Observable implements Comparable<Person>
 		return createPersonsFromNodes(path);
 	}
 
+	/**
+	 * Method getFriendRecommendation.
+	 * @param numberOfFriendsToReturn int
+	 * @return Iterable<Person>
+	 */
 	public Iterable<Person> getFriendRecommendation(
 			int numberOfFriendsToReturn)
 			{
@@ -310,6 +405,10 @@ public class Person extends Observable implements Comparable<Person>
 		return onlyFriend(rankedFriends);
 			}
 
+	/**
+	 * Method getStatus.
+	 * @return Iterable<ShortTermContextUpdates>
+	 */
 	public Iterable<ShortTermContextUpdates> getStatus()
 	{
 		Relationship firstStatus = underlyingNode.getSingleRelationship(
@@ -338,6 +437,10 @@ public class Person extends Observable implements Comparable<Person>
 				};
 	}
 
+	/**
+	 * Method getLastShortTermUpdate.
+	 * @return ShortTermContextUpdates
+	 */
 	public ShortTermContextUpdates getLastShortTermUpdate()
 	{
 		Relationship firstStatus = underlyingNode.getSingleRelationship(
@@ -351,6 +454,10 @@ public class Person extends Observable implements Comparable<Person>
 		return new ShortTermContextUpdates(firstStatus.getEndNode());
 	}
 
+	/**
+	 * Method friendLastStatuses.
+	 * @return ArrayList<ShortTermContextUpdates>
+	 */
 	public ArrayList<ShortTermContextUpdates> friendLastStatuses()
 	{
 		ArrayList<ShortTermContextUpdates> status = new ArrayList<ShortTermContextUpdates>();
@@ -361,12 +468,21 @@ public class Person extends Observable implements Comparable<Person>
 		return status;
 	}
 
+	/**
+	 * Method friendStatuses.
+	 * @return Iterator<ShortTermContextUpdates>
+	 */
 	@SuppressWarnings("deprecation")
 	public Iterator<ShortTermContextUpdates> friendStatuses()
 	{
 		return new CheckAllCtxActivityStreamIterator(this);
 	}
 
+	/**
+	 * Method addContextStatus.
+	 * @param shortTermCtx Map<String,String>
+	 * @param sessionRep SessionRepository
+	 */
 	public void addContextStatus(Map<String, String> shortTermCtx, SessionRepository sessionRep)
 	{
 		Transaction tx = graphDb().beginTx();
@@ -399,11 +515,21 @@ public class Person extends Observable implements Comparable<Person>
 		}
 	}
 
+	/**
+	 * Method graphDb.
+	 * @return GraphDatabaseService
+	 */
 	private GraphDatabaseService graphDb()
 	{
 		return underlyingNode.getGraphDatabase();
 	}
 
+	/**
+	 * Method createShortTermCtxNode.
+	 * @param shortTermCtx Map<String,String>
+	 * @param sessionRep SessionRepository
+	 * @return Node
+	 */
 	private Node createShortTermCtxNode(Map<String, String> shortTermCtx, SessionRepository sessionRep)
 	{
 		Transaction tx = underlyingNode.getGraphDatabase().beginTx();
@@ -448,7 +574,8 @@ public class Person extends Observable implements Comparable<Person>
 	/**
 	 * @param contextType 
 	 * @param context
-	 * @return
+	
+	 * @return boolean
 	 */
 	private boolean contextHasChanged(final String contextType, String context) {
 		ShortTermContextUpdates ctxStatus= this.getLastShortTermUpdate();
@@ -464,21 +591,42 @@ public class Person extends Observable implements Comparable<Person>
 		return false;
 	}
 
+	/**
+	 */
 	private final class RankedPerson
 	{
+		/**
+		 * Field person.
+		 */
 		final Person person;
+		/**
+		 * Field rank.
+		 */
 		final int rank;
 
+		/**
+		 * Constructor for RankedPerson.
+		 * @param person Person
+		 * @param rank int
+		 */
 		private RankedPerson(Person person, int rank)
 		{
 			this.person = person;
 			this.rank = rank;
 		}
 
+		/**
+		 * Method getPerson.
+		 * @return Person
+		 */
 		public Person getPerson()
 		{
 			return person;
 		}
+		/**
+		 * Method getRank.
+		 * @return int
+		 */
 		public int getRank()
 		{
 			return rank;
@@ -486,14 +634,27 @@ public class Person extends Observable implements Comparable<Person>
 
 	}
 
+	/**
+	 */
 	private class RankedComparer implements Comparator<RankedPerson>
 	{
+		/**
+		 * Method compare.
+		 * @param a RankedPerson
+		 * @param b RankedPerson
+		 * @return int
+		 */
 		public int compare(RankedPerson a, RankedPerson b)
 		{
 			return b.getRank() - a.getRank();
 		}
 	}
 
+	/**
+	 * Method trimTo.
+	 * @param rankedFriends ArrayList<RankedPerson>
+	 * @param numberOfFriendsToReturn int
+	 */
 	private void trimTo(ArrayList<RankedPerson> rankedFriends,
 			int numberOfFriendsToReturn)
 	{
@@ -503,6 +664,11 @@ public class Person extends Observable implements Comparable<Person>
 		}
 	}
 
+	/**
+	 * Method onlyFriend.
+	 * @param rankedFriends Iterable<RankedPerson>
+	 * @return Iterable<Person>
+	 */
 	private Iterable<Person> onlyFriend(Iterable<RankedPerson> rankedFriends)
 	{
 		ArrayList<Person> retVal = new ArrayList<Person>();
@@ -513,6 +679,12 @@ public class Person extends Observable implements Comparable<Person>
 		return retVal;
 	}
 
+	/**
+	 * Method getPersonRelationshipTo.
+	 * @param otherPerson Person
+	 * @param ctxAttribute String
+	 * @return Relationship
+	 */
 	public Relationship getPersonRelationshipTo(Person otherPerson, String ctxAttribute)
 	{
 		Node otherNode = otherPerson.getUnderlyingNode();
@@ -526,6 +698,11 @@ public class Person extends Observable implements Comparable<Person>
 		return null;
 	}
 	
+	/**
+	 * Method getPersonsByDepth.
+	 * @param depth int
+	 * @return Iterable<Person>
+	 */
 	private Iterable<Person> getPersonsByDepth(int depth)
 	{
 		// return all my friends and their friends using new traversal API
@@ -538,6 +715,11 @@ public class Person extends Observable implements Comparable<Person>
 		return createPersonsFromPath(travDesc.traverse(underlyingNode) );
 	}
 
+	/**
+	 * Method createPersonsFromPath.
+	 * @param iterableToWrap Traverser
+	 * @return IterableWrapper<Person,Path>
+	 */
 	private IterableWrapper<Person, Path> createPersonsFromPath(Traverser iterableToWrap)
 	{
 		return new IterableWrapper<Person, Path>(iterableToWrap)
@@ -550,6 +732,11 @@ public class Person extends Observable implements Comparable<Person>
 				};
 	}
 
+	/**
+	 * Method getNumberOfPathsToPerson.
+	 * @param otherPerson Person
+	 * @return int
+	 */
 	private int getNumberOfPathsToPerson(Person otherPerson)
 	{
 		PathFinder<Path> finder = GraphAlgoFactory.allPaths( Traversal.expanderForTypes(SIMILARITY, Direction.BOTH), 2 );
@@ -557,6 +744,11 @@ public class Person extends Observable implements Comparable<Person>
 		return IteratorUtil.count( paths );
 	}
 
+	/**
+	 * Method createPersonsFromNodes.
+	 * @param path Path
+	 * @return Iterable<Person>
+	 */
 	private Iterable<Person> createPersonsFromNodes(final Path path)
 	{
 		return new IterableWrapper<Person, Node>(path.nodes()){
@@ -568,6 +760,10 @@ public class Person extends Observable implements Comparable<Person>
 		};
 	}
 
+	/**
+	 * Method setCollabApps.
+	 * @param collabApps String[]
+	 */
 	public void setCollabApps(String[] collabApps)
 	{
 		Transaction tx = this.underlyingNode.getGraphDatabase().beginTx();
@@ -583,11 +779,19 @@ public class Person extends Observable implements Comparable<Person>
 		}
 	}
 
+	/**
+	 * Method getCollabApps.
+	 * @return String[]
+	 */
 	public String[] getCollabApps()
 	{
 		return (String[])this.underlyingNode.getProperty(LongTermCtxTypes.COLLAB_APPS);
 	}
 
+	/**
+	 * Method addSession.
+	 * @param sessionName String
+	 */
 	public void addSession(String sessionName)
 	{
 		//Fix this, has session is not a long term variable

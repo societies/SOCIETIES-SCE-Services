@@ -49,14 +49,32 @@ import org.slf4j.LoggerFactory;
 
 
 
+/**
+ */
 public class PersonRepository
 {
+    /**
+     * Field graphDb.
+     */
     private final GraphDatabaseService graphDb;
+    /**
+     * Field indexPerson.
+     */
     private final Index<Node> indexPerson;
+    /**
+     * Field personRefNode.
+     */
     private final Node personRefNode;
 	
+	/**
+	 * Field logger.
+	 */
 	private static final Logger logger  = LoggerFactory.getLogger(PersonRepository.class);
 
+    /**
+     * Constructor for PersonRepository.
+     * @param graphDb GraphDatabaseService
+     */
     public PersonRepository(GraphDatabaseService graphDb) {
         this.graphDb = graphDb;
         this.indexPerson = this.graphDb.index().forNodes("PersonNodes", MapUtil.stringMap("type", "fulltext", "to_lower_case", "true" ) );
@@ -64,6 +82,11 @@ public class PersonRepository
         personRefNode = getPersonsRootNode(graphDb);
     }
 
+    /**
+     * Method getPersonsRootNode.
+     * @param graphDb GraphDatabaseService
+     * @return Node
+     */
     private Node getPersonsRootNode(GraphDatabaseService graphDb) {
         Relationship rel = graphDb.getReferenceNode().getSingleRelationship(
                 REF_PERSONS, Direction.OUTGOING );
@@ -88,6 +111,12 @@ public class PersonRepository
         }
     }
 
+    /**
+     * Method createPerson.
+     * @param name String
+     * @return Person
+     * @throws Exception
+     */
     public Person createPerson(String name) throws Exception {
         // to guard against duplications we use the lock grabbed on ref node
         // when
@@ -119,6 +148,11 @@ public class PersonRepository
 
     }
 
+    /**
+     * Method getPersonByName.
+     * @param name String
+     * @return Person
+     */
     public Person getPersonByName(String name) {
         Node personNode = indexPerson.query(LongTermCtxTypes.NAME, name).getSingle();
         if ( null == personNode )
@@ -129,6 +163,11 @@ public class PersonRepository
         return new Person(personNode);
     }
     
+    /**
+     * Method hasPerson.
+     * @param name String
+     * @return boolean
+     */
     public boolean hasPerson(String name) {
         Node personNode = indexPerson.query(LongTermCtxTypes.NAME, name).getSingle();
         if (null == personNode)
@@ -136,6 +175,12 @@ public class PersonRepository
         return true;
     }
     
+    /**
+     * Method getPersonWithSimilarCtx.
+     * @param self Person
+     * @param property String
+     * @return Map<Person,Integer>
+     */
     public Map<Person, Integer> getPersonWithSimilarCtx(Person self, String property) {
     	Map<Person,Integer> persons = new HashMap<Person, Integer>();
     	for (Person person : getAllPersons())
@@ -156,6 +201,12 @@ public class PersonRepository
     	return persons;
     }
     
+    /**
+     * Method getPersonsByProperty.
+     * @param property String
+     * @param value String
+     * @return Person[]
+     */
     public Person[] getPersonsByProperty(String property, String value) {
     	List<Person> persons = new ArrayList<Person>();
     	//E.g. LongTermCtxTypes.COMPANY
@@ -178,6 +229,10 @@ public class PersonRepository
 		return persons.toArray(new Person[persons.size()]);
     }
 
+    /**
+     * Method deletePerson.
+     * @param person Person
+     */
     public void deletePerson(Person person) {
         Transaction tx = graphDb.beginTx();
         try
@@ -210,6 +265,10 @@ public class PersonRepository
         }
     }
 
+    /**
+     * Method getAllPersons.
+     * @return Iterable<Person>
+     */
     public Iterable<Person> getAllPersons() {
         return new IterableWrapper<Person, Relationship>(
                 personRefNode.getRelationships(A_PERSON) )
@@ -222,6 +281,11 @@ public class PersonRepository
         };
     }
     
+    /**
+     * Method getRelationships.
+     * @param relationshipType String
+     * @return Iterable<Relationship>
+     */
     public Iterable<Relationship> getRelationships(String relationshipType) {
     	Iterable<Relationship> relationships = GlobalGraphOperations.at(graphDb).getAllRelationships();
     	ArrayList<Relationship> results = new ArrayList<Relationship>();
@@ -249,6 +313,10 @@ public class PersonRepository
 		return results;
     }
     
+    /**
+     * Method size.
+     * @return int
+     */
     public int size() {
     	int size = 0;
     	for(@SuppressWarnings("unused") Person person : this.getAllPersons()) {

@@ -50,20 +50,43 @@ import org.societies.collabtools.acquisition.RelTypes;
 import org.societies.collabtools.acquisition.ShortTermCtxTypes;
 
 /**
- * Class in charge to manage collaborative sessions
+ * Class responsible to manage the collaborative sessions
  *
  * @author cviana
  *
  */
 public class SessionRepository implements Observer {
 
+	/**
+	 * Field graphDb.
+	 */
 	private final GraphDatabaseService graphDb;
+	/**
+	 * Field indexSession.
+	 */
 	private final Index<Node> indexSession;
+	/**
+	 * Field sessionRefNode.
+	 */
 	private final Node sessionRefNode;
+	/**
+	 * Field collabApps.
+	 */
 	private CollabApps collabApps;
+	/**
+	 * Field language.
+	 */
 	private String language = "English";
+	/**
+	 * Field logger.
+	 */
 	private static final Logger logger = LoggerFactory.getLogger(SessionRepository.class);
 
+	/**
+	 * Constructor for SessionRepository.
+	 * @param graphDb GraphDatabaseService
+	 * @param collabApps CollabApps that will make part in the sessions
+	 */
 	public SessionRepository(GraphDatabaseService graphDb, CollabApps collabApps)
 	{
 		this.graphDb = graphDb;
@@ -73,6 +96,11 @@ public class SessionRepository implements Observer {
 		this.sessionRefNode = getSessionRootNode(graphDb);
 	}
 
+	/**
+	 * Method getSessionRootNode.
+	 * @param graphDb GraphDatabaseService
+	 * @return Node Root node of the session repository
+	 */
 	private Node getSessionRootNode(GraphDatabaseService graphDb)
 	{
 		Relationship rel = graphDb.getReferenceNode().getSingleRelationship(
@@ -97,6 +125,11 @@ public class SessionRepository implements Observer {
 		}
 	}
 
+	/**
+	 * Method getSessionByName.
+	 * @param sessionName Session name
+	 * @return Session Return session by its name
+	 */
 	public Session getSessionByName(String sessionName)
 	{
 		//Using query for index, not get()
@@ -108,6 +141,12 @@ public class SessionRepository implements Observer {
 		return new Session(sessionNode, this.collabApps);
 	}
 
+	/**
+	 * Method update.
+	 * @param o Observable
+	 * @param arg Object
+	 * @see java.util.Observer#update(Observable, Object)
+	 */
 	public synchronized void update(Observable o, Object arg)
 	{
 		//Verify if object class is Person
@@ -179,6 +218,12 @@ public class SessionRepository implements Observer {
 
 	}
 
+	/**
+	 * Method isInSession.
+	 * @param person Person to verify
+	 * @param session Session name
+	 * @return boolean Return true if this person is part of the session
+	 */
 	private synchronized boolean isInSession(Person person, String session)
 	{
 		Iterator<Node> personNode = this.indexSession.query(LongTermCtxTypes.NAME, session).iterator();
@@ -190,6 +235,11 @@ public class SessionRepository implements Observer {
 		return false;
 	}
 
+	/**
+	 * Method containSession.
+	 * @param sessionName Session name to verify
+	 * @return boolean Return true if the session exists
+	 */
 	public boolean containSession(String sessionName)
 	{
 		Node temp = this.indexSession.query(Session.SESSION, sessionName).getSingle();
@@ -201,8 +251,8 @@ public class SessionRepository implements Observer {
 
 	/**
 	 * Create a collaborative sessions if doesn't exists
-	 * @param Session name
-	 * @return A session object
+	 * @param sessionName String
+	 * @return A session object 
 	 */
 	public Session createSession(String sessionName)
 	{
@@ -246,9 +296,9 @@ public class SessionRepository implements Observer {
 
 	/**
 	 * Include members in a session previously created
-	 * @param Session name
-	 * @param Members to participate
-	 * @return Members include in the session if necessary
+	 * @param sessionName String
+	 * @param members to participate
+	 * @return Members include in the session if necessary 
 	 */
 	public synchronized String[] addMembers(String sessionName, HashSet<Person> members)
 	{
@@ -314,10 +364,9 @@ public class SessionRepository implements Observer {
 	
 	/**
 	 * Include members in a session previously created
-	 * @param Session name
-	 * @param Members to participate
-	 * @return Members include in the session if necessary
-	 */
+	 * @param person Person
+	 * @return Members include in the session if necessary 
+	 * */
 	public synchronized boolean deleteMember(Person person) {
 		for (Session session : this.getAllSessions() ) {
 			Iterator<Person> it = session.getMembers();
@@ -332,6 +381,10 @@ public class SessionRepository implements Observer {
 		
 	}
 	
+    /**
+     * Method getAllSessions.
+     * @return Iterable<Session> Get a list of all the sessions available
+     */
     public Iterable<Session> getAllSessions()
     {
         return new IterableWrapper<Session, Relationship>(
@@ -346,7 +399,8 @@ public class SessionRepository implements Observer {
     }
 
 	/**
-	 * @param string language of sessions
+	
+	 * @param language Set the language of the session
 	 */
 	public void setLanguage(String language) {
 		if (null != language){

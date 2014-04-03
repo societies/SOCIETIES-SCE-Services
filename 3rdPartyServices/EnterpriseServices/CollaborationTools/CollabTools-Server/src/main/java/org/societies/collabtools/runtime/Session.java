@@ -63,23 +63,80 @@ import org.societies.collabtools.api.ICollabApps;
  */
 public class Session {
 
+	/**
+	 * Field logger.
+	 */
 	private static final Logger logger = LoggerFactory.getLogger(Session.class);
 
 
+	/**
+	 * Field DATE.
+	 * (value is ""date"")
+	 */
 	static final String DATE = "date";
+	/**
+	 * Field DATE_FORMAT.
+	 * (value is ""HH:mm:ss dd-MM-yyyy"")
+	 */
 	static final String DATE_FORMAT = "HH:mm:ss dd-MM-yyyy";
+	/**
+	 * Field SESSION.
+	 * (value is ""session"")
+	 */
 	public static final String SESSION = "session";
+	/**
+	 * Field ID.
+	 * (value is ""id"")
+	 */
 	public static final String ID = "id";
+	/**
+	 * Field MEMBERS_INVITED.
+	 * (value is ""membersInvited"")
+	 */
 	public static final String MEMBERS_INVITED = "membersInvited";
+	/**
+	 * Field MEMBERS_PARTICIPATING.
+	 * (value is ""membersParticipating"")
+	 */
 	public static final String MEMBERS_PARTICIPATING = "membersParticipating";
+	/**
+	 * Field ROLE.
+	 * (value is ""role"")
+	 */
 	public static final String ROLE = "role";
+	/**
+	 * Field CHAIR.
+	 * (value is ""id"")
+	 */
 	public static final String CHAIR = "id";
+	/**
+	 * Field VISITOR.
+	 * (value is ""visitor"")
+	 */
 	public static final String VISITOR = "visitor";
+	/**
+	 * Field LANGUAGE.
+	 * (value is ""language"")
+	 */
 	public static final String LANGUAGE = "language";
+	/**
+	 * Field underlyingNode.
+	 */
 	private final Node underlyingNode;
+	/**
+	 * Field collabApps.
+	 */
 	private ICollabApps collabApps;
+	/**
+	 * Field index.
+	 */
 	private Index<Node> index;
 
+	/**
+	 * Constructor for Session.
+	 * @param sessionNode Node
+	 * @param collabApps CollabApps
+	 */
 	Session(Node sessionNode, CollabApps collabApps)
 	{
 		this.underlyingNode = sessionNode;
@@ -89,7 +146,8 @@ public class Session {
 	}
 
 	/**
-	 * @param endNode
+	
+	 * @return Node
 	 */
 //	public Session(Node sessionNode) {
 //		this.underlyingNode = sessionNode;
@@ -100,6 +158,10 @@ public class Session {
 		return this.underlyingNode;
 	}
 
+	/**
+	 * Method getMembers.
+	 * @return Iterator<Person> Return the members of the session
+	 */
 	public Iterator<Person> getMembers()
 	{
 		Iterator<Node> personNode = index.query(LongTermCtxTypes.NAME, this.getSessionName()).iterator();
@@ -122,16 +184,27 @@ public class Session {
 		//			return persons.iterator();
 	}
 
+	/**
+	 * Method getCollabApp.
+	 * @param member Person
+	 * @return String[] Return the collaborative applications used by the member
+	 */
 	public String[] getCollabApp(Person member) {
 		return member.getCollabApps();
 	}
 
+	/**
+	 * Method setCollabApp.
+	 * @param member Person
+	 * @param collabApps String[] Set the collaborative applications for the member
+	 */
 	public void setCollabApp(Person member, String[] collabApps) {
 		member.setCollabApps(collabApps);
 	}
 
 	/**
 	 * Return the name of the session
+	 * @return String
 	 */
 	public String getSessionName()
 	{
@@ -141,6 +214,7 @@ public class Session {
 
 	/**
 	 * Set the language of the session
+	 * @param language String
 	 */
 	public void setLanguage(String language)
 	{
@@ -161,6 +235,7 @@ public class Session {
 
 	/**
 	 * Get the language of the session
+	 * @return String
 	 */
 	public String getLanguage()
 	{
@@ -179,6 +254,7 @@ public class Session {
 	
 	/**
 	 * Get members that really accepted the invitation to join a session
+	 * @return String[] of person names
 	 */
 	public String[] getMembersParticipating()
 	{
@@ -195,12 +271,17 @@ public class Session {
 		}
 	}
 	
-	public String[] getMembersInterests()
+	/**
+	 * Method getMembersInterests.
+	 * @param A LongTermCtxTypes
+	 * @return String[]
+	 */
+	public String[] getMembersLongTermCtx(String property)
 	{
 		Transaction tx = underlyingNode.getGraphDatabase().beginTx();
 		try
 		{
-			String[] membersParticipating  = (String[]) this.getLastSessionHistoryStatus().getProperty(LongTermCtxTypes.INTERESTS, null);
+			String[] membersParticipating  = (String[]) this.getLastSessionHistoryStatus().getProperty(property, null);
 			tx.success();
 			return membersParticipating;
 		}
@@ -236,6 +317,7 @@ public class Session {
 	 * Add member to join a session
 	 * @param member name of the member
 	 * @param role Role possibles are CHAIR and VISITOR
+	 * @param msg String
 	 */
 	public void addMember(Person member, String role, String msg)
 	{
@@ -274,7 +356,7 @@ public class Session {
 
 	/**
 	 * 
-	 * @param member
+	 * @param member to remove from the session
 	 */
 	public synchronized void removeMember(Person member)
 	{
@@ -335,27 +417,21 @@ public class Session {
 		}
 	}
 
-	//		private void inviteMembers()
-	//		{
-	//			Iterator<Person> it = getMembers();
-	//			Set<String> membersSet = new HashSet<String>();
-	//			while (it.hasNext()) {
-	//				Person member = (Person)it.next();
-	//				membersSet.add(member.getName());
-	//				inviteMember(member);
-	//			}
-	//			Map<String, String[]> ctxSessionHistory = new HashMap<String, String[]>();
-	//			System.out.println("membersSet.toArray(new String[0]" +Arrays.toString(membersSet.toArray(new String[0])));
-	//			ctxSessionHistory.put(MEMBERS, membersSet.toArray(new String[0]));
-	//			addSessionHistoryStatus(ctxSessionHistory);
-	//		}
-
+	/**
+	 * Method inviteMember.
+	 * @param member Person to invite
+	 * @param msg String messge to send to the user
+	 */
 	private void inviteMember(Person member, String msg)
 	{
 		String[] collabAppsAvailables = member.getArrayLongTermCtx(LongTermCtxTypes.COLLAB_APPS);
 		this.collabApps.sendInvite(member.getName(), collabAppsAvailables, getSessionName(), getLanguage(), msg);
 	}
 
+	/**
+	 * Method kickMember.
+	 * @param member Person to remove from the application
+	 */
 	private void kickMember(Person member)
 	{
 		String[] collabAppsAvailables = member.getArrayLongTermCtx(LongTermCtxTypes.COLLAB_APPS);
@@ -363,6 +439,11 @@ public class Session {
 	}
 
 
+	/**
+	 * Method addSessionHistoryStatus to keep the session history
+	 * @param ctxSessionHistory Map<String,String[]>
+	 * @return Node
+	 */
 	public Node addSessionHistoryStatus(Map<String, String[]> ctxSessionHistory)
 	{
 		Transaction tx = this.underlyingNode.getGraphDatabase().beginTx();
@@ -394,7 +475,8 @@ public class Session {
 	}
 
 	/**
-	 * @return
+	 * Return the session history
+	 * @return Iterable<SessionHistory>
 	 */
 	 private Iterable<SessionHistory> getHistoryStatus() {
 		Relationship firstStatus = underlyingNode.getSingleRelationship(
@@ -423,7 +505,12 @@ public class Session {
 				};
 	 }
 
-	 //Session history node model
+
+	 /**
+	  * Session history node model
+	  * @param ctxSessionHistory Map<String,String[]>
+	  * @return Node
+	  */
 	 private Node createNewSessionHistoryNode(Map<String, String[]> ctxSessionHistory)
 	 {
 		 Transaction tx = underlyingNode.getGraphDatabase().beginTx();
@@ -455,6 +542,10 @@ public class Session {
 		 }
 	 }
 
+	 /**
+	  * Method getLastSessionHistoryStatus.
+	  * @return Node
+	  */
 	 public Node getLastSessionHistoryStatus()
 	 {
 		 Relationship firstStatus = underlyingNode.getSingleRelationship(
@@ -474,6 +565,10 @@ public class Session {
 		/* (non-Javadoc)
 		 * @see java.lang.Object#hashCode()
 		 */
+		/**
+		 * Method hashCode.
+		 * @return int
+		 */
 		@Override
 		public int hashCode() {
 			final int prime = 31;
@@ -485,6 +580,11 @@ public class Session {
 
 		/* (non-Javadoc)
 		 * @see java.lang.Object#equals(java.lang.Object)
+		 */
+		/**
+		 * Method equals.
+		 * @param obj Object
+		 * @return boolean
 		 */
 		@Override
 		public boolean equals(Object obj) {

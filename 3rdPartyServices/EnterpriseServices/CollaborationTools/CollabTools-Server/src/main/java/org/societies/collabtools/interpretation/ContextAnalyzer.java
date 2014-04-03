@@ -159,11 +159,11 @@ public class ContextAnalyzer implements IContextAnalyzer {
 						String[] newContexts = ctxEnrichment(originalCtx, ctxType.toString(), enrichmentType);
 						friend.setLongTermCtx(ctxType, newContexts);
 						if (newContexts.length != originalCtx.length) {
-							log.debug("{} enrichment done for person {}",enrichmentType,friend.getName());
+							log.info("{} enrichment done for person {}",enrichmentType,friend.getName());
 							System.out.println("Done");
 						}
 						else {
-							log.debug("{} enrichment WAS NOT done for person {}",enrichmentType,friend.getName());
+							log.info("{} enrichment WAS NOT done for person {}",enrichmentType,friend.getName());
 							System.out.println("NOT Done");
 						}
 
