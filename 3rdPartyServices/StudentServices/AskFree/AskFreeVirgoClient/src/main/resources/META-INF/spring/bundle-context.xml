@@ -11,7 +11,7 @@
 
 
 	<bean id="askFree"  class="ac.hw.askfree.AskFree" name="askFree"  
-		init-method="init">
+		init-method="init" destroy-method="tearDown">
 		<property name="serviceMgmt" ref="serviceMgmt"/>
 		<property name="eventMgr" ref="eventMgr"/>	
 		<property name="ctxBroker" ref="ctxBroker"></property>

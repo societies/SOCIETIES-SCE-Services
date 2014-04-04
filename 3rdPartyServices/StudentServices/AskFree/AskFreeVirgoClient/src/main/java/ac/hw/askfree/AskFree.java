@@ -88,6 +88,8 @@ public class AskFree extends EventListener implements IAskFree{
 	private ICommManager commManager;
 	private IIdentityManager idMgr;
 	private IAskFreeServerRemote askFreeCommsClient;
+	private Thread t;
+	private SocketServer server;
 	
 
 	public void init(){
@@ -99,6 +101,12 @@ public class AskFree extends EventListener implements IAskFree{
 
 		this.registerForServiceEvents();
 
+	}
+	
+	public void tearDown(){
+		if(server!=null) {
+			server.kill();
+		}
 	}
 
 	/*
@@ -132,8 +140,7 @@ public class AskFree extends EventListener implements IAskFree{
 	public void handleInternalEvent(InternalEvent event) {
 		// This method is called after the bundle has been successfully installed on virgo
 		//and we need this to receive the AskFree service identifier (ServiceResourceIdentifier)
-		SocketServer server = null;
-		Thread t;
+		
 		
 		logging.debug("Received internal event: "+event.geteventName());
 		logging.debug("Received SLM event");

@@ -52,7 +52,7 @@ public class SocketServer implements Runnable{
 	private Socket connection = null;
 
 	private AskFree askFree;
-	
+
 	private volatile boolean isRunning = true;
 
 	public SocketServer(AskFree askFree){
@@ -83,9 +83,17 @@ public class SocketServer implements Runnable{
 				return;
 			}
 		}
+		this.log.info("Out of loop successfully");
 	}
-	
+
 	public void kill(){
 		isRunning = false;
+		try {
+			this.providerSocket.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		this.log.info("Socket is now closed, I shall now die...");
 	}
 }
