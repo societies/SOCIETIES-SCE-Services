@@ -30,6 +30,7 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
@@ -40,9 +41,7 @@ import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
-import org.neo4j.graphdb.index.Index;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.societies.collabtools.acquisition.ContextSubscriber;
@@ -50,7 +49,6 @@ import org.societies.collabtools.acquisition.LongTermCtxTypes;
 import org.societies.collabtools.acquisition.Person;
 import org.societies.collabtools.acquisition.PersonRepository;
 import org.societies.collabtools.acquisition.ShortTermCtxTypes;
-import org.societies.collabtools.interpretation.ContextAnalyzer;
 import org.societies.collabtools.runtime.CollabApps;
 import org.societies.collabtools.runtime.SessionRepository;
 
@@ -71,7 +69,7 @@ public class CtxSubscriberTest {
 	private static SessionRepository sessionRepository;
 	private static int nrOfPersons = 5;
     private static ContextSubscriber ctxSub;
-	private static ContextAnalyzer ctxRsn;
+//	private static ContextAnalyzer ctxRsn;
 
 	/**
 	 * Test method for {@link org.societies.collabtools.acquisition.ContextSubscriber#ContextSubscriber(org.societies.collabtools.Activator, org.societies.collabtools.acquisition.PersonRepository, org.societies.collabtools.runtime.SessionRepository)}.
@@ -155,9 +153,10 @@ public class CtxSubscriberTest {
 	/**
 	 * Test method for {@link org.societies.collabtools.acquisition.ContextSubscriber#getSessions()}.
 	 */
-	@Ignore
+	@Test
 	public void testGetSessions() {
-		fail("Not yet implemented");
+		HashMap<String,List<String>> sessionHashMap = ctxSub.getSessions();
+		Assert.assertNotNull(sessionHashMap);
 	}
 
 	/**
@@ -181,20 +180,20 @@ public class CtxSubscriberTest {
 		Class[] methodParameters = new Class[]{String.class, String[].class, String.class};
 		Method method = ContextSubscriber.class.getDeclaredMethod("setContext", methodParameters );
 		String [] ctxType= {ShortTermCtxTypes.STATUS};
-		Object[] params = new Object[]{"Busy",ctxType,"person#9" };
+		Object[] params = new Object[]{"Busy",ctxType,"person#19" };
 
 
 		method.setAccessible(true);
-		//Insert location
-		method.invoke(ctxSub, params);
-		
 		//Insert status
+		method.invoke(ctxSub, params);
+		
+		//Insert location
 		ctxType[0]= ShortTermCtxTypes.LOCATION;
-		params = new Object[]{"Home",ctxType,"person#9" };
+		params = new Object[]{"Home",ctxType,"person#19" };
 		method.invoke(ctxSub, params);
 		
 		
-//		createPersons(1);
+		createPersons(10);
 		Person individual = personRepository.getPersonByName("person#9");
 		Map<String, String> shortTermCtx = new HashMap<String, String>();
 		
@@ -203,13 +202,13 @@ public class CtxSubscriberTest {
 		
 		if (null == individual.getLastShortTermUpdate()) {
 			shortTermCtx.put(ShortTermCtxTypes.STATUS, "Online");
-			individual.addContextStatus(shortTermCtx, this.sessionRepository);
+			individual.addContextStatus(shortTermCtx, CtxSubscriberTest.sessionRepository);
 		}
 //		shortTermCtx.put(individual.getLastShortTermUpdate() == null ? "" : individual.getLastShortTermUpdate().getShortTermCtx(ShortTermCtxTypes.STATUS), "Home");
 //		if (individual.getLastShortTermUpdate()==null)
 //			LOG.info("null");
 		shortTermCtx.put(ShortTermCtxTypes.LOCATION,"Home");
-		individual.addContextStatus(shortTermCtx, this.sessionRepository);
+		individual.addContextStatus(shortTermCtx, CtxSubscriberTest.sessionRepository);
 		
 //		
 //		String response = individual.getLastShortTermUpdate().getShortTermCtx(ShortTermCtxTypes.STATUS);
@@ -231,7 +230,7 @@ public class CtxSubscriberTest {
 		LOG.info("personGraphDb path: "+"target/persontestdb00"  + random);
 		
         ctxSub = new ContextSubscriber(null,personRepository, sessionRepository);
-        ctxRsn = new ContextAnalyzer(personRepository);
+//        ctxRsn = new ContextAnalyzer(personRepository);
 		LOG.info("personGraphDb path: "+"target/persontestdb0"  + random);
 		LOG.info("sessionGraphDb path: "+"target/sessiontestdb0"  + random);
 		LOG.info("Setup done...");

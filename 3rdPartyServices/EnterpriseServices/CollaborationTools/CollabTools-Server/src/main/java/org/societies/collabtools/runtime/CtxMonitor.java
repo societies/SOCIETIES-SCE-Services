@@ -48,6 +48,7 @@ import org.societies.collabtools.acquisition.ShortTermCtxTypes;
  */
 public class CtxMonitor extends Observable implements Runnable, Observer {
 
+	//By default engine starts by priority mode
 	public Engine engine;
 	private SessionRepository sessionRepository;
 	private static final Logger logger  = LoggerFactory.getLogger(CtxMonitor.class);

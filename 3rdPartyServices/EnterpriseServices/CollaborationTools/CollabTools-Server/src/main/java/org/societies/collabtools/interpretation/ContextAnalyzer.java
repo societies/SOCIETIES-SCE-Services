@@ -66,7 +66,7 @@ public class ContextAnalyzer implements IContextAnalyzer {
 	private HashMap<String, HashSet<Person>> hashCtxList = new HashMap<String, HashSet<Person>>(10);
 	
 	//TODO: api key hardcoded....Change to config.propreties
-	final String APIKEY = "ca193cc1d3101c225266787a3d5fc1f810b52f02";
+	final static String APIKEY = "ca193cc1d3101c225266787a3d5fc1f810b52f02";
 	private boolean weightAlreadyAssigned = false;
 
 	/**
@@ -136,37 +136,33 @@ public class ContextAnalyzer implements IContextAnalyzer {
 				if (null != friend.getArrayLongTermCtx("ORIGINAL_"+ctxType)){
 					continue;
 				}
-				// Start thread for the first half of the numbers
+				
+				//Check if original ctx information is available
+				if (null == friend.getArrayLongTermCtx(ctxType)){
+					continue;
+				}
+
+				// Start thread for the persons increment
 				FutureTask<Boolean> task = new FutureTask<Boolean>(new Callable<Boolean>() {
 					@Override
 					public Boolean call() throws Exception {
-						String[] originalCtx;
 						//Keeping the original ctx information
-//						originalCtx = friend.getArrayLongTermCtx(ctxType);
-						
-						//Check if this ctxTyp was incremented
-						if (friend.getArrayLongTermCtx("ORIGINAL_"+ctxType) == null) {
-							//Taking the original ctx information
-							originalCtx = friend.getArrayLongTermCtx(ctxType);
-							//Saving the original ctx in a different property
-							friend.setLongTermCtx("ORIGINAL_"+ctxType, originalCtx);
-						}
-						else {
-							originalCtx = friend.getArrayLongTermCtx("ORIGINAL_"+ctxType);
-						}
-						
+						String[] originalCtx = friend.getArrayLongTermCtx(ctxType);
+
+						//Saving the original ctx in a different property
+						friend.setLongTermCtx("ORIGINAL_"+ctxType, originalCtx);
+							
 						//Adding the new ctx info + original ctx info
 						String[] newContexts = ctxEnrichment(originalCtx, ctxType.toString(), enrichmentType);
 						friend.setLongTermCtx(ctxType, newContexts);
 						if (newContexts.length != originalCtx.length) {
 							log.info("{} enrichment done for person {}",enrichmentType,friend.getName());
-							System.out.println("Done");
+							System.out.println("Enrichment Done");
 						}
 						else {
 							log.info("{} enrichment WAS NOT done for person {}",enrichmentType,friend.getName());
-							System.out.println("NOT Done");
+							System.out.println("Enrichment NOT Done");
 						}
-
 						return true;
 					}
 				});
@@ -239,9 +235,11 @@ public class ContextAnalyzer implements IContextAnalyzer {
 		initialThreshold = initialThreshold / elements.size();
 		double finalThreshold = 0;
 		boolean done = false;
+		double avgG1,  avgG2;
+		int nG1, nG2;
 		while (!done) {
-			double avgG1 = 0,  avgG2 = 0;
-			int nG1 = 0, nG2 = 0;
+			avgG1 = 0;  avgG2 = 0;
+			nG1 = 0; nG2 = 0;
 			for (int i = 0; i < elements.size(); i++) {
 				if (elements.get(i) > initialThreshold) {
 					avgG1 = elements.get(i) + avgG1;

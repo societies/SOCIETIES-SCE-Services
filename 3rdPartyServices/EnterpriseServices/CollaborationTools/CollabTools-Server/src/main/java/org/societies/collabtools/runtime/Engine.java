@@ -59,6 +59,8 @@ public class Engine implements IEngine {
 	private List<Rule> rules = new ArrayList<Rule>();
 	private ContextAnalyzer ctxRsn;
 	private boolean engineByPriority = true;
+	@SuppressWarnings("unused")
+	private boolean engineByUpdate = true;
 	private double weightSum;
 
 	/**

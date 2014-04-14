@@ -70,6 +70,7 @@ public class TestUtils {
             //Set long term context
             person.setLongTermCtx(LongTermCtxTypes.NAME, "person#" + i);
             person.setLongTermCtx(LongTermCtxTypes.COLLAB_APPS, new String[] { "chat" });
+            person.setLongTermCtx(LongTermCtxTypes.INTERESTS, getRandomInterests());
             System.out.println("Person#" +i+" created");
         }
     }
@@ -135,8 +136,8 @@ public class TestUtils {
 	public void createMockShortTermCtx()
 	{
 //		Map<String, String> shortTermCtx1 = new HashMap<String, String>();
-		for (Person friend : this.personRepository.getAllPersons()) {
-			String [] response = new String [] {ShortTermCtxTypes.LOCATION, getRandomLocation(), friend.getName()};
+		for (Person person : this.personRepository.getAllPersons()) {
+			String [] response = new String [] {ShortTermCtxTypes.LOCATION, getRandomLocation(), person.getName()};
 			ctxSub.update(null, response);
 			try {
 				//3 sec

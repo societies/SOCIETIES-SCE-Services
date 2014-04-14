@@ -193,7 +193,13 @@ public class ContextAnalyzerTest {
 	@Test
 	public void testGetAutoThreshold() {
 		ArrayList<Double> elements = new ArrayList<Double>();
+		elements.add(50.0);
+		elements.add(40.0);
+		elements.add(30.0);
+		elements.add(20.0);
+		
 		double threshold = ContextAnalyzer.getAutoThreshold(elements);
+		LOG.info("Threshold: {}", threshold);
 		Assert.assertNotNull(threshold);
 	}
 
@@ -279,14 +285,14 @@ public class ContextAnalyzerTest {
 	 */
 	@Test
 	public void testIncrementCtx() {
-		for (int i = 0; i < 4; i++)
+		for (int i = 0; i < 10; i++)
 		{
 			Person person;
 			try {
 				person = personRepository.createPerson("person#" + i);
 				//Set long term context
 				person.setLongTermCtx(LongTermCtxTypes.NAME, "person#" + i);
-				String[] interests = {"music, cinema, Aquatic Invertebrates, Nanoparticles Toxicity, Aquatic Ecotoxicology, gym, yoga"};
+				String[] interests = {"methodologies in research",  "classes of biological organic compounds", "organisms"};
 				person.setLongTermCtx(LongTermCtxTypes.INTERESTS, interests);
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
@@ -299,30 +305,6 @@ public class ContextAnalyzerTest {
 //		ctxRsn.incrementCtx(LongTermCtxTypes.INTERESTS, EnrichmentTypes.CATEGORY, null);
 	}
 
-	/**
-	 * Test method for {@link org.societies.collabtools.interpretation.ContextAnalyzer#incrementCtx(java.lang.String, org.societies.collabtools.api.IIncrementCtx.EnrichmentTypes, org.societies.collabtools.acquisition.Person)}.
-	 */
-	@Test
-	public void testIncrementCtxNull() {
-		for (int i = 0; i < 4; i++)
-		{
-			Person person;
-			try {
-				person = personRepository.createPerson("person#" + i);
-				//Set long term context
-				person.setLongTermCtx(LongTermCtxTypes.NAME, "person#" + i);
-				String[] interests = {};
-				person.setLongTermCtx(LongTermCtxTypes.INTERESTS, interests);
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-
-		}
-		ctxRsn.incrementCtx(LongTermCtxTypes.INTERESTS, EnrichmentTypes.CONCEPT, null);
-		// context enrichment considering previous concept performed
-//		ctxRsn.incrementCtx(LongTermCtxTypes.INTERESTS, EnrichmentTypes.CATEGORY, null);
-	}
 	/**
 	 * Test method for {@link org.societies.collabtools.interpretation.ContextAnalyzer#personCtxSimilarity(int, java.lang.String, org.societies.collabtools.acquisition.Person, org.societies.collabtools.acquisition.Person)}.
 	 */

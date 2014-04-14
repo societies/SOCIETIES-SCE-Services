@@ -80,8 +80,8 @@ public class IncrementCtxTest {
 				"Bioaccumulation and Biomagnification, Oxidative Stress Biomarkers, Environmental Toxicology, Biodiversity and Conservation, " +
 				"Metabolomics, Proteomics, Nanoparticles, Pesticides, Metals, " +
 				"R Statistical Software, IBM SPSS Statistics, Minitab Statistics Package" ;
-		String ctx1 = "Biomarkers in Ecotoxicology";
-		System.out.println("\nOriginal ctx: "+ctx);
+		String ctx1 = "organisms";
+		System.out.println("\nOriginal ctx: "+ctx1);
 		String [] response = alchemyObj.incrementString(ctx1, EnrichmentTypes.CONCEPT);
 		System.out.println("Response concept: "+Arrays.toString(response));
 		response = alchemyObj.incrementString(ctx1, EnrichmentTypes.CATEGORY);

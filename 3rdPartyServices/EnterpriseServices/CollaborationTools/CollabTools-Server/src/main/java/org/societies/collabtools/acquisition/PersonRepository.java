@@ -185,7 +185,9 @@ public class PersonRepository
     	Map<Person,Integer> persons = new HashMap<Person, Integer>();
     	for (Person person : getAllPersons())
     	{
-    		logger.debug("getPersonWithSimilarCtx: {}" ,person.getName());
+    		logger.info("Comparing {} with {}" ,self, person.getName());
+//			if (self.getArrayLongTermCtx(property) == null || person.getArrayLongTermCtx(property) == null)
+//				continue;
         	int counter = 0;
     		if (!self.equals(person)) {
     			List<String> personCtx = Arrays.asList(person.getArrayLongTermCtx(property));
