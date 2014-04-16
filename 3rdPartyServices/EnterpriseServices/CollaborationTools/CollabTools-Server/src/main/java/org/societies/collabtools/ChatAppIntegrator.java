@@ -79,17 +79,17 @@ public class ChatAppIntegrator extends AbstractCollabAppConnector {
 	 */
 	@Override
 	public void setup() {
-		logger.info("Openfire setup with host: {}",this.host);
+		logger.info("Openfire setup with host: {}", this.host);
 		ConnectionConfiguration config = new ConnectionConfiguration(this.host, 5222);
 		config.setDebuggerEnabled(false);
 		XMPPConnection connection = new XMPPConnection(config);
 		try {
 			connection.connect();
-			connection.loginAnonymously();
+			connection.login("admin", "admin");
 		} catch (XMPPException e) {
-			//try as admin
+			//try as anonymous
 			try {
-				connection.login("admin", "admin");
+				connection.loginAnonymously();
 			} catch (XMPPException e1) {
 				e1.printStackTrace();
 			}
@@ -97,6 +97,21 @@ public class ChatAppIntegrator extends AbstractCollabAppConnector {
 			//			e.printStackTrace();
 		}
 		this.connection = connection;
+		
+		//Need to destroy all chat rooms because openfire will not invite again...
+		try {
+			Collection<HostedRoom> rooms = MultiUserChat.getHostedRooms(connection, "conference."+this.host);
+			for (HostedRoom hostedRoom :rooms){
+				muc = new MultiUserChat(connection, hostedRoom.getJid());
+				muc.join("admin");
+				muc.grantOwnership("admin");
+				muc.destroy(null, null);
+			}
+		} catch (XMPPException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 
 		//filter to check if user joins or leaves the conference
 		connection.addPacketListener(new PacketListener() { 
@@ -199,11 +214,13 @@ public class ChatAppIntegrator extends AbstractCollabAppConnector {
 		//TODO: Change message to inform which context information trigger the event 
 		try {
 			// TODO Insert context reason!E.g. location changed
+			muc.join("admin");
+			muc.grantOwnership("admin");
 			muc.kickParticipant(user, "Context change");
 			muc.kickParticipant(user+"@"+this.host, "Context change");
 			//Sending kick event to be triggered by leaveEvent
 			Presence leavePresence = new Presence(Presence.Type.unavailable);
-			leavePresence.setTo(room + "/" + user);
+			leavePresence.setTo(room+"@conference."+this.host + "/" + user);
 			connection.sendPacket(leavePresence);
 		} catch (XMPPException e) {
 			e.printStackTrace();

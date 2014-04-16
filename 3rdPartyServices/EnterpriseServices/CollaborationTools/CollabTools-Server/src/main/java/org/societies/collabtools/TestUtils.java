@@ -63,15 +63,16 @@ public class TestUtils {
     
 	public void createPersons(int nrOfPersons) throws Exception
     {
-		this.nrOfPersons = nrOfPersons;
-        for ( int i = 0; i < nrOfPersons; i++ )
+		//this.nrOfPersons = nrOfPersons;
+		String[] persons = {"mariabordalo", "rsl", "hugoricardo", "hugovieira", "rodriguesa", "sgoncalves", "nunoferreira", "ruimorgado", "jessicalugo", "dianacampos", "jfhenriques"};
+        for ( int i = 0; i < persons.length; i++ )
         {    	
-            Person person = personRepository.createPerson("person#" + i);
+            Person person = personRepository.createPerson(persons[i]);
             //Set long term context
-            person.setLongTermCtx(LongTermCtxTypes.NAME, "person#" + i);
+            person.setLongTermCtx(LongTermCtxTypes.NAME, persons[i]);
             person.setLongTermCtx(LongTermCtxTypes.COLLAB_APPS, new String[] { "chat" });
             person.setLongTermCtx(LongTermCtxTypes.INTERESTS, getRandomInterests());
-            System.out.println("Person#" +i+" created");
+            System.out.println(persons[i]+" created");
         }
     }
 	

@@ -96,7 +96,7 @@ public class MainTest {
 		test.deleteSocialGraph();
 		
 //		test.menu();
-		test.createPersons(10); //5 people by default
+		test.createPersons(11); //5 people by default
 		
 //		Creating some updates
 		test.createMockLongTermCtx();
