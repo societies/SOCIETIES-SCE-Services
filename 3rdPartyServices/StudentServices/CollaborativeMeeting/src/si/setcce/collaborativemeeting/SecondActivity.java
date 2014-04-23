@@ -670,11 +670,20 @@ public class SecondActivity extends FragmentActivity implements
 	}
 	
 	private void showQrCode(String data) {
-		String type = "TEXT_TYPE";
-		Intent intent = new Intent("com.google.zxing.client.android.ENCODE");
-		intent.putExtra("ENCODE_TYPE", type);
-		intent.putExtra("ENCODE_DATA", data);
-		startActivity(intent);
+		
+		String action = "com.google.zxing.client.android.ENCODE";
+		
+		if (OtherApps.isActivityAvailable(this, action)) {
+			String type = "TEXT_TYPE";
+			Intent intent = new Intent(action);
+			intent.putExtra("ENCODE_TYPE", type);
+			intent.putExtra("ENCODE_DATA", data);
+			startActivity(intent);
+		}
+		else {
+			Toast.makeText(getApplicationContext(), "ZXing Barcode Scanner not installed!",
+					Toast.LENGTH_SHORT).show();
+		}
 	}
 	
 	public void setMeetingSubject(String subject) {
