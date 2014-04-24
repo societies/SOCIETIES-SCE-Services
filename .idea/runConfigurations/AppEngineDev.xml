@@ -6,6 +6,7 @@
       <option name="port" value="8888" />
       <option name="serverParameters" value="--address=0.0.0.0" />
     </server-settings>
+    <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea" />
     <RunnerSettings RunnerId="Debug">
       <option name="DEBUG_PORT" value="" />
       <option name="TRANSPORT" value="0" />

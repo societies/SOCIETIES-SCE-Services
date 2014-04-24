@@ -32,22 +32,25 @@ var CrowdTaskingApp = function () {
     var communities = [];
     var TEST_HOST = "localhost1";
 
-    var getTaskById = function (id, resetTaskIndex) {
-        resetTaskIndex = typeof resetTaskIndex !== 'undefined' ? resetTaskIndex : true;
+    var getTaskById = function (id, replaceTask) {
+        replaceTask = typeof replaceTask !== 'undefined' ? replaceTask : false;
         $.ajax({
             type: 'GET',
             url: '/rest/task',
             data: { 'id': id },
             success: function (task) {
-                tasks = [];
-                tasks.push(task);
-                if (resetTaskIndex) {
-                    currentTaskIndex = 0;
+                if (replaceTask) {
+                    tasks[currentTaskIndex] = task;
                 }
-                $('#backButton').bind('tap', function (event, data) {
-                    event.preventDefault();
-                    window.location.replace('/menu');
-                });
+                else {
+                    tasks = [];
+                    tasks.push(task);
+                    currentTaskIndex = 0;
+                    $('#backButton').bind('tap', function (event, data) {
+                        event.preventDefault();
+                        window.location.replace('/menu');
+                    });
+                }
                 fillForm();
             }
         });
@@ -855,7 +858,7 @@ var CrowdTaskingApp = function () {
             console.log("currentTaskIndex = " + currentTaskIndex);
             $('#status').val("refresh");
             var task = tasks[currentTaskIndex];
-            getTaskById(task.id, false);
+            getTaskById(task.id, true);
             console.log("currentTaskIndex = " + currentTaskIndex);
         },
 
