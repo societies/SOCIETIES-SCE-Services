@@ -1159,6 +1159,7 @@ $(document).on('pageshow', '#indexPage', function (event, data) {
 
 
 $(document).on('pageinit', '#mobilePage', function (event, data) {
+    event.preventDefault();
     refreshFunction = CrowdTaskingApp.init;
     console.log("refreshFunction = CrowdTaskingApp.init");
     CrowdTaskingApp.init();
