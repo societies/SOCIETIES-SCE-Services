@@ -82,7 +82,11 @@ public class TaskJS {
 //			Date now = new Date();
             for (Meeting meeting : task.getMeetings()) {
 //				if (meeting.getEndTime() == null || meeting.getEndTime().after(now)) {	// TODO: check this
-                meetings.add(new MeetingJS(meeting, loggedinUser.getId()));
+                if (loggedinUser != null) {
+                    meetings.add(new MeetingJS(meeting, loggedinUser.getId()));
+                } else {
+                    meetings.add(new MeetingJS(meeting));
+                }
 //				}
             }
         }

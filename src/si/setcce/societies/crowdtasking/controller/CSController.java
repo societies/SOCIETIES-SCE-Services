@@ -83,7 +83,9 @@ public class CSController extends HttpServlet {
                     CTUser user = UsersAPI.getLoggedInUser(request.getSession());
                     CollaborativeSpace space = SpaceAPI.getCollaborativeSpace(path[1]);
                     if (space == null) {
-                        notMemeber(response);
+                        log.warning("Can't find CS: " + path[1]);
+                        response.setContentType("text/html");
+                        response.getWriter().write("CS does not exit!");
                         return;
                     }
                     log.info("User:" + user.getUserName());
