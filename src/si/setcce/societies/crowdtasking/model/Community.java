@@ -64,7 +64,6 @@ public class Community {
     @Load
     @Index
     private Set<Ref<CTUser>> requests;
-    //    @Index @Load private List<Ref<Task>> taskRefs;  // todo: Mike's idea to have list of tasks here, finnish it or ...
     Date created, modified;
 
     public Community() {
@@ -109,7 +108,7 @@ public class Community {
     }
 
 /*
-	public void addCommunity(Community community) {
+    public void addCommunity(Community community) {
 		if (subCommunities == null) {
 			subCommunities = new ArrayList<Ref<Community>>();
 		}
@@ -225,9 +224,7 @@ public class Community {
                     }
                 }
             } catch (Exception e) {
-                // TODO developing...
-//                collaborativeSpaceRefs = null;
-//                CommunityDAO.saveCommunity(this);
+                e.printStackTrace();
             }
         }
         return collaborativeSpaces;

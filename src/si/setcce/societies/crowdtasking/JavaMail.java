@@ -99,15 +99,12 @@ public class JavaMail {
             System.out.println("Message sent.");
         } catch (AddressException e) {
             System.out.println("Error:" + e.getMessage());
-            // TODO Auto-generated catch block
             e.printStackTrace();
         } catch (MessagingException e) {
             System.out.println("Error:" + e.getMessage());
-            // TODO Auto-generated catch block
             e.printStackTrace();
         } catch (Exception e) {
             System.out.println("Error:" + e.getMessage());
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
     }

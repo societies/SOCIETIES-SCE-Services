@@ -14,11 +14,10 @@ public class AppListener implements ServletContextListener {
             System.out.println("hostname:" + hostname);
             System.out.println("getByName:" + InetAddress.getByName(hostname));
         } catch (UnknownHostException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
         /*String domena = request.getServerName();
-		if (request.getServerPort() != 80) {
+        if (request.getServerPort() != 80) {
 			domena += request.getServerPort(); 
 		}*/
 
