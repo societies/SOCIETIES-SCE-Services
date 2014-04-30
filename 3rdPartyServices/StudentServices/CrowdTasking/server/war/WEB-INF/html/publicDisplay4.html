@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link href="/css/bootstrap.css" rel="stylesheet" media="screen">
+	<link href="/css/bootstrap-responsive.css" rel="stylesheet" media="screen">
+	<link rel="stylesheet" href="/css/pd4.css" type="text/css" media="screen"/>
+    <style type="text/css">
+      /* Give a quick and non-cross-browser friendly divider */
+    .span4 {
+        padding-right: 40px;
+        border: 0px solid #eee;
+	}
+    .span8 {
+        padding-left: 40px;
+        border: 0px solid #eee;
+	}
+	.blue-header th {
+	    background-color: #DCE9F9;
+	    background-image: -moz-linear-gradient(center top , #EBF3FC, #DCE9F9);
+	    border-top: medium none;
+	    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.8) inset;
+	    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
+	}
+    </style>
+</head>
+<body style="background: url('/images/Lj_dragon_HD.jpg') no-repeat center fixed;">
+	<div class="row-fluid">
+		<div class="span12 text-center" style="margin-bottom:30px">
+			<h1>{{ pdHeader }}</h1>
+		</div>
+	</div>
+	<div class="row-fluid">
+		<div class="span8">
+			<table id="meeting_list" class="table table-bordered" style="width:100%">
+				<caption><h3>Agenda</h3></caption>
+				<thead class="blue-header">
+					<tr>
+						<th>Subject</th>
+						<th>Description</th>
+						<th>Start time</th>
+						<th>End time</th>
+						<th>organizer</th>
+						<!--th>QR code</th-->
+					</tr>
+				</thead>
+			</table>
+		</div>
+		<div class="span4">
+			<div id="feedWidget">
+				<div id="activeTab" class="">Activity feed</div>
+				<div class="line"></div>
+				<div id="tabContent"></div>
+				<div class="shadow"></div>
+			</div>
+		</div>
+	</div>
+
+	<script src="/js/jquery-1.9.1.min.js" type="text/javascript" charset="utf-8"></script>
+    <script src="/js/bootstrap.js"></script>
+	<script type="text/javascript" src="/_ah/channel/jsapi"></script>
+	<script src="/js/mobile.js" type="text/javascript" charset="utf-8"></script>
+	<script src="/js/publicdisplay4.js" type="text/javascript" charset="utf-8"></script>
+	<script type='text/javascript'>
+	var myModule = Object.create({
+	    sendMessage : function() {
+	      var xhr = new XMLHttpRequest();
+	      xhr.open('POST', '/Events', true);
+	      xhr.send();
+	    },
+	    showMeetingsAndEvents : function() {
+	        showMeetings('{{ spaceId }}');
+	    	getEvents('{{ communityId }}', '{{ spaceId }}');
+	    },
+	    initChannel : function() {
+	      var channel = new goog.appengine.Channel('{{ token }}');
+	      var socket = channel.open();
+	      socket.onopen = channelHandler.onOpened;
+	      socket.onmessage = channelHandler.onMessage;
+	      socket.onerror = channelHandler.onError;
+	      socket.onclose = channelHandler.onClose;
+	}});
+	    
+	var channelHandler = Object.create({
+		onOpened : function() {
+		},
+		onMessage : function(message) {
+			message.data = message.data.replace(/\r\n/g,'');
+			var change = "changeTo:";
+			var show = "showTask:"
+			var hideTaskMsg = "hideTask"
+			var length = message.data.length;
+			if (message.data.substring(0, change.length) === change) {
+				window.location.replace(message.data.substring(change.length, length));
+			}
+			else if (message.data.substring(0, show.length) === show) {
+				var id = message.data.substring(show.length, length);
+				showTask(id);
+			}
+			else if (message.data.substring(0, hideTaskMsg.length) === hideTaskMsg) {
+				hideTask();
+			}
+			else {
+	   			addEvent(message.data);
+		        showMeetings('{{ spaceId }}');
+			}
+		},
+		onError : function() {
+			window.location.reload();
+		},
+		onClose : function() {
+	}
+	});    
+    </script>
+</body>
+</html>

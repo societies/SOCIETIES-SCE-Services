@@ -1,0 +1,12 @@
+<component name="libraryTable">
+  <library name="objectify-appengine-4.0b1">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/war/WEB-INF/lib/objectify-appengine-4.0b1.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$PROJECT_DIR$/war/WEB-INF/lib/objectify-appengine-4.0b1.jar!/com/googlecode/objectify/impl/emul" />
+      <root url="jar://$PROJECT_DIR$/war/WEB-INF/lib/objectify-appengine-4.0b1.jar!/" />
+    </SOURCES>
+  </library>
+</component>

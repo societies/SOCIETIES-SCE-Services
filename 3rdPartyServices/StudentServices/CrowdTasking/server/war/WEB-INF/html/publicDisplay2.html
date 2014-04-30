@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<link rel="stylesheet" href="/css/pd2.css" type="text/css" media="screen"/>
+	<link rel="stylesheet" href="/css/smoothness/jquery-ui-1.8.22.custom.css" type="text/css" media="screen"/>
+
+	<script src="/js/jquery-1.7.2.min.js" type="text/javascript" charset="utf-8"></script>
+	<script src="/js/jquery-ui-1.8.22.custom.min.js" type="text/javascript" charset="utf-8"></script>
+
+	<script src="http://ajax.aspnetcdn.com/ajax/jquery.dataTables/1.9.3/jquery.dataTables.js" type="text/javascript" charset="utf-8"></script>
+	<script type="text/javascript" src="/_ah/channel/jsapi"></script>
+	<script src="/js/publicdisplay2.js" type="text/javascript" charset="utf-8"></script>
+</head>
+<body>
+	<header><h1>{{ pdHeader }}</h1></header>
+	<div class='wrapper'>
+		<div class='main'>
+			<div class='left'>
+				<span class='caption'>Interesting tasks</span>
+				<table id='task_list' class='datatable'>
+					<thead>
+					<tr>
+						<th style="text-align: center;"></th>
+						<th>Title</th>
+						<th>Posted by</th>
+						<th>Due date</th>
+						<th>Description</th>
+						<th>Meetings</th>
+						<th>QR code</th>
+					</tr>
+					</thead>
+					<tbody>
+					<tr class="template" style="display:none;">
+						<td class="task_status" style="text-align: center; width:16px;"></td>
+						<td class="task_title">title</td>
+						<td class="task_postedby">posted by</td>
+						<td class="task_description">description</td>
+						<td class="task_meetings"></td>
+						<td class="task_qrcode"></td>
+					</tr>	
+					</tbody>			
+					<tfoot>
+					<tr>
+						<th>Status</th>
+						<th style="display:none;">My</th>
+						<th style="display:none;">ID</th>
+						<th>Title</th>
+						<th>Posted by</th>
+						<th>Due date</th>
+						<th>Description</th>
+						<th>Meetings</th>
+						<th>QR code</th>
+					</tr>
+					</tfoot>
+				</table>
+			</div>
+			<div class='right'>
+				<div>
+					<span class='caption'>Hall of fame</span>
+					<table id='top_users' class='datatable'>
+						<thead>
+							<tr>
+								<th>User</th>
+								<th>Karma</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr class="topuser_template" style="display:none;">
+								<td class="user_name">Dyer</td>
+								<td class="user_karma">2</td>
+							</tr>
+						</tbody>
+						<tfoot>
+							<tr>
+								<th>User</th>
+								<th>Points</th>
+							</tr>
+						</tfoot>
+					</table>				
+				</div>
+				<br><br>
+				<!--div style='overflow:hidden; height:300px;'-->
+				<div style='overflow:hidden; height:300px;'>
+					<span class='caption'>Events</span>
+					<table cellpadding="0" cellspacing="0" border="0" id="event_list" width="100%">
+					</table>				
+				</div>
+			</div>
+		</div>
+	</div>
+	<script type='text/javascript'>
+	var myModule = Object.create({
+	    sendMessage : function() {
+	      var xhr = new XMLHttpRequest();
+	      xhr.open('POST', '/Events', true);
+	      xhr.send();
+	    },
+	    showEvents : function() {
+	        showTasks('{{ communityId }}');
+	    	getEvents('{{ communityId }}', '{{ spaceId }}');
+	    	showTopUsers();
+	    },
+	    initChannel : function() {
+	      var channel = new goog.appengine.Channel('{{ token }}');
+	      var socket = channel.open();
+	      socket.onopen = channelHandler.onOpened;
+	      socket.onmessage = channelHandler.onMessage;
+	      socket.onerror = channelHandler.onError;
+	      socket.onclose = channelHandler.onClose;
+	}});
+	    
+	var channelHandler = Object.create({
+		onOpened : function() {
+		},
+		onMessage : function(message) {
+			var change = "changeTo:";
+			var length = message.data.length;
+			if (message.data.substring(0, change.length) === change) {
+				window.location.replace(message.data.substring(change.length, length));
+			}
+			else {
+	   			addEvent(message.data);
+	   			showTasks('{{ communityId }}');
+	   			showTopUsers();
+			}
+		},
+		onError : function() {
+			window.location.reload();
+		},
+		onClose : function() {
+	}
+	});    
+    </script>
+</body>
+</html>
