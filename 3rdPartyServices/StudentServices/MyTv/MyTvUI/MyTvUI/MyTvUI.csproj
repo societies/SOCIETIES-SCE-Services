@@ -77,8 +77,12 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>C:\Program Files\Microsoft SDKs\Kinect\Developer Toolkit v1.7.0\Assemblies\Microsoft.Kinect.Toolkit.Interaction.dll</HintPath>
     </Reference>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>C:\Users\StuartWork\Documents\Visual Studio 2012\Projects\SocialLearningUI\SocialLearningUI\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Core" />
@@ -90,6 +94,7 @@
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
+    <Reference Include="WindowsFormsIntegration" />
   </ItemGroup>
   <ItemGroup>
     <ApplicationDefinition Include="App.xaml">
@@ -97,6 +102,8 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="ActivityFeedManager.cs" />
+    <Compile Include="ActivityList.cs" />
+    <Compile Include="MarshaledActivity.cs" />
     <Compile Include="Settings.cs" />
     <Compile Include="SocketClient.cs" />
     <Compile Include="SocketServer.cs" />
@@ -205,6 +212,7 @@
   <ItemGroup>
     <Resource Include="Images\heriotwatt.png" />
     <Resource Include="Images\societies.png" />
+    <Resource Include="Images\askfree.png" />
     <Content Include="KinectInteraction170_32.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

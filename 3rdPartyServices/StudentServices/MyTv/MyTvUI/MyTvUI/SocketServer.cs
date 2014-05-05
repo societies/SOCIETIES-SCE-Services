@@ -90,17 +90,25 @@ namespace MyTvUI
 
             // Buffer for reading data
             byte[] bytes = new byte[1024];
-            string data;
+            string data = "";
 
             try
             {
                 // Get a stream object for reading and writing
                 stream = client.GetStream();
                 int i = stream.Read(bytes, 0, bytes.Length);
-                if (i > 0)
+                data = System.Text.Encoding.ASCII.GetString(bytes, 0, i);
+                while (i == 1024)
+                {
+                    i = stream.Read(bytes, 0, bytes.Length);
+                    Console.WriteLine(DateTime.Now + "\t" + String.Format("Reading data from stream", data));
+                    data = data +System.Text.Encoding.ASCII.GetString(bytes, 0, i);
+                }
+               // int i = stream.Read(bytes, 0, bytes.Length);
+                if (data.Length>0)
                 {
                     // Translate data bytes to a ASCII string.
-                    data = System.Text.Encoding.ASCII.GetString(bytes, 0, i);
+                    //data = System.Text.Encoding.ASCII.GetString(bytes, 0, i);
                     Console.WriteLine(DateTime.Now + "\t" +String.Format("SOCKET_SERVER: got new input: {0}", data));
 
                     if (data.IndexOf("START_MSG") > -1)
@@ -123,9 +131,16 @@ namespace MyTvUI
                             //close down
                             //window.Close();
                         }
+                        else if (command.Equals("ACTIVITY_FEED"))
+                        {
+                            String activityString = splitData[2];
+                            List<MarshaledActivity> activities = Newtonsoft.Json.JsonConvert.DeserializeObject<List<MarshaledActivity>>(activityString);
+                            stream.Write(okBytes, 0, okBytes.Length);
+                            this.window.updateActivities(activities);
+                        }
                         else
                         {
-                            Console.WriteLine(DateTime.Now + "\t" +"SOCKET_SERVER: Unknown command received from service client");
+                            Console.WriteLine(DateTime.Now + "\t" + "SOCKET_SERVER: Unknown command received from service client");
                             stream.Write(notOKBytes, 0, notOKBytes.Length);
                         }
                     }

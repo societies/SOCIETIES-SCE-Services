@@ -4,13 +4,15 @@
         "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
 
 <hibernate-mapping>
-    <class name="ac.hw.services.collabquiz.entities.UserScore"
-           table="UserScore">
+	<class name="ac.hw.services.collabquiz.entities.Cis" table="cis">
 
-        <id name="userJid" type="string" column="userJid" />
+		<id name="cisName" type="string" column="cisName" />
 
-        <property name="score" column="score"/>
-        
+		<property name="score" column="score" />
 
-    </class>
+		<property name="contributors" column="contributors" />
+
+
+
+	</class>
 </hibernate-mapping>

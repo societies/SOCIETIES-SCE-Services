@@ -24,7 +24,7 @@
 
             <k:KinectCircleButton Name="menuButton" Height="100" Width="139" Grid.Column="1" Label="Menu" HorizontalAlignment="Right" LabelPosition="Right" Click="menuButtonClick" Grid.ColumnSpan="2" Margin="10.2,0,198.8,0"/>
 
-            <k:KinectCircleButton x:Name="groupButton" Height="100" Grid.Column="2" Label="Group Menu" LabelPosition="Right" Click="groupButtonClick" Margin="0.4,0,148.6,0" Grid.ColumnSpan="2" Width="199"/>
+            <k:KinectCircleButton x:Name="groupButton" Height="100" Grid.Column="2" Label="CIS Menu" LabelPosition="Right" Click="groupButtonClick" Margin="0.4,0,148.6,0" Grid.ColumnSpan="2" Width="199"/>
             
             <k:KinectCircleButton x:Name="quitButton" Height="100" Width="129" Grid.Column="3" Label="Quit" HorizontalAlignment="Left" LabelPosition="Right" Click="exitButtonClick"/>
 

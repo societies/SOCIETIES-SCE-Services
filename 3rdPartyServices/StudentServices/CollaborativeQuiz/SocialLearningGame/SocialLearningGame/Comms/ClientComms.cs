@@ -15,7 +15,7 @@
  * 2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following
  *    disclaimer in the documentation and/or other materials provided with the distribution.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING,
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUT_ORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING,
  * BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT 
  * SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
  * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
@@ -50,15 +50,29 @@ namespace SocialLearningGame.Comms
         private int portalPort = 2114;
 
         //MESSAGE VARIABLES
+        private static String GET_USER = "GET_USER";
+        private static String NEXT_QUESTION = "NEXT_QUESTION";
+        private static String ANSWER_QUESTION = "ANSWER_QUESTION";
+        private static String GET_ALL_USERS = "GET_ALL_USERS";
+        private static String GET_ALL_CIS = "GET_ALL_CIS";
+        private static String GET_CATEGORIES = "GET_CATEGORIES";
+       // private static String GET_USER_INTERESTS = "GET_USER_INTERESTS";
+        private static String GET_CIS_NAMES = "GET_CIS_NAMES";
+        private static String GET_CIS = "GET_CIS";
+        private static String POST_ACTIVITY = "POST_ACTIVITY";
+
+        private static String NULL_REPLY = "NULL";
+        private static String TRUE_REPLY = "TRUE";
+
         private static String REQUEST_SERVERIP = "REQUEST_SERVER\n";
         private static String CURRENT_USER = "CURRENT_USER";
         private static String VIRGO_ENDPOINT_IPADDRESS = "VIRGO_ENDPOINT_IPADDRESS";
         private static String SERVICE_PORT = "SERVICE_PORT->Collaborative Quiz";
         private static String RETRIEVE_SCORES = "RETRIEVE_SCORES\n";
-        private static String RETRIEVE_CATEGORIES = "RETRIEVE_CATEGORIES\n";
+        
         private static String RETRIEVE_QUESTIONS = "RETRIEVE_QUESTIONS\n";
         private static String RETRIEVE_USER_HISTORY = "RETRIEVE_USER_HISTORY\n";
-        private static String REQUEST_USER_INTERESTS = "REQUEST_USER_INTERESTS\n";
+        
         private static String RETRIEVE_INVITED_PLAYERS = "RETRIEVE_INVITED_PLAYERS\n";
         private static String RETRIEVE_ALL_USERS = "RETRIEVE_ALL_USERS\n";
         private static String UPLOAD_PROGRESS = "UPLOAD_PROGRESS\n";
@@ -77,8 +91,7 @@ namespace SocialLearningGame.Comms
         private static String USER = "USER\n";
         private static String GROUP = "GROUP\n";
 
-        private static String NULL_REPLY = "NULL";
-        private static String TRUE_REPLY = "TRUE";
+        
 
         public ClientComms()
         {
@@ -277,59 +290,187 @@ namespace SocialLearningGame.Comms
 
         }
 
-        public List<UserScore> getAllUsers()
+       /* public List<String> getUserInterests(String userID)
         {
-            if (connectToServer(serverIP, serverPort))
+            if (connectToServer(clientIP, clientPort))
             {
-                server.Send(Encoding.ASCII.GetBytes(RETRIEVE_SCORES));
-                server.Send(Encoding.ASCII.GetBytes(userID + "\n"));
+                server.Send(Encoding.ASCII.GetBytes(GET_USER_INTERESTS + "\n" + userID + "\n"));
                 String reply = recieveMessage(); //if(reply.Equals("ERROR")) MainWindow.SwitchPage(new CommsError());
                 if (!reply.Equals(NULL_REPLY))
                 {
-                    List<UserScore> usersList = JsonConvert.DeserializeObject<List<UserScore>>(reply);
+                    List<String> interests = JsonConvert.DeserializeObject<List<String>>(reply);
+                    disconnectFromServer();
+                    return interests;
+                }
+                else
+                {
+                    disconnectFromServer();
+                }
+
+            }
+            return new List<String>();
+        }*/
+
+        public User getUser()
+        {
+            if (connectToServer(serverIP, serverPort))
+            {
+                Console.WriteLine(DateTime.Now + "\t" + "Connected To CollabQuizServer");
+                Console.WriteLine(DateTime.Now + "\t" + "SENDING " + GET_USER);
+                server.Send(Encoding.ASCII.GetBytes(GET_USER + "\n" + userID +"\n"));
+                String reply = recieveMessage(); //if(reply.Equals("ERROR")) MainWindow.SwitchPage(new CommsError());
+                if (!reply.Equals(NULL_REPLY))
+                {
+                    User user = JsonConvert.DeserializeObject<User>(reply);
+                    disconnectFromServer();
+                    return user;
+                }
+                else
+                {
+                    disconnectFromServer();
+                }
+            }
+            return null;
+        }
+
+        public Boolean answerQuestion(AnsweredQuestions question)
+        {
+            if (connectToServer(serverIP, serverPort))
+            {
+                String questionString = JsonConvert.SerializeObject(question);
+                server.Send(Encoding.ASCII.GetBytes(ANSWER_QUESTION + "\n" + questionString + "\n"));
+                String reply = recieveMessage();
+                if (reply.Equals(TRUE_REPLY))
+                {
+                    disconnectFromServer();
+                    return true;
+                }
+                else
+                {
+                    disconnectFromServer();
+                    return false;
+                }
+            }
+            return false;
+        }
+
+        public List<Category> getCategories()
+        {
+            if (connectToServer(serverIP, serverPort))
+            {
+                server.Send(Encoding.ASCII.GetBytes(GET_CATEGORIES + "\n" + userID+"\n"));
+                String reply = recieveMessage(); //if(reply.Equals("ERROR")) MainWindow.SwitchPage(new CommsError());
+                if (!reply.Equals(NULL_REPLY))
+                {
+                    List<Category> categories = JsonConvert.DeserializeObject<List<Category>>(reply);
+                    disconnectFromServer();
+                    return categories;
+                }
+                else
+                {
+                    disconnectFromServer();
+                }
+            }
+            return new List<Category>();
+        }
+
+        public Question getNextQuestion(String userID, String cisName, String category)
+        {
+            if (cisName == null)
+            {
+                cisName = NULL_REPLY;
+            }
+            if (category == null)
+            {
+                category = NULL_REPLY;
+            }
+            if (connectToServer(serverIP, serverPort))
+            {
+                server.Send(Encoding.ASCII.GetBytes(NEXT_QUESTION + "\n" + userID + "\n" + cisName + "\n" + category + "\n"));
+                String reply = recieveMessage(); //if(reply.Equals("ERROR")) MainWindow.SwitchPage(new CommsError());
+                if (!reply.Equals(NULL_REPLY))
+                {
+                    Question question = JsonConvert.DeserializeObject<Question>(reply);
+                    disconnectFromServer();
+                    return question;
+                }
+                else
+                {
+                    disconnectFromServer();
+                }
+            }
+            return null;
+        }
+
+        public void postActivity(String cisName, String correct)
+        {
+            if (connectToServer(clientIP, clientPort))
+            {
+                server.Send(Encoding.ASCII.GetBytes(POST_ACTIVITY + "\n" + cisName + "\n" + correct + "\n"));
+            }
+        }
+
+        public List<User> getAllUsers()
+        {
+            if (connectToServer(serverIP, serverPort))
+            {
+                server.Send(Encoding.ASCII.GetBytes(GET_ALL_USERS + "\n"));
+                String reply = recieveMessage();
+                if (!reply.Equals(NULL_REPLY))
+                {
+                    List<User> usersList = JsonConvert.DeserializeObject<List<User>>(reply);
                     disconnectFromServer();
                     return usersList;
                 }
                 else
                 {
                     disconnectFromServer();
-                    return new List<UserScore>();
+                }
+            }
+            return new List<User>();
+        }
+
+        public List<Cis> getAllCis()
+        {
+            if (connectToServer(serverIP, serverPort))
+            {
+                server.Send(Encoding.ASCII.GetBytes(GET_ALL_CIS + "\n"));
+                String reply = recieveMessage();
+                if (!reply.Equals(NULL_REPLY))
+                {
+                    List<Cis> cisList = JsonConvert.DeserializeObject<List<Cis>>(reply);
+                    disconnectFromServer();
+                    return cisList;
+                }
+                else
+                {
+                    disconnectFromServer();
+                }
+            }
+            return new List<Cis>();
+        }
+
+        public Cis getCis(String cisName)
+        {
+            if (connectToServer(serverIP, serverPort))
+            {
+                server.Send(Encoding.ASCII.GetBytes(GET_CIS + "\n" + cisName + "\n"));
+                String reply = recieveMessage();
+                if (!reply.Equals(NULL_REPLY))
+                {
+                    Cis cis = JsonConvert.DeserializeObject<Cis>(reply);
+                    disconnectFromServer();
+                    return cis;
+                }
+                else
+                {
+                    disconnectFromServer();
                 }
             }
             return null;
-            /* Console.WriteLine(DateTime.Now + "\t" +"TRYING TO SPEAK TO Server ON " + serverIP + " " + serverPort.ToString());
-             IPEndPoint ip = new IPEndPoint(IPAddress.Parse(serverIP), serverPort);
-             Socket server = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-             try
-             {
-                 server.Connect(ip);
-             }
-             catch (SocketException e)
-             {
-                 Console.WriteLine(DateTime.Now + "\t" +"SOCKET_CLIENT: Unable to connect to server.");
-                 Console.WriteLine(DateTime.Now + "\t" +e.ToString());
-                 return null;
-             }
-
-             //get current user
-             server.Send(Encoding.ASCII.GetBytes(RETRIEVE_SCORES));
-             server.Send(Encoding.ASCII.GetBytes(userID+"\n"));
-
-             Console.WriteLine(DateTime.Now + "\t" +"SENT TO SERVER: " + REQUEST_SERVERIP);
-             String reply = recieveMessage(server);
-             Console.WriteLine(DateTime.Now + "\t" +"Reply:" + reply + "!");
-             //NOW CHANGE THE USERS INTO A LIST OF USER OBJECTS
-             Console.WriteLine(DateTime.Now + "\t" +"Converting JSON to USER Objects!!!");
-             List<UserScore> usersList = new List<UserScore>();
-             if (!reply.Equals(NULL_REPLY) && !reply.Equals(EMPTY_REPLY))
-             {
-                 usersList = JsonConvert.DeserializeObject<List<UserScore>>(reply);
-             }
-             server.Close();
-             return usersList; */
         }
 
-        public List<Category> getCategories()
+      /*  public List<Category> getCategories()
         {
             if (connectToServer(serverIP, serverPort))
             {
@@ -349,7 +490,7 @@ namespace SocialLearningGame.Comms
             }
             return null;
 
-            /*
+            
             Console.WriteLine(DateTime.Now + "\t" +"TRYING TO SPEAK TO Server ON " + serverIP + " " + serverPort.ToString());
             IPEndPoint ip = new IPEndPoint(IPAddress.Parse(serverIP), serverPort);
             Socket server = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
@@ -383,8 +524,8 @@ namespace SocialLearningGame.Comms
 
             List<Category> c = JsonConvert.DeserializeObject<List<Category>>(reply);
             Console.WriteLine(DateTime.Now + "\t" +"C: " + c[0].ToString());
-            return c; */
-        }
+            return c; 
+        }*/
 
         public List<Question> getQuestions()
         {
@@ -503,6 +644,27 @@ namespace SocialLearningGame.Comms
             return q;*/
         }
 
+        public List<String> getCisNames()
+        {
+            if (connectToServer(clientIP, clientPort))
+            {
+                server.Send(Encoding.ASCII.GetBytes(GET_CIS_NAMES + "\n" ));
+                String reply = recieveMessage(); //if(reply.Equals("ERROR")) MainWindow.SwitchPage(new CommsError());
+                if (!reply.Equals(NULL_REPLY))
+                {
+                    List<String> cisNames = JsonConvert.DeserializeObject<List<String>>(reply);
+                    disconnectFromServer();
+                    return cisNames;
+                }
+                else
+                {
+                    disconnectFromServer();
+                    
+                }
+            }
+            return new List<String>();
+        }
+
         public List<String> getInvitedUsers(String groupID)
         {
             if (connectToServer(serverIP, serverPort))
@@ -561,11 +723,11 @@ namespace SocialLearningGame.Comms
               return players; */
         }
 
-        public List<String> getUserInterests()
+    /*    public List<String> getUserInterests()
         {
             if (connectToServer(clientIP, clientPort))
             {
-                server.Send(Encoding.ASCII.GetBytes(REQUEST_USER_INTERESTS));
+                server.Send(Encoding.ASCII.GetBytes(GET_USER_INTERESTS));
                 String reply = recieveMessage(); //if(reply.Equals("ERROR")) MainWindow.SwitchPage(new CommsError());
                 if (!reply.Equals(NULL_REPLY))
                 {
@@ -581,7 +743,7 @@ namespace SocialLearningGame.Comms
 
             }
             return null;
-            /*
+            
             Console.WriteLine(DateTime.Now + "\t" +"TRYING TO CLIENT TO Server ON " + clientIP + " " + clientPort.ToString());
             IPEndPoint ip = new IPEndPoint(IPAddress.Parse(clientIP), clientPort);
             Socket server = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
@@ -614,8 +776,8 @@ namespace SocialLearningGame.Comms
 
             List<String> userInterests = JsonConvert.DeserializeObject<List<String>>(reply);
             Console.WriteLine(DateTime.Now + "\t" +userInterests);
-            return userInterests; */
-        }
+            return userInterests; 
+        }*/
 
         //CHANGE TO RECEIVE ACK, SEND QUESTIONS USER HAS ANSWERED
         public Boolean sendProgress(Object user, UserAnsweredQ answeredQ)

@@ -1,0 +1,50 @@
+﻿<Page x:Class="SocialLearningGame.Pages.SelectCIS"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:k="http://schemas.microsoft.com/kinect/2013"
+      mc:Ignorable="d" 
+      d:DesignHeight="600" d:DesignWidth="1000"
+      Title="Select CIS" Height="600" Width="1000">
+    
+    <Grid Name="selectCISGrid">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="25*" />
+            <RowDefinition Height="10*" />
+            <RowDefinition Height="10*" />
+            <RowDefinition Height="10*" />
+            <RowDefinition Height="10*" />
+            <RowDefinition Height="10*" />
+            <RowDefinition Height="10*" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="40*" />
+            <ColumnDefinition Width="30*" />
+            <ColumnDefinition Width="20*" />
+        </Grid.ColumnDefinitions>
+
+        <!-- Current student's score and rank details -->
+        <!--  <TextBlock Canvas.Left="59" Canvas.Top="120" Height="44" Name="studentName" Text="You" Width="400" FontSize="28" MinWidth="50" MaxWidth="400" /> -->
+        <TextBlock Grid.Row="0" Grid.Column="0" Text="CIS" FontSize="32" />
+        <TextBlock Grid.Row="0" Grid.Column="1" FontSize="32" Text="View Contributors"  />
+        <TextBlock Grid.Row="0" Grid.Column="2" FontSize="32" Text="Play"  />
+
+
+        <!-- next and previous buttons -->
+        <k:KinectCircleButton x:Name="backButton" 
+                              Click="backButton_Click"
+                              Grid.Row="6" Grid.Column="2" Label="Back" LabelPosition="Right" Height="70" Margin="0.4,0,0,0" Visibility="Hidden">
+        </k:KinectCircleButton>
+        <!--<Controls:HoverButton x:Name="backButton" ImageSize="100" TimeInterval="1500" Height="56" Width="100" Canvas.Left="740" Canvas.Top="483" />-->
+
+        <k:KinectCircleButton x:Name="nextButton" 
+                              Click="nextButton_Click"
+                              Label="Next"
+                              Grid.Row="6" Grid.Column="1" LabelPosition="Right"  Grid.ColumnSpan="2" Height="70" Margin="0,0,250,0" Visibility="Hidden" >
+        </k:KinectCircleButton>
+        <!--<Controls:HoverButton x:Name="nextButton" HorizontalAlignment="Left" Grid.Column="1" ImageSize="100" VerticalAlignment="Top" TimeInterval="1500" Height="56" Width="84" Margin="112,496,0,0" Canvas.Left="777" Canvas.Top="-13" />-->
+    </Grid>
+
+</Page>
+<!-- list scores for all friends of current player -->

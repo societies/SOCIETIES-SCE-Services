@@ -7,7 +7,7 @@
       mc:Ignorable="d" 
       Background="{x:Null}"
       d:DesignHeight="600" d:DesignWidth="1000"
-      Title="Group Play">
+      Title="Community Play">
 
     <Page.Resources>
         <Style x:Key="labelStyle" TargetType="TextBlock">
@@ -34,12 +34,10 @@
 
     <Grid Name="groupGrid">
         <Grid.RowDefinitions>
-            <RowDefinition Height="20*" />
-            <RowDefinition Height="10*" />
-            <RowDefinition Height="20*" />
-            <RowDefinition Height="10*" />
-            <RowDefinition Height="10*" />
-            <RowDefinition Height="20*" />
+            <RowDefinition Height="33*" />
+            <RowDefinition Height="33*" />
+            <RowDefinition Height="33*" />
+
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="33*" />
@@ -49,26 +47,16 @@
         
         <TextBlock Name="groupText" Grid.Row="0" Grid.Column="1" FontSize="30" TextAlignment="Center" />
 
-        <TextBlock Text="Scoreboard" Grid.Row="4" Grid.Column="0" FontSize="28" TextAlignment="Center" />
+        <TextBlock Text="View Communities" Grid.Row="1" Grid.Column="0" FontSize="28" TextAlignment="Center" />
+        <k:KinectCircleButton x:Name="cisPlayButton" 
+                              Click="buttonClick" 
+                              Grid.Row="1" Grid.Column="0" />
+
+        <TextBlock Text="Scoreboard" Grid.Row="1" Grid.Column="2" FontSize="28" TextAlignment="Center" />
         <k:KinectCircleButton x:Name="scoreboardButton" 
                               Click="buttonClick" 
-                              Grid.Row="5" Grid.Column="0" />
+                              Grid.Row="1" Grid.Column="2" />
 
-            <TextBlock Text="Notfications" Grid.Row="4" Grid.Column="2" FontSize="28" TextAlignment="Center" />
-        <k:KinectCircleButton x:Name="notificationButton" 
-                              Click="buttonClick" 
-                              Grid.Row="5" Grid.Column="2" />
-
-        <Border Name="notificationCircle" CornerRadius="50"
-        Width="25"
-        Height="25"
-        Margin="243.6,55.4,65,52.4"
-        Background="Yellow"
-        BorderBrush="Black"
-                Visibility="Hidden"
-        BorderThickness="1" RenderTransformOrigin="2.916,16.228" Grid.Row="3" Grid.Column="2" Grid.RowSpan="2">
-            <TextBlock Name="notificationText" VerticalAlignment="Center" HorizontalAlignment="Center" />
-        </Border>
 
 
 

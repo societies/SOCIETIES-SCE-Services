@@ -27,11 +27,13 @@ public class CommsServerListener implements Runnable {
 	private int port;
 	private InetAddress address;
 	private ISocialLearningService socialApp;
+	private boolean running;
 
 	public CommsServerListener(ISocialLearningService socialApp)
 	{
 		init();
 		this.socialApp = socialApp;
+		this.running=true;
 	}
 
 	public void run() {
@@ -49,13 +51,23 @@ public class CommsServerListener implements Runnable {
 			log.debug("Error when trying to get port and address!");
 		}
 	}
+	
+	public void kill() {
+		this.running = false;
+		try {
+			this.serverSocket.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 
 	//TODO issue new thread for each acception
 	public void listen() {
 		try {
 			serverSocket = new ServerSocket(port);
 			log.debug("Socket started on port:" + this.address.toString()+":"+this.port);
-			while(true)
+			while(this.running)
 			{			
 				Socket clientSocket = serverSocket.accept();
 				log.debug("accepted new client");
@@ -63,6 +75,12 @@ public class CommsServerListener implements Runnable {
 			}
 
 		} catch (Exception e) {
+			try {
+				serverSocket.close();
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
 			log.debug("Error: " + e.toString());
 		}
 

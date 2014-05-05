@@ -35,7 +35,7 @@ namespace SocialLearningGame.Logic
 {
     public static class GameLogic
     {
-      //log.  private static log4net.ILog log = log4net.LogManager.GetLogger(typeof(GameLogic));
+        //log.  private static log4net.ILog log = log4net.LogManager.GetLogger(typeof(GameLogic));
 
         public static readonly AbstractPose[] PossiblePoses = { 
                                                                    new Pose1(), new Pose2(), 
@@ -69,15 +69,19 @@ namespace SocialLearningGame.Logic
                 _clientComms = new ClientComms();
                 if (!_clientComms.getSessionParameters())
                 {
-                    Console.WriteLine(DateTime.Now + "\t" +"Setting game error here 1");
+                    Console.WriteLine(DateTime.Now + "\t" + "Setting game error here 1");
                     _userSession.gameStage = GameStage.SetupError;
                     return false;
                 }
+
                 userJID = _clientComms.getUserID();
+                
                 //SPEAKING TO CLIENT
                 _clientComms.getSocietiesServer();
-                Console.WriteLine(DateTime.Now + "\t" +"Recieved server IP & Port. Can now start to retrieve data...");
+                Console.WriteLine(DateTime.Now + "\t" + "Recieved server IP & Port. Can now start to retrieve data...");
                 connectedToSocieties = true;
+
+
                 return true;
             }
             return true;
@@ -85,7 +89,7 @@ namespace SocialLearningGame.Logic
             //NOW HAVE CLIENT AND SERVER IP STORED
         }
 
-        private static void setUserNames()
+      /*  private static void setUserNames()
         {
             int counter = 0;
             while (counter < _userSession.allUsers.Count())
@@ -100,17 +104,17 @@ namespace SocialLearningGame.Logic
         {
             switch (dataType)
             {
-                case DataType.ALL_USERS :
+                case DataType.ALL_USERS:
                     _userSession.allUsers = _clientComms.getAllUsers();
                     setUserNames();
                     break;
-                case DataType.ALL_CATEGORIES :
+                case DataType.ALL_CATEGORIES:
                     _userSession.allCategories = _clientComms.getCategories();
                     break;
                 case DataType.ALL_QUESTIONS:
                     _userSession.allQuestions = _clientComms.getQuestions();
                     break;
-                case DataType.ALL_GROUPS :
+                case DataType.ALL_GROUPS:
                     _userSession.allGroups = _clientComms.getGroups();
                     break;
                 case DataType.ALL_GROUP_PLAYERS:
@@ -142,7 +146,7 @@ namespace SocialLearningGame.Logic
         {
             switch (dataType)
             {
-                case DataType.POST_PROGRESS :
+                case DataType.POST_PROGRESS:
                     if (_userSession.player == GameStage.USER)
                     {
                         _clientComms.sendProgress(_userSession.currentUser, _userSession.answeredQuestion);
@@ -174,27 +178,27 @@ namespace SocialLearningGame.Logic
                     }
                     break;
                 case DataType.INVITE_PLAYER:
-                    if (!_clientComms.inviteUserToGroup(_userSession.currentUser.userJid, (String) arg, _userSession.currentGroup.groupName))
+                    if (!_clientComms.inviteUserToGroup(_userSession.currentUser.userJid, (String)arg, _userSession.currentGroup.groupName))
                     {
                         MainWindow.SwitchPage(new CommsError());
                     }
                     break;
                 case DataType.ACCEPT_NOTIFICATION:
-                    if (!_clientComms.addUserToGroup((String) arg, _userSession.currentUser.userJid))
+                    if (!_clientComms.addUserToGroup((String)arg, _userSession.currentUser.userJid))
                     {
                         MainWindow.SwitchPage(new CommsError());
                     }
                     break;
                 case DataType.DELETE_NOTIFICATION:
-                    if (!_clientComms.deleteNotifications((PendingJoins) arg))
+                    if (!_clientComms.deleteNotifications((PendingJoins)arg))
                     {
                         MainWindow.SwitchPage(new CommsError());
                     }
                     break;
 
-                  
+
             }
-        }
+        } */
 
         public static UserSession newUserSession()
         {
@@ -204,125 +208,134 @@ namespace SocialLearningGame.Logic
             //IF FAILURE - DO NOT CONTINUE
             if (!connectedToSocieties)
             {
-                if (!connectToSocieties())
-                {
-                    return _userSession;
-                }
+                return _userSession;
             }
             //CONNECTED TO SOCIETIES, NOW WE CAN CONTINUE
 
-            //GET ALL USERS
-            Console.WriteLine(DateTime.Now + "\t" +"Getting all users");
-            getRemoteData(DataType.ALL_USERS);
-            if (_userSession.allUsers == null)
+            //JUST GET CURRENT USER
+            Console.WriteLine(DateTime.Now + "\t" + "Getting User Data From Server");
+            User user = _clientComms.getUser();
+            if (user == null)
             {
                 _userSession.gameStage = GameStage.SetupError;
             }
-            //SET THIS USER IN USER SESSION
-            foreach (UserScore user in _userSession.allUsers)
+            else
             {
-                if (user.userJid == userJID)
-                {
-                    _userSession.currentUser = user;
-                }
+                _userSession.user = user;
             }
+            /* //GET ALL USERS
+             Console.WriteLine(DateTime.Now + "\t" +"Getting all users");
+             getRemoteData(DataType.ALL_USERS);
+             if (_userSession.allUsers == null)
+             {
+                 _userSession.gameStage = GameStage.SetupError;
+             }
+             //SET THIS USER IN USER SESSION
+             foreach (UserScore user in _userSession.allUsers)
+             {
+                 if (user.userJid == userJID)
+                 {
+                     _userSession.currentUser = user;
+                 }
+             }
 
-            //GET ALL CATEGORIES
-            Console.WriteLine(DateTime.Now + "\t" +"Getting all categories");
-            getRemoteData(DataType.ALL_CATEGORIES);
-            if (_userSession.allCategories == null)
-            {
-                Console.WriteLine(DateTime.Now + "\t" +"SET UP ERROR WITH CATEGORIES");
-                _userSession.gameStage = GameStage.SetupError;
-            }
+             //GET ALL CATEGORIES
+             Console.WriteLine(DateTime.Now + "\t" +"Getting all categories");
+             getRemoteData(DataType.ALL_CATEGORIES);
+             if (_userSession.allCategories == null)
+             {
+                 Console.WriteLine(DateTime.Now + "\t" +"SET UP ERROR WITH CATEGORIES");
+                 _userSession.gameStage = GameStage.SetupError;
+             }
 
-            //GET ALL QUESTIONS
-            Console.WriteLine(DateTime.Now + "\t" +"Getting all questions");
-            getRemoteData(DataType.ALL_QUESTIONS);
-            if (_userSession.allQuestions == null)
-            {
-                Console.WriteLine(DateTime.Now + "\t" +"SET UP ERROR WITH QUESTIONS");
-                _userSession.gameStage = GameStage.SetupError;
-            }
+             //GET ALL QUESTIONS
+             Console.WriteLine(DateTime.Now + "\t" +"Getting all questions");
+             getRemoteData(DataType.ALL_QUESTIONS);
+             if (_userSession.allQuestions == null)
+             {
+                 Console.WriteLine(DateTime.Now + "\t" +"SET UP ERROR WITH QUESTIONS");
+                 _userSession.gameStage = GameStage.SetupError;
+             }
 
-            //GET ALL GROUPS
-            Console.WriteLine(DateTime.Now + "\t" +"Getting all groups");
-            getRemoteData(DataType.ALL_GROUPS);
-            if (_userSession.allGroups == null)
-            {
-                Console.WriteLine(DateTime.Now + "\t" +"SET UP ERROR WITH ALL GROUP");
-                _userSession.gameStage = GameStage.SetupError;
-            }
+             //GET ALL GROUPS
+             Console.WriteLine(DateTime.Now + "\t" +"Getting all groups");
+             getRemoteData(DataType.ALL_GROUPS);
+             if (_userSession.allGroups == null)
+             {
+                 Console.WriteLine(DateTime.Now + "\t" +"SET UP ERROR WITH ALL GROUP");
+                 _userSession.gameStage = GameStage.SetupError;
+             }
 
-            //GET USERS GROUP
-            Console.WriteLine(DateTime.Now + "\t" +"Getting users group");
-            getRemoteData(DataType.CURRENT_GROUP);
-            if (_userSession.currentGroup == null)
-            {
-                Console.WriteLine(DateTime.Now + "\t" +"SET UP ERROR WITH USERS GROUP");
-                _userSession.gameStage = GameStage.SetupError;
-            }
-            //EMPTY GROUP IS RETURNED IF NULL
-            if (_userSession.currentGroup.groupName == null)
-            {
-                _userSession.currentGroup = null;
-            }
+             //GET USERS GROUP
+             Console.WriteLine(DateTime.Now + "\t" +"Getting users group");
+             getRemoteData(DataType.CURRENT_GROUP);
+             if (_userSession.currentGroup == null)
+             {
+                 Console.WriteLine(DateTime.Now + "\t" +"SET UP ERROR WITH USERS GROUP");
+                 _userSession.gameStage = GameStage.SetupError;
+             }
+             //EMPTY GROUP IS RETURNED IF NULL
+             if (_userSession.currentGroup.groupName == null)
+             {
+                 _userSession.currentGroup = null;
+             }
             
            
             
-            //GET PREVIOUS ANSWERS
-            //GET USER ANSWERS
-            Console.WriteLine(DateTime.Now + "\t" +"Getting all user answered questions");
-            getRemoteData(DataType.ALL_USER_ANSWERED);
-            if (_userSession.userAnsweredQuestions == null)
-            {
-                _userSession.gameStage = GameStage.SetupError;
-            }
-            //IF USER IS IN GROUP, GET GROUP ANSWERS, AND GROUP PLAYERS
-            if (_userSession.currentGroup != null)
-            {
-                Console.WriteLine(DateTime.Now + "\t" +"Getting all group answered questions");
-                getRemoteData(DataType.ALL_GROUP_ANSWERED);
-                if (_userSession.groupAnsweredQuestions == null)
-                {
-                    Console.WriteLine(DateTime.Now + "\t" +"SET UP ERROR WITH GROUP ANSWERS");
-                    _userSession.gameStage = GameStage.SetupError;
-                }
-                Console.WriteLine(DateTime.Now + "\t" +"Getting all group players");
-                getRemoteData(DataType.ALL_GROUP_PLAYERS);
-                if (_userSession.allGroupPlayers== null)
-                {
-                    Console.WriteLine(DateTime.Now + "\t" +"SET UP ERROR WITH GROUP PLAYERS");
-                    _userSession.gameStage = GameStage.SetupError;
-                }
-            }
+             //GET PREVIOUS ANSWERS
+             //GET USER ANSWERS
+             Console.WriteLine(DateTime.Now + "\t" +"Getting all user answered questions");
+             getRemoteData(DataType.ALL_USER_ANSWERED);
+             if (_userSession.userAnsweredQuestions == null)
+             {
+                 _userSession.gameStage = GameStage.SetupError;
+             }
+             //IF USER IS IN GROUP, GET GROUP ANSWERS, AND GROUP PLAYERS
+             if (_userSession.currentGroup != null)
+             {
+                 Console.WriteLine(DateTime.Now + "\t" +"Getting all group answered questions");
+                 getRemoteData(DataType.ALL_GROUP_ANSWERED);
+                 if (_userSession.groupAnsweredQuestions == null)
+                 {
+                     Console.WriteLine(DateTime.Now + "\t" +"SET UP ERROR WITH GROUP ANSWERS");
+                     _userSession.gameStage = GameStage.SetupError;
+                 }
+                 Console.WriteLine(DateTime.Now + "\t" +"Getting all group players");
+                 getRemoteData(DataType.ALL_GROUP_PLAYERS);
+                 if (_userSession.allGroupPlayers== null)
+                 {
+                     Console.WriteLine(DateTime.Now + "\t" +"SET UP ERROR WITH GROUP PLAYERS");
+                     _userSession.gameStage = GameStage.SetupError;
+                 }
+             }
 
-            //GET NOTIFICATIONS
-            Console.WriteLine(DateTime.Now + "\t" +"Getting all notifications");
-            getRemoteData(DataType.ALL_NOTIFICATIONS);
-            if (_userSession.allNotifications == null)
-            {
-                Console.WriteLine(DateTime.Now + "\t" +"SET UP ERROR WITH NOTIFICATIONS");
-                _userSession.gameStage = GameStage.SetupError;
-            }
+             //GET NOTIFICATIONS
+             Console.WriteLine(DateTime.Now + "\t" +"Getting all notifications");
+             getRemoteData(DataType.ALL_NOTIFICATIONS);
+             if (_userSession.allNotifications == null)
+             {
+                 Console.WriteLine(DateTime.Now + "\t" +"SET UP ERROR WITH NOTIFICATIONS");
+                 _userSession.gameStage = GameStage.SetupError;
+             }
             
-            //GET USER INTERESTS
-            Console.WriteLine(DateTime.Now + "\t" +"Getting all user interests");
-            getRemoteData(DataType.USER_INTERESTS);
-            if (_userSession.userInterests == null)
-            {
-                Console.WriteLine(DateTime.Now + "\t" +"SET UP ERROR WITH USERS INTERESTS");
-                _userSession.gameStage = GameStage.SetupError;
-            }
+             //GET USER INTERESTS
+             Console.WriteLine(DateTime.Now + "\t" +"Getting all user interests");
+             getRemoteData(DataType.USER_INTERESTS);
+             if (_userSession.userInterests == null)
+             {
+                 Console.WriteLine(DateTime.Now + "\t" +"SET UP ERROR WITH USERS INTERESTS");
+                 _userSession.gameStage = GameStage.SetupError;
+             }
 
-            if (_userSession.gameStage == GameStage.InProgress)
-            {
-                _userSession.gameStage = GameStage.ReadyToStart;
-            }
+             if (_userSession.gameStage == GameStage.InProgress)
+             {
+                 _userSession.gameStage = GameStage.ReadyToStart;
+             }
 
-            _userSession.player = GameStage.USER;
-
+             _userSession.player = GameStage.USER;
+             */
             return _userSession;
+
         }
 
 
@@ -331,29 +344,31 @@ namespace SocialLearningGame.Logic
         {
 
             _userSession.gameStage = GameStage.InProgress;
+            Console.WriteLine(DateTime.Now + "\t" + "Starting new game in game logic");
 
-            if (_userSession.player == GameStage.USER)
-            {
-                //SET UP QUESTIONS FOR USER
+            /*  if (_userSession.player == GameStage.USER)
+              {
+                  //SET UP QUESTIONS FOR USER
 
-                //REMOVE PREVIOUSLY ANSWERED QUESTIONS
-                _userSession.availableUserQuestions = new List<Question>(_userSession.allQuestions);
-                _userSession.availableUserQuestions.RemoveAll(q1 => _userSession.userAnsweredQuestions.Any(q2 => q1.questionID == q2.questionID));
+                  //REMOVE PREVIOUSLY ANSWERED QUESTIONS
+                  _userSession.availableUserQuestions = new List<Question>(_userSession.allQuestions);
+                  _userSession.availableUserQuestions.RemoveAll(q1 => _userSession.userAnsweredQuestions.Any(q2 => q1.questionID == q2.questionID));
 
-                //REMOVE SO ONLY REQUESTED CATEGORY REMAIN
-                if (userCategory != null)
-                {
-                    _userSession.availableUserQuestions.RemoveAll(q1 => q1.categoryID != userCategory.categoryID);
-                }
-            }
-            else if (_userSession.player == GameStage.GROUP)
-            {
-                //SET UP QUESTIONS FOR GROUP
-                _userSession.availableGroupQuestions = new List<Question>(_userSession.allQuestions);
-                _userSession.availableGroupQuestions.RemoveAll(q1 => _userSession.groupAnsweredQuestions.Any(q2 => q1.questionID == q2.questionID));
-            }
+                  //REMOVE SO ONLY REQUESTED CATEGORY REMAIN
+                  if (userCategory != null)
+                  {
+                      _userSession.availableUserQuestions.RemoveAll(q1 => q1.categoryID != userCategory.categoryID);
+                  }
+              }
+              else if (_userSession.player == GameStage.GROUP)
+              {
+                  //SET UP QUESTIONS FOR GROUP
+                  _userSession.availableGroupQuestions = new List<Question>(_userSession.allQuestions);
+                  Console.WriteLine(DateTime.Now + "\t" + "Removing previously answered questions");
+                  _userSession.availableGroupQuestions.RemoveAll(q1 => _userSession.groupAnsweredQuestions.Any(q2 => q1.questionID == q2.questionID));
+              } */
 
-            _userSession.questionRound = new QuestionRound();
+            _userSession.quizRound = new QuestionRound();
 
 
             _userSession.gameStage = GameStage.ReadyToStart;
@@ -361,7 +376,7 @@ namespace SocialLearningGame.Logic
         }
 
 
-        public static void getGroupInformation()
+    /*    public static void getGroupInformation()
         {
             //GET USERS GROUP
             getRemoteData(DataType.CURRENT_GROUP);
@@ -394,22 +409,78 @@ namespace SocialLearningGame.Logic
             {
                 _userSession.gameStage = GameStage.SetupError;
             }
-        }
-  
-        //GET THE NEXT QUESTION ROUND
-        public static void NextQuestion()
+        }*/
+
+        public static List<Category> getCategories()
         {
-            _userSession.questionRound.Question = PickRandomQuestion();
-            _userSession.questionRound.RoundNumber++;
-            _userSession.questionRound.RequiredGrammar = PickRandomGrammar();
-            _userSession.questionRound.RequiredPose = PickRandomPose();
-            _userSession.questionRound.AnswerMethod = PickRandomAnswerMethod();
+            return _clientComms.getCategories();
+        }
+
+       // public static List<String> getUserInterests()
+        //{
+         //   return _clientComms.getUserInterests(_userSession.user.userJid);
+        //}
+
+        public static List<String> getCisNames() {
+            return _clientComms.getCisNames();
+        }
+
+        public static List<User> getAllUsers()
+        {
+            return _clientComms.getAllUsers();
+        }
+
+        public static List<Cis> getAllCis()
+        {
+            return _clientComms.getAllCis();
+        }
+
+        public static void postActivity(AnsweredQuestions q)
+        {
+            String correct = "FALSE";
+            if(q.answeredCorrect) {
+                correct = "TRUE";
+            }
+
+            _clientComms.postActivity(q.cisName, correct);
+        }
+
+        public static Cis getCis(String cisName)
+        {
+            return _clientComms.getCis(cisName);
+        }
+
+        public static Boolean AnswerQuestion(AnsweredQuestions question)
+        {
+           return _clientComms.answerQuestion(question);
+        }
+
+        //GET THE NEXT QUESTION ROUND
+        public static void NextQuestion(Category category)
+        {
+            String userJid = _userSession.user.userJid;
+            String cisName = null;
+            if(_userSession.currentPlayer == GameStage.CIS) {
+                cisName = _userSession.currentCis.cisName;
+            }
+            String cat = null;
+            if (category != null)
+            {
+                cat = category.categoryID.ToString();
+            }
+            Question question = _clientComms.getNextQuestion(userJid, cisName, cat);
+            _userSession.quizRound.Question = question;
+            _userSession.quizRound.RoundNumber++;
+            _userSession.quizRound.RequiredGrammar = PickRandomGrammar();
+            _userSession.quizRound.RequiredPose = PickRandomPose();
+            _userSession.quizRound.AnswerMethod = PickRandomAnswerMethod();
+            
         }
 
 
-            
 
-  
+
+
 
         private static AnswerMethod PickRandomAnswerMethod()
         {
@@ -428,7 +499,7 @@ namespace SocialLearningGame.Logic
             return (Grammar)values.GetValue(random.Next(values.Length));
         }
 
-        private static Question PickRandomQuestion()
+       /* private static Question PickRandomQuestion()
         {
             if (_userSession.player == GameStage.USER)
             {
@@ -444,7 +515,7 @@ namespace SocialLearningGame.Logic
             }
             else if (_userSession.player == GameStage.GROUP)
             {
-                Console.WriteLine(DateTime.Now + "\t" +"In group questions");
+                Console.WriteLine(DateTime.Now + "\t" + "In group questions");
                 //CHECK IF QUESTIONS ARE AVAILABLE
                 if (_userSession.availableGroupQuestions.Count() == 0)
                 {
@@ -456,7 +527,7 @@ namespace SocialLearningGame.Logic
                 return _userSession.availableGroupQuestions[random.Next(_userSession.availableGroupQuestions.Count())];
             }
             return null;
-        }
+        } */
 
 
     }

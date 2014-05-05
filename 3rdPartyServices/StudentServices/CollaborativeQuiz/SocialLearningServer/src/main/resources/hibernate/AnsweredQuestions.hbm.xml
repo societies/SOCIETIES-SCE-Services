@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+        "-//Hibernate/Hibernate Mapping DTD//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping>
+	<class name="ac.hw.services.collabquiz.entities.AnsweredQuestions"
+		table="answeredQuestions">
+		
+	    <id name="answeredQID" type="int" column="answered_q_id">
+            <generator class="native"/>
+        </id>
+
+		<property name="userID" column="userID" />
+		
+		<property name="cisName" column="cisName" />
+
+		<property name="questionID" column="question_id"  />
+
+		<property name="answeredCorrect" column="answeredCorrect" />
+
+	</class>
+</hibernate-mapping>

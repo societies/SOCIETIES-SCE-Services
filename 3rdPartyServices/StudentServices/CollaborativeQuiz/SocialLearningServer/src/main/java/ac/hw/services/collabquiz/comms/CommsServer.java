@@ -73,8 +73,7 @@ public class CommsServer implements IFeatureServer {
 
 	@Override
 	public void receiveMessage(Stanza stanza, Object payload) {
-		log.debug("I have receieved a message:" + (String) payload);
-		
+
 	}
 
 	@Override

@@ -24,7 +24,9 @@
  */
 package ac.hw.services.socialLearning.app;
 
-import org.eclipse.jetty.util.log.Log;
+import org.societies.api.activity.IActivity;
+import org.societies.api.activity.IActivityFeed;
+import org.societies.api.activity.IActivityFeedCallback;
 import org.societies.api.context.CtxException;
 import org.societies.api.context.model.CtxIdentifier;
 
@@ -39,8 +41,11 @@ import java.util.concurrent.ExecutionException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.annotation.PreDestroy;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.societies.api.cis.management.ICis;
 import org.societies.api.cis.management.ICisManager;
 import org.societies.api.comm.xmpp.interfaces.ICommManager;
 import org.societies.api.context.broker.ICtxBroker;
@@ -65,11 +70,15 @@ import org.societies.api.osgi.event.EventListener;
 import org.societies.api.osgi.event.EventTypes;
 import org.societies.api.osgi.event.IEventMgr;
 import org.societies.api.osgi.event.InternalEvent;
+import org.societies.api.schema.activity.MarshaledActivity;
+import org.societies.api.schema.activityfeed.MarshaledActivityFeed;
+import org.societies.api.schema.cis.community.Community;
 import org.societies.api.schema.servicelifecycle.model.ServiceResourceIdentifier;
 import org.societies.api.services.IServices;
 import org.societies.api.services.ServiceMgmtEvent;
 import org.societies.api.services.ServiceMgmtEventType;
 
+import weka.classifiers.bayes.net.search.ci.CISearchAlgorithm;
 import ac.hw.services.socialLearning.api.ISocialLearningService;
 import ac.hw.services.socialLearning.app.comms.CommsServerListener;
 import ac.hw.services.socialLearning.app.comms.ISocialLearningServer;
@@ -88,6 +97,8 @@ public class SocialLearningService extends EventListener implements ISocialLearn
 	private IEventMgr evMgr;
 	private ICommManager commMgr;
 	private IIdentityManager idMgr;
+
+	private ICisManager cisManager;
 
 
 	private IIdentity userIdentity;
@@ -114,12 +125,18 @@ public class SocialLearningService extends EventListener implements ISocialLearn
 
 	private List<String> interests;
 
+	private List<String> cisNames;
 
 	public void Init(){
+
+
 		//FIRST REGISTER FOR SERVICE EVENTS
 		this.registerForServiceEvents();
 		//THEN REGISTER WITH IDISPLAYPORTAL
 		this.registerForDisplayEvents();
+
+		//REGISTER FOR CIS EVENTS
+		//this.registerForCisEvents();
 
 		//SET UP SOCKET TO LISTEN FROM GUI (C#)
 		this.commsServerListener = new CommsServerListener(this);
@@ -152,79 +169,149 @@ public class SocialLearningService extends EventListener implements ISocialLearn
 		}
 		try {
 
-		this.myServiceExeURL = new URL("http://www2.macs.hw.ac.uk/~sww2/societies/SocialLearningGame.exe");
-		this.myServiceName = "Collaborative Quiz";
-		this.displayDriverService.registerDisplayableService(this, myServiceName, myServiceExeURL, listenerPort, false);
-		logging.debug("Registered as a displayable service");
-	} catch (MalformedURLException e) {
-		// TODO Auto-generated catch block
-		e.printStackTrace();
+			this.myServiceExeURL = new URL("http://www2.macs.hw.ac.uk/~sww2/societies/SocialLearningGame.exe");
+			this.myServiceName = "Collaborative Quiz";
+			this.displayDriverService.registerDisplayableService(this, myServiceName, myServiceExeURL, listenerPort, false);
+			logging.debug("Registered as a displayable service");
+		} catch (MalformedURLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+	}
+	
+	public void tearDown() {
+		logging.debug("TearDown");
+		this.unregisterForServiceEvents();
+		this.unregisterForDisplayEvents();
+		this.commsServerListener.kill();
 	}
 
-}
+	@Override
+	public void postActivity(String cisName, String correct) {
+		String myJID = this.commMgr.getIdManager().getThisNetworkNode().getBareJid();
+		String activityText = cisName + " has answered a new question ";//question on Collaborative Quiz has been answered ";
+		if(correct.equals("TRUE")) {
+			activityText = activityText.concat("correctly!");
+		} else {
+			activityText = activityText.concat("incorrectly!");
+		}
+		
+		ICis theCIS = null;
+		for(ICis cis : this.cisManager.getCisList()) {
+			if(cis.getName().equals(cisName)) {
+				theCIS = cis;
+				break;
+			}
+		}
+		
+		if(theCIS!=null) {
+			IActivityFeed feed = theCIS.getActivityFeed();
+			IActivity activity = feed.getEmptyIActivity();
+			activity.setActor(myJID);
+			activity.setObject("Collaborative Quiz");
+			activity.setVerb(activityText);
+			feed.addActivity(activity, new ActivityCallback());
+		}
+		
+	}
+	
+	class ActivityCallback implements IActivityFeedCallback {
 
+		@Override
+		public void receiveResult(MarshaledActivityFeed arg0) {
+			logging.debug("I have been called (callback)");
+			
+		}
+		
+	}
 
+	@Override
+	public List<String> getCisNames() {
+		List<ICis> cisList = this.cisManager.getCisList();
+		List<String> cisNames = new ArrayList<String>();
+		for(ICis cis : cisList) {
+			cisNames.add(cis.getName());
+		}
+		return cisNames;
+	}
 
-/*
- * Register for events from SLM so I can get my service parameters and finish initialising
- */
-private void registerForServiceEvents(){
-	String eventFilter = "(&" + 
-			"(" + CSSEventConstants.EVENT_NAME + "="+ServiceMgmtEventType.SERVICE_STARTED+")" +
-			"(" + CSSEventConstants.EVENT_SOURCE + "=org/societies/servicelifecycle)" +
-			")";
-	this.evMgr.subscribeInternalEvent(this, new String[]{EventTypes.SERVICE_LIFECYCLE_EVENT}, eventFilter);
-	this.logging.debug("Subscribed to "+EventTypes.SERVICE_LIFECYCLE_EVENT+" events");
-}
+	/*
+	 * Register for events from SLM so I can get my service parameters and finish initialising
+	 */
+	private void registerForServiceEvents(){
+		String eventFilter = "(&" + 
+				"(" + CSSEventConstants.EVENT_NAME + "="+ServiceMgmtEventType.SERVICE_STARTED+")" +
+				"(" + CSSEventConstants.EVENT_SOURCE + "=org/societies/servicelifecycle)" +
+				")";
+		this.evMgr.subscribeInternalEvent(this, new String[]{EventTypes.SERVICE_LIFECYCLE_EVENT}, eventFilter);
+		this.logging.debug("Subscribed to "+EventTypes.SERVICE_LIFECYCLE_EVENT+" events");
+	}
 
-private void unregisterForServiceEvents()
-{
-	String eventFilter = "(&" + 
-			"(" + CSSEventConstants.EVENT_NAME + "="+ServiceMgmtEventType.NEW_SERVICE+")" +
-			"(" + CSSEventConstants.EVENT_SOURCE + "=org/societies/servicelifecycle)" +
-			")";
+	private void unregisterForServiceEvents() 
+	{
+		String eventFilter = "(&" + 
+				"(" + CSSEventConstants.EVENT_NAME + "="+ServiceMgmtEventType.NEW_SERVICE+")" +
+				"(" + CSSEventConstants.EVENT_SOURCE + "=org/societies/servicelifecycle)" +
+				")";
 
-	this.evMgr.unSubscribeInternalEvent(this, new String[]{EventTypes.SERVICE_LIFECYCLE_EVENT}, eventFilter);
-	//this.evMgr.subscribeInternalEvent(this, new String[]{EventTypes.SERVICE_LIFECYCLE_EVENT}, eventFilter);
-	this.logging.debug("Unsubscribed from "+EventTypes.SERVICE_LIFECYCLE_EVENT+" events");
-}
+		this.evMgr.unSubscribeInternalEvent(this, new String[]{EventTypes.SERVICE_LIFECYCLE_EVENT}, eventFilter);
+		//this.evMgr.subscribeInternalEvent(this, new String[]{EventTypes.SERVICE_LIFECYCLE_EVENT}, eventFilter);
+		this.logging.debug("Unsubscribed from "+EventTypes.SERVICE_LIFECYCLE_EVENT+" events");
+	}
 
-/*
- * Register for display events
- */
-private void registerForDisplayEvents() {
-	String eventFilter = "(&" + 
-			"(" + CSSEventConstants.EVENT_NAME + "=displayUpdate)" +
-			"(" + CSSEventConstants.EVENT_SOURCE + "=org/societies/css/device)" +
-			")";
-	this.evMgr.subscribeInternalEvent(this, new String[]{EventTypes.DISPLAY_EVENT}, eventFilter);
-	this.logging.debug("Subscribed to "+EventTypes.DISPLAY_EVENT+" events");
+	public void registerForCisEvents() {
+		this.evMgr.subscribeInternalEvent(this, new String[]{EventTypes.CIS_SUBS, EventTypes.CIS_UNSUBS}, null);
+	}
 
-}
+	/*
+	 * Register for display events
+	 */
+	private void registerForDisplayEvents() {
+		String eventFilter = "(&" + 
+				"(" + CSSEventConstants.EVENT_NAME + "=displayUpdate)" +
+				"(" + CSSEventConstants.EVENT_SOURCE + "=org/societies/css/device)" +
+				")";
+		this.evMgr.subscribeInternalEvent(this, new String[]{EventTypes.DISPLAY_EVENT}, eventFilter);
+		this.logging.debug("Subscribed to "+EventTypes.DISPLAY_EVENT+" events");
 
-@Override
-public void handleInternalEvent(InternalEvent event) {
-	logging.debug("Received internal event: "+event.geteventName());
+	}
+	
+	private void unregisterForDisplayEvents() {
+		String eventFilter = "(&" + 
+				"(" + CSSEventConstants.EVENT_NAME + "=displayUpdate)" +
+				"(" + CSSEventConstants.EVENT_SOURCE + "=org/societies/css/device)" +
+				")";
+		this.evMgr.unSubscribeInternalEvent(this, new String[]{EventTypes.DISPLAY_EVENT}, eventFilter);
+		this.logging.debug("Unsubscribed to "+EventTypes.DISPLAY_EVENT+" events");
+
+	}
+
+	@Override
+	public void handleInternalEvent(InternalEvent event) {
+		logging.debug("Received internal event: "+event.geteventName());
 
 		if(event.geteventName().equalsIgnoreCase("SERVICE_STARTED")){
-	//logging.debug("Received SLM event");
-	ServiceMgmtEvent slmEvent = (ServiceMgmtEvent) event.geteventInfo();
-	logging.debug("EventBundle: " + slmEvent.getBundleSymbolName());
-	if (slmEvent.getBundleSymbolName().equalsIgnoreCase("ac.hw.services.SocialLearningApp")){
-		this.logging.debug("Received SLM event for my bundle");
-		if (slmEvent.getEventType().equals(ServiceMgmtEventType.SERVICE_STARTED)){
+			//logging.debug("Received SLM event");
+			ServiceMgmtEvent slmEvent = (ServiceMgmtEvent) event.geteventInfo();
+			logging.debug("EventBundle: " + slmEvent.getBundleSymbolName());
+			if (slmEvent.getBundleSymbolName().equalsIgnoreCase("ac.hw.services.SocialLearningApp")){
+				this.logging.debug("Received SLM event for my bundle");
+				if (slmEvent.getEventType().equals(ServiceMgmtEventType.SERVICE_STARTED)){
 
-			//GET ID OF SERVICE FOR XMPP COMMUNICATION
-			this.serverIdentity = serviceMgmt.getServer(slmEvent.getServiceId());
-			logging.debug("Got my servers Identity: " + serverIdentity);
+					//GET ID OF SERVICE FOR XMPP COMMUNICATION
+					this.serverIdentity = serviceMgmt.getServer(slmEvent.getServiceId());
+					logging.debug("Got my servers Identity: " + serverIdentity);
 
-			//GET ADDRESS & PORT OF REMOTE SERVER
-			String addressPort[] = this.server.getServerPortAddress(serverIdentity);
-			this.serverIPPort=addressPort[0]+":"+addressPort[1];
-			logging.debug("Remote Address: " + addressPort[0]+":"+addressPort[1]);
 
-			//SEND MESSAGE TO GET REMOTE SOCKET LISTENER INFO
-			/*SocialLearningServerBean serverBean = new SocialLearningServerBean();
+
+					//GET ADDRESS & PORT OF REMOTE SERVER
+					String addressPort[] = this.server.getServerPortAddress(serverIdentity);
+					this.serverIPPort=addressPort[0]+":"+addressPort[1];
+					logging.debug("Remote Address: " + addressPort[0]+":"+addressPort[1]);
+
+					//SEND MESSAGE TO GET REMOTE SOCKET LISTENER INFO
+					/*SocialLearningServerBean serverBean = new SocialLearningServerBean();
 					logging.debug("BEAN INIT!");
 					serverBean.setMethod(SocialLearningMethodType.SERVER_SOCKET_INFO_REQUEST);
 					logging.debug("BEAN METHOD CHANGED");
@@ -246,53 +333,56 @@ public void handleInternalEvent(InternalEvent event) {
 
 
 
-		}
-	}
+				}
+			}
 
-	}else if(event.geteventName().equalsIgnoreCase("displayUpdate")){
-		logging.debug("Received DisplayPortal event");
-	}else{
-		logging.debug("Received unknown event with name: "+event.geteventName());
-	}
-
-	if (event.geteventInfo() instanceof DisplayEvent){
-		DisplayEvent eventObj  = (DisplayEvent) event.geteventInfo();
-		if (eventObj.getDisplayStatus().equals(DisplayEventConstants.DEVICE_AVAILABLE)){
-			this.deviceAvailable = true;
-			//	this.getDataFromContext();
+		}else if(event.geteventName().equalsIgnoreCase("displayUpdate")){
+			logging.debug("Received DisplayPortal event");
 		}else{
-			this.deviceAvailable  = false;
+			logging.debug("Received unknown event with name: "+event.geteventName());
 		}
-	}
-	// TODO Auto-generated method stub
-	//this.displayDriverService.sendNotification(myServiceName, "Hello, I am an example service and I wanted to notify you that I can send you notifications!");
-}
 
-private void getContext() throws InterruptedException, ExecutionException, CtxException, ClassNotFoundException, IOException
-{
-	this.interests.clear();
-	IIdentity myID = commMgr.getIdManager().getThisNetworkNode();
-	Requestor r = new Requestor(myID);
-	List<CtxIdentifier> list = ctxBroker.lookup(r, myID, CtxModelType.ENTITY, CtxEntityTypes.PERSON).get();
-	if (list.size()>0){
-		logging.debug("First list over size 0");
-		CtxIdentifier ctxEntityId = list.get(0);
-		CtxEntity ctxEntity = (CtxEntity) ctxBroker.retrieve(r, ctxEntityId).get();
-		Set<CtxAttribute> interestAttributes = ctxEntity.getAttributes(CtxAttributeTypes.INTERESTS);
-
-		for (CtxAttribute ctx : interestAttributes)
-		{		this.interests.add(ctx.getStringValue());
-		logging.debug("FOUND ONE: " + ctx.getStringValue());
+		if (event.geteventInfo() instanceof DisplayEvent){
+			DisplayEvent eventObj  = (DisplayEvent) event.geteventInfo();
+			if (eventObj.getDisplayStatus().equals(DisplayEventConstants.DEVICE_AVAILABLE)){
+				//USER HAS LOGGED ON TO SCREEN
+				this.deviceAvailable = true;
+				//	this.getDataFromContext();
+			}else{
+				this.deviceAvailable  = false;
+			}
 		}
+
+		}
+		// TODO Auto-generated method stub
+		//this.displayDriverService.sendNotification(myServiceName, "Hello, I am an example service and I wanted to notify you that I can send you notifications!");
+	
+
+	private void getContext() throws InterruptedException, ExecutionException, CtxException, ClassNotFoundException, IOException
+	{
+		this.interests.clear();
+		IIdentity myID = commMgr.getIdManager().getThisNetworkNode();
+		Requestor r = new Requestor(myID);
+		List<CtxIdentifier> list = ctxBroker.lookup(r, myID, CtxModelType.ENTITY, CtxEntityTypes.PERSON).get();
+		if (list.size()>0){
+			logging.debug("First list over size 0");
+			CtxIdentifier ctxEntityId = list.get(0);
+			CtxEntity ctxEntity = (CtxEntity) ctxBroker.retrieve(r, ctxEntityId).get();
+			Set<CtxAttribute> interestAttributes = ctxEntity.getAttributes(CtxAttributeTypes.INTERESTS);
+
+			for (CtxAttribute ctx : interestAttributes)
+			{		this.interests.add(ctx.getStringValue());
+			logging.debug("FOUND ONE: " + ctx.getStringValue());
+			}
+		}
+
+
 	}
 
 
-}
 
 
-
-
-/*private void getDataFromContext() {
+	/*private void getDataFromContext() {
 
 		if (this.requestor==null){
 			//TODO: replace this with method to service registry when it becomes available
@@ -337,158 +427,181 @@ private void getContext() throws InterruptedException, ExecutionException, CtxEx
 		}
 
 	}*/
-@Override
-public String getServerIPPort()
-{
-	return this.serverIPPort;
-}
-
-@Override
-public List<String> getUserInterests()
-{
-	
-	try {
-		getContext();
-	} catch (ClassNotFoundException e) {
-		// TODO Auto-generated catch block
-		e.printStackTrace();
-	} catch (InterruptedException e) {
-		// TODO Auto-generated catch block
-		e.printStackTrace();
-	} catch (ExecutionException e) {
-		// TODO Auto-generated catch block
-		e.printStackTrace();
-	} catch (CtxException e) {
-		// TODO Auto-generated catch block
-		e.printStackTrace();
-	} catch (IOException e) {
-		// TODO Auto-generated catch block
-		e.printStackTrace();
-	}
-	return this.interests;
-}
-
-
-
-@Override
-public void handleExternalEvent(CSSEvent arg0) {
-	// TODO Auto-generated method stub
-
-}
-
-
-
-
-/**
- * @return the displayDriverService
- */
-public IDisplayDriver getDisplayDriverService() {
-	return displayDriverService;
-}
-
-/**
- * @param displayDriverService the displayDriverService to set
- */
-public void setDisplayDriverService(IDisplayDriver displayDriverService) {
-	this.displayDriverService = displayDriverService;
-}
-
-
-/**
- * @return the evMgr
- */
-public IEventMgr getEvMgr() {
-	return evMgr;
-}
-
-
-/**
- * @param evMgr the evMgr to set
- */
-public void setEvMgr(IEventMgr evMgr) {
-	this.evMgr = evMgr;
-}
-
-
-/**
- * @return the commMgr
- */
-public ICommManager getCommMgr() {
-	return commMgr;
-}
-
-
-/**
- * @param commMgr the commMgr to set
- */
-public void setCommMgr(ICommManager commMgr) {
-	this.commMgr = commMgr;
-	this.idMgr = commMgr.getIdManager();
-	this.userIdentity = this.idMgr.getThisNetworkNode();
-}
-
-@Override
-public void serviceStarted(String ipAddr) {
-	// TODO Auto-generated method stub
-	if(this.userIdentity!=null)
+	@Override
+	public String getServerIPPort()
 	{
-		logging.info("CollabQuiz Started From: " + this.userIdentity.getBareJid());
+		return this.serverIPPort;
 	}
 
-}
-
-@Override
-public void serviceStopped(String ipAddr) {
-	// TODO Auto-generated method stub
-	if(this.userIdentity!=null)
+	@Override
+	public List<String> getUserInterests()
 	{
-		logging.info("CollabQuiz Stopped From: " + this.userIdentity.getBareJid());
+
+		try {
+			getContext();
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ExecutionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (CtxException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return this.interests;
 	}
 
-}
 
-/**
- * @return the ctxBroker
- */
-public ICtxBroker getCtxBroker() {
-	return ctxBroker;
-}
+	public List<String> getAllCis() {
+		List<ICis> localCisList = this.cisManager.getCisList();
+		List<String> cisList = new ArrayList<String>();
+		for(ICis cis : localCisList) {
+			cisList.add(cis.getName());
+		}
 
-/**
- * @param ctxBroker the ctxBroker to set
- */
-public void setCtxBroker(ICtxBroker ctxBroker) {
-	this.ctxBroker = ctxBroker;
-}
-
-/**
- * @return the server
- */
-public ISocialLearningServer getServer() {
-	return server;
-}
-
-/**
- * @param server the server to set
- */
-public void setServer(ISocialLearningServer server) {
-	this.server = server;
-}
+		return cisList;
+	}
 
 
-/**
- * @return the serviceMgmt
- */
-public IServices getServiceMgmt() {
-	return serviceMgmt;
-}
 
-/**
- * @param serviceMgmt the serviceMgmt to set
- */
-public void setServiceMgmt(IServices serviceMgmt) {
-	this.serviceMgmt = serviceMgmt;
-}
+	@Override
+	public void handleExternalEvent(CSSEvent arg0) {
+		// TODO Auto-generated method stub
+
+	}
+
+
+
+
+	/**
+	 * @return the displayDriverService
+	 */
+	public IDisplayDriver getDisplayDriverService() {
+		return displayDriverService;
+	}
+
+	/**
+	 * @param displayDriverService the displayDriverService to set
+	 */
+	public void setDisplayDriverService(IDisplayDriver displayDriverService) {
+		this.displayDriverService = displayDriverService;
+	}
+
+
+	/**
+	 * @return the evMgr
+	 */
+	public IEventMgr getEvMgr() {
+		return evMgr;
+	}
+
+
+	/**
+	 * @param evMgr the evMgr to set
+	 */
+	public void setEvMgr(IEventMgr evMgr) {
+		this.evMgr = evMgr;
+	}
+
+
+	/**
+	 * @return the commMgr
+	 */
+	public ICommManager getCommMgr() {
+		return commMgr;
+	}
+
+
+	/**
+	 * @param commMgr the commMgr to set
+	 */
+	public void setCommMgr(ICommManager commMgr) {
+		this.commMgr = commMgr;
+		this.idMgr = commMgr.getIdManager();
+		this.userIdentity = this.idMgr.getThisNetworkNode();
+	}
+
+	@Override
+	public void serviceStarted(String ipAddr) {
+		// TODO Auto-generated method stub
+		if(this.userIdentity!=null)
+		{
+			logging.info("CollabQuiz Started From: " + this.userIdentity.getBareJid());
+		}
+
+	}
+
+	@Override
+	public void serviceStopped(String ipAddr) {
+		// TODO Auto-generated method stub
+		if(this.userIdentity!=null)
+		{
+			logging.info("CollabQuiz Stopped From: " + this.userIdentity.getBareJid());
+		}
+
+	}
+
+	/**
+	 * @return the ctxBroker
+	 */
+	public ICtxBroker getCtxBroker() {
+		return ctxBroker;
+	}
+
+	/**
+	 * @param ctxBroker the ctxBroker to set
+	 */
+	public void setCtxBroker(ICtxBroker ctxBroker) {
+		this.ctxBroker = ctxBroker;
+	}
+
+	/**
+	 * @return the server
+	 */
+	public ISocialLearningServer getServer() {
+		return server;
+	}
+
+	/**
+	 * @param server the server to set
+	 */
+	public void setServer(ISocialLearningServer server) {
+		this.server = server;
+	}
+
+
+	/**
+	 * @return the serviceMgmt
+	 */
+	public IServices getServiceMgmt() {
+		return serviceMgmt;
+	}
+
+	/**
+	 * @param serviceMgmt the serviceMgmt to set
+	 */
+	public void setServiceMgmt(IServices serviceMgmt) {
+		this.serviceMgmt = serviceMgmt;
+	}
+
+
+
+	public ICisManager getCisManager() {
+		return cisManager;
+	}
+
+
+
+	public void setCisManager(ICisManager cisManager) {
+		this.cisManager = cisManager;
+	}
 
 
 

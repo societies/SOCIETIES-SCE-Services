@@ -20,6 +20,7 @@
 		<property name="eventMgr" ref="eventMgr"/>
 		<property name="commsMgr" ref="commsMgr"/>
 		<property name="displayDriver" ref="displayDriver"/>
+		<property name="cisManager" ref="cisManager"/>
 	</bean>	
 	
 

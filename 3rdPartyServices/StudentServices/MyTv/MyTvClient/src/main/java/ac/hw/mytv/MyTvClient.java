@@ -27,14 +27,29 @@ package ac.hw.mytv;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
+import javax.swing.text.MaskFormatter;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.societies.api.activity.IActivity;
+import org.societies.api.activity.IActivityFeedCallback;
 import org.societies.api.activity.IActivityFeedManager;
+import org.societies.api.cis.management.ICis;
+import org.societies.api.cis.management.ICisManager;
 import org.societies.api.comm.xmpp.interfaces.ICommManager;
 import org.societies.api.css.ICSSManager;
 import org.societies.api.css.devicemgmt.display.IDisplayDriver;
@@ -52,11 +67,17 @@ import org.societies.api.personalisation.model.Action;
 import org.societies.api.personalisation.model.IAction;
 import org.societies.api.personalisation.model.IActionConsumer;
 import org.societies.api.personalisation.model.PersonalisablePreferenceIdentifier;
+import org.societies.api.schema.activity.MarshaledActivity;
+import org.societies.api.schema.activityfeed.GetActivitiesResponse;
+import org.societies.api.schema.activityfeed.MarshaledActivityFeed;
 import org.societies.api.schema.servicelifecycle.model.ServiceResourceIdentifier;
 import org.societies.api.services.IServices;
 import org.societies.api.services.ServiceMgmtEvent;
 import org.societies.api.services.ServiceMgmtEventType;
 import org.societies.api.useragent.monitoring.IUserActionMonitor;
+
+import com.google.common.collect.Lists;
+import com.google.gson.Gson;
 
 public class MyTvClient extends EventListener implements IDisplayableService, IActionConsumer, IMyTv{
 
@@ -74,16 +95,29 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 	String myServiceType;
 	URL myUIExeLocation;
 	List<String> myServiceTypes;
-	Thread activityFeedThread;
+	public static final String CHANNEL = "channel";
+	public static final String ACTIVITY_FEED = "activity_feed";
+	public static final String MUTED = "muted";
 	Logger LOG = LoggerFactory.getLogger(MyTvClient.class);
+
+	ActivityFeed activityFeedThread;
+	Timer activityFeedTimer;
 
 	//personalisable parameters
 	int currentChannel;
 	boolean mutedState;
+	boolean activityState;
 	private ServiceResourceIdentifier serverServiceIdentifier;
 	private IIdentity serverJid;
 	private RequestorService requestor;
+
+	private ICisManager cisManager;
+	private HashMap<String, MarshaledActivityFeed> activityFeed;
+	private List<MarshaledActivity> currentActivities;
+
 	public MyTvClient(){
+		activityFeed = new HashMap<String, MarshaledActivityFeed>();
+		currentActivities = new ArrayList<MarshaledActivity>();
 	}
 
 	public void initialiseMyTvClient(){
@@ -130,6 +164,7 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 
 		//register for portal events
 		registerForDisplayEvents();
+
 	}
 
 	@Override
@@ -143,7 +178,7 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 	 */
 	private void registerForServiceEvents(){
 		String eventFilter = "(&" + 
-				"(" + CSSEventConstants.EVENT_NAME + "="+ServiceMgmtEventType.NEW_SERVICE+")" +
+				"(" + CSSEventConstants.EVENT_NAME + "="+ServiceMgmtEventType.SERVICE_STARTED+")" +
 				"(" + CSSEventConstants.EVENT_SOURCE + "=org/societies/servicelifecycle)" +
 				")";
 		this.eventMgr.subscribeInternalEvent(this, new String[]{EventTypes.SERVICE_LIFECYCLE_EVENT}, eventFilter);
@@ -153,7 +188,7 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 	private void unregisterForServiceEvents()
 	{
 		String eventFilter = "(&" + 
-				"(" + CSSEventConstants.EVENT_NAME + "="+ServiceMgmtEventType.NEW_SERVICE+")" +
+				"(" + CSSEventConstants.EVENT_NAME + "="+ServiceMgmtEventType.SERVICE_STARTED+")" +
 				"(" + CSSEventConstants.EVENT_SOURCE + "=org/societies/servicelifecycle)" +
 				")";
 
@@ -193,12 +228,12 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 	public void handleInternalEvent(InternalEvent event) {
 		if(LOG.isDebugEnabled()) LOG.debug("Received internal event: "+event.geteventName());
 
-		if(event.geteventName().equalsIgnoreCase("NEW_SERVICE")){
+		if(event.geteventName().equalsIgnoreCase("SERVICE_STARTED")){
 			if(LOG.isDebugEnabled()) LOG.debug("Received SLM event");
 			ServiceMgmtEvent slmEvent = (ServiceMgmtEvent) event.geteventInfo();
 			if (slmEvent.getBundleSymbolName().equalsIgnoreCase("ac.hw.mytv.MyTVClient")){
 				if(LOG.isDebugEnabled()) LOG.debug("Received SLM event for my bundle");
-				if (slmEvent.getEventType().equals(ServiceMgmtEventType.NEW_SERVICE)){
+				if (slmEvent.getEventType().equals(ServiceMgmtEventType.SERVICE_STARTED)){
 
 					//get service ID
 					if(myServiceID == null){
@@ -226,6 +261,99 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 		}
 	}
 
+	public List<MarshaledActivity> getActivities() {
+		List<ICis> myCISs = this.cisManager.getCisList();
+
+
+		List<MarshaledActivity> allActivities = new ArrayList<MarshaledActivity>();
+
+		for(ICis cis : myCISs) {
+			String uID = UUID.randomUUID().toString();
+			ActivityCallback callback = new ActivityCallback(uID);
+			cis.getActivityFeed().getActivities("0 " +System.currentTimeMillis(), callback);
+			synchronized (activityFeed) {
+				while(!activityFeed.containsKey(uID)) {
+					try {
+						activityFeed.wait();
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+			}
+			LOG.info("I am out of the sync!");
+			if(activityFeed.containsKey(uID)) {
+				LOG.info("Map contains the key");
+				MarshaledActivityFeed marshaledAct = activityFeed.remove(uID);
+				GetActivitiesResponse getActivitiesResponse = marshaledAct.getGetActivitiesResponse();
+
+				allActivities.addAll(getActivitiesResponse.getMarshaledActivity());
+			}
+		}
+
+		allActivities = orderByDate(allActivities);
+		List<MarshaledActivity> activities = new ArrayList<MarshaledActivity>();
+		int x = 0;
+		while(x<5 && x<allActivities.size()) {
+			MarshaledActivity act = allActivities.get(x);
+			act.setObject(changeIfCISID(act.getObject()));
+			act.setTarget(changeIfCISID(act.getTarget()));
+			act.setPublished(changeDateToString(act.getPublished()));
+			activities.add(act);
+			x++;
+		}
+
+
+		LOG.info("Returning list of activities: " + activities.size());
+		return activities;
+
+	}
+	
+	public String changeIfCISID(String cisID) {
+		ICis cis = this.cisManager.getCis(cisID);
+		if(cis==null) {
+			return cisID;
+		} else {
+			return "Community " +cis.getName();
+		}
+	}
+	
+	public String changeDateToString(String millie) {
+		SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+		long ms = Long.parseLong(millie);
+		Date d = new Date(ms);
+		return sdf.format(d);
+	}
+
+	public Date getDate(String currentTimeMillis){
+		Calendar cal = Calendar.getInstance();
+		cal.setTimeInMillis(Long.parseLong(currentTimeMillis));
+		return cal.getTime();
+
+	}
+
+	public List<MarshaledActivity> orderByDate(List<MarshaledActivity> activities){
+		LOG.info("In sorting algorithm");
+		Collections.sort(activities, new Comparator<MarshaledActivity>(){
+			public int compare (MarshaledActivity m1, MarshaledActivity m2){
+
+				int compareTo = getDate(m1.getPublished()).compareTo(getDate(m2.getPublished()));
+
+				if (compareTo>0){
+					return -1;
+				}
+				if (compareTo<0){
+					return 1;
+				}
+
+				return compareTo;
+			}
+		});
+		LOG.info("Returning from sorting algorithm");
+		return activities;
+		//Collections.sort(activities, Collections.reverseOrder(new Co));
+		//return Lists.reverse(activities);
+	}
 
 
 	/*
@@ -243,6 +371,7 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 			LOG.info("MyTV Service Started From Unknown User!");
 		}
 		//START THREAD FOR ACTIVITY FEEDS
+
 	}
 
 	@Override
@@ -257,6 +386,27 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 			LOG.info("MyTV Service Stoped From Unknown User!");
 		}
 		//END THREAD FOR ACTIVITY FEEDS
+	}
+
+	class ActivityCallback implements IActivityFeedCallback {
+
+		private String uID;
+
+		public ActivityCallback(String uID) {
+			this.uID = uID;
+		}
+
+		@Override
+		public void receiveResult(MarshaledActivityFeed activityFeedObject) {
+			LOG.info("I have recieved the acitivity feed !");
+			// TODO Auto-generated method stub
+			synchronized (activityFeed) {
+				activityFeed.put(uID, activityFeedObject);
+				activityFeed.notify();
+			}
+
+		}
+
 	}
 
 
@@ -319,9 +469,73 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 		this.displayDriver = displayDriver;
 	}
 
+	public ICisManager getCisManager() {
+		return cisManager;
+	}
+
+	public void setCisManager(ICisManager cisManager) {
+		this.cisManager = cisManager;
+	}
+
 	public static void main(String[] args) throws IOException{
 		new MyTvClient();
 	}
+
+	public void startActivityTask() {
+		this.activityFeedThread = new ActivityFeed(this, socketClient);
+		this.activityFeedTimer = new Timer();
+
+		//EVERY MINUTE
+		this.activityFeedTimer.scheduleAtFixedRate(this.activityFeedThread, Calendar.getInstance().getTime(), 1000*60);
+	}
+
+	public void stopActivityTask() {
+		if(this.activityFeedTimer!=null) {
+			this.activityFeedTimer.cancel();
+			this.activityFeedTimer = null;
+			this.activityFeedThread = null;
+		}
+	}
+
+	class ActivityFeed extends TimerTask {
+
+		MyTvClient myTVClient;
+		SocketClient clientGUI;
+		List<MarshaledActivity> activities;
+
+		public ActivityFeed(MyTvClient myTVClient, SocketClient clientGUI) {
+			this.myTVClient = myTVClient;
+			this.clientGUI = clientGUI;
+			this.activities = new ArrayList<MarshaledActivity>();
+		}
+
+		@Override
+		public void run() {
+			List<MarshaledActivity> newActivities = this.myTVClient.getActivities();
+			if(!this.activities.equals(newActivities)) {
+				this.activities = newActivities;
+				String activityString = toJSONString(this.activities);
+				clientGUI.sendMessage("START_MSG\n" + "ACTIVITY_FEED\n" + activityString + "\nEND_MSG");
+			} else {
+				LOG.debug("Activities remain the same, not sending to GUI");
+			}
+							
+		}
+
+		private String toJSONString(Object object) {
+			String jsonData = new Gson().toJson(object);
+			if(jsonData!=null)
+			{
+				return jsonData;
+			}
+			else
+			{
+				return "{}";
+			}
+		}
+
+	}
+
 
 
 
@@ -329,11 +543,20 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 		return new CommandHandler();
 	}
 
+
+
 	/*
 	 * Handle commands from GUI
 	 */
+
+
+
 	public class CommandHandler{
 
+
+
+
+		
 
 		public void connectToGUI(String gui_ip){
 			if(LOG.isDebugEnabled()) LOG.debug("Connecting to service GUI on IP address: "+gui_ip);
@@ -366,10 +589,12 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 		public void processUserAction(String parameterName, String value){
 			if(LOG.isDebugEnabled()) LOG.debug("Processing user action: "+parameterName+" = "+value);
 
-			if(parameterName.equalsIgnoreCase("channel")){
+			if(parameterName.equalsIgnoreCase(CHANNEL)){
 				currentChannel = new Integer(value).intValue();
-			}else if(parameterName.equalsIgnoreCase("muted")){
+			}else if(parameterName.equalsIgnoreCase(MUTED)){
 				mutedState = new Boolean(value).booleanValue();
+			} else if(parameterName.equalsIgnoreCase(ACTIVITY_FEED)) {
+				activityState = new Boolean(value).booleanValue();
 			}
 
 			//create action object and send to uam
@@ -382,7 +607,29 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 			if(LOG.isDebugEnabled()) LOG.debug("Getting channel preference from personalisation manager");
 			String result = "PREFERENCE-ERROR";
 			try {
-				Future<IAction> futureOutcome = persoMgr.getPreference(requestor, userID, myServiceType, myServiceID, "channel");
+				Future<IAction> futureOutcome = persoMgr.getPreference(requestor, userID, myServiceType, myServiceID, CHANNEL);
+				if(LOG.isDebugEnabled()) LOG.debug("Requested preference from personalisationManager");
+				IAction outcome = futureOutcome.get();
+				if(LOG.isDebugEnabled()) LOG.debug("Called .get()");
+				if(outcome!=null){
+					if(LOG.isDebugEnabled()) LOG.debug("Successfully retrieved channel preference outcome: "+outcome.getvalue());
+					result = outcome.getvalue();
+				}else{
+					if(LOG.isDebugEnabled()) LOG.debug("No channel preference was found");
+				}
+			} catch (Exception e){
+				if(LOG.isDebugEnabled()) LOG.debug("Error retrieving preference");
+				e.printStackTrace();
+			}
+			if(LOG.isDebugEnabled()) LOG.debug("Preference request result = "+result);
+			return result;
+		}
+		
+		public String getActivityPreference(){
+			if(LOG.isDebugEnabled()) LOG.debug("Getting channel preference from personalisation manager");
+			String result = "PREFERENCE-ERROR";
+			try {
+				Future<IAction> futureOutcome = persoMgr.getPreference(requestor, userID, myServiceType, myServiceID, ACTIVITY_FEED);
 				if(LOG.isDebugEnabled()) LOG.debug("Requested preference from personalisationManager");
 				IAction outcome = futureOutcome.get();
 				if(LOG.isDebugEnabled()) LOG.debug("Called .get()");
@@ -404,7 +651,7 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 			if(LOG.isDebugEnabled()) LOG.debug("Getting mute preference from personalisation manager");
 			String result = "PREFERENCE-ERROR";
 			try {
-				Future<IAction> futureOutcome = persoMgr.getPreference(requestor, userID, myServiceType, myServiceID, "muted");
+				Future<IAction> futureOutcome = persoMgr.getPreference(requestor, userID, myServiceType, myServiceID, MUTED);
 				if(LOG.isDebugEnabled()) LOG.debug("Requested preference from personalisationManager");
 				IAction outcome = futureOutcome.get();
 				if(LOG.isDebugEnabled()) LOG.debug("Called .get()");
@@ -427,7 +674,7 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 			String result = "INTENT-ERROR";
 			try {
 
-				Future<IAction> futureOutcome = persoMgr.getIntentAction(requestor, userID, myServiceID, "channel");
+				Future<IAction> futureOutcome = persoMgr.getIntentAction(requestor, userID, myServiceID, CHANNEL);
 				if(LOG.isDebugEnabled()) LOG.debug("Requested intent from personalisationManager");
 				IAction outcome = futureOutcome.get();
 				if(LOG.isDebugEnabled()) LOG.debug("Called .get()");
@@ -448,7 +695,7 @@ public class MyTvClient extends EventListener implements IDisplayableService, IA
 			if(LOG.isDebugEnabled()) LOG.debug("Getting muted intent from personalisation manager");
 			String result = "INTENT_ERROR";
 			try {
-				Future<IAction> futureOutcome = persoMgr.getIntentAction(requestor, userID, myServiceID, "muted");
+				Future<IAction> futureOutcome = persoMgr.getIntentAction(requestor, userID, myServiceID, MUTED);
 				if(LOG.isDebugEnabled()) LOG.debug("Requested intent from personalisationManager");
 				IAction outcome = futureOutcome.get();
 				if(LOG.isDebugEnabled()) LOG.debug("Called .get()");

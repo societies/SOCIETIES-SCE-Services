@@ -47,4 +47,7 @@
 	<osgi:reference id="displayDriver" interface="org.societies.api.css.devicemgmt.display.IDisplayDriver">
 	</osgi:reference>
 	
+	<osgi:reference id="cisManager" interface="org.societies.api.cis.management.ICisManager">
+	</osgi:reference>
+	
 </beans>

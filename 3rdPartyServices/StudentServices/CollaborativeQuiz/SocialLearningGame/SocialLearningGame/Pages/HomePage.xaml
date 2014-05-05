@@ -76,7 +76,7 @@
 
 
         <!-- Challenge option-->
-        <TextBlock Text="Group Play" 
+        <TextBlock Text="Community Play" 
                    Style="{StaticResource labelStyle}"
                    Grid.Row="2" Grid.Column="0"/>
         <k:KinectCircleButton x:Name="challengeButton" 
@@ -104,17 +104,5 @@
                 </Ellipse.Fill>
             </Ellipse>
         </k:KinectCircleButton>
-
-        <Border Name="notificationCircle" CornerRadius="50"
-        Width="25"
-        Height="25"
-        Margin="318,34.8,157,30.6"
-        Background="Yellow"
-        BorderBrush="Black"
-                Visibility="Hidden"
-        BorderThickness="1" RenderTransformOrigin="2.916,16.228" Grid.Row="2">
-            <TextBlock Name="notificationText" VerticalAlignment="Center" HorizontalAlignment="Center" />
-        </Border>
-
     </Grid>
 </Page>

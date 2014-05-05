@@ -14,10 +14,9 @@
         <property name="hbm2ddl.auto">update</property>
         <mapping resource="hibernate/Category.hbm.xml"></mapping>
         <mapping resource="hibernate/Question.hbm.xml"></mapping>
-         <mapping resource="hibernate/UserAnsweredQ.hbm.xml"></mapping>
-        <mapping resource="hibernate/UserScore.hbm.xml"></mapping> 
-        <mapping resource="hibernate/Groups.hbm.xml"></mapping> 
-        <mapping resource="hibernate/PendingJoins.hbm.xml"></mapping> 
-        <mapping resource="hibernate/UserGroups.hbm.xml"></mapping> 
+         <mapping resource="hibernate/AnsweredQuestions.hbm.xml"></mapping>
+        <mapping resource="hibernate/User.hbm.xml"></mapping> 
+        <mapping resource="hibernate/Cis.hbm.xml"></mapping> 
+
     </session-factory>
 </hibernate-configuration>

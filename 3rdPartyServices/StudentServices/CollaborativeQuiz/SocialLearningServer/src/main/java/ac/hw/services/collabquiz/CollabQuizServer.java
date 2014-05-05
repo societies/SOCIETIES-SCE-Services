@@ -1,8 +1,11 @@
 package ac.hw.services.collabquiz;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
@@ -10,10 +13,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.societies.api.cis.management.ICisManager;
 import org.societies.api.cis.management.ICisOwned;
-
 import org.societies.api.comm.xmpp.interfaces.ICommCallback;
 import org.societies.api.comm.xmpp.interfaces.ICommManager;
-
 import org.societies.api.identity.IIdentity;
 import org.societies.api.identity.Requestor;
 import org.societies.api.schema.servicelifecycle.model.ServiceResourceIdentifier;
@@ -22,17 +23,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import ac.hw.services.collabquiz.comms.CommsClient;
 import ac.hw.services.collabquiz.comms.CommsServerListener;
+import ac.hw.services.collabquiz.dao.IAnsweredQuestionsRepository;
 import ac.hw.services.collabquiz.dao.ICategoryRepository;
+import ac.hw.services.collabquiz.dao.ICisRepository;
 import ac.hw.services.collabquiz.dao.IQuestionRepository;
-import ac.hw.services.collabquiz.dao.IUserAnsweredQRepository;
-import ac.hw.services.collabquiz.dao.IUserScoreRepository;
+import ac.hw.services.collabquiz.dao.IUserRepository;
+import ac.hw.services.collabquiz.dao.impl.AnsweredQuestionsRepository;
 import ac.hw.services.collabquiz.dao.impl.CategoryRepository;
+import ac.hw.services.collabquiz.dao.impl.CisRepository;
 import ac.hw.services.collabquiz.dao.impl.QuestionRepository;
-import ac.hw.services.collabquiz.dao.impl.UserAnsweredQRepository;
-import ac.hw.services.collabquiz.dao.impl.UserScoreRepository;
+import ac.hw.services.collabquiz.dao.impl.UserRepository;
+import ac.hw.services.collabquiz.entities.AnsweredQuestions;
 import ac.hw.services.collabquiz.entities.Category;
+import ac.hw.services.collabquiz.entities.Cis;
 import ac.hw.services.collabquiz.entities.Question;
-import ac.hw.services.collabquiz.entities.UserScore;
+import ac.hw.services.collabquiz.entities.User;
 
 
 
@@ -42,8 +47,10 @@ public class CollabQuizServer implements ICollabQuizServer {
 
 	private ICategoryRepository categoryRepo;
 	private IQuestionRepository questionRepo;
-	private IUserAnsweredQRepository userAnsweredRepo;
-	private IUserScoreRepository userScoreRepo;
+	private IAnsweredQuestionsRepository answeredQuestionsRepo;
+	private IUserRepository userRepo;
+
+	private ICisRepository cisRepo;
 
 	private List<Question> questionList;
 	private List<Category> categoryList;
@@ -53,7 +60,7 @@ public class CollabQuizServer implements ICollabQuizServer {
 	private Thread serverThread;
 	private int serverPort;
 	private String serverAddress;
-	
+
 
 	private CommsClient commsClient;
 
@@ -66,15 +73,24 @@ public class CollabQuizServer implements ICollabQuizServer {
 
 
 
+
+
 	public void init() {
 		//DATABASE REPO 
 		log.debug("COLLAB QUIZ SERVER STARTED");
 		//this.categoryRepo = new CategoryRepository();
 		//this.questionRepo = new QuestionRepository();
-		this.userScoreRepo = new UserScoreRepository();
-		this.userAnsweredRepo = new UserAnsweredQRepository();
+
+		this.userRepo = new UserRepository();
+		this.answeredQuestionsRepo = new AnsweredQuestionsRepository();
+		this.cisRepo = new CisRepository();
+		this.questionRepo = new QuestionRepository();
+		this.categoryRepo = new CategoryRepository();
+
+
+
 		//SET UP NEW SOCKET
-		commsServerListener = new CommsServerListener();
+		commsServerListener = new CommsServerListener(this);
 		//GET PORT & ADDRESS
 		this.serverPort = commsServerListener.getSocket();
 		this.serverAddress = commsServerListener.getAddress();
@@ -83,20 +99,148 @@ public class CollabQuizServer implements ICollabQuizServer {
 		serverThread.start();
 
 	}
-				
-	
+
+
 	//CHECK IF CURRENT USER HAS PREVIOUSLY PLAYED, IF NOT ADD IN TO DB
 	@Override
 	public void checkUser(String jid)
 	{
-		if(userScoreRepo.getByJID(jid)==null)
+		if(userRepo.getByJID(jid)==null)
 		{
 			log.debug("A user doesn't exists! Add the new user!");
-			UserScore newUser = new UserScore();
+			User newUser = new User();
 			newUser.setUserJid(jid);
 			newUser.setScore(0);
-			userScoreRepo.insert(newUser);
+			userRepo.insert(newUser);
 		}
+	}
+
+	@Override
+	public Question getRandomQuestion(String userID, String cisName) {
+		return getRandomQuestion(userID, cisName, null);
+	}
+
+	@Override
+	public Cis getCis(String cisName) {
+		Cis cis = this.cisRepo.getByName(cisName);
+		if(cis==null) {
+			cis = new Cis();
+			cis.setCisName(cisName);
+			cis.setScore(0);
+			cis.setContributors(new HashSet<String>());
+			this.cisRepo.insert(cis);
+		}
+		return cis;
+	}
+
+	public void tearDown() {
+		this.commsServerListener.kill();
+	}
+
+	@Override 
+	public synchronized Question getRandomQuestion(String userID, String cisName, String categoryID) {
+		log.debug("Getting random question");
+		List<Question> allQuestions;
+		if(categoryID==null) {
+			log.debug("No category selected, getting all questions");
+			allQuestions = questionRepo.list();
+		} else {
+			log.debug("Getting all questions by category");
+			//Category category = categoryRepo.getByID(Integer.parseInt(categoryID));
+			allQuestions = questionRepo.listByCategory(Integer.parseInt(categoryID));
+		}
+		List<AnsweredQuestions> answeredQuestions = new ArrayList<AnsweredQuestions>();
+		if(cisName==null) {
+			log.debug("Getting answered questions for the user " + userID);
+			answeredQuestions = answeredQuestionsRepo.getByJID(userID);
+		} else {
+			log.debug("Getting all questions for the cis " + cisName);
+			answeredQuestions = answeredQuestionsRepo.getByCisName(cisName);
+		}
+		List<Question> availableQuestions = new ArrayList<Question>();
+		Iterator<Question> it = allQuestions.iterator();
+		while(it.hasNext()) {
+			Question q = it.next();
+			log.debug("Checking question " + q.getQuestionText() + " is in " + answeredQuestions.toString());
+			if(!answeredQuestions.contains(q)) {
+				log.debug("The question hasn't been answered! Make it available");
+				availableQuestions.add(q);
+			}
+		}
+
+		if(availableQuestions.size()>0) {
+			int randomNum = new Random().nextInt((availableQuestions.size()));
+			return availableQuestions.get(randomNum);
+		}
+
+		return null;
+
+	}
+
+	@Override
+	public List<User> getAllUsers() {
+		List<User> users = new ArrayList<User>();
+		users = this.userRepo.list();
+		return users;
+	}
+
+	@Override
+	public List<Cis> getAllCis() {
+		List<Cis> ciss = new ArrayList<Cis>();
+		ciss = this.cisRepo.list();
+		return ciss;
+	}
+
+	@Override
+	public User getUser(String userJID) {
+		return this.userRepo.getByJID(userJID);
+	}
+
+	@Override
+	public synchronized void answerQuestion(AnsweredQuestions answeredQuestion) {
+		log.debug("Answering questiong!");
+		this.answeredQuestionsRepo.insert(answeredQuestion);
+		if(answeredQuestion.getCisName()==null) {
+			log.debug("This question does not refer to a CIS");
+			User user = this.userRepo.getByJID(answeredQuestion.getUserID());
+			Question question = this.questionRepo.getByID(answeredQuestion.getQuestionID());
+			if(answeredQuestion.isAnsweredCorrect()) {
+				log.debug("This question is answered correcntly!");
+				user.setScore(user.getScore()+question.getPointsIfCorrect());
+				userRepo.update(user);;
+			}
+		} else {
+			Cis cis = this.cisRepo.getByName(answeredQuestion.getCisName());
+			if(cis==null) {
+				cis = new Cis();
+				cis.setCisName(answeredQuestion.getCisName());
+				HashSet<String> contributors = new HashSet<String>();
+				cis.setContributors(contributors);
+			}
+			Question question = this.questionRepo.getByID(answeredQuestion.getQuestionID());
+			if(cis.getContributors()== null) {
+				HashSet<String> contributors = new HashSet<String>();
+				contributors.add(answeredQuestion.getUserID());
+				cis.setContributors(contributors);
+			} else {
+				cis.getContributors().add(answeredQuestion.getUserID());
+			}
+			if(answeredQuestion.isAnsweredCorrect()) {
+				cis.setScore(cis.getScore()+question.getPointsIfCorrect());				
+			}
+			this.cisRepo.update(cis);;
+		}
+	}
+
+	@Override
+	public List<String> getInterests(String userID) {
+		//	this.commsClient.
+		return null;
+	}
+
+	@Override
+	public List<Category> getAllCategories() {
+		return this.categoryRepo.list();
 	}
 
 	public List<Question> getQuestions(){
@@ -121,12 +265,12 @@ public class CollabQuizServer implements ICollabQuizServer {
 		}
 		return this.myServiceId;
 	}
-	
+
 	@Override
 	public int getPort() {
 		return this.serverPort;
 	}
-	
+
 	@Override
 	public String getAddress() {
 		return this.serverAddress;
@@ -142,7 +286,7 @@ public class CollabQuizServer implements ICollabQuizServer {
 	public void setCommsManager(ICommManager commsManager) {
 		this.commsManager = commsManager;
 	}
-	
+
 	public IServices getServices() {
 		return services;
 	}

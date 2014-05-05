@@ -56,11 +56,11 @@ namespace SocialLearningGame.Pages
         public CategoriesPage()
         {
             InitializeComponent();
-            categories = new List<Category>(GameLogic._userSession.allCategories);
+            categories = GameLogic.getCategories();
+        //    userInterests = GameLogic.getUserInterests();
             Console.WriteLine(DateTime.Now + "\t" +"GOT CATEGORIES" + categories.ToString());
             superCategories = new List<Category>();
-            userInterests = new List<String>(GameLogic._userSession.userInterests);
-            keywords = getKeywords(userInterests);
+          //  keywords = getKeywords(userInterests);
 
             sortCategories();
 

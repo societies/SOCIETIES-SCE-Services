@@ -4,18 +4,14 @@
         "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
 
 <hibernate-mapping>
-    <class name="ac.hw.services.collabquiz.entities.Groups"
-           table="groups">
+    <class name="ac.hw.services.collabquiz.entities.User"
+           table="user">
 
-        <id name="groupID" type="int" column="group_id">
-            <generator class="native"/>
-        </id>
-
-        <property name="groupName" column="group_name"/>
+        <id name="userJid" type="string" column="userJid" />
         
+        <property name="cisList" column="cisList"/>
+
         <property name="score" column="score"/>
-        
-        <property name="admin" column="admin"/>
         
 
     </class>

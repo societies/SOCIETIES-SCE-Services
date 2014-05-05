@@ -40,16 +40,16 @@ namespace SocialLearningGame.Pages
         {
             InitializeComponent();
 
-            roundScoreBox.Text = GameLogic._userSession.questionRound.roundScore.ToString();
-            rightBox.Text = GameLogic._userSession.questionRound.correctAnswerCount.ToString();
-            wrongBox.Text = GameLogic._userSession.questionRound.incorrectAnswerCount.ToString();
-            if (GameLogic._userSession.player == GameStage.USER)
+            roundScoreBox.Text = GameLogic._userSession.quizRound.roundScore.ToString();
+            rightBox.Text = GameLogic._userSession.quizRound.correctAnswerCount.ToString();
+            wrongBox.Text = GameLogic._userSession.quizRound.incorrectAnswerCount.ToString();
+            if (GameLogic._userSession.currentPlayer == GameStage.USER)
             {
-                totalScoreBox.Text = GameLogic._userSession.currentUser.score.ToString();
+                totalScoreBox.Text = GameLogic._userSession.user.score.ToString();
             }
-            else if (GameLogic._userSession.player == GameStage.GROUP)
+            else if (GameLogic._userSession.currentPlayer == GameStage.CIS)
             {
-                totalScoreBox.Text = GameLogic._userSession.currentGroup.score.ToString();
+                totalScoreBox.Text = GameLogic._userSession.currentCis.score.ToString();
             }
         }
 

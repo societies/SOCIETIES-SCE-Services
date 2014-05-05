@@ -16,7 +16,7 @@
         {
             this.InitializeComponent();
 
-            this.messageTextBlock.Text = "The correct answer was " + answer + "!";
+            this.messageTextBlock.Text = "";//The correct answer was " + answer + "!";
 
             if (correct)
             {

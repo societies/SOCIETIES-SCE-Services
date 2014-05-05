@@ -2,14 +2,14 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:k="http://schemas.microsoft.com/kinect/2013"
-        Title="MyTV" Height="700" Width="1340" Loaded="Window_Loaded" Closing="Window_Closing"
+        Title="MyTV" Height="700" Width="1340" Loaded="Window_Loaded" 
         WindowStartupLocation="CenterScreen" Name="mytvWindow" Topmost="True"
         WindowStyle="None">
 
     <k:KinectRegion Grid.Row="1" x:Name="kinectRegion" Grid.ColumnSpan="3">
         
         
-        <Canvas Margin="10,10,-9.4,-10.4">
+        <Canvas Margin="-9,-10,9.6,9.6">
             
             
 
@@ -19,40 +19,63 @@
 
             <k:KinectSensorChooserUI HorizontalAlignment="Center" VerticalAlignment="Top" Name="sensorChooserUi" Canvas.Left="624" Canvas.Top="10" />
 
-         
 
+      
 
-            <Ellipse Height="80" Name="rightEllipse" Width="80" Panel.ZIndex="1" Canvas.Left="1226" Canvas.Top="568">
-                <Ellipse.Fill>
-                    <ImageBrush ImageSource="Images/pointer.png" />
-                </Ellipse.Fill>
-            </Ellipse>
-
-            <DockPanel Canvas.Left="1052" Canvas.Top="90" Height="558" Name="dockPanel1" Width="254">
+           <DockPanel Canvas.Left="1052" Canvas.Top="91" Height="558" Name="dockPanel1" Width="254" >
                 <DockPanel.Background>
                     <ImageBrush ImageSource="/MyTvUI;component/Images/group_background.png" />
                 </DockPanel.Background>
+               
+               
 
-                <ListBox Height="503" Name="listBox1" Width="237" DockPanel.Dock="Bottom"  DataContext="{Binding}" FontSize="12" FontWeight="Bold" Foreground="Black" Background="{x:Null}" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Hidden" BorderBrush="{x:Null}">
-                    <ListBox.ItemTemplate>
-                        <DataTemplate>
-                            <DockPanel Name="activities_list">
-                                <Grid DockPanel.Dock="Top">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="35"/>
-                                        <ColumnDefinition Width="5"/>
-                                        <ColumnDefinition Width="205"/>
-                                    </Grid.ColumnDefinitions>
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="45"/>
-                                    </Grid.RowDefinitions>
-                                    <Image Source="Images/speech-bubble.png" Grid.Column="0" Grid.Row="0" VerticalAlignment="Top"/>
-                                    <TextBlock Text="{Binding}" Grid.Column="2" Grid.Row="0" TextWrapping="WrapWithOverflow" VerticalAlignment="Top"/>
-                                </Grid>
-                            </DockPanel>
-                        </DataTemplate>
-                    </ListBox.ItemTemplate>
-                </ListBox>
+                <Grid  Margin="15">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="100" />
+                        <RowDefinition Height="500" />
+                       <!-- <RowDefinition Name="act1" Height="85" />
+                        <RowDefinition Name="act2" Height="85" />
+                        <RowDefinition Name="act3" Height="85" />
+                        <RowDefinition Name="act4" Height="85" />
+                        <RowDefinition Name="act5" Height="85" />-->
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="400"/>
+                    </Grid.ColumnDefinitions>
+
+                    
+
+
+                    <Rectangle Margin="0,0,170,0" Height="60" Width="60"  Grid.Row="0">
+                        <Rectangle.Fill>
+                            <ImageBrush ImageSource="Images/channel_background.png"/>
+                        </Rectangle.Fill>
+                    </Rectangle>
+                    <k:KinectCircleButton Foreground="Transparent"  Margin="0,0,170,0"  Height="60" Width="60" Click="activity_buttonClick"
+                                      Grid.Row="0" Canvas.ZIndex="1"/>
+        
+                    <Label Margin="0,0,170,0" FontSize="14" Height="60" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Width="60" Foreground="Black" >
+                        <TextBlock Name="activityText">Off</TextBlock>
+                    </Label>
+
+                    <Grid Name="activityGrid" Grid.Row="1" Margin="0,0,176,72">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="400"/>
+                        </Grid.ColumnDefinitions>
+                    </Grid>
+
+                </Grid>
+  
+
+                <!--<WebBrowser Margin="0, -60, 0, 0"  Height="450" Name="webView" Width="200" />-->
+
             </DockPanel>
 
             <!-- Hover button regions -->
@@ -79,24 +102,36 @@
             </DockPanel> 
 
             <Canvas Canvas.Left="12" Canvas.Top="57" Height="453" Name="canvas1" Width="1020">
-                <WebBrowser Canvas.Left="71" Canvas.Top="10" Height="418" Name="tvBrowser" Width="737" Loaded="tvBrowser_WindowLoaded" Navigated="tvBrowser_Navigated" Cursor="None" DataContext="{Binding}" />
+                <!-- <WebBrowser Canvas.Left="71" Canvas.Top="10" Height="418" Name="tvBrowser" Width="737" Loaded="tvBrowser_WindowLoaded" Navigated="tvBrowser_Navigated" Cursor="None" DataContext="{Binding}" /> -->
 
-               <!-- <k:KinectCircleButton Foreground="Transparent" Name="volumeUpButton" Height="60" Width="60" Click="volumeUpButtonClick"
-                                      Canvas.ZIndex="1" Canvas.Left="925" Canvas.Top="343" /> -->
+               <k:KinectCircleButton Foreground="Transparent" Name="volumeUpButton" Height="60" Width="60" Click="volumeUpButtonClick"
+                                      Canvas.ZIndex="1" Canvas.Left="925" Canvas.Top="343" />
 
-                <!--<k:KinectCircleButton Foreground="Transparent" Name="volumeDownButton" Height="60" Width="60" Click="volumeDownButtonClick"
-                                      Canvas.ZIndex="1" Canvas.Left="835" Canvas.Top="343" /> -->
+                <k:KinectCircleButton Foreground="Transparent" Name="volumeDownButton" Height="60" Width="60" Click="volumeDownButtonClick"
+                                      Canvas.ZIndex="1" Canvas.Left="835" Canvas.Top="343" />
 
-               <!-- <Rectangle Height="60" Width="60" Name="volumeUp" Canvas.Left="925" Canvas.Top="343">
+              <!--   <k:KinectCircleButton Foreground="Transparent" Name="volumeUpButton" Height="60" Width="60" Click="clearWBButtonClick"
+                                      Canvas.ZIndex="1" Canvas.Left="877" Canvas.Top="343" />
+
+
+                <Rectangle Height="60" Width="60" Name="volumeUp" Canvas.Left="877" Canvas.Top="343">
+                    <Rectangle.Fill>
+                        <ImageBrush ImageSource="Images/channel_background.png"/>
+                    </Rectangle.Fill>
+                </Rectangle>
+                <Label Canvas.Left="877" Canvas.Top="343" FontSize="14" Height="60" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Width="60" Foreground="Black" >
+                    <TextBlock>Clear<LineBreak />Chat</TextBlock>
+                </Label> -->
+                 <Rectangle Height="60" Width="60" Name="volumeUp" Canvas.Left="925" Canvas.Top="343">
                     <Rectangle.Fill>
                         <ImageBrush ImageSource="Images/volume_up.png"/>
                     </Rectangle.Fill>
-                </Rectangle> -->
-                <!--<Rectangle Height="60" Width="60" Name="volumeDown" Canvas.Left="835" Canvas.Top="343">
+                </Rectangle>
+                <Rectangle Height="60" Width="60" Name="volumeDown" Canvas.Left="835" Canvas.Top="343">
                     <Rectangle.Fill>
                         <ImageBrush ImageSource="Images/volume_down.png"/>
                     </Rectangle.Fill>
-                </Rectangle> -->
+                </Rectangle>
                 <Rectangle Canvas.Left="835" Canvas.Top="143" Height="60" Name="channel4Rectangle" Width="60">
                     <Rectangle.Fill>
                         <ImageBrush ImageSource="Images/channel_background.png" />
@@ -123,19 +158,24 @@
 
                 <k:KinectCircleButton Foreground="Transparent" Name="channel2Button" Height="60" Width="60" Click="channelButtonClick"
                                       Canvas.ZIndex="1" Canvas.Left="835" Canvas.Top="60" />
-                <Label Canvas.Left="835" Canvas.Top="60" Content="General" FontSize="14" Height="60" HorizontalContentAlignment="Center" Name="label2" VerticalContentAlignment="Center" Width="60" Foreground="Black"/>
-
+                <Label Canvas.Left="835" Canvas.Top="60"  FontSize="14" Height="60" HorizontalContentAlignment="Center" Name="label2" VerticalContentAlignment="Center" Width="60" Foreground="Black">
+                    <TextBlock>BBC<LineBreak />One</TextBlock> 
+                </Label>
                 <k:KinectCircleButton Foreground="Transparent" Name="channel1Button" Height="60" Width="60" Click="channelButtonClick"
                                       Canvas.ZIndex="1" Canvas.Left="925" Canvas.Top="60" />
-                <Label Canvas.Left="925" Canvas.Top="60" Content="News" Height="60" Name="label1" Width="60" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontSize="14" Foreground="Black" />
-
+                <Label Canvas.Left="925" Canvas.Top="60"  Height="60" Name="label1" Width="60" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontSize="14" Foreground="Black">
+                <TextBlock>BBC<LineBreak />News</TextBlock>
+                </Label>
                 <k:KinectCircleButton Foreground="Transparent" Name="channel4Button" Height="60" Width="60" Click="channelButtonClick"
                                       Canvas.ZIndex="1" Canvas.Left="835" Canvas.Top="143" />
-                <Label Canvas.Left="835" Canvas.Top="143" Content="Music" FontSize="14" Height="60" HorizontalContentAlignment="Center" Name="label4" VerticalContentAlignment="Center" Width="60" Foreground="Black" />
+                <Label Canvas.Left="835" Canvas.Top="143" FontSize="14" Content="CBBC"  Height="60" HorizontalContentAlignment="Center" Name="label4" VerticalContentAlignment="Center" Width="64" Foreground="Black"/>
+               
 
                 <k:KinectCircleButton Foreground="Transparent" Name="channel3Button" Height="60" Width="60" Click="channelButtonClick"
                                       Canvas.ZIndex="1" Canvas.Left="925" Canvas.Top="143" />
-                <Label Canvas.Left="925" Canvas.Top="143" Content="Games" FontSize="14" Height="60" HorizontalContentAlignment="Center" Name="label3" VerticalContentAlignment="Center" Width="60" Foreground="Black" />
+                <Label Canvas.Left="925" Canvas.Top="143" FontSize="14" Height="60" HorizontalContentAlignment="Center" Name="label3" VerticalContentAlignment="Center" Width="60" Foreground="Black" >
+                    <TextBlock>BBC<LineBreak />Two</TextBlock>
+                </Label>
 
                 <k:KinectCircleButton Foreground="Transparent" Name="offButton" Height="70" Width="70" Click="offButtonClick"
                                       Canvas.ZIndex="1" Canvas.Left="877" Canvas.Top="238" />
@@ -149,7 +189,7 @@
                     <ImageBrush ImageSource="/MyTvUI;component/Images/group_background.png" />
                 </Canvas.Background>
             </Canvas>
-            <Rectangle Canvas.Left="1082" Canvas.Top="65" Height="35" Name="rectangle3" Width="165">
+            <Rectangle Canvas.Left="1078" Canvas.Top="60" Height="35" Name="rectangle3" Width="165">
                 <Rectangle.Fill>
                     <ImageBrush ImageSource="/MyTvUI;component/Images/my_updates.png" />
                 </Rectangle.Fill>

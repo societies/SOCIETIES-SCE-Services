@@ -24,6 +24,8 @@
  */
 package ac.hw.services.socialLearning.app.comms;
 
+import java.util.List;
+
 import org.societies.api.identity.IIdentity;
 import org.societies.api.schema.servicelifecycle.model.ServiceResourceIdentifier;
 

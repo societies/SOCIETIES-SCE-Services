@@ -1,59 +1,23 @@
 package ac.hw.services.collabquiz.comms;
 
-import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
+
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
-import java.lang.reflect.Type;
+
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.List;
+
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
 
+import ac.hw.services.collabquiz.ICollabQuizServer;
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-import ac.hw.services.collabquiz.dao.ICategoryRepository;
-import ac.hw.services.collabquiz.dao.IGroupsRepository;
-import ac.hw.services.collabquiz.dao.IPendingJoinsRepository;
-import ac.hw.services.collabquiz.dao.IQuestionRepository;
-import ac.hw.services.collabquiz.dao.IUserAnsweredQRepository;
-import ac.hw.services.collabquiz.dao.IUserGroupsRepository;
-import ac.hw.services.collabquiz.dao.IUserScoreRepository;
-import ac.hw.services.collabquiz.dao.impl.*;
-import ac.hw.services.collabquiz.entities.Category;
-import ac.hw.services.collabquiz.entities.Groups;
-import ac.hw.services.collabquiz.entities.PendingJoins;
-import ac.hw.services.collabquiz.entities.Question;
-import ac.hw.services.collabquiz.entities.UserAnsweredQ;
-import ac.hw.services.collabquiz.entities.UserGroups;
-import ac.hw.services.collabquiz.entities.UserScore;
 
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 
 
 
@@ -66,63 +30,39 @@ public class CommsServerListener implements Runnable {
 	private ServerSocket serverSocket;
 	private int port;
 	private String address;
-
-	//DB REPOS
-	private IQuestionRepository questionRepo;
-	private ICategoryRepository categoryRepo;
-	private IUserAnsweredQRepository userAnswerRepo;
-	private IUserScoreRepository userScoreRepo;
-	private IUserGroupsRepository userGroupsRepo;
-	private IGroupsRepository groupsRepo;
-	private IPendingJoinsRepository pendingJoinsRepo;
-
-	//COLLECTION TYPES
-	private static final Type collectionType = new TypeToken<List<UserAnsweredQ>>(){}.getType();
-	private static final Type collectionType2 = new TypeToken<List<PendingJoins>>(){}.getType();
-
-	//MESSAGE TYPES
-	private static final String RETRIEVE_SCORES = "RETRIEVE_SCORES";
-	private static final String RETRIEVE_USER_HISTORY = "RETRIEVE_USER_HISTORY";
-	private static final String RETRIEVE_QUESTIONS = "RETRIEVE_QUESTIONS";
-	private static final String RETRIEVE_CATEGORIES = "RETRIEVE_CATEGORIES";
-	private static final String UPLOAD_PROGRESS = "UPLOAD_PROGRESS";
-	private static final String USER = "USER";
-	private static final String GROUP = "GROUP";
-	private static final String RETRIEVE_USER_GROUP = "RETRIEVE_USER_GROUP";
-	private static final String RETRIEVE_GROUPS = "RETRIEVE_GROUPS";
-	private static final String RETRIEVE_GROUP_PLAYERS = "RETRIEVE_GROUP_PLAYERS";
-	private static final String RETRIEVE_INVITED_PLAYERS = "RETRIEVE_INVITED_PLAYERS";
-	private static final String RETRIEVE_NOTIFICATIONS = "RETRIEVE_NOTIFICATIONS";
-	private static final String DELETE_NOTIFICATIONS = "DELETE_NOTIFICATIONS";
-	private static final String CREATE_GROUP = "CREATE_GROUP";
-	private static final String LEAVE_GROUP = "LEAVE_GROUP";
-	private static final String RETRIEVE_ALL_USERS = "RETRIEVE_ALL_USERS";
-	private static final String ADD_USER_TO_GROUP = "ADD_USER_TO_GROUP";
-	private static final String INVITE_USER = "INVITE_USER";
-	private static final String REMOVE_USER_FROM_GROUP = "REMOVE_USER_FROM_GROUP";
-	private static final String DELETE_GROUP = "DELETE_GROUP";
-	private static final String RESET_USER = "RESET_USER";
+	private boolean running;
+	
+	private ICollabQuizServer collabQuiz;
 
 
 
 
-	public CommsServerListener()
+
+
+
+
+	public CommsServerListener(ICollabQuizServer collabQuiz)
 	{
+		this.collabQuiz = collabQuiz;
+		this.running = true;
 		init();
 	}
 
 	public void run() {
 		listen();		
 	}
+	
+	public void kill() {
+		this.running = false;
+		try {
+			this.serverSocket.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 
 	public void init() {
-		this.userAnswerRepo= new UserAnsweredQRepository();
-		this.userScoreRepo=new UserScoreRepository();
-		this.questionRepo = new QuestionRepository();
-		this.categoryRepo= new CategoryRepository();
-		this.userGroupsRepo = new UserGroupsRepository();
-		this.groupsRepo = new GroupsRepository();
-		this.pendingJoinsRepo = new PendingJoinsRepository();
 		try {
 			this.serverSocket = new ServerSocket(0);
 			this.port = this.serverSocket.getLocalPort();
@@ -138,16 +78,18 @@ public class CommsServerListener implements Runnable {
 		try {
 			serverSocket = new ServerSocket(port);
 		
-			while(true)
+			while(this.running)
 			{
 				
 				log.debug("Listening for connection from GUI");
 
 				Socket clientSocket = serverSocket.accept();
 				log.debug("Connection made");
-				new Thread(new CommsServerAction(clientSocket, userAnswerRepo, userScoreRepo, questionRepo, categoryRepo, userGroupsRepo, groupsRepo, pendingJoinsRepo)).start();
+				new Thread(new CommsServerAction(this.collabQuiz, clientSocket)).start();//clientSocket, userAnswerRepo, userScoreRepo, questionRepo, categoryRepo, userGroupsRepo, groupsRepo, pendingJoinsRepo)).start();
 			}
-		}catch(Exception e){}
+		}catch(Exception e){
+
+		}
 				//CommsServerAction action = new CommsServerAction(clientSocket);
 				//Thread thread = new Thread(action);
 				//thread.start();

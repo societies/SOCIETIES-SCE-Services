@@ -74,8 +74,6 @@ namespace MyTvUI
 		    connected = false;
         }
 
-
-
         public String sendMessage(String message)
         {
             String response = "";

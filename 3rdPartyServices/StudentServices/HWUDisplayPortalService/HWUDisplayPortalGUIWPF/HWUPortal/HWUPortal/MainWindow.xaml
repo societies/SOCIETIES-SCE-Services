@@ -113,8 +113,10 @@
                         Grid.Row="0" Grid.Column="1"
                         Grid.RowSpan="6" Grid.ColumnSpan="3"/>
 
-            <WebBrowser x:Name="webBrowser" 
+         <!--   <WebBrowser x:Name="webBrowser" 
                         Grid.Row="0" Grid.Column="1"
+                        Grid.RowSpan="6" Grid.ColumnSpan="3"/> -->
+            <Grid Name="webGrid" Grid.Row="0" Grid.Column="1"
                         Grid.RowSpan="6" Grid.ColumnSpan="3"/>
 
             <k:KinectCircleButton Name="logoutButton" Click="logoutButton_Click"
@@ -122,6 +124,13 @@
                                   Style="{StaticResource FooterButtonStyle}"
                                   Grid.Column="2" Grid.Row="6">
             </k:KinectCircleButton>
+
+            <!--<k:KinectCircleButton Name="sessionChange" Click="session_Click"
+                                 Label="Change to LZ Session 2" LabelPosition="Bottom"
+                                  Visibility="Hidden"
+                                  Style="{StaticResource FooterButtonStyle}"
+                                  Grid.Column="1" Grid.Row="6" Grid.ColumnSpan="2" Margin="229,10,195,0">
+            </k:KinectCircleButton> -->
 
             <!--<Controls:HoverButton Name="logoutButton">
 

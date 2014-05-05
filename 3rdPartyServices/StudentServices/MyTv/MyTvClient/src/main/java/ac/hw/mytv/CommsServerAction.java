@@ -25,6 +25,9 @@
 
 package ac.hw.mytv;
 
+import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -33,7 +36,11 @@ import java.net.Socket;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.societies.api.schema.activity.MarshaledActivity;
 
+import com.google.gson.Gson;
+
+import ac.hw.mytv.ActivityList;
 import ac.hw.mytv.MyTvClient.CommandHandler;
 
 /**
@@ -45,34 +52,42 @@ public class CommsServerAction implements Runnable{
 	private Socket client;
 	private PrintWriter out;
 	private BufferedReader in;
-	
+
 	private static final String GUI_STARTED = "GUI_STARTED";
 	private static final String GUI_STOPPED = "GUI_STOPPED";
 	private static final String USER_ACTION = "USER_ACTION";
 	private static final String CHANNEL_PREFERENCE_REQUEST = "CHANNEL_PREFERENCE_REQUEST";
 	private static final String MUTED_PREFERENCE_REQUEST = "MUTED_PREFERENCE_REQUEST";
+	private static final String ACTIVITY_PREFERENCE_REQUEST = "ACTIVITY_PREFERENCE_REQUEST";
 	private static final String CHANNEL_INTENT_REQUEST = "CHANNEL_INTENT_REQUEST";
 	private static final String MUTED_INTENT_REQUEST = "MUTED_INTENT_REQUEST";
 	private static final String RECEIVED = "RECEIVED";
 	private static final String FAILED = "FAILED";
 	private static final String START_MSG = "START_MSG";
 	private static final String END_MSG = "END_MSG";
+	//ACTIVITY FEED MESSAGES
+	private static final String ACTIVITY_FEED_REQUEST = "ACTIVITY_FEED_REQUEST";
+
 	private Logger LOG = LoggerFactory.getLogger(this.getClass());
 	private CommandHandler commandHandler;
 	private int port;
+	private MyTvClient myTVClient;
 	
+
 	public CommsServerAction(Socket socket, MyTvClient myTVClient, int port){
 		this.client = socket;
 		this.port = port;
 		this.commandHandler = myTVClient.getCommandHandler();
-		
+		this.myTVClient = myTVClient;
+
 	}
+	
 	@Override
 	public void run() {
 		// TODO Auto-generated method stub
-		
-		
-		
+
+
+
 		if(LOG.isDebugEnabled()) LOG.debug("Connection accepted from GUI!");
 
 		try {
@@ -117,15 +132,15 @@ public class CommsServerAction implements Runnable{
 					out.close();
 					String gui_ip = splitData[1];
 					commandHandler.connectToGUI(gui_ip);
-					
+					myTVClient.startActivityTask();
 				}else if (command.equalsIgnoreCase(USER_ACTION)){
 					if(LOG.isDebugEnabled()) LOG.debug(USER_ACTION+" message received");
 					out.println(RECEIVED);
 					out.close();
-					String parameterName = splitData[1];
-					String value = splitData[2];
+					String parameterName = splitData[1].trim();
+					String value = splitData[2].trim();
 					commandHandler.processUserAction(parameterName, value);
-					
+
 				}else if(command.equalsIgnoreCase(CHANNEL_PREFERENCE_REQUEST)){
 					if(LOG.isDebugEnabled()) LOG.debug(CHANNEL_PREFERENCE_REQUEST+" message received");
 					String response = commandHandler.getChannelPreference();
@@ -137,13 +152,19 @@ public class CommsServerAction implements Runnable{
 					String response = commandHandler.getMutedPreference();
 					out.println(response);
 					out.close();
-					
+
+				}else if(command.equalsIgnoreCase(ACTIVITY_PREFERENCE_REQUEST)){
+					if(LOG.isDebugEnabled()) LOG.debug(ACTIVITY_PREFERENCE_REQUEST+" message received");
+					String response = commandHandler.getActivityPreference();
+					out.println(response);
+					out.close();
+
 				}else if(command.equalsIgnoreCase(CHANNEL_INTENT_REQUEST)){
 					if(LOG.isDebugEnabled()) LOG.debug(CHANNEL_INTENT_REQUEST+" message received");
 					String response = commandHandler.getChannelIntent();
 					out.println(response);
 					out.close();
-					
+
 				}else if(command.equalsIgnoreCase(MUTED_INTENT_REQUEST)){
 					if(LOG.isDebugEnabled()) LOG.debug(MUTED_INTENT_REQUEST+" message received");
 					String response = commandHandler.getMutedIntent();
@@ -154,9 +175,10 @@ public class CommsServerAction implements Runnable{
 					if(LOG.isDebugEnabled()) LOG.debug(GUI_STOPPED+" message received");
 					out.println(RECEIVED);
 					out.close();
+					myTVClient.stopActivityTask();
 					commandHandler.disconnectFromGUI();
 				}
-				
+
 				else{
 					if(LOG.isDebugEnabled()) LOG.debug("Unknown command received from MyTvUI: "+command);
 					out.println(FAILED);
@@ -172,5 +194,6 @@ public class CommsServerAction implements Runnable{
 			e.printStackTrace();
 		}
 	}
+
 
 }

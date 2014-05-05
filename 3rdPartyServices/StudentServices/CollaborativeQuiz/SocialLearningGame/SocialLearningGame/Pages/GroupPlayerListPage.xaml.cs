@@ -31,8 +31,7 @@ namespace SocialLearningGame.Pages
         public GroupPlayerListPage()
         {
             InitializeComponent();
-            players = GameLogic._userSession.allGroupPlayers;
-            index = 0;
+            players = GameLogic._userSession.currentCis.contributors;
             maxCount = players.Count();
 
             if (maxCount > 20)
@@ -45,7 +44,7 @@ namespace SocialLearningGame.Pages
 
         private void loadPage()
         {
-            groupsTitle.Text = "Players in " + GameLogic._userSession.currentGroup.groupName;
+            groupsTitle.Text = "Contributors of Community " + GameLogic._userSession.currentCis.cisName;
             
             TextBlock tb;
             int x;
@@ -56,7 +55,7 @@ namespace SocialLearningGame.Pages
                 if (x < maxCount)
                 {
                     String s = players[x];
-                    if (s.Equals(GameLogic._userSession.currentUser.userJid))
+                    if (s.Equals(GameLogic._userSession.user.userJid))
                     {
                         highlight = Brushes.DarkOrange;
                     }
@@ -70,7 +69,7 @@ namespace SocialLearningGame.Pages
                         row = 1;
                         column++;
                     }
-                    tb.Text = s.Split(new char[] { '.' }, 2)[0];
+                    tb.Text = s;
                     tb.FontSize = 25;
                     tb.Foreground = highlight;
                     tb.TextAlignment = TextAlignment.Center;
@@ -113,5 +112,5 @@ namespace SocialLearningGame.Pages
             }
             loadPage();
         }
-    }
+    } 
 }

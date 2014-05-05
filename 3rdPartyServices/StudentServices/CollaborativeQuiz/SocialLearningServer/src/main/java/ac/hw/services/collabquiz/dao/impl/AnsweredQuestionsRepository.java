@@ -9,23 +9,22 @@ import org.hibernate.Transaction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ac.hw.services.collabquiz.comms.CommsServerListener;
-import ac.hw.services.collabquiz.dao.IUserAnsweredQRepository;
-import ac.hw.services.collabquiz.entities.UserAnsweredQ;
+import ac.hw.services.collabquiz.dao.IAnsweredQuestionsRepository;
+import ac.hw.services.collabquiz.entities.AnsweredQuestions;
 
 
-public class UserAnsweredQRepository extends HibernateRepository implements IUserAnsweredQRepository {
+public class AnsweredQuestionsRepository extends HibernateRepository implements IAnsweredQuestionsRepository {
 
-	private static final Logger log = LoggerFactory.getLogger(UserAnsweredQRepository.class);
+	private static final Logger log = LoggerFactory.getLogger(AnsweredQuestionsRepository.class);
 
 	@Override
-	public List<UserAnsweredQ> list() {
+	public List<AnsweredQuestions> list() {
 		Session session = getSessionFactory().openSession();
 		Transaction transaction = null;
-		List<UserAnsweredQ> userAnsweredQ = null;
+		List<AnsweredQuestions> userAnsweredQ = null;
 		try {
 			transaction = session.beginTransaction();
-			userAnsweredQ = session.createQuery("from UserAnsweredQ").list();
+			userAnsweredQ = session.createQuery("from AnsweredQuestions").list();
 			transaction.commit();
 		} catch (HibernateException e) {
 			transaction.rollback();
@@ -37,15 +36,38 @@ public class UserAnsweredQRepository extends HibernateRepository implements IUse
 	}
 
 	@Override
-	public List<UserAnsweredQ> getByJID(String jid) {
+	public List<AnsweredQuestions> getByJID(String jid) {
 		Session session =getSessionFactory().openSession();
 		Transaction transaction = null;
-		List<UserAnsweredQ> userAnsweredQ = null;
+		List<AnsweredQuestions> userAnsweredQ = null;
 		try {
 			transaction = session.beginTransaction();
-			String hql = "from UserAnsweredQ where userJid = :userJid";
+			String hql = "from AnsweredQuestions where userID = :userJid and cisName = :name";
 			userAnsweredQ = session.createQuery(hql)
 					.setParameter("userJid", jid)
+					.setParameter("name", null)
+					.list();
+			//userAnsweredQ = session.createQuery("from UserAnsweredQ WHERE userJid="+jid).list();
+			transaction.commit();
+		} catch (HibernateException e) {
+			transaction.rollback();
+			e.printStackTrace();
+		} finally {
+			session.close();
+		}
+		return userAnsweredQ;
+	}
+	
+	@Override
+	public List<AnsweredQuestions> getByCisName(String cisName) {
+		Session session =getSessionFactory().openSession();
+		Transaction transaction = null;
+		List<AnsweredQuestions> userAnsweredQ = null;
+		try {
+			transaction = session.beginTransaction();
+			String hql = "from AnsweredQuestions where cisName = :name";
+			userAnsweredQ = session.createQuery(hql)
+					.setParameter("name", cisName)
 					.list();
 			//userAnsweredQ = session.createQuery("from UserAnsweredQ WHERE userJid="+jid).list();
 			transaction.commit();
@@ -59,7 +81,7 @@ public class UserAnsweredQRepository extends HibernateRepository implements IUse
 	}
 
 	@Override
-	public void insert(UserAnsweredQ userAnsweredQ) {
+	public void insert(AnsweredQuestions userAnsweredQ) {
 		Session session = getSessionFactory().openSession();
 		Transaction transaction = null;
 		try {
@@ -74,8 +96,8 @@ public class UserAnsweredQRepository extends HibernateRepository implements IUse
 		}
 	} 
 	@Override
-	public void insertList(List<UserAnsweredQ> userAnsweredQ) {
-		for(UserAnsweredQ ans : userAnsweredQ)
+	public void insertList(List<AnsweredQuestions> userAnsweredQ) {
+		for(AnsweredQuestions ans : userAnsweredQ)
 		{
 			Session session = getSessionFactory().openSession();
 			Transaction transaction = null;
@@ -93,11 +115,11 @@ public class UserAnsweredQRepository extends HibernateRepository implements IUse
 	}
 
 	@Override
-	public void update(List<UserAnsweredQ> userAnsweredQ) {
+	public void update(List<AnsweredQuestions> userAnsweredQ) {
 		Session session = getSessionFactory().openSession();
 		Transaction transaction = null;
 		try {
-			for(UserAnsweredQ u : userAnsweredQ)
+			for(AnsweredQuestions u : userAnsweredQ)
 			{
 				transaction = session.beginTransaction();
 				session.save(u);
@@ -120,7 +142,7 @@ public class UserAnsweredQRepository extends HibernateRepository implements IUse
         Transaction transaction = null;
         try {
             transaction = session.beginTransaction();
-            Query query = session.createQuery("delete from UserAnsweredQ where userJid = :id");
+            Query query = session.createQuery("delete from AnsweredQuestions where userJid = :id");
             query.setParameter("id", id);
             query.executeUpdate();
             transaction.commit();
@@ -133,7 +155,7 @@ public class UserAnsweredQRepository extends HibernateRepository implements IUse
     }
 
 	@Override
-	public void physicalDelete(UserAnsweredQ userAnsweredQ) {
+	public void physicalDelete(AnsweredQuestions userAnsweredQ) {
 		Session session = getSessionFactory().openSession();
 		Transaction transaction = null;
 		try {

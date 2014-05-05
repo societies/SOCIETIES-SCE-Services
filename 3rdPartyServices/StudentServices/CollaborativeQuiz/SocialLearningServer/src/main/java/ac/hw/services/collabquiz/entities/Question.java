@@ -2,9 +2,6 @@ package ac.hw.services.collabquiz.entities;
 
 
 import javax.persistence.*;
-
-import java.io.Serializable;
-
 /*
  * Copyright (coffee) 2011, SOCIETIES Consortium (WATERFORD INSTITUTE OF TECHNOLOGY (TSSG), HERIOT-WATT UNIVERSITY (HWU), SOLUTA.NET
  * (SN), GERMAN AEROSPACE CENTRE (Deutsches Zentrum fuer Luft- und Raumfahrt e.V.) (DLR), Zavod za varnostne tehnologije
@@ -32,17 +29,34 @@ import java.io.Serializable;
 
 @Entity
 @Table(name = "question")
-public class Question implements Serializable {
+public class Question {
 
+    @Id
+    @Column(name = "question_id")
     private int questionID;
+    
+    @Column(name = "question_text")
     private String questionText;
+    
+    @Column(name = "answer_1")
     private String answer1;
+    
+    @Column(name = "answer_2")
     private String answer2;
+    
+    @Column(name = "answer_3")
     private String answer3;
+    
+    @Column(name = "answer_4")
     private String answer4;
 
+    @Column(name = "correct_answer")
     private int correctAnswer;
+    
+    @Column(name = "category_ID")
     private int categoryID;
+    
+    @Column(name = "points_if_correct")
     private int pointsIfCorrect;
 
     public Question() {
@@ -57,9 +71,6 @@ public class Question implements Serializable {
         this.categoryID = -1;
     }
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "question_id")
     public int getQuestionID() {
         return questionID;
     }
@@ -68,7 +79,7 @@ public class Question implements Serializable {
         this.questionID = questionID;
     }
 
-    @Column(name = "question_text")
+  
     public String getQuestionText() {
         return questionText;
     }
@@ -77,7 +88,7 @@ public class Question implements Serializable {
         this.questionText = questionText;
     }
 
-    @Column(name = "answer_1")
+   
     public String getAnswer1() {
         return answer1;
     }
@@ -86,7 +97,6 @@ public class Question implements Serializable {
         this.answer1 = answer1;
     }
 
-    @Column(name = "answer_2")
     public String getAnswer2() {
         return answer2;
     }
@@ -95,7 +105,6 @@ public class Question implements Serializable {
         this.answer2 = answer2;
     }
 
-    @Column(name = "answer_3")
     public String getAnswer3() {
         return answer3;
     }
@@ -104,7 +113,6 @@ public class Question implements Serializable {
         this.answer3 = answer3;
     }
 
-    @Column(name = "answer_4")
     public String getAnswer4() {
         return answer4;
     }
@@ -116,7 +124,6 @@ public class Question implements Serializable {
     /**
      * 1-based answer index (1-4)
      */
-    @Column(name = "correct_answer")
     public int getCorrectAnswer() {
         return correctAnswer;
     }
@@ -128,7 +135,6 @@ public class Question implements Serializable {
         this.correctAnswer = correctAnswer;
     }
 
-    @Column(name = "category_ID")
     public int getCategoryID() {
         return categoryID;
     }
@@ -137,13 +143,26 @@ public class Question implements Serializable {
         this.categoryID = categoryID;
     }
 
-    @Column(name = "points_if_correct")
     public int getPointsIfCorrect() {
         return pointsIfCorrect;
     }
 
     public void setPointsIfCorrect(int pointsIfCorrect) {
         this.pointsIfCorrect = pointsIfCorrect;
+    }
+    
+    @Override
+    public boolean equals(Object obj) {
+    	if(obj instanceof Question) {
+    		if(this.questionID == ((Question) obj).getQuestionID()) {
+    			return true;
+    		}
+    	} else if(obj instanceof AnsweredQuestions) {
+    		if(this.questionID == ((AnsweredQuestions) obj).getQuestionID()) {
+    			return true;
+    		}
+    	}
+    	return false;
     }
 
 }

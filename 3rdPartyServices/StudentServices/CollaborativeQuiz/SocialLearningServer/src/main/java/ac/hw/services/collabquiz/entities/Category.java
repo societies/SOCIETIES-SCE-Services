@@ -40,6 +40,7 @@ public class Category {
 	@Column(name = "name")
 	private String name;
 	
+	@Column(name = "superCatID")
 	private int superCatID;
 
 

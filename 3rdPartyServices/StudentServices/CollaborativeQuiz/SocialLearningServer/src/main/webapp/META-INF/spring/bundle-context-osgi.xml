@@ -7,7 +7,7 @@
 	http://www.springframework.org/schema/osgi http://www.springframework.org/schema/osgi/spring-osgi.xsd">
 
 	<bean id="quizRestServer" class="ac.hw.services.collabquiz.CollabQuizServer"
-		init-method="init" name="quizRestServer" >
+		init-method="init" name="quizRestServer" destroy-method="tearDown" >
 		<property name="commsManager" ref="commsManager" />
 		<property name="services" ref="services" />
 		</bean>

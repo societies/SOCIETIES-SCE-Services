@@ -38,8 +38,8 @@ namespace SocialLearningGame.Pages
     /// </summary>
     public partial class ScoreboardPage : Page
     {
-        private List<UserScore> allUsers;
-        private List<Groups> allGroups;
+        private List<User> allUsers;
+        private List<Cis> allCis;
         private List<TextBlock> childNodes;
         private SolidColorBrush highlight;
         private static int index;
@@ -54,11 +54,11 @@ namespace SocialLearningGame.Pages
             InitializeComponent();
         
             childNodes = new List<TextBlock>();
-            if (GameLogic._userSession.player == GameStage.USER)
+            if (GameLogic._userSession.currentPlayer == GameStage.USER)
             {
                 playerGroup.Text = "Player";
-                GameLogic.getRemoteData(DataType.ALL_USERS);
-                allUsers = GameLogic._userSession.allUsers.OrderByDescending(o => o.score).ToList();
+                List<User> users = GameLogic.getAllUsers();
+                allUsers = users.OrderByDescending(o => o.score).ToList();
                 maxCount = allUsers.Count();
                 if (maxCount > 5)
                 {
@@ -66,12 +66,16 @@ namespace SocialLearningGame.Pages
                 }
                 refreshUserPage();
             }
-            else if (GameLogic._userSession.player == GameStage.GROUP)
+            else if (GameLogic._userSession.currentPlayer == GameStage.CIS)
             {
-                playerGroup.Text = "Group";
-                GameLogic.getRemoteData(DataType.ALL_GROUPS);
-                allGroups = GameLogic._userSession.allGroups.OrderByDescending(o => o.score).ToList();
-                maxCount = allGroups.Count();
+                playerGroup.Text = "CIS";
+                allCis = GameLogic.getAllCis();
+                if (allCis == null)
+                {
+                    Console.WriteLine(DateTime.Now + "\t" + "ALL CIS LIST IS NULL");
+                }
+                allCis = allCis.OrderByDescending(o => o.score).ToList();
+                maxCount = allCis.Count();
                 if (maxCount > 5)
                 {
                     nextButton.Visibility = Visibility.Visible;
@@ -88,19 +92,19 @@ namespace SocialLearningGame.Pages
                 scoreBoardGrid.Children.Remove(oldTB);
             }
             childNodes.Clear();
-            Console.WriteLine(DateTime.Now + "\t" +"Getting new user score...");  
+              
             int row = 1;
             int column = 0;
             int rank = 1;
             TextBlock tb;
             int x = index;
-            UserScore user;
+            User user;
             for (x = index; x < index + 5; x++)
             {
                 if (x < allUsers.Count())
                 {
                     user = allUsers[x];
-                    if (user.Equals(GameLogic._userSession.currentUser))
+                    if (user.userJid.Equals(GameLogic._userSession.user.userJid))
                     {
                         highlight = Brushes.DarkOrange;
                     }
@@ -109,7 +113,7 @@ namespace SocialLearningGame.Pages
                         highlight = Brushes.Black;
                     }
                     tb = new TextBlock();
-                    tb.Text = user.name;
+                    tb.Text = user.userJid;
                     tb.FontSize = 28;
                     tb.Foreground = highlight;
                     Grid.SetRow(tb, row);
@@ -156,20 +160,14 @@ namespace SocialLearningGame.Pages
             int column = 0;
             int rank = 1;
             TextBlock tb;
-            Groups group;
+            Cis cis;
             int x;
             for (x = index; x < index + 5; x++)
             {
-                if (x < allGroups.Count())
+                if (x < allCis.Count())
                 {
-                    group = allGroups[x];
-                    if (GameLogic._userSession.currentGroup == null)
-                    {
-                        highlight = Brushes.Black;
-                    }
-                    else
-                    {
-                        if (group.groupID.Equals(GameLogic._userSession.currentGroup.groupID))
+                    cis = allCis[x];
+                        if (cis.contributors.Contains(GameLogic._userSession.user.userJid))
                         {
                             highlight = Brushes.DarkOrange;
                         }
@@ -177,14 +175,13 @@ namespace SocialLearningGame.Pages
                         {
                             highlight = Brushes.Black;
                         }
-                    }
 
                     tb = new TextBlock();
                     tb.FontSize = 28;
                     Grid.SetRow(tb, row);
                     Grid.SetColumn(tb, column);
                     tb.Foreground = highlight;
-                    tb.Text = group.groupName;
+                    tb.Text = cis.cisName;
                     scoreBoardGrid.Children.Add(tb);
                     childNodes.Add(tb);
 
@@ -207,7 +204,7 @@ namespace SocialLearningGame.Pages
                     tb.Foreground = highlight;
                     Grid.SetRow(tb, row);
                     Grid.SetColumn(tb, column);
-                    tb.Text = group.score.ToString();
+                    tb.Text = cis.score.ToString();
                     scoreBoardGrid.Children.Add(tb);
                     childNodes.Add(tb);
                     column = 0;
@@ -228,11 +225,11 @@ namespace SocialLearningGame.Pages
             {
                 nextButton.Visibility = Visibility.Visible;
             }
-            if (GameLogic._userSession.player==GameStage.USER)
+            if (GameLogic._userSession.currentPlayer==GameStage.USER)
             {               
                 refreshUserPage();
             }
-            else if (GameLogic._userSession.player==GameStage.GROUP)
+            else if (GameLogic._userSession.currentPlayer==GameStage.CIS)
             {
                 refreshGroupPage();
             }
@@ -250,11 +247,11 @@ namespace SocialLearningGame.Pages
             {
                 backButton.Visibility = Visibility.Visible;
             }
-            if (GameLogic._userSession.player == GameStage.USER)
+            if (GameLogic._userSession.currentPlayer == GameStage.USER)
             {
                 refreshUserPage();
             }
-            else if (GameLogic._userSession.player == GameStage.GROUP)
+            else if (GameLogic._userSession.currentPlayer == GameStage.CIS)
             {
                 refreshGroupPage();
             }

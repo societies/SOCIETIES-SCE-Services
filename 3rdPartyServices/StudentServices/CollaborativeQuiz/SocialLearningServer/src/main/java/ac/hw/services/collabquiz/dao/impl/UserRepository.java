@@ -11,22 +11,23 @@ import org.hibernate.criterion.Order;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ac.hw.services.collabquiz.dao.IUserScoreRepository;
-import ac.hw.services.collabquiz.entities.UserScore;
+import ac.hw.services.collabquiz.dao.IUserRepository;
+import ac.hw.services.collabquiz.entities.User;
 
 
-public class UserScoreRepository extends HibernateRepository implements IUserScoreRepository {
+
+public class UserRepository extends HibernateRepository implements IUserRepository {
 	
-	private static final Logger log = LoggerFactory.getLogger(UserScoreRepository.class);
+	private static final Logger log = LoggerFactory.getLogger(UserRepository.class);
 
     @Override
-    public List<UserScore> list() {
+    public List<User> list() {
         Session session = getSessionFactory().openSession();
         Transaction transaction = null;
-        List<UserScore> userScores = new ArrayList<UserScore>();
+        List<User> userScores = new ArrayList<User>();
         try {
             transaction = session.beginTransaction();
-            userScores = session.createQuery("from UserScore").list();
+            userScores = session.createQuery("from User").list();
             transaction.commit();
         } catch (HibernateException e) {
             transaction.rollback();
@@ -40,13 +41,13 @@ public class UserScoreRepository extends HibernateRepository implements IUserSco
     }
 
     @Override
-    public UserScore getByJID(String jid) {
+    public User getByJID(String jid) {
         Session session =getSessionFactory().openSession();
         Transaction transaction = null;
-        UserScore userScore = null;
+        User userScore = null;
         try {
             transaction = session.beginTransaction();
-            userScore = (UserScore) session.get(UserScore.class, jid);
+            userScore = (User) session.get(User.class, jid);
             transaction.commit();
         } catch (HibernateException e) {
             transaction.rollback();
@@ -58,12 +59,12 @@ public class UserScoreRepository extends HibernateRepository implements IUserSco
     }
 
     @Override
-    public void insert(UserScore userScore) {
+    public void insert(User user) {
         Session session = getSessionFactory().openSession();
         Transaction transaction = null;
         try {
             transaction = session.beginTransaction();
-            session.save(userScore);
+            session.save(user);
             transaction.commit();
         } catch (HibernateException e) {
             transaction.rollback();
@@ -74,12 +75,12 @@ public class UserScoreRepository extends HibernateRepository implements IUserSco
     }
 
     @Override
-    public void update(UserScore userScore) {
+    public void update(User user) {
         Session session = getSessionFactory().openSession();
         Transaction transaction = null;
         try {
             transaction = session.beginTransaction();
-            session.update(userScore);
+            session.update(user);
             transaction.commit();
         } catch (HibernateException e) {
             transaction.rollback();
@@ -90,12 +91,12 @@ public class UserScoreRepository extends HibernateRepository implements IUserSco
     }
 
     @Override
-    public void physicalDelete(UserScore userScore) {
+    public void physicalDelete(User user) {
         Session session = getSessionFactory().openSession();
         Transaction transaction = null;
         try {
             transaction = session.beginTransaction();
-            session.delete(userScore);
+            session.delete(user);
             transaction.commit();
         } catch (HibernateException e) {
             transaction.rollback();

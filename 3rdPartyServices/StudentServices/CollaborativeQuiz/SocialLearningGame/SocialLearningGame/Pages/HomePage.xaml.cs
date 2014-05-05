@@ -41,32 +41,13 @@ namespace SocialLearningGame.Pages
         public HomePage()
         {
             InitializeComponent();
-            GameLogic._userSession.player = GameStage.USER;
-            
-
         }
 
-
-        public void refreshNotifications()
-        {
-            int notifications = GameLogic._userSession.allNotifications.Count;
-            Console.WriteLine(DateTime.Now + "\t" +"Number of notifications:" + notifications);
-            if (notifications > 0)
-            {
-                notificationCircle.Visibility = Visibility.Visible;
-                notificationText.Text = notifications.ToString();
-            }
-            else
-            {
-                notificationCircle.Visibility = Visibility.Hidden;
-            }
-        }
 
         private void window_Loaded(object sender, RoutedEventArgs e)
         {
-            GameLogic.getGroupInformation();
-            Console.WriteLine(DateTime.Now + "\t" +"Getting notifications.....");
-            refreshNotifications();
+            GameLogic._userSession.currentPlayer = GameStage.USER;
+            Console.WriteLine(DateTime.Now + "\t" + "Game stage " + GameLogic._userSession.currentPlayer.ToString());
 
         }
 

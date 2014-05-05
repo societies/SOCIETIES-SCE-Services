@@ -29,6 +29,7 @@ import java.util.Collections;
 import java.util.Hashtable;
 import java.util.List;
 
+import org.omg.PortableInterceptor.ServerIdHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.societies.api.comm.xmpp.datatypes.Stanza;
@@ -209,6 +210,7 @@ public class CommsClient implements ISocialLearningServer, ICommCallback{
 		
 		
 	}*/
+	
 
 	@Override
 	public String[] getServerPortAddress(IIdentity serverIdentity) {

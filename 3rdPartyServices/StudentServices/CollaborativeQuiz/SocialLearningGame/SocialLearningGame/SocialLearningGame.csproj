@@ -122,9 +122,11 @@
     <Compile Include="Comms\ClientComms.cs" />
     <Compile Include="Comms\ServerComms.cs" />
     <Compile Include="Entities\Category.cs" />
-    <Compile Include="Entities\Class2.cs" />
+    <Compile Include="Entities\Cis.cs" />
+    <Compile Include="Entities\AnsweredQuestions.cs" />
     <Compile Include="Entities\Logic\DataType.cs" />
     <Compile Include="Entities\Logic\UserSession.cs" />
+    <Compile Include="Entities\User.cs" />
     <Compile Include="Entities\UserGroups.cs" />
     <Compile Include="Entities\PendingJoins.cs" />
     <Compile Include="Entities\Groups.cs" />
@@ -181,12 +183,6 @@
     <Compile Include="Pages\GroupPlayPage.xaml.cs">
       <DependentUpon>GroupPlayPage.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Pages\NotificationsPage.xaml.cs">
-      <DependentUpon>NotificationsPage.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Pages\InvitePage.xaml.cs">
-      <DependentUpon>InvitePage.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Pages\GroupPlayerListPage.xaml.cs">
       <DependentUpon>GroupPlayerListPage.xaml</DependentUpon>
     </Compile>
@@ -195,6 +191,9 @@
     </Compile>
     <Compile Include="Pages\ScoreboardPage.xaml.cs">
       <DependentUpon>ScoreboardPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\SelectCIS.xaml.cs">
+      <DependentUpon>SelectCIS.xaml</DependentUpon>
     </Compile>
     <Compile Include="SocketClient.cs" />
     <Compile Include="Speech\SpeechUtils.cs" />
@@ -251,14 +250,6 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Pages\NotificationsPage.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Pages\InvitePage.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
     <Page Include="Pages\GroupPlayerListPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -270,6 +261,10 @@
     <Page Include="Pages\ScoreboardPage.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Pages\SelectCIS.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
   <ItemGroup>

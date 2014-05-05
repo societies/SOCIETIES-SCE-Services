@@ -27,6 +27,6 @@ namespace SocialLearningGame.Logic
 {
     public enum GameStage
     {
-        SetupError, ReadyToStart, InProgress, Complete, USER, GROUP
+        SetupError, ReadyToStart, InProgress, Complete, USER, CIS
     }
 }

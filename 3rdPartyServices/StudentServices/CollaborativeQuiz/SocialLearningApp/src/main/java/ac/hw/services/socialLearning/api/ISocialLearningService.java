@@ -6,5 +6,7 @@ public interface ISocialLearningService {
 	
 	String getServerIPPort();
 	List<String> getUserInterests();
+	List<String> getCisNames();
+	void postActivity(String cisName, String correct);
 
 }

@@ -12,13 +12,14 @@
  
 	 <bean id="socialLearning"
 		class="ac.hw.services.socialLearning.app.SocialLearningService"
-		name="socialLearning" init-method="Init">
+		name="socialLearning" init-method="Init" destroy-method="tearDown">
 	    <property name="commMgr" ref="commManager"></property>
 	    <property name="displayDriverService" ref="displayDriverServiceRef"></property>
 		<property name="evMgr" ref="eventMgmtRef"></property>
 		<property name="ctxBroker" ref="ctxBroker"></property>
 		<property name="server" ref="commsClient"></property>
 		<property name="serviceMgmt" ref="serviceMgmt"></property>
+		<property name="cisManager" ref="cisManager" />
 	</bean>
 
 
