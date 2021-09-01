@@ -160,7 +160,7 @@
 		</plugins>
 	</build>
 	<properties>
-		<neo4jversion>1.8.M04</neo4jversion>
+		<neo4jversion>3.5.0</neo4jversion>
 		<paxrunnerversion>1.7.6</paxrunnerversion>
 	</properties>
 </project>
